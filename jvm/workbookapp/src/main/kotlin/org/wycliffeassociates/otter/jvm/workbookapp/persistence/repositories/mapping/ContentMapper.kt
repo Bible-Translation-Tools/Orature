@@ -34,6 +34,7 @@ class ContentMapper(private val contentTypeDao: ContentTypeDao) {
             text = entity.text,
             format = entity.format,
             type = contentTypeDao.fetchForId(entity.type_fk)!!,
+            draftNumber = entity.draftNumber,
             id = entity.id
         )
     }
@@ -48,7 +49,8 @@ class ContentMapper(private val contentTypeDao: ContentTypeDao) {
             selectedTakeFk = obj.selectedTake?.id,
             text = obj.text,
             format = obj.format,
-            type_fk = contentTypeDao.fetchId(obj.type)
+            type_fk = contentTypeDao.fetchId(obj.type),
+            draftNumber = obj.draftNumber
         )
     }
 }

@@ -25,6 +25,7 @@ import java.text.MessageFormat
 import javafx.animation.AnimationTimer
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.ScrollingWaveform
@@ -34,6 +35,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingWizardP
 import tornadofx.*
 
 class Consume : Fragment() {
+    private val logger = LoggerFactory.getLogger(Consume::class.java)
 
     val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
     val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
@@ -44,8 +46,15 @@ class Consume : Fragment() {
 
     override fun onDock() {
         super.onDock()
+        logger.info("Consume docked")
         tryImportStylesheet(resources.get("/css/scrolling-waveform.css"))
         tryImportStylesheet(resources.get("/css/consume-page.css"))
+        vm.compositeDisposable.add(
+            vm.waveform.observeOnFx().subscribe {
+                (root.center as ScrollingWaveform).addWaveformImage(it)
+            }
+        )
+
         vm.onDockConsume()
         vm.pageProperty.set(ChunkingWizardPage.CONSUME)
         vm.titleProperty.set(messages["consumeTitle"])
@@ -68,10 +77,6 @@ class Consume : Fragment() {
     override val root = borderpane {
         center = ScrollingWaveform().apply {
             positionProperty.bind(vm.positionProperty)
-
-            vm.compositeDisposable.add(
-                vm.waveform.observeOnFx().subscribe { addWaveformImage(it) }
-            )
 
             onWaveformClicked = { vm.pause() }
             onWaveformDragReleased = { deltaPos ->

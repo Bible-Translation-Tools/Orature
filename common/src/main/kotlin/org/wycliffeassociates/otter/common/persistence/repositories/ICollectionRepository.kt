@@ -39,7 +39,8 @@ interface ICollectionRepository : IRepository<Collection> {
     fun deriveProject(
         sourceMetadatas: List<ResourceMetadata>,
         sourceCollection: Collection,
-        language: Language
+        language: Language,
+        verseByVerse: Boolean
     ): Single<Collection>
 
     /**

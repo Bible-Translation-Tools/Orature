@@ -27,5 +27,6 @@ data class Content(
     var text: String?,
     var format: String?,
     var type: ContentType,
+    var draftNumber: Int,
     var id: Int = 0
 ) : CollectionOrContent

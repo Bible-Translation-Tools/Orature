@@ -87,6 +87,10 @@ internal class Mp3Metadata(val mp3File: File, val cueFile: File) : AudioMetadata
         return _cues
     }
 
+    override fun clearMarkers() {
+        _cues.clear()
+    }
+
     fun write() {
         writeID3Tag()
         cueFile.delete()

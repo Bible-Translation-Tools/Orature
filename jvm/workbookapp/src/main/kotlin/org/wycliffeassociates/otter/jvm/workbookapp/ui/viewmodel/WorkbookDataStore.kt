@@ -149,9 +149,9 @@ class WorkbookDataStore : Component(), ScopedInstance {
         val _chunk = activeChunkProperty.get()
         val _chapter = activeChapterProperty.get()
         if (_chapter != null && _chunk != null) {
-            sourceAudioProperty.set(workbook.sourceAudioAccessor.getChunk(_chapter.sort, _chunk.sort))
+            sourceAudioProperty.set(workbook.sourceAudioAccessor.getChunk(_chapter.sort, _chunk.sort, workbook.target))
         } else if (_chapter != null) {
-            sourceAudioProperty.set(workbook.sourceAudioAccessor.getChapter(_chapter.sort))
+            sourceAudioProperty.set(workbook.sourceAudioAccessor.getChapter(_chapter.sort, workbook.target))
         } else {
             sourceAudioProperty.set(null)
         }
@@ -208,12 +208,14 @@ class WorkbookDataStore : Component(), ScopedInstance {
 
     fun getSourceAudio(): SourceAudio? {
         val sourceAudio = workbook.sourceAudioAccessor
+        val meta = workbook.target
         return chunk?.let { chunk ->
             sourceAudio.getChunk(
                 chapter.sort,
-                chunk.start
+                chunk.start,
+                meta
             )
-        } ?: run { sourceAudio.getChapter(chapter.sort) }
+        } ?: run { sourceAudio.getChapter(chapter.sort, meta) }
     }
 
     fun getSourceText(): Maybe<String> {
@@ -221,20 +223,33 @@ class WorkbookDataStore : Component(), ScopedInstance {
             activeResourceComponent != null -> Maybe.just(
                 activeResourceComponent.textItem.text
             )
-            chunk != null -> getSourceChunk().map { _chunk ->
-                _chunk.textItem.text
-            }
+            chunk != null -> getChunkSourceText()
             else -> getSourceChapter().map { _chapter ->
                 _chapter.textItem.text
             }
         }
     }
 
+    fun getChunkSourceText(): Maybe<String> {
+        chunk?.let { chunk ->
+
+            val accessor = ProjectFilesAccessor(
+                directoryProvider,
+                workbook.source.resourceMetadata,
+                workbook.target.resourceMetadata,
+                workbook.target
+            )
+            val text = StringBuilder().apply {accessor.getChunkText(workbook.source.slug, chapter.sort, chunk.start, chunk.end).forEach { append("$it\n") }}.toString()
+            return Maybe.just(text)
+        }
+        return Maybe.just("")
+    }
+
     fun sourceTextBinding(): StringBinding {
         return Bindings.createStringBinding(
-            Callable {
+            {
                 activeChapterProperty.value?.let {
-                    getSourceText().blockingGet()
+                    getSourceText().blockingGet() ?: ""
                 }
             },
             activeChapterProperty,
@@ -269,7 +284,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
                         MessageFormat.format(
                             messages["chunkTitle"],
                             messages[activeChunkProperty.value.label],
-                            activeChunkProperty.value.start
+                            activeChunkProperty.value.sort
                         )
                     } else {
                         null
@@ -293,7 +308,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
                             messages["bookChapterChunkTitle"],
                             activeWorkbookProperty.value.source.title,
                             activeChapterProperty.value.title,
-                            activeChunkProperty.value.start
+                            activeChunkProperty.value.sort
                         )
                     } else {
                         MessageFormat.format(

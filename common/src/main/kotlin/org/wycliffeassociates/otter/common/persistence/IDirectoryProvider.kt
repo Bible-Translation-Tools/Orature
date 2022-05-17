@@ -75,6 +75,12 @@ interface IDirectoryProvider {
         bookSlug: String
     ): File
 
+    fun getProjectSourceAudioDirectory(
+        source: ResourceMetadata,
+        target: ResourceMetadata?,
+        bookSlug: String
+    ): File
+
     /** Internal-use directory of the given source RC */
     fun getSourceContainerDirectory(container: ResourceContainer): File
 

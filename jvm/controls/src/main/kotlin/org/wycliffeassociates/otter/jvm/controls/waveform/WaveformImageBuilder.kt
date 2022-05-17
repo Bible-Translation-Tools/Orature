@@ -131,7 +131,7 @@ class WaveformImageBuilder(
             waveformStream.onNext(img)
         }
 
-        waveformStream.onComplete()
+        // waveformStream.onComplete()
     }
 
     private fun scaleToHeight(value: Int, height: Int): Int {

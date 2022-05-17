@@ -87,11 +87,13 @@ class AudioPluginViewModel : ViewModel() {
     private fun constructPluginParameters(action: String = ""): PluginParameters {
         val workbook = workbookDataStore.workbook
         val sourceAudio = workbookDataStore.getSourceAudio()
-        val sourceText = workbookDataStore.getSourceText().blockingGet()
+        val sourceText = workbookDataStore.sourceTextBinding().value
 
         val chapterLabel = messages[workbookDataStore.activeChapterProperty.value.label]
         val chapterNumber = workbookDataStore.activeChapterProperty.value.sort
-        val verseTotal = workbookDataStore.activeChapterProperty.value.chunks.blockingLast().end
+
+        // TODO: This needs a better solution
+        val verseTotal =  100
         val chunkLabel = workbookDataStore.activeChunkProperty.value?.let {
             messages[workbookDataStore.activeChunkProperty.value.label]
         }

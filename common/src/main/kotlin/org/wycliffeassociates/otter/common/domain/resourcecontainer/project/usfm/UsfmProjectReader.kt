@@ -149,6 +149,8 @@ private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<O
             resourceContainer = null
         )
         val chapterTree = OtterTree<CollectionOrContent>(chapterCollection)
+
+        val chapterText = mutableListOf<String>()
         // create a chunk for the whole chapter
         val chapChunk = Content(
             sort = 0,
@@ -157,11 +159,13 @@ private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<O
             end = endVerse,
             selectedTake = null,
             text = null,
-            format = null,
-            type = ContentType.META
+            format = FORMAT,
+            type = ContentType.META,
+            draftNumber = 1
         )
         chapterTree.addChild(OtterTreeNode(chapChunk))
 
+        verses.sortBy { it.startingVerse }
         // Create content for each verse
         for (verse in verses) {
             val content = Content(
@@ -172,10 +176,17 @@ private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<O
                 selectedTake = null,
                 text = verse.getText(),
                 format = FORMAT,
-                type = ContentType.TEXT
+                type = ContentType.TEXT,
+                draftNumber = 1
             )
+            chapterText.add("${verse.startingVerse}. ${verse.getText()}\n")
             chapterTree.addChild(OtterTreeNode(content))
         }
+        val sb = StringBuilder()
+        for (text in chapterText) {
+            sb.append(text)
+        }
+        chapChunk.text = sb.toString()
         return@map chapterTree
     }
 }

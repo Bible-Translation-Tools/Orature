@@ -18,8 +18,12 @@
  */
 package org.wycliffeassociates.otter.common.data.workbook
 
+import com.jakewharton.rxrelay2.Relay
+import com.jakewharton.rxrelay2.ReplayRelay
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.cast
+import java.lang.Thread.sleep
+import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
@@ -32,26 +36,21 @@ data class Chapter(
     override val audio: AssociatedAudio,
     override val resources: List<ResourceGroup>,
     override val subtreeResources: List<ResourceMetadata>,
-    val chunks: Observable<Chunk>
+    val chunks: ReplayRelay<Chunk>,
+    val addChunk: (List<Content>) -> Unit,
+    val reset: () -> Unit
 ) : BookElement, BookElementContainer, Recordable {
 
     override val contentType: ContentType = ContentType.META
     override val children: Observable<BookElement> = chunks.cast()
 
+    var text: String = ""
+
     override val textItem
         get() = textItem()
 
     private fun textItem(): TextItem {
-        var format: MimeType? = null
-        val text = chunks
-            .reduce("") { acc, elm ->
-                if (format == null) format = elm.textItem.format
-                // Clean multiple line breaks to leave only one
-                val text = "${elm.textItem.text.replace("\n", "")}\n"
-                acc + "${verseLabel(elm.start, elm.end)}. $text"
-            }
-            .blockingGet()
-        return TextItem(text, format!!)
+        return TextItem(text, MimeType.USFM!!)
     }
 
     private fun verseLabel(start: Int, end: Int): String {

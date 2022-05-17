@@ -21,18 +21,25 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.jfoenix.controls.JFXButton
 import com.sun.javafx.util.Utils
+import java.io.File
 import java.text.MessageFormat
 import javafx.animation.AnimationTimer
 import javafx.geometry.Pos
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.common.audio.AudioCue
+import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerTrackControl
+import org.wycliffeassociates.otter.jvm.controls.waveform.ScrollingWaveform
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingWizardPage
+import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.Fragment
 import tornadofx.action
 import tornadofx.borderpane
@@ -64,6 +71,13 @@ class Chunk : Fragment() {
         tryImportStylesheet(resources.get("/css/scrolling-waveform.css"))
         tryImportStylesheet(resources.get("/css/chunk-marker.css"))
         tryImportStylesheet(resources.get("/css/chunk-page.css"))
+
+        vm.compositeDisposable.add(
+            vm.waveform.observeOnFx().subscribe {
+                (root.center as ScrollingWaveform).addWaveformImage(it)
+            }
+        )
+
         vm.onDockConsume()
         vm.pageProperty.set(ChunkingWizardPage.CHUNK)
         vm.titleProperty.set(messages["chunkingTitle"])
@@ -100,10 +114,6 @@ class Chunk : Fragment() {
     override val root = borderpane {
         center = MarkerPlacementWaveform(markerTrack).apply {
             positionProperty.bind(vm.positionProperty)
-
-            vm.compositeDisposable.add(
-                vm.waveform.observeOnFx().subscribe { addWaveformImage(it) }
-            )
 
             onWaveformClicked = { vm.pause() }
             onWaveformDragReleased = { deltaPos ->
@@ -159,7 +169,12 @@ class Chunk : Fragment() {
                 }
             }
             add(nextBtn)
+            button("save") {
+                setOnAction {
+                    vm.saveAndQuit()
+                    workspace.navigateBack()
+                }
+            }
         }
     }
 }
-

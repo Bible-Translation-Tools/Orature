@@ -251,8 +251,8 @@ class RecordScriptureViewModel : ViewModel() {
     private fun setHasNextAndPreviousChunk() {
         activeChunkProperty.value?.let { chunk ->
             if (chunkList.isNotEmpty()) {
-                hasNextChunk.set(chunk.start < chunkList.last().start)
-                hasPreviousChunk.set(chunk.start > chunkList.first().start)
+                hasNextChunk.set(chunk.sort < chunkList.last().sort)
+                hasPreviousChunk.set(chunk.sort > chunkList.first().sort)
             } else {
                 hasNextChunk.set(false)
                 hasPreviousChunk.set(false)
@@ -270,7 +270,7 @@ class RecordScriptureViewModel : ViewModel() {
         title = MessageFormat.format(
             messages["chunkTitle"],
             messages[chunk.label],
-            chunk.start
+            chunk.sort
         )
     }
 
@@ -289,16 +289,21 @@ class RecordScriptureViewModel : ViewModel() {
     }
 
     private fun getChunkList(chunks: Observable<Chunk>) {
+        var draft = 0
         activeChunkSubscription?.dispose()
+        chunkList.clear()
         activeChunkSubscription = chunks
-            .toList()
-            .map { it.sortedBy { chunk -> chunk.start } }
             .observeOnFx()
             .doOnError { e ->
                 logger.error("Error in getting the chunk list", e)
             }
-            .subscribe { list ->
-                chunkList.setAll(list)
+            .subscribe {
+                if (it.draftNumber > draft) {
+                    draft = it.draftNumber
+                    chunkList.removeIf { it.draftNumber < draft }
+                }
+                chunkList.add(it)
+                chunkList.sortBy { it.sort }
             }
     }
 

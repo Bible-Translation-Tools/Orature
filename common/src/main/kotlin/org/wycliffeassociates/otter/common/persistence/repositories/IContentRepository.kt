@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.common.persistence.repositories
 
 import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.Single
 import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.Collection
@@ -28,10 +29,12 @@ interface IContentRepository : IRepository<Content> {
     fun insertForCollection(content: Content, collection: Collection): Single<Int>
     // Get all the chunks for a collection
     fun getByCollection(collection: Collection): Single<List<Content>>
+    fun getByCollectionWithPersistentConnection(collection: Collection): Observable<Content>
     // Get the collection meta-chunk
     fun getCollectionMetaContent(collection: Collection): Single<Content>
     // Get sources this content is derived from
     fun getSources(content: Content): Single<List<Content>>
     // Update the sources for a content
     fun updateSources(content: Content, sourceContents: List<Content>): Completable
+    fun deleteForCollection(chapterCollection: Collection): Completable
 }

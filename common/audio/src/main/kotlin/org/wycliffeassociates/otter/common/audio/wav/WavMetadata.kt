@@ -64,6 +64,10 @@ class WavMetadata(parsableChunks: List<RiffChunk>? = null) : AudioMetadata {
         return cueChunk.cues
     }
 
+    override fun clearMarkers() {
+        cueChunk.clearCues()
+    }
+
     override fun artists(): List<String> {
         TODO()
     }

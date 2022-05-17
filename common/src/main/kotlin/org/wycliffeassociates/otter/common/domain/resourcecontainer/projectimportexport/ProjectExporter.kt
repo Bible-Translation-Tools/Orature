@@ -63,9 +63,12 @@ class ProjectExporter @Inject constructor(
                 val projectSourceMetadata = workbook.source.linkedResources
                     .firstOrNull { it.identifier == projectMetadataToExport.identifier }
                     ?: workbook.source.resourceMetadata
+                println("got project source RC")
 
                 val projectToExportIsBook: Boolean =
                     projectMetadataToExport.identifier == workbook.target.resourceMetadata.identifier
+
+                println("exporting book is $projectToExportIsBook")
 
                 val contributors = projectFilesAccessor.getContributorInfo()
                 val zipFilename = makeExportFilename(workbook, projectSourceMetadata)
@@ -81,11 +84,14 @@ class ProjectExporter @Inject constructor(
                         workbookRepository,
                         projectToExportIsBook
                     )
+                    println("Copied take files")
 
                     val linkedResource = workbook.source.linkedResources
                         .firstOrNull { it.identifier == projectMetadataToExport.identifier }
                     projectFilesAccessor.copySourceFiles(fileWriter, linkedResource)
+                    println("copied source files")
                     projectFilesAccessor.writeSelectedTakesFile(fileWriter, workbook, projectToExportIsBook)
+                    println("wrote selected takes")
                 }
 
                 if (fileFormat != OratureFileFormat.ZIP) {

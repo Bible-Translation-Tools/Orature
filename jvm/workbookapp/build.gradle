@@ -330,8 +330,9 @@ compileJava.dependsOn createSentryProperties
 compileJava.dependsOn createLocalesProperties
 compileJava.dependsOn copyMessages
 compileJava.dependsOn copyTestResources
-integrationTest.mustRunAfter test
+integrationTest.shouldRunAfter test
 integrationTest.dependsOn ':assets:build'
 integrationTest.dependsOn ':assets:copyToResources'
+check.dependsOn integrationTest
 install4jdeploy.dependsOn build
 install4jdeploy.dependsOn integrationTest

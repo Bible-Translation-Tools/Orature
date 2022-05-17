@@ -57,7 +57,7 @@ class CreateProject @Inject constructor(
         return matchingRcs
             .toList()
             .flatMap {
-                collectionRepo.deriveProject(it, sourceProject, targetLanguage)
+                collectionRepo.deriveProject(it, sourceProject, targetLanguage, false)
             }
     }
 }

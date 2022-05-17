@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.common.persistence.repositories
 
 import com.jakewharton.rxrelay2.BehaviorRelay
+import com.jakewharton.rxrelay2.Relay
 import com.jakewharton.rxrelay2.ReplayRelay
 import io.reactivex.Completable
 import io.reactivex.Maybe
@@ -26,6 +27,8 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import io.reactivex.functions.BiConsumer
+import io.reactivex.rxkotlin.toObservable
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
@@ -51,6 +54,7 @@ import org.wycliffeassociates.otter.common.domain.collections.UpdateTranslation
 import java.util.WeakHashMap
 import java.util.Collections.synchronizedMap
 import javax.inject.Inject
+import kotlin.math.log
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 
 private typealias ModelTake = org.wycliffeassociates.otter.common.data.primitives.Take
@@ -117,6 +121,7 @@ class WorkbookRepository(
             )
         )
         connections[workbook] = CompositeDisposable(disposables)
+        println("workbook built")
         return workbook
     }
 
@@ -211,21 +216,34 @@ class WorkbookRepository(
                     resources = constructResourceGroups(chapterCollection, disposables),
                     audio = constructAssociatedAudio(metaContent, disposables),
                     chunks = constructChunks(chapterCollection, disposables),
-                    subtreeResources = db.getSubtreeResourceMetadata(chapterCollection)
-                )
+                    subtreeResources = db.getSubtreeResourceMetadata(chapterCollection),
+                    addChunk = {
+                        logger.info("Adding chunk $it")
+                        db.addContentForCollection(chapterCollection, it).subscribe()
+                    },
+                    reset = {
+                        db.clearContentForCollection(chapterCollection).map {
+                            it.forEach { take ->
+                                println("deleting take: $take")
+                                println("delete status is: ${take.path.delete()}")
+                            }
+                        }.subscribe()
+                    }
+                ).also { it.text = metaContent.text ?: "" }
             }
     }
 
     private fun constructChunks(
         chapterCollection: Collection,
         disposables: MutableList<Disposable>
-    ): Observable<Chunk> {
-        return Observable.defer {
-            db.getContentByCollection(chapterCollection)
-                .flattenAsObservable { it }
-                .filter { it.type == ContentType.TEXT }
-                .map { chunk(it, disposables) }
-        }.cache()
+    ): ReplayRelay<Chunk> {
+        val rr = ReplayRelay.create<Chunk>()
+        db.getContentByCollectionActiveConnection(chapterCollection)
+            .filter { it.type == ContentType.TEXT }
+            .map {
+                chunk(it, disposables)
+            }.subscribe { rr.accept(it) }
+        return rr
     }
 
     private fun chunk(content: Content, disposables: MutableList<Disposable>): Chunk {
@@ -237,7 +255,8 @@ class WorkbookRepository(
             textItem = textItem(content),
             start = content.start,
             end = content.end,
-            contentType = content.type
+            contentType = content.type,
+            draftNumber = content.draftNumber
         )
     }
 
@@ -560,9 +579,11 @@ class WorkbookRepository(
     }
 
     interface IDatabaseAccessors {
+        fun addContentForCollection(collection: Collection, chunks: List<Content>): Completable
         fun getChildren(collection: Collection): Single<List<Collection>>
         fun getCollectionMetaContent(collection: Collection): Single<Content>
         fun getContentByCollection(collection: Collection): Single<List<Content>>
+        fun getContentByCollectionActiveConnection(collection: Collection): Observable<Content>
         fun updateContent(content: Content): Completable
         fun getResources(content: Content, metadata: ResourceMetadata): Observable<Content>
         fun getResources(collection: Collection, metadata: ResourceMetadata): Observable<Content>
@@ -578,6 +599,7 @@ class WorkbookRepository(
         fun getSourceProject(targetProject: Collection): Maybe<Collection>
         fun getTranslation(sourceLanguage: Language, targetLanguage: Language): Single<Translation>
         fun updateTranslation(translation: Translation): Completable
+        fun clearContentForCollection(chapterCollection: Collection): Single<List<ModelTake>>
     }
 }
 
@@ -590,10 +612,42 @@ private class DefaultDatabaseAccessors(
     private val languageRepo: ILanguageRepository,
     private val updateTranslationUseCase: UpdateTranslation
 ) : WorkbookRepository.IDatabaseAccessors {
+
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
+    override fun clearContentForCollection(chapterCollection: Collection): Single<List<ModelTake>> {
+        return takeRepo
+            .getByCollection(chapterCollection, true).map {
+                contentRepo.deleteForCollection(chapterCollection).blockingAwait()
+                it.forEach {
+                    takeRepo.markDeleted(it).blockingAwait()
+                }
+                takeRepo.deleteExpiredTakes().blockingAwait()
+                it
+            }
+
+    }
+
+    override fun addContentForCollection(collection: Collection, chunks: List<Content>): Completable {
+        return Observable
+            .fromArray(*chunks.toTypedArray())
+            .map {
+                contentRepo.insertForCollection(it, collection)
+            }
+            .map { it.toObservable() }
+            .flatMap { it }
+            .collectInto(mutableListOf<Int>()) { l, i -> l.add(i) }
+            .ignoreElement()
+    }
+
     override fun getChildren(collection: Collection) = collectionRepo.getChildren(collection)
 
     override fun getCollectionMetaContent(collection: Collection) = contentRepo.getCollectionMetaContent(collection)
     override fun getContentByCollection(collection: Collection) = contentRepo.getByCollection(collection)
+    override fun getContentByCollectionActiveConnection(collection: Collection): Observable<Content> {
+        return contentRepo.getByCollectionWithPersistentConnection(collection)
+    }
+
     override fun updateContent(content: Content) = contentRepo.update(content)
 
     override fun getResources(content: Content, metadata: ResourceMetadata) =

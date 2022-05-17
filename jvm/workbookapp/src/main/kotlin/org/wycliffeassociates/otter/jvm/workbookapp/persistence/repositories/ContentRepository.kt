@@ -18,7 +18,9 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories
 
+import com.jakewharton.rxrelay2.ReplayRelay
 import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
@@ -33,17 +35,21 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.map
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.TakeMapper
 import java.lang.IllegalStateException
 import javax.inject.Inject
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.CollectionMapper
 
 class ContentRepository @Inject constructor(
     database: AppDatabase
 ) : IContentRepository {
     private val logger = LoggerFactory.getLogger(ContentRepository::class.java)
 
+    private val activeConnections = mutableMapOf<Collection, ReplayRelay<Content>>()
+
     private val contentDao = database.contentDao
     private val takeDao = database.takeDao
     private val markerDao = database.markerDao
     private val contentTypeDao = database.contentTypeDao
     private val contentMapper: ContentMapper = ContentMapper(contentTypeDao)
+    private val collectionMapper = CollectionMapper()
     private val takeMapper: TakeMapper = TakeMapper()
     private val markerMapper: MarkerMapper = MarkerMapper()
 
@@ -58,6 +64,21 @@ class ContentRepository @Inject constructor(
                 logger.error("Error in getByCollection for collection: $collection", e)
             }
             .subscribeOn(Schedulers.io())
+    }
+
+    override fun getByCollectionWithPersistentConnection(collection: Collection): Observable<Content> {
+        activeConnections.getOrDefault(collection, null)?.let { return it }
+
+        val connection = ReplayRelay.create<Content>()
+        activeConnections[collection] = connection
+        getByCollection(collection)
+            .map {
+                it.forEach { connection.accept(it) }
+            }
+            .subscribeOn(Schedulers.io())
+            .subscribe()
+
+        return connection
     }
 
     override fun getCollectionMetaContent(collection: Collection): Single<Content> {
@@ -107,6 +128,12 @@ class ContentRepository @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
+    override fun deleteForCollection(chapterCollection: Collection): Completable {
+        return Completable.fromCallable {
+            contentDao.deleteForCollection(collectionMapper.mapToEntity(chapterCollection))
+        }
+    }
+
     override fun delete(obj: Content): Completable {
         return Completable
             .fromAction {
@@ -134,7 +161,10 @@ class ContentRepository @Inject constructor(
     override fun insertForCollection(content: Content, collection: Collection): Single<Int> {
         return Single
             .fromCallable {
-                contentDao.insert(contentMapper.mapToEntity(content).apply { collectionFk = collection.id })
+                val id = contentDao.insert(contentMapper.mapToEntity(content, collection.id).apply { collectionFk = collection.id })
+                content.id = id
+                activeConnections.getOrDefault(collection, null)?.let { it.accept(content) }
+                id
             }
             .doOnError { e ->
                 logger.error("Error in insertForCollection for content: $content, collection: $collection", e)
@@ -163,12 +193,12 @@ class ContentRepository @Inject constructor(
         val contentEnd = sources.map { it.start }.maxOrNull() ?: entity.start
         val selectedTake = entity
             .selectedTakeFk?.let { selectedTakeFk ->
-            // Retrieve the markers
-            val markers = markerDao
-                .fetchByTakeId(selectedTakeFk)
-                .map(markerMapper::mapFromEntity)
-            takeMapper.mapFromEntity(takeDao.fetchById(selectedTakeFk), markers)
-        }
+                // Retrieve the markers
+                val markers = markerDao
+                    .fetchByTakeId(selectedTakeFk)
+                    .map(markerMapper::mapFromEntity)
+                takeMapper.mapFromEntity(takeDao.fetchById(selectedTakeFk), markers)
+            }
         return contentMapper.mapFromEntity(entity, selectedTake, contentEnd)
     }
 }

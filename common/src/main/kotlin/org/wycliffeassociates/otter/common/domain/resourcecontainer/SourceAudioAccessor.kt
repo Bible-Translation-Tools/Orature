@@ -23,6 +23,8 @@ import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Media
 import java.io.File
+import org.wycliffeassociates.otter.common.data.workbook.Book
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 
 data class SourceAudio(val file: File, val start: Int, val end: Int)
@@ -36,7 +38,21 @@ class SourceAudioAccessor(
     private val dir = File(directoryProvider.cacheDirectory, "source").apply { mkdirs() }
     private val cache = mutableMapOf<String, File>()
 
-    fun getChapter(chapter: Int): SourceAudio? {
+    fun getChapter(chapter: Int, target: Book? = null): SourceAudio? {
+        target?.let { meta ->
+            println("looking for target audio")
+            val accessor = ProjectFilesAccessor(directoryProvider, metadata, target.resourceMetadata, target)
+            val dir = accessor.sourceAudioDir
+            val file = dir.listFiles()?.find {
+                it.name.contains("_c$chapter") || it.name.contains("_c0$chapter") || it.name.contains("_c00$chapter")
+            }
+            file?.let {
+                println("found the file! ${it.path}")
+                val audioFile = AudioFile(it)
+                val size = audioFile.totalFrames
+                return SourceAudio(it, 0, size)
+            }
+        }
         ResourceContainer.load(metadata.path).use { rc ->
             if (rc.media != null) {
                 val mediaProject = rc.media!!.projects.find { it.identifier == project }
@@ -46,14 +62,14 @@ class SourceAudioAccessor(
                     media = mediaProject?.media?.find { it.identifier == "wav" }
                 }
                 if (media != null) {
-                    return getChapter(media, chapter, rc)
+                    return getChapter(media, chapter, rc, target?.resourceMetadata)
                 }
             }
         }
         return null
     }
 
-    private fun getChapter(media: Media, chapter: Int, rc: ResourceContainer): SourceAudio? {
+    private fun getChapter(media: Media, chapter: Int, rc: ResourceContainer, targetMetadata: ResourceMetadata?): SourceAudio? {
         return if (rc.media != null && media.chapterUrl.isNotEmpty()) {
             val path = media.chapterUrl.replace("{chapter}", chapter.toString())
             if (rc.accessor.fileExists(path)) {
@@ -95,9 +111,10 @@ class SourceAudioAccessor(
         }
     }
 
-    fun getChunk(chapter: Int, chunk: Int): SourceAudio? {
-        val file = getChapter(chapter)?.file
+    fun getChunk(chapter: Int, chunk: Int, target: Book?): SourceAudio? {
+        val file = getChapter(chapter, target)?.file
         if (file != null) {
+            println("chunk file is ${file.absolutePath}")
             val audioFile = AudioFile(file)
             val cues = audioFile.metadata.getCues()
             cues.sortedBy { it.location }

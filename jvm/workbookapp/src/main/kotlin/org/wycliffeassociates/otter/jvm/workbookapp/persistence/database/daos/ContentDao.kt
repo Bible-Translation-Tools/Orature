@@ -26,6 +26,7 @@ import org.jooq.SelectFieldOrAsterisk
 import org.jooq.impl.DSL.max
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.InsertionException
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.CollectionEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ContentEntity
 
 class ContentDao(
@@ -198,7 +199,9 @@ class ContentDao(
                 CONTENT_ENTITY.LABEL,
                 CONTENT_ENTITY.SELECTED_TAKE_FK,
                 CONTENT_ENTITY.TEXT,
-                CONTENT_ENTITY.FORMAT
+                CONTENT_ENTITY.FORMAT,
+                CONTENT_ENTITY.TYPE_FK,
+                CONTENT_ENTITY.DRAFT_NUMBER
             )
             .values(
                 entity.collectionFk,
@@ -207,7 +210,9 @@ class ContentDao(
                 entity.labelKey,
                 entity.selectedTakeFk,
                 entity.text,
-                entity.format
+                entity.format,
+                entity.type_fk,
+                entity.draftNumber
             )
             .execute()
 
@@ -232,7 +237,8 @@ class ContentDao(
                 CONTENT_ENTITY.SELECTED_TAKE_FK,
                 CONTENT_ENTITY.TEXT,
                 CONTENT_ENTITY.FORMAT,
-                CONTENT_ENTITY.TYPE_FK
+                CONTENT_ENTITY.TYPE_FK,
+                CONTENT_ENTITY.DRAFT_NUMBER
             )
         val insertWithValues = entities.fold(bareInsert) { q, e ->
             if (e.id != 0) throw InsertionException("Entity ID was not 0")
@@ -244,7 +250,8 @@ class ContentDao(
                 e.selectedTakeFk,
                 e.text,
                 e.format,
-                e.type_fk
+                e.type_fk,
+                e.draftNumber
             )
         }
         insertWithValues.execute()
@@ -287,6 +294,15 @@ class ContentDao(
         dsl
             .deleteFrom(CONTENT_ENTITY)
             .where(CONTENT_ENTITY.ID.eq(entity.id))
+            .execute()
+    }
+
+    fun deleteForCollection(chapterCollection: CollectionEntity, dsl: DSLContext = instanceDsl) {
+        dsl.deleteFrom(CONTENT_ENTITY)
+            .where(
+                CONTENT_ENTITY.COLLECTION_FK.eq(chapterCollection.id)
+                    .and((CONTENT_ENTITY.TYPE_FK).eq(1))
+            )
             .execute()
     }
 }

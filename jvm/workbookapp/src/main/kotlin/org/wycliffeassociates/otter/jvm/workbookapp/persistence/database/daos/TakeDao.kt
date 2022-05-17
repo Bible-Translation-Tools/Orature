@@ -49,6 +49,7 @@ class TakeDao(
     fun insert(entity: TakeEntity, dsl: DSLContext = instanceDsl): Int {
         if (entity.id != 0) throw InsertionException("Entity ID is not 0")
 
+        println(entity)
         // Insert the take entity
         dsl
             .insertInto(
@@ -167,5 +168,27 @@ class TakeDao(
             .fetch {
                 RecordMappers.mapToTakeEntity(it)
             }
+    }
+
+    fun fetchByCollectionId(
+        id: Int,
+        includeDeleted: Boolean = false,
+        dsl: DSLContext = instanceDsl
+    ): List<TakeEntity> {
+        val contentid = CONTENT_ENTITY.ID.`as`("contentid")
+        val baseQuery = dsl
+            .select()
+            .from(TAKE_ENTITY)
+            .leftJoin(
+                select(contentid)
+                    .from(CONTENT_ENTITY)
+                    .where(CONTENT_ENTITY.COLLECTION_FK.eq(id))
+            ).on(contentid.eq(TAKE_ENTITY.CONTENT_FK))
+
+        val query = when {
+            includeDeleted -> baseQuery
+            else -> baseQuery.and(TAKE_ENTITY.DELETED_TS.isNull)
+        }
+        return query.fetch(RecordMappers.Companion::mapToTakeEntity)
     }
 }

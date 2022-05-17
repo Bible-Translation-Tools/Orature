@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 import com.github.thomasnield.rxkotlinfx.changes
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
@@ -53,6 +54,11 @@ import tornadofx.*
 import java.io.File
 import java.util.concurrent.Callable
 import javax.inject.Inject
+import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.common.domain.content.VerseByVerseChunking
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+
 
 class ChapterPageViewModel : ViewModel() {
 
@@ -60,6 +66,11 @@ class ChapterPageViewModel : ViewModel() {
 
     val workbookDataStore: WorkbookDataStore by inject()
     val audioPluginViewModel: AudioPluginViewModel by inject()
+
+    var draft = 0
+
+    @Inject
+    lateinit var directoryProvider: IDirectoryProvider
 
     @Inject
     lateinit var concatenateAudio: ConcatenateAudio
@@ -106,31 +117,30 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     fun dock() {
-        chapterCardProperty.set(CardData(workbookDataStore.chapter))
-        workbookDataStore.activeChapterProperty.value.let { _chapter ->
-            _chapter?.let { chapter ->
-                loadChapterContents(chapter).subscribe()
-                val chap = CardData(chapter)
-                chapterCardProperty.set(chap)
-                subscribeSelectedTakePropertyToRelay(chapter.audio)
-            }
-        }
-
+        draft = 0
         allContent
             .changes()
             .doOnError { e ->
                 logger.error("Error in setting up content cards", e)
             }
+            .observeOnFx()
             .subscribe {
-                filteredContent.setAll(
-                    allContent.filtered { cardData ->
-                        cardData.item != ContentLabel.CHAPTER.value
-                    }
-                )
+                println("in the allcontent changes")
+                println(allContent.size)
+
                 checkCanCompile()
                 setWorkChunk()
             }
 
+        chapterCardProperty.set(CardData(workbookDataStore.chapter))
+        workbookDataStore.activeChapterProperty.value.let { _chapter ->
+            _chapter?.let { chapter ->
+                loadChapterContents(chapter).subscribe { println("carddata from beginning $it") }
+                val chap = CardData(chapter)
+                chapterCardProperty.set(chap)
+                subscribeSelectedTakePropertyToRelay(chapter.audio)
+            }
+        }
         appPreferencesRepo.sourceTextZoomRate().subscribe { rate ->
             workbookDataStore.sourceTextZoomRateProperty.set(rate)
         }
@@ -175,7 +185,8 @@ class ChapterPageViewModel : ViewModel() {
     fun checkCanCompile() {
         val hasUnselected = filteredContent.any { chunk ->
             chunk.chunkSource?.audio?.selected?.value?.value == null
-        }
+        }.or(filteredContent.isEmpty())
+
         canCompileProperty.set(hasUnselected.not())
     }
 
@@ -353,12 +364,15 @@ class ChapterPageViewModel : ViewModel() {
         )
     }
 
-    private fun loadChapterContents(chapter: Chapter): Completable {
+    private fun loadChapterContents(chapter: Chapter): Observable<CardData> {
         // Remove existing content so the user knows they are outdated
         allContent.clear()
         loading = true
         return chapter.chunks
-            .map { CardData(it) }
+            .map {
+                println("adding chunk $it to card data")
+                CardData(it)
+            }
             .map {
                 buildTakes(it)
                 it.player = getPlayer()
@@ -370,13 +384,23 @@ class ChapterPageViewModel : ViewModel() {
                 loading = false
             }
             .observeOnFx()
-            .toList()
             .doOnError { e ->
                 logger.error("Error in loading chapter contents for chapter: $chapter", e)
             }
-            .map { list: List<CardData> ->
-                allContent.setAll(list)
-            }.ignoreElement()
+            .map {
+                if (it.chunkSource != null) {
+                    if (it.chunkSource.draftNumber > draft) {
+                        logger.error("draft number is $draft, chunk draft number is ${it.chunkSource.draftNumber} should be removing other chunks")
+                        draft = it.chunkSource.draftNumber
+                        filteredContent.removeIf { it.chunkSource != null && it.chunkSource.draftNumber < draft }
+                    }
+                }
+                if (filteredContent.find { cont -> it.sort == cont.sort } == null) {
+                    filteredContent.add(it)
+                    filteredContent.sortBy { it.sort }
+                }
+                it
+            }.observeOnFx()
     }
 
     private fun subscribeSelectedTakePropertyToRelay(audio: AssociatedAudio) {
@@ -414,6 +438,7 @@ class ChapterPageViewModel : ViewModel() {
             val selected = chunk.audio.selected.value?.value
             chunk.audio.takes
                 .filter { it.deletedTimestamp.value?.value == null }
+                .filter { it.file.exists() }
                 .map { take ->
                     setMarker(chunk.start.toString(), take)
                     take.mapToModel(take == selected)
@@ -441,5 +466,33 @@ class ChapterPageViewModel : ViewModel() {
 
     private fun getPlayer(): IAudioPlayer {
         return (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
+    }
+
+    fun subList() {
+        workbookDataStore.activeChapterProperty.value.chunks.map {
+            CardData(it)
+        }.map {
+            buildTakes(it)
+            it.player = getPlayer()
+            it.onChunkOpen = ::onChunkOpen
+            it.onTakeSelected = ::onTakeSelected
+            it
+        }.map {
+            allContent.add(it)
+        }.observeOnFx().subscribe()
+    }
+
+    fun chunkVerseByVerse() {
+        val wkbk = workbookDataStore.activeWorkbookProperty.value
+        val chapter = workbookDataStore.activeChapterProperty.value
+        VerseByVerseChunking(directoryProvider, wkbk, chapter.addChunk, chapter.sort)
+            .chunkVerseByVerse(wkbk.source.slug, draft + 1)
+    }
+
+    fun resetChapter() {
+        closePlayers()
+        filteredContent.clear()
+        val chapter = workbookDataStore.activeChapterProperty.value
+        chapter.reset()
     }
 }

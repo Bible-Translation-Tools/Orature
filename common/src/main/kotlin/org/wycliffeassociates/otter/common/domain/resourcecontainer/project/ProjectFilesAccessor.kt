@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.project
 
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.cast
+import io.reactivex.rxkotlin.toObservable
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Collection
@@ -42,6 +43,12 @@ import org.wycliffeassociates.resourcecontainer.entity.Project
 import java.io.File
 import java.io.OutputStream
 import kotlin.io.path.outputStream
+import org.wycliffeassociates.otter.common.data.workbook.Book
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.usfm.getText
+import org.wycliffeassociates.usfmtools.USFMParser
+import org.wycliffeassociates.usfmtools.models.markers.CMarker
+import org.wycliffeassociates.usfmtools.models.markers.VMarker
+
 
 class ProjectFilesAccessor(
     directoryProvider: IDirectoryProvider,
@@ -49,6 +56,14 @@ class ProjectFilesAccessor(
     private val targetMetadata: ResourceMetadata,
     private val project: Collection
 ) {
+
+    constructor(
+        directoryProvider: IDirectoryProvider,
+        sourceMetadata: ResourceMetadata,
+        targetMetadata: ResourceMetadata,
+        project: Book
+    ) : this(directoryProvider, sourceMetadata, targetMetadata, project.toCollection())
+
     private val log = LoggerFactory.getLogger(ProjectFilesAccessor::class.java)
 
     val projectDir = directoryProvider.getProjectDirectory(
@@ -61,6 +76,12 @@ class ProjectFilesAccessor(
         sourceMetadata,
         targetMetadata,
         project
+    )
+
+    val sourceAudioDir = directoryProvider.getProjectSourceAudioDirectory(
+        sourceMetadata,
+        targetMetadata,
+        project.slug
     )
 
     val audioDir = directoryProvider.getProjectAudioDirectory(
@@ -111,6 +132,12 @@ class ProjectFilesAccessor(
     }
 
     fun copySourceFiles(fileWriter: IFileWriter, linkedResource: ResourceMetadata? = null) {
+        if (sourceAudioDir.exists()) {
+            sourceAudioDir.listFiles()?.forEach {
+                fileWriter.copyFile(it, RcConstants.SOURCE_AUDIO_DIR)
+            }
+        }
+
         val sources = mutableListOf(sourceMetadata)
         linkedResource?.let { sources.add(it) }
 
@@ -119,6 +146,7 @@ class ProjectFilesAccessor(
             .distinct()
             .forEach { fileWriter.copyFile(it, RcConstants.SOURCE_DIR) }
     }
+
 
     fun initializeResourceContainerInDir(overwrite: Boolean = true) {
         if (!overwrite) { // if existing container is valid, then use it
@@ -239,6 +267,63 @@ class ProjectFilesAccessor(
         }
     }
 
+    fun getChapterText(projectSlug: String, chapterNumber: Int): List<String> {
+        val chapterText = arrayListOf<String>()
+
+        println(sourceMetadata.path)
+        ResourceContainer.load(sourceMetadata.path).use { rc ->
+            val projectEntry = rc.manifest.projects.find { it.identifier == projectSlug }
+            projectEntry?.let {
+                println(it.path)
+                println(rc.accessor.fileExists(it.path.removePrefix("./")))
+                val text = rc.accessor.getReader(it.path.removePrefix("./")).readText()
+                val parser = USFMParser(arrayListOf("s5"))
+                val doc = parser.parseFromString(text)
+                val chapters = doc.getChildMarkers(CMarker::class.java)
+                val chap = chapters.find { it.number == chapterNumber }
+                chap?.let {
+                    it.getChildMarkers(VMarker::class.java).forEach {
+                        chapterText.add(it.getText())
+                    }
+                }
+            }
+        }
+
+        return chapterText
+    }
+
+    fun getChunkText(
+        projectSlug: String,
+        chapterNumber: Int,
+        startVerse: Int,
+        endVerse: Int
+    ): List<String> {
+        val chapterText = arrayListOf<String>()
+
+        ResourceContainer.load(sourceMetadata.path).use { rc ->
+            val projectEntry = rc.manifest.projects.find { it.identifier == projectSlug }
+            projectEntry?.let {
+                println(it.path)
+                println(rc.accessor.fileExists(it.path.removePrefix("./")))
+                val text = rc.accessor.getReader(it.path.removePrefix("./")).readText()
+                val parser = USFMParser(arrayListOf("s5"))
+                val doc = parser.parseFromString(text)
+                val chapters = doc.getChildMarkers(CMarker::class.java)
+                val chap = chapters.find { it.number == chapterNumber }
+                chap?.let {
+                    for (i in startVerse..endVerse) {
+                        val verse = it.getChildMarkers(VMarker::class.java).find { it.startingVerse == i }
+                        verse?.let {
+                            chapterText.add(it.getText())
+                        }
+                    }
+                }
+            }
+        }
+
+        return chapterText
+    }
+
     private fun copySourceWithoutMedia(source: File, target: File) {
         if (!OratureFileFormat.isSupported(source.extension)) {
             return
@@ -287,12 +372,19 @@ class ProjectFilesAccessor(
             // Work around a quirk that records resource takes to the source tree
             else -> Observable.concat(workbook.source.chapters, workbook.target.chapters)
         }
+        println("got chapters")
+
         val bookElements: Observable<BookElement> = when {
             chaptersOnly -> chapters.cast()
-            else -> chapters.concatMap { chapter -> chapter.children.startWith(chapter) }
+            else -> chapters.concatMap { chapter ->
+                chapter.chunks.values.toObservable().cast()
+            }
         }
+        println("got book elements")
+
         return bookElements
-            .flatMap { getAudioForCurrentResource(it, isBook) }
+            .flatMap {
+                getAudioForCurrentResource(it, isBook) }
             .mapNotNull { audio -> audio.selected.value?.value }
     }
 
