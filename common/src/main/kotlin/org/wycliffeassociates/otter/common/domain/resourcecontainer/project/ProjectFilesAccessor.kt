@@ -355,7 +355,7 @@ class ProjectFilesAccessor(
         }
     }
 
-    private fun selectedChapterFilePaths(workbook: Workbook, isBook: Boolean): Set<String> {
+    fun selectedChapterFilePaths(workbook: Workbook, isBook: Boolean): Set<String> {
         return fetchSelectedTakes(workbook, isBook, true)
             .map(this::relativeTakePath)
             .collectInto(hashSetOf<String>(), { set, path -> set.add(path) })
@@ -447,6 +447,11 @@ class ProjectFilesAccessor(
 
     private fun isAudioFile(file: File) =
         file.extension.lowercase().let { it == "wav" || it == "mp3" }
+
+    fun getChunkFile(projectSlug: String, chapterNumber: Int): File {
+        val chapterDir = File(projectDir, "${RcConstants.APP_SPECIFIC_DIR}/$projectSlug").apply { mkdirs() }
+        return File(chapterDir,"/chapter_${chapterNumber}_chunks.json")
+    }
 
     companion object {
         val ignoredSourceMediaExtensions = listOf("wav", "mp3", "jpg", "jpeg", "png", "cue")

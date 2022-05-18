@@ -73,7 +73,6 @@ class TargetLanguageSelection : Fragment() {
                     LanguageCell(
                         LanguageType.TARGET,
                         viewModel.anglicizedProperty,
-                        translationViewModel.existingLanguages
                     ) {
                         translationViewModel.selectedTargetLanguageProperty.set(it)
                     }
@@ -84,7 +83,7 @@ class TargetLanguageSelection : Fragment() {
 
                 overrideDefaultKeyEventHandler {
                     val current = selectionModel.selectedItem
-                    val availableItems = getAvailableLanguages()
+                    val availableItems = viewModel.filteredLanguages
                     var index = availableItems.indexOf(current)
                     when (it) {
                         KeyCode.UP -> index--
@@ -99,19 +98,12 @@ class TargetLanguageSelection : Fragment() {
                 }
                 focusedProperty().onChange { focused ->
                     if (focused) {
-                        val item = getAvailableLanguages().firstOrNull()
+                        val item = viewModel.filteredLanguages.firstOrNull()
                         val index = items.indexOf(item)
                         selectionModel.select(index)
                     }
                 }
             }
-        }
-    }
-
-    private fun getAvailableLanguages(): List<Language> {
-        return viewModel.filteredLanguages.filter {
-            translationViewModel.existingLanguages
-                .contains(it).not()
         }
     }
 

@@ -51,7 +51,7 @@ jobs:
           -e GITHUB_TOKEN \
           -e SONAR_TOKEN \
           wycliffeassociates/install4j-docker:9.0.2 \
-          ./gradlew :jvm:workbookapp:install4jdeploy "-Dorg.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m"
+          ./gradlew build codeCoverageReport sonarqube :jvm:workbookapp:install4jdeploy "-Dorg.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m"
         env:
           ORG_GRADLE_PROJECT_gradlewCommandLicenseProp: ${{ secrets.INSTALL4J_LICENSE_9 }}
           ORG_GRADLE_PROJECT_githubRepoUrl: https://api.github.com/repos/OratureCrashReports/orature-crash-reports/issues

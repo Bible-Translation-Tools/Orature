@@ -19,7 +19,7 @@
 package org.wycliffeassociates.otter.common.data.primitives
 
 data class Contributor(
-    var name: String
+    val name: String
 ) {
     override fun toString(): String {
         return name

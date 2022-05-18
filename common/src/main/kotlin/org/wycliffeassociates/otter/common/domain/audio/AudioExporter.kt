@@ -33,16 +33,27 @@ class AudioExporter @Inject constructor() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    /**
+     * Exports the given wav file to mp3 file
+     * including the relevant metadata.
+     * @param wavAudio the input wav file
+     * @param outputPath either a directory or a complete file path
+     * @param license license information to be included in the mp3 metadata
+     * @param contributors contributors information to be included in the mp3 metadata
+     */
     fun exportMp3(
-        audio: File,
-        outputDir: File,
+        wavAudio: File,
+        outputPath: File,
         license: License? = null,
         contributors: List<Contributor> = listOf()
     ): Completable {
-        val mp3Name = audio.nameWithoutExtension + ".mp3"
-        val mp3File = File(outputDir, mp3Name)
+        val mp3File = if (outputPath.isDirectory) {
+            File(outputPath, wavAudio.nameWithoutExtension + ".mp3")
+        } else {
+            outputPath
+        }
 
-        return audioConverter.wavToMp3(audio, mp3File)
+        return audioConverter.wavToMp3(wavAudio, mp3File)
             .subscribeOn(Schedulers.io())
             .andThen(updateMetadata(mp3File, license, contributors))
     }
