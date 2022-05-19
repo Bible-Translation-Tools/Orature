@@ -18,6 +18,13 @@
  */
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
 
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.core.JsonFactory
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.exc.MismatchedInputException
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -163,6 +170,13 @@ class ProjectImporter @Inject constructor(
         projectFilesAccessor.copySourceFiles(fileReader)
 
         importContributorInfo(metadata, projectFilesAccessor)
+
+        importChunks(
+            derivedProject,
+            projectFilesAccessor,
+            fileReader
+        )
+
         importTakes(
             fileReader,
             derivedProject,
@@ -176,6 +190,42 @@ class ProjectImporter @Inject constructor(
         languageRepository.updateTranslation(translation).subscribe()
         println("here in thing")
         resetChaptersWithoutTakes(derivedProject)
+    }
+
+    private fun importChunks(project: Collection, accessor: ProjectFilesAccessor, fileReader: IFileReader) {
+        accessor.copyChunkFile(fileReader)
+
+        val factory = JsonFactory()
+        factory.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET)
+        val mapper = ObjectMapper(factory)
+        mapper.registerModule(KotlinModule())
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+
+        val chunks = mutableMapOf<Int, List<Content>>()
+
+        val file: File = accessor.getChunkFile()
+        try {
+            if (file.exists() && file.length() > 0) {
+                val typeRef: TypeReference<HashMap<Int, List<Content>>> =
+                    object : TypeReference<HashMap<Int, List<Content>>>() {}
+                val map: Map<Int, List<Content>> = mapper.readValue(file, typeRef)
+                chunks.putAll(map)
+            }
+        } catch (e: MismatchedInputException) {
+            // clear file if it can't be read
+            file.writer().use {  }
+        }
+
+        val chapters = collectionRepository.getChildren(project).blockingGet()
+        chapters.forEach { chapter ->
+            if (chunks.containsKey(chapter.sort)) {
+                val contents = chunks[chapter.sort]
+                contentRepository.deleteForCollection(chapter).blockingAwait()
+                contents?.forEach { content ->
+                    contentRepository.insertForCollection(content, chapter).blockingGet()
+                }
+            }
+        }
     }
 
     private fun resetChaptersWithoutTakes(derivedProject: Collection) {

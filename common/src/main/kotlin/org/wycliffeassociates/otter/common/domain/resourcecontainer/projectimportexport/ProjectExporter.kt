@@ -92,6 +92,7 @@ class ProjectExporter @Inject constructor(
                     println("copied source files")
                     projectFilesAccessor.writeSelectedTakesFile(fileWriter, workbook, projectToExportIsBook)
                     println("wrote selected takes")
+                    projectFilesAccessor.writeChunksFile(fileWriter)
                 }
 
                 if (fileFormat != OratureFileFormat.ZIP) {

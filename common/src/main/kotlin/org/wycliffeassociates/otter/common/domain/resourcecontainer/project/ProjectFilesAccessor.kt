@@ -193,6 +193,11 @@ class ProjectFilesAccessor(
         outFile.createNewFile()
     }
 
+    fun createChunksFile() {
+        val outFile = projectDir.resolve(RcConstants.CHUNKS_FILE)
+        outFile.createNewFile()
+    }
+
     fun copySelectedTakesFile(fileReader: IFileReader) {
         val outFile = projectDir.resolve(RcConstants.SELECTED_TAKES_FILE)
         if (!outFile.exists()) {
@@ -224,6 +229,16 @@ class ProjectFilesAccessor(
                 .blockingSubscribe {
                     _fileWriter.appendLine(it)
                 }
+        }
+    }
+
+    fun writeChunksFile(fileWriter: IFileWriter) {
+        val inFile = projectDir.resolve(RcConstants.CHUNKS_FILE)
+
+        fileWriter.bufferedWriter(RcConstants.CHUNKS_FILE).use { _fileWriter ->
+            inFile.reader().use { _fileReader ->
+                _fileReader.transferTo(_fileWriter)
+            }
         }
     }
 
@@ -448,9 +463,15 @@ class ProjectFilesAccessor(
     private fun isAudioFile(file: File) =
         file.extension.lowercase().let { it == "wav" || it == "mp3" }
 
-    fun getChunkFile(projectSlug: String, chapterNumber: Int): File {
-        val chapterDir = File(projectDir, "${RcConstants.APP_SPECIFIC_DIR}/$projectSlug").apply { mkdirs() }
-        return File(chapterDir,"/chapter_${chapterNumber}_chunks.json")
+    fun getChunkFile(): File {
+        return projectDir.resolve(RcConstants.CHUNKS_FILE)
+    }
+
+    fun copyChunkFile(fileReader: IFileReader) {
+        val outFile = projectDir.resolve(RcConstants.CHUNKS_FILE)
+        if (!outFile.exists()) {
+            fileReader.stream(RcConstants.CHUNKS_FILE).transferTo(outFile.outputStream())
+        }
     }
 
     companion object {
