@@ -64,6 +64,7 @@ import tornadofx.*
 import java.text.MessageFormat
 import java.util.*
 import kotlin.math.max
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.ChunkingWizard
 
 class ChapterPage : View() {
     private val logger = LoggerFactory.getLogger(ChapterPage::class.java)
@@ -322,6 +323,8 @@ class ChapterPage : View() {
                 addClass("chapter-page__chunks")
                 vgrow = Priority.ALWAYS
 
+                visibleProperty().bind(viewModel.filteredContent.sizeProperty.lessThan(1))
+
                 var textBlock1: Label? = null
                 var textBlock2: Label? = null
 
@@ -353,6 +356,8 @@ class ChapterPage : View() {
                         button("Select") {
                             addClass("btn", "btn--secondary", "chunk-mode__selection-btn")
                             graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
+
+                            setOnAction { viewModel.chunkVerseByVerse() }
                         }
                     }
 
@@ -379,6 +384,12 @@ class ChapterPage : View() {
                         button("Select") {
                             addClass("btn", "btn--secondary", "chunk-mode__selection-btn")
                             graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
+
+                            setOnAction {
+                                workspace.dock<ChunkingWizard>()
+                            }
+
+                            enableWhen(viewModel.sourceAudioAvailableProperty)
                         }
                     }
 
