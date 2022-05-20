@@ -434,7 +434,14 @@ class ProjectImporter @Inject constructor(
                 // If type isn't specified in filename, match on TEXT.
                 .filter { content -> content.type == (type ?: ContentType.TEXT) }
                 // If verse number isn't specified in filename, assume chapter helps or meta.
-                .filter { content -> content.start == (verse ?: metaOrHelpStartVerse) }
+                .filter { content ->
+                    // start is not unique for chunks, as it refers to verse ranges
+                    val number = when (content.labelKey) {
+                        "chunk" -> content.sort
+                        else -> content.start
+                    }
+                    number == (verse ?: metaOrHelpStartVerse)
+                }
                 // If sort isn't specified in filename,
                 // DON'T filter on it, because we only need it for helps and meta.
                 .filter { content -> sort?.let { content.sort == sort } ?: true }
