@@ -242,6 +242,7 @@ class BookWizardViewModel : ViewModel() {
                     projectFilesAccessor.initializeResourceContainerInDir()
                     projectFilesAccessor.copySourceFiles(excludeMedia = true)
                     projectFilesAccessor.createSelectedTakesFile()
+                    projectFilesAccessor.createChunksFile()
 
                     updateTranslationModifiedDate(translation)
                         .observeOnFx()

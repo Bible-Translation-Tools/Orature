@@ -93,7 +93,7 @@ class AudioPluginViewModel : ViewModel() {
         val chapterNumber = workbookDataStore.activeChapterProperty.value.sort
 
         // TODO: This needs a better solution
-        val verseTotal =  100
+        val verseTotal =  workbookDataStore.getSourceChapter().map { it.chunkCount }.blockingGet().blockingGet()
         val chunkLabel = workbookDataStore.activeChunkProperty.value?.let {
             messages[workbookDataStore.activeChunkProperty.value.label]
         }

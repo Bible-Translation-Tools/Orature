@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.common.data.workbook
 import com.jakewharton.rxrelay2.Relay
 import com.jakewharton.rxrelay2.ReplayRelay
 import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.rxkotlin.cast
 import java.lang.Thread.sleep
 import org.wycliffeassociates.otter.common.data.primitives.Content
@@ -37,6 +38,7 @@ data class Chapter(
     override val resources: List<ResourceGroup>,
     override val subtreeResources: List<ResourceMetadata>,
     val chunks: ReplayRelay<Chunk>,
+    val chunkCount: Single<Int>,
     val addChunk: (List<Content>) -> Unit,
     val reset: () -> Unit
 ) : BookElement, BookElementContainer, Recordable {

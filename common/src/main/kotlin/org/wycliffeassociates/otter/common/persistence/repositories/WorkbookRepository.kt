@@ -217,6 +217,7 @@ class WorkbookRepository(
                     audio = constructAssociatedAudio(metaContent, disposables),
                     chunks = constructChunks(chapterCollection, disposables),
                     subtreeResources = db.getSubtreeResourceMetadata(chapterCollection),
+                    chunkCount = db.getChunkCount(chapterCollection),
                     addChunk = {
                         logger.info("Adding chunk $it")
                         db.addContentForCollection(chapterCollection, it).subscribe()
@@ -600,6 +601,7 @@ class WorkbookRepository(
         fun getTranslation(sourceLanguage: Language, targetLanguage: Language): Single<Translation>
         fun updateTranslation(translation: Translation): Completable
         fun clearContentForCollection(chapterCollection: Collection): Single<List<ModelTake>>
+        fun getChunkCount(chapterCollection: Collection): Single<Int>
     }
 }
 
@@ -615,14 +617,20 @@ private class DefaultDatabaseAccessors(
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
+    override fun getChunkCount(chapterCollection: Collection): Single<Int> {
+        return contentRepo
+            .getByCollection(chapterCollection)
+            .map { it.count { it.type == ContentType.TEXT } }
+    }
+
     override fun clearContentForCollection(chapterCollection: Collection): Single<List<ModelTake>> {
         return takeRepo
             .getByCollection(chapterCollection, true).map {
-                contentRepo.deleteForCollection(chapterCollection).blockingAwait()
                 it.forEach {
-                    takeRepo.markDeleted(it).blockingAwait()
+                    takeRepo.delete(it).blockingAwait()
                 }
                 takeRepo.deleteExpiredTakes().blockingAwait()
+                contentRepo.deleteForCollection(chapterCollection).blockingAwait()
                 it
             }
 

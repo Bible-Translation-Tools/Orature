@@ -18,6 +18,13 @@
  */
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
 
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.core.JsonFactory
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.exc.MismatchedInputException
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -146,8 +153,9 @@ class ProjectImporter @Inject constructor(
         manifestProject: Project,
         sourceCollection: Collection
     ) {
+        println("importing resumable project")
         val sourceMetadata = sourceCollection.resourceContainer!!
-        val derivedProject = createDerivedProjects(metadata.language, sourceCollection)
+        val derivedProject = createDerivedProjects(metadata.language, sourceCollection, true)
 
         val translation = createTranslation(sourceMetadata.language, metadata.language)
 
@@ -162,6 +170,13 @@ class ProjectImporter @Inject constructor(
         projectFilesAccessor.copySourceFiles(fileReader)
 
         importContributorInfo(metadata, projectFilesAccessor)
+
+        importChunks(
+            derivedProject,
+            projectFilesAccessor,
+            fileReader
+        )
+
         importTakes(
             fileReader,
             derivedProject,
@@ -173,6 +188,50 @@ class ProjectImporter @Inject constructor(
 
         translation.modifiedTs = LocalDateTime.now()
         languageRepository.updateTranslation(translation).subscribe()
+        println("here in thing")
+        resetChaptersWithoutTakes(derivedProject)
+    }
+
+    private fun importChunks(project: Collection, accessor: ProjectFilesAccessor, fileReader: IFileReader) {
+        accessor.copyChunkFile(fileReader)
+
+        val factory = JsonFactory()
+        factory.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET)
+        val mapper = ObjectMapper(factory)
+        mapper.registerModule(KotlinModule())
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+
+        val chunks = mutableMapOf<Int, List<Content>>()
+
+        val file: File = accessor.getChunkFile()
+        try {
+            if (file.exists() && file.length() > 0) {
+                val typeRef: TypeReference<HashMap<Int, List<Content>>> =
+                    object : TypeReference<HashMap<Int, List<Content>>>() {}
+                val map: Map<Int, List<Content>> = mapper.readValue(file, typeRef)
+                chunks.putAll(map)
+            }
+        } catch (e: MismatchedInputException) {
+            // clear file if it can't be read
+            file.writer().use {  }
+        }
+
+        val chapters = collectionRepository.getChildren(project).blockingGet()
+        chapters.forEach { chapter ->
+            if (chunks.containsKey(chapter.sort)) {
+                val contents = chunks[chapter.sort]
+                contentRepository.deleteForCollection(chapter).blockingAwait()
+                contents?.forEach { content ->
+                    contentRepository.insertForCollection(content, chapter).blockingGet()
+                }
+            }
+        }
+    }
+
+    private fun resetChaptersWithoutTakes(derivedProject: Collection) {
+        println(derivedProject)
+        val chaptersNotStarted = collectionRepository.collectionsWithoutTakes(derivedProject).blockingGet()
+        chaptersNotStarted.forEach { contentRepository.deleteForCollection(it).blockingGet() }
     }
 
     private fun importContributorInfo(
@@ -249,9 +308,13 @@ class ProjectImporter @Inject constructor(
         }
     }
 
-    private fun createDerivedProjects(language: Language, sourceCollection: Collection): Collection {
+    private fun createDerivedProjects(
+        language: Language,
+        sourceCollection: Collection,
+        verseByVerse: Boolean
+    ): Collection {
         return CreateProject(collectionRepository, resourceMetadataRepository)
-            .create(sourceCollection, language)
+            .create(sourceCollection, language, verseByVerse = verseByVerse)
             .blockingGet()
     }
 
@@ -371,7 +434,14 @@ class ProjectImporter @Inject constructor(
                 // If type isn't specified in filename, match on TEXT.
                 .filter { content -> content.type == (type ?: ContentType.TEXT) }
                 // If verse number isn't specified in filename, assume chapter helps or meta.
-                .filter { content -> content.start == (verse ?: metaOrHelpStartVerse) }
+                .filter { content ->
+                    // start is not unique for chunks, as it refers to verse ranges
+                    val number = when (content.labelKey) {
+                        "chunk" -> content.sort
+                        else -> content.start
+                    }
+                    number == (verse ?: metaOrHelpStartVerse)
+                }
                 // If sort isn't specified in filename,
                 // DON'T filter on it, because we only need it for helps and meta.
                 .filter { content -> sort?.let { content.sort == sort } ?: true }

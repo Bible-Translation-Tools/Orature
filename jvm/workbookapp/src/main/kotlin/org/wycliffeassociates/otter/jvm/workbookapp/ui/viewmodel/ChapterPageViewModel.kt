@@ -492,11 +492,7 @@ class ChapterPageViewModel : ViewModel() {
     fun resetChapter() {
         closePlayers()
         filteredContent.clear()
-        val workbook = workbookDataStore.workbook
         val chapter = workbookDataStore.activeChapterProperty.value
-        val book = workbook.target
-        val accessor = ProjectFilesAccessor(directoryProvider, workbook.source.resourceMetadata, book.resourceMetadata, book)
-        accessor.getChunkFile(book.slug, chapter.sort).delete()
         chapter.reset()
     }
 }

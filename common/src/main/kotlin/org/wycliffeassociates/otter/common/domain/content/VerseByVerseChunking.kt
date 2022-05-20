@@ -3,8 +3,9 @@ package org.wycliffeassociates.otter.common.domain.content
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import java.io.File
 import org.slf4j.LoggerFactory
@@ -16,6 +17,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+
 
 class VerseByVerseChunking(
     val directoryProvider: IDirectoryProvider,
@@ -66,10 +68,8 @@ class VerseByVerseChunking(
                 draftNumber
             ))
         }
-
-        writeChunkFile(projectSlug, chapterNumber, chunksToAdd)
-
         chunkCreator(chunksToAdd)
+        writeChunkFile(projectSlug, chapterNumber, chunksToAdd)
     }
 
     private fun writeChunkFile(projectSlug: String, chapterNumber: Int, chunksToAdd: List<Content>) {
@@ -79,13 +79,29 @@ class VerseByVerseChunking(
         mapper.registerModule(KotlinModule())
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
-        val file: File = accessor.getChunkFile(projectSlug, chapterNumber)
-        if (file.exists()) { file.delete() }
+        val chunks = mutableMapOf<Int, List<Content>>()
+
+        val file: File = accessor.getChunkFile()
+        try {
+            if (file.exists() && file.length() > 0) {
+                val typeRef: TypeReference<HashMap<Int, List<Content>>> =
+                    object : TypeReference<HashMap<Int, List<Content>>>() {}
+                val map: Map<Int, List<Content>> = mapper.readValue(file, typeRef)
+                chunks.putAll(map)
+                logger.error("restoring chunks")
+            }
+        } catch (e: MismatchedInputException) {
+            // clear file if it can't be read
+            file.writer().use {  }
+        }
+
+        logger.error("adding chunks to chapter: $chapterNumber")
+        chunks[chapterNumber] = chunksToAdd
 
         logger.error("File with chunks is ${file.absolutePath}")
 
         file.writer().use {
-            mapper.writeValue(it, chunksToAdd)
+            mapper.writeValue(it, chunks)
         }
     }
 
@@ -148,3 +164,5 @@ class VerseByVerseChunking(
         chunkCreator(chunksToAdd)
     }
 }
+
+typealias ChunkFile = MutableMap<Int, Content>

@@ -20,6 +20,8 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos
 
 import jooq.Tables.*
 import org.jooq.DSLContext
+import org.jooq.impl.DSL.asterisk
+import org.jooq.impl.DSL.count
 import org.jooq.impl.DSL.max
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.InsertionException
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.CollectionEntity
@@ -50,13 +52,19 @@ class CollectionDao(
      * Fetches the collection by slug, container id, and label. If a label is not provided,
      * assume it is the project level collection (book)
      */
-    fun fetch(slug: String, containerId: Int, label: String = "project", dsl: DSLContext = instanceDsl): CollectionEntity? {
+    fun fetch(
+        slug: String,
+        containerId: Int,
+        label: String = "project",
+        dsl: DSLContext = instanceDsl
+    ): CollectionEntity? {
         return dsl
             .select()
             .from(COLLECTION_ENTITY)
-            .where(COLLECTION_ENTITY.SLUG.eq(slug)
-                .and(COLLECTION_ENTITY.DUBLIN_CORE_FK.eq(containerId))
-                .and(COLLECTION_ENTITY.LABEL.eq(label))
+            .where(
+                COLLECTION_ENTITY.SLUG.eq(slug)
+                    .and(COLLECTION_ENTITY.DUBLIN_CORE_FK.eq(containerId))
+                    .and(COLLECTION_ENTITY.LABEL.eq(label))
             )
             .fetchOne()
             ?.let {
@@ -152,4 +160,66 @@ class CollectionDao(
             .where(COLLECTION_ENTITY.ID.eq(entity.id))
             .execute()
     }
+
+    fun collectionsWithoutTakes(
+        projectEntity: CollectionEntity,
+        dsl: DSLContext = instanceDsl
+    ): List<CollectionEntity> {
+        val id = COLLECTION_ENTITY.ID.`as`("id")
+        val contentid = CONTENT_ENTITY.ID.`as`("contentid")
+        val chapterid = CONTENT_ENTITY.COLLECTION_FK.`as`("chapterid")
+        val takecount = count(TAKE_ENTITY.FILENAME).`as`("takecount")
+
+        val chapterIdsInBook = dsl
+            .select(COLLECTION_ENTITY.ID)
+            .from(COLLECTION_ENTITY)
+            .where(COLLECTION_ENTITY.PARENT_FK.eq(projectEntity.id))
+
+        val contentAndChapterIdsInBook = dsl
+            .select(contentid, chapterid)
+            .from(CONTENT_ENTITY)
+            .where(
+                CONTENT_ENTITY.COLLECTION_FK.`in`(chapterIdsInBook).and(CONTENT_ENTITY.TYPE_FK.eq(1))
+            )
+
+        val contentAndTakeCountInBook = dsl
+            .select(takecount, asterisk())
+            .from(
+                contentAndChapterIdsInBook.asTable()
+                    .leftJoin(TAKE_ENTITY).on(TAKE_ENTITY.CONTENT_FK.eq(contentid))
+            )
+            .groupBy(contentid)
+
+        val collectionsWithTakes = dsl.select(id)
+            .from(
+                COLLECTION_ENTITY
+                    .leftJoin(
+                        contentAndTakeCountInBook
+                    ).on(COLLECTION_ENTITY.ID.eq(chapterid))
+            )
+            .where(takecount.greaterThan(0))
+            .groupBy(chapterid)
+
+        val query = dsl
+            .select()
+            .from(COLLECTION_ENTITY)
+            .where(
+                COLLECTION_ENTITY.ID.`notIn`(
+                    collectionsWithTakes
+                ).and(COLLECTION_ENTITY.PARENT_FK.eq(projectEntity.id))
+            )
+        return query.fetch {
+            println(it)
+            RecordMappers.mapToCollectionEntity(it)
+        }
+    }
+//    select * from collection_entity where collection_entity.id
+//    in (select id from  collection_entity left join (select contentid, chapterid, count(filename) as takecount
+//    from (select id as contentid, collection_fk as chapterid from content_entity
+//    where content_entity.collection_fk in
+//    (select collection_entity.id from collection_entity
+//    where collection_entity.parent_fk == 1257) and type_fk == 1)
+//    left join take_entity on take_entity.content_fk == contentid
+//    group by contentid) on collection_entity.id == chapterid where takecount > 0 group by chapterid)
+
 }
