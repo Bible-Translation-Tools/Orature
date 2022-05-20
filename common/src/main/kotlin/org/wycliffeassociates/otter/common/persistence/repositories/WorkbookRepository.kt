@@ -618,11 +618,11 @@ private class DefaultDatabaseAccessors(
     override fun clearContentForCollection(chapterCollection: Collection): Single<List<ModelTake>> {
         return takeRepo
             .getByCollection(chapterCollection, true).map {
-                contentRepo.deleteForCollection(chapterCollection).blockingAwait()
                 it.forEach {
-                    takeRepo.markDeleted(it).blockingAwait()
+                    takeRepo.delete(it).blockingAwait()
                 }
                 takeRepo.deleteExpiredTakes().blockingAwait()
+                contentRepo.deleteForCollection(chapterCollection).blockingAwait()
                 it
             }
 
