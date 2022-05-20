@@ -21,12 +21,18 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 import com.github.thomasnield.rxkotlinfx.toLazyBinding
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.value.ChangeListener
+import javafx.scene.Node
+import javafx.scene.control.Label
 import javafx.scene.control.ListView
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
+import javafx.scene.layout.ColumnConstraints
+import javafx.scene.layout.GridPane
 import javafx.scene.layout.Priority
+import javafx.scene.layout.Region
 import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
@@ -57,9 +63,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataSto
 import tornadofx.*
 import java.text.MessageFormat
 import java.util.*
-import javafx.geometry.Pos
-import javafx.scene.paint.Color
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.ChunkingWizard
 import kotlin.math.max
 
 class ChapterPage : View() {
@@ -105,12 +108,8 @@ class ChapterPage : View() {
         viewModel.openPlayers()
 
         viewModel.checkCanCompile()
-
         chunkListView.refresh()
-
         initializeProgressDialog()
-
-        println("sourceAudio is ${workbookDataStore.sourceAudioProperty.get()}")
     }
 
     override fun onUndock() {
@@ -150,7 +149,6 @@ class ChapterPage : View() {
         createSnackBar()
 
         vbox {
-            button("Reset") { setOnAction { viewModel.resetChapter() } }
             addClass("chapter-page__chapter-info")
             vgrow = Priority.ALWAYS
 
@@ -258,9 +256,6 @@ class ChapterPage : View() {
         }
 
         stackpane {
-            addClass("chapter-page__chunks")
-            vgrow = Priority.ALWAYS
-
             vbox {
                 addClass("chapter-page__chunks")
                 vgrow = Priority.ALWAYS
@@ -323,82 +318,79 @@ class ChapterPage : View() {
                     }
                 }
             }
-
-            hbox {
+            vbox {
                 addClass("chapter-page__chunks")
+                vgrow = Priority.ALWAYS
 
-                prefWidth = 648.0
+                var textBlock1: Label? = null
+                var textBlock2: Label? = null
 
-                style {
-                    padding = box(8.px, 4.px, 8.px, 8.px)
-                }
-
-                visibleProperty().bind(viewModel.filteredContent.sizeProperty.lessThan(1))
-
-                vbox {
+                hbox {
+                    addClass("chunk-mode")
                     vgrow = Priority.ALWAYS
-                    alignment = Pos.CENTER_LEFT
+                    hgrow = Priority.ALWAYS
 
-                    style {
-                        backgroundColor += Color.rgb(0, 21, 51, 0.2)
-                        padding = box(8.px, 4.px, 8.px, 8.px)
-                    }
+                    vbox {
+                        addClass("chunk-mode__selection-card")
+                        vgrow = Priority.ALWAYS
+                        prefWidthProperty().bind(this@hbox.widthProperty().divide(2))
 
-                    add(FontIcon(MaterialDesign.MDI_BOOKMARK).apply {
-                        iconSize = 40
-                        iconColor = Color.WHITE
-                    })
-                    label("Verse by Verse") {
-                        style {
-                            fontSize = 24.pt
-                            textFill = Color.WHITE
+                        vbox {
+                            add(
+                                FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE).apply {
+                                    addClass("chunk-mode__icon")
+                                }
+                            )
+                            label("Verse by Verse") {
+                                addClass("chunk-mode__selection__title")
+                            }
+                            label("Start a new translation with the default verse structure.") {
+                                addClass("chunk-mode__selection__text")
+                                textBlock1 = this
+                            }
+                        }
+
+                        button("Select") {
+                            addClass("btn", "btn--secondary", "chunk-mode__selection-btn")
+                            graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
                         }
                     }
 
-                    label("Start a new translation with the default verse structure.") {
-                        style {
-                            fontSize = 14.pt
-                            textFill = Color.WHITE
-                            wrapText = true
-                        }
-                    }
-                    button("verse by verse") {
-                        setOnAction { viewModel.chunkVerseByVerse() }
-                    }
-                }
+                    vbox {
+                        addClass("chunk-mode__selection-card")
+                        vgrow = Priority.ALWAYS
+                        prefWidthProperty().bind(this@hbox.widthProperty().divide(2))
 
-                vbox {
-                    vgrow = Priority.ALWAYS
-                    alignment = Pos.CENTER_LEFT
-
-                    style {
-                        backgroundColor += Color.rgb(0, 21, 51, 0.2)
-                        padding = box(8.px, 8.px, 8.px, 4.px)
-                    }
-
-                    add(FontIcon(MaterialDesign.MDI_FLAG).apply {
-                        iconSize = 40
-                        iconColor = Color.WHITE
-                    })
-                    label("Chunks") {
-                        style {
-                            fontSize = 24.pt
-                            textFill = Color.WHITE
-                        }
-                    }
-                    label("Start a new translation with custom chunk markers.") {
-                        style {
-                            fontSize = 14.pt
-                            textFill = Color.WHITE
-                            wrapText = true
-                        }
-                    }
-                    button("chunk") {
-                        setOnAction {
-                            workspace.dock<ChunkingWizard>()
+                        vbox {
+                            add(
+                                FontIcon(MaterialDesign.MDI_FLAG).apply {
+                                    addClass("chunk-mode__icon")
+                                }
+                            )
+                            label("Chunks") {
+                                addClass("chunk-mode__selection__title")
+                            }
+                            label("Start a new translation with custom chunk markers.") {
+                                addClass("chunk-mode__selection__text")
+                                textBlock2 = this
+                            }
                         }
 
-                        enableWhen(viewModel.sourceAudioAvailableProperty)
+                        button("Select") {
+                            addClass("btn", "btn--secondary", "chunk-mode__selection-btn")
+                            graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
+                        }
+                    }
+
+                    textBlock1?.let { text1 ->
+                        textBlock2?.let { text2 ->
+                            // bind height to the tallest block's height by text size (it wraps)
+                            if (text1.text.length > text2.text.length) {
+                                text2.prefHeightProperty().bind(text1.heightProperty())
+                            } else {
+                                text1.prefHeightProperty().bind(text2.heightProperty())
+                            }
+                        }
                     }
                 }
             }
