@@ -469,7 +469,7 @@ class ProjectFilesAccessor(
 
     fun copyChunkFile(fileReader: IFileReader) {
         val outFile = projectDir.resolve(RcConstants.CHUNKS_FILE)
-        if (!outFile.exists()) {
+        if (!outFile.exists() && fileReader.exists(RcConstants.CHUNKS_FILE)) {
             fileReader.stream(RcConstants.CHUNKS_FILE).transferTo(outFile.outputStream())
         }
     }
