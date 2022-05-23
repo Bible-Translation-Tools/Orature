@@ -71,8 +71,6 @@ class ChunkCell(
                 if (isFocused) {
                     focusedChunkProperty.value?.hideTakes()
                     focusedChunkProperty.value = this
-
-                    listView.selectionModel.select(item)
                 }
             }
 
