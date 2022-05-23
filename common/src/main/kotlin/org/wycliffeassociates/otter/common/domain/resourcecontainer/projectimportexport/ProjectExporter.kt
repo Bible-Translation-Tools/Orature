@@ -23,6 +23,7 @@ import io.reactivex.Single
 import io.reactivex.rxkotlin.toObservable
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
@@ -43,6 +44,7 @@ import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.*
 import javax.inject.Inject
 
 class ProjectExporter @Inject constructor(
@@ -124,45 +126,76 @@ class ProjectExporter @Inject constructor(
 
         projectFilesAccessor.initializeResourceContainerInFile(workbook, zipFile)
         setContributorInfo(contributors, zipFile)
+        val projectSlug = workbook.target.slug
+
 
         // update manifest.yaml
 
         // build media.yaml
+        val tempExportDir = directoryProvider.tempDirectory.resolve("export${Date().time}").apply { mkdirs() }
         val fileWriter = directoryProvider.newFileWriter(zipFile)
         return workbook.target.chapters
             .filter { it.audio.selected.value?.value != null }
             .flatMapCompletable { chapter ->
-                chapter.audio.selected.value!!.value!!.let {
-                    val exportedTake = directoryProvider.tempDirectory.resolve(
-                        templateAudioFileName(workbook.target.slug, chapter.sort.toString(), AudioFileFormat.MP3.extension)
+                chapter.audio.selected.value!!.value!!.let { take ->
+                    val exportedTake = tempExportDir.resolve(
+                        templateAudioFileName(projectSlug, chapter.sort.toString(), AudioFileFormat.MP3.extension)
                     )
                     exportedTake.delete()
-                    it.file.copyTo(exportedTake)
-                    audioExporter.exportMp3(it.file, exportedTake, license, contributors)
-                        .andThen(Completable
-                            .fromAction {
-                                fileWriter.copyFile(exportedTake, RcConstants.SOURCE_MEDIA_DIR)
-                            }
-                            .subscribeOn(Schedulers.io())
-                        )
+                    take.file.copyTo(exportedTake)
+                    val cues = AudioFile(take.file).metadata.getCues()
+                    AudioFile(exportedTake).apply {
+                        cues.forEach { metadata.addCue(it.location, it.label) }
+                        update()
+                    }
+                    audioExporter.exportMp3(take.file, exportedTake, license, contributors)
+//                        .andThen(Completable
+//                            .fromAction {
+//                                fileWriter.copyFile(exportedTake, RcConstants.SOURCE_MEDIA_DIR)
+//                            }
+//                            .subscribeOn(Schedulers.io())
+//                        )
                 }
             }
+            .andThen(Completable
+                .fromAction {
+                    fileWriter.copyDirectory(tempExportDir, RcConstants.SOURCE_MEDIA_DIR)
+                }
+                .subscribeOn(Schedulers.io())
+            )
             .doOnComplete {
                 fileWriter.close() // close writer before updating manifest
 
-                val projectSlug = workbook.target.slug
                 ResourceContainer.load(zipFile).use { rc ->
+                    ResourceContainer.load(workbook.source.resourceMetadata.path).use { sourceRC ->
+                        val projects = sourceRC.manifest.projects
+                        rc.manifest.projects = projects
+
+                        sourceRC.accessor.getInputStreams(".", "usfm").forEach { fileName, inputStream ->
+                            inputStream.use { ins ->
+                                rc.accessor.write(fileName) {
+                                    it.buffered().use { out ->
+                                        out.write(ins.buffered().readBytes())
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     val mediaManifest = let {
                         MediaManifest().apply {
                             projects = listOf(MediaProject(identifier = projectSlug))
                         }
                     }
-                    val chapterUrl = templateAudioFileName(projectSlug, "{chapter}", AudioFileFormat.MP3.extension)
-                    val media = Media("mp3", "", "", listOf(), "${RcConstants.SOURCE_MEDIA_DIR}/${chapterUrl}")
-                    mediaManifest.projects.first().media = listOf(media)
+                    var chapterUrl = templateAudioFileName(projectSlug, "{chapter}", AudioFileFormat.MP3.extension)
+                    val mp3Media = Media("mp3", "", "", listOf(), "${RcConstants.SOURCE_MEDIA_DIR}/${chapterUrl}")
 
+                    chapterUrl = templateAudioFileName(projectSlug, "{chapter}", "cue")
+                    val cueMedia = Media("cue", "", "", listOf(), "${RcConstants.SOURCE_MEDIA_DIR}/${chapterUrl}")
+
+                    mediaManifest.projects.first().media = listOf(mp3Media, cueMedia)
                     rc.media = mediaManifest
-                    rc.writeMedia()
+                    rc.write()
                 }
             }
             .doOnError {
