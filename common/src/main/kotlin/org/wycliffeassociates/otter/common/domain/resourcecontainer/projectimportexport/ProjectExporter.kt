@@ -19,11 +19,11 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
 
 import io.reactivex.Completable
-import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.rxkotlin.toObservable
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.License
@@ -35,6 +35,9 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.Proj
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
+import org.wycliffeassociates.resourcecontainer.entity.Media
+import org.wycliffeassociates.resourcecontainer.entity.MediaManifest
+import org.wycliffeassociates.resourcecontainer.entity.MediaProject
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
@@ -101,6 +104,80 @@ class ProjectExporter @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
+    fun exportAsSource(
+        directory: File,
+        projectMetadataToExport: ResourceMetadata,
+        workbook: Workbook,
+        projectFilesAccessor: ProjectFilesAccessor
+    ): Single<ExportResult> {
+        val projectSourceMetadata = workbook.source.linkedResources
+            .firstOrNull { it.identifier == projectMetadataToExport.identifier }
+            ?: workbook.source.resourceMetadata
+
+        val projectToExportIsBook: Boolean =
+            projectMetadataToExport.identifier == workbook.target.resourceMetadata.identifier
+
+        val contributors = projectFilesAccessor.getContributorInfo()
+        val license = License.get(workbook.target.resourceMetadata.license)
+        val zipFilename = makeExportFilename(workbook, projectSourceMetadata)
+        val zipFile = directory.resolve(zipFilename)
+
+        projectFilesAccessor.initializeResourceContainerInFile(workbook, zipFile)
+        setContributorInfo(contributors, zipFile)
+
+        // update manifest.yaml
+
+        // build media.yaml
+        val fileWriter = directoryProvider.newFileWriter(zipFile)
+        return workbook.target.chapters
+            .filter { it.audio.selected.value?.value != null }
+            .flatMapCompletable { chapter ->
+                chapter.audio.selected.value!!.value!!.let {
+                    val exportedTake = directoryProvider.tempDirectory.resolve(
+                        templateAudioFileName(workbook.target.slug, chapter.sort.toString(), AudioFileFormat.MP3.extension)
+                    )
+                    exportedTake.delete()
+                    it.file.copyTo(exportedTake)
+                    audioExporter.exportMp3(it.file, exportedTake, license, contributors)
+                        .andThen(Completable
+                            .fromAction {
+                                fileWriter.copyFile(exportedTake, RcConstants.SOURCE_MEDIA_DIR)
+                            }
+                            .subscribeOn(Schedulers.io())
+                        )
+                }
+            }
+            .doOnComplete {
+                fileWriter.close() // close writer before updating manifest
+
+                val projectSlug = workbook.target.slug
+                ResourceContainer.load(zipFile).use { rc ->
+                    val mediaManifest = let {
+                        MediaManifest().apply {
+                            projects = listOf(MediaProject(identifier = projectSlug))
+                        }
+                    }
+                    val chapterUrl = templateAudioFileName(projectSlug, "{chapter}", AudioFileFormat.MP3.extension)
+                    val media = Media("mp3", "", "", listOf(), "${RcConstants.SOURCE_MEDIA_DIR}/${chapterUrl}")
+                    mediaManifest.projects.first().media = listOf(media)
+
+                    rc.media = mediaManifest
+                    rc.writeMedia()
+                }
+            }
+            .doOnError {
+                fileWriter.close()
+            }
+            .doFinally {
+                restoreFileExtension(zipFile, OratureFileFormat.ORATURE.extension)
+            }
+            .toSingle {
+                ExportResult.SUCCESS
+            }
+            .onErrorReturnItem(ExportResult.FAILURE)
+            .subscribeOn(Schedulers.io())
+    }
+
     fun exportMp3(
         directory: File,
         projectMetadataToExport: ResourceMetadata,
@@ -148,7 +225,7 @@ class ProjectExporter @Inject constructor(
         val contributors = projectFilesAccessor.getContributorInfo()
         val license = License.get(workbook.target.resourceMetadata.license)
 
-        val outputProjectDir =  directory
+        val outputProjectDir = directory
             .resolve("${workbook.target.slug}-${projectMetadataToExport.identifier}")
             .apply { mkdirs() }
 
@@ -188,6 +265,14 @@ class ProjectExporter @Inject constructor(
             rc.manifest.dublinCore.contributor = contributors.map { it.name }.toMutableList()
             rc.writeManifest()
         }
+    }
+
+    private fun templateAudioFileName(
+        projectSlug: String,
+        chapterString: String,
+        extension: String
+    ): String {
+        return "${projectSlug}-export-c${chapterString}.$extension"
     }
 
     private fun restoreFileExtension(file: File, extension: String) {
