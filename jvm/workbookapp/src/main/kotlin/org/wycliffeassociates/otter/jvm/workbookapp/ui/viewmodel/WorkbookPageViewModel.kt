@@ -209,8 +209,7 @@ class WorkbookPageViewModel : ViewModel() {
         )
 
         projectExporter
-//            .export(directory, resourceMetadata, workbook, projectFileAccessor)
-            .exportAsSource(directory, resourceMetadata, workbook, projectFileAccessor)
+            .export(directory, resourceMetadata, workbook, projectFileAccessor)
             .observeOnFx()
             .doOnError { e ->
                 logger.error("Error in exporting project for project: ${workbook.target.slug}")
