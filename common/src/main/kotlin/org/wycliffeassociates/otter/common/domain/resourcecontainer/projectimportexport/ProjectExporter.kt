@@ -125,18 +125,20 @@ class ProjectExporter @Inject constructor(
         setContributorInfo(contributors, zipFile)
 
         val fileWriter = directoryProvider.newFileWriter(zipFile)
+
         return copyTakesAsSource(workbook, fileWriter, contributors)
             .doOnComplete {
-                // calling writer.close() multiple times causes an exception, thus,
-                // it should not be invoked again in finally {} block
-                fileWriter.close()
-                updateManifest(zipFile, workbook.source.resourceMetadata.path, workbook)
+                fileWriter.close() // must close before changing file extension or NoSuchFileException
+                try {
+                    updateManifest(zipFile, workbook.source.resourceMetadata.path, workbook)
+                } catch (e: Exception) {
+                    log.error("Error while updating manifest.", e)
+                    throw e
+                }
+                restoreFileExtension(zipFile, OratureFileFormat.ORATURE.extension)
             }
             .doOnError {
-                fileWriter.close()
-            }
-            .doFinally {
-                restoreFileExtension(zipFile, OratureFileFormat.ORATURE.extension)
+                log.error("Error while exporting project as source.", it)
             }
             .toSingle {
                 ExportResult.SUCCESS
@@ -239,14 +241,23 @@ class ProjectExporter @Inject constructor(
                             AudioFileFormat.MP3.extension
                         )
                     )
-                    take.file.copyTo(takeToExport)
-                    // update cues for newly copied takes
+                    // update markers for newly copied takes
                     val cues = AudioFile(take.file).metadata.getCues()
-                    AudioFile(takeToExport).apply {
-                        cues.forEach { metadata.addCue(it.location, it.label) }
-                        update()
+                    if (cues.isEmpty()) {
+                        Completable.complete()
+                    } else {
+                        audioExporter.exportMp3(take.file, takeToExport, license, contributors)
+                            .andThen(
+                                Completable.fromAction {
+                                    // update audio metadata
+                                    AudioFile(takeToExport).apply {
+                                        cues.forEach { metadata.addCue(it.location, it.label) }
+                                        update()
+                                    }
+                                }
+                                    .subscribeOn(Schedulers.io())
+                            )
                     }
-                    audioExporter.exportMp3(take.file, takeToExport, license, contributors)
                 }
             }
             .andThen(
@@ -257,6 +268,10 @@ class ProjectExporter @Inject constructor(
                     }
                     .subscribeOn(Schedulers.io())
             )
+            .doOnError {
+                log.error("Error while copying takes to export file", it)
+                fileWriter.close()
+            }
     }
 
     private fun updateManifest(
