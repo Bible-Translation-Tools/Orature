@@ -49,6 +49,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRep
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.time.LocalDate
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.io.path.createTempDirectory
@@ -167,9 +168,49 @@ class TestProjectExport {
         )
     }
 
+    @Test
+    fun exportProjectAsSource() {
+        val testTake = createTestWavFile()
+        val take = Take(
+            "chapter-take",
+            testTake,
+            1,
+            MimeType.WAV,
+            LocalDate.now()
+        )
+        // select a take to be included when export
+        workbook.target.chapters.blockingFirst().audio.selectTake(take)
+        AudioFile(testTake).apply {
+            metadata.addCue(1, "marker-1")
+            update()
+        }
+
+        val result = exportUseCase.get()
+            .exportAsSource(outputDir, targetMetadata, workbook, projectFilesAccessor)
+            .blockingGet()
+
+        assertEquals(ExportResult.SUCCESS, result)
+
+        val exportedFile = outputDir.listFiles().first()
+        ResourceContainer.load(exportedFile).use { rc ->
+            assertEquals(1, rc.media?.projects?.size ?: 0)
+
+            val projectMediaPath = rc.media?.projects?.first()?.media?.first { it.identifier == "mp3" }?.chapterUrl
+            val filePathInContainer = File(projectMediaPath).parentFile.invariantSeparatorsPath
+            val files = rc.accessor.getInputStreams(filePathInContainer, listOf("mp3", "cue"))
+            files.forEach { (name, ins) ->
+                ins.close()
+            }
+            
+            assertEquals(2, files.size)
+            assertTrue(files.keys.any { it.endsWith(".mp3") })
+            assertTrue(files.keys.any { it.endsWith(".cue") })
+        }
+    }
+
     private fun createTestWavFile(): File {
-        val testFile = File.createTempFile("test-take", "wav")
-            .apply { deleteOnExit() }
+        val testFile = directoryProvider.tempDirectory.resolve("test-take-${Date().time}.wav")
+            .apply { createNewFile(); deleteOnExit() }
 
         val wav = WavFile(
             testFile,
