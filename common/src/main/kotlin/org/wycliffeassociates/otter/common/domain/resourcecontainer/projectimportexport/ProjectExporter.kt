@@ -33,6 +33,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.audio.AudioExporter
 import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.DEFAULT_RC_SLUG
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
+import org.wycliffeassociates.otter.common.io.zip.IFileWriter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
@@ -116,87 +117,20 @@ class ProjectExporter @Inject constructor(
             .firstOrNull { it.identifier == projectMetadataToExport.identifier }
             ?: workbook.source.resourceMetadata
 
-        val projectToExportIsBook: Boolean =
-            projectMetadataToExport.identifier == workbook.target.resourceMetadata.identifier
-
         val contributors = projectFilesAccessor.getContributorInfo()
-        val license = License.get(workbook.target.resourceMetadata.license)
         val zipFilename = makeExportFilename(workbook, projectSourceMetadata)
         val zipFile = directory.resolve(zipFilename)
 
         projectFilesAccessor.initializeResourceContainerInFile(workbook, zipFile)
         setContributorInfo(contributors, zipFile)
-        val projectSlug = workbook.target.slug
 
-
-        // update manifest.yaml
-
-        // build media.yaml
-        val tempExportDir = directoryProvider.tempDirectory.resolve("export${Date().time}").apply { mkdirs() }
         val fileWriter = directoryProvider.newFileWriter(zipFile)
-        return workbook.target.chapters
-            .filter { it.audio.selected.value?.value != null }
-            .flatMapCompletable { chapter ->
-                chapter.audio.selected.value!!.value!!.let { take ->
-                    val exportedTake = tempExportDir.resolve(
-                        templateAudioFileName(projectSlug, chapter.sort.toString(), AudioFileFormat.MP3.extension)
-                    )
-                    exportedTake.delete()
-                    take.file.copyTo(exportedTake)
-                    val cues = AudioFile(take.file).metadata.getCues()
-                    AudioFile(exportedTake).apply {
-                        cues.forEach { metadata.addCue(it.location, it.label) }
-                        update()
-                    }
-                    audioExporter.exportMp3(take.file, exportedTake, license, contributors)
-//                        .andThen(Completable
-//                            .fromAction {
-//                                fileWriter.copyFile(exportedTake, RcConstants.SOURCE_MEDIA_DIR)
-//                            }
-//                            .subscribeOn(Schedulers.io())
-//                        )
-                }
-            }
-            .andThen(Completable
-                .fromAction {
-                    fileWriter.copyDirectory(tempExportDir, RcConstants.SOURCE_MEDIA_DIR)
-                }
-                .subscribeOn(Schedulers.io())
-            )
+        return copyTakesAsSource(workbook, fileWriter, contributors)
             .doOnComplete {
-                fileWriter.close() // close writer before updating manifest
-
-                ResourceContainer.load(zipFile).use { rc ->
-                    ResourceContainer.load(workbook.source.resourceMetadata.path).use { sourceRC ->
-                        val projects = sourceRC.manifest.projects
-                        rc.manifest.projects = projects
-
-                        sourceRC.accessor.getInputStreams(".", "usfm").forEach { fileName, inputStream ->
-                            inputStream.use { ins ->
-                                rc.accessor.write(fileName) {
-                                    it.buffered().use { out ->
-                                        out.write(ins.buffered().readBytes())
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    val mediaManifest = let {
-                        MediaManifest().apply {
-                            projects = listOf(MediaProject(identifier = projectSlug))
-                        }
-                    }
-                    var chapterUrl = templateAudioFileName(projectSlug, "{chapter}", AudioFileFormat.MP3.extension)
-                    val mp3Media = Media("mp3", "", "", listOf(), "${RcConstants.SOURCE_MEDIA_DIR}/${chapterUrl}")
-
-                    chapterUrl = templateAudioFileName(projectSlug, "{chapter}", "cue")
-                    val cueMedia = Media("cue", "", "", listOf(), "${RcConstants.SOURCE_MEDIA_DIR}/${chapterUrl}")
-
-                    mediaManifest.projects.first().media = listOf(mp3Media, cueMedia)
-                    rc.media = mediaManifest
-                    rc.write()
-                }
+                // calling writer.close() multiple times causes an exception, thus,
+                // it should not be invoked again in finally {} block
+                fileWriter.close()
+                updateManifest(zipFile, workbook.source.resourceMetadata.path, workbook)
             }
             .doOnError {
                 fileWriter.close()
@@ -279,6 +213,106 @@ class ProjectExporter @Inject constructor(
             }
             .onErrorReturnItem(ExportResult.FAILURE)
             .subscribeOn(Schedulers.io())
+    }
+
+    private fun copyTakesAsSource(
+        workbook: Workbook,
+        fileWriter: IFileWriter,
+        contributors: List<Contributor>
+    ): Completable {
+        val tempExportDir = directoryProvider.tempDirectory
+            .resolve("export${Date().time}")
+            .apply { mkdirs() }
+
+        val license = License.get(workbook.target.resourceMetadata.license)
+
+        return workbook.target.chapters
+            .filter { it.audio.selected.value?.value != null }
+            .flatMapCompletable { chapter ->
+                chapter.audio.selected.value!!.value!!.let { take ->
+                    val takeToExport = tempExportDir.resolve(
+                        templateAudioFileName(
+                            workbook.target.slug,
+                            chapter.sort.toString(),
+                            AudioFileFormat.MP3.extension
+                        )
+                    )
+                    take.file.copyTo(takeToExport)
+                    // update cues for newly copied takes
+                    val cues = AudioFile(take.file).metadata.getCues()
+                    AudioFile(takeToExport).apply {
+                        cues.forEach { metadata.addCue(it.location, it.label) }
+                        update()
+                    }
+                    audioExporter.exportMp3(take.file, takeToExport, license, contributors)
+                }
+            }
+            .andThen(
+                Completable
+                    .fromAction {
+                        // include the .cue files associated with takes within the same directory
+                        fileWriter.copyDirectory(tempExportDir, RcConstants.SOURCE_MEDIA_DIR)
+                    }
+                    .subscribeOn(Schedulers.io())
+            )
+    }
+
+    private fun updateManifest(
+        rcFile: File,
+        sourceRCFile: File,
+        workbook: Workbook
+    ) {
+        val projectSlug = workbook.target.slug
+
+        ResourceContainer.load(rcFile).use { rc ->
+            // update manifest.yaml
+            ResourceContainer.load(sourceRCFile).use { sourceRC ->
+                val projects = sourceRC.manifest.projects
+                rc.manifest.projects = projects
+
+                // copy source text
+                sourceRC.accessor
+                    .getInputStreams(".", "usfm").forEach { fileName, inputStream ->
+                        inputStream.use { ins ->
+                            rc.accessor.write(fileName) {
+                                it.buffered().use { out ->
+                                    out.write(ins.buffered().readBytes())
+                                }
+                            }
+                        }
+                    }
+            }
+            // update media (.yaml + files)
+            val mediaManifest = let {
+                MediaManifest().apply {
+                    projects = listOf(MediaProject(identifier = projectSlug))
+                }
+            }
+            var mediaUrl = templateAudioFileName(
+                projectSlug, "{chapter}", AudioFileFormat.MP3.extension
+            )
+            val mp3Media = Media(
+                identifier = "mp3",
+                version = "",
+                url = "",
+                quality = listOf(),
+                chapterUrl = "${RcConstants.SOURCE_MEDIA_DIR}/${mediaUrl}"
+            )
+
+            mediaUrl = templateAudioFileName(projectSlug, "{chapter}", "cue")
+            val cueMedia = Media(
+                identifier = "cue",
+                version = "",
+                url = "",
+                quality = listOf(),
+                chapterUrl = "${RcConstants.SOURCE_MEDIA_DIR}/${mediaUrl}"
+            )
+
+            mediaManifest.projects.first().media = listOf(mp3Media, cueMedia)
+            rc.media = mediaManifest
+
+            rc.write()
+        }
     }
 
     private fun makeExportFilename(workbook: Workbook, metadata: ResourceMetadata): String {
