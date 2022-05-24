@@ -232,6 +232,8 @@ class ProjectExporter @Inject constructor(
                 chapter.audio.selected.value!!.value!!.let { take ->
                     val takeToExport = tempExportDir.resolve(
                         templateAudioFileName(
+                            workbook.target.language.slug,
+                            workbook.target.resourceMetadata.identifier,
                             workbook.target.slug,
                             chapter.sort.toString(),
                             AudioFileFormat.MP3.extension
@@ -262,6 +264,8 @@ class ProjectExporter @Inject constructor(
         sourceRCFile: File,
         workbook: Workbook
     ) {
+        val languageSlug = workbook.target.language.slug
+        val resourceSlug = workbook.target.resourceMetadata.identifier
         val projectSlug = workbook.target.slug
 
         ResourceContainer.load(rcFile).use { rc ->
@@ -289,7 +293,7 @@ class ProjectExporter @Inject constructor(
                 }
             }
             var mediaUrl = templateAudioFileName(
-                projectSlug, "{chapter}", AudioFileFormat.MP3.extension
+                languageSlug, resourceSlug, projectSlug, "{chapter}", AudioFileFormat.MP3.extension
             )
             val mp3Media = Media(
                 identifier = "mp3",
@@ -299,7 +303,9 @@ class ProjectExporter @Inject constructor(
                 chapterUrl = "${RcConstants.SOURCE_MEDIA_DIR}/${mediaUrl}"
             )
 
-            mediaUrl = templateAudioFileName(projectSlug, "{chapter}", "cue")
+            mediaUrl = templateAudioFileName(
+                languageSlug, resourceSlug, projectSlug, "{chapter}", "cue"
+            )
             val cueMedia = Media(
                 identifier = "cue",
                 version = "",
@@ -335,11 +341,13 @@ class ProjectExporter @Inject constructor(
     }
 
     private fun templateAudioFileName(
-        projectSlug: String,
-        chapterString: String,
+        language: String,
+        resource: String,
+        project: String,
+        chapterLabel: String,
         extension: String
     ): String {
-        return "${projectSlug}-export-c${chapterString}.$extension"
+        return "${language}_${resource}_${project}_c${chapterLabel}.$extension"
     }
 
     private fun restoreFileExtension(file: File, extension: String) {
