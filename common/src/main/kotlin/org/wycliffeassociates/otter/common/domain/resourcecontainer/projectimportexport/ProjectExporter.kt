@@ -13,7 +13,7 @@ import java.nio.file.StandardCopyOption
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-abstract class IProjectExporter {
+abstract class ProjectExporter {
 
     abstract fun export(
         directory: File,

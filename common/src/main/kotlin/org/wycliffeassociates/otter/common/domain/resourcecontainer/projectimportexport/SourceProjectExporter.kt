@@ -25,7 +25,7 @@ import javax.inject.Inject
 
 class SourceProjectExporter @Inject constructor(
     private val directoryProvider: IDirectoryProvider
-) : IProjectExporter() {
+) : ProjectExporter() {
     @Inject
     lateinit var audioExporter: AudioExporter
 

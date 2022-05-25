@@ -16,7 +16,7 @@ import javax.inject.Inject
 class Mp3ProjectExporter @Inject constructor(
     private val directoryProvider: IDirectoryProvider,
     private val workbookRepository: IWorkbookRepository
-) : IProjectExporter() {
+) : ProjectExporter() {
 
     @Inject
     lateinit var audioExporter: AudioExporter

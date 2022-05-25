@@ -15,7 +15,7 @@ import javax.inject.Inject
 class BackupProjectExporter @Inject constructor(
     private val directoryProvider: IDirectoryProvider,
     private val workbookRepository: IWorkbookRepository
-) : IProjectExporter() {
+) : ProjectExporter() {
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
