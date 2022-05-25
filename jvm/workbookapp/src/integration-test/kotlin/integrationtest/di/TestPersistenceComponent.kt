@@ -19,7 +19,7 @@
 package integrationtest.di
 
 import dagger.Component
-import integrationtest.projects.TestProjectExport
+// import integrationtest.projects.TestProjectExport
 import integrationtest.projects.TestRcImport
 import integrationtest.projects.TestRemoveRc
 import org.wycliffeassociates.otter.jvm.workbookapp.di.AppDependencyGraph
@@ -43,5 +43,5 @@ import javax.inject.Singleton
 interface TestPersistenceComponent : AppDependencyGraph {
     fun inject(test: TestRcImport)
     fun inject(test: TestRemoveRc)
-    fun inject(test: TestProjectExport)
+    // fun inject(test: TestProjectExport)
 }
