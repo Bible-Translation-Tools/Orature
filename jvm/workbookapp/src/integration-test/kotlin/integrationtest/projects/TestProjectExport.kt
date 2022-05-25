@@ -42,8 +42,11 @@ import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.Mp3ProjectExporter
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.BackupProjectExporter
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.SourceProjectExporter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
@@ -55,10 +58,20 @@ import javax.inject.Provider
 import kotlin.io.path.createTempDirectory
 
 class TestProjectExport {
-    @Inject lateinit var dbEnvProvider: Provider<DatabaseEnvironment>
-    @Inject lateinit var exportUseCase: Provider<ProjectExporter>
-    @Inject lateinit var workbookRepository: IWorkbookRepository
-    @Inject lateinit var directoryProvider: IDirectoryProvider
+    @Inject
+    lateinit var dbEnvProvider: Provider<DatabaseEnvironment>
+    @Inject
+    lateinit var exportUseCase: Provider<ProjectExporter>
+    @Inject
+    lateinit var exportSourceProvider: Provider<SourceProjectExporter>
+    @Inject
+    lateinit var exportBackupProvider: Provider<BackupProjectExporter>
+    @Inject
+    lateinit var exportMp3Provider: Provider<Mp3ProjectExporter>
+    @Inject
+    lateinit var workbookRepository: IWorkbookRepository
+    @Inject
+    lateinit var directoryProvider: IDirectoryProvider
 
     init {
         DaggerTestPersistenceComponent.create().inject(this)
@@ -122,7 +135,7 @@ class TestProjectExport {
 
     @Test
     fun exportOratureProjectWithMetadata() {
-        val result = exportUseCase.get()
+        val result = exportBackupProvider.get()
             .export(outputDir, targetMetadata, workbook, projectFilesAccessor)
             .blockingGet()
 
@@ -151,8 +164,8 @@ class TestProjectExport {
         // select a take to be included when export
         workbook.target.chapters.blockingFirst().audio.selectTake(take)
 
-        val result = exportUseCase.get()
-            .exportMp3(outputDir, targetMetadata, workbook, projectFilesAccessor)
+        val result = exportMp3Provider.get()
+            .export(outputDir, targetMetadata, workbook, projectFilesAccessor)
             .blockingGet()
 
         assertEquals(ExportResult.SUCCESS, result)
@@ -185,8 +198,8 @@ class TestProjectExport {
             update()
         }
 
-        val result = exportUseCase.get()
-            .exportAsSource(outputDir, targetMetadata, workbook, projectFilesAccessor)
+        val result = exportSourceProvider.get()
+            .export(outputDir, targetMetadata, workbook, projectFilesAccessor)
             .blockingGet()
 
         assertEquals(ExportResult.SUCCESS, result)
