@@ -47,14 +47,14 @@ data class Chapter(
 ) : BookElement, BookElementContainer, Recordable {
 
     override val contentType: ContentType = ContentType.META
-    override val children: Observable<BookElement> = chunks.cast()
+    override val children: Observable<BookElement> = getDraft().cast()
 
     var text: String = ""
 
     override val textItem
         get() = textItem()
 
-    private fun stuff(): Single<List<Chunk>> {
+    private fun getLatestDraftFromRelay(): Single<List<Chunk>> {
         return Single.fromCallable {
             val draft = mutableListOf<Chunk>()
             val maxDraft = currentDraftNumber.blockingGet()
@@ -75,7 +75,7 @@ data class Chapter(
         return chunkCount
             .toObservable()
             .map {
-                (stuff().blockingGet()).toObservable()
+                (getLatestDraftFromRelay().blockingGet()).toObservable()
             }
             .flatMap { it }
             .subscribeOn(Schedulers.io())

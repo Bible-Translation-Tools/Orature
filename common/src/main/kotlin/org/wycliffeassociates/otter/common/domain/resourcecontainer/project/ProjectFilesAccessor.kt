@@ -222,10 +222,6 @@ class ProjectFilesAccessor(
     fun writeSelectedTakesFile(fileWriter: IFileWriter, workbook: Workbook, isBook: Boolean) {
         fileWriter.bufferedWriter(RcConstants.SELECTED_TAKES_FILE).use { _fileWriter ->
             fetchSelectedTakes(workbook, isBook)
-                .map {
-                    println("writing ${it.name}")
-                    it
-                }
                 .map(::relativeTakePath)
                 .doOnError { e ->
                     log.error("Error in writeSelectedTakesFile", e)
@@ -389,21 +385,14 @@ class ProjectFilesAccessor(
 
         val bookElements: Observable<BookElement> = when {
             chaptersOnly -> chapters.cast()
-            else -> chapters.concatMap { chapter -> chapter.getDraft().cast<BookElement>().startWith(chapter) }
+            else -> chapters.concatMap { chapter -> chapter.children.startWith(chapter) }
         }
 
         return bookElements
             .flatMap { getAudioForCurrentResource(it, isBook) }
             .mapNotNull { audio ->
                 val take = audio.selected.value?.value
-                if (take?.name?.contains("meta") == true) {
-                    log.error("should have written the chapter")
-                    log.error(audio.selected.value?.value?.name)
-                }
                 take
-            }.map {
-                println("book elems ${it.name}")
-             it
             }
     }
 
