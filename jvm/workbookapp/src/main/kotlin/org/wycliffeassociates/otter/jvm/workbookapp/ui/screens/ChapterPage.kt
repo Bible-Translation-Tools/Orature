@@ -293,6 +293,11 @@ class ChapterPage : View() {
                             }
                         }
                     }
+                    button("Reset") {
+                        action {
+                            viewModel.resetChapter()
+                        }
+                    }
                 }
 
                 listview(viewModel.filteredContent) {

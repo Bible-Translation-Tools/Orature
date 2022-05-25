@@ -222,6 +222,7 @@ class WorkbookRepository(
                         logger.info("Adding chunk $it")
                         db.addContentForCollection(chapterCollection, it).subscribe()
                     },
+                    currentDraftNumber = db.getCurrentDraftNumber(chapterCollection),
                     reset = {
                         db.clearContentForCollection(chapterCollection).map {
                             it.forEach { take ->
@@ -602,6 +603,7 @@ class WorkbookRepository(
         fun updateTranslation(translation: Translation): Completable
         fun clearContentForCollection(chapterCollection: Collection): Single<List<ModelTake>>
         fun getChunkCount(chapterCollection: Collection): Single<Int>
+        fun getCurrentDraftNumber(chapterCollection: Collection): Single<Int>
     }
 }
 
@@ -616,6 +618,10 @@ private class DefaultDatabaseAccessors(
 ) : WorkbookRepository.IDatabaseAccessors {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    override fun getCurrentDraftNumber(chapterCollection: Collection): Single<Int> {
+        return contentRepo.getMaxDraftNumber(chapterCollection)
+    }
 
     override fun getChunkCount(chapterCollection: Collection): Single<Int> {
         return contentRepo

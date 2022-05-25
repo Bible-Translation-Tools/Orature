@@ -37,4 +37,5 @@ interface IContentRepository : IRepository<Content> {
     // Update the sources for a content
     fun updateSources(content: Content, sourceContents: List<Content>): Completable
     fun deleteForCollection(chapterCollection: Collection): Completable
+    fun getMaxDraftNumber(chapterCollection: Collection): Single<Int>
 }

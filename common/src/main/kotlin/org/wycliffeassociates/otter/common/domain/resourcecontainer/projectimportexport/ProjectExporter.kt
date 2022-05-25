@@ -63,12 +63,9 @@ class ProjectExporter @Inject constructor(
                 val projectSourceMetadata = workbook.source.linkedResources
                     .firstOrNull { it.identifier == projectMetadataToExport.identifier }
                     ?: workbook.source.resourceMetadata
-                println("got project source RC")
 
                 val projectToExportIsBook: Boolean =
                     projectMetadataToExport.identifier == workbook.target.resourceMetadata.identifier
-
-                println("exporting book is $projectToExportIsBook")
 
                 val contributors = projectFilesAccessor.getContributorInfo()
                 val zipFilename = makeExportFilename(workbook, projectSourceMetadata)

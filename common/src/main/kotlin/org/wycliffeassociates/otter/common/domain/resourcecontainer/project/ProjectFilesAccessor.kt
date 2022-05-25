@@ -222,6 +222,10 @@ class ProjectFilesAccessor(
     fun writeSelectedTakesFile(fileWriter: IFileWriter, workbook: Workbook, isBook: Boolean) {
         fileWriter.bufferedWriter(RcConstants.SELECTED_TAKES_FILE).use { _fileWriter ->
             fetchSelectedTakes(workbook, isBook)
+                .map {
+                    println("writing ${it.name}")
+                    it
+                }
                 .map(::relativeTakePath)
                 .doOnError { e ->
                     log.error("Error in writeSelectedTakesFile", e)
@@ -285,12 +289,9 @@ class ProjectFilesAccessor(
     fun getChapterText(projectSlug: String, chapterNumber: Int): List<String> {
         val chapterText = arrayListOf<String>()
 
-        println(sourceMetadata.path)
         ResourceContainer.load(sourceMetadata.path).use { rc ->
             val projectEntry = rc.manifest.projects.find { it.identifier == projectSlug }
             projectEntry?.let {
-                println(it.path)
-                println(rc.accessor.fileExists(it.path.removePrefix("./")))
                 val text = rc.accessor.getReader(it.path.removePrefix("./")).readText()
                 val parser = USFMParser(arrayListOf("s5"))
                 val doc = parser.parseFromString(text)
@@ -318,8 +319,6 @@ class ProjectFilesAccessor(
         ResourceContainer.load(sourceMetadata.path).use { rc ->
             val projectEntry = rc.manifest.projects.find { it.identifier == projectSlug }
             projectEntry?.let {
-                println(it.path)
-                println(rc.accessor.fileExists(it.path.removePrefix("./")))
                 val text = rc.accessor.getReader(it.path.removePrefix("./")).readText()
                 val parser = USFMParser(arrayListOf("s5"))
                 val doc = parser.parseFromString(text)
@@ -387,20 +386,27 @@ class ProjectFilesAccessor(
             // Work around a quirk that records resource takes to the source tree
             else -> Observable.concat(workbook.source.chapters, workbook.target.chapters)
         }
-        println("got chapters")
 
         val bookElements: Observable<BookElement> = when {
             chaptersOnly -> chapters.cast()
             else -> chapters.concatMap { chapter ->
-                chapter.chunks.values.toObservable().cast()
+                chapter.getDraft()
             }
         }
-        println("got book elements")
 
         return bookElements
-            .flatMap {
-                getAudioForCurrentResource(it, isBook) }
-            .mapNotNull { audio -> audio.selected.value?.value }
+            .flatMap { getAudioForCurrentResource(it, isBook) }
+            .mapNotNull { audio ->
+                val take = audio.selected.value?.value
+                if (take?.name?.contains("meta") == true) {
+                    log.error("should have written the chapter")
+                    log.error(audio.selected.value?.value?.name)
+                }
+                take
+            }.map {
+                println("book elems ${it.name}")
+             it
+            }
     }
 
     private fun deletedTakeFilePaths(workbook: Workbook, workbookRepository: IWorkbookRepository): List<String> {

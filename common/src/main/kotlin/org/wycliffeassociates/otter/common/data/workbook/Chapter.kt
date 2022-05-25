@@ -23,6 +23,8 @@ import com.jakewharton.rxrelay2.ReplayRelay
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.rxkotlin.cast
+import io.reactivex.rxkotlin.toObservable
+import io.reactivex.schedulers.Schedulers
 import java.lang.Thread.sleep
 import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
@@ -39,6 +41,7 @@ data class Chapter(
     override val subtreeResources: List<ResourceMetadata>,
     val chunks: ReplayRelay<Chunk>,
     val chunkCount: Single<Int>,
+    val currentDraftNumber: Single<Int>,
     val addChunk: (List<Content>) -> Unit,
     val reset: () -> Unit
 ) : BookElement, BookElementContainer, Recordable {
@@ -50,6 +53,33 @@ data class Chapter(
 
     override val textItem
         get() = textItem()
+
+    private fun stuff(): Single<List<Chunk>> {
+        return Single.fromCallable {
+            val draft = mutableListOf<Chunk>()
+            val maxDraft = currentDraftNumber.blockingGet()
+            val chunkTotal = chunkCount.blockingGet()
+            val disposable = chunks
+                .filter { it.draftNumber == maxDraft }
+                .takeUntil { draft.size == chunkTotal }
+                .forEach { draft.add(it) }
+            while (draft.size != chunkTotal) {
+                sleep(50)
+            }
+            disposable.dispose()
+            draft.toList()
+        }.subscribeOn(Schedulers.io())
+    }
+
+    fun getDraft(): Observable<Chunk> {
+        return chunkCount
+            .toObservable()
+            .map {
+                (stuff().blockingGet()).toObservable()
+            }
+            .flatMap { it }
+            .subscribeOn(Schedulers.io())
+    }
 
     private fun textItem(): TextItem {
         return TextItem(text, MimeType.USFM!!)

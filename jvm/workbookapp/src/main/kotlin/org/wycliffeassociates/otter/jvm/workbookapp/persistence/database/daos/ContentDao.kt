@@ -23,6 +23,7 @@ import org.jooq.DSLContext
 import org.jooq.Record
 import org.jooq.Select
 import org.jooq.SelectFieldOrAsterisk
+import org.jooq.impl.DSL
 import org.jooq.impl.DSL.max
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.InsertionException
@@ -303,6 +304,14 @@ class ContentDao(
                 CONTENT_ENTITY.COLLECTION_FK.eq(chapterCollection.id)
                     .and((CONTENT_ENTITY.TYPE_FK).eq(1))
             )
+            .execute()
+    }
+
+    fun getMaxDraftNumber(chapter: CollectionEntity, dsl: DSLContext = instanceDsl): Int {
+        return dsl
+            .select(max(CONTENT_ENTITY.DRAFT_NUMBER))
+            .from(CONTENT_ENTITY)
+            .where(CONTENT_ENTITY.COLLECTION_FK.eq(chapter.id))
             .execute()
     }
 }

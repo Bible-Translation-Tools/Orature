@@ -161,7 +161,8 @@ class ContentRepository @Inject constructor(
     override fun insertForCollection(content: Content, collection: Collection): Single<Int> {
         return Single
             .fromCallable {
-                val id = contentDao.insert(contentMapper.mapToEntity(content, collection.id).apply { collectionFk = collection.id })
+                val id = contentDao.insert(
+                    contentMapper.mapToEntity(content, collection.id).apply { collectionFk = collection.id })
                 content.id = id
                 activeConnections.getOrDefault(collection, null)?.let { it.accept(content) }
                 id
@@ -183,6 +184,14 @@ class ContentRepository @Inject constructor(
             }
             .doOnError { e ->
                 logger.error("Error in update for content: $obj", e)
+            }
+            .subscribeOn(Schedulers.io())
+    }
+
+    override fun getMaxDraftNumber(chapterCollection: Collection): Single<Int> {
+        return Single
+            .fromCallable {
+                contentDao.getMaxDraftNumber(collectionMapper.mapToEntity(chapterCollection))
             }
             .subscribeOn(Schedulers.io())
     }
