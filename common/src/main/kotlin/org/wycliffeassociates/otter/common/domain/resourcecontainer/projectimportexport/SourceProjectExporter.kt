@@ -54,11 +54,16 @@ class SourceProjectExporter @Inject constructor(
         return exportTakeFiles(workbook, fileWriter, contributors)
             .doOnComplete {
                 fileWriter.close() // must close before changing file extension or NoSuchFileException
-                updateProjectMetadata(zipFile, workbook.source.resourceMetadata.path, workbook)
+                buildSourceProjectMetadata(
+                    zipFile,
+                    workbook.source.resourceMetadata.path,
+                    workbook
+                )
                 restoreFileExtension(zipFile, OratureFileFormat.ORATURE.extension)
             }
             .doOnError {
                 logger.error("Error while exporting project as source.", it)
+                fileWriter.close()
             }
             .toSingle {
                 ExportResult.SUCCESS
@@ -120,17 +125,16 @@ class SourceProjectExporter @Inject constructor(
             )
             .doOnError {
                 logger.error("Error while copying takes to export file", it)
-                fileWriter.close()
             }
     }
 
-    private fun updateProjectMetadata(
-        rcFile: File,
+    private fun buildSourceProjectMetadata(
+        exportFile: File,
         sourceRCFile: File,
         workbook: Workbook
     ) {
         try {
-            ResourceContainer.load(rcFile).use { rc ->
+            ResourceContainer.load(exportFile).use { rc ->
                 updateManifest(sourceRCFile, rc)
                 rc.media = buildMediaManifest(
                     projectSlug = workbook.target.slug,
@@ -146,16 +150,16 @@ class SourceProjectExporter @Inject constructor(
         }
     }
 
-    private fun updateManifest(sourceRCFile: File, targetRc: ResourceContainer) {
+    private fun updateManifest(sourceRCFile: File, exportRC: ResourceContainer) {
         ResourceContainer.load(sourceRCFile).use { sourceRC ->
             val projects = sourceRC.manifest.projects
-            targetRc.manifest.projects = projects
+            exportRC.manifest.projects = projects
 
             // copy source text
             sourceRC.accessor
                 .getInputStreams(".", "usfm").forEach { fileName, inputStream ->
                     inputStream.use { ins ->
-                        targetRc.accessor.write(fileName) {
+                        exportRC.accessor.write(fileName) {
                             it.buffered().use { out ->
                                 out.write(ins.buffered().readBytes())
                             }
