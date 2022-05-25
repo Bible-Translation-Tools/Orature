@@ -30,6 +30,7 @@ class SourceProjectExporter @Inject constructor(
     lateinit var audioExporter: AudioExporter
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
+    private val exportMediaTypes = listOf(AudioFileFormat.MP3.extension, "cue")
 
     override fun export(
         directory: File,
@@ -50,15 +51,10 @@ class SourceProjectExporter @Inject constructor(
 
         val fileWriter = directoryProvider.newFileWriter(zipFile)
 
-        return copyTakesAsSource(workbook, fileWriter, contributors)
+        return exportTakeFiles(workbook, fileWriter, contributors)
             .doOnComplete {
                 fileWriter.close() // must close before changing file extension or NoSuchFileException
-                try {
-                    updateManifest(zipFile, workbook.source.resourceMetadata.path, workbook)
-                } catch (e: Exception) {
-                    logger.error("Error while updating manifest.", e)
-                    throw e
-                }
+                updateProjectMetadata(zipFile, workbook.source.resourceMetadata.path, workbook)
                 restoreFileExtension(zipFile, OratureFileFormat.ORATURE.extension)
             }
             .doOnError {
@@ -71,7 +67,7 @@ class SourceProjectExporter @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
-    fun copyTakesAsSource(
+    private fun exportTakeFiles(
         workbook: Workbook,
         fileWriter: IFileWriter,
         contributors: List<Contributor>
@@ -128,66 +124,73 @@ class SourceProjectExporter @Inject constructor(
             }
     }
 
-    private fun updateManifest(
+    private fun updateProjectMetadata(
         rcFile: File,
         sourceRCFile: File,
         workbook: Workbook
     ) {
-        val languageSlug = workbook.target.language.slug
-        val resourceSlug = workbook.target.resourceMetadata.identifier
-        val projectSlug = workbook.target.slug
+        try {
+            ResourceContainer.load(rcFile).use { rc ->
+                updateManifest(sourceRCFile, rc)
+                rc.media = buildMediaManifest(
+                    projectSlug = workbook.target.slug,
+                    resourceSlug = workbook.target.resourceMetadata.identifier,
+                    languageSlug = workbook.target.language.slug
+                )
 
-        ResourceContainer.load(rcFile).use { rc ->
-            // update manifest.yaml
-            ResourceContainer.load(sourceRCFile).use { sourceRC ->
-                val projects = sourceRC.manifest.projects
-                rc.manifest.projects = projects
+                rc.write()
+            }
+        } catch (e: Exception) {
+            logger.error("Error while updating project manifest.", e)
+            throw e
+        }
+    }
 
-                // copy source text
-                sourceRC.accessor
-                    .getInputStreams(".", "usfm").forEach { fileName, inputStream ->
-                        inputStream.use { ins ->
-                            rc.accessor.write(fileName) {
-                                it.buffered().use { out ->
-                                    out.write(ins.buffered().readBytes())
-                                }
+    private fun updateManifest(sourceRCFile: File, targetRc: ResourceContainer) {
+        ResourceContainer.load(sourceRCFile).use { sourceRC ->
+            val projects = sourceRC.manifest.projects
+            targetRc.manifest.projects = projects
+
+            // copy source text
+            sourceRC.accessor
+                .getInputStreams(".", "usfm").forEach { fileName, inputStream ->
+                    inputStream.use { ins ->
+                        targetRc.accessor.write(fileName) {
+                            it.buffered().use { out ->
+                                out.write(ins.buffered().readBytes())
                             }
                         }
                     }
-            }
-            // update media (.yaml + files)
-            val mediaManifest = let {
-                MediaManifest().apply {
-                    projects = listOf(MediaProject(identifier = projectSlug))
                 }
+        }
+    }
+
+    private fun buildMediaManifest(
+        projectSlug: String,
+        languageSlug: String,
+        resourceSlug: String
+    ): MediaManifest {
+        val mediaManifest = let {
+            MediaManifest().apply {
+                projects = listOf(MediaProject(identifier = projectSlug))
             }
-            var mediaUrl = templateAudioFileName(
-                languageSlug, resourceSlug, projectSlug, "{chapter}", AudioFileFormat.MP3.extension
+        }
+        val mediaList = exportMediaTypes.map { mediaType ->
+            val fileName = templateAudioFileName(
+                languageSlug, resourceSlug, projectSlug, "{chapter}", mediaType
             )
-            val mp3Media = Media(
+            Media(
                 identifier = "mp3",
                 version = "",
                 url = "",
                 quality = listOf(),
-                chapterUrl = "${RcConstants.SOURCE_MEDIA_DIR}/${mediaUrl}"
+                chapterUrl = "${RcConstants.SOURCE_MEDIA_DIR}/${fileName}"
             )
-
-            mediaUrl = templateAudioFileName(
-                languageSlug, resourceSlug, projectSlug, "{chapter}", "cue"
-            )
-            val cueMedia = Media(
-                identifier = "cue",
-                version = "",
-                url = "",
-                quality = listOf(),
-                chapterUrl = "${RcConstants.SOURCE_MEDIA_DIR}/${mediaUrl}"
-            )
-
-            mediaManifest.projects.first().media = listOf(mp3Media, cueMedia)
-            rc.media = mediaManifest
-
-            rc.write()
         }
+
+        mediaManifest.projects.first().media = mediaList
+
+        return mediaManifest
     }
 
     private fun templateAudioFileName(

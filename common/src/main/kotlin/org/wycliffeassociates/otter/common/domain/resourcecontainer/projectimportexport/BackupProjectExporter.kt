@@ -65,5 +65,4 @@ class BackupProjectExporter @Inject constructor(
             .onErrorReturnItem(ExportResult.FAILURE)
             .subscribeOn(Schedulers.io())
     }
-
 }
