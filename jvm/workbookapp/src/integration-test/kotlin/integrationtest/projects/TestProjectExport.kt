@@ -45,7 +45,6 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.Proj
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.Mp3ProjectExporter
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.BackupProjectExporter
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.SourceProjectExporter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
@@ -60,8 +59,6 @@ import kotlin.io.path.createTempDirectory
 class TestProjectExport {
     @Inject
     lateinit var dbEnvProvider: Provider<DatabaseEnvironment>
-    @Inject
-    lateinit var exportUseCase: Provider<ProjectExporter>
     @Inject
     lateinit var exportSourceProvider: Provider<SourceProjectExporter>
     @Inject

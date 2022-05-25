@@ -19,15 +19,10 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.times
 import io.reactivex.Observable
-import io.reactivex.Single
 import javafx.beans.property.SimpleObjectProperty
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.BeforeClass
 import org.junit.Test
 import org.mockito.Mockito.`when`
@@ -43,12 +38,8 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.ArtworkAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
 import tornadofx.*
-import java.io.File
 import java.time.LocalDateTime
-import javax.inject.Provider
 
 class WorkbookPageViewModelTest {
     companion object {
@@ -135,7 +126,6 @@ class WorkbookPageViewModelTest {
     fun openWorkbook_loadChapters() {
         assertEquals(0, vm.chapters.size)
 
-        val lockObject = Object()
         val chapterSizeChanges = mutableListOf<Int>()
         vm.chapters.onChange {
             chapterSizeChanges.add(vm.chapters.size)
@@ -152,38 +142,5 @@ class WorkbookPageViewModelTest {
     @Test
     fun getAllBookResources() {
         assertEquals(1, vm.getAllBookResources().size)
-    }
-
-    @Test
-    fun exportWorkbook() {
-        val mockProjectExporter = mock(ProjectExporter::class.java)
-        `when`(mockProjectExporter.export(any(), any(), any(), any(), any()))
-            .thenReturn(Single.just(ExportResult.SUCCESS))
-        val exportProvider: Provider<ProjectExporter> = Provider {
-            mockProjectExporter
-        }
-        vm.projectExporterProvider = exportProvider
-
-        val projectTitleChanges = mutableListOf<String?>()
-        val showProgressChanges = mutableListOf<Boolean>()
-
-        vm.activeProjectTitleProperty.onChange {
-            projectTitleChanges.add(it)
-        }
-        vm.showExportProgressDialogProperty.onChange {
-            showProgressChanges.add(it)
-        }
-        vm.exportWorkbook(mock(File::class.java))
-
-        WaitForAsyncUtils.waitForFxEvents()
-
-        assertEquals(mockBook.title, projectTitleChanges[0])
-        assertNull(projectTitleChanges[1])
-        assertTrue(showProgressChanges[0])
-        assertFalse(showProgressChanges[1])
-        verify(mockProjectExporter).export(any(), any(), any(), any(), any())
-        verify(mockWorkbookDS, atLeastOnce()).workbook
-        verify(mockWorkbookDS).activeResourceMetadata
-        verify(mockWorkbookDS).activeProjectFilesAccessor
     }
 }
