@@ -389,9 +389,7 @@ class ProjectFilesAccessor(
 
         val bookElements: Observable<BookElement> = when {
             chaptersOnly -> chapters.cast()
-            else -> chapters.concatMap { chapter ->
-                chapter.getDraft()
-            }
+            else -> chapters.concatMap { chapter -> chapter.getDraft().cast<BookElement>().startWith(chapter) }
         }
 
         return bookElements
