@@ -123,16 +123,11 @@ class SourceProjectExporter @Inject constructor(
         return if (cues.isEmpty()) {
             Completable.complete()
         } else {
+            val metadata = AudioExporter.ExportMetadata(
+                license, contributors, cues
+            )
             audioExporter
-                .exportMp3(take.file, exportPath, license, contributors)
-                .andThen {
-                    // update audio metadata
-                    AudioFile(exportPath).apply {
-                        cues.forEach { metadata.addCue(it.location, it.label) }
-                        update()
-                    }
-                    it.onComplete()
-                }
+                .exportMp3(take.file, exportPath, metadata)
                 .subscribeOn(Schedulers.io())
         }
     }
