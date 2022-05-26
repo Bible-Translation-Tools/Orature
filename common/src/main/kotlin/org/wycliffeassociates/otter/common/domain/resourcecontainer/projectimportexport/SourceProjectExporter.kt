@@ -10,6 +10,7 @@ import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.License
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.audio.AudioExporter
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
@@ -51,7 +52,7 @@ class SourceProjectExporter @Inject constructor(
 
         val fileWriter = directoryProvider.newFileWriter(zipFile)
 
-        return exportTakeFiles(workbook, fileWriter, contributors)
+        return exportSelectedTakes(workbook, fileWriter, contributors)
             .doOnComplete {
                 fileWriter.close() // must close before changing file extension or NoSuchFileException
                 buildSourceProjectMetadata(
@@ -72,7 +73,7 @@ class SourceProjectExporter @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
-    private fun exportTakeFiles(
+    private fun exportSelectedTakes(
         workbook: Workbook,
         fileWriter: IFileWriter,
         contributors: List<Contributor>
@@ -80,52 +81,60 @@ class SourceProjectExporter @Inject constructor(
         val tempExportDir = directoryProvider.tempDirectory
             .resolve("export${Date().time}")
             .apply { mkdirs() }
-
         val license = License.get(workbook.target.resourceMetadata.license)
-
-        return workbook.target.chapters
-            .filter { it.audio.selected.value?.value != null }
-            .flatMapCompletable { chapter ->
-                chapter.audio.selected.value!!.value!!.let { take ->
-                    val takeToExport = tempExportDir.resolve(
-                        templateAudioFileName(
-                            workbook.target.language.slug,
-                            workbook.target.resourceMetadata.identifier,
-                            workbook.target.slug,
-                            chapter.sort.toString(),
-                            AudioFileFormat.MP3.extension
-                        )
+        return workbook
+            .target
+            .chapters
+            .map { Pair(it.audio.selected.value?.value, it.sort) }
+            .filter { (take, _) -> take != null }
+            .map { (take, sort) ->
+                val exportPath = tempExportDir.resolve(
+                    templateAudioFileName(
+                        workbook.target.language.slug,
+                        workbook.target.resourceMetadata.identifier,
+                        workbook.target.slug,
+                        sort.toString(),
+                        AudioFileFormat.MP3.extension
                     )
-                    // update markers for newly copied takes
-                    val cues = AudioFile(take.file).metadata.getCues()
-                    if (cues.isEmpty()) {
-                        Completable.complete()
-                    } else {
-                        audioExporter.exportMp3(take.file, takeToExport, license, contributors)
-                            .andThen(
-                                Completable.fromAction {
-                                    // update audio metadata
-                                    AudioFile(takeToExport).apply {
-                                        cues.forEach { metadata.addCue(it.location, it.label) }
-                                        update()
-                                    }
-                                }
-                                    .subscribeOn(Schedulers.io())
-                            )
-                    }
-                }
+                )
+                Pair(take, exportPath)
             }
-            .andThen(
-                Completable
-                    .fromAction {
-                        // include the .cue files associated with takes within the same directory
-                        fileWriter.copyDirectory(tempExportDir, RcConstants.SOURCE_MEDIA_DIR)
-                    }
-                    .subscribeOn(Schedulers.io())
-            )
+            .flatMapCompletable { (take, exportPath) ->
+                exportTake(take!!, exportPath, license, contributors)
+            }.andThen {
+                // include the .cue files associated with takes within the same directory
+                fileWriter.copyDirectory(tempExportDir, RcConstants.SOURCE_MEDIA_DIR)
+                it.onComplete()
+            }
+            .subscribeOn(Schedulers.io())
             .doOnError {
                 logger.error("Error while copying takes to export file", it)
             }
+    }
+
+    private fun exportTake(
+        take: Take,
+        exportPath: File,
+        license: License?,
+        contributors: List<Contributor>
+    ): Completable {
+        // update markers for newly copied takes
+        val cues = AudioFile(take.file).metadata.getCues()
+        return if (cues.isEmpty()) {
+            Completable.complete()
+        } else {
+            audioExporter
+                .exportMp3(take.file, exportPath, license, contributors)
+                .andThen {
+                    // update audio metadata
+                    AudioFile(exportPath).apply {
+                        cues.forEach { metadata.addCue(it.location, it.label) }
+                        update()
+                    }
+                    it.onComplete()
+                }
+                .subscribeOn(Schedulers.io())
+        }
     }
 
     private fun buildSourceProjectMetadata(
@@ -184,7 +193,7 @@ class SourceProjectExporter @Inject constructor(
                 languageSlug, resourceSlug, projectSlug, "{chapter}", mediaType
             )
             Media(
-                identifier = "mp3",
+                identifier = mediaType,
                 version = "",
                 url = "",
                 quality = listOf(),
