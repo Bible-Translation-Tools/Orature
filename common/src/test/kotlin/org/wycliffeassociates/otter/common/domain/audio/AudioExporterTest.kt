@@ -48,12 +48,12 @@ class AudioExporterTest {
             Contributor("Test User 1"),
             Contributor("Test User 2")
         )
-
+        val metadata = AudioExporter.ExportMetadata(license, contributors)
         AudioExporter()
             .apply {
                 audioConverter = AudioConverter()
             }
-            .exportMp3(inputFile, outputDir, license, contributors)
+            .exportMp3(inputFile, outputDir, metadata)
             .blockingAwait()
 
         val outputFile = outputDir.resolve(inputFile.nameWithoutExtension + ".mp3")
