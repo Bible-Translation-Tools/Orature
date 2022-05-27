@@ -88,6 +88,8 @@
 
 .export-menu__option-btn {
     -fx-text-fill: -wa-regular-text;
+    -fx-max-width: infinity;
+    -fx-alignment: center-left;
 }
 
 .btn--tertiary.export-menu__option-btn .ikonli-font-icon {

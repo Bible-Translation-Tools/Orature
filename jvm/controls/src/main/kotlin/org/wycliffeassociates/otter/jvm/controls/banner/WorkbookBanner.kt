@@ -30,6 +30,7 @@ import javafx.scene.control.Skin
 import javafx.scene.image.Image
 import org.wycliffeassociates.otter.jvm.controls.skins.banner.WorkbookBannerSkin
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.Artwork
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportOption
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
@@ -46,6 +47,12 @@ class WorkbookBanner : Control() {
 
     val onDeleteActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onExportActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+
+    val exportOptions = observableListOf(
+        ExportOption.LISTEN,
+        ExportOption.SOURCE_AUDIO,
+        ExportOption.BACKUP
+    )
 
     init {
         styleClass.setAll("workbook-banner")

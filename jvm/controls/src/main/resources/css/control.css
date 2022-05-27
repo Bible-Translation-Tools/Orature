@@ -243,6 +243,7 @@
     -fx-border-width: 0px;
     -fx-text-fill: -wa-secondary-btn-text-fill;
     -fx-icon-color: -wa-secondary-btn-text-fill;
+    -fx-graphic-text-gap: 8px;
 }
 .btn--tertiary:hover {
     -fx-background-color: -wa-secondary-btn-background-hover;

@@ -32,7 +32,9 @@ import javafx.scene.layout.HBox
 import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportOption
 import org.wycliffeassociates.otter.jvm.controls.banner.WorkbookBanner
+import org.wycliffeassociates.otter.jvm.controls.listview.ExportOptionListCell
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
@@ -57,10 +59,10 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
     lateinit var exportBtn: Button
 
     @FXML
-    lateinit var exportSelectMenu: ComboBox<String>
+    lateinit var exportSelectMenu: ComboBox<ExportOption>
 
     @FXML
-    lateinit var fakeExportMenu: ComboBox<String>
+    lateinit var fakeExportMenu: ComboBox<String> // this menu displays on top of the actual menu
 
     init {
         loadFXML()
@@ -87,22 +89,9 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
             }
         }
         exportSelectMenu.apply {
-            items = observableListOf("Listen", "Source Audio", "Backup")
-
+            items = banner.exportOptions
             setCellFactory {
-                object : ListCell<String>() {
-                    override fun updateItem(item: String?, btl: Boolean) {
-                        super.updateItem(item, btl)
-                        if (item != null || !btl) {
-                            graphic = Button(item).apply {
-                                useMaxWidth = true
-                                alignment = Pos.CENTER_LEFT
-                                addClass("btn", "btn--tertiary", "btn--borderless", "export-menu__option-btn")
-                                graphic = FontIcon(MaterialDesign.MDI_PLAY)
-                            }
-                        }
-                    }
-                }
+                ExportOptionListCell()
             }
             tooltip {
                 text = messages["exportOptions"]
@@ -112,6 +101,7 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
                 runLater { selectionModel.clearSelection() }
             }
         }
+
         fakeExportMenu.apply {
             prefWidthProperty().bind(exportSelectMenu.widthProperty())
             minHeightProperty().bind(exportSelectMenu.prefHeightProperty())
@@ -122,7 +112,9 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
                     super.updateItem(item, btl)
                     if (item != null || !btl) {
                         graphic = Button(item).apply {
-                            addClass("btn", "btn--tertiary", "btn--borderless", "dummy-export-menu__btn")
+                            addClass(
+                                "btn", "btn--tertiary", "btn--borderless", "dummy-export-menu__btn"
+                            )
                             graphic = FontIcon(MaterialDesign.MDI_FILE_EXPORT)
                         }
                     }
