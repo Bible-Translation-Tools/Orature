@@ -63,6 +63,10 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataSto
 import tornadofx.*
 import java.text.MessageFormat
 import java.util.*
+import javafx.beans.property.SimpleBooleanProperty
+import javafx.geometry.Pos
+import javafx.scene.paint.Color
+import javafx.scene.paint.Paint
 import kotlin.math.max
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.ChunkingWizard
 
@@ -78,6 +82,8 @@ class ChapterPage : View() {
 
     private val pluginOpenedPage: PluginOpenedPage
     private var exportProgressListener: ChangeListener<Boolean>? = null
+
+    private val showDeleteChunksDialogProperty = SimpleBooleanProperty(false)
 
     private val breadCrumb = BreadCrumb().apply {
         titleProperty.bind(
@@ -99,6 +105,7 @@ class ChapterPage : View() {
 
     override fun onDock() {
         super.onDock()
+        showDeleteChunksDialogProperty.set(false)
         workbookDataStore.activeChunkProperty.set(null)
         workbookDataStore.activeResourceComponentProperty.set(null)
         workbookDataStore.activeResourceProperty.set(null)
@@ -115,6 +122,7 @@ class ChapterPage : View() {
 
     override fun onUndock() {
         super.onUndock()
+        showDeleteChunksDialogProperty.set(false)
         viewModel.closePlayers()
         viewModel.undock()
         removeDialogListeners()
@@ -263,6 +271,14 @@ class ChapterPage : View() {
 
                 hbox {
                     addClass("chapter-page__chunks-header")
+                    button(messages["delete"]) {
+                        addClass("btn", "btn--secondary", "btn--secondary-light")
+                        tooltip(text)
+                        graphic = FontIcon(MaterialDesign.MDI_DELETE)
+                        action {
+                            showDeleteChunksDialog()
+                        }
+                    }
                     button {
                         addClass("btn", "btn--secondary", "btn--secondary-light")
                         text = messages["compile"]
@@ -291,11 +307,6 @@ class ChapterPage : View() {
                                 viewModel.onCardSelection(it)
                                 navigator.dock<RecordScripturePage>()
                             }
-                        }
-                    }
-                    button("Reset") {
-                        action {
-                            viewModel.resetChapter()
                         }
                     }
                 }
@@ -410,7 +421,68 @@ class ChapterPage : View() {
                     }
                 }
             }
+            vbox {
+                addClass("chapter-page__chunks")
+
+                visibleProperty().bind(showDeleteChunksDialogProperty)
+                vbox {
+                    vgrow = Priority.ALWAYS
+                    alignment = Pos.CENTER
+
+                    style {
+                        backgroundColor += Paint.valueOf("#f8efef")
+                        padding = box(16.px)
+                    }
+
+                    add(
+                        FontIcon(MaterialDesign.MDI_ALERT).apply {
+                            addClass("chunk-mode__icon", "chunk-mode__icon--delete")
+                        }
+                    )
+
+                    label(messages["warning"]) {
+                        addClass(
+                            "chunk-mode__selection__title",
+                            "chunk-mode__selection__title--delete"
+                        )
+                    }
+                    label(messages["deleteTranslationInfo"]) {
+                        addClass(
+                            "chunk-mode__selection__text",
+                            "chunk-mode__selection__text--delete"
+                        )
+                    }
+                }
+
+                vbox {
+                    alignment = Pos.CENTER
+                    style {
+                        spacing = 16.px
+                        prefHeight = 176.px
+                        padding = box(16.px)
+                    }
+                    button(messages["keepTranslation"]) {
+                        addClass("btn", "btn--primary", "chunk-mode__selection-btn")
+                        graphic = FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE)
+                        action {
+                            showDeleteChunksDialogProperty.set(false)
+                        }
+                    }
+                    button(messages["deleteTranslation"]) {
+                        addClass("btn", "btn--secondary", "chunk-mode__selection-btn--delete")
+                        graphic = FontIcon(MaterialDesign.MDI_DELETE)
+                        action {
+                            viewModel.resetChapter()
+                            showDeleteChunksDialogProperty.set(false)
+                        }
+                    }
+                }
+            }
         }
+    }
+
+    private fun showDeleteChunksDialog() {
+        showDeleteChunksDialogProperty.set(true)
     }
 
     private fun ListView<CardData>.scrollListTo(delta: Int) {
