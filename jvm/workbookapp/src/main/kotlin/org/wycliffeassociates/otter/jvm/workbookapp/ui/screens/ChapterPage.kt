@@ -426,13 +426,9 @@ class ChapterPage : View() {
 
                 visibleProperty().bind(showDeleteChunksDialogProperty)
                 vbox {
+                    addClass("chapter-page__delete-warning")
                     vgrow = Priority.ALWAYS
                     alignment = Pos.CENTER
-
-                    style {
-                        backgroundColor += Paint.valueOf("#f8efef")
-                        padding = box(16.px)
-                    }
 
                     add(
                         FontIcon(MaterialDesign.MDI_ALERT).apply {

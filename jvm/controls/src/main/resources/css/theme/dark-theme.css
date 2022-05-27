@@ -48,7 +48,8 @@
     -wa-primary-gradient: linear-gradient(to top, -wa-primary, #267CF7);
     -wa-cta-gradient: linear-gradient(to bottom, -wa-accent-light, -wa-accent);
 
-    -wa-warning: #B85659;
+    -wa-warning: rgba(241, 143, 146, 1);
+    -wa-warning-overlay: rgba(255, 17, 136, 0.1);
 
 /* -------------------- Components mappings --------------------*/
     -wa-regular-text: #e6e6e6;

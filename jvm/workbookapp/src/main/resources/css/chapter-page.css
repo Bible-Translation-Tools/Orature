@@ -183,3 +183,9 @@
 .chunk-mode__selection-btn--delete .ikonli-font-icon {
     -fx-icon-color: -wa-warning;
 }
+
+.chapter-page__delete-warning {
+    -fx-background-color: -wa-warning-overlay;
+    -fx-padding: 16px;
+    -fx-background-radius: 16px 16px 0px 0px
+}
