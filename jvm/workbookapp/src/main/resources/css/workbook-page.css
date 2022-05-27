@@ -50,3 +50,15 @@
 .workbook-page__tab-content .contributor__container {
     -fx-min-width: 400px;
 }
+
+.export-menu.combo-box .combo-box-popup .list-cell {
+    -fx-padding: 5px;
+}
+
+.export-menu {
+    -fx-opacity: 0; /* hide the actual combo box */
+}
+
+.dummy-export-menu {
+    -fx-text-fill: -wa-regular-text;
+}

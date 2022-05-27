@@ -54,6 +54,10 @@
                                 <FontIcon iconLiteral="mdi-cloud-upload" />
                             </graphic>
                         </JFXButton>
+                        <StackPane>
+                            <ComboBox fx:id="exportSelectMenu" styleClass="wa-combobox"></ComboBox>
+                            <ComboBox fx:id="fakeExportSelection" mouseTransparent="true" styleClass="wa-combobox"></ComboBox>
+                        </StackPane>
                     </children>
                 </HBox>
             </children>

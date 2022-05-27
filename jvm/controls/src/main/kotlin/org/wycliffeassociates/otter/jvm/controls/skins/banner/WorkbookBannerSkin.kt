@@ -20,15 +20,20 @@ package org.wycliffeassociates.otter.jvm.controls.skins.banner
 
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
+import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Button
+import javafx.scene.control.ComboBox
 import javafx.scene.control.Label
+import javafx.scene.control.ListCell
 import javafx.scene.control.SkinBase
 import javafx.scene.image.ImageView
 import javafx.scene.layout.HBox
 import javafx.scene.shape.Rectangle
+import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.banner.WorkbookBanner
-import tornadofx.tooltip
+import tornadofx.*
 
 class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<WorkbookBanner>(banner) {
 
@@ -49,6 +54,12 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
 
     @FXML
     lateinit var exportBtn: Button
+
+    @FXML
+    lateinit var exportSelectMenu: ComboBox<String>
+
+    @FXML
+    lateinit var fakeExportSelection: ComboBox<String>
 
     init {
         loadFXML()
@@ -73,6 +84,46 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
             tooltip {
                 textProperty().bind(banner.attributionTextProperty)
             }
+        }
+        exportSelectMenu.apply {
+            addClass("export-menu")
+            items = observableListOf("Listen", "Source Audio", "Backup")
+
+            setCellFactory {
+                object : ListCell<String>() {
+                    override fun updateItem(item: String?, btl: Boolean) {
+                        super.updateItem(item, btl)
+                        if (item != null || !btl) {
+                            graphic = Button(item).apply {
+                                useMaxWidth = true
+                                alignment = Pos.CENTER_LEFT
+                                addClass("btn", "btn--tertiary", "btn--borderless")
+                                graphic = FontIcon(MaterialDesign.MDI_PLAY)
+                            }
+                        }
+                    }
+                }
+            }
+//            selectionModel.selectFirst()
+            selectionModel.selectedItemProperty().onChange {
+                println(it)
+            }
+        }
+        fakeExportSelection.apply {
+            items.setAll("Export...")
+            prefWidthProperty().bind(exportSelectMenu.widthProperty())
+            buttonCell = object : ListCell<String>() {
+                override fun updateItem(item: String?, btl: Boolean) {
+                    super.updateItem(item, btl)
+                    if (item != null || !btl) {
+                        graphic = Label(item).apply {
+                            addClass("dummy-export-menu")
+                        }
+                    }
+                }
+            }
+
+            selectionModel.selectFirst()
         }
         bindText()
         bindAction()
