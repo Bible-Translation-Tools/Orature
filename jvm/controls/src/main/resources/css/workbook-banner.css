@@ -72,22 +72,24 @@
     -fx-background-color: #162240; /* this color is consistent across themes */
     -fx-focus-traversable: false;
     -fx-border-color: -wa-transparent;
-    -fx-background-insets: 3px;
-
+    -fx-background-insets: 2px;
 }
 
-.workbook-banner .combo-box.dummy-export-menu .arrow-button .arrow {
+.combo-box.dummy-export-menu .arrow-button .arrow {
     -fx-background-color: -wa-white;
 }
 
-.workbook-banner .combo-box.dummy-export-menu .dummy-export-menu__btn {
+.combo-box.dummy-export-menu .dummy-export-menu__btn {
     -fx-text-fill: -wa-white;
 }
+.combo-box.dummy-export-menu .dummy-export-menu__btn .ikonli-font-icon {
+    -fx-fill: -wa-white;
+}
 
-.export-menu__list-item-btn {
+.export-menu__option-btn {
     -fx-text-fill: -wa-regular-text;
 }
 
-.btn--tertiary.export-menu__list-item-btn .ikonli-font-icon {
+.btn--tertiary.export-menu__option-btn .ikonli-font-icon {
     -fx-icon-color: -wa-regular-text;
 }

@@ -97,34 +97,37 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
                             graphic = Button(item).apply {
                                 useMaxWidth = true
                                 alignment = Pos.CENTER_LEFT
-                                addClass("btn", "btn--tertiary", "btn--borderless", "export-menu__list-item-btn")
+                                addClass("btn", "btn--tertiary", "btn--borderless", "export-menu__option-btn")
                                 graphic = FontIcon(MaterialDesign.MDI_PLAY)
                             }
                         }
                     }
                 }
             }
+            tooltip {
+                text = messages["exportOptions"]
+            }
+
             selectionModel.selectedItemProperty().onChange {
                 runLater { selectionModel.clearSelection() }
             }
-
         }
         fakeExportMenu.apply {
             prefWidthProperty().bind(exportSelectMenu.widthProperty())
+            minHeightProperty().bind(exportSelectMenu.prefHeightProperty())
 
             items.setAll(messages["exportOptions"])
-
             buttonCell = object : ListCell<String>() {
                 override fun updateItem(item: String?, btl: Boolean) {
                     super.updateItem(item, btl)
                     if (item != null || !btl) {
-                        graphic = Label(item).apply {
-                            addClass("dummy-export-menu__btn")
+                        graphic = Button(item).apply {
+                            addClass("btn", "btn--tertiary", "btn--borderless", "dummy-export-menu__btn")
+                            graphic = FontIcon(MaterialDesign.MDI_FILE_EXPORT)
                         }
                     }
                 }
             }
-
             selectionModel.selectFirst()
         }
         bindText()
