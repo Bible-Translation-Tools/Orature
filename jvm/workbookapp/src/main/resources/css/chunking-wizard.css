@@ -24,6 +24,10 @@
     -fx-padding: 15px;
 }
 
+.chunking-wizard__title {
+    -fx-wrap-text: true;
+}
+
 .chunking-wizard__title .text {
     -fx-fill: -wa-regular-text;
     -fx-font-size: 26pt;
@@ -31,9 +35,13 @@
     -fx-font-style: normal;
 }
 
+.chunking-wizard__subtitle {
+    -fx-wrap-text: true;
+}
+
 .chunking-wizard__subtitle .text {
     -fx-fill: -wa-regular-text;
-    -fx-font-size: 20pt;
+    -fx-font-size: 14pt;
     -fx-font-weight: normal;
     -fx-font-style: normal;
 }
