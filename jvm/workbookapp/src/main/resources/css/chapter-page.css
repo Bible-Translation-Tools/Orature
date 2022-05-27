@@ -24,6 +24,7 @@
 }
 
 .chapter-page__chapter-info {
+    -fx-min-width: 460px;
     -fx-spacing: 30px;
 }
 
@@ -154,4 +155,31 @@
 .chunk-mode__selection-btn {
     -fx-padding: 10;
     -fx-max-width: infinity;
+}
+
+.chunk-mode__icon--delete {
+    -fx-fill: -wa-warning;
+}
+
+.chunk-mode__selection__title--delete {
+    -fx-text-fill: -wa-warning;
+}
+
+.chunk-mode__selection__text--delete {
+    -fx-text-fill: -wa-warning;
+}
+
+.chunk-mode__selection-btn--delete {
+    -fx-padding: 10;
+    -fx-max-width: infinity;
+    -fx-text-fill: -wa-warning;
+    -fx-border-width: 0;
+}
+
+.chunk-mode__selection-btn--delete:hover {
+    -fx-text-fill: -wa-warning;
+}
+
+.chunk-mode__selection-btn--delete .ikonli-font-icon {
+    -fx-icon-color: -wa-warning;
 }
