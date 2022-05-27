@@ -44,7 +44,7 @@
                 </VBox>
                 <HBox spacing="15.0" pickOnBounds="false">
                     <children>
-                        <JFXButton fx:id="deleteBtn" styleClass="btn, btn--secondary, workbook-banner__btn--delete" text="delete" underline="true">
+                        <JFXButton fx:id="deleteBtn" styleClass="btn, btn--icon, workbook-banner__btn--delete" underline="true">
                             <graphic>
                                 <FontIcon iconLiteral="mdi-delete" />
                             </graphic>

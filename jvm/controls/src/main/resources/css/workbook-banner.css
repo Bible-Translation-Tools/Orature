@@ -42,28 +42,20 @@
 }
 
 .workbook-banner__btn--delete {
+    -fx-min-width: 48px;
     -fx-border-color: -wa-white;
-    -fx-text-fill: -wa-white;
     -fx-background-color: #162240; /* this color is consistent across themes */
 }
 
 .workbook-banner__btn--delete:hover,
 .workbook-banner__btn--delete:pressed {
     -fx-border-color: -wa-white;
-    -fx-text-fill: -wa-white;
-}
-
-.workbook-banner__btn--delete:hover {
-    -fx-background-color: -wa-white-05;
-}
-
-.workbook-banner__btn--delete:pressed {
-    -fx-background-color: -wa-white-10;
 }
 
 .workbook-banner__btn--delete .ikonli-font-icon,
 .workbook-banner__btn--delete:hover .ikonli-font-icon,
 .workbook-banner__btn--delete:pressed .ikonli-font-icon {
+    -fx-icon-size: 24px;
     -fx-fill: -wa-white;
 }
 
