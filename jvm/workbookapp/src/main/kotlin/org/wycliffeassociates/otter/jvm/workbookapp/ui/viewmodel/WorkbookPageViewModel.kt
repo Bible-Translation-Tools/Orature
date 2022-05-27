@@ -35,8 +35,10 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.BackupProjectExporter
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.Mp3ProjectExporter
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.SourceProjectExporter
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -58,13 +60,14 @@ class WorkbookPageViewModel : ViewModel() {
 
     @Inject
     lateinit var deleteProjectProvider: Provider<DeleteProject>
-
     @Inject
-    lateinit var projectExporterProvider: Provider<ProjectExporter>
-
+    lateinit var exportSourceProvider: Provider<SourceProjectExporter>
+    @Inject
+    lateinit var exportBackupProvider: Provider<BackupProjectExporter>
+    @Inject
+    lateinit var exportMp3Provider: Provider<Mp3ProjectExporter>
     @Inject
     lateinit var workbookRepository: IWorkbookRepository
-
     @Inject
     lateinit var preferencesRepository: IAppPreferencesRepository
 
@@ -199,7 +202,6 @@ class WorkbookPageViewModel : ViewModel() {
         showExportProgressDialogProperty.set(true)
 
         val workbook = workbookDataStore.workbook
-        val projectExporter = projectExporterProvider.get()
         val resourceMetadata = workbookDataStore.activeResourceMetadata
         val projectFileAccessor = workbookDataStore.activeProjectFilesAccessor
 
@@ -208,7 +210,7 @@ class WorkbookPageViewModel : ViewModel() {
             workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
         )
 
-        projectExporter
+        exportBackupProvider.get()
             .export(directory, resourceMetadata, workbook, projectFileAccessor)
             .observeOnFx()
             .doOnError { e ->

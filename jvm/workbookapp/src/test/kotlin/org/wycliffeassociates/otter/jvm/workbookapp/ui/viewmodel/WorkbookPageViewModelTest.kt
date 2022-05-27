@@ -43,6 +43,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.ArtworkAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.BackupProjectExporter
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
 import tornadofx.*
@@ -156,13 +157,13 @@ class WorkbookPageViewModelTest {
 
     @Test
     fun exportWorkbook() {
-        val mockProjectExporter = mock(ProjectExporter::class.java)
-        `when`(mockProjectExporter.export(any(), any(), any(), any(), any()))
+        val mockProjectExporter = mock(BackupProjectExporter::class.java)
+        `when`(mockProjectExporter.export(any(), any(), any(), any()))
             .thenReturn(Single.just(ExportResult.SUCCESS))
-        val exportProvider: Provider<ProjectExporter> = Provider {
+        val exportProvider: Provider<BackupProjectExporter> = Provider {
             mockProjectExporter
         }
-        vm.projectExporterProvider = exportProvider
+        vm.exportBackupProvider = exportProvider
 
         val projectTitleChanges = mutableListOf<String?>()
         val showProgressChanges = mutableListOf<Boolean>()
@@ -181,7 +182,7 @@ class WorkbookPageViewModelTest {
         assertNull(projectTitleChanges[1])
         assertTrue(showProgressChanges[0])
         assertFalse(showProgressChanges[1])
-        verify(mockProjectExporter).export(any(), any(), any(), any(), any())
+        verify(mockProjectExporter).export(any(), any(), any(), any())
         verify(mockWorkbookDS, atLeastOnce()).workbook
         verify(mockWorkbookDS).activeResourceMetadata
         verify(mockWorkbookDS).activeProjectFilesAccessor

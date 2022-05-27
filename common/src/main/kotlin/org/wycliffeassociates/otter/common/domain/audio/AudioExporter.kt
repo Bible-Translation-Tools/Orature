@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.common.domain.audio
 import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.License
@@ -44,8 +45,7 @@ class AudioExporter @Inject constructor() {
     fun exportMp3(
         wavAudio: File,
         outputPath: File,
-        license: License? = null,
-        contributors: List<Contributor> = listOf()
+        metadata: ExportMetadata
     ): Completable {
         val mp3File = if (outputPath.isDirectory) {
             File(outputPath, wavAudio.nameWithoutExtension + ".mp3")
@@ -55,20 +55,22 @@ class AudioExporter @Inject constructor() {
 
         return audioConverter.wavToMp3(wavAudio, mp3File)
             .subscribeOn(Schedulers.io())
-            .andThen(updateMetadata(mp3File, license, contributors))
+            .andThen(updateMetadata(mp3File, metadata))
     }
 
     private fun updateMetadata(
         file: File,
-        license: License?,
-        contributors: List<Contributor>
+        metadata: ExportMetadata
     ): Completable {
         return Completable
             .fromAction {
                 val audioFile = AudioFile(file)
-                audioFile.metadata.setArtists(contributors.map { it.name })
-                license?.url?.let {
+                audioFile.metadata.setArtists(metadata.contributors.map { it.name })
+                metadata.license?.url?.let {
                     audioFile.metadata.setLegalInformationUrl(it)
+                }
+                metadata.markers.forEach {
+                    audioFile.metadata.addCue(it.location, it.label)
                 }
                 audioFile.update()
             }
@@ -77,4 +79,10 @@ class AudioExporter @Inject constructor() {
                 logger.error("Error while updating output file metadata.", it)
             }
     }
+
+    data class ExportMetadata(
+        val license: License?,
+        val contributors: List<Contributor> = listOf(),
+        val markers: List<AudioCue> = listOf()
+    )
 }

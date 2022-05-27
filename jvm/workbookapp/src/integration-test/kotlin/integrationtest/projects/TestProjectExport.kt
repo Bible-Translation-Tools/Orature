@@ -42,22 +42,33 @@ import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.Mp3ProjectExporter
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.BackupProjectExporter
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.SourceProjectExporter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.time.LocalDate
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.io.path.createTempDirectory
 
 class TestProjectExport {
-    @Inject lateinit var dbEnvProvider: Provider<DatabaseEnvironment>
-    @Inject lateinit var exportUseCase: Provider<ProjectExporter>
-    @Inject lateinit var workbookRepository: IWorkbookRepository
-    @Inject lateinit var directoryProvider: IDirectoryProvider
+    @Inject
+    lateinit var dbEnvProvider: Provider<DatabaseEnvironment>
+    @Inject
+    lateinit var exportSourceProvider: Provider<SourceProjectExporter>
+    @Inject
+    lateinit var exportBackupProvider: Provider<BackupProjectExporter>
+    @Inject
+    lateinit var exportMp3Provider: Provider<Mp3ProjectExporter>
+    @Inject
+    lateinit var workbookRepository: IWorkbookRepository
+    @Inject
+    lateinit var directoryProvider: IDirectoryProvider
 
     init {
         DaggerTestPersistenceComponent.create().inject(this)
@@ -121,7 +132,7 @@ class TestProjectExport {
 
     @Test
     fun exportOratureProjectWithMetadata() {
-        val result = exportUseCase.get()
+        val result = exportBackupProvider.get()
             .export(outputDir, targetMetadata, workbook, projectFilesAccessor)
             .blockingGet()
 
@@ -150,8 +161,8 @@ class TestProjectExport {
         // select a take to be included when export
         workbook.target.chapters.blockingFirst().audio.selectTake(take)
 
-        val result = exportUseCase.get()
-            .exportMp3(outputDir, targetMetadata, workbook, projectFilesAccessor)
+        val result = exportMp3Provider.get()
+            .export(outputDir, targetMetadata, workbook, projectFilesAccessor)
             .blockingGet()
 
         assertEquals(ExportResult.SUCCESS, result)
@@ -167,9 +178,49 @@ class TestProjectExport {
         )
     }
 
+    @Test
+    fun exportProjectAsSource() {
+        val testTake = createTestWavFile()
+        val take = Take(
+            "chapter-take",
+            testTake,
+            1,
+            MimeType.WAV,
+            LocalDate.now()
+        )
+        // select a take to be included when export
+        workbook.target.chapters.blockingFirst().audio.selectTake(take)
+        AudioFile(testTake).apply {
+            metadata.addCue(1, "marker-1")
+            update()
+        }
+
+        val result = exportSourceProvider.get()
+            .export(outputDir, targetMetadata, workbook, projectFilesAccessor)
+            .blockingGet()
+
+        assertEquals(ExportResult.SUCCESS, result)
+
+        val exportedFile = outputDir.listFiles().first()
+        ResourceContainer.load(exportedFile).use { rc ->
+            assertEquals(1, rc.media?.projects?.size ?: 0)
+
+            val projectMediaPath = rc.media?.projects?.first()?.media?.first { it.identifier == "mp3" }?.chapterUrl
+            val filePathInContainer = File(projectMediaPath).parentFile.invariantSeparatorsPath
+            val files = rc.accessor.getInputStreams(filePathInContainer, listOf("mp3", "cue"))
+            files.forEach { (name, ins) ->
+                ins.close()
+            }
+            
+            assertEquals(2, files.size)
+            assertTrue(files.keys.any { it.endsWith(".mp3") })
+            assertTrue(files.keys.any { it.endsWith(".cue") })
+        }
+    }
+
     private fun createTestWavFile(): File {
-        val testFile = File.createTempFile("test-take", "wav")
-            .apply { deleteOnExit() }
+        val testFile = directoryProvider.tempDirectory.resolve("test-take-${Date().time}.wav")
+            .apply { createNewFile(); deleteOnExit() }
 
         val wav = WavFile(
             testFile,
