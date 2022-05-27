@@ -34,6 +34,7 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.banner.WorkbookBanner
 import tornadofx.*
+import tornadofx.FX.Companion.messages
 
 class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<WorkbookBanner>(banner) {
 
@@ -59,7 +60,7 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
     lateinit var exportSelectMenu: ComboBox<String>
 
     @FXML
-    lateinit var fakeExportSelection: ComboBox<String>
+    lateinit var fakeExportMenu: ComboBox<String>
 
     init {
         loadFXML()
@@ -86,7 +87,6 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
             }
         }
         exportSelectMenu.apply {
-            addClass("export-menu")
             items = observableListOf("Listen", "Source Audio", "Backup")
 
             setCellFactory {
@@ -97,27 +97,29 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
                             graphic = Button(item).apply {
                                 useMaxWidth = true
                                 alignment = Pos.CENTER_LEFT
-                                addClass("btn", "btn--tertiary", "btn--borderless")
+                                addClass("btn", "btn--tertiary", "btn--borderless", "export-menu__list-item-btn")
                                 graphic = FontIcon(MaterialDesign.MDI_PLAY)
                             }
                         }
                     }
                 }
             }
-//            selectionModel.selectFirst()
             selectionModel.selectedItemProperty().onChange {
-                println(it)
+                runLater { selectionModel.clearSelection() }
             }
+
         }
-        fakeExportSelection.apply {
-            items.setAll("Export...")
+        fakeExportMenu.apply {
             prefWidthProperty().bind(exportSelectMenu.widthProperty())
+
+            items.setAll(messages["exportOptions"])
+
             buttonCell = object : ListCell<String>() {
                 override fun updateItem(item: String?, btl: Boolean) {
                     super.updateItem(item, btl)
                     if (item != null || !btl) {
                         graphic = Label(item).apply {
-                            addClass("dummy-export-menu")
+                            addClass("dummy-export-menu__btn")
                         }
                     }
                 }

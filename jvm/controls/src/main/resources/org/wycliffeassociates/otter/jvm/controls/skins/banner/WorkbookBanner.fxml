@@ -55,8 +55,8 @@
                             </graphic>
                         </JFXButton>
                         <StackPane>
-                            <ComboBox fx:id="exportSelectMenu" styleClass="wa-combobox"></ComboBox>
-                            <ComboBox fx:id="fakeExportSelection" mouseTransparent="true" styleClass="wa-combobox"></ComboBox>
+                            <ComboBox fx:id="exportSelectMenu" styleClass="wa-combobox, export-menu"></ComboBox>
+                            <ComboBox fx:id="fakeExportMenu" mouseTransparent="true" styleClass="wa-combobox, dummy-export-menu"></ComboBox>
                         </StackPane>
                     </children>
                 </HBox>
