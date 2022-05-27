@@ -34,6 +34,7 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportOption
 import org.wycliffeassociates.otter.jvm.controls.banner.WorkbookBanner
+import org.wycliffeassociates.otter.jvm.controls.listview.DummyExportComboBoxButton
 import org.wycliffeassociates.otter.jvm.controls.listview.ExportOptionListCell
 import tornadofx.*
 import tornadofx.FX.Companion.messages
@@ -107,19 +108,7 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
             minHeightProperty().bind(exportSelectMenu.prefHeightProperty())
 
             items.setAll(messages["exportOptions"])
-            buttonCell = object : ListCell<String>() {
-                override fun updateItem(item: String?, btl: Boolean) {
-                    super.updateItem(item, btl)
-                    if (item != null || !btl) {
-                        graphic = Button(item).apply {
-                            addClass(
-                                "btn", "btn--tertiary", "btn--borderless", "dummy-export-menu__btn"
-                            )
-                            graphic = FontIcon(MaterialDesign.MDI_FILE_EXPORT)
-                        }
-                    }
-                }
-            }
+            buttonCell = DummyExportComboBoxButton()
             selectionModel.selectFirst()
         }
         bindText()

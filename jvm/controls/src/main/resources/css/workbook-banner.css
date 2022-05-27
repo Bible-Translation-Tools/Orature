@@ -64,14 +64,22 @@
     -fx-background-color: #162240; /* this color is consistent across themes */
 }
 
+.export-menu:hover {
+   -fx-background-color: #585b74;
+}
+
+.export-menu:showing {
+    -fx-background-color: #001733;
+}
+
 .export-menu.combo-box .combo-box-popup .list-cell {
     -fx-padding: 0;
 }
 
-.workbook-banner .combo-box.dummy-export-menu {
-    -fx-background-color: #162240; /* this color is consistent across themes */
+.combo-box.dummy-export-menu {
     -fx-focus-traversable: false;
     -fx-border-color: -wa-transparent;
+    -fx-background-color: -wa-transparent;
     -fx-background-insets: 2px;
 }
 

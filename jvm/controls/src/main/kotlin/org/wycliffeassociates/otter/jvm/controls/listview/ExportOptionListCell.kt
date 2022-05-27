@@ -31,3 +31,17 @@ class ExportOptionListCell : ListCell<ExportOption>() {
         }
     }
 }
+
+class DummyExportComboBoxButton : ListCell<String>() {
+    override fun updateItem(item: String?, btl: Boolean) {
+        super.updateItem(item, btl)
+        if (item != null || !btl) {
+            graphic = Button(item).apply {
+                addClass(
+                    "btn", "btn--tertiary", "btn--borderless", "dummy-export-menu__btn"
+                )
+                graphic = FontIcon(MaterialDesign.MDI_FILE_EXPORT)
+            }
+        }
+    }
+}
