@@ -1,6 +1,5 @@
 package org.wycliffeassociates.otter.jvm.controls.listview
 
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.control.Button
 import javafx.scene.control.ListCell
 import org.kordamp.ikonli.javafx.FontIcon
@@ -10,16 +9,8 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimpor
 import tornadofx.FX.Companion.messages
 import tornadofx.addClass
 import tornadofx.get
-import tornadofx.toggleClass
 
 class ExportOptionListCell : ListCell<ExportOption>() {
-
-    private val node = Button().apply {
-        addClass(
-            "btn", "btn--tertiary", "btn--borderless", "export-menu__option-btn"
-        )
-        isMouseTransparent = true
-    }
 
     private fun associatedIcon(option: ExportOption): FontIcon = when (option) {
         ExportOption.BACKUP -> FontIcon(MaterialDesign.MDI_FOLDER_MULTIPLE_OUTLINE)
@@ -33,8 +24,12 @@ class ExportOptionListCell : ListCell<ExportOption>() {
             return
         }
 
-        graphic = node.apply {
+        graphic = Button().apply {
+            addClass(
+                "btn", "btn--tertiary", "btn--borderless", "export-menu__option-btn"
+            )
             text = messages[item.titleKey]
+            isMouseTransparent = true
             graphic = associatedIcon(item)
         }
     }
