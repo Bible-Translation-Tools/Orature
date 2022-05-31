@@ -44,15 +44,15 @@
                 </VBox>
                 <HBox spacing="15.0" pickOnBounds="false">
                     <children>
+                        <StackPane>
+                            <ComboBox fx:id="exportSelectMenu" styleClass="wa-combobox, export-menu"></ComboBox>
+                            <ComboBox fx:id="fakeExportMenu" mouseTransparent="true" styleClass="wa-combobox, dummy-export-menu"></ComboBox>
+                        </StackPane>
                         <JFXButton fx:id="deleteBtn" styleClass="btn, btn--icon, workbook-banner__btn--delete" underline="true">
                             <graphic>
                                 <FontIcon iconLiteral="mdi-delete" />
                             </graphic>
                         </JFXButton>
-                        <StackPane>
-                            <ComboBox fx:id="exportSelectMenu" styleClass="wa-combobox, export-menu"></ComboBox>
-                            <ComboBox fx:id="fakeExportMenu" mouseTransparent="true" styleClass="wa-combobox, dummy-export-menu"></ComboBox>
-                        </StackPane>
                     </children>
                 </HBox>
             </children>
