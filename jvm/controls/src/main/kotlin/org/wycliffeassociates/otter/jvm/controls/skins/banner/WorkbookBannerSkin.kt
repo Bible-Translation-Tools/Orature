@@ -33,6 +33,7 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimpor
 import org.wycliffeassociates.otter.jvm.controls.banner.WorkbookBanner
 import org.wycliffeassociates.otter.jvm.controls.listview.DummyExportComboBoxButton
 import org.wycliffeassociates.otter.jvm.controls.listview.ExportOptionListCell
+import org.wycliffeassociates.otter.jvm.utils.overrideDefaultKeyEventHandler
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
@@ -92,11 +93,11 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
                 text = messages["exportOptions"]
             }
 
-            selectionModel.selectedItemProperty().onChange {
-                it?.let { option ->
-                    banner.onExportActionProperty.value.handle(ActionEvent(option, null))
-                    runLater { selectionModel.clearSelection() }
-                }
+            overrideDefaultKeyEventHandler { option ->
+                selectionModel.clearSelection()
+                banner.onExportActionProperty.value.handle(
+                    ActionEvent(option, null)
+                )
             }
         }
 

@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.controls.listview
 
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.control.Button
 import javafx.scene.control.ListCell
 import org.kordamp.ikonli.javafx.FontIcon
@@ -9,6 +10,7 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimpor
 import tornadofx.FX.Companion.messages
 import tornadofx.addClass
 import tornadofx.get
+import tornadofx.toggleClass
 
 class ExportOptionListCell : ListCell<ExportOption>() {
 
@@ -39,6 +41,7 @@ class ExportOptionListCell : ListCell<ExportOption>() {
 }
 
 class DummyExportComboBoxButton : ListCell<String>() {
+
     override fun updateItem(item: String?, btl: Boolean) {
         super.updateItem(item, btl)
         if (item != null || !btl) {

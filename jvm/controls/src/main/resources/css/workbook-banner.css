@@ -72,8 +72,8 @@
     -fx-background-color: #001733;
 }
 
-.export-menu.combo-box .combo-box-popup .list-cell {
-    -fx-padding: 0;
+.export-menu.combo-box > .list-cell {
+    -fx-opacity: 0; /* hide display value for selected */
 }
 
 .combo-box.dummy-export-menu {
