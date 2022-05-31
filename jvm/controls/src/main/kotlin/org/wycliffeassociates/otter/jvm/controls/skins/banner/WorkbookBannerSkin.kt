@@ -18,20 +18,17 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.skins.banner
 
+import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
-import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Button
 import javafx.scene.control.ComboBox
 import javafx.scene.control.Label
-import javafx.scene.control.ListCell
 import javafx.scene.control.SkinBase
 import javafx.scene.image.ImageView
 import javafx.scene.layout.HBox
 import javafx.scene.shape.Rectangle
-import org.kordamp.ikonli.javafx.FontIcon
-import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportOption
 import org.wycliffeassociates.otter.jvm.controls.banner.WorkbookBanner
 import org.wycliffeassociates.otter.jvm.controls.listview.DummyExportComboBoxButton
@@ -55,9 +52,6 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
 
     @FXML
     lateinit var deleteBtn: Button
-
-    @FXML
-    lateinit var exportBtn: Button
 
     @FXML
     lateinit var exportSelectMenu: ComboBox<ExportOption>
@@ -99,7 +93,10 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
             }
 
             selectionModel.selectedItemProperty().onChange {
-                runLater { selectionModel.clearSelection() }
+                it?.let { option ->
+                    banner.onExportActionProperty.value.handle(ActionEvent(option, null))
+                    runLater { selectionModel.clearSelection() }
+                }
             }
         }
 
@@ -121,10 +118,6 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
         deleteBtn.tooltip {
             textProperty().bind(banner.deleteTitleProperty)
         }
-        exportBtn.textProperty().bind(banner.exportTitleProperty)
-        exportBtn.tooltip {
-            textProperty().bind(exportBtn.textProperty())
-        }
     }
 
     private fun bindAction() {
@@ -132,9 +125,6 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
             visibleProperty().bind(banner.hideDeleteButtonProperty.not())
             managedProperty().bind(visibleProperty())
             onActionProperty().bind(banner.onDeleteActionProperty)
-        }
-        exportBtn.apply {
-            onActionProperty().bind(banner.onExportActionProperty)
         }
     }
 

@@ -84,8 +84,10 @@ class WorkbookBanner : Control() {
         onDeleteActionProperty.set(EventHandler { op.invoke() })
     }
 
-    fun onExportAction(op: () -> Unit) {
-        onExportActionProperty.set(EventHandler { op.invoke() })
+    fun onExportAction(op: (ExportOption) -> Unit) {
+        onExportActionProperty.set(
+            EventHandler { op.invoke(it.source as ExportOption) }
+        )
     }
 
     override fun createDefaultSkin(): Skin<*> {

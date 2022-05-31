@@ -426,10 +426,11 @@ class WorkbookPage : View() {
                     )
                 )
                 onDeleteAction { viewModel.showDeleteDialogProperty.set(true) }
-                onExportAction {
+                onExportAction { option ->
+                    println(option)
                     val directory = chooseDirectory(FX.messages["exportProject"])
-                    directory?.let {
-                        viewModel.exportWorkbook(it)
+                    directory?.let { dir ->
+                        viewModel.exportWorkbook(dir, option)
                     }
                 }
             }

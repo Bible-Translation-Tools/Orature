@@ -49,11 +49,6 @@
                                 <FontIcon iconLiteral="mdi-delete" />
                             </graphic>
                         </JFXButton>
-                        <JFXButton fx:id="exportBtn" styleClass="btn, btn--primary" text="export" underline="true">
-                            <graphic>
-                                <FontIcon iconLiteral="mdi-cloud-upload" />
-                            </graphic>
-                        </JFXButton>
                         <StackPane>
                             <ComboBox fx:id="exportSelectMenu" styleClass="wa-combobox, export-menu"></ComboBox>
                             <ComboBox fx:id="fakeExportMenu" mouseTransparent="true" styleClass="wa-combobox, dummy-export-menu"></ComboBox>
