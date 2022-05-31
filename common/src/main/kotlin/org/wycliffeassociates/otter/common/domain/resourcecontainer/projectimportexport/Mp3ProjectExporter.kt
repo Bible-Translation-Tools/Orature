@@ -49,7 +49,8 @@ class Mp3ProjectExporter @Inject constructor(
             .flatMapCompletable { chapter ->
                 chapter.audio.selected.value!!.value!!.let {
                     val outputFile = outputProjectDir.resolve("chapter-${chapter.sort}.mp3")
-                    audioExporter.exportMp3(it.file, outputFile, license, contributors)
+                    val metadata = AudioExporter.ExportMetadata(license, contributors)
+                    audioExporter.exportMp3(it.file, outputFile, metadata)
                 }
             }
             .toSingle {
@@ -82,7 +83,8 @@ class Mp3ProjectExporter @Inject constructor(
                     it.parentFile.mkdirs()
                     it.parentFile.resolve("${takeFile.nameWithoutExtension}.mp3")
                 }
-                audioExporter.exportMp3(takeFile, outputFile, license, contributors)
+                val metadata = AudioExporter.ExportMetadata(license, contributors)
+                audioExporter.exportMp3(takeFile, outputFile, metadata)
             }
             .toSingle {
                 ExportResult.SUCCESS
