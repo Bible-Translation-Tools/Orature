@@ -52,11 +52,11 @@
     -fx-border-color: -wa-white;
 }
 
-.workbook-banner__btn--delete .ikonli-font-icon,
-.workbook-banner__btn--delete:hover .ikonli-font-icon,
-.workbook-banner__btn--delete:pressed .ikonli-font-icon {
+.workbook-banner__btn--delete.btn--icon .ikonli-font-icon,
+.workbook-banner__btn--delete.btn--icon:hover .ikonli-font-icon,
+.workbook-banner__btn--delete.btn--icon:pressed .ikonli-font-icon {
     -fx-icon-size: 24px;
-    -fx-fill: -wa-white;
+    -fx-icon-color: -wa-white;
 }
 
 .export-menu {
