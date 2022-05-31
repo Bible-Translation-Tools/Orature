@@ -48,7 +48,7 @@ class SourceProjectExporter @Inject constructor(
         val zipFile = directory.resolve(zipFilename)
 
         projectFilesAccessor.initializeResourceContainerInFile(workbook, zipFile)
-        setContributorInfo(contributors, zipFile)
+        setContributorInfo(contributors, projectSourceMetadata, zipFile)
 
         val fileWriter = directoryProvider.newFileWriter(zipFile)
 
