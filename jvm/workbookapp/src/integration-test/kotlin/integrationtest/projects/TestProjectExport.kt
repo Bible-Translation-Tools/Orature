@@ -201,21 +201,24 @@ class TestProjectExport {
 
         assertEquals(ExportResult.SUCCESS, result)
 
-        val exportedFile = outputDir.listFiles().first()
-        ResourceContainer.load(exportedFile).use { rc ->
+        ResourceContainer.load(outputDir.listFiles().first()).use { rc ->
             assertEquals(1, rc.media?.projects?.size ?: 0)
 
-            val projectMediaPath = rc.media?.projects?.first()?.media?.first { it.identifier == "mp3" }?.chapterUrl
-            val filePathInContainer = File(projectMediaPath).parentFile.invariantSeparatorsPath
-            val files = rc.accessor.getInputStreams(filePathInContainer, listOf("mp3", "cue"))
-            files.forEach { (name, ins) ->
-                ins.close()
-            }
-            
+            val files = getExportedFiles(rc)
             assertEquals(2, files.size)
-            assertTrue(files.keys.any { it.endsWith(".mp3") })
-            assertTrue(files.keys.any { it.endsWith(".cue") })
+            assertTrue(files.any { it.endsWith(".mp3") })
+            assertTrue(files.any { it.endsWith(".cue") })
         }
+    }
+
+    private fun getExportedFiles(rc: ResourceContainer): Set<String> {
+        val projectMediaPath = rc.media?.projects?.first()?.media?.first { it.identifier == "mp3" }?.chapterUrl
+        val filePathInContainer = File(projectMediaPath).parentFile.invariantSeparatorsPath
+        val files = rc.accessor.getInputStreams(filePathInContainer, listOf("mp3", "cue"))
+        files.forEach { (name, ins) ->
+            ins.close()
+        }
+        return files.keys
     }
 
     private fun createTestWavFile(): File {
