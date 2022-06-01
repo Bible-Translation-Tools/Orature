@@ -36,8 +36,10 @@ import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.BackupProjectExporter
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportOption
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.Mp3ProjectExporter
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.SourceProjectExporter
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
@@ -60,14 +62,19 @@ class WorkbookPageViewModel : ViewModel() {
 
     @Inject
     lateinit var deleteProjectProvider: Provider<DeleteProject>
+
     @Inject
     lateinit var exportSourceProvider: Provider<SourceProjectExporter>
+
     @Inject
     lateinit var exportBackupProvider: Provider<BackupProjectExporter>
+
     @Inject
     lateinit var exportMp3Provider: Provider<Mp3ProjectExporter>
+
     @Inject
     lateinit var workbookRepository: IWorkbookRepository
+
     @Inject
     lateinit var preferencesRepository: IAppPreferencesRepository
 
@@ -97,7 +104,7 @@ class WorkbookPageViewModel : ViewModel() {
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
-        
+
         projectFilesAccessorListener = ChangeListener<ProjectFilesAccessor> { _, _, projectAccessor ->
             if (projectAccessor != null) {
                 val projectContributors = projectAccessor.getContributorInfo()
@@ -198,7 +205,7 @@ class WorkbookPageViewModel : ViewModel() {
         }
     }
 
-    fun exportWorkbook(directory: File) {
+    fun exportWorkbook(directory: File, option: ExportOption) {
         showExportProgressDialogProperty.set(true)
 
         val workbook = workbookDataStore.workbook
@@ -210,7 +217,13 @@ class WorkbookPageViewModel : ViewModel() {
             workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
         )
 
-        exportBackupProvider.get()
+        val exporter: ProjectExporter = when (option) {
+            ExportOption.LISTEN -> exportMp3Provider.get()
+            ExportOption.SOURCE_AUDIO -> exportSourceProvider.get()
+            ExportOption.BACKUP -> exportBackupProvider.get()
+        }
+
+        exporter
             .export(directory, resourceMetadata, workbook, projectFileAccessor)
             .observeOnFx()
             .doOnError { e ->

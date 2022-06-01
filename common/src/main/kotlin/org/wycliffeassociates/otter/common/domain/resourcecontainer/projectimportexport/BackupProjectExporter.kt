@@ -39,7 +39,7 @@ class BackupProjectExporter @Inject constructor(
                 val zipFile = directory.resolve(zipFilename)
 
                 projectFilesAccessor.initializeResourceContainerInFile(workbook, zipFile)
-                setContributorInfo(contributors, zipFile)
+                setContributorInfo(contributors, projectMetadataToExport, zipFile)
 
                 directoryProvider.newFileWriter(zipFile).use { fileWriter ->
                     projectFilesAccessor.copyTakeFiles(

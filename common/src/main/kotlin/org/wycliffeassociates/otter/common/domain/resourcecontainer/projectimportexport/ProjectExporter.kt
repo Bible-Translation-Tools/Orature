@@ -44,9 +44,16 @@ abstract class ProjectExporter {
         )
     }
 
-    protected fun setContributorInfo(contributors: List<Contributor>, projectFile: File) {
+    protected fun setContributorInfo(
+        contributors: List<Contributor>,
+        metadata: ResourceMetadata,
+        projectFile: File
+    ) {
         ResourceContainer.load(projectFile).use { rc ->
-            rc.manifest.dublinCore.contributor = contributors.map { it.name }.toMutableList()
+            rc.manifest.dublinCore.apply {
+                contributor = contributors.map { it.name }.toMutableList()
+                creator = metadata.creator
+            }
             rc.writeManifest()
         }
     }

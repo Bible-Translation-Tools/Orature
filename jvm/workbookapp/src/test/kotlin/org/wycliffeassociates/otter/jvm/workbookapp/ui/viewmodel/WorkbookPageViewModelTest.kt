@@ -44,6 +44,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.ArtworkAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.BackupProjectExporter
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportOption
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
 import tornadofx.*
@@ -174,7 +175,7 @@ class WorkbookPageViewModelTest {
         vm.showExportProgressDialogProperty.onChange {
             showProgressChanges.add(it)
         }
-        vm.exportWorkbook(mock(File::class.java))
+        vm.exportWorkbook(mock(File::class.java), ExportOption.BACKUP)
 
         WaitForAsyncUtils.waitForFxEvents()
 

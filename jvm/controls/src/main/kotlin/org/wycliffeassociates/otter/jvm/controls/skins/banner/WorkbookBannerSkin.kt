@@ -18,17 +18,24 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.skins.banner
 
+import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.scene.Node
 import javafx.scene.control.Button
+import javafx.scene.control.ComboBox
 import javafx.scene.control.Label
 import javafx.scene.control.SkinBase
 import javafx.scene.image.ImageView
 import javafx.scene.layout.HBox
 import javafx.scene.shape.Rectangle
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportOption
 import org.wycliffeassociates.otter.jvm.controls.banner.WorkbookBanner
-import tornadofx.tooltip
+import org.wycliffeassociates.otter.jvm.controls.listview.DummyExportComboBoxButton
+import org.wycliffeassociates.otter.jvm.controls.listview.ExportOptionListCell
+import org.wycliffeassociates.otter.jvm.utils.overrideDefaultKeyEventHandler
+import tornadofx.*
+import tornadofx.FX.Companion.messages
 
 class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<WorkbookBanner>(banner) {
 
@@ -48,7 +55,10 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
     lateinit var deleteBtn: Button
 
     @FXML
-    lateinit var exportBtn: Button
+    lateinit var exportSelectMenu: ComboBox<ExportOption>
+
+    @FXML
+    lateinit var fakeExportMenu: ComboBox<String> // this menu displays on top of the actual menu
 
     init {
         loadFXML()
@@ -74,6 +84,31 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
                 textProperty().bind(banner.attributionTextProperty)
             }
         }
+        exportSelectMenu.apply {
+            items = banner.exportOptions
+            setCellFactory {
+                ExportOptionListCell()
+            }
+            tooltip {
+                text = messages["exportOptions"]
+            }
+
+            overrideDefaultKeyEventHandler { option ->
+                selectionModel.clearSelection()
+                banner.onExportActionProperty.value.handle(
+                    ActionEvent(option, null)
+                )
+            }
+        }
+
+        fakeExportMenu.apply {
+            prefWidthProperty().bind(exportSelectMenu.widthProperty())
+            minHeightProperty().bind(exportSelectMenu.prefHeightProperty())
+
+            items.setAll(messages["exportOptions"])
+            buttonCell = DummyExportComboBoxButton()
+            selectionModel.selectFirst()
+        }
         bindText()
         bindAction()
     }
@@ -81,14 +116,8 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
     private fun bindText() {
         bookTitle.textProperty().bind(banner.bookTitleProperty)
         resourceTitle.textProperty().bind(banner.resourceTitleProperty)
-
-        deleteBtn.textProperty().bind(banner.deleteTitleProperty)
         deleteBtn.tooltip {
-            textProperty().bind(deleteBtn.textProperty())
-        }
-        exportBtn.textProperty().bind(banner.exportTitleProperty)
-        exportBtn.tooltip {
-            textProperty().bind(exportBtn.textProperty())
+            textProperty().bind(banner.deleteTitleProperty)
         }
     }
 
@@ -97,9 +126,6 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
             visibleProperty().bind(banner.hideDeleteButtonProperty.not())
             managedProperty().bind(visibleProperty())
             onActionProperty().bind(banner.onDeleteActionProperty)
-        }
-        exportBtn.apply {
-            onActionProperty().bind(banner.onExportActionProperty)
         }
     }
 
