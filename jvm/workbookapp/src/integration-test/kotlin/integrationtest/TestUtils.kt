@@ -19,7 +19,7 @@ val enUlbTestMetadata = ResourceMetadata(
     "rc0.2",
     "Door43 World Missions Community",
     "",
-    "",
+    "text/usfm",
     "ulb",
     LocalDate.now(),
     Language("en", "", "", "", true, ""),
