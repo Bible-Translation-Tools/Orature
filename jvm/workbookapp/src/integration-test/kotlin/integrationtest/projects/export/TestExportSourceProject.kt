@@ -6,6 +6,7 @@ import integrationtest.enUlbTestMetadata
 import integrationtest.projects.DatabaseEnvironment
 import integrationtest.projects.RowCount
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -14,10 +15,13 @@ import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
+import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.SourceProjectExporter
@@ -92,7 +96,15 @@ class TestExportSourceProject {
 
         assertEquals(ExportResult.SUCCESS, result)
 
-        ResourceContainer.load(outputDir.listFiles().first()).use { rc ->
+        val exportFile = outputDir.listFiles().first()
+        val chapterSourceAudio = getSourceAudio(
+            targetMetadata.copy(path = exportFile),
+            "rev",
+            1
+        )
+        assertNotNull(chapterSourceAudio)
+
+        ResourceContainer.load(exportFile).use { rc ->
             assertEquals(1, rc.media?.projects?.size ?: 0)
 
             val files = getExportedFiles(rc)
@@ -100,6 +112,8 @@ class TestExportSourceProject {
             assertTrue(files.any { it.endsWith(".mp3") })
             assertTrue(files.any { it.endsWith(".cue") })
         }
+
+
     }
 
     @Test
@@ -169,5 +183,17 @@ class TestExportSourceProject {
             metadata.addCue(1, "marker-1")
             update()
         }
+    }
+
+    private fun getSourceAudio(
+        metadata: ResourceMetadata,
+        project: String,
+        chapter: Int
+    ): SourceAudio? {
+        return SourceAudioAccessor(
+            directoryProvider,
+            metadata,
+            project
+        ).getChapter(chapter)
     }
 }
