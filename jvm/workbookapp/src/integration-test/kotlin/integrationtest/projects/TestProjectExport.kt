@@ -18,7 +18,9 @@
  */
 package integrationtest.projects
 
+import integrationtest.createTestWavFile
 import integrationtest.di.DaggerTestPersistenceComponent
+import integrationtest.enUlbTestMetadata
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -27,31 +29,20 @@ import org.junit.Before
 import org.junit.Test
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
-import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
-import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
-import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
-import org.wycliffeassociates.otter.common.audio.wav.CueChunk
-import org.wycliffeassociates.otter.common.audio.wav.WavFile
-import org.wycliffeassociates.otter.common.audio.wav.WavMetadata
-import org.wycliffeassociates.otter.common.audio.wav.WavOutputStream
 import org.wycliffeassociates.otter.common.data.primitives.Collection
-import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
-import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.Mp3ProjectExporter
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.BackupProjectExporter
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.SourceProjectExporter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.time.LocalDate
-import java.util.*
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.io.path.createTempDirectory
@@ -60,15 +51,13 @@ class TestProjectExport {
     @Inject
     lateinit var dbEnvProvider: Provider<DatabaseEnvironment>
     @Inject
-    lateinit var exportSourceProvider: Provider<SourceProjectExporter>
+    lateinit var directoryProvider: IDirectoryProvider
     @Inject
     lateinit var exportBackupProvider: Provider<BackupProjectExporter>
     @Inject
     lateinit var exportMp3Provider: Provider<Mp3ProjectExporter>
     @Inject
     lateinit var workbookRepository: IWorkbookRepository
-    @Inject
-    lateinit var directoryProvider: IDirectoryProvider
 
     init {
         DaggerTestPersistenceComponent.create().inject(this)
@@ -81,23 +70,7 @@ class TestProjectExport {
     private lateinit var workbook: Workbook
     private lateinit var projectFilesAccessor: ProjectFilesAccessor
 
-    private val sourceMetadata = ResourceMetadata(
-        "rc0.2",
-        "Door43 World Missions Community",
-        "",
-        "",
-        "ulb",
-        LocalDate.now(),
-        Language("en", "", "", "", true, ""),
-        LocalDate.now(),
-        "",
-        "",
-        ContainerType.Book,
-        "",
-        "12",
-        "",
-        File(".")
-    )
+    private val sourceMetadata = enUlbTestMetadata
 
     private val targetMetadata = sourceMetadata.copy(
         creator = "Orature",
@@ -150,7 +123,7 @@ class TestProjectExport {
 
     @Test
     fun exportMp3ProjectWithMetadata() {
-        val testTake = createTestWavFile()
+        val testTake = createTestWavFile(directoryProvider.tempDirectory)
         val take = Take(
             "chapter-1",
             testTake,
