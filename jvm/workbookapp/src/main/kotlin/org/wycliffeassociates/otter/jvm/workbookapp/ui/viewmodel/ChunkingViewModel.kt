@@ -207,6 +207,9 @@ class ChunkingViewModel : ViewModel() {
 
     fun saveAndQuit() {
         compositeDisposable.clear()
+        audioConnectionFactory.clearPlayerConnections()
+        audioPlayer.value.close()
+        audioController = null
 
         val wkbk = workbookDataStore.activeWorkbookProperty.value
         val chapter = workbookDataStore.activeChapterProperty.value
@@ -221,14 +224,12 @@ class ChunkingViewModel : ViewModel() {
             .chunkChunkByChunk(wkbk.source.slug, cues, chapterPageViewModel.draft + 1)
 
         pageProperty.set(ChunkingWizardPage.CONSUME)
-        audioPlayer.value.close()
-        audioController = null
+
 
         ChunkAudioUseCase(directoryProvider, workbookDataStore.workbook)
             .createChunkedSourceAudio(sourceAudio.file, cues)
 
         markerStateProperty.set(null)
-        audioConnectionFactory.clearPlayerConnections()
     }
 
     fun initializeAudioController() {
