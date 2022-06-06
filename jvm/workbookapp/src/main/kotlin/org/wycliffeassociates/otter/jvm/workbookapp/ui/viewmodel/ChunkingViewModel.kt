@@ -228,6 +228,7 @@ class ChunkingViewModel : ViewModel() {
             .createChunkedSourceAudio(sourceAudio.file, cues)
 
         markerStateProperty.set(null)
+        audioConnectionFactory.clearPlayerConnections()
     }
 
     fun initializeAudioController() {
