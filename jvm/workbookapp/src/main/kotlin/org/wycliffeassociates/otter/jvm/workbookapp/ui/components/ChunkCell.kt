@@ -35,6 +35,9 @@ class ChunkCell(
     private val focusedChunkProperty: Property<ChunkItem>
 ) : ListCell<CardData>() {
     private val view = ChunkItem()
+    init {
+        addClass("chunk-list-cell")
+    }
 
     override fun updateItem(item: CardData?, empty: Boolean) {
         super.updateItem(item, empty)
@@ -42,6 +45,12 @@ class ChunkCell(
         if (empty || item == null) {
             graphic = null
             return
+        }
+
+        // mouseReleased avoids drag click side effect
+        setOnMouseReleased {
+            view.requestFocus()
+            view.toggleShowTakes()
         }
 
         graphic = view.apply {
@@ -95,12 +104,6 @@ class ChunkCell(
                     }
                     KeyCode.ESCAPE -> hideTakes()
                 }
-            }
-
-            // mouseReleased avoids drag click side effect
-            setOnMouseReleased {
-                requestFocus()
-                toggleShowTakes()
             }
         }
     }
