@@ -212,7 +212,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
         return chunk?.let { chunk ->
             sourceAudio.getChunk(
                 chapter.sort,
-                chunk.start,
+                chunk.sort,
                 meta
             )
         } ?: run { sourceAudio.getChapter(chapter.sort, meta) }
