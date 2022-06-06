@@ -107,7 +107,7 @@
 .chapter-page__chunks .list-view .list-cell:even,
 .chapter-page__chunks .list-view .list-cell:odd {
     -fx-background-color: -wa-foreground;
-    -fx-padding: 4px;
+    -fx-padding: 0;
 }
 
 .btn--icon .ikonli-font-icon {

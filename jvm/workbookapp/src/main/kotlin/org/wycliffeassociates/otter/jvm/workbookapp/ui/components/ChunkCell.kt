@@ -97,7 +97,8 @@ class ChunkCell(
                 }
             }
 
-            setOnMouseClicked {
+            // mouseReleased avoids drag click side effect
+            setOnMouseReleased {
                 requestFocus()
                 toggleShowTakes()
             }
