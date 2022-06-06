@@ -23,6 +23,7 @@ import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Media
 import java.io.File
+import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.workbook.Book
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -44,7 +45,7 @@ class SourceAudioAccessor(
             val accessor = ProjectFilesAccessor(directoryProvider, metadata, target.resourceMetadata, target)
             val dir = accessor.sourceAudioDir
             val file = dir.listFiles()?.find {
-                it.name.contains("_c$chapter") || it.name.contains("_c0$chapter") || it.name.contains("_c00$chapter")
+                chapterMatches(it, chapter) && validAudioExtension(it)
             }
             file?.let {
                 println("found the file! ${it.path}")
@@ -126,5 +127,13 @@ class SourceAudioAccessor(
             }
         }
         return null
+    }
+
+    private fun chapterMatches(file: File, chapter: Int): Boolean {
+        return file.name.contains("_c$chapter") || file.name.contains("_c0$chapter") || file.name.contains("_c00$chapter")
+    }
+
+    private fun validAudioExtension(file: File): Boolean {
+        return AudioFileFormat.values().map { it.extension }.contains(file.extension)
     }
 }
