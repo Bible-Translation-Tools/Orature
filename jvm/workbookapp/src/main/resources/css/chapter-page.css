@@ -110,6 +110,10 @@
     -fx-padding: 4px;
 }
 
+.chapter-page__chunks .list-view .list-cell:hover {
+    -fx-cursor: hand;
+}
+
 .btn--icon .ikonli-font-icon {
     -fx-icon-color: -wa-regular-text;
 }
