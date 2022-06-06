@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
 import javafx.beans.binding.Bindings
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import javafx.event.ActionEvent
@@ -39,6 +40,7 @@ class ContributorInfo(
 ) : VBox() {
     var contributorField: TextField by singleAssign()
 
+    val lastModifiedIndex = SimpleIntegerProperty(-1)
     val addContributorCallbackProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val editContributorCallbackProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val removeContributorCallbackProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
@@ -107,6 +109,7 @@ class ContributorInfo(
                                 contributors
                             )
                         )
+                        lastModifiedIndexProperty.bind(lastModifiedIndex)
                         onRemoveContributorActionProperty.bind(removeContributorCallbackProperty)
                         onEditContributorActionProperty.bind(editContributorCallbackProperty)
                     }

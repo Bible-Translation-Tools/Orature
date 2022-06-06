@@ -36,6 +36,8 @@ class ContributorCell : HBox() {
     val onRemoveContributorActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>(null)
     val onEditContributorActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>(null)
 
+    val lastModifiedIndexProperty = SimpleIntegerProperty(-1)
+
     init {
         addClass("contributor__list-cell")
 
@@ -62,8 +64,16 @@ class ContributorCell : HBox() {
             addClass("btn", "btn--icon")
             graphic = FontIcon(Material.DELETE)
             setOnAction {
+                val index = if (indexProperty.value < 0) {
+                    // when an item is deleted, its index will no longer be valid (-1)
+                    // uses the last modified will track the latest item changed, allows deleting the correct one
+                    lastModifiedIndexProperty.value
+                } else {
+                    indexProperty.value
+                }
+
                 onRemoveContributorActionProperty.value?.handle(
-                    ActionEvent(indexProperty.value, this@ContributorCell)
+                    ActionEvent(index, this@ContributorCell)
                 )
             }
         }
