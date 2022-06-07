@@ -19,6 +19,7 @@
 package integrationtest.projects
 
 import integrationtest.di.DaggerTestPersistenceComponent
+import integrationtest.enUlbTestMetadata
 import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -30,10 +31,8 @@ import org.wycliffeassociates.otter.common.data.primitives.ContentType.META
 import org.wycliffeassociates.otter.common.data.primitives.ContentType.TEXT
 import org.wycliffeassociates.otter.common.data.primitives.ContentType.TITLE
 import org.wycliffeassociates.otter.common.data.primitives.Language
-import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
-import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -48,23 +47,7 @@ class TestProjectImport {
 
     private val db = dbEnvProvider.get()
 
-    private val sourceMetadata = ResourceMetadata(
-        "rc0.2",
-        "Door43 World Missions Community",
-        "",
-        "",
-        "ulb",
-        LocalDate.now(),
-        Language("en", "", "", "", true, ""),
-        LocalDate.now(),
-        "",
-        "",
-        ContainerType.Book,
-        "",
-        "12",
-        "",
-        File(".")
-    )
+    private val sourceMetadata = enUlbTestMetadata
 
     private val ulbTargetMetadata = sourceMetadata.copy(
         creator = "Orature",
