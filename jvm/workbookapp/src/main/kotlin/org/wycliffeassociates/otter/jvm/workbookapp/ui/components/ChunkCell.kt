@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 import javafx.beans.property.Property
 import javafx.scene.control.Button
 import javafx.scene.control.ListCell
+import javafx.scene.control.skin.VirtualFlow
 import javafx.scene.input.KeyCode
 import org.wycliffeassociates.otter.common.utils.capitalizeString
 import org.wycliffeassociates.otter.jvm.utils.findChild
@@ -49,6 +50,9 @@ class ChunkCell(
 
         // mouseReleased avoids drag click side effect
         setOnMouseReleased {
+            if (index == listView.items.size - 1) {
+                forceScrollToResizeListView()
+            }
             view.requestFocus()
             view.toggleShowTakes()
         }
@@ -114,5 +118,17 @@ class ChunkCell(
                 .thenByDescending { it.take.file.lastModified() }
         )
         view.takes.setAll(sorted)
+    }
+
+    /**
+     * Use workaround for the last item in the list view
+     * to fully display the expanded content of such item.
+     */
+    private fun forceScrollToResizeListView() {
+        val flow = listView
+            .childrenUnmodifiable
+            .find { it is VirtualFlow<*> } as VirtualFlow<*>
+        flow.scrollPixels(-1.0)
+        runLater { flow.scrollPixels(1.0) }
     }
 }
