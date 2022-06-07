@@ -451,7 +451,9 @@ class WorkbookPage : View() {
                 )
                 editContributorCallbackProperty.set(
                     EventHandler {
-                        viewModel.editContributor(it.source as ContributorCellData)
+                        val data = it.source as ContributorCellData
+                        viewModel.editContributor(data)
+                        lastModifiedIndex.set(data.index)
                     }
                 )
                 removeContributorCallbackProperty.set(
