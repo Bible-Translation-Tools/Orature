@@ -121,8 +121,8 @@ class ChunkCell(
     }
 
     /**
-     * Use workaround for the last item in the list view
-     * to fully display the expanded content of such item.
+     * Workaround for the last item in the list view
+     * to fully display when expanding causes an overflow
      */
     private fun forceScrollToResizeListView() {
         val flow = listView
