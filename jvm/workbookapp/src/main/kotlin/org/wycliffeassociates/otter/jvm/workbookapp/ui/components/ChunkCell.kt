@@ -128,7 +128,7 @@ class ChunkCell(
         val flow = listView
             .childrenUnmodifiable
             .find { it is VirtualFlow<*> } as VirtualFlow<*>
-        flow.scrollPixels(-1.0)
-        runLater { flow.scrollPixels(1.0) }
+        flow.scrollPixels(-5.0)
+        runLater { flow.scrollPixels(10.0) }
     }
 }
