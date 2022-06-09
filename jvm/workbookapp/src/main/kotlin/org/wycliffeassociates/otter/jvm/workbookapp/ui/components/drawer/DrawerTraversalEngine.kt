@@ -8,11 +8,11 @@ import com.sun.javafx.scene.traversal.TraversalContext
 import javafx.scene.Node
 import javafx.scene.Parent
 
-class DrawerTraversalEngine(private val root: Parent) {
-    var prevNode: Node? = null
-    var prevDirection: Direction? = null
+class DrawerTraversalEngine(root: Parent) {
+    private var prevNode: Node? = null
+    private var prevDirection: Direction? = null
 
-    val algorithm = object: Algorithm {
+    private val algorithm = object: Algorithm {
         override fun select(owner: Node, dir: Direction, context: TraversalContext): Node {
             return traverse(owner, dir, context)
         }
@@ -54,9 +54,8 @@ class DrawerTraversalEngine(private val root: Parent) {
         }
     }
 
-    val engine = ParentTraversalEngine(root, algorithm)
-
-    fun set() {
+    init {
+        val engine = ParentTraversalEngine(root, algorithm)
         ParentHelper.setTraversalEngine(root, engine)
     }
 

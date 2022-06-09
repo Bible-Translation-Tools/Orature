@@ -131,10 +131,6 @@ class AddFilesView : View() {
                 }
             }
         }
-
-        setOnKeyPressed {
-            if (it.code == KeyCode.ESCAPE) collapse()
-        }
     }
 
     init {
@@ -154,7 +150,10 @@ class AddFilesView : View() {
         }
 
         traversalEngine = DrawerTraversalEngine(root)
-        traversalEngine.set()
+
+        primaryStage.scene?.setOnMouseClicked {
+            println("ejfnse,fns,enf,semnfsme")
+        }
     }
 
     override fun onDock() {

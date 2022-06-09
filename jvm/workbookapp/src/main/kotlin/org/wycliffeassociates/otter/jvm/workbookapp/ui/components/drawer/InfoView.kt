@@ -173,7 +173,6 @@ class InfoView : View() {
         }
 
         traversalEngine = DrawerTraversalEngine(root)
-        traversalEngine.set()
     }
 
     override fun onDock() {
