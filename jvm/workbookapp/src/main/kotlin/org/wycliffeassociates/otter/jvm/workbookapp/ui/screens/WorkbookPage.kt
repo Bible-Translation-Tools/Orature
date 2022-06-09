@@ -353,6 +353,11 @@ class WorkbookPage : View() {
                 }
                 val index = it.list.indexOf(item)
                 listView.scrollTo(index)
+                listView.selectionModel.select(index)
+                runLater {
+                    listView.requestFocus()
+                    listView.focusModel.focus(index)
+                }
             })
             viewModel.chapters.addListener(tabChaptersListeners[text])
         }
