@@ -18,6 +18,10 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui
 
+import javafx.scene.control.Button
+import javafx.scene.control.ButtonBase
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Pane
 import javafx.stage.Stage
 import javafx.stage.StageStyle
@@ -71,6 +75,13 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
                 it.consume()
                 SnackbarHandler.enqueue(messages["applicationCloseBlocked"])
             } else audioConnectionFactory.releasePlayer()
+        }
+        stage.scene.addEventHandler(KeyEvent.KEY_PRESSED) {
+            if (it.code == KeyCode.ENTER) {
+                if (stage.scene.focusOwner is ButtonBase) {
+                    (stage.scene.focusOwner as ButtonBase).fire()
+                }
+            }
         }
         find<SplashScreen>().openModal(StageStyle.UNDECORATED)
     }
