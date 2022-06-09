@@ -78,8 +78,8 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
         }
         stage.scene.addEventHandler(KeyEvent.KEY_PRESSED) {
             if (it.code == KeyCode.ENTER) {
-                if (stage.scene.focusOwner is ButtonBase) {
-                    (stage.scene.focusOwner as ButtonBase).fire()
+                if (stage.scene?.focusOwner is ButtonBase) {
+                    (stage.scene?.focusOwner as? ButtonBase)?.fire()
                 }
             }
         }

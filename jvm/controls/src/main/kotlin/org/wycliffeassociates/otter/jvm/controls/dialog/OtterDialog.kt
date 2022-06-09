@@ -21,6 +21,9 @@ package org.wycliffeassociates.otter.jvm.controls.dialog
 import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Bounds
 import javafx.geometry.NodeOrientation
+import javafx.scene.control.ButtonBase
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
@@ -63,8 +66,15 @@ abstract class OtterDialog : Fragment() {
 
     fun open() {
         val stage = openModal(StageStyle.TRANSPARENT, Modality.APPLICATION_MODAL, false)
-        stage?.let {
-            fitStageToParent(it)
+        stage?.let { _stage ->
+            fitStageToParent(_stage)
+            _stage.scene.addEventHandler(KeyEvent.KEY_PRESSED) {
+                if (it.code == KeyCode.ENTER) {
+                    if (_stage.scene?.focusOwner is ButtonBase) {
+                        (_stage.scene?.focusOwner as? ButtonBase)?.fire()
+                    }
+                }
+            }
         }
     }
 
