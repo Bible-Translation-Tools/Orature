@@ -24,7 +24,6 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Language
-import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.domain.collections.CreateTranslation
 import org.wycliffeassociates.otter.common.domain.collections.DeleteTranslation
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
@@ -35,7 +34,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TranslationCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.TargetLanguageSelection
 import tornadofx.*
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class TranslationViewModel : ViewModel() {
@@ -54,15 +52,13 @@ class TranslationViewModel : ViewModel() {
 
     private val navigator: NavigationMediator by inject()
 
-    val sourceLanguages = SortedFilteredList<Language>()
-    val targetLanguages = SortedFilteredList<Language>()
+    val sourceLanguages = observableListOf<Language>()
+    val targetLanguages = observableListOf<Language>()
 
     val selectedSourceLanguageProperty = SimpleObjectProperty<Language>()
     val selectedTargetLanguageProperty = SimpleObjectProperty<Language>()
 
     val showProgressProperty = SimpleBooleanProperty(false)
-
-    private val sourceResources = mutableListOf<ResourceMetadata>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -115,7 +111,6 @@ class TranslationViewModel : ViewModel() {
     }
 
     fun reset() {
-        sourceResources.clear()
         sourceLanguages.clear()
         targetLanguages.clear()
         selectedSourceLanguageProperty.set(null)
@@ -136,8 +131,7 @@ class TranslationViewModel : ViewModel() {
                 logger.error("Error in initializing source languages", e)
             }
             .subscribe { collections ->
-                sourceResources.addAll(collections)
-                sourceLanguages.addAll(collections.map { it.language })
+                sourceLanguages.setAll(collections.map { it.language })
             }
     }
 
@@ -150,7 +144,7 @@ class TranslationViewModel : ViewModel() {
                 logger.error("Error initializing target languages", e)
             }
             .subscribe { retrieved ->
-                targetLanguages.addAll(retrieved)
+                targetLanguages.setAll(retrieved)
             }
     }
 }
