@@ -90,6 +90,9 @@ class ChunkCell(
             setOnKeyReleased {
                 when (it.code) {
                     KeyCode.ENTER, KeyCode.SPACE -> {
+                        if (index == listView.items.size - 1) {
+                            forceScrollToResizeListView()
+                        }
                         toggleShowTakes()
                     }
                     KeyCode.DOWN, KeyCode.UP -> {
