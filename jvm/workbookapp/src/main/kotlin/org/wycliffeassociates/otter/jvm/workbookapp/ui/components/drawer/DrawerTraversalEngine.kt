@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
 
+import com.sun.javafx.scene.NodeHelper
 import com.sun.javafx.scene.ParentHelper
 import com.sun.javafx.scene.traversal.Algorithm
 import com.sun.javafx.scene.traversal.Direction
@@ -9,58 +10,59 @@ import javafx.scene.Node
 import javafx.scene.Parent
 
 class DrawerTraversalEngine(root: Parent) {
-    private var prevNode: Node? = null
-    private var prevDirection: Direction? = null
-
     private val algorithm = object: Algorithm {
+        private val targetNodes = mutableListOf<Node>()
+
         override fun select(owner: Node, dir: Direction, context: TraversalContext): Node {
             return traverse(owner, dir, context)
         }
 
         private fun traverse(node: Node, dir: Direction, context: TraversalContext): Node {
-            prevDirection = prevDirection ?: dir
-            var index = context.allTargetNodes.indexOf(prevNode)
+            if (targetNodes.isEmpty()) {
+                addFocusableChildrenToTargetNodes(context.root)
+            }
+
+            var index = targetNodes.indexOf(node)
 
             when (dir) {
-                Direction.DOWN, Direction.RIGHT, Direction.NEXT, Direction.NEXT_IN_LINE -> {
-                    when (prevDirection) {
-                        Direction.DOWN, Direction.RIGHT, Direction.NEXT, Direction.NEXT_IN_LINE -> index++
-                    }
-                }
-                Direction.LEFT, Direction.PREVIOUS, Direction.UP -> {
-                    when (prevDirection) {
-                        Direction.LEFT, Direction.PREVIOUS, Direction.UP -> index--
-                    }
-                }
+                Direction.DOWN, Direction.RIGHT, Direction.NEXT, Direction.NEXT_IN_LINE -> index++
+                Direction.LEFT, Direction.PREVIOUS, Direction.UP -> index--
             }
-
-            prevNode = node
-            prevDirection = dir
 
             if (index < 0) {
-                index = context.allTargetNodes.lastIndex
+                index = targetNodes.lastIndex
             }
-            index %= context.allTargetNodes.size
 
-            return context.allTargetNodes[index]
+            if (targetNodes.size > 0) {
+                index %= targetNodes.size
+            }
+
+            return targetNodes[index]
         }
 
         override fun selectFirst(context: TraversalContext): Node {
-            return context.allTargetNodes.first()
+            return if (targetNodes.isNotEmpty()) targetNodes.first() else root
         }
 
         override fun selectLast(context: TraversalContext): Node {
-            return context.allTargetNodes.last()
+            return if (targetNodes.isNotEmpty()) targetNodes.last() else root
+        }
+
+        private fun addFocusableChildrenToTargetNodes(parent: Parent) {
+            val parentsNodes: List<Node> = parent.childrenUnmodifiable
+            for (node in parentsNodes) {
+                if (node.isFocusTraversable && NodeHelper.isTreeVisible(node) && !node.isDisabled) {
+                    targetNodes.add(node)
+                }
+                if (node is Parent) {
+                    addFocusableChildrenToTargetNodes(node)
+                }
+            }
         }
     }
 
     init {
         val engine = ParentTraversalEngine(root, algorithm)
         ParentHelper.setTraversalEngine(root, engine)
-    }
-
-    fun reset() {
-        prevNode = null
-        prevDirection = null
     }
 }
