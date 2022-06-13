@@ -38,16 +38,18 @@ import tornadofx.setValue
 import java.io.File
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
+import tornadofx.runLater
 
 class RecorderViewModel : ViewModel() {
 
     val parameters = (scope as ParameterizedScope).parameters
-    val wav = AudioFile(File(parameters.named["wav"]), 1, 44100, 16)
-    val recorder = (scope.workspace.params["audioConnectionFactory"] as AudioConnectionFactory).getRecorder()
 
-    val writer = WavFileWriter(wav, recorder.getAudioStream()) {
-        (scope as ParameterizedScope).navigateBack()
-    }
+    val targetFile = File(parameters.named["wav"])
+    var tempTake = createTempRecordingTake()
+    var wavAudio = AudioFile(tempTake, 1, 44100, 16)
+
+    val recorder = (scope.workspace.params["audioConnectionFactory"] as AudioConnectionFactory).getRecorder()
+    var writer = WavFileWriter(wavAudio, recorder.getAudioStream()) { /* no-op */ }
 
     val waveformView = CanvasFragment()
     val volumeBarView = CanvasFragment()
@@ -120,5 +122,32 @@ class RecorderViewModel : ViewModel() {
     fun save() {
         at.stop()
         recorder.stop()
+        writer.writer.dispose()
+        wavAudio.file.copyTo(targetFile, true)
+        runLater {
+            (scope as ParameterizedScope).navigateBack()
+        }
+    }
+
+    fun reset() {
+        writer.pause()
+        writer.writer.dispose()
+        timer.pause()
+        timer.reset()
+        hasWritten = false
+
+        tempTake = createTempRecordingTake()
+        wavAudio = AudioFile(tempTake, 1, 44100, 16)
+        writer = WavFileWriter(wavAudio, recorder.getAudioStream()) {
+            // callback
+        }
+    }
+
+    private fun createTempRecordingTake(): File {
+        return kotlin.io.path.createTempFile("dump-take",".wav").toFile()
+            .also {
+                it.deleteOnExit()
+                targetFile.copyTo(it, true)
+            }
     }
 }
