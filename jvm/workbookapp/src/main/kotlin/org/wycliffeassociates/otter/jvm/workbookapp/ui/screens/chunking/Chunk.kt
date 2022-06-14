@@ -62,8 +62,6 @@ class Chunk : Fragment() {
 
     val vm: ChunkingViewModel by inject()
 
-    private val markerTrack: MarkerTrackControl = MarkerTrackControl()
-
     var timer: AnimationTimer? = null
 
     override fun onDock() {
@@ -90,19 +88,6 @@ class Chunk : Fragment() {
         }
         timer?.start()
         vm.onDockChunk()
-
-        markerTrack.apply {
-            prefWidth = vm.imageWidth
-            vm.markerStateProperty.onChangeAndDoNow { markers ->
-                markers?.let { markers ->
-                    markers.markerCountProperty?.onChangeAndDoNow {
-                        highlightState.setAll(vm.markers.highlightState)
-                        this.markers.setAll(vm.markers.markers)
-                        refreshMarkers()
-                    }
-                }
-            }
-        }
     }
 
     override fun onUndock() {
@@ -112,7 +97,7 @@ class Chunk : Fragment() {
     }
 
     override val root = borderpane {
-        center = MarkerPlacementWaveform(markerTrack).apply {
+        center = MarkerPlacementWaveform().apply {
             positionProperty.bind(vm.positionProperty)
 
             onWaveformClicked = { vm.pause() }
@@ -127,6 +112,14 @@ class Chunk : Fragment() {
             onPlaceMarker = vm::placeMarker
 
             markerStateProperty.bind(vm.markerStateProperty)
+
+            vm.markerStateProperty.onChangeAndDoNow { markers ->
+                markers?.let { markers ->
+                    markers.markerCountProperty?.onChangeAndDoNow {
+                        this.markers.setAll(vm.markers.markers)
+                    }
+                }
+            }
         }
         bottom = hbox {
             styleClass.addAll("consume__bottom")

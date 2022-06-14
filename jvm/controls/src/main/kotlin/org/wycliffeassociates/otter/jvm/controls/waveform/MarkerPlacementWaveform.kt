@@ -21,20 +21,25 @@ package org.wycliffeassociates.otter.jvm.controls.waveform
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Node
 import javafx.scene.control.Skin
+import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.skins.waveform.MarkerPlacementWaveformSkin
+import tornadofx.observableListOf
 
 class MarkerPlacementWaveform(
-    val topNode: Node
 ) : ScrollingWaveform() {
+
+    val markers = observableListOf<ChunkMarkerModel>()
+    var onPositionChangedProperty: (Int, Double) -> Unit = { _,_ ->}
+    var onSeekPreviousProperty: () -> Unit = {}
+    var onSeekNextProperty: () -> Unit = {}
+    var onLocationRequestProperty: () -> Int = { 0 }
 
     val markerStateProperty = SimpleObjectProperty<VerseMarkerModel>()
 
     var onSeekNext: () -> Unit = {}
     var onSeekPrevious: () -> Unit = {}
     var onPlaceMarker: () -> Unit = {}
-    var topTrack: Node? = topNode
-    var bottomTrack: Node? = null
 
     override fun createDefaultSkin(): Skin<*> {
         return MarkerPlacementWaveformSkin(this)

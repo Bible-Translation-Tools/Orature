@@ -24,6 +24,7 @@ import javafx.scene.layout.StackPane
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.model.MarkerHighlightState
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
+import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerTrackControl
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerViewBackground
 import org.wycliffeassociates.otter.jvm.controls.waveform.PlaceMarkerLayer
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformFrame
@@ -33,24 +34,6 @@ import tornadofx.*
 
 class MarkerPlacementWaveformSkin(val control: MarkerPlacementWaveform) : ScrollingWaveformSkin(control) {
 
-    private fun addHighlights(highlights: List<MarkerHighlightState>) {
-        waveformFrame.clearHighlights()
-
-        highlights.forEach {
-            waveformFrame.addHighlight(
-                Rectangle().apply {
-                    managedProperty().set(false)
-                    widthProperty().bind(it.width)
-                    translateXProperty().bind(it.translate)
-                    visibleProperty().bind(it.visibility)
-                    it.styleClass.onChangeAndDoNow {
-                        styleClass.setAll(it)
-                    }
-                }
-            )
-        }
-    }
-
     override fun initialize() {
         val root = StackPane().apply {
             hgrow = Priority.ALWAYS
@@ -59,9 +42,7 @@ class MarkerPlacementWaveformSkin(val control: MarkerPlacementWaveform) : Scroll
             nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
 
             add(MarkerViewBackground())
-            waveformFrame = WaveformFrame(
-                (skinnable as MarkerPlacementWaveform).topTrack
-            ).apply {
+            waveformFrame = WaveformFrame().apply {
                 framePositionProperty.bind(skinnable.positionProperty)
                 onWaveformClicked { skinnable.onWaveformClicked() }
                 onWaveformDragReleased {
@@ -79,14 +60,28 @@ class MarkerPlacementWaveformSkin(val control: MarkerPlacementWaveform) : Scroll
                 }
             }
             add(waveformFrame)
+            val topTrack = MarkerTrackControl().apply {
+
+                // prefWidth = viewModel.imageWidth
+                (skinnable as MarkerPlacementWaveform).markerStateProperty.onChangeAndDoNow { markers ->
+                    markers?.let { markers ->
+                        markers.markerCountProperty.onChangeAndDoNow {
+                            this.markers.setAll((skinnable as MarkerPlacementWaveform).markers)
+                        }
+                    }
+                }
+                setOnPositionChanged { id, position ->
+                    (skinnable as MarkerPlacementWaveform).onPositionChangedProperty.invoke(id, position)
+                }
+                setOnLocationRequest {
+                    (skinnable as MarkerPlacementWaveform).onLocationRequestProperty.invoke()
+                }
+
+                translateXProperty().bind(waveformFrame.translateXProperty())
+            }
+            add(topTrack)
             add(WaveformOverlay().apply { playbackPositionProperty.bind(skinnable.positionProperty) })
             add(PlaceMarkerLayer().apply { onPlaceMarkerAction { control.onPlaceMarker() } })
-
-            (skinnable as MarkerPlacementWaveform).markerStateProperty.onChangeAndDoNow { markers ->
-                markers?.let { markers ->
-                    addHighlights(markers.highlightState)
-                }
-            }
         }
         children.add(root)
     }

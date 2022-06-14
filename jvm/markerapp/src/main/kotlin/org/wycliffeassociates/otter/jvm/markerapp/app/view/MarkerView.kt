@@ -38,8 +38,7 @@ class MarkerView : PluginEntrypoint() {
 
     val viewModel: VerseMarkerViewModel by inject()
 
-    private val markerTrack: MarkerTrackControl = MarkerTrackControl()
-    private val waveform = MarkerPlacementWaveform(markerTrack)
+    private val waveform = MarkerPlacementWaveform()
 
     private var slider: AudioSlider? = null
     private var minimap: MinimapFragment? = null
@@ -54,24 +53,6 @@ class MarkerView : PluginEntrypoint() {
             }
         }
         timer?.start()
-        markerTrack.apply {
-            prefWidth = viewModel.imageWidth
-            viewModel.markerStateProperty.onChangeAndDoNow { markers ->
-                markers?.let { markers ->
-                    markers.markerCountProperty.onChangeAndDoNow {
-                        highlightState.setAll(viewModel.markers.highlightState)
-                        this.markers.setAll(viewModel.markers.markers)
-                        refreshMarkers()
-                    }
-                }
-            }
-            setOnPositionChanged { id, position ->
-                slider?.updateMarker(id, position)
-            }
-            setOnLocationRequest {
-                viewModel.requestAudioLocation()
-            }
-        }
         slider?.let {
             viewModel.initializeAudioController(it)
         }
@@ -128,6 +109,17 @@ class MarkerView : PluginEntrypoint() {
                         onFastForward = viewModel::fastForward
                         onToggleMedia = viewModel::mediaToggle
                         onResumeMedia = viewModel::resumeMedia
+
+                        // Marker stuff
+                        viewModel.markerStateProperty.onChangeAndDoNow { markers ->
+                            markers?.let { markers ->
+                                markers.markerCountProperty.onChangeAndDoNow {
+                                    this.markers.setAll(viewModel.markers.markers)
+                                }
+                            }
+                        }
+                        onPositionChangedProperty = slider!!::updateMarker
+                        onLocationRequestProperty = viewModel::requestAudioLocation
                     }
                 )
             }

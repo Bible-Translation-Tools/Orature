@@ -41,7 +41,8 @@ private const val MOVE_MARKER_INTERVAL = 0.001
 class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrackControl>(control) {
 
     val track: Region = Region().apply {
-        styleClass.add("scrolling-waveform__marker-track")
+        // Makes the the region mouse transparent but not children
+        pickOnBoundsProperty().set(false)
     }
 
     val markers = mutableListOf<ChunkMarker>()
@@ -145,9 +146,15 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
 
     private fun createHighlight(i: Int, mk: ChunkMarkerModel): Rectangle {
         return Rectangle().apply {
-            skinnable.highlightState[i].styleClass.onChangeAndDoNow {
-                styleClass.setAll(it)
+            when(i%2==0) {
+                true -> styleClass.setAll("scrolling-waveform__highlight--secondary")
+                false -> styleClass.setAll("scrolling-waveform__highlight--primary")
             }
+            mouseTransparentProperty().set(true)
+            pickOnBoundsProperty().set(false)
+//            skinnable.highlightState[i].styleClass.onChangeAndDoNow {
+//                styleClass.setAll(it)
+//            }
         }
     }
 
@@ -200,9 +207,9 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
                 } else {
                     rect.widthProperty().bind(endPos.minus(rect.translateXProperty()))
                 }
-                skinnable.highlightState[i].visibility.bind(rect.visibleProperty())
-                skinnable.highlightState[i].translate.bind(rect.translateXProperty())
-                skinnable.highlightState[i].width.bind(rect.widthProperty())
+//                skinnable.highlightState[i].visibility.bind(rect.visibleProperty())
+//                skinnable.highlightState[i].translate.bind(rect.translateXProperty())
+//                skinnable.highlightState[i].width.bind(rect.widthProperty())
             }
         }
 
