@@ -95,7 +95,6 @@ class WorkbookBanner : Control() {
     fun cleanUp() {
         backgroundArtworkProperty.unbind()
         backgroundArtworkProperty.set(null)
-        println("cleanUp")
     }
 
     override fun createDefaultSkin(): Skin<*> {
