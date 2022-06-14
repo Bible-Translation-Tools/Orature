@@ -124,6 +124,10 @@ class WorkbookPage : View() {
      * Clear out the tabs so new ones can be created the next time this view is docked.
      */
     override fun onUndock() {
+        super.onUndock()
+        tabMap.forEach { _, tab ->
+            (tab as WorkbookResourceTab).undock()
+        }
         tabMap.clear()
         removeDialogListeners()
         tabChaptersListeners.map {
@@ -335,6 +339,7 @@ class WorkbookPage : View() {
     private inner class WorkbookResourceTab(val resourceMetadata: ResourceMetadata) : Tab() {
 
         lateinit var listView: ListView<ChapterCardModel>
+        lateinit var banner: WorkbookBanner
         val tab = buildTab()
 
         init {
@@ -383,7 +388,11 @@ class WorkbookPage : View() {
                         fitToParentWidth()
                         addClass("workbook-page__left-pane")
 
-                        add(buildWorkbookBanner())
+                        add(
+                            buildWorkbookBanner().apply {
+                                banner = this
+                            }
+                        )
 
                         listview(viewModel.chapters) {
                             listView = this
@@ -400,6 +409,10 @@ class WorkbookPage : View() {
                     add(buildContributorSection())
                 }
             }
+        }
+
+        fun undock() {
+            banner.cleanUp()
         }
 
         private fun buildWorkbookBanner(): WorkbookBanner {
