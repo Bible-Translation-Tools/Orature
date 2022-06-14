@@ -82,6 +82,7 @@ class ActiveRecordingRenderer(
         return (DEFAULT_SAMPLE_RATE * secondsOnScreen) / width
     }
 
+    /** Sets a new status listener and removes the old one */
     fun setRecordingStatusObservable(value: Observable<Boolean>) {
         compositeDisposable.clear()
 
@@ -96,6 +97,7 @@ class ActiveRecordingRenderer(
             }
     }
 
+    /** Clears rendered data from buffer */
     fun clearData() {
         floatBuffer.clear()
     }

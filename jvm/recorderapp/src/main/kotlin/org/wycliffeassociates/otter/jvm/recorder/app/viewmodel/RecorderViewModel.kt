@@ -137,10 +137,12 @@ class RecorderViewModel : ViewModel() {
         timer.reset()
         hasWritten = false
 
+        // replace audio take
         tempTake = createTempRecordingTake()
         wavAudio = AudioFile(tempTake, 1, 44100, 16)
         writer = WavFileWriter(wavAudio, recorder.getAudioStream()) { /* no op */ }
 
+        // clear waveform
         renderer.clearData()
         renderer.setRecordingStatusObservable(writer.isWriting)
     }
