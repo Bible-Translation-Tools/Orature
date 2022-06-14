@@ -89,7 +89,7 @@ class ControlFragment : Fragment() {
         }
 
         resetBtn.apply {
-            addClass("btn", "btn--secondary")
+            addClass("btn", "btn--secondary", "reset-button")
             prefHeightProperty().bind(continueBtn.heightProperty())
             tooltip(text)
             visibleWhen { vm.canSaveProperty }
