@@ -62,6 +62,8 @@ class FloatRingBuffer(private val capacity: Int) {
     fun clear() {
         head = 0
         tail = 0
+        buffer.fill(0f)
+        returnBuffer.fill(0f)
     }
 
     @Synchronized

@@ -49,7 +49,7 @@ class RecorderViewModel : ViewModel() {
     var wavAudio = AudioFile(tempTake, 1, 44100, 16)
 
     val recorder = (scope.workspace.params["audioConnectionFactory"] as AudioConnectionFactory).getRecorder()
-    var writer = WavFileWriter(wavAudio, recorder.getAudioStream()) { /* no-op */ }
+    var writer = WavFileWriter(wavAudio, recorder.getAudioStream()) { /* no op */ }
 
     val waveformView = CanvasFragment()
     val volumeBarView = CanvasFragment()
@@ -83,9 +83,10 @@ class RecorderViewModel : ViewModel() {
             waveformView.add(fps)
         }
     }
+    private lateinit var renderer: ActiveRecordingRenderer
 
     fun onViewReady(width: Int) {
-        val renderer = ActiveRecordingRenderer(
+        renderer = ActiveRecordingRenderer(
             recorder.getAudioStream(),
             writer.isWriting,
             width,
@@ -138,13 +139,14 @@ class RecorderViewModel : ViewModel() {
 
         tempTake = createTempRecordingTake()
         wavAudio = AudioFile(tempTake, 1, 44100, 16)
-        writer = WavFileWriter(wavAudio, recorder.getAudioStream()) {
-            // callback
-        }
+        writer = WavFileWriter(wavAudio, recorder.getAudioStream()) { /* no op */ }
+
+        renderer.clearData()
+        renderer.setRecordingStatusObservable(writer.isWriting)
     }
 
     private fun createTempRecordingTake(): File {
-        return kotlin.io.path.createTempFile("dump-take",".wav").toFile()
+        return kotlin.io.path.createTempFile("otter-take",".wav").toFile()
             .also {
                 it.deleteOnExit()
                 targetFile.copyTo(it, true)
