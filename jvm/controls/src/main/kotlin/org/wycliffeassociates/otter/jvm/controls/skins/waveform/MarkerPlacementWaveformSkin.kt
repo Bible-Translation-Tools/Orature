@@ -62,7 +62,7 @@ class MarkerPlacementWaveformSkin(val control: MarkerPlacementWaveform) : Scroll
             add(waveformFrame)
             val topTrack = MarkerTrackControl().apply {
 
-                // prefWidth = viewModel.imageWidth
+                minWidthProperty().bind((skinnable as MarkerPlacementWaveform).imageWidthProperty)
                 (skinnable as MarkerPlacementWaveform).markerStateProperty.onChangeAndDoNow { markers ->
                     markers?.let { markers ->
                         markers.markerCountProperty.onChangeAndDoNow {

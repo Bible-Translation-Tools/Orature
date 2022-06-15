@@ -80,7 +80,7 @@ class VerseMarkerViewModel : ViewModel() {
     val headerSubtitle = SimpleStringProperty()
     val compositeDisposable = CompositeDisposable()
     val positionProperty = SimpleDoubleProperty(0.0)
-    var imageWidth: Double = 0.0
+    var imageWidthProperty = SimpleDoubleProperty()
 
     private var sampleRate: Int = 0 // beware of divided by 0
     private var totalFrames: Int = 0 // beware of divided by 0
@@ -136,7 +136,7 @@ class VerseMarkerViewModel : ViewModel() {
             val current = audioPlayer.getLocationInFrames()
             val duration = audioPlayer.getDurationInFrames().toDouble()
             val percentPlayed = current / duration
-            val pos = percentPlayed * imageWidth
+            val pos = percentPlayed * imageWidthProperty.value
             positionProperty.set(pos)
             updateCurrentPlaybackMarker(current)
         }
@@ -245,7 +245,7 @@ class VerseMarkerViewModel : ViewModel() {
     }
 
     fun createWaveformImages(audio: AudioFile) {
-        imageWidth = computeImageWidth(SECONDS_ON_SCREEN)
+        imageWidthProperty.set(computeImageWidth(SECONDS_ON_SCREEN))
 
         val builder = WaveformImageBuilder(
             wavColor = Color.web(WAV_COLOR),
@@ -255,7 +255,7 @@ class VerseMarkerViewModel : ViewModel() {
         builder
             .build(
                 audio.reader(),
-                width = imageWidth.toInt(),
+                width = imageWidthProperty.value.toInt(),
                 height = 50
             )
             .observeOnFx()
@@ -266,7 +266,7 @@ class VerseMarkerViewModel : ViewModel() {
             .andThen(
                 builder.buildWaveformAsync(
                     audio.reader(),
-                    width = imageWidth.toInt(),
+                    width = imageWidthProperty.value.toInt(),
                     height = height,
                     waveformSubject
                 )

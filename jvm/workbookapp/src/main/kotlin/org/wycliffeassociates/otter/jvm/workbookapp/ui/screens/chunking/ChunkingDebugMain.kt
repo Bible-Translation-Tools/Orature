@@ -18,7 +18,6 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 
-import java.io.File
 import javafx.scene.layout.StackPane
 import javafx.stage.Stage
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
@@ -30,7 +29,11 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.DaggerAppDependencyGraph
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.logging.ConfigureLogger
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
-import tornadofx.*
+import tornadofx.App
+import tornadofx.View
+import tornadofx.addClass
+import tornadofx.launch
+import java.io.File
 
 fun main(args: Array<String>) {
     launch<ChunkingDebugApp>(args)
@@ -63,7 +66,7 @@ class ChunkingDebugView : View(){
 
     init {
         val wkbk: WorkbookDataStore = tornadofx.find()
-        wkbk.sourceAudioProperty.set(SourceAudio(File("/Users/joe/Documents/test12345.mp3"), 0, 1))
+        wkbk.sourceAudioProperty.set(SourceAudio(File("/Users/jsara/Documents/test12345.mp3"), 0, 1))
         add<ChunkingWizard>()
     }
 }

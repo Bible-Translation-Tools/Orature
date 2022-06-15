@@ -24,7 +24,6 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
 import java.io.File
-import java.io.IOException
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -34,7 +33,6 @@ import javafx.scene.paint.Color
 import javax.inject.Inject
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.AudioFile
-import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.VerseByVerseChunking
@@ -159,7 +157,7 @@ class ChunkingViewModel : ViewModel() {
     val isPlayingProperty = SimpleBooleanProperty(false)
     val compositeDisposable = CompositeDisposable()
     val positionProperty = SimpleDoubleProperty(0.0)
-    var imageWidth: Double = 0.0
+    var imageWidthProperty = SimpleDoubleProperty(0.0)
 
     val disposeables = mutableListOf<Disposable>()
 
@@ -200,7 +198,7 @@ class ChunkingViewModel : ViewModel() {
             val current = audioPlayer.getLocationInFrames()
             val duration = audioPlayer.getDurationInFrames().toDouble()
             val percentPlayed = current / duration
-            val pos = percentPlayed * imageWidth
+            val pos = percentPlayed * imageWidthProperty.value
             positionProperty.set(pos)
         }
     }
@@ -251,7 +249,7 @@ class ChunkingViewModel : ViewModel() {
     }
 
     fun createWaveformImages(audio: AudioFile) {
-        imageWidth = computeImageWidth(SECONDS_ON_SCREEN)
+        imageWidthProperty.set(computeImageWidth(SECONDS_ON_SCREEN))
 
         compositeDisposable.add(
             WaveformImageBuilder(
@@ -259,7 +257,7 @@ class ChunkingViewModel : ViewModel() {
                 background = Color.web(BACKGROUND_COLOR)
             ).buildWaveformAsync(
                 audio.reader(),
-                width = imageWidth.toInt(),
+                width = imageWidthProperty.value.toInt(),
                 height = height,
                 waveformSubject
             ).subscribe()

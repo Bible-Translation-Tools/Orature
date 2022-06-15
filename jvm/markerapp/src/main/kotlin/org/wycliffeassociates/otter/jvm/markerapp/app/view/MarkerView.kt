@@ -111,6 +111,8 @@ class MarkerView : PluginEntrypoint() {
                         onResumeMedia = viewModel::resumeMedia
 
                         // Marker stuff
+                        imageWidthProperty.bind(viewModel.imageWidthProperty)
+
                         viewModel.markerStateProperty.onChangeAndDoNow { markers ->
                             markers?.let { markers ->
                                 markers.markerCountProperty.onChangeAndDoNow {

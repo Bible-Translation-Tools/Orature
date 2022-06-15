@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.waveform
 
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Node
 import javafx.scene.control.Skin
@@ -36,6 +37,8 @@ class MarkerPlacementWaveform(
     var onLocationRequestProperty: () -> Int = { 0 }
 
     val markerStateProperty = SimpleObjectProperty<VerseMarkerModel>()
+
+    val imageWidthProperty = SimpleDoubleProperty()
 
     var onSeekNext: () -> Unit = {}
     var onSeekPrevious: () -> Unit = {}
