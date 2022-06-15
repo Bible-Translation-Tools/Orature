@@ -60,6 +60,7 @@
 }
 
 .export-menu {
+    -fx-pref-width: 220px;
     -fx-border-color: -wa-white;
     -fx-background-color: #162240; /* this color is consistent across themes */
 }
@@ -81,6 +82,7 @@
 }
 
 .dummy-export-menu.combo-box {
+    -fx-pref-width: 220px;
     -fx-focus-traversable: false;
     -fx-border-color: -wa-transparent;
     -fx-background-color: -wa-transparent;
