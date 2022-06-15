@@ -43,13 +43,13 @@ import tornadofx.runLater
 class RecorderViewModel : ViewModel() {
 
     val parameters = (scope as ParameterizedScope).parameters
-
     val targetFile = File(parameters.named["wav"])
-    var tempTake = createTempRecordingTake()
-    var wavAudio = AudioFile(tempTake, 1, 44100, 16)
+
+    lateinit var tempTake: File
+    lateinit var wavAudio: AudioFile
+    lateinit var writer: WavFileWriter
 
     val recorder = (scope.workspace.params["audioConnectionFactory"] as AudioConnectionFactory).getRecorder()
-    var writer = WavFileWriter(wavAudio, recorder.getAudioStream()) { /* no op */ }
 
     val waveformView = CanvasFragment()
     val volumeBarView = CanvasFragment()
@@ -77,6 +77,7 @@ class RecorderViewModel : ViewModel() {
     }
 
     init {
+        initializeAudioData()
         volumeBarView.addDrawable(volumeBar)
         waveformView.addDrawable(BaseWaveLine())
         if (app.parameters.named.containsKey("debug")) {
@@ -125,6 +126,7 @@ class RecorderViewModel : ViewModel() {
         recorder.stop()
         writer.writer.dispose()
         wavAudio.file.copyTo(targetFile, true)
+
         runLater {
             (scope as ParameterizedScope).navigateBack()
         }
@@ -137,14 +139,18 @@ class RecorderViewModel : ViewModel() {
         timer.reset()
         hasWritten = false
 
-        // replace audio take
-        tempTake = createTempRecordingTake()
-        wavAudio = AudioFile(tempTake, 1, 44100, 16)
-        writer = WavFileWriter(wavAudio, recorder.getAudioStream()) { /* no op */ }
+        // reset take
+        initializeAudioData()
 
         // clear waveform
         renderer.clearData()
         renderer.setRecordingStatusObservable(writer.isWriting)
+    }
+
+    private fun initializeAudioData() {
+        tempTake = createTempRecordingTake()
+        wavAudio = AudioFile(tempTake, 1, 44100, 16)
+        writer = WavFileWriter(wavAudio, recorder.getAudioStream()) { /* no op */ }
     }
 
     private fun createTempRecordingTake(): File {
