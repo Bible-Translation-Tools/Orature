@@ -69,7 +69,7 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
         }
     }
 
-    fun resetState() {
+    fun  resetState() {
         markers.clear()
         highlights.clear()
         preDragThumbPos = DoubleArray(skinnable.markers.size)
@@ -159,6 +159,7 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
     }
 
     private fun initializeMarkers() {
+        println("making new markers")
         skinnable.markers.forEachIndexed { i, mk ->
             val marker = createMarker(i, mk)
             val rect = createHighlight(i, mk)
@@ -174,42 +175,43 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
 
     init {
         skinnable.markers.onChangeAndDoNow {
-            resetState()
-            initializeMarkers()
+            if (markers.isEmpty() || it.size != markers.size) {
+                resetState()
+                initializeMarkers()
 
-            track.getChildList()?.clear()
-            highlights.forEach { track.add(it) }
-            markers.forEach { track.add(it) }
+                track.getChildList()?.clear()
+                highlights.forEach { track.add(it) }
+                markers.forEach { track.add(it) }
 
-            highlights.forEachIndexed { i, rect ->
-                val endPos = skinnable.widthProperty()
+                highlights.forEachIndexed { i, rect ->
+                    val endPos = skinnable.widthProperty()
 
-                if (i + 1 < highlights.size) {
-                    highlights[i + 1]?.let { next ->
-                        val nextVis = next.visibleProperty()
-                        val nextPos = next.translateXProperty()
-                        val highlightWidth = Bindings.createDoubleBinding(
-                            Callable {
-                                return@Callable if (nextVis.value) {
-                                    nextPos.value - rect.translateXProperty().value
-                                } else {
-                                    endPos.value - rect.translateXProperty().value
-                                }
-                            },
-                            nextVis,
-                            nextPos,
-                            endPos,
-                            rect.translateXProperty(),
-                            next.translateXProperty()
-                        )
-                        rect.widthProperty().bind(highlightWidth)
+                    if (i + 1 < highlights.size) {
+                        highlights[i + 1]?.let { next ->
+                            val nextVis = next.visibleProperty()
+                            val nextPos = next.translateXProperty()
+                            val highlightWidth = Bindings.createDoubleBinding(
+                                Callable {
+                                    return@Callable if (nextVis.value) {
+                                        nextPos.value - rect.translateXProperty().value
+                                    } else {
+                                        endPos.value - rect.translateXProperty().value
+                                    }
+                                },
+                                nextVis,
+                                nextPos,
+                                endPos,
+                                rect.translateXProperty(),
+                                next.translateXProperty()
+                            )
+                            rect.widthProperty().bind(highlightWidth)
+                        }
+                    } else {
+                        rect.widthProperty().bind(endPos.minus(rect.translateXProperty()))
                     }
-                } else {
-                    rect.widthProperty().bind(endPos.minus(rect.translateXProperty()))
                 }
-//                skinnable.highlightState[i].visibility.bind(rect.visibleProperty())
-//                skinnable.highlightState[i].translate.bind(rect.translateXProperty())
-//                skinnable.highlightState[i].width.bind(rect.widthProperty())
+            } else {
+                refreshMarkers()
             }
         }
 

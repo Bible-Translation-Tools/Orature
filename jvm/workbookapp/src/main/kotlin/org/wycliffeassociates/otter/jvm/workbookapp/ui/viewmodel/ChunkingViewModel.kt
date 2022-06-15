@@ -187,7 +187,7 @@ class ChunkingViewModel : ViewModel() {
     }
 
     fun loadMarkers(audio: AudioFile) {
-        val totalMarkers: Int = 200
+        val totalMarkers: Int = 500
         audio.metadata.clearMarkers()
         val markers = VerseMarkerModel(audio, totalMarkers)
         markerStateProperty.set(markers)
