@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
 
 import javafx.animation.Timeline
 import javafx.application.Platform
+import javafx.scene.Node
 import javafx.scene.control.Button
 import javafx.scene.control.ToggleGroup
 import javafx.scene.input.KeyCode
@@ -316,20 +317,10 @@ class SettingsView : View() {
                         }
 
                         label {
-                            graphic = ImageLoader.load(
-                                ClassLoader.getSystemResourceAsStream("images/spinner.svg"),
-                                ImageLoader.Format.SVG
-                            ).apply {
-                                scaleX = 1.0
-                                scaleY = 1.0
+                            ClassLoader.getSystemResourceAsStream("images/spinner.svg")?.use {
+                                graphic = ImageLoader.load(it, ImageLoader.Format.SVG)
                             }
-
-                            timeline {
-                                keyframe(1.seconds) {
-                                    keyvalue(rotateProperty(), 360.0)
-                                }
-                                cycleCount = Timeline.INDEFINITE
-                            }
+                            rotateNode(this)
 
                             visibleProperty().bind(viewModel.langNamesImportingProperty)
                         }
@@ -396,6 +387,15 @@ class SettingsView : View() {
 
         viewModel.showChangeLanguageSuccessDialogProperty.onChange {
             Platform.runLater { if (it) successDialog.open() else successDialog.close() }
+        }
+    }
+
+    private fun rotateNode(node: Node) {
+        timeline {
+            keyframe(1.seconds) {
+                keyvalue(node.rotateProperty(), 360.0)
+            }
+            cycleCount = Timeline.INDEFINITE
         }
     }
 }
