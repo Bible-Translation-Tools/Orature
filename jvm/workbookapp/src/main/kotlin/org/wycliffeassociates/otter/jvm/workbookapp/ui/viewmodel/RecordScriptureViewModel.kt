@@ -95,6 +95,7 @@ class RecordScriptureViewModel : ViewModel() {
 
     val isChunk = activeChunkProperty.isNotNull
     val highlightedChunkProperty = SimpleIntegerProperty(-1)
+    val verseCountProperty = SimpleIntegerProperty()
 
     private var activeChapterSubscription: Disposable? = null
     private var activeChunkSubscription: Disposable? = null
@@ -125,6 +126,15 @@ class RecordScriptureViewModel : ViewModel() {
                 getChapterList(workbook.target.chapters)
             }
         }
+
+        verseCountProperty.bind(
+            workbookDataStore.activeProjectFilesAccessorProperty.objectBinding {
+                it?.getVerseCount(
+                    workbookDataStore.workbook.target.slug,
+                    activeChapter.sort
+                ) ?: 0
+            }
+        )
 
         activeChapterProperty.onChangeAndDoNow { chapter ->
             setHasNextAndPreviousChapter()
@@ -167,7 +177,12 @@ class RecordScriptureViewModel : ViewModel() {
                         animationMediatorProperty.set(animationMediator)
                         takeProperty.set(takeCardModel.take)
                         audioPlayerProperty.set(takeCardModel.audioPlayer)
-                        markerModelProperty.set(VerseMarkerModel(AudioFile(takeCardModel.take.file), chunkList.size))
+                        markerModelProperty.set(
+                            VerseMarkerModel(
+                                AudioFile(takeCardModel.take.file),
+                                verseCountProperty.value
+                            )
+                        )
                         onChunkPlaybackUpdated = { chunkNumber -> highlightedChunkProperty.set(chunkNumber) }
                         selectedProperty.set(takeCardModel.selected)
                         takeLabelProperty.set(

@@ -282,6 +282,25 @@ class ProjectFilesAccessor(
         }
     }
 
+    fun getVerseCount(projectSlug: String, chapterNumber: Int): Int {
+        var count = 0
+        ResourceContainer.load(sourceMetadata.path).use { rc ->
+            val projectEntry = rc.manifest.projects.find { it.identifier == projectSlug }
+            projectEntry?.let {
+                val text = rc.accessor.getReader(it.path.removePrefix("./")).readText()
+                val parser = USFMParser(arrayListOf("s5"))
+                val doc = parser.parseFromString(text)
+                val chapters = doc.getChildMarkers(CMarker::class.java)
+                val chap = chapters.find { it.number == chapterNumber }
+                chap?.let {
+                    count = it.getChildMarkers(VMarker::class.java).size
+                }
+            }
+        }
+
+        return count
+    }
+
     fun getChapterText(projectSlug: String, chapterNumber: Int): List<String> {
         val chapterText = arrayListOf<String>()
 
