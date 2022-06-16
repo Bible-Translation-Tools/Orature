@@ -32,12 +32,7 @@ import org.wycliffeassociates.otter.jvm.controls.waveform.ScrollingWaveform
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingWizardPage
-import tornadofx.Fragment
-import tornadofx.action
-import tornadofx.borderpane
-import tornadofx.button
-import tornadofx.get
-import tornadofx.hbox
+import tornadofx.*
 
 class Chunk : Fragment() {
 
@@ -55,6 +50,28 @@ class Chunk : Fragment() {
     val vm: ChunkingViewModel by inject()
 
     var timer: AnimationTimer? = null
+
+    val waveform = MarkerPlacementWaveform().apply {
+        positionProperty.bind(vm.positionProperty)
+
+        onWaveformClicked = { vm.pause() }
+        onWaveformDragReleased = { deltaPos ->
+            val deltaFrames = pixelsToFrames(deltaPos)
+            val curFrames = vm.getLocationInFrames()
+            val duration = vm.getDurationInFrames()
+            val final = Utils.clamp(0, curFrames - deltaFrames, duration)
+            vm.seek(final)
+        }
+
+        onPlaceMarker = {
+            vm::placeMarker.invoke()
+            refreshMarkers()
+        }
+
+        markerStateProperty.bind(vm.markerStateProperty)
+
+        imageWidthProperty.bind(vm.imageWidthProperty)
+    }
 
     override fun onDock() {
         super.onDock()
@@ -80,6 +97,9 @@ class Chunk : Fragment() {
         }
         timer?.start()
         vm.onDockChunk()
+
+        waveform.markers.bind(vm.markers.markers, {it})
+        waveform.refreshMarkers()
     }
 
     override fun onUndock() {
@@ -89,32 +109,7 @@ class Chunk : Fragment() {
     }
 
     override val root = borderpane {
-        center = MarkerPlacementWaveform().apply {
-            positionProperty.bind(vm.positionProperty)
-
-            onWaveformClicked = { vm.pause() }
-            onWaveformDragReleased = { deltaPos ->
-                val deltaFrames = pixelsToFrames(deltaPos)
-                val curFrames = vm.getLocationInFrames()
-                val duration = vm.getDurationInFrames()
-                val final = Utils.clamp(0, curFrames - deltaFrames, duration)
-                vm.seek(final)
-            }
-
-            onPlaceMarker = vm::placeMarker
-
-            markerStateProperty.bind(vm.markerStateProperty)
-
-            imageWidthProperty.bind(vm.imageWidthProperty)
-
-            vm.markerStateProperty.onChangeAndDoNow { markers ->
-                markers?.let { markers ->
-                    markers.markerCountProperty?.onChangeAndDoNow {
-                        this.markers.setAll(vm.markers.markers)
-                    }
-                }
-            }
-        }
+        center = waveform
         bottom = hbox {
             styleClass.addAll("consume__bottom")
             styleClass.add(rootStyles)

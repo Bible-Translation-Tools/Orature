@@ -26,9 +26,7 @@ import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
-import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerTrackControl
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*
 
@@ -56,6 +54,11 @@ class MarkerView : PluginEntrypoint() {
         slider?.let {
             viewModel.initializeAudioController(it)
         }
+
+        runLater {
+            waveform.markers.bind(viewModel.markers.markers, { it })
+            waveform.refreshMarkers()
+        }
     }
 
     init {
@@ -82,9 +85,7 @@ class MarkerView : PluginEntrypoint() {
                     this@MarkerView.slider = slider
                 }
             }
-            center = vbox {
-                addClass("vm-marker-waveform__container")
-                add(
+            center =
                     waveform.apply {
                         addClass("vm-marker-waveform")
                         viewModel.compositeDisposable.add(
@@ -113,17 +114,9 @@ class MarkerView : PluginEntrypoint() {
                         // Marker stuff
                         imageWidthProperty.bind(viewModel.imageWidthProperty)
 
-                        viewModel.markerStateProperty.onChangeAndDoNow { markers ->
-                            markers?.let { markers ->
-                                markers.markerCountProperty.onChangeAndDoNow {
-                                    this.markers.setAll(viewModel.markers.markers)
-                                }
-                            }
-                        }
                         onPositionChangedProperty = slider!!::updateMarker
                         onLocationRequestProperty = viewModel::requestAudioLocation
-                    }
-                )
+
             }
             bottom = vbox {
                 add(

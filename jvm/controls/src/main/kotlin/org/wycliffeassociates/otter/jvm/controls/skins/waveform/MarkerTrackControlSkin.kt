@@ -37,6 +37,7 @@ import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerTrackControl
 
 private const val MOVE_MARKER_INTERVAL = 0.001
+private const val MARKER_COUNT = 1_000
 
 class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrackControl>(control) {
 
@@ -45,8 +46,7 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
         pickOnBoundsProperty().set(false)
     }
 
-    val markers = mutableListOf<ChunkMarker>()
-
+    private val _markers = mutableListOf<ChunkMarker>()
     private val highlights = mutableListOf<Rectangle>()
 
     private var preDragThumbPos = DoubleArray(control.markers.size)
@@ -55,9 +55,11 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
     private val focusedMarkerProperty = SimpleObjectProperty<ChunkMarker>()
 
     fun refreshMarkers() {
+        println("refreshing")
         if (skinnable.width > 0) {
+            println("actually refreshing markers size is ${skinnable.markers.size}")
             skinnable.markers.forEachIndexed { index, chunkMarker ->
-                val marker = markers[index]
+                val marker = _markers[index]
                 marker.isPlacedProperty.set(chunkMarker.placed)
                 marker.markerPositionProperty.set(
                     framesToPixels(
@@ -65,15 +67,30 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
                     ).toDouble()
                 )
                 marker.markerNumberProperty.set(chunkMarker.label)
+                highlights[index].apply {
+                    styleClass.clear()
+                    when (index % 2 == 1) {
+                        true -> {
+                            styleClass.setAll("scrolling-waveform__highlight--secondary")
+                            styleClass.removeAll("scrolling-waveform__highlight--primary")
+                        }
+                        false -> {
+                            styleClass.setAll("scrolling-waveform__highlight--primary")
+                            styleClass.removeAll("scrolling-waveform__highlight--secondary")
+                        }
+                    }
+                }
+                highlights[index].translateXProperty().bind(marker.translateXProperty())
+                highlights[index].visibleProperty().bind(marker.visibleProperty())
             }
         }
     }
 
-    fun  resetState() {
-        markers.clear()
+    fun resetState() {
+        _markers.clear()
         highlights.clear()
-        preDragThumbPos = DoubleArray(skinnable.markers.size)
-        dragStart = Array(skinnable.markers.size) { null }
+        preDragThumbPos = DoubleArray(MARKER_COUNT)
+        dragStart = Array(MARKER_COUNT) { null }
     }
 
     private fun createMarker(i: Int, mk: ChunkMarkerModel): ChunkMarker {
@@ -146,21 +163,19 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
 
     private fun createHighlight(i: Int, mk: ChunkMarkerModel): Rectangle {
         return Rectangle().apply {
-            when(i%2==0) {
+            when (i % 2 == 0) {
                 true -> styleClass.setAll("scrolling-waveform__highlight--secondary")
                 false -> styleClass.setAll("scrolling-waveform__highlight--primary")
             }
             mouseTransparentProperty().set(true)
             pickOnBoundsProperty().set(false)
-//            skinnable.highlightState[i].styleClass.onChangeAndDoNow {
-//                styleClass.setAll(it)
-//            }
         }
     }
 
     private fun initializeMarkers() {
         println("making new markers")
-        skinnable.markers.forEachIndexed { i, mk ->
+        for (i in 0..MARKER_COUNT) {
+            val mk = ChunkMarkerModel(0, i.toString(), false)
             val marker = createMarker(i, mk)
             val rect = createHighlight(i, mk)
 
@@ -168,51 +183,55 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
             rect.translateXProperty().bind(marker.translateXProperty())
             rect.visibleProperty().bind(marker.visibleProperty())
 
-            markers.add(marker)
+            _markers.add(marker)
             highlights.add(rect)
         }
     }
 
-    init {
-        skinnable.markers.onChangeAndDoNow {
-            if (markers.isEmpty() || it.size != markers.size) {
-                resetState()
-                initializeMarkers()
+    private fun refreshHighlights() {
+        highlights.forEachIndexed { i, rect ->
+            val endPos = skinnable.widthProperty()
 
-                track.getChildList()?.clear()
-                highlights.forEach { track.add(it) }
-                markers.forEach { track.add(it) }
-
-                highlights.forEachIndexed { i, rect ->
-                    val endPos = skinnable.widthProperty()
-
-                    if (i + 1 < highlights.size) {
-                        highlights[i + 1]?.let { next ->
-                            val nextVis = next.visibleProperty()
-                            val nextPos = next.translateXProperty()
-                            val highlightWidth = Bindings.createDoubleBinding(
-                                Callable {
-                                    return@Callable if (nextVis.value) {
-                                        nextPos.value - rect.translateXProperty().value
-                                    } else {
-                                        endPos.value - rect.translateXProperty().value
-                                    }
-                                },
-                                nextVis,
-                                nextPos,
-                                endPos,
-                                rect.translateXProperty(),
-                                next.translateXProperty()
-                            )
-                            rect.widthProperty().bind(highlightWidth)
-                        }
-                    } else {
-                        rect.widthProperty().bind(endPos.minus(rect.translateXProperty()))
-                    }
+            if (i + 1 < highlights.size) {
+                highlights[i + 1]?.let { next ->
+                    val nextVis = next.visibleProperty()
+                    val nextPos = next.translateXProperty()
+                    val highlightWidth = Bindings.createDoubleBinding(
+                        Callable {
+                            return@Callable if (nextVis.value) {
+                                nextPos.value - rect.translateXProperty().value
+                            } else {
+                                endPos.value - rect.translateXProperty().value
+                            }
+                        },
+                        nextVis,
+                        nextPos,
+                        endPos,
+                        rect.translateXProperty(),
+                        next.translateXProperty()
+                    )
+                    rect.widthProperty().bind(highlightWidth)
                 }
             } else {
-                refreshMarkers()
+                rect.widthProperty().bind(endPos.minus(rect.translateXProperty()))
             }
+        }
+    }
+
+    init {
+        resetState()
+        initializeMarkers()
+        track.getChildList()?.clear()
+        highlights.forEach { track.add(it) }
+        _markers.forEach { track.add(it) }
+        refreshMarkers()
+        refreshHighlights()
+
+        skinnable.markers.onChangeAndDoNow {
+            println("here")
+            it.sortedBy { it.frame }
+            refreshMarkers()
+            refreshHighlights()
         }
 
         control.setOnKeyPressed { e ->
@@ -262,7 +281,7 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
         val location = skinnable.onLocationRequestProperty.value?.invoke() ?: 0
         val position = framesToPixels(location).toDouble()
 
-        markers.singleOrNull { it.markerPositionProperty.value == position }?.let {
+        _markers.singleOrNull { it.markerPositionProperty.value == position }?.let {
             it.requestFocus()
             event.consume()
         }
@@ -274,12 +293,12 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
             val min = getMin(id)
             val max = getMax(id)
             val clamped = Utils.clamp(min, newValue, max)
-            markers.get(id).markerPositionProperty.set(clamped)
+            _markers.get(id).markerPositionProperty.set(clamped)
         }
     }
 
     fun getMin(id: Int): Double {
-        val placedMarkers = markers.filter { it.isPlacedProperty.value }
+        val placedMarkers = _markers.filter { it.isPlacedProperty.value }
         val previousMaker = if (id > 0) {
             placedMarkers.get(id - 1)
         } else {
@@ -291,7 +310,7 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
     }
 
     fun getMax(id: Int): Double {
-        val placedMarkers = markers.filter { it.isPlacedProperty.value }
+        val placedMarkers = _markers.filter { it.isPlacedProperty.value }
         val previousMaker = if (id < placedMarkers.size - 1) {
             placedMarkers.get(id + 1)
         } else {

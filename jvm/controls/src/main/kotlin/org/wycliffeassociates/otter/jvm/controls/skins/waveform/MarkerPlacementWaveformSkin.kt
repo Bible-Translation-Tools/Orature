@@ -34,6 +34,12 @@ import tornadofx.*
 
 class MarkerPlacementWaveformSkin(val control: MarkerPlacementWaveform) : ScrollingWaveformSkin(control) {
 
+    private lateinit var top: MarkerTrackControl
+
+    fun refreshMarkers() {
+        top.refreshMarkers()
+    }
+
     override fun initialize() {
         val root = StackPane().apply {
             hgrow = Priority.ALWAYS
@@ -61,15 +67,9 @@ class MarkerPlacementWaveformSkin(val control: MarkerPlacementWaveform) : Scroll
             }
             add(waveformFrame)
             val topTrack = MarkerTrackControl().apply {
-
+                top = this
                 minWidthProperty().bind((skinnable as MarkerPlacementWaveform).imageWidthProperty)
-                (skinnable as MarkerPlacementWaveform).markerStateProperty.onChangeAndDoNow { markers ->
-                    markers?.let { markers ->
-                        markers.markerCountProperty.onChangeAndDoNow {
-                            this.markers.setAll((skinnable as MarkerPlacementWaveform).markers)
-                        }
-                    }
-                }
+                markers.bind((skinnable as MarkerPlacementWaveform).markers, {it})
                 setOnPositionChanged { id, position ->
                     (skinnable as MarkerPlacementWaveform).onPositionChangedProperty.invoke(id, position)
                 }

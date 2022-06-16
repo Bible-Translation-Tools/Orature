@@ -25,10 +25,10 @@ import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.skins.waveform.MarkerPlacementWaveformSkin
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.observableListOf
 
-class MarkerPlacementWaveform(
-) : ScrollingWaveform() {
+class MarkerPlacementWaveform : ScrollingWaveform() {
 
     val markers = observableListOf<ChunkMarkerModel>()
     var onPositionChangedProperty: (Int, Double) -> Unit = { _,_ ->}
@@ -43,6 +43,14 @@ class MarkerPlacementWaveform(
     var onSeekNext: () -> Unit = {}
     var onSeekPrevious: () -> Unit = {}
     var onPlaceMarker: () -> Unit = {}
+
+    fun refreshMarkers() {
+        (skin as? MarkerPlacementWaveformSkin)?.refreshMarkers()
+    }
+
+    init {
+        skinProperty().onChangeAndDoNow { refreshMarkers() }
+    }
 
     override fun createDefaultSkin(): Skin<*> {
         return MarkerPlacementWaveformSkin(this)
