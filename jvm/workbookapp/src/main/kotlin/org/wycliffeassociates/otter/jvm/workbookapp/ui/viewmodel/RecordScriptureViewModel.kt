@@ -129,10 +129,10 @@ class RecordScriptureViewModel : ViewModel() {
 
         verseCountProperty.bind(
             workbookDataStore.activeProjectFilesAccessorProperty.objectBinding {
-                it?.getVerseCount(
+                it?.getChapterText(
                     workbookDataStore.workbook.target.slug,
                     activeChapter.sort
-                ) ?: 0
+                )?.size ?: 0
             }
         )
 
