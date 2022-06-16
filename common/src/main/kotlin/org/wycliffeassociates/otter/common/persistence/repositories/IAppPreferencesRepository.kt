@@ -39,4 +39,7 @@ interface IAppPreferencesRepository {
     fun setAppTheme(theme: ColorTheme): Completable
     fun sourceTextZoomRate(): Single<Int>
     fun setSourceTextZoomRate(rate: Int): Completable
+    fun langNamesServer(): Single<String>
+    fun setLangNamesServer(server: String): Completable
+
 }

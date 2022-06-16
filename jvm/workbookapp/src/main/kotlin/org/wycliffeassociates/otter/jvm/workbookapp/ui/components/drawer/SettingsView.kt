@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
 
+import javafx.animation.Timeline
 import javafx.application.Platform
 import javafx.scene.control.Button
 import javafx.scene.control.ToggleGroup
@@ -28,6 +29,7 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.button.SelectButton
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
+import org.wycliffeassociates.otter.jvm.utils.images.ImageLoader
 import org.wycliffeassociates.otter.jvm.utils.overrideDefaultKeyEventHandler
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ComboboxItem
@@ -283,6 +285,53 @@ class SettingsView : View() {
 
                         action {
                             addPluginDialog.open()
+                        }
+                    }
+                }
+
+                vbox {
+                    addClass("app-drawer__section")
+
+                    label(messages["languageNamesServer"]).apply {
+                        addClass("app-drawer__subtitle--small")
+                    }
+
+                    textfield(viewModel.langNamesServerProperty) {
+                        addClass("txt-input")
+                        focusedProperty().onChange {
+                            if (!it) viewModel.updateLanguagesServer()
+                        }
+                    }
+
+                    hbox {
+                        button(messages["import"]) {
+                            addClass("btn", "btn--secondary")
+                            graphic = FontIcon(MaterialDesign.MDI_IMPORT)
+                            tooltip {
+                                textProperty().bind(this@button.textProperty())
+                            }
+                            action {
+                                viewModel.importLanguages()
+                            }
+                        }
+
+                        label {
+                            graphic = ImageLoader.load(
+                                ClassLoader.getSystemResourceAsStream("images/spinner.svg"),
+                                ImageLoader.Format.SVG
+                            ).apply {
+                                scaleX = 1.0
+                                scaleY = 1.0
+                            }
+
+                            timeline {
+                                keyframe(1.seconds) {
+                                    keyvalue(rotateProperty(), 360.0)
+                                }
+                                cycleCount = Timeline.INDEFINITE
+                            }
+
+                            visibleProperty().bind(viewModel.langNamesImportingProperty)
                         }
                     }
                 }

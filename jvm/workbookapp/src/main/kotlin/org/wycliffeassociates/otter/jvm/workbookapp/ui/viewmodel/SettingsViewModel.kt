@@ -20,15 +20,22 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.jthemedetecor.OsThemeDetector
+import io.reactivex.Completable
+import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.geometry.NodeOrientation
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
 import org.wycliffeassociates.otter.common.domain.theme.AppTheme
@@ -39,26 +46,19 @@ import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.ThemeColorEvent
 import tornadofx.*
+import java.net.URI
 import javax.inject.Inject
 
 class SettingsViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(SettingsViewModel::class.java)
 
-    @Inject
-    lateinit var audioDeviceProvider: AudioDeviceProvider
-
-    @Inject
-    lateinit var appPrefRepository: IAppPreferencesRepository
-
-    @Inject
-    lateinit var pluginRepository: IAudioPluginRepository
-
-    @Inject
-    lateinit var localeLanguage: LocaleLanguage
-
-    @Inject
-    lateinit var theme: AppTheme
+    @Inject lateinit var audioDeviceProvider: AudioDeviceProvider
+    @Inject lateinit var appPrefRepository: IAppPreferencesRepository
+    @Inject lateinit var pluginRepository: IAudioPluginRepository
+    @Inject lateinit var localeLanguage: LocaleLanguage
+    @Inject lateinit var theme: AppTheme
+    @Inject lateinit var importLanguages: ImportLanguages
 
     private val audioPluginViewModel: AudioPluginViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
@@ -101,6 +101,9 @@ class SettingsViewModel : ViewModel() {
         }
     }
 
+    val langNamesServerProperty = SimpleStringProperty()
+    val langNamesImportingProperty = SimpleBooleanProperty(false)
+
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
 
@@ -121,6 +124,7 @@ class SettingsViewModel : ViewModel() {
         loadInputDevices()
         loadCurrentOutputDevice()
         loadCurrentInputDevice()
+        loadLangNamesServer()
 
         supportedThemes.setAll(ColorTheme.values().asList())
         theme.preferredTheme
@@ -202,6 +206,17 @@ class SettingsViewModel : ViewModel() {
             }
     }
 
+    private fun loadLangNamesServer() {
+        appPrefRepository.langNamesServer()
+            .doOnError {
+                logger.error("Error in loadLangNamesServer: ", it)
+            }
+            .observeOnFx()
+            .subscribe { server ->
+                langNamesServerProperty.set(server)
+            }
+    }
+
     private fun loadOutputDevices() {
         val devices = audioDeviceProvider.getOutputDeviceNames()
         outputDevices.setAll(devices)
@@ -253,6 +268,50 @@ class SettingsViewModel : ViewModel() {
 
         theme.setPreferredThem(selectedTheme)
             .subscribe()
+    }
+
+    fun updateLanguagesServer() {
+        appPrefRepository
+            .setLangNamesServer(langNamesServerProperty.value)
+            .subscribe()
+    }
+
+    fun importLanguages() {
+        if (langNamesImportingProperty.value) return
+        langNamesImportingProperty.set(true)
+
+        fetchLangNames()
+            .subscribeOn(Schedulers.io())
+            .flatMapCompletable { response ->
+                if (response.isSuccessful) {
+                    response.body()?.byteStream()?.let { stream ->
+                        importLanguages.update(stream)
+                    }
+                } else {
+                    val error = Throwable("Response code: ${response.code()}")
+                    Completable.error(error)
+                }
+            }
+            .doOnError {
+                logger.error("Error in importLanguages: ", it)
+                langNamesImportingProperty.set(false)
+            }
+            .onErrorComplete()
+            .observeOnFx()
+            .subscribe {
+                langNamesImportingProperty.set(false)
+            }
+    }
+
+    private fun fetchLangNames(): Single<Response> {
+        val uri = URI.create("${langNamesServerProperty.value}/langnames.json").normalize()
+        return Single.fromCallable {
+            val httpClient = OkHttpClient()
+            val request = Request.Builder()
+                .url(uri.toURL())
+                .build()
+            httpClient.newCall(request).execute()
+        }
     }
 
     private fun bindSystemTheme() {

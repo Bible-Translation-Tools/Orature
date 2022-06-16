@@ -26,6 +26,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Translation
 interface ILanguageRepository : IRepository<Language> {
     fun insert(language: Language): Single<Int>
     fun insertAll(languages: List<Language>): Single<List<Int>>
+    fun upsertAll(languages: List<Language>): Completable
     fun updateRegions(languages: List<Language>): Completable
     fun getBySlug(slug: String): Single<Language>
     fun getGateway(): Single<List<Language>>

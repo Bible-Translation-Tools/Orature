@@ -50,6 +50,7 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
     private val LOCALE_LANGUAGE_KEY = "localeLanguage"
     private val APP_THEME_KEY = "appTheme"
     private val SOURCE_TEXT_ZOOM_KEY = "sourceTextZoom"
+    private val LANG_NAMES_SERVER_KEY = "langNamesServer"
 
     private fun putInt(key: String, value: Int): Completable {
         return Completable
@@ -213,5 +214,13 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
 
     override fun setSourceTextZoomRate(rate: Int): Completable {
         return putInt(SOURCE_TEXT_ZOOM_KEY, rate)
+    }
+
+    override fun langNamesServer(): Single<String> {
+        return getString(LANG_NAMES_SERVER_KEY, "http://td.unfoldingword.org/exports/")
+    }
+
+    override fun setLangNamesServer(server: String): Completable {
+        return putString(LANG_NAMES_SERVER_KEY, server)
     }
 }

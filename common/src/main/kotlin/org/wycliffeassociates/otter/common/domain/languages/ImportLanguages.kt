@@ -47,6 +47,18 @@ class ImportLanguages @Inject constructor(val languageRepo: ILanguageRepository)
             .subscribeOn(Schedulers.io())
     }
 
+    fun update(inputStream: InputStream): Completable {
+        return Completable
+            .fromCallable {
+                val languages = mapLanguages(inputStream)
+                languageRepo.upsertAll(languages).blockingGet()
+            }
+            .doOnError { e ->
+                logger.error("Error in ImportLanguages", e)
+            }
+            .subscribeOn(Schedulers.io())
+    }
+
     fun updateRegions(inputStream: InputStream): Completable {
         return Completable
             .fromCallable {
