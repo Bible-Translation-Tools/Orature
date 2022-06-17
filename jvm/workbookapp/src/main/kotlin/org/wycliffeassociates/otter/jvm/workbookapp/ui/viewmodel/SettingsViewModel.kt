@@ -46,7 +46,6 @@ import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.ThemeColorEvent
 import tornadofx.*
-import java.net.URI
 import javax.inject.Inject
 
 class SettingsViewModel : ViewModel() {
@@ -101,7 +100,7 @@ class SettingsViewModel : ViewModel() {
         }
     }
 
-    val langNamesServerProperty = SimpleStringProperty()
+    val languageNamesUrlProperty = SimpleStringProperty()
     val langNamesImportingProperty = SimpleBooleanProperty(false)
 
     init {
@@ -124,7 +123,7 @@ class SettingsViewModel : ViewModel() {
         loadInputDevices()
         loadCurrentOutputDevice()
         loadCurrentInputDevice()
-        loadLangNamesServer()
+        loadLanguageNamesUrl()
 
         supportedThemes.setAll(ColorTheme.values().asList())
         theme.preferredTheme
@@ -206,14 +205,14 @@ class SettingsViewModel : ViewModel() {
             }
     }
 
-    private fun loadLangNamesServer() {
-        appPrefRepository.langNamesServer()
+    private fun loadLanguageNamesUrl() {
+        appPrefRepository.languageNamesUrl()
             .doOnError {
-                logger.error("Error in loadLangNamesServer: ", it)
+                logger.error("Error in loadLanguageNamesUrl: ", it)
             }
             .observeOnFx()
             .subscribe { server ->
-                langNamesServerProperty.set(server)
+                languageNamesUrlProperty.set(server)
             }
     }
 
@@ -270,9 +269,9 @@ class SettingsViewModel : ViewModel() {
             .subscribe()
     }
 
-    fun updateLanguagesServer() {
+    fun updateLanguageNamesUrl() {
         appPrefRepository
-            .setLangNamesServer(langNamesServerProperty.value)
+            .setLanguageNamesUrl(languageNamesUrlProperty.value)
             .subscribe()
     }
 
@@ -304,11 +303,10 @@ class SettingsViewModel : ViewModel() {
     }
 
     private fun fetchLangNames(): Single<Response> {
-        val uri = URI.create("${langNamesServerProperty.value}/langnames.json").normalize()
         return Single.fromCallable {
             val httpClient = OkHttpClient()
             val request = Request.Builder()
-                .url(uri.toURL())
+                .url(languageNamesUrlProperty.value)
                 .build()
             httpClient.newCall(request).execute()
         }

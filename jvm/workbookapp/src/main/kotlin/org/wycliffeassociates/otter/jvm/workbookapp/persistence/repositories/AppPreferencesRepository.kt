@@ -114,11 +114,11 @@ class AppPreferencesRepository @Inject constructor(
         return preferences.setSourceTextZoomRate(rate)
     }
 
-    override fun langNamesServer(): Single<String> {
-        return preferences.langNamesServer()
+    override fun languageNamesUrl(): Single<String> {
+        return preferences.languageNamesUrl()
     }
 
-    override fun setLangNamesServer(server: String): Completable {
-        return preferences.setLangNamesServer(server)
+    override fun setLanguageNamesUrl(server: String): Completable {
+        return preferences.setLanguageNamesUrl(server)
     }
 }

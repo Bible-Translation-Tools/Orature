@@ -293,14 +293,14 @@ class SettingsView : View() {
                 vbox {
                     addClass("app-drawer__section")
 
-                    label(messages["languageNamesServer"]).apply {
+                    label(messages["languageNamesUrl"]).apply {
                         addClass("app-drawer__subtitle--small")
                     }
 
-                    textfield(viewModel.langNamesServerProperty) {
+                    textfield(viewModel.languageNamesUrlProperty) {
                         addClass("txt-input")
                         focusedProperty().onChange {
-                            if (!it) viewModel.updateLanguagesServer()
+                            if (!it) viewModel.updateLanguageNamesUrl()
                         }
                     }
 
