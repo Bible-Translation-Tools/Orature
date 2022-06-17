@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import javafx.animation.AnimationTimer
+import javafx.collections.ListChangeListener
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
@@ -71,7 +72,6 @@ class MarkerView : PluginEntrypoint() {
         super.onUndock()
         timer?.stop()
         timer = null
-        waveform.markerStateProperty.unbind()
         waveform.positionProperty.unbind()
         minimap?.cleanUpOnUndock()
     }
@@ -91,7 +91,6 @@ class MarkerView : PluginEntrypoint() {
                         viewModel.compositeDisposable.add(
                             viewModel.waveform.observeOnFx().subscribe { addWaveformImage(it) }
                         )
-                        markerStateProperty.bind(viewModel.markerStateProperty)
                         positionProperty.bind(viewModel.positionProperty)
 
                         onSeekNext = viewModel::seekNext

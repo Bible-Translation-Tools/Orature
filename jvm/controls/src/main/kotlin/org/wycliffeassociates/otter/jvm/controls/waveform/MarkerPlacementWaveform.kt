@@ -31,12 +31,10 @@ import tornadofx.observableListOf
 class MarkerPlacementWaveform : ScrollingWaveform() {
 
     val markers = observableListOf<ChunkMarkerModel>()
-    var onPositionChangedProperty: (Int, Double) -> Unit = { _,_ ->}
+    var onPositionChangedProperty: (Int, Double) -> Unit = { _, _ -> }
     var onSeekPreviousProperty: () -> Unit = {}
     var onSeekNextProperty: () -> Unit = {}
     var onLocationRequestProperty: () -> Int = { 0 }
-
-    val markerStateProperty = SimpleObjectProperty<VerseMarkerModel>()
 
     val imageWidthProperty = SimpleDoubleProperty()
 
@@ -45,11 +43,11 @@ class MarkerPlacementWaveform : ScrollingWaveform() {
     var onPlaceMarker: () -> Unit = {}
 
     fun refreshMarkers() {
-        (skin as? MarkerPlacementWaveformSkin)?.refreshMarkers()
+        (skin as MarkerPlacementWaveformSkin).refreshMarkers()
     }
 
     init {
-        skinProperty().onChangeAndDoNow { refreshMarkers() }
+        skinProperty().onChangeAndDoNow { it?.let { refreshMarkers() } }
     }
 
     override fun createDefaultSkin(): Skin<*> {
