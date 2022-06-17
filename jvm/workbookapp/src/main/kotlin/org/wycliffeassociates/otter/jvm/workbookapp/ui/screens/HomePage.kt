@@ -40,6 +40,7 @@ class HomePage : View() {
     private val settingsViewModel: SettingsViewModel by inject()
     private val navigator: NavigationMediator by inject()
 
+    private lateinit var banner: ResumeBookBanner
     private val breadCrumb = BreadCrumb().apply {
         titleProperty.set(messages["projects"])
         iconProperty.set(FontIcon(MaterialDesign.MDI_HOME))
@@ -69,6 +70,7 @@ class HomePage : View() {
 
                 add(
                     ResumeBookBanner().apply {
+                        banner = this
                         resumeTextProperty.set(messages["resume"])
                         orientationScaleProperty.bind(settingsViewModel.orientationScaleProperty)
 
@@ -142,5 +144,10 @@ class HomePage : View() {
         viewModel.loadResumeBook()
         viewModel.loadTranslations()
         viewModel.clearSelectedProject()
+    }
+
+    override fun onUndock() {
+        super.onUndock()
+        banner.cleanUp()
     }
 }
