@@ -23,6 +23,7 @@ import javafx.beans.binding.ObjectBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.collections.transformation.FilteredList
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.scene.control.Control
@@ -33,6 +34,7 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.Artw
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportOption
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
+import java.util.function.Predicate
 
 class WorkbookBanner : Control() {
 
@@ -40,7 +42,8 @@ class WorkbookBanner : Control() {
     val attributionTextProperty = SimpleStringProperty()
     val bookTitleProperty = SimpleStringProperty()
     val resourceTitleProperty = SimpleStringProperty()
-    val hideDeleteButtonProperty = SimpleBooleanProperty(false)
+    val isBookResourceProperty = SimpleBooleanProperty(false)
+    val hideDeleteButtonProperty = SimpleBooleanProperty()
 
     val deleteTitleProperty = SimpleStringProperty("delete")
     val exportTitleProperty = SimpleStringProperty("export")
@@ -53,6 +56,7 @@ class WorkbookBanner : Control() {
         ExportOption.SOURCE_AUDIO,
         ExportOption.BACKUP
     )
+    val filteredExportOptions = FilteredList(exportOptions)
 
     init {
         styleClass.setAll("workbook-banner")
@@ -66,6 +70,11 @@ class WorkbookBanner : Control() {
                     )
                 )
             } ?: attributionTextProperty.set(null)
+        }
+        isBookResourceProperty.onChange { isBook ->
+            filteredExportOptions.predicate = Predicate {
+                it != ExportOption.SOURCE_AUDIO || isBook
+            }
         }
     }
 

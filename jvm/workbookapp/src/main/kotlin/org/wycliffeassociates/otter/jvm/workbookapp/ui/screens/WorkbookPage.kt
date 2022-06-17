@@ -412,11 +412,12 @@ class WorkbookPage : View() {
                 )
                 bookTitleProperty.bind(workbook.stringBinding { it?.target?.title })
                 resourceTitleProperty.bind(viewModel.selectedResourceMetadata.stringBinding { it?.title })
-                hideDeleteButtonProperty.bind(
+                isBookResourceProperty.bind(
                     viewModel.selectedResourceMetadata.booleanBinding {
-                        it?.type == ContainerType.Help
+                        it?.type == ContainerType.Book
                     }
                 )
+                hideDeleteButtonProperty.bind(isBookResourceProperty.not())
                 deleteTitleProperty.set(FX.messages["delete"])
                 exportTitleProperty.bind(
                     Bindings.createStringBinding(

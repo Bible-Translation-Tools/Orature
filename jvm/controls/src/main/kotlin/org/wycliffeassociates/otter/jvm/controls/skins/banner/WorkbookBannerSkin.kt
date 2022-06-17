@@ -85,7 +85,7 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
             }
         }
         exportSelectMenu.apply {
-            items = banner.exportOptions
+            items = banner.filteredExportOptions
             setCellFactory {
                 ExportOptionListCell()
             }
