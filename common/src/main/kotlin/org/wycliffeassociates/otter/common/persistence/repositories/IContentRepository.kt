@@ -23,6 +23,7 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.Collection
+import org.wycliffeassociates.otter.common.data.primitives.ContentType
 
 interface IContentRepository : IRepository<Content> {
     // Insert for a collection
@@ -36,6 +37,9 @@ interface IContentRepository : IRepository<Content> {
     fun getSources(content: Content): Single<List<Content>>
     // Update the sources for a content
     fun updateSources(content: Content, sourceContents: List<Content>): Completable
-    fun deleteForCollection(chapterCollection: Collection): Completable
+    fun deleteForCollection(
+        chapterCollection: Collection,
+        typeFilter: ContentType? = null
+    ): Completable
     fun getMaxDraftNumber(chapterCollection: Collection): Single<Int>
 }

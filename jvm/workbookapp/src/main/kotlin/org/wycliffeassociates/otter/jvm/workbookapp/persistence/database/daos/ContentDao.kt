@@ -298,11 +298,15 @@ class ContentDao(
             .execute()
     }
 
-    fun deleteForCollection(chapterCollection: CollectionEntity, dsl: DSLContext = instanceDsl) {
+    fun deleteForCollection(
+        chapterCollection: CollectionEntity,
+        contentTypeId: Int? = null,
+        dsl: DSLContext = instanceDsl
+    ) {
         dsl.deleteFrom(CONTENT_ENTITY)
             .where(
                 CONTENT_ENTITY.COLLECTION_FK.eq(chapterCollection.id)
-                    .and((CONTENT_ENTITY.TYPE_FK).eq(1))
+                    .and((CONTENT_ENTITY.TYPE_FK).eq(contentTypeId ?: 1))
             )
             .execute()
     }

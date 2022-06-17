@@ -224,7 +224,7 @@ class WorkbookRepository(
                     },
                     currentDraftNumber = db.getCurrentDraftNumber(chapterCollection),
                     reset = {
-                        db.clearContentForCollection(chapterCollection).map {
+                        db.clearContentForCollection(chapterCollection, ContentType.TEXT).map {
                             it.forEach { take ->
                                 println("deleting take: $take")
                                 println("delete status is: ${take.path.delete()}")
@@ -601,7 +601,11 @@ class WorkbookRepository(
         fun getSourceProject(targetProject: Collection): Maybe<Collection>
         fun getTranslation(sourceLanguage: Language, targetLanguage: Language): Single<Translation>
         fun updateTranslation(translation: Translation): Completable
-        fun clearContentForCollection(chapterCollection: Collection): Single<List<ModelTake>>
+        fun clearContentForCollection(
+            chapterCollection: Collection,
+            typeFilter: ContentType
+        ): Single<List<ModelTake>>
+
         fun getChunkCount(chapterCollection: Collection): Single<Int>
         fun getCurrentDraftNumber(chapterCollection: Collection): Single<Int>
     }
@@ -629,17 +633,25 @@ private class DefaultDatabaseAccessors(
             .map { it.count { it.type == ContentType.TEXT } }
     }
 
-    override fun clearContentForCollection(chapterCollection: Collection): Single<List<ModelTake>> {
+    override fun clearContentForCollection(
+        chapterCollection: Collection,
+        typeFilter: ContentType
+    ): Single<List<ModelTake>> {
         return takeRepo
-            .getByCollection(chapterCollection, true).map {
+            .getByCollection(chapterCollection, true)
+            .map {
+                it.filter { take ->
+                    takeRepo.getContentType(take).blockingGet() == typeFilter
+                }
+            }
+            .map {
                 it.forEach {
                     takeRepo.delete(it).blockingAwait()
                 }
                 takeRepo.deleteExpiredTakes().blockingAwait()
-                contentRepo.deleteForCollection(chapterCollection).blockingAwait()
+                contentRepo.deleteForCollection(chapterCollection, typeFilter).blockingAwait()
                 it
             }
-
     }
 
     override fun addContentForCollection(collection: Collection, chunks: List<Content>): Completable {

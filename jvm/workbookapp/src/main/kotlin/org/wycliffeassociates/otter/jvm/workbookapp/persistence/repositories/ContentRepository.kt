@@ -128,9 +128,19 @@ class ContentRepository @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
-    override fun deleteForCollection(chapterCollection: Collection): Completable {
+    override fun deleteForCollection(
+        chapterCollection: Collection,
+        typeFilter: ContentType?
+    ): Completable {
+        val typeId = typeFilter?.let {
+            contentTypeDao.fetchId(typeFilter)
+        }
+
         return Completable.fromCallable {
-            contentDao.deleteForCollection(collectionMapper.mapToEntity(chapterCollection))
+            contentDao.deleteForCollection(
+                collectionMapper.mapToEntity(chapterCollection),
+                typeId
+            )
         }
     }
 
