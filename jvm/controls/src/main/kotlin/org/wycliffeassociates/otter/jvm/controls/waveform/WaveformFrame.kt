@@ -102,23 +102,6 @@ class WaveformFrame(
         with(this) {
             bindTranslateX()
 
-            hgrow = Priority.ALWAYS
-            vgrow = Priority.ALWAYS
-
-//            top {
-//                region {
-//                    styleClass.add("scrolling-waveform-frame__top-track")
-//                    topTrack?.let {
-//                        add(it.apply {
-//                            val me = (it as MarkerTrackControl)
-//                            me.onSeekPreviousProperty.bind(this@WaveformFrame.onSeekPreviousProperty)
-//                            me.onSeekNextProperty.bind(this@WaveformFrame.onSeekNextProperty)
-//                        })
-//                    }
-//                }
-//            }
-//
-//            center {
             region {
                 imageRegion = this
                 stackpane {
@@ -126,16 +109,15 @@ class WaveformFrame(
                     styleClass.add("scrolling-waveform-frame__center")
                     alignment = Pos.CENTER
 
-                    fitToParentHeight()
+                    hbox {
+                        imageHolder = this@hbox
+                    }
 
                     borderpane {
                         top {
                             region {
                                 styleClass.add("scrolling-waveform-frame__top-track")
                             }
-                        }
-                        center = hbox {
-                            imageHolder = this@hbox
                         }
                         bottom {
                             region {
@@ -146,6 +128,7 @@ class WaveformFrame(
                             }
                         }
                     }
+
                     topTrack?.let {
                         add(it.apply {
                             val me = (it as MarkerTrackControl)
