@@ -32,7 +32,7 @@ class Chunk(
     val start: Int,
     val end: Int,
 
-    val draftNumber: Int,
+    var draftNumber: Int,
 
     override val contentType: ContentType
 
