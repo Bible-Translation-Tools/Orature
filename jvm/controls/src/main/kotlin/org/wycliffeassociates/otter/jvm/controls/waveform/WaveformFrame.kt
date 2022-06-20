@@ -102,22 +102,21 @@ class WaveformFrame(
         with(this) {
             bindTranslateX()
 
-            region {
-                imageRegion = this
+
                 stackpane {
                     highlightHolder = this
                     styleClass.add("scrolling-waveform-frame__center")
                     alignment = Pos.CENTER
-
-                    hbox {
-                        imageHolder = this@hbox
-                    }
 
                     borderpane {
                         top {
                             region {
                                 styleClass.add("scrolling-waveform-frame__top-track")
                             }
+                        }
+                        center = hbox {
+                            imageRegion = this
+                            imageHolder = this@hbox
                         }
                         bottom {
                             region {
@@ -136,7 +135,7 @@ class WaveformFrame(
                             me.onSeekNextProperty.bind(this@WaveformFrame.onSeekNextProperty)
                         })
                     }
-                }
+                
             }
 
             setOnMousePressed { me ->
