@@ -105,7 +105,7 @@ class SettingsView : View() {
                         }
                     }
 
-                    label(messages["languageSettings"]).apply {
+                    label(messages["language"]).apply {
                         addClass("app-drawer__subtitle--small")
                     }
 
@@ -293,7 +293,7 @@ class SettingsView : View() {
                 vbox {
                     addClass("app-drawer__section")
 
-                    label(messages["languageNamesUrl"]).apply {
+                    label(messages["languageSettings"]).apply {
                         addClass("app-drawer__subtitle--small")
                     }
 
@@ -305,9 +305,8 @@ class SettingsView : View() {
                     }
 
                     hbox {
-                        button(messages["import"]) {
-                            addClass("btn", "btn--secondary")
-                            graphic = FontIcon(MaterialDesign.MDI_IMPORT)
+                        button(messages["checkForUpdates"]) {
+                            addClass("btn", "btn--primary")
                             tooltip {
                                 textProperty().bind(this@button.textProperty())
                             }
