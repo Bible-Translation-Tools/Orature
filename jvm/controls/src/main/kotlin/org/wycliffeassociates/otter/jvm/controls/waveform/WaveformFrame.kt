@@ -41,7 +41,7 @@ import tornadofx.*
 class WaveformFrame(
     topTrack: Node? = null,
     bottomTrack: Node? = null
-) : BorderPane() {
+) : StackPane() {
 
     private val onWaveformClickedProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     private val onWaveformDragReleasedProperty = SimpleObjectProperty<(pixel: Double) -> Unit>()
@@ -105,40 +105,53 @@ class WaveformFrame(
             hgrow = Priority.ALWAYS
             vgrow = Priority.ALWAYS
 
-            top {
-                region {
-                    styleClass.add("scrolling-waveform-frame__top-track")
+//            top {
+//                region {
+//                    styleClass.add("scrolling-waveform-frame__top-track")
+//                    topTrack?.let {
+//                        add(it.apply {
+//                            val me = (it as MarkerTrackControl)
+//                            me.onSeekPreviousProperty.bind(this@WaveformFrame.onSeekPreviousProperty)
+//                            me.onSeekNextProperty.bind(this@WaveformFrame.onSeekNextProperty)
+//                        })
+//                    }
+//                }
+//            }
+//
+//            center {
+            region {
+                imageRegion = this
+                stackpane {
+                    highlightHolder = this
+                    styleClass.add("scrolling-waveform-frame__center")
+                    alignment = Pos.CENTER
+
+                    fitToParentHeight()
+
+                    borderpane {
+                        top {
+                            region {
+                                styleClass.add("scrolling-waveform-frame__top-track")
+                            }
+                        }
+                        center = hbox {
+                            imageHolder = this@hbox
+                        }
+                        bottom {
+                            region {
+                                styleClass.add("scrolling-waveform-frame__bottom-track")
+                                bottomTrack?.let {
+                                    add(it)
+                                }
+                            }
+                        }
+                    }
                     topTrack?.let {
                         add(it.apply {
                             val me = (it as MarkerTrackControl)
                             me.onSeekPreviousProperty.bind(this@WaveformFrame.onSeekPreviousProperty)
                             me.onSeekNextProperty.bind(this@WaveformFrame.onSeekNextProperty)
                         })
-                    }
-                }
-            }
-
-            center {
-                region {
-                    imageRegion = this
-                    stackpane {
-                        highlightHolder = this
-                        styleClass.add("scrolling-waveform-frame__center")
-                        alignment = Pos.CENTER
-
-                        fitToParentHeight()
-                        hbox {
-                            imageHolder = this@hbox
-                        }
-                    }
-                }
-            }
-
-            bottom {
-                region {
-                    styleClass.add("scrolling-waveform-frame__bottom-track")
-                    bottomTrack?.let {
-                        add(it)
                     }
                 }
             }

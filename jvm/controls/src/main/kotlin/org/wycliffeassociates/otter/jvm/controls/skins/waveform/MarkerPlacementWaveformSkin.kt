@@ -48,7 +48,18 @@ class MarkerPlacementWaveformSkin(val control: MarkerPlacementWaveform) : Scroll
             nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
 
             add(MarkerViewBackground())
-            waveformFrame = WaveformFrame().apply {
+
+            val topTrack = MarkerTrackControl().apply {
+                top = this
+                markers.bind((skinnable as MarkerPlacementWaveform).markers, {it})
+                setOnPositionChanged { id, position ->
+                    (skinnable as MarkerPlacementWaveform).onPositionChangedProperty.invoke(id, position)
+                }
+                setOnLocationRequest {
+                    (skinnable as MarkerPlacementWaveform).onLocationRequestProperty.invoke()
+                }
+            }
+            waveformFrame = WaveformFrame(topTrack).apply {
                 framePositionProperty.bind(skinnable.positionProperty)
                 onWaveformClicked { skinnable.onWaveformClicked() }
                 onWaveformDragReleased {
@@ -66,20 +77,6 @@ class MarkerPlacementWaveformSkin(val control: MarkerPlacementWaveform) : Scroll
                 }
             }
             add(waveformFrame)
-            val topTrack = MarkerTrackControl().apply {
-                top = this
-                minWidthProperty().bind((skinnable as MarkerPlacementWaveform).imageWidthProperty)
-                markers.bind((skinnable as MarkerPlacementWaveform).markers, {it})
-                setOnPositionChanged { id, position ->
-                    (skinnable as MarkerPlacementWaveform).onPositionChangedProperty.invoke(id, position)
-                }
-                setOnLocationRequest {
-                    (skinnable as MarkerPlacementWaveform).onLocationRequestProperty.invoke()
-                }
-
-                translateXProperty().bind(waveformFrame.translateXProperty())
-            }
-            add(topTrack)
             add(WaveformOverlay().apply { playbackPositionProperty.bind(skinnable.positionProperty) })
             add(PlaceMarkerLayer().apply { onPlaceMarkerAction { control.onPlaceMarker() } })
         }
