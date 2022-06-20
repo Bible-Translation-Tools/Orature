@@ -28,14 +28,11 @@ import tornadofx.*
 
 private const val SEEK_EPSILON = 15_000
 
-private var idgen = 0
-
 class VerseMarkerModel(private val audio: AudioFile, private val markerTotal: Int) {
 
-
     val cues = sanitizeCues(audio)
-    val _markers: MutableList<ChunkMarkerModel> = mutableListOf()
     val markers: ObservableList<ChunkMarkerModel> = observableListOf()
+    val highlightState: List<MarkerHighlightState>
 
     val markerCountProperty = SimpleIntegerProperty(1)
     val audioEnd = audio.totalFrames
@@ -49,18 +46,21 @@ class VerseMarkerModel(private val audio: AudioFile, private val markerTotal: In
         markerCountProperty.value = cues.size
 
         markers.setAll(initializeMarkers(markerTotal, cues))
+        highlightState = initializeHighlights(markers)
     }
 
     fun addMarker(location: Int) {
-        if (markers.size < markerTotal) {
-            changesSaved = false
-            _markers.add(ChunkMarkerModel(location, markers.size.toString(), true))
-            _markers.sortWith(compareBy({ !it.placed }, { it.frame }))
-            _markers.forEachIndexed { index, chunkMarker -> chunkMarker.label = "${(index + 1).toString()} thing" }
-            markers.clear()
-           // markers.setAll(_markers)
-            markerCountProperty.value = markers.filter { it.placed }.size
+        changesSaved = false
+        for (marker in markers) {
+            if (!marker.placed) {
+                marker.frame = location
+                marker.placed = true
+                break
+            }
         }
+        markers.sortWith(compareBy({ !it.placed }, { it.frame }))
+        markers.forEachIndexed { index, chunkMarker -> chunkMarker.label = (index + 1).toString() }
+        markerCountProperty.value = markers.filter { it.placed }.size
     }
 
     fun seekCurrent(location: Int): Int {
@@ -127,16 +127,31 @@ class VerseMarkerModel(private val audio: AudioFile, private val markerTotal: In
                 markers.add(ChunkMarkerModel(cue))
             }
         }
-
+        for (i in markers.size until markerTotal) {
+            markers.add(ChunkMarkerModel(0, (i + 1).toString(), false))
+        }
         return markers
+    }
+
+    private fun initializeHighlights(markers: List<ChunkMarkerModel>): List<MarkerHighlightState> {
+        val highlightState = mutableListOf<MarkerHighlightState>()
+        markers.forEachIndexed { i, _ ->
+            val highlight = MarkerHighlightState()
+            if (i % 2 == 0) {
+                highlight.styleClass.bind(highlight.secondaryStyleClass)
+            } else {
+                highlight.styleClass.bind(highlight.primaryStyleClass)
+            }
+            highlightState.add(highlight)
+        }
+        return highlightState
     }
 }
 
 data class ChunkMarkerModel(
     var frame: Int,
     var label: String,
-    var placed: Boolean,
-    val id: Int = idgen++
+    var placed: Boolean
 ) {
     constructor(audioCue: AudioCue) : this(audioCue.location, audioCue.label, true)
 

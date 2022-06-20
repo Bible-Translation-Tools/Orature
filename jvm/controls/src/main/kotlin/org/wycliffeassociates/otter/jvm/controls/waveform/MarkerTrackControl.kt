@@ -39,10 +39,7 @@ class MarkerTrackControl : Control() {
     }
 
     fun refreshMarkers() {
-        (skin as? MarkerTrackControlSkin)?.let {
-            println("what you expect bruh")
-            it.refreshMarkers()
-        }
+        (skin as? MarkerTrackControlSkin)?.let { it.refreshMarkers() }
     }
 
     fun setOnPositionChanged(op: (Int, Double) -> Unit) {

@@ -68,6 +68,8 @@ class Chunk : Fragment() {
             refreshMarkers()
         }
 
+        markerStateProperty.bind(vm.markerStateProperty)
+
         imageWidthProperty.bind(vm.imageWidthProperty)
     }
 

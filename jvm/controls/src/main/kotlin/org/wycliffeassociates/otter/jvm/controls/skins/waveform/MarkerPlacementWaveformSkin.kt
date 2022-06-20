@@ -37,7 +37,6 @@ class MarkerPlacementWaveformSkin(val control: MarkerPlacementWaveform) : Scroll
     private lateinit var top: MarkerTrackControl
 
     fun refreshMarkers() {
-        println("refreshhhhh")
         top.refreshMarkers()
     }
 
