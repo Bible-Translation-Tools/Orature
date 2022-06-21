@@ -95,14 +95,8 @@ class WaveformFrame(
     init {
         addClass("vm-waveform-frame")
 
-        fitToParentSize()
-        hgrow = Priority.ALWAYS
-        vgrow = Priority.ALWAYS
-
         with(this) {
             bindTranslateX()
-
-
                 stackpane {
                     highlightHolder = this
                     styleClass.add("scrolling-waveform-frame__center")
@@ -135,7 +129,7 @@ class WaveformFrame(
                             me.onSeekNextProperty.bind(this@WaveformFrame.onSeekNextProperty)
                         })
                     }
-                
+
             }
 
             setOnMousePressed { me ->
