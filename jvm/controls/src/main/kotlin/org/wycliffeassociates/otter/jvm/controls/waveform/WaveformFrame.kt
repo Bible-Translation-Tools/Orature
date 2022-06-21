@@ -211,15 +211,6 @@ class WaveformFrame(
         )
     }
 
-    fun addHighlight(rect: Rectangle) {
-        rect.heightProperty().bind(highlightHolder.heightProperty())
-        highlightHolder.add(rect)
-    }
-
-    fun clearHighlights() {
-        highlightHolder.children.removeIf { it is Rectangle }
-    }
-
     fun freeImages() {
         imageHolder?.getChildList()?.clear()
     }
