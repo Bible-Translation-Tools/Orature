@@ -81,7 +81,7 @@ class Chunk : Fragment() {
 
         vm.compositeDisposable.add(
             vm.waveform.observeOnFx().subscribe {
-                (root.center as ScrollingWaveform).addWaveformImage(it)
+                (root.center as MarkerPlacementWaveform).addWaveformImage(it)
             }
         )
 
