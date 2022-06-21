@@ -32,7 +32,6 @@ class VerseMarkerModel(private val audio: AudioFile, private val markerTotal: In
 
     val cues = sanitizeCues(audio)
     val markers: ObservableList<ChunkMarkerModel> = observableListOf()
-    val highlightState: List<MarkerHighlightState>
 
     val markerCountProperty = SimpleIntegerProperty(1)
     val audioEnd = audio.totalFrames
@@ -46,7 +45,6 @@ class VerseMarkerModel(private val audio: AudioFile, private val markerTotal: In
         markerCountProperty.value = cues.size
 
         markers.setAll(initializeMarkers(markerTotal, cues))
-        highlightState = initializeHighlights(markers)
     }
 
     fun addMarker(location: Int) {
