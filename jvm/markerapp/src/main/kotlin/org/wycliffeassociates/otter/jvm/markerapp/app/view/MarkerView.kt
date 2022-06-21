@@ -95,7 +95,10 @@ class MarkerView : PluginEntrypoint() {
                     onSeekNext = viewModel::seekNext
                     onSeekPrevious = viewModel::seekPrevious
 
-                    onPlaceMarker = viewModel::placeMarker
+                    onPlaceMarker =  {
+                        viewModel.placeMarker()
+                        refreshMarkers()
+                    }
                     onWaveformClicked = { viewModel.pause() }
                     onWaveformDragReleased = { deltaPos ->
                         val deltaFrames = pixelsToFrames(deltaPos)

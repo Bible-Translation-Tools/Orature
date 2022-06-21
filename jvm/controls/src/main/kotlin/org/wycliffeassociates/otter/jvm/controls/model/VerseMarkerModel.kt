@@ -48,17 +48,13 @@ class VerseMarkerModel(private val audio: AudioFile, private val markerTotal: In
     }
 
     fun addMarker(location: Int) {
-        changesSaved = false
-        for (marker in markers) {
-            if (!marker.placed) {
-                marker.frame = location
-                marker.placed = true
-                break
-            }
+        if (markers.size < markerTotal) {
+            changesSaved = false
+            markers.add(ChunkMarkerModel(AudioCue(location, "${markers.size + 1}")))
+            markers.sortBy { it.frame }
+            markers.forEachIndexed { index, chunkMarker -> chunkMarker.label = (index + 1).toString() }
+            markerCountProperty.value = markers.filter { it.placed }.size
         }
-        markers.sortWith(compareBy({ !it.placed }, { it.frame }))
-        markers.forEachIndexed { index, chunkMarker -> chunkMarker.label = (index + 1).toString() }
-        markerCountProperty.value = markers.filter { it.placed }.size
     }
 
     fun seekCurrent(location: Int): Int {
@@ -125,9 +121,7 @@ class VerseMarkerModel(private val audio: AudioFile, private val markerTotal: In
                 markers.add(ChunkMarkerModel(cue))
             }
         }
-        for (i in markers.size until markerTotal) {
-            markers.add(ChunkMarkerModel(0, (i + 1).toString(), false))
-        }
+
         return markers
     }
 
