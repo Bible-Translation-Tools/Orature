@@ -19,13 +19,19 @@
 package org.wycliffeassociates.otter.jvm.controls.waveform
 
 import javafx.beans.property.SimpleDoubleProperty
-import javafx.scene.control.Control
-import javafx.scene.control.Skin
+import javafx.geometry.NodeOrientation
 import javafx.scene.image.Image
+import javafx.scene.layout.Priority
+import javafx.scene.layout.StackPane
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
-import org.wycliffeassociates.otter.jvm.controls.skins.waveform.ScrollingWaveformSkin
+import tornadofx.add
+import tornadofx.hgrow
+import tornadofx.onChange
+import tornadofx.togglePseudoClass
+import tornadofx.vgrow
 
-open class ScrollingWaveform : Control() {
+open class ScrollingWaveform : StackPane() {
+
     val positionProperty = SimpleDoubleProperty(0.0)
 
     var onWaveformClicked: () -> Unit = {}
@@ -35,15 +41,39 @@ open class ScrollingWaveform : Control() {
     var onToggleMedia: () -> Unit = {}
     var onResumeMedia: () -> Unit = {}
 
-    fun addWaveformImage(image: Image) {
-        (skin as ScrollingWaveformSkin).addWaveformImage(image)
+    private val waveformFrame: WaveformFrame
+
+    init {
+        hgrow = Priority.ALWAYS
+        vgrow = Priority.ALWAYS
+
+        nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
+
+        add(MarkerViewBackground())
+        waveformFrame = WaveformFrame().apply {
+            framePositionProperty.bind(positionProperty)
+            onWaveformClicked { onWaveformClicked() }
+            onWaveformDragReleased {
+                onWaveformDragReleased(it)
+            }
+            onRewind(onRewind)
+            onFastForward(onFastForward)
+            onToggleMedia(onToggleMedia)
+            onResumeMedia(onResumeMedia)
+
+            focusedProperty().onChange {
+                togglePseudoClass("active", it)
+            }
+        }
+        add(waveformFrame)
+        add(WaveformOverlay().apply { playbackPositionProperty.bind(positionProperty) })
     }
 
     fun freeImages() {
-        (skin as ScrollingWaveformSkin).freeImages()
+        waveformFrame.freeImages()
     }
 
-    override fun createDefaultSkin(): Skin<*> {
-        return ScrollingWaveformSkin(this)
+    fun addWaveformImage(image: Image) {
+        waveformFrame.addImage(image)
     }
 }

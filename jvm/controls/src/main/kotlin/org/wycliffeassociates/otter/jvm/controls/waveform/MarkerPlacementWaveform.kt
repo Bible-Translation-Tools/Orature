@@ -20,15 +20,16 @@ package org.wycliffeassociates.otter.jvm.controls.waveform
 
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
-import javafx.scene.Node
-import javafx.scene.control.Skin
+import javafx.geometry.NodeOrientation
+import javafx.scene.image.Image
+import javafx.scene.layout.Priority
+import javafx.scene.layout.StackPane
+import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
-import org.wycliffeassociates.otter.jvm.controls.skins.waveform.MarkerPlacementWaveformSkin
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import tornadofx.observableListOf
+import tornadofx.*
 
-class MarkerPlacementWaveform : ScrollingWaveform() {
+class MarkerPlacementWaveform : StackPane() {
 
     val markers = observableListOf<ChunkMarkerModel>()
     var onPositionChangedProperty: (Int, Double) -> Unit = { _, _ -> }
@@ -44,11 +45,68 @@ class MarkerPlacementWaveform : ScrollingWaveform() {
     var onSeekPrevious: () -> Unit = {}
     var onPlaceMarker: () -> Unit = {}
 
-    fun refreshMarkers() {
-        (skin as MarkerPlacementWaveformSkin).refreshMarkers()
+
+    val positionProperty = SimpleDoubleProperty(0.0)
+    var onWaveformClicked: () -> Unit = {}
+    var onWaveformDragReleased: (Double) -> Unit = {}
+    var onRewind: ((ScrollSpeed) -> Unit) = {}
+    var onFastForward: ((ScrollSpeed) -> Unit) = {}
+    var onToggleMedia: () -> Unit = {}
+    var onResumeMedia: () -> Unit = {}
+
+    private val waveformFrame: WaveformFrame
+
+    fun freeImages() {
+        waveformFrame.freeImages()
     }
-    
-    override fun createDefaultSkin(): Skin<*> {
-        return MarkerPlacementWaveformSkin(this)
+
+    fun addWaveformImage(image: Image) {
+        waveformFrame.addImage(image)
+    }
+
+    private lateinit var top: MarkerTrackControl
+
+    fun refreshMarkers() {
+        top.refreshMarkers()
+    }
+
+    init {
+        hgrow = Priority.ALWAYS
+        vgrow = Priority.ALWAYS
+
+        nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
+
+        add(MarkerViewBackground())
+
+        val topTrack = MarkerTrackControl().apply {
+            top = this
+            markers.bind(this@MarkerPlacementWaveform.markers, { it })
+            setOnPositionChanged { id, position ->
+                this@MarkerPlacementWaveform.onPositionChangedProperty.invoke(id, position)
+            }
+            setOnLocationRequest {
+                this@MarkerPlacementWaveform.onLocationRequestProperty.invoke()
+            }
+        }
+        waveformFrame = WaveformFrame(topTrack).apply {
+            framePositionProperty.bind(positionProperty)
+            onWaveformClicked { onWaveformClicked() }
+            onWaveformDragReleased {
+                onWaveformDragReleased(it)
+            }
+            onRewind(onRewind)
+            onFastForward(onFastForward)
+            onToggleMedia(onToggleMedia)
+            onResumeMedia(onResumeMedia)
+            onSeekPrevious(this@MarkerPlacementWaveform.onSeekPrevious)
+            onSeekNext(this@MarkerPlacementWaveform.onSeekNext)
+
+            focusedProperty().onChange {
+                togglePseudoClass("active", it)
+            }
+        }
+        add(waveformFrame)
+        add(WaveformOverlay().apply { playbackPositionProperty.bind(positionProperty) })
+        add(PlaceMarkerLayer().apply { onPlaceMarkerAction { onPlaceMarker() } })
     }
 }
