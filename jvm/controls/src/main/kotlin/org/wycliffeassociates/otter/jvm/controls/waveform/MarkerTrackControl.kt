@@ -55,7 +55,6 @@ class MarkerTrackControl : Region() {
     }
 
 
-
     init {
         // Makes the the region mouse transparent but not children
         pickOnBoundsProperty().set(false)
@@ -70,34 +69,32 @@ class MarkerTrackControl : Region() {
     private val focusedMarkerProperty = SimpleObjectProperty<ChunkMarker>()
 
     fun refreshMarkers() {
-        println("refreshing")
-        if (width > 0) {
-            println("actually refreshing markers size is ${markers.size}")
-            markers.forEachIndexed { index, chunkMarker ->
-                val marker = _markers[index]
-                marker.isPlacedProperty.set(chunkMarker.placed)
-                marker.markerPositionProperty.set(
-                    framesToPixels(
-                        chunkMarker.frame
-                    ).toDouble()
-                )
-                marker.markerNumberProperty.set(chunkMarker.label)
-                highlights[index].apply {
-                    styleClass.clear()
-                    when (index % 2 == 1) {
-                        true -> {
-                            styleClass.setAll("scrolling-waveform__highlight--secondary")
-                            styleClass.removeAll("scrolling-waveform__highlight--primary")
-                        }
-                        false -> {
-                            styleClass.setAll("scrolling-waveform__highlight--primary")
-                            styleClass.removeAll("scrolling-waveform__highlight--secondary")
-                        }
+        println("refreshing markers size is ${markers.size}")
+        markers.forEachIndexed { index, chunkMarker ->
+            val marker = _markers[index]
+            marker.isPlacedProperty.set(chunkMarker.placed)
+            marker.markerPositionProperty.set(
+                framesToPixels(
+                    chunkMarker.frame
+                ).toDouble()
+            )
+            marker.markerNumberProperty.set(chunkMarker.label)
+            highlights[index].apply {
+                styleClass.clear()
+                when (index % 2 == 1) {
+                    true -> {
+                        styleClass.setAll("scrolling-waveform__highlight--secondary")
+                        styleClass.removeAll("scrolling-waveform__highlight--primary")
+                    }
+                    false -> {
+                        styleClass.setAll("scrolling-waveform__highlight--primary")
+                        styleClass.removeAll("scrolling-waveform__highlight--secondary")
                     }
                 }
-                highlights[index].translateXProperty().bind(marker.translateXProperty())
-                highlights[index].visibleProperty().bind(marker.visibleProperty())
             }
+            highlights[index].translateXProperty().bind(marker.translateXProperty())
+            highlights[index].visibleProperty().bind(marker.visibleProperty())
+
         }
     }
 

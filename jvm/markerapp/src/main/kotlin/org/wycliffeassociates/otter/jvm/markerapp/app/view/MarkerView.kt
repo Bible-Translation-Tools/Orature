@@ -55,10 +55,8 @@ class MarkerView : PluginEntrypoint() {
             viewModel.initializeAudioController(it)
         }
 
-        runLater {
-            waveform.markers.bind(viewModel.markers.markers, { it })
-            waveform.refreshMarkers()
-        }
+        waveform.markers.bind(viewModel.markers.markers, { it })
+        waveform.refreshMarkers()
     }
 
     init {
@@ -86,38 +84,38 @@ class MarkerView : PluginEntrypoint() {
                 }
             }
             center =
-                    waveform.apply {
-                        addClass("vm-marker-waveform")
-                        viewModel.compositeDisposable.add(
-                            viewModel.waveform.observeOnFx().subscribe { addWaveformImage(it) }
-                        )
-                        markerStateProperty.bind(viewModel.markerStateProperty)
-                        positionProperty.bind(viewModel.positionProperty)
+                waveform.apply {
+                    addClass("vm-marker-waveform")
+                    viewModel.compositeDisposable.add(
+                        viewModel.waveform.observeOnFx().subscribe { addWaveformImage(it) }
+                    )
+                    markerStateProperty.bind(viewModel.markerStateProperty)
+                    positionProperty.bind(viewModel.positionProperty)
 
-                        onSeekNext = viewModel::seekNext
-                        onSeekPrevious = viewModel::seekPrevious
+                    onSeekNext = viewModel::seekNext
+                    onSeekPrevious = viewModel::seekPrevious
 
-                        onPlaceMarker = viewModel::placeMarker
-                        onWaveformClicked = { viewModel.pause() }
-                        onWaveformDragReleased = { deltaPos ->
-                            val deltaFrames = pixelsToFrames(deltaPos)
-                            val curFrames = viewModel.getLocationInFrames()
-                            val duration = viewModel.getDurationInFrames()
-                            val final = Utils.clamp(0, curFrames - deltaFrames, duration)
-                            viewModel.seek(final)
-                        }
-                        onRewind = viewModel::rewind
-                        onFastForward = viewModel::fastForward
-                        onToggleMedia = viewModel::mediaToggle
-                        onResumeMedia = viewModel::resumeMedia
+                    onPlaceMarker = viewModel::placeMarker
+                    onWaveformClicked = { viewModel.pause() }
+                    onWaveformDragReleased = { deltaPos ->
+                        val deltaFrames = pixelsToFrames(deltaPos)
+                        val curFrames = viewModel.getLocationInFrames()
+                        val duration = viewModel.getDurationInFrames()
+                        val final = Utils.clamp(0, curFrames - deltaFrames, duration)
+                        viewModel.seek(final)
+                    }
+                    onRewind = viewModel::rewind
+                    onFastForward = viewModel::fastForward
+                    onToggleMedia = viewModel::mediaToggle
+                    onResumeMedia = viewModel::resumeMedia
 
-                        // Marker stuff
-                        imageWidthProperty.bind(viewModel.imageWidthProperty)
+                    // Marker stuff
+                    imageWidthProperty.bind(viewModel.imageWidthProperty)
 
-                        onPositionChangedProperty = slider!!::updateMarker
-                        onLocationRequestProperty = viewModel::requestAudioLocation
+                    onPositionChangedProperty = slider!!::updateMarker
+                    onLocationRequestProperty = viewModel::requestAudioLocation
 
-            }
+                }
             bottom = vbox {
                 add(
                     SourceTextFragment().apply {
