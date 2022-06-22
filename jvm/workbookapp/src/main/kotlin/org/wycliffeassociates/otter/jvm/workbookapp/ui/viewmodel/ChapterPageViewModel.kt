@@ -67,8 +67,6 @@ class ChapterPageViewModel : ViewModel() {
     val workbookDataStore: WorkbookDataStore by inject()
     val audioPluginViewModel: AudioPluginViewModel by inject()
 
-    var draft = 0
-
     @Inject
     lateinit var directoryProvider: IDirectoryProvider
 
@@ -117,7 +115,6 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     fun dock() {
-        draft = 0
         allContent
             .changes()
             .doOnError { e ->
@@ -389,7 +386,6 @@ class ChapterPageViewModel : ViewModel() {
             .map {
                 if (it.chunkSource != null) {
                     if (it.chunkSource.draftNumber > 0) {
-                        draft = it.chunkSource.draftNumber
                         if (filteredContent.find { cont -> it.sort == cont.sort } == null) {
                             filteredContent.add(it)
                         }
@@ -487,10 +483,12 @@ class ChapterPageViewModel : ViewModel() {
         val wkbk = workbookDataStore.activeWorkbookProperty.value
         val chapter = workbookDataStore.activeChapterProperty.value
         VerseByVerseChunking(directoryProvider, wkbk, chapter.addChunk, chapter.sort)
-            .chunkVerseByVerse(wkbk.source.slug, draft + 1)
+            .chunkVerseByVerse(wkbk.source.slug, 1)
         chapter.chunks.getValues(emptyArray()).forEach {
             if (it.draftNumber != -1){
-                it.draftNumber = draft + 1
+                it.draftNumber = 1
+            } else {
+                println("stale draft ${it.sort}")
             }
         }
     }
