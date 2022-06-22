@@ -388,10 +388,8 @@ class ChapterPageViewModel : ViewModel() {
             }
             .map {
                 if (it.chunkSource != null) {
-                    if (it.chunkSource.draftNumber > draft) {
+                    if (it.chunkSource.draftNumber > 0) {
                         draft = it.chunkSource.draftNumber
-                    }
-                    if (it.chunkSource.draftNumber >= 0) {
                         if (filteredContent.find { cont -> it.sort == cont.sort } == null) {
                             filteredContent.add(it)
                         }
@@ -490,8 +488,10 @@ class ChapterPageViewModel : ViewModel() {
         val chapter = workbookDataStore.activeChapterProperty.value
         VerseByVerseChunking(directoryProvider, wkbk, chapter.addChunk, chapter.sort)
             .chunkVerseByVerse(wkbk.source.slug, draft + 1)
-        chapter.chunks.forEach {
-            it.draftNumber = draft + 1
+        chapter.chunks.getValues(emptyArray()).forEach {
+            if (it.draftNumber != -1){
+                it.draftNumber = draft + 1
+            }
         }
     }
 
@@ -499,7 +499,7 @@ class ChapterPageViewModel : ViewModel() {
         closePlayers()
         filteredContent.clear()
         val chapter = workbookDataStore.activeChapterProperty.value
-        chapter.chunks.forEach {
+        chapter.chunks.getValues(emptyArray()).forEach {
             it.draftNumber = -1
         }
         chapter.reset()

@@ -136,6 +136,9 @@ class ContentRepository @Inject constructor(
             contentTypeDao.fetchId(typeFilter)
         }
 
+        activeConnections.getOrDefault(chapterCollection, null)
+            ?.let { it.getValues(emptyArray()).forEach { it.draftNumber = -1 } }
+
         return Completable.fromCallable {
             contentDao.deleteForCollection(
                 collectionMapper.mapToEntity(chapterCollection),
