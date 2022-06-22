@@ -71,8 +71,7 @@ class MarkerPlacementWaveform : StackPane() {
     }
 
     init {
-        hgrow = Priority.ALWAYS
-        vgrow = Priority.ALWAYS
+        minHeight = 120.0
 
         nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
 
