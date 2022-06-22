@@ -21,7 +21,6 @@ package org.wycliffeassociates.otter.jvm.controls.waveform
 import com.sun.javafx.util.Utils
 import javafx.beans.binding.Bindings
 import javafx.geometry.Point2D
-import javafx.scene.control.SkinBase
 import javafx.scene.layout.Region
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.ChunkMarker
@@ -36,7 +35,7 @@ import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 
 private const val MOVE_MARKER_INTERVAL = 0.001
-private const val MARKER_COUNT = 1_000
+private const val MARKER_COUNT = 500
 
 class MarkerTrackControl : Region() {
 
@@ -69,7 +68,6 @@ class MarkerTrackControl : Region() {
     private val focusedMarkerProperty = SimpleObjectProperty<ChunkMarker>()
 
     fun refreshMarkers() {
-        println("refreshing markers size is ${markers.size}")
         markers.forEachIndexed { index, chunkMarker ->
             val marker = _markers[index]
             marker.isPlacedProperty.set(chunkMarker.placed)
@@ -83,18 +81,17 @@ class MarkerTrackControl : Region() {
                 styleClass.clear()
                 when (index % 2 == 1) {
                     true -> {
-                        styleClass.setAll("scrolling-waveform__highlight--secondary")
-                        styleClass.removeAll("scrolling-waveform__highlight--primary")
-                    }
-                    false -> {
                         styleClass.setAll("scrolling-waveform__highlight--primary")
                         styleClass.removeAll("scrolling-waveform__highlight--secondary")
+                    }
+                    false -> {
+                        styleClass.setAll("scrolling-waveform__highlight--secondary")
+                        styleClass.removeAll("scrolling-waveform__highlight--primary")
                     }
                 }
             }
             highlights[index].translateXProperty().bind(marker.translateXProperty())
             highlights[index].visibleProperty().bind(marker.visibleProperty())
-
         }
     }
 
@@ -176,21 +173,19 @@ class MarkerTrackControl : Region() {
     private fun createHighlight(i: Int, mk: ChunkMarkerModel): Rectangle {
         return Rectangle().apply {
             when (i % 2 == 0) {
-                true -> styleClass.setAll("scrolling-waveform__highlight--secondary")
-                false -> styleClass.setAll("scrolling-waveform__highlight--primary")
+                true -> styleClass.setAll("scrolling-waveform__highlight--primary")
+                false -> styleClass.setAll("scrolling-waveform__highlight--secondary")
             }
             mouseTransparentProperty().set(true)
             pickOnBoundsProperty().set(false)
         }
     }
 
-    private fun initializeMarkers() {
-        println("making new markers")
+    private fun preallocateMarkers() {
         for (i in 0..MARKER_COUNT) {
             val mk = ChunkMarkerModel(0, i.toString(), false)
             val marker = createMarker(i, mk)
             val rect = createHighlight(i, mk)
-
             rect.heightProperty().bind(heightProperty().minus(40.0))
             rect.translateXProperty().bind(marker.translateXProperty())
             rect.visibleProperty().bind(marker.visibleProperty())
@@ -232,7 +227,7 @@ class MarkerTrackControl : Region() {
 
     init {
         resetState()
-        initializeMarkers()
+        preallocateMarkers()
         getChildList()?.clear()
         highlights.forEach { add(it) }
         _markers.forEach { add(it) }
@@ -240,7 +235,6 @@ class MarkerTrackControl : Region() {
         refreshHighlights()
 
         markers.onChangeAndDoNow {
-            println("here")
             it.sortedBy { it.frame }
             refreshMarkers()
             refreshHighlights()
