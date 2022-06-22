@@ -147,6 +147,7 @@ class MarkerTrackControl : Region() {
                         }
                         val dragPos = cur.x - dragStart[i]!!.x
                         updateValue(i, preDragThumbPos[i] + dragPos / (trackWidth - this.width))
+                        onPositionChangedProperty.value.invoke(i, _markers[i].markerPositionProperty.value / trackWidth)
                     }
                     me.consume()
                 }
