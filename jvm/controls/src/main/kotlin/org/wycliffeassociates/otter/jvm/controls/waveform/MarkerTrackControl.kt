@@ -191,7 +191,7 @@ class MarkerTrackControl : Region() {
             val marker = createMarker(i, mk)
             val rect = createHighlight(i, mk)
 
-            rect.heightProperty().bind(heightProperty())
+            rect.heightProperty().bind(heightProperty().minus(40.0))
             rect.translateXProperty().bind(marker.translateXProperty())
             rect.visibleProperty().bind(marker.visibleProperty())
 

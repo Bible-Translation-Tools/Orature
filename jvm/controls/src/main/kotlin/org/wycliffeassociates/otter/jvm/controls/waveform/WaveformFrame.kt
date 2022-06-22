@@ -27,14 +27,10 @@ import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.image.Image
 import javafx.scene.input.KeyCode
-import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
-import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.layout.StackPane
-import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
-import org.wycliffeassociates.otter.jvm.utils.images.fitToHeight
 
 import tornadofx.*
 
@@ -90,37 +86,48 @@ class WaveformFrame(
     private var dragContextX = 0.0
     var imageHolder: HBox? = null
     lateinit var imageRegion: Region
-    lateinit var highlightHolder: StackPane
+
+    lateinit var topTrackRegion: Region
+    lateinit var bottomTrackRegion: Region
 
     init {
         addClass("vm-waveform-frame")
 
-        fitToParentSize()
-        hgrow = Priority.ALWAYS
-        vgrow = Priority.ALWAYS
-
         with(this) {
             bindTranslateX()
+
+            alignment = Pos.CENTER
 
             region {
                 imageRegion = this
                 stackpane {
-                    highlightHolder = this
+                    fitToParentHeight()
                     styleClass.add("scrolling-waveform-frame__center")
                     alignment = Pos.CENTER
 
+                    /**
+                     * Putting this in the middle of the borderpane below will result in one of the following errors:
+                     *
+                     * 1. The width of this container will push beyond the bounds of the window and push the app bar
+                     * off screen.
+                     *
+                     * 2. The width of the marker track will not extend to the end of the waveform for longer recordings
+                     */
                     hbox {
+                        alignment = Pos.CENTER
                         imageHolder = this@hbox
                     }
 
                     borderpane {
                         top {
                             region {
+                                topTrackRegion = this
                                 styleClass.add("scrolling-waveform-frame__top-track")
                             }
                         }
                         bottom {
                             region {
+                                bottomTrackRegion = this
                                 styleClass.add("scrolling-waveform-frame__bottom-track")
                                 bottomTrack?.let {
                                     add(it)
@@ -213,7 +220,13 @@ class WaveformFrame(
     fun addImage(image: Image) {
         imageHolder?.add(
             imageview(image) {
-                fitToHeight(imageRegion)
+                // This is to adjust the height of the image to fit within the tracks
+                fitHeightProperty()
+                    .bind(
+                        imageRegion.heightProperty()
+                            .minus(topTrackRegion.heightProperty())
+                            .minus(bottomTrackRegion.heightProperty())
+                    )
             }
         )
     }

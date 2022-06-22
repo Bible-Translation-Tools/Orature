@@ -40,14 +40,14 @@ class WaveformOverlay : StackPane() {
         add(
             Rectangle().apply {
                 styleClass.add("scrolling-waveform-holder--played")
-                heightProperty().bind(this@WaveformOverlay.heightProperty().minus(90.0))
+                heightProperty().bind(this@WaveformOverlay.heightProperty().minus(80.0))
                 widthProperty().bind(
                     Bindings.min(
                         playbackPositionProperty,
                         this@WaveformOverlay.widthProperty().divide(2)
                     )
                 )
-                translateYProperty().set(-50.0)
+                translateYProperty().set(-40.0)
                 translateXProperty().bind(-widthProperty() / 2)
             }
         )
