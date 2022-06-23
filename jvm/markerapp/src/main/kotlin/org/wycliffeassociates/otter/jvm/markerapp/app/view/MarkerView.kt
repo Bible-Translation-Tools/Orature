@@ -95,7 +95,7 @@ class MarkerView : PluginEntrypoint() {
                     onSeekNext = viewModel::seekNext
                     onSeekPrevious = viewModel::seekPrevious
 
-                    onPlaceMarker =  {
+                    onPlaceMarker = {
                         viewModel.placeMarker()
                         refreshMarkers()
                     }
@@ -120,12 +120,14 @@ class MarkerView : PluginEntrypoint() {
 
                 }
             bottom = vbox {
-                add(
-                    SourceTextFragment().apply {
-                        highlightedChunkNumberProperty.bind(viewModel.currentMarkerNumberProperty)
+                add<SourceTextFragment> {
+                    highlightedChunkNumberProperty.bind(viewModel.currentMarkerNumberProperty)
+                }
+                add<PlaybackControlsFragment> {
+                    refreshViewProperty = {
+                        waveform.refreshMarkers()
                     }
-                )
-                add<PlaybackControlsFragment>()
+                }
             }
             shortcut(Shortcut.ADD_MARKER.value, viewModel::placeMarker)
             shortcut(Shortcut.GO_BACK.value, viewModel::saveAndQuit)

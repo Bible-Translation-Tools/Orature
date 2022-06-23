@@ -151,6 +151,18 @@ class Chunk : Fragment() {
                 }
             }
             add(nextBtn)
+            button("undo") {
+                setOnAction {
+                    vm.markers?.undo()
+                    waveform.refreshMarkers()
+                }
+            }
+            button("redo") {
+                setOnAction {
+                    vm.markers?.redo()
+                    waveform.refreshMarkers()
+                }
+            }
             button("save") {
                 setOnAction {
                     vm.saveAndQuit()
