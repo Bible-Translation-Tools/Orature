@@ -35,7 +35,7 @@ class VerseMarkerModel(private val audio: AudioFile, private val markerTotal: In
     private val redoStack: Deque<MarkerOperation> = ArrayDeque()
 
     val cues = sanitizeCues(audio)
-    val markers: MutableList<ChunkMarkerModel> = mutableListOf()
+    val markers: ObservableList<ChunkMarkerModel> = observableListOf()
 
     val markerCountProperty = SimpleIntegerProperty(1)
     val audioEnd = audio.totalFrames
