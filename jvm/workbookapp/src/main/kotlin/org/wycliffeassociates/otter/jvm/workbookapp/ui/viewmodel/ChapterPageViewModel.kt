@@ -55,6 +55,7 @@ import java.io.File
 import java.util.concurrent.Callable
 import javax.inject.Inject
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.domain.content.VerseByVerseChunking
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -499,6 +500,9 @@ class ChapterPageViewModel : ViewModel() {
         val chapter = workbookDataStore.activeChapterProperty.value
         chapter.chunks.getValues(emptyArray()).forEach {
             it.draftNumber = -1
+            it.audio.getAllTakes().forEach {
+                it.deletedTimestamp.accept(DateHolder.now())
+            }
         }
         chapter.reset()
     }

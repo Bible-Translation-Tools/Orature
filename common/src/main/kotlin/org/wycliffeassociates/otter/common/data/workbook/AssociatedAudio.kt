@@ -39,11 +39,16 @@ class AssociatedAudio(
 
     fun selectTake(take: Take?) = selected.accept(TakeHolder(take))
 
-    fun getAllTakes(): Array<Take> = takes.getValues(emptyArray())
+    /**
+     * Retrieves all valid (not stale) takes from the relay.
+     */
+    fun getAllTakes(): List<Take> = takes.getValues(emptyArray())
+        .filter { it.deletedTimestamp.value?.value == null }
 
     fun getNewTakeNumber(): Single<Int> =
         Single.just(
             getAllTakes()
+                .filter { it.deletedTimestamp.value?.value == null }
                 .maxByOrNull { it.number }
                 ?.number
                 ?.plus(1)
