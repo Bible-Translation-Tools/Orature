@@ -27,7 +27,6 @@ import io.reactivex.subjects.PublishSubject
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -107,13 +106,13 @@ class ChapterPageViewModel : ViewModel() {
 
     fun dock() {
         chapterCardProperty.set(CardData(workbookDataStore.chapter))
-        workbookDataStore.activeChapterProperty.value.let { _chapter ->
-            _chapter?.let { chapter ->
-                loadChapterContents(chapter).subscribe()
-                val chap = CardData(chapter)
-                chapterCardProperty.set(chap)
-                subscribeSelectedTakePropertyToRelay(chapter.audio)
-            }
+
+        workbookDataStore.activeChapterProperty.value?.let { chapter ->
+            updateLastSelectedChapter(chapter.sort)
+            loadChapterContents(chapter).subscribe()
+            val chap = CardData(chapter)
+            chapterCardProperty.set(chap)
+            subscribeSelectedTakePropertyToRelay(chapter.audio)
         }
 
         allContent
@@ -351,6 +350,11 @@ class ChapterPageViewModel : ViewModel() {
             audioPluginViewModel.selectedEditorProperty,
             audioPluginViewModel.selectedMarkerProperty
         )
+    }
+
+    private fun updateLastSelectedChapter(chapterNumber: Int) {
+        val bookHash = workbookDataStore.workbook.hashCode()
+        workbookDataStore.lastSelectedChapterInWorkBooks[bookHash] = chapterNumber - 1
     }
 
     private fun loadChapterContents(chapter: Chapter): Completable {
