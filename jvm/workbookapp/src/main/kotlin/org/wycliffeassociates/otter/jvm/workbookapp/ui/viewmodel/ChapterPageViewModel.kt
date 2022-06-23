@@ -491,11 +491,13 @@ class ChapterPageViewModel : ViewModel() {
         closePlayers()
         filteredContent.clear()
         val chapter = workbookDataStore.activeChapterProperty.value
-        chapter.chunks.getValues(emptyArray()).forEach {
-            it.draftNumber = -1
-            it.audio.getAllTakes().forEach {
-                it.deletedTimestamp.accept(DateHolder.now())
-            }
+        chapter.chunks.getValues(emptyArray()).forEach { chunk ->
+            chunk.draftNumber = -1
+            chunk.audio.getAllTakes()
+                .filter { it.deletedTimestamp.value?.value == null }
+                .forEach { take ->
+                    take.deletedTimestamp.accept(DateHolder.now())
+                }
         }
         chapter.reset()
     }
