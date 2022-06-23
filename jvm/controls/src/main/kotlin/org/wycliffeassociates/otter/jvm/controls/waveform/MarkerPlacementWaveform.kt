@@ -37,8 +37,6 @@ class MarkerPlacementWaveform : StackPane() {
     var onSeekNextProperty: () -> Unit = {}
     var onLocationRequestProperty: () -> Int = { 0 }
 
-    val markerStateProperty = SimpleObjectProperty<VerseMarkerModel>()
-
     val imageWidthProperty = SimpleDoubleProperty()
 
     var onSeekNext: () -> Unit = {}

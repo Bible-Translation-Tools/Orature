@@ -39,6 +39,7 @@ import org.wycliffeassociates.otter.common.domain.content.VerseByVerseChunking
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
+import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
@@ -47,6 +48,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.ViewModel
 import tornadofx.getValue
+import tornadofx.observableListOf
 import tornadofx.onChange
 
 const val ACTIVE = "chunking-wizard__step--active"
@@ -68,7 +70,12 @@ class ChunkAudioUseCase(val directoryProvider: IDirectoryProvider, val workbook:
         val temp = File(source.name).apply { createNewFile() }
         val tempCue = File(temp.parent, "${temp.nameWithoutExtension}.cue")
 
-        val accessor = ProjectFilesAccessor(directoryProvider, workbook.source.resourceMetadata, workbook.target.resourceMetadata, workbook.target)
+        val accessor = ProjectFilesAccessor(
+            directoryProvider,
+            workbook.source.resourceMetadata,
+            workbook.target.resourceMetadata,
+            workbook.target
+        )
         try {
             source.copyTo(temp, true)
             val audio = AudioFile(temp)
@@ -87,7 +94,7 @@ class ChunkAudioUseCase(val directoryProvider: IDirectoryProvider, val workbook:
                 it.write()
             }
         } finally {
-           temp.delete()
+            temp.delete()
             if (tempCue.exists()) {
                 tempCue.delete()
             }
@@ -118,12 +125,12 @@ class ChunkingViewModel : ViewModel() {
     @Inject
     lateinit var audioConnectionFactory: AudioConnectionFactory
 
-    val markerStateProperty = SimpleObjectProperty<VerseMarkerModel>()
-    val markers by markerStateProperty
+    lateinit var markerModel: VerseMarkerModel
+    val markers = observableListOf<ChunkMarkerModel>()
 
     init {
         pageProperty.onChange {
-            when(it) {
+            when (it) {
                 ChunkingWizardPage.CONSUME -> {
                     consumeStepColor.set(ACTIVE)
                     verbalizeStepColor.set(INACTIVE)
@@ -143,7 +150,6 @@ class ChunkingViewModel : ViewModel() {
         }
     }
 
-
     private val width = Screen.getMainScreen().platformWidth
     private val height = Integer.min(Screen.getMainScreen().platformHeight, 500)
 
@@ -159,14 +165,12 @@ class ChunkingViewModel : ViewModel() {
     val positionProperty = SimpleDoubleProperty(0.0)
     var imageWidthProperty = SimpleDoubleProperty(0.0)
 
-    val disposeables = mutableListOf<Disposable>()
+    private val disposeables = mutableListOf<Disposable>()
 
     lateinit var audio: AudioFile
 
     fun onDockConsume() {
-        println("docking consume")
         sourceAudio?.file?.let {
-            println("loading stufff")
             (app as IDependencyGraphProvider).dependencyGraph.inject(this)
             audio = loadAudio(it)
             createWaveformImages(audio)
@@ -189,8 +193,8 @@ class ChunkingViewModel : ViewModel() {
     fun loadMarkers(audio: AudioFile) {
         val totalMarkers: Int = 500
         audio.metadata.clearMarkers()
-        val markers = VerseMarkerModel(audio, totalMarkers)
-        markerStateProperty.set(markers)
+        markerModel = VerseMarkerModel(audio, totalMarkers)
+        markers.setAll(markerModel.markers)
     }
 
     fun calculatePosition() {
@@ -211,12 +215,7 @@ class ChunkingViewModel : ViewModel() {
 
         val wkbk = workbookDataStore.activeWorkbookProperty.value
         val chapter = workbookDataStore.activeChapterProperty.value
-        val cues = markers.markers.filter { it.placed }.map { it.toAudioCue() }
-
-        println("cues size is $cues")
-        println("cues are:")
-        cues.forEach { println(it) }
-        println()
+        val cues = markers.filter { it.placed }.map { it.toAudioCue() }
 
         VerseByVerseChunking(directoryProvider, wkbk, chapter.addChunk, chapter.sort)
             .chunkChunkByChunk(wkbk.source.slug, cues, chapterPageViewModel.draft + 1)
@@ -227,10 +226,10 @@ class ChunkingViewModel : ViewModel() {
         ChunkAudioUseCase(directoryProvider, workbookDataStore.workbook)
             .createChunkedSourceAudio(sourceAudio.file, cues)
 
-        markerStateProperty.set(null)
+        disposeables.forEach { it.dispose() }
     }
 
-    fun initializeAudioController() {
+    private fun initializeAudioController() {
         audioController = AudioPlayerController()
         audioController?.load(audioPlayer.get())
         isPlayingProperty.bind(audioController!!.isPlayingProperty)
@@ -248,7 +247,7 @@ class ChunkingViewModel : ViewModel() {
         audioController?.seek(location)
     }
 
-    fun createWaveformImages(audio: AudioFile) {
+    private fun createWaveformImages(audio: AudioFile) {
         imageWidthProperty.set(computeImageWidth(SECONDS_ON_SCREEN))
 
         compositeDisposable.add(
@@ -281,7 +280,7 @@ class ChunkingViewModel : ViewModel() {
 
     fun placeMarker() {
         val pos = audioPlayer.get().getLocationInFrames()
-        markerStateProperty.get()?.addMarker(pos)
+        markerModel.addMarker(pos)
     }
 
     fun seekNext() {
@@ -289,9 +288,7 @@ class ChunkingViewModel : ViewModel() {
         if (wasPlaying) {
             audioController?.toggle()
         }
-        markerStateProperty.get()?.let { markers ->
-            seek(markers.seekNext(audioPlayer.get().getLocationInFrames()))
-        }
+        seek(markerModel.seekNext(audioPlayer.get().getLocationInFrames()))
         if (wasPlaying) {
             audioController?.toggle()
         }
@@ -302,9 +299,7 @@ class ChunkingViewModel : ViewModel() {
         if (wasPlaying) {
             audioController?.toggle()
         }
-        markerStateProperty.get()?.let { markers ->
-            seek(markers.seekPrevious(audioPlayer.get().getLocationInFrames()))
-        }
+        seek(markerModel.seekPrevious(audioPlayer.get().getLocationInFrames()))
         if (wasPlaying) {
             audioController?.toggle()
         }

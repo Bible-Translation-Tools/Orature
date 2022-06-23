@@ -34,11 +34,11 @@ class VerseMarkerModel(private val audio: AudioFile, private val markerTotal: In
     private val undoStack: Deque<MarkerOperation> = ArrayDeque()
     private val redoStack: Deque<MarkerOperation> = ArrayDeque()
 
-    val cues = sanitizeCues(audio)
+    private val cues = sanitizeCues(audio)
     val markers: ObservableList<ChunkMarkerModel> = observableListOf()
 
     val markerCountProperty = SimpleIntegerProperty(1)
-    val audioEnd = audio.totalFrames
+    private val audioEnd = audio.totalFrames
     var changesSaved = true
         private set
 
@@ -60,27 +60,35 @@ class VerseMarkerModel(private val audio: AudioFile, private val markerTotal: In
             undoStack.push(op)
             op.apply()
             redoStack.clear()
+
+            markers.sortBy { it.frame }
+            markers.forEachIndexed { index, chunkMarker -> chunkMarker.label = (index + 1).toString() }
+            markerCountProperty.value = markers.filter { it.placed }.size
         }
     }
 
     fun undo() {
-        val op = undoStack.pop()
-        redoStack.push(op)
-        op.undo()
+        if (undoStack.isNotEmpty()) {
+            val op = undoStack.pop()
+            redoStack.push(op)
+            op.undo()
 
-        markers.sortBy { it.frame }
-        markers.forEachIndexed { index, chunkMarker -> chunkMarker.label = (index + 1).toString() }
-        markerCountProperty.value = markers.filter { it.placed }.size
+            markers.sortBy { it.frame }
+            markers.forEachIndexed { index, chunkMarker -> chunkMarker.label = (index + 1).toString() }
+            markerCountProperty.value = markers.filter { it.placed }.size
+        }
     }
 
     fun redo() {
-        val op = redoStack.pop()
-        undoStack.push(op)
-        op.apply()
+        if (redoStack.isNotEmpty()) {
+            val op = redoStack.pop()
+            undoStack.push(op)
+            op.apply()
 
-        markers.sortBy { it.frame }
-        markers.forEachIndexed { index, chunkMarker -> chunkMarker.label = (index + 1).toString() }
-        markerCountProperty.value = markers.filter { it.placed }.size
+            markers.sortBy { it.frame }
+            markers.forEachIndexed { index, chunkMarker -> chunkMarker.label = (index + 1).toString() }
+            markerCountProperty.value = markers.filter { it.placed }.size
+        }
     }
 
     fun seekCurrent(location: Int): Int {

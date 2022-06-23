@@ -79,7 +79,7 @@ class PlaybackControlsFragment : Fragment() {
         text = "undo"
 
         setOnAction {
-            viewModel.markers?.undo()
+            viewModel.undoMarker()
             refreshViewProperty.invoke()
         }
     }
@@ -88,7 +88,7 @@ class PlaybackControlsFragment : Fragment() {
         text = "redo"
 
         setOnAction {
-            viewModel.markers?.redo()
+            viewModel.redoMarker()
             refreshViewProperty.invoke()
         }
     }

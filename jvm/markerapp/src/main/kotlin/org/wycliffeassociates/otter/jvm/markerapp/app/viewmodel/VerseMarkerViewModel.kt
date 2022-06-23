@@ -44,11 +44,15 @@ import java.io.File
 import java.lang.Integer.min
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import kotlin.math.max
+import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
 
 private const val WAV_COLOR = "#0A337390"
 private const val BACKGROUND_COLOR = "#FFFFFF"
 
 class VerseMarkerViewModel : ViewModel() {
+
+    private val logger = LoggerFactory.getLogger(VerseMarkerViewModel::class.java)
+
     private val width = Screen.getMainScreen().platformWidth
     private val height = min(Screen.getMainScreen().platformHeight, 500)
 
@@ -61,13 +65,13 @@ class VerseMarkerViewModel : ViewModel() {
         get() = waveformSubject
 
     lateinit var waveformMinimapImageListener: ChangeListener<Image>
-    lateinit var markerStateListener: ChangeListener<VerseMarkerModel>
-
-    val logger = LoggerFactory.getLogger(VerseMarkerViewModel::class.java)
 
     var markerStateProperty = SimpleObjectProperty<VerseMarkerModel>()
-    val markers by markerStateProperty
     val currentMarkerNumberProperty = SimpleIntegerProperty(0)
+
+    lateinit var markerModel: VerseMarkerModel
+    val markers = observableListOf<ChunkMarkerModel>()
+    val markerCountProperty = markers.sizeProperty
 
     var audioController: AudioPlayerController? = null
 
@@ -94,7 +98,7 @@ class VerseMarkerViewModel : ViewModel() {
         createWaveformImages(audio)
     }
 
-    fun loadAudio(): AudioFile {
+    private fun loadAudio(): AudioFile {
         val scope = scope as ParameterizedScope
         val player = (scope.workspace.params["audioConnectionFactory"] as AudioConnectionFactory).getPlayer()
         val audioFile = File(scope.parameters.named["wav"])
@@ -108,27 +112,27 @@ class VerseMarkerViewModel : ViewModel() {
         return audio
     }
 
-    fun loadMarkers(audio: AudioFile) {
+    private fun loadMarkers(audio: AudioFile) {
         val initialMarkerCount = audio.metadata.getCues().size
         scope as ParameterizedScope
         val totalMarkers: Int = scope.parameters.named["marker_total"]?.toInt() ?: initialMarkerCount
-        val markers = VerseMarkerModel(audio, totalMarkers)
-        markers.markerCountProperty.onChangeAndDoNow {
+        markerModel = VerseMarkerModel(audio, totalMarkers)
+        markerCountProperty.onChangeAndDoNow {
             markerRatioProperty.set("$it/$totalMarkers")
         }
-        markerStateProperty.set(markers)
+        markers.setAll(markerModel.markers)
     }
 
-    fun loadTitles() {
+    private fun loadTitles() {
         scope as ParameterizedScope
         headerTitle.set(scope.parameters.named["action_title"])
         headerSubtitle.set(scope.parameters.named["content_title"])
     }
 
-    fun writeMarkers(): Completable {
+    private fun writeMarkers(): Completable {
         audioPlayer.get()?.pause()
         audioPlayer.get()?.close()
-        return markerStateProperty.get()?.writeMarkers() ?: Completable.complete()
+        return markerModel.writeMarkers()
     }
 
     fun calculatePosition() {
@@ -163,7 +167,8 @@ class VerseMarkerViewModel : ViewModel() {
     }
 
     fun placeMarker() {
-        markerStateProperty.get()?.addMarker(audioPlayer.get().getLocationInFrames())
+        markerModel.addMarker(audioPlayer.get().getLocationInFrames())
+        markers.setAll(markerModel.markers)
     }
 
     fun seekNext() {
@@ -171,9 +176,7 @@ class VerseMarkerViewModel : ViewModel() {
         if (wasPlaying) {
             audioController?.toggle()
         }
-        markerStateProperty.get()?.let { markers ->
-            seek(markers.seekNext(audioPlayer.get().getLocationInFrames()))
-        }
+        seek(markerModel.seekNext(audioPlayer.get().getLocationInFrames()))
         if (wasPlaying) {
             audioController?.toggle()
         }
@@ -184,9 +187,7 @@ class VerseMarkerViewModel : ViewModel() {
         if (wasPlaying) {
             audioController?.toggle()
         }
-        markerStateProperty.get()?.let { markers ->
-            seek(markers.seekPrevious(audioPlayer.get().getLocationInFrames()))
-        }
+        seek(markerModel.seekPrevious(audioPlayer.get().getLocationInFrames()))
         if (wasPlaying) {
             audioController?.toggle()
         }
@@ -202,7 +203,7 @@ class VerseMarkerViewModel : ViewModel() {
         audioController?.pause()
     }
 
-    fun isPlaying(): Boolean {
+    private fun isPlaying(): Boolean {
         return audioController?.isPlayingProperty?.value ?: false
     }
 
@@ -244,7 +245,7 @@ class VerseMarkerViewModel : ViewModel() {
         updateCurrentPlaybackMarker(location)
     }
 
-    fun createWaveformImages(audio: AudioFile) {
+    private fun createWaveformImages(audio: AudioFile) {
         imageWidthProperty.set(computeImageWidth(SECONDS_ON_SCREEN))
 
         val builder = WaveformImageBuilder(
@@ -277,7 +278,7 @@ class VerseMarkerViewModel : ViewModel() {
             }
     }
 
-    fun computeImageWidth(secondsOnScreen: Int): Double {
+    private fun computeImageWidth(secondsOnScreen: Int): Double {
         if (sampleRate == 0) {
             return 0.0
         }
@@ -307,13 +308,23 @@ class VerseMarkerViewModel : ViewModel() {
     }
 
     private fun updateCurrentPlaybackMarker(currentFrame: Int) {
-        val currentMarkerFrame = markers.seekCurrent(currentFrame)
-        val currentMarker = markers.markers.find { it.frame == currentMarkerFrame }
-        val index = currentMarker?.let { markers.markers.indexOf(it) } ?: 0
+        val currentMarkerFrame = markerModel.seekCurrent(currentFrame)
+        val currentMarker = markers.find { it.frame == currentMarkerFrame }
+        val index = currentMarker?.let { markers.indexOf(it) } ?: 0
         currentMarkerNumberProperty.set(index)
     }
 
     fun requestAudioLocation(): Int {
         return audioPlayer.value?.getLocationInFrames() ?: 0
+    }
+
+    fun undoMarker() {
+        markerModel.undo()
+        markers.setAll(markerModel.markers)
+    }
+
+    fun redoMarker() {
+        markerModel.redo()
+        markers.setAll(markerModel.markers)
     }
 }

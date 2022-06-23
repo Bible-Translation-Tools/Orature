@@ -46,23 +46,17 @@ class MinimapFragment : Fragment() {
             player.bind(viewModel.audioPlayer)
             secondsToHighlightProperty.set(SECONDS_ON_SCREEN)
 
-            viewModel.markerStateListener = ChangeListener { _, _, it ->
-                it?.let { model ->
-                    model.markers.onChangeAndDoNow {
-                        markers.setAll(
-                            it.filter { marker -> marker.placed }
-                                .map { marker -> marker.toAudioCue() }
-                        )
-                    }
-                }
+            viewModel.markers.onChangeAndDoNow {
+                markers.setAll(
+                    it.filter { marker -> marker.placed }
+                        .map { marker -> marker.toAudioCue() }
+                )
             }
-            viewModel.markerStateProperty.addListener(viewModel.markerStateListener)
         }
     }
 
     fun cleanUpOnUndock() {
         viewModel.waveformMinimapImage.removeListener(viewModel.waveformMinimapImageListener)
-        viewModel.markerStateProperty.removeListener(viewModel.markerStateListener)
         slider.clearListeners()
     }
 

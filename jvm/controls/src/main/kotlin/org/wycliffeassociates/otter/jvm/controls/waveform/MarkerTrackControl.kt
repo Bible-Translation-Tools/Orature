@@ -93,6 +93,9 @@ class MarkerTrackControl : Region() {
             highlights[index].translateXProperty().bind(marker.translateXProperty())
             highlights[index].visibleProperty().bind(marker.visibleProperty())
         }
+        for (i in markers.size until _markers.size) {
+            _markers[i].isPlacedProperty.set(false)
+        }
     }
 
     fun resetState() {

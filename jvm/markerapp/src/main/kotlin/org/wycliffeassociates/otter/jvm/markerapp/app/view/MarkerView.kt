@@ -55,8 +55,7 @@ class MarkerView : PluginEntrypoint() {
             viewModel.initializeAudioController(it)
         }
 
-        waveform.markers.bind(viewModel.markers.markers, { it })
-        waveform.refreshMarkers()
+        waveform.markers.bind(viewModel.markers, { it })
     }
 
     init {
@@ -69,7 +68,6 @@ class MarkerView : PluginEntrypoint() {
         super.onUndock()
         timer?.stop()
         timer = null
-        waveform.markerStateProperty.unbind()
         waveform.positionProperty.unbind()
         minimap?.cleanUpOnUndock()
     }
@@ -89,7 +87,6 @@ class MarkerView : PluginEntrypoint() {
                     viewModel.compositeDisposable.add(
                         viewModel.waveform.observeOnFx().subscribe { addWaveformImage(it) }
                     )
-                    markerStateProperty.bind(viewModel.markerStateProperty)
                     positionProperty.bind(viewModel.positionProperty)
 
                     onSeekNext = viewModel::seekNext
@@ -97,7 +94,6 @@ class MarkerView : PluginEntrypoint() {
 
                     onPlaceMarker = {
                         viewModel.placeMarker()
-                        refreshMarkers()
                     }
                     onWaveformClicked = { viewModel.pause() }
                     onWaveformDragReleased = { deltaPos ->
@@ -125,7 +121,6 @@ class MarkerView : PluginEntrypoint() {
                 }
                 add<PlaybackControlsFragment> {
                     refreshViewProperty = {
-                        waveform.refreshMarkers()
                     }
                 }
             }

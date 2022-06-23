@@ -68,8 +68,6 @@ class Chunk : Fragment() {
             refreshMarkers()
         }
 
-        markerStateProperty.bind(vm.markerStateProperty)
-
         imageWidthProperty.bind(vm.imageWidthProperty)
     }
 
@@ -98,7 +96,7 @@ class Chunk : Fragment() {
         timer?.start()
         vm.onDockChunk()
 
-        waveform.markers.bind(vm.markers.markers, {it})
+        waveform.markers.bind(vm.markers, {it})
         waveform.refreshMarkers()
     }
 
@@ -153,13 +151,13 @@ class Chunk : Fragment() {
             add(nextBtn)
             button("undo") {
                 setOnAction {
-                    vm.markers?.undo()
+                    vm.markerModel.undo()
                     waveform.refreshMarkers()
                 }
             }
             button("redo") {
                 setOnAction {
-                    vm.markers?.redo()
+                    vm.markerModel.redo()
                     waveform.refreshMarkers()
                 }
             }
