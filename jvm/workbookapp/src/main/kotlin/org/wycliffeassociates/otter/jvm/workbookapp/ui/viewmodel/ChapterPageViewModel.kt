@@ -485,13 +485,6 @@ class ChapterPageViewModel : ViewModel() {
         val chapter = workbookDataStore.activeChapterProperty.value
         VerseByVerseChunking(directoryProvider, wkbk, chapter.addChunk, chapter.sort)
             .chunkVerseByVerse(wkbk.source.slug, 1)
-        chapter.chunks.getValues(emptyArray()).forEach {
-            if (it.draftNumber != -1){
-                it.draftNumber = 1
-            } else {
-                println("stale draft ${it.sort}")
-            }
-        }
     }
 
     fun resetChapter() {
