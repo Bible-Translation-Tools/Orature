@@ -279,8 +279,8 @@ class ChunkingViewModel : ViewModel() {
     }
 
     fun placeMarker() {
-        val pos = audioPlayer.get().getLocationInFrames()
-        markerModel.addMarker(pos)
+        markerModel.addMarker(audioPlayer.get().getLocationInFrames())
+        markers.setAll(markerModel.markers)
     }
 
     fun seekNext() {
@@ -303,5 +303,15 @@ class ChunkingViewModel : ViewModel() {
         if (wasPlaying) {
             audioController?.toggle()
         }
+    }
+
+    fun undoMarker() {
+        markerModel.undo()
+        markers.setAll(markerModel.markers)
+    }
+
+    fun redoMarker() {
+        markerModel.redo()
+        markers.setAll(markerModel.markers)
     }
 }

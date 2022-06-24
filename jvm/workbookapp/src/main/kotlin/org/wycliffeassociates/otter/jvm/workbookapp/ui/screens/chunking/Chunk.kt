@@ -65,7 +65,6 @@ class Chunk : Fragment() {
 
         onPlaceMarker = {
             vm::placeMarker.invoke()
-            refreshMarkers()
         }
 
         imageWidthProperty.bind(vm.imageWidthProperty)
@@ -151,14 +150,12 @@ class Chunk : Fragment() {
             add(nextBtn)
             button("undo") {
                 setOnAction {
-                    vm.markerModel.undo()
-                    waveform.refreshMarkers()
+                    vm.undoMarker()
                 }
             }
             button("redo") {
                 setOnAction {
-                    vm.markerModel.redo()
-                    waveform.refreshMarkers()
+                    vm.redoMarker()
                 }
             }
             button("save") {
