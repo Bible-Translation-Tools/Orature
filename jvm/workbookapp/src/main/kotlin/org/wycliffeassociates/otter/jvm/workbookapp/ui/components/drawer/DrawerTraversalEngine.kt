@@ -18,9 +18,10 @@ class DrawerTraversalEngine(root: Parent) {
         }
 
         private fun traverse(node: Node, dir: Direction, context: TraversalContext): Node {
-            if (targetNodes.isEmpty()) {
-                addFocusableChildrenToTargetNodes(context.root)
-            }
+            if (!isFocusable(node)) return node
+
+            targetNodes.clear()
+            addFocusableChildrenToTargetNodes(context.root)
 
             var index = targetNodes.indexOf(node)
 
@@ -51,13 +52,17 @@ class DrawerTraversalEngine(root: Parent) {
         private fun addFocusableChildrenToTargetNodes(parent: Parent) {
             val parentsNodes: List<Node> = parent.childrenUnmodifiable
             for (node in parentsNodes) {
-                if (node.isFocusTraversable && NodeHelper.isTreeVisible(node) && !node.isDisabled) {
+                if (isFocusable(node)) {
                     targetNodes.add(node)
                 }
                 if (node is Parent) {
                     addFocusableChildrenToTargetNodes(node)
                 }
             }
+        }
+
+        private fun isFocusable(node: Node): Boolean {
+            return node.isFocusTraversable && NodeHelper.isTreeVisible(node) && !node.isDisabled
         }
     }
 

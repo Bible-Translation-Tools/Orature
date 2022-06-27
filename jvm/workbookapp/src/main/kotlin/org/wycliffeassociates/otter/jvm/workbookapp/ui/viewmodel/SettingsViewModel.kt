@@ -101,7 +101,10 @@ class SettingsViewModel : ViewModel() {
     }
 
     val languageNamesUrlProperty = SimpleStringProperty()
-    val langNamesImportingProperty = SimpleBooleanProperty(false)
+    val defaultLanguageNamesUrlProperty = SimpleStringProperty()
+    val languageNamesImportingProperty = SimpleBooleanProperty(false)
+    val updateLanguagesResultProperty = SimpleStringProperty()
+    val updateLanguagesSuccessProperty = SimpleObjectProperty<Boolean>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -124,6 +127,7 @@ class SettingsViewModel : ViewModel() {
         loadCurrentOutputDevice()
         loadCurrentInputDevice()
         loadLanguageNamesUrl()
+        loadDefaultLanguageNamesUrl()
 
         supportedThemes.setAll(ColorTheme.values().asList())
         theme.preferredTheme
@@ -211,8 +215,19 @@ class SettingsViewModel : ViewModel() {
                 logger.error("Error in loadLanguageNamesUrl: ", it)
             }
             .observeOnFx()
-            .subscribe { server ->
-                languageNamesUrlProperty.set(server)
+            .subscribe { url ->
+                languageNamesUrlProperty.set(url)
+            }
+    }
+
+    private fun loadDefaultLanguageNamesUrl() {
+        appPrefRepository.defaultLanguageNamesUrl()
+            .doOnError {
+                logger.error("Error in loadDefaultLanguageNamesUrl: ", it)
+            }
+            .observeOnFx()
+            .subscribe { url ->
+                defaultLanguageNamesUrlProperty.set(url)
             }
     }
 
@@ -276,10 +291,11 @@ class SettingsViewModel : ViewModel() {
     }
 
     fun importLanguages() {
-        if (langNamesImportingProperty.value) return
-        langNamesImportingProperty.set(true)
+        if (languageNamesImportingProperty.value) return
 
-        fetchLangNames()
+        languageNamesImportingProperty.set(true)
+
+        fetchLanguageNames()
             .subscribeOn(Schedulers.io())
             .flatMapCompletable { response ->
                 if (response.isSuccessful) {
@@ -291,23 +307,39 @@ class SettingsViewModel : ViewModel() {
                     Completable.error(error)
                 }
             }
+            .observeOnFx()
             .doOnError {
                 logger.error("Error in importLanguages: ", it)
-                langNamesImportingProperty.set(false)
             }
-            .onErrorComplete()
-            .observeOnFx()
-            .subscribe {
-                langNamesImportingProperty.set(false)
+            .subscribe(
+                {
+                    languageNamesImportingProperty.set(false)
+                    updateLanguagesSuccessProperty.set(true)
+                    updateLanguagesResultProperty.set(messages["success"])
+                },
+                {
+                    languageNamesImportingProperty.set(false)
+                    updateLanguagesSuccessProperty.set(false)
+                    updateLanguagesResultProperty.set(it.message)
+                }
+            )
+    }
+
+    fun resetLanguageNamesLocation() {
+        appPrefRepository
+            .resetLanguageNamesUrl()
+            .subscribe { url ->
+                languageNamesUrlProperty.set(url)
             }
     }
 
-    private fun fetchLangNames(): Single<Response> {
+    private fun fetchLanguageNames(): Single<Response> {
         return Single.fromCallable {
-            val httpClient = OkHttpClient()
             val request = Request.Builder()
                 .url(languageNamesUrlProperty.value)
                 .build()
+
+            val httpClient = OkHttpClient()
             httpClient.newCall(request).execute()
         }
     }

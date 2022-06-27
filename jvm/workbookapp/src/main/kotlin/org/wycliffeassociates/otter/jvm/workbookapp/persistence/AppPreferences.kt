@@ -51,6 +51,7 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
     private val APP_THEME_KEY = "appTheme"
     private val SOURCE_TEXT_ZOOM_KEY = "sourceTextZoom"
     private val LANGUAGE_NAMES_URL_KEY = "languageNamesUrl"
+    private val DEFAULT_LANGUAGE_NAMES_URL = "https://td.unfoldingword.org/exports/langnames.json"
 
     private fun putInt(key: String, value: Int): Completable {
         return Completable
@@ -217,10 +218,19 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
     }
 
     override fun languageNamesUrl(): Single<String> {
-        return getString(LANGUAGE_NAMES_URL_KEY, "http://td.unfoldingword.org/exports/langnames.json")
+        return getString(LANGUAGE_NAMES_URL_KEY, DEFAULT_LANGUAGE_NAMES_URL)
     }
 
     override fun setLanguageNamesUrl(server: String): Completable {
         return putString(LANGUAGE_NAMES_URL_KEY, server)
+    }
+
+    override fun defaultLanguageNamesUrl(): Single<String> {
+        return Single.just(DEFAULT_LANGUAGE_NAMES_URL)
+    }
+
+    override fun resetLanguageNamesUrl(): Single<String> {
+        return putString(LANGUAGE_NAMES_URL_KEY, DEFAULT_LANGUAGE_NAMES_URL)
+            .toSingleDefault(DEFAULT_LANGUAGE_NAMES_URL)
     }
 }

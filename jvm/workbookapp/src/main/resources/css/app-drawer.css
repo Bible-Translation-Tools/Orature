@@ -182,3 +182,44 @@
 .app-drawer__shortcut .ikonli-font-icon {
     -fx-fill: -wa-regular-text;
 }
+
+.app-drawer-success {
+    -fx-text-fill: -wa-success-color;
+}
+
+.app-drawer-error {
+    -fx-text-fill: -wa-error-color;
+}
+
+.app-drawer-progress-bar {
+    -fx-max-width: infinity;
+}
+
+.app-drawer-progress {
+    -fx-pref-height: 48px;
+    -fx-max-width: infinity;
+    -fx-background-radius: 6px;
+    -fx-background-insets: 0;
+    -fx-border-radius: 4px;
+    -fx-border-width: 2px;
+    -fx-border-color: -wa-primary-dark;
+    -fx-border-style: solid;
+}
+
+.app-drawer-progress .track {
+    -fx-background-radius: 3px;
+    -fx-background-insets: 0;
+    -fx-background-color: -wa-primary-gradient;
+}
+
+.app-drawer-progress .bar {
+    -fx-background-radius: 3px;
+    -fx-background-insets: 0;
+    -fx-background-color: -wa-primary-dark;
+}
+
+.app-drawer-progress-text {
+    -fx-text-fill: -wa-primary-btn-text-fill;
+    -fx-font-size: 20px;
+    -fx-alignment: center;
+}
