@@ -249,6 +249,8 @@ class WorkbookPageViewModel : ViewModel() {
         val workbook = workbookDataStore.workbook
         val deleteProject = deleteProjectProvider.get()
 
+        logger.info("Deleting project: ${workbook.target.slug}")
+
         activeProjectTitleProperty.set(workbook.target.title)
         activeProjectCoverProperty.set(
             workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
