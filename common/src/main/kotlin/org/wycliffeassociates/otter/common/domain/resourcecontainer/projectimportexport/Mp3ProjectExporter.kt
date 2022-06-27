@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimpo
 import io.reactivex.Single
 import io.reactivex.rxkotlin.toObservable
 import io.reactivex.schedulers.Schedulers
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.License
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
@@ -21,6 +22,8 @@ class Mp3ProjectExporter @Inject constructor(
     @Inject
     lateinit var audioExporter: AudioExporter
 
+    private val logger = LoggerFactory.getLogger(this.javaClass)
+
     override fun export(
         directory: File,
         projectMetadataToExport: ResourceMetadata,
@@ -29,8 +32,10 @@ class Mp3ProjectExporter @Inject constructor(
     ): Single<ExportResult> {
         val isBook = projectMetadataToExport.identifier == workbook.target.resourceMetadata.identifier
         return if (isBook) {
+            logger.info("Exporting Scripture project as mp3: ${workbook.target.slug}")
             exportBookMp3(directory, workbook, projectFilesAccessor)
         } else {
+            logger.info("Exporting help project as mp3: ${workbook.target.slug}")
             exportResourceMp3(directory, projectMetadataToExport, workbook, projectFilesAccessor)
         }
     }

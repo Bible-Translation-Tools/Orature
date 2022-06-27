@@ -20,13 +20,13 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import io.reactivex.Completable
 import io.reactivex.Maybe
-import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
@@ -59,6 +59,8 @@ class WorkbookDataStore : Component(), ScopedInstance {
 
     @Inject
     lateinit var localeLanguage: LocaleLanguage
+
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     val activeWorkbookProperty = SimpleObjectProperty<Workbook>()
     val workbook: Workbook
@@ -96,9 +98,16 @@ class WorkbookDataStore : Component(), ScopedInstance {
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
-        activeChapterProperty.onChange { updateSourceAudio() }
-        activeChunkProperty.onChangeAndDoNow { updateSourceAudio() }
+        activeChapterProperty.onChange {
+            logger.info("Active chapter: ${it?.sort}")
+            updateSourceAudio()
+        }
+        activeChunkProperty.onChangeAndDoNow {
+            logger.info("Active chunk: ${it?.sort}")
+            updateSourceAudio()
+        }
         activeWorkbookProperty.onChange {
+            logger.info("Active workbook: ${it?.target?.slug}")
             if (it == null) {
                 activeChapterProperty.set(null)
                 activeChunkProperty.set(null)

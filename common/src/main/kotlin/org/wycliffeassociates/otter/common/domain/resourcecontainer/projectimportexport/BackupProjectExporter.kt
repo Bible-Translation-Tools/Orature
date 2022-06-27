@@ -38,6 +38,8 @@ class BackupProjectExporter @Inject constructor(
                 val zipFilename = makeExportFilename(workbook, projectSourceMetadata)
                 val zipFile = directory.resolve(zipFilename)
 
+                logger.info("Exporting backup project: ${zipFile.nameWithoutExtension}")
+
                 projectFilesAccessor.initializeResourceContainerInFile(workbook, zipFile)
                 setContributorInfo(contributors, projectMetadataToExport, zipFile)
 
