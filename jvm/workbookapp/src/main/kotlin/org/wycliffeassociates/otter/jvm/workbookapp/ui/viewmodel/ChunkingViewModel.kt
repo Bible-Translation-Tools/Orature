@@ -24,8 +24,10 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
 import java.io.File
+import javafx.beans.binding.IntegerBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.image.Image
@@ -43,6 +45,7 @@ import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
+import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
@@ -50,6 +53,7 @@ import tornadofx.ViewModel
 import tornadofx.getValue
 import tornadofx.observableListOf
 import tornadofx.onChange
+import tornadofx.sizeProperty
 
 const val ACTIVE = "chunking-wizard__step--active"
 const val COMPLETE = "chunking-wizard__step--complete"
@@ -102,7 +106,7 @@ class ChunkAudioUseCase(val directoryProvider: IDirectoryProvider, val workbook:
     }
 }
 
-class ChunkingViewModel : ViewModel() {
+class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
 
     val chapterPageViewModel: ChapterPageViewModel by inject()
 
@@ -125,8 +129,31 @@ class ChunkingViewModel : ViewModel() {
     @Inject
     lateinit var audioConnectionFactory: AudioConnectionFactory
 
-    lateinit var markerModel: VerseMarkerModel
-    val markers = observableListOf<ChunkMarkerModel>()
+    override var markerModel: VerseMarkerModel? = null
+    override val markers = observableListOf<ChunkMarkerModel>()
+
+    override val markerCountProperty = markers.sizeProperty
+    override val currentMarkerNumberProperty = SimpleIntegerProperty(1)
+    override var resumeAfterScroll: Boolean = false
+
+    private val width = Screen.getMainScreen().platformWidth
+    private val height = Integer.min(Screen.getMainScreen().platformHeight, 500)
+
+    private val waveformSubject = PublishSubject.create<Image>()
+
+    val waveform: Observable<Image>
+        get() = waveformSubject
+
+    override var audioController: AudioPlayerController? = null
+    override val audioPlayer = SimpleObjectProperty<IAudioPlayer>()
+    val isPlayingProperty = SimpleBooleanProperty(false)
+    val compositeDisposable = CompositeDisposable()
+    override val positionProperty = SimpleDoubleProperty(0.0)
+    override var imageWidthProperty = SimpleDoubleProperty(0.0)
+
+    private val disposeables = mutableListOf<Disposable>()
+
+    lateinit var audio: AudioFile
 
     init {
         pageProperty.onChange {
@@ -149,25 +176,6 @@ class ChunkingViewModel : ViewModel() {
             }
         }
     }
-
-    private val width = Screen.getMainScreen().platformWidth
-    private val height = Integer.min(Screen.getMainScreen().platformHeight, 500)
-
-    private val waveformSubject = PublishSubject.create<Image>()
-
-    val waveform: Observable<Image>
-        get() = waveformSubject
-
-    var audioController: AudioPlayerController? = null
-    val audioPlayer = SimpleObjectProperty<IAudioPlayer>()
-    val isPlayingProperty = SimpleBooleanProperty(false)
-    val compositeDisposable = CompositeDisposable()
-    val positionProperty = SimpleDoubleProperty(0.0)
-    var imageWidthProperty = SimpleDoubleProperty(0.0)
-
-    private val disposeables = mutableListOf<Disposable>()
-
-    lateinit var audio: AudioFile
 
     fun onDockConsume() {
         sourceAudio?.file?.let {
@@ -194,16 +202,8 @@ class ChunkingViewModel : ViewModel() {
         val totalMarkers: Int = 500
         audio.metadata.clearMarkers()
         markerModel = VerseMarkerModel(audio, totalMarkers)
-        markers.setAll(markerModel.markers)
-    }
-
-    fun calculatePosition() {
-        audioPlayer.get()?.let { audioPlayer ->
-            val current = audioPlayer.getLocationInFrames()
-            val duration = audioPlayer.getDurationInFrames().toDouble()
-            val percentPlayed = current / duration
-            val pos = percentPlayed * imageWidthProperty.value
-            positionProperty.set(pos)
+        markerModel?.let { markerModel ->
+            markers.setAll(markerModel.markers)
         }
     }
 
@@ -239,14 +239,6 @@ class ChunkingViewModel : ViewModel() {
         audioController?.pause()
     }
 
-    fun mediaToggle() {
-        audioController?.toggle()
-    }
-
-    fun seek(location: Int) {
-        audioController?.seek(location)
-    }
-
     private fun createWaveformImages(audio: AudioFile) {
         imageWidthProperty.set(computeImageWidth(SECONDS_ON_SCREEN))
 
@@ -268,50 +260,5 @@ class ChunkingViewModel : ViewModel() {
         val samplesPerPixel = samplesPerScreenWidth / width
         val pixelsInDuration = audioPlayer.get().getDurationInFrames() / samplesPerPixel
         return pixelsInDuration.toDouble()
-    }
-
-    fun getLocationInFrames(): Int {
-        return audioPlayer.get().getLocationInFrames() ?: 0
-    }
-
-    fun getDurationInFrames(): Int {
-        return audioPlayer.get().getDurationInFrames() ?: 0
-    }
-
-    fun placeMarker() {
-        markerModel.addMarker(audioPlayer.get().getLocationInFrames())
-        markers.setAll(markerModel.markers)
-    }
-
-    fun seekNext() {
-        val wasPlaying = audioPlayer.get().isPlaying()
-        if (wasPlaying) {
-            audioController?.toggle()
-        }
-        seek(markerModel.seekNext(audioPlayer.get().getLocationInFrames()))
-        if (wasPlaying) {
-            audioController?.toggle()
-        }
-    }
-
-    fun seekPrevious() {
-        val wasPlaying = audioPlayer.get().isPlaying()
-        if (wasPlaying) {
-            audioController?.toggle()
-        }
-        seek(markerModel.seekPrevious(audioPlayer.get().getLocationInFrames()))
-        if (wasPlaying) {
-            audioController?.toggle()
-        }
-    }
-
-    fun undoMarker() {
-        markerModel.undo()
-        markers.setAll(markerModel.markers)
-    }
-
-    fun redoMarker() {
-        markerModel.redo()
-        markers.setAll(markerModel.markers)
     }
 }
