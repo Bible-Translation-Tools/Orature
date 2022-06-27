@@ -19,7 +19,6 @@
 package org.wycliffeassociates.otter.common.persistence.repositories
 
 import com.jakewharton.rxrelay2.BehaviorRelay
-import com.jakewharton.rxrelay2.Relay
 import com.jakewharton.rxrelay2.ReplayRelay
 import io.reactivex.Completable
 import io.reactivex.Maybe
@@ -27,8 +26,6 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
-import io.reactivex.functions.BiConsumer
-import io.reactivex.rxkotlin.toObservable
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
@@ -54,7 +51,6 @@ import org.wycliffeassociates.otter.common.domain.collections.UpdateTranslation
 import java.util.WeakHashMap
 import java.util.Collections.synchronizedMap
 import javax.inject.Inject
-import kotlin.math.log
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 
 private typealias ModelTake = org.wycliffeassociates.otter.common.data.primitives.Take
@@ -222,7 +218,6 @@ class WorkbookRepository(
                         logger.info("Adding chunk $it")
                         db.addContentForCollection(chapterCollection, it).subscribe()
                     },
-                    currentDraftNumber = db.getCurrentDraftNumber(chapterCollection),
                     reset = {
                         db.clearContentForCollection(chapterCollection, ContentType.TEXT).map {
                             it.forEach { take ->
@@ -607,7 +602,6 @@ class WorkbookRepository(
         ): Single<List<ModelTake>>
 
         fun getChunkCount(chapterCollection: Collection): Single<Int>
-        fun getCurrentDraftNumber(chapterCollection: Collection): Single<Int>
     }
 }
 
@@ -622,10 +616,6 @@ private class DefaultDatabaseAccessors(
 ) : WorkbookRepository.IDatabaseAccessors {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
-
-    override fun getCurrentDraftNumber(chapterCollection: Collection): Single<Int> {
-        return contentRepo.getMaxDraftNumber(chapterCollection)
-    }
 
     override fun getChunkCount(chapterCollection: Collection): Single<Int> {
         return contentRepo

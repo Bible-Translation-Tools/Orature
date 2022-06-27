@@ -201,14 +201,6 @@ class ContentRepository @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
-    override fun getMaxDraftNumber(chapterCollection: Collection): Single<Int> {
-        return Single
-            .fromCallable {
-                contentDao.getMaxDraftNumber(collectionMapper.mapToEntity(chapterCollection))
-            }
-            .subscribeOn(Schedulers.io())
-    }
-
     private fun buildContent(entity: ContentEntity): Content {
         // Check for sources
         val sources = contentDao.fetchSources(entity)

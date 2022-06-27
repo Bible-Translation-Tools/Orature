@@ -310,12 +310,4 @@ class ContentDao(
             )
             .execute()
     }
-
-    fun getMaxDraftNumber(chapter: CollectionEntity, dsl: DSLContext = instanceDsl): Int {
-        return dsl
-            .select(max(CONTENT_ENTITY.DRAFT_NUMBER))
-            .from(CONTENT_ENTITY)
-            .where(CONTENT_ENTITY.COLLECTION_FK.eq(chapter.id))
-            .execute()
-    }
 }

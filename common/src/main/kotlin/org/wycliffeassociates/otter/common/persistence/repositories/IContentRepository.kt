@@ -41,5 +41,4 @@ interface IContentRepository : IRepository<Content> {
         chapterCollection: Collection,
         typeFilter: ContentType? = null
     ): Completable
-    fun getMaxDraftNumber(chapterCollection: Collection): Single<Int>
 }
