@@ -173,17 +173,12 @@ class VerseMarkerModel(private val audio: AudioFile, private val markerTotal: In
         return highlightState
     }
 
-    private enum class OperationType {
-        ADD,
-        DELETE
-    }
-
-    private abstract inner class MarkerOperation(val id: Int, val op: OperationType) {
+    private abstract inner class MarkerOperation(val markerId: Int) {
         abstract fun apply()
         abstract fun undo()
     }
 
-    private inner class Add(val marker: ChunkMarkerModel): MarkerOperation(marker.id, OperationType.ADD) {
+    private inner class Add(val marker: ChunkMarkerModel): MarkerOperation(marker.id) {
         override fun apply() {
             markers.add(marker)
         }
@@ -193,11 +188,11 @@ class VerseMarkerModel(private val audio: AudioFile, private val markerTotal: In
         }
     }
 
-    private inner class Delete(id: Int): MarkerOperation(id, OperationType.DELETE) {
+    private inner class Delete(id: Int): MarkerOperation(id) {
         var marker: ChunkMarkerModel? = null
 
         override fun apply() {
-            marker = markers.find { it.id == id }
+            marker = markers.find { it.id == markerId }
             marker?.let {
                 markers.remove(it)
             }
