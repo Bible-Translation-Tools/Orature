@@ -54,6 +54,7 @@ import java.io.File
 import java.util.concurrent.Callable
 import javax.inject.Inject
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.domain.content.VerseByVerseChunking
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -65,8 +66,6 @@ class ChapterPageViewModel : ViewModel() {
 
     val workbookDataStore: WorkbookDataStore by inject()
     val audioPluginViewModel: AudioPluginViewModel by inject()
-
-    var draft = 0
 
     @Inject
     lateinit var directoryProvider: IDirectoryProvider
@@ -116,8 +115,6 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     fun dock() {
-        draft = 0
-
         allContent
             .changes()
             .doOnError { e ->
@@ -133,7 +130,6 @@ class ChapterPageViewModel : ViewModel() {
             }
 
         chapterCardProperty.set(CardData(workbookDataStore.chapter))
-
         workbookDataStore.activeChapterProperty.value?.let { chapter ->
             updateLastSelectedChapter(chapter.sort)
             loadChapterContents(chapter).subscribe()
@@ -375,7 +371,6 @@ class ChapterPageViewModel : ViewModel() {
         loading = true
         return chapter.chunks
             .map {
-                println("adding chunk $it to card data")
                 CardData(it)
             }
             .map {
@@ -394,16 +389,17 @@ class ChapterPageViewModel : ViewModel() {
             }
             .map {
                 if (it.chunkSource != null) {
-                    if (it.chunkSource.draftNumber > draft) {
-                        logger.error("draft number is $draft, chunk draft number is ${it.chunkSource.draftNumber} should be removing other chunks")
-                        draft = it.chunkSource.draftNumber
-                        filteredContent.removeIf { it.chunkSource != null && it.chunkSource.draftNumber < draft }
+                    if (it.chunkSource.draftNumber > 0) {
+                        if (filteredContent.find { cont -> it.sort == cont.sort } == null) {
+                            filteredContent.add(it)
+                        }
                     }
-                }
-                if (filteredContent.find { cont -> it.sort == cont.sort } == null) {
+                } else {
                     filteredContent.add(it)
-                    filteredContent.sortBy { it.sort }
                 }
+
+                filteredContent.removeIf { it.chunkSource != null && it.chunkSource.draftNumber < 0 }
+                filteredContent.sortBy { it.sort }
                 it
             }.observeOnFx()
     }
@@ -491,13 +487,21 @@ class ChapterPageViewModel : ViewModel() {
         val wkbk = workbookDataStore.activeWorkbookProperty.value
         val chapter = workbookDataStore.activeChapterProperty.value
         VerseByVerseChunking(directoryProvider, wkbk, chapter.addChunk, chapter.sort)
-            .chunkVerseByVerse(wkbk.source.slug, draft + 1)
+            .chunkVerseByVerse(wkbk.source.slug, 1)
     }
 
     fun resetChapter() {
         closePlayers()
         filteredContent.clear()
         val chapter = workbookDataStore.activeChapterProperty.value
+        chapter.chunks.getValues(emptyArray()).forEach { chunk ->
+            chunk.draftNumber = -1
+            chunk.audio.getAllTakes()
+                .filter { it.deletedTimestamp.value?.value == null }
+                .forEach { take ->
+                    take.deletedTimestamp.accept(DateHolder.now())
+                }
+        }
         chapter.reset()
     }
 }

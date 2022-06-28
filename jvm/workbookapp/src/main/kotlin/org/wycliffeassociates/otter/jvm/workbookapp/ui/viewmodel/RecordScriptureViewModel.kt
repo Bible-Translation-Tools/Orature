@@ -336,8 +336,14 @@ class RecordScriptureViewModel : ViewModel() {
             StepDirection.FORWARD -> 1
             StepDirection.BACKWARD -> -1
         }
-        val nextIndex = chunkList.indexOf(activeChunk) + amount
-        chunkList.elementAtOrNull(nextIndex)?.let { activeChunkProperty.set(it) }
+
+        val currentChunks = chunkList.filter { it.draftNumber > 0 }
+        currentChunks
+            .indexOf(activeChunk)
+            .let { currentIndex ->
+                currentChunks.elementAtOrNull(currentIndex + amount)
+                    ?.let { activeChunkProperty.set(it) }
+            }
     }
 
     fun recordNewTake() {

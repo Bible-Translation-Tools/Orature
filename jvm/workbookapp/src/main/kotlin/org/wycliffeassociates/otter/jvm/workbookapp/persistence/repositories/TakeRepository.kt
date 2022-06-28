@@ -24,11 +24,13 @@ import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.Content
+import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.Take
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.TakeEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.CollectionMapper
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.ContentMapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.MarkerMapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.TakeMapper
 import java.io.File
@@ -47,6 +49,7 @@ class TakeRepository @Inject constructor(
     private val takeDao = database.takeDao
     private val markerDao = database.markerDao
     private val contentDao = database.contentDao
+    private val contentTypeDao = database.contentTypeDao
 
     /** Delete the DB record. Instead of this, consider using {@see markDeleted} to set the deleted timestamp. */
     override fun delete(obj: Take): Completable {
@@ -211,6 +214,15 @@ class TakeRepository @Inject constructor(
                 logger.error("Error in getByCollection for collection: $chapterCollection, includeDeleted: $includeDeleted", e)
             }
             .subscribeOn(Schedulers.io())
+    }
+
+    override fun getContentType(take: Take): Single<ContentType> {
+        return Single
+            .fromCallable {
+                val contentId = takeDao.fetchById(take.id).contentFk
+                val content = contentDao.fetchById(contentId)
+                contentTypeDao.fetchForId(content.type_fk)
+            }
     }
 
     private fun buildTake(entity: TakeEntity): Take {

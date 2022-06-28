@@ -221,7 +221,7 @@ class ChunkingViewModel : ViewModel() {
         println()
 
         VerseByVerseChunking(directoryProvider, wkbk, chapter.addChunk, chapter.sort)
-            .chunkChunkByChunk(wkbk.source.slug, cues, chapterPageViewModel.draft + 1)
+            .chunkChunkByChunk(wkbk.source.slug, cues, 1)
 
         pageProperty.set(ChunkingWizardPage.CONSUME)
 

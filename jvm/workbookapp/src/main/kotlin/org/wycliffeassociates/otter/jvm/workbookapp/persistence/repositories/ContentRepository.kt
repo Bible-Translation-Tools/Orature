@@ -128,9 +128,22 @@ class ContentRepository @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
-    override fun deleteForCollection(chapterCollection: Collection): Completable {
+    override fun deleteForCollection(
+        chapterCollection: Collection,
+        typeFilter: ContentType?
+    ): Completable {
+        val typeId = typeFilter?.let {
+            contentTypeDao.fetchId(typeFilter)
+        }
+
+        activeConnections.getOrDefault(chapterCollection, null)
+            ?.let { it.getValues(emptyArray()).forEach { it.draftNumber = -1 } }
+
         return Completable.fromCallable {
-            contentDao.deleteForCollection(collectionMapper.mapToEntity(chapterCollection))
+            contentDao.deleteForCollection(
+                collectionMapper.mapToEntity(chapterCollection),
+                typeId
+            )
         }
     }
 
@@ -184,14 +197,6 @@ class ContentRepository @Inject constructor(
             }
             .doOnError { e ->
                 logger.error("Error in update for content: $obj", e)
-            }
-            .subscribeOn(Schedulers.io())
-    }
-
-    override fun getMaxDraftNumber(chapterCollection: Collection): Single<Int> {
-        return Single
-            .fromCallable {
-                contentDao.getMaxDraftNumber(collectionMapper.mapToEntity(chapterCollection))
             }
             .subscribeOn(Schedulers.io())
     }

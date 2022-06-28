@@ -18,7 +18,6 @@
  */
 package org.wycliffeassociates.otter.common.data.workbook
 
-import com.jakewharton.rxrelay2.Relay
 import com.jakewharton.rxrelay2.ReplayRelay
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -41,7 +40,6 @@ data class Chapter(
     override val subtreeResources: List<ResourceMetadata>,
     val chunks: ReplayRelay<Chunk>,
     val chunkCount: Single<Int>,
-    val currentDraftNumber: Single<Int>,
     val addChunk: (List<Content>) -> Unit,
     val reset: () -> Unit
 ) : BookElement, BookElementContainer, Recordable {
@@ -57,10 +55,9 @@ data class Chapter(
     private fun getLatestDraftFromRelay(): Single<List<Chunk>> {
         return Single.fromCallable {
             val draft = mutableListOf<Chunk>()
-            val maxDraft = currentDraftNumber.blockingGet()
             val chunkTotal = chunkCount.blockingGet()
             val disposable = chunks
-                .filter { it.draftNumber == maxDraft }
+                .filter { it.draftNumber > 0 } // filter active drafts
                 .takeUntil { draft.size == chunkTotal }
                 .forEach { draft.add(it) }
             while (draft.size != chunkTotal) {
