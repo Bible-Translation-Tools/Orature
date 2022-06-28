@@ -171,11 +171,13 @@ class SettingsViewModel : ViewModel() {
     }
 
     fun selectEditor(editorData: AudioPluginData) {
+        logger.info("Selected editor: ${editorData.name}")
         pluginRepository.setPluginData(PluginType.EDITOR, editorData).subscribe()
         selectedEditorProperty.set(editorData)
     }
 
     fun selectRecorder(recorderData: AudioPluginData) {
+        logger.info("Selected recorder: ${recorderData.name}")
         pluginRepository.setPluginData(PluginType.RECORDER, recorderData).subscribe()
         selectedRecorderProperty.set(recorderData)
     }
@@ -213,10 +215,12 @@ class SettingsViewModel : ViewModel() {
     }
 
     fun updateOutputDevice(mixer: String) {
+        logger.info("Selected output device: $mixer")
         appPrefRepository.setOutputDevice(mixer).subscribe()
     }
 
     fun updateInputDevice(mixer: String) {
+        logger.info("Selected input device: $mixer")
         appPrefRepository.setInputDevice(mixer).subscribe()
     }
 
@@ -228,6 +232,7 @@ class SettingsViewModel : ViewModel() {
     }
 
     fun updateLanguage(language: Language) {
+        logger.info("Selected app language: ${language.slug}")
         localeLanguage.setPreferredLanguage(language)
             .subscribe {
                 showChangeLanguageSuccessDialogProperty.set(true)
@@ -244,6 +249,8 @@ class SettingsViewModel : ViewModel() {
     }
 
     fun updateTheme(selectedTheme: ColorTheme) {
+        logger.info("Selected theme: ${selectedTheme.name}")
+
         if (selectedTheme == ColorTheme.SYSTEM) {
             bindSystemTheme()
         } else {
