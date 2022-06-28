@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import com.jfoenix.controls.JFXButton
+import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.layout.Priority
@@ -30,6 +31,8 @@ import tornadofx.*
 class PlaybackControlsFragment : Fragment() {
 
     private val logger = LoggerFactory.getLogger(PlaybackControlsFragment::class.java)
+
+    var refreshViewProperty = {}
 
     val viewModel: VerseMarkerViewModel by inject()
 
@@ -72,6 +75,24 @@ class PlaybackControlsFragment : Fragment() {
         setOnAction { viewModel.seekPrevious() }
     }
 
+    private val undoBtn = Button().apply {
+        text = "undo"
+
+        setOnAction {
+            viewModel.undoMarker()
+            refreshViewProperty.invoke()
+        }
+    }
+
+    private val redoBtn = Button().apply {
+        text = "redo"
+
+        setOnAction {
+            viewModel.redoMarker()
+            refreshViewProperty.invoke()
+        }
+    }
+
     private val closeBtn = Button().apply {
         text = messages["continue"]
         graphic = continueIcon
@@ -109,6 +130,8 @@ class PlaybackControlsFragment : Fragment() {
         }
         right = hbox {
             alignment = Pos.CENTER_RIGHT
+            add(undoBtn)
+            add(redoBtn)
             add(closeBtn)
         }
     }

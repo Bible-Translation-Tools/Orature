@@ -19,16 +19,11 @@
 package org.wycliffeassociates.otter.jvm.controls.waveform
 
 import javafx.scene.layout.BorderPane
-import javafx.scene.layout.Priority
 import tornadofx.*
 
 class MarkerViewBackground : BorderPane() {
 
     init {
-        fitToParentSize()
-        hgrow = Priority.ALWAYS
-        vgrow = Priority.ALWAYS
-
         with(this) {
             top {
                 region {

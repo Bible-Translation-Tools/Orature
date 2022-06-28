@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.controls.model
 
 import io.reactivex.Completable
 import io.reactivex.Single
+import java.util.*
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.audio.AudioCue
@@ -30,12 +31,14 @@ private const val SEEK_EPSILON = 15_000
 
 class VerseMarkerModel(private val audio: AudioFile, private val markerTotal: Int) {
 
-    val cues = sanitizeCues(audio)
+    private val undoStack: Deque<MarkerOperation> = ArrayDeque()
+    private val redoStack: Deque<MarkerOperation> = ArrayDeque()
+
+    private val cues = sanitizeCues(audio)
     val markers: ObservableList<ChunkMarkerModel> = observableListOf()
-    val highlightState: List<MarkerHighlightState>
 
     val markerCountProperty = SimpleIntegerProperty(1)
-    val audioEnd = audio.totalFrames
+    private val audioEnd = audio.totalFrames
     var changesSaved = true
         private set
 
@@ -46,21 +49,46 @@ class VerseMarkerModel(private val audio: AudioFile, private val markerTotal: In
         markerCountProperty.value = cues.size
 
         markers.setAll(initializeMarkers(markerTotal, cues))
-        highlightState = initializeHighlights(markers)
     }
 
     fun addMarker(location: Int) {
-        changesSaved = false
-        for (marker in markers) {
-            if (!marker.placed) {
-                marker.frame = location
-                marker.placed = true
-                break
-            }
+        if (markers.size < markerTotal) {
+            changesSaved = false
+
+            val marker = ChunkMarkerModel(AudioCue(location, "${markers.size + 1}"))
+            val op = Add(marker)
+            undoStack.push(op)
+            op.apply()
+            redoStack.clear()
+
+            markers.sortBy { it.frame }
+            markers.forEachIndexed { index, chunkMarker -> chunkMarker.label = (index + 1).toString() }
+            markerCountProperty.value = markers.filter { it.placed }.size
         }
-        markers.sortWith(compareBy({ !it.placed }, { it.frame }))
-        markers.forEachIndexed { index, chunkMarker -> chunkMarker.label = (index + 1).toString() }
-        markerCountProperty.value = markers.filter { it.placed }.size
+    }
+
+    fun undo() {
+        if (undoStack.isNotEmpty()) {
+            val op = undoStack.pop()
+            redoStack.push(op)
+            op.undo()
+
+            markers.sortBy { it.frame }
+            markers.forEachIndexed { index, chunkMarker -> chunkMarker.label = (index + 1).toString() }
+            markerCountProperty.value = markers.filter { it.placed }.size
+        }
+    }
+
+    fun redo() {
+        if (redoStack.isNotEmpty()) {
+            val op = redoStack.pop()
+            undoStack.push(op)
+            op.apply()
+
+            markers.sortBy { it.frame }
+            markers.forEachIndexed { index, chunkMarker -> chunkMarker.label = (index + 1).toString() }
+            markerCountProperty.value = markers.filter { it.placed }.size
+        }
     }
 
     fun seekCurrent(location: Int): Int {
@@ -127,9 +155,7 @@ class VerseMarkerModel(private val audio: AudioFile, private val markerTotal: In
                 markers.add(ChunkMarkerModel(cue))
             }
         }
-        for (i in markers.size until markerTotal) {
-            markers.add(ChunkMarkerModel(0, (i + 1).toString(), false))
-        }
+
         return markers
     }
 
@@ -146,16 +172,53 @@ class VerseMarkerModel(private val audio: AudioFile, private val markerTotal: In
         }
         return highlightState
     }
+
+    private abstract inner class MarkerOperation(val markerId: Int) {
+        abstract fun apply()
+        abstract fun undo()
+    }
+
+    private inner class Add(val marker: ChunkMarkerModel): MarkerOperation(marker.id) {
+        override fun apply() {
+            markers.add(marker)
+        }
+
+        override fun undo() {
+            markers.remove(marker)
+        }
+    }
+
+    private inner class Delete(id: Int): MarkerOperation(id) {
+        var marker: ChunkMarkerModel? = null
+
+        override fun apply() {
+            marker = markers.find { it.id == markerId }
+            marker?.let {
+                markers.remove(it)
+            }
+        }
+
+        override fun undo() {
+            marker?.let {
+                markers.add(it)
+            }
+        }
+    }
 }
 
 data class ChunkMarkerModel(
     var frame: Int,
     var label: String,
-    var placed: Boolean
+    var placed: Boolean,
+    var id: Int = idGen++
 ) {
     constructor(audioCue: AudioCue) : this(audioCue.location, audioCue.label, true)
 
     fun toAudioCue(): AudioCue {
         return AudioCue(frame, label)
+    }
+
+    companion object {
+        var idGen = 0
     }
 }

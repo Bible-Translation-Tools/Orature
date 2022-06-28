@@ -26,9 +26,7 @@ import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
-import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerTrackControl
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*
 
@@ -38,8 +36,7 @@ class MarkerView : PluginEntrypoint() {
 
     val viewModel: VerseMarkerViewModel by inject()
 
-    private val markerTrack: MarkerTrackControl = MarkerTrackControl()
-    private val waveform = MarkerPlacementWaveform(markerTrack)
+    private val waveform = MarkerPlacementWaveform()
 
     private var slider: AudioSlider? = null
     private var minimap: MinimapFragment? = null
@@ -54,27 +51,11 @@ class MarkerView : PluginEntrypoint() {
             }
         }
         timer?.start()
-        markerTrack.apply {
-            prefWidth = viewModel.imageWidth
-            viewModel.markerStateProperty.onChangeAndDoNow { markers ->
-                markers?.let { markers ->
-                    markers.markerCountProperty.onChangeAndDoNow {
-                        highlightState.setAll(viewModel.markers.highlightState)
-                        this.markers.setAll(viewModel.markers.markers)
-                        refreshMarkers()
-                    }
-                }
-            }
-            setOnPositionChanged { id, position ->
-                slider?.updateMarker(id, position)
-            }
-            setOnLocationRequest {
-                viewModel.requestAudioLocation()
-            }
-        }
         slider?.let {
             viewModel.initializeAudioController(it)
         }
+
+        waveform.markers.bind(viewModel.markers, { it })
     }
 
     init {
@@ -87,7 +68,6 @@ class MarkerView : PluginEntrypoint() {
         super.onUndock()
         timer?.stop()
         timer = null
-        waveform.markerStateProperty.unbind()
         waveform.positionProperty.unbind()
         minimap?.cleanUpOnUndock()
     }
@@ -101,43 +81,48 @@ class MarkerView : PluginEntrypoint() {
                     this@MarkerView.slider = slider
                 }
             }
-            center = vbox {
-                addClass("vm-marker-waveform__container")
-                add(
-                    waveform.apply {
-                        addClass("vm-marker-waveform")
-                        viewModel.compositeDisposable.add(
-                            viewModel.waveform.observeOnFx().subscribe { addWaveformImage(it) }
-                        )
-                        markerStateProperty.bind(viewModel.markerStateProperty)
-                        positionProperty.bind(viewModel.positionProperty)
+            center =
+                waveform.apply {
+                    addClass("vm-marker-waveform")
+                    viewModel.compositeDisposable.add(
+                        viewModel.waveform.observeOnFx().subscribe { addWaveformImage(it) }
+                    )
+                    positionProperty.bind(viewModel.positionProperty)
 
-                        onSeekNext = viewModel::seekNext
-                        onSeekPrevious = viewModel::seekPrevious
+                    onSeekNext = viewModel::seekNext
+                    onSeekPrevious = viewModel::seekPrevious
 
-                        onPlaceMarker = viewModel::placeMarker
-                        onWaveformClicked = { viewModel.pause() }
-                        onWaveformDragReleased = { deltaPos ->
-                            val deltaFrames = pixelsToFrames(deltaPos)
-                            val curFrames = viewModel.getLocationInFrames()
-                            val duration = viewModel.getDurationInFrames()
-                            val final = Utils.clamp(0, curFrames - deltaFrames, duration)
-                            viewModel.seek(final)
-                        }
-                        onRewind = viewModel::rewind
-                        onFastForward = viewModel::fastForward
-                        onToggleMedia = viewModel::mediaToggle
-                        onResumeMedia = viewModel::resumeMedia
+                    onPlaceMarker = {
+                        viewModel.placeMarker()
                     }
-                )
-            }
+                    onWaveformClicked = { viewModel.pause() }
+                    onWaveformDragReleased = { deltaPos ->
+                        val deltaFrames = pixelsToFrames(deltaPos)
+                        val curFrames = viewModel.getLocationInFrames()
+                        val duration = viewModel.getDurationInFrames()
+                        val final = Utils.clamp(0, curFrames - deltaFrames, duration)
+                        viewModel.seek(final)
+                    }
+                    onRewind = viewModel::rewind
+                    onFastForward = viewModel::fastForward
+                    onToggleMedia = viewModel::mediaToggle
+                    onResumeMedia = viewModel::resumeMedia
+
+                    // Marker stuff
+                    imageWidthProperty.bind(viewModel.imageWidthProperty)
+
+                    onPositionChangedProperty = slider!!::updateMarker
+                    onLocationRequestProperty = viewModel::requestAudioLocation
+
+                }
             bottom = vbox {
-                add(
-                    SourceTextFragment().apply {
-                        highlightedChunkNumberProperty.bind(viewModel.currentMarkerNumberProperty)
+                add<SourceTextFragment> {
+                    highlightedChunkNumberProperty.bind(viewModel.currentMarkerNumberProperty)
+                }
+                add<PlaybackControlsFragment> {
+                    refreshViewProperty = {
                     }
-                )
-                add<PlaybackControlsFragment>()
+                }
             }
             shortcut(Shortcut.ADD_MARKER.value, viewModel::placeMarker)
             shortcut(Shortcut.GO_BACK.value, viewModel::saveAndQuit)

@@ -24,7 +24,7 @@ import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewM
 class TimecodeHolder(
     viewModel: VerseMarkerViewModel,
     val height: Double,
-    val imageWidth: Double = viewModel.imageWidth,
+    val imageWidth: Double = viewModel.imageWidthProperty.value,
     durationMs: Int = 0// viewModel.audioPlayer.getDurationMs()
 ) : ImageView() {
 
