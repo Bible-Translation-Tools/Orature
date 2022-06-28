@@ -53,6 +53,7 @@ class BackupProjectExporter @Inject constructor(
                         .firstOrNull { it.identifier == projectMetadataToExport.identifier }
                     projectFilesAccessor.copySourceFiles(fileWriter, linkedResource)
                     projectFilesAccessor.writeSelectedTakesFile(fileWriter, workbook, projectToExportIsBook)
+                    projectFilesAccessor.writeChunksFile(fileWriter)
                 }
 
                 restoreFileExtension(zipFile, OratureFileFormat.ORATURE.extension)
