@@ -353,15 +353,16 @@ class WorkbookPage : View() {
             }
 
             tabChaptersListeners.putIfAbsent(text, ListChangeListener {
-                val item = it.list.singleOrNull { model ->
-                    model.source == viewModel.selectedChapterProperty.value
-                }
-                val index = it.list.indexOf(item)
-                listView.scrollTo(index)
+                val index = workbookDataStore.workbookRecentChapterMap.getOrDefault(
+                    workbookDataStore.workbook.hashCode(),
+                    -1
+                )
+
                 listView.selectionModel.select(index)
                 runLater {
                     listView.requestFocus()
                     listView.focusModel.focus(index)
+                    listView.scrollTo(index)
                 }
             })
             viewModel.chapters.addListener(tabChaptersListeners[text])

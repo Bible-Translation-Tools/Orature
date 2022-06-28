@@ -93,7 +93,6 @@ class WorkbookPageViewModel : ViewModel() {
     val activeProjectTitleProperty = SimpleStringProperty()
     val activeProjectCoverProperty = SimpleObjectProperty<File>()
 
-    val selectedChapterProperty = SimpleObjectProperty<Chapter>()
     val showDeleteDialogProperty = SimpleBooleanProperty(false)
     val showDeleteSuccessDialogProperty = SimpleBooleanProperty(false)
     val showDeleteFailDialogProperty = SimpleBooleanProperty(false)
@@ -195,7 +194,6 @@ class WorkbookPageViewModel : ViewModel() {
      * the appropriate page based on which resource the User was in.
      */
     fun navigate(chapter: Chapter) {
-        selectedChapterProperty.set(chapter)
         workbookDataStore.activeChapterProperty.set(chapter)
         val resourceMetadata = workbookDataStore.activeResourceMetadata
         updateLastResource(resourceMetadata.identifier)

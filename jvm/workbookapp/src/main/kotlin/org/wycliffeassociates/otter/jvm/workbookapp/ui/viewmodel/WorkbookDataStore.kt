@@ -67,6 +67,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
     val activeChapterProperty = SimpleObjectProperty<Chapter>()
     val chapter: Chapter
         get() = activeChapterProperty.value ?: throw IllegalStateException("Chapter is null")
+    val workbookRecentChapterMap = mutableMapOf<Int, Int>()
 
     val activeChunkProperty = SimpleObjectProperty<Chunk>()
     val chunk: Chunk? by activeChunkProperty
