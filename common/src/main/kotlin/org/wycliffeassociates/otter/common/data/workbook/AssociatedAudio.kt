@@ -44,7 +44,6 @@ class AssociatedAudio(
     fun getNewTakeNumber(): Single<Int> =
         Single.just(
             getAllTakes()
-                .filter { it.deletedTimestamp.value?.value == null }
                 .maxByOrNull { it.number }
                 ?.number
                 ?.plus(1)
