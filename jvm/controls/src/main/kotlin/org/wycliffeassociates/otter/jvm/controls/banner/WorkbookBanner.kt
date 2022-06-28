@@ -23,6 +23,7 @@ import javafx.beans.binding.ObjectBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.collections.transformation.FilteredList
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.scene.control.Control
@@ -30,9 +31,10 @@ import javafx.scene.control.Skin
 import javafx.scene.image.Image
 import org.wycliffeassociates.otter.jvm.controls.skins.banner.WorkbookBannerSkin
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.Artwork
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportOption
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import tornadofx.FX
-import tornadofx.get
+import tornadofx.*
+import java.util.function.Predicate
 
 class WorkbookBanner : Control() {
 
@@ -40,13 +42,21 @@ class WorkbookBanner : Control() {
     val attributionTextProperty = SimpleStringProperty()
     val bookTitleProperty = SimpleStringProperty()
     val resourceTitleProperty = SimpleStringProperty()
-    val hideDeleteButtonProperty = SimpleBooleanProperty(false)
+    val isBookResourceProperty = SimpleBooleanProperty(false)
+    val hideDeleteButtonProperty = SimpleBooleanProperty()
 
     val deleteTitleProperty = SimpleStringProperty("delete")
     val exportTitleProperty = SimpleStringProperty("export")
 
     val onDeleteActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onExportActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+
+    val exportOptions = observableListOf(
+        ExportOption.LISTEN,
+        ExportOption.SOURCE_AUDIO,
+        ExportOption.BACKUP
+    )
+    val filteredExportOptions = FilteredList(exportOptions)
 
     init {
         styleClass.setAll("workbook-banner")
@@ -61,13 +71,20 @@ class WorkbookBanner : Control() {
                 )
             } ?: attributionTextProperty.set(null)
         }
+        isBookResourceProperty.onChange { isBook ->
+            filteredExportOptions.predicate = Predicate {
+                it != ExportOption.SOURCE_AUDIO || isBook
+            }
+        }
     }
 
     fun coverImageBinding(): ObjectBinding<Image> {
         return Bindings.createObjectBinding(
             {
                 backgroundArtworkProperty.value?.let {
-                    Image(it.file.inputStream())
+                    it.file.inputStream().use { input ->
+                        Image(input)
+                    }
                 }
             },
             backgroundArtworkProperty
@@ -78,8 +95,15 @@ class WorkbookBanner : Control() {
         onDeleteActionProperty.set(EventHandler { op.invoke() })
     }
 
-    fun onExportAction(op: () -> Unit) {
-        onExportActionProperty.set(EventHandler { op.invoke() })
+    fun onExportAction(op: (ExportOption) -> Unit) {
+        onExportActionProperty.set(
+            EventHandler { op.invoke(it.source as ExportOption) }
+        )
+    }
+
+    fun cleanUp() {
+        backgroundArtworkProperty.unbind()
+        backgroundArtworkProperty.set(null)
     }
 
     override fun createDefaultSkin(): Skin<*> {

@@ -124,6 +124,10 @@ class WorkbookPage : View() {
      * Clear out the tabs so new ones can be created the next time this view is docked.
      */
     override fun onUndock() {
+        super.onUndock()
+        tabMap.forEach { _, tab ->
+            (tab as WorkbookResourceTab).undock()
+        }
         tabMap.clear()
         removeDialogListeners()
         tabChaptersListeners.map {
@@ -335,6 +339,7 @@ class WorkbookPage : View() {
     private inner class WorkbookResourceTab(val resourceMetadata: ResourceMetadata) : Tab() {
 
         lateinit var listView: ListView<ChapterCardModel>
+        lateinit var banner: WorkbookBanner
         val tab = buildTab()
 
         init {
@@ -348,11 +353,17 @@ class WorkbookPage : View() {
             }
 
             tabChaptersListeners.putIfAbsent(text, ListChangeListener {
-                val item = it.list.singleOrNull { model ->
-                    model.source == viewModel.selectedChapterProperty.value
+                val index = workbookDataStore.workbookRecentChapterMap.getOrDefault(
+                    workbookDataStore.workbook.hashCode(),
+                    -1
+                )
+
+                listView.selectionModel.select(index)
+                runLater {
+                    listView.requestFocus()
+                    listView.focusModel.focus(index)
+                    listView.scrollTo(index)
                 }
-                val index = it.list.indexOf(item)
-                listView.scrollTo(index)
             })
             viewModel.chapters.addListener(tabChaptersListeners[text])
         }
@@ -378,7 +389,11 @@ class WorkbookPage : View() {
                         fitToParentWidth()
                         addClass("workbook-page__left-pane")
 
-                        add(buildWorkbookBanner())
+                        add(
+                            buildWorkbookBanner().apply {
+                                banner = this
+                            }
+                        )
 
                         listview(viewModel.chapters) {
                             listView = this
@@ -397,6 +412,10 @@ class WorkbookPage : View() {
             }
         }
 
+        fun undock() {
+            banner.cleanUp()
+        }
+
         private fun buildWorkbookBanner(): WorkbookBanner {
             return WorkbookBanner().apply {
                 val workbook = workbookDataStore.activeWorkbookProperty
@@ -407,11 +426,12 @@ class WorkbookPage : View() {
                 )
                 bookTitleProperty.bind(workbook.stringBinding { it?.target?.title })
                 resourceTitleProperty.bind(viewModel.selectedResourceMetadata.stringBinding { it?.title })
-                hideDeleteButtonProperty.bind(
+                isBookResourceProperty.bind(
                     viewModel.selectedResourceMetadata.booleanBinding {
-                        it?.type == ContainerType.Help
+                        it?.type == ContainerType.Book
                     }
                 )
+                hideDeleteButtonProperty.bind(isBookResourceProperty.not())
                 deleteTitleProperty.set(FX.messages["delete"])
                 exportTitleProperty.bind(
                     Bindings.createStringBinding(
@@ -426,10 +446,10 @@ class WorkbookPage : View() {
                     )
                 )
                 onDeleteAction { viewModel.showDeleteDialogProperty.set(true) }
-                onExportAction {
+                onExportAction { option ->
                     val directory = chooseDirectory(FX.messages["exportProject"])
-                    directory?.let {
-                        viewModel.exportWorkbook(it)
+                    directory?.let { dir ->
+                        viewModel.exportWorkbook(dir, option)
                     }
                 }
             }
@@ -451,7 +471,9 @@ class WorkbookPage : View() {
                 )
                 editContributorCallbackProperty.set(
                     EventHandler {
-                        viewModel.editContributor(it.source as ContributorCellData)
+                        val data = it.source as ContributorCellData
+                        viewModel.editContributor(data)
+                        lastModifiedIndex.set(data.index)
                     }
                 )
                 removeContributorCallbackProperty.set(

@@ -44,11 +44,12 @@ class SettingsView : View() {
         orientationProperty.set(viewModel.orientationProperty.value)
     }
 
-    private lateinit var traversalEngine: DrawerTraversalEngine
     private lateinit var closeButton: Button
 
     override val root = vbox {
         addClass("app-drawer__content")
+
+        DrawerTraversalEngine(this)
 
         scrollpane {
             addClass("app-drawer__scroll-pane")
@@ -310,12 +311,8 @@ class SettingsView : View() {
             if (it.action == DrawerEventAction.OPEN) {
                 viewModel.refreshDevices()
                 focusCloseButton()
-                traversalEngine.reset()
             }
         }
-
-        traversalEngine = DrawerTraversalEngine(root)
-        traversalEngine.set()
     }
 
     override fun onDock() {
@@ -323,7 +320,6 @@ class SettingsView : View() {
         viewModel.bind()
         viewModel.refreshDevices()
         focusCloseButton()
-        traversalEngine.reset()
     }
 
     private fun focusCloseButton() {

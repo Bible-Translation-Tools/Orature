@@ -28,20 +28,23 @@ import javax.sound.sampled.AudioSystem
 
 class WaveFileCreator : IWaveFileCreator {
     override fun createEmpty(path: File) {
-        AudioSystem.write(
+        ByteArrayInputStream(ByteArray(0)).use { input ->
+            AudioSystem.write(
                 AudioInputStream(
-                        ByteArrayInputStream(ByteArray(0)),
-                        AudioFormat(
-                                44100.0f,
-                                16,
-                                1,
-                                true,
-                                false
-                        ),
-                        0
+                    input,
+                    AudioFormat(
+                        44100.0f,
+                        16,
+                        1,
+                        true,
+                        false
+                    ),
+                    0
                 ),
                 AudioFileFormat.Type.WAVE,
                 path
-        )
+            )
+
+        }
     }
 }

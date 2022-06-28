@@ -51,8 +51,8 @@ class ExportChapterViewModel : ViewModel() {
 
             val licenseTitle = workbookDataStore.workbook.target.resourceMetadata.license
             val license = License.get(licenseTitle)
-
-            audioExporter.exportMp3(take.file, outputDir, license, contributors)
+            val metadata = AudioExporter.ExportMetadata(license, contributors)
+            audioExporter.exportMp3(take.file, outputDir, metadata)
                 .doOnError {
                     logger.error("Error while exporting chapter.", it)
                 }
