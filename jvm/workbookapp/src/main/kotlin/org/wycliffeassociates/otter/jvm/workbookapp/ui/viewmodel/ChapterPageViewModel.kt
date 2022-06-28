@@ -353,8 +353,8 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     private fun updateLastSelectedChapter(chapterNumber: Int) {
-        val bookHash = workbookDataStore.workbook.hashCode()
-        workbookDataStore.lastSelectedChapterInWorkBooks[bookHash] = chapterNumber - 1
+        val workbookHash = workbookDataStore.workbook.hashCode()
+        workbookDataStore.workbookRecentChapterMap[workbookHash] = chapterNumber - 1
     }
 
     private fun loadChapterContents(chapter: Chapter): Completable {

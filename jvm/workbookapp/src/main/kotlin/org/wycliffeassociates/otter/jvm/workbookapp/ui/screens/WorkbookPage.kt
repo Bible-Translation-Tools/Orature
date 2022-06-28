@@ -353,7 +353,7 @@ class WorkbookPage : View() {
             }
 
             tabChaptersListeners.putIfAbsent(text, ListChangeListener {
-                val index = workbookDataStore.lastSelectedChapterInWorkBooks.getOrDefault(
+                val index = workbookDataStore.workbookRecentChapterMap.getOrDefault(
                     workbookDataStore.workbook.hashCode(),
                     -1
                 )
