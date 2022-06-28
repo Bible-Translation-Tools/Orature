@@ -249,7 +249,7 @@ class SettingsView : View() {
                                 }
                                 action {
                                     resetUpdateLanguagesStatus()
-                                    viewModel.importLanguages()
+                                    viewModel.updateLanguages()
                                 }
                                 visibleProperty().bind(viewModel.languageNamesImportingProperty.not())
                                 managedProperty().bind(visibleProperty())

@@ -18,12 +18,20 @@
  */
 package org.wycliffeassociates.otter.common.data.primitives
 
+import com.squareup.moshi.Json
+
 data class Language(
+    @Json(name = "lc")
     var slug: String,
+    @Json(name = "ln")
     var name: String,
+    @Json(name = "ang")
     var anglicizedName: String,
+    @Json(name = "ld")
     var direction: String,
+    @Json(name = "gw")
     var isGateway: Boolean,
+    @Json(name = "lr")
     var region: String,
     var id: Int = 0
 )

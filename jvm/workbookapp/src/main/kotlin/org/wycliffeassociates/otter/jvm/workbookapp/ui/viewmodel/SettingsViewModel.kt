@@ -20,8 +20,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.jthemedetecor.OsThemeDetector
-import io.reactivex.Completable
-import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -29,9 +27,6 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.geometry.NodeOrientation
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.data.primitives.Language
@@ -290,27 +285,12 @@ class SettingsViewModel : ViewModel() {
             .subscribe()
     }
 
-    fun importLanguages() {
+    fun updateLanguages() {
         if (languageNamesImportingProperty.value) return
-
         languageNamesImportingProperty.set(true)
 
-        fetchLanguageNames()
-            .subscribeOn(Schedulers.io())
-            .flatMapCompletable { response ->
-                if (response.isSuccessful) {
-                    response.body()?.byteStream()?.let { stream ->
-                        importLanguages.update(stream)
-                    }
-                } else {
-                    val error = Throwable("Response code: ${response.code()}")
-                    Completable.error(error)
-                }
-            }
+        importLanguages.update(languageNamesUrlProperty.value)
             .observeOnFx()
-            .doOnError {
-                logger.error("Error in importLanguages: ", it)
-            }
             .subscribe(
                 {
                     languageNamesImportingProperty.set(false)
@@ -331,17 +311,6 @@ class SettingsViewModel : ViewModel() {
             .subscribe { url ->
                 languageNamesUrlProperty.set(url)
             }
-    }
-
-    private fun fetchLanguageNames(): Single<Response> {
-        return Single.fromCallable {
-            val request = Request.Builder()
-                .url(languageNamesUrlProperty.value)
-                .build()
-
-            val httpClient = OkHttpClient()
-            httpClient.newCall(request).execute()
-        }
     }
 
     private fun bindSystemTheme() {
