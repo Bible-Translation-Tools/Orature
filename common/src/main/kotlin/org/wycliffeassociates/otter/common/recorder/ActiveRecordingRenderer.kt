@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.common.recorder
 
 import io.reactivex.Observable
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.collections.FloatRingBuffer
@@ -31,18 +32,21 @@ private const val DEFAULT_BUFFER_SIZE = 1024
 
 class ActiveRecordingRenderer(
     stream: Observable<ByteArray>,
-    recordingActive: Observable<Boolean>,
+    recordingStatus: Observable<Boolean>,
     width: Int,
     secondsOnScreen: Int
 ) {
     private val logger = LoggerFactory.getLogger(ActiveRecordingRenderer::class.java)
 
     private var isActive = AtomicBoolean(false)
+    private var recordingActive: Observable<Boolean> = recordingStatus
 
     // double the width as for each pixel there will be a min and max value
     val floatBuffer = FloatRingBuffer(width * 2)
     private val pcmCompressor = PCMCompressor(floatBuffer, samplesToCompress(width, secondsOnScreen))
     val bb = ByteBuffer.allocate(DEFAULT_BUFFER_SIZE)
+
+    val compositeDisposable = CompositeDisposable()
 
     init {
         recordingActive
@@ -50,6 +54,9 @@ class ActiveRecordingRenderer(
                 logger.error("Error in active recording listener", e)
             }
             .subscribe { isActive.set(it) }
+            .also {
+                compositeDisposable.add(it)
+            }
         bb.order(ByteOrder.LITTLE_ENDIAN)
     }
 
@@ -73,5 +80,25 @@ class ActiveRecordingRenderer(
     private fun samplesToCompress(width: Int, secondsOnScreen: Int): Int {
         // TODO: get samplerate from wav file, don't assume 44.1khz
         return (DEFAULT_SAMPLE_RATE * secondsOnScreen) / width
+    }
+
+    /** Sets a new status listener and removes the old one */
+    fun setRecordingStatusObservable(value: Observable<Boolean>) {
+        compositeDisposable.clear()
+
+        recordingActive = value
+        recordingActive
+            .doOnError { e ->
+                logger.error("Error in active recording listener", e)
+            }
+            .subscribe { isActive.set(it) }
+            .also {
+                compositeDisposable.add(it)
+            }
+    }
+
+    /** Clears rendered data from buffer */
+    fun clearData() {
+        floatBuffer.clear()
     }
 }

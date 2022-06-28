@@ -22,6 +22,7 @@ import dagger.Component
 // import integrationtest.projects.TestProjectExport
 import integrationtest.projects.TestRcImport
 import integrationtest.projects.TestRemoveRc
+import integrationtest.projects.export.TestExportSourceProject
 import org.wycliffeassociates.otter.jvm.workbookapp.di.AppDependencyGraph
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppDatabaseModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppPreferencesModule

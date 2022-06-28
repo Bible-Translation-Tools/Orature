@@ -28,7 +28,6 @@ import io.reactivex.subjects.PublishSubject
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -131,13 +130,12 @@ class ChapterPageViewModel : ViewModel() {
             }
 
         chapterCardProperty.set(CardData(workbookDataStore.chapter))
-        workbookDataStore.activeChapterProperty.value.let { _chapter ->
-            _chapter?.let { chapter ->
-                loadChapterContents(chapter).subscribe()
-                val chap = CardData(chapter)
-                chapterCardProperty.set(chap)
-                subscribeSelectedTakePropertyToRelay(chapter.audio)
-            }
+        workbookDataStore.activeChapterProperty.value?.let { chapter ->
+            updateLastSelectedChapter(chapter.sort)
+            loadChapterContents(chapter).subscribe()
+            val chap = CardData(chapter)
+            chapterCardProperty.set(chap)
+            subscribeSelectedTakePropertyToRelay(chapter.audio)
         }
         appPreferencesRepo.sourceTextZoomRate().subscribe { rate ->
             workbookDataStore.sourceTextZoomRateProperty.set(rate)
@@ -360,6 +358,11 @@ class ChapterPageViewModel : ViewModel() {
             audioPluginViewModel.selectedEditorProperty,
             audioPluginViewModel.selectedMarkerProperty
         )
+    }
+
+    private fun updateLastSelectedChapter(chapterNumber: Int) {
+        val workbookHash = workbookDataStore.workbook.hashCode()
+        workbookDataStore.workbookRecentChapterMap[workbookHash] = chapterNumber - 1
     }
 
     private fun loadChapterContents(chapter: Chapter): Observable<CardData> {

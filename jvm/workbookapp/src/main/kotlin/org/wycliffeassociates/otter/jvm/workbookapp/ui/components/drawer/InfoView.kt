@@ -36,11 +36,12 @@ class InfoView : View() {
     val info = AppInfo()
     private val viewModel: AppInfoViewModel by inject()
 
-    private lateinit var traversalEngine: DrawerTraversalEngine
     private lateinit var closeButton: Button
 
     override val root = vbox {
         addClass("app-drawer__content")
+
+        DrawerTraversalEngine(this)
 
         scrollpane {
             addClass("app-drawer__scroll-pane")
@@ -168,18 +169,13 @@ class InfoView : View() {
         subscribe<DrawerEvent<UIComponent>> {
             if (it.action == DrawerEventAction.OPEN) {
                 focusCloseButton()
-                traversalEngine.reset()
             }
         }
-
-        traversalEngine = DrawerTraversalEngine(root)
-        traversalEngine.set()
     }
 
     override fun onDock() {
         super.onDock()
         focusCloseButton()
-        traversalEngine.reset()
     }
 
     private fun focusCloseButton() {

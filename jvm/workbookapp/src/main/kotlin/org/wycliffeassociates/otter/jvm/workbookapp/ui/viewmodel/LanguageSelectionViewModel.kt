@@ -22,6 +22,7 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
 import javafx.collections.transformation.FilteredList
+import javafx.collections.transformation.SortedList
 import javafx.scene.control.CustomMenuItem
 import javafx.scene.control.Label
 import javafx.scene.control.MenuItem
@@ -40,6 +41,7 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
     val anglicizedProperty = SimpleBooleanProperty(false)
 
     val filteredLanguages = FilteredList(items)
+    val sortedLanguages = SortedList(filteredLanguages)
 
     private var regionPredicate = Predicate<Language> { true }
     private var queryPredicate = Predicate<Language> { true }
@@ -64,7 +66,20 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
                         .or(language.anglicizedName.contains(query, true))
                 }
             }
-            filteredLanguages.predicate = queryPredicate.and(regionPredicate)
+
+            filteredLanguages.predicate = regionPredicate.and(queryPredicate)
+
+            if (!query.isNullOrEmpty()) {
+                val lowerQuery = query.lowercase()
+                val comparator = compareByDescending<Language> { language -> language.slug == lowerQuery }
+                    .thenByDescending { language -> language.name.lowercase() == lowerQuery }
+                    .thenByDescending { language -> language.anglicizedName.lowercase() == lowerQuery }
+                    .thenComparing { language -> language.slug }
+                    .thenComparing { language -> language.name }
+                    .thenComparing { language -> language.anglicizedName }
+
+                sortedLanguages.comparator = comparator
+            }
         }
     }
 

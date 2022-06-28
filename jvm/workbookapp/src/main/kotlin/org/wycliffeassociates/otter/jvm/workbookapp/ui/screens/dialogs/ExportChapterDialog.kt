@@ -122,6 +122,7 @@ class ExportChapterDialog : OtterDialog() {
                     EventHandler {
                         val data = it.source as ContributorCellData
                         viewModel.editContributor(data)
+                        lastModifiedIndex.set(data.index)
                     }
                 )
             }

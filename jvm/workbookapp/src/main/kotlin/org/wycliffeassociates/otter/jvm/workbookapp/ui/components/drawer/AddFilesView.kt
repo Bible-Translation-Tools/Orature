@@ -45,11 +45,12 @@ class AddFilesView : View() {
     private val viewModel: AddFilesViewModel by inject()
     private val settingsViewModel: SettingsViewModel by inject()
 
-    private lateinit var traversalEngine: DrawerTraversalEngine
     private lateinit var closeButton: Button
 
     override val root = vbox {
         addClass("app-drawer__content")
+
+        DrawerTraversalEngine(this)
 
         scrollpane {
             addClass("app-drawer__scroll-pane")
@@ -132,7 +133,7 @@ class AddFilesView : View() {
             }
         }
 
-        setOnKeyPressed {
+        setOnKeyReleased {
             if (it.code == KeyCode.ESCAPE) collapse()
         }
     }
@@ -149,18 +150,13 @@ class AddFilesView : View() {
         subscribe<DrawerEvent<UIComponent>> {
             if (it.action == DrawerEventAction.OPEN) {
                 focusCloseButton()
-                traversalEngine.reset()
             }
         }
-
-        traversalEngine = DrawerTraversalEngine(root)
-        traversalEngine.set()
     }
 
     override fun onDock() {
         super.onDock()
         focusCloseButton()
-        traversalEngine.reset()
     }
 
     private fun initImportDialog() {
