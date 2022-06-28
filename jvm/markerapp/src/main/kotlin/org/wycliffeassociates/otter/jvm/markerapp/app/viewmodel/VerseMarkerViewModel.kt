@@ -143,6 +143,8 @@ class VerseMarkerViewModel : ViewModel() {
     }
 
     fun saveAndQuit() {
+        logger.info("Closing Verse Marker app...")
+
         compositeDisposable.clear()
         waveformMinimapImage.set(null)
         currentMarkerNumberProperty.set(-1)
