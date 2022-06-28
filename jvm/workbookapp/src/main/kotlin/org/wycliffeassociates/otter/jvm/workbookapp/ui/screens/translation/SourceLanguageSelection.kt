@@ -67,7 +67,7 @@ class SourceLanguageSelection : Fragment() {
                     viewModel.searchQueryProperty.bindBidirectional(textProperty)
                 }
             )
-            listview(viewModel.filteredLanguages) {
+            listview(viewModel.sortedLanguages) {
                 addClass("translation-wizard__list")
                 vgrow = Priority.ALWAYS
                 setCellFactory {

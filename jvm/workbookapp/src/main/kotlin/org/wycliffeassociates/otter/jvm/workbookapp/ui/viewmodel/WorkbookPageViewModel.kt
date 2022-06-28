@@ -35,8 +35,12 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.BackupProjectExporter
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportOption
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.Mp3ProjectExporter
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.SourceProjectExporter
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -60,7 +64,13 @@ class WorkbookPageViewModel : ViewModel() {
     lateinit var deleteProjectProvider: Provider<DeleteProject>
 
     @Inject
-    lateinit var projectExporterProvider: Provider<ProjectExporter>
+    lateinit var exportSourceProvider: Provider<SourceProjectExporter>
+
+    @Inject
+    lateinit var exportBackupProvider: Provider<BackupProjectExporter>
+
+    @Inject
+    lateinit var exportMp3Provider: Provider<Mp3ProjectExporter>
 
     @Inject
     lateinit var workbookRepository: IWorkbookRepository
@@ -83,7 +93,6 @@ class WorkbookPageViewModel : ViewModel() {
     val activeProjectTitleProperty = SimpleStringProperty()
     val activeProjectCoverProperty = SimpleObjectProperty<File>()
 
-    val selectedChapterProperty = SimpleObjectProperty<Chapter>()
     val showDeleteDialogProperty = SimpleBooleanProperty(false)
     val showDeleteSuccessDialogProperty = SimpleBooleanProperty(false)
     val showDeleteFailDialogProperty = SimpleBooleanProperty(false)
@@ -94,7 +103,7 @@ class WorkbookPageViewModel : ViewModel() {
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
-        
+
         projectFilesAccessorListener = ChangeListener<ProjectFilesAccessor> { _, _, projectAccessor ->
             if (projectAccessor != null) {
                 val projectContributors = projectAccessor.getContributorInfo()
@@ -185,7 +194,6 @@ class WorkbookPageViewModel : ViewModel() {
      * the appropriate page based on which resource the User was in.
      */
     fun navigate(chapter: Chapter) {
-        selectedChapterProperty.set(chapter)
         workbookDataStore.activeChapterProperty.set(chapter)
         val resourceMetadata = workbookDataStore.activeResourceMetadata
         updateLastResource(resourceMetadata.identifier)
@@ -195,11 +203,10 @@ class WorkbookPageViewModel : ViewModel() {
         }
     }
 
-    fun exportWorkbook(directory: File) {
+    fun exportWorkbook(directory: File, option: ExportOption) {
         showExportProgressDialogProperty.set(true)
 
         val workbook = workbookDataStore.workbook
-        val projectExporter = projectExporterProvider.get()
         val resourceMetadata = workbookDataStore.activeResourceMetadata
         val projectFileAccessor = workbookDataStore.activeProjectFilesAccessor
 
@@ -208,7 +215,13 @@ class WorkbookPageViewModel : ViewModel() {
             workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
         )
 
-        projectExporter
+        val exporter: ProjectExporter = when (option) {
+            ExportOption.LISTEN -> exportMp3Provider.get()
+            ExportOption.SOURCE_AUDIO -> exportSourceProvider.get()
+            ExportOption.BACKUP -> exportBackupProvider.get()
+        }
+
+        exporter
             .export(directory, resourceMetadata, workbook, projectFileAccessor)
             .observeOnFx()
             .doOnError { e ->

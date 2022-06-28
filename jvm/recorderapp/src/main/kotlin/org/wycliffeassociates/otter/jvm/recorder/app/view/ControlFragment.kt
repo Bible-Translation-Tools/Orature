@@ -40,6 +40,7 @@ class ControlFragment : Fragment() {
     private val continueBtn = button(messages["continue"], FontIcon("fas-check"))
     private val cancelBtn = button(messages["cancel"], FontIcon("gmi-undo"))
     private val recordBtn = Button()
+    private val resetBtn = Button(messages["reset"], FontIcon("gmi-delete"))
 
     override val root = borderpane {
         addClass("controls")
@@ -59,6 +60,8 @@ class ControlFragment : Fragment() {
             hbox {
                 padding = Insets(10.0, 10.0, 10.0, 0.0)
                 alignment = Pos.CENTER_RIGHT
+                spacing = 10.0
+                add(resetBtn)
                 add(continueBtn)
                 add(cancelBtn)
             }
@@ -85,6 +88,17 @@ class ControlFragment : Fragment() {
             shortcut(Shortcut.RECORD.value)
         }
 
+        resetBtn.apply {
+            addClass("btn", "btn--secondary", "reset-button")
+            prefHeightProperty().bind(continueBtn.heightProperty())
+            tooltip(text)
+            visibleWhen { vm.canSaveProperty }
+
+            setOnAction {
+                vm.reset()
+            }
+        }
+
         continueBtn.apply {
             addClass("btn", "btn--primary", "btn--borderless", "continue-button")
             tooltip(text)
@@ -100,7 +114,7 @@ class ControlFragment : Fragment() {
             addClass("btn", "btn--primary", "btn--borderless", "continue-button")
             tooltip(text)
             visibleProperty().bind(vm.recordingProperty.not().and(vm.hasWrittenProperty.not()))
-            managedProperty().bind(vm.recordingProperty.not().and(vm.hasWrittenProperty.not()))
+            managedProperty().bind(visibleProperty())
             setOnAction {
                 vm.save()
             }

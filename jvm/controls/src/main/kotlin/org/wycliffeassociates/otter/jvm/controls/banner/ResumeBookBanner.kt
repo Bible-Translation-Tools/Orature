@@ -67,11 +67,18 @@ class ResumeBookBanner : Control() {
         return Bindings.createObjectBinding(
             {
                 backgroundArtworkProperty.value?.let {
-                    Image(it.file.inputStream())
+                    it.file.inputStream().use { input ->
+                        Image(input)
+                    }
                 }
             },
             backgroundArtworkProperty
         )
+    }
+
+    fun cleanUp() {
+        backgroundArtworkProperty.unbind()
+        backgroundArtworkProperty.set(null)
     }
 
     override fun createDefaultSkin(): Skin<*> {
