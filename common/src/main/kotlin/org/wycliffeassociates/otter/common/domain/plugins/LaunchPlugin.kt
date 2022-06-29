@@ -44,5 +44,11 @@ class LaunchPlugin @Inject constructor(
                 it.launch(file, pluginParameters).andThen(Maybe.just(Result.SUCCESS))
             }
             .toSingle(Result.NO_PLUGIN)
+            .map {
+                if (it == Result.NO_PLUGIN) {
+                    logger.error("Plugin $type is unavailable")
+                }
+                it
+            }
     }
 }

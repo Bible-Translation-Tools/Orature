@@ -240,6 +240,9 @@ class ChapterPageViewModel : ViewModel() {
             workbookDataStore.activeTakeNumberProperty.set(take.number)
             audioPluginViewModel
                 .getPlugin(pluginType)
+                .doOnError { e ->
+                    logger.error("Error in processing take with plugin type: $pluginType, ${e.message}")
+                }
                 .flatMapSingle { plugin ->
                     fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
                     when (pluginType) {
@@ -250,7 +253,7 @@ class ChapterPageViewModel : ViewModel() {
                 }
                 .observeOnFx()
                 .doOnError { e ->
-                    logger.error("Error in processing take with plugin type: $pluginType", e)
+                    logger.error("Error in processing take with plugin type: $pluginType - $e")
                 }
                 .onErrorReturn { TakeActions.Result.NO_PLUGIN }
                 .subscribe { result: TakeActions.Result ->
