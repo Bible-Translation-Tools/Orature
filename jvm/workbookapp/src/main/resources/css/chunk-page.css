@@ -55,3 +55,7 @@
     -fx-icon-size: 18px;
     -fx-icon-color: "#FFFFFF";
 }
+
+.chunking__controls-group {
+    -fx-spacing: 20px;
+}

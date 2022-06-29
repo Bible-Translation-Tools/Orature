@@ -23,6 +23,8 @@ import com.jfoenix.controls.JFXButton
 import com.sun.javafx.util.Utils
 import javafx.animation.AnimationTimer
 import javafx.geometry.Pos
+import javafx.scene.layout.Priority
+import javafx.scene.layout.Region
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import org.kordamp.ikonli.materialdesign.MaterialDesign
@@ -105,65 +107,101 @@ class Chunk : Fragment() {
         vm.compositeDisposable.clear()
     }
 
+    private lateinit var leftControls: Region
+
     override val root = borderpane {
         center = waveform
         bottom = hbox {
             styleClass.addAll("consume__bottom")
             styleClass.add(rootStyles)
+            hgrow = Priority.ALWAYS
             alignment = Pos.CENTER
-            val nextBtn = JFXButton().apply {
-                graphic = nextIcon
-                setOnAction { vm.seekNext() }
-                styleClass.addAll(
-                    seekButtonStyle,
-                    roundedButtonStyle
-                )
-            }
 
-            val previousBtn = JFXButton().apply {
-                graphic = previousIcon
-                setOnAction { vm.seekPrevious() }
-                styleClass.addAll(
-                    seekButtonStyle,
-                    roundedButtonStyle
-                )
-            }
-            add(previousBtn)
-
-            button {
-                vm.isPlayingProperty.onChangeAndDoNow {
-                    it?.let {
-                        when (it) {
-                            true -> graphic = pauseIcon
-                            false -> graphic = playIcon
-                        }
+            borderpane {
+                left {
+                    hbox {
+                        leftControls = this
                     }
                 }
-                styleClass.addAll(
-                    playButtonStyle,
-                    roundedButtonStyle
-                )
-                action {
-                    vm.mediaToggle()
+                center {
+                    hgrow = Priority.ALWAYS
+
+                    hbox {
+                        addClass("chunking__controls-group")
+                        alignment = Pos.CENTER
+
+                        add(
+                            JFXButton().apply {
+                                graphic = previousIcon
+                                setOnAction { vm.seekPrevious() }
+                                styleClass.addAll(
+                                    seekButtonStyle,
+                                    roundedButtonStyle
+                                )
+                            }
+                        )
+
+                        button {
+                            vm.isPlayingProperty.onChangeAndDoNow {
+                                it?.let {
+                                    when (it) {
+                                        true -> graphic = pauseIcon
+                                        false -> graphic = playIcon
+                                    }
+                                }
+                            }
+                            styleClass.addAll(
+                                playButtonStyle,
+                                roundedButtonStyle
+                            )
+                            action {
+                                vm.mediaToggle()
+                            }
+                        }
+                        add(
+                            JFXButton().apply {
+                                graphic = nextIcon
+                                setOnAction { vm.seekNext() }
+                                styleClass.addAll(
+                                    seekButtonStyle,
+                                    roundedButtonStyle
+                                )
+                            }
+                        )
+                    }
                 }
-            }
-            add(nextBtn)
-            button("undo") {
-                setOnAction {
-                    vm.undoMarker()
-                }
-            }
-            button("redo") {
-                setOnAction {
-                    vm.redoMarker()
-                }
-            }
-            button("save") {
-                setOnAction {
-                    vm.saveAndQuit()
-                    workspace.navigateBack()
+
+                right {
+                    hbox {
+                        addClass("chunking__controls-group")
+                        alignment = Pos.CENTER_RIGHT
+                        leftControls.prefWidthProperty().bind(this.widthProperty())
+
+                        button("undo") {
+                            addClass("btn", "btn--secondary", "reset-button")
+                            setOnAction {
+                                vm.undoMarker()
+                            }
+                        }
+                        button("redo") {
+                            addClass("btn", "btn--secondary", "reset-button")
+                            setOnAction {
+                                vm.redoMarker()
+                            }
+                        }
+                        button("save") {
+                            addClass("btn", "btn--primary", "btn--borderless", "save-btn")
+                            setOnAction {
+                                vm.saveAndQuit()
+                            }
+                        }
+                    }
                 }
             }
         }
     }
+
+//    private fun buildControlFragment(): Node {
+//        return
+//    }
 }

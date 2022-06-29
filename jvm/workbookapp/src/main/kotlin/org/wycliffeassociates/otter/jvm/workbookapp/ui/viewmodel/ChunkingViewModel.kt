@@ -53,6 +53,7 @@ import tornadofx.ViewModel
 import tornadofx.getValue
 import tornadofx.observableListOf
 import tornadofx.onChange
+import tornadofx.runLater
 import tornadofx.sizeProperty
 
 const val ACTIVE = "chunking-wizard__step--active"
@@ -227,6 +228,10 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
             .createChunkedSourceAudio(sourceAudio.file, cues)
 
         disposeables.forEach { it.dispose() }
+
+        runLater {
+            workspace.navigateBack()
+        }
     }
 
     private fun initializeAudioController() {
