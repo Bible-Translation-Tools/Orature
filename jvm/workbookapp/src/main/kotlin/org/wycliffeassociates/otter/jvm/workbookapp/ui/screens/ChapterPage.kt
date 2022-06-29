@@ -289,9 +289,6 @@ class ChapterPage : View() {
                             viewModel.compile()
                         }
                     }
-                    region {
-                        hgrow = Priority.ALWAYS
-                    }
                     button {
                         addClass("btn", "btn--cta")
                         textProperty().bind(viewModel.noTakesProperty.stringBinding {
@@ -373,7 +370,9 @@ class ChapterPage : View() {
                             addClass("btn", "btn--secondary", "chunk-mode__selection-btn")
                             graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
 
-                            setOnAction { viewModel.chunkVerseByVerse() }
+                            setOnAction {
+                                viewModel.chunkVerseByVerse()
+                            }
                         }
                     }
 

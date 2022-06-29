@@ -164,5 +164,3 @@ class VerseByVerseChunking(
         chunkCreator(chunksToAdd)
     }
 }
-
-typealias ChunkFile = MutableMap<Int, Content>

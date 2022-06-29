@@ -126,7 +126,6 @@ class ChapterPageViewModel : ViewModel() {
                 println(allContent.size)
 
                 checkCanCompile()
-                setWorkChunk()
             }
 
         chapterCardProperty.set(CardData(workbookDataStore.chapter))
@@ -187,7 +186,7 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     fun setWorkChunk() {
-        if (filteredContent.isEmpty()) return
+        if (filteredContent.isEmpty()) { return }
 
         val hasTakes = filteredContent.any { chunk ->
             chunk.chunkSource?.audio?.getAllTakes()
@@ -195,9 +194,10 @@ class ChapterPageViewModel : ViewModel() {
         }
 
         if (hasTakes) {
-            val notSelected = filteredContent.firstOrNull { chunk ->
-                chunk.chunkSource?.audio?.selected?.value?.value == null
-            } ?: filteredContent.last()
+            val notSelected = filteredContent
+                .firstOrNull { chunk ->
+                    chunk.chunkSource?.audio?.selected?.value?.value == null
+                } ?: filteredContent.last()
             noTakesProperty.set(false)
             workChunkProperty.set(notSelected)
         } else {
@@ -400,6 +400,7 @@ class ChapterPageViewModel : ViewModel() {
 
                 filteredContent.removeIf { it.chunkSource != null && it.chunkSource.draftNumber < 0 }
                 filteredContent.sortBy { it.sort }
+                setWorkChunk()
                 it
             }.observeOnFx()
     }
@@ -467,20 +468,6 @@ class ChapterPageViewModel : ViewModel() {
 
     private fun getPlayer(): IAudioPlayer {
         return (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
-    }
-
-    fun subList() {
-        workbookDataStore.activeChapterProperty.value.chunks.map {
-            CardData(it)
-        }.map {
-            buildTakes(it)
-            it.player = getPlayer()
-            it.onChunkOpen = ::onChunkOpen
-            it.onTakeSelected = ::onTakeSelected
-            it
-        }.map {
-            allContent.add(it)
-        }.observeOnFx().subscribe()
     }
 
     fun chunkVerseByVerse() {
