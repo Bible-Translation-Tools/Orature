@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.assets.initialization
 import io.reactivex.Completable
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
+import org.wycliffeassociates.otter.common.persistence.ILanguageDataSource
 import org.wycliffeassociates.otter.common.persistence.config.Installable
 import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
@@ -30,7 +31,8 @@ const val LANGNAMES_PATH = "content/langnames.json"
 
 class InitializeLanguages @Inject constructor(
     val installedEntityRepo: IInstalledEntityRepository,
-    val languageRepo: ILanguageRepository
+    val languageRepo: ILanguageRepository,
+    val languageDataSource: ILanguageDataSource
 ) : Installable {
 
     override val name = "LANGUAGES"
@@ -83,13 +85,12 @@ class InitializeLanguages @Inject constructor(
     }
 
     private fun importLanguages(): Completable {
-        return ImportLanguages(
-            languageRepo
-        ).import(ClassLoader.getSystemResourceAsStream(LANGNAMES_PATH))
+        return ImportLanguages(languageRepo, languageDataSource)
+            .import(ClassLoader.getSystemResourceAsStream(LANGNAMES_PATH))
     }
 
     private fun updateRegions(): Completable {
-        return ImportLanguages(languageRepo)
+        return ImportLanguages(languageRepo, languageDataSource)
             .updateRegions(ClassLoader.getSystemResourceAsStream(LANGNAMES_PATH))
     }
 }

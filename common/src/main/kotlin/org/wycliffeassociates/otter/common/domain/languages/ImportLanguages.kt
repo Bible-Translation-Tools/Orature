@@ -26,12 +26,16 @@ import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.common.persistence.ILanguageDataSource
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import java.io.InputStream
 import javax.inject.Inject
 
 // Imports from langnames.json
-class ImportLanguages @Inject constructor(val languageRepo: ILanguageRepository) {
+class ImportLanguages @Inject constructor(
+    private val languageRepo: ILanguageRepository,
+    private val languageDataSource: ILanguageDataSource
+    ) {
 
     private val logger = LoggerFactory.getLogger(ImportLanguages::class.java)
 
@@ -43,6 +47,17 @@ class ImportLanguages @Inject constructor(val languageRepo: ILanguageRepository)
             }
             .doOnError { e ->
                 logger.error("Error in ImportLanguages", e)
+            }
+            .subscribeOn(Schedulers.io())
+    }
+
+    fun update(url: String): Completable {
+        return languageDataSource.fetchLanguageNames(url)
+            .flatMapCompletable {
+                languageRepo.upsertAll(it)
+            }
+            .doOnError { e ->
+                logger.error("Error in update languages", e)
             }
             .subscribeOn(Schedulers.io())
     }

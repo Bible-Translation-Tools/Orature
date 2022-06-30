@@ -20,7 +20,9 @@ package org.wycliffeassociates.otter.jvm.workbookapp.di.modules
 
 import dagger.Binds
 import dagger.Module
+import org.wycliffeassociates.otter.common.domain.languages.LanguageDataSource
 import org.wycliffeassociates.otter.common.domain.plugins.IAudioPluginRegistrar
+import org.wycliffeassociates.otter.common.persistence.ILanguageDataSource
 import org.wycliffeassociates.otter.common.persistence.ILocaleDataSource
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
@@ -127,4 +129,10 @@ abstract class AppRepositoriesModule {
     abstract fun providesLocaleDataSource(
         dataSource: LocaleDataSource
     ): ILocaleDataSource
+
+    @Binds
+    @Singleton
+    abstract fun providesLanguageDataSource(
+        dataSource: LanguageDataSource
+    ): ILanguageDataSource
 }
