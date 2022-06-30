@@ -18,20 +18,22 @@
  */
 package org.wycliffeassociates.otter.common.data.primitives
 
-import com.squareup.moshi.Json
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonProperty
 
+@JsonIgnoreProperties(ignoreUnknown=true)
 data class Language(
-    @Json(name = "lc")
+    @JsonProperty("lc")
     var slug: String,
-    @Json(name = "ln")
+    @JsonProperty("ln")
     var name: String,
-    @Json(name = "ang")
+    @JsonProperty("ang")
     var anglicizedName: String,
-    @Json(name = "ld")
+    @JsonProperty("ld")
     var direction: String,
-    @Json(name = "gw")
+    @JsonProperty("gw")
     var isGateway: Boolean,
-    @Json(name = "lr")
+    @JsonProperty("lr")
     var region: String,
     var id: Int = 0
 )

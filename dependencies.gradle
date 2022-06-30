@@ -25,9 +25,9 @@ ext {
     jooqVer = '3.12.4'
     franzXaverVer = '0.1' // SVG Loader
     franzXaverSvgVer = 'unspecified'
-    retrofitVer = '2.0.0'
-    retrofitMoshiVer = '2.0.0'
-    retrofitRxJava2Ver = '2.3.0'
+    retrofitVer = '2.9.0'
+    retrofitJacksonVer = '2.9.0'
+    retrofitRxJava2Ver = '2.9.0'
     jacksonVer = '2.9.2'
     daggerVer = '2.24'
     junitVer = '4.12'

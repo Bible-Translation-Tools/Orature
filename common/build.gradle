@@ -25,6 +25,6 @@ dependencies {
 
     // Retrofit
     implementation "com.squareup.retrofit2:retrofit:$retrofitVer"
-    implementation "com.squareup.retrofit2:converter-moshi:$retrofitMoshiVer"
+    implementation "com.squareup.retrofit2:converter-jackson:$retrofitJacksonVer"
     implementation "com.squareup.retrofit2:adapter-rxjava2:$retrofitRxJava2Ver"
 }
