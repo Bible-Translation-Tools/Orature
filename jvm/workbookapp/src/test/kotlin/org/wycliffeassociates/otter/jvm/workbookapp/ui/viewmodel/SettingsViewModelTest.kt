@@ -283,7 +283,7 @@ class SettingsViewModelTest {
         settingsViewModel.updateLanguagesSuccessProperty.addListener(updateLanguagesSuccessListener)
 
         updateLanguagesResultListener = createChangeListener {
-            Assert.assertEquals(messages["success"], it)
+            Assert.assertEquals(messages["languagesImportSuccess"], it)
         }
         settingsViewModel.updateLanguagesResultProperty.addListener(updateLanguagesResultListener)
 
@@ -313,7 +313,7 @@ class SettingsViewModelTest {
         settingsViewModel.updateLanguagesSuccessProperty.addListener(updateLanguagesSuccessListener)
 
         updateLanguagesResultListener = createChangeListener {
-            Assert.assertEquals("invalid url", it)
+            Assert.assertEquals(messages["languagesImportError"], it)
         }
         settingsViewModel.updateLanguagesResultProperty.addListener(updateLanguagesResultListener)
 
