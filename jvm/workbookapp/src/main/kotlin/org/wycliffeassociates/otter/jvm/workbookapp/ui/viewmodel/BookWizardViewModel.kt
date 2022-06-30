@@ -213,6 +213,8 @@ class BookWizardViewModel : ViewModel() {
     }
 
     private fun createProject(collection: Collection) {
+        logger.info("Creating project: ${collection.slug}")
+
         translationProperty.value?.let { translation ->
             showProgressProperty.set(true)
 
@@ -249,6 +251,7 @@ class BookWizardViewModel : ViewModel() {
                             logger.error("Error while creating project - update translation timestamp", e)
                         }
                         .subscribe {
+                            logger.info("Project created: ${collection.slug}")
                             showProgressProperty.set(false)
                             Platform.runLater { navigator.home() }
                         }

@@ -47,6 +47,8 @@ class SourceProjectExporter @Inject constructor(
         val zipFilename = makeExportFilename(workbook, projectSourceMetadata)
         val zipFile = directory.resolve(zipFilename)
 
+        logger.info("Exporting project as source: ${zipFile.nameWithoutExtension}")
+
         projectFilesAccessor.initializeResourceContainerInFile(workbook, zipFile)
         setContributorInfo(contributors, projectSourceMetadata, zipFile)
 

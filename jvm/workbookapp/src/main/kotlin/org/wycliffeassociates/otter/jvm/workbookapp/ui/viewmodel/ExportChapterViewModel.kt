@@ -46,6 +46,8 @@ class ExportChapterViewModel : ViewModel() {
     }
 
     fun export(outputDir: File) {
+        logger.info("Exporting chapter take at $outputDir")
+
         chapterViewModel.selectedChapterTakeProperty.value?.let { take ->
             chapterViewModel.showExportProgressDialogProperty.set(true)
 
