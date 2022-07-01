@@ -20,6 +20,8 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.book
 
 import javafx.application.Platform
 import javafx.geometry.Pos
+import javafx.scene.control.Tab
+import javafx.scene.control.TabPane
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
@@ -87,6 +89,15 @@ class BookSelection : View() {
                     }
                 }
             }
+            hbox {
+                addClass("book-wizard__resource-tab-group")
+                tabpane {
+                    addClass("wa-tab-pane")
+                    hgrow = Priority.ALWAYS
+                    tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
+                    buildResourceTabs(this)
+                }
+            }
             add(
                 FilteredSearchBar().apply {
                     leftIconProperty.set(FontIcon(MaterialDesign.MDI_BOOK))
@@ -132,6 +143,21 @@ class BookSelection : View() {
                     }
                 }
             }
+        }
+    }
+
+    private fun buildResourceTabs(tabPane: TabPane) {
+        viewModel.sourceCollections.onChange {
+            val tabs = it.list.map { resource ->
+                Tab().apply {
+                    text = resource.slug
+
+                    whenSelected {
+                        viewModel.selectedSourceProperty.set(resource)
+                    }
+                }
+            }
+            tabPane.tabs.setAll(tabs)
         }
     }
 
