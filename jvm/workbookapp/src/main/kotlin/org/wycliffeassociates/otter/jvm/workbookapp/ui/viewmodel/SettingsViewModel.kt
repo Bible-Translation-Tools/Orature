@@ -287,6 +287,13 @@ class SettingsViewModel : ViewModel() {
     }
 
     fun updateLanguageNamesUrl() {
+        val matchRegex = "^https?://.*".toRegex()
+        val replaceRegex = "^h?t?t?p?s?:?/+(.*)".toRegex()
+        if (!matchRegex.matches(languageNamesUrlProperty.value)) {
+            val cleaned = languageNamesUrlProperty.value.replace(replaceRegex, "$1")
+            languageNamesUrlProperty.set("https://$cleaned")
+        }
+
         appPrefRepository
             .setLanguageNamesUrl(languageNamesUrlProperty.value)
             .subscribe()
@@ -302,12 +309,12 @@ class SettingsViewModel : ViewModel() {
                 {
                     languageNamesImportingProperty.set(false)
                     updateLanguagesSuccessProperty.set(true)
-                    updateLanguagesResultProperty.set(messages["success"])
+                    updateLanguagesResultProperty.set(messages["languagesImportSuccess"])
                 },
                 {
                     languageNamesImportingProperty.set(false)
                     updateLanguagesSuccessProperty.set(false)
-                    updateLanguagesResultProperty.set(it.message)
+                    updateLanguagesResultProperty.set(messages["languagesImportError"])
                 }
             )
     }
