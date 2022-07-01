@@ -64,7 +64,12 @@ class BookCell(
 
         disableProperty().bind(
             Bindings.createBooleanBinding(
-                { existingBooks.map { it.target.slug }.contains(item.collection.slug) },
+                {
+                    existingBooks.any {
+                        it.target.slug == item.collection.slug &&
+                            it.source.resourceMetadata?.identifier == item.collection.resourceContainer?.identifier
+                    }
+                },
                 existingBooks
             )
         )
