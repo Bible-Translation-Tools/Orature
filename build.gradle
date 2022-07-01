@@ -90,7 +90,6 @@ allprojects {
 subprojects {
     repositories {
         maven { url "https://nexus-registry.walink.org/repository/maven-public/" }
-        maven { url "https://jitpack.io" }
     }
 
     apply plugin: 'kotlin'
