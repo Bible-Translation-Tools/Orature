@@ -145,7 +145,9 @@ class WorkbookPageViewModel : ViewModel() {
         val currentTarget = workbookDataStore.workbook.target
         return listOf(
             currentTarget.resourceMetadata,
-            *currentTarget.linkedResources.toTypedArray()
+            *currentTarget.linkedResources
+                .filter { it.type == ContainerType.Help }
+                .toTypedArray()
         )
     }
 
