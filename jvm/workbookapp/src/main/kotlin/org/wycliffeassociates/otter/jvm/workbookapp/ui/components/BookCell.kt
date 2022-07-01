@@ -67,7 +67,8 @@ class BookCell(
                 {
                     existingBooks.any {
                         it.target.slug == item.collection.slug &&
-                            it.source.resourceMetadata?.identifier == item.collection.resourceContainer?.identifier
+                                (it.source.resourceMetadata?.identifier == 
+                                        item.collection.resourceContainer?.identifier)
                     }
                 },
                 existingBooks
