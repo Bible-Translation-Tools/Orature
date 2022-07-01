@@ -46,6 +46,7 @@ import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
+import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
@@ -140,10 +141,10 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
     private val width = Screen.getMainScreen().platformWidth
     private val height = Integer.min(Screen.getMainScreen().platformHeight, 500)
 
-    private val waveformSubject = PublishSubject.create<Image>()
 
-    val waveform: Observable<Image>
-        get() = waveformSubject
+    private val builder = ObservableWaveformBuilder()
+    lateinit var waveform: Observable<Image>
+
 
     override var audioController: AudioPlayerController? = null
     override val audioPlayer = SimpleObjectProperty<IAudioPlayer>()
@@ -178,12 +179,13 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
         }
     }
 
-    fun onDockConsume() {
+    fun onDockConsume(op: () -> Unit) {
         sourceAudio?.file?.let {
             (app as IDependencyGraphProvider).dependencyGraph.inject(this)
             audio = loadAudio(it)
             createWaveformImages(audio)
             initializeAudioController()
+            op.invoke()
         }
     }
 
@@ -206,6 +208,10 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
         markerModel?.let { markerModel ->
             markers.setAll(markerModel.markers)
         }
+    }
+
+    fun cleanup() {
+        builder.cancel()
     }
 
     fun saveAndQuit() {
@@ -247,16 +253,12 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
     private fun createWaveformImages(audio: AudioFile) {
         imageWidthProperty.set(computeImageWidth(SECONDS_ON_SCREEN))
 
-        compositeDisposable.add(
-            WaveformImageBuilder(
-                wavColor = Color.web(WAV_COLOR),
-                background = Color.web(BACKGROUND_COLOR)
-            ).buildWaveformAsync(
-                audio.reader(),
-                width = imageWidthProperty.value.toInt(),
-                height = height,
-                waveformSubject
-            ).subscribe()
+        waveform = builder.build(
+            audio.reader(),
+            width = imageWidthProperty.value.toInt(),
+            height = height,
+            wavColor = Color.web(WAV_COLOR),
+            background = Color.web(BACKGROUND_COLOR)
         )
     }
 

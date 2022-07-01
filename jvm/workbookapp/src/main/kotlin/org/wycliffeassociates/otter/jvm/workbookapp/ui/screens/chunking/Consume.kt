@@ -49,13 +49,13 @@ class Consume : Fragment() {
         logger.info("Consume docked")
         tryImportStylesheet(resources.get("/css/scrolling-waveform.css"))
         tryImportStylesheet(resources.get("/css/consume-page.css"))
-        vm.compositeDisposable.add(
-            vm.waveform.observeOnFx().subscribe {
-                (root.center as ScrollingWaveform).addWaveformImage(it)
-            }
-        )
-
-        vm.onDockConsume()
+        vm.onDockConsume {
+            vm.compositeDisposable.add(
+                vm.waveform.observeOnFx().subscribe {
+                    (root.center as ScrollingWaveform).addWaveformImage(it)
+                }
+            )
+        }
         vm.pageProperty.set(ChunkingWizardPage.CONSUME)
         vm.titleProperty.set(messages["consumeTitle"])
         vm.stepProperty.set(MessageFormat.format(messages["consumeDescription"], vm.chapterTitle))

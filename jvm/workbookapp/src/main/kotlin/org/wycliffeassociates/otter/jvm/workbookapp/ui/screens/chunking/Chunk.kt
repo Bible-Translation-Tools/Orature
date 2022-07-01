@@ -84,7 +84,7 @@ class Chunk : Fragment() {
             }
         )
 
-        vm.onDockConsume()
+        vm.seek(0)
         vm.pageProperty.set(ChunkingWizardPage.CHUNK)
         vm.titleProperty.set(messages["chunkingTitle"])
         vm.stepProperty.set(messages["chunkingDescription"])
