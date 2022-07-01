@@ -7,6 +7,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.util.concurrent.atomic.AtomicBoolean
 import javafx.scene.image.Image
 import javafx.scene.image.WritableImage
 import javafx.scene.paint.Color
@@ -76,18 +77,15 @@ class ObservableWaveformBuilder {
         return Observable.create<Image?> { emitter ->
             emitter.setDisposable(
                 object : Disposable {
-                    var disposed = false
+                    var disposed = AtomicBoolean(false)
 
                     override fun dispose() {
                         println("disposing of disposable")
-                        synchronized(this@ObservableWaveformBuilder) {
-                            subscribers.remove(emitter)
-                        }
-                        disposed = true
+                        disposed.set(true)
                     }
 
                     override fun isDisposed(): Boolean {
-                        return disposed
+                        return disposed.get()
                     }
                 }
             )
@@ -164,13 +162,11 @@ class ObservableWaveformBuilder {
             }
         }
 
-//        synchronized(this@ObservableWaveformBuilder) {
-//            waveformStream.forEach {
-//                if (!it.isDisposed) {
-//                    it.onComplete()
-//                }
-//            }
-//        }
+        synchronized(this@ObservableWaveformBuilder) {
+            subscribers.forEach {
+                if (!it.isDisposed) it.onComplete()
+            }
+        }
     }
 
     private fun scaleToHeight(value: Int, height: Int): Int {
