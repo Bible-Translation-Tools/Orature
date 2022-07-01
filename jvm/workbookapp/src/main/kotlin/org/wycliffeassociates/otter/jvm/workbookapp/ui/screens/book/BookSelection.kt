@@ -199,8 +199,11 @@ class BookSelection : View() {
     private fun getAvailableBooks(): List<BookCardData> {
         return viewModel.filteredBooks.filter {
             viewModel.existingBooks
-                .map { book -> book.target.slug }
-                .contains(it.collection.slug).not()
+                .any { existing ->
+                    existing.target.slug == it.collection.slug &&
+                            (existing.source.resourceMetadata?.identifier ==
+                                            it.collection.resourceContainer?.identifier)
+                }.not()
         }
     }
 

@@ -300,8 +300,6 @@ class BookWizardViewModel : ViewModel() {
 
     fun setFilterMenu() {
         val items = mutableListOf<MenuItem>()
-        items.add(createMenuSeparator(messages["resources"]))
-        items.addAll(resourcesMenuItems())
         items.add(createMenuSeparator(messages["sortBy"]))
         items.add(
             createRadioMenuItem(messages["bookOrder"], true, sortByToggleGroup) { selected ->
@@ -315,17 +313,6 @@ class BookWizardViewModel : ViewModel() {
         )
 
         menuItems.setAll(items)
-    }
-
-    private fun resourcesMenuItems(): List<MenuItem> {
-        return sourceCollections.mapIndexed { index, collection ->
-            val preselected = index == 0
-            createRadioMenuItem(collection.titleKey, preselected, resourcesToggleGroup) { selected ->
-                if (selected) {
-                    selectedSourceProperty.set(collection)
-                }
-            }
-        }
     }
 
     private fun createMenuSeparator(label: String): MenuItem {
