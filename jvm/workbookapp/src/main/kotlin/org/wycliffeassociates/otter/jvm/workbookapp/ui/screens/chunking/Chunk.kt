@@ -193,6 +193,7 @@ class Chunk : Fragment() {
                             addClass("btn", "btn--primary", "btn--borderless", "save-btn")
                             setOnAction {
                                 vm.saveAndQuit()
+                                workspace.navigateBack()
                             }
                         }
                     }

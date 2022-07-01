@@ -234,10 +234,6 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
             .createChunkedSourceAudio(sourceAudio.file, cues)
 
         disposeables.forEach { it.dispose() }
-
-        runLater {
-            workspace.navigateBack()
-        }
     }
 
     private fun initializeAudioController() {
