@@ -35,8 +35,6 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
 import javafx.scene.shape.Rectangle
-import org.kordamp.ikonli.javafx.FontIcon
-import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.card.BookCard
 import tornadofx.*
 import java.io.File
@@ -62,9 +60,6 @@ class BookCardSkin(private val card: BookCard) : SkinBase<BookCard>(card) {
 
     @FXML
     lateinit var slug: Label
-
-    @FXML
-    lateinit var separatorIcon: Label
 
     @FXML
     lateinit var subtitle: Label
@@ -119,7 +114,6 @@ class BookCardSkin(private val card: BookCard) : SkinBase<BookCard>(card) {
         slug.apply {
             textProperty().bind(card.slugProperty)
         }
-        separatorIcon.apply { graphic = FontIcon(MaterialDesign.MDI_CHECKBOX_BLANK_CIRCLE) }
         subtitle.apply {
             textProperty().bind(card.subtitleProperty)
         }

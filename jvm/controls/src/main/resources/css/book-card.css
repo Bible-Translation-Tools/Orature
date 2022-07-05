@@ -77,7 +77,7 @@
     -fx-spacing: 10px;
 }
 
-.book-card__dot .ikonli-font-icon {
+.book-card__dot {
     -fx-icon-size: 8px;
     -fx-icon-color: -wa-regular-text;
 }

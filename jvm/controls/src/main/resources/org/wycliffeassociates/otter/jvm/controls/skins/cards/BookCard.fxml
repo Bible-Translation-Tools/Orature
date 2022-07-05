@@ -55,7 +55,7 @@
                         <Label fx:id="title" styleClass="book-card__title" />
                         <HBox styleClass="book-card__subtitle-section">
                             <Label fx:id="slug" />
-                            <Label fx:id="separatorIcon" styleClass="book-card__dot"/>
+                            <FontIcon iconLiteral="mdi-checkbox-blank-circle" styleClass="book-card__dot"/>
                             <Label fx:id="subtitle" styleClass="book-card__subtitle"/>
                         </HBox>
                     </children>
