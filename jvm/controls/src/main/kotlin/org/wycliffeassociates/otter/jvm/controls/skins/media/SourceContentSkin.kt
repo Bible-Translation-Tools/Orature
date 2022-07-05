@@ -270,7 +270,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             addClass("source-content__text")
             minHeight = Region.USE_PREF_SIZE // avoid ellipsis
 
-            prefWidthProperty().bind(
+            maxWidthProperty().bind(
                 sourceTextChunksContainer.widthProperty().minus(60) // scrollbar offset
             )
 

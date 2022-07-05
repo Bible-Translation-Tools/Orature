@@ -9,7 +9,6 @@ javafx {
 
 repositories {
     maven { url 'https://oss.sonatype.org/content/repositories/snapshots' } // TornadoFX 2.0 Snapshot
-    maven { url 'https://jitpack.io' } // FranzXaverSVG fork
 }
 
 dependencies {
