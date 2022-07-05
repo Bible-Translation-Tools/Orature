@@ -75,9 +75,10 @@
 
 .book-card__subtitle-section {
     -fx-spacing: 10px;
+    -fx-alignment: center-left;
 }
 
-.book-card__dot {
+.book-card__subtitle-section .book-card__dot {
     -fx-icon-size: 8px;
     -fx-icon-color: -wa-regular-text;
 }
