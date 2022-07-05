@@ -179,7 +179,7 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
             background = Color.web(BACKGROUND_COLOR)
         )
 
-        ObservableWaveformBuilder()
+        asyncBuilder
             .build(
                 audio.reader(),
                 width = Screen.getMainScreen().platformWidth,
