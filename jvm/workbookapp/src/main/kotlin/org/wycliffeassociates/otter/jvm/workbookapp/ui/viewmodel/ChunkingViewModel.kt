@@ -22,9 +22,7 @@ import com.sun.glass.ui.Screen
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
-import io.reactivex.subjects.PublishSubject
 import java.io.File
-import javafx.beans.binding.IntegerBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
@@ -44,7 +42,6 @@ import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerControll
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
-import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
@@ -54,7 +51,6 @@ import tornadofx.ViewModel
 import tornadofx.getValue
 import tornadofx.observableListOf
 import tornadofx.onChange
-import tornadofx.runLater
 import tornadofx.sizeProperty
 
 const val ACTIVE = "chunking-wizard__step--active"
@@ -249,7 +245,7 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
     private fun createWaveformImages(audio: AudioFile) {
         imageWidthProperty.set(computeImageWidth(SECONDS_ON_SCREEN))
 
-        waveform = builder.build(
+        waveform = builder.buildAsync(
             audio.reader(),
             width = imageWidthProperty.value.toInt(),
             height = height,

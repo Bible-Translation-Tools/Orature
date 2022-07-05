@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.controls.waveform
 import com.sun.glass.ui.Screen
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
+import io.reactivex.Single
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import java.nio.ByteBuffer
@@ -12,27 +13,32 @@ import javafx.scene.image.Image
 import javafx.scene.image.WritableImage
 import javafx.scene.paint.Color
 import kotlin.math.absoluteValue
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 
+const val SIGNED_SHORT_MAX = 32767
+
 class ObservableWaveformBuilder {
-    var reader: AudioFileReader? = null
+    private val logger = LoggerFactory.getLogger(ObservableWaveformBuilder::class.java)
 
-    val images = mutableListOf<Image>()
+    private var reader: AudioFileReader? = null
 
-    var wavColor: Color = Color.BLACK
-    var background: Color = Color.TRANSPARENT
+    private val images = mutableListOf<Image>()
+
+    private var wavColor: Color = Color.BLACK
+    private var background: Color = Color.TRANSPARENT
 
     private val partialImageWidth = Screen.getMainScreen().platformWidth
-    var width: Int = Screen.getMainScreen().platformWidth
-    var height: Int = Screen.getMainScreen().platformHeight
+    private var width: Int = Screen.getMainScreen().platformWidth
+    private var height: Int = Screen.getMainScreen().platformHeight
 
     @Volatile
-    var started = false
+    private var started = false
 
     @Volatile
-    var cancelled = false
+    private var cancelled = false
 
-    val subscribers = mutableListOf<ObservableEmitter<Image>>()
+    private val subscribers = mutableListOf<ObservableEmitter<Image>>()
 
     private fun start() {
         if (!started) {
@@ -63,6 +69,36 @@ class ObservableWaveformBuilder {
 
     fun build(
         reader: AudioFileReader,
+        width: Int = Screen.getMainScreen().platformWidth,
+        height: Int = Screen.getMainScreen().platformHeight,
+        wavColor: Color = Color.BLACK,
+        background: Color = Color.TRANSPARENT
+    ): Single<Image> {
+        this.wavColor = wavColor
+        this.background = background
+        return Single
+            .fromCallable {
+                if (width > 0) {
+                    val framesPerPixel = reader.totalFrames / width
+                    val img = WritableImage(width, height)
+                    reader.open()
+                    renderImage(img, reader, width, height, framesPerPixel)
+                    img
+                } else {
+                    WritableImage(1, 1) as Image
+                }
+            }
+            .doOnError { e ->
+                logger.error("Error in building WaveformImage", e)
+            }
+            .doAfterTerminate {
+                reader.release()
+            }
+            .subscribeOn(Schedulers.computation())
+    }
+
+    fun buildAsync(
+        reader: AudioFileReader,
         width: Int,
         height: Int,
         wavColor: Color = Color.BLACK,
@@ -80,7 +116,6 @@ class ObservableWaveformBuilder {
                     var disposed = AtomicBoolean(false)
 
                     override fun dispose() {
-                        println("disposing of disposable")
                         disposed.set(true)
                     }
 
@@ -98,7 +133,6 @@ class ObservableWaveformBuilder {
             start()
         }.subscribeOn(Schedulers.io())
     }
-
 
     private fun drawPartialImages(
         reader: AudioFileReader,
