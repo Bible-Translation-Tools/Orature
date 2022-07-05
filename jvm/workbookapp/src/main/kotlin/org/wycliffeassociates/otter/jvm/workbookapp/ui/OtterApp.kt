@@ -18,7 +18,6 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui
 
-import javafx.scene.control.Button
 import javafx.scene.control.ButtonBase
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
@@ -77,10 +76,8 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
             } else audioConnectionFactory.releasePlayer()
         }
         stage.scene.addEventHandler(KeyEvent.KEY_PRESSED) {
-            if (it.code == KeyCode.ENTER) {
-                if (stage.scene?.focusOwner is ButtonBase) {
-                    (stage.scene?.focusOwner as? ButtonBase)?.fire()
-                }
+            if (it.code == KeyCode.ENTER && stage.scene?.focusOwner is ButtonBase) {
+                (stage.scene?.focusOwner as? ButtonBase)?.fire()
             }
         }
         find<SplashScreen>().openModal(StageStyle.UNDECORATED)
