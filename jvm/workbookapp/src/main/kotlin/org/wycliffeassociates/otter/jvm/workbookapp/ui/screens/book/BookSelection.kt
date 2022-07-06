@@ -27,6 +27,7 @@ import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.controls.bar.FilteredSearchBar
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
@@ -200,9 +201,7 @@ class BookSelection : View() {
         return viewModel.filteredBooks.filter {
             viewModel.existingBooks
                 .any { existing ->
-                    existing.target.slug == it.collection.slug &&
-                            (existing.source.resourceMetadata?.identifier ==
-                                            it.collection.resourceContainer?.identifier)
+                    matchedExistingBook(it, existing)
                 }.not()
         }
     }
@@ -213,4 +212,10 @@ class BookSelection : View() {
         viewModel.loadExistingProjects()
         viewModel.loadResources()
     }
+}
+
+fun matchedExistingBook(book: BookCardData, existingBook: Workbook): Boolean {
+    return existingBook.target.slug == book.collection.slug &&
+            (existingBook.sourceMetadataSlug ==
+                    book.collection.resourceContainer?.identifier)
 }

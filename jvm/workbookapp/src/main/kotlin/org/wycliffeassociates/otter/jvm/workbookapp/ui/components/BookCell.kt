@@ -25,6 +25,7 @@ import javafx.scene.input.KeyCode
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.controls.card.BookCardCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.BookCardData
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.book.matchedExistingBook
 import tornadofx.*
 
 class BookCell(
@@ -66,9 +67,7 @@ class BookCell(
             Bindings.createBooleanBinding(
                 {
                     existingBooks.any {
-                        it.target.slug == item.collection.slug &&
-                                (it.source.resourceMetadata?.identifier == 
-                                        item.collection.resourceContainer?.identifier)
+                        matchedExistingBook(item, it)
                     }
                 },
                 existingBooks
