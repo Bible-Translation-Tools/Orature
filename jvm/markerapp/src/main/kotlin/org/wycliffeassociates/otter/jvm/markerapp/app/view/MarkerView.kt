@@ -43,7 +43,11 @@ class MarkerView : PluginEntrypoint() {
 
     override fun onDock() {
         super.onDock()
-        viewModel.onDock()
+        viewModel.onDock {
+            viewModel.compositeDisposable.add(
+                viewModel.waveform.observeOnFx().subscribe { waveform.addWaveformImage(it) }
+            )
+        }
         viewModel.imageCleanup = waveform::freeImages
         timer = object : AnimationTimer() {
             override fun handle(currentNanoTime: Long) {
@@ -84,9 +88,7 @@ class MarkerView : PluginEntrypoint() {
             center =
                 waveform.apply {
                     addClass("vm-marker-waveform")
-                    viewModel.compositeDisposable.add(
-                        viewModel.waveform.observeOnFx().subscribe { addWaveformImage(it) }
-                    )
+
                     positionProperty.bind(viewModel.positionProperty)
 
                     onSeekNext = viewModel::seekNext

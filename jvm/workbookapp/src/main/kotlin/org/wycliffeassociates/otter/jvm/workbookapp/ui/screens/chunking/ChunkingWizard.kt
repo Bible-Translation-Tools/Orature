@@ -61,6 +61,10 @@ class ChunkingWizard : Wizard() {
         node.addClass(cssClass)
     }
 
+    override fun onUndock() {
+        vm.cleanup()
+    }
+
     override fun onDock() {
         tryImportStylesheet(resources["/css/chunking-wizard.css"])
         pages.clear()

@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
-import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
 import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
@@ -45,6 +44,7 @@ import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import kotlin.math.max
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
+import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
 
 private const val WAV_COLOR = "#0A337390"
 private const val BACKGROUND_COLOR = "#FFFFFF"
@@ -57,12 +57,12 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
     private val height = min(Screen.getMainScreen().platformHeight, 500)
 
     val waveformMinimapImage = SimpleObjectProperty<Image>()
+
     /** Call this before leaving the view to avoid memory leak */
     var imageCleanup: () -> Unit = {}
 
-    private val waveformSubject = PublishSubject.create<Image>()
-    val waveform: Observable<Image>
-        get() = waveformSubject
+    private val asyncBuilder = ObservableWaveformBuilder()
+    lateinit var waveform: Observable<Image>
 
     lateinit var waveformMinimapImageListener: ChangeListener<Image>
 
@@ -89,12 +89,13 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
     private var totalFrames: Int = 0 // beware of divided by 0
     override var resumeAfterScroll = false
 
-    fun onDock() {
+    fun onDock(op: () -> Unit) {
         isLoadingProperty.set(true)
         val audio = loadAudio()
         loadMarkers(audio)
         loadTitles()
         createWaveformImages(audio)
+        op.invoke()
     }
 
     private fun loadAudio(): AudioFile {
@@ -141,6 +142,7 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
         waveformMinimapImage.set(null)
         currentMarkerNumberProperty.set(-1)
         imageCleanup()
+        asyncBuilder.cancel()
 
         (scope as ParameterizedScope).let {
             writeMarkers()
@@ -169,30 +171,29 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
     private fun createWaveformImages(audio: AudioFile) {
         imageWidthProperty.set(computeImageWidth(SECONDS_ON_SCREEN))
 
-        val builder = WaveformImageBuilder(
+        waveform = asyncBuilder.buildAsync(
+            audio.reader(),
+            width = imageWidthProperty.value.toInt(),
+            height = Screen.getMainScreen().platformHeight,
             wavColor = Color.web(WAV_COLOR),
             background = Color.web(BACKGROUND_COLOR)
         )
 
-        builder
+        asyncBuilder
             .build(
                 audio.reader(),
-                width = imageWidthProperty.value.toInt(),
-                height = 50
+                width = Screen.getMainScreen().platformWidth,
+                height = 50,
+                wavColor = Color.web(WAV_COLOR),
+                background = Color.web(BACKGROUND_COLOR)
             )
             .observeOnFx()
             .map { image ->
                 waveformMinimapImage.set(image)
             }
             .ignoreElement()
-            .andThen(
-                builder.buildWaveformAsync(
-                    audio.reader(),
-                    width = imageWidthProperty.value.toInt(),
-                    height = height,
-                    waveformSubject
-                )
-            ).subscribe {
+            .andThen(waveform)
+            .subscribe {
                 runLater {
                     isLoadingProperty.set(false)
                 }

@@ -1,51 +1,80 @@
-/**
- * Copyright (C) 2020-2022 Wycliffe Associates
- *
- * This file is part of Orature.
- *
- * Orature is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Orature is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
- */
 package org.wycliffeassociates.otter.jvm.controls.waveform
 
 import com.sun.glass.ui.Screen
-import io.reactivex.Completable
+import io.reactivex.Observable
+import io.reactivex.ObservableEmitter
 import io.reactivex.Single
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.Subject
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.util.concurrent.atomic.AtomicBoolean
 import javafx.scene.image.Image
 import javafx.scene.image.WritableImage
 import javafx.scene.paint.Color
+import kotlin.math.absoluteValue
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import kotlin.math.absoluteValue
 
 const val SIGNED_SHORT_MAX = 32767
 
-class WaveformImageBuilder(
-    private val wavColor: Color = Color.BLACK,
-    private val background: Color = Color.TRANSPARENT
-) {
-    private val logger = LoggerFactory.getLogger(WaveformImageBuilder::class.java)
+class ObservableWaveformBuilder {
+    private val logger = LoggerFactory.getLogger(ObservableWaveformBuilder::class.java)
+
+    private var reader: AudioFileReader? = null
+
+    private var wavColor: Color = Color.BLACK
+    private var background: Color = Color.TRANSPARENT
+
     private val partialImageWidth = Screen.getMainScreen().platformWidth
+    private var width: Int = Screen.getMainScreen().platformWidth
+    private var height: Int = Screen.getMainScreen().platformHeight
+
+    private val started = AtomicBoolean(false)
+    private val cancelled = AtomicBoolean(false)
+
+    private val images = mutableListOf<Image>()
+    private val subscribers = mutableListOf<ObservableEmitter<Image>>()
+
+    private fun start() {
+        synchronized(started) {
+            // return if already started (the swap happens if starting the first time, which then returns true)
+            if (!started.compareAndSet(false, true)) {
+                return
+            }
+        }
+        cancelled.set(false)
+        reader?.let { reader ->
+            try {
+                reader.open()
+                drawPartialImages(reader, width, height, subscribers)
+            } finally {
+                reader.release()
+            }
+        }
+    }
+
+    fun cancel() {
+        synchronized(started) {
+            cancelled.set(true)
+            started.set(false)
+            subscribers.forEach {
+                if (!it.isDisposed) it.onComplete()
+            }
+            images.clear()
+            subscribers.clear()
+        }
+    }
 
     fun build(
         reader: AudioFileReader,
         width: Int = Screen.getMainScreen().platformWidth,
-        height: Int = Screen.getMainScreen().platformHeight
+        height: Int = Screen.getMainScreen().platformHeight,
+        wavColor: Color = Color.BLACK,
+        background: Color = Color.TRANSPARENT
     ): Single<Image> {
+        this.wavColor = wavColor
+        this.background = background
         return Single
             .fromCallable {
                 if (width > 0) {
@@ -67,30 +96,48 @@ class WaveformImageBuilder(
             .subscribeOn(Schedulers.computation())
     }
 
-    fun buildWaveformAsync(
+    fun buildAsync(
         reader: AudioFileReader,
-        width: Int = Screen.getMainScreen().platformWidth,
-        height: Int = Screen.getMainScreen().platformHeight,
-        waveformStream: Subject<Image>
-    ): Completable {
-        return Completable.fromAction {
-            reader.open()
-            drawPartialImages(reader, width, height, waveformStream)
-        }
-        .doOnError { e ->
-            logger.error("Error in building WaveformImage", e)
-        }
-        .doAfterTerminate {
-            reader.release()
-        }
-        .subscribeOn(Schedulers.computation())
+        width: Int,
+        height: Int,
+        wavColor: Color = Color.BLACK,
+        background: Color = Color.TRANSPARENT
+    ): Observable<Image> {
+        this.reader = reader
+        this.width = width
+        this.height = height
+        this.wavColor = wavColor
+        this.background = background
+
+        return Observable.create<Image?> { emitter ->
+            emitter.setDisposable(
+                object : Disposable {
+                    val disposed = AtomicBoolean(false)
+
+                    override fun dispose() {
+                        disposed.set(true)
+                    }
+
+                    override fun isDisposed(): Boolean {
+                        return disposed.get()
+                    }
+                }
+            )
+            synchronized(this@ObservableWaveformBuilder) {
+                for (image in images) {
+                    emitter.onNext(image)
+                }
+                subscribers.add(emitter)
+            }
+            start()
+        }.subscribeOn(Schedulers.io())
     }
 
     private fun drawPartialImages(
         reader: AudioFileReader,
         width: Int,
         height: Int,
-        waveformStream: Subject<Image>
+        subscribers: List<ObservableEmitter<Image>>
     ) {
         val framesPerPixel = reader.totalFrames / width
         var img = WritableImage(partialImageWidth, height)
@@ -101,6 +148,7 @@ class WaveformImageBuilder(
         // render fixed-width images until the last one
         val lastImageWidth = width % partialImageWidth
         for (i in 0 until width - lastImageWidth) {
+            if (cancelled.get()) break
             val range = computeWaveRange(reader, height, shortsArray, bytes)
 
             for (j in 0 until height) {
@@ -112,14 +160,21 @@ class WaveformImageBuilder(
 
             counter++
             if (counter == partialImageWidth) {
-                waveformStream.onNext(img)
+                synchronized(this@ObservableWaveformBuilder) {
+                    images.add(img)
+                    subscribers.forEach {
+                        if (!it.isDisposed) {
+                            it.onNext(img)
+                        }
+                    }
+                }
                 img = WritableImage(partialImageWidth, height)
                 counter = 0
             }
         }
 
         // render final image with exact width
-        if (lastImageWidth != 0) {
+        if (lastImageWidth != 0 && !cancelled.get()) {
             img = WritableImage(
                 img.pixelReader,
                 0,
@@ -128,10 +183,23 @@ class WaveformImageBuilder(
                 height
             )
             renderImage(img, reader, lastImageWidth, height, framesPerPixel)
-            waveformStream.onNext(img)
+            if (!cancelled.get()) {
+                synchronized(this@ObservableWaveformBuilder) {
+                    images.add(img)
+                    subscribers.forEach {
+                        if (!it.isDisposed) {
+                            it.onNext(img)
+                        }
+                    }
+                }
+            }
         }
 
-        // waveformStream.onComplete()
+        synchronized(this@ObservableWaveformBuilder) {
+            subscribers.forEach {
+                if (!it.isDisposed) it.onComplete()
+            }
+        }
     }
 
     private fun scaleToHeight(value: Int, height: Int): Int {
