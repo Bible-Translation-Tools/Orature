@@ -353,9 +353,9 @@ class WorkbookDataStore : Component(), ScopedInstance {
                 _chapter
                     .chunks
                     .filter { _chunk ->
-                        _chunk.start == chunk?.start
+                        _chunk.sort == chunk?.sort
                     }
-                    .singleElement()
+                    .firstElement()
             }
     }
 

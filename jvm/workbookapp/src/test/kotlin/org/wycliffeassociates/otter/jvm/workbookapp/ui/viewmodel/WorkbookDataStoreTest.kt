@@ -131,7 +131,7 @@ class WorkbookDataStoreTest {
                 end = 1,
                 contentType = ContentType.TEXT,
                 resources = listOf(),
-                label = "Chunk",
+                label = "chunk",
                 draftNumber = 1
             )
         }
@@ -289,34 +289,6 @@ class WorkbookDataStoreTest {
     }
 
     @Test
-    fun `getting source text for active chapter`() {
-        workbookDataStore.activeChapterProperty.set(targetChapter)
-
-        val observer = workbookDataStore.getSourceText().test()
-        observer.assertComplete()
-        observer.assertResult("1. Chunk 1\n")
-    }
-
-    @Test
-    fun `getting source text for active chunk`() {
-        workbookDataStore.activeChapterProperty.set(targetChapter)
-        workbookDataStore.activeChunkProperty.set(targetChunk)
-
-        val observer = workbookDataStore.getSourceText().test()
-        observer.assertComplete()
-        observer.assertResult("Chunk 1")
-    }
-
-    @Test
-    fun `getting source chapter for active chapter`() {
-        workbookDataStore.activeChapterProperty.set(targetChapter)
-
-        val observer = workbookDataStore.getSourceChapter().test()
-        observer.assertComplete()
-        observer.assertResult(sourceChapter)
-    }
-
-    @Test
     fun `getting source chunk for active chunk`() {
         workbookDataStore.activeChapterProperty.set(targetChapter)
         workbookDataStore.activeChunkProperty.set(targetChunk)
@@ -374,27 +346,6 @@ class WorkbookDataStoreTest {
 
         val stringProperty = SimpleStringProperty()
         stringProperty.bind(workbookDataStore.activeChunkTitleBinding())
-
-        Assert.assertEquals("Verse 1", stringProperty.value)
-    }
-
-    @Test
-    fun `source text for active chapter`() {
-        workbookDataStore.activeChapterProperty.set(targetChapter)
-
-        val stringProperty = SimpleStringProperty()
-        stringProperty.bind(workbookDataStore.sourceTextBinding())
-
-        Assert.assertEquals("1. Chunk 1\n", stringProperty.value)
-    }
-
-    @Test
-    fun `source text for active chunk`() {
-        workbookDataStore.activeChapterProperty.set(targetChapter)
-        workbookDataStore.activeChunkProperty.set(targetChunk)
-
-        val stringProperty = SimpleStringProperty()
-        stringProperty.bind(workbookDataStore.sourceTextBinding())
 
         Assert.assertEquals("Chunk 1", stringProperty.value)
     }
