@@ -257,6 +257,32 @@
     -fx-border-width: 0px;
     -fx-background-color: transparent;
 }
+/* -------------- Toggle Group -------------- */
+.wa-toggle-button-pane {
+    -fx-border-color: -wa-border-neutral;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.wa-toggle-button-pane .custom-toggle-btn {
+    -fx-max-width: infinity;
+    -fx-max-height: infinity;
+    -fx-border-width: 0;
+    -fx-border-color: transparent;
+    -fx-border-insets: 0;
+    -fx-background-insets: 0;
+    -fx-background-color: transparent;
+    -fx-background-radius: 8px;
+    -fx-effect: none;
+    -fx-text-fill: -wa-regular-text;
+}
+
+.wa-toggle-button-pane .custom-toggle-btn:selected {
+    -fx-background-color: -wa-primary;
+    -fx-text-fill: white;
+}
+
 /* -------------- Text Link ----------------- */
 .wa-text--hyperlink {
     -fx-padding: 5 5 10 5;

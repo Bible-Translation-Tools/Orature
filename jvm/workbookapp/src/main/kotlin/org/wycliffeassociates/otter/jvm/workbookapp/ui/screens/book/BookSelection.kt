@@ -20,8 +20,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.book
 
 import javafx.application.Platform
 import javafx.geometry.Pos
-import javafx.scene.control.Tab
-import javafx.scene.control.TabPane
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
@@ -32,6 +30,8 @@ import org.wycliffeassociates.otter.jvm.controls.bar.FilteredSearchBar
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
+import org.wycliffeassociates.otter.jvm.controls.toggle.RadioButtonPane
+import org.wycliffeassociates.otter.jvm.controls.toggle.ToggleButtonData
 import org.wycliffeassociates.otter.jvm.utils.overrideDefaultKeyEventHandler
 import org.wycliffeassociates.otter.jvm.utils.virtualFlow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
@@ -92,12 +92,12 @@ class BookSelection : View() {
             }
             hbox {
                 addClass("book-wizard__resource-tab-group")
-                tabpane {
-                    addClass("wa-tab-pane")
-                    hgrow = Priority.ALWAYS
-                    tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
-                    buildResourceTabs(this)
-                }
+                add(
+                    RadioButtonPane().apply {
+                        addClass("wa-tab-pane")
+                        buildResourceSelections(this)
+                    }
+                )
             }
             add(
                 FilteredSearchBar().apply {
@@ -147,18 +147,15 @@ class BookSelection : View() {
         }
     }
 
-    private fun buildResourceTabs(tabPane: TabPane) {
+    private fun buildResourceSelections(togglePane: RadioButtonPane) {
         viewModel.sourceCollections.onChange {
-            val tabs = it.list.map { resource ->
-                Tab().apply {
-                    text = resource.slug
-
-                    whenSelected {
-                        viewModel.selectedSourceProperty.set(resource)
-                    }
+            val data = it.list.mapIndexed { index, resource ->
+                val isFirst = index == 0
+                ToggleButtonData(resource.slug, isFirst) {
+                    viewModel.selectedSourceProperty.set(resource)
                 }
             }
-            tabPane.tabs.setAll(tabs)
+            togglePane.list.setAll(data)
         }
     }
 
