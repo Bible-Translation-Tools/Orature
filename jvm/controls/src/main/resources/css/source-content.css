@@ -88,21 +88,26 @@
     -fx-padding: 15px 5px;
 }
 
+.source-content__text-container {
+    -fx-padding: 10 0 0 0;
+}
+
 .source-content__chunk-list {
     -fx-border-width: 3px;
     -fx-border-radius: 6px;
     -fx-border-color: transparent;
+    -fx-padding: 5;
 }
+
 .source-content__chunk-list:focused {
     -fx-border-color: -wa-card-border;
 }
 
-.source-content__text-container {
-    -fx-padding: 5px 0 0 0;
+.source-content__chunk-list .list-cell {
+    -fx-padding: 5 15;
 }
 
 .source-content__text {
-    -fx-padding: 0 15px;
     -fx-text-fill: -wa-regular-text;
     -fx-wrap-text: true;
 }

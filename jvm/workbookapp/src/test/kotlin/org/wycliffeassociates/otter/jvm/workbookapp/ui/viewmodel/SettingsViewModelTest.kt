@@ -33,9 +33,11 @@ import org.junit.BeforeClass
 import org.junit.Test
 import org.testfx.api.FxToolkit
 import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
 import tornadofx.*
+import tornadofx.FX.Companion.messages
 
 class SettingsViewModelTest {
     companion object {
@@ -48,6 +50,9 @@ class SettingsViewModelTest {
         private var selectedLocaleLanguageListener: ChangeListener<Language>? = null
         private var supportedLocaleLanguagesListener: ListChangeListener<Language>? = null
         private var orientationListener: ChangeListener<NodeOrientation>? = null
+        private var languageNamesImportingListener: ChangeListener<Boolean>? = null
+        private var updateLanguagesSuccessListener: ChangeListener<Boolean>? = null
+        private var updateLanguagesResultListener: ChangeListener<String>? = null
 
         private val recorder = AudioPluginData(
             0,
@@ -130,6 +135,9 @@ class SettingsViewModelTest {
     @Before
     fun prepare() {
         settingsViewModel.selectedLocaleLanguageProperty.set(null)
+        settingsViewModel.languageNamesImportingProperty.set(false)
+        settingsViewModel.updateLanguagesSuccessProperty.set(null)
+        settingsViewModel.updateLanguagesResultProperty.set(null)
     }
 
     @After
@@ -151,6 +159,15 @@ class SettingsViewModelTest {
         }
         orientationListener?.let {
             settingsViewModel.orientationProperty.removeListener(it)
+        }
+        languageNamesImportingListener?.let {
+            settingsViewModel.languageNamesImportingProperty.removeListener(it)
+        }
+        updateLanguagesSuccessListener?.let {
+            settingsViewModel.updateLanguagesSuccessProperty.removeListener(it)
+        }
+        updateLanguagesResultListener?.let {
+            settingsViewModel.updateLanguagesResultProperty.removeListener(it)
         }
     }
 
@@ -246,5 +263,65 @@ class SettingsViewModelTest {
         settingsViewModel.localeLanguage = localeLanguage
 
         settingsViewModel.updateLanguage(spanish)
+    }
+
+    @Test
+    fun updateLanguagesSuccessful() {
+        var counter = 1
+        languageNamesImportingListener = createChangeListener {
+            when (counter) {
+                1 -> Assert.assertEquals(true, it)
+                2 -> Assert.assertEquals(false, it)
+            }
+            counter++
+        }
+        settingsViewModel.languageNamesImportingProperty.addListener(languageNamesImportingListener)
+
+        updateLanguagesSuccessListener = createChangeListener {
+            Assert.assertEquals(true, it)
+        }
+        settingsViewModel.updateLanguagesSuccessProperty.addListener(updateLanguagesSuccessListener)
+
+        updateLanguagesResultListener = createChangeListener {
+            Assert.assertEquals(messages["languagesImportSuccess"], it)
+        }
+        settingsViewModel.updateLanguagesResultProperty.addListener(updateLanguagesResultListener)
+
+        val importLanguages = mock<ImportLanguages> {
+            on { update(any()) } doReturn Completable.complete()
+        }
+
+        settingsViewModel.importLanguages = importLanguages
+        settingsViewModel.updateLanguages()
+    }
+
+    @Test
+    fun updateLanguagesFailed() {
+        var counter = 1
+        languageNamesImportingListener = createChangeListener {
+            when (counter) {
+                1 -> Assert.assertEquals(true, it)
+                2 -> Assert.assertEquals(false, it)
+            }
+            counter++
+        }
+        settingsViewModel.languageNamesImportingProperty.addListener(languageNamesImportingListener)
+
+        updateLanguagesSuccessListener = createChangeListener {
+            Assert.assertEquals(false, it)
+        }
+        settingsViewModel.updateLanguagesSuccessProperty.addListener(updateLanguagesSuccessListener)
+
+        updateLanguagesResultListener = createChangeListener {
+            Assert.assertEquals(messages["languagesImportError"], it)
+        }
+        settingsViewModel.updateLanguagesResultProperty.addListener(updateLanguagesResultListener)
+
+        val importLanguages = mock<ImportLanguages> {
+            on { update(any()) } doReturn Completable.error(Exception("invalid url"))
+        }
+
+        settingsViewModel.importLanguages = importLanguages
+        settingsViewModel.updateLanguages()
     }
 }

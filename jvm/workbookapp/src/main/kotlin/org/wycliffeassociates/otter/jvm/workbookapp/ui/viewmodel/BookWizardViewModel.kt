@@ -213,6 +213,8 @@ class BookWizardViewModel : ViewModel() {
     }
 
     private fun createProject(collection: Collection) {
+        logger.info("Creating project: ${collection.slug}")
+
         translationProperty.value?.let { translation ->
             showProgressProperty.set(true)
 
@@ -250,6 +252,7 @@ class BookWizardViewModel : ViewModel() {
                             logger.error("Error while creating project - update translation timestamp", e)
                         }
                         .subscribe {
+                            logger.info("Project created: ${collection.slug}")
                             showProgressProperty.set(false)
                             Platform.runLater { navigator.home() }
                         }
@@ -298,8 +301,6 @@ class BookWizardViewModel : ViewModel() {
 
     fun setFilterMenu() {
         val items = mutableListOf<MenuItem>()
-        items.add(createMenuSeparator(messages["resources"]))
-        items.addAll(resourcesMenuItems())
         items.add(createMenuSeparator(messages["sortBy"]))
         items.add(
             createRadioMenuItem(messages["bookOrder"], true, sortByToggleGroup) { selected ->
@@ -313,17 +314,6 @@ class BookWizardViewModel : ViewModel() {
         )
 
         menuItems.setAll(items)
-    }
-
-    private fun resourcesMenuItems(): List<MenuItem> {
-        return sourceCollections.mapIndexed { index, collection ->
-            val preselected = index == 0
-            createRadioMenuItem(collection.titleKey, preselected, resourcesToggleGroup) { selected ->
-                if (selected) {
-                    selectedSourceProperty.set(collection)
-                }
-            }
-        }
     }
 
     private fun createMenuSeparator(label: String): MenuItem {

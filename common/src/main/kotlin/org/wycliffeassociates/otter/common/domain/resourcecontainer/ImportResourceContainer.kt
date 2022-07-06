@@ -95,9 +95,13 @@ class ImportResourceContainer @Inject constructor(
                 }
             }
             tryUpdateExistingRC(rcFile) -> {
+                logger.info("Importing RC as default")
                 importContainer(rcFile)
             }
-            else -> Single.just(ImportResult.DEPENDENCY_ERROR)
+            else -> {
+                logger.error("Could not import RC $rcFile - ${ImportResult.DEPENDENCY_ERROR}")
+                Single.just(ImportResult.DEPENDENCY_ERROR)
+            }
         }
     }
 

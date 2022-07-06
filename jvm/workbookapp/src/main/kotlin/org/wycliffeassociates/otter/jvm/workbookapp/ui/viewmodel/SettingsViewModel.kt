@@ -23,12 +23,14 @@ import com.jthemedetecor.OsThemeDetector
 import io.reactivex.schedulers.Schedulers
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.geometry.NodeOrientation
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
 import org.wycliffeassociates.otter.common.domain.theme.AppTheme
@@ -45,20 +47,12 @@ class SettingsViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(SettingsViewModel::class.java)
 
-    @Inject
-    lateinit var audioDeviceProvider: AudioDeviceProvider
-
-    @Inject
-    lateinit var appPrefRepository: IAppPreferencesRepository
-
-    @Inject
-    lateinit var pluginRepository: IAudioPluginRepository
-
-    @Inject
-    lateinit var localeLanguage: LocaleLanguage
-
-    @Inject
-    lateinit var theme: AppTheme
+    @Inject lateinit var audioDeviceProvider: AudioDeviceProvider
+    @Inject lateinit var appPrefRepository: IAppPreferencesRepository
+    @Inject lateinit var pluginRepository: IAudioPluginRepository
+    @Inject lateinit var localeLanguage: LocaleLanguage
+    @Inject lateinit var theme: AppTheme
+    @Inject lateinit var importLanguages: ImportLanguages
 
     private val audioPluginViewModel: AudioPluginViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
@@ -101,6 +95,12 @@ class SettingsViewModel : ViewModel() {
         }
     }
 
+    val languageNamesUrlProperty = SimpleStringProperty()
+    val defaultLanguageNamesUrlProperty = SimpleStringProperty()
+    val languageNamesImportingProperty = SimpleBooleanProperty(false)
+    val updateLanguagesResultProperty = SimpleStringProperty()
+    val updateLanguagesSuccessProperty = SimpleObjectProperty<Boolean>()
+
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
 
@@ -121,6 +121,8 @@ class SettingsViewModel : ViewModel() {
         loadInputDevices()
         loadCurrentOutputDevice()
         loadCurrentInputDevice()
+        loadLanguageNamesUrl()
+        loadDefaultLanguageNamesUrl()
 
         supportedThemes.setAll(ColorTheme.values().asList())
         theme.preferredTheme
@@ -171,11 +173,13 @@ class SettingsViewModel : ViewModel() {
     }
 
     fun selectEditor(editorData: AudioPluginData) {
+        logger.info("Selected editor: ${editorData.name}")
         pluginRepository.setPluginData(PluginType.EDITOR, editorData).subscribe()
         selectedEditorProperty.set(editorData)
     }
 
     fun selectRecorder(recorderData: AudioPluginData) {
+        logger.info("Selected recorder: ${recorderData.name}")
         pluginRepository.setPluginData(PluginType.RECORDER, recorderData).subscribe()
         selectedRecorderProperty.set(recorderData)
     }
@@ -202,6 +206,28 @@ class SettingsViewModel : ViewModel() {
             }
     }
 
+    private fun loadLanguageNamesUrl() {
+        appPrefRepository.languageNamesUrl()
+            .doOnError {
+                logger.error("Error in loadLanguageNamesUrl: ", it)
+            }
+            .observeOnFx()
+            .subscribe { url ->
+                languageNamesUrlProperty.set(url)
+            }
+    }
+
+    private fun loadDefaultLanguageNamesUrl() {
+        appPrefRepository.defaultLanguageNamesUrl()
+            .doOnError {
+                logger.error("Error in loadDefaultLanguageNamesUrl: ", it)
+            }
+            .observeOnFx()
+            .subscribe { url ->
+                defaultLanguageNamesUrlProperty.set(url)
+            }
+    }
+
     private fun loadOutputDevices() {
         val devices = audioDeviceProvider.getOutputDeviceNames()
         outputDevices.setAll(devices)
@@ -213,10 +239,12 @@ class SettingsViewModel : ViewModel() {
     }
 
     fun updateOutputDevice(mixer: String) {
+        logger.info("Selected output device: $mixer")
         appPrefRepository.setOutputDevice(mixer).subscribe()
     }
 
     fun updateInputDevice(mixer: String) {
+        logger.info("Selected input device: $mixer")
         appPrefRepository.setInputDevice(mixer).subscribe()
     }
 
@@ -228,6 +256,7 @@ class SettingsViewModel : ViewModel() {
     }
 
     fun updateLanguage(language: Language) {
+        logger.info("Selected app language: ${language.slug}")
         localeLanguage.setPreferredLanguage(language)
             .subscribe {
                 showChangeLanguageSuccessDialogProperty.set(true)
@@ -244,6 +273,8 @@ class SettingsViewModel : ViewModel() {
     }
 
     fun updateTheme(selectedTheme: ColorTheme) {
+        logger.info("Selected theme: ${selectedTheme.name}")
+
         if (selectedTheme == ColorTheme.SYSTEM) {
             bindSystemTheme()
         } else {
@@ -253,6 +284,47 @@ class SettingsViewModel : ViewModel() {
 
         theme.setPreferredThem(selectedTheme)
             .subscribe()
+    }
+
+    fun updateLanguageNamesUrl() {
+        val matchRegex = "^https?://.*".toRegex()
+        val replaceRegex = "^h?t?t?p?s?:?/+(.*)".toRegex()
+        if (!matchRegex.matches(languageNamesUrlProperty.value)) {
+            val cleaned = languageNamesUrlProperty.value.replace(replaceRegex, "$1")
+            languageNamesUrlProperty.set("https://$cleaned")
+        }
+
+        appPrefRepository
+            .setLanguageNamesUrl(languageNamesUrlProperty.value)
+            .subscribe()
+    }
+
+    fun updateLanguages() {
+        if (languageNamesImportingProperty.value) return
+        languageNamesImportingProperty.set(true)
+
+        importLanguages.update(languageNamesUrlProperty.value)
+            .observeOnFx()
+            .subscribe(
+                {
+                    languageNamesImportingProperty.set(false)
+                    updateLanguagesSuccessProperty.set(true)
+                    updateLanguagesResultProperty.set(messages["languagesImportSuccess"])
+                },
+                {
+                    languageNamesImportingProperty.set(false)
+                    updateLanguagesSuccessProperty.set(false)
+                    updateLanguagesResultProperty.set(messages["languagesImportError"])
+                }
+            )
+    }
+
+    fun resetLanguageNamesLocation() {
+        appPrefRepository
+            .resetLanguageNamesUrl()
+            .subscribe { url ->
+                languageNamesUrlProperty.set(url)
+            }
     }
 
     private fun bindSystemTheme() {

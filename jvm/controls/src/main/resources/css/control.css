@@ -284,6 +284,12 @@
     -fx-text-fill: -wa-regular-text;
     -fx-font-size: 20px;
 }
+.txt-input-success {
+    -fx-border-color: -wa-success-color;
+}
+.txt-input-error {
+    -fx-border-color: -wa-error-color;
+}
 .txt-input:hover {
     -fx-background-color: -wa-text-field-background-hover;
 }

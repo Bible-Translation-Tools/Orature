@@ -185,6 +185,32 @@ class LanguageDao(
             .execute()
     }
 
+    @Synchronized
+    fun updateAll(entities: List<LanguageEntity>, dsl: DSLContext = instanceDsl) {
+        val dbRecords = fetchAll(dsl)
+
+        val dbSlugs = dbRecords.map { it.slug }.toSet()
+        val entitiesToInsert = entities.filter { it.slug !in dbSlugs }
+
+        dsl.transaction { config ->
+            val transactionDsl = DSL.using(config)
+            entities.forEach { entity ->
+                // Update the language entity
+                transactionDsl
+                    .update(LANGUAGE_ENTITY)
+                    .set(LANGUAGE_ENTITY.NAME, entity.name)
+                    .set(LANGUAGE_ENTITY.ANGLICIZED, entity.anglicizedName)
+                    .set(LANGUAGE_ENTITY.DIRECTION, entity.direction)
+                    .set(LANGUAGE_ENTITY.GATEWAY, entity.gateway)
+                    .set(LANGUAGE_ENTITY.REGION, entity.region)
+                    .where(LANGUAGE_ENTITY.SLUG.eq(entity.slug))
+                    .execute()
+            }
+        }
+        // Insert new entities
+        insertAll(entitiesToInsert, dsl)
+    }
+
     fun delete(entity: LanguageEntity, dsl: DSLContext = instanceDsl) {
         dsl
             .deleteFrom(LANGUAGE_ENTITY)

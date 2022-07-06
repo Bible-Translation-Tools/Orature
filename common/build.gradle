@@ -22,4 +22,9 @@ dependencies {
     // to Jackson 2.9.8+.
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVer"
     implementation project(':common:audio')
+
+    // Retrofit
+    implementation "com.squareup.retrofit2:retrofit:$retrofitVer"
+    implementation "com.squareup.retrofit2:converter-jackson:$retrofitJacksonVer"
+    implementation "com.squareup.retrofit2:adapter-rxjava2:$retrofitRxJava2Ver"
 }

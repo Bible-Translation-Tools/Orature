@@ -22,6 +22,7 @@ import javafx.animation.AnimationTimer
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
 import org.wycliffeassociates.otter.common.recorder.RecordingTimer
 import org.wycliffeassociates.otter.common.recorder.WavFileWriter
@@ -48,6 +49,8 @@ class RecorderViewModel : ViewModel() {
     lateinit var tempTake: File
     lateinit var wavAudio: AudioFile
     lateinit var writer: WavFileWriter
+
+    private val logger = LoggerFactory.getLogger(this.javaClass)
 
     val recorder = (scope.workspace.params["audioConnectionFactory"] as AudioConnectionFactory).getRecorder()
 
@@ -127,6 +130,7 @@ class RecorderViewModel : ViewModel() {
         writer.writer.dispose()
         wavAudio.file.copyTo(targetFile, true)
 
+        logger.info("Closing Recorder...")
         runLater {
             (scope as ParameterizedScope).navigateBack()
         }

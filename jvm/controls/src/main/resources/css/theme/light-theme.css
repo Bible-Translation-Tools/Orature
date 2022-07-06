@@ -151,6 +151,10 @@
     /* dialog */
     -wa-dialog-overlay: -wa-black-60;
     -wa-dialog-background: -wa-background;
+
+    /* status */
+    -wa-success-color: #82A93F;
+    -wa-error-color: #B85659;
 }
 
 .scroll-bar {

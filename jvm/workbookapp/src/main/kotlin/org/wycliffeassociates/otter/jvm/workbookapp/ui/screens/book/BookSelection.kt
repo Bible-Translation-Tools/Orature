@@ -20,11 +20,14 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.book
 
 import javafx.application.Platform
 import javafx.geometry.Pos
+import javafx.scene.control.Tab
+import javafx.scene.control.TabPane
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.controls.bar.FilteredSearchBar
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
@@ -87,6 +90,15 @@ class BookSelection : View() {
                     }
                 }
             }
+            hbox {
+                addClass("book-wizard__resource-tab-group")
+                tabpane {
+                    addClass("wa-tab-pane")
+                    hgrow = Priority.ALWAYS
+                    tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
+                    buildResourceTabs(this)
+                }
+            }
             add(
                 FilteredSearchBar().apply {
                     leftIconProperty.set(FontIcon(MaterialDesign.MDI_BOOK))
@@ -135,6 +147,21 @@ class BookSelection : View() {
         }
     }
 
+    private fun buildResourceTabs(tabPane: TabPane) {
+        viewModel.sourceCollections.onChange {
+            val tabs = it.list.map { resource ->
+                Tab().apply {
+                    text = resource.slug
+
+                    whenSelected {
+                        viewModel.selectedSourceProperty.set(resource)
+                    }
+                }
+            }
+            tabPane.tabs.setAll(tabs)
+        }
+    }
+
     init {
         tryImportStylesheet(resources["/css/book-wizard.css"])
         tryImportStylesheet(resources["/css/filtered-search-bar.css"])
@@ -173,8 +200,9 @@ class BookSelection : View() {
     private fun getAvailableBooks(): List<BookCardData> {
         return viewModel.filteredBooks.filter {
             viewModel.existingBooks
-                .map { book -> book.target.slug }
-                .contains(it.collection.slug).not()
+                .any { existing ->
+                    matchedExistingBook(it, existing)
+                }.not()
         }
     }
 
@@ -184,4 +212,10 @@ class BookSelection : View() {
         viewModel.loadExistingProjects()
         viewModel.loadResources()
     }
+}
+
+fun matchedExistingBook(book: BookCardData, existingBook: Workbook): Boolean {
+    return existingBook.target.slug == book.collection.slug &&
+            (existingBook.sourceMetadataSlug ==
+                    book.collection.resourceContainer?.identifier)
 }

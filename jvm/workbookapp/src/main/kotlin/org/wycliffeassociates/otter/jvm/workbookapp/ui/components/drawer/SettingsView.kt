@@ -18,8 +18,11 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
 
+import com.jfoenix.controls.JFXProgressBar
 import javafx.application.Platform
+import javafx.collections.ObservableList
 import javafx.scene.control.Button
+import javafx.scene.control.ProgressBar
 import javafx.scene.control.ToggleGroup
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.Priority
@@ -28,8 +31,8 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.button.SelectButton
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
-import org.wycliffeassociates.otter.jvm.utils.overrideDefaultKeyEventHandler
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.utils.overrideDefaultKeyEventHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ComboboxItem
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.DeviceComboboxCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.LanguageComboboxCell
@@ -46,6 +49,8 @@ class SettingsView : View() {
 
     private lateinit var closeButton: Button
 
+    lateinit var progressBar: ProgressBar
+
     override val root = vbox {
         addClass("app-drawer__content")
 
@@ -56,7 +61,6 @@ class SettingsView : View() {
 
             vbox {
                 isFitToWidth = true
-                isFitToHeight = true
 
                 addClass("app-drawer-container")
 
@@ -102,7 +106,7 @@ class SettingsView : View() {
                         }
                     }
 
-                    label(messages["languageSettings"]).apply {
+                    label(messages["language"]).apply {
                         addClass("app-drawer__subtitle--small")
                     }
 
@@ -186,6 +190,102 @@ class SettingsView : View() {
                         buttonCell = DeviceComboboxCell(FontIcon(MaterialDesign.MDI_MICROPHONE))
                         overrideDefaultKeyEventHandler {
                             viewModel.updateInputDevice(it)
+                        }
+                    }
+                }
+
+                label(messages["languageSettings"]).apply {
+                    addClass("app-drawer__subtitle")
+                }
+
+                vbox {
+                    addClass("app-drawer__section")
+
+                    label(messages["useInternetWarning"]).apply {
+                        fitToParentWidth()
+                        addClass("app-drawer__text")
+                    }
+
+                    vbox {
+                        spacing = 10.0
+                        label(messages["location"]).apply {
+                            addClass("app-drawer__subtitle--small")
+                        }
+                        textfield(viewModel.languageNamesUrlProperty) {
+                            addClass("txt-input")
+                            focusedProperty().onChange {
+                                if (!it) viewModel.updateLanguageNamesUrl()
+                            }
+                            disableProperty().bind(viewModel.languageNamesImportingProperty)
+
+                            viewModel.updateLanguagesSuccessProperty.onChangeAndDoNow { result ->
+                                updateLanguageStatusStyle(
+                                    styleClass,
+                                    "txt-input-success",
+                                    "txt-input-error",
+                                    result
+                                )
+                            }
+                        }
+                        label {
+                            addClass("app-drawer__text")
+                            textProperty().bind(viewModel.updateLanguagesResultProperty)
+                            viewModel.updateLanguagesSuccessProperty.onChangeAndDoNow { result ->
+                                updateLanguageStatusStyle(
+                                    styleClass,
+                                    "app-drawer-success",
+                                    "app-drawer-error",
+                                    result)
+                            }
+                        }
+                        hbox {
+                            spacing = 10.0
+                            button(messages["checkForUpdates"]) {
+                                addClass("btn", "btn--primary")
+                                hgrow = Priority.ALWAYS
+                                maxWidth = Double.MAX_VALUE
+                                tooltip {
+                                    textProperty().bind(this@button.textProperty())
+                                }
+                                action {
+                                    resetUpdateLanguagesStatus()
+                                    viewModel.updateLanguages()
+                                }
+                                visibleProperty().bind(viewModel.languageNamesImportingProperty.not())
+                                managedProperty().bind(visibleProperty())
+                                whenVisible { requestFocus() }
+                            }
+                            stackpane {
+                                addClass("app-drawer-progress-bar")
+                                hgrow = Priority.ALWAYS
+                                add(JFXProgressBar().apply {
+                                    progressBar = this
+                                    hgrow = Priority.ALWAYS
+                                    addClass("app-drawer-progress")
+                                })
+                                label(messages["updatingWait"]) {
+                                    addClass("app-drawer-progress-text")
+                                    prefWidthProperty().bind(progressBar.widthProperty().minus(10.0))
+                                }
+                                visibleProperty().bind(viewModel.languageNamesImportingProperty)
+                                managedProperty().bind(visibleProperty())
+                            }
+                            button(messages["reset"]) {
+                                addClass("btn", "btn--secondary", "btn--borderless")
+                                tooltip {
+                                    textProperty().bind(this@button.textProperty())
+                                }
+                                action {
+                                    resetUpdateLanguagesStatus()
+                                    viewModel.resetLanguageNamesLocation()
+                                }
+                                visibleProperty().bind(
+                                    viewModel.defaultLanguageNamesUrlProperty.isNotEqualTo(
+                                        viewModel.languageNamesUrlProperty
+                                    ).and(viewModel.languageNamesImportingProperty.not())
+                                )
+                                managedProperty().bind(visibleProperty())
+                            }
                         }
                     }
                 }
@@ -311,6 +411,7 @@ class SettingsView : View() {
             if (it.action == DrawerEventAction.OPEN) {
                 viewModel.refreshDevices()
                 focusCloseButton()
+                resetUpdateLanguagesStatus()
             }
         }
     }
@@ -320,12 +421,40 @@ class SettingsView : View() {
         viewModel.bind()
         viewModel.refreshDevices()
         focusCloseButton()
+        resetUpdateLanguagesStatus()
     }
 
     private fun focusCloseButton() {
         runAsync {
             Thread.sleep(500)
             runLater(closeButton::requestFocus)
+        }
+    }
+
+    private fun resetUpdateLanguagesStatus() {
+        viewModel.updateLanguagesResultProperty.set("")
+        viewModel.updateLanguagesSuccessProperty.set(null)
+    }
+
+    private fun updateLanguageStatusStyle(
+        style: ObservableList<String>,
+        successClass: String,
+        errorClass: String,
+        result: Boolean?
+    ) {
+        when (result) {
+            true -> {
+                style.add(successClass)
+                style.remove(errorClass)
+            }
+            false -> {
+                style.add(errorClass)
+                style.remove(successClass)
+            }
+            else -> {
+                style.remove(errorClass)
+                style.remove(successClass)
+            }
         }
     }
 

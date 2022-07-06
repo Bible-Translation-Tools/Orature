@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.common.domain.plugins
 
 import io.reactivex.Maybe
 import io.reactivex.Single
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import java.io.File
@@ -33,12 +34,21 @@ class LaunchPlugin @Inject constructor(
         NO_PLUGIN
     }
 
+    private val logger = LoggerFactory.getLogger(this.javaClass)
+
     fun launchPlugin(type: PluginType, file: File, pluginParameters: PluginParameters): Single<Result> {
+        logger.info("Launching plugin: ${type.name}")
         return pluginRepository
             .getPlugin(type)
             .flatMap {
                 it.launch(file, pluginParameters).andThen(Maybe.just(Result.SUCCESS))
             }
             .toSingle(Result.NO_PLUGIN)
+            .map {
+                if (it == Result.NO_PLUGIN) {
+                    logger.error("Plugin $type is unavailable")
+                }
+                it
+            }
     }
 }

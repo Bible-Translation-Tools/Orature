@@ -145,7 +145,9 @@ class WorkbookPageViewModel : ViewModel() {
         val currentTarget = workbookDataStore.workbook.target
         return listOf(
             currentTarget.resourceMetadata,
-            *currentTarget.linkedResources.toTypedArray()
+            *currentTarget.linkedResources
+                .filter { it.type == ContainerType.Help }
+                .toTypedArray()
         )
     }
 
@@ -246,6 +248,8 @@ class WorkbookPageViewModel : ViewModel() {
         showDeleteProgressDialogProperty.set(true)
         val workbook = workbookDataStore.workbook
         val deleteProject = deleteProjectProvider.get()
+
+        logger.info("Deleting project: ${workbook.target.slug}")
 
         activeProjectTitleProperty.set(workbook.target.title)
         activeProjectCoverProperty.set(
