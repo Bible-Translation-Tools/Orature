@@ -53,7 +53,11 @@
                 <VBox fx:id="bookCardInfo" styleClass="book-card__info">
                     <children>
                         <Label fx:id="title" styleClass="book-card__title" />
-                        <Label fx:id="slug" />
+                        <HBox styleClass="book-card__subtitle-section">
+                            <Label fx:id="slug" />
+                            <FontIcon iconLiteral="mdi-checkbox-blank-circle" styleClass="book-card__dot"/>
+                            <Label fx:id="subtitle" styleClass="book-card__subtitle"/>
+                        </HBox>
                     </children>
                 </VBox>
                 <Button fx:id="addBookBtn">
