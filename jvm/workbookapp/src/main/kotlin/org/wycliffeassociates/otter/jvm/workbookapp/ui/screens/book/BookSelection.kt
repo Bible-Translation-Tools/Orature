@@ -94,7 +94,6 @@ class BookSelection : View() {
                 addClass("book-wizard__resource-tab-group")
                 add(
                     RadioButtonPane().apply {
-                        addClass("wa-tab-pane")
                         buildResourceSelections(this)
                     }
                 )

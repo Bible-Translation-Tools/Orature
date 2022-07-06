@@ -259,28 +259,41 @@
 }
 /* -------------- Toggle Group -------------- */
 .wa-toggle-button-pane {
-    -fx-border-color: -wa-border-neutral;
-    -fx-border-width: 1px;
-    -fx-border-radius: 8px;
+    -fx-background-color: -wa-foreground;
     -fx-background-radius: 8px;
 }
 
 .wa-toggle-button-pane .custom-toggle-btn {
     -fx-max-width: infinity;
     -fx-max-height: infinity;
-    -fx-border-width: 0;
-    -fx-border-color: transparent;
+    -fx-border-width: 1;
+    -fx-border-color: -wa-border-neutral;
     -fx-border-insets: 0;
+    -fx-border-radius: 0;
     -fx-background-insets: 0;
     -fx-background-color: transparent;
-    -fx-background-radius: 8px;
+    -fx-background-radius: 0;
     -fx-effect: none;
     -fx-text-fill: -wa-regular-text;
 }
 
 .wa-toggle-button-pane .custom-toggle-btn:selected {
-    -fx-background-color: -wa-primary;
+    -fx-background-color: -wa-primary-dark;
     -fx-text-fill: white;
+}
+
+.wa-toggle-button-pane .custom-toggle-btn:pressed {
+    -fx-background-color: -wa-foreground-pressed;
+}
+
+.toggle-button--first-child {
+    -fx-border-radius: 8 0 0 8 !important;
+    -fx-background-radius: 8 0 0 8 !important;
+}
+
+.toggle-button--last-child {
+    -fx-border-radius: 0 8 8 0 !important;
+    -fx-background-radius: 0 8 8 0 !important;
 }
 
 /* -------------- Text Link ----------------- */

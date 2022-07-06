@@ -12,6 +12,7 @@ import tornadofx.hgrow
 import tornadofx.objectBinding
 import tornadofx.observableListOf
 import tornadofx.radiobutton
+import tornadofx.toggleClass
 import tornadofx.togglebutton
 import tornadofx.vgrow
 import tornadofx.whenSelected
@@ -36,6 +37,9 @@ class RadioButtonPane : HBox() {
                 }
 
                 isSelected = data.isDefaultSelected
+
+                toggleClass("toggle-button--first-child", list.indexOf(data) == 0)
+                toggleClass("toggle-button--last-child", list.indexOf(data) == list.size - 1)
             }
         }
     }
