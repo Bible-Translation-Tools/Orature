@@ -23,6 +23,7 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import io.reactivex.Observable
+import io.reactivex.Single
 import javafx.beans.property.SimpleStringProperty
 import org.junit.After
 import org.junit.AfterClass
@@ -109,8 +110,8 @@ class WorkbookDataStoreTest {
         }
 
         private val sourceAudioAccessor = mock<SourceAudioAccessor> {
-            on { getChapter(any()) } doReturn SourceAudio(sourceTakeFile, 0, 10)
-            on { getChunk(any(), any()) } doReturn SourceAudio(sourceTakeFile, 0, 1)
+            on { getChapter(any(), any()) } doReturn SourceAudio(sourceTakeFile, 0, 10)
+            on { getChunk(any(), any(), any()) } doReturn SourceAudio(sourceTakeFile, 0, 1)
         }
 
         private val workbook = mock<Workbook> {
@@ -130,11 +131,14 @@ class WorkbookDataStoreTest {
                 end = 1,
                 contentType = ContentType.TEXT,
                 resources = listOf(),
-                label = "Chunk"
+                label = "Chunk",
+                draftNumber = 1
             )
         }
 
         private fun createChapter(chunk: Chunk): Chapter {
+            val chunks = ReplayRelay.create<Chunk>()
+            chunks.accept(chunk)
             return Chapter(
                 1,
                 "1",
@@ -142,7 +146,10 @@ class WorkbookDataStoreTest {
                 createAssociatedAudio(),
                 listOf(),
                 listOf(),
-                Observable.fromIterable(listOf(chunk))
+                chunks,
+                Single.just(1),
+                {},
+                {}
             )
         }
 
