@@ -23,8 +23,6 @@ class ObservableWaveformBuilder {
 
     private var reader: AudioFileReader? = null
 
-    private val images = mutableListOf<Image>()
-
     private var wavColor: Color = Color.BLACK
     private var background: Color = Color.TRANSPARENT
 
@@ -32,33 +30,34 @@ class ObservableWaveformBuilder {
     private var width: Int = Screen.getMainScreen().platformWidth
     private var height: Int = Screen.getMainScreen().platformHeight
 
-    @Volatile
-    private var started = false
+    private val started = AtomicBoolean(false)
+    private val cancelled = AtomicBoolean(false)
 
-    @Volatile
-    private var cancelled = false
-
+    private val images = mutableListOf<Image>()
     private val subscribers = mutableListOf<ObservableEmitter<Image>>()
 
     private fun start() {
-        if (!started) {
-            started = true
-            cancelled = false
-            reader?.let { reader ->
-                try {
-                    reader.open()
-                    drawPartialImages(reader, width, height, subscribers)
-                } finally {
-                    reader.release()
-                }
+        synchronized(started) {
+            // return if already started (the swap happens if starting the first time, which then returns true)
+            if (!started.compareAndSet(false, true)) {
+                return
+            }
+        }
+        cancelled.set(false)
+        reader?.let { reader ->
+            try {
+                reader.open()
+                drawPartialImages(reader, width, height, subscribers)
+            } finally {
+                reader.release()
             }
         }
     }
 
     fun cancel() {
-        synchronized(this) {
-            cancelled = true
-            started = false
+        synchronized(started) {
+            cancelled.set(true)
+            started.set(false)
             subscribers.forEach {
                 if (!it.isDisposed) it.onComplete()
             }
@@ -113,7 +112,7 @@ class ObservableWaveformBuilder {
         return Observable.create<Image?> { emitter ->
             emitter.setDisposable(
                 object : Disposable {
-                    var disposed = AtomicBoolean(false)
+                    val disposed = AtomicBoolean(false)
 
                     override fun dispose() {
                         disposed.set(true)
@@ -138,7 +137,7 @@ class ObservableWaveformBuilder {
         reader: AudioFileReader,
         width: Int,
         height: Int,
-        waveformStream: List<ObservableEmitter<Image>>
+        subscribers: List<ObservableEmitter<Image>>
     ) {
         val framesPerPixel = reader.totalFrames / width
         var img = WritableImage(partialImageWidth, height)
@@ -149,7 +148,7 @@ class ObservableWaveformBuilder {
         // render fixed-width images until the last one
         val lastImageWidth = width % partialImageWidth
         for (i in 0 until width - lastImageWidth) {
-            if (cancelled) break
+            if (cancelled.get()) break
             val range = computeWaveRange(reader, height, shortsArray, bytes)
 
             for (j in 0 until height) {
@@ -163,7 +162,7 @@ class ObservableWaveformBuilder {
             if (counter == partialImageWidth) {
                 synchronized(this@ObservableWaveformBuilder) {
                     images.add(img)
-                    waveformStream.forEach {
+                    subscribers.forEach {
                         if (!it.isDisposed) {
                             it.onNext(img)
                         }
@@ -175,7 +174,7 @@ class ObservableWaveformBuilder {
         }
 
         // render final image with exact width
-        if (lastImageWidth != 0 && !cancelled) {
+        if (lastImageWidth != 0 && !cancelled.get()) {
             img = WritableImage(
                 img.pixelReader,
                 0,
@@ -184,10 +183,10 @@ class ObservableWaveformBuilder {
                 height
             )
             renderImage(img, reader, lastImageWidth, height, framesPerPixel)
-            if (!cancelled) {
+            if (!cancelled.get()) {
                 synchronized(this@ObservableWaveformBuilder) {
                     images.add(img)
-                    waveformStream.forEach {
+                    subscribers.forEach {
                         if (!it.isDisposed) {
                             it.onNext(img)
                         }
