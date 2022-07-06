@@ -30,7 +30,6 @@ import org.kordamp.ikonli.material.Material
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
-import org.wycliffeassociates.otter.jvm.controls.waveform.ScrollingWaveform
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingWizardPage
@@ -78,12 +77,7 @@ class Chunk : Fragment() {
         tryImportStylesheet(resources.get("/css/chunk-marker.css"))
         tryImportStylesheet(resources.get("/css/chunk-page.css"))
 
-        vm.compositeDisposable.add(
-            vm.waveform.observeOnFx().subscribe {
-                (root.center as MarkerPlacementWaveform).addWaveformImage(it)
-            }
-        )
-
+        vm.subscribeOnWaveformImages = ::subscribeOnWaveformImages
         vm.seek(0)
         vm.pageProperty.set(ChunkingWizardPage.CHUNK)
         vm.titleProperty.set(messages["chunkingTitle"])
@@ -202,7 +196,11 @@ class Chunk : Fragment() {
         }
     }
 
-//    private fun buildControlFragment(): Node {
-//        return
-//    }
+    private fun subscribeOnWaveformImages() {
+        vm.compositeDisposable.add(
+            vm.waveform.observeOnFx().subscribe {
+                (root.center as MarkerPlacementWaveform).addWaveformImage(it)
+            }
+        )
+    }
 }

@@ -49,13 +49,10 @@ class Consume : Fragment() {
         logger.info("Consume docked")
         tryImportStylesheet(resources.get("/css/scrolling-waveform.css"))
         tryImportStylesheet(resources.get("/css/consume-page.css"))
-        vm.onDockConsume {
-            vm.compositeDisposable.add(
-                vm.waveform.observeOnFx().subscribe {
-                    (root.center as ScrollingWaveform).addWaveformImage(it)
-                }
-            )
-        }
+
+        vm.subscribeOnWaveformImages = ::subscribeOnWaveformImages
+        vm.onDockConsume()
+
         vm.pageProperty.set(ChunkingWizardPage.CONSUME)
         vm.titleProperty.set(messages["consumeTitle"])
         vm.stepProperty.set(MessageFormat.format(messages["consumeDescription"], vm.chapterTitle))
@@ -72,6 +69,14 @@ class Consume : Fragment() {
         super.onUndock()
         timer?.stop()
         vm.compositeDisposable.clear()
+    }
+
+    private fun subscribeOnWaveformImages() {
+        vm.compositeDisposable.add(
+            vm.waveform.observeOnFx().subscribe {
+                (root.center as ScrollingWaveform).addWaveformImage(it)
+            }
+        )
     }
 
     override val root = borderpane {

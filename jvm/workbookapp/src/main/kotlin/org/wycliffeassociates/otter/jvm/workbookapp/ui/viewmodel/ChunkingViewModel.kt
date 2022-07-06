@@ -153,6 +153,8 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
 
     lateinit var audio: AudioFile
 
+    var subscribeOnWaveformImages: () -> Unit = {}
+
     init {
         pageProperty.onChange {
             when (it) {
@@ -175,18 +177,19 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
         }
     }
 
-    fun onDockConsume(op: () -> Unit) {
+    fun onDockConsume() {
         sourceAudio?.file?.let {
             (app as IDependencyGraphProvider).dependencyGraph.inject(this)
             audio = loadAudio(it)
             createWaveformImages(audio)
             initializeAudioController()
-            op.invoke()
+            subscribeOnWaveformImages()
         }
     }
 
     fun onDockChunk() {
         loadMarkers(audio)
+        subscribeOnWaveformImages()
     }
 
     fun loadAudio(audioFile: File): AudioFile {
