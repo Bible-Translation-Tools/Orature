@@ -151,7 +151,7 @@ class BookSelection : View() {
         viewModel.sourceCollections.onChange {
             val data = it.list.mapIndexed { index, resource ->
                 val isFirst = index == 0
-                ToggleButtonData(resource.slug, isFirst) {
+                ToggleButtonData(resource.slug.uppercase(), isFirst) {
                     viewModel.selectedSourceProperty.set(resource)
                 }
             }
