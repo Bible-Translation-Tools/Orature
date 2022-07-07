@@ -18,7 +18,16 @@
  */
 package org.wycliffeassociates.otter.common
 
+import java.io.File
+import java.util.*
 import org.junit.Assert
+import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
+import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
+import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
+import org.wycliffeassociates.otter.common.audio.wav.CueChunk
+import org.wycliffeassociates.otter.common.audio.wav.WavFile
+import org.wycliffeassociates.otter.common.audio.wav.WavMetadata
+import org.wycliffeassociates.otter.common.audio.wav.WavOutputStream
 
 /**
  * Applies the given transformation to each element in the keyset of the map, and uses [doAssertEquals]
@@ -53,3 +62,24 @@ fun <T> doAssertEquals(expected: T, output: T): Boolean {
         false
     }
 }
+
+fun createTestWavFile(dir: File): File {
+    val testFile = dir.resolve("test-take-${Date().time}.wav")
+        .apply { createNewFile(); deleteOnExit() }
+
+    val wav = WavFile(
+        testFile,
+        DEFAULT_CHANNELS,
+        DEFAULT_SAMPLE_RATE,
+        DEFAULT_BITS_PER_SAMPLE,
+        WavMetadata(listOf(CueChunk()))
+    )
+    WavOutputStream(wav).use {
+        for (i in 0 until 4) {
+            it.write(i)
+        }
+    }
+    wav.update()
+    return testFile
+}
+
