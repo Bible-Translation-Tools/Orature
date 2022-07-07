@@ -123,6 +123,9 @@
     -wa-checkbox-button-background: -wa-foreground;
     -wa-checkbox-button-background-selected: -wa-primary-10;
 
+    /* toggle button */
+    -wa-toggle-selected: -wa-primary-dark;
+
     /* shadow effects */
     -wa-card-shadow-lower-right: dropshadow(gaussian, -wa-black-20, 10, 0, 3, 3); /* [blur], [color], [radius], [spread], [x], [y] */
     -wa-card-shadow-lower-right-dark: dropshadow(gaussian, -wa-black-30, 10, 0, 3, 3);

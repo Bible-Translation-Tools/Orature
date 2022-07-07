@@ -1,28 +1,23 @@
 package org.wycliffeassociates.otter.jvm.controls.toggle
 
-import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.ToggleButton
 import javafx.scene.control.ToggleGroup
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import tornadofx.addClass
 import tornadofx.bindChildren
-import tornadofx.booleanBinding
 import tornadofx.hgrow
-import tornadofx.objectBinding
 import tornadofx.observableListOf
-import tornadofx.radiobutton
 import tornadofx.toggleClass
-import tornadofx.togglebutton
 import tornadofx.vgrow
 import tornadofx.whenSelected
 
-class RadioButtonPane : HBox() {
+class ToggleButtonPane : HBox() {
     val list = observableListOf<ToggleButtonData>()
     val tg = ToggleGroup()
 
     init {
-        addClass("wa-toggle-button-pane")
+        addClass("wa-toggle-btn-pane")
         hgrow = Priority.ALWAYS
 
         bindChildren(list) { data ->
@@ -38,8 +33,8 @@ class RadioButtonPane : HBox() {
 
                 isSelected = data.isDefaultSelected
 
-                toggleClass("toggle-button--first-child", list.indexOf(data) == 0)
-                toggleClass("toggle-button--last-child", list.indexOf(data) == list.size - 1)
+                toggleClass("toggle-btn--first-child", list.indexOf(data) == 0)
+                toggleClass("toggle-btn--last-child", list.indexOf(data) == list.size - 1)
             }
         }
     }
