@@ -19,7 +19,7 @@
 package integrationtest.di
 
 import dagger.Component
-//import integrationtest.initialization.TestInitializeProjects
+import integrationtest.initialization.TestInitializeProjects
 import integrationtest.initialization.TestInitializeUlb
 import integrationtest.projects.TestProjectCreate
 import integrationtest.projects.TestProjectExport
@@ -47,7 +47,7 @@ import javax.inject.Singleton
 @Singleton
 interface TestPersistenceComponent : AppDependencyGraph {
     fun inject(test: TestInitializeUlb)
-    // fun inject(test: TestInitializeProjects)
+    fun inject(test: TestInitializeProjects)
     fun inject(test: TestProjectCreate)
     fun inject(test: TestRcImport)
     fun inject(test: TestProjectImport)
