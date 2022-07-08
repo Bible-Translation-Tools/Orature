@@ -125,6 +125,8 @@
 
     /* toggle button */
     -wa-toggle-selected: -wa-white-40;
+    -wa-toggle-background: -wa-foreground;
+    -wa-toggle-border: -wa-border-neutral;
 
     /* shadow effects */
     -wa-card-shadow-lower-right: -wa-level0;

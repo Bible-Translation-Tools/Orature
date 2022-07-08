@@ -259,7 +259,7 @@
 }
 /* -------------- Toggle Group -------------- */
 .wa-toggle-btn-group {
-    -fx-background-color: -wa-foreground;
+    -fx-background-color: -wa-toggle-background;
     -fx-background-radius: 8px;
 }
 
@@ -267,11 +267,11 @@
     -fx-max-width: infinity;
     -fx-max-height: infinity;
     -fx-border-width: 1 0 1 1;
-    -fx-border-color: -wa-secondary-btn-border;
+    -fx-border-color: -wa-toggle-border;
     -fx-border-insets: 0;
     -fx-border-radius: 0;
     -fx-background-insets: 0;
-    -fx-background-color: transparent;
+    -fx-background-color: -wa-transparent;
     -fx-background-radius: 0;
     -fx-effect: none;
     -fx-text-fill: -wa-regular-text;
