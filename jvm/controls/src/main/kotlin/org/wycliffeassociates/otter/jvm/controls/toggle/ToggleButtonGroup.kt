@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.controls.toggle
 
+import javafx.collections.ObservableList
 import javafx.scene.control.ToggleButton
 import javafx.scene.control.ToggleGroup
 import javafx.scene.layout.HBox
@@ -13,8 +14,9 @@ import tornadofx.togglePseudoClass
 import tornadofx.vgrow
 import tornadofx.whenSelected
 
-class ToggleButtonGroup : HBox() {
-    val items = observableListOf<ToggleButtonData>()
+class ToggleButtonGroup(
+    val items: ObservableList<ToggleButtonData> = observableListOf()
+) : HBox() {
     val tg = ToggleGroup()
 
     init {

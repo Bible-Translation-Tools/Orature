@@ -31,7 +31,6 @@ import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.toggle.ToggleButtonGroup
-import org.wycliffeassociates.otter.jvm.controls.toggle.ToggleButtonData
 import org.wycliffeassociates.otter.jvm.utils.overrideDefaultKeyEventHandler
 import org.wycliffeassociates.otter.jvm.utils.virtualFlow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
@@ -91,9 +90,8 @@ class BookSelection : View() {
                 }
             }
             add(
-                ToggleButtonGroup().apply {
+                ToggleButtonGroup(viewModel.resourceToggleGroup).apply {
                     addClass("book-wizard__resource-tab-group")
-                    buildResourceSelections(this)
                 }
             )
             add(
@@ -141,18 +139,6 @@ class BookSelection : View() {
                     }
                 }
             }
-        }
-    }
-
-    private fun buildResourceSelections(toggleGroup: ToggleButtonGroup) {
-        viewModel.sourceCollections.onChange {
-            val data = it.list.mapIndexed { index, resource ->
-                val isFirst = index == 0
-                ToggleButtonData(resource.slug.uppercase(), isFirst) {
-                    viewModel.selectedSourceProperty.set(resource)
-                }
-            }
-            toggleGroup.items.setAll(data)
         }
     }
 
@@ -205,6 +191,7 @@ class BookSelection : View() {
         viewModel.reset()
         viewModel.loadExistingProjects()
         viewModel.loadResources()
+        viewModel.loadResourceSelections()
     }
 }
 
