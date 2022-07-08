@@ -12,15 +12,15 @@ import tornadofx.toggleClass
 import tornadofx.vgrow
 import tornadofx.whenSelected
 
-class ToggleButtonPane : HBox() {
-    val list = observableListOf<ToggleButtonData>()
+class ToggleButtonGroup : HBox() {
+    val items = observableListOf<ToggleButtonData>()
     val tg = ToggleGroup()
 
     init {
-        addClass("wa-toggle-btn-pane")
+        addClass("wa-toggle-btn-group")
         hgrow = Priority.ALWAYS
 
-        bindChildren(list) { data ->
+        bindChildren(items) { data ->
             RadioToggleButton(data.title).apply {
                 toggleGroup = tg
 
@@ -33,8 +33,9 @@ class ToggleButtonPane : HBox() {
 
                 isSelected = data.isDefaultSelected
 
-                toggleClass("toggle-btn--first-child", list.indexOf(data) == 0)
-                toggleClass("toggle-btn--last-child", list.indexOf(data) == list.size - 1)
+                // styling for first & last element
+                toggleClass("toggle-btn--first-child", items.indexOf(data) == 0)
+                toggleClass("toggle-btn--last-child", items.indexOf(data) == items.size - 1)
             }
         }
     }

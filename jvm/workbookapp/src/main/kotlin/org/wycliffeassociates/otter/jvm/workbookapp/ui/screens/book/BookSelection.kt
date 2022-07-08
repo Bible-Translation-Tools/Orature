@@ -30,7 +30,7 @@ import org.wycliffeassociates.otter.jvm.controls.bar.FilteredSearchBar
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
-import org.wycliffeassociates.otter.jvm.controls.toggle.ToggleButtonPane
+import org.wycliffeassociates.otter.jvm.controls.toggle.ToggleButtonGroup
 import org.wycliffeassociates.otter.jvm.controls.toggle.ToggleButtonData
 import org.wycliffeassociates.otter.jvm.utils.overrideDefaultKeyEventHandler
 import org.wycliffeassociates.otter.jvm.utils.virtualFlow
@@ -93,7 +93,7 @@ class BookSelection : View() {
             hbox {
                 addClass("book-wizard__resource-tab-group")
                 add(
-                    ToggleButtonPane().apply {
+                    ToggleButtonGroup().apply {
                         buildResourceSelections(this)
                     }
                 )
@@ -146,7 +146,7 @@ class BookSelection : View() {
         }
     }
 
-    private fun buildResourceSelections(togglePane: ToggleButtonPane) {
+    private fun buildResourceSelections(toggleGroup: ToggleButtonGroup) {
         viewModel.sourceCollections.onChange {
             val data = it.list.mapIndexed { index, resource ->
                 val isFirst = index == 0
@@ -154,7 +154,7 @@ class BookSelection : View() {
                     viewModel.selectedSourceProperty.set(resource)
                 }
             }
-            togglePane.list.setAll(data)
+            toggleGroup.items.setAll(data)
         }
     }
 
