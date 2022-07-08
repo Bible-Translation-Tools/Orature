@@ -24,6 +24,7 @@ import javafx.scene.Cursor
 import javafx.scene.Node
 import javafx.scene.control.SkinBase
 import javafx.scene.control.Slider
+import javafx.scene.effect.ColorAdjust
 import javafx.scene.image.ImageView
 import javafx.scene.layout.Region
 import javafx.scene.paint.Color
@@ -31,6 +32,7 @@ import javafx.scene.shape.Line
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
+import org.wycliffeassociates.otter.jvm.controls.waveform.adjustWaveformImageByTheme
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import kotlin.math.max
@@ -51,6 +53,7 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
     }
     private val markersHolder = Region()
     private val root = Region()
+    private val waveformColorEffect = ColorAdjust()
 
     private var imageViewDisposable: ImageView? = null
 
@@ -62,6 +65,7 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
                 val imageView = ImageView(it).apply {
                     fitHeightProperty().bind(root.heightProperty())
                     fitWidthProperty().bind(root.widthProperty())
+                    effect = waveformColorEffect
                 }
                 imageViewDisposable = imageView
                 root.getChildList()?.clear()
@@ -82,6 +86,11 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
             }
         }
         control.waveformImageProperty.addListener(control.waveformMinimapListener)
+        control.colorThemeProperty.onChangeAndDoNow {
+            it?.let { theme ->
+                adjustWaveformImageByTheme(theme, waveformColorEffect)
+            }
+        }
 
         children.add(root)
 

@@ -48,6 +48,7 @@ open class ScrollingWaveformSkin(control: ScrollingWaveform) : SkinBase<Scrollin
 
             add(MarkerViewBackground())
             waveformFrame = WaveformFrame().apply {
+                themeProperty.bind(skinnable.themeProperty)
                 framePositionProperty.bind(skinnable.positionProperty)
                 onWaveformClicked(skinnable.onWaveformClicked)
                 onWaveformDragReleased(skinnable.onWaveformDragReleased)
