@@ -90,14 +90,12 @@ class BookSelection : View() {
                     }
                 }
             }
-            hbox {
-                addClass("book-wizard__resource-tab-group")
-                add(
-                    ToggleButtonGroup().apply {
-                        buildResourceSelections(this)
-                    }
-                )
-            }
+            add(
+                ToggleButtonGroup().apply {
+                    addClass("book-wizard__resource-tab-group")
+                    buildResourceSelections(this)
+                }
+            )
             add(
                 FilteredSearchBar().apply {
                     leftIconProperty.set(FontIcon(MaterialDesign.MDI_BOOK))
