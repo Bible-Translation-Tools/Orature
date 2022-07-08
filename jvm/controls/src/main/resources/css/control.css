@@ -266,8 +266,8 @@
 .wa-toggle-btn-group .custom-toggle-btn {
     -fx-max-width: infinity;
     -fx-max-height: infinity;
-    -fx-border-width: 1;
-    -fx-border-color: -wa-border-light;
+    -fx-border-width: 1 0 1 1;
+    -fx-border-color: -wa-secondary-btn-border;
     -fx-border-insets: 0;
     -fx-border-radius: 0;
     -fx-background-insets: 0;
@@ -287,17 +287,18 @@
 }
 
 .wa-toggle-btn-group .custom-toggle-btn:focused {
-    -fx-border-width: 4px;
+    -fx-border-width: 4px !important;
     -fx-border-color: -wa-button-border;
     -fx-border-insets: -2;
 }
 
-.toggle-btn--first-child {
+.wa-toggle-btn-group .custom-toggle-btn.first-child {
     -fx-border-radius: 8 0 0 8 !important;
     -fx-background-radius: 8 0 0 8 !important;
 }
 
-.toggle-btn--last-child {
+.wa-toggle-btn-group .custom-toggle-btn.last-child {
+    -fx-border-width: 1;
     -fx-border-radius: 0 8 8 0 !important;
     -fx-background-radius: 0 8 8 0 !important;
 }

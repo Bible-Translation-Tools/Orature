@@ -9,6 +9,7 @@ import tornadofx.bindChildren
 import tornadofx.hgrow
 import tornadofx.observableListOf
 import tornadofx.toggleClass
+import tornadofx.togglePseudoClass
 import tornadofx.vgrow
 import tornadofx.whenSelected
 
@@ -34,8 +35,8 @@ class ToggleButtonGroup : HBox() {
                 isSelected = data.isDefaultSelected
 
                 // styling for first & last element
-                toggleClass("toggle-btn--first-child", items.indexOf(data) == 0)
-                toggleClass("toggle-btn--last-child", items.indexOf(data) == items.size - 1)
+                toggleClass("first-child", items.indexOf(data) == 0)
+                toggleClass("last-child", items.indexOf(data) == items.size - 1)
             }
         }
     }
