@@ -24,6 +24,7 @@ dependencies {
 
     // JFoenix
     implementation "com.jfoenix:jfoenix:$jfoenixVer"
+    implementation "com.github.bkenn:kfoenix:$kfoenixVer"
 
     // Testing
     testImplementation "junit:junit:$junitVer"
