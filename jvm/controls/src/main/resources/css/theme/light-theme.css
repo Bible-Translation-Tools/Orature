@@ -130,6 +130,7 @@
     /* audio player */
     -wa-slider-track-color: -wa-black-05;
     -wa-slider-border-color: -wa-black-20;
+    -wa-minimap-slider-background: #00000008;
     -wa-recorder-controls-background: #282CBD;
 
     -wa-waveform-background: rgb(247, 250, 255);

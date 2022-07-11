@@ -42,8 +42,6 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
 
     private val thumb = Rectangle(1.0, 1.0).apply {
         addClass("wa-audio-slider-thumb")
-        stroke = Color.BLACK
-        strokeWidth = 1.0
         arcHeight = 10.0
         arcWidth = 10.0
     }

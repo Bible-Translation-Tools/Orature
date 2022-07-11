@@ -130,6 +130,7 @@
     /* audio player */
     -wa-slider-track-color: gray;
     -wa-slider-border-color: -wa-white-30;
+    -wa-minimap-slider-background: rgba(90, 149, 187, 0.22);
     -wa-recorder-controls-background: #0c0033;
 
     -wa-waveform-background: #777777;
@@ -141,7 +142,7 @@
     -wa-playback-line: rgb(255, 177, 0);
 
     -wa-marker-overlay-primary: #0f32a542;
-    -wa-marker-overlay-secondary: #224e7150;
+    -wa-marker-overlay-secondary: #3a9b6a30;
     -wa-marker-track-background: #4f5964;
 
     /* dialog */
