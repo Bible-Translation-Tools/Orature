@@ -293,14 +293,19 @@
 }
 
 .wa-toggle-btn-group .custom-toggle-btn.first-child {
-    -fx-border-radius: 8 0 0 8 !important;
-    -fx-background-radius: 8 0 0 8 !important;
+    -fx-border-radius: 8 0 0 8;
+    -fx-background-radius: 8 0 0 8;
 }
 
 .wa-toggle-btn-group .custom-toggle-btn.last-child {
     -fx-border-width: 1;
-    -fx-border-radius: 0 8 8 0 !important;
-    -fx-background-radius: 0 8 8 0 !important;
+    -fx-border-radius: 0 8 8 0;
+    -fx-background-radius: 0 8 8 0;
+}
+
+.wa-toggle-btn-group .custom-toggle-btn.first-child.last-child {
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
 }
 
 /* -------------- Text Link ----------------- */
