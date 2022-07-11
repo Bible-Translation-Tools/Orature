@@ -45,7 +45,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChapterCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ContributorInfo
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ContributorCellData
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.CardGridStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookPageViewModel
@@ -378,7 +377,7 @@ class WorkbookPage : View() {
                 progressindicator {
                     visibleProperty().bind(viewModel.loadingProperty)
                     managedProperty().bind(visibleProperty())
-                    addClass(CardGridStyles.contentLoadingProgress)
+                    addClass("workbook-page__content-loading-progress")
                 }
 
                 hbox {

@@ -50,3 +50,7 @@
 .workbook-page__tab-content .contributor__container {
     -fx-min-width: 400px;
 }
+
+.workbook-page__content-loading-progress {
+    -fx-progress-color: -wa-selected-tab-line;
+}
