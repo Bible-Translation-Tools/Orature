@@ -30,7 +30,7 @@ import org.wycliffeassociates.otter.jvm.controls.bar.FilteredSearchBar
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
-import org.wycliffeassociates.otter.jvm.controls.toggle.ToggleButtonGroup
+import org.wycliffeassociates.otter.jvm.controls.toggle.togglebuttongroup
 import org.wycliffeassociates.otter.jvm.utils.overrideDefaultKeyEventHandler
 import org.wycliffeassociates.otter.jvm.utils.virtualFlow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
@@ -89,11 +89,9 @@ class BookSelection : View() {
                     }
                 }
             }
-            add(
-                ToggleButtonGroup(viewModel.resourceToggleGroup).apply {
-                    addClass("book-wizard__resource-tab-group")
-                }
-            )
+            togglebuttongroup(viewModel.resourceToggleGroup) {
+                addClass("book-wizard__resource-tab-group")
+            }
             add(
                 FilteredSearchBar().apply {
                     leftIconProperty.set(FontIcon(MaterialDesign.MDI_BOOK))

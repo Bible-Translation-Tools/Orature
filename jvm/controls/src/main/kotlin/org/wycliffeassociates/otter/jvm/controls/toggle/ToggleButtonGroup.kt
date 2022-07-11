@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.controls.toggle
 
 import javafx.collections.ObservableList
+import javafx.event.EventTarget
 import javafx.scene.control.ToggleButton
 import javafx.scene.control.ToggleGroup
 import javafx.scene.layout.HBox
@@ -9,8 +10,8 @@ import tornadofx.addClass
 import tornadofx.bindChildren
 import tornadofx.hgrow
 import tornadofx.observableListOf
+import tornadofx.opcr
 import tornadofx.toggleClass
-import tornadofx.togglePseudoClass
 import tornadofx.vgrow
 import tornadofx.whenSelected
 
@@ -56,4 +57,14 @@ private class RadioToggleButton(text: String = "") : ToggleButton(text) {
             super.fire()
         }
     }
+}
+
+fun EventTarget.togglebuttongroup(values: ObservableList<ToggleButtonData>? = null, spacing: Double? = null, op: HBox.() -> Unit): HBox {
+    val toggleBtnGroup = if (values != null) {
+        ToggleButtonGroup(values)
+    } else {
+        ToggleButtonGroup()
+    }
+    if (spacing != null) toggleBtnGroup.spacing = spacing
+    return opcr(this, toggleBtnGroup, op)
 }
