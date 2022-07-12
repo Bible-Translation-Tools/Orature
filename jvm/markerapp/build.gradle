@@ -26,6 +26,7 @@ dependencies {
 
     // JFoenix
     implementation "com.jfoenix:jfoenix:$jfoenixVer"
+    implementation "com.github.bkenn:kfoenix:$kfoenixVer"
 
     // Ikonli
     implementation "org.kordamp.ikonli:ikonli-javafx:$ikonliVer"
