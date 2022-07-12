@@ -161,7 +161,7 @@ private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<O
             text = null,
             format = FORMAT,
             type = ContentType.META,
-            draftNumber = 0
+            draftNumber = 1
         )
         chapterTree.addChild(OtterTreeNode(chapChunk))
 
@@ -177,7 +177,7 @@ private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<O
                 text = verse.getText(),
                 format = FORMAT,
                 type = ContentType.TEXT,
-                draftNumber = 0
+                draftNumber = 1
             )
             chapterText.add("${verse.startingVerse}. ${verse.getText()}\n")
             chapterTree.addChild(OtterTreeNode(content))

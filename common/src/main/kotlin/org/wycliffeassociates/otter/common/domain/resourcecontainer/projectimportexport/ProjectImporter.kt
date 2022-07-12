@@ -229,7 +229,6 @@ class ProjectImporter @Inject constructor(
     }
 
     private fun resetChaptersWithoutTakes(derivedProject: Collection) {
-        println(derivedProject)
         val chaptersNotStarted = collectionRepository.collectionsWithoutTakes(derivedProject).blockingGet()
         chaptersNotStarted.forEach { contentRepository.deleteForCollection(it).blockingGet() }
     }
