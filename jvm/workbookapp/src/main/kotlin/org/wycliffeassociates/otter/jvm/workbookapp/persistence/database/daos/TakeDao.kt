@@ -175,17 +175,17 @@ class TakeDao(
         includeDeleted: Boolean = false,
         dsl: DSLContext = instanceDsl
     ): List<TakeEntity> {
-        val contentid = CONTENT_ENTITY.ID.`as`("contentid")
         val baseQuery = dsl
             .select()
             .from(TAKE_ENTITY)
-            .leftJoin(
-                select(contentid)
-                    .from(CONTENT_ENTITY)
-                    .where(CONTENT_ENTITY.COLLECTION_FK.eq(id))
-            ).on(contentid.eq(TAKE_ENTITY.CONTENT_FK))
+            .where(
+                TAKE_ENTITY.CONTENT_FK.`in`(
+                    select(contentid)
+                        .from(CONTENT_ENTITY)
+                        .where(CONTENT_ENTITY.COLLECTION_FK.eq(id))
+                )
 
-        val query = when {
+                val query = when {
             includeDeleted -> baseQuery
             else -> baseQuery.and(TAKE_ENTITY.DELETED_TS.isNull)
         }
