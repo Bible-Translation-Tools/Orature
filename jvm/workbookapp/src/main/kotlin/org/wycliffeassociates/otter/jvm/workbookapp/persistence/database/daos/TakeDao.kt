@@ -180,12 +180,13 @@ class TakeDao(
             .from(TAKE_ENTITY)
             .where(
                 TAKE_ENTITY.CONTENT_FK.`in`(
-                    select(contentid)
+                    select(CONTENT_ENTITY.ID)
                         .from(CONTENT_ENTITY)
                         .where(CONTENT_ENTITY.COLLECTION_FK.eq(id))
                 )
-
-                val query = when {
+            )
+        
+        val query = when {
             includeDeleted -> baseQuery
             else -> baseQuery.and(TAKE_ENTITY.DELETED_TS.isNull)
         }
