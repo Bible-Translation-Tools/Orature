@@ -125,12 +125,16 @@ class TestProjectImport {
 
     @Test
     fun ulb() {
+        // Note that the total number of content entries is 31507
+        // but, as verses are not derived by default, only in the presense of takes,
+        // chapters 2-22 of Revelation are unchunked. Chapter 1 contains recordings, and thus is
+        // derived verse by verse.
         db.import("en-x-demo1-ulb-rev.zip")
             .assertRowCounts(
                 RowCount(
                     contents = mapOf(
                         META to 1211,
-                        TEXT to 31509
+                        TEXT to 31124
                     ),
                     collections = 1279,
                     links = 0
@@ -154,7 +158,7 @@ class TestProjectImport {
                 RowCount(
                     contents = mapOf(
                         META to 1211,
-                        TEXT to 31509
+                        TEXT to 31124
                     ),
                     collections = 1279,
                     links = 0
@@ -178,7 +182,7 @@ class TestProjectImport {
                 RowCount(
                     contents = mapOf(
                         META to 1211,
-                        TEXT to 31509,
+                        TEXT to 31124,
                         TITLE to 82025,
                         BODY to 79240
                     ),
