@@ -147,10 +147,12 @@ class MarkerView : PluginEntrypoint() {
         }
 
     private fun initThemeProperty() {
-        if (primaryStage.scene.root.styleClass.contains(ColorTheme.DARK.styleClass)) {
-            viewModel.themeColorProperty.set(ColorTheme.DARK)
-        } else {
-            viewModel.themeColorProperty.set(ColorTheme.LIGHT)
+        primaryStage.scene.root.styleClass.onChangeAndDoNow {
+            if (it.contains(ColorTheme.DARK.styleClass)) {
+                viewModel.themeColorProperty.set(ColorTheme.DARK)
+            } else {
+                viewModel.themeColorProperty.set(ColorTheme.LIGHT)
+            }
         }
     }
 }
