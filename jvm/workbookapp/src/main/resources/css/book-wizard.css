@@ -51,10 +51,6 @@
     -fx-font-size: 20px;
 }
 
-.book-wizard__resource-tab-group {
-    -fx-min-height: 60px;
-}
-
 .book-wizard__resource-tab-group,
 .book-wizard__root .filtered-search-bar {
     -fx-max-width: 800px;

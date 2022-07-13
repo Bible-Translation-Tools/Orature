@@ -257,6 +257,57 @@
     -fx-border-width: 0px;
     -fx-background-color: transparent;
 }
+/* -------------- Toggle Group -------------- */
+.wa-toggle-btn-group {
+    -fx-background-color: -wa-toggle-background;
+    -fx-background-radius: 8px;
+}
+
+.wa-toggle-btn-group .custom-toggle-btn {
+    -fx-max-width: infinity;
+    -fx-max-height: infinity;
+    -fx-border-width: 1 0 1 1;
+    -fx-border-color: -wa-toggle-border;
+    -fx-border-insets: 0;
+    -fx-border-radius: 0;
+    -fx-background-insets: 0;
+    -fx-background-color: -wa-transparent;
+    -fx-background-radius: 0;
+    -fx-effect: none;
+    -fx-text-fill: -wa-regular-text;
+}
+
+.wa-toggle-btn-group .custom-toggle-btn:selected {
+    -fx-background-color: -wa-toggle-selected;
+    -fx-text-fill: white;
+}
+
+.wa-toggle-btn-group .custom-toggle-btn:pressed {
+    -fx-background-color: -wa-foreground-pressed;
+}
+
+.wa-toggle-btn-group .custom-toggle-btn:focused {
+    -fx-border-width: 4px !important;
+    -fx-border-color: -wa-button-border;
+    -fx-border-insets: -2;
+}
+
+.wa-toggle-btn-group .custom-toggle-btn.first-child {
+    -fx-border-radius: 8 0 0 8;
+    -fx-background-radius: 8 0 0 8;
+}
+
+.wa-toggle-btn-group .custom-toggle-btn.last-child {
+    -fx-border-width: 1;
+    -fx-border-radius: 0 8 8 0;
+    -fx-background-radius: 0 8 8 0;
+}
+
+.wa-toggle-btn-group .custom-toggle-btn.first-child.last-child {
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
 /* -------------- Text Link ----------------- */
 .wa-text--hyperlink {
     -fx-padding: 5 5 10 5;

@@ -123,6 +123,11 @@
     -wa-checkbox-button-background: #4d4f66;
     -wa-checkbox-button-background-selected: #bdd8ff;
 
+    /* toggle button */
+    -wa-toggle-selected: -wa-white-40;
+    -wa-toggle-background: -wa-foreground;
+    -wa-toggle-border: -wa-border-neutral;
+
     /* shadow effects */
     -wa-card-shadow-lower-right: -wa-level0;
     -wa-card-shadow-lower-right-dark: -wa-level0;
