@@ -26,9 +26,11 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.*
 import javafx.beans.value.ChangeListener
+import javafx.event.EventHandler
 import javafx.scene.control.Slider
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
+import javafx.stage.WindowEvent
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.ColorTheme
@@ -65,6 +67,7 @@ class VerseMarkerViewModel : ViewModel() {
 
     lateinit var waveformMinimapImageListener: ChangeListener<Image>
     lateinit var markerStateListener: ChangeListener<VerseMarkerModel>
+    lateinit var defaultOnCloseRequest: EventHandler<WindowEvent>
 
     val logger = LoggerFactory.getLogger(VerseMarkerViewModel::class.java)
 
@@ -166,6 +169,17 @@ class VerseMarkerViewModel : ViewModel() {
             .subscribe {
                 callback()
             }
+    }
+
+    fun saveAndQuit() {
+        saveChanges {
+            (scope as ParameterizedScope).let {
+                runLater {
+                    it.navigateBack()
+                    System.gc()
+                }
+            }
+        }
     }
 
     fun placeMarker() {

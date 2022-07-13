@@ -23,16 +23,13 @@ import com.sun.javafx.util.Utils
 import javafx.animation.AnimationTimer
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
-import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadcrumbBar
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerTrackControl
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
-import org.wycliffeassociates.otter.jvm.utils.findChildren
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*
 
@@ -49,7 +46,6 @@ class MarkerView : PluginEntrypoint() {
 
     override fun onDock() {
         super.onDock()
-        blockAppControlsWhenLoading()
         viewModel.onDock()
         viewModel.imageCleanup = waveform::freeImages
         timer = object : AnimationTimer() {
@@ -87,6 +83,7 @@ class MarkerView : PluginEntrypoint() {
         tryImportStylesheet(resources.get("/css/chunk-marker.css"))
 
         initThemeProperty()
+        overrideClosingAppHandler()
     }
 
     override fun onUndock() {
@@ -97,6 +94,8 @@ class MarkerView : PluginEntrypoint() {
         waveform.positionProperty.unbind()
         minimap?.cleanUpOnUndock()
         viewModel.saveChanges()
+        currentWindow?.onCloseRequest = viewModel.defaultOnCloseRequest // revert change to default
+        // TODO: cancel the waveform rendering process
     }
 
     override val root =
@@ -149,40 +148,9 @@ class MarkerView : PluginEntrypoint() {
             }
             shortcut(Shortcut.ADD_MARKER.value, viewModel::placeMarker)
             shortcut(Shortcut.GO_BACK.value) {
-                viewModel.saveChanges {
-                    (scope as ParameterizedScope).let {
-                        runLater {
-                            it.navigateBack()
-                            System.gc()
-                        }
-                    }
-                }
+                viewModel.saveAndQuit()
             }
         }
-
-    private fun blockAppControlsWhenLoading() {
-        currentStage?.scene?.root
-            ?.let { node ->
-                node.findChildren(BreadcrumbBar::class)?.firstOrNull()
-                    ?.let { bar ->
-                        (bar as BreadcrumbBar).disableProperty().bind(viewModel.isLoadingProperty)
-                    }
-
-                node.lookupAll(".app-bar").firstOrNull()?.let {
-                    it.disableProperty().bind(viewModel.isLoadingProperty)
-                }
-            }
-
-        runLater {
-            currentWindow?.setOnCloseRequest {
-                if (viewModel.isLoadingProperty.value) {
-                    it.consume()
-                } else {
-                    viewModel.saveChanges()
-                }
-            }
-        }
-    }
 
     private fun initThemeProperty() {
         primaryStage.scene.root.styleClass.onChangeAndDoNow {
@@ -190,6 +158,21 @@ class MarkerView : PluginEntrypoint() {
                 viewModel.themeColorProperty.set(ColorTheme.DARK)
             } else {
                 viewModel.themeColorProperty.set(ColorTheme.LIGHT)
+            }
+        }
+    }
+
+    private fun overrideClosingAppHandler() {
+        runLater {
+            currentWindow?.let {
+                viewModel.defaultOnCloseRequest = it.onCloseRequest
+            }
+            currentWindow?.setOnCloseRequest {
+                if (viewModel.isLoadingProperty.value) {
+                    it.consume()
+                } else {
+                    viewModel.saveChanges()
+                }
             }
         }
     }

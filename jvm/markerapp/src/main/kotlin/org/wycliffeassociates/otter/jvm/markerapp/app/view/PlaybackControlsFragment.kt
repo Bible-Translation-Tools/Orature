@@ -80,14 +80,7 @@ class PlaybackControlsFragment : Fragment() {
 
         disableProperty().bind(viewModel.isLoadingProperty)
         setOnAction {
-            viewModel.saveChanges {
-                (scope as ParameterizedScope).let {
-                    runLater {
-                        it.navigateBack()
-                        System.gc()
-                    }
-                }
-            }
+            viewModel.saveAndQuit()
         }
     }
 
