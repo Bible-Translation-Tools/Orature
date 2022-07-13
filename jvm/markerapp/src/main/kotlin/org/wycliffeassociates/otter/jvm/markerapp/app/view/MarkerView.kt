@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import javafx.animation.AnimationTimer
+import javafx.event.EventHandler
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadcrumbBar
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
@@ -170,5 +171,14 @@ class MarkerView : PluginEntrypoint() {
                 }
             }
 
+        runLater {
+            currentWindow?.setOnCloseRequest {
+                if (viewModel.isLoadingProperty.value) {
+                    it.consume()
+                } else {
+                    viewModel.saveChanges()
+                }
+            }
+        }
     }
 }
