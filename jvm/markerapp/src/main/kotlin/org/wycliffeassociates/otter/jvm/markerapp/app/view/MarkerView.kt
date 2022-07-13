@@ -22,12 +22,14 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import javafx.animation.AnimationTimer
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
+import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadcrumbBar
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerTrackControl
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
+import org.wycliffeassociates.otter.jvm.utils.findChildren
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
@@ -47,6 +49,7 @@ class MarkerView : PluginEntrypoint() {
 
     override fun onDock() {
         super.onDock()
+        bindLoadingNavigationLock()
         viewModel.onDock()
         viewModel.imageCleanup = waveform::freeImages
         timer = object : AnimationTimer() {
@@ -153,4 +156,12 @@ class MarkerView : PluginEntrypoint() {
                 }
             }
         }
+
+    private fun bindLoadingNavigationLock() {
+        currentStage?.scene?.root
+            ?.findChildren(BreadcrumbBar::class)?.firstOrNull()
+            ?.let { bar ->
+                (bar as BreadcrumbBar).disableProperty().bind(viewModel.isLoadingProperty)
+            }
+    }
 }
