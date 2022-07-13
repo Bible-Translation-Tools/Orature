@@ -112,7 +112,7 @@ class HomePage : View() {
                                 BookCard().apply {
                                     titleProperty.set(workbook.target.title)
                                     slugProperty.set(workbook.target.slug.uppercase())
-                                    subtitleProperty.set(workbook.sourceMetadataSlug)
+                                    subtitleProperty.set(workbook.sourceMetadataSlug.uppercase())
                                     coverArtProperty.set(
                                         workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)
                                     )

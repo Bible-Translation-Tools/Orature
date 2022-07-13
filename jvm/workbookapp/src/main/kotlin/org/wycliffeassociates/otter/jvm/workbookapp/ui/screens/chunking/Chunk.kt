@@ -33,6 +33,7 @@ import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerTrackControl
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingWizardPage
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.Fragment
 import tornadofx.action
 import tornadofx.borderpane
@@ -54,6 +55,7 @@ class Chunk : Fragment() {
     private val continueButtonStyle = "chunking-continue-button"
 
     val vm: ChunkingViewModel by inject()
+    val settingsViewModel: SettingsViewModel by inject()
 
     private val markerTrack: MarkerTrackControl = MarkerTrackControl()
 
@@ -99,6 +101,7 @@ class Chunk : Fragment() {
 
     override val root = borderpane {
         center = MarkerPlacementWaveform(markerTrack).apply {
+            themeProperty.bind(settingsViewModel.appColorMode)
             positionProperty.bind(vm.positionProperty)
 
             vm.compositeDisposable.add(

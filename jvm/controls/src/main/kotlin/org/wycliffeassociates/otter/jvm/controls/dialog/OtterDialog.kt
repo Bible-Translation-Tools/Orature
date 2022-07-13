@@ -99,12 +99,12 @@ abstract class OtterDialog : Fragment() {
         themeProperty.onChange {
             when (it) {
                 ColorTheme.LIGHT -> {
-                    root.addClass("light-theme")
-                    root.removeClass("dark-theme")
+                    root.addClass(ColorTheme.LIGHT.styleClass)
+                    root.removeClass(ColorTheme.DARK.styleClass)
                 }
                 ColorTheme.DARK -> {
-                    root.addClass("dark-theme")
-                    root.removeClass("light-theme")
+                    root.addClass(ColorTheme.DARK.styleClass)
+                    root.removeClass(ColorTheme.LIGHT.styleClass)
                 }
             }
         }

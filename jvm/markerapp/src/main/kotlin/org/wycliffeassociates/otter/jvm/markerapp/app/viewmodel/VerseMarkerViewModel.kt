@@ -31,6 +31,7 @@ import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
@@ -52,6 +53,7 @@ class VerseMarkerViewModel : ViewModel() {
     private val width = Screen.getMainScreen().platformWidth
     private val height = min(Screen.getMainScreen().platformHeight, 500)
 
+    val themeColorProperty = SimpleObjectProperty(ColorTheme.LIGHT)
     val waveformMinimapImage = SimpleObjectProperty<Image>()
 
     /** Call this before leaving the view to avoid memory leak */

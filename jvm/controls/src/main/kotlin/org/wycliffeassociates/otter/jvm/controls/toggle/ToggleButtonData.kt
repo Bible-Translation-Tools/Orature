@@ -16,10 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.common.data
+package org.wycliffeassociates.otter.jvm.controls.toggle
 
-enum class ColorTheme(val titleKey: String, val styleClass: String = "") {
-    LIGHT("light", "light-theme"),
-    DARK("dark", "dark-theme"),
-    SYSTEM("system");
-}
+class ToggleButtonData(
+    val title: String,
+    val isDefaultSelected: Boolean = false,
+    val onAction: () -> Unit = { }
+)

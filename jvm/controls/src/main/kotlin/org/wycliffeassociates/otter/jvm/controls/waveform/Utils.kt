@@ -16,10 +16,20 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.common.data
+package org.wycliffeassociates.otter.jvm.controls.waveform
 
-enum class ColorTheme(val titleKey: String, val styleClass: String = "") {
-    LIGHT("light", "light-theme"),
-    DARK("dark", "dark-theme"),
-    SYSTEM("system");
+import javafx.scene.effect.ColorAdjust
+import org.wycliffeassociates.otter.common.data.ColorTheme
+
+fun adjustWaveformColorByTheme(theme: ColorTheme, adjust: ColorAdjust) {
+    when(theme) {
+        ColorTheme.LIGHT -> {
+            adjust.brightness = 0.0
+            adjust.contrast = 0.0
+        }
+        ColorTheme.DARK -> {
+            adjust.brightness = -0.65
+            adjust.contrast = 0.5
+        }
+    }
 }

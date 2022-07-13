@@ -123,6 +123,11 @@
     -wa-checkbox-button-background: -wa-foreground;
     -wa-checkbox-button-background-selected: -wa-primary-10;
 
+    /* toggle button */
+    -wa-toggle-selected: -wa-primary;
+    -wa-toggle-background: -wa-background;
+    -wa-toggle-border: -wa-primary-dark;
+
     /* shadow effects */
     -wa-card-shadow-lower-right: dropshadow(gaussian, -wa-black-20, 10, 0, 3, 3); /* [blur], [color], [radius], [spread], [x], [y] */
     -wa-card-shadow-lower-right-dark: dropshadow(gaussian, -wa-black-30, 10, 0, 3, 3);
@@ -130,13 +135,13 @@
     /* audio player */
     -wa-slider-track-color: -wa-black-05;
     -wa-slider-border-color: -wa-black-20;
+    -wa-minimap-slider-background: #00000008;
     -wa-recorder-controls-background: #282CBD;
-
-    -wa-scrolling-waveform-background: -wa-black-30-noalpha;
-    -wa-scrolling-waveform-track-border: rgb(167, 182, 207);
 
     -wa-waveform-background: rgb(247, 250, 255);
     -wa-waveform-background-dark: rgb(206, 214, 227);
+    -wa-scrolling-waveform-background: -wa-black-30-noalpha;
+    -wa-scrolling-waveform-track-border: rgb(167, 182, 207);
 
     -wa-played-audio-highlight: rgba(1, 90, 217, 0.4);
     -wa-playback-line: rgb(255, 177, 0);

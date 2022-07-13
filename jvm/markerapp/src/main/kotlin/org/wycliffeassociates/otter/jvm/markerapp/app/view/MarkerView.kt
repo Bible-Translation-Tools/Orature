@@ -21,7 +21,7 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import javafx.animation.AnimationTimer
-import javafx.event.EventHandler
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadcrumbBar
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
@@ -39,7 +39,6 @@ import tornadofx.*
 class MarkerView : PluginEntrypoint() {
 
     var timer: AnimationTimer? = null
-
     val viewModel: VerseMarkerViewModel by inject()
 
     private val markerTrack: MarkerTrackControl = MarkerTrackControl()
@@ -86,6 +85,8 @@ class MarkerView : PluginEntrypoint() {
         tryImportStylesheet(resources.get("/css/verse-marker-app.css"))
         tryImportStylesheet(resources.get("/css/scrolling-waveform.css"))
         tryImportStylesheet(resources.get("/css/chunk-marker.css"))
+
+        initThemeProperty()
     }
 
     override fun onUndock() {
@@ -112,6 +113,7 @@ class MarkerView : PluginEntrypoint() {
                 add(
                     waveform.apply {
                         addClass("vm-marker-waveform")
+                        themeProperty.bind(viewModel.themeColorProperty)
                         viewModel.compositeDisposable.add(
                             viewModel.waveform.observeOnFx().subscribe { addWaveformImage(it) }
                         )
@@ -162,9 +164,9 @@ class MarkerView : PluginEntrypoint() {
         currentStage?.scene?.root
             ?.let { node ->
                 node.findChildren(BreadcrumbBar::class)?.firstOrNull()
-                ?.let { bar ->
-                    (bar as BreadcrumbBar).disableProperty().bind(viewModel.isLoadingProperty)
-                }
+                    ?.let { bar ->
+                        (bar as BreadcrumbBar).disableProperty().bind(viewModel.isLoadingProperty)
+                    }
 
                 node.lookupAll(".app-bar").firstOrNull()?.let {
                     it.disableProperty().bind(viewModel.isLoadingProperty)
@@ -178,6 +180,16 @@ class MarkerView : PluginEntrypoint() {
                 } else {
                     viewModel.saveChanges()
                 }
+            }
+        }
+    }
+
+    private fun initThemeProperty() {
+        primaryStage.scene.root.styleClass.onChangeAndDoNow {
+            if (it.contains(ColorTheme.DARK.styleClass)) {
+                viewModel.themeColorProperty.set(ColorTheme.DARK)
+            } else {
+                viewModel.themeColorProperty.set(ColorTheme.LIGHT)
             }
         }
     }

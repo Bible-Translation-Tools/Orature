@@ -64,7 +64,7 @@ class PlaybackControlsFragment : Fragment() {
         setOnAction { viewModel.seekNext() }
     }
 
-    private val previousBtn = Button().apply {
+    private val previousBtn = JFXButton().apply {
         styleClass.addAll(
             seekButtonStyle,
             roundedButtonStyle
