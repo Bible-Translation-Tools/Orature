@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database
 
 import jooq.tables.AudioPluginEntity
 import jooq.tables.CollectionEntity
+import jooq.tables.ContentEntity
 import jooq.tables.DublinCoreEntity
 import jooq.tables.InstalledEntity
 import jooq.tables.LanguageEntity
@@ -246,6 +247,31 @@ class DatabaseMigrator {
                 logger.error("Error in migrate7to8", e)
             }
             return 8
+        } else {
+            current
+        }
+    }
+
+    /**
+     * Version 9
+     * Adds a column for the draft number to the collections table
+     *
+     * The DataAccessException is caught in the event that the column already exists.
+     */
+    private fun migrate8to9(dsl: DSLContext, current: Int): Int {
+        return if (current < 9) {
+            try {
+                dsl
+                    .alterTable(ContentEntity.CONTENT_ENTITY)
+                    .addColumn(ContentEntity.CONTENT_ENTITY.DRAFT_NUMBER)
+                    .execute()
+                logger.info("Updated database from version 8 to 9")
+            } catch (e: DataAccessException) {
+                // Exception is thrown because the column might already exist but an existence check cannot
+                // be performed in sqlite.
+                logger.error("Error in migrate8to9", e)
+            }
+            return 9
         } else {
             current
         }
