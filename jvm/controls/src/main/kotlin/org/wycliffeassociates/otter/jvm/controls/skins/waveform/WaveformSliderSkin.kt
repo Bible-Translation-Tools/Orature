@@ -32,7 +32,7 @@ import javafx.scene.shape.Line
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
-import org.wycliffeassociates.otter.jvm.controls.waveform.adjustWaveformImageByTheme
+import org.wycliffeassociates.otter.jvm.controls.waveform.adjustWaveformColorByTheme
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import kotlin.math.max
@@ -86,7 +86,7 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
         control.waveformImageProperty.addListener(control.waveformMinimapListener)
         control.colorThemeProperty.onChangeAndDoNow {
             it?.let { theme ->
-                adjustWaveformImageByTheme(theme, waveformColorEffect)
+                adjustWaveformColorByTheme(theme, waveformColorEffect)
             }
         }
 

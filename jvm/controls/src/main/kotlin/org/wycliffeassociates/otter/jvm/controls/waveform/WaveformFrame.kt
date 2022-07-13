@@ -27,7 +27,6 @@ import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.effect.ColorAdjust
 import javafx.scene.image.Image
-import javafx.scene.image.ImageView
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
@@ -139,7 +138,7 @@ class WaveformFrame(
 
                         themeProperty.onChange {
                             it?.let { theme ->
-                                adjustWaveformImageByTheme(theme, waveformColorEffect)
+                                adjustWaveformColorByTheme(theme, waveformColorEffect)
                             }
                         }
                     }
