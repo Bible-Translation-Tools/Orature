@@ -89,10 +89,10 @@ class WaveformFrame(
         onSeekNextProperty.set(op)
     }
 
+    private var imageHolder: HBox? = null
     private var dragContextX = 0.0
+    private var dragStart: Point2D? = null
     private val waveformColorEffect = ColorAdjust()
-    var imageHolder: HBox? = null
-    var dragStart: Point2D? = null
 
     lateinit var imageRegion: Region
     lateinit var highlightHolder: StackPane
