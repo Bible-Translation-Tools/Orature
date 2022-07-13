@@ -49,7 +49,7 @@ class MarkerView : PluginEntrypoint() {
 
     override fun onDock() {
         super.onDock()
-        bindLoadingNavigationLock()
+        blockAppControlsWhenLoading()
         viewModel.onDock()
         viewModel.imageCleanup = waveform::freeImages
         timer = object : AnimationTimer() {
@@ -157,11 +157,18 @@ class MarkerView : PluginEntrypoint() {
             }
         }
 
-    private fun bindLoadingNavigationLock() {
+    private fun blockAppControlsWhenLoading() {
         currentStage?.scene?.root
-            ?.findChildren(BreadcrumbBar::class)?.firstOrNull()
-            ?.let { bar ->
-                (bar as BreadcrumbBar).disableProperty().bind(viewModel.isLoadingProperty)
+            ?.let { node ->
+                node.findChildren(BreadcrumbBar::class)?.firstOrNull()
+                ?.let { bar ->
+                    (bar as BreadcrumbBar).disableProperty().bind(viewModel.isLoadingProperty)
+                }
+
+                node.lookupAll(".app-bar").firstOrNull()?.let {
+                    it.disableProperty().bind(viewModel.isLoadingProperty)
+                }
             }
+
     }
 }
