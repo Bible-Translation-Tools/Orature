@@ -44,11 +44,11 @@ class RootView : View() {
         // loss of communication between the app and the external plugin, thus data loss
         workspace.subscribe<PluginOpenedEvent> {
             (app as OtterApp).shouldBlockWindowCloseRequest = !it.isNative
-            viewModel.pluginOpenedProperty.set(true)
+            viewModel.externalPluginOpenedProperty.set(!it.isNative)
         }
         workspace.subscribe<PluginClosedEvent> {
             (app as OtterApp).shouldBlockWindowCloseRequest = false
-            viewModel.pluginOpenedProperty.set(false)
+            viewModel.externalPluginOpenedProperty.set(false)
         }
         workspace.header.removeFromParent()
         workspace.root.vgrow = Priority.ALWAYS

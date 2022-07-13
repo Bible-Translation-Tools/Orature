@@ -41,6 +41,7 @@ class AppContent : View() {
             borderpane {
                 top = navigator.breadCrumbsBar.apply {
                     orientationScaleProperty.bind(settingsViewModel.orientationScaleProperty)
+                    disableProperty().bind(rootViewModel.externalPluginOpenedProperty)
                 }
                 center<Workspace>()
             }
