@@ -34,7 +34,7 @@ object WorkbookFileNamerBuilder {
         chapterCount = workbook.target.chapters.count().blockingGet(),
         chapterTitle = chapter.title,
         chapterSort = chapter.sort,
-        chunkCount = 99,
+        chunkCount = chapter.chunkCount.blockingGet().toLong(),
         start = chunk?.start,
         end = chunk?.end,
         contentType = recordable.contentType,
