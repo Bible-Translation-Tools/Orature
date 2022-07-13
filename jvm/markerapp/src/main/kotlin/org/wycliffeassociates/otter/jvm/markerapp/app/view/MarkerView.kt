@@ -29,6 +29,7 @@ import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWavefor
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerTrackControl
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*
 
@@ -90,6 +91,7 @@ class MarkerView : PluginEntrypoint() {
         waveform.markerStateProperty.unbind()
         waveform.positionProperty.unbind()
         minimap?.cleanUpOnUndock()
+        viewModel.saveChanges()
     }
 
     override val root =
@@ -140,6 +142,15 @@ class MarkerView : PluginEntrypoint() {
                 add<PlaybackControlsFragment>()
             }
             shortcut(Shortcut.ADD_MARKER.value, viewModel::placeMarker)
-            shortcut(Shortcut.GO_BACK.value, viewModel::saveAndQuit)
+            shortcut(Shortcut.GO_BACK.value) {
+                viewModel.saveChanges {
+                    (scope as ParameterizedScope).let {
+                        runLater {
+                            it.navigateBack()
+                            System.gc()
+                        }
+                    }
+                }
+            }
         }
 }

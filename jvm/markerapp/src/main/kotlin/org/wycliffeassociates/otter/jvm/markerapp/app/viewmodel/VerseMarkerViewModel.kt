@@ -53,6 +53,7 @@ class VerseMarkerViewModel : ViewModel() {
     private val height = min(Screen.getMainScreen().platformHeight, 500)
 
     val waveformMinimapImage = SimpleObjectProperty<Image>()
+
     /** Call this before leaving the view to avoid memory leak */
     var imageCleanup: () -> Unit = {}
 
@@ -85,9 +86,11 @@ class VerseMarkerViewModel : ViewModel() {
     private var sampleRate: Int = 0 // beware of divided by 0
     private var totalFrames: Int = 0 // beware of divided by 0
     private var resumeAfterScroll = false
+    private var isSaved = false
 
     fun onDock() {
         isLoadingProperty.set(true)
+        isSaved = false
         val audio = loadAudio()
         loadMarkers(audio)
         loadTitles()
@@ -142,7 +145,11 @@ class VerseMarkerViewModel : ViewModel() {
         }
     }
 
-    fun saveAndQuit() {
+    fun saveChanges(callback: () -> Unit = {}) {
+        if (isSaved) {
+            return
+        }
+        isSaved = true
         logger.info("Closing Verse Marker app...")
 
         compositeDisposable.clear()
@@ -150,18 +157,13 @@ class VerseMarkerViewModel : ViewModel() {
         currentMarkerNumberProperty.set(-1)
         imageCleanup()
 
-        (scope as ParameterizedScope).let {
-            writeMarkers()
-                .doOnError { e ->
-                    logger.error("Error in closing the maker app", e)
-                }
-                .subscribe {
-                    runLater {
-                        it.navigateBack()
-                        System.gc()
-                    }
-                }
-        }
+        writeMarkers()
+            .doOnError { e ->
+                logger.error("Error in closing the maker app", e)
+            }
+            .subscribe {
+                callback()
+            }
     }
 
     fun placeMarker() {

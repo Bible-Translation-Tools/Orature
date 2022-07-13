@@ -89,8 +89,6 @@ class AppBar : Fragment() {
         root.apply {
             styleClass.setAll("app-bar")
 
-            disableProperty().bind(rootViewModel.pluginOpenedProperty)
-
             label {
                 addClass("app-bar__logo")
                 graphic = FontIcon(MaterialDesign.MDI_HEADSET)

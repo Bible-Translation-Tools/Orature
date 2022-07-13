@@ -25,6 +25,7 @@ import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
+import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
 
 class PlaybackControlsFragment : Fragment() {
@@ -79,7 +80,14 @@ class PlaybackControlsFragment : Fragment() {
 
         disableProperty().bind(viewModel.isLoadingProperty)
         setOnAction {
-            viewModel.saveAndQuit()
+            viewModel.saveChanges {
+                (scope as ParameterizedScope).let {
+                    runLater {
+                        it.navigateBack()
+                        System.gc()
+                    }
+                }
+            }
         }
     }
 
