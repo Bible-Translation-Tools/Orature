@@ -619,6 +619,11 @@
     -fx-focus-traversable: true;
 }
 
+.wa-audio-slider .wa-audio-slider-thumb {
+    -fx-stroke-width: 1;
+    -fx-fill: -wa-minimap-slider-background;
+}
+
 .wa-audio-slider:focused .wa-audio-slider-thumb {
     -fx-stroke-width: 4;
     -fx-stroke: -wa-button-border;

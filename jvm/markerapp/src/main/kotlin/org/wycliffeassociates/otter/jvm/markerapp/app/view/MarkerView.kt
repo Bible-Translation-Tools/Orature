@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import javafx.animation.AnimationTimer
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
@@ -35,7 +36,6 @@ import tornadofx.*
 class MarkerView : PluginEntrypoint() {
 
     var timer: AnimationTimer? = null
-
     val viewModel: VerseMarkerViewModel by inject()
 
     private val markerTrack: MarkerTrackControl = MarkerTrackControl()
@@ -81,6 +81,8 @@ class MarkerView : PluginEntrypoint() {
         tryImportStylesheet(resources.get("/css/verse-marker-app.css"))
         tryImportStylesheet(resources.get("/css/scrolling-waveform.css"))
         tryImportStylesheet(resources.get("/css/chunk-marker.css"))
+
+        initThemeProperty()
     }
 
     override fun onUndock() {
@@ -106,6 +108,7 @@ class MarkerView : PluginEntrypoint() {
                 add(
                     waveform.apply {
                         addClass("vm-marker-waveform")
+                        themeProperty.bind(viewModel.themeColorProperty)
                         viewModel.compositeDisposable.add(
                             viewModel.waveform.observeOnFx().subscribe { addWaveformImage(it) }
                         )
@@ -142,4 +145,14 @@ class MarkerView : PluginEntrypoint() {
             shortcut(Shortcut.ADD_MARKER.value, viewModel::placeMarker)
             shortcut(Shortcut.GO_BACK.value, viewModel::saveAndQuit)
         }
+
+    private fun initThemeProperty() {
+        primaryStage.scene.root.styleClass.onChangeAndDoNow {
+            if (it.contains(ColorTheme.DARK.styleClass)) {
+                viewModel.themeColorProperty.set(ColorTheme.DARK)
+            } else {
+                viewModel.themeColorProperty.set(ColorTheme.LIGHT)
+            }
+        }
+    }
 }
