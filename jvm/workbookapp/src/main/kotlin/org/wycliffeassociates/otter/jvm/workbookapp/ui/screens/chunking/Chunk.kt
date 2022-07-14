@@ -19,12 +19,12 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import com.jfoenix.controls.JFXButton
 import com.sun.javafx.util.Utils
 import javafx.animation.AnimationTimer
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
+import kfoenix.jfxbutton
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import org.kordamp.ikonli.materialdesign.MaterialDesign
@@ -94,7 +94,7 @@ class Chunk : Fragment() {
         timer?.start()
         vm.onDockChunk()
 
-        waveform.markers.bind(vm.markers, {it})
+        waveform.markers.bind(vm.markers, { it })
         waveform.refreshMarkers()
     }
 
@@ -127,18 +127,16 @@ class Chunk : Fragment() {
                         addClass("chunking__controls-group")
                         alignment = Pos.CENTER
 
-                        add(
-                            JFXButton().apply {
-                                graphic = previousIcon
-                                setOnAction { vm.seekPrevious() }
-                                styleClass.addAll(
-                                    seekButtonStyle,
-                                    roundedButtonStyle
-                                )
-                            }
-                        )
+                        jfxbutton {
+                            graphic = previousIcon
+                            setOnAction { vm.seekPrevious() }
+                            styleClass.addAll(
+                                seekButtonStyle,
+                                roundedButtonStyle
+                            )
+                        }
 
-                        button {
+                        jfxbutton {
                             vm.isPlayingProperty.onChangeAndDoNow {
                                 it?.let {
                                     when (it) {
@@ -155,16 +153,14 @@ class Chunk : Fragment() {
                                 vm.mediaToggle()
                             }
                         }
-                        add(
-                            JFXButton().apply {
-                                graphic = nextIcon
-                                setOnAction { vm.seekNext() }
-                                styleClass.addAll(
-                                    seekButtonStyle,
-                                    roundedButtonStyle
-                                )
-                            }
-                        )
+                        jfxbutton {
+                            graphic = nextIcon
+                            setOnAction { vm.seekNext() }
+                            styleClass.addAll(
+                                seekButtonStyle,
+                                roundedButtonStyle
+                            )
+                        }
                     }
                 }
 
@@ -174,19 +170,19 @@ class Chunk : Fragment() {
                         alignment = Pos.CENTER_RIGHT
                         leftControls.prefWidthProperty().bind(this.widthProperty())
 
-                        button("undo") {
+                        jfxbutton(messages["undo"]) {
                             addClass("btn", "btn--secondary", "reset-button")
                             setOnAction {
                                 vm.undoMarker()
                             }
                         }
-                        button("redo") {
+                        jfxbutton(messages["redo"]) {
                             addClass("btn", "btn--secondary", "reset-button")
                             setOnAction {
                                 vm.redoMarker()
                             }
                         }
-                        button("save") {
+                        jfxbutton(messages["save"]) {
                             addClass("btn", "btn--primary", "btn--borderless", "save-btn")
                             setOnAction {
                                 vm.saveAndQuit()

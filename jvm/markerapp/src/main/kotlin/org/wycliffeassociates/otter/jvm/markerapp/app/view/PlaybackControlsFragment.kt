@@ -23,6 +23,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.layout.Priority
+import javafx.scene.layout.Region
 import org.kordamp.ikonli.javafx.FontIcon
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
@@ -47,6 +48,8 @@ class PlaybackControlsFragment : Fragment() {
     private val nextIcon = FontIcon("gmi-skip-next")
     private val previousIcon = FontIcon("gmi-skip-previous")
     private val continueIcon = FontIcon("fas-check")
+
+    private lateinit var leftControls: Region
 
     private val playBtn = JFXButton().apply {
         styleClass.addAll(
@@ -75,8 +78,9 @@ class PlaybackControlsFragment : Fragment() {
         setOnAction { viewModel.seekPrevious() }
     }
 
-    private val undoBtn = Button().apply {
-        text = "undo"
+    private val undoBtn = JFXButton().apply {
+        text = messages["undo"]
+        addClass("btn", "btn--secondary", "reset-button")
 
         setOnAction {
             viewModel.undoMarker()
@@ -84,8 +88,9 @@ class PlaybackControlsFragment : Fragment() {
         }
     }
 
-    private val redoBtn = Button().apply {
-        text = "redo"
+    private val redoBtn = JFXButton().apply {
+        text = messages["redo"]
+        addClass("btn", "btn--secondary", "reset-button")
 
         setOnAction {
             viewModel.redoMarker()
@@ -93,7 +98,7 @@ class PlaybackControlsFragment : Fragment() {
         }
     }
 
-    private val closeBtn = Button().apply {
+    private val closeBtn = JFXButton().apply {
         text = messages["continue"]
         graphic = continueIcon
         styleClass.addAll("btn", "btn--primary", "btn--borderless", continueButtonStyle)
@@ -117,11 +122,9 @@ class PlaybackControlsFragment : Fragment() {
     override val root = borderpane {
         styleClass.add(rootStyles)
         left = region {
-            prefWidthProperty().bind(closeBtn.widthProperty())
+            leftControls = this
         }
         center = hbox {
-            hgrow = Priority.ALWAYS
-
             styleClass.add(rootStyles)
             alignment = Pos.CENTER
             add(previousBtn)
@@ -129,7 +132,9 @@ class PlaybackControlsFragment : Fragment() {
             add(nextBtn)
         }
         right = hbox {
+            leftControls.prefWidthProperty().bind(this.widthProperty())
             alignment = Pos.CENTER_RIGHT
+            spacing = 10.0
             add(undoBtn)
             add(redoBtn)
             add(closeBtn)
