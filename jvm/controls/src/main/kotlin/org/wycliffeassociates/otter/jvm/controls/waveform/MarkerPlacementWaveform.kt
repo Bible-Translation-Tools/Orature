@@ -22,14 +22,15 @@ import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.NodeOrientation
 import javafx.scene.image.Image
-import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
-import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
 import tornadofx.*
 
 class MarkerPlacementWaveform : StackPane() {
+
+    val themeProperty = SimpleObjectProperty(ColorTheme.LIGHT)
 
     val markers = observableListOf<ChunkMarkerModel>()
     var onPositionChangedProperty: (Int, Double) -> Unit = { _, _ -> }
@@ -86,6 +87,7 @@ class MarkerPlacementWaveform : StackPane() {
             }
         }
         waveformFrame = WaveformFrame(topTrack).apply {
+            themeProperty.bind(this@MarkerPlacementWaveform.themeProperty)
             framePositionProperty.bind(positionProperty)
             onWaveformClicked { onWaveformClicked() }
             onWaveformDragReleased {

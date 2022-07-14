@@ -50,6 +50,7 @@ open class ScrollingWaveform : StackPane() {
 
         add(MarkerViewBackground())
         waveformFrame = WaveformFrame().apply {
+            themeProperty.bind(this@ScrollingWaveform.themeProperty)
             framePositionProperty.bind(positionProperty)
             onWaveformClicked { onWaveformClicked() }
             onWaveformDragReleased {
