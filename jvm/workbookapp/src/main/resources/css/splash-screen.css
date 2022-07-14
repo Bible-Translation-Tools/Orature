@@ -1,0 +1,14 @@
+.splash__root {
+    -fx-alignment: center;
+}
+
+.splash__progress {
+    -fx-padding: 0 7em;
+    -fx-translate-y: 130px;
+}
+
+.splash__progress .bar {
+    -fx-background-insets: 1;
+    -fx-padding: 0.3em;
+    -fx-fill: -wa-primary;
+}

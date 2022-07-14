@@ -23,16 +23,15 @@ import javafx.geometry.NodeOrientation
 import javafx.scene.image.Image
 import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
+import javafx.beans.property.SimpleObjectProperty
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
-import tornadofx.add
-import tornadofx.hgrow
-import tornadofx.onChange
-import tornadofx.togglePseudoClass
-import tornadofx.vgrow
+import tornadofx.*
 
 open class ScrollingWaveform : StackPane() {
 
     val positionProperty = SimpleDoubleProperty(0.0)
+    val themeProperty = SimpleObjectProperty(ColorTheme.LIGHT)
 
     var onWaveformClicked: () -> Unit = {}
     var onWaveformDragReleased: (Double) -> Unit = {}

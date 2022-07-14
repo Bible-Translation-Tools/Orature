@@ -29,6 +29,7 @@ import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
 import org.wycliffeassociates.otter.common.audio.AudioCue
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.skins.waveform.WaveformSliderSkin
 import tornadofx.*
@@ -38,6 +39,7 @@ class AudioSlider(
     max: Double = 1.0,
     value: Double = 0.0
 ) : Slider(min, max, value) {
+    val colorThemeProperty = SimpleObjectProperty<ColorTheme>()
     val waveformImageProperty = SimpleObjectProperty<Image>()
     val thumbFillProperty = SimpleObjectProperty(Paint.valueOf("#00000015"))
     val thumbLineColorProperty = SimpleObjectProperty(Color.BLACK)

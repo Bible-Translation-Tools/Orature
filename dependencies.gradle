@@ -21,6 +21,7 @@ ext {
     rxkotlinfxVer = '2.2.2'
     rxrelayVer = '2.1.0'
     jfoenixVer = '17-hotfix'
+    kfoenixVer = "0.2.0"
     sqliteJdbcVer = '3.28.0'
     jooqVer = '3.12.4'
     franzXaverVer = '0.1' // SVG Loader

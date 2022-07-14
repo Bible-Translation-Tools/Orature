@@ -32,6 +32,7 @@ import org.wycliffeassociates.otter.jvm.controls.waveform.ScrollingWaveform
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingWizardPage
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 
 class Consume : Fragment() {
@@ -41,6 +42,7 @@ class Consume : Fragment() {
     val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
 
     val vm: ChunkingViewModel by inject()
+    val settingsViewModel: SettingsViewModel by inject()
 
     var timer: AnimationTimer? = null
 
@@ -81,6 +83,7 @@ class Consume : Fragment() {
 
     override val root = borderpane {
         center = ScrollingWaveform().apply {
+            themeProperty.bind(settingsViewModel.appColorMode)
             positionProperty.bind(vm.positionProperty)
 
             onWaveformClicked = { vm.pause() }

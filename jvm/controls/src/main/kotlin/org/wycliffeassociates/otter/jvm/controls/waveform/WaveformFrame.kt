@@ -25,11 +25,13 @@ import javafx.event.EventHandler
 import javafx.geometry.Point2D
 import javafx.geometry.Pos
 import javafx.scene.Node
+import javafx.scene.effect.ColorAdjust
 import javafx.scene.image.Image
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Region
 import javafx.scene.layout.StackPane
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 
 import tornadofx.*
@@ -48,6 +50,7 @@ class WaveformFrame(
     private val onSeekPreviousProperty = SimpleObjectProperty<() -> Unit>()
     private val onSeekNextProperty = SimpleObjectProperty<() -> Unit>()
 
+    val themeProperty = SimpleObjectProperty<ColorTheme>()
     val framePositionProperty = SimpleDoubleProperty(0.0)
 
     fun onWaveformClicked(op: () -> Unit) {
@@ -82,9 +85,11 @@ class WaveformFrame(
         onSeekNextProperty.set(op)
     }
 
-    var dragStart: Point2D? = null
+    private var imageHolder: HBox? = null
     private var dragContextX = 0.0
-    var imageHolder: HBox? = null
+    private var dragStart: Point2D? = null
+    private val waveformColorEffect = ColorAdjust()
+
     lateinit var imageRegion: Region
 
     lateinit var topTrackRegion: Region
@@ -104,6 +109,12 @@ class WaveformFrame(
                     fitToParentHeight()
                     styleClass.add("scrolling-waveform-frame__center")
                     alignment = Pos.CENTER
+
+                    themeProperty.onChange {
+                        it?.let { theme ->
+                            adjustWaveformColorByTheme(theme, waveformColorEffect)
+                        }
+                    }
 
                     /**
                      * Putting this in the middle of the borderpane below will result in one of the following errors:
@@ -220,6 +231,8 @@ class WaveformFrame(
     fun addImage(image: Image) {
         imageHolder?.add(
             imageview(image) {
+                addClass("waveform-image")
+                this.effect = waveformColorEffect
                 // This is to adjust the height of the image to fit within the tracks
                 fitHeightProperty()
                     .bind(

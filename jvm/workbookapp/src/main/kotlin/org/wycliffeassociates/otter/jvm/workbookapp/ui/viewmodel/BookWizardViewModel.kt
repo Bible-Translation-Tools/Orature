@@ -48,6 +48,8 @@ import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionR
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.controls.button.SelectButton
+import org.wycliffeassociates.otter.jvm.controls.toggle.ToggleButtonData
+import org.wycliffeassociates.otter.jvm.controls.toggle.ToggleButtonGroup
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.enums.BookSortBy
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
@@ -98,6 +100,7 @@ class BookWizardViewModel : ViewModel() {
     private val books = observableListOf<BookCardData>()
     val sourceCollections = observableListOf<Collection>()
     val selectedSourceProperty = SimpleObjectProperty<Collection>()
+    val resourceToggleGroup = observableListOf<ToggleButtonData>()
     val filteredBooks = FilteredList(books)
     val existingBooks = observableListOf<Workbook>()
     val menuItems = observableListOf<MenuItem>()
@@ -297,6 +300,18 @@ class BookWizardViewModel : ViewModel() {
                 t!!.modifiedTs = LocalDateTime.now()
                 updateTranslationUseCase.update(t)
             }
+    }
+
+    fun loadResourceSelections() {
+        sourceCollections.onChange {
+            val data = it.list.mapIndexed { index, resource ->
+                val isFirst = index == 0
+                ToggleButtonData(resource.slug.uppercase(), isFirst) {
+                    selectedSourceProperty.set(resource)
+                }
+            }
+            resourceToggleGroup.setAll(data)
+        }
     }
 
     fun setFilterMenu() {

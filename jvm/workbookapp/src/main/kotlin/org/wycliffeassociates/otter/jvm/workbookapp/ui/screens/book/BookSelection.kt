@@ -20,8 +20,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.book
 
 import javafx.application.Platform
 import javafx.geometry.Pos
-import javafx.scene.control.Tab
-import javafx.scene.control.TabPane
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
@@ -32,6 +30,7 @@ import org.wycliffeassociates.otter.jvm.controls.bar.FilteredSearchBar
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
+import org.wycliffeassociates.otter.jvm.controls.toggle.togglebuttongroup
 import org.wycliffeassociates.otter.jvm.utils.overrideDefaultKeyEventHandler
 import org.wycliffeassociates.otter.jvm.utils.virtualFlow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
@@ -90,14 +89,8 @@ class BookSelection : View() {
                     }
                 }
             }
-            hbox {
+            togglebuttongroup(viewModel.resourceToggleGroup) {
                 addClass("book-wizard__resource-tab-group")
-                tabpane {
-                    addClass("wa-tab-pane")
-                    hgrow = Priority.ALWAYS
-                    tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
-                    buildResourceTabs(this)
-                }
             }
             add(
                 FilteredSearchBar().apply {
@@ -144,21 +137,6 @@ class BookSelection : View() {
                     }
                 }
             }
-        }
-    }
-
-    private fun buildResourceTabs(tabPane: TabPane) {
-        viewModel.sourceCollections.onChange {
-            val tabs = it.list.map { resource ->
-                Tab().apply {
-                    text = resource.slug
-
-                    whenSelected {
-                        viewModel.selectedSourceProperty.set(resource)
-                    }
-                }
-            }
-            tabPane.tabs.setAll(tabs)
         }
     }
 
@@ -211,6 +189,7 @@ class BookSelection : View() {
         viewModel.reset()
         viewModel.loadExistingProjects()
         viewModel.loadResources()
+        viewModel.loadResourceSelections()
     }
 }
 

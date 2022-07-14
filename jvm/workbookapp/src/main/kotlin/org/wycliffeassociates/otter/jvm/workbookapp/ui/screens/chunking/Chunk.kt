@@ -34,6 +34,7 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingWizardPage
 import tornadofx.*
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 
 class Chunk : Fragment() {
 
@@ -49,10 +50,12 @@ class Chunk : Fragment() {
     private val continueButtonStyle = "chunking-continue-button"
 
     val vm: ChunkingViewModel by inject()
+    val settingsViewModel: SettingsViewModel by inject()
 
     var timer: AnimationTimer? = null
 
     val waveform = MarkerPlacementWaveform().apply {
+        themeProperty.bind(settingsViewModel.appColorMode)
         positionProperty.bind(vm.positionProperty)
 
         onWaveformClicked = { vm.pause() }
