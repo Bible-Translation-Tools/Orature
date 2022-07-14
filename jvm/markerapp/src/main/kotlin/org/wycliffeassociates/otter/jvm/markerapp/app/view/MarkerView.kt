@@ -83,7 +83,7 @@ class MarkerView : PluginEntrypoint() {
         tryImportStylesheet(resources.get("/css/chunk-marker.css"))
 
         initThemeProperty()
-        overrideClosingAppHandler()
+        overrideCloseRequestHandler()
     }
 
     override fun onUndock() {
@@ -162,15 +162,12 @@ class MarkerView : PluginEntrypoint() {
         }
     }
 
-    private fun overrideClosingAppHandler() {
+    private fun overrideCloseRequestHandler() {
         runLater {
-            currentWindow?.let {
-                viewModel.defaultOnCloseRequest = it.onCloseRequest
-            }
-            currentWindow?.setOnCloseRequest {
-                if (viewModel.isLoadingProperty.value) {
-                    it.consume()
-                } else {
+            currentWindow?.let { window ->
+                viewModel.defaultOnCloseRequest = window.onCloseRequest
+
+                window.setOnCloseRequest {
                     viewModel.saveChanges()
                 }
             }
