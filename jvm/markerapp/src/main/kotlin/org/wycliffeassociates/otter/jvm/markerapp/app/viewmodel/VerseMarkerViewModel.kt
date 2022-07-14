@@ -173,11 +173,9 @@ class VerseMarkerViewModel : ViewModel() {
 
     fun saveAndQuit() {
         saveChanges {
-            (scope as ParameterizedScope).let {
-                runLater {
-                    it.navigateBack()
-                    System.gc()
-                }
+            runLater {
+                (scope as ParameterizedScope).navigateBack()
+                System.gc()
             }
         }
     }
