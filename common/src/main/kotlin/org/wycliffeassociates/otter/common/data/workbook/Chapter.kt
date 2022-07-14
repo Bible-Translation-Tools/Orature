@@ -38,7 +38,7 @@ data class Chapter(
     override val audio: AssociatedAudio,
     override val resources: List<ResourceGroup>,
     override val subtreeResources: List<ResourceMetadata>,
-    val chunks: ReplayRelay<Chunk>,
+    private val lazychunks: Lazy<ReplayRelay<Chunk>>,
     val chunkCount: Single<Int>,
     val addChunk: (List<Content>) -> Unit,
     val reset: () -> Unit
@@ -46,6 +46,8 @@ data class Chapter(
 
     override val contentType: ContentType = ContentType.META
     override val children: Observable<BookElement> = getDraft().cast()
+
+    val chunks by lazychunks
 
     var text: String = ""
 

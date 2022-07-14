@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.common.persistence.repositories
 
+import com.jakewharton.rxrelay2.ReplayRelay
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.times
@@ -38,6 +39,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.ResourceGroup
 import org.wycliffeassociates.otter.common.data.workbook.Take
@@ -168,6 +170,20 @@ class TestWorkbookRepository {
         }
 
         whenever(
+            mockedDb.getChunkCount(any())
+        ).thenAnswer { invocation ->
+            val collection = invocation.getArgument<Collection>(0)!!
+            when (collection.slug.count { it == '_' }) {
+                1 -> {
+                    Single.just(BasicTestParams.chunksPerChapter)
+                }
+                else -> {
+                    Single.just(0)
+                }
+            }
+        }
+
+        whenever(
             mockedDb.getContentByCollection(any())
         ).thenAnswer { invocation ->
             val collection = invocation.getArgument<Collection>(0)!!
@@ -193,6 +209,37 @@ class TestWorkbookRepository {
                     else -> emptyList()
                 }
             )
+        }
+
+        whenever(
+            mockedDb.getContentByCollectionActiveConnection(any())
+        ).thenAnswer { invocation ->
+            val collection = invocation.getArgument<Collection>(0)!!
+            val format = if (collection.resourceContainer == rcTarget) "audio/wav" else "text/usfm"
+
+            val rr = ReplayRelay.create<Content>()
+            when (collection.slug.count { it == '_' }) {
+                1 -> {
+                    (1..BasicTestParams.chunksPerChapter).map { verse ->
+                        rr.accept(
+                            Content(
+                                id = autoincrement,
+                                start = verse,
+                                end = verse,
+                                sort = verse,
+                                labelKey = ContentLabel.VERSE.value,
+                                type = ContentType.TEXT,
+                                format = format,
+                                text = "/v $verse but test everything; hold fast what is good.",
+                                selectedTake = null,
+                                draftNumber = 1
+                            )
+                        )
+                    }
+                }
+                else -> {}
+            }
+            rr
         }
 
         whenever(
@@ -431,10 +478,16 @@ class TestWorkbookRepository {
         Assert.assertEquals(1, chapter.sort)
         Assert.assertArrayEquals(arrayOf("tn"), resourceSlugArray(chapter.resources))
         verify(mockedDb, times(0)).getContentByCollection(any())
+        verify(mockedDb, times(0)).getContentByCollectionActiveConnection(any())
 
         // Fetch chunks, and verify one DB call is made
-        chapter.chunks.blockingLast()
-        verify(mockedDb, times(1)).getContentByCollection(any())
+        var count = 0
+        chapter.chunks.takeUntil {
+            count++
+            count >= BasicTestParams.chunksPerChapter
+        }
+        verify(mockedDb, times(0)).getContentByCollection(any())
+        verify(mockedDb, times(1)).getContentByCollectionActiveConnection(any())
     }
 
     @Test
@@ -444,9 +497,13 @@ class TestWorkbookRepository {
         val chapter = workbook.source.chapters.blockingIterable().minByOrNull { it.sort }!!
 
         // Fetch chunks twice, and verify only one DB call is made
-        chapter.chunks.blockingLast()
+        var count = 0
+        chapter.chunks.takeUntil {
+            count++
+            count >= BasicTestParams.chunksPerChapter
+        }
         chapter.children.blockingLast()
-        verify(mockedDb, times(1)).getContentByCollection(any())
+        verify(mockedDb, times(1)).getContentByCollectionActiveConnection(any())
     }
 
     @Test
@@ -456,7 +513,7 @@ class TestWorkbookRepository {
 
         Assert.assertArrayEquals(
             chapter.children.blockingIterable().sortedBy { it.sort }.toTypedArray(),
-            chapter.chunks.blockingIterable().sortedBy { it.sort }.toTypedArray()
+            chapter.chunks.getValues(Array<Chunk?>(BasicTestParams.chunksPerChapter, init = {null})).sortedBy { it?.sort }.toTypedArray()
         )
     }
 

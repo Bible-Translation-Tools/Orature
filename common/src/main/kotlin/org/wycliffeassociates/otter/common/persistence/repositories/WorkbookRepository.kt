@@ -211,7 +211,7 @@ class WorkbookRepository(
                     sort = chapterCollection.sort,
                     resources = constructResourceGroups(chapterCollection, disposables),
                     audio = constructAssociatedAudio(metaContent, disposables),
-                    chunks = constructChunks(chapterCollection, disposables),
+                    lazychunks = lazy {  constructChunks(chapterCollection, disposables) },
                     subtreeResources = db.getSubtreeResourceMetadata(chapterCollection),
                     chunkCount = db.getChunkCount(chapterCollection),
                     addChunk = {
