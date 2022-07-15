@@ -529,7 +529,7 @@ class TestWorkbookRepository {
     fun resourceGroupsHaveCorrectMetadata() {
         val workbook = buildBasicTestWorkbook()
         val chapter = workbook.source.chapters.blockingIterable().minByOrNull { it.sort }!!
-        val chunk = chapter.chunks.filter { it.title == "2" }.blockingSingle()
+        val chunk = chapter.getDraft().filter { it.title == "2" }.blockingSingle()
         val resourceGroups = chunk.resources
 
         val expected = 1
@@ -542,7 +542,7 @@ class TestWorkbookRepository {
         val mockedDb = buildBasicTestDb()
         val workbook = buildBasicTestWorkbook(mockedDb)
         val chapter = workbook.source.chapters.blockingIterable().minByOrNull { it.sort }!!
-        val chunk = chapter.chunks.filter { it.title == "2" }.blockingSingle()
+        val chunk = chapter.getDraft().filter { it.title == "2" }.blockingSingle()
         val resourceGroup = chunk.resources.first()
 
         // Load some things that shouldn't trigger resource fetch, and verify no DB call is made
@@ -558,7 +558,7 @@ class TestWorkbookRepository {
     fun resourceGroupsHaveCorrectResources() {
         val workbook = buildBasicTestWorkbook()
         val chapter = workbook.source.chapters.blockingIterable().minByOrNull { it.sort }!!
-        val chunk = chapter.chunks.filter { it.title == "2" }.blockingSingle()
+        val chunk = chapter.getDraft().filter { it.title == "2" }.blockingSingle()
         val resourceGroup = chunk.resources.firstOrNull()
         Assert.assertNotNull(resourceGroup)
         val resources = resourceGroup!!.resources.blockingIterable().toList()
@@ -573,7 +573,7 @@ class TestWorkbookRepository {
         val mockedDb = buildBasicTestDb()
         val workbook = buildBasicTestWorkbook(mockedDb)
         val chapter = workbook.target.chapters.blockingIterable().minByOrNull { it.sort }!!
-        val chunk = chapter.chunks.blockingFirst()
+        val chunk = chapter.getDraft().blockingFirst()
         val takes = chunk.audio.takes
 
         // Verify precondition - no DB writes yet
@@ -596,7 +596,7 @@ class TestWorkbookRepository {
         val mockedDb = buildBasicTestDb()
         val workbook = buildBasicTestWorkbook(mockedDb)
         val chapter = workbook.target.chapters.blockingIterable().minByOrNull { it.sort }!!
-        val chunk = chapter.chunks.filter { it.title == "3" }.blockingSingle()
+        val chunk = chapter.getDraft().filter { it.title == "3" }.blockingSingle()
         val takes = chunk.audio.takes
         val take = takes.blockingFirst()
 
@@ -613,7 +613,7 @@ class TestWorkbookRepository {
         val mockedDb = buildBasicTestDb()
         val workbook = buildBasicTestWorkbook(mockedDb)
         val chapter = workbook.target.chapters.blockingIterable().minByOrNull { it.sort }!!
-        val chunk = chapter.chunks.filter { it.title == "3" }.blockingSingle()
+        val chunk = chapter.getDraft().filter { it.title == "3" }.blockingSingle()
         val takes = chunk.audio.takes
         val take = takes.blockingFirst()
 
@@ -630,7 +630,7 @@ class TestWorkbookRepository {
         val mockedDb = buildBasicTestDb()
         val workbook = buildBasicTestWorkbook(mockedDb)
         val chapter = workbook.target.chapters.blockingIterable().minByOrNull { it.sort }!!
-        val chunk = chapter.chunks.filter { it.title == "3" }.blockingSingle()
+        val chunk = chapter.getDraft().filter { it.title == "3" }.blockingSingle()
         val takes = chunk.audio.takes
         val take = takes.blockingFirst()
 
@@ -652,7 +652,7 @@ class TestWorkbookRepository {
         val mockedDb = buildBasicTestDb()
         val workbook = buildBasicTestWorkbook(mockedDb)
         val chapter = workbook.source.chapters.blockingFirst()
-        val chunks = chapter.chunks.blockingIterable().sortedBy { it.sort }
+        val chunks = chapter.getDraft().blockingIterable().sortedBy { it.sort }
 
         Assert.assertArrayEquals(
             "Expected chunk titles",
