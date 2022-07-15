@@ -146,7 +146,7 @@ class WorkbookDataStoreTest {
                 createAssociatedAudio(),
                 listOf(),
                 listOf(),
-                chunks,
+                lazy { chunks },
                 Single.just(1),
                 {},
                 {}
@@ -154,7 +154,8 @@ class WorkbookDataStoreTest {
         }
 
         @BeforeClass
-        @JvmStatic fun setup() {
+        @JvmStatic
+        fun setup() {
             FxToolkit.registerPrimaryStage()
             FxToolkit.setupApplication { testApp }
 
@@ -172,7 +173,8 @@ class WorkbookDataStoreTest {
         }
 
         @AfterClass
-        @JvmStatic fun tearDown() {
+        @JvmStatic
+        fun tearDown() {
             FxToolkit.hideStage()
             FxToolkit.cleanupStages()
             FxToolkit.cleanupApplication(testApp)

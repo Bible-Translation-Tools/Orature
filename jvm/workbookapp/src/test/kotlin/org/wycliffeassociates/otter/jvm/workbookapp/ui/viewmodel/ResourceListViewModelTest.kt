@@ -166,9 +166,11 @@ class ResourceListViewModelTest {
             audio = createAssociatedAudio(),
             subtreeResources = listOf(resourceMetadataTn),
             resources = listOf(chapterResourceGroup),
-            chunks = ReplayRelay.create<Chunk>().apply {
-                accept(chunk1)
-                accept(chunk2)
+            lazychunks = lazy {
+                ReplayRelay.create<Chunk>().apply {
+                    accept(chunk1)
+                    accept(chunk2)
+                }
             },
             label = "Chapter",
             chunkCount = Single.just(2),
@@ -198,6 +200,7 @@ class ResourceListViewModelTest {
             ContentType.TITLE,
             "Title"
         )
+
         private fun createBodyComponent(sort: Int, title: String) = Resource.Component(
             sort,
             TextItem(title, MimeType.MARKDOWN),
@@ -207,7 +210,8 @@ class ResourceListViewModelTest {
         )
 
         @BeforeClass
-        @JvmStatic fun setup() {
+        @JvmStatic
+        fun setup() {
             FxToolkit.registerPrimaryStage()
             FxToolkit.setupApplication { testApp }
 
@@ -220,7 +224,8 @@ class ResourceListViewModelTest {
         }
 
         @AfterClass
-        @JvmStatic fun tearDown() {
+        @JvmStatic
+        fun tearDown() {
             FxToolkit.hideStage()
             FxToolkit.cleanupStages()
             FxToolkit.cleanupApplication(testApp)

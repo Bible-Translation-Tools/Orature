@@ -149,7 +149,7 @@ class RecordScriptureViewModelTest {
                 createAssociatedAudio(),
                 listOf(),
                 listOf(),
-                chunks,
+                lazy { chunks },
                 Single.just(1),
                 {},
                 {}

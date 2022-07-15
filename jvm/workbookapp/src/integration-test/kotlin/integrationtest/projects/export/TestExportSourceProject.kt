@@ -145,12 +145,13 @@ class TestExportSourceProject {
             .blockingGet()
 
         assertEquals(ImportResult.SUCCESS, importResult)
-
+        509
+        124
         db.assertRowCounts(
             RowCount(
                 contents = mapOf(
                     ContentType.META to 2400,
-                    ContentType.TEXT to 62613
+                    ContentType.TEXT to 62228
                 ),
                 collections = 2535,
                 links = 0

@@ -104,7 +104,7 @@ class WorkbookPageViewModelTest {
                 mock(AssociatedAudio::class.java),
                 listOf(),
                 listOf(),
-                ReplayRelay.create(),
+                lazy { ReplayRelay.create() },
                 Single.just(0),
                 {},
                 {}
@@ -116,7 +116,7 @@ class WorkbookPageViewModelTest {
                 mock(AssociatedAudio::class.java),
                 listOf(),
                 listOf(),
-                ReplayRelay.create(),
+                lazy { ReplayRelay.create() },
                 Single.just(0),
                 {},
                 {}
@@ -124,7 +124,8 @@ class WorkbookPageViewModelTest {
         )
 
         @BeforeClass
-        @JvmStatic fun setup() {
+        @JvmStatic
+        fun setup() {
             FxToolkit.registerPrimaryStage()
             FxToolkit.setupApplication { testApp }
 
@@ -133,7 +134,8 @@ class WorkbookPageViewModelTest {
         }
 
         @AfterClass
-        @JvmStatic fun tearDown() {
+        @JvmStatic
+        fun tearDown() {
             FxToolkit.hideStage()
             FxToolkit.cleanupStages()
             FxToolkit.cleanupApplication(testApp)
