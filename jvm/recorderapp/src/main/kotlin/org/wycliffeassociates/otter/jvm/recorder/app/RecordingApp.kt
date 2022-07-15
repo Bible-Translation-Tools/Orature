@@ -30,6 +30,6 @@ class RecordingApp : App() {
     init {
         val args =
             if (!parameters?.raw.isNullOrEmpty()) parameters.raw.toTypedArray() else arrayOf("--wav=recording.wav")
-        this.scope = ParameterizedScope(ParametersImpl(args)) {}
+        this.scope = ParameterizedScope(ParametersImpl(args), {}, {})
     }
 }

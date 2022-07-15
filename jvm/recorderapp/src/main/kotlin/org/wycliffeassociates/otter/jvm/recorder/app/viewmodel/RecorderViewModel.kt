@@ -18,6 +18,8 @@
  */
 package org.wycliffeassociates.otter.jvm.recorder.app.viewmodel
 
+import io.reactivex.Completable
+import io.reactivex.schedulers.Schedulers
 import javafx.animation.AnimationTimer
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
@@ -64,6 +66,7 @@ class RecorderViewModel : ViewModel() {
     val timer = RecordingTimer()
     val timerTextProperty = SimpleStringProperty("00:00:00")
     var timerText by timerTextProperty
+    private var isSaved = false
 
     val at = object : AnimationTimer() {
         override fun handle(now: Long) {
@@ -87,6 +90,7 @@ class RecorderViewModel : ViewModel() {
             waveformView.add(fps)
         }
     }
+
     private lateinit var renderer: ActiveRecordingRenderer
 
     fun onViewReady(width: Int) {
@@ -112,6 +116,10 @@ class RecorderViewModel : ViewModel() {
 
     var canSaveProperty: BooleanBinding = (recordingProperty.not()).and(hasWrittenProperty)
 
+    fun dock() {
+        isSaved = false
+    }
+
     fun toggle() {
         if (isRecording) {
             writer.pause()
@@ -124,15 +132,35 @@ class RecorderViewModel : ViewModel() {
         isRecording = !isRecording
     }
 
-    fun save() {
+    fun save(callback: () -> Unit = {}) {
+        logger.info("Closing Recorder...")
+        if (isSaved) {
+            return
+        }
+        isSaved = true
+
         at.stop()
         recorder.stop()
         writer.writer.dispose()
-        wavAudio.file.copyTo(targetFile, true)
 
-        logger.info("Closing Recorder...")
-        runLater {
-            (scope as ParameterizedScope).navigateBack()
+        Completable
+            .fromAction {
+                wavAudio.file.copyTo(targetFile, true)
+            }
+            .doOnError { e ->
+                logger.error("Error in closing the maker app", e)
+            }
+            .subscribeOn(Schedulers.io())
+            .subscribe {
+                callback()
+            }
+    }
+
+    fun saveAndQuit() {
+        save {
+            runLater {
+                (scope as ParameterizedScope).navigateBack()
+            }
         }
     }
 
@@ -158,7 +186,7 @@ class RecorderViewModel : ViewModel() {
     }
 
     private fun createTempRecordingTake(): File {
-        return kotlin.io.path.createTempFile("otter-take",".wav").toFile()
+        return kotlin.io.path.createTempFile("otter-take", ".wav").toFile()
             .also {
                 it.deleteOnExit()
                 targetFile.copyTo(it, true)

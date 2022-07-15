@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.recorder.app.view
 import javafx.stage.Screen
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.recorder.app.viewmodel.RecorderViewModel
+import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*
 
@@ -55,6 +56,20 @@ class RecorderView : PluginEntrypoint() {
             if (!viewInflated && width.toInt() > 0) {
                 recorderViewModel.onViewReady(width.toInt())
                 viewInflated = true
+            }
+        }
+    }
+
+    override fun onDock() {
+        super.onDock()
+        recorderViewModel.dock()
+    }
+
+    override fun onUndock() {
+        super.onUndock()
+        recorderViewModel.save {
+            runLater {
+                (scope as ParameterizedScope).onNavigate()
             }
         }
     }

@@ -195,12 +195,20 @@ class AudioPlugin(
 
     private fun runInOtterMainWindow(pluginClass: KClass<PluginEntrypoint>, parameters: Parameters) {
         val appWorkspace: Workspace = find()
-        val scope = ParameterizedScope(parameters) {
-            synchronized(monitor) {
-                monitor.notify()
-                appWorkspace.navigateBack()
+        val scope = ParameterizedScope(
+            parameters,
+            {
+                synchronized(monitor) {
+                    monitor.notify()
+                    appWorkspace.navigateBack()
+                }
+            },
+            {
+                synchronized(monitor) {
+                    monitor.notify()
+                }
             }
-        }
+        )
         val paramsMap = appWorkspace.params
         val oldEntries = paramsMap.entries.map { it.toPair() }.toTypedArray()
         val newEntries = mapOf(*oldEntries, Pair("audioConnectionFactory", connectionFactory))

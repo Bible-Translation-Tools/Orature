@@ -105,7 +105,7 @@ class ControlFragment : Fragment() {
             visibleProperty().bind(vm.canSaveProperty)
             managedProperty().bind(vm.recordingProperty.or(vm.hasWrittenProperty))
             setOnAction {
-                vm.save()
+                vm.saveAndQuit()
             }
             shortcut(Shortcut.GO_BACK.value)
         }
@@ -116,7 +116,7 @@ class ControlFragment : Fragment() {
             visibleProperty().bind(vm.recordingProperty.not().and(vm.hasWrittenProperty.not()))
             managedProperty().bind(visibleProperty())
             setOnAction {
-                vm.save()
+                vm.saveAndQuit()
             }
             shortcut(Shortcut.GO_BACK.value)
         }
