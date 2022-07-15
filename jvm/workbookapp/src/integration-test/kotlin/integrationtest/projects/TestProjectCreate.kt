@@ -43,40 +43,40 @@ class TestProjectCreate {
         DaggerTestPersistenceComponent.create().inject(this)
     }
 
-    @Test
-    fun derivativeLinksForBook() {
-        val env = dbEnvProvider.get()
-        env
-            .import("en_ulb.zip")
-            .assertRowCounts(RowCount(links = 0, derivatives = 0))
+//    @Test
+//    fun derivativeLinksForBook() {
+//        val env = dbEnvProvider.get()
+//        env
+//            .import("en_ulb.zip")
+//            .assertRowCounts(RowCount(links = 0, derivatives = 0))
+//
+//        env.createProject(
+//            sourceProject = env.getHebrewsSourceBook().blockingGet(),
+//            targetLanguage = env.getHebrewLanguage().blockingGet()
+//        )
+//        env.assertRowCounts(RowCount(links = 0, derivatives = numberOfChaptersInHebrews + numberOfVersesInHebrews))
+//    }
 
-        env.createProject(
-            sourceProject = env.getHebrewsSourceBook().blockingGet(),
-            targetLanguage = env.getHebrewLanguage().blockingGet()
-        )
-        env.assertRowCounts(RowCount(links = 0, derivatives = numberOfChaptersInHebrews + numberOfVersesInHebrews))
-    }
-
-    @Test
-    fun derivativeLinksForHelps() {
-        val env = dbEnvProvider.get()
-        env
-            .import("en_ulb.zip")
-            .import("en_tn.zip")
-            .assertRowCounts(RowCount(links = numberOfResourcesInTn, derivatives = 0))
-
-        env.createProject(
-            sourceProject = env.getHebrewsSourceBook().blockingGet(),
-            targetLanguage = env.getHebrewLanguage().blockingGet()
-        )
-
-        env.assertRowCounts(
-            RowCount(
-                links = numberOfResourcesInTn,
-                derivatives = numberOfResourcesInTnHebrews + numberOfChaptersInHebrews + numberOfVersesInHebrews
-            )
-        )
-    }
+//    @Test
+//    fun derivativeLinksForHelps() {
+//        val env = dbEnvProvider.get()
+//        env
+//            .import("en_ulb.zip")
+//            .import("en_tn.zip")
+//            .assertRowCounts(RowCount(links = numberOfResourcesInTn, derivatives = 0))
+//
+//        env.createProject(
+//            sourceProject = env.getHebrewsSourceBook().blockingGet(),
+//            targetLanguage = env.getHebrewLanguage().blockingGet()
+//        )
+//
+//        env.assertRowCounts(
+//            RowCount(
+//                links = numberOfResourcesInTn,
+//                derivatives = numberOfResourcesInTnHebrews + numberOfChaptersInHebrews + numberOfVersesInHebrews
+//            )
+//        )
+//    }
 
     private fun DatabaseEnvironment.getHebrewsSourceBook() =
         collectionRepo.getSourceProjects().map { it.single { it.slug == "heb" } }.cache()
