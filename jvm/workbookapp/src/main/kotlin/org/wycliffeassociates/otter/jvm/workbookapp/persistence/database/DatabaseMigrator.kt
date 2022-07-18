@@ -30,7 +30,7 @@ import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
 import org.slf4j.LoggerFactory
 
-const val SCHEMA_VERSION = 8
+const val SCHEMA_VERSION = 9
 const val DATABASE_INSTALLABLE_NAME = "DATABASE"
 
 class DatabaseMigrator {
@@ -47,7 +47,7 @@ class DatabaseMigrator {
             currentVersion = migrate5to6(dsl, currentVersion)
             currentVersion = migrate6to7(dsl, currentVersion)
             currentVersion = migrate7to8(dsl, currentVersion)
-
+            currentVersion = migrate8to9(dsl, currentVersion)
             updateDatabaseVersion(dsl, currentVersion)
         }
     }
@@ -266,12 +266,13 @@ class DatabaseMigrator {
                     .addColumn(ContentEntity.CONTENT_ENTITY.DRAFT_NUMBER)
                     .execute()
                 logger.info("Updated database from version 8 to 9")
+                return 9
             } catch (e: DataAccessException) {
                 // Exception is thrown because the column might already exist but an existence check cannot
                 // be performed in sqlite.
                 logger.error("Error in migrate8to9", e)
+                return 8
             }
-            return 9
         } else {
             current
         }
