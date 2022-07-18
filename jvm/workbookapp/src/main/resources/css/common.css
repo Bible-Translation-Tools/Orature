@@ -31,3 +31,13 @@
 .scroll-pane {
     -fx-background-color: transparent;
 }
+
+.jfx-snackbar-content {
+    -fx-background-color: #1a1a1a;
+    -fx-background-radius: 6px;
+}
+
+.jfx-snackbar-content .label {
+    -fx-text-fill: -wa-white;
+    -fx-font-size: 14pt;
+}
