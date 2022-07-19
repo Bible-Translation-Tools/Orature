@@ -69,7 +69,7 @@ enum class ChunkingWizardPage {
 
 class ChunkAudioUseCase(val directoryProvider: IDirectoryProvider, val workbook: Workbook) {
     fun createChunkedSourceAudio(source: File, cues: List<AudioCue>) {
-        val temp = File(source.name).apply { createNewFile() }
+        val temp = File(source.name)
         val tempCue = File(temp.parent, "${temp.nameWithoutExtension}.cue")
 
         val accessor = ProjectFilesAccessor(
