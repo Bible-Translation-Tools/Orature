@@ -24,15 +24,20 @@ import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadcrumbBar
+import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
+import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseFinishedEvent
+import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseRequestEvent
 import tornadofx.*
 import java.text.MessageFormat
 
 class NavigationMediator : Component(), ScopedInstance {
 
     val workbookDataStore: WorkbookDataStore by inject()
+    val rootVM: RootViewModel by inject()
     val breadCrumbsBar = BreadcrumbBar()
 
     private val recorderBreadCrumb = BreadCrumb().apply {
@@ -80,6 +85,16 @@ class NavigationMediator : Component(), ScopedInstance {
                 PluginType.EDITOR -> breadCrumbsBar.removeItem(editorBreadCrumb)
                 PluginType.MARKER -> breadCrumbsBar.removeItem(markerBreadCrumb)
             }
+        }
+        subscribe<NavigationRequestEvent> {
+            if (rootVM.pluginOpenedProperty.value) {
+                fire(PluginCloseRequestEvent)
+            } else {
+                dock(it.view)
+            }
+        }
+        subscribe<PluginCloseFinishedEvent> {
+            back()
         }
     }
 

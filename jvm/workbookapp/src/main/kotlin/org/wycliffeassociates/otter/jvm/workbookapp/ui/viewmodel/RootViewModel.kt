@@ -34,6 +34,7 @@ class RootViewModel : ViewModel() {
     val logger = LoggerFactory.getLogger(RootViewModel::class.java)
 
     val pluginOpenedProperty = SimpleBooleanProperty(false)
+    val externalPluginOpenedProperty = SimpleBooleanProperty(false)
     val drawerOpenedProperty = SimpleBooleanProperty(false)
 
     val showAudioErrorDialogProperty = SimpleBooleanProperty(false)

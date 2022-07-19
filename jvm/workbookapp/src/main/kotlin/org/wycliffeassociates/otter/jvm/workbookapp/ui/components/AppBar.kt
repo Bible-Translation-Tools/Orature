@@ -89,7 +89,7 @@ class AppBar : Fragment() {
         root.apply {
             styleClass.setAll("app-bar")
 
-            disableProperty().bind(rootViewModel.pluginOpenedProperty)
+            disableWhen { rootViewModel.externalPluginOpenedProperty }
 
             label {
                 addClass("app-bar__logo")

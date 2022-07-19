@@ -39,6 +39,7 @@ import tornadofx.setValue
 import java.io.File
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
+import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseFinishedEvent
 import tornadofx.runLater
 
 class RecorderViewModel : ViewModel() {
@@ -124,14 +125,16 @@ class RecorderViewModel : ViewModel() {
         isRecording = !isRecording
     }
 
-    fun save() {
+    fun saveAndQuit() {
+        logger.info("Saving Recorder data...")
         at.stop()
         recorder.stop()
         writer.writer.dispose()
         wavAudio.file.copyTo(targetFile, true)
 
-        logger.info("Closing Recorder...")
         runLater {
+            logger.info("Close Recorder")
+            fire(PluginCloseFinishedEvent)
             (scope as ParameterizedScope).navigateBack()
         }
     }
