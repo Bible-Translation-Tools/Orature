@@ -18,12 +18,14 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui
 
+import javafx.application.Platform
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadcrumbBar
+import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
@@ -39,6 +41,7 @@ class NavigationMediator : Component(), ScopedInstance {
     val workbookDataStore: WorkbookDataStore by inject()
     val rootVM: RootViewModel by inject()
     val breadCrumbsBar = BreadcrumbBar()
+    var appExitRequested = false
 
     private val recorderBreadCrumb = BreadCrumb().apply {
         titleProperty.bind(
@@ -95,6 +98,16 @@ class NavigationMediator : Component(), ScopedInstance {
         }
         subscribe<PluginCloseFinishedEvent> {
             back()
+            if (appExitRequested) {
+                runLater {
+                    Platform.exit()
+                    System.exit(0);
+                }
+            }
+        }
+        subscribe<AppCloseRequestEvent> {
+            appExitRequested = true
+            fire(PluginCloseRequestEvent)
         }
     }
 

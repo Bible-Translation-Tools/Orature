@@ -115,9 +115,7 @@ class RecorderViewModel : ViewModel() {
 
     fun toggle() {
         if (isRecording) {
-            writer.pause()
-            hasWritten = true
-            timer.pause()
+            pause()
         } else {
             writer.start()
             timer.start()
@@ -127,6 +125,7 @@ class RecorderViewModel : ViewModel() {
 
     fun saveAndQuit() {
         logger.info("Saving Recorder data...")
+        pause()
         at.stop()
         recorder.stop()
         writer.writer.dispose()
@@ -152,6 +151,12 @@ class RecorderViewModel : ViewModel() {
         // clear waveform
         renderer.clearData()
         renderer.setRecordingStatusObservable(writer.isWriting)
+    }
+
+    private fun pause() {
+        writer.pause()
+        hasWritten = true
+        timer.pause()
     }
 
     private fun initializeAudioData() {
