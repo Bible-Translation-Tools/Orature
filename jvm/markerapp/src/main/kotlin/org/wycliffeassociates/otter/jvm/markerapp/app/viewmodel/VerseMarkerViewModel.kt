@@ -44,6 +44,7 @@ import tornadofx.*
 import java.io.File
 import java.lang.Integer.min
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
+import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseFinishedEvent
 import kotlin.math.max
 
 private const val WAV_COLOR = "#0A337390"
@@ -145,25 +146,26 @@ class VerseMarkerViewModel : ViewModel() {
     }
 
     fun saveAndQuit() {
-        logger.info("Closing Verse Marker app...")
+        logger.info("Saving Marker data...")
 
         compositeDisposable.clear()
         waveformMinimapImage.set(null)
         currentMarkerNumberProperty.set(-1)
         imageCleanup()
 
-        (scope as ParameterizedScope).let {
+
             writeMarkers()
                 .doOnError { e ->
                     logger.error("Error in closing the maker app", e)
                 }
                 .subscribe {
                     runLater {
-                        it.navigateBack()
+                        logger.info("Close Marker")
+                        fire(PluginCloseFinishedEvent)
+                        (scope as ParameterizedScope).navigateBack()
                         System.gc()
                     }
                 }
-        }
     }
 
     fun placeMarker() {
