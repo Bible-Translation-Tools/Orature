@@ -115,7 +115,6 @@ class ChapterPage : View() {
         viewModel.setWorkChunk()
         viewModel.openPlayers()
 
-        viewModel.checkCanCompile()
         chunkListView.refresh()
         initializeProgressDialog()
     }

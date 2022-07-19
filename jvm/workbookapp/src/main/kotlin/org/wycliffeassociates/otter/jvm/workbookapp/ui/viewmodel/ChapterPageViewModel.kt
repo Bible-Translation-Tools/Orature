@@ -112,22 +112,13 @@ class ChapterPageViewModel : ViewModel() {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
 
         audioPluginViewModel.pluginNameProperty.bind(pluginNameBinding())
+
+        filteredContent.onChange {
+            checkCanCompile()
+        }
     }
 
     fun dock() {
-        allContent
-            .changes()
-            .doOnError { e ->
-                logger.error("Error in setting up content cards", e)
-            }
-            .observeOnFx()
-            .subscribe {
-                println("in the allcontent changes")
-                println(allContent.size)
-
-                checkCanCompile()
-            }
-
         chapterCardProperty.set(CardData(workbookDataStore.chapter))
         workbookDataStore.activeChapterProperty.value?.let { chapter ->
             updateLastSelectedChapter(chapter.sort)
@@ -139,6 +130,7 @@ class ChapterPageViewModel : ViewModel() {
         appPreferencesRepo.sourceTextZoomRate().subscribe { rate ->
             workbookDataStore.sourceTextZoomRateProperty.set(rate)
         }
+        checkCanCompile()
     }
 
     fun undock() {
