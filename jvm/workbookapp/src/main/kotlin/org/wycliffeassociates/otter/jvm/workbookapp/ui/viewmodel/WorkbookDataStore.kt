@@ -80,7 +80,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
 
     val activeResourceMetadataProperty = SimpleObjectProperty<ResourceMetadata>()
     val activeResourceMetadata
-         get() = activeResourceMetadataProperty.value ?: throw IllegalStateException("Resource Metadata is null")
+        get() = activeResourceMetadataProperty.value ?: throw IllegalStateException("Resource Metadata is null")
 
     val activeProjectFilesAccessorProperty = SimpleObjectProperty<ProjectFilesAccessor>()
     val activeProjectFilesAccessor: ProjectFilesAccessor
@@ -184,7 +184,8 @@ class WorkbookDataStore : Component(), ScopedInstance {
                     targetAudioProperty.set(null)
                 }
             }
-            _chapter != null -> { /* no-op */ } // preserve targetAudio for clean up
+            _chapter != null -> { /* no-op */
+            } // preserve targetAudio for clean up
             else -> {
                 selectedChapterPlayerProperty.set(null)
                 targetAudioProperty.set(null)
@@ -235,24 +236,29 @@ class WorkbookDataStore : Component(), ScopedInstance {
             )
             chunk != null -> getChunkSourceText()
             else -> getSourceChapter().map { _chapter ->
-                _chapter.textItem.text
+                val verses = activeProjectFilesAccessor.getChapterText(workbook.source.slug, _chapter.sort)
+                combineVerses(verses)
             }
         }
     }
 
-    fun getChunkSourceText(): Maybe<String> {
+    private fun getChunkSourceText(): Maybe<String> {
         chunk?.let { chunk ->
-
             val accessor = ProjectFilesAccessor(
                 directoryProvider,
                 workbook.source.resourceMetadata,
                 workbook.target.resourceMetadata,
                 workbook.target
             )
-            val text = StringBuilder().apply {accessor.getChunkText(workbook.source.slug, chapter.sort, chunk.start, chunk.end).forEach { append("$it\n") }}.toString()
+            val verses = accessor.getChunkText(workbook.source.slug, chapter.sort, chunk.start, chunk.end)
+            val text = combineVerses(verses)
             return Maybe.just(text)
         }
         return Maybe.just("")
+    }
+
+    private fun combineVerses(verses: List<String>): String {
+        return StringBuilder().apply { verses.forEach { append("$it\n") } }.toString()
     }
 
     fun sourceTextBinding(): StringBinding {
