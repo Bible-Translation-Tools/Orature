@@ -115,16 +115,13 @@ class VerseByVerseChunking(
             }
             // chunk end inside verse
             else if (chunk.endLoc >= verse.startLoc && chunk.endLoc <= verse.endLoc) {
-                println("matched second")
                 verses.add(verse.sort)
             }
             // verse inside chunk
             else if (verse.startLoc >= chunk.startLoc && verse.endLoc <= chunk.endLoc) {
-                println("matched third")
                 verses.add(verse.sort)
             }
         }
-        println("matching verses for chunk ${chunk.sort} is $verses")
         return verses
     }
 

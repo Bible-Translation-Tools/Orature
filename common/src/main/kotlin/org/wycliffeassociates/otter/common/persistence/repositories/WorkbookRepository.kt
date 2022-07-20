@@ -117,7 +117,6 @@ class WorkbookRepository(
             )
         )
         connections[workbook] = CompositeDisposable(disposables)
-        println("workbook built")
         return workbook
     }
 

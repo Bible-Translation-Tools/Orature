@@ -49,7 +49,6 @@ class TakeDao(
     fun insert(entity: TakeEntity, dsl: DSLContext = instanceDsl): Int {
         if (entity.id != 0) throw InsertionException("Entity ID is not 0")
 
-        println(entity)
         // Insert the take entity
         dsl
             .insertInto(

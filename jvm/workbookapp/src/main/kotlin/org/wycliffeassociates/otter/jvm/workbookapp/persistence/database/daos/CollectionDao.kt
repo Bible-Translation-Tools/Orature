@@ -209,7 +209,6 @@ class CollectionDao(
                 ).and(COLLECTION_ENTITY.PARENT_FK.eq(projectEntity.id))
             )
         return query.fetch {
-            println(it)
             RecordMappers.mapToCollectionEntity(it)
         }
     }

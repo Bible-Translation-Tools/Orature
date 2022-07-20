@@ -199,13 +199,11 @@ class CollectionRepository @Inject constructor(
     }
 
     override fun collectionsWithoutTakes(project: Collection): Single<List<Collection>> {
-        println(" in collection without take")
         return Single.fromCallable {
             collectionDao
                 .collectionsWithoutTakes(collectionMapper.mapToEntity(project))
                 .map {
                     val collection = collectionMapper.mapFromEntity(it, project.resourceContainer)
-                    println(collection)
                     collection
                 }
         }

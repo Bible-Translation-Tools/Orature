@@ -23,6 +23,7 @@ import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Media
 import java.io.File
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.workbook.Book
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
@@ -36,19 +37,21 @@ class SourceAudioAccessor(
     val project: String
 ) {
 
+    private val logger = LoggerFactory.getLogger(SourceAudioAccessor::class.java)
+
     private val dir = File(directoryProvider.cacheDirectory, "source").apply { mkdirs() }
     private val cache = mutableMapOf<String, File>()
 
     fun getChapter(chapter: Int, target: Book? = null): SourceAudio? {
-        target?.let { meta ->
-            println("looking for target audio")
+        logger.info("Looking for target audio for chapter: $chapter with target book: $target")
+        target?.let { target ->
             val accessor = ProjectFilesAccessor(directoryProvider, metadata, target.resourceMetadata, target)
             val dir = accessor.sourceAudioDir
             val file = dir.listFiles()?.find {
                 chapterMatches(it, chapter) && validAudioExtension(it)
             }
             file?.let {
-                println("found the file! ${it.path}")
+                logger.info("Found the source audio file! ${it.path}")
                 val audioFile = AudioFile(it)
                 val size = audioFile.totalFrames
                 return SourceAudio(it, 0, size)
@@ -67,6 +70,7 @@ class SourceAudioAccessor(
                 }
             }
         }
+        logger.info("No source audio found")
         return null
     }
 
@@ -115,7 +119,7 @@ class SourceAudioAccessor(
     fun getChunk(chapter: Int, chunk: Int, target: Book?): SourceAudio? {
         val file = getChapter(chapter, target)?.file
         if (file != null) {
-            println("chunk file is ${file.absolutePath}")
+            logger.info("chunk file is ${file.absolutePath}")
             val audioFile = AudioFile(file)
             val cues = audioFile.metadata.getCues()
             cues.sortedBy { it.location }

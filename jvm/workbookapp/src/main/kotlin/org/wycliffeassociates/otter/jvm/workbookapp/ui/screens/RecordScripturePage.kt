@@ -176,8 +176,6 @@ class RecordScripturePage : View() {
         tryImportStylesheet(resources.get("/css/scripturetakecard.css"))
         tryImportStylesheet(resources.get("/css/add-plugin-dialog.css"))
 
-        println("here in the init ya know")
-
         isDraggingFileProperty.onChange {
             if (it) recordScriptureViewModel.stopPlayers()
         }
@@ -197,8 +195,6 @@ class RecordScripturePage : View() {
             recordScriptureViewModel.openPlayers()
         }
 
-        println("subbed on workbook stuff")
-
         fileDragTarget.setOnDragOver {
             if (it.gestureSource != fileDragTarget && it.dragboard.hasFiles()) {
                 it.acceptTransferModes(*TransferMode.ANY)
@@ -217,7 +213,6 @@ class RecordScripturePage : View() {
             it.consume()
         }
 
-        println("before main container")
         mainContainer.apply {
             addEventHandler(DragEvent.DRAG_ENTERED) {
                 if (it.dragboard.hasFiles()) {
@@ -351,7 +346,6 @@ class RecordScripturePage : View() {
             columnConstraints.addAll(sourceContentColumn, rightPaneColumn)
             rowConstraints.add(row)
         }
-        println("after main container")
         fileDragTarget.apply {
             visibleProperty().bind(isDraggingFileProperty)
             isDraggingFileProperty.onChange {
@@ -361,8 +355,6 @@ class RecordScripturePage : View() {
                 isDraggingFileProperty.value = false
             }
         }
-        println("after file drag target")
-        println("finished init yeh")
     }
 
     private fun Parent.addButtonEventHandlers() {
