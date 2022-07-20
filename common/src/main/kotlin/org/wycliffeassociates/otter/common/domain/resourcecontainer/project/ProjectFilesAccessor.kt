@@ -282,7 +282,7 @@ class ProjectFilesAccessor(
         }
     }
 
-    fun getChapterText(projectSlug: String, chapterNumber: Int): List<String> {
+    fun getChapterText(projectSlug: String, chapterNumber: Int, showVerseNumber: Boolean = true): List<String> {
         val chapterText = arrayListOf<String>()
 
         ResourceContainer.load(sourceMetadata.path).use { rc ->
@@ -295,7 +295,10 @@ class ProjectFilesAccessor(
                 val chap = chapters.find { it.number == chapterNumber }
                 chap?.let {
                     it.getChildMarkers(VMarker::class.java).forEach {
-                        chapterText.add(it.getText())
+                        when (showVerseNumber) {
+                            true -> chapterText.add("${it.verseNumber}. ${it.getText()}")
+                            false -> chapterText.add(it.getText())
+                        }
                     }
                 }
             }
