@@ -18,9 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
-import com.github.thomasnield.rxkotlinfx.changes
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -33,7 +31,6 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
-import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Take
@@ -53,10 +50,8 @@ import tornadofx.*
 import java.io.File
 import java.util.concurrent.Callable
 import javax.inject.Inject
-import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
-import org.wycliffeassociates.otter.common.domain.content.VerseByVerseChunking
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
+import org.wycliffeassociates.otter.common.domain.content.CreateChunks
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 
 
@@ -465,11 +460,11 @@ class ChapterPageViewModel : ViewModel() {
         return (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
     }
 
-    fun chunkVerseByVerse() {
+    fun createChunksFromVerses() {
         val wkbk = workbookDataStore.activeWorkbookProperty.value
         val chapter = workbookDataStore.activeChapterProperty.value
-        VerseByVerseChunking(directoryProvider, wkbk, chapter.addChunk, chapter.sort)
-            .chunkVerseByVerse(wkbk.source.slug, 1)
+        CreateChunks(directoryProvider, wkbk, chapter.addChunk, chapter.sort)
+            .createChunksFromVerses(wkbk.source.slug, 1)
     }
 
     fun resetChapter() {

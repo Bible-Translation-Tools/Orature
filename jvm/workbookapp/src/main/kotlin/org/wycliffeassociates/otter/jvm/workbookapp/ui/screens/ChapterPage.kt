@@ -21,18 +21,13 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 import com.github.thomasnield.rxkotlinfx.toLazyBinding
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
-import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.value.ChangeListener
-import javafx.scene.Node
 import javafx.scene.control.Label
 import javafx.scene.control.ListView
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
-import javafx.scene.layout.ColumnConstraints
-import javafx.scene.layout.GridPane
 import javafx.scene.layout.Priority
-import javafx.scene.layout.Region
 import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
@@ -65,8 +60,6 @@ import java.text.MessageFormat
 import java.util.*
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Pos
-import javafx.scene.paint.Color
-import javafx.scene.paint.Paint
 import kotlin.math.max
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.ChunkingWizard
 
@@ -370,7 +363,7 @@ class ChapterPage : View() {
                             graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
 
                             setOnAction {
-                                viewModel.chunkVerseByVerse()
+                                viewModel.createChunksFromVerses()
                             }
                         }
                     }

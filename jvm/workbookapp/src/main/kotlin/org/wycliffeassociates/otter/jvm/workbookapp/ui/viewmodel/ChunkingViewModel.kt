@@ -35,7 +35,7 @@ import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.common.domain.content.VerseByVerseChunking
+import org.wycliffeassociates.otter.common.domain.content.CreateChunks
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
@@ -223,8 +223,8 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
         val chapter = workbookDataStore.activeChapterProperty.value
         val cues = markers.filter { it.placed }.map { it.toAudioCue() }
 
-        VerseByVerseChunking(directoryProvider, wkbk, chapter.addChunk, chapter.sort)
-            .chunkChunkByChunk(wkbk.source.slug, cues, 1)
+        CreateChunks(directoryProvider, wkbk, chapter.addChunk, chapter.sort)
+            .createUserDefinedChunks(wkbk.source.slug, cues, 1)
 
         pageProperty.set(ChunkingWizardPage.CONSUME)
 

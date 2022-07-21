@@ -19,17 +19,16 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.Proj
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 
 
-class VerseByVerseChunking(
-    val directoryProvider: IDirectoryProvider,
-    val workbook: Workbook,
-    val chunkCreator: (List<Content>) -> Unit,
-    val chapterNumber: Int
+class CreateChunks(
+    private val directoryProvider: IDirectoryProvider,
+    private val workbook: Workbook,
+    private val chunkCreator: (List<Content>) -> Unit,
+    private val chapterNumber: Int
 ) {
+    private val logger = LoggerFactory.getLogger(CreateChunks::class.java)
 
-    private val logger = LoggerFactory.getLogger(VerseByVerseChunking::class.java)
-
-    val accessor: ProjectFilesAccessor
-    val sourceAudio: SourceAudioAccessor
+    private val accessor: ProjectFilesAccessor
+    private val sourceAudio: SourceAudioAccessor
 
     init {
         accessor = ProjectFilesAccessor(
@@ -41,7 +40,7 @@ class VerseByVerseChunking(
         sourceAudio = SourceAudioAccessor(directoryProvider, workbook.source.resourceMetadata, workbook.source.slug)
     }
 
-    fun chunkChunkByChunk(
+    fun createUserDefinedChunks(
         projectSlug: String,
         chunks: List<AudioCue>,
         draftNumber: Int
@@ -70,6 +69,29 @@ class VerseByVerseChunking(
         }
         chunkCreator(chunksToAdd)
         writeChunkFile(projectSlug, chapterNumber, chunksToAdd)
+    }
+
+    fun createChunksFromVerses(
+        projectSlug: String,
+        draftNumber: Int
+    ) {
+        val chunksToAdd = mutableListOf<Content>()
+        accessor.getChapterText(projectSlug, chapterNumber).forEachIndexed { idx, str ->
+            val verseNumber = idx + 1
+            val content = Content(
+                verseNumber,
+                "verse",
+                verseNumber,
+                verseNumber,
+                null,
+                str,
+                "usfm",
+                ContentType.TEXT,
+                draftNumber
+            )
+            chunksToAdd.add(content)
+        }
+        chunkCreator(chunksToAdd)
     }
 
     private fun writeChunkFile(projectSlug: String, chapterNumber: Int, chunksToAdd: List<Content>) {
@@ -105,6 +127,8 @@ class VerseByVerseChunking(
         }
     }
 
+    private data class VerseRange(val sort: Int, val startLoc: Int, val endLoc: Int)
+
     private fun findVerseRange(verseMarkers: List<VerseRange>, chunk: VerseRange): List<Int> {
         val verses = mutableListOf<Int>()
 
@@ -125,7 +149,6 @@ class VerseByVerseChunking(
         return verses
     }
 
-
     private fun mapCuesToRanges(cues: List<AudioCue>): List<VerseRange> {
         cues.sortedBy { it.location }
         val ranges = mutableListOf<VerseRange>()
@@ -134,30 +157,5 @@ class VerseByVerseChunking(
             ranges.add(VerseRange(idx + 1, cue.location, end))
         }
         return ranges
-    }
-
-    private data class VerseRange(val sort: Int, val startLoc: Int, val endLoc: Int)
-
-    fun chunkVerseByVerse(
-        projectSlug: String,
-        draftNumber: Int
-    ) {
-        val chunksToAdd = mutableListOf<Content>()
-        accessor.getChapterText(projectSlug, chapterNumber).forEachIndexed { idx, str ->
-            val verseNumber = idx + 1
-            val content = Content(
-                verseNumber,
-                "verse",
-                verseNumber,
-                verseNumber,
-                null,
-                str,
-                "usfm",
-                ContentType.TEXT,
-                draftNumber
-            )
-            chunksToAdd.add(content)
-        }
-        chunkCreator(chunksToAdd)
     }
 }
