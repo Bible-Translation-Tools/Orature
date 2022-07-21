@@ -25,13 +25,14 @@ import io.reactivex.rxkotlin.cast
 import io.reactivex.rxkotlin.toObservable
 import io.reactivex.schedulers.Schedulers
 import java.lang.Thread.sleep
+import java.util.*
 import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 
-data class Chapter(
+class Chapter(
     override val sort: Int,
     override val title: String,
     override val label: String,
@@ -90,5 +91,32 @@ data class Chapter(
         } else {
             "$start"
         }
+    }
+
+    override fun hashCode(): Int {
+        return Objects.hash(
+            sort,
+            title,
+            label,
+            contentType
+        )
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Chunk
+
+        if (sort != other.sort) return false
+        if (title != other.title) return false
+        if (label != other.label) return false
+        if (contentType != other.contentType) return false
+
+        return true
+    }
+
+    override fun toString(): String {
+        return "Chapter(sort=$sort, title=$title, label=$label, textItem=$textItem, contentType=$contentType)"
     }
 }

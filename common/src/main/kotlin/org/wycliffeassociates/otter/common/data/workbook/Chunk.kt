@@ -59,7 +59,6 @@ class Chunk(
         other as Chunk
 
         if (sort != other.sort) return false
-        if (contentType != other.contentType) return false
         if (label != other.label) return false
         if (contentType != other.contentType) return false
         if (textItem != other.textItem) return false
