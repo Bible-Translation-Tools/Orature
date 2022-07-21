@@ -33,12 +33,17 @@ class CreateProject @Inject constructor(
     /**
      * Create derived collections for each source RC that has content in sourceProject's subtree, optionally
      * limited to resourceId (if not null).
+     *
+     * @param sourceProject The Book Collection to derive from
+     * @param targetLanguage The language of the derived project
+     * @param resourceId Filters the source and linked RCs by this optional filter
+     * @param deriveProjectFromVerses Derives Content/Chunks for Chapters based on the Verses parsed in the text.
      */
     fun create(
         sourceProject: Collection,
         targetLanguage: Language,
         resourceId: String? = null,
-        verseByVerse: Boolean = false
+        deriveProjectFromVerses: Boolean = false
     ): Single<Collection> {
         // Find the source RC and its linked (help) RCs
         val sourceRc = sourceProject.resourceContainer
@@ -58,7 +63,7 @@ class CreateProject @Inject constructor(
         return matchingRcs
             .toList()
             .flatMap {
-                collectionRepo.deriveProject(it, sourceProject, targetLanguage, verseByVerse)
+                collectionRepo.deriveProject(it, sourceProject, targetLanguage, deriveProjectFromVerses)
             }
     }
 }

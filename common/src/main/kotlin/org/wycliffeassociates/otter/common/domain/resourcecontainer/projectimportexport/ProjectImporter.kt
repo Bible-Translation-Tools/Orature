@@ -311,7 +311,7 @@ class ProjectImporter @Inject constructor(
         verseByVerse: Boolean
     ): Collection {
         return CreateProject(collectionRepository, resourceMetadataRepository)
-            .create(sourceCollection, language, verseByVerse = verseByVerse)
+            .create(sourceCollection, language, deriveProjectFromVerses = verseByVerse)
             .blockingGet()
     }
 
