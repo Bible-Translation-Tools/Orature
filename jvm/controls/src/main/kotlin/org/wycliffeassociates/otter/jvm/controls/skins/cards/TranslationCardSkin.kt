@@ -35,6 +35,9 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import java.text.MessageFormat
 import java.util.concurrent.Callable
+import javafx.beans.binding.BooleanBinding
+import javafx.beans.property.ListProperty
+import javafx.collections.ObservableList
 
 class TranslationCardSkin<T>(private val card: TranslationCard<T>) : SkinBase<TranslationCard<T>>(card) {
 
@@ -112,11 +115,17 @@ class TranslationCardSkin<T>(private val card: TranslationCard<T>) : SkinBase<Tr
 
         seeMoreBtn.apply {
             textProperty().bind(card.showMoreTextProperty)
-            visibleProperty().bind(card.itemsProperty.booleanBinding {
-                it?.let {
-                    it.size > card.shownItemsNumberProperty.value
-                } ?: false
-            })
+
+            visibleProperty().bind(
+                booleanBinding(
+                    card.itemsProperty,
+                    op = {
+                        card.itemsProperty.value?.let {
+                            it.size > card.shownItemsNumberProperty.value
+                        } ?: false
+                    }
+                )
+            )
             managedProperty().bind(visibleProperty())
             textProperty().bind(seeMoreLessTextBinding())
             tooltip { textProperty().bind(seeMoreLessTextBinding()) }
@@ -146,21 +155,21 @@ class TranslationCardSkin<T>(private val card: TranslationCard<T>) : SkinBase<Tr
             Callable {
                 val hidden = card.itemsProperty.value.size - card.shownItemsNumberProperty.value
                 when (card.seeAllProperty.value) {
-                     true -> {
+                    true -> {
                         MessageFormat.format(
                             "{0} ({1})",
                             card.showLessTextProperty.value,
                             hidden
                         )
-                     }
-                     false -> {
-                         MessageFormat.format(
-                             "{0} ({1})",
-                             card.showMoreTextProperty.value,
-                             hidden
-                         )
-                     }
-                 }
+                    }
+                    false -> {
+                        MessageFormat.format(
+                            "{0} ({1})",
+                            card.showMoreTextProperty.value,
+                            hidden
+                        )
+                    }
+                }
             },
             card.seeAllProperty,
             card.showMoreTextProperty,
