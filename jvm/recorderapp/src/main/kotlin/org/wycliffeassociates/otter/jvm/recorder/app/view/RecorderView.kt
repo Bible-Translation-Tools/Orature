@@ -19,12 +19,15 @@
 package org.wycliffeassociates.otter.jvm.recorder.app.view
 
 import javafx.stage.Screen
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.recorder.app.viewmodel.RecorderViewModel
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*
 
 class RecorderView : PluginEntrypoint() {
+
+    private val logger = LoggerFactory.getLogger(RecorderView::class.java)
 
     private var viewInflated = false
 
@@ -47,7 +50,19 @@ class RecorderView : PluginEntrypoint() {
         add<ControlFragment>()
     }
 
+    override fun onDock() {
+        super.onDock()
+        logger.info("Docking RecorderView")
+    }
+
+    override fun onUndock() {
+        super.onUndock()
+        logger.info("Undocking RecorderView")
+    }
+
     init {
+        logger.info("Initializing RecorderView")
+
         tryImportStylesheet(resources.get("/css/recorder.css"))
 
         // notifies viewmodel that views have been inflated and the canvas now has a width

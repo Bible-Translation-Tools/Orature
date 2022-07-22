@@ -61,6 +61,13 @@ class AudioPlugin(
         }
     }
 
+    /**
+     * Prepare to launch a plugin jar, as a jar needs to be run on the jvm.
+     * If the jar contains our PluginEntrypoint, instead the class is loaded and docked.
+     *
+     * @param audioFile the file containing audio of which the plugin is to operate on
+     * @param pluginParameters parameters to pass to the plugin
+     */
     private fun launchJar(audioFile: File, pluginParameters: PluginParameters): Completable {
         val parameters = buildJarArguments(pluginData.args, audioFile.absolutePath, pluginParameters)
         return Completable
@@ -165,7 +172,14 @@ class AudioPlugin(
         }.toTypedArray()
     }
 
+    /**
+     * Looks within a jar file to find a PluginEntrypoint class.
+     *
+     * If a PluginEntrypoint is found, then a plugin can be docked in the Otter window,
+     * as it is a plugin following our API and uses tornadofx.
+     */
     private fun findPlugin(jar: File): KClass<PluginEntrypoint>? {
+        logger.info("Looking for PluginEntrypoint class in jar file: ${jar.name}")
         val finder = ClassFinder()
         finder.add(jar)
         val foundClasses = mutableListOf<ClassInfo>()
@@ -175,6 +189,7 @@ class AudioPlugin(
                 PluginEntrypoint::class.java.name == it.superClassName
             }
             ?.let { foundClass ->
+                logger.info("PluginEntrypoint from jar found! ${foundClass.className}")
                 val urls = arrayOf(URL("jar:file:${jar.absolutePath}!/"))
                 val jarClassLoader = URLClassLoader.newInstance(urls)
                 val pluginClass = jarClassLoader.loadClass(foundClass.className)
@@ -194,9 +209,11 @@ class AudioPlugin(
     }
 
     private fun runInOtterMainWindow(pluginClass: KClass<PluginEntrypoint>, parameters: Parameters) {
+        logger.info("Preparing to launch plugin in window.")
         val appWorkspace: Workspace = find()
         val scope = ParameterizedScope(parameters) {
             synchronized(monitor) {
+                logger.info("Plugin closing, notifying the lock and navigating back.")
                 monitor.notify()
                 appWorkspace.navigateBack()
             }
@@ -208,10 +225,12 @@ class AudioPlugin(
 
         Platform.runLater {
             val plugin = find(pluginClass, scope)
+            logger.info("Docking the plugin...")
             appWorkspace.dock(plugin)
         }
         synchronized(monitor) {
             monitor.wait()
+            logger.info("Plugin close notification received, closing...")
         }
     }
 }
