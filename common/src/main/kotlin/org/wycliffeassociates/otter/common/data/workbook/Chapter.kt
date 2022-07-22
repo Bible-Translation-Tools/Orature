@@ -106,7 +106,7 @@ class Chapter(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as Chunk
+        other as Chapter
 
         if (sort != other.sort) return false
         if (title != other.title) return false
