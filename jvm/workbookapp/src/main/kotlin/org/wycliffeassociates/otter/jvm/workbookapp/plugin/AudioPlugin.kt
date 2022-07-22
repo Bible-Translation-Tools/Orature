@@ -224,6 +224,7 @@ class AudioPlugin(
         scope.workspace.paramsProperty.set(newEntries)
 
         Platform.runLater {
+            logger.info("Getting the plugin from di...")
             val plugin = find(pluginClass, scope)
             logger.info("Docking the plugin...")
             appWorkspace.dock(plugin)
