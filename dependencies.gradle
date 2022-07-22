@@ -16,7 +16,7 @@ ext {
     kotlinVer = '1.5.10'
     javafxVer = '18'
     javaGridviewVer = '1.0.0'
-    tornadofxVer = '2.0.0-WA-fork'
+    tornadofxVer = '2.0.0-SNAPSHOT'
     rxkotlinVer = '2.4.0'
     rxkotlinfxVer = '2.2.2'
     rxrelayVer = '2.1.0'
