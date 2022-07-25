@@ -153,7 +153,6 @@ class VerseMarkerViewModel : ViewModel() {
         currentMarkerNumberProperty.set(-1)
         imageCleanup()
 
-
             writeMarkers()
                 .doOnError { e ->
                     logger.error("Error in closing the maker app", e)
