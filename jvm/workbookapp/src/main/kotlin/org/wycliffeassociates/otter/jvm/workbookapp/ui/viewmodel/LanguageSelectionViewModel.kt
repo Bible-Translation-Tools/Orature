@@ -56,7 +56,9 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
             filteredLanguages.predicate = regionPredicate.and(queryPredicate)
         }
 
-        searchQueryProperty.onChange { query ->
+        searchQueryProperty.onChange { q ->
+            val query = q?.trim()
+            
             queryPredicate = if (query.isNullOrBlank()) {
                 Predicate { true }
             } else {
@@ -74,9 +76,6 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
                 val comparator = compareByDescending<Language> { language -> language.slug == lowerQuery }
                     .thenByDescending { language -> language.name.lowercase() == lowerQuery }
                     .thenByDescending { language -> language.anglicizedName.lowercase() == lowerQuery }
-                    .thenComparing { language -> language.slug }
-                    .thenComparing { language -> language.name }
-                    .thenComparing { language -> language.anglicizedName }
 
                 sortedLanguages.comparator = comparator
             }
