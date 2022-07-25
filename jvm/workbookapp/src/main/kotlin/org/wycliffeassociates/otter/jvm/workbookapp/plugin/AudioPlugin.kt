@@ -231,6 +231,7 @@ class AudioPlugin(
         }
         synchronized(monitor) {
             monitor.wait()
+            scope.deregister()
             logger.info("Plugin close notification received, closing...")
         }
     }
