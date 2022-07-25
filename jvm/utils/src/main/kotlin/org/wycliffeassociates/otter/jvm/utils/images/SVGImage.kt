@@ -33,24 +33,24 @@ class SVGImage(svgGroup: Group) : StackPane() {
     init {
         // Setup bindings so svg scales to fit Node
         svgGroup.scaleXProperty().bind(
-                widthProperty().doubleBinding(heightProperty(), preserveAspectProperty()) {
-                    var scaleX = (it?.toDouble() ?: 0.0) / svgGroup.boundsInLocal.width
-                    if (preserveAspect && width / height > svgAspectRatio) {
-                        // Wider than it should be
-                        scaleX = svgAspectRatio * height / svgGroup.boundsInLocal.width
-                    }
-                    return@doubleBinding scaleX
+            doubleBinding(widthProperty(), heightProperty(), preserveAspectProperty(), op = {
+                var scaleX = (widthProperty().value?.toDouble() ?: 0.0) / svgGroup.boundsInLocal.width
+                if (preserveAspect && width / height > svgAspectRatio) {
+                    // Wider than it should be
+                    scaleX = svgAspectRatio * height / svgGroup.boundsInLocal.width
                 }
+                return@doubleBinding scaleX
+            })
         )
         svgGroup.scaleYProperty().bind(
-                heightProperty().doubleBinding(widthProperty(), preserveAspectProperty()) {
-                    var scaleY = (it?.toDouble() ?: 0.0) / svgGroup.boundsInLocal.height
-                    if (preserveAspect && width / height < svgAspectRatio) {
-                        // Taller than it should be
-                        scaleY = (width / svgAspectRatio) / svgGroup.boundsInLocal.height
-                    }
-                    return@doubleBinding scaleY
+            doubleBinding(heightProperty(), widthProperty(), preserveAspectProperty(), op = {
+                var scaleY = (heightProperty().value?.toDouble() ?: 0.0) / svgGroup.boundsInLocal.height
+                if (preserveAspect && width / height < svgAspectRatio) {
+                    // Taller than it should be
+                    scaleY = (width / svgAspectRatio) / svgGroup.boundsInLocal.height
                 }
+                return@doubleBinding scaleY
+            })
         )
         minHeight = 0.0
         minWidth = 0.0
