@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui
 
 import javafx.application.Platform
+import javafx.beans.property.SimpleBooleanProperty
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
@@ -29,7 +30,6 @@ import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseFinishedEvent
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseRequestEvent
@@ -39,9 +39,9 @@ import java.text.MessageFormat
 class NavigationMediator : Component(), ScopedInstance {
 
     val workbookDataStore: WorkbookDataStore by inject()
-    val rootVM: RootViewModel by inject()
     val breadCrumbsBar = BreadcrumbBar()
-    var appExitRequested = false
+    private val pluginOpenedProperty = SimpleBooleanProperty(false)
+    private var appExitRequested = false
 
     private val recorderBreadCrumb = BreadCrumb().apply {
         titleProperty.bind(
@@ -81,6 +81,7 @@ class NavigationMediator : Component(), ScopedInstance {
                 PluginType.EDITOR -> breadCrumbsBar.addItem(editorBreadCrumb)
                 PluginType.MARKER -> breadCrumbsBar.addItem(markerBreadCrumb)
             }
+            pluginOpenedProperty.set(true)
         }
         subscribe<PluginClosedEvent> {
             when (it.type) {
@@ -88,9 +89,10 @@ class NavigationMediator : Component(), ScopedInstance {
                 PluginType.EDITOR -> breadCrumbsBar.removeItem(editorBreadCrumb)
                 PluginType.MARKER -> breadCrumbsBar.removeItem(markerBreadCrumb)
             }
+            pluginOpenedProperty.set(false)
         }
         subscribe<NavigationRequestEvent> {
-            if (rootVM.pluginOpenedProperty.value) {
+            if (pluginOpenedProperty.value) {
                 fire(PluginCloseRequestEvent)
             } else {
                 dock(it.view)

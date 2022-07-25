@@ -25,6 +25,7 @@ import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.AppBar
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.audioerrordialog
@@ -36,6 +37,7 @@ class RootView : View() {
 
     private val viewModel: RootViewModel by inject()
     private val settingsViewModel: SettingsViewModel by inject()
+    private val navigator: NavigationMediator by inject()
 
     init {
         // Configure the Workspace: sets up the window menu and external app open events
@@ -45,12 +47,10 @@ class RootView : View() {
         workspace.subscribe<PluginOpenedEvent> {
             (app as OtterApp).shouldBlockWindowCloseRequest = !it.isNative
             viewModel.externalPluginOpenedProperty.set(!it.isNative)
-            viewModel.pluginOpenedProperty.set(true)
         }
         workspace.subscribe<PluginClosedEvent> {
             (app as OtterApp).shouldBlockWindowCloseRequest = false
             viewModel.externalPluginOpenedProperty.set(false)
-            viewModel.pluginOpenedProperty.set(false)
         }
         workspace.header.removeFromParent()
         workspace.root.vgrow = Priority.ALWAYS
