@@ -112,11 +112,16 @@ class TranslationCardSkin<T>(private val card: TranslationCard<T>) : SkinBase<Tr
 
         seeMoreBtn.apply {
             textProperty().bind(card.showMoreTextProperty)
-            visibleProperty().bind(card.itemsProperty.booleanBinding {
-                it?.let {
-                    it.size > card.shownItemsNumberProperty.value
-                } ?: false
-            })
+            visibleProperty().bind(
+                booleanBinding(
+                    card.itemsProperty,
+                    op = {
+                        card.itemsProperty.value?.let {
+                            it.size > card.shownItemsNumberProperty.value
+                        } ?: false
+                    }
+                )
+            )
             managedProperty().bind(visibleProperty())
             textProperty().bind(seeMoreLessTextBinding())
             tooltip { textProperty().bind(seeMoreLessTextBinding()) }
