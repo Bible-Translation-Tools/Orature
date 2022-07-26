@@ -70,7 +70,7 @@ class ChunkingWizard : Wizard() {
         pages.clear()
         add<Consume>()
         add<Verbalize>()
-        add<Chunk>()
+        add<ChunkingPage>()
         val top = vbox {
             removeClass(WizardStyles.content)
             addClass("chunking-wizard")

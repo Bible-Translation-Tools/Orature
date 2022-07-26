@@ -36,7 +36,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingWizardP
 import tornadofx.*
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 
-class Chunk : Fragment() {
+class ChunkingPage : View() {
 
     val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
     val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
