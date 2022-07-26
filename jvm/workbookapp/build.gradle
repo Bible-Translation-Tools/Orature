@@ -103,7 +103,7 @@ dependencies {
     implementation "com.jakewharton.rxrelay2:rxrelay:$rxrelayVer"
 
     // TornadoFX
-    implementation "no.tornado:tornadofx:$tornadofxVer"
+    implementation "no.tornado:tornadofx2:$tornadofxVer"
 
     //OpenJFX cross-platform fat jar dependencies
     runtimeOnly "org.openjfx:javafx-graphics:$javafxVer:win"
@@ -115,6 +115,7 @@ dependencies {
 
     // JFoenix
     implementation "com.jfoenix:jfoenix:$jfoenixVer"
+    implementation "com.github.bkenn:kfoenix:$kfoenixVer"
 
     // ControlsFX
     implementation "org.wycliffeassociates:javafx-gridview:$javaGridviewVer"

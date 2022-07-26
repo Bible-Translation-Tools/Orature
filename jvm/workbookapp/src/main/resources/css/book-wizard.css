@@ -47,47 +47,11 @@
     -fx-pref-height: 30px;
 }
 
-.book-wizard__project-type-card {
-    -fx-background-radius: 16px;
-    -fx-padding: 40px;
-    -fx-spacing: 20px;
-    -fx-pref-width: 632px;
-    -fx-effect: dropshadow(gaussian, -wa-black-20, 10, 0, 3, 3);
-}
-
-.book-wizard__project-type-card--primary {
-    -fx-background-color: -wa-primary;
-}
-
-.book-wizard__project-type-card--secondary {
-    -fx-background-color: -wa-white;
-}
-
-.book-wizard__project-type-card--primary .label {
-    -fx-text-fill: -wa-white;
-}
-
-.book-wizard__project-type-card--primary .book-wizard__project-type-info {
-    -fx-fill: -wa-white;
-}
-
-.book-wizard__project-type-icon .ikonli-font-icon {
-    -fx-font-size: 80px;
-}
-
-.book-wizard__project-type-card--primary .book-wizard__project-type-icon .ikonli-font-icon {
-    -fx-fill: -wa-white;
-}
-
-.book-wizard__project-type-title {
-    -fx-font-size: 26px;
-    -fx-font-weight: bold;
-}
-
 .book-wizard__project-type-info {
     -fx-font-size: 20px;
 }
 
+.book-wizard__resource-tab-group,
 .book-wizard__root .filtered-search-bar {
     -fx-max-width: 800px;
 }

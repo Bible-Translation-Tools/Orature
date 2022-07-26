@@ -98,6 +98,10 @@
     -fx-icon-size: 22px;
 }
 
+.vm-play-controls__play-btn:hover {
+    -fx-background-color: #a6a6a6;
+}
+
 .vm-play-controls__play-btn:focused {
     -fx-background-color: -wa-background;
 }
@@ -111,6 +115,10 @@
     -fx-border-color: "#FFFFFF";
     -fx-pref-width: 40px;
     -fx-pref-height: 40px;
+}
+
+.vm-play-controls__seek-btn:hover {
+    -fx-background-color: -wa-white-30;
 }
 
 .vm-play-controls__seek-btn .ikonli-font-icon {

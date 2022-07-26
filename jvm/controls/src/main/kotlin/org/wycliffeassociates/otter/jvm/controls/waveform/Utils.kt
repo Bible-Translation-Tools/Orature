@@ -16,26 +16,20 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.styles
+package org.wycliffeassociates.otter.jvm.controls.waveform
 
-import javafx.scene.paint.Paint
-import tornadofx.*
+import javafx.scene.effect.ColorAdjust
+import org.wycliffeassociates.otter.common.data.ColorTheme
 
-class SplashScreenStyles : Stylesheet() {
-    companion object {
-        val splashRoot by cssclass()
-        val splashProgress by cssclass()
-    }
-
-    init {
-        splashRoot {
-            splashProgress {
-                bar {
-                    backgroundInsets += CssBox(1.px, 1.px, 1.px, 1.px)
-                    padding = CssBox(0.3.em, 0.3.em, 0.3.em, 0.3.em)
-                    fill = Paint.valueOf("#015AD9")
-                }
-            }
+fun adjustWaveformColorByTheme(theme: ColorTheme, adjust: ColorAdjust) {
+    when(theme) {
+        ColorTheme.LIGHT -> {
+            adjust.brightness = 0.0
+            adjust.contrast = 0.0
+        }
+        ColorTheme.DARK -> {
+            adjust.brightness = -0.65
+            adjust.contrast = 0.5
         }
     }
 }

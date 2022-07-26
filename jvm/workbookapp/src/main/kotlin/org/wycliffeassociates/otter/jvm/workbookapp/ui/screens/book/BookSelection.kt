@@ -25,10 +25,12 @@ import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.controls.bar.FilteredSearchBar
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
+import org.wycliffeassociates.otter.jvm.controls.toggle.togglebuttongroup
 import org.wycliffeassociates.otter.jvm.utils.overrideDefaultKeyEventHandler
 import org.wycliffeassociates.otter.jvm.utils.virtualFlow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
@@ -86,6 +88,9 @@ class BookSelection : View() {
                         )
                     }
                 }
+            }
+            togglebuttongroup(viewModel.resourceToggleGroup) {
+                addClass("book-wizard__resource-tab-group")
             }
             add(
                 FilteredSearchBar().apply {
@@ -173,8 +178,9 @@ class BookSelection : View() {
     private fun getAvailableBooks(): List<BookCardData> {
         return viewModel.filteredBooks.filter {
             viewModel.existingBooks
-                .map { book -> book.target.slug }
-                .contains(it.collection.slug).not()
+                .any { existing ->
+                    matchedExistingBook(it, existing)
+                }.not()
         }
     }
 
@@ -183,5 +189,12 @@ class BookSelection : View() {
         viewModel.reset()
         viewModel.loadExistingProjects()
         viewModel.loadResources()
+        viewModel.loadResourceSelections()
     }
+}
+
+fun matchedExistingBook(book: BookCardData, existingBook: Workbook): Boolean {
+    return existingBook.target.slug == book.collection.slug &&
+            (existingBook.sourceMetadataSlug ==
+                    book.collection.resourceContainer?.identifier)
 }

@@ -31,7 +31,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.di.DaggerAppDependencyGraph
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.logging.ConfigureLogger
-import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.RootView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.SplashScreen
 import tornadofx.*
@@ -52,8 +51,6 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
         Thread.setDefaultUncaughtExceptionHandler(OtterExceptionHandler(directoryProvider, localeLanguage))
         initializeLogger(directoryProvider)
         initializeAppLocale()
-
-        importStylesheet<AppStyles>()
     }
 
     fun initializeLogger(directoryProvider: IDirectoryProvider) {

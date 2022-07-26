@@ -13,5 +13,5 @@ repositories {
 
 dependencies {
     // TornadoFX
-    implementation "no.tornado:tornadofx:$tornadofxVer"
+    implementation "no.tornado:tornadofx2:$tornadofxVer"
 }

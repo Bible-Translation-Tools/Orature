@@ -212,6 +212,7 @@ class AudioPlugin(
         }
         synchronized(monitor) {
             monitor.wait()
+            scope.deregister()
         }
     }
 }

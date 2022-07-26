@@ -34,6 +34,7 @@ import tornadofx.FX.Companion.messages
 class BookCard(
     title: String = "",
     slug: String = "",
+    subtitle: String = "",
     coverArt: Artwork? = null,
     newBook: Boolean = false
 ) : ButtonBase() {
@@ -41,6 +42,7 @@ class BookCard(
     val coverArtProperty = SimpleObjectProperty<Artwork>(coverArt)
     val attributionTextProperty = SimpleStringProperty()
     val titleProperty = SimpleStringProperty(title)
+    val subtitleProperty = SimpleStringProperty(subtitle)
     val slugProperty = SimpleStringProperty(slug)
     val newBookProperty = SimpleBooleanProperty(newBook)
 

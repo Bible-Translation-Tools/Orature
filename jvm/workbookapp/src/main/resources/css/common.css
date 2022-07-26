@@ -1,0 +1,43 @@
+@font-face {
+    font-family: 'Noto Sans';
+    font-size: 10pt;
+    src: url('/fonts/NotoSans-Regular.ttf');
+}
+
+@font-face {
+    font-family: 'Noto Sans Bold';
+    font-size: 10pt;
+    src: url('/fonts/NotoSans-Bold.ttf');
+}
+
+@font-face {
+    font-family: 'Noto Sans Italic';
+    font-size: 10pt;
+    src: url('/fonts/NotoSans-Italic.ttf');
+}
+
+@font-face {
+    font-family: 'Noto Sans Italic Bold';
+    font-size: 10pt;
+    src: url('/fonts/NotoSans-BoldItalic.ttf');
+}
+
+.root {
+    -fx-font-family: 'Noto Sans';
+    -fx-font-weight: normal;
+    -fx-font-size: 10pt;
+}
+
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.jfx-snackbar-content {
+    -fx-background-color: #1a1a1a;
+    -fx-background-radius: 6px;
+}
+
+.jfx-snackbar-content .label {
+    -fx-text-fill: -wa-white;
+    -fx-font-size: 14pt;
+}

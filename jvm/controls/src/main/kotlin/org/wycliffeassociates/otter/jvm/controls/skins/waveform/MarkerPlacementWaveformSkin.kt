@@ -62,6 +62,7 @@ class MarkerPlacementWaveformSkin(val control: MarkerPlacementWaveform) : Scroll
             waveformFrame = WaveformFrame(
                 (skinnable as MarkerPlacementWaveform).topTrack
             ).apply {
+                themeProperty.bind(skinnable.themeProperty)
                 framePositionProperty.bind(skinnable.positionProperty)
                 onWaveformClicked { skinnable.onWaveformClicked() }
                 onWaveformDragReleased {

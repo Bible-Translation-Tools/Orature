@@ -25,6 +25,7 @@ import javafx.scene.input.KeyCode
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.controls.card.BookCardCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.BookCardData
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.book.matchedExistingBook
 import tornadofx.*
 
 class BookCell(
@@ -64,7 +65,11 @@ class BookCell(
 
         disableProperty().bind(
             Bindings.createBooleanBinding(
-                { existingBooks.map { it.target.slug }.contains(item.collection.slug) },
+                {
+                    existingBooks.any {
+                        matchedExistingBook(item, it)
+                    }
+                },
                 existingBooks
             )
         )

@@ -38,6 +38,7 @@ class MinimapFragment : Fragment() {
     override fun onDock() {
         super.onDock()
         slider.apply {
+            colorThemeProperty.bind(viewModel.themeColorProperty)
             viewModel.waveformMinimapImageListener = ChangeListener { _, _, it ->
                 waveformImageProperty.set(it)
             }

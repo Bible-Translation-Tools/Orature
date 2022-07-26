@@ -20,10 +20,11 @@ dependencies {
     implementation "com.jakewharton.rxrelay2:rxrelay:$rxrelayVer"
 
     // TornadoFX
-    implementation "no.tornado:tornadofx:$tornadofxVer"
+    implementation "no.tornado:tornadofx2:$tornadofxVer"
 
     // JFoenix
     implementation "com.jfoenix:jfoenix:$jfoenixVer"
+    implementation "com.github.bkenn:kfoenix:$kfoenixVer"
 
     // Testing
     testImplementation "junit:junit:$junitVer"
