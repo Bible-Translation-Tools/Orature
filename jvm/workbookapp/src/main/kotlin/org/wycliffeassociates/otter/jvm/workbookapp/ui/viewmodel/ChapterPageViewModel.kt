@@ -50,8 +50,8 @@ import tornadofx.*
 import java.io.File
 import java.util.concurrent.Callable
 import javax.inject.Inject
-import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.domain.content.CreateChunks
+import org.wycliffeassociates.otter.common.domain.content.ResetChunks
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 
 
@@ -61,6 +61,9 @@ class ChapterPageViewModel : ViewModel() {
 
     val workbookDataStore: WorkbookDataStore by inject()
     val audioPluginViewModel: AudioPluginViewModel by inject()
+
+    @Inject
+    lateinit var resetChunks: ResetChunks
 
     @Inject
     lateinit var directoryProvider: IDirectoryProvider
@@ -471,14 +474,7 @@ class ChapterPageViewModel : ViewModel() {
         closePlayers()
         filteredContent.clear()
         val chapter = workbookDataStore.activeChapterProperty.value
-        chapter.chunks.getValues(emptyArray()).forEach { chunk ->
-            chunk.draftNumber = -1
-            chunk.audio.getAllTakes()
-                .filter { it.deletedTimestamp.value?.value == null }
-                .forEach { take ->
-                    take.deletedTimestamp.accept(DateHolder.now())
-                }
-        }
-        chapter.reset()
+        resetChunks.resetChapter(workbookDataStore.activeProjectFilesAccessor, chapter)
+        workbookDataStore.updateSourceAudio()
     }
 }
