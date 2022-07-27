@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
+import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.workbookheader.workbookheader
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.view.resourcegroupcard
@@ -51,7 +52,7 @@ class ResourcePage : View() {
         )
         iconProperty.set(FontIcon(MaterialDesign.MDI_FILE))
         setOnAction {
-            navigator.dock(this@ResourcePage)
+            fire(NavigationRequestEvent(this@ResourcePage))
         }
     }
 

@@ -22,6 +22,8 @@ import javafx.stage.Screen
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.recorder.app.viewmodel.RecorderViewModel
+import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseFinishedEvent
+import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseRequestEvent
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*
 
@@ -71,6 +73,10 @@ class RecorderView : PluginEntrypoint() {
                 recorderViewModel.onViewReady(width.toInt())
                 viewInflated = true
             }
+        }
+
+        subscribe<PluginCloseRequestEvent> {
+            recorderViewModel.saveAndQuit()
         }
     }
 }

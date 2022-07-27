@@ -37,6 +37,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.jvm.controls.banner.WorkbookBanner
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
+import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.enableContentAnimation
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
@@ -86,7 +87,7 @@ class WorkbookPage : View() {
         )
         iconProperty.set(FontIcon(MaterialDesign.MDI_BOOK))
         setOnAction {
-            navigator.dock(this@WorkbookPage)
+            fire(NavigationRequestEvent(this@WorkbookPage))
         }
     }
 

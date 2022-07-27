@@ -29,6 +29,7 @@ import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseRequestEvent
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*
 
@@ -69,6 +70,9 @@ class MarkerView : PluginEntrypoint() {
         tryImportStylesheet(resources.get("/css/chunk-marker.css"))
 
         initThemeProperty()
+        subscribe<PluginCloseRequestEvent> {
+            viewModel.saveAndQuit()
+        }
     }
 
     override fun onUndock() {

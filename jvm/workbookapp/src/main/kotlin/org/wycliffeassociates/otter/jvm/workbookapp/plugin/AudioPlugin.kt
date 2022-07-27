@@ -215,7 +215,6 @@ class AudioPlugin(
             synchronized(monitor) {
                 logger.info("Plugin closing, notifying the lock and navigating back.")
                 monitor.notify()
-                appWorkspace.navigateBack()
             }
         }
         val paramsMap = appWorkspace.params

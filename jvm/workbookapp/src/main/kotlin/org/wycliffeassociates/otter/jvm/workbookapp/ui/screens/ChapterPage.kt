@@ -39,6 +39,7 @@ import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
+import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.virtualFlow
@@ -92,7 +93,7 @@ class ChapterPage : View() {
         )
         iconProperty.set(FontIcon(MaterialDesign.MDI_FILE))
         setOnAction {
-            navigator.dock(this@ChapterPage)
+            fire(NavigationRequestEvent(this@ChapterPage))
         }
     }
 

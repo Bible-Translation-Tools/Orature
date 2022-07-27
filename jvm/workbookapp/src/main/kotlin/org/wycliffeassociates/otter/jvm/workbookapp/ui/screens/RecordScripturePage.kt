@@ -50,6 +50,7 @@ import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
+import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.listview.NoSelectionModel
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
@@ -140,7 +141,7 @@ class RecordScripturePage : View() {
         )
         iconProperty.set(FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE))
         setOnAction {
-            navigator.dock(this@RecordScripturePage)
+            fire(NavigationRequestEvent(this@RecordScripturePage))
         }
     }
 
