@@ -115,7 +115,6 @@ class TranslationCardSkin<T>(private val card: TranslationCard<T>) : SkinBase<Tr
 
         seeMoreBtn.apply {
             textProperty().bind(card.showMoreTextProperty)
-
             visibleProperty().bind(
                 booleanBinding(
                     card.itemsProperty,
