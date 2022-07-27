@@ -28,6 +28,7 @@ import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.card.BookCard
 import org.wycliffeassociates.otter.jvm.controls.card.NewTranslationCard
 import org.wycliffeassociates.otter.jvm.controls.card.TranslationCard
+import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel
@@ -45,7 +46,7 @@ class HomePage : View() {
         titleProperty.set(messages["projects"])
         iconProperty.set(FontIcon(MaterialDesign.MDI_HOME))
         setOnAction {
-            navigator.dock(this@HomePage)
+            fire(NavigationRequestEvent(this@HomePage))
         }
     }
 

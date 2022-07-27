@@ -25,6 +25,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
+import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.utils.enableContentAnimation
 import org.wycliffeassociates.otter.jvm.utils.getNotNull
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithListener
@@ -66,7 +67,7 @@ class RecordResourcePage : View() {
         )
         iconProperty.set(FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE))
         setOnAction {
-            navigator.dock(this@RecordResourcePage)
+            fire(NavigationRequestEvent(this@RecordResourcePage))
         }
     }
 

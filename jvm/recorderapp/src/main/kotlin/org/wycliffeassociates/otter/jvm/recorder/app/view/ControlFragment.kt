@@ -18,13 +18,10 @@
  */
 package org.wycliffeassociates.otter.jvm.recorder.app.view
 
-import com.jfoenix.controls.JFXButton
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.layout.Priority
-import javafx.scene.paint.Color
-import javafx.scene.text.Font
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.recorder.app.viewmodel.RecorderViewModel
@@ -105,7 +102,7 @@ class ControlFragment : Fragment() {
             visibleProperty().bind(vm.canSaveProperty)
             managedProperty().bind(vm.recordingProperty.or(vm.hasWrittenProperty))
             setOnAction {
-                vm.save()
+                vm.saveAndQuit()
             }
             shortcut(Shortcut.GO_BACK.value)
         }
@@ -116,7 +113,7 @@ class ControlFragment : Fragment() {
             visibleProperty().bind(vm.recordingProperty.not().and(vm.hasWrittenProperty.not()))
             managedProperty().bind(visibleProperty())
             setOnAction {
-                vm.save()
+                vm.saveAndQuit()
             }
             shortcut(Shortcut.GO_BACK.value)
         }

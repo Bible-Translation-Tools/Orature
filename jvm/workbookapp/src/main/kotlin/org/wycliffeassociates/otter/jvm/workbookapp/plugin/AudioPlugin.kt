@@ -198,7 +198,6 @@ class AudioPlugin(
         val scope = ParameterizedScope(parameters) {
             synchronized(monitor) {
                 monitor.notify()
-                appWorkspace.navigateBack()
             }
         }
         val paramsMap = appWorkspace.params
