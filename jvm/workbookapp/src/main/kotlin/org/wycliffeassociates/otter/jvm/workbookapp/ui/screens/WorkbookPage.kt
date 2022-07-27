@@ -23,6 +23,7 @@ import javafx.beans.value.ChangeListener
 import javafx.collections.ListChangeListener
 import javafx.event.EventHandler
 import javafx.geometry.Pos
+import javafx.scene.Node
 import javafx.scene.control.ListView
 import javafx.scene.control.Tab
 import javafx.scene.control.TabPane
@@ -32,6 +33,7 @@ import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
+import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.jvm.controls.banner.WorkbookBanner
@@ -40,6 +42,8 @@ import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.enableContentAnimation
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithListener
+import org.wycliffeassociates.otter.jvm.utils.whenSelectedWithListener
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChapterCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ContributorInfo
@@ -76,7 +80,10 @@ class WorkbookPage : View() {
     private var deleteSuccessListener: ChangeListener<Boolean>? = null
     private var deleteFailListener: ChangeListener<Boolean>? = null
     private var exportProgressListener: ChangeListener<Boolean>? = null
-    private val tabChaptersListeners = mutableMapOf<String, ListChangeListener<ChapterCardModel>>()
+    private val tabContributorsListeners = mutableListOf<ListChangeListener<Contributor>>()
+    private val tabContributorConversionListeners = mutableListOf<ListConversionListener<Contributor, Node>>()
+    private val tabChaptersListeners = mutableListOf<ListChangeListener<ChapterCardModel>>()
+    private val tabsSelectedListeners = mutableMapOf<String, ChangeListener<Boolean>>()
 
     private val breadCrumb = BreadCrumb().apply {
         titleProperty.bind(
@@ -124,15 +131,10 @@ class WorkbookPage : View() {
      */
     override fun onUndock() {
         super.onUndock()
-        tabMap.forEach { _, tab ->
-            (tab as WorkbookResourceTab).undock()
-        }
-        tabMap.clear()
+
         removeDialogListeners()
-        tabChaptersListeners.map {
-            viewModel.chapters.removeListener(it.value)
-        }
-        tabChaptersListeners.clear()
+        removeTabListeners()
+
         viewModel.undock()
     }
 
@@ -331,6 +333,34 @@ class WorkbookPage : View() {
         viewModel.showExportProgressDialogProperty.removeListener(exportProgressListener)
     }
 
+    private fun removeTabListeners() {
+        tabChaptersListeners.forEach {
+            viewModel.chapters.removeListener(it)
+        }
+        tabChaptersListeners.clear()
+
+        tabContributorsListeners.forEach {
+            viewModel.contributors.removeListener(it)
+        }
+        tabContributorsListeners.clear()
+
+        tabContributorConversionListeners.forEach {
+            viewModel.contributors.removeListener(it)
+        }
+        tabContributorConversionListeners.clear()
+
+        tabMap.map {
+            val listener = tabsSelectedListeners[it.key]
+            it.value.selectedProperty().removeListener(listener)
+        }
+        tabsSelectedListeners.clear()
+
+        tabMap.forEach { (_, tab) ->
+            (tab as WorkbookResourceTab).undock()
+        }
+        tabMap.clear()
+    }
+
     /**
      * The tab for a single resource of the workbook. This will contain top level actions for
      * the resource, as well as the list of chapters within the resource.
@@ -345,13 +375,15 @@ class WorkbookPage : View() {
             text = resourceMetadata.identifier
             content = tab
 
-            whenSelected {
+            whenSelectedWithListener {
                 viewModel.openTab(resourceMetadata)
                 viewModel.selectedResourceMetadata.set(resourceMetadata)
                 listView.refresh()
+            }.let {
+                tabsSelectedListeners.putIfAbsent(text, it)
             }
 
-            tabChaptersListeners.putIfAbsent(text, ListChangeListener {
+            viewModel.chapters.onChangeWithListener {
                 val index = workbookDataStore.workbookRecentChapterMap.getOrDefault(
                     workbookDataStore.workbook.hashCode(),
                     -1
@@ -363,8 +395,9 @@ class WorkbookPage : View() {
                     listView.focusModel.focus(index)
                     listView.scrollTo(index)
                 }
-            })
-            viewModel.chapters.addListener(tabChaptersListeners[text])
+            }.let {
+                tabChaptersListeners.add(it)
+            }
         }
 
         fun buildTab(): VBox {
@@ -481,12 +514,19 @@ class WorkbookPage : View() {
                         viewModel.removeContributor(indexToRemove)
                     }
                 )
+                tabContributorConversionListeners.add(contributorConversionListener)
+
                 button(messages["saveContributors"]) {
                     addClass("btn", "btn--primary", "btn--borderless", "contributor__save-btn")
                     fitToParentWidth()
                     tooltip(this.text)
                     isDisable = true
-                    viewModel.contributors.onChange { isDisable = false }
+
+                    viewModel.contributors.onChangeWithListener {
+                        isDisable = false
+                    }.let {
+                        tabContributorsListeners.add(it)
+                    }
 
                     setOnAction {
                         viewModel.saveContributorInfo()

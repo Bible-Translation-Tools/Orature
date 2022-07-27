@@ -24,6 +24,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
+import javafx.scene.Node
 import javafx.scene.control.TextField
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.Priority
@@ -44,6 +45,8 @@ class ContributorInfo(
     val addContributorCallbackProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val editContributorCallbackProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val removeContributorCallbackProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+
+    lateinit var contributorConversionListener: ListConversionListener<Contributor, Node>
 
     init {
         addClass("contributor__container")
@@ -113,6 +116,8 @@ class ContributorInfo(
                         onRemoveContributorActionProperty.bind(removeContributorCallbackProperty)
                         onEditContributorActionProperty.bind(editContributorCallbackProperty)
                     }
+                }.let {
+                    contributorConversionListener = it
                 }
             }
         }

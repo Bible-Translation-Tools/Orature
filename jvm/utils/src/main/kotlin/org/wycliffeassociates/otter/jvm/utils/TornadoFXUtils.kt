@@ -23,8 +23,10 @@ import io.reactivex.Observable
 import javafx.application.Platform
 import javafx.beans.value.ChangeListener
 import javafx.beans.value.ObservableValue
+import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
 import javafx.scene.Node
+import javafx.scene.control.Tab
 import javafx.scene.layout.Pane
 import tornadofx.onChange
 import java.lang.IllegalStateException
@@ -64,6 +66,17 @@ fun <T> ObservableValue<T>.onChangeWithListener(op: (T?) -> Unit): ChangeListene
 }
 
 /**
+ * Sets up an on change listener to run [op] function
+ * @param op the function to run when observable list is changed
+ * @return ListChangeListener
+ */
+fun <T> ObservableList<T>.onChangeWithListener(op: (ListChangeListener.Change<out T>) -> Unit): ListChangeListener<T> {
+    val listener = ListChangeListener<T> { op(it) }
+    addListener(listener)
+    return listener
+}
+
+/**
  * Runs the given operation now and also calls [onChangeWithListener] with the given operation to set up an
  * on change listener
  * @param op the function to run when observable value is changed
@@ -74,6 +87,15 @@ fun <T> ObservableValue<T>.onChangeAndDoNowWithListener(op: (T?) -> Unit): Chang
     return this.onChangeWithListener {
         op(it)
     }
+}
+
+/**
+ * Runs an [op] function when tab is selected
+ * @param op the function to run when tab is selected
+ * @return ChangeListener
+ */
+fun Tab.whenSelectedWithListener(op: () -> Unit): ChangeListener<Boolean> {
+    return selectedProperty().onChangeWithListener { if (it == true) op() }
 }
 
 /**
