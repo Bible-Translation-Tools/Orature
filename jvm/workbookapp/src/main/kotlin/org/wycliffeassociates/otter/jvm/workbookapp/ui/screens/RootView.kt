@@ -25,6 +25,7 @@ import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.AppBar
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.audioerrordialog
@@ -36,6 +37,7 @@ class RootView : View() {
 
     private val viewModel: RootViewModel by inject()
     private val settingsViewModel: SettingsViewModel by inject()
+    private val navigator: NavigationMediator by inject()
 
     init {
         // Configure the Workspace: sets up the window menu and external app open events
@@ -43,12 +45,12 @@ class RootView : View() {
         // Plugins being opened should block the app from closing as this could result in a
         // loss of communication between the app and the external plugin, thus data loss
         workspace.subscribe<PluginOpenedEvent> {
-            (app as OtterApp).shouldBlockWindowCloseRequest = true
-            viewModel.pluginOpenedProperty.set(true)
+            (app as OtterApp).shouldBlockWindowCloseRequest = !it.isNative
+            viewModel.externalPluginOpenedProperty.set(!it.isNative)
         }
         workspace.subscribe<PluginClosedEvent> {
             (app as OtterApp).shouldBlockWindowCloseRequest = false
-            viewModel.pluginOpenedProperty.set(false)
+            viewModel.externalPluginOpenedProperty.set(false)
         }
         workspace.header.removeFromParent()
         workspace.root.vgrow = Priority.ALWAYS

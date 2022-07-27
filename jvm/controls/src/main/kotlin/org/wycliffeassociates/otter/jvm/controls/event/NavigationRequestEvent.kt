@@ -16,12 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.workbookplugin.plugin
+package org.wycliffeassociates.otter.jvm.controls.event
 
 import tornadofx.FXEvent
-import tornadofx.Fragment
+import tornadofx.View
 
-abstract class PluginEntrypoint : Fragment()
-
-object PluginCloseRequestEvent : FXEvent()
-object PluginCloseFinishedEvent : FXEvent()
+class NavigationRequestEvent(val view: View) : FXEvent()
+object AppCloseRequestEvent : FXEvent()

@@ -26,6 +26,7 @@ import javafx.stage.Stage
 import javafx.stage.StageStyle
 import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.di.DaggerAppDependencyGraph
@@ -70,7 +71,10 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
             if (shouldBlockWindowCloseRequest) {
                 it.consume()
                 SnackbarHandler.enqueue(messages["applicationCloseBlocked"])
-            } else audioConnectionFactory.releasePlayer()
+            } else {
+                fire(AppCloseRequestEvent)
+                audioConnectionFactory.releasePlayer()
+            }
         }
         stage.scene.addEventHandler(KeyEvent.KEY_PRESSED) {
             if (it.code == KeyCode.ENTER) {
