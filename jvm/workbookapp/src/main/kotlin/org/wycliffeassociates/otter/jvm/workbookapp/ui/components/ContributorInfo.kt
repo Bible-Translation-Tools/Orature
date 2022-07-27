@@ -24,7 +24,6 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
-import javafx.scene.Node
 import javafx.scene.control.TextField
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.Priority
@@ -33,6 +32,8 @@ import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.bindChildrenWithDisposer
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
@@ -46,7 +47,7 @@ class ContributorInfo(
     val editContributorCallbackProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val removeContributorCallbackProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
-    lateinit var contributorConversionListener: ListConversionListener<Contributor, Node>
+    var contributorsListenerDisposer: ListenerDisposer? = null
 
     init {
         addClass("contributor__container")
@@ -101,7 +102,7 @@ class ContributorInfo(
             addClass("contributor__list")
 
             vbox {
-                bindChildren(contributors) { contributor ->
+                bindChildrenWithDisposer(contributors) { contributor ->
                     ContributorCell().apply {
                         nameProperty.set(contributor.name)
                         indexProperty.bind(
@@ -117,7 +118,7 @@ class ContributorInfo(
                         onEditContributorActionProperty.bind(editContributorCallbackProperty)
                     }
                 }.let {
-                    contributorConversionListener = it
+                    contributorsListenerDisposer = it
                 }
             }
         }

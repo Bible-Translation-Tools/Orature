@@ -19,11 +19,8 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import javafx.beans.binding.Bindings
-import javafx.beans.value.ChangeListener
-import javafx.collections.ListChangeListener
 import javafx.event.EventHandler
 import javafx.geometry.Pos
-import javafx.scene.Node
 import javafx.scene.control.ListView
 import javafx.scene.control.Tab
 import javafx.scene.control.TabPane
@@ -33,17 +30,13 @@ import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
-import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.jvm.controls.banner.WorkbookBanner
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
-import org.wycliffeassociates.otter.jvm.utils.enableContentAnimation
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import org.wycliffeassociates.otter.jvm.utils.onChangeWithListener
-import org.wycliffeassociates.otter.jvm.utils.whenSelectedWithListener
+import org.wycliffeassociates.otter.jvm.utils.*
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChapterCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ContributorInfo
@@ -75,15 +68,7 @@ class WorkbookPage : View() {
     private val workbookDataStore: WorkbookDataStore by inject()
     private val settingsViewModel: SettingsViewModel by inject()
 
-    private var deleteListener: ChangeListener<Boolean>? = null
-    private var deleteProgressListener: ChangeListener<Boolean>? = null
-    private var deleteSuccessListener: ChangeListener<Boolean>? = null
-    private var deleteFailListener: ChangeListener<Boolean>? = null
-    private var exportProgressListener: ChangeListener<Boolean>? = null
-    private val tabContributorsListeners = mutableListOf<ListChangeListener<Contributor>>()
-    private val tabContributorConversionListeners = mutableListOf<ListConversionListener<Contributor, Node>>()
-    private val tabChaptersListeners = mutableListOf<ListChangeListener<ChapterCardModel>>()
-    private val tabsSelectedListeners = mutableMapOf<String, ChangeListener<Boolean>>()
+    private val listenerDisposers = mutableListOf<ListenerDisposer>()
 
     private val breadCrumb = BreadCrumb().apply {
         titleProperty.bind(
@@ -131,10 +116,12 @@ class WorkbookPage : View() {
      */
     override fun onUndock() {
         super.onUndock()
+        disposeListeners()
 
-        removeDialogListeners()
-        removeTabListeners()
-
+        tabMap.forEach { (_, tab) ->
+            (tab as WorkbookResourceTab).undock()
+        }
+        tabMap.clear()
         viewModel.undock()
     }
 
@@ -195,10 +182,9 @@ class WorkbookPage : View() {
                 viewModel.deleteWorkbook()
             }
 
-            deleteListener = ChangeListener { _, _, new ->
-                if (new) open() else close()
-            }
-            viewModel.showDeleteDialogProperty.addListener(deleteListener)
+            viewModel.showDeleteDialogProperty.onChangeWithDisposer {
+                if (it == true) open() else close()
+            }.let(listenerDisposers::add)
 
             onCloseAction { viewModel.showDeleteDialogProperty.set(false) }
             onCancelAction { viewModel.showDeleteDialogProperty.set(false) }
@@ -224,10 +210,9 @@ class WorkbookPage : View() {
                 viewModel.workbookDataStore.workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
             )
 
-            deleteSuccessListener = ChangeListener { _, _, new ->
-                if (new) open() else close()
-            }
-            viewModel.showDeleteSuccessDialogProperty.addListener(deleteSuccessListener)
+            viewModel.showDeleteSuccessDialogProperty.onChangeWithDisposer {
+                if (it == true) open() else close()
+            }.let(listenerDisposers::add)
 
             onCloseAction { viewModel.goBack() }
             onCancelAction { viewModel.goBack() }
@@ -253,10 +238,9 @@ class WorkbookPage : View() {
                 viewModel.workbookDataStore.workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
             )
 
-            deleteFailListener = ChangeListener { _, _, new ->
-                if (new) open() else close()
-            }
-            viewModel.showDeleteFailDialogProperty.addListener(deleteFailListener)
+            viewModel.showDeleteFailDialogProperty.onChangeWithDisposer {
+                if (it == true) open() else close()
+            }.let(listenerDisposers::add)
 
             onCloseAction { viewModel.showDeleteFailDialogProperty.set(false) }
             onCancelAction { viewModel.showDeleteFailDialogProperty.set(false) }
@@ -265,15 +249,15 @@ class WorkbookPage : View() {
 
     private fun initializeProgressDialogs() {
         confirmdialog {
-            deleteProgressListener = ChangeListener { _, _, value ->
-                if (value) {
+            viewModel.showDeleteProgressDialogProperty.onChangeWithDisposer {
+                if (it == true) {
                     titleTextProperty.bind(
-                        viewModel.activeProjectTitleProperty.stringBinding {
-                            it?.let {
+                        viewModel.activeProjectTitleProperty.stringBinding { title ->
+                            title?.let {
                                 MessageFormat.format(
                                     messages["deleteProjectTitle"],
                                     messages["delete"],
-                                    it
+                                    title
                                 )
                             }
                         }
@@ -284,39 +268,39 @@ class WorkbookPage : View() {
                 } else {
                     close()
                 }
-            }
-            viewModel.showDeleteProgressDialogProperty.addListener(deleteProgressListener)
+            }.let(listenerDisposers::add)
 
-            exportProgressListener = ChangeListener { _, _, value ->
-                if (value) {
+            viewModel.showExportProgressDialogProperty.onChangeWithDisposer {
+                if (it == true) {
                     titleTextProperty.bind(
-                        viewModel.activeProjectTitleProperty.stringBinding {
-                            it?.let {
+                        viewModel.activeProjectTitleProperty.stringBinding { title ->
+                            title?.let {
                                 MessageFormat.format(
                                     messages["exportProjectTitle"],
                                     messages["export"],
-                                    it
+                                    title
                                 )
                             }
                         }
                     )
 
-                    viewModel.activeProjectTitleProperty.stringBinding {
-                        it?.let {
+                    viewModel.activeProjectTitleProperty.stringBinding { title ->
+                        title?.let {
                             MessageFormat.format(
                                 messages["exportProjectMessage"],
-                                it
+                                title
                             )
                         }
-                    }.onChangeAndDoNow { messageTextProperty.set(it) }
+                    }.onChangeAndDoNowWithDisposer { title ->
+                        messageTextProperty.set(title)
+                    }.let(listenerDisposers::add)
 
                     backgroundImageFileProperty.bind(viewModel.activeProjectCoverProperty)
                     open()
                 } else {
                     close()
                 }
-            }
-            viewModel.showExportProgressDialogProperty.addListener(exportProgressListener)
+            }.let(listenerDisposers::add)
 
             progressTitleProperty.set(messages["pleaseWait"])
             showProgressBarProperty.set(true)
@@ -325,40 +309,9 @@ class WorkbookPage : View() {
         }
     }
 
-    private fun removeDialogListeners() {
-        viewModel.showDeleteDialogProperty.removeListener(deleteListener)
-        viewModel.showDeleteProgressDialogProperty.removeListener(deleteProgressListener)
-        viewModel.showDeleteFailDialogProperty.removeListener(deleteFailListener)
-        viewModel.showDeleteSuccessDialogProperty.removeListener(deleteSuccessListener)
-        viewModel.showExportProgressDialogProperty.removeListener(exportProgressListener)
-    }
-
-    private fun removeTabListeners() {
-        tabChaptersListeners.forEach {
-            viewModel.chapters.removeListener(it)
-        }
-        tabChaptersListeners.clear()
-
-        tabContributorsListeners.forEach {
-            viewModel.contributors.removeListener(it)
-        }
-        tabContributorsListeners.clear()
-
-        tabContributorConversionListeners.forEach {
-            viewModel.contributors.removeListener(it)
-        }
-        tabContributorConversionListeners.clear()
-
-        tabMap.map {
-            val listener = tabsSelectedListeners[it.key]
-            it.value.selectedProperty().removeListener(listener)
-        }
-        tabsSelectedListeners.clear()
-
-        tabMap.forEach { (_, tab) ->
-            (tab as WorkbookResourceTab).undock()
-        }
-        tabMap.clear()
+    private fun disposeListeners() {
+        listenerDisposers.forEach(ListenerDisposer::dispose)
+        listenerDisposers.clear()
     }
 
     /**
@@ -375,15 +328,13 @@ class WorkbookPage : View() {
             text = resourceMetadata.identifier
             content = tab
 
-            whenSelectedWithListener {
+            whenSelectedWithDisposer {
                 viewModel.openTab(resourceMetadata)
                 viewModel.selectedResourceMetadata.set(resourceMetadata)
                 listView.refresh()
-            }.let {
-                tabsSelectedListeners.putIfAbsent(text, it)
-            }
+            }.let(listenerDisposers::add)
 
-            viewModel.chapters.onChangeWithListener {
+            viewModel.chapters.onChangeWithDisposer {
                 val index = workbookDataStore.workbookRecentChapterMap.getOrDefault(
                     workbookDataStore.workbook.hashCode(),
                     -1
@@ -395,9 +346,7 @@ class WorkbookPage : View() {
                     listView.focusModel.focus(index)
                     listView.scrollTo(index)
                 }
-            }.let {
-                tabChaptersListeners.add(it)
-            }
+            }.let(listenerDisposers::add)
         }
 
         fun buildTab(): VBox {
@@ -514,7 +463,7 @@ class WorkbookPage : View() {
                         viewModel.removeContributor(indexToRemove)
                     }
                 )
-                tabContributorConversionListeners.add(contributorConversionListener)
+                contributorsListenerDisposer?.let(listenerDisposers::add)
 
                 button(messages["saveContributors"]) {
                     addClass("btn", "btn--primary", "btn--borderless", "contributor__save-btn")
@@ -522,11 +471,9 @@ class WorkbookPage : View() {
                     tooltip(this.text)
                     isDisable = true
 
-                    viewModel.contributors.onChangeWithListener {
+                    viewModel.contributors.onChangeWithDisposer {
                         isDisable = false
-                    }.let {
-                        tabContributorsListeners.add(it)
-                    }
+                    }.let(listenerDisposers::add)
 
                     setOnAction {
                         viewModel.saveContributorInfo()

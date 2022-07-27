@@ -23,7 +23,6 @@ import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.beans.value.ChangeListener
 import javafx.geometry.NodeOrientation
 import javafx.geometry.Pos
 import javafx.scene.input.KeyCodeCombination
@@ -32,7 +31,8 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithListener
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import tornadofx.*
 
 class PluginOpenedPage : View() {
@@ -51,8 +51,7 @@ class PluginOpenedPage : View() {
     val targetSpeedRateProperty = SimpleDoubleProperty()
     val sourceTextZoomRateProperty = SimpleIntegerProperty()
 
-    private var sourcePlayerListener: ChangeListener<IAudioPlayer>? = null
-    private var targetPlayerListener: ChangeListener<IAudioPlayer>? = null
+    private val playerListenerDisposers = mutableListOf<ListenerDisposer>()
 
     init {
         tryImportStylesheet(resources["/css/plugin-opened-page.css"])
@@ -103,25 +102,24 @@ class PluginOpenedPage : View() {
     }
 
     override fun onDock() {
-        playerProperty.onChangeAndDoNowWithListener {
+        playerProperty.onChangeAndDoNowWithDisposer {
             it?.let {
                 addShortcut(Shortcut.PLAY_SOURCE.value, it::toggle)
             }
-        }.let { sourcePlayerListener = it }
+        }.let(playerListenerDisposers::add)
 
-        targetAudioPlayerProperty.onChangeAndDoNowWithListener {
+        targetAudioPlayerProperty.onChangeAndDoNowWithDisposer {
             it?.let {
                 addShortcut(Shortcut.PLAY_TARGET.value, it::toggle)
             }
-        }.let { targetPlayerListener = it }
+        }.let(playerListenerDisposers::add)
         super.onDock()
     }
 
     override fun onUndock() {
         playerProperty.value?.stop()
         targetAudioPlayerProperty.value?.close()
-        sourcePlayerListener?.let { playerProperty.removeListener(it) }
-        targetPlayerListener?.let { targetAudioPlayerProperty.removeListener(it) }
+        playerListenerDisposers.forEach(ListenerDisposer::dispose)
         removeShortcut(Shortcut.PLAY_SOURCE.value)
         removeShortcut(Shortcut.PLAY_TARGET.value)
         super.onUndock()
