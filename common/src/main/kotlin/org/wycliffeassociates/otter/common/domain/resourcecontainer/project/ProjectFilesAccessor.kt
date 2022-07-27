@@ -356,6 +356,10 @@ class ProjectFilesAccessor(
     private fun isAudioFile(file: File) =
         file.extension.lowercase().let { it == "wav" || it == "mp3" }
 
+    fun getGradeFile(): File {
+        return projectDir.resolve(RcConstants.GRADES_FILE)
+    }
+
     companion object {
         val ignoredSourceMediaExtensions = listOf("wav", "mp3", "jpg", "jpeg", "png", "cue")
 
