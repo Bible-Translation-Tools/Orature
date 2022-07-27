@@ -1,25 +1,31 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.oqua
 
+import javafx.beans.binding.Bindings
 import javafx.scene.text.FontWeight
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import tornadofx.*
 
 class TCardListCellFragment: ListCellFragment<TranslationCard>() {
-    private val sourceProperty = stringBinding(itemProperty) {
-        value?.translation?.source?.name
-    }
-    private val targetProperty = stringBinding(itemProperty) {
-        value?.translation?.target?.name
-    }
-    private val hasQuestionsProperty = booleanBinding(itemProperty) {
-        value?.hasQuestions ?: false
-    }
-    private val questionsURLProperty = stringBinding(itemProperty) {
-        "https://content.bibletranslationtools.org/WA-Catalog/${value?.translation?.source?.slug}_tq"
-    }
-    private val projects = objectBinding(itemProperty) {
-        value?.projects
-    }
+    private val sourceProperty = Bindings.createStringBinding(
+        { itemProperty.value?.translation?.source?.name },
+        itemProperty
+    )
+    private val targetProperty = Bindings.createStringBinding(
+        { itemProperty.value?.translation?.target?.name },
+        itemProperty
+    )
+    private val hasQuestionsProperty = Bindings.createBooleanBinding(
+        { itemProperty.value?.hasQuestions ?: false },
+        itemProperty
+    )
+    private val questionsURLProperty = Bindings.createStringBinding(
+        { "https://content.bibletranslationtools.org/WA-Catalog/${itemProperty.value?.translation?.source?.slug}_tq" },
+        itemProperty
+    )
+    private val projects = Bindings.createObjectBinding(
+        { itemProperty.value?.projects },
+        itemProperty
+    )
 
     override val root = vbox {
         hbox {

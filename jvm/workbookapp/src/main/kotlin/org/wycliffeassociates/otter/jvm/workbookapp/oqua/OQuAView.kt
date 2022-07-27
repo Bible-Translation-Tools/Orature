@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.oqua
 
+import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
@@ -14,6 +15,7 @@ class OQuAView : View() {
     private val wbDataStore: WorkbookDataStore by inject()
 
     private val view = SimpleObjectProperty<View>(homeView)
+    private val viewRoot = Bindings.createObjectBinding({ view.value?.root }, view)
 
     init {
         javaClass.getResource("/css/oqua.css")?.let { tryImportStylesheet(it.toExternalForm()) }
@@ -43,6 +45,6 @@ class OQuAView : View() {
         hgrow = Priority.ALWAYS
 
         top<NavBar>()
-        centerProperty().bind(objectBinding(view) { value?.root })
+        centerProperty().bind(viewRoot)
     }
 }

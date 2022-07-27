@@ -1,22 +1,28 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.oqua
 
+import javafx.beans.binding.Bindings
 import javafx.scene.control.ToggleGroup
 import tornadofx.*
 
 class TQListCellFragment: ListCellFragment<Question>() {
     private val toggleGroup = ToggleGroup()
 
-    private val questionProperty = stringBinding(itemProperty) {
-        value?.question
-    }
-    private val answerProperty = stringBinding(itemProperty) {
-        value?.answer
-    }
-    private val verseProperty = stringBinding(itemProperty) {
-        value?.let { question ->
-            getVerseLabel(question)
-        }
-    }
+    private val questionProperty = Bindings.createStringBinding(
+        { itemProperty.value?.question },
+        itemProperty
+    )
+    private val answerProperty = Bindings.createStringBinding(
+        { itemProperty.value?.answer },
+        itemProperty
+    )
+    private val verseProperty = Bindings.createStringBinding(
+        {
+            itemProperty.value?.let { question ->
+                getVerseLabel(question)
+            }
+        },
+        itemProperty
+    )
 
     private fun getVerseLabel(question: Question): String {
         return if (question.start == question.end) {

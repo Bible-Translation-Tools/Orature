@@ -23,13 +23,13 @@ class NavBar : View() {
             }
         }
         button(viewModel.projectTitleProperty){
-            style { visibleWhen(booleanBinding(viewModel.projectTitleProperty) { value != null }) }
+            style { visibleWhen(viewModel.projectTitleProperty.isNotNull) }
             action {
                 viewModel.wbDataStore.activeChapterProperty.set(null)
             }
         }
         button(viewModel.chapterTitleProperty) {
-            style { visibleWhen(booleanBinding(viewModel.wbDataStore.activeChapterProperty) { value != null }) }
+            style { visibleWhen(viewModel.chapterTitleProperty.isNotNull) }
         }
     }
 }
