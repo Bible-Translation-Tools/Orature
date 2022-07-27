@@ -1,0 +1,36 @@
+.button {
+    -fx-background-color: linear-gradient(to bottom, lightcyan, cyan);
+    -fx-background-radius: 5px;
+    -fx-border-radius: 5px;
+    -fx-border-color: darkcyan;
+}
+
+.toggle-button {
+    -fx-background-color: linear-gradient(to bottom, lightcyan, cyan);
+    -fx-background-radius: 5px;
+    -fx-border-radius: 5px;
+    -fx-border-color: darkcyan;
+}
+
+.toggle-button:selected {
+    -fx-background-color: linear-gradient(to top, lightcyan, darkcyan);
+    -fx-border-color: blue;
+}
+
+.list-cell {
+    -fx-background-color: white;
+}
+
+.progress-marker {
+    -fx-max-height: 20px;
+    -fx-max-width: 20px;
+    -fx-pref-height: 20px;
+    -fx-pref-width: 20px;
+    -fx-background-radius: 50%;
+    -fx-border-radius: 50%;
+    borderColor: darkcyan;
+}
+
+.progress-marker .active {
+    -fx-background-color: cyan;
+}

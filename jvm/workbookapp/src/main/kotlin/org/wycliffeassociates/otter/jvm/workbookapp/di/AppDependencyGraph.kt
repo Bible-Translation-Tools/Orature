@@ -50,6 +50,9 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AppInfoViewMode
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.VerbalizeViewModel
+import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
+import org.wycliffeassociates.otter.jvm.device.ConfigureAudioSystem
+import org.wycliffeassociates.otter.jvm.workbookapp.oqua.ChapterViewModel
 
 @Component(
     modules = [
@@ -81,6 +84,7 @@ interface AppDependencyGraph {
     fun inject(viewModel: VerbalizeViewModel)
     fun inject(viewModel: ChunkingViewModel)
     fun inject(viewModel: ExportChapterViewModel)
+    fun inject(viewModel: ChapterViewModel)
     fun injectDatabase(): AppDatabase
     fun injectDirectoryProvider(): IDirectoryProvider
     fun injectAppPreferencesRepository(): IAppPreferencesRepository
@@ -89,4 +93,6 @@ interface AppDependencyGraph {
     fun injectPlayer(): IAudioPlayer
     fun injectConnectionFactory(): AudioConnectionFactory
     fun injectAudioDeviceProvider(): AudioDeviceProvider
+    fun injectWorkbookRepository(): WorkbookRepository
+    fun injectConfigureAudioSystem(): ConfigureAudioSystem
 }
