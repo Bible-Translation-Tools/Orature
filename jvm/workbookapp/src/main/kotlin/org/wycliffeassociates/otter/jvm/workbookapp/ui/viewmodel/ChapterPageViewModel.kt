@@ -283,7 +283,9 @@ class ChapterPageViewModel : ViewModel() {
 
             var compiled: File? = null
 
-            concatenateAudio.execute(takes)
+            // Don't place verse markers if the draft comes from user chunks
+            val shouldIncludeMarkers = filteredContent.any { it.chunkSource?.label?.lowercase() == "chunk" }.not()
+            concatenateAudio.execute(takes, shouldIncludeMarkers)
                 .flatMapCompletable { file ->
                     compiled = file
                     audioPluginViewModel.import(chapter, file)
