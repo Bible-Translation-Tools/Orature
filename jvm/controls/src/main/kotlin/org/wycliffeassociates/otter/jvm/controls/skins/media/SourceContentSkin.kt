@@ -29,11 +29,14 @@ import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.control.ListView
 import javafx.scene.control.ScrollBar
+import javafx.scene.control.ScrollPane
 import javafx.scene.control.SkinBase
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
 import javafx.scene.text.TextAlignment
+import javafx.stage.Popup
+import javafx.stage.PopupWindow
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateChangedEvent
@@ -87,6 +90,9 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     lateinit var sourceTextChunksContainer: ListView<Label>
 
     @FXML
+    lateinit var toggleSourceTextBtn: Button
+
+    @FXML
     lateinit var title: Label
 
     @FXML
@@ -109,6 +115,8 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
 
     @FXML
     lateinit var sourceAudioBlock: VBox
+
+    lateinit var sourceTextPopup: Popup
 
     init {
         loadFXML()
@@ -235,7 +243,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
         }
 
         zoomRateText.apply {
-            textProperty().bind(sourceContent.zoomRateProperty.stringBinding{
+            textProperty().bind(sourceContent.zoomRateProperty.stringBinding {
                 String.format("%d%%", it)
             })
         }
@@ -247,6 +255,24 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             sourceTextChunksContainer.apply {
                 styleClass.removeAll { it.startsWith("text-zoom") }
                 addClass("text-zoom-$rate")
+            }
+        }
+
+        sourceTextPopup = Popup().apply {
+            isAutoHide = true
+
+            content.setAll(buildTextPopupContent())
+        }
+
+        toggleSourceTextBtn.apply {
+            action {
+                val bound = this.boundsInLocal
+                val screenBound = this.localToScreen(bound)
+                sourceTextPopup.show(
+                    FX.primaryStage
+                )
+                sourceTextPopup.x = screenBound.minX - sourceTextPopup.width + this.width
+                sourceTextPopup.y = screenBound.minY - sourceTextPopup.height
             }
         }
     }
@@ -317,6 +343,34 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
                         ?: visibleProperty()
                 }
             ))
+        }
+    }
+
+    private fun buildTextPopupContent(): Node {
+        return ScrollPane().apply {
+            addClass("source-content__text-popup__scroll")
+            maxWidth = 400.0
+            val scrollpane = this
+
+            add(
+                VBox().apply {
+                    maxWidthProperty().bind(scrollpane.widthProperty().minus(20))
+                    add(
+                        Label().apply {
+                            addClass("bold")
+                            textProperty().bind(sourceContent.contentTitleProperty)
+                            paddingAll = 10.0
+                        }
+                    )
+                    add(
+                        Label().apply {
+                            textProperty().bind(sourceContent.sourceTextProperty)
+                            isWrapText = true
+                            paddingAll = 10.0
+                        }
+                    )
+                }
+            )
         }
     }
 

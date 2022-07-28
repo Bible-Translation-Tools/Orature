@@ -122,6 +122,9 @@
                                 </styleClass>
                             </Button>
                             <SimpleAudioPlayer fx:id="sourcePlayer" HBox.hgrow="ALWAYS" />
+                            <Button fx:id="toggleSourceTextBtn" styleClass="btn,btn--icon">
+                                <graphic><FontIcon iconLiteral="mdi-file-document"/></graphic>
+                            </Button>
                         </children>
                         <VBox.margin>
                             <Insets top="16.0"/>
