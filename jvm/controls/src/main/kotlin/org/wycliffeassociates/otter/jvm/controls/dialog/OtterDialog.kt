@@ -69,10 +69,8 @@ abstract class OtterDialog : Fragment() {
         stage?.let { _stage ->
             fitStageToParent(_stage)
             _stage.scene.addEventHandler(KeyEvent.KEY_PRESSED) {
-                if (it.code == KeyCode.ENTER) {
-                    if (_stage.scene?.focusOwner is ButtonBase) {
-                        (_stage.scene?.focusOwner as? ButtonBase)?.fire()
-                    }
+                if (it.code == KeyCode.ENTER && _stage.scene?.focusOwner is ButtonBase) {
+                    (_stage.scene?.focusOwner as? ButtonBase)?.fire()
                 }
             }
         }

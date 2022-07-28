@@ -51,6 +51,8 @@ class SettingsView : View() {
 
     lateinit var progressBar: ProgressBar
 
+    private val drawerTextStyleClass = "app-drawer__text"
+
     override val root = vbox {
         addClass("app-drawer__content")
 
@@ -203,7 +205,7 @@ class SettingsView : View() {
 
                     label(messages["useInternetWarning"]).apply {
                         fitToParentWidth()
-                        addClass("app-drawer__text")
+                        addClass(drawerTextStyleClass)
                     }
 
                     vbox {
@@ -228,7 +230,7 @@ class SettingsView : View() {
                             }
                         }
                         label {
-                            addClass("app-drawer__text")
+                            addClass(drawerTextStyleClass)
                             textProperty().bind(viewModel.updateLanguagesResultProperty)
                             viewModel.updateLanguagesSuccessProperty.onChangeAndDoNow { result ->
                                 updateLanguageStatusStyle(
@@ -301,7 +303,7 @@ class SettingsView : View() {
                         addClass("app-drawer__plugin-header")
 
                         label(messages["applicationName"]).apply {
-                            addClass("app-drawer__text")
+                            addClass(drawerTextStyleClass)
                             hgrow = Priority.ALWAYS
                         }
 
@@ -331,7 +333,7 @@ class SettingsView : View() {
                                 addClass("app-drawer__plugin")
 
                                 label(pluginData.name).apply {
-                                    addClass("app-drawer__text")
+                                    addClass(drawerTextStyleClass)
                                     hgrow = Priority.ALWAYS
                                 }
 
