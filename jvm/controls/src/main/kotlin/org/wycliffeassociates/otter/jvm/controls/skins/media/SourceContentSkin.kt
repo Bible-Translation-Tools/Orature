@@ -283,7 +283,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
                     FX.primaryStage
                 )
                 sourceTextPopup.x = screenBound.minX - sourceTextPopup.width + this.width
-                sourceTextPopup.y = screenBound.minY - sourceTextPopup.height
+                sourceTextPopup.y = screenBound.minY - sourceTextPopup.height - 10
             }
         }
     }
