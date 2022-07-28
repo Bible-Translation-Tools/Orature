@@ -101,34 +101,34 @@
                             <Insets top="16.0"/>
                         </VBox.margin>
                     </HBox>
-                    <HBox fx:id="sourceAudioNotAvailable" managed="false" styleClass="source-content__not-available"
-                          visible="false" HBox.hgrow="ALWAYS">
-                        <children>
-                            <Label fx:id="audioNotAvailableText"/>
-                        </children>
+                    <HBox HBox.hgrow="ALWAYS" styleClass="source-content__control-group">
                         <VBox.margin>
                             <Insets top="16.0"/>
                         </VBox.margin>
-                    </HBox>
-                    <HBox fx:id="sourceAudioContainer" styleClass="source-content__audio_container" HBox.hgrow="ALWAYS">
-                        <children>
+                        <HBox fx:id="sourceAudioNotAvailable" managed="false" styleClass="source-content__not-available"
+                              visible="false" HBox.hgrow="ALWAYS">
+                            <VBox.margin>
+                                <Insets top="16.0"/>
+                            </VBox.margin>
+                            <Label fx:id="audioNotAvailableText"/>
+                        </HBox>
+                        <HBox fx:id="sourceAudioContainer" styleClass="source-content__audio_container" HBox.hgrow="ALWAYS">
                             <Button fx:id="playSourceBtn">
                                 <graphic>
-                                    <FontIcon iconLiteral="mdi-play" />
+                                    <FontIcon iconLiteral="mdi-play"/>
                                 </graphic>
                                 <styleClass>
                                     <String fx:value="btn"/>
                                     <String fx:value="btn--primary"/>
                                 </styleClass>
                             </Button>
-                            <SimpleAudioPlayer fx:id="sourcePlayer" HBox.hgrow="ALWAYS" />
-                            <Button fx:id="toggleSourceTextBtn" styleClass="btn,btn--icon">
-                                <graphic><FontIcon iconLiteral="mdi-file-document"/></graphic>
-                            </Button>
-                        </children>
-                        <VBox.margin>
-                            <Insets top="16.0"/>
-                        </VBox.margin>
+                            <SimpleAudioPlayer fx:id="sourcePlayer" HBox.hgrow="ALWAYS"/>
+                        </HBox>
+                        <Button fx:id="toggleSourceTextBtn" styleClass="btn,btn--icon">
+                            <graphic>
+                                <FontIcon iconLiteral="mdi-file-document"/>
+                            </graphic>
+                        </Button>
                     </HBox>
                 </children>
                 <VBox.margin>

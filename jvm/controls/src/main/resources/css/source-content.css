@@ -42,6 +42,14 @@
     -fx-border-color: -wa-border-light;
 }
 
+.source-content__control-group {
+    -fx-alignment: center;
+    -fx-spacing: 10;
+    -fx-background-color: -wa-foreground;
+    -fx-background-radius: 5;
+    -fx-padding: 8px;
+}
+
 .source-content__not-available {
     -fx-alignment: center;
     -fx-font-size: 1.3em;
@@ -75,11 +83,8 @@
 
 .source-content__audio_container {
     -fx-alignment: center-left;
-    -fx-padding: 8px;
     -fx-min-height: 60px;
     -fx-spacing: 20px;
-    -fx-background-color: -wa-foreground;
-    -fx-background-radius: 5;
 }
 
 .source-content__audio_container--target {
