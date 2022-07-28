@@ -22,7 +22,7 @@ class ResetChunks @Inject constructor() {
     }
 
     private fun chapterMatches(file: File, chapter: Int): Boolean {
-        return file.name.contains("_c$chapter") || file.name.contains("_c0$chapter") || file.name.contains("_c00$chapter")
+        return file.name.contains(Regex("_c(0*)$chapter\\."))
     }
 
     private fun markTakesForDeletion(chapter: Chapter) {
