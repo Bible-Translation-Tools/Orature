@@ -23,6 +23,7 @@ import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.geometry.NodeOrientation
 import javafx.geometry.Orientation
+import javafx.geometry.Pos
 import javafx.geometry.Side
 import javafx.scene.Node
 import javafx.scene.control.Button
@@ -190,6 +191,10 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     }
 
     private fun initTextControls() {
+        titleContainer.apply {
+            visibleWhen { sourceContent.sourceTextCompactMode.not() }
+            managedWhen(visibleProperty())
+        }
         sourceTextNotAvailable.apply {
             hiddenWhen(sourceContent.sourceTextAvailableProperty)
             managedWhen(visibleProperty())
@@ -200,7 +205,10 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
         }
 
         sourceTextContainer.apply {
-            visibleWhen(sourceContent.sourceTextAvailableProperty)
+            visibleWhen {
+                sourceContent.sourceTextAvailableProperty
+                    .and(sourceContent.sourceTextCompactMode.not())
+            }
             managedWhen(visibleProperty())
         }
 
@@ -265,6 +273,9 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
         }
 
         toggleSourceTextBtn.apply {
+            visibleWhen { sourceContent.sourceTextCompactMode }
+            managedWhen(visibleProperty())
+
             action {
                 val bound = this.boundsInLocal
                 val screenBound = this.localToScreen(bound)

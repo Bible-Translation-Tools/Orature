@@ -45,6 +45,7 @@ class SourceContent : Control() {
 
     val sourceTextProperty = SimpleStringProperty()
     val sourceTextAvailableProperty: BooleanBinding = sourceTextProperty.isNotNull
+    val sourceTextCompactMode = SimpleBooleanProperty(false)
     val sourceTextChunks = observableListOf<String>()
     val highlightedChunk = SimpleIntegerProperty(-1)
 
