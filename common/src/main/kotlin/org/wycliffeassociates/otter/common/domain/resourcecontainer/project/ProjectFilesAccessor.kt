@@ -43,6 +43,8 @@ import org.wycliffeassociates.resourcecontainer.entity.Project
 import java.io.File
 import java.io.OutputStream
 import kotlin.io.path.outputStream
+import org.wycliffeassociates.otter.common.audio.AudioFileFormat
+import org.wycliffeassociates.otter.common.audio.AudioMetadataFileFormat
 import org.wycliffeassociates.otter.common.data.workbook.Book
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.usfm.getText
 import org.wycliffeassociates.usfmtools.USFMParser
@@ -113,20 +115,32 @@ class ProjectFilesAccessor(
     }
 
     fun copySourceFiles(fileReader: IFileReader) {
-        val sourceFiles: Sequence<String> = fileReader
-            .list(RcConstants.SOURCE_DIR)
-            .filter {
-                val ext = it.substringAfterLast(".")
-                OratureFileFormat.isSupported(ext)
+        val sourceDirectories = listOf(RcConstants.SOURCE_DIR, RcConstants.SOURCE_AUDIO_DIR)
+        for (dir in sourceDirectories) {
+            val sourceFiles: Sequence<String> = fileReader
+                .list(dir)
+                .filter {
+                    val ext = it.substringAfterLast(".")
+                    when (dir) {
+                        RcConstants.SOURCE_DIR -> OratureFileFormat.isSupported(ext)
+                        RcConstants.SOURCE_AUDIO_DIR -> AudioFileFormat.isSupported (ext) || AudioMetadataFileFormat.isSupported(ext)
+                        else -> false
+                    }
+                }
+
+            val outDir = when (dir) {
+                RcConstants.SOURCE_DIR -> sourceDir
+                RcConstants.SOURCE_AUDIO_DIR -> sourceAudioDir
+                else -> continue
             }
+            sourceFiles.forEach { path ->
+                val inFile = File(path)
+                val outFile = outDir.resolve(inFile.name)
 
-        sourceFiles.forEach { path ->
-            val inFile = File(path)
-            val outFile = sourceDir.resolve(inFile.name)
-
-            if (!outFile.exists()) {
-                val stream = fileReader.stream(path)
-                stream.transferTo(outFile.outputStream())
+                if (!outFile.exists()) {
+                    val stream = fileReader.stream(path)
+                    stream.transferTo(outFile.outputStream())
+                }
             }
         }
     }
