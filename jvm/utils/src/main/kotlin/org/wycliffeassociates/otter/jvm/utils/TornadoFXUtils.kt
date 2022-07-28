@@ -23,12 +23,19 @@ import io.reactivex.Observable
 import javafx.application.Platform
 import javafx.beans.value.ChangeListener
 import javafx.beans.value.ObservableValue
+import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
+import javafx.event.EventTarget
 import javafx.scene.Node
+import javafx.scene.control.Tab
 import javafx.scene.layout.Pane
 import tornadofx.onChange
 import java.lang.IllegalStateException
 import tornadofx.*
+
+interface ListenerDisposer {
+    fun dispose()
+}
 
 /**
  * Runs the given operation now and also calls tornadofx's [onChange] with the given operation to set up an
@@ -55,24 +62,66 @@ fun <T> ObservableList<T>.onChangeAndDoNow(op: (List<T>) -> Unit) {
 /**
  * Sets up an on change listener to run [op] function
  * @param op the function to run when observable value is changed
- * @return ChangeListener
+ * @return ListenerDisposer
  */
-fun <T> ObservableValue<T>.onChangeWithListener(op: (T?) -> Unit): ChangeListener<T> {
+fun <T> ObservableValue<T>.onChangeWithDisposer(op: (T?) -> Unit): ListenerDisposer {
     val listener = ChangeListener<T> { _, _, newValue -> op(newValue) }
     addListener(listener)
-    return listener
+    return object: ListenerDisposer {
+        override fun dispose() {
+            removeListener(listener)
+        }
+    }
 }
 
 /**
- * Runs the given operation now and also calls [onChangeWithListener] with the given operation to set up an
+ * Sets up an on change listener to run [op] function
+ * @param op the function to run when observable list is changed
+ * @return ListenerDisposer
+ */
+fun <T> ObservableList<T>.onChangeWithDisposer(op: (ListChangeListener.Change<out T>) -> Unit): ListenerDisposer {
+    val listener = ListChangeListener<T> { op(it) }
+    addListener(listener)
+    return object: ListenerDisposer {
+        override fun dispose() {
+            removeListener(listener)
+        }
+    }
+}
+
+/**
+ * Runs the given operation now and also calls [onChangeWithDisposer] with the given operation to set up an
  * on change listener
  * @param op the function to run when observable value is changed
- * @return ChangeListener
+ * @return ListenerDisposer
  */
-fun <T> ObservableValue<T>.onChangeAndDoNowWithListener(op: (T?) -> Unit): ChangeListener<T> {
+fun <T> ObservableValue<T>.onChangeAndDoNowWithDisposer(op: (T?) -> Unit): ListenerDisposer {
     op(this.value)
-    return this.onChangeWithListener {
+    return this.onChangeWithDisposer {
         op(it)
+    }
+}
+
+/**
+ * Runs an [op] function when tab is selected
+ * @param op the function to run when tab is selected
+ * @return ListenerDisposer
+ */
+fun Tab.whenSelectedWithDisposer(op: () -> Unit): ListenerDisposer {
+    return selectedProperty().onChangeWithDisposer { if (it == true) op() }
+}
+
+/**
+ * Bind the children of this Layout node to the given observable list of items by converting them into nodes via
+ * the given converter function. Changes to the source list will be reflected in the children list of this layout node.
+ * @return ListenerDisposer
+ */
+fun <T> EventTarget.bindChildrenWithDisposer(sourceList: ObservableList<T>, converter: (T) -> Node): ListenerDisposer {
+    val listener = this.bindChildren(sourceList, converter)
+    return object: ListenerDisposer {
+        override fun dispose() {
+            sourceList.removeListener(listener)
+        }
     }
 }
 

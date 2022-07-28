@@ -28,7 +28,7 @@ import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.utils.enableContentAnimation
 import org.wycliffeassociates.otter.jvm.utils.getNotNull
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithListener
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordResourceViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -91,9 +91,9 @@ class RecordResourcePage : View() {
     override fun onDock() {
         tabs.forEach { recordableTab ->
             recordableTab.bindProperties()
-            recordableTab.recordableProperty.onChangeAndDoNowWithListener {
+            recordableTab.recordableProperty.onChangeAndDoNowWithDisposer {
                 addRemoveTabs(recordableTab, it)
-            }.let { recordableTab.recordableListener = it }
+            }.let { recordableTab.recordableListenerDisposer = it }
         }
         navigator.dock(this, breadCrumb)
     }

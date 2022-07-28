@@ -18,14 +18,13 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
-import javafx.application.Platform
 import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.value.ChangeListener
 import javafx.scene.control.Tab
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.jvm.controls.statusindicator.StatusIndicator
 import org.wycliffeassociates.otter.jvm.controls.statusindicator.statusindicator
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordableTabViewModel
 import tornadofx.*
 
@@ -35,7 +34,7 @@ class RecordableTab(
 ) : Tab() {
 
     val recordableProperty = SimpleObjectProperty<Recordable?>()
-    var recordableListener: ChangeListener<Recordable?>? = null
+    var recordableListenerDisposer: ListenerDisposer? = null
     private val recordResourceFragment = RecordResourceFragment(viewModel)
 
     init {
@@ -71,7 +70,8 @@ class RecordableTab(
     }
 
     fun removeListeners() {
-        recordableListener?.let { recordableProperty.removeListener(it) }
+        recordableListenerDisposer?.dispose()
+        recordableListenerDisposer = null
     }
 
     fun recordNewTake() {
