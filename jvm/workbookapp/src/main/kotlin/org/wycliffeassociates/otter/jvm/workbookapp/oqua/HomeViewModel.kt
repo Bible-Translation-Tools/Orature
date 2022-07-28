@@ -1,36 +1,56 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.oqua
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Observable
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 
 class HomeViewModel: ViewModel() {
+    private val wbDataStore: WorkbookDataStore by inject()
     private val workbookRepo = (app as OQuAApp).dependencyGraph.injectWorkbookRepository()
 
     val tCards = observableListOf<TranslationCard>()
 
-    init {
+    fun dock() {
         getTranslations()
+        wbDataStore.activeWorkbookProperty.set(null)
     }
 
-    fun dock() {}
-
-    fun undock() {}
+    fun undock() {
+        clearTCards()
+    }
 
     private fun getTranslations() {
-        workbookRepo.getProjects().observeOnFx().subscribe { sources ->
-            sources.forEach { workbook ->
-                val tCard = tCardFromWB(workbook)
-                if (tCard.hasAudio) {
-                    val found = tCards.find { card -> card == tCard }
-                    if (found == null) {
-                        tCards.add(tCard)
-                    } else {
-                        found.projects.addAll(tCard.projects)
-                    }
-                }
+        workbookRepo
+            .getProjects()
+            .toObservable()
+            .flatMap {
+                Observable.fromIterable(it.filter{ workbook ->
+                    workbookHasAudio(workbook)
+                })
             }
-            tCards.forEach { card -> card.sortProjects() }
-            tCards.sortByDescending { card -> card.projects.size }
-        }
+            .map { workbook -> TranslationCard.mapFromWorkbook(workbook) }
+            .observeOnFx()
+            .subscribe { tCard ->
+                val existingSource = tCards.find { card -> card == tCard }
+                (existingSource?.projects?.addAll(tCard.projects)) ?: tCards.add(tCard)
+
+                tCards.forEach { card -> card.sortProjects() }
+                tCards.sortByDescending { card -> card.projects.size }
+            }
+    }
+
+    private fun clearTCards() {
+        tCards.setAll()
+    }
+
+    private fun workbookHasAudio(workbook: Workbook): Boolean {
+        return workbook
+            .target
+            .chapters
+            .toList()
+            .blockingGet()
+            .any { it.hasAudio() }
     }
 }

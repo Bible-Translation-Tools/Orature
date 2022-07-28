@@ -17,6 +17,7 @@ class ProjectListCellFragment: ListCellFragment<Workbook>() {
         button (projectProperty) {
             action {
                 wbDataStore.activeWorkbookProperty.set(item)
+                workspace.dock(find<ProjectView>())
             }
         }
     }

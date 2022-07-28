@@ -10,13 +10,11 @@ class ChapterView : View() {
     override fun onDock() {
         super.onDock()
         viewModel.dock()
-        println("Docked Chapter View")
     }
 
     override fun onUndock() {
         super.onUndock()
         viewModel.undock()
-        println("Undocked Chapter View")
     }
 
     override val root = vbox {

@@ -5,24 +5,9 @@ import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import tornadofx.*
 
-fun tCardFromWB (workbook: Workbook): TranslationCard {
-    val translation = Translation(workbook.source.language, workbook.target.language, null)
-
-    val projects = observableListOf<Workbook>(workbook)
-
-    val hasAudio = workbook.target.chapters.toList().blockingGet().any { chapter ->
-        chapter.audio.selected.value?.value != null
-    }
-
-    val hasQuestions = workbook.source.subtreeResources.any { resource -> resource.identifier == "tq" }
-
-    return TranslationCard(translation, projects, hasAudio, hasQuestions)
-}
-
 class TranslationCard (
     val translation: Translation,
     val projects: ObservableList<Workbook>,
-    val hasAudio: Boolean,
     val hasQuestions: Boolean
 ) {
 
@@ -37,5 +22,15 @@ class TranslationCard (
         var result = translation.hashCode()
         result = 31 * result + projects.hashCode()
         return result
+    }
+
+    companion object {
+        fun mapFromWorkbook (workbook: Workbook): TranslationCard {
+            val translation = Translation(workbook.source.language, workbook.target.language, null)
+            val projects = observableListOf(workbook)
+            val hasQuestions = workbook.source.subtreeResources.any { resource -> resource.identifier == "tq" }
+
+            return TranslationCard(translation, projects, hasQuestions)
+        }
     }
 }

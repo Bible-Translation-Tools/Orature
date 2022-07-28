@@ -5,31 +5,21 @@ import tornadofx.*
 class NavBar : View() {
     private val viewModel: NavBarViewModel by inject()
 
-    override fun onDock() {
-        super.onDock()
-        viewModel.dock()
-    }
-
-    override fun onUndock() {
-        super.onUndock()
-        viewModel.undock()
-    }
-
     override val root = hbox(5) {
         style { padding = box(5.px) }
         button("OQuA") {
             action {
-                viewModel.wbDataStore.activeWorkbookProperty.set(null)
+                workspace.dock(find<HomeView>())
             }
         }
         button(viewModel.projectTitleProperty){
-            style { visibleWhen(viewModel.projectTitleProperty.isNotNull) }
+            visibleWhen(viewModel.projectTitleProperty.isNotNull)
             action {
-                viewModel.wbDataStore.activeChapterProperty.set(null)
+                workspace.dock(find<ProjectView>())
             }
         }
         button(viewModel.chapterTitleProperty) {
-            style { visibleWhen(viewModel.chapterTitleProperty.isNotNull) }
+            visibleWhen(viewModel.chapterTitleProperty.isNotNull)
         }
     }
 }

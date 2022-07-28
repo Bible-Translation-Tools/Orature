@@ -19,7 +19,9 @@ class TCardListCellFragment: ListCellFragment<TranslationCard>() {
         itemProperty
     )
     private val questionsURLProperty = Bindings.createStringBinding(
-        { "https://content.bibletranslationtools.org/WA-Catalog/${itemProperty.value?.translation?.source?.slug}_tq" },
+        { itemProperty.value?.translation?.source?.slug?.let { slug ->
+                "https://content.bibletranslationtools.org/WA-Catalog/${slug}_tq"
+        }},
         itemProperty
     )
     private val projects = Bindings.createObjectBinding(

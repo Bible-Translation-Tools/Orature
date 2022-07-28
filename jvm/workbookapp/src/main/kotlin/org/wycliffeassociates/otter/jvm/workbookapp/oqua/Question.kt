@@ -16,28 +16,34 @@ fun questionsDedup(questions: List<Question>): List<Question> {
     return result
 }
 
-fun questionFromChunk(chunk: Chunk): Question? {
-    val resourceGroup = chunk.resources.find { it.metadata.identifier == "tq" }
-    return if (resourceGroup != null) {
-        Question(chunk.start, chunk.end, resourceGroup)
-    } else {
-        null
-    }
-}
-
 data class Question(
     val start: Int,
     var end: Int,
     val resources: ResourceGroup?
 ) {
+
     val question: String?
-        get() = resources?.resources?.blockingFirst()?.title?.textItem?.text
+        get() = resources
+            ?.resources
+            ?.blockingFirst()
+            ?.title
+            ?.textItem
+            ?.text
+
     val answer: String?
-        get() = resources?.resources?.blockingFirst()?.body?.textItem?.text
+        get() = resources
+            ?.resources
+            ?.blockingFirst()
+            ?.body
+            ?.textItem
+            ?.text
+
     var result: String? = null
 
     override fun equals(other: Any?): Boolean =
-        (other is Question) && (question == other.question) && (answer == other.answer)
+        (other is Question)
+                && (question == other.question)
+                && (answer == other.answer)
 
     override fun hashCode(): Int {
         var result = start.hashCode()
@@ -45,5 +51,16 @@ data class Question(
         result = 31 * result + (question?.hashCode() ?: 0)
         result = 31 * result + (answer?.hashCode() ?: 0)
         return result
+    }
+
+    companion object {
+        fun mapFromChunk(chunk: Chunk): Question? {
+            val resourceGroup = chunk.resources.find {
+                it.metadata.identifier == "tq"
+            }
+            return resourceGroup?.let {
+                Question(chunk.start, chunk.end, resourceGroup)
+            }
+        }
     }
 }

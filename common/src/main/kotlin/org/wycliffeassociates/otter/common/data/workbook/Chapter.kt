@@ -61,4 +61,10 @@ data class Chapter(
             "$start"
         }
     }
+
+    fun hasAudio(): Boolean =
+        audio
+            .selected
+            .value
+            ?.value != null
 }

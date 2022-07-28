@@ -21,7 +21,4 @@ class NavBarViewModel: ViewModel() {
         },
         wbDataStore.activeChapterProperty
     )
-
-    fun dock() {}
-    fun undock() {}
 }

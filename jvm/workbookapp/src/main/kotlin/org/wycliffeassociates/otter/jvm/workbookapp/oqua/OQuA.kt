@@ -9,7 +9,7 @@ fun main() {
     launch<OQuAApp>()
 }
 
-class OQuAApp : App(OQuAView::class), IDependencyGraphProvider {
+class OQuAApp : App(OQuAWorkspace::class), IDependencyGraphProvider {
     override val dependencyGraph = DaggerAppDependencyGraph.builder().build()
 
     init {
