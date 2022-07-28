@@ -23,7 +23,6 @@ import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.geometry.NodeOrientation
 import javafx.geometry.Orientation
-import javafx.geometry.Pos
 import javafx.geometry.Side
 import javafx.scene.Node
 import javafx.scene.control.Button
@@ -35,9 +34,7 @@ import javafx.scene.control.SkinBase
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
-import javafx.scene.text.TextAlignment
 import javafx.stage.Popup
-import javafx.stage.PopupWindow
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateChangedEvent
@@ -359,13 +356,13 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
 
     private fun buildTextPopupContent(): Node {
         return ScrollPane().apply {
+            val sp = this
             addClass("source-content__text-popup__scroll")
             maxWidth = 400.0
-            val scrollpane = this
 
             add(
                 VBox().apply {
-                    maxWidthProperty().bind(scrollpane.widthProperty().minus(20))
+                    maxWidthProperty().bind(sp.widthProperty().minus(20))
                     add(
                         Label().apply {
                             addClass("bold")
