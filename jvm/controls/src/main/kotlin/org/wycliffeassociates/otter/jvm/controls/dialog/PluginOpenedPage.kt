@@ -120,6 +120,7 @@ class PluginOpenedPage : View() {
         playerProperty.value?.stop()
         targetAudioPlayerProperty.value?.close()
         playerListenerDisposers.forEach(ListenerDisposer::dispose)
+        playerListenerDisposers.clear()
         removeShortcut(Shortcut.PLAY_SOURCE.value)
         removeShortcut(Shortcut.PLAY_TARGET.value)
         super.onUndock()

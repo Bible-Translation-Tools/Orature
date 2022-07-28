@@ -22,7 +22,6 @@ import com.github.thomasnield.rxkotlinfx.toLazyBinding
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
 import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.value.ChangeListener
 import javafx.scene.control.ListView
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
@@ -41,6 +40,8 @@ import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.utils.virtualFlow
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -71,7 +72,7 @@ class ChapterPage : View() {
     private lateinit var chunkListView: ListView<CardData>
 
     private val pluginOpenedPage: PluginOpenedPage
-    private var exportProgressListener: ChangeListener<Boolean>? = null
+    private var exportProgressListenerDisposer: ListenerDisposer? = null
 
     private val breadCrumb = BreadCrumb().apply {
         titleProperty.bind(
@@ -117,12 +118,12 @@ class ChapterPage : View() {
     }
 
     init {
-        tryImportStylesheet(resources.get("/css/chapter-page.css"))
-        tryImportStylesheet(resources.get("/css/chunk-item.css"))
-        tryImportStylesheet(resources.get("/css/take-item.css"))
-        tryImportStylesheet(resources.get("/css/add-plugin-dialog.css"))
-        tryImportStylesheet(resources.get("/css/confirm-dialog.css"))
-        tryImportStylesheet(resources.get("/css/contributor-info.css"))
+        tryImportStylesheet(resources["/css/chapter-page.css"])
+        tryImportStylesheet(resources["/css/chunk-item.css"])
+        tryImportStylesheet(resources["/css/take-item.css"])
+        tryImportStylesheet(resources["/css/add-plugin-dialog.css"])
+        tryImportStylesheet(resources["/css/confirm-dialog.css"])
+        tryImportStylesheet(resources["/css/contributor-info.css"])
 
         pluginOpenedPage = createPluginOpenedPage()
         workspace.subscribe<PluginOpenedEvent> { pluginInfo ->
@@ -376,16 +377,16 @@ class ChapterPage : View() {
 
     private fun initializeProgressDialog() {
         confirmdialog {
-            exportProgressListener = ChangeListener { _, _, value ->
-                if (value) {
+            viewModel.showExportProgressDialogProperty.onChangeWithDisposer {
+                if (it == true) {
                     titleTextProperty.bind(
-                        workbookDataStore.activeChapterProperty.stringBinding {
-                            it?.let {
+                        workbookDataStore.activeChapterProperty.stringBinding { chapter ->
+                            chapter?.let {
                                 MessageFormat.format(
                                     messages["exportChapterTitle"],
                                     messages["export"],
-                                    messages[it.label],
-                                    it.title
+                                    messages[chapter.label],
+                                    chapter.title
                                 )
                             }
                         }
@@ -400,8 +401,9 @@ class ChapterPage : View() {
                 } else {
                     close()
                 }
+            }.let {
+                exportProgressListenerDisposer = it
             }
-            viewModel.showExportProgressDialogProperty.addListener(exportProgressListener)
 
             progressTitleProperty.set(messages["pleaseWait"])
             showProgressBarProperty.set(true)
@@ -411,6 +413,7 @@ class ChapterPage : View() {
     }
 
     private fun removeDialogListeners() {
-        viewModel.showExportProgressDialogProperty.removeListener(exportProgressListener)
+        exportProgressListenerDisposer?.dispose()
+        exportProgressListenerDisposer = null
     }
 }

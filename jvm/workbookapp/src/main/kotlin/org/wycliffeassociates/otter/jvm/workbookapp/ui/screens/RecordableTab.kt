@@ -71,6 +71,7 @@ class RecordableTab(
 
     fun removeListeners() {
         recordableListenerDisposer?.dispose()
+        recordableListenerDisposer = null
     }
 
     fun recordNewTake() {
