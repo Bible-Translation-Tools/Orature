@@ -1,9 +1,9 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.oqua
 
-data class ChapterResults (
+data class ChapterDraftReview (
     val source: String,
     val target: String,
     val book: String,
     val chapter: Int,
-    val results: List<QuestionResults>
+    val draftReviews: List<QuestionDraftReview>
 )

@@ -6,38 +6,41 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.Proj
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
 import javax.inject.Inject
-class ResultsRepository
+
+class DraftReviewRepository
 @Inject
 constructor (
     private val directoryProvider: IDirectoryProvider
 ) {
 
-    fun readResultsFile(workbook: Workbook, chapter: Int): ChapterResults {
+    fun readDraftReviewFile(workbook: Workbook, chapter: Int): ChapterDraftReview {
         val accessor = getAccessor(workbook)
         val mapper = jacksonObjectMapper()
-        val dir: File = accessor.getResultsFile()
+        val dir: File = accessor.getDraftReviewFile()
         val file = File("${dir.absoluteFile}/ch${chapter}.json")
 
         return mapper.readValue(file)
     }
 
-    fun writeResultsFile(workbook: Workbook, chapter: Int, questions: List<Question>) {
+    fun writeDraftReviewFile(workbook: Workbook, chapter: Int, questions: List<Question>) {
         val accessor = getAccessor(workbook)
         val mapper = jacksonObjectMapper()
-        val dir: File = accessor.getResultsFile()
+        val dir: File = accessor.getDraftReviewFile()
         val file = File("${dir.absoluteFile}/ch${chapter}.json")
 
-        val results = ChapterResults(
+        val draftReviews = ChapterDraftReview(
             workbook.source.language.slug,
             workbook.target.language.slug,
             workbook.target.slug,
             chapter,
-            questions.map(QuestionResults::mapFromQuestion)
+            questions.map {
+                QuestionDraftReview.mapFromQuestion(it)
+            }
         )
 
         dir.mkdirs()
         file.printWriter().use { out ->
-            out.println(mapper.writeValueAsString(results))
+            out.println(mapper.writeValueAsString(draftReviews))
         }
     }
 

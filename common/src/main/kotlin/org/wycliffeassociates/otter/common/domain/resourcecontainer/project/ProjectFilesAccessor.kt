@@ -356,8 +356,8 @@ class ProjectFilesAccessor(
     private fun isAudioFile(file: File) =
         file.extension.lowercase().let { it == "wav" || it == "mp3" }
 
-    fun getResultsFile(): File {
-        return projectDir.resolve(RcConstants.GRADES_FILE)
+    fun getDraftReviewFile(): File {
+        return projectDir.resolve(RcConstants.DRAFT_REVIEW_DIR)
     }
 
     companion object {

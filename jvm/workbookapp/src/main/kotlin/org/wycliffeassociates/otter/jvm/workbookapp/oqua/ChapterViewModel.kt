@@ -13,7 +13,7 @@ import javax.inject.Inject
 class ChapterViewModel : ViewModel() {
     private val wbDataStore: WorkbookDataStore by inject()
 @Inject
-    lateinit var resultsRepo: ResultsRepository
+    lateinit var draftReviewRepo: DraftReviewRepository
 
     val settingsViewModel: SettingsViewModel by inject()
 
@@ -36,7 +36,7 @@ class ChapterViewModel : ViewModel() {
     }
 
     fun undock() {
-        saveResults()
+        saveDraftReview()
     }
 
     private fun loadChapterAudio() {
@@ -56,11 +56,11 @@ class ChapterViewModel : ViewModel() {
     private fun loadQuestions() {
         val newQuestions = loadQuestionsResource()
         try {
-            resultsRepo
-                .readResultsFile(workbook, chapterNumber)
-                .results
-                .let { results ->
-                    loadResultsIntoQuestions(newQuestions, results)
+            draftReviewRepo
+                .readDraftReviewFile(workbook, chapterNumber)
+                .draftReviews
+                .let { draftReviews ->
+                    loadDraftReviewIntoQuestions(newQuestions, draftReviews)
                 }
         } catch (_: FileNotFoundException) {
             /**
@@ -89,18 +89,18 @@ class ChapterViewModel : ViewModel() {
             } ?: listOf()
     }
 
-    private fun loadResultsIntoQuestions(questions: List<Question>, results: List<QuestionResults>) {
+    private fun loadDraftReviewIntoQuestions(questions: List<Question>, draftReviews: List<QuestionDraftReview>) {
         questions.forEach { question ->
-            results.find { loadedResult ->
-                (question.question == loadedResult.question)
-                        && (question.answer == loadedResult.answer)
+            draftReviews.find { loadedReview ->
+                (question.question == loadedReview.question)
+                        && (question.answer == loadedReview.answer)
             }?.run {
-                question.result = this.result
+                question.review = this.review
             }
         }
     }
 
-    private fun saveResults() {
-        resultsRepo.writeResultsFile(workbook, chapterNumber, questions)
+    private fun saveDraftReview() {
+        draftReviewRepo.writeDraftReviewFile(workbook, chapterNumber, questions)
     }
 }

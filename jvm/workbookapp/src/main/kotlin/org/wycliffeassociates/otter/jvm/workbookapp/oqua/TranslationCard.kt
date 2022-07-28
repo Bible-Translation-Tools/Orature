@@ -4,6 +4,7 @@ import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import tornadofx.*
+import java.util.*
 
 class TranslationCard (
     val translation: Translation,
@@ -18,11 +19,7 @@ class TranslationCard (
     override fun equals(other: Any?): Boolean =
         ((other is TranslationCard) && (translation == other.translation))
 
-    override fun hashCode(): Int {
-        var result = translation.hashCode()
-        result = 31 * result + projects.hashCode()
-        return result
-    }
+    override fun hashCode(): Int = Objects.hash(translation, projects)
 
     companion object {
         fun mapFromWorkbook (workbook: Workbook): TranslationCard {

@@ -1,20 +1,20 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.oqua
 
-data class QuestionResults (
+data class QuestionDraftReview (
     val question: String?,
     val answer: String?,
     val start: Int,
     val end: Int,
-    val result: String?
+    val review: String?
 ) {
     companion object {
-        fun mapFromQuestion(question: Question): QuestionResults {
-            return QuestionResults(
+        fun mapFromQuestion(question: Question): QuestionDraftReview {
+            return QuestionDraftReview(
                 question.question,
                 question.answer,
                 question.start,
                 question.end,
-                question.result
+                question.review
             )
         }
     }

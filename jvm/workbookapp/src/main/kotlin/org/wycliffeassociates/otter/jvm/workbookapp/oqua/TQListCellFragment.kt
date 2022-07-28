@@ -39,22 +39,22 @@ class TQListCellFragment: ListCellFragment<Question>() {
         hbox {
             val correct = togglebutton("Correct", toggleGroup) {
                 action {
-                    item.result = "correct"
+                    item.review = "correct"
                 }
             }
             val incorrect = togglebutton("Incorrect", toggleGroup) {
                 action {
-                    item.result = "incorrect"
+                    item.review = "incorrect"
                 }
             }
             val invalid = togglebutton("Invalid", toggleGroup) {
                 action {
-                    item.result = "invalid"
+                    item.review = "invalid"
                 }
             }
 
             itemProperty.onChange {
-                when (it?.result) {
+                when (it?.review) {
                     "correct" -> toggleGroup.selectToggle(correct)
                     "incorrect" -> toggleGroup.selectToggle(incorrect)
                     "invalid" -> toggleGroup.selectToggle(invalid)

@@ -2,18 +2,19 @@ package org.wycliffeassociates.otter.jvm.workbookapp.oqua
 
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.ResourceGroup
+import java.util.*
 
 fun questionsDedup(questions: List<Question>): List<Question> {
-    val result = mutableListOf<Question>()
+    val filteredQuestions = mutableListOf<Question>()
     questions.forEach {question ->
-        val match = result.find { it == question }
+        val match = filteredQuestions.find { it == question }
         if (match != null) {
             match.end = question.end
         } else {
-            result.add(question)
+            filteredQuestions.add(question)
         }
     }
-    return result
+    return filteredQuestions
 }
 
 data class Question(
@@ -38,20 +39,14 @@ data class Question(
             ?.textItem
             ?.text
 
-    var result: String? = null
+    var review: String? = null
 
     override fun equals(other: Any?): Boolean =
         (other is Question)
                 && (question == other.question)
                 && (answer == other.answer)
 
-    override fun hashCode(): Int {
-        var result = start.hashCode()
-        result = 31 * result + end.hashCode()
-        result = 31 * result + (question?.hashCode() ?: 0)
-        result = 31 * result + (answer?.hashCode() ?: 0)
-        return result
-    }
+    override fun hashCode(): Int = Objects.hash(start, end, question, answer)
 
     companion object {
         fun mapFromChunk(chunk: Chunk): Question? {
