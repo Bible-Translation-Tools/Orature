@@ -116,7 +116,13 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     @FXML
     lateinit var sourceAudioBlock: VBox
 
-    lateinit var sourceTextPopup: Popup
+    private val sourceTextPopup: Popup by lazy {
+        Popup().apply {
+            isAutoHide = true
+            importStylesForPopup(this)
+            content.setAll(buildTextPopupContent())
+        }
+    }
 
     init {
         loadFXML()
@@ -263,12 +269,6 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
                 styleClass.removeAll { it.startsWith("text-zoom") }
                 addClass("text-zoom-$rate")
             }
-        }
-
-        sourceTextPopup = Popup().apply {
-            isAutoHide = true
-            importStylesForPopup(this)
-            content.setAll(buildTextPopupContent())
         }
 
         toggleSourceTextBtn.apply {
