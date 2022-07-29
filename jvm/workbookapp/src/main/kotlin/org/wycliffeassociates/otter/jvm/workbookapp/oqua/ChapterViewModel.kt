@@ -82,8 +82,8 @@ class ChapterViewModel : ViewModel() {
                     .chunks
                     .toList()
                     .blockingGet()
-                    .mapNotNull { chunk ->
-                        Question.mapFromChunk(chunk)
+                    .flatMap { chunk ->
+                        Question.getQuestionsFromChunk(chunk)
                     }
                 ).toList()
             } ?: listOf()

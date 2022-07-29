@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.oqua
 
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
-import org.wycliffeassociates.otter.common.data.workbook.ResourceGroup
+import org.wycliffeassociates.otter.common.data.workbook.Resource
 import java.util.*
 
 fun questionsDedup(questions: List<Question>): List<Question> {
@@ -20,21 +20,17 @@ fun questionsDedup(questions: List<Question>): List<Question> {
 data class Question(
     val start: Int,
     var end: Int,
-    val resources: ResourceGroup?
+    val resource: Resource?
 ) {
 
     val question: String?
-        get() = resources
-            ?.resources
-            ?.blockingFirst()
+        get() = resource
             ?.title
             ?.textItem
             ?.text
 
     val answer: String?
-        get() = resources
-            ?.resources
-            ?.blockingFirst()
+        get() = resource
             ?.body
             ?.textItem
             ?.text
@@ -49,13 +45,17 @@ data class Question(
     override fun hashCode(): Int = Objects.hash(start, end, question, answer)
 
     companion object {
-        fun mapFromChunk(chunk: Chunk): Question? {
+        fun getQuestionsFromChunk(chunk: Chunk): List<Question> {
             val resourceGroup = chunk.resources.find {
                 it.metadata.identifier == "tq"
             }
-            return resourceGroup?.let {
-                Question(chunk.start, chunk.end, resourceGroup)
-            }
+            return resourceGroup
+                ?.resources
+                ?.map { resource ->
+                    Question(chunk.start, chunk.end, resource)
+                }
+                ?.blockingIterable()
+                ?.toList() ?: listOf()
         }
     }
 }
