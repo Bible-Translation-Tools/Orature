@@ -32,11 +32,13 @@ import javafx.scene.control.ScrollBar
 import javafx.scene.control.ScrollPane
 import javafx.scene.control.SkinBase
 import javafx.scene.layout.HBox
+import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
 import javafx.stage.Popup
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateChangedEvent
 import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateType
 import org.wycliffeassociates.otter.jvm.controls.media.SimpleAudioPlayer
@@ -265,7 +267,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
 
         sourceTextPopup = Popup().apply {
             isAutoHide = true
-
+            importStylesForPopup(this)
             content.setAll(buildTextPopupContent())
         }
 
@@ -274,13 +276,39 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             managedWhen(visibleProperty())
 
             action {
+                setPopupTheme(sourceTextPopup)
                 val bound = this.boundsInLocal
                 val screenBound = this.localToScreen(bound)
                 sourceTextPopup.show(
                     FX.primaryStage
                 )
-                sourceTextPopup.x = screenBound.minX - sourceTextPopup.width + this.width
-                sourceTextPopup.y = screenBound.minY - sourceTextPopup.height - 10
+                sourceTextPopup.x = screenBound.centerX - sourceTextPopup.width + this.width
+                sourceTextPopup.y = screenBound.minY - sourceTextPopup.height
+            }
+        }
+    }
+
+    /**
+     * Popup (Window) requires a separate set of stylesheets.
+     * Existing stylesheets from the current stage are not inherited in the popup.
+     */
+    private fun importStylesForPopup(popUp: Popup) {
+        popUp.scene.stylesheets.setAll(
+            javaClass.getResource("/css/base-colors.css").toExternalForm(),
+            javaClass.getResource("/css/theme/light-theme.css").toExternalForm(),
+            javaClass.getResource("/css/theme/dark-theme.css").toExternalForm(),
+            javaClass.getResource("/css/source-content.css").toExternalForm()
+        )
+    }
+
+    private fun setPopupTheme(popUp: Popup) {
+        FX.primaryStage.scene.root.styleClass.let {
+            if (it.contains(ColorTheme.DARK.styleClass)) {
+                popUp.scene.root.addClass(ColorTheme.DARK.styleClass)
+                popUp.scene.root.removeClass(ColorTheme.LIGHT.styleClass)
+            } else {
+                popUp.scene.root.addClass(ColorTheme.LIGHT.styleClass)
+                popUp.scene.root.removeClass(ColorTheme.DARK.styleClass)
             }
         }
     }
@@ -355,30 +383,32 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     }
 
     private fun buildTextPopupContent(): Node {
-        return ScrollPane().apply {
-            val sp = this
-            addClass("source-content__text-popup__scroll")
-            maxWidth = 400.0
+        return VBox().apply {
+            addClass("source-content__text-popup__container")
+            scrollpane {
+                addClass("source-content__text-popup__scroll")
+                vgrow = Priority.ALWAYS
 
-            add(
-                VBox().apply {
-                    maxWidthProperty().bind(sp.widthProperty().minus(20))
-                    add(
-                        Label().apply {
-                            addClass("bold")
-                            textProperty().bind(sourceContent.contentTitleProperty)
-                            paddingAll = 10.0
-                        }
-                    )
-                    add(
-                        Label().apply {
-                            textProperty().bind(sourceContent.sourceTextProperty)
-                            isWrapText = true
-                            paddingAll = 10.0
-                        }
-                    )
+                vbox {
+                    vgrow = Priority.ALWAYS
+                    maxWidthProperty().bind(this@scrollpane.widthProperty().minus(20))
+                    minHeightProperty().bind(this@scrollpane.heightProperty().minus(10))
+
+                    label {
+                        addClass("source-content__text", "source-content__text-popup__title")
+                        textProperty().bind(sourceContent.contentTitleProperty)
+                    }
+                    label {
+                        addClass("source-content__text", "source-content__text-popup__text")
+                        textProperty().bind(sourceContent.sourceTextProperty)
+                    }
+                    region { vgrow = Priority.ALWAYS }
+                    label {
+                        addClass("source-content__text-popup__license-text")
+                        textProperty().bind(sourceContent.licenseTextProperty)
+                    }
                 }
-            )
+            }
         }
     }
 

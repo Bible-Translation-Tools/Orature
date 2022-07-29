@@ -29,6 +29,7 @@ import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.skins.media.SourceContentSkin
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.*
 import java.text.MessageFormat
 
@@ -95,6 +96,10 @@ class SourceContent : Control() {
     }
 
     private fun initialize() {
+        tryImportStylesheet(javaClass.getResource("/css/base-colors.css").toExternalForm())
+        tryImportStylesheet(javaClass.getResource("/css/theme/light-theme.css").toExternalForm())
+        tryImportStylesheet(javaClass.getResource("/css/theme/dark-theme.css").toExternalForm())
+        tryImportStylesheet(javaClass.getResource("/css/source-content.css").toExternalForm())
         stylesheets.setAll(userAgentStyleSheet)
     }
 }

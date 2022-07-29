@@ -135,6 +135,40 @@
     -fx-text-fill: -wa-regular-text;
 }
 
+.source-content__text-popup__container {
+    -fx-padding: 5;
+    -fx-effect: -wa-level3;
+}
+
+.source-content__text-popup__scroll {
+    -fx-max-width: 450px;
+    -fx-max-height: 400px;
+    -fx-min-height: 200px;
+}
+
+.source-content__text-popup__container .viewport {
+    -fx-background-color: -wa-background;
+}
+
+.source-content__text-popup__title {
+    -fx-font-weight: bold;
+    -fx-padding: 10 12;
+    -fx-font-size: 1.2em;
+}
+
+.source-content__text-popup__text {
+    -fx-padding: 10 12;
+    -fx-font-size: 1.2em;
+    -fx-line-spacing: 3px;
+}
+
+.source-content__text-popup__license-text {
+    -fx-padding: 15 12 10 12;
+    -fx-font-size: 14px;
+    -fx-text-fill: -wa-note-text;
+    -fx-wrap-text: true;
+}
+
 .source-content__zoom-control {
     -fx-alignment: center-left;
 }
