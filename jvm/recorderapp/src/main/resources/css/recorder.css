@@ -55,21 +55,6 @@
     -fx-icon-size: 48px;
 }
 
-.reset-button {
-    -fx-text-fill: -wa-white; /* specific on dark banner */
-    -fx-border-color: -wa-white;
-}
-
-.reset-button:hover {
-    -fx-text-fill: -wa-white;
-    -fx-border-color: -wa-white;
-    -fx-background-color: -wa-btn-icon-background-hover;
-}
-
-.reset-button .ikonli-font-icon {
-    -fx-icon-color: -wa-white;
-}
-
 .continue-button {
     -fx-pref-height: 30px;
     -fx-pref-width: 160px;

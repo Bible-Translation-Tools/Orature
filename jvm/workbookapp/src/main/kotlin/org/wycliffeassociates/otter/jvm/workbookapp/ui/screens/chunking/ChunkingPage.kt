@@ -171,19 +171,19 @@ class ChunkingPage : View() {
                         leftControls.prefWidthProperty().bind(this.widthProperty())
 
                         jfxbutton(messages["undo"]) {
-                            addClass("btn", "btn--secondary", "reset-button")
+                            addClass("btn", "btn--secondary", "btn--white-on-dark")
                             setOnAction {
                                 vm.undoMarker()
                             }
                         }
                         jfxbutton(messages["redo"]) {
-                            addClass("btn", "btn--secondary", "reset-button")
+                            addClass("btn", "btn--secondary", "btn--white-on-dark")
                             setOnAction {
                                 vm.redoMarker()
                             }
                         }
                         jfxbutton(messages["save"]) {
-                            addClass("btn", "btn--primary", "btn--borderless", "save-btn")
+                            addClass("btn", "btn--primary", "btn--borderless")
                             setOnAction {
                                 vm.saveAndQuit()
                                 workspace.navigateBack()
