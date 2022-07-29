@@ -117,6 +117,9 @@ class ProjectFilesAccessor(
     fun copySourceFiles(fileReader: IFileReader) {
         val sourceDirectories = listOf(RcConstants.SOURCE_DIR, RcConstants.SOURCE_AUDIO_DIR)
         for (dir in sourceDirectories) {
+            if (!fileReader.exists(dir)) {
+                continue
+            }
             val sourceFiles: Sequence<String> = fileReader
                 .list(dir)
                 .filter {
