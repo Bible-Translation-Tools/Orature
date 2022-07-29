@@ -47,7 +47,6 @@ class ChunkingPage : View() {
     private val playButtonStyle = "chunking-play-controls__play-btn"
     private val roundedButtonStyle = "chunking-play-controls__btn--rounded"
     private val seekButtonStyle = "chunking-play-controls__seek-btn"
-    private val continueButtonStyle = "chunking-continue-button"
 
     val vm: ChunkingViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
