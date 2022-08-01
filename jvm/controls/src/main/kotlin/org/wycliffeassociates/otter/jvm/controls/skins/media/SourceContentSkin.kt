@@ -394,6 +394,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
 
                 vbox {
                     vgrow = Priority.ALWAYS
+                    // scroll bar offsets to avoid text overrun
                     maxWidthProperty().bind(this@scrollpane.widthProperty().minus(20))
                     minHeightProperty().bind(this@scrollpane.heightProperty().minus(10))
 
