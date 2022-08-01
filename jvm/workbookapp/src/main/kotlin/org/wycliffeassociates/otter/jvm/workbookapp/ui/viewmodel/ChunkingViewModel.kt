@@ -137,10 +137,12 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
     private val width = Screen.getMainScreen().platformWidth
     private val height = Integer.min(Screen.getMainScreen().platformHeight, 500)
 
-
     private val builder = ObservableWaveformBuilder()
     lateinit var waveform: Observable<Image>
 
+    /** Call this before leaving the view to avoid memory leak */
+    var chunkImageCleanup: () -> Unit = {}
+    var consumeImageCleanup: () -> Unit = {}
 
     override var audioController: AudioPlayerController? = null
     override val audioPlayer = SimpleObjectProperty<IAudioPlayer>()
@@ -211,6 +213,10 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
 
     fun cleanup() {
         builder.cancel()
+        consumeImageCleanup()
+        chunkImageCleanup()
+        compositeDisposable.clear()
+        disposeables.forEach { it.dispose() }
     }
 
     fun saveAndQuit() {

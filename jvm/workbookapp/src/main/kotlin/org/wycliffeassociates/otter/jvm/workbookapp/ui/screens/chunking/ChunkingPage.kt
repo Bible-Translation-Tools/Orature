@@ -58,6 +58,8 @@ class ChunkingPage : View() {
         themeProperty.bind(settingsViewModel.appColorMode)
         positionProperty.bind(vm.positionProperty)
 
+        vm.chunkImageCleanup = ::freeImages
+
         onWaveformClicked = { vm.pause() }
         onWaveformDragReleased = { deltaPos ->
             val deltaFrames = pixelsToFrames(deltaPos)

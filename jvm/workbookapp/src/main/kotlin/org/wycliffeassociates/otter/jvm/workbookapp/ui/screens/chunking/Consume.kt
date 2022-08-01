@@ -94,6 +94,8 @@ class Consume : Fragment() {
                 val final = Utils.clamp(0, curFrames - deltaFrames, duration)
                 vm.seek(final)
             }
+
+            vm.consumeImageCleanup = ::freeImages
         }
         bottom = hbox {
             styleClass.addAll("consume__bottom")
