@@ -137,6 +137,8 @@
 
 .source-content__text-popup__container {
     -fx-padding: 5;
+    -fx-background-radius: 8px;
+    -fx-background-color: -wa-background;
     -fx-effect: -wa-level3;
 }
 
