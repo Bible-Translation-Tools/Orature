@@ -144,7 +144,7 @@
 
 .source-content__text-popup__scroll {
     -fx-max-width: 450px;
-    -fx-min-height: 200px;
+    -fx-min-height: 150px;
 }
 
 .source-content__text-popup__container .viewport {
@@ -164,7 +164,7 @@
 }
 
 .source-content__text-popup__license-text {
-    -fx-padding: 15 12 10 12;
+    -fx-padding: 10 12;
     -fx-font-size: 14px;
     -fx-text-fill: -wa-note-text;
     -fx-wrap-text: true;
