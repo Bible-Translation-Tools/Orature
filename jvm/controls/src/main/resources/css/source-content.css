@@ -144,7 +144,6 @@
 
 .source-content__text-popup__scroll {
     -fx-max-width: 450px;
-    -fx-max-height: 400px;
     -fx-min-height: 200px;
 }
 

@@ -388,6 +388,9 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             scrollpane {
                 addClass("source-content__text-popup__scroll")
                 vgrow = Priority.ALWAYS
+                maxHeightProperty().bind(
+                    FX.primaryStage.scene.heightProperty().multiply(2.0/3)
+                )
 
                 vbox {
                     vgrow = Priority.ALWAYS
