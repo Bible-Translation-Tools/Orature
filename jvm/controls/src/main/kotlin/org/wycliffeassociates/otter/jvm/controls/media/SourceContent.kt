@@ -70,8 +70,6 @@ class SourceContent : Control() {
     val orientationProperty = SimpleObjectProperty<NodeOrientation>()
     val sourceOrientationProperty = SimpleObjectProperty<NodeOrientation>()
 
-    private val userAgentStyleSheet = javaClass.getResource("/css/source-content.css").toExternalForm()
-
     init {
         addClass("source-content")
 
@@ -91,15 +89,7 @@ class SourceContent : Control() {
         return SourceContentSkin(this)
     }
 
-    override fun getUserAgentStylesheet(): String {
-        return userAgentStyleSheet
-    }
-
     private fun initialize() {
-        tryImportStylesheet(javaClass.getResource("/css/base-colors.css").toExternalForm())
-        tryImportStylesheet(javaClass.getResource("/css/theme/light-theme.css").toExternalForm())
-        tryImportStylesheet(javaClass.getResource("/css/theme/dark-theme.css").toExternalForm())
         tryImportStylesheet(javaClass.getResource("/css/source-content.css").toExternalForm())
-        stylesheets.setAll(userAgentStyleSheet)
     }
 }

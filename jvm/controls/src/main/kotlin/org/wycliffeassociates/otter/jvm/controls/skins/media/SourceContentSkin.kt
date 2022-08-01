@@ -119,7 +119,6 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     private val sourceTextPopup: Popup by lazy {
         Popup().apply {
             isAutoHide = true
-            importStylesForPopup(this)
             content.setAll(buildTextPopupContent())
         }
     }
@@ -288,19 +287,6 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
         }
     }
 
-    /**
-     * Popup (Window) requires a separate set of stylesheets.
-     * Existing stylesheets from the current stage are not inherited in the popup.
-     */
-    private fun importStylesForPopup(popUp: Popup) {
-        popUp.scene.stylesheets.setAll(
-            javaClass.getResource("/css/base-colors.css").toExternalForm(),
-            javaClass.getResource("/css/theme/light-theme.css").toExternalForm(),
-            javaClass.getResource("/css/theme/dark-theme.css").toExternalForm(),
-            javaClass.getResource("/css/source-content.css").toExternalForm()
-        )
-    }
-
     private fun setPopupTheme(popUp: Popup) {
         FX.primaryStage.scene.root.styleClass.let {
             if (it.contains(ColorTheme.DARK.styleClass)) {
@@ -385,6 +371,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     private fun buildTextPopupContent(): Node {
         return VBox().apply {
             addClass("source-content__text-popup__container")
+
             scrollpane {
                 addClass("source-content__text-popup__scroll")
                 vgrow = Priority.ALWAYS
