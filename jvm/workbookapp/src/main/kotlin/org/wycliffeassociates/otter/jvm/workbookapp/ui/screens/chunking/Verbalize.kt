@@ -79,9 +79,10 @@ class Verbalize : View() {
                     styleClass.addAll("btn", "btn--cta", "verbalize__btn--primary")
                     vm.recordingProperty.onChangeAndDoNow {
                         it?.let {
-                            when (it) {
-                                true -> graphic = stopIcon
-                                false -> graphic = recordIcon
+                            graphic = if (it) {
+                                stopIcon
+                            } else {
+                                recordIcon
                             }
                         }
                     }
@@ -98,5 +99,10 @@ class Verbalize : View() {
                 action { vm.reRecord() }
             }
         }
+    }
+
+    override fun onUndock() {
+        super.onUndock()
+        vm.pausePlayback()
     }
 }

@@ -148,6 +148,13 @@ class VerbalizeViewModel : ViewModel() {
         toggle()
     }
 
+    fun pausePlayback() {
+        player?.let {
+            it.pause()
+        }
+        isPlayingProperty.set(false)
+    }
+
     fun playToggle() {
         player?.let { player ->
             if (!isLoaded) {
@@ -166,8 +173,7 @@ class VerbalizeViewModel : ViewModel() {
                 isLoaded = true
             }
             if (player.isPlaying()) {
-                isPlayingProperty.set(false)
-                player.pause()
+                pausePlayback()
             } else {
                 isPlayingProperty.set(true)
                 player.play()
