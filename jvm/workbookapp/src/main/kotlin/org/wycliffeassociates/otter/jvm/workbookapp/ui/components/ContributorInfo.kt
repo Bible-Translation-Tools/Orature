@@ -32,6 +32,8 @@ import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.bindChildrenWithDisposer
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
@@ -44,6 +46,8 @@ class ContributorInfo(
     val addContributorCallbackProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val editContributorCallbackProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val removeContributorCallbackProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+
+    var contributorsListenerDisposer: ListenerDisposer? = null
 
     init {
         addClass("contributor__container")
@@ -98,7 +102,7 @@ class ContributorInfo(
             addClass("contributor__list")
 
             vbox {
-                bindChildren(contributors) { contributor ->
+                bindChildrenWithDisposer(contributors) { contributor ->
                     ContributorCell().apply {
                         nameProperty.set(contributor.name)
                         indexProperty.bind(
@@ -113,6 +117,8 @@ class ContributorInfo(
                         onRemoveContributorActionProperty.bind(removeContributorCallbackProperty)
                         onEditContributorActionProperty.bind(editContributorCallbackProperty)
                     }
+                }.let {
+                    contributorsListenerDisposer = it
                 }
             }
         }
