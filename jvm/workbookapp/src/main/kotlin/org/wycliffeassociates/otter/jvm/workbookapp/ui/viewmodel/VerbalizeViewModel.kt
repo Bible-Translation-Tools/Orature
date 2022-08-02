@@ -82,9 +82,12 @@ class VerbalizeViewModel : ViewModel() {
     }
 
     private fun prepareAudio() {
-        prepareVerbalizationFile()
+        isLoaded = false
         getAudioConnections()
-        prepareRecorder()
+        if (!hasContentProperty.value) {
+            prepareVerbalizationFile()
+            prepareRecorder()
+        }
     }
 
     private fun prepareVerbalizationFile() {
