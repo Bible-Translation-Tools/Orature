@@ -118,7 +118,13 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     private val sourceTextPopup: Popup by lazy {
         Popup().apply {
             isAutoHide = true
-            content.setAll(buildTextPopupContent())
+
+            val contentNode = buildTextPopupContent()
+            content.setAll(contentNode)
+
+            focusedProperty().onChange {
+                if (it) contentNode.requestFocus()
+            }
         }
     }
 
@@ -372,17 +378,19 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             addClass("source-content__text-popup__container")
 
             scrollpane {
+                val sp = this
                 addClass("source-content__text-popup__scroll")
                 vgrow = Priority.ALWAYS
                 maxHeightProperty().bind(
                     FX.primaryStage.scene.heightProperty().multiply(2.0/3)
                 )
+                this@apply.focusedProperty().onChange { if (it) sp.requestFocus() }
 
                 vbox {
                     vgrow = Priority.ALWAYS
                     // scroll bar offsets to avoid text overrun
-                    maxWidthProperty().bind(this@scrollpane.widthProperty().minus(20))
-                    minHeightProperty().bind(this@scrollpane.heightProperty().minus(10))
+                    maxWidthProperty().bind(sp.widthProperty().minus(20))
+                    minHeightProperty().bind(sp.heightProperty().minus(10))
 
                     label {
                         addClass("source-content__text", "source-content__text-popup__title")
