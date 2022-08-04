@@ -99,7 +99,7 @@ class ChunkingWizard : Wizard() {
                 add(verbalizeStep)
                 add(chunkStep)
 
-                button() {
+                button {
                     styleClass.addAll("btn", "btn--secondary")
                     textProperty().bind(nextButtonTextProperty)
                     runLater {

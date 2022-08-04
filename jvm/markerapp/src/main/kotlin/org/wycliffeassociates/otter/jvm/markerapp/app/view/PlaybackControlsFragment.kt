@@ -80,7 +80,7 @@ class PlaybackControlsFragment : Fragment() {
 
     private val undoBtn = JFXButton().apply {
         text = messages["undo"]
-        addClass("btn", "btn--secondary", "reset-button")
+        addClass("btn", "btn--secondary", "btn--white-on-dark")
 
         setOnAction {
             viewModel.undoMarker()
@@ -90,7 +90,7 @@ class PlaybackControlsFragment : Fragment() {
 
     private val redoBtn = JFXButton().apply {
         text = messages["redo"]
-        addClass("btn", "btn--secondary", "reset-button")
+        addClass("btn", "btn--secondary", "btn--white-on-dark")
 
         setOnAction {
             viewModel.redoMarker()

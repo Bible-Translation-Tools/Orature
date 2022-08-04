@@ -40,6 +40,16 @@
     -fx-pref-height: 60px;
 }
 
+.chunking-play-controls__play-btn:focused {
+    -fx-border-width: 4px;
+    -fx-border-color: -wa-button-border;
+    -fx-background-color: -wa-background;
+}
+
+.chunking-play-controls__play-btn:focused .ikonli-font-icon {
+    -fx-icon-color: -wa-regular-text;
+}
+
 .chunking-play-controls__play-btn .ikonli-font-icon {
     -fx-icon-size: 22px;
 }
@@ -49,6 +59,11 @@
     -fx-border-color: "#FFFFFF";
     -fx-pref-width: 40px;
     -fx-pref-height: 40px;
+}
+
+.chunking-play-controls__seek-btn:focused {
+    -fx-border-width: 2px;
+    -fx-border-color: -wa-button-border;
 }
 
 .chunking-play-controls__seek-btn .ikonli-font-icon {

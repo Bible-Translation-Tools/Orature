@@ -257,6 +257,22 @@
     -fx-border-width: 0px;
     -fx-background-color: transparent;
 }
+/* ------------ Universal button style --------- */
+/* these button styles are for consistent design across different themes */
+.btn--white-on-dark {
+    -fx-text-fill: -wa-white;
+    -fx-border-color: -wa-white;
+}
+
+.btn--white-on-dark:hover {
+    -fx-text-fill: -wa-white;
+    -fx-border-color: -wa-white;
+    -fx-background-color: -wa-white-30;
+}
+
+.btn--white-on-dark .ikonli-font-icon {
+    -fx-icon-color: -wa-white;
+}
 /* -------------- Toggle Group -------------- */
 .wa-toggle-btn-group {
     -fx-background-color: -wa-toggle-background;
