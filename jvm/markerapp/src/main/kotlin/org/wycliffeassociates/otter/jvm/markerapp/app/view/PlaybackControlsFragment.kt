@@ -19,7 +19,7 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import com.jfoenix.controls.JFXButton
-import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.binding.Bindings
 import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.layout.Priority
@@ -56,7 +56,17 @@ class PlaybackControlsFragment : Fragment() {
             playButtonStyle,
             roundedButtonStyle
         )
-        graphic = playIcon
+        graphicProperty().bind(
+            Bindings.createObjectBinding(
+                {
+                    when (viewModel.isPlayingProperty.value) {
+                        true -> pauseIcon
+                        false -> playIcon
+                    }
+                },
+                viewModel.isPlayingProperty
+            )
+        )
         setOnAction { viewModel.mediaToggle() }
     }
 
@@ -106,16 +116,6 @@ class PlaybackControlsFragment : Fragment() {
         disableProperty().bind(viewModel.isLoadingProperty)
         setOnAction {
             viewModel.saveAndQuit()
-        }
-    }
-
-    init {
-        viewModel.isPlayingProperty.onChange { playing ->
-            if (playing) {
-                playBtn.graphicProperty().set(pauseIcon)
-            } else {
-                playBtn.graphicProperty().set(playIcon)
-            }
         }
     }
 
