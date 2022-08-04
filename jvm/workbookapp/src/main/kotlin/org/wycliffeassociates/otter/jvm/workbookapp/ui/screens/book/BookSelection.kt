@@ -191,6 +191,13 @@ class BookSelection : View() {
         viewModel.loadResources()
         viewModel.loadResourceSelections()
     }
+
+    override fun onUndock() {
+        super.onUndock()
+        viewModel.reset()
+        FX.getComponents().remove(this::class)
+        FX.getComponents().remove(viewModel::class)
+    }
 }
 
 fun matchedExistingBook(book: BookCardData, existingBook: Workbook): Boolean {
