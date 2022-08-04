@@ -64,7 +64,7 @@ class SourceAudioFragment : Fragment() {
 
         return SourceContent().apply {
             sourceTextProperty.set(sourceText)
-
+            sourceTextCompactMode.set(true)
             audioNotAvailableTextProperty.set(messages["audioNotAvailable"])
             textNotAvailableTextProperty.set(messages["textNotAvailable"])
             playSourceLabelProperty.set(messages["playSource"])

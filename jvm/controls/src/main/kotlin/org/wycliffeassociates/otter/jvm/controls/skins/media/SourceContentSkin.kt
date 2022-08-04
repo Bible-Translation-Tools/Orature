@@ -31,11 +31,13 @@ import javafx.scene.control.ListView
 import javafx.scene.control.ScrollBar
 import javafx.scene.control.SkinBase
 import javafx.scene.layout.HBox
+import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
-import javafx.scene.text.TextAlignment
+import javafx.stage.Popup
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateChangedEvent
 import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateType
 import org.wycliffeassociates.otter.jvm.controls.media.SimpleAudioPlayer
@@ -87,6 +89,9 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     lateinit var sourceTextChunksContainer: ListView<Label>
 
     @FXML
+    lateinit var toggleSourceTextBtn: Button
+
+    @FXML
     lateinit var title: Label
 
     @FXML
@@ -109,6 +114,19 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
 
     @FXML
     lateinit var sourceAudioBlock: VBox
+
+    private val sourceTextPopup: Popup by lazy {
+        Popup().apply {
+            isAutoHide = true
+
+            val contentNode = buildTextPopupContent()
+            content.setAll(contentNode)
+
+            focusedProperty().onChange {
+                if (it) contentNode.requestFocus()
+            }
+        }
+    }
 
     init {
         loadFXML()
@@ -182,6 +200,10 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     }
 
     private fun initTextControls() {
+        titleContainer.apply {
+            visibleWhen { sourceContent.sourceTextCompactMode.not() }
+            managedWhen(visibleProperty())
+        }
         sourceTextNotAvailable.apply {
             hiddenWhen(sourceContent.sourceTextAvailableProperty)
             managedWhen(visibleProperty())
@@ -192,7 +214,10 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
         }
 
         sourceTextContainer.apply {
-            visibleWhen(sourceContent.sourceTextAvailableProperty)
+            visibleWhen {
+                sourceContent.sourceTextAvailableProperty
+                    .and(sourceContent.sourceTextCompactMode.not())
+            }
             managedWhen(visibleProperty())
         }
 
@@ -235,7 +260,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
         }
 
         zoomRateText.apply {
-            textProperty().bind(sourceContent.zoomRateProperty.stringBinding{
+            textProperty().bind(sourceContent.zoomRateProperty.stringBinding {
                 String.format("%d%%", it)
             })
         }
@@ -247,6 +272,34 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             sourceTextChunksContainer.apply {
                 styleClass.removeAll { it.startsWith("text-zoom") }
                 addClass("text-zoom-$rate")
+            }
+        }
+
+        toggleSourceTextBtn.apply {
+            visibleWhen { sourceContent.sourceTextCompactMode }
+            managedWhen(visibleProperty())
+
+            action {
+                setPopupTheme(sourceTextPopup)
+                val bound = this.boundsInLocal
+                val screenBound = this.localToScreen(bound)
+                sourceTextPopup.show(
+                    FX.primaryStage
+                )
+                sourceTextPopup.x = screenBound.centerX - sourceTextPopup.width + this.width
+                sourceTextPopup.y = screenBound.minY - sourceTextPopup.height
+            }
+        }
+    }
+
+    private fun setPopupTheme(popUp: Popup) {
+        FX.primaryStage.scene.root.styleClass.let {
+            if (it.contains(ColorTheme.DARK.styleClass)) {
+                popUp.scene.root.addClass(ColorTheme.DARK.styleClass)
+                popUp.scene.root.removeClass(ColorTheme.LIGHT.styleClass)
+            } else {
+                popUp.scene.root.addClass(ColorTheme.LIGHT.styleClass)
+                popUp.scene.root.removeClass(ColorTheme.DARK.styleClass)
             }
         }
     }
@@ -317,6 +370,43 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
                         ?: visibleProperty()
                 }
             ))
+        }
+    }
+
+    private fun buildTextPopupContent(): Node {
+        return VBox().apply {
+            addClass("source-content__text-popup__container")
+
+            scrollpane {
+                val sp = this
+                addClass("source-content__text-popup__scroll")
+                vgrow = Priority.ALWAYS
+                maxHeightProperty().bind(
+                    FX.primaryStage.scene.heightProperty().multiply(2.0/3)
+                )
+                this@apply.focusedProperty().onChange { if (it) sp.requestFocus() }
+
+                vbox {
+                    vgrow = Priority.ALWAYS
+                    // scroll bar offsets to avoid text overrun
+                    maxWidthProperty().bind(sp.widthProperty().minus(20))
+                    minHeightProperty().bind(sp.heightProperty().minus(10))
+
+                    label {
+                        addClass("source-content__text", "source-content__text-popup__title")
+                        textProperty().bind(sourceContent.contentTitleProperty)
+                    }
+                    label {
+                        addClass("source-content__text", "source-content__text-popup__text")
+                        textProperty().bind(sourceContent.sourceTextProperty)
+                    }
+                    region { vgrow = Priority.ALWAYS }
+                    label {
+                        addClass("source-content__text-popup__license-text")
+                        textProperty().bind(sourceContent.licenseTextProperty)
+                    }
+                }
+            }
         }
     }
 
