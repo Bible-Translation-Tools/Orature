@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.skins.media
 
+import javafx.beans.binding.Bindings
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.scene.Node
@@ -27,7 +28,6 @@ import javafx.scene.control.Slider
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.media.AudioPlayerNode
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class SourceAudioSkin(private val playerNode: AudioPlayerNode) : SkinBase<AudioPlayerNode>(playerNode) {
@@ -52,12 +52,18 @@ class SourceAudioSkin(private val playerNode: AudioPlayerNode) : SkinBase<AudioP
         playBtn.setOnMouseClicked {
             audioController.toggle()
         }
-        audioController.isPlayingProperty.onChangeAndDoNow {
-            if (it == true) {
-                playBtn.graphicProperty().set(PAUSE_ICON)
-            } else {
-                playBtn.graphicProperty().set(PLAY_ICON)
-            }
+        playBtn.apply {
+            graphicProperty().bind(
+                Bindings.createObjectBinding(
+                    {
+                        when (audioController.isPlayingProperty.value) {
+                            true -> PAUSE_ICON
+                            false -> PLAY_ICON
+                        }
+                    },
+                    audioController.isPlayingProperty
+                )
+            )
         }
         playerNode.audioPlayerProperty.onChange { player ->
             player?.let {
