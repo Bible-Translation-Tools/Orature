@@ -101,6 +101,7 @@ class ChunkingPage : View() {
 
     override fun onUndock() {
         super.onUndock()
+        vm.pause()
         timer?.stop()
         vm.compositeDisposable.clear()
     }
