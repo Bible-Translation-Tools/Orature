@@ -29,6 +29,7 @@ import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.skins.media.SourceContentSkin
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.*
 import java.text.MessageFormat
 
@@ -45,6 +46,7 @@ class SourceContent : Control() {
 
     val sourceTextProperty = SimpleStringProperty()
     val sourceTextAvailableProperty: BooleanBinding = sourceTextProperty.isNotNull
+    val sourceTextCompactMode = SimpleBooleanProperty(false)
     val sourceTextChunks = observableListOf<String>()
     val highlightedChunk = SimpleIntegerProperty(-1)
 
@@ -68,8 +70,6 @@ class SourceContent : Control() {
     val orientationProperty = SimpleObjectProperty<NodeOrientation>()
     val sourceOrientationProperty = SimpleObjectProperty<NodeOrientation>()
 
-    private val userAgentStyleSheet = javaClass.getResource("/css/source-content.css").toExternalForm()
-
     init {
         addClass("source-content")
 
@@ -89,11 +89,7 @@ class SourceContent : Control() {
         return SourceContentSkin(this)
     }
 
-    override fun getUserAgentStylesheet(): String {
-        return userAgentStyleSheet
-    }
-
     private fun initialize() {
-        stylesheets.setAll(userAgentStyleSheet)
+        tryImportStylesheet(javaClass.getResource("/css/source-content.css").toExternalForm())
     }
 }
