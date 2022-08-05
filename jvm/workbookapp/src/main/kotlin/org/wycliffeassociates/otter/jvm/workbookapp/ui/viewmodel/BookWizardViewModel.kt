@@ -138,7 +138,6 @@ class BookWizardViewModel : ViewModel() {
             it.artworkProperty.set(null)
         }
         reset()
-        println("disposing ${disposableListeners.size} listeners")
         disposableListeners.forEach { it.dispose() }
         disposableListeners.clear()
     }
