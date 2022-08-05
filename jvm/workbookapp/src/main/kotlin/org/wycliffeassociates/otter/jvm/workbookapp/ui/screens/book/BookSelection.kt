@@ -186,6 +186,7 @@ class BookSelection : View() {
 
     override fun onDock() {
         navigator.dock(this, breadCrumb)
+        viewModel.dock()
         viewModel.reset()
         viewModel.loadExistingProjects()
         viewModel.loadResources()
@@ -194,9 +195,7 @@ class BookSelection : View() {
 
     override fun onUndock() {
         super.onUndock()
-        viewModel.reset()
-        FX.getComponents().remove(this::class)
-        FX.getComponents().remove(viewModel::class)
+        viewModel.undock()
     }
 }
 
