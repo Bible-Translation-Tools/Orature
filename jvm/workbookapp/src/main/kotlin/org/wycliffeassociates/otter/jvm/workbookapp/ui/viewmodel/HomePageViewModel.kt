@@ -137,9 +137,6 @@ class HomePageViewModel : ViewModel() {
 
     fun undock() {
         translationModels.clear()
-        runLater {
-            System.gc()
-        }
     }
 
     private fun mapToTranslationCardModel(translation: Translation): TranslationCardModel {
