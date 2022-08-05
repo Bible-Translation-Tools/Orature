@@ -49,7 +49,6 @@ import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRep
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.controls.button.SelectButton
 import org.wycliffeassociates.otter.jvm.controls.toggle.ToggleButtonData
-import org.wycliffeassociates.otter.jvm.controls.toggle.ToggleButtonGroup
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -110,7 +109,6 @@ class BookWizardViewModel : ViewModel() {
     private var queryPredicate = Predicate<BookCardData> { true }
 
     private val sortByProperty = SimpleObjectProperty<BookSortBy>(BookSortBy.BOOK_ORDER)
-    private val resourcesToggleGroup = ToggleGroup()
     private val sortByToggleGroup = ToggleGroup()
 
     private val disposableListeners = mutableListOf<ListenerDisposer>()
