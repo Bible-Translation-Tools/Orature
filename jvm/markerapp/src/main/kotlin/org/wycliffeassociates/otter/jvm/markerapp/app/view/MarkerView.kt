@@ -29,7 +29,9 @@ import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerTrackControl
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseRequestEvent
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*
@@ -44,6 +46,8 @@ class MarkerView : PluginEntrypoint() {
 
     private var slider: AudioSlider? = null
     private var minimap: MinimapFragment? = null
+
+    private val disposables = mutableListOf<ListenerDisposer>()
 
     override fun onDock() {
         super.onDock()
@@ -86,6 +90,7 @@ class MarkerView : PluginEntrypoint() {
         initThemeProperty()
         subscribe<PluginCloseRequestEvent> {
             viewModel.saveAndQuit()
+            unsubscribe()
         }
     }
 
@@ -96,6 +101,8 @@ class MarkerView : PluginEntrypoint() {
         waveform.markerStateProperty.unbind()
         waveform.positionProperty.unbind()
         minimap?.cleanUpOnUndock()
+        disposables.forEach { it.dispose() }
+        disposables.clear()
     }
 
     override val root =
@@ -151,12 +158,12 @@ class MarkerView : PluginEntrypoint() {
         }
 
     private fun initThemeProperty() {
-        primaryStage.scene.root.styleClass.onChangeAndDoNow {
+        primaryStage.scene.root.styleClass.onChangeAndDoNowWithDisposer {
             if (it.contains(ColorTheme.DARK.styleClass)) {
                 viewModel.themeColorProperty.set(ColorTheme.DARK)
             } else {
                 viewModel.themeColorProperty.set(ColorTheme.LIGHT)
             }
-        }
+        }.apply { disposables.add(this) }
     }
 }
