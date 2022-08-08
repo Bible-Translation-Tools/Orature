@@ -97,30 +97,27 @@ class MarkerView : PluginEntrypoint() {
                 themeProperty.bind(viewModel.themeColorProperty)
                 positionProperty.bind(viewModel.positionProperty)
 
-                onSeekNext = viewModel::seekNext
-                onSeekPrevious = viewModel::seekPrevious
-
-                onPlaceMarker = {
-                    viewModel.placeMarker()
-                }
-                onWaveformClicked = { viewModel.pause() }
-                onWaveformDragReleased = { deltaPos ->
+                setOnSeekNext { viewModel.seekNext() }
+                setOnSeekPrevious { viewModel.seekPrevious() }
+                setOnPlaceMarker { viewModel.placeMarker() }
+                setOnWaveformClicked  { viewModel.pause() }
+                setOnWaveformDragReleased { deltaPos ->
                     val deltaFrames = pixelsToFrames(deltaPos)
                     val curFrames = viewModel.getLocationInFrames()
                     val duration = viewModel.getDurationInFrames()
                     val final = Utils.clamp(0, curFrames - deltaFrames, duration)
                     viewModel.seek(final)
                 }
-                onRewind = viewModel::rewind
-                onFastForward = viewModel::fastForward
-                onToggleMedia = viewModel::mediaToggle
-                onResumeMedia = viewModel::resumeMedia
+                setOnRewind { viewModel::rewind }
+                setOnFastForward { viewModel::fastForward }
+                setOnToggleMedia { viewModel.mediaToggle() }
+                setOnResumeMedia { viewModel.resumeMedia() }
 
                 // Marker stuff
                 imageWidthProperty.bind(viewModel.imageWidthProperty)
 
-                onPositionChangedProperty = slider!!::updateMarker
-                onLocationRequestProperty = viewModel::requestAudioLocation
+                setOnPositionChanged { id, position -> slider!!.updateMarker(id, position) }
+                setOnLocationRequest { viewModel.requestAudioLocation() }
             }
             bottom = vbox {
                 add<SourceTextFragment> {
