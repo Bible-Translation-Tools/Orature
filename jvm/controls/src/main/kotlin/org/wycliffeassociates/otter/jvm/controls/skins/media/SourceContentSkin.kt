@@ -168,8 +168,12 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             pauseTextProperty.bind(sourceContent.pauseSourceLabelProperty)
             menuSideProperty.set(Side.TOP)
 
-            sourceContent.sourceSpeedRateProperty.onChangeAndDoNow { rate ->
-                audioPlaybackRateProperty.set(rate?.toDouble() ?: 1.0)
+            sourceContent.sourceSpeedRateProperty.onChangeAndDoNow {
+                it?.toDouble()?.let { rate ->
+                    if (rate > 0) {
+                        audioPlaybackRateProperty.set(rate)
+                    }
+                } ?: audioPlaybackRateProperty.set(1.0)
             }
             audioPlaybackRateProperty.onChange { rate ->
                 if (rate > 0) FX.eventbus.fire(PlaybackRateChangedEvent(PlaybackRateType.SOURCE, rate))
@@ -184,8 +188,12 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             pauseTextProperty.bind(sourceContent.pauseTargetLabelProperty)
             menuSideProperty.set(Side.TOP)
 
-            sourceContent.targetSpeedRateProperty.onChangeAndDoNow { rate ->
-                audioPlaybackRateProperty.set(rate?.toDouble() ?: 1.0)
+            sourceContent.targetSpeedRateProperty.onChangeAndDoNow {
+                it?.toDouble()?.let { rate ->
+                    if (rate > 0) {
+                        audioPlaybackRateProperty.set(rate)
+                    }
+                } ?: audioPlaybackRateProperty.set(1.0)
             }
 
             audioPlaybackRateProperty.onChange { rate ->
