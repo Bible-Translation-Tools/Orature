@@ -31,6 +31,8 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.utils.simulateKeyPress
 import tornadofx.*
 import java.util.concurrent.TimeUnit
@@ -52,6 +54,7 @@ class AudioPlayerController(
     private var player: IAudioPlayer? = null
 ) {
     private val logger = LoggerFactory.getLogger(AudioPlayerController::class.java)
+    private val disposableListeners = mutableListOf<ListenerDisposer>()
 
     private var startAtLocation = 0
     private var disposable: Disposable? = null
@@ -63,9 +66,11 @@ class AudioPlayerController(
     init {
         initializeSliderActions()
 
-        playbackRateProperty.onChange {
-            setPlaybackRate(it)
-        }
+        playbackRateProperty.onChangeWithDisposer {
+            it?.let { rate ->
+                setPlaybackRate(rate.toDouble())
+            }
+        }.apply { disposableListeners.add(this) }
     }
 
     fun toggle() {
@@ -79,6 +84,13 @@ class AudioPlayerController(
     }
 
     fun setPlaybackRate(rate: Double) {
+        if (rate == 0.0) {
+            player = null
+            disposableListeners.forEach { it.dispose() }
+            disposableListeners.clear()
+            return
+        }
+
         player?.let { _player ->
             var wasPlaying = false
             if (_player.isPlaying()) {
