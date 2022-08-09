@@ -92,6 +92,7 @@ class BookWizardViewModelTest {
         `when`(mockCollectionRepo.getChildren(simpleResource))
             .thenReturn(Single.just(simpleBooks))
 
+        vm.dock()
         assertEquals(0, vm.filteredBooks.size)
 
         vm.selectedSourceProperty.set(simpleResource)
