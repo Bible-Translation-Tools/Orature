@@ -52,7 +52,6 @@ import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
-import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent

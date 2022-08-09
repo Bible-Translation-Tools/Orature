@@ -311,6 +311,11 @@ class SourceContent : StackPane() {
 
     fun initializeListeners() {
         removeListeners()
+        initializeAudioListeners()
+        initializeSourceContentListeners()
+    }
+
+    private fun initializeAudioListeners() {
         sourcePlayer.audioPlaybackRateProperty.onChangeWithDisposer { rate ->
             rate?.let {
                 if (rate.toDouble() > 0) {
@@ -332,7 +337,9 @@ class SourceContent : StackPane() {
         targetSpeedRateProperty.onChangeAndDoNowWithDisposer { rate ->
             targetPlayer.audioPlaybackRateProperty.set(rate?.toDouble() ?: 1.0)
         }
+    }
 
+    private fun initializeSourceContentListeners() {
         sourceTextChunks.onChangeAndDoNowWithDisposer {
             val textNodes = it.mapIndexed { index, chunkText ->
                 buildChunkText(chunkText, index)

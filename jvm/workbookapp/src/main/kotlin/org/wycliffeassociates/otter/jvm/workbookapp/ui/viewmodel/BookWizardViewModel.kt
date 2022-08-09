@@ -49,7 +49,6 @@ import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRep
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.controls.button.SelectButton
 import org.wycliffeassociates.otter.jvm.controls.toggle.ToggleButtonData
-import org.wycliffeassociates.otter.jvm.controls.toggle.ToggleButtonGroup
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.enums.BookSortBy
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
