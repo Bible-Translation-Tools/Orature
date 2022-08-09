@@ -593,6 +593,7 @@ class RecordScriptureViewModel : ViewModel() {
     fun closePlayers() {
         takeCardModels.forEach { it.audioPlayer.close() }
         sourceAudioPlayerProperty.value?.close()
+        sourceAudioPlayerProperty.set(null)
         workbookDataStore.targetAudioProperty.value?.player?.close()
         workbookDataStore.selectedChapterPlayerProperty.value?.close()
     }

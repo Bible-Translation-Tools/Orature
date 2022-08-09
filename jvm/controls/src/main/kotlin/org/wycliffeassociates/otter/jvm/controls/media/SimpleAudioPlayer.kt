@@ -146,7 +146,7 @@ class SimpleAudioPlayer(
         playerProperty.onChange {
             it?.let {
                 audioPlayerController.load(it)
-            }
+            } ?: audioPlayerController.reset()
         }
 
         playButtonProperty.onChange {

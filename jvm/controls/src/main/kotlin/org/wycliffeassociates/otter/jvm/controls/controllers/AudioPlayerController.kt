@@ -68,6 +68,12 @@ class AudioPlayerController(
         }
     }
 
+    fun reset() {
+        this.player = null
+        startAtLocation = 0
+        isPlayingProperty.set(false)
+    }
+
     fun toggle() {
         player?.let { _player ->
             if (_player.isPlaying()) {
