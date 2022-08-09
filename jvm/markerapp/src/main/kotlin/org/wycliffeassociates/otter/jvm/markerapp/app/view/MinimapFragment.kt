@@ -18,7 +18,6 @@
  */
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
-import javafx.beans.value.ChangeListener
 import javafx.geometry.NodeOrientation
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
@@ -39,26 +38,18 @@ class MinimapFragment : Fragment() {
         super.onDock()
         slider.apply {
             colorThemeProperty.bind(viewModel.themeColorProperty)
-            viewModel.waveformMinimapImageListener = ChangeListener { _, _, it ->
-                waveformImageProperty.set(it)
-            }
-            viewModel.waveformMinimapImage.addListener(viewModel.waveformMinimapImageListener)
-            pixelsInHighlight = viewModel::pixelsInHighlight
+            waveformImageProperty.bind(viewModel.waveformMinimapImage)
+            setPixelsInHighlightFunction { viewModel.pixelsInHighlight(it) }
             player.bind(viewModel.audioPlayer)
             secondsToHighlightProperty.set(SECONDS_ON_SCREEN)
 
             viewModel.markers.onChangeAndDoNow {
                 markers.setAll(
-                    it.filter { marker -> marker.placed }
+                    viewModel.markers.filter { marker -> marker.placed }
                         .map { marker -> marker.toAudioCue() }
                 )
             }
         }
-    }
-
-    fun cleanUpOnUndock() {
-        viewModel.waveformMinimapImage.removeListener(viewModel.waveformMinimapImageListener)
-        slider.clearListeners()
     }
 
     override val root = hbox {

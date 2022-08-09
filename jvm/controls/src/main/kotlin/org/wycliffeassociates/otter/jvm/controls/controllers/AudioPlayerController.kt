@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.controls.controllers
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import io.reactivex.Observable
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
@@ -54,7 +55,7 @@ class AudioPlayerController(
     private val logger = LoggerFactory.getLogger(AudioPlayerController::class.java)
 
     private var startAtLocation = 0
-    private var disposable: Disposable? = null
+    private val disposable = CompositeDisposable()
     private var resumeAfterDrag = false
 
     val isPlayingProperty = SimpleBooleanProperty(false)
@@ -62,10 +63,7 @@ class AudioPlayerController(
 
     init {
         initializeSliderActions()
-
-        playbackRateProperty.onChange {
-            setPlaybackRate(it)
-        }
+        playbackRateProperty.onChange { setPlaybackRate(it) }
     }
 
     fun toggle() {
@@ -78,7 +76,12 @@ class AudioPlayerController(
         }
     }
 
-    fun setPlaybackRate(rate: Double) {
+    fun release() {
+        player?.close()
+        disposable.dispose()
+    }
+
+    private fun setPlaybackRate(rate: Double) {
         player?.let { _player ->
             var wasPlaying = false
             if (_player.isPlaying()) {
@@ -99,8 +102,8 @@ class AudioPlayerController(
         startAtLocation = 0
 
         this.player = player
-        disposable?.dispose()
-        disposable = startProgressUpdate()
+        disposable.dispose()
+        disposable.add(startProgressUpdate())
 
         setPlaybackRate(playbackRateProperty.value)
 

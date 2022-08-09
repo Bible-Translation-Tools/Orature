@@ -28,14 +28,11 @@ import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseRequestEvent
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*
 
 class MarkerView : PluginEntrypoint() {
-
-    var timer: AnimationTimer? = null
     val viewModel: VerseMarkerViewModel by inject()
 
     private val waveform = MarkerPlacementWaveform()
@@ -50,17 +47,9 @@ class MarkerView : PluginEntrypoint() {
                 viewModel.waveform.observeOnFx().subscribe { waveform.addWaveformImage(it) }
             )
         }
-        viewModel.imageCleanup = waveform::freeImages
-        timer = object : AnimationTimer() {
-            override fun handle(currentNanoTime: Long) {
-                viewModel.calculatePosition()
-            }
-        }
-        timer?.start()
         slider?.let {
             viewModel.initializeAudioController(it)
         }
-
         waveform.markers.bind(viewModel.markers, { it })
     }
 
@@ -69,18 +58,10 @@ class MarkerView : PluginEntrypoint() {
         tryImportStylesheet(resources.get("/css/scrolling-waveform.css"))
         tryImportStylesheet(resources.get("/css/chunk-marker.css"))
 
-        initThemeProperty()
         subscribe<PluginCloseRequestEvent> {
+            unsubscribe()
             viewModel.saveAndQuit()
         }
-    }
-
-    override fun onUndock() {
-        super.onUndock()
-        timer?.stop()
-        timer = null
-        waveform.positionProperty.unbind()
-        minimap?.cleanUpOnUndock()
     }
 
     override val root =
@@ -123,22 +104,9 @@ class MarkerView : PluginEntrypoint() {
                 add<SourceTextFragment> {
                     highlightedChunkNumberProperty.bind(viewModel.currentMarkerNumberProperty)
                 }
-                add<PlaybackControlsFragment> {
-                    refreshViewProperty = {
-                    }
-                }
+                add<PlaybackControlsFragment>()
             }
             shortcut(Shortcut.ADD_MARKER.value, viewModel::placeMarker)
             shortcut(Shortcut.GO_BACK.value, viewModel::saveAndQuit)
         }
-
-    private fun initThemeProperty() {
-        primaryStage.scene.root.styleClass.onChangeAndDoNow {
-            if (it.contains(ColorTheme.DARK.styleClass)) {
-                viewModel.themeColorProperty.set(ColorTheme.DARK)
-            } else {
-                viewModel.themeColorProperty.set(ColorTheme.LIGHT)
-            }
-        }
-    }
 }

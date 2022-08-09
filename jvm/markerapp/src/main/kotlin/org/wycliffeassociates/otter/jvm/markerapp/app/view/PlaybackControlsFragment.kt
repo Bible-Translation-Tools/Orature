@@ -27,6 +27,7 @@ import javafx.scene.layout.Region
 import org.kordamp.ikonli.javafx.FontIcon
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
+import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseRequestEvent
 import tornadofx.*
 
 class PlaybackControlsFragment : Fragment() {
@@ -115,7 +116,7 @@ class PlaybackControlsFragment : Fragment() {
 
         disableProperty().bind(viewModel.isLoadingProperty)
         setOnAction {
-            viewModel.saveAndQuit()
+            fire(PluginCloseRequestEvent)
         }
     }
 
