@@ -64,7 +64,7 @@ class AudioPlayerController(
         initializeSliderActions()
 
         playbackRateProperty.onChange {
-            setPlaybackRate(it)
+            if (it > 0.0) setPlaybackRate(it)
         }
     }
 
