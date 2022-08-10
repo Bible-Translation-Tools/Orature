@@ -23,6 +23,7 @@ import com.sun.glass.ui.Screen
 import com.sun.javafx.util.Utils
 import java.text.MessageFormat
 import javafx.animation.AnimationTimer
+import javafx.beans.binding.Bindings
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
@@ -87,8 +88,8 @@ class Consume : Fragment() {
             themeProperty.bind(settingsViewModel.appColorMode)
             positionProperty.bind(vm.positionProperty)
 
-            onWaveformClicked = { vm.pause() }
-            onWaveformDragReleased = { deltaPos ->
+            setOnWaveformClicked { vm.pause() }
+            setOnWaveformDragReleased { deltaPos ->
                 val deltaFrames = pixelsToFrames(deltaPos)
                 val curFrames = vm.getLocationInFrames()
                 val duration = vm.getDurationInFrames()
@@ -101,14 +102,16 @@ class Consume : Fragment() {
         bottom = hbox {
             styleClass.addAll("consume__bottom")
             button {
-                vm.isPlayingProperty.onChangeAndDoNow {
-                    it?.let {
-                        when (it) {
-                            true -> graphic = pauseIcon
-                            false -> graphic = playIcon
+                Bindings.createObjectBinding(
+                    {
+                        graphic = when (vm.isPlayingProperty.value) {
+                            true -> pauseIcon
+                            false -> playIcon
                         }
-                    }
-                }
+                    },
+                    vm.isPlayingProperty
+
+                )
                 styleClass.addAll("btn--cta", "consume__btn")
                 action {
                     vm.mediaToggle()

@@ -59,8 +59,8 @@ class ChunkingPage : View() {
 
         vm.chunkImageCleanup = ::freeImages
 
-        onWaveformClicked = { vm.pause() }
-        onWaveformDragReleased = { deltaPos ->
+        setOnWaveformClicked { vm.pause() }
+        setOnWaveformDragReleased { deltaPos ->
             val deltaFrames = pixelsToFrames(deltaPos)
             val curFrames = vm.getLocationInFrames()
             val duration = vm.getDurationInFrames()
@@ -68,8 +68,8 @@ class ChunkingPage : View() {
             vm.seek(final)
         }
 
-        onPlaceMarker = {
-            vm::placeMarker.invoke()
+        setOnPlaceMarker {
+            vm.placeMarker()
         }
 
         imageWidthProperty.bind(vm.imageWidthProperty)

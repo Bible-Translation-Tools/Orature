@@ -23,9 +23,7 @@ import com.sun.glass.ui.Screen
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.*
-import javafx.beans.value.ChangeListener
 import javafx.scene.control.Slider
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
@@ -36,17 +34,19 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
 import java.io.File
 import java.lang.Integer.min
+import javafx.animation.AnimationTimer
+import javafx.beans.binding.Bindings
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseFinishedEvent
 import kotlin.math.max
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
+import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseRequestEvent
 
 private const val WAV_COLOR = "#0A337390"
 private const val BACKGROUND_COLOR = "#FFFFFF"
@@ -59,15 +59,10 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
     private val height = min(Screen.getMainScreen().platformHeight, 500)
 
     val themeColorProperty = SimpleObjectProperty(ColorTheme.LIGHT)
-    val waveformMinimapImage = SimpleObjectProperty<Image>()
-
-    /** Call this before leaving the view to avoid memory leak */
-    var imageCleanup: () -> Unit = {}
 
     private val asyncBuilder = ObservableWaveformBuilder()
     lateinit var waveform: Observable<Image>
-
-    lateinit var waveformMinimapImageListener: ChangeListener<Image>
+    val waveformMinimapImage = SimpleObjectProperty<Image>()
 
     override val currentMarkerNumberProperty = SimpleIntegerProperty(0)
 
@@ -92,13 +87,33 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
     private var totalFrames: Int = 0 // beware of divided by 0
     override var resumeAfterScroll = false
 
+    val timer = object : AnimationTimer() {
+        override fun handle(currentNanoTime: Long) {
+            calculatePosition()
+        }
+    }
+
     fun onDock(op: () -> Unit) {
+        timer.start()
         isLoadingProperty.set(true)
         val audio = loadAudio()
         loadMarkers(audio)
         loadTitles()
         createWaveformImages(audio)
         op.invoke()
+
+        themeColorProperty.bind(
+            Bindings.createObjectBinding(
+                {
+                    if (primaryStage.scene.root.styleClass.contains(ColorTheme.DARK.styleClass)) {
+                        ColorTheme.DARK
+                    } else {
+                        ColorTheme.LIGHT
+                    }
+                },
+                primaryStage.scene.root.styleClass
+            )
+        )
     }
 
     private fun loadAudio(): AudioFile {
@@ -120,9 +135,13 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
         scope as ParameterizedScope
         val totalMarkers: Int = scope.parameters.named["marker_total"]?.toInt() ?: initialMarkerCount
         markerModel = VerseMarkerModel(audio, totalMarkers)
-        markerCountProperty.onChangeAndDoNow {
-            markerRatioProperty.set("$it/$totalMarkers")
-        }
+
+        markerRatioProperty.bind(
+            Bindings.createStringBinding(
+                { "${markerCountProperty.value}/$totalMarkers" },
+                markerCountProperty
+            )
+        )
         markerModel?.let { markerModel ->
             markers.setAll(markerModel.markers)
         }
@@ -142,25 +161,26 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
 
     fun saveAndQuit() {
         logger.info("Saving Marker data...")
-
+        timer.stop()
         compositeDisposable.clear()
         waveformMinimapImage.set(null)
         currentMarkerNumberProperty.set(-1)
-        imageCleanup()
+        audioController!!.release()
+        audioController = null
         asyncBuilder.cancel()
 
-            writeMarkers()
-                .doOnError { e ->
-                    logger.error("Error in closing the maker app", e)
+        writeMarkers()
+            .doOnError { e ->
+                logger.error("Error in closing the maker app", e)
+            }
+            .subscribe {
+                runLater {
+                    logger.info("Close Marker")
+                    fire(PluginCloseFinishedEvent)
+                    (scope as ParameterizedScope).navigateBack()
+                    System.gc()
                 }
-                .subscribe {
-                    runLater {
-                        logger.info("Close Marker")
-                        fire(PluginCloseFinishedEvent)
-                        (scope as ParameterizedScope).navigateBack()
-                        System.gc()
-                    }
-                }
+            }
     }
 
     fun initializeAudioController(slider: Slider) {

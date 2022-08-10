@@ -24,6 +24,8 @@ import javafx.scene.image.Image
 import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
 import javafx.beans.property.SimpleObjectProperty
+import javafx.event.ActionEvent
+import javafx.event.EventHandler
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import tornadofx.*
@@ -33,12 +35,35 @@ open class ScrollingWaveform : StackPane() {
     val positionProperty = SimpleDoubleProperty(0.0)
     val themeProperty = SimpleObjectProperty(ColorTheme.LIGHT)
 
-    var onWaveformClicked: () -> Unit = {}
-    var onWaveformDragReleased: (Double) -> Unit = {}
-    var onRewind: ((ScrollSpeed) -> Unit) = {}
-    var onFastForward: ((ScrollSpeed) -> Unit) = {}
-    var onToggleMedia: () -> Unit = {}
-    var onResumeMedia: () -> Unit = {}
+    val onWaveformClicked = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    fun setOnWaveformClicked(op: () -> Unit) {
+        onWaveformClicked.set((EventHandler { op.invoke() }))
+    }
+
+    val onWaveformDragReleased = SimpleObjectProperty<(Double) -> Unit> {}
+    fun setOnWaveformDragReleased(op: (Double) -> Unit) {
+        onWaveformDragReleased.set(op)
+    }
+
+    var onRewind = SimpleObjectProperty<((ScrollSpeed) -> Unit)> {}
+    fun setOnRewind(op: (ScrollSpeed) -> Unit){
+        onRewind.set(op)
+    }
+
+    var onFastForward = SimpleObjectProperty<((ScrollSpeed) -> Unit)> {}
+    fun setOnFastForward(op: (ScrollSpeed) -> Unit){
+        onFastForward.set(op)
+    }
+
+    var onToggleMedia = SimpleObjectProperty<(() -> Unit)> {}
+    fun setOnToggleMedia(op: () -> Unit){
+        onToggleMedia.set(op)
+    }
+
+    var onResumeMedia = SimpleObjectProperty<(() -> Unit)> {}
+    fun setOnResumeMedia(op: () -> Unit){
+        onResumeMedia.set(op)
+    }
 
     private val waveformFrame: WaveformFrame
 
@@ -52,14 +77,12 @@ open class ScrollingWaveform : StackPane() {
         waveformFrame = WaveformFrame().apply {
             themeProperty.bind(this@ScrollingWaveform.themeProperty)
             framePositionProperty.bind(positionProperty)
-            onWaveformClicked { onWaveformClicked() }
-            onWaveformDragReleased {
-                onWaveformDragReleased(it)
-            }
-            onRewind(onRewind)
-            onFastForward(onFastForward)
-            onToggleMedia(onToggleMedia)
-            onResumeMedia(onResumeMedia)
+            onWaveformClickedProperty.bind(onWaveformClicked)
+            onWaveformDragReleasedProperty.bind(onWaveformDragReleased)
+            onRewindProperty.bind(onRewind)
+            onFastForwardProperty.bind(onFastForward)
+            onToggleMediaProperty.bind(onToggleMedia)
+            onResumeMediaProperty.bind(onResumeMedia)
 
             focusedProperty().onChange {
                 togglePseudoClass("active", it)
