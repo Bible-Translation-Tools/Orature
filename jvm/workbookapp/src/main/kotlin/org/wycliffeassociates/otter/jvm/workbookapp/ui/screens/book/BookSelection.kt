@@ -186,10 +186,16 @@ class BookSelection : View() {
 
     override fun onDock() {
         navigator.dock(this, breadCrumb)
+        viewModel.dock()
         viewModel.reset()
         viewModel.loadExistingProjects()
         viewModel.loadResources()
         viewModel.loadResourceSelections()
+    }
+
+    override fun onUndock() {
+        super.onUndock()
+        viewModel.undock()
     }
 }
 

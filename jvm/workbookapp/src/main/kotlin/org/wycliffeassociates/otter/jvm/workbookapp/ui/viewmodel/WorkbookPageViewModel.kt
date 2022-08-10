@@ -305,6 +305,7 @@ class WorkbookPageViewModel : ViewModel() {
     }
 
     fun undock() {
+        chapters.clear()
         workbookDataStore.activeProjectFilesAccessorProperty.removeListener(
             projectFilesAccessorListener
         )
