@@ -115,6 +115,7 @@ class RecorderViewModel : ViewModel() {
 
     fun toggle() {
         if (isRecording) {
+            hasWritten = true
             pause()
         } else {
             writer.start()
@@ -155,7 +156,6 @@ class RecorderViewModel : ViewModel() {
 
     private fun pause() {
         writer.pause()
-        hasWritten = true
         timer.pause()
     }
 
