@@ -45,7 +45,7 @@
 .source-content__control-group {
     -fx-alignment: center;
     -fx-spacing: 10;
-    -fx-background-color: -wa-foreground;
+    -fx-background-color: -wa-transparent;
     -fx-background-radius: 5;
     -fx-padding: 8px;
 }
@@ -115,6 +115,7 @@
 .source-content__text {
     -fx-text-fill: -wa-regular-text;
     -fx-wrap-text: true;
+    -fx-padding: 10px 0 0 0;
 }
 
 .source-content__text--highlighted {

@@ -127,6 +127,7 @@ class OtterExceptionHandler(
                     sendReport(error)
                         .doOnSubscribe { sendingReportProperty.set(true) }
                         .doOnComplete {
+                            logger.info("Bug report sent. Closing app...")
                             sendingReportProperty.set(false)
                             Platform.exit()
                         }
@@ -145,6 +146,7 @@ class OtterExceptionHandler(
     private fun sendReport(error: Throwable): Completable {
         return Completable
             .fromAction {
+                logger.info("Sending bug report to Github...")
                 sendGithubReport(error)
             }
             .doOnError {
@@ -152,7 +154,9 @@ class OtterExceptionHandler(
             }
             .onErrorComplete()
             .andThen {
+                logger.info("Sending bug report to Sentry...")
                 sendSentryReport(error)
+                it.onComplete()
             }
             .doOnError {
                 logger.error("Error sending report to Sentry.", it)

@@ -72,7 +72,7 @@ class ChapterPage : View() {
     private lateinit var chunkListView: ListView<CardData>
 
     private val pluginOpenedPage: PluginOpenedPage
-    private var exportProgressListenerDisposer: ListenerDisposer? = null
+    private var listeners = mutableListOf<ListenerDisposer>()
 
     private val breadCrumb = BreadCrumb().apply {
         titleProperty.bind(
@@ -112,7 +112,7 @@ class ChapterPage : View() {
         super.onUndock()
         viewModel.closePlayers()
         viewModel.undock()
-        removeDialogListeners()
+        removeListeners()
         (app as IDependencyGraphProvider).dependencyGraph.injectConnectionFactory().releasePlayer()
         (app as IDependencyGraphProvider).dependencyGraph.injectConnectionFactory().clearPlayerConnections()
     }
@@ -401,9 +401,7 @@ class ChapterPage : View() {
                 } else {
                     close()
                 }
-            }.let {
-                exportProgressListenerDisposer = it
-            }
+            }.let(listeners::add)
 
             progressTitleProperty.set(messages["pleaseWait"])
             showProgressBarProperty.set(true)
@@ -412,8 +410,8 @@ class ChapterPage : View() {
         }
     }
 
-    private fun removeDialogListeners() {
-        exportProgressListenerDisposer?.dispose()
-        exportProgressListenerDisposer = null
+    private fun removeListeners() {
+        listeners.forEach(ListenerDisposer::dispose)
+        listeners.clear()
     }
 }
