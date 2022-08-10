@@ -102,15 +102,16 @@ class Consume : Fragment() {
         bottom = hbox {
             styleClass.addAll("consume__bottom")
             button {
-                Bindings.createObjectBinding(
-                    {
-                        graphic = when (vm.isPlayingProperty.value) {
-                            true -> pauseIcon
-                            false -> playIcon
-                        }
-                    },
-                    vm.isPlayingProperty
-
+                graphicProperty().bind(
+                    Bindings.createObjectBinding(
+                        {
+                            when (vm.isPlayingProperty.value) {
+                                true -> pauseIcon
+                                false -> playIcon
+                            }
+                        },
+                        vm.isPlayingProperty
+                    )
                 )
                 styleClass.addAll("btn--cta", "consume__btn")
                 action {
