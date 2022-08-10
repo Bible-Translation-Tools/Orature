@@ -211,6 +211,8 @@ class RecordScriptureViewModelTest {
 
         writeWavFile(take1File)
         writeWavFile(take2File)
+
+        recordScriptureViewModel.dock()
     }
 
     @After
@@ -224,6 +226,8 @@ class RecordScriptureViewModelTest {
         showImportProgressListener?.let {
             recordScriptureViewModel.showImportProgressDialogProperty.removeListener(it)
         }
+
+        recordScriptureViewModel.undock()
     }
 
     @Test

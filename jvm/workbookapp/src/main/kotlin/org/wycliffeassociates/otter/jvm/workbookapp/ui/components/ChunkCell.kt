@@ -24,7 +24,9 @@ import javafx.scene.control.ListCell
 import javafx.scene.control.skin.VirtualFlow
 import javafx.scene.input.KeyCode
 import org.wycliffeassociates.otter.common.utils.capitalizeString
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.findChild
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.utils.simulateKeyPress
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
@@ -36,6 +38,7 @@ class ChunkCell(
     private val focusedChunkProperty: Property<ChunkItem>
 ) : ListCell<CardData>() {
     private val view = ChunkItem()
+    private var focusedListenerDisposer: ListenerDisposer? = null
     init {
         addClass("chunk-list-cell")
     }
@@ -47,6 +50,9 @@ class ChunkCell(
             graphic = null
             return
         }
+
+        focusedListenerDisposer?.dispose()
+        focusedListenerDisposer = null
 
         // mouseReleased avoids drag click side effect
         setOnMouseReleased {
@@ -80,12 +86,12 @@ class ChunkCell(
 
             refreshTakes()
 
-            focusedProperty().onChange {
+            focusedProperty().onChangeWithDisposer {
                 if (isFocused) {
                     focusedChunkProperty.value?.hideTakes()
                     focusedChunkProperty.value = this
                 }
-            }
+            }.let { focusedListenerDisposer = it }
 
             setOnKeyReleased {
                 when (it.code) {

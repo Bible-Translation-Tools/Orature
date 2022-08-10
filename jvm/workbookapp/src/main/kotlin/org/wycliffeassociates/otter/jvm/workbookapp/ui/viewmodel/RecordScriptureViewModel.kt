@@ -21,7 +21,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import javafx.application.Platform
@@ -50,7 +49,8 @@ import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
@@ -96,9 +96,6 @@ class RecordScriptureViewModel : ViewModel() {
     val isChunk = activeChunkProperty.isNotNull
     val highlightedChunkProperty = SimpleIntegerProperty(-1)
 
-    private var activeChapterSubscription: Disposable? = null
-    private var activeChunkSubscription: Disposable? = null
-
     val recordableProperty = SimpleObjectProperty<Recordable?>()
     var recordable by recordableProperty
 
@@ -115,26 +112,42 @@ class RecordScriptureViewModel : ViewModel() {
     val showImportFailDialogProperty = SimpleBooleanProperty(false)
 
     private val disposables = CompositeDisposable()
+    val listeners = mutableListOf<ListenerDisposer>()
 
     init {
         activeChapterProperty.bindBidirectional(workbookDataStore.activeChapterProperty)
         activeChunkProperty.bindBidirectional(workbookDataStore.activeChunkProperty)
+        audioPluginViewModel.pluginNameProperty.bind(pluginNameBinding())
+    }
 
-        workbookDataStore.activeWorkbookProperty.onChangeAndDoNow { workbook ->
+    fun dock() {
+        initializeListeners()
+        loadTakes()
+        openPlayers()
+        highlightedChunkProperty.set(-1)
+    }
+
+    fun undock() {
+        removeListeners()
+        closePlayers()
+    }
+
+    private fun initializeListeners() {
+        workbookDataStore.activeWorkbookProperty.onChangeAndDoNowWithDisposer { workbook ->
             workbook?.let {
                 getChapterList(workbook.target.chapters)
             }
-        }
+        }.let(listeners::add)
 
-        activeChapterProperty.onChangeAndDoNow { chapter ->
+        activeChapterProperty.onChangeAndDoNowWithDisposer { chapter ->
             setHasNextAndPreviousChapter()
             chapter?.let {
                 getChunkList(chapter.chunks)
                 recordable = it
             }
-        }
+        }.let(listeners::add)
 
-        activeChunkProperty.onChangeAndDoNow { chunk ->
+        activeChunkProperty.onChangeAndDoNowWithDisposer { chunk ->
             setHasNextAndPreviousChunk()
             if (chunk != null) {
                 setTitle(chunk)
@@ -145,24 +158,22 @@ class RecordScriptureViewModel : ViewModel() {
                     recordable = it
                 }
             }
-        }
+        }.let(listeners::add)
 
-        recordableProperty.onChangeAndDoNow {
+        recordableProperty.onChangeAndDoNowWithDisposer {
             clearDisposables()
             subscribeSelectedTakePropertyToRelay()
             loadTakes()
-        }
+        }.let(listeners::add)
 
-        workbookDataStore.sourceAudioProperty.onChangeAndDoNow {
+        workbookDataStore.sourceAudioProperty.onChangeAndDoNowWithDisposer {
             openSourceAudioPlayer()
-        }
+        }.let(listeners::add)
 
-        audioPluginViewModel.pluginNameProperty.bind(pluginNameBinding())
-
-        takeCardModels.onChange {
+        takeCardModels.onChangeAndDoNowWithDisposer {
             val animationMediator = ListAnimationMediator<ScriptureTakeCard>()
             takeCardViews.setAll(
-                it.list.map { takeCardModel ->
+                it.map { takeCardModel ->
                     ScriptureTakeCard().apply {
                         animationMediatorProperty.set(animationMediator)
                         takeProperty.set(takeCardModel.take)
@@ -207,7 +218,12 @@ class RecordScriptureViewModel : ViewModel() {
                     }
                 }
             )
-        }
+        }.let(listeners::add)
+    }
+
+    private fun removeListeners() {
+        listeners.forEach(ListenerDisposer::dispose)
+        listeners.clear()
     }
 
     fun nextChapter() {
@@ -275,8 +291,7 @@ class RecordScriptureViewModel : ViewModel() {
     }
 
     private fun getChapterList(chapters: Observable<Chapter>) {
-        activeChapterSubscription?.dispose()
-        activeChapterSubscription = chapters
+        chapters
             .toList()
             .map { it.sortedBy { chapter -> chapter.sort } }
             .observeOnFx()
@@ -289,8 +304,7 @@ class RecordScriptureViewModel : ViewModel() {
     }
 
     private fun getChunkList(chunks: Observable<Chunk>) {
-        activeChunkSubscription?.dispose()
-        activeChunkSubscription = chunks
+        chunks
             .toList()
             .map { it.sortedBy { chunk -> chunk.start } }
             .observeOnFx()
@@ -454,7 +468,7 @@ class RecordScriptureViewModel : ViewModel() {
         )
     }
 
-    fun pluginNameBinding(): StringBinding {
+    private fun pluginNameBinding(): StringBinding {
         return Bindings.createStringBinding(
             {
                 when (contextProperty.get()) {
@@ -477,18 +491,13 @@ class RecordScriptureViewModel : ViewModel() {
         )
     }
 
-    @Suppress("ProtectedInFinal", "Unused")
-    protected fun finalize() {
-        clearDisposables()
-    }
-
     private fun clearDisposables() {
         disposables.clear()
     }
 
     private fun Take.isNotDeleted() = deletedTimestamp.value?.value == null
 
-    fun loadTakes() {
+    private fun loadTakes() {
         recordable?.audio?.let { audio ->
             // selectedTakeProperty may not have been updated yet so ask for the current selected take
             val selected = audio.selected.value?.value

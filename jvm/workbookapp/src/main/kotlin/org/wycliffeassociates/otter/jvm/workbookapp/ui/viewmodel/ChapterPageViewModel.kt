@@ -22,6 +22,7 @@ import com.github.thomasnield.rxkotlinfx.changes
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.binding.Bindings
@@ -107,14 +108,6 @@ class ChapterPageViewModel : ViewModel() {
     fun dock() {
         chapterCardProperty.set(CardData(workbookDataStore.chapter))
 
-        workbookDataStore.activeChapterProperty.value?.let { chapter ->
-            updateLastSelectedChapter(chapter.sort)
-            loadChapterContents(chapter).subscribe()
-            val chap = CardData(chapter)
-            chapterCardProperty.set(chap)
-            subscribeSelectedTakePropertyToRelay(chapter.audio)
-        }
-
         allContent
             .changes()
             .doOnError { e ->
@@ -129,10 +122,21 @@ class ChapterPageViewModel : ViewModel() {
                 checkCanCompile()
                 setWorkChunk()
             }
+            .let {
+                disposables.add(it)
+            }
+
+        workbookDataStore.activeChapterProperty.value?.let { chapter ->
+            updateLastSelectedChapter(chapter.sort)
+            loadChapterContents(chapter).subscribe().let { disposables.add(it) }
+            val chap = CardData(chapter)
+            chapterCardProperty.set(chap)
+            subscribeSelectedTakePropertyToRelay(chapter.audio)
+        }
 
         appPreferencesRepo.sourceTextZoomRate().subscribe { rate ->
             workbookDataStore.sourceTextZoomRateProperty.set(rate)
-        }
+        }.let { disposables.add(it) }
     }
 
     fun undock() {
@@ -206,6 +210,7 @@ class ChapterPageViewModel : ViewModel() {
     fun recordChapter() {
         chapterCardProperty.value?.chapterSource?.let { rec ->
             contextProperty.set(PluginType.RECORDER)
+
             rec.audio.getNewTakeNumber()
                 .flatMapMaybe { takeNumber ->
                     workbookDataStore.activeTakeNumberProperty.set(takeNumber)
@@ -237,6 +242,7 @@ class ChapterPageViewModel : ViewModel() {
             val audio = chapterCardProperty.value!!.chapterSource!!.audio
             contextProperty.set(pluginType)
             workbookDataStore.activeTakeNumberProperty.set(take.number)
+
             audioPluginViewModel
                 .getPlugin(pluginType)
                 .doOnError { e ->
