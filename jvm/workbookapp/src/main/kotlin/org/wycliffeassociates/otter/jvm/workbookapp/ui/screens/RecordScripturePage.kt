@@ -23,8 +23,6 @@ import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
 import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleIntegerProperty
-import javafx.beans.value.ChangeListener
 import javafx.scene.Parent
 import javafx.scene.control.ScrollPane
 import javafx.scene.input.DragEvent
@@ -39,7 +37,6 @@ import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
@@ -54,6 +51,7 @@ import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.listview.NoSelectionModel
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
@@ -83,10 +81,6 @@ class RecordScripturePage : View() {
 
     private val isDraggingFileProperty = SimpleBooleanProperty(false)
 
-    private var importProgressListener: ChangeListener<Boolean>? = null
-    private var importSuccessListener: ChangeListener<Boolean>? = null
-    private var importFailListener: ChangeListener<Boolean>? = null
-
     private val sourceContent =
         SourceContent().apply {
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
@@ -115,16 +109,6 @@ class RecordScripturePage : View() {
                     it.translation.targetRate.toLazyBinding()
                 }
             )
-            sourceAudioPlayerProperty.onChange {
-                it?.let { player ->
-                    shortcut(Shortcut.PLAY_SOURCE.value, player::toggle)
-                }
-            }
-            targetAudioPlayerProperty.onChange {
-                it?.let { player ->
-                    shortcut(Shortcut.PLAY_TARGET.value, player::toggle)
-                }
-            }
         }
 
     private val breadCrumb = BreadCrumb().apply {
@@ -172,10 +156,10 @@ class RecordScripturePage : View() {
     }
 
     init {
-        tryImportStylesheet(resources.get("/css/record-scripture.css"))
-        tryImportStylesheet(resources.get("/css/takecard.css"))
-        tryImportStylesheet(resources.get("/css/scripturetakecard.css"))
-        tryImportStylesheet(resources.get("/css/add-plugin-dialog.css"))
+        tryImportStylesheet(resources["/css/record-scripture.css"])
+        tryImportStylesheet(resources["/css/takecard.css"])
+        tryImportStylesheet(resources["/css/scripturetakecard.css"])
+        tryImportStylesheet(resources["/css/add-plugin-dialog.css"])
 
         isDraggingFileProperty.onChange {
             if (it) recordScriptureViewModel.stopPlayers()
@@ -414,7 +398,6 @@ class RecordScripturePage : View() {
                     it.translation.sourceRate.toLazyBinding()
                 }
             )
-
             targetSpeedRateProperty.bind(
                 workbookDataStore.activeWorkbookProperty.select {
                     it.translation.targetRate.toLazyBinding()
@@ -431,10 +414,9 @@ class RecordScripturePage : View() {
             titleTextProperty.set(messages["importTakesTitle"])
             messageTextProperty.set(messages["importTakesMessage"])
 
-            importProgressListener = ChangeListener { _, _, value ->
-                if (value) open() else close()
-            }
-            recordScriptureViewModel.showImportProgressDialogProperty.addListener(importProgressListener)
+            recordScriptureViewModel.showImportProgressDialogProperty.onChangeWithDisposer {
+                if (it == true) open() else close()
+            }.let(recordScriptureViewModel.listeners::add)
 
             progressTitleProperty.set(messages["pleaseWait"])
             showProgressBarProperty.set(true)
@@ -452,10 +434,9 @@ class RecordScripturePage : View() {
             orientationProperty.set(settingsViewModel.orientationProperty.value)
             themeProperty.set(settingsViewModel.appColorMode.value)
 
-            importSuccessListener = ChangeListener { _, _, value ->
-                if (value) open() else close()
-            }
-            recordScriptureViewModel.showImportSuccessDialogProperty.addListener(importSuccessListener)
+            recordScriptureViewModel.showImportSuccessDialogProperty.onChangeWithDisposer {
+                if (it == true) open() else close()
+            }.let(recordScriptureViewModel.listeners::add)
 
             onCloseAction { recordScriptureViewModel.showImportSuccessDialogProperty.set(false) }
             onCancelAction { recordScriptureViewModel.showImportSuccessDialogProperty.set(false) }
@@ -470,33 +451,42 @@ class RecordScripturePage : View() {
             orientationProperty.set(settingsViewModel.orientationProperty.value)
             themeProperty.set(settingsViewModel.appColorMode.value)
 
-            importFailListener = ChangeListener { _, _, value ->
-                if (value) open() else close()
-            }
-            recordScriptureViewModel.showImportFailDialogProperty.addListener(importFailListener)
+            recordScriptureViewModel.showImportFailDialogProperty.onChangeWithDisposer {
+                if (it == true) open() else close()
+            }.let(recordScriptureViewModel.listeners::add)
 
             onCloseAction { recordScriptureViewModel.showImportFailDialogProperty.set(false) }
             onCancelAction { recordScriptureViewModel.showImportFailDialogProperty.set(false) }
         }
     }
 
-    private fun removeDialogListeners() {
-        recordScriptureViewModel.showImportProgressDialogProperty.removeListener(importProgressListener)
-        recordScriptureViewModel.showImportFailDialogProperty.removeListener(importFailListener)
-        recordScriptureViewModel.showImportSuccessDialogProperty.removeListener(importSuccessListener)
+    private fun initializeSourceContentListeners() {
+        sourceContent.initializeListeners()
+        sourceContent.sourceAudioPlayerProperty.onChangeWithDisposer {
+            it?.let { player ->
+                shortcut(Shortcut.PLAY_SOURCE.value, player::toggle)
+            }
+        }.let(sourceContent.listeners::add)
+
+        sourceContent.targetAudioPlayerProperty.onChangeWithDisposer {
+            it?.let { player ->
+                shortcut(Shortcut.PLAY_TARGET.value, player::toggle)
+            }
+        }.let(sourceContent.listeners::add)
     }
 
     override fun onUndock() {
         super.onUndock()
-        recordScriptureViewModel.closePlayers()
-        removeDialogListeners()
+        sourceContent.removeListeners()
+        recordScriptureViewModel.undock()
     }
 
     override fun onDock() {
         super.onDock()
-        recordScriptureViewModel.loadTakes()
-        recordScriptureViewModel.openPlayers()
-        recordScriptureViewModel.highlightedChunkProperty.set(-1)
+
+        initializeSourceContentListeners()
+        recordScriptureViewModel.dock()
+
         sourceContent.zoomRateProperty.set(workbookDataStore.sourceTextZoomRateProperty.value)
         navigator.dock(this, breadCrumb)
 

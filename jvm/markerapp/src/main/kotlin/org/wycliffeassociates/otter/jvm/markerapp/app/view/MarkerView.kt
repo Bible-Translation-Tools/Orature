@@ -20,14 +20,13 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
-import javafx.animation.AnimationTimer
-import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseRequestEvent
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*
@@ -39,6 +38,8 @@ class MarkerView : PluginEntrypoint() {
 
     private var slider: AudioSlider? = null
     private var minimap: MinimapFragment? = null
+
+    private val disposables = mutableListOf<ListenerDisposer>()
 
     override fun onDock() {
         super.onDock()
@@ -61,6 +62,7 @@ class MarkerView : PluginEntrypoint() {
         subscribe<PluginCloseRequestEvent> {
             unsubscribe()
             viewModel.saveAndQuit()
+            unsubscribe()
         }
     }
 

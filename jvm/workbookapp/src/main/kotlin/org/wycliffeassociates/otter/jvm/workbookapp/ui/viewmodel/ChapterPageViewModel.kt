@@ -127,7 +127,7 @@ class ChapterPageViewModel : ViewModel() {
         }
         appPreferencesRepo.sourceTextZoomRate().subscribe { rate ->
             workbookDataStore.sourceTextZoomRateProperty.set(rate)
-        }
+        }.let { disposables.add(it) }
         checkCanCompile()
     }
 
@@ -204,6 +204,7 @@ class ChapterPageViewModel : ViewModel() {
     fun recordChapter() {
         chapterCardProperty.value?.chapterSource?.let { rec ->
             contextProperty.set(PluginType.RECORDER)
+
             rec.audio.getNewTakeNumber()
                 .flatMapMaybe { takeNumber ->
                     workbookDataStore.activeTakeNumberProperty.set(takeNumber)
@@ -235,6 +236,7 @@ class ChapterPageViewModel : ViewModel() {
             val audio = chapterCardProperty.value!!.chapterSource!!.audio
             contextProperty.set(pluginType)
             workbookDataStore.activeTakeNumberProperty.set(take.number)
+
             audioPluginViewModel
                 .getPlugin(pluginType)
                 .doOnError { e ->

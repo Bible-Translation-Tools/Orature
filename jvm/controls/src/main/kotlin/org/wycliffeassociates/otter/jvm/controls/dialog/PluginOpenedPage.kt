@@ -33,6 +33,7 @@ import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import tornadofx.*
 
 class PluginOpenedPage : View() {
@@ -51,7 +52,9 @@ class PluginOpenedPage : View() {
     val targetSpeedRateProperty = SimpleDoubleProperty()
     val sourceTextZoomRateProperty = SimpleIntegerProperty()
 
-    private val playerListenerDisposers = mutableListOf<ListenerDisposer>()
+    private lateinit var sourceContent: SourceContent
+
+    private val listeners = mutableListOf<ListenerDisposer>()
 
     init {
         tryImportStylesheet(resources["/css/plugin-opened-page.css"])
@@ -74,6 +77,7 @@ class PluginOpenedPage : View() {
         add(
             SourceContent().apply {
                 addClass("plugin-opened-page__source")
+                sourceContent = this
                 vgrow = Priority.ALWAYS
                 sourceTextProperty.bind(this@PluginOpenedPage.sourceTextProperty)
                 sourceAudioPlayerProperty.bind(playerProperty)
@@ -94,9 +98,6 @@ class PluginOpenedPage : View() {
 
                 sourceSpeedRateProperty.bind(this@PluginOpenedPage.sourceSpeedRateProperty)
                 targetSpeedRateProperty.bind(this@PluginOpenedPage.targetSpeedRateProperty)
-                this@PluginOpenedPage.sourceTextZoomRateProperty.onChange {
-                    zoomRateProperty.set(it)
-                }
             }
         )
     }
@@ -106,21 +107,26 @@ class PluginOpenedPage : View() {
             it?.let {
                 addShortcut(Shortcut.PLAY_SOURCE.value, it::toggle)
             }
-        }.let(playerListenerDisposers::add)
+        }.let(listeners::add)
 
         targetAudioPlayerProperty.onChangeAndDoNowWithDisposer {
             it?.let {
                 addShortcut(Shortcut.PLAY_TARGET.value, it::toggle)
             }
-        }.let(playerListenerDisposers::add)
+        }.let(listeners::add)
+
+        sourceTextZoomRateProperty.onChangeWithDisposer {
+            it?.let { sourceContent.zoomRateProperty.set(it.toInt()) }
+        }.let(listeners::add)
+
         super.onDock()
     }
 
     override fun onUndock() {
         playerProperty.value?.stop()
         targetAudioPlayerProperty.value?.close()
-        playerListenerDisposers.forEach(ListenerDisposer::dispose)
-        playerListenerDisposers.clear()
+        listeners.forEach(ListenerDisposer::dispose)
+        listeners.clear()
         removeShortcut(Shortcut.PLAY_SOURCE.value)
         removeShortcut(Shortcut.PLAY_TARGET.value)
         super.onUndock()

@@ -90,6 +90,23 @@ fun <T> ObservableList<T>.onChangeWithDisposer(op: (ListChangeListener.Change<ou
 }
 
 /**
+ * Runs the given operation now and also calls tornadofx's [onChange] with the given operation to set up an
+ * on change listener
+ * @param op the function to run now and when observable list is changed
+ * @return ListenerDisposer
+ */
+fun <T> ObservableList<T>.onChangeAndDoNowWithDisposer(op: (List<T>) -> Unit): ListenerDisposer {
+    op(this)
+    val listener = ListChangeListener<T> { op(it.list) }
+    addListener(listener)
+    return object: ListenerDisposer {
+        override fun dispose() {
+            removeListener(listener)
+        }
+    }
+}
+
+/**
  * Runs the given operation now and also calls [onChangeWithDisposer] with the given operation to set up an
  * on change listener
  * @param op the function to run when observable value is changed
