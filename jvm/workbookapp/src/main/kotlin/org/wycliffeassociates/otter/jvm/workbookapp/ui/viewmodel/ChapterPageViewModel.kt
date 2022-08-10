@@ -99,10 +99,6 @@ class ChapterPageViewModel : ViewModel() {
     private val disposables = CompositeDisposable()
     private val navigator: NavigationMediator by inject()
 
-    private var recordChapterSubscription: Disposable? = null
-    private var openPluginSubscription: Disposable? = null
-    private var compileSubscription: Disposable? = null
-
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
 
@@ -215,8 +211,7 @@ class ChapterPageViewModel : ViewModel() {
         chapterCardProperty.value?.chapterSource?.let { rec ->
             contextProperty.set(PluginType.RECORDER)
 
-            recordChapterSubscription?.dispose()
-            recordChapterSubscription = rec.audio.getNewTakeNumber()
+            rec.audio.getNewTakeNumber()
                 .flatMapMaybe { takeNumber ->
                     workbookDataStore.activeTakeNumberProperty.set(takeNumber)
                     audioPluginViewModel.getPlugin(PluginType.RECORDER)
@@ -248,8 +243,7 @@ class ChapterPageViewModel : ViewModel() {
             contextProperty.set(pluginType)
             workbookDataStore.activeTakeNumberProperty.set(take.number)
 
-            openPluginSubscription?.dispose()
-            openPluginSubscription = audioPluginViewModel
+            audioPluginViewModel
                 .getPlugin(pluginType)
                 .doOnError { e ->
                     logger.error("Error in processing take with plugin type: $pluginType, ${e.message}")
@@ -297,9 +291,7 @@ class ChapterPageViewModel : ViewModel() {
 
             var compiled: File? = null
 
-            compileSubscription?.dispose()
-
-            compileSubscription = concatenateAudio.execute(takes)
+            concatenateAudio.execute(takes)
                 .flatMapCompletable { file ->
                     compiled = file
                     audioPluginViewModel.import(chapter, file)
