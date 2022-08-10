@@ -21,7 +21,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import javafx.application.Platform
@@ -96,12 +95,6 @@ class RecordScriptureViewModel : ViewModel() {
 
     val isChunk = activeChunkProperty.isNotNull
     val highlightedChunkProperty = SimpleIntegerProperty(-1)
-
-    private var activeChapterSubscription: Disposable? = null
-    private var activeChunkSubscription: Disposable? = null
-    private var recorderSubscription: Disposable? = null
-    private var pluginSubscription: Disposable? = null
-    private var importSubscription: Disposable? = null
 
     val recordableProperty = SimpleObjectProperty<Recordable?>()
     var recordable by recordableProperty
@@ -298,8 +291,7 @@ class RecordScriptureViewModel : ViewModel() {
     }
 
     private fun getChapterList(chapters: Observable<Chapter>) {
-        activeChapterSubscription?.dispose()
-        activeChapterSubscription = chapters
+        chapters
             .toList()
             .map { it.sortedBy { chapter -> chapter.sort } }
             .observeOnFx()
@@ -312,8 +304,7 @@ class RecordScriptureViewModel : ViewModel() {
     }
 
     private fun getChunkList(chunks: Observable<Chunk>) {
-        activeChunkSubscription?.dispose()
-        activeChunkSubscription = chunks
+        chunks
             .toList()
             .map { it.sortedBy { chunk -> chunk.start } }
             .observeOnFx()
@@ -346,9 +337,8 @@ class RecordScriptureViewModel : ViewModel() {
     fun recordNewTake() {
         closePlayers()
         recordable?.let { rec ->
-            recorderSubscription?.dispose()
             contextProperty.set(PluginType.RECORDER)
-            recorderSubscription = rec.audio.getNewTakeNumber()
+            rec.audio.getNewTakeNumber()
                 .flatMapMaybe { takeNumber ->
                     workbookDataStore.activeTakeNumberProperty.set(takeNumber)
                     audioPluginViewModel.getPlugin(PluginType.RECORDER)
@@ -376,11 +366,10 @@ class RecordScriptureViewModel : ViewModel() {
     }
 
     fun processTakeWithPlugin(takeEvent: TakeEvent, pluginType: PluginType) {
-        pluginSubscription?.dispose()
         closePlayers()
         contextProperty.set(pluginType)
         workbookDataStore.activeTakeNumberProperty.set(takeEvent.take.number)
-        pluginSubscription = audioPluginViewModel
+        audioPluginViewModel
             .getPlugin(pluginType)
             .flatMapSingle { plugin ->
                 fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
@@ -414,11 +403,10 @@ class RecordScriptureViewModel : ViewModel() {
     }
 
     fun importTakes(files: List<File>) {
-        importSubscription?.dispose()
         showImportProgressDialogProperty.set(true)
         closePlayers()
 
-        importSubscription = recordable?.let { rec ->
+        recordable?.let { rec ->
             files.toRxObservable()
                 .subscribeOn(Schedulers.io())
                 .flatMapCompletable { takeFile ->
