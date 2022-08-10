@@ -151,5 +151,6 @@ class HomePage : View() {
     override fun onUndock() {
         super.onUndock()
         banner.cleanUp()
+        viewModel.undock()
     }
 }

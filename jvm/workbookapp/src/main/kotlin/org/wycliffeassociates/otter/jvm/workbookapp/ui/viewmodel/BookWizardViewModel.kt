@@ -49,6 +49,8 @@ import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRep
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.controls.button.SelectButton
 import org.wycliffeassociates.otter.jvm.controls.toggle.ToggleButtonData
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.enums.BookSortBy
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
@@ -107,25 +109,37 @@ class BookWizardViewModel : ViewModel() {
     private var queryPredicate = Predicate<BookCardData> { true }
 
     private val sortByProperty = SimpleObjectProperty<BookSortBy>(BookSortBy.BOOK_ORDER)
-    private val resourcesToggleGroup = ToggleGroup()
     private val sortByToggleGroup = ToggleGroup()
+
+    private val disposableListeners = mutableListOf<ListenerDisposer>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+    }
 
+    fun dock() {
         bindFilterProperties()
 
-        selectedSourceProperty.onChange {
+        selectedSourceProperty.onChangeWithDisposer {
             it?.let { collection ->
                 loadChildren(collection)
             }
-        }
+        }.apply { disposableListeners.add(this) }
 
-        selectedBookProperty.onChange {
+        selectedBookProperty.onChangeWithDisposer {
             it?.let {
                 createProject(it)
             }
+        }.apply { disposableListeners.add(this) }
+    }
+
+    fun undock() {
+        books.forEach {
+            it.artworkProperty.set(null)
         }
+        reset()
+        disposableListeners.forEach { it.dispose() }
+        disposableListeners.clear()
     }
 
     fun loadResources() {
@@ -192,7 +206,7 @@ class BookWizardViewModel : ViewModel() {
     }
 
     private fun bindFilterProperties() {
-        searchQueryProperty.onChange { query ->
+        searchQueryProperty.onChangeWithDisposer { query ->
             queryPredicate = if (query.isNullOrBlank()) {
                 Predicate { true }
             } else {
@@ -202,16 +216,16 @@ class BookWizardViewModel : ViewModel() {
                 }
             }
             filteredBooks.predicate = queryPredicate
-        }
+        }.apply { disposableListeners.add(this) }
 
-        sortByProperty.onChange {
+        sortByProperty.onChangeWithDisposer {
             it?.let { sortBy ->
                 when (sortBy) {
                     BookSortBy.BOOK_ORDER -> books.sortBy { it.collection.sort }
                     BookSortBy.ALPHABETICAL -> books.sortBy { it.collection.titleKey }
                 }
             }
-        }
+        }.apply { disposableListeners.add(this) }
     }
 
     private fun createProject(collection: Collection) {
@@ -302,7 +316,7 @@ class BookWizardViewModel : ViewModel() {
     }
 
     fun loadResourceSelections() {
-        sourceCollections.onChange {
+        sourceCollections.onChangeWithDisposer {
             val data = it.list.mapIndexed { index, resource ->
                 val isFirst = index == 0
                 ToggleButtonData(resource.slug.uppercase(), isFirst) {
@@ -310,6 +324,8 @@ class BookWizardViewModel : ViewModel() {
                 }
             }
             resourceToggleGroup.setAll(data)
+        }.apply {
+            disposableListeners.add(this)
         }
     }
 
@@ -348,9 +364,9 @@ class BookWizardViewModel : ViewModel() {
             content = SelectButton().apply {
                 text = label
                 tooltip(label)
-                selectedProperty().onChange {
-                    onSelected(it)
-                }
+                selectedProperty().onChangeWithDisposer {
+                    onSelected(it ?: false)
+                }.apply { disposableListeners.add(this) }
                 toggleGroup = group
                 isSelected = preSelected
             }
