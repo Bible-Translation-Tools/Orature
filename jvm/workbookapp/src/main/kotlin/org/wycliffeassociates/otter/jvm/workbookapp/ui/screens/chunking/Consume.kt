@@ -21,8 +21,8 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.glass.ui.Screen
 import com.sun.javafx.util.Utils
+import io.reactivex.rxkotlin.addTo
 import java.text.MessageFormat
-import javafx.animation.AnimationTimer
 import javafx.beans.binding.Bindings
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.ScrollingWaveform
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingWizardPage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
@@ -45,8 +44,6 @@ class Consume : Fragment() {
     val vm: ChunkingViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
 
-    var timer: AnimationTimer? = null
-
     override fun onDock() {
         super.onDock()
         logger.info("Consume docked")
@@ -55,32 +52,20 @@ class Consume : Fragment() {
 
         vm.subscribeOnWaveformImages = ::subscribeOnWaveformImages
         vm.onDockConsume()
-
-        vm.pageProperty.set(ChunkingWizardPage.CONSUME)
-        vm.titleProperty.set(messages["consumeTitle"])
-        vm.stepProperty.set(MessageFormat.format(messages["consumeDescription"], vm.chapterTitle))
-
-        timer = object : AnimationTimer() {
-            override fun handle(currentNanoTime: Long) {
-                vm.calculatePosition()
-            }
-        }
-        timer?.start()
     }
 
     override fun onUndock() {
         super.onUndock()
-        vm.pause()
-        timer?.stop()
-        vm.compositeDisposable.clear()
+        vm.onUndockConsume()
     }
 
     private fun subscribeOnWaveformImages() {
-        vm.compositeDisposable.add(
-            vm.waveform.observeOnFx().subscribe {
+        vm.waveform
+            .observeOnFx()
+            .subscribe {
                 (root.center as ScrollingWaveform).addWaveformImage(it)
             }
-        )
+            .addTo(vm.compositeDisposable)
     }
 
     override val root = borderpane {
