@@ -164,7 +164,6 @@ class ProjectFilesAccessor(
             .forEach { fileWriter.copyFile(it, RcConstants.SOURCE_DIR) }
     }
 
-
     fun initializeResourceContainerInDir(overwrite: Boolean = true) {
         if (!overwrite) { // if existing container is valid, then use it
             try {
