@@ -162,12 +162,20 @@ class LanguageRepository @Inject constructor(
     }
 
     override fun getTranslation(sourceLanguage: Language, targetLanguage: Language): Single<Translation> {
-        return Single.fromCallable {
-            val translation = translationDao
-                .fetchBySourceAndTarget(sourceLanguage.id, targetLanguage.id)
+        return Single
+            .fromCallable {
+                val translation = translationDao
+                    .fetch(sourceLanguage.id, targetLanguage.id)
+                    ?: throw NullPointerException("Translation not found")
 
-            translationMapper.mapFromEntity(translation, sourceLanguage, targetLanguage)
-        }
+                translationMapper.mapFromEntity(translation, sourceLanguage, targetLanguage)
+            }
+            .doOnError {
+                logger.error(
+                    "Could not get translation for these languages: ${sourceLanguage.slug} -> ${targetLanguage.slug}.",
+                    it
+                )
+            }
     }
 
     override fun getAllTranslations(): Single<List<Translation>> {
@@ -216,7 +224,7 @@ class LanguageRepository @Inject constructor(
             .fromAction {
                 translationDao.delete(translationMapper.mapToEntity(translation))
             }
-            .doOnError { e->
+            .doOnError { e ->
                 logger.error("Error in delete translation: $translation", e)
             }
             .subscribeOn(Schedulers.io())

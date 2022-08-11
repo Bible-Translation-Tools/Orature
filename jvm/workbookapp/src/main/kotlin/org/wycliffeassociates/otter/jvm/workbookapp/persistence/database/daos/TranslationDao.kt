@@ -39,17 +39,6 @@ class TranslationDao(
             }
     }
 
-    fun fetchBySourceAndTarget(sourceId: Int, targetId: Int, dsl: DSLContext = instanceDsl): TranslationEntity {
-        return dsl
-            .select()
-            .from(Tables.TRANSLATION_ENTITY)
-            .where(Tables.TRANSLATION_ENTITY.SOURCE_FK.eq(sourceId))
-            .and(Tables.TRANSLATION_ENTITY.TARGET_FK.eq(targetId))
-            .fetchOne {
-                RecordMappers.mapToTranslationEntity(it)
-            }
-    }
-
     fun fetchById(id: Int, dsl: DSLContext = instanceDsl): TranslationEntity {
         return dsl
             .select()
