@@ -68,6 +68,14 @@ class AudioPlayerController(
         }
     }
 
+    fun release() {
+        player?.close()
+        player = null
+        startAtLocation = 0
+        isPlayingProperty.set(false)
+        disposable?.dispose()
+    }
+
     fun toggle() {
         player?.let { _player ->
             if (_player.isPlaying()) {
@@ -122,11 +130,6 @@ class AudioPlayerController(
                 }
             }
         }
-    }
-
-    fun release() {
-        player?.close()
-        disposable?.dispose()
     }
 
     private fun initializeSliderActions() {
