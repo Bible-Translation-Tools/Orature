@@ -73,6 +73,7 @@ class AudioPlayerController(
         player = null
         startAtLocation = 0
         isPlayingProperty.set(false)
+        disposable?.dispose()
     }
 
     fun toggle() {
@@ -129,11 +130,6 @@ class AudioPlayerController(
                 }
             }
         }
-    }
-
-    fun release() {
-        player?.close()
-        disposable?.dispose()
     }
 
     private fun initializeSliderActions() {
