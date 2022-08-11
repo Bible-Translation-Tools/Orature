@@ -51,8 +51,6 @@ class ChunkingPage : View() {
     val vm: ChunkingViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
 
-    var timer: AnimationTimer? = null
-
     val waveform = MarkerPlacementWaveform().apply {
         themeProperty.bind(settingsViewModel.appColorMode)
         positionProperty.bind(vm.positionProperty)
@@ -82,17 +80,7 @@ class ChunkingPage : View() {
         tryImportStylesheet(resources.get("/css/chunk-page.css"))
 
         vm.subscribeOnWaveformImages = ::subscribeOnWaveformImages
-        vm.seek(0)
-        vm.pageProperty.set(ChunkingWizardPage.CHUNK)
-        vm.titleProperty.set(messages["chunkingTitle"])
-        vm.stepProperty.set(messages["chunkingDescription"])
 
-        timer = object : AnimationTimer() {
-            override fun handle(currentNanoTime: Long) {
-                vm.calculatePosition()
-            }
-        }
-        timer?.start()
         vm.onDockChunk()
 
         waveform.markers.bind(vm.markers, { it })
@@ -101,9 +89,7 @@ class ChunkingPage : View() {
 
     override fun onUndock() {
         super.onUndock()
-        vm.pause()
-        timer?.stop()
-        vm.compositeDisposable.clear()
+        vm.onUndockChunk()
     }
 
     private lateinit var leftControls: Region

@@ -23,6 +23,8 @@ import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import java.io.File
+import java.text.MessageFormat
+import javafx.animation.AnimationTimer
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
@@ -45,6 +47,7 @@ import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuil
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.ViewModel
+import tornadofx.get
 import tornadofx.getValue
 import tornadofx.observableListOf
 import tornadofx.onChange
@@ -66,7 +69,7 @@ enum class ChunkingWizardPage {
 
 class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
 
-    val chapterPageViewModel: ChapterPageViewModel by inject()
+    var timer: AnimationTimer? = null
 
     val workbookDataStore: WorkbookDataStore by inject()
 
@@ -140,6 +143,10 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
     }
 
     fun onDockConsume() {
+        pageProperty.set(ChunkingWizardPage.CONSUME)
+        titleProperty.set(messages["consumeTitle"])
+        stepProperty.set(MessageFormat.format(messages["consumeDescription"], chapterTitle))
+
         sourceAudio?.file?.let {
             (app as IDependencyGraphProvider).dependencyGraph.inject(this)
             audio = loadAudio(it)
@@ -147,11 +154,43 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
             initializeAudioController()
             subscribeOnWaveformImages()
         }
+        startAnimationTimer()
+    }
+
+    fun onUndockConsume() {
+        stopAnimationTimer()
+        pause()
+        compositeDisposable.clear()
     }
 
     fun onDockChunk() {
+        pageProperty.set(ChunkingWizardPage.CHUNK)
+        titleProperty.set(messages["chunkingTitle"])
+        stepProperty.set(messages["chunkingDescription"])
+
         loadMarkers(audio)
         subscribeOnWaveformImages()
+        startAnimationTimer()
+        seek(0)
+    }
+
+    fun onUndockChunk() {
+        pause()
+        compositeDisposable.clear()
+        stopAnimationTimer()
+    }
+
+    private fun startAnimationTimer() {
+        timer = object : AnimationTimer() {
+            override fun handle(currentNanoTime: Long) {
+                calculatePosition()
+            }
+        }.apply { start() }
+    }
+
+    private fun stopAnimationTimer() {
+        timer?.stop()
+        timer = null
     }
 
     fun loadAudio(audioFile: File): AudioFile {
