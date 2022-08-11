@@ -131,6 +131,11 @@ class AudioPlayerController(
         }
     }
 
+    fun release() {
+        player?.close()
+        disposable?.dispose()
+    }
+
     private fun initializeSliderActions() {
         seek(0)
         audioSlider?.value = 0.0

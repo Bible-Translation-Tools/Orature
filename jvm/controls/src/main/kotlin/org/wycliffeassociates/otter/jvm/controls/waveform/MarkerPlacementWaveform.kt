@@ -20,6 +20,8 @@ package org.wycliffeassociates.otter.jvm.controls.waveform
 
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.event.ActionEvent
+import javafx.event.EventHandler
 import javafx.geometry.NodeOrientation
 import javafx.scene.image.Image
 import javafx.scene.layout.StackPane
@@ -33,25 +35,63 @@ class MarkerPlacementWaveform : StackPane() {
     val themeProperty = SimpleObjectProperty(ColorTheme.LIGHT)
 
     val markers = observableListOf<ChunkMarkerModel>()
-    var onPositionChangedProperty: (Int, Double) -> Unit = { _, _ -> }
-    var onSeekPreviousProperty: () -> Unit = {}
-    var onSeekNextProperty: () -> Unit = {}
-    var onLocationRequestProperty: () -> Int = { 0 }
-
     val imageWidthProperty = SimpleDoubleProperty()
-
-    var onSeekNext: () -> Unit = {}
-    var onSeekPrevious: () -> Unit = {}
-    var onPlaceMarker: () -> Unit = {}
-
-
     val positionProperty = SimpleDoubleProperty(0.0)
-    var onWaveformClicked: () -> Unit = {}
-    var onWaveformDragReleased: (Double) -> Unit = {}
-    var onRewind: ((ScrollSpeed) -> Unit) = {}
-    var onFastForward: ((ScrollSpeed) -> Unit) = {}
-    var onToggleMedia: () -> Unit = {}
-    var onResumeMedia: () -> Unit = {}
+
+    private val onPositionChanged = SimpleObjectProperty<(Int, Double) -> Unit> { _, _ -> }
+    fun setOnPositionChanged(op: (Int, Double) -> Unit) {
+        onPositionChanged.set(op)
+    }
+
+    private val onSeekPrevious = SimpleObjectProperty<() -> Unit> {}
+    fun setOnSeekPrevious(op: () -> Unit) {
+        onSeekPrevious.set(op)
+    }
+
+    private val onSeekNext = SimpleObjectProperty<() -> Unit> {}
+    fun setOnSeekNext(op: () -> Unit) {
+        onSeekNext.set(op)
+    }
+
+    private val onPlaceMarker = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    fun setOnPlaceMarker(op: () -> Unit) {
+        onPlaceMarker.set(EventHandler { op.invoke() })
+    }
+
+    private val onLocationRequest = SimpleObjectProperty<() -> Int> { 0 }
+    fun setOnLocationRequest(op: () -> Int) {
+        onLocationRequest.set(op)
+    }
+
+    val onWaveformClicked = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    fun setOnWaveformClicked(op: () -> Unit) {
+        onWaveformClicked.set((EventHandler { op.invoke() }))
+    }
+
+    val onWaveformDragReleased = SimpleObjectProperty<(Double) -> Unit> {}
+    fun setOnWaveformDragReleased(op: (Double) -> Unit) {
+        onWaveformDragReleased.set(op)
+    }
+
+    var onRewind = SimpleObjectProperty<((ScrollSpeed) -> Unit)> {}
+    fun setOnRewind(op: (ScrollSpeed) -> Unit){
+        onRewind.set(op)
+    }
+
+    var onFastForward = SimpleObjectProperty<((ScrollSpeed) -> Unit)> {}
+    fun setOnFastForward(op: (ScrollSpeed) -> Unit){
+        onFastForward.set(op)
+    }
+
+    var onToggleMedia = SimpleObjectProperty<(() -> Unit)> {}
+    fun setOnToggleMedia(op: () -> Unit){
+        onToggleMedia.set(op)
+    }
+
+    var onResumeMedia = SimpleObjectProperty<(() -> Unit)> {}
+    fun setOnResumeMedia(op: () -> Unit){
+        onResumeMedia.set(op)
+    }
 
     private val waveformFrame: WaveformFrame
 
@@ -79,26 +119,20 @@ class MarkerPlacementWaveform : StackPane() {
         val topTrack = MarkerTrackControl().apply {
             top = this
             markers.bind(this@MarkerPlacementWaveform.markers, { it })
-            setOnPositionChanged { id, position ->
-                this@MarkerPlacementWaveform.onPositionChangedProperty.invoke(id, position)
-            }
-            setOnLocationRequest {
-                this@MarkerPlacementWaveform.onLocationRequestProperty.invoke()
-            }
+            onPositionChangedProperty.bind(onPositionChanged)
+            onLocationRequestProperty.bind(onLocationRequest)
         }
         waveformFrame = WaveformFrame(topTrack).apply {
             themeProperty.bind(this@MarkerPlacementWaveform.themeProperty)
             framePositionProperty.bind(positionProperty)
-            onWaveformClicked { onWaveformClicked() }
-            onWaveformDragReleased {
-                onWaveformDragReleased(it)
-            }
-            onRewind(onRewind)
-            onFastForward(onFastForward)
-            onToggleMedia(onToggleMedia)
-            onResumeMedia(onResumeMedia)
-            onSeekPrevious(this@MarkerPlacementWaveform.onSeekPrevious)
-            onSeekNext(this@MarkerPlacementWaveform.onSeekNext)
+            onWaveformClickedProperty.bind(onWaveformClicked)
+            onWaveformDragReleasedProperty.bind(onWaveformDragReleased)
+            onRewindProperty.bind(onRewind)
+            onFastForwardProperty.bind(onFastForward)
+            onToggleMediaProperty.bind(onToggleMedia)
+            onResumeMediaProperty.bind(onResumeMedia)
+            onSeekPreviousProperty.bind(onSeekPrevious)
+            onSeekNextProperty.bind(onSeekNext)
 
             focusedProperty().onChange {
                 togglePseudoClass("active", it)
@@ -106,6 +140,10 @@ class MarkerPlacementWaveform : StackPane() {
         }
         add(waveformFrame)
         add(WaveformOverlay().apply { playbackPositionProperty.bind(positionProperty) })
-        add(PlaceMarkerLayer().apply { onPlaceMarkerAction { onPlaceMarker() } })
+        add(
+            PlaceMarkerLayer().apply {
+                onPlaceMarkerActionProperty.bind(onPlaceMarker)
+            }
+        )
     }
 }

@@ -69,7 +69,7 @@ class WorkbookPage : View() {
     private val workbookDataStore: WorkbookDataStore by inject()
     private val settingsViewModel: SettingsViewModel by inject()
 
-    private val listenerDisposers = mutableListOf<ListenerDisposer>()
+    private val listeners = mutableListOf<ListenerDisposer>()
 
     private val breadCrumb = BreadCrumb().apply {
         titleProperty.bind(
@@ -185,7 +185,7 @@ class WorkbookPage : View() {
 
             viewModel.showDeleteDialogProperty.onChangeWithDisposer {
                 if (it == true) open() else close()
-            }.let(listenerDisposers::add)
+            }.let(listeners::add)
 
             onCloseAction { viewModel.showDeleteDialogProperty.set(false) }
             onCancelAction { viewModel.showDeleteDialogProperty.set(false) }
@@ -213,7 +213,7 @@ class WorkbookPage : View() {
 
             viewModel.showDeleteSuccessDialogProperty.onChangeWithDisposer {
                 if (it == true) open() else close()
-            }.let(listenerDisposers::add)
+            }.let(listeners::add)
 
             onCloseAction { viewModel.goBack() }
             onCancelAction { viewModel.goBack() }
@@ -241,7 +241,7 @@ class WorkbookPage : View() {
 
             viewModel.showDeleteFailDialogProperty.onChangeWithDisposer {
                 if (it == true) open() else close()
-            }.let(listenerDisposers::add)
+            }.let(listeners::add)
 
             onCloseAction { viewModel.showDeleteFailDialogProperty.set(false) }
             onCancelAction { viewModel.showDeleteFailDialogProperty.set(false) }
@@ -269,7 +269,7 @@ class WorkbookPage : View() {
                 } else {
                     close()
                 }
-            }.let(listenerDisposers::add)
+            }.let(listeners::add)
 
             viewModel.showExportProgressDialogProperty.onChangeWithDisposer {
                 if (it == true) {
@@ -294,14 +294,14 @@ class WorkbookPage : View() {
                         }
                     }.onChangeAndDoNowWithDisposer { title ->
                         messageTextProperty.set(title)
-                    }.let(listenerDisposers::add)
+                    }.let(listeners::add)
 
                     backgroundImageFileProperty.bind(viewModel.activeProjectCoverProperty)
                     open()
                 } else {
                     close()
                 }
-            }.let(listenerDisposers::add)
+            }.let(listeners::add)
 
             progressTitleProperty.set(messages["pleaseWait"])
             showProgressBarProperty.set(true)
@@ -311,8 +311,8 @@ class WorkbookPage : View() {
     }
 
     private fun disposeListeners() {
-        listenerDisposers.forEach(ListenerDisposer::dispose)
-        listenerDisposers.clear()
+        listeners.forEach(ListenerDisposer::dispose)
+        listeners.clear()
     }
 
     /**
@@ -333,7 +333,7 @@ class WorkbookPage : View() {
                 viewModel.openTab(resourceMetadata)
                 viewModel.selectedResourceMetadata.set(resourceMetadata)
                 listView.refresh()
-            }.let(listenerDisposers::add)
+            }.let(listeners::add)
 
             viewModel.chapters.onChangeWithDisposer {
                 val index = workbookDataStore.workbookRecentChapterMap.getOrDefault(
@@ -347,7 +347,7 @@ class WorkbookPage : View() {
                     listView.focusModel.focus(index)
                     listView.scrollTo(index)
                 }
-            }.let(listenerDisposers::add)
+            }.let(listeners::add)
         }
 
         fun buildTab(): VBox {
@@ -464,7 +464,7 @@ class WorkbookPage : View() {
                         viewModel.removeContributor(indexToRemove)
                     }
                 )
-                contributorsListenerDisposer?.let(listenerDisposers::add)
+                contributorsListenerDisposer?.let(listeners::add)
 
                 button(messages["saveContributors"]) {
                     addClass("btn", "btn--primary", "btn--borderless", "contributor__save-btn")
@@ -474,7 +474,7 @@ class WorkbookPage : View() {
 
                     viewModel.contributors.onChangeWithDisposer {
                         isDisable = false
-                    }.let(listenerDisposers::add)
+                    }.let(listeners::add)
 
                     setOnAction {
                         viewModel.saveContributorInfo()

@@ -20,28 +20,26 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
-import javafx.animation.AnimationTimer
-import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseRequestEvent
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*
 
 class MarkerView : PluginEntrypoint() {
-
-    var timer: AnimationTimer? = null
     val viewModel: VerseMarkerViewModel by inject()
 
     private val waveform = MarkerPlacementWaveform()
 
     private var slider: AudioSlider? = null
     private var minimap: MinimapFragment? = null
+
+    private val disposables = mutableListOf<ListenerDisposer>()
 
     override fun onDock() {
         super.onDock()
@@ -50,17 +48,9 @@ class MarkerView : PluginEntrypoint() {
                 viewModel.waveform.observeOnFx().subscribe { waveform.addWaveformImage(it) }
             )
         }
-        viewModel.imageCleanup = waveform::freeImages
-        timer = object : AnimationTimer() {
-            override fun handle(currentNanoTime: Long) {
-                viewModel.calculatePosition()
-            }
-        }
-        timer?.start()
         slider?.let {
             viewModel.initializeAudioController(it)
         }
-
         waveform.markers.bind(viewModel.markers, { it })
     }
 
@@ -69,18 +59,11 @@ class MarkerView : PluginEntrypoint() {
         tryImportStylesheet(resources.get("/css/scrolling-waveform.css"))
         tryImportStylesheet(resources.get("/css/chunk-marker.css"))
 
-        initThemeProperty()
         subscribe<PluginCloseRequestEvent> {
+            unsubscribe()
             viewModel.saveAndQuit()
+            unsubscribe()
         }
-    }
-
-    override fun onUndock() {
-        super.onUndock()
-        timer?.stop()
-        timer = null
-        waveform.positionProperty.unbind()
-        minimap?.cleanUpOnUndock()
     }
 
     override val root =
@@ -97,51 +80,35 @@ class MarkerView : PluginEntrypoint() {
                 themeProperty.bind(viewModel.themeColorProperty)
                 positionProperty.bind(viewModel.positionProperty)
 
-                onSeekNext = viewModel::seekNext
-                onSeekPrevious = viewModel::seekPrevious
-
-                onPlaceMarker = {
-                    viewModel.placeMarker()
-                }
-                onWaveformClicked = { viewModel.pause() }
-                onWaveformDragReleased = { deltaPos ->
+                setOnSeekNext { viewModel.seekNext() }
+                setOnSeekPrevious { viewModel.seekPrevious() }
+                setOnPlaceMarker { viewModel.placeMarker() }
+                setOnWaveformClicked  { viewModel.pause() }
+                setOnWaveformDragReleased { deltaPos ->
                     val deltaFrames = pixelsToFrames(deltaPos)
                     val curFrames = viewModel.getLocationInFrames()
                     val duration = viewModel.getDurationInFrames()
                     val final = Utils.clamp(0, curFrames - deltaFrames, duration)
                     viewModel.seek(final)
                 }
-                onRewind = viewModel::rewind
-                onFastForward = viewModel::fastForward
-                onToggleMedia = viewModel::mediaToggle
-                onResumeMedia = viewModel::resumeMedia
+                setOnRewind { viewModel::rewind }
+                setOnFastForward { viewModel::fastForward }
+                setOnToggleMedia { viewModel.mediaToggle() }
+                setOnResumeMedia { viewModel.resumeMedia() }
 
                 // Marker stuff
                 imageWidthProperty.bind(viewModel.imageWidthProperty)
 
-                onPositionChangedProperty = slider!!::updateMarker
-                onLocationRequestProperty = viewModel::requestAudioLocation
+                setOnPositionChanged { id, position -> slider!!.updateMarker(id, position) }
+                setOnLocationRequest { viewModel.requestAudioLocation() }
             }
             bottom = vbox {
                 add<SourceTextFragment> {
                     highlightedChunkNumberProperty.bind(viewModel.currentMarkerNumberProperty)
                 }
-                add<PlaybackControlsFragment> {
-                    refreshViewProperty = {
-                    }
-                }
+                add<PlaybackControlsFragment>()
             }
             shortcut(Shortcut.ADD_MARKER.value, viewModel::placeMarker)
             shortcut(Shortcut.GO_BACK.value, viewModel::saveAndQuit)
         }
-
-    private fun initThemeProperty() {
-        primaryStage.scene.root.styleClass.onChangeAndDoNow {
-            if (it.contains(ColorTheme.DARK.styleClass)) {
-                viewModel.themeColorProperty.set(ColorTheme.DARK)
-            } else {
-                viewModel.themeColorProperty.set(ColorTheme.LIGHT)
-            }
-        }
-    }
 }

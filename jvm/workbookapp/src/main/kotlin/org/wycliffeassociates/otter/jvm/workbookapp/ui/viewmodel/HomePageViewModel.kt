@@ -135,6 +135,10 @@ class HomePageViewModel : ViewModel() {
         navigator.dock<WorkbookPage>()
     }
 
+    fun undock() {
+        translationModels.clear()
+    }
+
     private fun mapToTranslationCardModel(translation: Translation): TranslationCardModel {
         val projects = workbookRepo.getProjects(translation).blockingGet()
         return TranslationCardModel(

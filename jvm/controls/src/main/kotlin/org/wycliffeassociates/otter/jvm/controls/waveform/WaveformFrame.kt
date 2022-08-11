@@ -41,14 +41,14 @@ class WaveformFrame(
     bottomTrack: Node? = null
 ) : StackPane() {
 
-    private val onWaveformClickedProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
-    private val onWaveformDragReleasedProperty = SimpleObjectProperty<(pixel: Double) -> Unit>()
-    private val onRewindProperty = SimpleObjectProperty<(ScrollSpeed) -> Unit>()
-    private val onFastForwardProperty = SimpleObjectProperty<(ScrollSpeed) -> Unit>()
-    private val onToggleMediaProperty = SimpleObjectProperty<() -> Unit>()
-    private val onResumeMediaProperty = SimpleObjectProperty<() -> Unit>()
-    private val onSeekPreviousProperty = SimpleObjectProperty<() -> Unit>()
-    private val onSeekNextProperty = SimpleObjectProperty<() -> Unit>()
+    val onWaveformClickedProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val onWaveformDragReleasedProperty = SimpleObjectProperty<(pixel: Double) -> Unit>()
+    val onRewindProperty = SimpleObjectProperty<(ScrollSpeed) -> Unit>()
+    val onFastForwardProperty = SimpleObjectProperty<(ScrollSpeed) -> Unit>()
+    val onToggleMediaProperty = SimpleObjectProperty<() -> Unit>()
+    val onResumeMediaProperty = SimpleObjectProperty<() -> Unit>()
+    val onSeekPreviousProperty = SimpleObjectProperty<() -> Unit>()
+    val onSeekNextProperty = SimpleObjectProperty<() -> Unit>()
 
     val themeProperty = SimpleObjectProperty<ColorTheme>()
     val framePositionProperty = SimpleDoubleProperty(0.0)

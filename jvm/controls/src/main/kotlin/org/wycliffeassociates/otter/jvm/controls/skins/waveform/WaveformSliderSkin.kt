@@ -19,7 +19,6 @@
 package org.wycliffeassociates.otter.jvm.controls.skins.waveform
 
 import com.sun.javafx.util.Utils
-import javafx.beans.value.ChangeListener
 import javafx.scene.Cursor
 import javafx.scene.Node
 import javafx.scene.control.SkinBase
@@ -58,8 +57,8 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
     init {
         children.clear()
 
-        control.waveformMinimapListener = ChangeListener { _, oldValue, newValue ->
-            newValue?.let { it ->
+        control.waveformImageProperty.onChangeAndDoNow { newImage ->
+            newImage?.let {
                 val imageView = ImageView(it).apply {
                     fitHeightProperty().bind(root.heightProperty())
                     fitWidthProperty().bind(root.widthProperty())
@@ -77,37 +76,22 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
                 root.add(playbackLine)
                 root.add(thumb)
             }
-
-            // clear minimap image when exiting marker app - free up memory
-            if (newValue == null && oldValue != null) {
-                imageViewDisposable?.image = null
-            }
         }
-        control.waveformImageProperty.addListener(control.waveformMinimapListener)
-        control.colorThemeProperty.onChangeAndDoNow {
-            it?.let { theme ->
-                adjustWaveformColorByTheme(theme, waveformColorEffect)
-            }
+
+        control.colorThemeProperty.onChangeAndDoNow { theme ->
+            theme?.let { adjustWaveformColorByTheme(it, waveformColorEffect) }
         }
 
         children.add(root)
 
-        control.thumbFillProperty.onChangeAndDoNow {
-            if (it != null) {
-                thumb.fill = it
-            }
+        thumb.fillProperty().bind(control.thumbFillProperty)
+        thumb.strokeProperty().bind(control.thumbLineColorProperty)
+        playbackLine.strokeProperty().bind(control.playbackLineColorProperty)
+
+        control.secondsToHighlightProperty.onChangeAndDoNow {
+            resizeThumbWidth()
         }
-        control.thumbLineColorProperty.onChangeAndDoNow {
-            if (it != null) {
-                thumb.stroke = it
-            }
-        }
-        control.playbackLineColorProperty.onChangeAndDoNow {
-            if (it != null) {
-                playbackLine.stroke = it
-            }
-        }
-        control.secondsToHighlightProperty.onChangeAndDoNow { resizeThumbWidth() }
+
         thumb.layoutY = control.padding.top
         playbackLine.layoutY = control.padding.top
         thumb.heightProperty().bind(
@@ -116,15 +100,16 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
         playbackLine.endYProperty().bind(
             root.heightProperty() - control.padding.top - control.padding.bottom
         )
-        control.valueProperty().onChange { moveThumb() }
+
+        control.valueProperty().onChangeAndDoNow { moveThumb() }
+
         control.widthProperty().onChangeAndDoNow {
             moveThumb()
             resizeThumbWidth()
             placeMarkers()
         }
-        control.markers.onChangeAndDoNow {
-            placeMarkers()
-        }
+        control.markers.onChangeAndDoNow { placeMarkers() }
+
         thumb.setOnMouseDragged {
             val x = control.sceneToLocal(it.sceneX, it.sceneY).x
             val pos = (x / control.width) * control.max
@@ -168,7 +153,7 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
     }
 
     private fun resizeThumbWidth(): Double {
-        val pixelsInHighlight = control.pixelsInHighlight(control.width)
+        val pixelsInHighlight = control.pixelsInHighlight.value.invoke(control.width)
         thumb.width = min(pixelsInHighlight, control.width)
         return pixelsInHighlight
     }

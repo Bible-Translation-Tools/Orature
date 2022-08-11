@@ -21,7 +21,6 @@ package org.wycliffeassociates.otter.jvm.controls.waveform
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.value.ChangeListener
 import javafx.collections.ObservableList
 import javafx.scene.control.Skin
 import javafx.scene.control.Slider
@@ -39,6 +38,7 @@ class AudioSlider(
     max: Double = 1.0,
     value: Double = 0.0
 ) : Slider(min, max, value) {
+
     val colorThemeProperty = SimpleObjectProperty<ColorTheme>()
     val waveformImageProperty = SimpleObjectProperty<Image>()
     val thumbFillProperty = SimpleObjectProperty(Paint.valueOf("#00000015"))
@@ -48,10 +48,11 @@ class AudioSlider(
     val currentPositionProperty = SimpleDoubleProperty(0.0)
     val markers: ObservableList<AudioCue> = observableListOf()
 
-    var waveformMinimapListener: ChangeListener<Image>? = null
-
     val player = SimpleObjectProperty<IAudioPlayer>()
-    var pixelsInHighlight: (Double) -> Double = { 0.0 }
+    val pixelsInHighlight = SimpleObjectProperty<(Double) -> Double> { 0.0 }
+    fun setPixelsInHighlightFunction(op: (Double) -> Double) {
+        pixelsInHighlight.set(op)
+    }
 
     init {
         addClass("wa-audio-slider")
@@ -71,15 +72,5 @@ class AudioSlider(
 
     fun updateMarker(id: Int, position: Double) {
         (skin as WaveformSliderSkin).updateMarker(id, position)
-    }
-
-    /**
-     * Cleans up listeners to release memory usage.
-     * Calls this method when leaving/undocking the view.
-     */
-    fun clearListeners() {
-        if (waveformMinimapListener != null) {
-            waveformImageProperty.removeListener(waveformMinimapListener)
-        }
     }
 }
