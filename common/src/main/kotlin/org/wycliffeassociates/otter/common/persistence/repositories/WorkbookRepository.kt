@@ -26,6 +26,7 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.addTo
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
@@ -210,20 +211,14 @@ class WorkbookRepository(
                     sort = chapterCollection.sort,
                     resources = constructResourceGroups(chapterCollection, disposables),
                     audio = constructAssociatedAudio(metaContent, disposables),
-                    lazychunks = lazy {  constructChunks(chapterCollection, disposables) },
+                    lazychunks = lazy { constructChunks(chapterCollection, disposables) },
                     subtreeResources = db.getSubtreeResourceMetadata(chapterCollection),
                     chunkCount = db.getChunkCount(chapterCollection),
                     addChunk = {
-                        logger.info("Adding chunk $it")
                         db.addContentForCollection(chapterCollection, it).subscribe()
                     },
                     reset = {
-                        db.clearContentForCollection(chapterCollection, ContentType.TEXT).map {
-                            it.forEach { take ->
-                                println("deleting take: $take")
-                                println("delete status is: ${take.path.delete()}")
-                            }
-                        }.subscribe()
+                        db.clearContentForCollection(chapterCollection, ContentType.TEXT).subscribe()
                     }
                 ).also { it.text = metaContent.text ?: "" }
             }
@@ -238,7 +233,13 @@ class WorkbookRepository(
             .filter { it.type == ContentType.TEXT }
             .map {
                 chunk(it, disposables)
-            }.subscribe { rr.accept(it) }
+            }
+            .subscribe { rr.accept(it) }
+            .let {
+                synchronized(disposables) {
+                    disposables.add(it)
+                }
+            }
         return rr
     }
 
