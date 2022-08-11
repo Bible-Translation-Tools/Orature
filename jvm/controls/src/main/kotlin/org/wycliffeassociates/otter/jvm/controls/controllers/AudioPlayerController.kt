@@ -68,8 +68,9 @@ class AudioPlayerController(
         }
     }
 
-    fun reset() {
-        this.player = null
+    fun release() {
+        player?.close()
+        player = null
         startAtLocation = 0
         isPlayingProperty.set(false)
     }
