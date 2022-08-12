@@ -114,7 +114,7 @@ class ChapterPage : View() {
 
         chunkListView.refresh()
         initializeProgressDialog()
-        clearChunkingScope()
+        resetChunkingScope()
     }
 
     override fun onUndock() {
@@ -149,7 +149,7 @@ class ChapterPage : View() {
         }
     }
 
-    private fun clearChunkingScope() {
+    private fun resetChunkingScope() {
         if (::chunkingScope.isInitialized) {
             logger.info("Deregistering chunking scope")
             chunkingScope.deregister()
