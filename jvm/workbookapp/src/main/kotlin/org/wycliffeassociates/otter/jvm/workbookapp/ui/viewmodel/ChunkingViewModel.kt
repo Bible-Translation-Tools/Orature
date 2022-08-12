@@ -215,6 +215,7 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
         consumeImageCleanup()
         chunkImageCleanup()
         compositeDisposable.clear()
+        stopAnimationTimer()
         disposeables.forEach { it.dispose() }
     }
 

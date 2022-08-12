@@ -22,7 +22,6 @@ import com.github.thomasnield.rxkotlinfx.toLazyBinding
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
 import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.value.ChangeListener
 import javafx.scene.control.Label
 import javafx.scene.control.ListView
 import javafx.scene.input.KeyCode
@@ -79,6 +78,8 @@ class ChapterPage : View() {
     private val pluginOpenedPage: PluginOpenedPage
     private var listeners = mutableListOf<ListenerDisposer>()
 
+    private lateinit var chunkingScope: Scope
+
     private val showDeleteChunksDialogProperty = SimpleBooleanProperty(false)
 
     private val breadCrumb = BreadCrumb().apply {
@@ -113,6 +114,7 @@ class ChapterPage : View() {
 
         chunkListView.refresh()
         initializeProgressDialog()
+        clearChunkingScope()
     }
 
     override fun onUndock() {
@@ -145,6 +147,18 @@ class ChapterPage : View() {
                 workspace.navigateBack()
             }
         }
+    }
+
+    private fun clearChunkingScope() {
+        if (::chunkingScope.isInitialized) {
+            logger.info("Deregistering chunking scope")
+            chunkingScope.deregister()
+        }
+        chunkingScope = buildChunkingScope()
+    }
+    private fun buildChunkingScope(): Scope {
+        val settingsViewModel = find<SettingsViewModel>()
+        return Scope(workspace, viewModel, workbookDataStore, settingsViewModel, navigator)
     }
 
     override val root = hbox {
@@ -396,7 +410,7 @@ class ChapterPage : View() {
                             graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
 
                             setOnAction {
-                                workspace.dock<ChunkingWizard>()
+                                workspace.dock<ChunkingWizard>(chunkingScope)
                             }
 
                             enableWhen(viewModel.sourceAudioAvailableProperty)
