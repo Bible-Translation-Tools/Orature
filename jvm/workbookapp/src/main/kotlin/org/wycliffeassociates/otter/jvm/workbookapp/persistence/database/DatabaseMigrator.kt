@@ -51,7 +51,7 @@ class DatabaseMigrator {
         }
     }
 
-    private fun getDatabaseVersion(dsl: DSLContext): Int {
+    fun getDatabaseVersion(dsl: DSLContext): Int {
         val databaseVersionExists =
             dsl
                 .fetchExists(

@@ -24,18 +24,21 @@ import org.jooq.SQLDialect
 import org.jooq.impl.DSL
 import org.slf4j.LoggerFactory
 import org.sqlite.SQLiteDataSource
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.*
 import java.io.File
 import java.io.IOException
+import java.nio.file.Files
 
 const val CREATION_SCRIPT = "sql/CreateAppDb.sql"
 
 class AppDatabase(
-    databaseFile: File
+    private val databaseFile: File,
+    private val directoryProvider: IDirectoryProvider
 ) {
     val logger = LoggerFactory.getLogger(AppDatabase::class.java)
 
-    val dsl: DSLContext
+    lateinit var dsl: DSLContext
 
     init {
         System.setProperty("org.jooq.no-logo", "true")
@@ -46,19 +49,68 @@ class AppDatabase(
             .getDeclaredConstructor()
             .newInstance()
 
-        // Create a new sqlite data source
-        val dbDoesNotExist = !databaseFile.exists() || databaseFile.length() == 0L
-
         val sqLiteDataSource = SQLiteDataSource()
         sqLiteDataSource.url = "jdbc:sqlite:${databaseFile.toURI().path}"
-
         // Enable foreign key constraints (disabled by default for backwards compatibility)
         sqLiteDataSource.config.toProperties().setProperty("foreign_keys", "true")
 
-        // Create the jooq dsl
-        dsl = DSL.using(sqLiteDataSource.connection, SQLDialect.SQLITE)
-        if (dbDoesNotExist) setup()
-        DatabaseMigrator().migrate(dsl)
+        handleDatabaseMigration(sqLiteDataSource)
+    }
+
+    private fun handleDatabaseMigration(
+        sqLiteDataSource: SQLiteDataSource
+    ) {
+        val dbMigrator = DatabaseMigrator()
+        var dslContext: DSLContext? = null
+
+        val oldDbFile = directoryProvider.getUserDataDirectory().resolve("content.sqlite")
+        val oldDbExist = oldDbFile.exists() && oldDbFile.length() == 0L
+        val currentDbExists = databaseFile.exists() && databaseFile.length() > 0
+
+        when {
+            oldDbExist && currentDbExists -> {
+                archiveDb(databaseFile)
+                Files.move(oldDbFile.toPath(), databaseFile.toPath())
+            }
+            oldDbExist -> {
+                Files.move(oldDbFile.toPath(), databaseFile.toPath())
+            }
+            currentDbExists -> {
+                val conn = sqLiteDataSource.connection
+                DSL.using(conn, SQLDialect.SQLITE).use { _dsl ->
+                    val currentVersion = dbMigrator.getDatabaseVersion(_dsl)
+                    if (currentVersion > SCHEMA_VERSION) {
+                        _dsl.close()
+                        conn.close()
+                        archiveDb(databaseFile)
+                    }
+                }
+            }
+            else -> {
+                dslContext = DSL.using(sqLiteDataSource.connection, SQLDialect.SQLITE)
+                dsl = dslContext
+                setup()
+            }
+        }
+
+        dsl = dslContext ?: DSL.using(sqLiteDataSource.connection, SQLDialect.SQLITE)
+        dbMigrator.migrate(dsl)
+    }
+
+    private fun archiveDb(dbFile: File) {
+        val archive = directoryProvider.databaseDirectory
+            .resolve("archive")
+            .let {
+                it.mkdirs()
+                it.resolve(
+                    "app_db-${System.currentTimeMillis()}.sqlite"
+                )
+            }
+
+        Files.move(
+            dbFile.toPath(),
+            archive.toPath()
+        )
     }
 
     private fun setup() {
