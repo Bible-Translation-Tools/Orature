@@ -18,23 +18,35 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.dao
 
+import com.nhaarman.mockitokotlin2.doReturn
+import com.nhaarman.mockitokotlin2.mock
 import io.reactivex.Completable
 import jooq.Tables.INSTALLED_ENTITY
 import org.junit.Assert
 import org.junit.Test
 import org.wycliffeassociates.otter.common.persistence.config.Installable
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.DirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.InstalledEntityDao
 import java.io.File
 
 class TestInstalledEntityDao {
 
     private val testDatabaseFile = File.createTempFile("test-db", ".sqlite").also(File::deleteOnExit)
-    private val database = AppDatabase(testDatabaseFile)
-    private val dao = database.installedEntityDao
+    private val database: AppDatabase
+    private val dao: InstalledEntityDao
 
     private val installable = SimpleInstallable("test", 1)
     private val installableV2 = SimpleInstallable("test", 2)
     private val notInserted = SimpleInstallable("not_here", 1)
+
+    init {
+        val mockDirProvider = mock<DirectoryProvider>() {
+            on { databaseDirectory } doReturn File("any")
+        }
+        database = AppDatabase(testDatabaseFile, mockDirProvider)
+        dao = database.installedEntityDao
+    }
 
     @Test
     fun testUpsert() {

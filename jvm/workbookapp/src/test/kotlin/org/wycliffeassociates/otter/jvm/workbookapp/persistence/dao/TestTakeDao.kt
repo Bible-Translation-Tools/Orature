@@ -18,11 +18,14 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.dao
 
+import com.nhaarman.mockitokotlin2.doReturn
+import com.nhaarman.mockitokotlin2.mock
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.DirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.TakeDao
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.CollectionEntity
@@ -36,8 +39,8 @@ import java.time.LocalDate
 
 class TestTakeDao {
     private val testDatabaseFile = File.createTempFile("test-db", ".sqlite").also(File::deleteOnExit)
-    private val database = AppDatabase(testDatabaseFile)
-    private val dao = database.takeDao
+    private val database: AppDatabase
+    private val dao: TakeDao
 
     private val files = listOf(
         File("take1.wav"),
@@ -45,6 +48,14 @@ class TestTakeDao {
         File("take3.wav"),
         File("take4.wav")
     )
+
+    init {
+        val mockDirProvider = mock<DirectoryProvider>() {
+            on { databaseDirectory } doReturn File("any")
+        }
+        database = AppDatabase(testDatabaseFile, mockDirProvider)
+        dao = database.takeDao
+    }
 
     @Before
     fun setup() {
