@@ -21,8 +21,13 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 import javafx.scene.Node
 import javafx.scene.layout.Region
 import javafx.scene.shape.Rectangle
+import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import tornadofx.*
 
@@ -31,27 +36,35 @@ private const val STEP_HEIGHT = 8.0
 
 class ChunkingWizard : Wizard() {
 
-    val vm: ChunkingViewModel by inject()
+    private val logger = LoggerFactory.getLogger(ChunkingWizard::class.java)
 
-    val consumeStep = Rectangle(STEP_WIDTH, STEP_HEIGHT).apply {
+    private val vm: ChunkingViewModel by inject()
+    private val navigator: NavigationMediator by inject()
+
+    private val consumeStep = Rectangle(STEP_WIDTH, STEP_HEIGHT).apply {
         addClass("chunking-wizard__step")
         vm.consumeStepColor.onChangeAndDoNow {
             updateStepCssClass(it!!, this)
         }
     }
 
-    val verbalizeStep = Rectangle(STEP_WIDTH, STEP_HEIGHT).apply {
+    private val verbalizeStep = Rectangle(STEP_WIDTH, STEP_HEIGHT).apply {
         addClass("chunking-wizard__step")
         vm.verbalizeStepColor.onChangeAndDoNow {
             updateStepCssClass(it!!, this)
         }
     }
 
-    val chunkStep = Rectangle(STEP_WIDTH, STEP_HEIGHT).apply {
+    private val chunkStep = Rectangle(STEP_WIDTH, STEP_HEIGHT).apply {
         addClass("chunking-wizard__step")
         vm.chunkStepColor.onChangeAndDoNow {
             updateStepCssClass(it!!, this)
         }
+    }
+
+    private val breadCrumb = BreadCrumb().apply {
+        titleProperty.bind(vm.titleProperty)
+        iconProperty.set(FontIcon(MaterialDesign.MDI_VIEW_CAROUSEL))
     }
 
     private fun updateStepCssClass(cssClass: String, node: Node) {
@@ -66,6 +79,7 @@ class ChunkingWizard : Wizard() {
     }
 
     override fun onDock() {
+        navigator.dock(this, breadCrumb)
         tryImportStylesheet(resources["/css/chunking-wizard.css"])
         pages.clear()
         add<Consume>()

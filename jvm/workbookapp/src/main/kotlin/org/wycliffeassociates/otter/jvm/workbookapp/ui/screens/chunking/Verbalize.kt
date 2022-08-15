@@ -18,12 +18,12 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 
+import javafx.beans.binding.Bindings
 import javafx.scene.shape.Circle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingWizardPage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.VerbalizeViewModel
@@ -62,14 +62,17 @@ class Verbalize : View() {
             button {
                 styleClass.addAll("btn", "btn--primary", "verbalize__btn--secondary")
                 visibleProperty().bind(vm.hasContentProperty)
-                vm.isPlayingProperty.onChangeAndDoNow {
-                    it?.let {
-                        when(it) {
-                            true -> graphic = pauseIcon
-                            false -> graphic = playIcon
-                        }
-                    }
-                }
+                graphicProperty().bind(
+                    Bindings.createObjectBinding(
+                        {
+                            when(vm.isPlayingProperty.value) {
+                                true -> pauseIcon
+                                false -> playIcon
+                            }
+                        },
+                        vm.isPlayingProperty
+                    )
+                )
                 action { vm.playToggle() }
             }
             stackpane {
@@ -77,15 +80,17 @@ class Verbalize : View() {
                 add(arc)
                 button {
                     styleClass.addAll("btn", "btn--cta", "verbalize__btn--primary")
-                    vm.recordingProperty.onChangeAndDoNow {
-                        it?.let {
-                            graphic = if (it) {
-                                stopIcon
-                            } else {
-                                recordIcon
-                            }
-                        }
-                    }
+                    graphicProperty().bind(
+                        Bindings.createObjectBinding(
+                            {
+                                when(vm.recordingProperty.value) {
+                                    true -> stopIcon
+                                    false -> recordIcon
+                                }
+                            },
+                            vm.recordingProperty
+                        )
+                    )
                     action {
                         arc.radiusProperty().bind(vm.arcLengthProperty)
                         vm.toggle()
