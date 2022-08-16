@@ -76,17 +76,21 @@ class AppDatabase(
                 Files.move(oldDbFile.toPath(), databaseFile.toPath())
             }
             currentDbExists -> {
-                val conn = sqLiteDataSource.connection
-                DSL.using(conn, SQLDialect.SQLITE).use { _dsl ->
+                var stale = false
+                DSL.using(sqLiteDataSource, SQLDialect.SQLITE).use { _dsl ->
                     val currentVersion = dbMigrator.getDatabaseVersion(_dsl)
-                    if (currentVersion > SCHEMA_VERSION) {
-                        _dsl.close()
-                        conn.close()
-                        archiveDb(databaseFile)
-                    }
+                    stale = currentVersion > SCHEMA_VERSION
+                }
+                if (stale) {
+                    archiveDb(databaseFile)
+                    // create new db
+                    dslContext = DSL.using(sqLiteDataSource.connection, SQLDialect.SQLITE)
+                    dsl = dslContext
+                    setup()
                 }
             }
             else -> {
+                // create new db
                 dslContext = DSL.using(sqLiteDataSource.connection, SQLDialect.SQLITE)
                 dsl = dslContext
                 setup()
