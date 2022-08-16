@@ -87,6 +87,26 @@ class DatabaseTest {
         Assert.assertEquals(CURRENT_LATEST_VER, version)
     }
 
+    @Test
+    fun `test when existing database has higher version than installed schema version`() {
+        oldDbFile.delete()
+        Assert.assertFalse(oldDbFile.exists())
+        Assert.assertTrue(databaseFile.exists())
+
+        setDatabaseVersion(CURRENT_LATEST_VER + 1, databaseFile)
+
+        val existingVersion = getDatabaseVersion(databaseFile)
+        Assert.assertEquals(SCHEMA_VERSION + 1, existingVersion)
+        Assert.assertTrue(databaseArchiveDir.list().isEmpty())
+
+        AppDatabase(databaseFile, directoryProviderMock)
+
+        val currentVersion = getDatabaseVersion(databaseFile)
+        Assert.assertEquals(SCHEMA_VERSION, currentVersion)
+        Assert.assertTrue(databaseArchiveDir.list().isNotEmpty())
+
+    }
+
     private fun getDatabaseVersion(dbFile: File): Int {
         val sqLiteDataSource = SQLiteDataSource()
         sqLiteDataSource.url = "jdbc:sqlite:${dbFile.path}"
@@ -99,6 +119,23 @@ class DatabaseTest {
                 .where(InstalledEntity.INSTALLED_ENTITY.NAME.eq(DATABASE_INSTALLABLE_NAME))
                 .fetchSingle()
                 .getValue(InstalledEntity.INSTALLED_ENTITY.VERSION)
+        }
+    }
+
+    private fun setDatabaseVersion(version: Int, dbFile: File) {
+        val sqLiteDataSource = SQLiteDataSource()
+        sqLiteDataSource.url = "jdbc:sqlite:${dbFile.path}"
+        sqLiteDataSource.config.toProperties().setProperty("foreign_keys", "true")
+
+        DSL.using(sqLiteDataSource, SQLDialect.SQLITE).use { _dsl ->
+            _dsl
+                .update(InstalledEntity.INSTALLED_ENTITY)
+                .set(
+                    InstalledEntity.INSTALLED_ENTITY.VERSION,
+                    version
+                )
+                .where(InstalledEntity.INSTALLED_ENTITY.NAME.eq(DATABASE_INSTALLABLE_NAME))
+                .execute()
         }
     }
 }
