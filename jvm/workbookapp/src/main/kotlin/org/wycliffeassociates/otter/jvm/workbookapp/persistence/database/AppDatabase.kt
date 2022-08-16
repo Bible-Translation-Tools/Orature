@@ -64,7 +64,7 @@ class AppDatabase(
         var dslContext: DSLContext? = null
 
         val oldDbFile = directoryProvider.getUserDataDirectory().resolve("content.sqlite")
-        val oldDbExist = oldDbFile.exists() && oldDbFile.length() == 0L
+        val oldDbExist = oldDbFile.exists() && oldDbFile.length() > 0
         val currentDbExists = databaseFile.exists() && databaseFile.length() > 0
 
         when {
