@@ -32,6 +32,7 @@ class RecorderView : PluginEntrypoint() {
 
     private var viewInflated = false
 
+    private lateinit var sourceAudioFragment: SourceAudioFragment
     private val waveform = RecordingVisualizerFragment()
 
     private val spacer = region().apply {
@@ -47,7 +48,9 @@ class RecorderView : PluginEntrypoint() {
         add<InfoFragment>()
         add(spacer)
         add(waveform)
-        add<SourceAudioFragment>()
+        sourceAudioFragment = find<SourceAudioFragment>()
+        add(sourceAudioFragment)
+
         add<ControlFragment>()
     }
 
@@ -58,6 +61,7 @@ class RecorderView : PluginEntrypoint() {
 
     override fun onUndock() {
         super.onUndock()
+        sourceAudioFragment.cleanup()
         logger.info("Undocking RecorderView")
     }
 
@@ -75,6 +79,7 @@ class RecorderView : PluginEntrypoint() {
         }
 
         subscribe<PluginCloseRequestEvent> {
+            unsubscribe()
             recorderViewModel.saveAndQuit()
         }
     }

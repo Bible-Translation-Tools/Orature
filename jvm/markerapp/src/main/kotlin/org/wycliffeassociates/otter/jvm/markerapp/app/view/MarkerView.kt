@@ -62,7 +62,6 @@ class MarkerView : PluginEntrypoint() {
         subscribe<PluginCloseRequestEvent> {
             unsubscribe()
             viewModel.saveAndQuit()
-            unsubscribe()
         }
     }
 

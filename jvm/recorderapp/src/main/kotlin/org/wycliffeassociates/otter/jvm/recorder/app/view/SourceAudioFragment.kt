@@ -32,7 +32,6 @@ import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 class SourceAudioFragment : Fragment() {
 
     override val root = initializeSourceContent()
-
     private fun initializeSourceContent(): SourceContent {
 
         var sourceText: String? = null
@@ -127,6 +126,11 @@ class SourceAudioFragment : Fragment() {
                 }
             }
         }
+    }
+
+    fun cleanup() {
+        root.sourceAudioPlayerProperty.set(null)
+        root.targetAudioPlayerProperty.set(null)
     }
 
     private fun initializeAudioPlayer(file: File, start: Int? = null, end: Int? = null): IAudioPlayer? {
