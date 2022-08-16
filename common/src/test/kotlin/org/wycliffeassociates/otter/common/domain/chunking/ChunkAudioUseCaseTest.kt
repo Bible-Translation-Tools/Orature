@@ -12,7 +12,6 @@ import org.wycliffeassociates.otter.common.audio.*
 import org.wycliffeassociates.otter.common.data.primitives.*
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.workbook.Translation
-import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
@@ -118,13 +117,14 @@ class ChunkAudioUseCaseTest {
     }
 
     @JvmField @Rule val tempDir = TemporaryFolder()
+    @JvmField @Rule val providerTempDir = TemporaryFolder()
     @JvmField @Rule val projectDir = TemporaryFolder()
 
     @Test
     fun chunkAudioFilesCreated() {
-        val sourceFile = createWavFile("source", "123456".toByteArray())
+        val sourceFile = createWavFile("source.wav", "123456".toByteArray())
         mockedDirectoryProvider.apply {
-            whenever(this.tempDirectory).thenReturn(tempDir.root)
+            whenever(this.tempDirectory).thenReturn(providerTempDir.root)
             whenever(this.getProjectDirectory(rcSource, rcTarget, workbook.target.toCollection())).thenReturn(projectDir.root)
         }
 
@@ -161,7 +161,7 @@ class ChunkAudioUseCaseTest {
     }
 
     private fun createWavFile(name: String, data: ByteArray): File {
-        val file = File.createTempFile(name, ".wav")
+        val file = File(tempDir.root, name)
         val audioFile = AudioFile(file, DEFAULT_CHANNELS, DEFAULT_SAMPLE_RATE, DEFAULT_BITS_PER_SAMPLE)
         audioFile.writer().use { os ->
             os.write(data)
