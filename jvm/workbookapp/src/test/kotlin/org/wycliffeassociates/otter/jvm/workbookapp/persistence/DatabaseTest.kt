@@ -8,23 +8,24 @@ import org.jooq.SQLDialect
 import org.jooq.impl.DSL
 import org.junit.After
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
 import org.sqlite.SQLiteDataSource
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.DATABASE_INSTALLABLE_NAME
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.SCHEMA_VERSION
 import java.io.File
 import kotlin.io.path.createTempDirectory
 
 class DatabaseTest {
+    private val CURRENT_LATEST_VER = 8
 
     private val databaseDir = createTempDirectory("otter-database").toFile()
     private val databaseFile = databaseDir.resolve("test-db-v8.sqlite")
-        .apply { deleteOnExit() }
-    private val databaseArchiveDir = databaseDir.resolve("archive").apply(File::mkdirs)
+    private val databaseArchiveDir = databaseDir.resolve("archive")
 
     private val oldDatabaseDir = createTempDirectory("otter-old-database").toFile()
     private val oldDbFile = oldDatabaseDir.resolve("content.sqlite")
-        .apply { deleteOnExit() }
 
     private val schemaFile = File(javaClass.classLoader.getResource("sql/AppDatabaseSchema_v8.sql").file)
     private val oldSchemaFile = File(javaClass.classLoader.getResource("sql/AppDatabaseSchema0.sql").file)
@@ -37,23 +38,16 @@ class DatabaseTest {
     @After
     fun cleanUp() {
         databaseDir.deleteRecursively()
+        databaseArchiveDir.deleteRecursively()
         oldDatabaseDir.deleteRecursively()
     }
 
-    @Test
-    fun `handle multiple databases exist`() {
-        setUpDatabases()
+    @Before
+    fun setup() {
+        databaseDir.mkdirs()
+        databaseArchiveDir.mkdirs()
+        oldDatabaseDir.mkdirs()
 
-        Assert.assertTrue(oldDbFile.exists())
-        Assert.assertFalse(databaseArchiveDir.list().any())
-
-        AppDatabase(databaseFile, directoryProviderMock)
-
-        Assert.assertFalse(oldDbFile.exists())
-        Assert.assertTrue(databaseArchiveDir.list().any())
-    }
-
-    private fun setUpDatabases() {
         JooqTestConfiguration.createDatabase(databaseFile.absolutePath, schemaFile)
         JooqTestConfiguration.createDatabase(oldDbFile.absolutePath, oldSchemaFile)
             .dsl()
@@ -62,9 +56,35 @@ class DatabaseTest {
             }
 
         Assert.assertTrue(databaseFile.exists() && databaseFile.length() > 0)
-        Assert.assertEquals(8, getDatabaseVersion(databaseFile))
+        Assert.assertEquals(CURRENT_LATEST_VER, getDatabaseVersion(databaseFile))
         Assert.assertTrue(oldDbFile.exists() && oldDbFile.length() > 0)
         Assert.assertEquals(1, getDatabaseVersion(oldDbFile))
+    }
+
+    @Test
+    fun `test handle multiple databases exist`() {
+        Assert.assertTrue(oldDbFile.exists())
+        Assert.assertTrue(databaseArchiveDir.list().isEmpty())
+
+        AppDatabase(databaseFile, directoryProviderMock)
+
+        Assert.assertFalse(oldDbFile.exists())
+        Assert.assertTrue(databaseArchiveDir.list().isNotEmpty())
+    }
+
+    @Test
+    fun `test when only old database exists`() {
+        databaseFile.delete()
+        Assert.assertFalse(databaseFile.exists())
+        Assert.assertTrue(oldDbFile.exists())
+
+        AppDatabase(databaseFile, directoryProviderMock)
+
+        Assert.assertTrue(databaseFile.exists())
+        Assert.assertFalse(oldDbFile.exists())
+
+        val version = getDatabaseVersion(databaseFile)
+        Assert.assertEquals(CURRENT_LATEST_VER, version)
     }
 
     private fun getDatabaseVersion(dbFile: File): Int {
