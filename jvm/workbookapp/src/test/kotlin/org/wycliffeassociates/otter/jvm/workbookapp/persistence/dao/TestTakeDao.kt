@@ -52,6 +52,7 @@ class TestTakeDao {
     init {
         val mockDirProvider = mock<DirectoryProvider>() {
             on { databaseDirectory } doReturn File("any")
+            on { getUserDataDirectory() } doReturn File("any")
         }
         database = AppDatabase(testDatabaseFile, mockDirProvider)
         dao = database.takeDao
