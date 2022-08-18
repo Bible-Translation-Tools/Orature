@@ -29,7 +29,7 @@ class DatabaseInitializer(
             }
             currentDbExists -> {
                 val existingDbVersion = AppDatabase.getDatabaseVersion(databaseFile)
-                if (existingDbVersion > SCHEMA_VERSION) {
+                if (existingDbVersion == null || existingDbVersion > SCHEMA_VERSION) {
                     archiveDb(databaseFile)
                 }
             }

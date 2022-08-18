@@ -49,10 +49,7 @@ class AppDatabase(
             .getDeclaredConstructor()
             .newInstance()
 
-        val sqLiteDataSource = SQLiteDataSource()
-        sqLiteDataSource.url = "jdbc:sqlite:${databaseFile.toURI().path}"
-        // Enable foreign key constraints (disabled by default for backwards compatibility)
-        sqLiteDataSource.config.toProperties().setProperty("foreign_keys", "true")
+        val sqLiteDataSource = createSQLiteDataSource(databaseFile)
         connection = sqLiteDataSource.connection
 
         // Create the jooq dsl
@@ -129,16 +126,12 @@ class AppDatabase(
     }
 
     companion object {
-        fun getDatabaseVersion(databaseFile: File): Int {
+        fun getDatabaseVersion(databaseFile: File): Int? {
             if (!databaseFile.exists() || databaseFile.length() == 0L) {
-                return -1
+                return null
             }
-
-            val sqLiteDataSource = SQLiteDataSource()
-            sqLiteDataSource.url = "jdbc:sqlite:${databaseFile.toURI().path}"
-            sqLiteDataSource.config.toProperties().setProperty("foreign_keys", "true")
-
-            DSL.using(sqLiteDataSource, SQLDialect.SQLITE).use { dsl ->
+            val sqliteDataSource = createSQLiteDataSource(databaseFile)
+            DSL.using(sqliteDataSource, SQLDialect.SQLITE).use { dsl ->
                 return try {
                     dsl
                         .select()
@@ -148,9 +141,16 @@ class AppDatabase(
                             it.get(InstalledEntity.INSTALLED_ENTITY.VERSION)
                         }
                 } catch (e: DataAccessException) {
-                    -1
+                    null
                 }
             }
+        }
+
+        private fun createSQLiteDataSource(databaseFile: File): SQLiteDataSource {
+            val sqLiteDataSource = SQLiteDataSource()
+            sqLiteDataSource.url = "jdbc:sqlite:${databaseFile.toURI().path}"
+            sqLiteDataSource.config.toProperties().setProperty("foreign_keys", "true")
+            return sqLiteDataSource
         }
     }
 }
