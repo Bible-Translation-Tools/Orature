@@ -102,6 +102,7 @@ interface IDirectoryProvider {
     /** Clean temporary directory */
     fun cleanTempDirectory()
 
+    val databaseDirectory: File
     val resourceContainerDirectory: File
     val userProfileImageDirectory: File
     val userProfileAudioDirectory: File
