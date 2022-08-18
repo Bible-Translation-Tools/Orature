@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory
 import javax.inject.Inject
 
 class InitializeApp @Inject constructor(
-    private val initializeDatabase: InitializeDatabase,
     private val initializeLanguages: InitializeLanguages,
     private val initializeUlb: InitializeUlb,
     private val initializeArtwork: InitializeArtwork,
@@ -42,7 +41,6 @@ class InitializeApp @Inject constructor(
         return Observable
             .fromPublisher<Double> { progress ->
                 val initializers = listOf(
-                    initializeDatabase,
                     initializeLanguages,
                     initializeUlb,
                     initializeArtwork,

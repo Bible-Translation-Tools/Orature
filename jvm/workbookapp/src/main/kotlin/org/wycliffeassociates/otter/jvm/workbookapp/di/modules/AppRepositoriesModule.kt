@@ -22,7 +22,6 @@ import dagger.Binds
 import dagger.Module
 import org.wycliffeassociates.otter.common.domain.languages.LanguageDataSource
 import org.wycliffeassociates.otter.common.domain.plugins.IAudioPluginRegistrar
-import org.wycliffeassociates.otter.common.persistence.IDatabaseUtil
 import org.wycliffeassociates.otter.common.persistence.ILanguageDataSource
 import org.wycliffeassociates.otter.common.persistence.ILocaleDataSource
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
@@ -38,7 +37,6 @@ import org.wycliffeassociates.otter.common.persistence.repositories.ITakeReposit
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.domain.LocaleDataSource
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.DatabaseUtil
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.AppPreferencesRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.AudioPluginRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.CollectionRepository
@@ -137,10 +135,4 @@ abstract class AppRepositoriesModule {
     abstract fun providesLanguageDataSource(
         dataSource: LanguageDataSource
     ): ILanguageDataSource
-
-    @Binds
-    @Singleton
-    abstract fun providesDatabaseUtil(
-        dbUtil: DatabaseUtil
-    ): IDatabaseUtil
 }

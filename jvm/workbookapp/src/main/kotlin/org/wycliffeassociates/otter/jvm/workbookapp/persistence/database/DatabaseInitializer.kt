@@ -1,25 +1,18 @@
-package org.wycliffeassociates.otter.assets.initialization
+package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database
 
-import io.reactivex.Completable
-import org.wycliffeassociates.otter.common.persistence.IDatabaseUtil
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.persistence.config.Initializable
 import java.io.File
 import java.nio.file.Files
-import javax.inject.Inject
 
-class InitializeDatabase @Inject constructor(
-    val directoryProvider: IDirectoryProvider,
-    val dbUtil: IDatabaseUtil
-) : Initializable {
+class DatabaseInitializer(
+    private val directoryProvider: IDirectoryProvider
+) {
 
-    override fun exec(): Completable {
-        return Completable.fromAction(::initialize)
-    }
-
-    private fun initialize() {
-        val databaseFile = directoryProvider.databaseDirectory.resolve("app_db.sqlite")
-        val oldDbFile = directoryProvider.getUserDataDirectory().resolve("content.sqlite")
+    fun initialize() {
+        val databaseFile = directoryProvider.databaseDirectory
+            .resolve("app_db.sqlite")
+        val oldDbFile = directoryProvider.getUserDataDirectory()
+            .resolve("content.sqlite")
         val oldDbExist = oldDbFile.exists() && oldDbFile.length() > 0
         val currentDbExists = databaseFile.exists() && databaseFile.length() > 0
 
@@ -32,9 +25,8 @@ class InitializeDatabase @Inject constructor(
                 Files.move(oldDbFile.toPath(), databaseFile.toPath())
             }
             currentDbExists -> {
-                val existingDbSchemaVersion = dbUtil.getDatabaseVersion(databaseFile)
-                val installedSchemaVersion = dbUtil.getSchemaVersion()
-                if (existingDbSchemaVersion > installedSchemaVersion) {
+                val existingDbVersion = AppDatabase.getDatabaseVersion(databaseFile)
+                if (existingDbVersion > SCHEMA_VERSION) {
                     archiveDb(databaseFile)
                 }
             }

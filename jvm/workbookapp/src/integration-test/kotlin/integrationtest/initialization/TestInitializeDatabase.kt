@@ -11,12 +11,11 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.sqlite.SQLiteDataSource
-import org.wycliffeassociates.otter.assets.initialization.InitializeDatabase
-import org.wycliffeassociates.otter.common.persistence.IDatabaseUtil
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.JooqTestConfiguration
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.DATABASE_INSTALLABLE_NAME
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.DatabaseUtil
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.DatabaseInitializer
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.SCHEMA_VERSION
 import java.io.File
 import kotlin.io.path.createTempDirectory
@@ -39,8 +38,7 @@ class TestInitializeDatabase {
         on { getUserDataDirectory(any()) } doReturn oldDatabaseDir
     }
 
-    private val dbUtil: IDatabaseUtil = DatabaseUtil()
-    private val dbInitializer = InitializeDatabase(directoryProviderMock, dbUtil)
+    private val dbInitializer = DatabaseInitializer(directoryProviderMock)
 
     @After
     fun cleanUp() {
@@ -63,9 +61,13 @@ class TestInitializeDatabase {
             }
 
         Assert.assertTrue(databaseFile.exists() && databaseFile.length() > 0)
-        Assert.assertEquals(CURRENT_LATEST_VER, dbUtil.getDatabaseVersion(databaseFile))
+        Assert.assertEquals(
+            CURRENT_LATEST_VER,
+            AppDatabase.getDatabaseVersion(databaseFile)
+        )
+
         Assert.assertTrue(oldDbFile.exists() && oldDbFile.length() > 0)
-        Assert.assertEquals(1, dbUtil.getDatabaseVersion(oldDbFile))
+        Assert.assertEquals(1, AppDatabase.getDatabaseVersion(oldDbFile))
     }
 
     @Test
@@ -73,7 +75,7 @@ class TestInitializeDatabase {
         Assert.assertTrue(oldDbFile.exists())
         Assert.assertTrue(databaseArchiveDir.list().isEmpty())
 
-        dbInitializer.exec().blockingAwait()
+        dbInitializer.initialize()
 
         Assert.assertFalse(oldDbFile.exists())
         Assert.assertTrue(databaseArchiveDir.list().isNotEmpty())
@@ -85,13 +87,12 @@ class TestInitializeDatabase {
         Assert.assertFalse(databaseFile.exists())
         Assert.assertTrue(oldDbFile.exists())
 
-        dbInitializer.exec().blockingAwait()
+        dbInitializer.initialize()
 
         Assert.assertTrue(databaseFile.exists())
         Assert.assertFalse(oldDbFile.exists())
 
-        val version = dbUtil.getDatabaseVersion(databaseFile)
-        Assert.assertEquals(1, version)
+        Assert.assertEquals(1, AppDatabase.getDatabaseVersion(databaseFile))
     }
 
     @Test
@@ -102,11 +103,13 @@ class TestInitializeDatabase {
 
         setDatabaseVersion(CURRENT_LATEST_VER + 1, databaseFile)
 
-        val existingVersion = dbUtil.getDatabaseVersion(databaseFile)
-        Assert.assertEquals(SCHEMA_VERSION + 1, existingVersion)
+        Assert.assertEquals(
+            SCHEMA_VERSION + 1,
+            AppDatabase.getDatabaseVersion(databaseFile)
+        )
         Assert.assertTrue(databaseArchiveDir.list().isEmpty())
 
-        dbInitializer.exec().blockingAwait()
+        dbInitializer.initialize()
 
         Assert.assertFalse(databaseFile.exists())
         Assert.assertTrue(databaseArchiveDir.list().isNotEmpty())

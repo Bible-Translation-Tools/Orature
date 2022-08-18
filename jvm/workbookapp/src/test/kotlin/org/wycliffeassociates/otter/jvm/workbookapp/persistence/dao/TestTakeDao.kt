@@ -39,8 +39,8 @@ import java.time.LocalDate
 
 class TestTakeDao {
     private val testDatabaseFile = File.createTempFile("test-db", ".sqlite").also(File::deleteOnExit)
-    private val database: AppDatabase
-    private val dao: TakeDao
+    private val database = AppDatabase(testDatabaseFile)
+    private val dao = database.takeDao
 
     private val files = listOf(
         File("take1.wav"),
@@ -48,15 +48,6 @@ class TestTakeDao {
         File("take3.wav"),
         File("take4.wav")
     )
-
-    init {
-        val mockDirProvider = mock<DirectoryProvider>() {
-            on { databaseDirectory } doReturn File("any")
-            on { getUserDataDirectory() } doReturn File("any")
-        }
-        database = AppDatabase(testDatabaseFile, mockDirProvider)
-        dao = database.takeDao
-    }
 
     @Before
     fun setup() {

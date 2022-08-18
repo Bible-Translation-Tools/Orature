@@ -35,8 +35,7 @@ class AppDatabaseModule {
         return AppDatabase(
             directoryProvider
                 .databaseDirectory
-                .resolve(File("app_db.sqlite")),
-            directoryProvider
+                .resolve(File("app_db.sqlite"))
         )
     }
 }
