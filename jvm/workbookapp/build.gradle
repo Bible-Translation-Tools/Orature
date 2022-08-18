@@ -152,7 +152,6 @@ dependencies {
     testImplementation "org.testfx:openjfx-monocle:$testFxMonocleVer"
     integrationTestCompile group: 'junit', name: 'junit', version: "$junitVer"
     integrationTestCompile "org.mockito:mockito-core:$mockitoVer"
-    integrationTestImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVer"
     integrationTestImplementation sourceSets.main.compileClasspath
     integrationTestImplementation sourceSets.main.output
 

@@ -4,15 +4,18 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
 import java.nio.file.Files
 
+const val DB_FILE_NAME = "app_db_sqlite"
+const val OLD_DB_FILE_NAME = "content.sqlite"
+
 class DatabaseInitializer(
     private val directoryProvider: IDirectoryProvider
 ) {
 
     fun initialize() {
         val databaseFile = directoryProvider.databaseDirectory
-            .resolve("app_db.sqlite")
+            .resolve(DB_FILE_NAME)
         val oldDbFile = directoryProvider.getUserDataDirectory()
-            .resolve("content.sqlite")
+            .resolve(OLD_DB_FILE_NAME)
         val oldDbExist = oldDbFile.exists() && oldDbFile.length() > 0
         val currentDbExists = databaseFile.exists() && databaseFile.length() > 0
 

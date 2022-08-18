@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package integrationtest.initialization
+package org.wycliffeassociates.otter.jvm.workbookapp.persistence
 
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
@@ -30,23 +30,24 @@ import org.junit.Before
 import org.junit.Test
 import org.sqlite.SQLiteDataSource
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.JooqTestConfiguration
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.DATABASE_INSTALLABLE_NAME
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.DB_FILE_NAME
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.DatabaseInitializer
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.OLD_DB_FILE_NAME
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.SCHEMA_VERSION
 import java.io.File
 import kotlin.io.path.createTempDirectory
 
-class TestInitializeDatabase {
+class TestDatabaseInitializer {
     private val CURRENT_DB_VERSION = SCHEMA_VERSION
 
     private val databaseDir = createTempDirectory("otter-database").toFile()
-    private val databaseFile = databaseDir.resolve("app_db.sqlite")
+    private val databaseFile = databaseDir.resolve(DB_FILE_NAME)
     private val databaseArchiveDir = databaseDir.resolve("archive")
 
     private val oldDatabaseDir = createTempDirectory("otter-old-database").toFile()
-    private val oldDbFile = oldDatabaseDir.resolve("content.sqlite")
+    private val oldDbFile = oldDatabaseDir.resolve(OLD_DB_FILE_NAME)
 
     private val schemaFile = File(javaClass.classLoader.getResource("sql/AppDatabaseSchema_v8.sql").file)
     private val oldSchemaFile = File(javaClass.classLoader.getResource("sql/AppDatabaseSchema0.sql").file)

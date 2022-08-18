@@ -22,6 +22,7 @@ import dagger.Module
 import dagger.Provides
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.DB_FILE_NAME
 import java.io.File
 import javax.inject.Singleton
 
@@ -35,7 +36,7 @@ class AppDatabaseModule {
         return AppDatabase(
             directoryProvider
                 .databaseDirectory
-                .resolve(File("app_db.sqlite"))
+                .resolve(File(DB_FILE_NAME))
         )
     }
 }
