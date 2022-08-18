@@ -63,6 +63,8 @@ class TestInitializeDatabase {
         databaseDir.deleteRecursively()
         databaseArchiveDir.deleteRecursively()
         oldDatabaseDir.deleteRecursively()
+
+        Assert.assertFalse(databaseDir.exists() || oldDatabaseDir.exists())
     }
 
     @Before

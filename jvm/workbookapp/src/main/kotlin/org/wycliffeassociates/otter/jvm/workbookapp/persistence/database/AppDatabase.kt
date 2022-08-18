@@ -28,6 +28,7 @@ import org.sqlite.SQLiteDataSource
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.*
 import java.io.File
 import java.io.IOException
+import java.sql.Connection
 
 const val CREATION_SCRIPT = "sql/CreateAppDb.sql"
 
@@ -37,6 +38,7 @@ class AppDatabase(
     val logger = LoggerFactory.getLogger(AppDatabase::class.java)
 
     val dsl: DSLContext
+    private val connection: Connection
 
     init {
         System.setProperty("org.jooq.no-logo", "true")
@@ -51,9 +53,10 @@ class AppDatabase(
         sqLiteDataSource.url = "jdbc:sqlite:${databaseFile.toURI().path}"
         // Enable foreign key constraints (disabled by default for backwards compatibility)
         sqLiteDataSource.config.toProperties().setProperty("foreign_keys", "true")
+        connection = sqLiteDataSource.connection
 
         // Create the jooq dsl
-        dsl = DSL.using(sqLiteDataSource, SQLDialect.SQLITE)
+        dsl = DSL.using(connection, SQLDialect.SQLITE)
 
         val dbDoesNotExist = !databaseFile.exists() || databaseFile.length() == 0L
         if (dbDoesNotExist) {
@@ -122,6 +125,7 @@ class AppDatabase(
 
     fun close() {
         dsl.close()
+        connection.close()
     }
 
     companion object {
@@ -140,7 +144,7 @@ class AppDatabase(
                         .select()
                         .from(InstalledEntity.INSTALLED_ENTITY)
                         .where(InstalledEntity.INSTALLED_ENTITY.NAME.eq(DATABASE_INSTALLABLE_NAME))
-                        .fetchSingle() {
+                        .fetchSingle {
                             it.get(InstalledEntity.INSTALLED_ENTITY.VERSION)
                         }
                 } catch (e: DataAccessException) {
