@@ -18,14 +18,11 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.dao
 
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.mock
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.DirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.TakeDao
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.CollectionEntity
