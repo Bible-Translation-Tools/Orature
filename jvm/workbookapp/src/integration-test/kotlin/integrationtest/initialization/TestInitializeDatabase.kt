@@ -39,7 +39,7 @@ import java.io.File
 import kotlin.io.path.createTempDirectory
 
 class TestInitializeDatabase {
-    private val CURRENT_LATEST_VER = 8
+    private val CURRENT_DB_VERSION = SCHEMA_VERSION
 
     private val databaseDir = createTempDirectory("otter-database").toFile()
     private val databaseFile = databaseDir.resolve("app_db.sqlite")
@@ -82,7 +82,7 @@ class TestInitializeDatabase {
 
         Assert.assertTrue(databaseFile.exists() && databaseFile.length() > 0)
         Assert.assertEquals(
-            CURRENT_LATEST_VER,
+            CURRENT_DB_VERSION,
             AppDatabase.getDatabaseVersion(databaseFile)
         )
 
@@ -121,10 +121,10 @@ class TestInitializeDatabase {
         Assert.assertFalse(oldDbFile.exists())
         Assert.assertTrue(databaseFile.exists())
 
-        setDatabaseVersion(CURRENT_LATEST_VER + 1, databaseFile)
+        setDatabaseVersion(CURRENT_DB_VERSION + 1, databaseFile)
 
         Assert.assertEquals(
-            SCHEMA_VERSION + 1,
+            CURRENT_DB_VERSION + 1,
             AppDatabase.getDatabaseVersion(databaseFile)
         )
         Assert.assertTrue(databaseArchiveDir.list().isEmpty())
