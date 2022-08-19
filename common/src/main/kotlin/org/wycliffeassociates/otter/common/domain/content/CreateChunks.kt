@@ -90,7 +90,11 @@ class CreateChunks(
 
         val chunks = mutableMapOf<Int, List<Content>>()
 
-        val file: File = projectFilesAccessor.getChunkFile()
+        val file: File = projectFilesAccessor.getChunkFile().apply {
+            // Create empty file if it doesn't exist
+            parentFile.mkdirs()
+            createNewFile()
+        }
         try {
             if (file.exists() && file.length() > 0) {
                 val typeRef: TypeReference<HashMap<Int, List<Content>>> =

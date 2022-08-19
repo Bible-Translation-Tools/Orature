@@ -18,6 +18,12 @@
  */
 package org.wycliffeassociates.otter.common
 
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.core.JsonFactory
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.nhaarman.mockitokotlin2.mock
 import java.io.File
 import java.util.*
@@ -29,6 +35,7 @@ import org.wycliffeassociates.otter.common.audio.wav.WavMetadata
 import org.wycliffeassociates.otter.common.audio.wav.WavOutputStream
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
+import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
@@ -222,4 +229,20 @@ fun createTestRc(
 
         write()
     }
+}
+
+fun readChunksFile(projectDir: File): Map<Int, List<Content>> {
+    val chunkFile = File(projectDir, RcConstants.CHUNKS_FILE)
+    val factory = JsonFactory()
+    factory.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET)
+    val mapper = ObjectMapper(factory)
+    mapper.registerModule(KotlinModule())
+    mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+
+    val chunks = mutableMapOf<Int, List<Content>>()
+    val typeRef: TypeReference<HashMap<Int, List<Content>>> =
+        object : TypeReference<HashMap<Int, List<Content>>>() {}
+    val map: Map<Int, List<Content>> = mapper.readValue(chunkFile, typeRef)
+    chunks.putAll(map)
+    return chunks
 }
