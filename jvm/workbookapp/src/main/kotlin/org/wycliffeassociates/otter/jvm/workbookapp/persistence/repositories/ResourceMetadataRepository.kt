@@ -44,7 +44,9 @@ class ResourceMetadataRepository @Inject constructor(
     override fun exists(metadata: ResourceMetadata): Single<Boolean> {
         return Single
             .fromCallable {
-                val languageFk = languageDao.fetchBySlug(metadata.language.slug).id
+                val languageSlug = metadata.language.slug
+                val languageFk = languageDao.fetchBySlug(languageSlug)?.id
+                    ?: throw NullPointerException("Could not find language with slug $$languageSlug.")
                 resourceMetadataDao.exists(languageFk, metadata.identifier, metadata.version, metadata.creator)
             }
             .doOnError { e ->
@@ -57,6 +59,8 @@ class ResourceMetadataRepository @Inject constructor(
         return Single
             .fromCallable {
                 val languageEntity = languageDao.fetchBySlug(metadata.language.slug)
+                    ?: throw NullPointerException("Could not find language with slug ${metadata.language.slug}.")
+
                 val metadataEntity = resourceMetadataDao.fetch(
                     languageEntity.id,
                     metadata.identifier,
@@ -193,8 +197,10 @@ class ResourceMetadataRepository @Inject constructor(
     }
 
     private fun buildMetadata(entity: ResourceMetadataEntity): ResourceMetadata {
+        val languageEntity = languageDao.fetchById(entity.languageFk)
+            ?: throw NullPointerException("Could not find language with id ${entity.languageFk}.")
         val language = languageMapper
-            .mapFromEntity(languageDao.fetchById(entity.languageFk))
+            .mapFromEntity(languageEntity)
         return metadataMapper.mapFromEntity(entity, language)
     }
 }

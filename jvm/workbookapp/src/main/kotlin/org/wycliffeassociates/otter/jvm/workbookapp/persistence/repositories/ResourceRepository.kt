@@ -270,8 +270,11 @@ class ResourceRepository @Inject constructor(private val database: AppDatabase) 
     }
 
     private fun mapToResourceMetadata(entity: ResourceMetadataEntity): ResourceMetadata {
+        val languageEntity = languageDao.fetchById(entity.languageFk)
+            ?: throw NullPointerException("Could not find language with id ${entity.languageFk}.")
+
         val language = languageMapper
-            .mapFromEntity(languageDao.fetchById(entity.languageFk))
+            .mapFromEntity(languageEntity)
         return metadataMapper.mapFromEntity(entity, language)
     }
 }
