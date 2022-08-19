@@ -211,36 +211,13 @@ fun templateAudioFileName(
 fun createTestRc(
     dir: File,
     dublinCore: DublinCore,
-    project: String,
     sourceFiles: List<File> = listOf()
 ): ResourceContainer {
     return ResourceContainer.create(dir) {
         manifest = Manifest(dublinCore, listOf(), Checking())
 
-        if (sourceFiles.isNotEmpty()) {
-            val fileName = templateAudioFileName(
-                dublinCore.language.identifier, dublinCore.identifier, project, "{chapter}"
-            )
-            val mediaManifest = mediamanifest {
-                projects = listOf(MediaProject(project))
-            }
-            val sourceMediaTypes = listOf(AudioFileFormat.WAV.extension, AudioMetadataFileFormat.CUE.extension)
-            val mediaList = sourceMediaTypes.map { mediaType ->
-                Media(
-                    identifier = mediaType,
-                    version = "",
-                    url = "",
-                    quality = listOf(),
-                    chapterUrl = "${RcConstants.SOURCE_MEDIA_DIR}/${fileName}.${mediaType}"
-                )
-            }
-
-            mediaManifest.projects.first().media = mediaList
-            media = mediaManifest
-
-            sourceFiles.forEach {
-                addFileToContainer(it, "${RcConstants.SOURCE_MEDIA_DIR}/$project/chapters/${it.name}")
-            }
+        sourceFiles.forEach {
+            addFileToContainer(it, "${RcConstants.SOURCE_AUDIO_DIR}/${it.name}")
         }
 
         write()

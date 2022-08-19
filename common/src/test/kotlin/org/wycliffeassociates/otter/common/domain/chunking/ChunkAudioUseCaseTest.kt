@@ -78,7 +78,7 @@ class ChunkAudioUseCaseTest {
             collTarget
         )
         sourceFile = createWavFile(tempDir.root, "source.wav", "123456".toByteArray())
-        rc = createTestRc(projectDir.root, dublinCore, collTarget.slug)
+        rc = createTestRc(projectDir.root, dublinCore)
 
         ChunkAudioUseCase(mockedDirectoryProvider, projectFilesAccessor)
             .createChunkedSourceAudio(sourceFile, cues)
