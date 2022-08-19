@@ -468,9 +468,16 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     fun createChunksFromVerses() {
+        val accessor = workbookDataStore.activeProjectFilesAccessorProperty.value
         val wkbk = workbookDataStore.activeWorkbookProperty.value
         val chapter = workbookDataStore.activeChapterProperty.value
-        CreateChunks(directoryProvider, wkbk, chapter.addChunk, chapter.sort)
+        CreateChunks(
+            accessor,
+            wkbk.sourceAudioAccessor,
+            chapter.addChunk,
+            chapter.sort,
+            wkbk.target
+        )
             .createChunksFromVerses(wkbk.source.slug, 1)
     }
 

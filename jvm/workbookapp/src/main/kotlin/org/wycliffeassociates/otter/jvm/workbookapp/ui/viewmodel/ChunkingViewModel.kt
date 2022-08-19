@@ -121,15 +121,6 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
 
     var subscribeOnWaveformImages: () -> Unit = {}
 
-    private val projectFilesAccessor by lazy {
-        ProjectFilesAccessor(
-            directoryProvider,
-            workbookDataStore.workbook.source.resourceMetadata,
-            workbookDataStore.workbook.target.resourceMetadata,
-            workbookDataStore.workbook.target
-        )
-    }
-
     init {
         pageProperty.onChange {
             when (it) {
@@ -235,17 +226,24 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
         audioPlayer.value.close()
         audioController = null
 
+        val accessor = workbookDataStore.activeProjectFilesAccessorProperty.value
         val wkbk = workbookDataStore.activeWorkbookProperty.value
         val chapter = workbookDataStore.activeChapterProperty.value
         val cues = markers.filter { it.placed }.map { it.toAudioCue() }
 
-        CreateChunks(directoryProvider, wkbk, chapter.addChunk, chapter.sort)
+        CreateChunks(
+            accessor,
+            wkbk.sourceAudioAccessor,
+            chapter.addChunk,
+            chapter.sort,
+            wkbk.target
+        )
             .createUserDefinedChunks(wkbk.source.slug, cues, 1)
 
         pageProperty.set(ChunkingWizardPage.CONSUME)
 
 
-        ChunkAudioUseCase(directoryProvider, projectFilesAccessor)
+        ChunkAudioUseCase(directoryProvider, accessor)
             .createChunkedSourceAudio(sourceAudio.file, cues)
 
         disposeables.forEach { it.dispose() }

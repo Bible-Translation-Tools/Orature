@@ -13,39 +13,26 @@ import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
-import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.data.workbook.Book
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
-import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 
 
 class CreateChunks(
-    private val directoryProvider: IDirectoryProvider,
-    private val workbook: Workbook,
+    private val projectFilesAccessor: ProjectFilesAccessor,
+    private val sourceAudioAccessor: SourceAudioAccessor,
     private val chunkCreator: (List<Content>) -> Unit,
-    private val chapterNumber: Int
+    private val chapterNumber: Int,
+    private val targetBook: Book
 ) {
     private val logger = LoggerFactory.getLogger(CreateChunks::class.java)
-
-    private val accessor: ProjectFilesAccessor
-    private val sourceAudio: SourceAudioAccessor
-
-    init {
-        accessor = ProjectFilesAccessor(
-            directoryProvider,
-            workbook.source.resourceMetadata,
-            workbook.target.resourceMetadata,
-            workbook.source
-        )
-        sourceAudio = SourceAudioAccessor(directoryProvider, workbook.source.resourceMetadata, workbook.source.slug)
-    }
 
     fun createUserDefinedChunks(
         projectSlug: String,
         chunks: List<AudioCue>,
         draftNumber: Int
     ) {
-        val chapAudio = sourceAudio.getChapter(chapterNumber, workbook.target)
+        val chapAudio = sourceAudioAccessor.getChapter(chapterNumber, targetBook)
         val verseMarkers = AudioFile(chapAudio!!.file).metadata.getCues()
         val chunkRanges = mapCuesToRanges(chunks)
         val chunksToAdd = mutableListOf<Content>()
@@ -53,7 +40,7 @@ class CreateChunks(
             val verses = findVerseRange(mapCuesToRanges(verseMarkers), chunk)
             val start = verses.first()
             val end = verses.last()
-            val v = accessor.getChunkText(projectSlug, chapterNumber, start, end)
+            val v = projectFilesAccessor.getChunkText(projectSlug, chapterNumber, start, end)
             val text = StringBuilder().apply { v.forEach { append("$it\n") } }.toString()
             chunksToAdd.add(Content(
                 idx + 1,
@@ -76,7 +63,7 @@ class CreateChunks(
         draftNumber: Int
     ) {
         val chunksToAdd = mutableListOf<Content>()
-        accessor.getChapterText(projectSlug, chapterNumber).forEachIndexed { idx, str ->
+        projectFilesAccessor.getChapterText(projectSlug, chapterNumber).forEachIndexed { idx, str ->
             val verseNumber = idx + 1
             val content = Content(
                 verseNumber,
@@ -103,7 +90,7 @@ class CreateChunks(
 
         val chunks = mutableMapOf<Int, List<Content>>()
 
-        val file: File = accessor.getChunkFile()
+        val file: File = projectFilesAccessor.getChunkFile()
         try {
             if (file.exists() && file.length() > 0) {
                 val typeRef: TypeReference<HashMap<Int, List<Content>>> =
