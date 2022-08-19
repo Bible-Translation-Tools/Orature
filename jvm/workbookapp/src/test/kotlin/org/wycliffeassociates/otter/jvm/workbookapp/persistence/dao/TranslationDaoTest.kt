@@ -22,17 +22,22 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.InsertionException
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.TranslationEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.LanguageMapper
 import java.io.File
 import java.time.LocalDateTime
 
 class TranslationDaoTest {
-    private val testDatabaseFile = File.createTempFile("test-translation-dao", ".sqlite").also(File::deleteOnExit)
+    private val testDatabaseFile = File.createTempFile(
+        "test-translation-dao", ".sqlite"
+    ).also(File::deleteOnExit)
     private val database = AppDatabase(testDatabaseFile)
     private val dao = database.translationDao
     private val languageDao = database.languageDao
@@ -49,8 +54,6 @@ class TranslationDaoTest {
         }.also {
             languageDao.insertAll(it)
         }
-
-        dao.fetchAll().forEach(dao::delete)
     }
 
     @After
@@ -58,6 +61,7 @@ class TranslationDaoTest {
         languageDao.fetchAll().forEach {
             languageDao.delete(it)
         }
+        dao.fetchAll().forEach(dao::delete)
     }
 
     @Test
@@ -80,11 +84,31 @@ class TranslationDaoTest {
     @Test
     fun testFetchTranslations() {
         insertDefault()
+        assertEquals(1, dao.fetchAll().size)
         assertNotNull(
             dao.fetch(languages[0].id, languages[1].id)
         )
-        assertNotNull(dao.fetchById(1))
-        assertEquals(1, dao.fetchAll().size)
+    }
+
+    @Test
+    fun testFetchNonExistingTranslation() {
+        assertNull(dao.fetchById(999))
+        assertNull(dao.fetch(999, 1000))
+    }
+
+    @Test
+    fun testInsertThrowsException() {
+        try {
+            val nonZeroId = 1
+            dao.insert(
+                TranslationEntity(nonZeroId, languages[0].id, languages[1].id, "", 1.0, 1.0)
+            )
+            fail(
+                "An exception is expected to throw when inserting a non-zero id field of translation entity."
+            )
+        } catch (e: InsertionException) {
+            assertEquals("Entity ID is not 0", e.message)
+        }
     }
 
     @Test
