@@ -21,12 +21,14 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database
 import jooq.tables.InstalledEntity
 import org.jooq.DSLContext
 import org.jooq.SQLDialect
+import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
 import org.slf4j.LoggerFactory
 import org.sqlite.SQLiteDataSource
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.*
 import java.io.File
 import java.io.IOException
+import java.sql.Connection
 
 const val CREATION_SCRIPT = "sql/CreateAppDb.sql"
 
@@ -36,6 +38,7 @@ class AppDatabase(
     val logger = LoggerFactory.getLogger(AppDatabase::class.java)
 
     val dsl: DSLContext
+    private val connection: Connection
 
     init {
         System.setProperty("org.jooq.no-logo", "true")
@@ -46,18 +49,16 @@ class AppDatabase(
             .getDeclaredConstructor()
             .newInstance()
 
-        // Create a new sqlite data source
-        val dbDoesNotExist = !databaseFile.exists() || databaseFile.length() == 0L
-
-        val sqLiteDataSource = SQLiteDataSource()
-        sqLiteDataSource.url = "jdbc:sqlite:${databaseFile.toURI().path}"
-
-        // Enable foreign key constraints (disabled by default for backwards compatibility)
-        sqLiteDataSource.config.toProperties().setProperty("foreign_keys", "true")
+        val sqLiteDataSource = createSQLiteDataSource(databaseFile)
+        connection = sqLiteDataSource.connection
 
         // Create the jooq dsl
-        dsl = DSL.using(sqLiteDataSource.connection, SQLDialect.SQLITE)
-        if (dbDoesNotExist) setup()
+        dsl = DSL.using(connection, SQLDialect.SQLITE)
+
+        val dbDoesNotExist = !databaseFile.exists() || databaseFile.length() == 0L
+        if (dbDoesNotExist) {
+            setup()
+        }
         DatabaseMigrator().migrate(dsl)
     }
 
@@ -116,6 +117,40 @@ class AppDatabase(
         return dsl.transactionResult { config ->
             // Create local transaction DSL and pass to block
             block(DSL.using(config))
+        }
+    }
+
+    fun close() {
+        dsl.close()
+        connection.close()
+    }
+
+    companion object {
+        fun getDatabaseVersion(databaseFile: File): Int? {
+            if (!databaseFile.exists() || databaseFile.length() == 0L) {
+                return null
+            }
+            val sqliteDataSource = createSQLiteDataSource(databaseFile)
+            DSL.using(sqliteDataSource, SQLDialect.SQLITE).use { dsl ->
+                return try {
+                    dsl
+                        .select()
+                        .from(InstalledEntity.INSTALLED_ENTITY)
+                        .where(InstalledEntity.INSTALLED_ENTITY.NAME.eq(DATABASE_INSTALLABLE_NAME))
+                        .fetchSingle {
+                            it.get(InstalledEntity.INSTALLED_ENTITY.VERSION)
+                        }
+                } catch (e: DataAccessException) {
+                    null
+                }
+            }
+        }
+
+        private fun createSQLiteDataSource(databaseFile: File): SQLiteDataSource {
+            val sqLiteDataSource = SQLiteDataSource()
+            sqLiteDataSource.url = "jdbc:sqlite:${databaseFile.toURI().path}"
+            sqLiteDataSource.config.toProperties().setProperty("foreign_keys", "true")
+            return sqLiteDataSource
         }
     }
 }
