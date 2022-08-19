@@ -37,6 +37,7 @@ import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.chunking.ChunkAudioUseCase
 import org.wycliffeassociates.otter.common.domain.content.CreateChunks
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
@@ -119,6 +120,15 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
     lateinit var audio: AudioFile
 
     var subscribeOnWaveformImages: () -> Unit = {}
+
+    private val projectFilesAccessor by lazy {
+        ProjectFilesAccessor(
+            directoryProvider,
+            workbookDataStore.workbook.source.resourceMetadata,
+            workbookDataStore.workbook.target.resourceMetadata,
+            workbookDataStore.workbook.target
+        )
+    }
 
     init {
         pageProperty.onChange {
@@ -235,7 +245,7 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
         pageProperty.set(ChunkingWizardPage.CONSUME)
 
 
-        ChunkAudioUseCase(directoryProvider, workbookDataStore.workbook)
+        ChunkAudioUseCase(directoryProvider, projectFilesAccessor)
             .createChunkedSourceAudio(sourceAudio.file, cues)
 
         disposeables.forEach { it.dispose() }

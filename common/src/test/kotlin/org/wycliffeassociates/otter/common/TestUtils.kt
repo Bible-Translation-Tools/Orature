@@ -22,10 +22,7 @@ import com.nhaarman.mockitokotlin2.mock
 import java.io.File
 import java.util.*
 import org.junit.Assert
-import org.wycliffeassociates.otter.common.audio.AudioFile
-import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
-import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
-import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
+import org.wycliffeassociates.otter.common.audio.*
 import org.wycliffeassociates.otter.common.audio.wav.CueChunk
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.common.audio.wav.WavMetadata
@@ -35,10 +32,10 @@ import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.RcConstants
 import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
-import org.wycliffeassociates.resourcecontainer.entity.DublinCore
-import org.wycliffeassociates.resourcecontainer.entity.dublincore
-import org.wycliffeassociates.resourcecontainer.entity.language
+import org.wycliffeassociates.resourcecontainer.ResourceContainer
+import org.wycliffeassociates.resourcecontainer.entity.*
 import java.time.LocalDate
 
 /**
@@ -198,4 +195,54 @@ fun readTextFromAudioFile(audioFile: AudioFile, bufferSize: Int): String {
         outStr = buffer.decodeToString()
     }
     return outStr
+}
+
+fun templateAudioFileName(
+    language: String,
+    resource: String,
+    project: String,
+    chapterLabel: String,
+    extension: String? = null
+): String {
+    val ext = extension ?: ""
+    return "${language}_${resource}_${project}_c${chapterLabel}$ext"
+}
+
+fun createTestRc(
+    dir: File,
+    dublinCore: DublinCore,
+    project: String,
+    sourceFiles: List<File> = listOf()
+): ResourceContainer {
+    return ResourceContainer.create(dir) {
+        manifest = Manifest(dublinCore, listOf(), Checking())
+
+        if (sourceFiles.isNotEmpty()) {
+            val fileName = templateAudioFileName(
+                dublinCore.language.identifier, dublinCore.identifier, project, "{chapter}"
+            )
+            val mediaManifest = mediamanifest {
+                projects = listOf(MediaProject(project))
+            }
+            val sourceMediaTypes = listOf(AudioFileFormat.WAV.extension, AudioMetadataFileFormat.CUE.extension)
+            val mediaList = sourceMediaTypes.map { mediaType ->
+                Media(
+                    identifier = mediaType,
+                    version = "",
+                    url = "",
+                    quality = listOf(),
+                    chapterUrl = "${RcConstants.SOURCE_MEDIA_DIR}/${fileName}.${mediaType}"
+                )
+            }
+
+            mediaManifest.projects.first().media = mediaList
+            media = mediaManifest
+
+            sourceFiles.forEach {
+                addFileToContainer(it, "${RcConstants.SOURCE_MEDIA_DIR}/$project/chapters/${it.name}")
+            }
+        }
+
+        write()
+    }
 }
