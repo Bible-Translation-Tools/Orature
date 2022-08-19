@@ -46,6 +46,9 @@ class TranslationDaoTest {
         Language("en", "English", "English", "ltr", true, "US", 1),
         Language("en-test", "English-test", "English-test", "ltr", true, "US", 2)
     )
+    private val sampleTranslation = TranslationEntity(
+        0, languages[0].id, languages[1].id, null, 1.0, 1.0
+    )
 
     @Before
     fun setup() {
@@ -71,12 +74,12 @@ class TranslationDaoTest {
         var result = 0
 
         result = dao.insert(
-            TranslationEntity(0, firstLanguage.id, secondLanguage.id, null, 1.0, 1.0)
+            sampleTranslation.copy(sourceFk = firstLanguage.id, targetFk = secondLanguage.id)
         )
         assertEquals(1, result)
 
         result = dao.insert(
-            TranslationEntity(0, secondLanguage.id, firstLanguage.id, null, 1.0, 1.0)
+            sampleTranslation.copy(sourceFk = secondLanguage.id, targetFk = firstLanguage.id)
         )
         assertEquals(2, result)
     }
@@ -101,7 +104,7 @@ class TranslationDaoTest {
         try {
             val nonZeroId = 1
             dao.insert(
-                TranslationEntity(nonZeroId, languages[0].id, languages[1].id, "", 1.0, 1.0)
+                sampleTranslation.copy(id = nonZeroId)
             )
             fail(
                 "An exception is expected to throw when inserting a non-zero id field of translation entity."
@@ -139,10 +142,6 @@ class TranslationDaoTest {
     }
 
     private fun insertDefault() {
-        dao.insert(
-            TranslationEntity(
-                0, languages[0].id, languages[1].id, null, 1.0, 1.0
-            )
-        )
+        dao.insert(sampleTranslation)
     }
 }
