@@ -149,6 +149,12 @@ class LanguageDaoTest {
             dao.update(duplicated)
             Assert.fail("An exception is expected to throw when setting a duplicated language slug. ")
         } catch (e: DataAccessException) { }
+    }
 
+    @Test
+    fun testDeleteLanguage() {
+        val entity = dao.fetchAll().first()
+        dao.delete(entity)
+        Assert.assertEquals(languages.size - 1, dao.fetchAll().size)
     }
 }
