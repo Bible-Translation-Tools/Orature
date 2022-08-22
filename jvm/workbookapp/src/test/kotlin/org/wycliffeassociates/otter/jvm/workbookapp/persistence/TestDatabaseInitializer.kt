@@ -54,7 +54,7 @@ class TestDatabaseInitializer {
 
     private val directoryProviderMock = mock<IDirectoryProvider> {
         on { databaseDirectory } doReturn databaseDir
-        on { getUserDataDirectory(any()) } doReturn oldDatabaseDir
+        on { getAppDataDirectory(any()) } doReturn oldDatabaseDir
     }
 
     private val dbInitializer = DatabaseInitializer(directoryProviderMock)

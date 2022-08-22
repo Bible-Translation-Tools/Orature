@@ -32,7 +32,7 @@ class DatabaseInitializer(
     fun initialize() {
         val databaseFile = directoryProvider.databaseDirectory
             .resolve(DB_FILE_NAME)
-        val oldDbFile = directoryProvider.getUserDataDirectory()
+        val oldDbFile = directoryProvider.getAppDataDirectory()
             .resolve(OLD_DB_FILE_NAME)
         val oldDbExist = oldDbFile.exists() && oldDbFile.length() > 0
         val currentDbExists = databaseFile.exists() && databaseFile.length() > 0
