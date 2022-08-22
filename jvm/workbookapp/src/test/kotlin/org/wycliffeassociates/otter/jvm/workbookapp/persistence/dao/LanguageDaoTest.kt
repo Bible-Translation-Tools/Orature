@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.dao
 
+import org.jooq.exception.DataAccessException
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -64,6 +65,19 @@ class LanguageDaoTest {
         } catch (e: InsertionException) {
             Assert.assertEquals("Entity ID is not 0", e.message)
         }
+
+        // insert duplicate (slug)
+        try {
+            dao.insert(
+                LanguageMapper().mapToEntity(languages.first())
+            )
+            dao.insert(
+                LanguageMapper().mapToEntity(languages.first())
+            )
+            Assert.fail(
+                "An exception is expected to throw when inserting duplicated slug."
+            )
+        } catch (e: DataAccessException) { }
     }
 
     @Test
@@ -106,6 +120,40 @@ class LanguageDaoTest {
 
         Assert.assertNotNull(dao.fetchById(1))
         Assert.assertNull(dao.fetchById(999))
+    }
+
+    @Test
+    fun testUpdateLanguage() {
+        insertLanguages()
+        val currentEntity = dao.fetchBySlug("en")!!
+        val updated = LanguageMapper().mapToEntity(
+            languages.find { it.slug == "aa" }!!
+        ).copy(
+            id = currentEntity.id,
+            currentEntity.slug
+        )
+
+        dao.update(updated)
+        val result = dao.fetchBySlug(updated.slug)
+
+        Assert.assertEquals(updated, result)
+    }
+
+    @Test
+    fun testUpdateLanguageThrowsException() {
+        insertLanguages()
+        val aa = languages.find { it.slug == "aa" }!!
+        val entity = dao.fetchBySlug("en")!!
+
+        val duplicated = entity.copy(
+            slug = aa.slug
+        )
+
+        try {
+            dao.update(duplicated)
+            Assert.fail("An exception is expected to throw when setting a duplicated language slug. ")
+        } catch (e: DataAccessException) { }
+
     }
 
     private fun insertLanguages() {
