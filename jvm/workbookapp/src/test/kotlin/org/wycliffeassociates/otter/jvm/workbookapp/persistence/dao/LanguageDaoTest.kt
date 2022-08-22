@@ -8,6 +8,7 @@ import org.junit.Test
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.InsertionException
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.LanguageEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.LanguageMapper
 import java.io.File
 
@@ -26,7 +27,9 @@ class LanguageDaoTest {
 
     @Before
     fun setup() {
-
+        dao.insertAll(
+            languages.map { LanguageMapper().mapToEntity(it) }
+        )
     }
 
     @After
@@ -36,18 +39,19 @@ class LanguageDaoTest {
 
     @Test
     fun testInsert() {
-        Assert.assertEquals(0, dao.fetchAll().size)
-        dao.insert(
-            LanguageMapper().mapToEntity(languages.first())
-        )
-        Assert.assertEquals(1, dao.fetchAll().size)
-    }
-
-    @Test
-    fun testInsertAll() {
-        Assert.assertEquals(0, dao.fetchAll().size)
-        insertLanguages()
         Assert.assertEquals(languages.size, dao.fetchAll().size)
+        dao.insert(
+            LanguageEntity(
+                id = 0,
+                slug = "test",
+                name = "test",
+                anglicizedName = "test",
+                direction = "test",
+                gateway = 0,
+                region = "test"
+            )
+        )
+        Assert.assertEquals(languages.size + 1, dao.fetchAll().size)
     }
 
     @Test
@@ -82,8 +86,6 @@ class LanguageDaoTest {
 
     @Test
     fun testFetchGateway() {
-        insertLanguages()
-
         val gwLanguages = dao.fetchGateway()
         Assert.assertEquals(1, gwLanguages.size)
         Assert.assertTrue(gwLanguages.all { it.gateway == 1 })
@@ -91,8 +93,6 @@ class LanguageDaoTest {
 
     @Test
     fun testFetchTargets() {
-        insertLanguages()
-
         val targetLanguages = dao.fetchTargets()
         Assert.assertEquals(2, targetLanguages.size)
         Assert.assertTrue(targetLanguages.all { it.gateway == 0 })
@@ -100,8 +100,6 @@ class LanguageDaoTest {
 
     @Test
     fun testFetchBySlug() {
-        insertLanguages()
-
         val en = LanguageMapper().mapToEntity(languages[1])
         val resultEntity = dao.fetchBySlug(en.slug)
 
@@ -116,15 +114,12 @@ class LanguageDaoTest {
 
     @Test
     fun testFetchById() {
-        insertLanguages()
-
         Assert.assertNotNull(dao.fetchById(1))
         Assert.assertNull(dao.fetchById(999))
     }
 
     @Test
     fun testUpdateLanguage() {
-        insertLanguages()
         val old = dao.fetchBySlug("en")!!
         val updated = old.copy(
             slug = "new-en-slug",
@@ -143,7 +138,6 @@ class LanguageDaoTest {
 
     @Test
     fun testUpdateLanguageThrowsException() {
-        insertLanguages()
         val aa = languages.find { it.slug == "aa" }!!
         val entity = dao.fetchBySlug("en")!!
 
@@ -156,11 +150,5 @@ class LanguageDaoTest {
             Assert.fail("An exception is expected to throw when setting a duplicated language slug. ")
         } catch (e: DataAccessException) { }
 
-    }
-
-    private fun insertLanguages() {
-        dao.insertAll(
-            languages.map { LanguageMapper().mapToEntity(it) }
-        )
     }
 }
