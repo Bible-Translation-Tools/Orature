@@ -125,16 +125,18 @@ class LanguageDaoTest {
     @Test
     fun testUpdateLanguage() {
         insertLanguages()
-        val currentEntity = dao.fetchBySlug("en")!!
-        val updated = LanguageMapper().mapToEntity(
-            languages.find { it.slug == "aa" }!!
-        ).copy(
-            id = currentEntity.id,
-            currentEntity.slug
+        val old = dao.fetchBySlug("en")!!
+        val updated = old.copy(
+            slug = "new-en-slug",
+            name = "updated-name",
+            anglicizedName = "updated-anglicize-name",
+            direction = "rtl",
+            gateway = 0,
+            region = "New Region"
         )
 
         dao.update(updated)
-        val result = dao.fetchBySlug(updated.slug)
+        val result = dao.fetchById(old.id)
 
         Assert.assertEquals(updated, result)
     }
