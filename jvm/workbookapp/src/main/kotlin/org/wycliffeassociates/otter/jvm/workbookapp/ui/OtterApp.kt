@@ -24,6 +24,7 @@ import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Pane
 import javafx.stage.Stage
 import javafx.stage.StageStyle
+import org.wycliffeassociates.otter.common.OratureInfo
 import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
@@ -32,6 +33,8 @@ import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.di.DaggerAppDependencyGraph
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.logging.ConfigureLogger
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.DirectoryProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.DatabaseInitializer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.RootView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.SplashScreen
 import tornadofx.*
@@ -47,6 +50,9 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
     @Inject lateinit var audioConnectionFactory: AudioConnectionFactory
 
     init {
+        DatabaseInitializer(
+            DirectoryProvider(OratureInfo.SUITE_NAME)
+        ).initialize()
         dependencyGraph.inject(this)
         directoryProvider.cleanTempDirectory()
         Thread.setDefaultUncaughtExceptionHandler(OtterExceptionHandler(directoryProvider, localeLanguage))
