@@ -89,13 +89,11 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
     private fun getInt(key: String, def: Int): Single<Int> {
         return Single
             .fromCallable {
-                var value = def
                 try {
-                    value = preferenceDao.fetchByKey(key)!!.value.toInt()
+                    preferenceDao.fetchByKey(key)?.value?.toInt() ?: def
                 } catch (e: RuntimeException) {
-                    // do nothing
+                    def
                 }
-                return@fromCallable value
             }
             .doOnError { e ->
                 logger.error("Error in getInt for $key, default: $def", e)
@@ -106,13 +104,11 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
     private fun getBoolean(key: String, def: Boolean): Single<Boolean> {
         return Single
             .fromCallable {
-                var value = def
                 try {
-                    value = preferenceDao.fetchByKey(key)!!.value.toBoolean()
+                    preferenceDao.fetchByKey(key)?.value.toBoolean()
                 } catch (e: RuntimeException) {
-                    // do nothing
+                    def
                 }
-                return@fromCallable value
             }
             .doOnError { e ->
                 logger.error("Error in getBoolean for key: $key, default: $def", e)
@@ -123,13 +119,11 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
     private fun getString(key: String, def: String): Single<String> {
         return Single
             .fromCallable {
-                var value = def
                 try {
-                    value = preferenceDao.fetchByKey(key)!!.value
+                    preferenceDao.fetchByKey(key)?.value ?: def
                 } catch (e: RuntimeException) {
-                    // do nothing
+                    def
                 }
-                return@fromCallable value
             }
             .doOnError { e ->
                 logger.error("Error in getString for key: $key, default: $def", e)
