@@ -221,9 +221,6 @@ class DirectoryProvider(
         deleteRecursively(tempDirectory)
     }
 
-    override val databaseDirectory: File
-        get() = getAppDataDirectory("database")
-
     override val resourceContainerDirectory: File
         get() = getAppDataDirectory("rc")
 
