@@ -36,7 +36,7 @@ class LanguageDaoTest {
     @After
     fun cleanUp() {
         dao.fetchAll().forEach(dao::delete)
-        database.close()
+//        database.close()
     }
 
     @Test
