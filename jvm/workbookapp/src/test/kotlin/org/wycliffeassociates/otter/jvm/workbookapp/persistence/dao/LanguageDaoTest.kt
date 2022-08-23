@@ -16,8 +16,8 @@ class LanguageDaoTest {
     private val testDatabaseFile = File.createTempFile(
         "test-language-dao", ".sqlite"
     ).also(File::deleteOnExit)
-    private val database = AppDatabase(testDatabaseFile)
-    private val dao = database.languageDao
+    private lateinit var database: AppDatabase
+    private val dao by lazy { database.languageDao }
 
     private val languages = listOf(
         Language("aa", "Afar", "Afaraf", "ltr", false, "Africa"),
@@ -27,14 +27,16 @@ class LanguageDaoTest {
 
     @Before
     fun setup() {
+        database = AppDatabase(testDatabaseFile)
         dao.insertAll(
             languages.map { LanguageMapper().mapToEntity(it) }
         )
     }
 
     @After
-    fun tearDown() {
+    fun cleanUp() {
         dao.fetchAll().forEach(dao::delete)
+        database.close()
     }
 
     @Test
