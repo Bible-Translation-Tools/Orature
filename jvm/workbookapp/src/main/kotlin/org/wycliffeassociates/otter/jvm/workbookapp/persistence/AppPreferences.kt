@@ -91,7 +91,7 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
             .fromCallable {
                 var value = def
                 try {
-                    value = preferenceDao.fetchByKey(key).value.toInt()
+                    value = preferenceDao.fetchByKey(key)!!.value.toInt()
                 } catch (e: RuntimeException) {
                     // do nothing
                 }
@@ -108,7 +108,7 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
             .fromCallable {
                 var value = def
                 try {
-                    value = preferenceDao.fetchByKey(key).value.toBoolean()
+                    value = preferenceDao.fetchByKey(key)!!.value.toBoolean()
                 } catch (e: RuntimeException) {
                     // do nothing
                 }
@@ -125,7 +125,7 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
             .fromCallable {
                 var value = def
                 try {
-                    value = preferenceDao.fetchByKey(key).value
+                    value = preferenceDao.fetchByKey(key)!!.value
                 } catch (e: RuntimeException) {
                     // do nothing
                 }
