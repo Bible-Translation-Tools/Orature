@@ -126,6 +126,10 @@ class AppDatabase(
     }
 
     companion object {
+        init {
+            System.setProperty("org.jooq.no-logo", "true")
+        }
+
         fun getDatabaseVersion(databaseFile: File): Int? {
             if (!databaseFile.exists() || databaseFile.length() == 0L) {
                 return null
