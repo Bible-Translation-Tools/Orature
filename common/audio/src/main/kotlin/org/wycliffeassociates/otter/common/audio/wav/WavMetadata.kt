@@ -24,6 +24,18 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioMetadata
 import org.wycliffeassociates.otter.common.audio.AudioCue
 
+
+/**
+ * WavMetadata is a class for reading and writing metadata from wav files.
+ * The wav file spec details various kinds of metadata chunks that can occur after
+ * the audio section of a wav file. Chunks have a standard header, and a chunk size, allowing
+ * for parsers to skip over unrecognized chunks.
+ *
+ * By default, a parser is included for cue chunks
+ *
+ * @param parsableChunks Parsable chunks are a list of optional parsers which implement the RiffChunk interface.
+ * This allows users of the WavMetadata library to add custom parsers beyond what is officially supported.
+ */
 class WavMetadata(parsableChunks: List<RiffChunk>? = null) : AudioMetadata {
 
     private val logger = LoggerFactory.getLogger(WavMetadata::class.java)
