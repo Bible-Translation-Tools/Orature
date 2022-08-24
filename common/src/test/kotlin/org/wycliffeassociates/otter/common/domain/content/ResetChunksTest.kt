@@ -229,6 +229,10 @@ class ResetChunksTest {
     fun clearContentForCollectionTriggered() {
         ResetChunks().resetChapter(projectFilesAccessor, chapter)
         Assert.assertEquals(true, clearContentForCollectionTriggered)
+
+        chapter.chunks.getValues(emptyArray()).forEach {
+            Assert.assertEquals(-1, it.draftNumber)
+        }
     }
 
     @Test
