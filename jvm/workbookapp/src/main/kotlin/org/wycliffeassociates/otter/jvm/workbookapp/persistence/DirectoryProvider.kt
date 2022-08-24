@@ -156,24 +156,22 @@ class DirectoryProvider(
         val dublinCore = container.manifest.dublinCore
         container.close()
         val appendedPath = listOf(
-            "src",
             dublinCore.creator,
             "${dublinCore.language.identifier}_${dublinCore.identifier}",
             "v${dublinCore.version}"
         ).joinToString(pathSeparator)
-        val path = resourceContainerDirectory.resolve(appendedPath)
+        val path = internalSourceRCDirectory.resolve(appendedPath)
         path.mkdirs()
         return path
     }
 
     override fun getSourceContainerDirectory(metadata: ResourceMetadata): File {
         return listOf(
-            "src",
             metadata.creator,
             "${metadata.language.slug}_${metadata.identifier}",
             "v${metadata.version}"
         )
-            .fold(resourceContainerDirectory, File::resolve)
+            .fold(internalSourceRCDirectory, File::resolve)
             .apply { mkdirs() }
     }
 
@@ -215,6 +213,9 @@ class DirectoryProvider(
 
     override val resourceContainerDirectory: File
         get() = getAppDataDirectory("rc")
+
+    override val internalSourceRCDirectory: File
+        get() = resourceContainerDirectory.resolve("src")
 
     override val userProfileAudioDirectory: File
         get() = getAppDataDirectory("users${pathSeparator}audio")

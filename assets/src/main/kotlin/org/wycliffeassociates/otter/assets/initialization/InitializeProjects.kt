@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.assets.initialization
 
 import io.reactivex.Completable
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
@@ -65,6 +66,7 @@ class InitializeProjects @Inject constructor(
 
             if (fetchProjects().isEmpty()) {
                 log.info("Importing projects...")
+                importSources(directoryProvider.internalSourceRCDirectory)
 
                 val dir = directoryProvider.getUserDataDirectory("/")
                 importProjects(dir)
@@ -163,6 +165,17 @@ class InitializeProjects @Inject constructor(
                 // Delete empty dir
                 take.path.parentFile.delete()
             }
+    }
+
+    private fun importSources(dir: File) {
+        if (dir.isFile || !dir.exists()) return
+
+        dir.walk().filter { it.isFile && it.name != EN_ULB_FILENAME }.forEach {
+            // Find resource containers to import
+            if (it.extension in OratureFileFormat.extensionList) {
+                importProject(it)
+            }
+        }
     }
 
     private fun importProjects(dir: File) {
