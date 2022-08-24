@@ -76,4 +76,8 @@ class Book(
 
         return true
     }
+
+    override fun toString(): String {
+        return "Book(sort=$sort, title=$title, label=$label, slug=$slug, collectionId=$collectionId)"
+    }
 }
