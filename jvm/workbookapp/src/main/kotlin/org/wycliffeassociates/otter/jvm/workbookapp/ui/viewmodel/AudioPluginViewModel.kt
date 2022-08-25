@@ -125,7 +125,8 @@ class AudioPluginViewModel : ViewModel() {
             sourceDirection = workbook.source.language.direction,
             sourceRate = sourceRate,
             targetRate = targetRate,
-            sourceTextZoom = sourceTextZoom
+            sourceTextZoom = sourceTextZoom,
+            sourceLanguageName = workbook.source.language.name
         )
     }
 

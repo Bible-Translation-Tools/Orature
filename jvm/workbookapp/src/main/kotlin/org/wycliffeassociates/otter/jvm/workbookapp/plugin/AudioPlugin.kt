@@ -146,7 +146,8 @@ class AudioPlugin(
                     "--source_direction=${pluginParameters.sourceDirection}",
                     "--source_rate=${pluginParameters.sourceRate}",
                     "--target_rate=${pluginParameters.targetRate}",
-                    "--source_text_zoom=${pluginParameters.sourceTextZoom}"
+                    "--source_text_zoom=${pluginParameters.sourceTextZoom}",
+                    "--source_language=${pluginParameters.sourceLanguageName}"
                 )
             }
         return ParametersImpl(insertedArgs)

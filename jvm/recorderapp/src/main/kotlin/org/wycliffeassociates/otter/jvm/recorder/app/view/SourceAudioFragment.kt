@@ -28,8 +28,11 @@ import java.io.File
 import java.lang.Exception
 import java.text.MessageFormat
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
+import org.wycliffeassociates.otter.jvm.recorder.app.viewmodel.RecorderViewModel
 
 class SourceAudioFragment : Fragment() {
+
+    private val vm: RecorderViewModel by inject()
 
     override val root = initializeSourceContent()
 
@@ -64,7 +67,8 @@ class SourceAudioFragment : Fragment() {
 
         return SourceContent().apply {
             sourceTextProperty.set(sourceText)
-            sourceTextCompactMode.set(true)
+            sourceTextCompactMode.set(vm.narrationMode.not())
+            isMinimizableProperty.set(false)
             audioNotAvailableTextProperty.set(messages["audioNotAvailable"])
             textNotAvailableTextProperty.set(messages["textNotAvailable"])
             playSourceLabelProperty.set(messages["playSource"])
@@ -142,7 +146,6 @@ class SourceAudioFragment : Fragment() {
         } catch (e: Exception) {
             null
         }
-        return null
     }
 
     private fun getSourceContentTitle(book: String?, chapter: String?, chunk: String?): String? {
