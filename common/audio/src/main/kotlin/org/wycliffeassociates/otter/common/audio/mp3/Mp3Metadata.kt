@@ -103,7 +103,7 @@ internal class Mp3Metadata(val mp3File: File, val cueFile: File) : AudioMetadata
         sheet.title = title
         val fileData = FileData(sheet, "\"${cueFile.name}\"", "MP3")
         for ((i, cue) in _cues.sortedBy { it.location }.withIndex()) {
-            val cueNumber = cue.label.toInt()
+            val cueNumber = cue.label.findInt()
             val trackData = TrackData(fileData, cueNumber, "AUDIO")
             trackData.title = cue.label
             val index = Index()
@@ -145,4 +145,10 @@ internal class Mp3Metadata(val mp3File: File, val cueFile: File) : AudioMetadata
             tempFile.delete()
         }
     }
+}
+
+private fun String.findInt(): Int {
+    val numberRegex = Regex("(\\d+)")
+    val match = numberRegex.find(this)
+    return match?.groupValues?.firstOrNull()?.toInt() ?: 0
 }
