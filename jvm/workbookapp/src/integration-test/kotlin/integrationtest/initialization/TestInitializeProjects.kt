@@ -32,6 +32,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
 import java.io.File
 import java.time.LocalDate
 import javax.inject.Inject
@@ -44,6 +45,9 @@ class TestInitializeProjects {
 
     @Inject
     lateinit var directoryProvider: IDirectoryProvider
+
+    @Inject
+    lateinit var resourceMetadataRepository: IResourceMetadataRepository
 
     @Inject
     lateinit var env: DatabaseEnvironment
@@ -110,6 +114,39 @@ class TestInitializeProjects {
         )
     }
 
+    @Test
+    fun testInitializeProjectsWithSources() {
+        prepareInitialProject()
+        prepareSource()
+
+        Assert.assertEquals(
+            0, resourceMetadataRepository.getAllSources().blockingGet().size
+        )
+
+        val testSub = TestObserver<Completable>()
+        val init = initProjectsProvider.get()
+        init
+            .exec()
+            .subscribe(testSub)
+
+        testSub.assertComplete()
+        testSub.assertNoErrors()
+
+        val sources = resourceMetadataRepository.getAllSources().blockingGet()
+        Assert.assertEquals(2, sources.size)
+
+        env.assertRowCounts(
+            RowCount(
+                contents = mapOf(
+                    ContentType.META to 1211,
+                    ContentType.TEXT to 31509
+                ),
+                collections = 1280,
+                links = 0
+            )
+        )
+    }
+
     private fun prepareInitialProject() {
         val targetDir = directoryProvider.getProjectDirectory(
             sourceMetadata,
@@ -117,5 +154,12 @@ class TestInitializeProjects {
             project
         )
         env.unzipProject("en-x-demo1-ulb-rev.zip", targetDir)
+    }
+
+    private fun prepareSource() {
+        val targetSource = directoryProvider.internalSourceRCDirectory.resolve("hi_ulb.zip")
+        val sourceToCopy = File(javaClass.classLoader.getResource("resource-containers/hi_ulb.zip").file)
+
+        sourceToCopy.copyTo(targetSource, overwrite = true)
     }
 }
