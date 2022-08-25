@@ -64,9 +64,11 @@ class InitializeProjects @Inject constructor(
                 log.info("$name up to date with version: $version")
             }
 
+            log.info("Importing sources...")
+            importSources(directoryProvider.internalSourceRCDirectory)
+
             if (fetchProjects().isEmpty()) {
                 log.info("Importing projects...")
-                importSources(directoryProvider.internalSourceRCDirectory)
 
                 val dir = directoryProvider.getUserDataDirectory("/")
                 importProjects(dir)
@@ -169,13 +171,25 @@ class InitializeProjects @Inject constructor(
 
     private fun importSources(dir: File) {
         if (dir.isFile || !dir.exists()) return
+        val existingPaths = fetchSourcePaths()
 
-        dir.walk().filter { it.isFile && it.name != EN_ULB_FILENAME }.forEach {
+        dir.walk().filter {
+            it.isFile && it !in existingPaths
+        }.forEach {
             // Find resource containers to import
             if (it.extension in OratureFileFormat.extensionList) {
                 importProject(it)
             }
         }
+    }
+
+    private fun fetchSourcePaths(): List<File> {
+        return resourceMetadataRepo
+            .getAllSources()
+            .blockingGet()
+            .map {
+                it.path
+            }
     }
 
     private fun importProjects(dir: File) {
