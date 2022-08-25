@@ -25,6 +25,7 @@ import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.recorder.app.viewmodel.RecorderViewModel
+import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseRequestEvent
 import tornadofx.*
 
 class ControlFragment : Fragment() {
@@ -102,7 +103,7 @@ class ControlFragment : Fragment() {
             visibleProperty().bind(vm.canSaveProperty)
             managedProperty().bind(vm.recordingProperty.or(vm.hasWrittenProperty))
             setOnAction {
-                vm.saveAndQuit()
+                fire(PluginCloseRequestEvent)
             }
             shortcut(Shortcut.GO_BACK.value)
         }
@@ -113,7 +114,7 @@ class ControlFragment : Fragment() {
             visibleProperty().bind(vm.recordingProperty.not().and(vm.hasWrittenProperty.not()))
             managedProperty().bind(visibleProperty())
             setOnAction {
-                vm.saveAndQuit()
+                fire(PluginCloseRequestEvent)
             }
             shortcut(Shortcut.GO_BACK.value)
         }

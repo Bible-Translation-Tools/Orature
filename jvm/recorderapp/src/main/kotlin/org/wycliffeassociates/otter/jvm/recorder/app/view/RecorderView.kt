@@ -62,6 +62,7 @@ class RecorderView : PluginEntrypoint() {
         }
 
         subscribe<PluginCloseRequestEvent> {
+            unsubscribe()
             recorderViewModel.saveAndQuit()
         }
     }
