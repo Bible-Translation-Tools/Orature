@@ -25,6 +25,7 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResour
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.persistence.config.Installable
 import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
+import java.io.File
 import javax.inject.Inject
 
 const val EN_ULB_FILENAME = "en_ulb"
@@ -45,6 +46,11 @@ class InitializeUlb @Inject constructor(
             .fromCallable {
                 val installedVersion = installedEntityRepo.getInstalledVersion(this)
                 if (installedVersion != version) {
+                    if (isAlreadyImported()) {
+                        log.info("$EN_ULB_FILENAME already exists, skipped.")
+                        return@fromCallable Completable.complete()
+                    }
+
                     log.info("Initializing $name version: $version...")
                     rcImporter.import(
                         EN_ULB_FILENAME,
@@ -69,5 +75,11 @@ class InitializeUlb @Inject constructor(
             .doOnError { e ->
                 log.error("Error in initializeUlb", e)
             }
+    }
+
+    private fun isAlreadyImported(): Boolean {
+        return rcImporter.isAlreadyImported(
+            File(javaClass.classLoader.getResource(EN_ULB_PATH).file)
+        )
     }
 }
