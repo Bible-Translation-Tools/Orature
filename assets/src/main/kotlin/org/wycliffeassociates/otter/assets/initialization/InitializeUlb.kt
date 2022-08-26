@@ -78,8 +78,16 @@ class InitializeUlb @Inject constructor(
     }
 
     private fun isAlreadyImported(): Boolean {
-        return rcImporter.isAlreadyImported(
-            File(javaClass.classLoader.getResource(EN_ULB_PATH).file)
-        )
+        val enUlbStream = javaClass.classLoader.getResourceAsStream(EN_ULB_PATH)!!
+        val tempFile = kotlin.io.path.createTempFile().toFile()
+            .also(File::deleteOnExit)
+
+        enUlbStream.use { input ->
+            tempFile.outputStream().use { output ->
+                input.transferTo(output)
+            }
+        }
+
+        return rcImporter.isAlreadyImported(tempFile)
     }
 }
