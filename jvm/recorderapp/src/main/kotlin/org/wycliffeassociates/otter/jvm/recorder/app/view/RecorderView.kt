@@ -44,15 +44,17 @@ class RecorderView : PluginEntrypoint() {
         add<InfoFragment>()
         add(spacer)
         add(waveform)
-        add<SourceAudioFragment>()
+        if (!recorderViewModel.narrationMode) {
+            add<SourceAudioFragment>()
+        }
         add<ControlFragment>()
     }
 
     init {
-        tryImportStylesheet(resources.get("/css/recorder.css"))
+        tryImportStylesheet(resources["/css/recorder.css"])
 
-        // notifies viewmodel that views have been inflated and the canvas now has a width
-        waveform.root.widthProperty().onChange { width ->
+        // notifies viewModel that views have been inflated and the canvas now has a width
+        recorderViewModel.waveformView.widthProperty().onChange { width ->
             if (!viewInflated && width.toInt() > 0) {
                 recorderViewModel.onViewReady(width.toInt())
                 viewInflated = true
@@ -60,6 +62,7 @@ class RecorderView : PluginEntrypoint() {
         }
 
         subscribe<PluginCloseRequestEvent> {
+            unsubscribe()
             recorderViewModel.saveAndQuit()
         }
     }
