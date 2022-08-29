@@ -98,6 +98,7 @@ interface IDirectoryProvider {
 
     val databaseDirectory: File
     val resourceContainerDirectory: File
+    val internalSourceRCDirectory: File
     val userProfileImageDirectory: File
     val userProfileAudioDirectory: File
     val audioPluginDirectory: File
