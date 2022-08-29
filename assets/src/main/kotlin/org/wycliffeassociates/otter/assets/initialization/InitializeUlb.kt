@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.config.Installable
 import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
 import java.io.File
@@ -32,6 +33,7 @@ const val EN_ULB_FILENAME = "en_ulb"
 private const val EN_ULB_PATH = "content/$EN_ULB_FILENAME.zip"
 
 class InitializeUlb @Inject constructor(
+    private val directoryProvider: IDirectoryProvider,
     private val installedEntityRepo: IInstalledEntityRepository,
     private val rcImporter: ImportResourceContainer
 ) : Installable {
@@ -79,7 +81,7 @@ class InitializeUlb @Inject constructor(
 
     private fun isAlreadyImported(): Boolean {
         val enUlbStream = javaClass.classLoader.getResourceAsStream(EN_ULB_PATH)!!
-        val tempFile = kotlin.io.path.createTempFile().toFile()
+        val tempFile = directoryProvider.createTempFile("en_ulb-test", ".zip")
             .also(File::deleteOnExit)
 
         enUlbStream.use { input ->

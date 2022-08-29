@@ -30,7 +30,7 @@ class InitializeSources @Inject constructor(
                 if (installedVersion != version) {
                     logger.info("Initializing sources...")
 
-                    importSources(directoryProvider.internalSourceRCDirectory)
+                    migrate()
 
                     installedEntityRepo.install(this)
                     logger.info("$name version: $version installed!")
@@ -40,8 +40,19 @@ class InitializeSources @Inject constructor(
             }
     }
 
+    private fun migrate() {
+        `migrate to version 1`()
+    }
+
+    private fun `migrate to version 1`() {
+        importSources(directoryProvider.internalSourceRCDirectory)
+    }
+
     private fun importSources(dir: File) {
-        if (dir.isFile || !dir.exists()) return
+        if (dir.isFile || !dir.exists()) {
+            return
+        }
+
         val existingPaths = fetchSourcePaths()
 
         dir.walk().filter {

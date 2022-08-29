@@ -32,6 +32,7 @@ import org.mockito.Mockito
 import org.wycliffeassociates.otter.assets.initialization.InitializeUlb
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import java.io.File
@@ -43,6 +44,9 @@ class TestInitializeUlb {
 
     @Inject
     lateinit var database: AppDatabase
+
+    @Inject
+    lateinit var directoryProvider: IDirectoryProvider
 
     @Inject
     lateinit var initUlbProvider: Provider<InitializeUlb>
@@ -85,6 +89,7 @@ class TestInitializeUlb {
         doReturn(true).`when`(importerSpy).isAlreadyImported(any())
 
         val init = InitializeUlb(
+            directoryProvider,
             installedEntityRepo,
             importerSpy
         )

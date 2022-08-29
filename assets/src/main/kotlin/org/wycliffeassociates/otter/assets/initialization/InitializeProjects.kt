@@ -45,7 +45,7 @@ class InitializeProjects @Inject constructor(
     private val rcImporter: ImportResourceContainer
 ) : Installable {
     override val name = "PROJECTS"
-    override val version = 2
+    override val version = 1
 
     private val log = LoggerFactory.getLogger(InitializeProjects::class.java)
 
