@@ -198,7 +198,9 @@ class HomePageViewModel : ViewModel() {
 
     private fun updateWorkbookModifiedDate(workbook: Workbook) {
         val project = workbook.target.toCollection()
-        project.modifiedTs = LocalDateTime.now()
+        val currentTime = LocalDateTime.now()
+        workbook.modifiedTs = currentTime
+        project.modifiedTs = currentTime
         updateProjectUseCase.update(project).subscribe()
     }
 }
