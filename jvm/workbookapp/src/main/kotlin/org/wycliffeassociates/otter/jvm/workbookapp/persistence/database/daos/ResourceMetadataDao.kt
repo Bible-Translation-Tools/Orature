@@ -54,7 +54,7 @@ class ResourceMetadataDao(
         version: String,
         creator: String,
         dsl: DSLContext = instanceDsl
-    ): ResourceMetadataEntity {
+    ): ResourceMetadataEntity? {
         return dsl.select()
             .from(DUBLIN_CORE_ENTITY)
             .where(
@@ -165,7 +165,7 @@ class ResourceMetadataDao(
             }
     }
 
-    fun fetchById(id: Int, dsl: DSLContext = instanceDsl): ResourceMetadataEntity {
+    fun fetchById(id: Int, dsl: DSLContext = instanceDsl): ResourceMetadataEntity? {
         return dsl
             .select()
             .from(DUBLIN_CORE_ENTITY)

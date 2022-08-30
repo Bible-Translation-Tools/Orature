@@ -845,9 +845,8 @@ class CollectionRepository @Inject constructor(
     private fun buildCollection(entity: CollectionEntity): Collection {
         var metadata: ResourceMetadata? = null
         entity.dublinCoreFk?.let {
-            val metadataEntity = metadataDao.fetchById(it)
-            val languageEntity = languageDao.fetchById(metadataEntity.languageFk)
-                ?: throw NullPointerException("Could not find language with id ${metadataEntity.languageFk}.")
+            val metadataEntity = metadataDao.fetchById(it)!!
+            val languageEntity = languageDao.fetchById(metadataEntity.languageFk)!!
 
             val language = languageMapper.mapFromEntity(languageEntity)
             metadata = metadataMapper.mapFromEntity(metadataEntity, language)

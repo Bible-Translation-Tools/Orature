@@ -66,7 +66,7 @@ class ResourceMetadataRepository @Inject constructor(
                     metadata.identifier,
                     metadata.version,
                     metadata.creator
-                )
+                )!!
                 metadataMapper.mapFromEntity(metadataEntity, languageMapper.mapFromEntity(languageEntity))
             }
             .doOnError { e ->
@@ -116,9 +116,9 @@ class ResourceMetadataRepository @Inject constructor(
     override fun getSource(metadata: ResourceMetadata): Maybe<ResourceMetadata> {
         return Maybe
             .fromCallable {
-                resourceMetadataDao.fetchById(metadata.id).derivedFromFk
+                resourceMetadataDao.fetchById(metadata.id)!!.derivedFromFk
             }
-            .map { buildMetadata(resourceMetadataDao.fetchById(it)) }
+            .map { buildMetadata(resourceMetadataDao.fetchById(it)!!) }
             .doOnError { e ->
                 logger.error("Error in getSource for metadata: $metadata", e)
             }
@@ -154,6 +154,7 @@ class ResourceMetadataRepository @Inject constructor(
         return Completable
             .fromAction {
                 val existing = resourceMetadataDao.fetchById(obj.id)
+                    ?: throw NullPointerException("Resource metadata id ${obj.id} not found.")
                 val updated = metadataMapper.mapToEntity(obj, existing.derivedFromFk)
                 resourceMetadataDao.update(updated)
             }
