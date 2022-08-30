@@ -143,9 +143,9 @@ class HomePage : View() {
 
     override fun onDock() {
         navigator.dock(this, breadCrumb)
+        viewModel.clearSelectedProject() // close project before loading
         viewModel.loadResumeBook()
         viewModel.loadTranslations()
-        viewModel.clearSelectedProject()
     }
 
     override fun onUndock() {
