@@ -39,28 +39,25 @@ class InitializeMarker @Inject constructor(
 ) : Installable {
 
     override val name = "MARKER"
-    override val version = 27
-    val log = LoggerFactory.getLogger(InitializeMarker::class.java)
+    override val version = 30
+    private val log = LoggerFactory.getLogger(InitializeMarker::class.java)
 
     override fun exec(): Completable {
         return Completable
             .fromCallable {
-                var installedVersion = installedEntityRepo.getInstalledVersion(this)
-                if (installedVersion != version) {
-                    log.info("Initializing $name version: $version...")
-                    importOtterMarker()
-                        .doOnComplete {
-                            installedEntityRepo.install(this)
-                            log.info("Marker imported!")
-                            log.info("$name version: $version installed!")
-                        }
-                        .doOnError { e ->
-                            log.error("Error importing marker.", e)
-                        }
-                        .blockingAwait()
-                } else {
-                    log.info("$name up to date with version: $version")
-                }
+                var installedVersion = installedEntityRepo.getInstalledVersion(this) ?: 0
+                migrate(installedVersion)
+                log.info("Initializing $name version: $version...")
+                importOtterMarker()
+                    .doOnComplete {
+                        installedEntityRepo.install(this)
+                        log.info("Marker imported!")
+                        log.info("$name version: $version installed!")
+                    }
+                    .doOnError { e ->
+                        log.error("Error importing marker.", e)
+                    }
+                    .blockingAwait()
             }
     }
 
@@ -84,5 +81,9 @@ class InitializeMarker @Inject constructor(
         ).doAfterSuccess { id: Int ->
             preferences.setPluginId(PluginType.MARKER, id).blockingGet()
         }.ignoreElement()
+    }
+
+    private fun migrate(version: Int) {
+        /* no-op */
     }
 }
