@@ -43,7 +43,7 @@ class Workbook(
             source.slug
         )
     }
-    var modifiedTs = target.modifiedTs
+    val modifiedTs = target.modifiedTs
     val sourceMetadataSlug: String
         get() = source.resourceMetadata.identifier
 
