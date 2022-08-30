@@ -32,20 +32,18 @@ import org.wycliffeassociates.otter.jvm.recorder.app.view.CanvasFragment
 import org.wycliffeassociates.otter.jvm.recorder.app.view.FramerateView
 import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.WaveformLayer
 import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.VolumeBar
-import tornadofx.ViewModel
-import tornadofx.add
-import tornadofx.getValue
-import tornadofx.setValue
 import java.io.File
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseFinishedEvent
-import tornadofx.runLater
+import tornadofx.*
 
 class RecorderViewModel : ViewModel() {
 
-    val parameters = (scope as ParameterizedScope).parameters
-    val targetFile = File(parameters.named["wav"])
+    private val parameters = (scope as ParameterizedScope).parameters
+    private val targetFile = File(parameters.named["wav"])
+    private val sourceLanguageName = parameters.named["source_language"]
+    private val targetLanguageName = parameters.named["language"]
 
     lateinit var tempTake: File
     lateinit var wavAudio: AudioFile
@@ -54,6 +52,7 @@ class RecorderViewModel : ViewModel() {
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
     val recorder = (scope.workspace.params["audioConnectionFactory"] as AudioConnectionFactory).getRecorder()
+    val narrationMode = targetLanguageName == sourceLanguageName
 
     val waveformView = CanvasFragment()
     val volumeBarView = CanvasFragment()

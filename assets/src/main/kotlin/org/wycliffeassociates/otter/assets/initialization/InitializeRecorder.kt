@@ -39,29 +39,28 @@ class InitializeRecorder @Inject constructor(
 ) : Installable {
 
     override val name = "RECORDER"
-    override val version = 26
+    override val version = 30
 
-    val log = LoggerFactory.getLogger(InitializeRecorder::class.java)
+    private val log = LoggerFactory.getLogger(InitializeRecorder::class.java)
 
     override fun exec(): Completable {
         return Completable
             .fromCallable {
-                var installedVersion = installedEntityRepo.getInstalledVersion(this)
-                if (installedVersion != version) {
-                    log.info("Initializing $name version: $version...")
-                    importOtterRecorder()
-                        .doOnComplete {
-                            installedEntityRepo.install(this)
-                            log.info("Recorder imported!")
-                            log.info("$name version: $version installed!")
-                        }
-                        .doOnError { e ->
-                            log.error("Error importing recorder.", e)
-                        }
-                        .blockingAwait()
-                } else {
-                    log.info("$name up to date with version: $version")
-                }
+                var installedVersion = installedEntityRepo.getInstalledVersion(this) ?: 0
+
+                migrate(installedVersion)
+
+                log.info("Initializing $name version: $version...")
+                importOtterRecorder()
+                    .doOnComplete {
+                        installedEntityRepo.install(this)
+                        log.info("Recorder imported!")
+                        log.info("$name version: $version installed!")
+                    }
+                    .doOnError { e ->
+                        log.error("Error importing recorder.", e)
+                    }
+                    .blockingAwait()
             }
     }
 
@@ -85,5 +84,9 @@ class InitializeRecorder @Inject constructor(
         ).doAfterSuccess { id: Int ->
             preferences.setPluginId(PluginType.RECORDER, id)
         }.ignoreElement()
+    }
+
+    private fun migrate(version: Int) {
+        /* no-op */
     }
 }
