@@ -111,9 +111,36 @@ class ResourceMetadataDaoTest {
         }
 
         dao.addLink(1,2)
-        val linked = dao.fetchLinks(1)
-        Assert.assertEquals(1, linked.size)
+        var links = dao.fetchLinks(1)
+
+        Assert.assertEquals(1, links.size)
         Assert.assertEquals(0, dao.fetchLinks(3).size)
+
+        // add non existing link does not crash
+        dao.addLink(999, 1000)
+        links = dao.fetchLinks(999)
+
+        Assert.assertEquals(0, links.size)
+    }
+
+    @Test
+    fun testRemoveLink() {
+        sampleEntities.forEach {
+            dao.insert(it)
+        }
+
+        dao.addLink(1,2)
+        var links = dao.fetchLinks(1)
+
+        Assert.assertEquals(1, links.size)
+
+        dao.removeLink(1, 2)
+        links = dao.fetchLinks(1)
+
+        Assert.assertEquals(0, links.size)
+
+        // remove non existing link does not crash
+        dao.removeLink(999, 1000)
     }
 
     @Test
@@ -145,6 +172,7 @@ class ResourceMetadataDaoTest {
 
         dao.update(updatedEntity)
         val result = dao.fetchById(entity.id)
+
         Assert.assertEquals(updatedEntity, result)
     }
 
@@ -158,10 +186,12 @@ class ResourceMetadataDaoTest {
             dao.delete(entity)
             Assert.fail("Deleting resource metadata with FK constraint should throw an exception")
         } catch (e: DataAccessException) {
+            // not deleted
             Assert.assertNotNull(dao.fetchById(1))
         }
 
         dao.delete(dao.fetchById(4)!!)
+
         Assert.assertNull(dao.fetchById(4))
     }
 
