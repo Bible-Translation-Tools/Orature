@@ -280,9 +280,9 @@ class CollectionRepository @Inject constructor(
     override fun getSource(project: Collection): Maybe<Collection> {
         return Maybe
             .fromCallable {
-                buildCollection(
-                    collectionDao.fetchSource(collectionDao.fetchById(project.id))
-                )
+                collectionDao.fetchSource(collectionDao.fetchById(project.id))?.let {
+                    buildCollection(it)
+                }
             }
             .doOnError { e ->
                 log.error("Error in getSource for collection: $project", e)
