@@ -1,10 +1,12 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.dao
 
+import org.jooq.exception.DataAccessException
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.TestDataStore
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.InsertionException
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.CollectionEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.LanguageMapper
 import java.io.File
@@ -16,25 +18,25 @@ class CollectionDaoTest {
     private lateinit var database: AppDatabase
     private val dao by lazy { database.collectionDao }
 
-    private val defaultCollection = CollectionEntity(
-        id = 0,
-        parentFk = null,
-        sourceFk = null,
-        label = "test",
-        title = "test",
-        slug = "test",
-        sort = 1,
-        dublinCoreFk = 1,
-        modifiedTs = null
-    )
+    companion object {
+        val defaultCollection = CollectionEntity(
+            id = 0,
+            parentFk = null,
+            sourceFk = null,
+            label = "test",
+            title = "test",
+            slug = "test",
+            sort = 1,
+            dublinCoreFk = 1,
+            modifiedTs = null
+        )
+    }
 
     @Before
     fun setup() {
         database = AppDatabase(testDatabaseFile)
         seedLanguages()
-        ResourceMetadataDaoTest.sampleEntities.forEach {
-            database.resourceMetadataDao.insert(it)
-        }
+        seedResourceMetadata()
     }
 
     @Test
@@ -44,6 +46,31 @@ class CollectionDaoTest {
         insertDefaultCollection()
 
         Assert.assertEquals(1, dao.fetchAll().size)
+    }
+
+    @Test
+    fun testInsertThrowsException() {
+        try {
+            dao.insert(
+                defaultCollection.copy(dublinCoreFk = null)
+            )
+            Assert.fail("DublinCore FK must not be null.")
+        } catch (e: DataAccessException) { }
+
+        try {
+            insertDefaultCollection()
+            insertDefaultCollection()
+            Assert.fail("Insert duplicated value for unique field should throw an exception.")
+        } catch (e: DataAccessException) { }
+
+        try {
+            dao.insert(
+                defaultCollection.copy(id = 1)
+            )
+            Assert.fail()
+        } catch (e: InsertionException) {
+            Assert.assertEquals("Entity ID was not 0", e.message)
+        }
     }
 
     @Test
@@ -73,8 +100,8 @@ class CollectionDaoTest {
 
     @Test
     fun testFetchChildren() {
-        insertDefaultCollection()
-        val entity = dao.fetchAll().single()
+        val entityId = insertDefaultCollection()
+        val entity = dao.fetchById(entityId)
         val child1 = entity.copy(id = 0, parentFk = entity.id, slug = "child-1")
         val child2 = entity.copy(id = 0, parentFk = entity.id, slug = "child-2")
 
@@ -92,8 +119,8 @@ class CollectionDaoTest {
 
     @Test
     fun testFetchSource() {
-        insertDefaultCollection()
-        val source = dao.fetchAll().single()
+        val entityId = insertDefaultCollection()
+        val source = dao.fetchById(entityId)
         val target = source.copy(id = 0, sourceFk = source.id, slug = "source-collection")
 
         dao.insert(target)
@@ -105,8 +132,7 @@ class CollectionDaoTest {
 
     @Test
     fun testUpdate() {
-        insertDefaultCollection()
-        val entity = dao.fetchAll().single()
+        val entityId = insertDefaultCollection()
         val updated = CollectionEntity(
             parentFk = null,
             sourceFk = null,
@@ -116,7 +142,7 @@ class CollectionDaoTest {
             sort = 1,
             modifiedTs = "updated",
             dublinCoreFk = 1,
-            id = entity.id
+            id = entityId
         )
 
         dao.update(updated)
@@ -141,8 +167,8 @@ class CollectionDaoTest {
         Assert.assertNull(entity)
     }
 
-    private fun insertDefaultCollection() {
-        dao.insert(defaultCollection)
+    private fun insertDefaultCollection(): Int {
+        return dao.insert(defaultCollection)
     }
 
     private fun seedLanguages() {
@@ -152,5 +178,11 @@ class CollectionDaoTest {
                     LanguageMapper().mapToEntity(it)
                 }
             )
+    }
+
+    private fun seedResourceMetadata() {
+        ResourceMetadataDaoTest.sampleEntities.forEach {
+            database.resourceMetadataDao.insert(it)
+        }
     }
 }
