@@ -119,8 +119,13 @@ class ProjectImporter @Inject constructor(
 
                 directoryProvider.newFileReader(resourceContainer).use { fileReader ->
                     val existingSource = fetchExistingSource(manifestProject, manifestSources)
-                    val sourceCollection = if (existingSource == null) {
+                    try {
+                        // Import Sources even if existing source exists in order to potentially merge source audio
                         importSources(fileReader)
+                    } catch (e: ImportException) {
+                        log.error("Error importing source of resumable project", e)
+                    }
+                    val sourceCollection = if (existingSource == null) {
                         findSourceCollection(manifestSources, manifestProject)
                     } else {
                         existingSource
