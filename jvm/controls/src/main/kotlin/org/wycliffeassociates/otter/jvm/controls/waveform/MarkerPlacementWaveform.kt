@@ -135,7 +135,7 @@ class MarkerPlacementWaveform : StackPane() {
             onSeekNextProperty.bind(onSeekNext)
 
             focusedProperty().onChange {
-                togglePseudoClass("active", it)
+                this@MarkerPlacementWaveform.togglePseudoClass("active", it)
             }
         }
         add(waveformFrame)

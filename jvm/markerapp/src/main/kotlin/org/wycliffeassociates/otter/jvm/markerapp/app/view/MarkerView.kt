@@ -90,10 +90,10 @@ class MarkerView : PluginEntrypoint() {
                     val final = Utils.clamp(0, curFrames - deltaFrames, duration)
                     viewModel.seek(final)
                 }
-                setOnRewind { viewModel::rewind }
-                setOnFastForward { viewModel::fastForward }
-                setOnToggleMedia { viewModel.mediaToggle() }
-                setOnResumeMedia { viewModel.resumeMedia() }
+                setOnRewind(viewModel::rewind)
+                setOnFastForward(viewModel::fastForward)
+                setOnToggleMedia(viewModel::mediaToggle)
+                setOnResumeMedia(viewModel::resumeMedia)
 
                 // Marker stuff
                 imageWidthProperty.bind(viewModel.imageWidthProperty)

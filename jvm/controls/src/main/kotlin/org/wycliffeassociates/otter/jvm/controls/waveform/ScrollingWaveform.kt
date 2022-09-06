@@ -85,7 +85,7 @@ open class ScrollingWaveform : StackPane() {
             onResumeMediaProperty.bind(onResumeMedia)
 
             focusedProperty().onChange {
-                togglePseudoClass("active", it)
+                this@ScrollingWaveform.togglePseudoClass("active", it)
             }
         }
         add(waveformFrame)

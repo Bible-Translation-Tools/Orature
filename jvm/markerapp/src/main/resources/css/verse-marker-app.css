@@ -166,7 +166,7 @@
 .vm-marker-waveform:active {
     -fx-border-width: 4px;
     -fx-border-color: -wa-button-border;
-    -fx-border-insets: -4;
+    -fx-border-insets: -4 -4 4 -4;
 }
 
 .vm-marker-track {
