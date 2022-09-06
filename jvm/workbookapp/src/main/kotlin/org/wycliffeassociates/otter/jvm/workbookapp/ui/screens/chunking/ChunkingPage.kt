@@ -20,7 +20,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
-import javafx.animation.AnimationTimer
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
@@ -28,11 +27,11 @@ import kfoenix.jfxbutton
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingWizardPage
 import tornadofx.*
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 
@@ -52,6 +51,8 @@ class ChunkingPage : View() {
     val settingsViewModel: SettingsViewModel by inject()
 
     val waveform = MarkerPlacementWaveform().apply {
+        addClass("chunking__marker-waveform")
+
         themeProperty.bind(settingsViewModel.appColorMode)
         positionProperty.bind(vm.positionProperty)
 
@@ -66,9 +67,11 @@ class ChunkingPage : View() {
             vm.seek(final)
         }
 
-        setOnPlaceMarker {
-            vm.placeMarker()
-        }
+        setOnToggleMedia(vm::mediaToggle)
+        setOnRewind(vm::rewind)
+        setOnFastForward(vm::fastForward)
+
+        setOnPlaceMarker(vm::placeMarker)
 
         imageWidthProperty.bind(vm.imageWidthProperty)
     }
@@ -181,6 +184,8 @@ class ChunkingPage : View() {
                 }
             }
         }
+
+        shortcut(Shortcut.ADD_MARKER.value, vm::placeMarker)
     }
 
     private fun subscribeOnWaveformImages() {
