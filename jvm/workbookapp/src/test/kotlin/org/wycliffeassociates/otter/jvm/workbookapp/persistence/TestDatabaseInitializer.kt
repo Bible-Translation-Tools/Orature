@@ -39,17 +39,21 @@ import java.io.File
 import kotlin.io.path.createTempDirectory
 
 class TestDatabaseInitializer {
-    private val TEST_DB_VERSION = 8
-
     private val databaseDir = createTempDirectory("otter-database").toFile()
+
     private val databaseFile = databaseDir.resolve(DB_FILE_NAME)
     private val databaseArchiveDir = databaseDir.resolve("archive")
-
     private val oldDatabaseDir = createTempDirectory("otter-old-database").toFile()
+
     private val oldDbFile = oldDatabaseDir.resolve(OLD_DB_FILE_NAME)
 
-    private val schemaFile = File(javaClass.classLoader.getResource("sql/AppDatabaseSchema_v8.sql").file)
-    private val oldSchemaFile = File(javaClass.classLoader.getResource("sql/AppDatabaseSchema0.sql").file)
+    private val TEST_DB_VERSION = 8 // use a fixed version with its corresponding sql schema file
+    private val schemaFile = File(
+        javaClass.classLoader.getResource("sql/AppDatabaseSchema_v$TEST_DB_VERSION.sql").file
+    )
+    private val oldSchemaFile = File(
+        javaClass.classLoader.getResource("sql/AppDatabaseSchema0.sql").file
+    )
 
     private val directoryProviderMock = mock<IDirectoryProvider> {
         on { databaseDirectory } doReturn databaseDir
