@@ -125,10 +125,10 @@ class TestDatabaseInitializer {
         Assert.assertFalse(oldDbFile.exists())
         Assert.assertTrue(databaseFile.exists())
 
-        setDatabaseVersion(TEST_DB_VERSION + 1, databaseFile)
+        setDatabaseVersion(Int.MAX_VALUE, databaseFile)
 
         Assert.assertEquals(
-            TEST_DB_VERSION + 1,
+            Int.MAX_VALUE,
             AppDatabase.getDatabaseVersion(databaseFile)
         )
         Assert.assertTrue(databaseArchiveDir.list().isEmpty())
