@@ -68,9 +68,7 @@ class CollectionDaoTest {
                 defaultCollection.copy(id = 1)
             )
             Assert.fail()
-        } catch (e: InsertionException) {
-            Assert.assertEquals("Entity ID was not 0", e.message)
-        }
+        } catch (e: InsertionException) { }
     }
 
     @Test
