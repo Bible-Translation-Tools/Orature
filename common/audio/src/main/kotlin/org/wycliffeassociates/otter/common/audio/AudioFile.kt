@@ -30,7 +30,7 @@ const val DEFAULT_SAMPLE_RATE = 44100
 const val DEFAULT_CHANNELS = 1
 const val DEFAULT_BITS_PER_SAMPLE = 16
 
-class AudioFile private constructor() {
+open class AudioFile private constructor() {
 
     lateinit var file: File
         private set
@@ -103,7 +103,7 @@ class AudioFile private constructor() {
     val totalFrames: Int
         get() = strategy.totalFrames
 
-    fun update() {
+    open fun update() {
         strategy.update()
     }
 
