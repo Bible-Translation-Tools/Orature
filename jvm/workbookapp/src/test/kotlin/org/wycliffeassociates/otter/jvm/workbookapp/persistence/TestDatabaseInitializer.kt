@@ -35,12 +35,11 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.DATABAS
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.DB_FILE_NAME
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.DatabaseInitializer
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.OLD_DB_FILE_NAME
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.SCHEMA_VERSION
 import java.io.File
 import kotlin.io.path.createTempDirectory
 
 class TestDatabaseInitializer {
-    private val CURRENT_DB_VERSION = SCHEMA_VERSION
+    private val TEST_DB_VERSION = 8
 
     private val databaseDir = createTempDirectory("otter-database").toFile()
     private val databaseFile = databaseDir.resolve(DB_FILE_NAME)
@@ -83,7 +82,7 @@ class TestDatabaseInitializer {
 
         Assert.assertTrue(databaseFile.exists() && databaseFile.length() > 0)
         Assert.assertEquals(
-            CURRENT_DB_VERSION,
+            TEST_DB_VERSION,
             AppDatabase.getDatabaseVersion(databaseFile)
         )
 
@@ -122,10 +121,10 @@ class TestDatabaseInitializer {
         Assert.assertFalse(oldDbFile.exists())
         Assert.assertTrue(databaseFile.exists())
 
-        setDatabaseVersion(CURRENT_DB_VERSION + 1, databaseFile)
+        setDatabaseVersion(TEST_DB_VERSION + 1, databaseFile)
 
         Assert.assertEquals(
-            CURRENT_DB_VERSION + 1,
+            TEST_DB_VERSION + 1,
             AppDatabase.getDatabaseVersion(databaseFile)
         )
         Assert.assertTrue(databaseArchiveDir.list().isEmpty())
