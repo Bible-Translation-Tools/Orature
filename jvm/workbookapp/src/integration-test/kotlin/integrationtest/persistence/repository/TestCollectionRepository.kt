@@ -29,12 +29,13 @@ class TestCollectionRepository {
         db
             .import("en_ulb.zip")
             .import("en_tn.zip")
+            .import("en-x-demo1-ulb-rev.zip")
             .import("en-x-demo1-tn-rev.zip")
             .assertRowCounts(
                 RowCount(
                     contents = mapOf(
                         ContentType.META to 1211,
-                        ContentType.TEXT to 31104,
+                        ContentType.TEXT to 31124,
                         ContentType.TITLE to 81419,
                         ContentType.BODY to 78637
                     ),
@@ -49,18 +50,19 @@ class TestCollectionRepository {
             .from(TAKE_ENTITY)
             .count()
 
-        Assert.assertTrue(takeCount > 0)
+        Assert.assertEquals(6, takeCount)
 
         val project = collectionRepository
             .getDerivedProjects().blockingGet()
             .single()
 
+        // delete resource takes
         collectionRepository.deleteResources(project, true).blockingAwait()
         takeCount = dsl
             .select(TAKE_ENTITY.asterisk())
             .from(TAKE_ENTITY)
             .count()
 
-        Assert.assertEquals(0, takeCount)
+        Assert.assertEquals(3, takeCount)
     }
 }
