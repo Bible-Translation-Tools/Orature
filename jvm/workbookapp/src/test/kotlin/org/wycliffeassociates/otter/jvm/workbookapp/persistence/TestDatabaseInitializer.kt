@@ -35,22 +35,25 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.DATABAS
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.DB_FILE_NAME
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.DatabaseInitializer
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.OLD_DB_FILE_NAME
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.SCHEMA_VERSION
 import java.io.File
 import kotlin.io.path.createTempDirectory
 
 class TestDatabaseInitializer {
-    private val CURRENT_DB_VERSION = SCHEMA_VERSION
-
     private val databaseDir = createTempDirectory("otter-database").toFile()
+
     private val databaseFile = databaseDir.resolve(DB_FILE_NAME)
     private val databaseArchiveDir = databaseDir.resolve("archive")
-
     private val oldDatabaseDir = createTempDirectory("otter-old-database").toFile()
+
     private val oldDbFile = oldDatabaseDir.resolve(OLD_DB_FILE_NAME)
 
-    private val schemaFile = File(javaClass.classLoader.getResource("sql/AppDatabaseSchema_v8.sql").file)
-    private val oldSchemaFile = File(javaClass.classLoader.getResource("sql/AppDatabaseSchema0.sql").file)
+    private val TEST_DB_VERSION = 8 // use a fixed version with its corresponding sql schema file
+    private val schemaFile = File(
+        javaClass.classLoader.getResource("sql/AppDatabaseSchema_v$TEST_DB_VERSION.sql").file
+    )
+    private val oldSchemaFile = File(
+        javaClass.classLoader.getResource("sql/AppDatabaseSchema0.sql").file
+    )
 
     private val directoryProviderMock = mock<IDirectoryProvider> {
         on { databaseDirectory } doReturn databaseDir
@@ -83,7 +86,7 @@ class TestDatabaseInitializer {
 
         Assert.assertTrue(databaseFile.exists() && databaseFile.length() > 0)
         Assert.assertEquals(
-            CURRENT_DB_VERSION,
+            TEST_DB_VERSION,
             AppDatabase.getDatabaseVersion(databaseFile)
         )
 
@@ -122,10 +125,10 @@ class TestDatabaseInitializer {
         Assert.assertFalse(oldDbFile.exists())
         Assert.assertTrue(databaseFile.exists())
 
-        setDatabaseVersion(CURRENT_DB_VERSION + 1, databaseFile)
+        setDatabaseVersion(Int.MAX_VALUE, databaseFile)
 
         Assert.assertEquals(
-            CURRENT_DB_VERSION + 1,
+            Int.MAX_VALUE,
             AppDatabase.getDatabaseVersion(databaseFile)
         )
         Assert.assertTrue(databaseArchiveDir.list().isEmpty())
