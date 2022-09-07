@@ -21,6 +21,7 @@ package integrationtest.di
 import dagger.Component
 import integrationtest.initialization.TestInitializeProjects
 import integrationtest.initialization.TestInitializeUlb
+import integrationtest.persistence.repository.TestCollectionRepository
 import integrationtest.projects.TestProjectCreate
 import integrationtest.projects.TestProjectExport
 import integrationtest.projects.TestProjectImport
@@ -54,4 +55,5 @@ interface TestPersistenceComponent : AppDependencyGraph {
     fun inject(test: TestRemoveRc)
     fun inject(test: TestProjectExport)
     fun inject(test: TestExportSourceProject)
+    fun inject(test: TestCollectionRepository)
 }

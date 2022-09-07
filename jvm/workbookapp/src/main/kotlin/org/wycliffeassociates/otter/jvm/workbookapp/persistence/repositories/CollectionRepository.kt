@@ -30,6 +30,8 @@ import jooq.tables.CollectionEntity.COLLECTION_ENTITY
 import jooq.tables.ContentDerivative.CONTENT_DERIVATIVE
 import jooq.tables.ContentEntity.CONTENT_ENTITY
 import org.jooq.DSLContext
+import org.jooq.Record
+import org.jooq.SelectConditionStep
 import org.jooq.impl.DSL.`val`
 import org.jooq.impl.DSL.and
 import org.jooq.impl.DSL.field
@@ -135,53 +137,17 @@ class CollectionRepository @Inject constructor(
                         .where(
                             RESOURCE_LINK.DUBLIN_CORE_FK.`in`(
                                 // get resources linked to source dublin core
-                                dsl.select(RC_LINK_ENTITY.RC2_FK)
-                                    .from(RC_LINK_ENTITY)
-                                    .where(
-                                        RC_LINK_ENTITY.RC1_FK.`in`(
-                                            // get source dublin core of derived project
-                                            dsl.select(DUBLIN_CORE_ENTITY.DERIVEDFROM_FK)
-                                                .from(DUBLIN_CORE_ENTITY)
-                                                .where(
-                                                    DUBLIN_CORE_ENTITY.ID.`in`(
-                                                        // get dublin core of project
-                                                        dsl.select(COLLECTION_ENTITY.DUBLIN_CORE_FK)
-                                                            .from(COLLECTION_ENTITY)
-                                                            .where(
-                                                                COLLECTION_ENTITY.ID.eq(
-                                                                    project.id
-                                                                )
-                                                            )
-                                                    )
-                                                )
-                                        )
-                                    )
+                                getSourceLinkedRCs(project.id, dsl)
+                                    .fetch {
+                                        it.getValue(RC_LINK_ENTITY.RC2_FK)
+                                    }
                             ).and(
                                 // Filter Resource Content to just what's in the project being deleted
                                 RESOURCE_LINK.RESOURCE_CONTENT_FK.`in`(
-                                    dsl.select(CONTENT_ENTITY.ID)
-                                        .from(CONTENT_ENTITY)
-                                        .where(
-                                            CONTENT_ENTITY.COLLECTION_FK.`in`(
-                                                // Look up the chapter collection the resource content belongs to
-                                                dsl.select(COLLECTION_ENTITY.ID)
-                                                    .from(COLLECTION_ENTITY)
-                                                    .where(
-                                                        COLLECTION_ENTITY.PARENT_FK.`in`(
-                                                            // Look up the project the chapter collection belongs to
-                                                            dsl.select(COLLECTION_ENTITY.ID)
-                                                                .from(COLLECTION_ENTITY)
-                                                                .where(
-                                                                    // We need the source, not the derived,
-                                                                    // just use the slug. It will result in derived results
-                                                                    // in addition to source, but resources aren't attached
-                                                                    // to the derived anyway
-                                                                    COLLECTION_ENTITY.SLUG.eq(project.slug)
-                                                                )
-                                                        )
-                                                    )
-                                            )
-                                        )
+                                    getProjectContentBySlug(project.slug, dsl)
+                                        .fetch {
+                                            it.getValue(CONTENT_ENTITY.ID)
+                                        }
                                 )
                             )
                         )
@@ -196,6 +162,62 @@ class CollectionRepository @Inject constructor(
                 log.error("Error in deleteResources for collection: $project, deleteAudio: $deleteAudio", e)
             }
             .subscribeOn(Schedulers.io())
+    }
+
+    private fun getSourceLinkedRCs(
+        projectId: Int,
+        dsl: DSLContext
+    ): SelectConditionStep<Record> {
+        return dsl.select(RC_LINK_ENTITY.asterisk())
+            .from(RC_LINK_ENTITY)
+            .where(
+                RC_LINK_ENTITY.RC1_FK.`in`(
+                    // get source dublin core of derived project
+                    dsl.select(DUBLIN_CORE_ENTITY.DERIVEDFROM_FK)
+                        .from(DUBLIN_CORE_ENTITY)
+                        .where(
+                            DUBLIN_CORE_ENTITY.ID.`in`(
+                                // get dublin core of project
+                                dsl.select(COLLECTION_ENTITY.DUBLIN_CORE_FK)
+                                    .from(COLLECTION_ENTITY)
+                                    .where(
+                                        COLLECTION_ENTITY.ID.eq(
+                                            projectId
+                                        )
+                                    )
+                            )
+                        )
+                )
+            )
+    }
+
+    private fun getProjectContentBySlug(
+        projectSlug: String,
+        dsl: DSLContext
+    ): SelectConditionStep<Record> {
+        return dsl.select(CONTENT_ENTITY.asterisk())
+            .from(CONTENT_ENTITY)
+            .where(
+                CONTENT_ENTITY.COLLECTION_FK.`in`(
+                    // Look up the chapter collection the resource content belongs to
+                    dsl.select(COLLECTION_ENTITY.ID)
+                        .from(COLLECTION_ENTITY)
+                        .where(
+                            COLLECTION_ENTITY.PARENT_FK.`in`(
+                                // Look up the project the chapter collection belongs to
+                                dsl.select(COLLECTION_ENTITY.ID)
+                                    .from(COLLECTION_ENTITY)
+                                    .where(
+                                        // We need the source, not the derived,
+                                        // just use the slug. It will result in derived results
+                                        // in addition to source, but resources aren't attached
+                                        // to the derived anyway
+                                        COLLECTION_ENTITY.SLUG.eq(projectSlug)
+                                    )
+                            )
+                        )
+                )
+            )
     }
 
     override fun collectionsWithoutTakes(project: Collection): Single<List<Collection>> {
