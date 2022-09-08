@@ -6,6 +6,7 @@ import org.junit.Test
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.TestDataStore
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.InsertionException
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.ContentTypeDao
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.RecordMappers
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ContentEntity
@@ -46,10 +47,23 @@ class ContentDaoTest {
     }
 
     @Test
-    fun testNoReturn() {
+    fun testInsertNoReturn() {
         Assert.assertEquals(0, dao.fetchAll().size)
         dao.insertNoReturn(defaultEntity)
         Assert.assertEquals(1, dao.fetchAll().size)
+    }
+
+    @Test
+    fun testInsertThrowsException() {
+        try {
+            dao.insert(defaultEntity.copy(id = 1))
+            Assert.fail("Insert entity must have zero id")
+        } catch (e: InsertionException) { }
+
+        try {
+            dao.insertNoReturn(defaultEntity.copy(id = 1))
+            Assert.fail("Insert entity must have zero id")
+        } catch (e: InsertionException) { }
     }
 
     @Test
