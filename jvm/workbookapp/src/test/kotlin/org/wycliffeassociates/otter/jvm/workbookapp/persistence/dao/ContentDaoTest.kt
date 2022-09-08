@@ -7,6 +7,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.TestDataStore
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.ContentTypeDao
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.RecordMappers
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ContentEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.ContentMapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.LanguageMapper
@@ -20,6 +21,7 @@ class ContentDaoTest {
     private val dao by lazy { database.contentDao }
 
     private lateinit var defaultEntity: ContentEntity
+    private var defaultProjectId = 0 // updated after insertion
 
     @Before
     fun setup() {
@@ -31,7 +33,7 @@ class ContentDaoTest {
             .mapToEntity(TestDataStore.content.first())
             .copy(
                 id = 0,
-                collectionFk = database.collectionDao.fetchAll().first().id,
+                collectionFk = defaultProjectId,
                 selectedTakeFk = null
             )
     }
@@ -87,6 +89,35 @@ class ContentDaoTest {
 
         Assert.assertEquals(1, result.size)
         Assert.assertEquals(chapter, result.first())
+    }
+
+    @Test
+    fun testFetchContentByProjectSlug() {
+        val chapterCollectionId = database.collectionDao
+            .insert(
+                CollectionDaoTest.defaultCollection
+                    .copy(
+                        slug = "chapter-test",
+                        title = "chapter-test",
+                        label = "chapter-test",
+                        sort = 2,
+                        parentFk = defaultProjectId
+                    )
+            )
+        dao.insert(
+            defaultEntity.copy(
+                collectionFk = chapterCollectionId
+            )
+        )
+
+        val contents = dao.fetchContentByProjectSlug(
+            CollectionDaoTest.defaultCollection.slug
+        ).fetch {
+            RecordMappers.mapToContentEntity(it)
+        }
+
+        Assert.assertEquals(1, contents.size)
+        Assert.assertEquals(chapterCollectionId, contents.first().collectionFk)
     }
 
     @Test
@@ -158,7 +189,7 @@ class ContentDaoTest {
     }
 
     private fun seedCollections() {
-        database.collectionDao
+        defaultProjectId = database.collectionDao
             .insert(CollectionDaoTest.defaultCollection)
     }
 }

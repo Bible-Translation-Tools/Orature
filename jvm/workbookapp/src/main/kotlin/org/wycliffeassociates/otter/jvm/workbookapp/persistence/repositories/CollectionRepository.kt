@@ -48,6 +48,7 @@ import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.ContentDao
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.CollectionEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ResourceMetadataEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.CollectionMapper
@@ -75,6 +76,7 @@ class CollectionRepository @Inject constructor(
 
     private val dublinCoreCreator: String = OratureInfo.SUITE_NAME
     private val collectionDao = database.collectionDao
+    private val contentDao = database.contentDao
     private val metadataDao = database.resourceMetadataDao
     private val languageDao = database.languageDao
     private val resourceMetadataDao = database.resourceMetadataDao
@@ -144,7 +146,7 @@ class CollectionRepository @Inject constructor(
                             ).and(
                                 // Filter Resource Content to just what's in the project being deleted
                                 RESOURCE_LINK.RESOURCE_CONTENT_FK.`in`(
-                                    getProjectContentBySlug(project.slug, dsl)
+                                    contentDao.fetchContentByProjectSlug(project.slug, dsl)
                                         .fetch {
                                             it.getValue(CONTENT_ENTITY.ID)
                                         }
@@ -184,35 +186,6 @@ class CollectionRepository @Inject constructor(
                                         COLLECTION_ENTITY.ID.eq(
                                             projectId
                                         )
-                                    )
-                            )
-                        )
-                )
-            )
-    }
-
-    private fun getProjectContentBySlug(
-        projectSlug: String,
-        dsl: DSLContext
-    ): SelectConditionStep<Record> {
-        return dsl.select(CONTENT_ENTITY.asterisk())
-            .from(CONTENT_ENTITY)
-            .where(
-                CONTENT_ENTITY.COLLECTION_FK.`in`(
-                    // Look up the chapter collection the resource content belongs to
-                    dsl.select(COLLECTION_ENTITY.ID)
-                        .from(COLLECTION_ENTITY)
-                        .where(
-                            COLLECTION_ENTITY.PARENT_FK.`in`(
-                                // Look up the project the chapter collection belongs to
-                                dsl.select(COLLECTION_ENTITY.ID)
-                                    .from(COLLECTION_ENTITY)
-                                    .where(
-                                        // We need the source, not the derived,
-                                        // just use the slug. It will result in derived results
-                                        // in addition to source, but resources aren't attached
-                                        // to the derived anyway
-                                        COLLECTION_ENTITY.SLUG.eq(projectSlug)
                                     )
                             )
                         )
