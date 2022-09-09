@@ -52,8 +52,6 @@ class CollectionDaoTest {
     fun setup() {
         database = AppDatabase(testDatabaseFile)
         database.dsl.execute("PRAGMA foreign_keys = OFF;")
-//        seedLanguages()
-//        seedResourceMetadata()
     }
 
     @Test
