@@ -24,6 +24,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.TestDataStore
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.InsertionException
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.LanguageEntity
@@ -37,17 +38,13 @@ class LanguageDaoTest {
     private lateinit var database: AppDatabase
     private val dao by lazy { database.languageDao }
 
-    private val languages = listOf(
-        Language("aa", "Afar", "Afaraf", "ltr", false, "Africa"),
-        Language("en", "English", "English", "ltr", true, "Europe"),
-        Language("ade", "Adele", "Adele", "ltr", false, "Africa")
-    )
+    private val languages = TestDataStore.languages
 
     @Before
     fun setup() {
         database = AppDatabase(testDatabaseFile)
         dao.insertAll(
-            languages.map { LanguageMapper().mapToEntity(it) }
+            TestDataStore.languages.map { LanguageMapper().mapToEntity(it) }
         )
     }
 
@@ -107,14 +104,14 @@ class LanguageDaoTest {
     @Test
     fun testFetchGateway() {
         val gwLanguages = dao.fetchGateway()
-        Assert.assertEquals(1, gwLanguages.size)
+        Assert.assertEquals(2, gwLanguages.size)
         Assert.assertTrue(gwLanguages.all { it.gateway == 1 })
     }
 
     @Test
     fun testFetchTargets() {
         val targetLanguages = dao.fetchTargets()
-        Assert.assertEquals(2, targetLanguages.size)
+        Assert.assertEquals(3, targetLanguages.size)
         Assert.assertTrue(targetLanguages.all { it.gateway == 0 })
     }
 
@@ -158,7 +155,7 @@ class LanguageDaoTest {
 
     @Test
     fun testUpdateLanguageThrowsException() {
-        val aa = languages.find { it.slug == "aa" }!!
+        val aa = languages.find { it.slug == "ar" }!!
         val entity = dao.fetchBySlug("en")!!
 
         val duplicated = entity.copy(

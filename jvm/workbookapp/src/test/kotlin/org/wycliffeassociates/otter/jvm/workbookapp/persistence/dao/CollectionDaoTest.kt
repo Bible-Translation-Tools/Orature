@@ -22,11 +22,9 @@ import org.jooq.exception.DataAccessException
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.TestDataStore
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.InsertionException
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.CollectionEntity
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.LanguageMapper
 import java.io.File
 
 class CollectionDaoTest {
@@ -53,8 +51,9 @@ class CollectionDaoTest {
     @Before
     fun setup() {
         database = AppDatabase(testDatabaseFile)
-        seedLanguages()
-        seedResourceMetadata()
+        database.dsl.execute("PRAGMA foreign_keys = OFF;")
+//        seedLanguages()
+//        seedResourceMetadata()
     }
 
     @Test
@@ -185,20 +184,5 @@ class CollectionDaoTest {
 
     private fun insertDefaultCollection(): Int {
         return dao.insert(defaultCollection)
-    }
-
-    private fun seedLanguages() {
-        database.languageDao
-            .insertAll(
-                TestDataStore.languages.map {
-                    LanguageMapper().mapToEntity(it)
-                }
-            )
-    }
-
-    private fun seedResourceMetadata() {
-        ResourceMetadataDaoTest.sampleEntities.forEach {
-            database.resourceMetadataDao.insert(it)
-        }
     }
 }

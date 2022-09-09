@@ -29,7 +29,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.Co
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.RecordMappers
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ContentEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.ContentMapper
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.LanguageMapper
 import java.io.File
 
 class ContentDaoTest {
@@ -40,19 +39,18 @@ class ContentDaoTest {
     private val dao by lazy { database.contentDao }
 
     private lateinit var defaultEntity: ContentEntity
-    private var defaultProjectId = 0 // updated after insertion
+    private var defaultCollectionId = 999
 
     @Before
     fun setup() {
         database = AppDatabase(testDatabaseFile)
-        seedLanguages()
-        seedResourceMetadata()
-        seedCollections()
+        database.dsl.execute("PRAGMA foreign_keys = OFF;")
+
         defaultEntity = ContentMapper(database.contentTypeDao)
             .mapToEntity(TestDataStore.content.first())
             .copy(
                 id = 0,
-                collectionFk = defaultProjectId,
+                collectionFk = defaultCollectionId,
                 selectedTakeFk = null
             )
     }
@@ -87,8 +85,7 @@ class ContentDaoTest {
     @Test
     fun testFetchByCollectionId() {
         insertDefault()
-        val collectionId = database.collectionDao.fetchAll().first().id
-        val result = dao.fetchByCollectionId(collectionId)
+        val result = dao.fetchByCollectionId(defaultCollectionId)
 
         Assert.assertEquals(1, result.size)
     }
@@ -96,9 +93,9 @@ class ContentDaoTest {
     @Test
     fun testFetchByCollectionIdAndType() {
         insertDefault()
-        val collectionId = database.collectionDao.fetchAll().first().id
-        val result = dao.fetchByCollectionIdAndType(collectionId, ContentType.TEXT)
-        val emptyResult = dao.fetchByCollectionIdAndType(collectionId, ContentType.BODY)
+//        val collectionId = dao.collectionDao.fetchAll().first().id
+        val result = dao.fetchByCollectionIdAndType(defaultCollectionId, ContentType.TEXT)
+        val emptyResult = dao.fetchByCollectionIdAndType(defaultCollectionId, ContentType.BODY)
 
         Assert.assertEquals(1, result.size)
         Assert.assertEquals(0, emptyResult.size)
@@ -125,6 +122,9 @@ class ContentDaoTest {
 
     @Test
     fun testFetchContentByProjectSlug() {
+        val projectId = database.collectionDao.insert(
+            CollectionDaoTest.defaultCollection
+        )
         val chapterCollectionId = database.collectionDao
             .insert(
                 CollectionDaoTest.defaultCollection
@@ -133,7 +133,7 @@ class ContentDaoTest {
                         title = "chapter-test",
                         label = "chapter-test",
                         sort = 2,
-                        parentFk = defaultProjectId
+                        parentFk = projectId
                     )
             )
         dao.insert(
@@ -191,37 +191,16 @@ class ContentDaoTest {
     }
 
     private fun insertAllSamples() {
-        val collectionId = database.collectionDao.fetchAll().first().id
         val mapper = ContentMapper(database.contentTypeDao)
 
         TestDataStore.content.forEach {
             val contentEntity = mapper.mapToEntity(it)
                 .copy(
                     id = 0,
-                    collectionFk = collectionId,
+                    collectionFk = 9999,
                     selectedTakeFk = null
                 )
             dao.insert(contentEntity)
         }
-    }
-
-    private fun seedLanguages() {
-        database.languageDao
-            .insertAll(
-                TestDataStore.languages.map {
-                    LanguageMapper().mapToEntity(it)
-                }
-            )
-    }
-
-    private fun seedResourceMetadata() {
-        ResourceMetadataDaoTest.sampleEntities.forEach {
-            database.resourceMetadataDao.insert(it)
-        }
-    }
-
-    private fun seedCollections() {
-        defaultProjectId = database.collectionDao
-            .insert(CollectionDaoTest.defaultCollection)
     }
 }

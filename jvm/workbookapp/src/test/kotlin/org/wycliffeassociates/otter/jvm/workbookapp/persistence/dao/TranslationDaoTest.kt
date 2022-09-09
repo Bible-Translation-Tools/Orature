@@ -26,11 +26,9 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
-import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.InsertionException
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.TranslationEntity
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.LanguageMapper
 import java.io.File
 import java.time.LocalDateTime
 
@@ -42,22 +40,16 @@ class TranslationDaoTest {
     private val dao by lazy { database.translationDao }
     private val languageDao by lazy { database.languageDao }
 
-    private val languages = listOf(
-        Language("en", "English", "English", "ltr", true, "US", 1),
-        Language("en-test", "English-test", "English-test", "ltr", true, "US", 2)
-    )
+    private val firstId = 1
+    private val secondId = 2
     private val sampleTranslation = TranslationEntity(
-        0, languages[0].id, languages[1].id, null, 1.0, 1.0
+        0, firstId, secondId, null, 1.0, 1.0
     )
 
     @Before
     fun setup() {
         database = AppDatabase(testDatabaseFile)
-        languages.map {
-            LanguageMapper().mapToEntity(it)
-        }.also {
-            languageDao.insertAll(it)
-        }
+        database.dsl.execute("PRAGMA foreign_keys = OFF;")
     }
 
     @After
@@ -71,17 +63,13 @@ class TranslationDaoTest {
 
     @Test
     fun testInsertTranslation() {
-        val firstLanguage = languages[0]
-        val secondLanguage = languages[1]
-        var result = 0
-
-        result = dao.insert(
-            sampleTranslation.copy(sourceFk = firstLanguage.id, targetFk = secondLanguage.id)
+        var result = dao.insert(
+            sampleTranslation.copy(sourceFk = firstId, targetFk = secondId)
         )
         assertEquals(1, result)
 
         result = dao.insert(
-            sampleTranslation.copy(sourceFk = secondLanguage.id, targetFk = firstLanguage.id)
+            sampleTranslation.copy(sourceFk = secondId, targetFk = secondId)
         )
         assertEquals(2, result)
     }
@@ -91,7 +79,7 @@ class TranslationDaoTest {
         insertDefault()
         assertEquals(1, dao.fetchAll().size)
         assertNotNull(
-            dao.fetch(languages[0].id, languages[1].id)
+            dao.fetch(firstId, secondId)
         )
     }
 
@@ -121,8 +109,8 @@ class TranslationDaoTest {
         insertDefault()
         val original = dao.fetchAll().first()
         val updated = original.copy(
-            sourceFk = languages[0].id,
-            targetFk = languages[0].id,
+            sourceFk = firstId,
+            targetFk = firstId,
             modifiedTs = LocalDateTime.now().toString()
         )
 
