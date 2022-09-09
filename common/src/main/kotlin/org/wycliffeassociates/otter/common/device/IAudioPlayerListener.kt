@@ -18,6 +18,20 @@
  */
 package org.wycliffeassociates.otter.common.device
 
+import java.lang.ref.WeakReference
+
 interface IAudioPlayerListener {
     fun onEvent(event: AudioPlayerEvent)
+}
+
+
+class WeakAudioListener(listener: IAudioPlayerListener) : IAudioPlayerListener {
+    private val wref: WeakReference<IAudioPlayerListener>
+    init {
+        wref = WeakReference(listener)
+    }
+
+    override fun onEvent(event: AudioPlayerEvent) {
+        wref.get()?.onEvent(event)
+    }
 }

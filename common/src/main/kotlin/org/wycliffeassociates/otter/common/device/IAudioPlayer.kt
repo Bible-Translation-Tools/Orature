@@ -25,7 +25,14 @@ interface IAudioPlayer {
     val frameStart: Int
     val frameEnd: Int
     fun addEventListener(listener: IAudioPlayerListener)
-    fun addEventListener(onEvent: (event: AudioPlayerEvent) -> Unit)
+    fun addEventListener(onEvent: (event: AudioPlayerEvent) -> Unit) {
+        addEventListener(WeakAudioListener(object : IAudioPlayerListener {
+            override fun onEvent(event: AudioPlayerEvent) {
+                onEvent(event)
+            }
+        }))
+    }
+
     fun load(file: File)
     fun loadSection(file: File, frameStart: Int, frameEnd: Int)
     fun getAudioReader(): AudioFileReader?
