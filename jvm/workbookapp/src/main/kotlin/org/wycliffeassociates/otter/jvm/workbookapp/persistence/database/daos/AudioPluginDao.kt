@@ -87,7 +87,7 @@ class AudioPluginDao(
             }
     }
 
-    fun fetchById(id: Int, dsl: DSLContext = instanceDsl): AudioPluginEntity {
+    fun fetchById(id: Int, dsl: DSLContext = instanceDsl): AudioPluginEntity? {
         return dsl
             .select()
             .from(AUDIO_PLUGIN_ENTITY)
@@ -115,6 +115,7 @@ class AudioPluginDao(
             .set(AUDIO_PLUGIN_ENTITY.ARGS, entity.args)
             .set(AUDIO_PLUGIN_ENTITY.EDIT, entity.edit)
             .set(AUDIO_PLUGIN_ENTITY.RECORD, entity.record)
+            .set(AUDIO_PLUGIN_ENTITY.MARK, entity.mark)
             .set(AUDIO_PLUGIN_ENTITY.PATH, entity.path)
             .where(AUDIO_PLUGIN_ENTITY.ID.eq(entity.id))
             .execute()
