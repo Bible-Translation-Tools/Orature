@@ -74,7 +74,6 @@ class AudioPlayerController(
         player = null
         startAtLocation = 0
         isPlayingProperty.set(false)
-        disposable?.dispose()
     }
 
     fun toggle() {
