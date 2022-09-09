@@ -21,7 +21,7 @@ package org.wycliffeassociates.otter.jvm.controls.controllers
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import io.reactivex.Observable
-import io.reactivex.disposables.Disposable
+import java.lang.ref.WeakReference
 import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
@@ -38,7 +38,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 const val DURATION_FORMAT = "%02d:%02d" // mm:ss
-private const val ANIMATION_REFRESH_MS = 16L
+private const val ANIMATION_REFRESH_MS = 32L // 30fps
 const val SEEK_INTERVAL = 0.1
 const val FAST_SEEK_INTERVAL = 1.0
 
@@ -54,11 +54,12 @@ class AudioPlayerController(
     private val logger = LoggerFactory.getLogger(AudioPlayerController::class.java)
 
     private var startAtLocation = 0
-    private var disposable: Disposable? = null
     private var resumeAfterDrag = false
 
     val isPlayingProperty = SimpleBooleanProperty(false)
     val playbackRateProperty = SimpleDoubleProperty(1.0)
+
+    private var timerListener: ITimerListener? = null
 
     init {
         initializeSliderActions()
@@ -97,12 +98,10 @@ class AudioPlayerController(
         audioSlider?.value = 0.0
         audioSlider?.max = player.getDurationInFrames().toDouble()
         startAtLocation = 0
-
         this.player = player
-        disposable?.dispose()
-        disposable = startProgressUpdate()
-
         setPlaybackRate(playbackRateProperty.value)
+
+        subscribeToTimer()
 
         player.addEventListener {
             if (
@@ -120,8 +119,23 @@ class AudioPlayerController(
                         }
                     }
                 }
+            } else if (it == AudioPlayerEvent.PLAY) {
+                Platform.runLater {
+                    isPlayingProperty.set(true)
+                }
             }
         }
+    }
+
+    private fun subscribeToTimer() {
+        timerListener = object : ITimerListener {
+            override var isGarbageCollected: Boolean = false
+            override fun onTick() {
+                if (isPlayingProperty.value == true && audioSlider?.isValueChanging == false) {
+                    audioSlider?.value = playbackPosition().toDouble()
+                }
+            }
+        }.also { SliderTimer.addListener(it) }
     }
 
     private fun initializeSliderActions() {
@@ -179,25 +193,6 @@ class AudioPlayerController(
                 }
             }
         }
-    }
-
-    private fun startProgressUpdate(): Disposable {
-        return Observable
-            .interval(ANIMATION_REFRESH_MS, TimeUnit.MILLISECONDS)
-            .observeOnFx()
-            .doOnError { e ->
-                logger.error("Error in startProgressUpdate", e)
-            }
-            .subscribe {
-                if (player?.isPlaying() == true) {
-                    isPlayingProperty.set(true)
-                } else {
-                    isPlayingProperty.set(false)
-                }
-                if (player?.isPlaying() == true && audioSlider?.isValueChanging == false) {
-                    audioSlider?.value = playbackPosition().toDouble()
-                }
-            }
     }
 
     private fun play() {
@@ -280,4 +275,44 @@ fun framesToTimecode(value: Double, sampleRate: Int = DEFAULT_SAMPLE_RATE): Stri
     val min = TimeUnit.MILLISECONDS.toMinutes(durationMs)
     val sec = TimeUnit.MILLISECONDS.toSeconds(durationMs) % 60
     return DURATION_FORMAT.format(min, sec)
+}
+
+private interface ITimerListener {
+    var isGarbageCollected: Boolean
+    fun onTick()
+}
+
+private object SliderTimer {
+    class WeakTimerListener(listener: ITimerListener) : ITimerListener {
+        override var isGarbageCollected = false
+        private val wref = WeakReference(listener)
+
+        override fun onTick() {
+            wref.get()?.onTick() ?: kotlin.run { isGarbageCollected = true }
+        }
+    }
+
+    private val listeners = mutableListOf<ITimerListener>()
+
+    init {
+        startTimer()
+    }
+
+    private fun startTimer() {
+        Observable
+            .interval(ANIMATION_REFRESH_MS, TimeUnit.MILLISECONDS)
+            .observeOnFx()
+            .subscribe {
+                synchronized(SliderTimer) {
+                    listeners.removeIf { it.isGarbageCollected }
+                    listeners.forEach { it.onTick() }
+                }
+            }
+    }
+
+    fun addListener(listener: ITimerListener) {
+        synchronized(SliderTimer) {
+            listeners.add(WeakTimerListener(listener))
+        }
+    }
 }
