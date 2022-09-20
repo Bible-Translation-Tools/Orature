@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui
 
 import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleObjectProperty
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
@@ -41,6 +42,7 @@ class NavigationMediator : Component(), ScopedInstance {
     val workbookDataStore: WorkbookDataStore by inject()
     val breadCrumbsBar = BreadcrumbBar()
     private val pluginOpenedProperty = SimpleBooleanProperty(false)
+    private val returningView = SimpleObjectProperty<View>(null)
     private var appExitRequested = false
 
     private val recorderBreadCrumb = BreadCrumb().apply {
@@ -93,6 +95,7 @@ class NavigationMediator : Component(), ScopedInstance {
         }
         subscribe<NavigationRequestEvent> {
             if (pluginOpenedProperty.value) {
+                returningView.set(it.view)
                 fire(PluginCloseRequestEvent)
             } else {
                 dock(it.view)
@@ -100,6 +103,10 @@ class NavigationMediator : Component(), ScopedInstance {
         }
         subscribe<PluginCloseFinishedEvent> {
             back()
+            returningView.value?.let { view ->
+                dock(view)
+                returningView.set(null)
+            }
             if (appExitRequested) {
                 runLater {
                     Platform.exit()

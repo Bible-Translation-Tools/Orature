@@ -32,7 +32,9 @@ task createDb {
     text.collect { it.trim() }.findAll { !it.isEmpty() && !it.startsWith("--") }.each {
         def sql = Sql.newInstance(sqliteConnect, "org.sqlite.JDBC")
         sql.execute(it)
-        sql.close()
+        if(!(System.getProperty("os.name")).toUpperCase().contains("MAC")) {
+            sql.close()
+        }
     }
 }
 
