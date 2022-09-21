@@ -243,18 +243,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
     }
 
     private fun getChunkSourceText(): Maybe<String> {
-        chunk?.let { chunk ->
-            val accessor = ProjectFilesAccessor(
-                directoryProvider,
-                workbook.source.resourceMetadata,
-                workbook.target.resourceMetadata,
-                workbook.target
-            )
-            val verses = accessor.getChunkText(workbook.source.slug, chapter.sort, chunk.start, chunk.end)
-            val text = combineVerses(verses)
-            return Maybe.just(text)
-        }
-        return Maybe.just("")
+        return Maybe.just(chunk?.textItem?.text ?: "")
     }
 
     private fun combineVerses(verses: List<String>): String {
