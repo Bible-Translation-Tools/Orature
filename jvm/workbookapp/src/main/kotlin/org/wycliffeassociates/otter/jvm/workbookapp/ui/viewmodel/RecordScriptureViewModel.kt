@@ -144,12 +144,24 @@ class RecordScriptureViewModel : ViewModel() {
         }.let(listeners::add)
 
         verseCountProperty.bind(
-            workbookDataStore.activeProjectFilesAccessorProperty.objectBinding {
-                it?.getChapterText(
-                    workbookDataStore.workbook.target.slug,
-                    activeChapter.sort
-                )?.size ?: 0
-            }
+            Bindings.createIntegerBinding(
+                {
+                    // no verse count in chunk/verse page
+                    if (activeChunkProperty.value != null) {
+                        0
+                    } else {
+                        val projectAccessor = workbookDataStore.activeProjectFilesAccessorProperty
+                        projectAccessor.value?.let {
+                            it.getChapterText(
+                                workbookDataStore.workbook.target.slug,
+                                activeChapter.sort
+                            ).size
+                        } ?: 0
+                    }
+                },
+                workbookDataStore.activeProjectFilesAccessorProperty,
+                activeChunkProperty
+            )
         )
 
         activeChapterProperty.onChangeAndDoNowWithDisposer { chapter ->
@@ -347,6 +359,7 @@ class RecordScriptureViewModel : ViewModel() {
         }
         val nextIndex = chapterList.indexOf(activeChapter) + amount
         chapterList.elementAtOrNull(nextIndex)?.let { activeChapterProperty.set(it) }
+        highlightedChunkProperty.set(-1)
     }
 
     private fun stepToChunk(direction: StepDirection) {
