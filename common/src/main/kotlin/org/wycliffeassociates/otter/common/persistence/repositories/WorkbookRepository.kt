@@ -644,14 +644,27 @@ private class DefaultDatabaseAccessors(
     }
 
     override fun addContentForCollection(collection: Collection, chunks: List<Content>): Completable {
+
         return Observable
             .fromArray(*chunks.toTypedArray())
-            .map {
-                contentRepo.insertForCollection(it, collection)
+            .map { content ->
+                contentRepo.insertForCollection(content, collection)
+                    .blockingGet()
+                    .let { contentId ->
+                        content.copy(
+                            id = contentId
+                        )
+                    }
             }
-            .map { it.toObservable() }
-            .flatMap { it }
-            .collectInto(mutableListOf<Int>()) { l, i -> l.add(i) }
+            .toList()
+            .map {
+                val sourceContents = collectionRepo.getSource(collection)
+                    .blockingGet()
+                    .let { collection ->
+                        contentRepo.getByCollection(collection).blockingGet()
+                    }
+                contentRepo.linkDerivedToSource(it, sourceContents)
+            }
             .ignoreElement()
     }
 

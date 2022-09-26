@@ -201,6 +201,15 @@ class ContentRepository @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
+    override fun linkDerivedToSource(derivedContents: List<Content>, sourceContents: List<Content>) {
+        derivedContents.forEach { content ->
+            for (verse in content.start .. content.end) {
+                val sourceId = sourceContents.first { it.sort == verse }.id
+                contentDao.linkDerivative(content.id, sourceId)
+            }
+        }
+    }
+
     private fun buildContent(entity: ContentEntity): Content {
         // Check for sources
         val sources = contentDao.fetchSources(entity)
