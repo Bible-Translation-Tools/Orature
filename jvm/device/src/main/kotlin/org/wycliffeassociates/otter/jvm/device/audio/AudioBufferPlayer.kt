@@ -91,7 +91,6 @@ class AudioBufferPlayer(
         reader?.let { close() }
         begin = frameStart
         end = frameEnd
-        logger.info("Loading mp3 file ${file.name} from start: $frameStart to end: $end")
         reader = AudioFile(file).reader(frameStart, frameEnd).let { _reader ->
             bytes = ByteArray(processor.inputBufferSize * 2)
             listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
