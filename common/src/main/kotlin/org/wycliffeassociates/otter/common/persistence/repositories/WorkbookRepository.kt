@@ -644,7 +644,6 @@ private class DefaultDatabaseAccessors(
     }
 
     override fun addContentForCollection(collection: Collection, chunks: List<Content>): Completable {
-
         return Observable
             .fromArray(*chunks.toTypedArray())
             .map { content ->
@@ -657,15 +656,14 @@ private class DefaultDatabaseAccessors(
                     }
             }
             .toList()
-            .map {
+            .flatMapCompletable { contents ->
                 val sourceContents = collectionRepo.getSource(collection)
                     .blockingGet()
                     .let { collection ->
                         contentRepo.getByCollection(collection).blockingGet()
                     }
-                contentRepo.linkDerivedToSource(it, sourceContents)
+                contentRepo.linkDerivedToSource(contents, sourceContents)
             }
-            .ignoreElement()
     }
 
     override fun getChildren(collection: Collection) = collectionRepo.getChildren(collection)

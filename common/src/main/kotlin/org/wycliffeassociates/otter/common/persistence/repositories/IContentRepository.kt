@@ -41,5 +41,8 @@ interface IContentRepository : IRepository<Content> {
         chapterCollection: Collection,
         typeFilter: ContentType? = null
     ): Completable
-    fun linkDerivedToSource(derivedContents: List<Content>, sourceContents: List<Content>)
+    fun linkDerivedToSource(
+        derivedContents: List<Content>,
+        sourceContents: List<Content>
+    ): Completable
 }

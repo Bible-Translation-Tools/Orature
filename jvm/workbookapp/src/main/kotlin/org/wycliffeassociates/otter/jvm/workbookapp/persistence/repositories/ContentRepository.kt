@@ -201,11 +201,16 @@ class ContentRepository @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
-    override fun linkDerivedToSource(derivedContents: List<Content>, sourceContents: List<Content>) {
-        derivedContents.forEach { content ->
-            for (verse in content.start .. content.end) {
-                val sourceId = sourceContents.first { it.sort == verse }.id
-                contentDao.linkDerivative(content.id, sourceId)
+    override fun linkDerivedToSource(
+        derivedContents: List<Content>,
+        sourceContents: List<Content>
+    ): Completable {
+        return Completable.fromAction {
+            derivedContents.forEach { content ->
+                for (verse in content.start .. content.end) {
+                    val sourceId = sourceContents.first { it.sort == verse }.id
+                    contentDao.linkDerivative(content.id, sourceId)
+                }
             }
         }
     }
