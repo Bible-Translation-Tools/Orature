@@ -39,12 +39,6 @@ private const val FMT = "fmt "
 private const val DATA = "data"
 private const val PCM: Short = 1
 
-internal const val WAV_HEADER_SIZE = 44
-private const val AUDIO_LENGTH_LOCATION = 40
-private const val PCM_POSITION = 20
-private const val CHANNEL_POSITION = 22
-private const val SAMPLE_RATE_POSITION = 24
-private const val BITS_PER_SAMPLE_POSITION = 34
 private const val BITS_IN_BYTE = 8
 
 class InvalidWavFileException(message: String? = null) : Exception(message)
@@ -59,6 +53,7 @@ class WavFile private constructor() : AudioFormatStrategy {
     internal lateinit var file: File
         private set
 
+
     override var sampleRate: Int = DEFAULT_SAMPLE_RATE
         private set
     override var channels: Int = DEFAULT_CHANNELS
@@ -69,6 +64,9 @@ class WavFile private constructor() : AudioFormatStrategy {
 
     override val totalFrames: Int
         get() = totalAudioLength / frameSizeInBytes
+
+    var headerSize: Int = 44
+        private set
 
     override fun addCue(location: Int, label: String) {
         metadata.addCue(location, label)
@@ -102,7 +100,17 @@ class WavFile private constructor() : AudioFormatStrategy {
     constructor(file: File, wavMetadata: WavMetadata = WavMetadata()) : this() {
         this.file = file
         this.metadata = wavMetadata
-        parseHeader()
+
+        val header = WavHeader()
+        header.parse(file)
+
+        channels = header.channels
+        sampleRate = header.sampleRate
+        bitsPerSample = header.bitsPerSample
+        totalAudioLength = header.totalAudioLength
+        totalDataLength = header.totalDataLength
+        headerSize = header.totalHeaderSize
+
         parseMetadata()
     }
 
@@ -137,11 +145,11 @@ class WavFile private constructor() : AudioFormatStrategy {
     @Throws(IOException::class)
     internal fun finishWrite(totalAudioLength: Int) {
         this.totalAudioLength = totalAudioLength
-        this.totalDataLength = WAV_HEADER_SIZE - CHUNK_HEADER_SIZE + totalAudioLength + metadata.totalSize
+        this.totalDataLength = headerSize - CHUNK_HEADER_SIZE + totalAudioLength + metadata.totalSize
     }
 
     internal fun initializeWavFile() {
-        totalDataLength = WAV_HEADER_SIZE - CHUNK_HEADER_SIZE
+        totalDataLength = headerSize - CHUNK_HEADER_SIZE
         totalAudioLength = 0
 
         FileOutputStream(file, false).use {
@@ -151,7 +159,7 @@ class WavFile private constructor() : AudioFormatStrategy {
 
     // http://soundfile.sapp.org/doc/WaveFormat/ for equations
     private fun generateHeaderArray(): ByteArray {
-        val header = ByteBuffer.allocate(WAV_HEADER_SIZE)
+        val header = ByteBuffer.allocate(headerSize)
         val longSampleRate = sampleRate
         val byteRate = (bitsPerSample * sampleRate * channels) / BITS_IN_BYTE
 
@@ -175,44 +183,14 @@ class WavFile private constructor() : AudioFormatStrategy {
         return header.array()
     }
 
-    @Throws(InvalidWavFileException::class)
-    private fun parseHeader() {
-        if (file.length() >= WAV_HEADER_SIZE) {
-            RandomAccessFile(file, "r").use {
-                val header = ByteArray(WAV_HEADER_SIZE)
-                it.read(header)
-                val bb = ByteBuffer.wrap(header)
-                bb.order(ByteOrder.LITTLE_ENDIAN)
-                val riff = bb.getText(CHUNK_LABEL_SIZE)
-                this.totalDataLength = bb.int
-                val wave = bb.getText(CHUNK_LABEL_SIZE)
-                val fmt = bb.getText(CHUNK_LABEL_SIZE)
-                bb.position(PCM_POSITION)
-                val pcm = bb.short
-                channels = bb.short.toInt()
-                sampleRate = bb.int
-                bb.position(BITS_PER_SAMPLE_POSITION)
-                bitsPerSample = bb.short.toInt()
-                // Seek to the audio length field
-                bb.position(AUDIO_LENGTH_LOCATION)
-                totalAudioLength = bb.int
-                if (!validate(riff, wave, fmt, pcm)) {
-                    throw InvalidWavFileException()
-                }
-            }
-        } else {
-            throw InvalidWavFileException()
-        }
-    }
-
     private fun parseMetadata() {
-        val nonMetadataSize = totalAudioLength + (WAV_HEADER_SIZE - CHUNK_HEADER_SIZE)
+        val nonMetadataSize = totalAudioLength + (headerSize - CHUNK_HEADER_SIZE)
         if (totalDataLength > nonMetadataSize) {
             try {
                 val metadataSize = totalDataLength - nonMetadataSize
                 val bytes = ByteArray(metadataSize)
                 file.inputStream().use {
-                    val metadataStart = WAV_HEADER_SIZE + totalAudioLength
+                    val metadataStart = headerSize + totalAudioLength
                     it.skip(metadataStart.toLong())
                     it.read(bytes)
                 }

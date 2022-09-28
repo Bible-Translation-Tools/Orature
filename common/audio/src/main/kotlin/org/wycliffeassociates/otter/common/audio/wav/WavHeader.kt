@@ -2,8 +2,6 @@ package org.wycliffeassociates.otter.common.audio.wav
 
 import java.io.File
 import java.io.FileInputStream
-import java.io.InputStream
-import java.lang.Exception
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -19,7 +17,25 @@ class WavHeader {
 
     private var readHeadPosition = 0
     private var dataChunkStart = 0
-    private var totalAudioSize = 0
+
+    val totalHeaderSize: Int
+        get() = dataChunkStart
+
+    internal var totalDataLength = 0
+        private set
+    internal var totalAudioLength = 0
+        private set
+
+    var channels = 0
+        private set
+    var bitsPerSample = 0
+        private set
+    var sampleRate = 0
+        private set
+    var byteRate = 0
+        private set
+    var blockAlign = 0
+        private set
 
     private val chunks: MutableList<Chunk> = mutableListOf()
 
@@ -39,7 +55,7 @@ class WavHeader {
 
         val preDataChunk = mutableListOf<Chunk>()
         for (chunk in chunks) {
-            if (chunk.label == "DATA") {
+            if (chunk.label == "data") {
                 dataChunkStart = chunk.start
                 break
             } else {
@@ -52,9 +68,11 @@ class WavHeader {
         // The fmt chunk is required in all WAV files, WAVs with extensions will have additional pre-data chunks.
         preDataChunk.removeAll { it.label == "fmt " }
 
-        if (!chunks.map { it.label }.containsAll(listOf("fmt ", "DATA"))) {
+        if (!chunks.map { it.label }.containsAll(listOf("fmt ", "data"))) {
             return ParseResult.INVALID
         }
+
+        readFmtChunk(file)
 
         if (preDataChunk.size > 0) {
             return ParseResult.VALID_EXTENDED_HEADER_WAV
@@ -63,10 +81,29 @@ class WavHeader {
         return ParseResult.VALID_NORMAL_WAV
     }
 
+    fun readFmtChunk(file: File) {
+        val fmt = chunks.find { it.label == "fmt " }
+        fmt?.let { fmt ->
+            file.inputStream().use {
+                it.skip(fmt.start.toLong())
+                val fmtData = ByteArray(fmt.chunkSize)
+                it.read(fmtData)
+                val bb = ByteBuffer.wrap(fmtData)
+                bb.order(ByteOrder.LITTLE_ENDIAN)
+                val pcm = bb.short
+                channels = bb.short.toInt()
+                sampleRate = bb.int
+                byteRate = bb.int
+                blockAlign = bb.short.toInt()
+                bitsPerSample = bb.short.toInt()
+            }
+        }
+    }
+
     private fun computeTotalAudioSize() {
-        val data = chunks.find { it.label == "DATA" }
+        val data = chunks.find { it.label == "data" }
         data?.let { data ->
-            totalAudioSize = data.chunkSize
+            totalAudioLength = data.chunkSize
         }
     }
 
@@ -117,7 +154,7 @@ class WavHeader {
         val form = bb.getText(4)
 
         chunks.add(Chunk("RIFF", 8, size))
-
+        totalDataLength = size
         readHeadPosition += 12
         return label == "RIFF" && form == "WAVE"
     }
