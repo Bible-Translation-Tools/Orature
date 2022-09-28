@@ -205,6 +205,10 @@ class ContentRepository @Inject constructor(
         derivedContents: List<Content>,
         sourceContents: List<Content>
     ): Completable {
+        if (sourceContents.isEmpty()) {
+            return Completable.complete()
+        }
+
         return Completable.fromAction {
             derivedContents.forEach { content ->
                 for (verse in content.start .. content.end) {

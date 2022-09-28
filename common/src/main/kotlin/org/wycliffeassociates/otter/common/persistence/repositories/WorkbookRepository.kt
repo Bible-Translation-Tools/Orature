@@ -659,10 +659,15 @@ private class DefaultDatabaseAccessors(
             .flatMapCompletable { contents ->
                 val sourceContents = collectionRepo.getSource(collection)
                     .blockingGet()
-                    .let { collection ->
+                    ?.let { collection ->
                         contentRepo.getByCollection(collection).blockingGet()
                     }
-                contentRepo.linkDerivedToSource(contents, sourceContents)
+
+                if (sourceContents == null || sourceContents.isEmpty()) {
+                    Completable.complete()
+                } else {
+                    contentRepo.linkDerivedToSource(contents, sourceContents)
+                }
             }
     }
 
