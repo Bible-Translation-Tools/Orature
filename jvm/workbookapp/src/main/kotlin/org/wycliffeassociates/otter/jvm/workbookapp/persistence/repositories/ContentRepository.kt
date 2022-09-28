@@ -212,8 +212,10 @@ class ContentRepository @Inject constructor(
         return Completable.fromAction {
             derivedContents.forEach { content ->
                 for (verse in content.start .. content.end) {
-                    val sourceId = sourceContents.first { it.sort == verse }.id
-                    contentDao.linkDerivative(content.id, sourceId)
+                    val sourceId = sourceContents.firstOrNull { it.sort == verse }?.id
+                    if (sourceId != null) {
+                        contentDao.linkDerivative(content.id, sourceId)
+                    }
                 }
             }
         }
