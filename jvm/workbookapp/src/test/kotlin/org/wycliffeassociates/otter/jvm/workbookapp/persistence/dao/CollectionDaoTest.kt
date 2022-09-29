@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.dao
 
 import org.jooq.exception.DataAccessException
+import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -52,6 +53,11 @@ class CollectionDaoTest {
     fun setup() {
         database = AppDatabase(testDatabaseFile)
         database.dsl.execute("PRAGMA foreign_keys = OFF;")
+    }
+
+    @After
+    fun cleanUp() {
+        database.close()
     }
 
     @Test

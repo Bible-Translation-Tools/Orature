@@ -47,7 +47,7 @@ class PreferenceDaoTest {
 
     @After
     fun tearDown() {
-//        database.close()
+        database.close()
     }
 
     @Test

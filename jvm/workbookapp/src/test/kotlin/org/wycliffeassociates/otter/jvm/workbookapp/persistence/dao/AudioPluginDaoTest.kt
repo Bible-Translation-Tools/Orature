@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.dao
 
 import org.jooq.exception.DataAccessException
+import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -49,6 +50,11 @@ class AudioPluginDaoTest {
     @Before
     fun setup() {
         database = AppDatabase(testDatabaseFile)
+    }
+
+    @After
+    fun cleanUp() {
+        database.close()
     }
 
     @Test

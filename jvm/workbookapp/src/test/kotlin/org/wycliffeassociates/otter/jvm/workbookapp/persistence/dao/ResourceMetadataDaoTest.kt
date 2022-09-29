@@ -59,7 +59,7 @@ class ResourceMetadataDaoTest {
 
     @After
     fun tearDown() {
-//        database.close()
+        database.close()
     }
 
     @Test

@@ -58,7 +58,7 @@ class TranslationDaoTest {
             languageDao.delete(it)
         }
         dao.fetchAll().forEach(dao::delete)
-//        database.close()
+        database.close()
     }
 
     @Test

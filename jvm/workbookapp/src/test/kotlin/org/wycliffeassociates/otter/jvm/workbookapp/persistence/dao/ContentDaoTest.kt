@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.dao
 
+import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -53,6 +54,11 @@ class ContentDaoTest {
                 collectionFk = defaultCollectionId,
                 selectedTakeFk = null
             )
+    }
+
+    @After
+    fun cleanUp() {
+        database.close()
     }
 
     @Test
