@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos
 
 import jooq.Tables.*
+import jooq.tables.ContentDerivative
 import org.jooq.DSLContext
 import org.jooq.Record
 import org.jooq.Select
@@ -308,6 +309,21 @@ class ContentDao(
                 CONTENT_ENTITY.COLLECTION_FK.eq(chapterCollection.id)
                     .and((CONTENT_ENTITY.TYPE_FK).eq(contentTypeId ?: 1))
             )
+            .execute()
+    }
+
+    fun linkDerivative(
+        contentId: Int,
+        sourceContentId: Int,
+        dsl: DSLContext = instanceDsl
+    ) {
+        dsl
+            .insertInto(
+                ContentDerivative.CONTENT_DERIVATIVE,
+                ContentDerivative.CONTENT_DERIVATIVE.CONTENT_FK,
+                ContentDerivative.CONTENT_DERIVATIVE.SOURCE_FK
+            )
+            .values(contentId, sourceContentId)
             .execute()
     }
 }
