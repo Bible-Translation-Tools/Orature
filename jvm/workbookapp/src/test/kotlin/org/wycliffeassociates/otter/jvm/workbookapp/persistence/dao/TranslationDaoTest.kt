@@ -63,21 +63,32 @@ class TranslationDaoTest {
 
     @Test
     fun testInsertTranslation() {
-        var result = dao.insert(
+        assertEquals(0, dao.fetchAll().size)
+
+        dao.insert(
             sampleTranslation.copy(sourceFk = firstId, targetFk = secondId)
         )
-        assertEquals(1, result)
 
-        result = dao.insert(
+        assertEquals(
+            "After inserting, the total number should increase by 1.",
+            1,
+            dao.fetchAll().size
+        )
+
+        dao.insert(
             sampleTranslation.copy(sourceFk = secondId, targetFk = secondId)
         )
-        assertEquals(2, result)
+
+        assertEquals(
+            "After inserting, the total number should increase by 1.",
+            2,
+            dao.fetchAll().size
+        )
     }
 
     @Test
     fun testFetchTranslations() {
         insertDefault()
-        assertEquals(1, dao.fetchAll().size)
         assertNotNull(
             dao.fetch(firstId, secondId)
         )
@@ -91,6 +102,8 @@ class TranslationDaoTest {
 
     @Test
     fun testInsertThrowsException() {
+        assertEquals(0, dao.fetchAll().size)
+
         try {
             val nonZeroId = 1
             dao.insert(
@@ -102,6 +115,12 @@ class TranslationDaoTest {
         } catch (e: InsertionException) {
             assertEquals("Entity ID is not 0", e.message)
         }
+
+        assertEquals(
+            "The total number should not change after the exception.",
+            0,
+            dao.fetchAll().size
+        )
     }
 
     @Test

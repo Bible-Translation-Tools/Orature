@@ -66,7 +66,11 @@ class AudioPluginDaoTest {
         // insert the same entity will trigger an update
         val id2 = dao.insert(defaultEnity)
 
-        Assert.assertEquals(1, dao.fetchAll().size)
+        Assert.assertEquals(
+            "Inserting a duplicate should update the existing record and not increase the total",
+            1,
+            dao.fetchAll().size
+        )
         Assert.assertEquals(id1, id2)
     }
 
@@ -85,6 +89,7 @@ class AudioPluginDaoTest {
 
         Assert.assertNotNull(entity)
         Assert.assertEquals(
+            "Fetched record should match the given object",
             defaultEnity.copy(id = insertedId),
             entity
         )
@@ -108,13 +113,14 @@ class AudioPluginDaoTest {
         dao.update(updated)
 
         Assert.assertEquals(
+            "Updated record should match the given value",
             updated,
             dao.fetchById(insertedId)
         )
     }
 
     @Test
-    fun `test update duplicated values throws exception`() {
+    fun testUpdateDuplicatedFieldsThrowsException() {
         val existingId = dao.insert(defaultEnity)
         val existingEntity = dao.fetchById(existingId)!!
 

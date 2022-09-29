@@ -208,9 +208,17 @@ class ResourceMetadataDaoTest {
             Assert.assertNotNull(dao.fetchById(1))
         }
 
-        dao.delete(dao.fetchById(4)!!)
+        Assert.assertEquals(sampleEntities.size, dao.fetchAll().size)
 
-        Assert.assertNull(dao.fetchById(4))
+        fun fetchEntity() = dao.fetchById(4)
+        dao.delete(fetchEntity()!!)
+
+        Assert.assertNull(fetchEntity())
+        Assert.assertEquals(
+            "After deleting, the total number should decrease by 1.",
+            sampleEntities.size - 1,
+            dao.fetchAll().size
+        )
     }
 
     private fun seedLanguages() {

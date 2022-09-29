@@ -42,6 +42,10 @@ class TestCollectionRepository {
 
     private val db = dbEnvProvider.get()
 
+    /**
+     * Verifies deleting the resource (helper) takes of a project
+     * and maintaining the Scripture takes
+     */
     @Test
     fun testDeleteResource() {
         db
@@ -68,7 +72,11 @@ class TestCollectionRepository {
             .from(TAKE_ENTITY)
             .count()
 
-        Assert.assertEquals(6, takeCount)
+        Assert.assertEquals(
+            "Total takes before delete should be 6",
+            6,
+            takeCount
+        )
 
         val project = collectionRepository
             .getDerivedProjects().blockingGet()
@@ -81,6 +89,10 @@ class TestCollectionRepository {
             .from(TAKE_ENTITY)
             .count()
 
-        Assert.assertEquals(3, takeCount)
+        Assert.assertEquals(
+            "After deleting resource takes, the remaining total should be 3",
+            3,
+            takeCount
+        )
     }
 }

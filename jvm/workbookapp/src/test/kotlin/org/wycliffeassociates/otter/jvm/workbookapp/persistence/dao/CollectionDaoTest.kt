@@ -88,7 +88,7 @@ class CollectionDaoTest {
             dao.insert(
                 defaultCollection.copy(id = 1)
             )
-            Assert.fail()
+            Assert.fail("Insert nonzero id should throw an exception.")
         } catch (e: InsertionException) { }
     }
 
@@ -103,6 +103,7 @@ class CollectionDaoTest {
 
         Assert.assertNotNull(result)
         Assert.assertEquals(
+            "Fetched record should match the given value",
             defaultCollection.copy(id = result!!.id),
             result
         )
@@ -132,8 +133,14 @@ class CollectionDaoTest {
 
         val firstChild = children.find { it.slug == child1.slug }
         val secondChild = children.find { it.slug == child2.slug }
-        Assert.assertNotNull(firstChild)
-        Assert.assertNotNull(secondChild)
+        Assert.assertNotNull(
+            "First child should be found in fetched result",
+            firstChild
+        )
+        Assert.assertNotNull(
+            "Second child should be found in fetched result",
+            secondChild
+        )
     }
 
     @Test
@@ -179,11 +186,17 @@ class CollectionDaoTest {
 
         var entity = fetch()
         Assert.assertNotNull(entity)
+        Assert.assertEquals(1, dao.fetchAll().size)
 
         dao.delete(entity!!)
         entity = fetch()
 
         Assert.assertNull(entity)
+        Assert.assertEquals(
+            "After delete, there should be 0 records.",
+            0,
+            dao.fetchAll().size
+        )
     }
 
     private fun insertDefaultCollection(): Int {

@@ -99,12 +99,19 @@ class ContentDaoTest {
     @Test
     fun testFetchByCollectionIdAndType() {
         insertDefault()
-//        val collectionId = dao.collectionDao.fetchAll().first().id
         val result = dao.fetchByCollectionIdAndType(defaultCollectionId, ContentType.TEXT)
         val emptyResult = dao.fetchByCollectionIdAndType(defaultCollectionId, ContentType.BODY)
 
-        Assert.assertEquals(1, result.size)
-        Assert.assertEquals(0, emptyResult.size)
+        Assert.assertEquals(
+            "There should be one matching result with the given id and type.",
+            1,
+            result.size
+        )
+        Assert.assertEquals(
+            "There should be no match for the given id and type.",
+            0,
+            emptyResult.size
+        )
     }
 
     @Test
@@ -122,12 +129,17 @@ class ContentDaoTest {
         dao.updateSources(content, listOf(chapter))
         val result = dao.fetchSources(content)
 
-        Assert.assertEquals(1, result.size)
+        Assert.assertEquals(
+            "After updating sources, there should be one record.",
+            1,
+            result.size
+        )
         Assert.assertEquals(chapter, result.first())
     }
 
     @Test
     fun testFetchContentByProjectSlug() {
+        val projectSlug = CollectionDaoTest.defaultCollection.slug
         val projectId = database.collectionDao.insert(
             CollectionDaoTest.defaultCollection
         )
@@ -148,14 +160,20 @@ class ContentDaoTest {
             )
         )
 
-        val contents = dao.fetchContentByProjectSlug(
-            CollectionDaoTest.defaultCollection.slug
-        ).fetch {
+        val contents = dao.fetchContentByProjectSlug(projectSlug).fetch {
             RecordMappers.mapToContentEntity(it)
         }
 
-        Assert.assertEquals(1, contents.size)
-        Assert.assertEquals(chapterCollectionId, contents.first().collectionFk)
+        Assert.assertEquals(
+            "There should be one content record for the project: $projectSlug",
+            1,
+            contents.size
+        )
+        Assert.assertEquals(
+            "Fetched collection FK should match the given chapter collection id",
+            chapterCollectionId,
+            contents.first().collectionFk
+        )
     }
 
     @Test
@@ -189,7 +207,11 @@ class ContentDaoTest {
         val collection = database.collectionDao.fetchById(newCollectionId)
         dao.deleteForCollection(collection)
 
-        Assert.assertEquals(3, dao.fetchAll().size)
+        Assert.assertEquals(
+            "After deleting content for collection, the remaining total should decrease by 1.",
+            3,
+            dao.fetchAll().size
+        )
     }
 
     private fun insertDefault(): Int {

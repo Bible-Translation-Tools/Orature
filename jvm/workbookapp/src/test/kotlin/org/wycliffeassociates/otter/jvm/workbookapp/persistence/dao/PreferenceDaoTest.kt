@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.dao
 
+import jooq.Tables.PREFERENCES
 import org.jooq.exception.DataAccessException
 import org.junit.After
 import org.junit.Assert
@@ -59,14 +60,28 @@ class PreferenceDaoTest {
 
     @Test
     fun testInsert() {
+        Assert.assertEquals(2, count())
+
         val p = PreferenceEntity("new-preference", "new-value")
         dao.insert(p)
+
+        Assert.assertEquals(
+            "After inserting, the total number should increase by 1.",
+            3,
+            count()
+        )
         Assert.assertEquals(p, dao.fetchByKey(p.key))
 
         try {
             dao.insert(p)
             Assert.fail("An exception is expected to throw when inserting a duplicated preference")
         } catch(e: DataAccessException) { }
+
+        Assert.assertEquals(
+            "The total number of objects should not change after the insertion exception.",
+            3,
+            count()
+        )
     }
 
     @Test
@@ -89,6 +104,11 @@ class PreferenceDaoTest {
         var result = dao.fetchByKey(pref.key)
         Assert.assertNotNull(result)
         Assert.assertEquals(pref, result)
+        Assert.assertEquals(
+            "The total number should increase by 1.",
+            3,
+            count()
+        )
 
         // update
         val newValue = "v3-updated"
@@ -97,15 +117,35 @@ class PreferenceDaoTest {
         result = dao.fetchByKey(pref.key)
         Assert.assertNotNull(result)
         Assert.assertEquals(newValue, result!!.value)
+        Assert.assertEquals(
+            "The total number should not change after updating.",
+            3,
+            count()
+        )
     }
 
     @Test
     fun testDelete() {
         val entity = dao.fetchByKey(prefs[0].key)
         Assert.assertNotNull(entity)
+        Assert.assertEquals(prefs.size, count())
 
         dao.delete(entity!!)
 
         Assert.assertNull(dao.fetchByKey(entity.key))
+        Assert.assertEquals(prefs.size - 1, count())
+    }
+
+    /**
+     * Returns the total number of records for PREFERENCES table,
+     * since PreferenceDao does not contain such method nor fetchAll().
+     */
+    private fun count(): Int {
+        return database.dsl
+            .selectCount()
+            .from(PREFERENCES)
+            .fetchOne {
+                it.value1()
+            }
     }
 }
