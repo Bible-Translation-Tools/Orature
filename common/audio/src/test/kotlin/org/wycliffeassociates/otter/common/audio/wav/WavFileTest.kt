@@ -91,7 +91,7 @@ fun writeWav(
         }
     }
 
-    return AudioTestEnv(testFile, dataSize - 8)
+    return AudioTestEnv(testFile, dataSize)
 }
 
 fun writeArbitraryChunks(outputStream: OutputStream, label: String): Int {
@@ -110,7 +110,7 @@ fun writeArbitraryChunks(outputStream: OutputStream, label: String): Int {
     bytes.put("END ".toByteArray())
 
     outputStream.write(bytes.array())
-    return bytes.array().size
+    return dataSize
 }
 
 fun writeFmtChunk(outputStream: OutputStream) {
