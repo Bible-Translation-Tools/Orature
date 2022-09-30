@@ -144,6 +144,12 @@ class WavHeader {
      * label, and a 4 byte chunk size. This method will populate a complete list of all chunks and their corresponding
      * sizes contained within the audio file. While this class is concerned primarily with the header, this list will
      * contain all chunks, including metadata chunks.
+     *
+     * Note that the size of a chunk does not contain a pad byte. If the size is odd, the chunk should contain a pad byte
+     * at the end to word align the chunk as per the wav file spec:
+     * https://www.mmsp.ece.mcgill.ca/Documents/AudioFormats/WAVE/Docs/riffmci.pdf
+     *
+     * We accomplish this by calling the wordAlign function prior to seeking in the buffer.
      */
     private fun parseChunk(inputStream: FileInputStream) {
         if (inputStream.available() < CHUNK_HEADER_SIZE) {
