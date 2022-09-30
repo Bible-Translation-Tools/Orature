@@ -59,6 +59,7 @@ class ImportResourceContainer @Inject constructor(
         logger.info("Importing resource container: $file")
 
         val rcFile = if (file.isDirectory) {
+            logger.info("zipping directory $file...")
             val zip = createTempFile(file.name, "zip")
             directoryProvider.newFileWriter(zip).use { fileWriter ->
                 fileWriter.copyDirectory(file, "/")
