@@ -101,6 +101,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
         activeChapterProperty.onChange {
             logger.info("Active chapter: ${it?.sort}")
+            if (it == null) cleanUpTargetAudio()
             updateSourceAudio()
         }
         activeChunkProperty.onChangeAndDoNow {
