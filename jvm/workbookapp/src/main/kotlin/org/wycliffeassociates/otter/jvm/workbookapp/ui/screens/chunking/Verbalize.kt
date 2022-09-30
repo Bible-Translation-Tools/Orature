@@ -18,38 +18,23 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 
-import javafx.beans.binding.Bindings
-import javafx.scene.shape.Circle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingWizardPage
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.VerbalizeViewModel
 import tornadofx.*
 
 class Verbalize : View() {
     private val logger = LoggerFactory.getLogger(Verbalize::class.java)
 
-    val chunkVm: ChunkingViewModel by inject()
-    val vm: VerbalizeViewModel by inject()
-
-    val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
-    val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
-    val recordIcon = FontIcon(MaterialDesign.MDI_MICROPHONE)
-    val stopIcon = FontIcon(MaterialDesign.MDI_STOP)
-    val rerecordButton = FontIcon(MaterialDesign.MDI_SYNC)
-
-    val arc = Circle(120.0, 120.0, 60.0).apply {
-        addClass("verbalize__animation")
-    }
+    private val chunkVm: ChunkingViewModel by inject()
 
     override fun onDock() {
         super.onDock()
         tryImportStylesheet(resources["/css/verbalize-page.css"])
         logger.info("Verbalize docked")
-        vm.onDock()
         chunkVm.pageProperty.set(ChunkingWizardPage.VERBALIZE)
         chunkVm.titleProperty.set(messages["verbalizeTitle"])
         chunkVm.stepProperty.set(messages["verbalizeDescription"])
@@ -59,55 +44,17 @@ class Verbalize : View() {
         addClass("verbalize")
         center = hbox {
             addClass("verbalize__grouping")
-            button {
-                styleClass.addAll("btn", "btn--primary", "verbalize__btn--secondary")
-                visibleProperty().bind(vm.hasContentProperty)
-                graphicProperty().bind(
-                    Bindings.createObjectBinding(
-                        {
-                            when(vm.isPlayingProperty.value) {
-                                true -> pauseIcon
-                                false -> playIcon
-                            }
-                        },
-                        vm.isPlayingProperty
-                    )
-                )
-                action { vm.playToggle() }
-            }
             stackpane {
                 addClass("verbalize__action-container")
-                add(arc)
                 button {
-                    styleClass.addAll("btn", "btn--cta", "verbalize__btn--primary")
-                    graphicProperty().bind(
-                        Bindings.createObjectBinding(
-                            {
-                                when(vm.recordingProperty.value) {
-                                    true -> stopIcon
-                                    false -> recordIcon
-                                }
-                            },
-                            vm.recordingProperty
-                        )
+                    styleClass.addAll(
+                        "btn", "btn--icon", "btn--borderless", "verbalize__btn"
                     )
-                    action {
-                        arc.radiusProperty().bind(vm.arcLengthProperty)
-                        vm.toggle()
-                    }
+                    graphic = FontIcon(MaterialDesign.MDI_VOICE)
+                    isMouseTransparent = true
+                    isFocusTraversable = false
                 }
             }
-            button {
-                styleClass.addAll("btn", "btn--secondary", "verbalize__btn--secondary")
-                visibleProperty().bind(vm.hasContentProperty)
-                graphic = rerecordButton
-                action { vm.reRecord() }
-            }
         }
-    }
-
-    override fun onUndock() {
-        super.onUndock()
-        vm.pausePlayback()
     }
 }
