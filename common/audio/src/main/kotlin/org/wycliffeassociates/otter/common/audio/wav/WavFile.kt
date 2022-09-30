@@ -33,14 +33,11 @@ import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
 import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 
-private const val RIFF = "RIFF"
-private const val WAVE = "WAVE"
-private const val FMT = "fmt "
-private const val DATA = "data"
-private const val PCM: Short = 1
 
-private const val BITS_IN_BYTE = 8
-
+enum class WavType {
+    NORMAL_WAV,
+    WAV_WITH_EXTENSION
+}
 class InvalidWavFileException(message: String? = null) : Exception(message)
 
 /**
@@ -53,20 +50,23 @@ class WavFile private constructor() : AudioFormatStrategy {
     internal lateinit var file: File
         private set
 
+    override val sampleRate: Int
+        get() = header.sampleRate
 
-    override var sampleRate: Int = DEFAULT_SAMPLE_RATE
-        private set
-    override var channels: Int = DEFAULT_CHANNELS
-        private set
-    override var bitsPerSample: Int = DEFAULT_BITS_PER_SAMPLE
-        private set
-    val frameSizeInBytes = channels * (bitsPerSample / BITS_IN_BYTE)
+    override val channels: Int
+        get() = header.channels
+
+    override val bitsPerSample: Int
+        get() = header.bitsPerSample
+
+    val frameSizeInBytes: Int
+        get() = header.blockAlign
 
     override val totalFrames: Int
         get() = totalAudioLength / frameSizeInBytes
 
-    var headerSize: Int = 44
-        private set
+    val headerSize
+        get() = header.totalHeaderSize
 
     override fun addCue(location: Int, label: String) {
         metadata.addCue(location, label)
@@ -76,16 +76,21 @@ class WavFile private constructor() : AudioFormatStrategy {
         return metadata.getCues()
     }
 
-    var totalAudioLength = 0
-        internal set
+    val totalAudioLength: Int
+        get() = header.totalAudioLength
 
-    internal var totalDataLength = 0
+    internal val totalDataLength: Int
+        get() = header.totalDataLength
+    var header: WavHeader = WavHeader()
+        private set
 
     override var metadata = WavMetadata()
         private set
 
     val hasMetadata
         get() = metadata.totalSize > 0
+
+    var wavType = WavType.NORMAL_WAV
 
     /**
      * Reads the file header of the provided wav file.
@@ -101,15 +106,13 @@ class WavFile private constructor() : AudioFormatStrategy {
         this.file = file
         this.metadata = wavMetadata
 
-        val header = WavHeader()
-        header.parse(file)
+        header = WavHeader()
 
-        channels = header.channels
-        sampleRate = header.sampleRate
-        bitsPerSample = header.bitsPerSample
-        totalAudioLength = header.totalAudioLength
-        totalDataLength = header.totalDataLength
-        headerSize = header.totalHeaderSize
+        val parseResult = header.parse(file)
+        when (parseResult) {
+            WavHeaderParseResult.VALID_EXTENDED_HEADER_WAV -> wavType = WavType.WAV_WITH_EXTENSION
+            WavHeaderParseResult.VALID_NORMAL_WAV -> wavType = WavType.NORMAL_WAV
+        }
 
         parseMetadata()
     }
@@ -132,9 +135,7 @@ class WavFile private constructor() : AudioFormatStrategy {
     ) : this() {
         this.file = file
         this.metadata = wavMetadata
-        this.channels = channels
-        this.sampleRate = sampleRate
-        this.bitsPerSample = bitsPerSample
+        header = WavHeader()
         initializeWavFile()
     }
 
@@ -144,44 +145,20 @@ class WavFile private constructor() : AudioFormatStrategy {
 
     @Throws(IOException::class)
     internal fun finishWrite(totalAudioLength: Int) {
-        this.totalAudioLength = totalAudioLength
-        this.totalDataLength = headerSize - CHUNK_HEADER_SIZE + totalAudioLength + metadata.totalSize
+        header.totalAudioLength = totalAudioLength
+        header.totalDataLength = headerSize - CHUNK_HEADER_SIZE + totalAudioLength + metadata.totalSize
     }
 
     internal fun initializeWavFile() {
-        totalDataLength = headerSize - CHUNK_HEADER_SIZE
-        totalAudioLength = 0
+        header.totalDataLength = headerSize - CHUNK_HEADER_SIZE
+        header.totalAudioLength = 0
 
         FileOutputStream(file, false).use {
-            it.write(generateHeaderArray())
+            it.write(header.generateHeaderArray())
         }
     }
 
-    // http://soundfile.sapp.org/doc/WaveFormat/ for equations
-    private fun generateHeaderArray(): ByteArray {
-        val header = ByteBuffer.allocate(headerSize)
-        val longSampleRate = sampleRate
-        val byteRate = (bitsPerSample * sampleRate * channels) / BITS_IN_BYTE
 
-        header.order(ByteOrder.LITTLE_ENDIAN)
-        header.put(RIFF.toByteArray(Charsets.US_ASCII))
-        header.putInt(totalDataLength)
-        header.put(WAVE.toByteArray(Charsets.US_ASCII))
-        header.put(FMT.toByteArray(Charsets.US_ASCII))
-        header.putInt(bitsPerSample)
-        header.putShort(PCM) // format = 1 for pcm
-        header.putShort(channels.toShort()) // number of channels
-        header.putInt(longSampleRate)
-        header.putInt(byteRate)
-        header.putShort(((channels * bitsPerSample) / BITS_IN_BYTE).toShort()) // block align
-        header.putShort(bitsPerSample.toShort()) // bits per sample
-        header.put(DATA.toByteArray(Charsets.US_ASCII))
-        header.putInt(totalAudioLength) // initial size
-
-        header.flip()
-
-        return header.array()
-    }
 
     private fun parseMetadata() {
         val nonMetadataSize = totalAudioLength + (headerSize - CHUNK_HEADER_SIZE)
@@ -199,20 +176,6 @@ class WavFile private constructor() : AudioFormatStrategy {
                 logger.error("Error parsing metadata for file: ${file.name}", e)
             }
         }
-    }
-
-    private fun validate(
-        riff: String,
-        wave: String,
-        fmt: String,
-        pcm: Short
-    ): Boolean {
-        return booleanArrayOf(
-            riff == RIFF,
-            wave == WAVE,
-            fmt == FMT,
-            pcm == PCM
-        ).all { true }
     }
 
     fun sampleIndex(sample: Int) = sample * frameSizeInBytes
