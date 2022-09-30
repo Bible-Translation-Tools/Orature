@@ -49,7 +49,10 @@ class WavHeader {
     private val chunks: MutableList<Chunk> = mutableListOf()
 
     /**
-     * Reads the header of a wav file.
+     * Reads the header of a wav file. If additional header chunks are present, it returns a parse result indicating
+     * the wav file is an extension wav file, otherwise it returns that it is a normal wav file.
+     *
+     * Fmt and data chunks are the two required chunks; and the "header" makes up chunks prior to the data chunk.
      */
     @Throws(InvalidWavFileException::class)
     fun parse(file: File): WavHeaderParseResult {
@@ -103,7 +106,11 @@ class WavHeader {
         return WavHeaderParseResult.VALID_NORMAL_WAV
     }
 
-    fun readFmtChunk(file: File) {
+    /**
+     * Reads the fmt chunk of the wav file and updates the member fields related to the audio format such as
+     * sample rate, bit rate, and number of channels.
+     */
+    private fun readFmtChunk(file: File) {
         val fmt = chunks.find { it.label == FMT }
         fmt?.let { fmt ->
             file.inputStream().use {
@@ -122,6 +129,9 @@ class WavHeader {
         }
     }
 
+    /**
+     * Retrieves the audio size which is the size of the data chunk
+     */
     private fun computeTotalAudioSize() {
         val data = chunks.find { it.label == DATA }
         data?.let { data ->
@@ -129,6 +139,12 @@ class WavHeader {
         }
     }
 
+    /**
+     * Parses an arbitrary chunk of the wav file. All chunks contain an 8 byte header containing a 4 character chunk
+     * label, and a 4 byte chunk size. This method will populate a complete list of all chunks and their corresponding
+     * sizes contained within the audio file. While this class is concerned primarily with the header, this list will
+     * contain all chunks, including metadata chunks.
+     */
     private fun parseChunk(inputStream: FileInputStream) {
         if (inputStream.available() < CHUNK_HEADER_SIZE) {
             return
@@ -154,6 +170,9 @@ class WavHeader {
         readHeadPosition += skip
     }
 
+    /**
+     * Validates that the wav file begins with RIFF, the size of the file, and that the type of RIFF file is WAVE
+     */
     private fun validateRiff(inputStream: FileInputStream): Boolean {
         if (inputStream.available() < RIFF_HEADER_SIZE) {
             return false
@@ -181,7 +200,11 @@ class WavHeader {
         return label == RIFF && form == WAVE
     }
 
-    // http://soundfile.sapp.org/doc/WaveFormat/ for equations
+    /**
+     * Generates a normal wav file with only the fmt and data subchunks
+     *
+     * see http://soundfile.sapp.org/doc/WaveFormat/ for equations
+     */
     internal fun generateHeaderArray(): ByteArray {
         val header = ByteBuffer.allocate(DEFAULT_HEADER_SIZE)
         val longSampleRate = sampleRate

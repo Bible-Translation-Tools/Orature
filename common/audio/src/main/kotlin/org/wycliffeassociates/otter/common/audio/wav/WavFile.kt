@@ -143,6 +143,9 @@ class WavFile private constructor() : AudioFormatStrategy {
         metadata.writeMetadata(outputStream)
     }
 
+    /**
+     * Updates the wav header with the file size and audio size to the riff and data chunks respectively
+     */
     @Throws(IOException::class)
     internal fun finishWrite(totalAudioLength: Int) {
         header.totalAudioLength = totalAudioLength
@@ -157,8 +160,6 @@ class WavFile private constructor() : AudioFormatStrategy {
             it.write(header.generateHeaderArray())
         }
     }
-
-
 
     private fun parseMetadata() {
         val nonMetadataSize = totalAudioLength + (headerSize - CHUNK_HEADER_SIZE)
@@ -180,6 +181,9 @@ class WavFile private constructor() : AudioFormatStrategy {
 
     fun sampleIndex(sample: Int) = sample * frameSizeInBytes
 
+    /**
+     * Updates the wav file, writing out any changes made to the wav file metadata.
+     */
     override fun update() {
         // the use block will write nothing, but will call .close()
         // which will truncate the file at the end of the audio section,
