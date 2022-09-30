@@ -3,14 +3,10 @@ package org.wycliffeassociates.otter.common.audio.wav
 import org.junit.Assert
 import org.junit.Test
 import java.io.File
-import java.io.InputStream
 import java.io.OutputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlin.random.Random
-
-class WavFileTest {
-}
 
 class WavHeaderTest {
 
@@ -32,9 +28,60 @@ class WavHeaderTest {
         testEnv.file.delete()
     }
 
+    /**
+     * This test validates that the audio is properly read when there are chunks prior to the fmt chunk, which means
+     * that there is additional metadata prior to where the data section would typically being.
+     *
+     * We write STRT and END to a buffer of random size, and the beginning and end of the data chunk should start and
+     * end with those values to signify all audio was properly accessed.
+     *
+     * We also validate that the format chunk is properly read.
+     */
     @Test
     fun `test header has chunks before fmt`() {
         val testEnv = writeWav(5, 0, 3)
+        val header = WavHeader().apply { parse(testEnv.file) }
+        validateFormat(header)
+        val reader = WavFileReader(WavFile(testEnv.file))
+        reader.open()
+        val audio = ByteArray(header.totalAudioLength)
+        Assert.assertEquals("Audio size", testEnv.dataSize, header.totalAudioLength)
+        reader.getPcmBuffer(audio)
+        val buffer = ByteBuffer.wrap(audio)
+        buffer.order(ByteOrder.LITTLE_ENDIAN)
+        Assert.assertEquals("Audio data should begin with STRT", buffer.getText(4), "STRT")
+        buffer.seek(audio.size - 8)
+        Assert.assertEquals("Audio data should end with END ", buffer.getText(4), "END ")
+        testEnv.file.delete()
+    }
+
+    /**
+     * This test validates that the audio is properly read when there are chunks after the fmt chunk
+     */
+    @Test
+    fun `test header has chunks after fmt`() {
+        val testEnv = writeWav(0, 2, 3)
+        val header = WavHeader().apply { parse(testEnv.file) }
+        validateFormat(header)
+        val reader = WavFileReader(WavFile(testEnv.file))
+        reader.open()
+        val audio = ByteArray(header.totalAudioLength)
+        Assert.assertEquals("Audio size", testEnv.dataSize, header.totalAudioLength)
+        reader.getPcmBuffer(audio)
+        val buffer = ByteBuffer.wrap(audio)
+        buffer.order(ByteOrder.LITTLE_ENDIAN)
+        Assert.assertEquals("Audio data should begin with STRT", buffer.getText(4), "STRT")
+        buffer.seek(audio.size - 8)
+        Assert.assertEquals("Audio data should end with END ", buffer.getText(4), "END ")
+        testEnv.file.delete()
+    }
+
+    /**
+     * This test validates that the audio is properly read when there are chunks prior to and after the fmt chunk
+     */
+    @Test
+    fun `test header has chunks before and after fmt`() {
+        val testEnv = writeWav(5, 3, 3)
         val header = WavHeader().apply { parse(testEnv.file) }
         validateFormat(header)
         val reader = WavFileReader(WavFile(testEnv.file))
