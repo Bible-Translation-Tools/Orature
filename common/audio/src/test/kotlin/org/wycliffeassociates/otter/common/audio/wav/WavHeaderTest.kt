@@ -49,9 +49,9 @@ class WavHeaderTest {
         reader.getPcmBuffer(audio)
         val buffer = ByteBuffer.wrap(audio)
         buffer.order(ByteOrder.LITTLE_ENDIAN)
-        Assert.assertEquals("Audio data should begin with STRT", buffer.getText(4), "STRT")
+        Assert.assertEquals("Audio data should begin with 'STRT', data size is ${testEnv.dataSize}", buffer.getText(4), "STRT")
         buffer.seek(audio.size - 8)
-        Assert.assertEquals("Audio data should end with END ", buffer.getText(4), "END ")
+        Assert.assertEquals("Audio data should end with 'END ', data size is ${testEnv.dataSize}", buffer.getText(4), "END ")
         testEnv.file.delete()
     }
 
@@ -70,9 +70,9 @@ class WavHeaderTest {
         reader.getPcmBuffer(audio)
         val buffer = ByteBuffer.wrap(audio)
         buffer.order(ByteOrder.LITTLE_ENDIAN)
-        Assert.assertEquals("Audio data should begin with STRT", buffer.getText(4), "STRT")
+        Assert.assertEquals("Audio data should begin with 'STRT', data size is ${testEnv.dataSize}", buffer.getText(4), "STRT")
         buffer.seek(audio.size - 8)
-        Assert.assertEquals("Audio data should end with END ", buffer.getText(4), "END ")
+        Assert.assertEquals("Audio data should end with 'END ', data size is ${testEnv.dataSize}", buffer.getText(4), "END ")
         testEnv.file.delete()
     }
 
@@ -91,9 +91,9 @@ class WavHeaderTest {
         reader.getPcmBuffer(audio)
         val buffer = ByteBuffer.wrap(audio)
         buffer.order(ByteOrder.LITTLE_ENDIAN)
-        Assert.assertEquals("Audio data should begin with STRT", buffer.getText(4), "STRT")
+        Assert.assertEquals("Audio data should begin with 'STRT', data size is ${testEnv.dataSize}", buffer.getText(4), "STRT")
         buffer.seek(audio.size - 8)
-        Assert.assertEquals("Audio data should end with END ", buffer.getText(4), "END ")
+        Assert.assertEquals("Audio data should end with 'END ', data size is ${testEnv.dataSize}", buffer.getText(4), "END ")
         testEnv.file.delete()
     }
 
