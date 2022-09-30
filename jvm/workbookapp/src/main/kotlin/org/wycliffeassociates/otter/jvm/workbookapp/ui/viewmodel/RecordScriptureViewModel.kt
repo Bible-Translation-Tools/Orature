@@ -61,6 +61,8 @@ import java.io.File
 import java.text.MessageFormat
 import io.reactivex.rxkotlin.toObservable as toRxObservable
 
+private const val NO_HIGHLIGHT_INDEX = -1
+
 class RecordScriptureViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(RecordScriptureViewModel::class.java)
@@ -95,7 +97,7 @@ class RecordScriptureViewModel : ViewModel() {
     val hasPreviousChunk = SimpleBooleanProperty(false)
 
     val isChunk = activeChunkProperty.isNotNull
-    val highlightedChunkProperty = SimpleIntegerProperty(-1)
+    val highlightedChunkProperty = SimpleIntegerProperty(NO_HIGHLIGHT_INDEX)
     val verseCountProperty = SimpleIntegerProperty()
 
     private var activeChunkSubscription: Disposable? = null
@@ -128,7 +130,7 @@ class RecordScriptureViewModel : ViewModel() {
         initializeListeners()
         loadTakes()
         openPlayers()
-        highlightedChunkProperty.set(-1)
+        highlightedChunkProperty.set(NO_HIGHLIGHT_INDEX)
     }
 
     fun undock() {
@@ -359,7 +361,7 @@ class RecordScriptureViewModel : ViewModel() {
         }
         val nextIndex = chapterList.indexOf(activeChapter) + amount
         chapterList.elementAtOrNull(nextIndex)?.let { activeChapterProperty.set(it) }
-        highlightedChunkProperty.set(-1)
+        highlightedChunkProperty.set(NO_HIGHLIGHT_INDEX)
     }
 
     private fun stepToChunk(direction: StepDirection) {
