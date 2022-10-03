@@ -58,50 +58,38 @@ class ImportResourceContainer @Inject constructor(
     fun import(file: File): Single<ImportResult> {
         logger.info("Importing resource container: $file")
 
-        val rcFile = file
-//        val rcFile = if (file.isDirectory) {
-//            logger.info("zipping directory $file...")
-//            val zip = createTempFile(file.name, "zip")
-//            directoryProvider.newFileWriter(zip).use { fileWriter ->
-//                fileWriter.copyDirectory(file, "/")
-//            }
-//            zip
-//        } else {
-//            file
-//        }
-
         val projectImporter = importProvider.get()
-        val isValid = validateRc(rcFile)
-        val isResumable = isValid && projectImporter.isResumableProject(rcFile)
-        val canMergeMedia = isValid && isAlreadyImported(rcFile)
+        val isValid = validateRc(file)
+        val isResumable = isValid && projectImporter.isResumableProject(file)
+        val canMergeMedia = isValid && isAlreadyImported(file)
 
         return when {
             !isValid -> {
-                logger.error("Import failed, $rcFile is an invalid RC")
+                logger.error("Import failed, $file is an invalid RC")
                 return Single.just(ImportResult.INVALID_RC)
             }
             isResumable -> {
                 logger.info("Importing rc as a resumable project")
-                projectImporter.importResumableProject(rcFile)
+                projectImporter.importResumableProject(file)
             }
             canMergeMedia -> {
                 logger.info("RC already imported, merging media")
                 Single.fromCallable {
-                    val existingRC = getExistingMetadata(rcFile)
+                    val existingRC = getExistingMetadata(file)
                     MediaMerge(
                         directoryProvider,
-                        ResourceContainer.load(rcFile),
+                        ResourceContainer.load(file),
                         ResourceContainer.load(existingRC.path)
                     ).merge()
                     ImportResult.SUCCESS
                 }
             }
-            tryUpdateExistingRC(rcFile) -> {
+            tryUpdateExistingRC(file) -> {
                 logger.info("Importing RC as default")
-                importContainer(rcFile)
+                importContainer(file)
             }
             else -> {
-                logger.error("Could not import RC $rcFile - ${ImportResult.DEPENDENCY_ERROR}")
+                logger.error("Could not import RC $file - ${ImportResult.DEPENDENCY_ERROR}")
                 Single.just(ImportResult.DEPENDENCY_ERROR)
             }
         }
