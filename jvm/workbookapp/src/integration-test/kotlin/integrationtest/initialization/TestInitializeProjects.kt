@@ -91,6 +91,15 @@ class TestInitializeProjects {
     fun testInitializeProjects() {
         prepareInitialProject()
 
+        env.assertRowCounts(
+            RowCount(
+                collections = 0,
+                links = 0,
+                derivatives = null,
+                contents = mapOf()
+            )
+        )
+
         val testSub = TestObserver<Completable>()
         val init = initProjectsProvider.get()
         init
@@ -101,6 +110,11 @@ class TestInitializeProjects {
         testSub.assertNoErrors()
 
         Assert.assertEquals(init.version, env.db.installedEntityDao.fetchVersion(init))
+        Assert.assertEquals(
+            "After initialization, there should be 2 resource metadata objects - one book and one source",
+            2,
+            env.db.resourceMetadataDao.fetchAll().size
+        )
 
         env.assertRowCounts(
             RowCount(
