@@ -55,6 +55,9 @@ class ImportResourceContainer @Inject constructor(
     @Inject lateinit var importProvider: Provider<ProjectImporter>
     @Inject lateinit var deleteProvider: Provider<DeleteResourceContainer>
 
+    /**
+     * Attempts to import the resource container based on its metadata & content.
+     */
     fun import(file: File): Single<ImportResult> {
         logger.info("Importing resource container: $file")
 
@@ -105,6 +108,9 @@ class ImportResourceContainer @Inject constructor(
         }
     }
 
+    /**
+     * Imports resource container from an InputStream.
+     */
     fun import(filename: String, stream: InputStream): Single<ImportResult> {
         val outFile = createTempFile(filename, "zip")
 
@@ -133,6 +139,9 @@ class ImportResourceContainer @Inject constructor(
         }
     }
 
+    /**
+     * Checks if the resource container file is already imported.
+     */
     fun isAlreadyImported(file: File): Boolean {
         val rc = ResourceContainer.load(file, true)
         val language = languageRepository.getBySlug(rc.manifest.dublinCore.language.identifier).blockingGet()
@@ -176,7 +185,8 @@ class ImportResourceContainer @Inject constructor(
     /**
      * Attempts to delete the existing RC before
      * importing the new one if they have different versions.
-     * Returns false if it could not delete the existing RC.
+     *
+     * @return false if it could not delete the existing RC; otherwise true.
      */
     private fun tryUpdateExistingRC(newFile: File): Boolean {
         ResourceContainer.load(newFile).use { newRc ->

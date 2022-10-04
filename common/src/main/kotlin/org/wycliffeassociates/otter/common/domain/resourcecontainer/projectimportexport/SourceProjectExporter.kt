@@ -42,6 +42,9 @@ import java.io.File
 import java.util.*
 import javax.inject.Inject
 
+/**
+ * Provides a use case to export an Orature project as a source file.
+ */
 class SourceProjectExporter @Inject constructor(
     private val directoryProvider: IDirectoryProvider
 ) : ProjectExporter() {

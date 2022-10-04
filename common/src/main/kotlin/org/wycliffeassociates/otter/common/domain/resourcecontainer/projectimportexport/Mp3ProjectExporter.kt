@@ -32,6 +32,9 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRep
 import java.io.File
 import javax.inject.Inject
 
+/**
+ * Provides a use case to export an Orature project as mp3 files.
+ */
 class Mp3ProjectExporter @Inject constructor(
     private val directoryProvider: IDirectoryProvider,
     private val workbookRepository: IWorkbookRepository
@@ -42,6 +45,11 @@ class Mp3ProjectExporter @Inject constructor(
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
+    /**
+     * Exports the project to mp3 files.
+     *
+     * @param directory the target directory to export
+     */
     override fun export(
         directory: File,
         projectMetadataToExport: ResourceMetadata,

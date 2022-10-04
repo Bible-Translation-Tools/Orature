@@ -31,8 +31,19 @@ import java.nio.file.StandardCopyOption
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+/**
+ * Provides an API to export an Orature project (book).
+ */
 abstract class ProjectExporter {
 
+    /**
+     * Exports the given project to a specific format.
+     *
+     * @param directory the target directory
+     * @param projectMetadataToExport project metadata
+     * @param workbook the workbook to be exported
+     * @param projectFilesAccessor - accessor to project content
+     */
     abstract fun export(
         directory: File,
         projectMetadataToExport: ResourceMetadata,
