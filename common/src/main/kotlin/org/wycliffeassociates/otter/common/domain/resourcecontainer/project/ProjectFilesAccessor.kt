@@ -69,6 +69,12 @@ class ProjectFilesAccessor(
         project
     )
 
+    /**
+     * Copies the existing source file to the project directory.
+     *
+     * @param linkedResource associated resource to be copied into the project directory
+     * @param excludeMedia copy the source file except the media within it.
+     */
     fun copySourceFiles(
         linkedResource: ResourceMetadata? = null,
         excludeMedia: Boolean = true
@@ -91,6 +97,10 @@ class ProjectFilesAccessor(
         }
     }
 
+    /**
+     * Copies the source content from the given FileReader
+     * to the project directory.
+     */
     fun copySourceFiles(fileReader: IFileReader) {
         val sourceFiles: Sequence<String> = fileReader
             .list(RcConstants.SOURCE_DIR)
@@ -110,6 +120,11 @@ class ProjectFilesAccessor(
         }
     }
 
+    /**
+     * Copies the source content to the project directory with a FileWriter
+     *
+     * @param linkedResource associated resource to be copied into the project directory
+     */
     fun copySourceFiles(fileWriter: IFileWriter, linkedResource: ResourceMetadata? = null) {
         val sources = mutableListOf(sourceMetadata)
         linkedResource?.let { sources.add(it) }
@@ -120,6 +135,11 @@ class ProjectFilesAccessor(
             .forEach { fileWriter.copyFile(it, RcConstants.SOURCE_DIR) }
     }
 
+    /**
+     * Creates a new resource container from the project directory.
+     *
+     * @param overwrite ignores the existing container and create a new one.
+     */
     fun initializeResourceContainerInDir(overwrite: Boolean = true) {
         if (!overwrite) { // if existing container is valid, then use it
             try {
@@ -144,6 +164,12 @@ class ProjectFilesAccessor(
             }
     }
 
+    /**
+     * Creates a new resource container from the project path.
+     *
+     * @param workbook the workbook used for creating the container.
+     * @param container target path to create the container.
+     */
     fun initializeResourceContainerInFile(workbook: Workbook, container: File) {
         ResourceContainer
             .create(container) {
@@ -160,11 +186,17 @@ class ProjectFilesAccessor(
             }
     }
 
+    /**
+     * Creates the index file which keeps track of selected takes.
+     */
     fun createSelectedTakesFile() {
         val outFile = projectDir.resolve(RcConstants.SELECTED_TAKES_FILE)
         outFile.createNewFile()
     }
 
+    /**
+     * Copies the index file of selected takes to the project directory.
+     */
     fun copySelectedTakesFile(fileReader: IFileReader) {
         val outFile = projectDir.resolve(RcConstants.SELECTED_TAKES_FILE)
         if (!outFile.exists()) {
@@ -172,6 +204,13 @@ class ProjectFilesAccessor(
         }
     }
 
+    /**
+     * Writes to the index file for selected takes
+     *
+     * @param workbook the workbook from which selected takes are accounted.
+     * @param isBook specifies whether the selected takes to index
+     * are book content or help resource.
+     */
     fun writeSelectedTakesFile(workbook: Workbook, isBook: Boolean) {
         val selectedTakes = projectDir.resolve(RcConstants.SELECTED_TAKES_FILE)
         selectedTakes.outputStream().use { stream ->
@@ -186,6 +225,13 @@ class ProjectFilesAccessor(
         }
     }
 
+    /**
+     * Writes (appends) to the index file of selected takes.
+     *
+     * @param workbook the workbook from which selected takes are accounted.
+     * @param isBook specifies whether the selected takes to index
+     * are book content or help resource.
+     */
     fun writeSelectedTakesFile(fileWriter: IFileWriter, workbook: Workbook, isBook: Boolean) {
         fileWriter.bufferedWriter(RcConstants.SELECTED_TAKES_FILE).use { _fileWriter ->
             fetchSelectedTakes(workbook, isBook)
@@ -199,6 +245,11 @@ class ProjectFilesAccessor(
         }
     }
 
+    /**
+     * Copies all takes to the project internal directory.
+     *
+     * @param manifestProject the project from which takes content will be copied.
+     */
     fun copyTakeFiles(fileReader: IFileReader, manifestProject: Project): Observable<String> {
         return Observable.just(RcConstants.TAKE_DIR, manifestProject.path)
             .filter(fileReader::exists)
@@ -208,6 +259,13 @@ class ProjectFilesAccessor(
             }
     }
 
+    /**
+     * Copies all takes of the given workbook to the project internal directory.
+     *
+     * @param workbook the workbook from which selected takes will be copied.
+     * @param isBook specifies whether the selected takes to index
+     * are book content or help resource.
+     */
     fun copyTakeFiles(
         fileWriter: IFileWriter,
         workbook: Workbook,
@@ -226,12 +284,18 @@ class ProjectFilesAccessor(
         }
     }
 
+    /**
+     * Gets a list of contributors of the project.
+     */
     fun getContributorInfo(): List<Contributor> {
         return ResourceContainer.load(projectDir).use { rc ->
             rc.manifest.dublinCore.contributor.map { Contributor(it) }
         }
     }
 
+    /**
+     * Sets the contributors of the project.
+     */
     fun setContributorInfo(contributors: List<Contributor>) {
         ResourceContainer.load(projectDir).use { rc ->
             rc.manifest.dublinCore.contributor = contributors.map { it.toString() }.toMutableList()
@@ -270,6 +334,12 @@ class ProjectFilesAccessor(
         }
     }
 
+    /**
+     * Gets the file paths of selected chapter takes.
+     *
+     * @param isBook specifies whether the book content or help resource
+     * will be collected.
+     */
     fun selectedChapterFilePaths(workbook: Workbook, isBook: Boolean): Set<String> {
         return fetchSelectedTakes(workbook, isBook, true)
             .map(this::relativeTakePath)
@@ -359,6 +429,9 @@ class ProjectFilesAccessor(
     companion object {
         val ignoredSourceMediaExtensions = listOf("wav", "mp3", "jpg", "jpeg", "png", "cue")
 
+        /**
+         * Returns the path of project internal directory that contains the takes.
+         */
         fun getTakesDirPath(): String {
             return RcConstants.TAKE_DIR
         }
