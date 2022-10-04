@@ -80,6 +80,9 @@ class ProjectImporter @Inject constructor(
         Pattern.compile(chapter + verse + sort + type + take + extensionDelim)
     }
 
+    /**
+     * Checks whether the project has work in progress.
+     */
     fun isResumableProject(resourceContainer: File): Boolean {
         return try {
             hasInProgressMarker(resourceContainer)
@@ -88,6 +91,11 @@ class ProjectImporter @Inject constructor(
         }
     }
 
+    /**
+     * Finds the source metadata of the given project (resource container).
+     *
+     * @param resourceContainer project file
+     */
     fun getSourceMetadata(resourceContainer: File): Maybe<ResourceMetadata> {
         return Maybe.fromCallable {
             val manifest: Manifest = ResourceContainer.load(resourceContainer).use { it.manifest }
@@ -98,6 +106,11 @@ class ProjectImporter @Inject constructor(
         }
     }
 
+    /**
+     * Imports the file as an in-progress target project.
+     *
+     * @param resourceContainer project file
+     */
     fun importResumableProject(resourceContainer: File): Single<ImportResult> {
         return Single.fromCallable {
             try {
