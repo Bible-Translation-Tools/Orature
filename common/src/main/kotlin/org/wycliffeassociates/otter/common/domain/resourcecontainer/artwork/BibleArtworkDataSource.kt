@@ -26,6 +26,9 @@ import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
+/**
+ * A default datasource for Bible artworks.
+ */
 class BibleArtworkDataSource(
     private val directoryProvider: IDirectoryProvider,
     private val imagesContainerNames: List<String> = listOf("en_art_sp.zip", "en_art_wa.zip")

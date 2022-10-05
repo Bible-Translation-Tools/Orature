@@ -27,6 +27,9 @@ import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
+/**
+ * A custom datasource for artwork content.
+ */
 class ResourceContainerArtworkDataSource(
     private val directoryProvider: IDirectoryProvider
 ) : ArtworkDataSource {

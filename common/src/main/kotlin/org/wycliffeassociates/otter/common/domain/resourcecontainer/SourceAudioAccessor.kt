@@ -27,6 +27,9 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 
 data class SourceAudio(val file: File, val start: Int, val end: Int)
 
+/**
+ * Provides access to the source project's audio.
+ */
 class SourceAudioAccessor(
     val directoryProvider: IDirectoryProvider,
     val metadata: ResourceMetadata,
