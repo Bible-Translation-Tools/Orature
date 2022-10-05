@@ -36,6 +36,9 @@ import java.lang.Exception
 import java.time.LocalDate
 import javax.inject.Inject
 
+/**
+ * Provides use cases for working with audio takes.
+ */
 class TakeActions @Inject constructor(
     private val waveFileCreator: IWaveFileCreator,
     private val launchPlugin: LaunchPlugin
@@ -46,6 +49,13 @@ class TakeActions @Inject constructor(
         NO_AUDIO
     }
 
+    /**
+     * Opens the audio take in a plugin to edit.
+     *
+     * @param audio the audio mapping to the database
+     * @param take the take to edit
+     * @param pluginParameters parameters passed into the plugin
+     */
     fun edit(audio: AssociatedAudio, take: Take, pluginParameters: PluginParameters): Single<Result> {
         return launchPlugin(PluginType.EDITOR, take, pluginParameters)
             .map { (take, result) ->
@@ -53,6 +63,13 @@ class TakeActions @Inject constructor(
             }
     }
 
+    /**
+     * Opens the audio take in a plugin to insert markers.
+     *
+     * @param audio the audio content mapped to the database
+     * @param take the take to edit
+     * @param pluginParameters parameters passed into the plugin
+     */
     fun mark(audio: AssociatedAudio, take: Take, pluginParameters: PluginParameters): Single<Result> {
         return launchPlugin(PluginType.MARKER, take, pluginParameters)
             .map { (take, result) ->
@@ -60,6 +77,14 @@ class TakeActions @Inject constructor(
             }
     }
 
+    /**
+     * Opens the audio take in a plugin to record.
+     *
+     * @param audio the audio content mapped to the database
+     * @param namer utility for generating file name
+     * @param projectAudioDir directory containing the project's audio files
+     * @param pluginParameters parameters passed into the plugin
+     */
     fun record(
         audio: AssociatedAudio,
         projectAudioDir: File,
@@ -82,6 +107,13 @@ class TakeActions @Inject constructor(
             }
     }
 
+    /**
+     * Imports the take into the project's audio content.
+     *
+     * @param audio the audio content mapped to the database
+     * @param projectAudioDir directory containing the project's audio files
+     * @param namer utility for generating file name
+     */
     fun import(
         audio: AssociatedAudio,
         projectAudioDir: File,
