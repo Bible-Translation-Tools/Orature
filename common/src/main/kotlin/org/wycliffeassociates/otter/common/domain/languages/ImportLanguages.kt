@@ -31,7 +31,10 @@ import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRep
 import java.io.InputStream
 import javax.inject.Inject
 
-// Imports from langnames.json
+/**
+ * Provide a use case to import/update the list of languages.
+ * JSON format is required for the input.
+ */
 class ImportLanguages @Inject constructor(
     private val languageRepo: ILanguageRepository,
     private val languageDataSource: ILanguageDataSource
@@ -39,6 +42,11 @@ class ImportLanguages @Inject constructor(
 
     private val logger = LoggerFactory.getLogger(ImportLanguages::class.java)
 
+    /**
+     * Import languages from an InputStream.
+     *
+     * @param inputStream the stream from a JSON source.
+     */
     fun import(inputStream: InputStream): Completable {
         return Completable
             .fromCallable {
@@ -51,6 +59,11 @@ class ImportLanguages @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
+    /**
+     * Updates the list of languages from a remote source.
+     *
+     * @param url endpoint of languages (JSON) file
+     */
     fun update(url: String): Completable {
         return languageDataSource.fetchLanguageNames(url)
             .flatMapCompletable {
