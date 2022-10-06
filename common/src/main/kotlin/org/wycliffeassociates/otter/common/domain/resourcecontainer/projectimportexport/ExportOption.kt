@@ -21,5 +21,6 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimpo
 enum class ExportOption(val titleKey: String) {
     LISTEN("listen"),
     SOURCE_AUDIO("sourceAudio"),
-    BACKUP("backup")
+    BACKUP("backup"),
+    PUBLISH("publish")
 }
