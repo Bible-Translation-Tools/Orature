@@ -34,8 +34,32 @@ interface ICollectionRepository : IRepository<Collection> {
     fun getSource(project: Collection): Maybe<Collection>
     fun getChildren(collection: Collection): Single<List<Collection>>
     fun getProjectBySlugAndMetadata(slug: String, metadata: ResourceMetadata): Single<Collection>
+
+    /**
+     * Updates the collection's reference to its source.
+     *
+     * @param collection the collection which source will be updated
+     * @param newSource the updated collection will refer to this as its new source
+     */
     fun updateSource(collection: Collection, newSource: Collection): Completable
+
+    /**
+     * Updates the collection's reference to its parent.
+     *
+     * @param collection the collection which parent will be updated
+     * @param newParent the updated collection will refer to this as its new parent
+     */
     fun updateParent(collection: Collection, newParent: Collection): Completable
+
+    /**
+     * Creates a new derived project based on the given source project (collection) and metadata(s).
+     *
+     * @param sourceMetadatas a list of resource metadata from the source
+     * @param sourceCollection the source project to be derived
+     * @param language the target language of the derived project
+     *
+     * @return the new derived project
+     */
     fun deriveProject(
         sourceMetadatas: List<ResourceMetadata>,
         sourceCollection: Collection,

@@ -29,6 +29,11 @@ interface ITakeRepository : IRepository<Take> {
     fun getByContent(content: Content, includeDeleted: Boolean = false): Single<List<Take>>
     fun removeNonExistentTakes(): Completable
     fun markDeleted(take: Take): Completable
+
+    /**
+     * Returns a list (observable wrapped) containing the takes of the given book
+     * that are marked to be deleted.
+     */
     fun getSoftDeletedTakes(project: Collection): Single<List<Take>>
     fun deleteExpiredTakes(expiry: Int = 0): Completable
 }

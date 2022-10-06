@@ -33,6 +33,10 @@ class CreateProject @Inject constructor(
     /**
      * Create derived collections for each source RC that has content in sourceProject's subtree, optionally
      * limited to resourceId (if not null).
+     *
+     * @param sourceProject the source project to be derived
+     * @param targetLanguage target language of the derived project(s)
+     * @param resourceId the id for filtering associated resources
      */
     fun create(
         sourceProject: Collection,

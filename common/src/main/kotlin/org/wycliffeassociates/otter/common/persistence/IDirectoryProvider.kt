@@ -25,6 +25,9 @@ import org.wycliffeassociates.otter.common.io.zip.IFileWriter
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 
+/**
+ * Provides access to the directory/file system.
+ */
 interface IDirectoryProvider {
 
     /** Directory to store the user's application projects/documents */

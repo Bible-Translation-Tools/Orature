@@ -24,6 +24,11 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPlugin
 class CreatePlugin(
     private val pluginRepository: IAudioPluginRepository
 ) {
+    /**
+     * Creates (inserts) a new plugin entry.
+     *
+     * @return the id of the inserted plugin.
+     */
     fun create(data: AudioPluginData): Maybe<Int> {
         return pluginRepository
             .insert(data)

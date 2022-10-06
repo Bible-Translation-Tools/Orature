@@ -52,7 +52,7 @@ class FileNamer(
     }
 
     /**
-     * Defines a file name for a given audio (take) file.
+     * Generates a file name for the take based on the related information.
      */
     fun generateName(takeNumber: Int, format: AudioFileFormat): String {
         return listOfNotNull(

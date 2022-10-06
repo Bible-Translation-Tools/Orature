@@ -24,6 +24,11 @@ import io.reactivex.Single
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.data.primitives.Language
 
+/**
+ * Provides an API to access app preferences.
+ *
+ * @see org.wycliffeassociates.otter.common.persistence.IAppPreferences
+ */
 interface IAppPreferencesRepository {
     fun resumeProjectId(): Single<Int>
     fun setResumeProjectId(id: Int): Completable

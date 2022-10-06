@@ -30,6 +30,9 @@ enum class PluginType {
     EDITOR
 }
 
+/**
+ * Provides access to audio plugins used by the app.
+ */
 interface IAudioPluginRepository : IRepository<AudioPluginData> {
     fun insert(data: AudioPluginData): Single<Int>
     fun getAllPlugins(): Single<List<IAudioPlugin>>

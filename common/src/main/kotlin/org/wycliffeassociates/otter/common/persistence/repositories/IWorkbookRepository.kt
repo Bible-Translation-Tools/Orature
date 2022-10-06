@@ -28,9 +28,18 @@ import org.wycliffeassociates.otter.common.data.workbook.Workbook
 
 interface IWorkbookRepository {
     fun get(source: Collection, target: Collection): Workbook
+
+    /**
+     * Returns a list (observable wrapped) containing the takes of the given book
+     * that are marked to be deleted.
+     */
     fun getSoftDeletedTakes(book: Book): Single<List<Take>>
     fun getProjects(): Single<List<Workbook>>
     fun getProjects(translation: Translation): Single<List<Workbook>>
     fun getWorkbook(project: Collection): Maybe<Workbook>
+
+    /**
+     * Closes the given workbook and clean up resources.
+     */
     fun closeWorkbook(workbook: Workbook)
 }

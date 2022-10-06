@@ -24,14 +24,14 @@ import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 
 interface IContentRepository : IRepository<Content> {
-    // Insert for a collection
+    /** Insert for a collection */
     fun insertForCollection(content: Content, collection: Collection): Single<Int>
-    // Get all the chunks for a collection
+    /** Get all the chunks for a collection */
     fun getByCollection(collection: Collection): Single<List<Content>>
-    // Get the collection meta-chunk
+    /** Get the collection meta-chunk */
     fun getCollectionMetaContent(collection: Collection): Single<Content>
-    // Get sources this content is derived from
+    /** Get sources this content is derived from */
     fun getSources(content: Content): Single<List<Content>>
-    // Update the sources for a content
+    /** Update the sources of the given content */
     fun updateSources(content: Content, sourceContents: List<Content>): Completable
 }

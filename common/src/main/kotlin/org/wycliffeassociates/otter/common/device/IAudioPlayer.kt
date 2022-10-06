@@ -21,6 +21,9 @@ package org.wycliffeassociates.otter.common.device
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import java.io.File
 
+/**
+ * An audio player API which allows working with the audio data.
+ */
 interface IAudioPlayer {
     val frameStart: Int
     val frameEnd: Int

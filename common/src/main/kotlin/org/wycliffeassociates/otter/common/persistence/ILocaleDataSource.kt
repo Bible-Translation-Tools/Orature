@@ -19,6 +19,12 @@
 package org.wycliffeassociates.otter.common.persistence
 
 interface ILocaleDataSource {
+    /**
+     * Returns a list of supported locales.
+     */
     fun getSupportedLocales(): List<String>
+    /**
+     * Returns the app's default locale.
+     */
     fun getDefaultLocale(): String
 }
