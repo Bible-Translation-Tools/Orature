@@ -71,7 +71,10 @@ class BackupProjectExporter @Inject constructor(
 
                     val linkedResource = workbook.source.linkedResources
                         .firstOrNull { it.identifier == projectMetadataToExport.identifier }
-                    projectFilesAccessor.copySourceFiles(fileWriter, linkedResource)
+
+                    projectFilesAccessor.copySourceFilesOfProject(
+                        fileWriter, directoryProvider.tempDirectory, linkedResource
+                    )
                     projectFilesAccessor.writeSelectedTakesFile(fileWriter, workbook, projectToExportIsBook)
                 }
 
