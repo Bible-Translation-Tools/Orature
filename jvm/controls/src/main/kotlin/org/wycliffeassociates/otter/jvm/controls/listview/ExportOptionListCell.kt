@@ -34,6 +34,7 @@ class ExportOptionListCell : ListCell<ExportOption>() {
         ExportOption.BACKUP -> FontIcon(MaterialDesign.MDI_FOLDER_MULTIPLE_OUTLINE)
         ExportOption.LISTEN -> FontIcon(MaterialDesign.MDI_PLAY)
         ExportOption.SOURCE_AUDIO -> FontIcon(Material.HEARING)
+        ExportOption.PUBLISH -> FontIcon(Material.CLOUD_UPLOAD)
     }
 
     override fun updateItem(item: ExportOption?, empty: Boolean) {

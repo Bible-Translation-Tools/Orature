@@ -219,7 +219,7 @@ class WorkbookPageViewModel : ViewModel() {
 
         val exporter: ProjectExporter = when (option) {
             ExportOption.LISTEN -> exportMp3Provider.get()
-            ExportOption.SOURCE_AUDIO -> exportSourceProvider.get()
+            ExportOption.SOURCE_AUDIO, ExportOption.PUBLISH -> exportSourceProvider.get()
             ExportOption.BACKUP -> exportBackupProvider.get()
         }
 
