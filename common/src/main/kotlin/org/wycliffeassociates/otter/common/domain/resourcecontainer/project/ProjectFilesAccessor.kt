@@ -41,7 +41,6 @@ import org.wycliffeassociates.resourcecontainer.ZipAccessor
 import org.wycliffeassociates.resourcecontainer.entity.Project
 import java.io.File
 import java.io.OutputStream
-import javax.inject.Inject
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.outputStream
 
@@ -146,7 +145,7 @@ class ProjectFilesAccessor(
             .distinct()
             .forEach { source ->
                 // prepare source before copying into export file.
-                val newSource = prepareProjectSourceMedia(source, sourceTempDir)
+                val newSource = filterSourceFileToContainProjectRelatedMedia(source, sourceTempDir)
                 fileWriter.copyFile(newSource, RcConstants.SOURCE_DIR)
             }
     }
@@ -302,9 +301,9 @@ class ProjectFilesAccessor(
     }
 
     /**
-     * Returns a new file containing source media of the given project only.
+     * Returns a new file containing source media of the corresponding project only.
      */
-    private fun prepareProjectSourceMedia(
+    private fun filterSourceFileToContainProjectRelatedMedia(
         source: File,
         tempDir: File
     ): File {
@@ -335,7 +334,7 @@ class ProjectFilesAccessor(
             }
         }
 
-        // update media manifest
+        // filter media projects that are not related to the current project
         ResourceContainer.load(newSourceFile).use { rc ->
             val singleProjectList = listOfNotNull(
                 rc.media?.projects?.find { it.identifier == project.slug }
