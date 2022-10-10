@@ -230,6 +230,7 @@ class SourceContent : StackPane() {
                         button {
                             addClass("btn", "btn--icon")
                             isVisible = false
+                            managedWhen(sourceTextCompactMode)
                         }
 
                         visibleWhen(targetAudioPlayerProperty.isNotNull)
