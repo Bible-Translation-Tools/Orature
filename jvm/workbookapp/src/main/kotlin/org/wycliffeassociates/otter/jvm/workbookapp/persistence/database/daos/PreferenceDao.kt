@@ -27,7 +27,7 @@ class PreferenceDao(
     private val instanceDsl: DSLContext
 ) {
 
-    fun fetchByKey(key: String, dsl: DSLContext = instanceDsl): PreferenceEntity {
+    fun fetchByKey(key: String, dsl: DSLContext = instanceDsl): PreferenceEntity? {
         return dsl
             .select()
             .from(PREFERENCES)

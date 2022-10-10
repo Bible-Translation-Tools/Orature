@@ -49,7 +49,7 @@ class LanguageDao(
             }
     }
 
-    fun fetchBySlug(slug: String, dsl: DSLContext = instanceDsl): LanguageEntity {
+    fun fetchBySlug(slug: String, dsl: DSLContext = instanceDsl): LanguageEntity? {
         return dsl
             .select()
             .from(LANGUAGE_ENTITY)
@@ -153,7 +153,7 @@ class LanguageDao(
         }
     }
 
-    fun fetchById(id: Int, dsl: DSLContext = instanceDsl): LanguageEntity {
+    fun fetchById(id: Int, dsl: DSLContext = instanceDsl): LanguageEntity? {
         return dsl
             .select()
             .from(LANGUAGE_ENTITY)

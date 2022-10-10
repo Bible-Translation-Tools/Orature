@@ -20,9 +20,11 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos
 
 import jooq.Tables
 import org.jooq.DSLContext
+import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.InsertionException
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.TranslationEntity
+import kotlin.jvm.Throws
 
 class TranslationDao(
     private val instanceDsl: DSLContext
@@ -39,25 +41,18 @@ class TranslationDao(
             }
     }
 
-    fun fetchBySourceAndTarget(sourceId: Int, targetId: Int, dsl: DSLContext = instanceDsl): TranslationEntity {
-        return dsl
-            .select()
-            .from(Tables.TRANSLATION_ENTITY)
-            .where(Tables.TRANSLATION_ENTITY.SOURCE_FK.eq(sourceId))
-            .and(Tables.TRANSLATION_ENTITY.TARGET_FK.eq(targetId))
-            .fetchOne {
-                RecordMappers.mapToTranslationEntity(it)
-            }
-    }
-
-    fun fetchById(id: Int, dsl: DSLContext = instanceDsl): TranslationEntity {
-        return dsl
-            .select()
-            .from(Tables.TRANSLATION_ENTITY)
-            .where(Tables.TRANSLATION_ENTITY.ID.eq(id))
-            .fetchOne {
-                RecordMappers.mapToTranslationEntity(it)
-            }
+    fun fetchById(id: Int, dsl: DSLContext = instanceDsl): TranslationEntity? {
+        return try {
+            dsl
+                .select()
+                .from(Tables.TRANSLATION_ENTITY)
+                .where(Tables.TRANSLATION_ENTITY.ID.eq(id))
+                .fetchOne {
+                    RecordMappers.mapToTranslationEntity(it)
+                }
+        } catch (e: DataAccessException) {
+            null
+        }
     }
 
     fun fetchAll(dsl: DSLContext = instanceDsl): List<TranslationEntity> {
@@ -70,6 +65,7 @@ class TranslationDao(
     }
 
     @Synchronized
+    @Throws(InsertionException::class)
     fun insert(entity: TranslationEntity, dsl: DSLContext = instanceDsl): Int {
         if (entity.id != 0) throw InsertionException("Entity ID is not 0")
 
