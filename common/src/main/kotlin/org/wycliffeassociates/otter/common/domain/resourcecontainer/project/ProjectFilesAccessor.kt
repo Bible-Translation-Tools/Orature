@@ -131,7 +131,7 @@ class ProjectFilesAccessor(
      * @param tempDir a temporary directory used to dump source file before copying.
      * @param linkedResource the associated resource file to the project's source.
      */
-    fun copySourceFilesOfProject(
+    fun copySourceFilesWithRelatedMedia(
         fileWriter: IFileWriter,
         tempDir: File,
         linkedResource: ResourceMetadata? = null
