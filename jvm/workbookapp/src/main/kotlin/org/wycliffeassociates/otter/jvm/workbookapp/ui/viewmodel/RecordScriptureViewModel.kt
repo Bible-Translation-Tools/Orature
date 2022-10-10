@@ -61,6 +61,8 @@ import java.io.File
 import java.text.MessageFormat
 import io.reactivex.rxkotlin.toObservable as toRxObservable
 
+private const val NO_HIGHLIGHT_INDEX = -1
+
 class RecordScriptureViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(RecordScriptureViewModel::class.java)
@@ -95,7 +97,7 @@ class RecordScriptureViewModel : ViewModel() {
     val hasPreviousChunk = SimpleBooleanProperty(false)
 
     val isChunk = activeChunkProperty.isNotNull
-    val highlightedChunkProperty = SimpleIntegerProperty(-1)
+    val highlightedChunkProperty = SimpleIntegerProperty(NO_HIGHLIGHT_INDEX)
     val verseCountProperty = SimpleIntegerProperty()
 
     private var activeChunkSubscription: Disposable? = null
@@ -128,7 +130,7 @@ class RecordScriptureViewModel : ViewModel() {
         initializeListeners()
         loadTakes()
         openPlayers()
-        highlightedChunkProperty.set(-1)
+        highlightedChunkProperty.set(NO_HIGHLIGHT_INDEX)
     }
 
     fun undock() {
@@ -144,12 +146,24 @@ class RecordScriptureViewModel : ViewModel() {
         }.let(listeners::add)
 
         verseCountProperty.bind(
-            workbookDataStore.activeProjectFilesAccessorProperty.objectBinding {
-                it?.getChapterText(
-                    workbookDataStore.workbook.target.slug,
-                    activeChapter.sort
-                )?.size ?: 0
-            }
+            Bindings.createIntegerBinding(
+                {
+                    // no verse count in chunk/verse page
+                    if (activeChunkProperty.value != null) {
+                        0
+                    } else {
+                        val projectAccessor = workbookDataStore.activeProjectFilesAccessorProperty
+                        projectAccessor.value?.let {
+                            it.getChapterText(
+                                workbookDataStore.workbook.target.slug,
+                                activeChapter.sort
+                            ).size
+                        } ?: 0
+                    }
+                },
+                workbookDataStore.activeProjectFilesAccessorProperty,
+                activeChunkProperty
+            )
         )
 
         activeChapterProperty.onChangeAndDoNowWithDisposer { chapter ->
@@ -347,6 +361,7 @@ class RecordScriptureViewModel : ViewModel() {
         }
         val nextIndex = chapterList.indexOf(activeChapter) + amount
         chapterList.elementAtOrNull(nextIndex)?.let { activeChapterProperty.set(it) }
+        highlightedChunkProperty.set(NO_HIGHLIGHT_INDEX)
     }
 
     private fun stepToChunk(direction: StepDirection) {
