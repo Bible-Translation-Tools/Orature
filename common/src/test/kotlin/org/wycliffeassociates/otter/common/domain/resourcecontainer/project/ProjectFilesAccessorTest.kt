@@ -133,8 +133,6 @@ class ProjectFilesAccessorTest {
 
     @Test
     fun copySourceFiles_excludeMedia() {
-        val project = mock(Collection::class.java)
-        `when`(project.slug).thenReturn(jasProjectSlug)
         val projectFilesAccessor = buildProjectAccessor()
 
         projectFilesAccessor.copySourceFiles(excludeMedia = true)
@@ -219,6 +217,12 @@ class ProjectFilesAccessorTest {
         val source = projectSourceDir.listFiles().first()
         ResourceContainer.load(source).use { rc ->
             assertEquals(
+                "Media project of source should have 1 project.",
+                1,
+                rc.media?.projects?.size
+            )
+            assertEquals(
+                "Source audio project slug should match the target slug.",
                 jasProjectSlug,
                 rc.media?.projects?.single()?.identifier
             )
@@ -227,7 +231,12 @@ class ProjectFilesAccessorTest {
             val pathsInZip = zip.entries().toList().map { it.name }
             val mediaPaths = pathsInZip.filter { it.contains("${RcConstants.MEDIA_DIR}/") }
             val isRelevantMedia = mediaPaths.all { it.contains("${RcConstants.MEDIA_DIR}/$jasProjectSlug") }
-            assertTrue(isRelevantMedia)
+
+            assertTrue(mediaPaths.isNotEmpty())
+            assertTrue(
+                "Source media should only contain files related to the target project.",
+                isRelevantMedia
+            )
         }
     }
 
