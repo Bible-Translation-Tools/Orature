@@ -22,7 +22,7 @@ import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import java.io.File
 
 /**
- * An audio player API which allows working with the audio data.
+ * A player which interacts with the audio.
  */
 interface IAudioPlayer {
     val frameStart: Int
