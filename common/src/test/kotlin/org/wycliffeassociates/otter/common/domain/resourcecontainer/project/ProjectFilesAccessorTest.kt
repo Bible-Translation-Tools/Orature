@@ -229,8 +229,8 @@ class ProjectFilesAccessorTest {
         }
         ZipFile(source).use { zip ->
             val pathsInZip = zip.entries().toList().map { it.name }
-            val mediaPaths = pathsInZip.filter { it.contains("${RcConstants.MEDIA_DIR}/") }
-            val isRelevantMedia = mediaPaths.all { it.contains("${RcConstants.MEDIA_DIR}/$jasProjectSlug") }
+            val mediaPaths = pathsInZip.filter { it.contains("${RcConstants.SOURCE_MEDIA_DIR}/") }
+            val isRelevantMedia = mediaPaths.all { it.contains("${RcConstants.SOURCE_MEDIA_DIR}/$jasProjectSlug") }
 
             assertTrue(mediaPaths.isNotEmpty())
             assertTrue(
