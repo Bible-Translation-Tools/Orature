@@ -41,6 +41,7 @@ import org.wycliffeassociates.resourcecontainer.ZipAccessor
 import org.wycliffeassociates.resourcecontainer.entity.Project
 import java.io.File
 import java.io.OutputStream
+import kotlin.io.path.createTempDirectory
 import kotlin.io.path.outputStream
 
 class ProjectFilesAccessor(
@@ -117,7 +118,36 @@ class ProjectFilesAccessor(
         sources
             .map { it.path }
             .distinct()
-            .forEach { fileWriter.copyFile(it, RcConstants.SOURCE_DIR) }
+            .forEach {
+                fileWriter.copyFile(it, RcConstants.SOURCE_DIR)
+            }
+    }
+
+    /**
+     * Copies the source files of the project containing project-related media only.
+     *
+     * @param fileWriter used to write to the project file.
+     * @param tempDir a temporary directory used to dump source file before copying.
+     * @param linkedResource the associated resource file to the project's source.
+     */
+    fun copySourceFilesWithRelatedMedia(
+        fileWriter: IFileWriter,
+        tempDir: File,
+        linkedResource: ResourceMetadata? = null
+    ) {
+        val sources = listOfNotNull(sourceMetadata, linkedResource)
+        /* generate a sub-temp directory to avoid dirty file
+            being accidentally reused due to the same name */
+        val sourceTempDir = createTempDirectory(tempDir.toPath(), "otter-export").toFile()
+
+        sources
+            .map { it.path }
+            .distinct()
+            .forEach { source ->
+                // prepare source before copying into export file.
+                val newSource = filterSourceFileToContainProjectRelatedMedia(source, sourceTempDir)
+                fileWriter.copyFile(newSource, RcConstants.SOURCE_DIR)
+            }
     }
 
     fun initializeResourceContainerInDir(overwrite: Boolean = true) {
@@ -268,6 +298,52 @@ class ProjectFilesAccessor(
             rc.media?.projects = listOf()
             rc.writeMedia()
         }
+    }
+
+    /**
+     * Returns a new file containing source media of the corresponding project only.
+     */
+    private fun filterSourceFileToContainProjectRelatedMedia(
+        source: File,
+        tempDir: File
+    ): File {
+        val newSourceFile = tempDir.resolve(source.nameWithoutExtension + ".zip")
+        val newSourceZip = ZipAccessor(newSourceFile)
+
+        ResourceContainer.load(source).use {
+            val inMap = it.accessor.getInputStreams(".", listOf())
+                .filterKeys { path ->
+                    if (path.contains("${RcConstants.SOURCE_MEDIA_DIR}/")) {
+                        path.contains("${RcConstants.SOURCE_MEDIA_DIR}/${project.slug}")
+                    } else {
+                        true
+                    }
+                }
+            val filesToWrite = inMap.mapValues {
+                { output: OutputStream ->
+                    it.value.copyTo(output)
+                    Unit
+                }
+            }
+            try {
+                newSourceZip.write(filesToWrite)
+            } catch (e: Exception) {
+                log.error("Error while copying source container to derived project.", e)
+            } finally {
+                newSourceZip.close()
+            }
+        }
+
+        // filter media projects that are not related to the current project
+        ResourceContainer.load(newSourceFile).use { rc ->
+            val singleProjectList = listOfNotNull(
+                rc.media?.projects?.find { it.identifier == project.slug }
+            )
+            rc.media?.projects = singleProjectList
+            rc.writeMedia()
+        }
+
+        return newSourceFile
     }
 
     fun selectedChapterFilePaths(workbook: Workbook, isBook: Boolean): Set<String> {
