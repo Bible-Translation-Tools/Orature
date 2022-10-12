@@ -28,12 +28,19 @@ import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.License
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.audio.AudioExporter
+import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
+import org.wycliffeassociates.otter.common.domain.content.FileNamer
+import org.wycliffeassociates.otter.common.domain.content.Recordable
+import org.wycliffeassociates.otter.common.domain.content.TakeActions
+import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.io.zip.IFileWriter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.utils.mapNotNull
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Media
 import org.wycliffeassociates.resourcecontainer.entity.MediaManifest
@@ -47,6 +54,10 @@ class SourceProjectExporter @Inject constructor(
 ) : ProjectExporter() {
     @Inject
     lateinit var audioExporter: AudioExporter
+    @Inject
+    lateinit var concatenateAudio: ConcatenateAudio
+    @Inject
+    lateinit var takeActions: TakeActions
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
     private val exportMediaTypes = listOf(AudioFileFormat.MP3.extension, "cue")
@@ -70,6 +81,9 @@ class SourceProjectExporter @Inject constructor(
         projectFilesAccessor.initializeResourceContainerInFile(workbook, zipFile)
         setContributorInfo(contributors, projectSourceMetadata, zipFile)
 
+        compileCompletedChapters(workbook, projectSourceMetadata, projectFilesAccessor)
+            .blockingAwait()
+
         val fileWriter = directoryProvider.newFileWriter(zipFile)
 
         return exportSelectedTakes(workbook, fileWriter, contributors)
@@ -91,6 +105,37 @@ class SourceProjectExporter @Inject constructor(
             }
             .onErrorReturnItem(ExportResult.FAILURE)
             .subscribeOn(Schedulers.io())
+    }
+
+    private fun compileCompletedChapters(
+        workbook: Workbook,
+        projectMetadata: ResourceMetadata,
+        projectFilesAccessor: ProjectFilesAccessor
+    ): Completable {
+        return workbook.target
+            .chapters
+            .filter {
+                // filter completed chapters which have not been compiled yet
+                it.audio.selected.value?.value == null &&
+                        it.chunks.all { chunk ->
+                            chunk.audio.selected.value?.value != null
+                        }.blockingGet()
+            }.flatMapCompletable { chapter ->
+                chapter.chunks
+                    .mapNotNull { chunk -> chunk.audio.selected.value?.value?.file }
+                    .toList()
+                    .flatMap { takes ->
+                        concatenateAudio.execute(takes)
+                    }
+                    .flatMapCompletable { compiledTake ->
+                        takeActions.import(
+                            chapter.audio,
+                            projectFilesAccessor.audioDir,
+                            createFileNamer(workbook, chapter, projectMetadata.identifier),
+                            compiledTake
+                        )
+                    }
+            }
     }
 
     private fun exportSelectedTakes(
@@ -229,5 +274,19 @@ class SourceProjectExporter @Inject constructor(
         extension: String
     ): String {
         return "${language}_${resource}_${project}_c${chapterLabel}.$extension"
+    }
+
+    private fun createFileNamer(
+        wb: Workbook,
+        chapter: Chapter,
+        rcSlug: String
+    ): FileNamer {
+        return WorkbookFileNamerBuilder.createFileNamer(
+            workbook = wb,
+            chapter = chapter,
+            chunk = null,
+            recordable = chapter,
+            rcSlug = rcSlug
+        )
     }
 }
