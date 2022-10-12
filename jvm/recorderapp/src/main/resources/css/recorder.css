@@ -50,6 +50,10 @@
     -fx-padding: 0 0 0 5px;
 }
 
+.record-button {
+    -fx-padding: 5 10;
+}
+
 .record-button .ikonli-font-icon {
     -fx-icon-color: -wa-white;
     -fx-icon-size: 48px;
