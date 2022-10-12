@@ -210,9 +210,8 @@ class SourceContent : StackPane() {
 
                         button {
                             playTargetBtn = this
-                            addClass("btn", "btn--primary")
+                            addClass("btn", "btn--primary", "source-content__play-audio-btn")
                             graphic = FontIcon(MaterialDesign.MDI_PLAY)
-                            // Set icon size to 16
                         }
 
                         simpleaudioplayer {
@@ -225,6 +224,13 @@ class SourceContent : StackPane() {
                             playTextProperty.bind(playTargetLabelProperty)
                             pauseTextProperty.bind(pauseTargetLabelProperty)
                             menuSideProperty.set(Side.TOP)
+                        }
+
+                        // dummy button for better spacing & alignment
+                        button {
+                            addClass("btn", "btn--icon")
+                            isVisible = false
+                            managedWhen(sourceTextCompactMode)
                         }
 
                         visibleWhen(targetAudioPlayerProperty.isNotNull)
@@ -255,7 +261,7 @@ class SourceContent : StackPane() {
 
                             button {
                                 playSourceBtn = this
-                                addClass("btn", "btn--primary")
+                                addClass("btn", "btn--primary", "source-content__play-audio-btn")
                                 graphic = FontIcon(MaterialDesign.MDI_PLAY)
                             }
 

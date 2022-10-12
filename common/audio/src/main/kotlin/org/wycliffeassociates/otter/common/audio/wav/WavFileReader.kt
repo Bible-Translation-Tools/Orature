@@ -58,7 +58,9 @@ internal class WavFileReader(val wav: WavFile, val start: Int? = null, val end: 
     }
 
     fun computeBounds(wav: WavFile): Pair<Int, Int> {
-        if (wav.file.length() <= WAV_HEADER_SIZE) {
+        val headerSize = wav.headerSize
+
+        if (wav.file.length() <= headerSize) {
             logger.info("Wav file ${wav.file.name} is just a header or empty, size is ${wav.file.length()}")
             return Pair(0, 0)
         }
@@ -67,15 +69,16 @@ internal class WavFileReader(val wav: WavFile, val start: Int? = null, val end: 
         var begin = if (start != null) min(max(0, start), totalFrames) else 0
         var end = if (end != null) min(max(begin, end), totalFrames) else totalFrames
 
+
         // Convert from frames to array index
         begin *= wav.frameSizeInBytes
-        begin += WAV_HEADER_SIZE
+        begin += headerSize
         end *= wav.frameSizeInBytes
-        end += WAV_HEADER_SIZE
+        end += headerSize
 
         // Should be clamped between header size, computed beginning, and the file length
-        val clampedBegin = max(WAV_HEADER_SIZE, min(begin, max(wav.file.length().toInt(), WAV_HEADER_SIZE)))
-        val clampedEnd = max(clampedBegin, min(end, max(wav.file.length().toInt(), WAV_HEADER_SIZE)))
+        val clampedBegin = max(headerSize, min(begin, max(wav.file.length().toInt(), headerSize)))
+        val clampedEnd = max(clampedBegin, min(end, max(wav.file.length().toInt(), headerSize)))
 
         if (clampedBegin != begin || clampedEnd != end) {
             logger.error("Error in file ${wav.file.name}")

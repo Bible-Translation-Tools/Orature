@@ -54,7 +54,8 @@ class WorkbookBanner : Control() {
     val exportOptions = observableListOf(
         ExportOption.LISTEN,
         ExportOption.SOURCE_AUDIO,
-        ExportOption.BACKUP
+        ExportOption.BACKUP,
+        ExportOption.PUBLISH
     )
     val filteredExportOptions = FilteredList(exportOptions)
 

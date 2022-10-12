@@ -19,20 +19,26 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.project
 
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.anyString
 import org.mockito.Mockito.mock
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.primitives.Collection
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.RcConstants
+import org.wycliffeassociates.otter.common.io.zip.IFileWriter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
@@ -45,15 +51,17 @@ import kotlin.jvm.Throws
 class ProjectFilesAccessorTest {
     private lateinit var projectSourceDir: File
     private lateinit var sourceRC: File
+    private lateinit var tempDir: File
     private val directoryProviderMock = mock(IDirectoryProvider::class.java)
     private val mediaProjectSize = 2
+    private val jasProjectSlug = "jas"
 
-    private fun setUp_copySourceFiles(
-        project: Collection,
-        tempDir: File
-    ): ProjectFilesAccessor {
+    private fun buildProjectAccessor(): ProjectFilesAccessor {
         sourceRC = getResource("source_with_imported_media_jas_jud.zip")
-        projectSourceDir = tempDir.resolve("source").apply { mkdir() }
+        projectSourceDir = tempDir.resolve("source").apply { mkdirs() }
+
+        val project = mock(Collection::class.java)
+        `when`(project.slug).thenReturn(jasProjectSlug)
 
         val sourceMetadata = ResourceMetadata(
             "_",
@@ -113,12 +121,19 @@ class ProjectFilesAccessorTest {
         )
     }
 
+    @Before
+    fun setup() {
+        tempDir = createTempDirectory("otter-test").toFile()
+    }
+
+    @After
+    fun cleanUp() {
+        tempDir.deleteRecursively()
+    }
+
     @Test
     fun copySourceFiles_excludeMedia() {
-        val tempDir = createTempDirectory("otter-test").toFile()
-        val project = mock(Collection::class.java)
-        `when`(project.slug).thenReturn("jas")
-        val projectFilesAccessor = setUp_copySourceFiles(project, tempDir)
+        val projectFilesAccessor = buildProjectAccessor()
 
         projectFilesAccessor.copySourceFiles(excludeMedia = true)
 
@@ -146,16 +161,11 @@ class ProjectFilesAccessorTest {
         verify(directoryProviderMock).getProjectSourceDirectory(
             any(), any(), any<Collection>()
         )
-
-        tempDir.deleteRecursively()
     }
 
     @Test
     fun copySourceFiles_includeMedia() {
-        val tempDir = createTempDirectory("otter-test").toFile()
-        val project = mock(Collection::class.java)
-        `when`(project.slug).thenReturn("jas")
-        val projectFilesAccessor = setUp_copySourceFiles(project, tempDir)
+        val projectFilesAccessor = buildProjectAccessor()
 
         projectFilesAccessor.copySourceFiles(excludeMedia = false)
 
@@ -186,8 +196,48 @@ class ProjectFilesAccessorTest {
         verify(directoryProviderMock).getProjectSourceDirectory(
             any(), any(), any<Collection>()
         )
+    }
 
-        tempDir.deleteRecursively()
+    @Test
+    fun `copy source files with project-related media only`() {
+        val pfa = buildProjectAccessor()
+        val writer = mock<IFileWriter> {
+            on { copyFile(any<File>(), anyString()) } doAnswer { invocation ->
+                // stub the writer with a simple copy to source dir
+                val source = invocation.arguments[0] as File
+                source.copyTo(pfa.sourceDir.resolve(source.name))
+                Unit
+            }
+        }
+
+        pfa.copySourceFilesWithRelatedMedia(writer, tempDir)
+
+        verify(writer).copyFile(any<File>(), anyString())
+
+        val source = projectSourceDir.listFiles().first()
+        ResourceContainer.load(source).use { rc ->
+            assertEquals(
+                "Media project of source should have 1 project.",
+                1,
+                rc.media?.projects?.size
+            )
+            assertEquals(
+                "Source audio project slug should match the target slug.",
+                jasProjectSlug,
+                rc.media?.projects?.single()?.identifier
+            )
+        }
+        ZipFile(source).use { zip ->
+            val pathsInZip = zip.entries().toList().map { it.name }
+            val mediaPaths = pathsInZip.filter { it.contains("${RcConstants.SOURCE_MEDIA_DIR}/") }
+            val isRelevantMedia = mediaPaths.all { it.contains("${RcConstants.SOURCE_MEDIA_DIR}/$jasProjectSlug") }
+
+            assertTrue(mediaPaths.isNotEmpty())
+            assertTrue(
+                "Source media should only contain files related to the target project.",
+                isRelevantMedia
+            )
+        }
     }
 
     @Test

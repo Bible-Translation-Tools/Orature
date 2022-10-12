@@ -73,25 +73,11 @@ class TestProjectExport {
     private lateinit var workbook: Workbook
     private lateinit var projectFilesAccessor: ProjectFilesAccessor
 
-    private val sourceMetadata = ResourceMetadata(
-        "rc0.2",
-        "Door43 World Missions Community",
-        "",
-        "",
-        "ulb",
-        LocalDate.now(),
-        Language("en", "", "", "", true, ""),
-        LocalDate.now(),
-        "",
-        "",
-        ContainerType.Book,
-        "",
-        "12",
-        "",
-        File(".")
+    private val sourceMetadata = enUlbTestMetadata.copy(
+        path = getResource("resource-containers/en_ulb.zip")
     )
 
-    private val targetMetadata = sourceMetadata.copy(
+    private val targetMetadata = enUlbTestMetadata.copy(
         creator = "Orature",
         language = Language("en-x-demo1", "", "", "", true, "Europe")
     )
@@ -188,5 +174,9 @@ class TestProjectExport {
         }
         wav.update()
         return testFile
+    }
+
+    private fun getResource(name: String): File {
+        return File(javaClass.classLoader.getResource("resource-containers/en_ulb.zip").file)
     }
 }
