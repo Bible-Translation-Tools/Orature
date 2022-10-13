@@ -117,12 +117,12 @@ interface IAudioPlayer : Closeable {
     fun getDurationMs(): Int
 
     /**
-     * Returns the current position of the playback thumb in frames.
+     * Returns the current position of the reader head in frames.
      */
     fun getLocationInFrames(): Int
 
     /**
-     * Returns the current location of the playback thumb in milliseconds.
+     * Returns the current location of the reader head in milliseconds.
      */
     fun getLocationMs(): Int
 }

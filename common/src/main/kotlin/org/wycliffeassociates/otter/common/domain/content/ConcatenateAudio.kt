@@ -25,14 +25,14 @@ import java.io.File
 import javax.inject.Inject
 
 /**
- * Joins multiple audio files into a single audio file.
- * It is recommended that the input files should have
- * the same audio format.
+ * Joins multiple audio files into a single audio file (.wav).
  */
 class ConcatenateAudio @Inject constructor(private val directoryProvider: IDirectoryProvider) {
 
     /**
-     * Joins the given files into a single audio file (.wav).
+     * Executes joining audio files into one output file.
+     * Note that the audio sample format of the first file
+     * from the input list will be applied to the output file.
      *
      * @param includeMarkers specifies whether to keep the markers from the input files
      * in the result file.
