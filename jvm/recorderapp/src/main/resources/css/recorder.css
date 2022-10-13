@@ -51,12 +51,11 @@
 }
 
 .record-button {
-    -fx-padding: 5 10;
+    -fx-padding: 5 12;
 }
 
 .record-button .ikonli-font-icon {
-    -fx-icon-color: -wa-white;
-    -fx-icon-size: 48px;
+    -fx-icon-size: 36px;
 }
 
 .reset-button {
