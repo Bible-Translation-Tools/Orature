@@ -91,7 +91,7 @@ class SourceProjectExporter @Inject constructor(
                     workbook.source.resourceMetadata.path,
                     workbook
                 )
-                // change extension from zip to app's specific format
+                // change extension app-specific format
                 restoreFileExtension(exportFile, OratureFileFormat.ORATURE.extension)
             }
             .doOnError {
