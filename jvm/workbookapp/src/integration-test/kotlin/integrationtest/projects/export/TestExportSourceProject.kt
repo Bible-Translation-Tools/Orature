@@ -23,6 +23,7 @@ import integrationtest.di.DaggerTestPersistenceComponent
 import integrationtest.enUlbTestMetadata
 import integrationtest.projects.DatabaseEnvironment
 import integrationtest.projects.RowCount
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -104,6 +105,11 @@ class TestExportSourceProject {
         outputDir = createTempDirectory("orature-export-test").toFile()
     }
 
+    @After
+    fun cleanUp() {
+        outputDir.deleteRecursively()
+    }
+
     @Test
     fun exportAsSource() {
         prepareTakeForExport()
@@ -130,8 +136,6 @@ class TestExportSourceProject {
             assertTrue(files.any { it.endsWith(".mp3") })
             assertTrue(files.any { it.endsWith(".cue") })
         }
-
-
     }
 
     @Test
@@ -176,6 +180,34 @@ class TestExportSourceProject {
         )
     }
 
+    @Test
+    fun exportSourceAudioWithCompiledChapter() {
+        prepareChapterContentReadyToCompile()
+
+        val result = exportSourceProvider.get()
+            .export(outputDir, targetMetadata, workbook, projectFilesAccessor)
+            .blockingGet()
+
+        assertEquals(ExportResult.SUCCESS, result)
+
+        val exportFile = outputDir.listFiles().first()
+        val chapterSourceAudio = getSourceAudio(
+            targetMetadata.copy(path = exportFile),
+            "rev",
+            1
+        )
+        assertNotNull(chapterSourceAudio)
+
+        ResourceContainer.load(exportFile).use { rc ->
+            assertEquals(1, rc.media?.projects?.size ?: 0)
+
+            val files = getExportedFiles(rc)
+            assertEquals(2, files.size)
+            assertTrue(files.any { it.endsWith(".mp3") })
+            assertTrue(files.any { it.endsWith(".cue") })
+        }
+    }
+
     private fun getExportedFiles(rc: ResourceContainer): Set<String> {
         val projectMediaPath = rc.media?.projects?.first()?.media?.first { it.identifier == "mp3" }?.chapterUrl
         val filePathInContainer = File(projectMediaPath).parentFile.invariantSeparatorsPath
@@ -198,6 +230,29 @@ class TestExportSourceProject {
         // select a take to be included when export
         workbook.target.chapters.blockingFirst().audio.selectTake(take)
         AudioFile(testTake).apply {
+            metadata.addCue(1, "marker-1")
+            update()
+        }
+    }
+
+    private fun prepareChapterContentReadyToCompile() {
+        val takeFile = createTestWavFile(directoryProvider.tempDirectory)
+        val take = Take(
+            "chapter-take",
+            takeFile,
+            1,
+            MimeType.WAV,
+            LocalDate.now()
+        )
+        // select take for each chunk so that the chapter is ready to compile
+        workbook.target
+            .chapters.blockingFirst()
+            .chunks
+            .forEach {
+                it.audio.selectTake(take)
+            }
+
+        AudioFile(takeFile).apply {
             metadata.addCue(1, "marker-1")
             update()
         }
