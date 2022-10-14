@@ -28,19 +28,12 @@ import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.License
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
-import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.audio.AudioExporter
-import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
-import org.wycliffeassociates.otter.common.domain.content.FileNamer
-import org.wycliffeassociates.otter.common.domain.content.Recordable
-import org.wycliffeassociates.otter.common.domain.content.TakeActions
-import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.io.zip.IFileWriter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.utils.mapNotNull
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Media
 import org.wycliffeassociates.resourcecontainer.entity.MediaManifest
@@ -54,10 +47,6 @@ class SourceProjectExporter @Inject constructor(
 ) : ProjectExporter() {
     @Inject
     lateinit var audioExporter: AudioExporter
-    @Inject
-    lateinit var concatenateAudio: ConcatenateAudio
-    @Inject
-    lateinit var takeActions: TakeActions
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
     private val exportMediaTypes = listOf(AudioFileFormat.MP3.extension, "cue")
@@ -74,27 +63,36 @@ class SourceProjectExporter @Inject constructor(
 
         val contributors = projectFilesAccessor.getContributorInfo()
         val zipFilename = makeExportFilename(workbook, projectSourceMetadata)
-        val zipFile = directory.resolve(zipFilename)
+        val targetZip = directory.resolve(zipFilename)
 
-        logger.info("Exporting project as source: ${zipFile.nameWithoutExtension}")
+        logger.info("Exporting project as source: ${targetZip.nameWithoutExtension}")
 
-        projectFilesAccessor.initializeResourceContainerInFile(workbook, zipFile)
-        setContributorInfo(contributors, projectSourceMetadata, zipFile)
+        projectFilesAccessor.initializeResourceContainerInFile(workbook, targetZip)
+        setContributorInfo(contributors, projectSourceMetadata, targetZip)
+        return compileCompletedChapters(workbook, projectSourceMetadata, projectFilesAccessor)
+            .onErrorComplete()
+            .andThen(
+                export(targetZip, workbook, contributors)
+            )
+    }
 
-        compileCompletedChapters(workbook, projectSourceMetadata, projectFilesAccessor)
-            .blockingAwait()
-
-        val fileWriter = directoryProvider.newFileWriter(zipFile)
+    fun export(
+        exportFile: File,
+        workbook: Workbook,
+        contributors: List<Contributor>
+    ): Single<ExportResult> {
+        val fileWriter = directoryProvider.newFileWriter(exportFile)
 
         return exportSelectedTakes(workbook, fileWriter, contributors)
             .doOnComplete {
                 fileWriter.close() // must close before changing file extension or NoSuchFileException
                 buildSourceProjectMetadata(
-                    zipFile,
+                    exportFile,
                     workbook.source.resourceMetadata.path,
                     workbook
                 )
-                restoreFileExtension(zipFile, OratureFileFormat.ORATURE.extension)
+                // change extension from zip to app's specific format
+                restoreFileExtension(exportFile, OratureFileFormat.ORATURE.extension)
             }
             .doOnError {
                 logger.error("Error while exporting project as source.", it)
@@ -105,37 +103,6 @@ class SourceProjectExporter @Inject constructor(
             }
             .onErrorReturnItem(ExportResult.FAILURE)
             .subscribeOn(Schedulers.io())
-    }
-
-    private fun compileCompletedChapters(
-        workbook: Workbook,
-        projectMetadata: ResourceMetadata,
-        projectFilesAccessor: ProjectFilesAccessor
-    ): Completable {
-        return workbook.target
-            .chapters
-            .filter {
-                // filter completed chapters which have not been compiled yet
-                it.audio.selected.value?.value == null &&
-                        it.chunks.all { chunk ->
-                            chunk.audio.selected.value?.value != null
-                        }.blockingGet()
-            }.flatMapCompletable { chapter ->
-                chapter.chunks
-                    .mapNotNull { chunk -> chunk.audio.selected.value?.value?.file }
-                    .toList()
-                    .flatMap { takes ->
-                        concatenateAudio.execute(takes)
-                    }
-                    .flatMapCompletable { compiledTake ->
-                        takeActions.import(
-                            chapter.audio,
-                            projectFilesAccessor.audioDir,
-                            createFileNamer(workbook, chapter, projectMetadata.identifier),
-                            compiledTake
-                        )
-                    }
-            }
     }
 
     private fun exportSelectedTakes(
@@ -274,19 +241,5 @@ class SourceProjectExporter @Inject constructor(
         extension: String
     ): String {
         return "${language}_${resource}_${project}_c${chapterLabel}.$extension"
-    }
-
-    private fun createFileNamer(
-        wb: Workbook,
-        chapter: Chapter,
-        rcSlug: String
-    ): FileNamer {
-        return WorkbookFileNamerBuilder.createFileNamer(
-            workbook = wb,
-            chapter = chapter,
-            chunk = null,
-            recordable = chapter,
-            rcSlug = rcSlug
-        )
     }
 }

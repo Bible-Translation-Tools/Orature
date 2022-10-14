@@ -18,20 +18,35 @@
  */
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
 
+import io.reactivex.Completable
 import io.reactivex.Single
+import io.reactivex.schedulers.Schedulers
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
+import org.wycliffeassociates.otter.common.domain.content.TakeActions
+import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
+import org.wycliffeassociates.otter.common.utils.mapNotNull
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import javax.inject.Inject
 
 abstract class ProjectExporter {
+    @Inject
+    lateinit var concatenateAudio: ConcatenateAudio
+    @Inject
+    lateinit var takeActions: TakeActions
+
+    private val logger = LoggerFactory.getLogger(this.javaClass)
 
     abstract fun export(
         directory: File,
@@ -52,6 +67,9 @@ abstract class ProjectExporter {
         return "$lang-$resource-$project-$timestamp.zip"
     }
 
+    /**
+     * Changes the file extension.
+     */
     protected fun restoreFileExtension(file: File, extension: String) {
         val fileName = file.nameWithoutExtension + ".$extension"
         // using nio Files.move() instead of file.rename() for platform independent
@@ -74,5 +92,56 @@ abstract class ProjectExporter {
             }
             rc.writeManifest()
         }
+    }
+
+    protected fun compileCompletedChapters(
+        workbook: Workbook,
+        projectMetadata: ResourceMetadata,
+        projectFilesAccessor: ProjectFilesAccessor
+    ): Completable {
+        return workbook.target
+            .chapters
+            .filter {
+                // filter completed chapters which have not been compiled yet
+                it.audio.selected.value?.value == null &&
+                        it.chunks.all { chunk ->
+                            chunk.audio.selected.value?.value != null
+                        }.blockingGet()
+            }.flatMapCompletable { chapter ->
+                chapter.chunks
+                    .mapNotNull { chunk -> chunk.audio.selected.value?.value?.file }
+                    .toList()
+                    .flatMap { takes ->
+                        logger.info("Compiling chunk/verse takes for completed chapter #${chapter.sort}")
+                        concatenateAudio.execute(takes)
+                    }
+                    .flatMapCompletable { compiledTake ->
+                        logger.info("Importing the new compiled chapter take $compiledTake")
+                        takeActions.import(
+                            chapter.audio,
+                            projectFilesAccessor.audioDir,
+                            createFileNamer(workbook, chapter, projectMetadata.identifier),
+                            compiledTake
+                        )
+                    }
+            }
+            .doOnError {
+                logger.error("Error while compiling completed chapters.", it)
+            }
+            .subscribeOn(Schedulers.io())
+    }
+
+    private fun createFileNamer(
+        wb: Workbook,
+        chapter: Chapter,
+        rcSlug: String
+    ): FileNamer {
+        return WorkbookFileNamerBuilder.createFileNamer(
+            workbook = wb,
+            chapter = chapter,
+            chunk = null,
+            recordable = chapter,
+            rcSlug = rcSlug
+        )
     }
 }
