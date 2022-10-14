@@ -69,6 +69,7 @@ class SourceProjectExporter @Inject constructor(
 
         projectFilesAccessor.initializeResourceContainerInFile(workbook, targetZip)
         setContributorInfo(contributors, projectSourceMetadata, targetZip)
+        
         return compileCompletedChapters(workbook, projectSourceMetadata, projectFilesAccessor)
             .onErrorComplete()
             .andThen(
