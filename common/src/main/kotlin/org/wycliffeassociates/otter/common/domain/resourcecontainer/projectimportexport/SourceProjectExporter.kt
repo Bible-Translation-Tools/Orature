@@ -76,7 +76,7 @@ class SourceProjectExporter @Inject constructor(
             )
     }
 
-    fun export(
+    private fun export(
         exportFile: File,
         workbook: Workbook,
         contributors: List<Contributor>
