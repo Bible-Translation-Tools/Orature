@@ -67,9 +67,6 @@ abstract class ProjectExporter {
         return "$lang-$resource-$project-$timestamp.zip"
     }
 
-    /**
-     * Changes the file extension.
-     */
     protected fun restoreFileExtension(file: File, extension: String) {
         val fileName = file.nameWithoutExtension + ".$extension"
         // using nio Files.move() instead of file.rename() for platform independent
