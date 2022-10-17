@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
 
 import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
@@ -97,23 +98,7 @@ abstract class ProjectExporter {
         projectMetadata: ResourceMetadata,
         projectFilesAccessor: ProjectFilesAccessor
     ): Completable {
-        return workbook.target
-            .chapters
-            .filter { chapter ->
-                // filter chapter without selected take
-                chapter.audio.selected.value?.value == null
-            }
-            .flatMap { chapter ->
-                // filter chapter where all its content are ready to compile
-                chapter.chunks
-                    .all { chunk ->
-                        chunk.audio.selected.value?.value != null
-                    }
-                    .toObservable()
-                    .mapNotNull {
-                        if (it) chapter else null
-                    }
-            }
+        return filterChaptersReadyToCompile(workbook.target.chapters)
             .flatMapCompletable { chapter ->
                 // compile the chapter
                 chapter.chunks
@@ -137,6 +122,27 @@ abstract class ProjectExporter {
                 logger.error("Error while compiling completed chapters.", it)
             }
             .subscribeOn(Schedulers.io())
+    }
+
+    private fun filterChaptersReadyToCompile(
+        chapters: Observable<Chapter>
+    ): Observable<Chapter> {
+        return chapters
+            .filter { chapter ->
+                // filter chapter without selected take
+                chapter.audio.selected.value?.value == null
+            }
+            .flatMap { chapter ->
+                // filter chapter where all its content are ready to compile
+                chapter.chunks
+                    .all { chunk ->
+                        chunk.audio.selected.value?.value != null
+                    }
+                    .toObservable()
+                    .mapNotNull {
+                        if (it) chapter else null
+                    }
+            }
     }
 
     private fun createFileNamer(
