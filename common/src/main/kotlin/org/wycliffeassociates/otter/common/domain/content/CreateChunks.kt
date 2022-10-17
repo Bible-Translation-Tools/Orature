@@ -17,6 +17,7 @@ import org.wycliffeassociates.otter.common.domain.audio.SourceAudioFile
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import kotlin.math.log
 
 
 class CreateChunks(
@@ -45,23 +46,39 @@ class CreateChunks(
         chunks: List<AudioCue>,
         draftNumber: Int
     ) {
+        logger.info("Creating ${chunks.size} user defined chunks for project: $projectSlug chapter: $chapterNumber")
         val chapAudio = sourceAudio.getChapter(chapterNumber, workbook.target)
         val sa = SourceAudioFile(chapAudio!!.file)
         val verseMarkers = sa.getVerses()
         val chunkRanges = mapCuesToRanges(chunks)
+        val verseRanges = mapCuesToRanges(verseMarkers)
         val chunksToAdd = mutableListOf<Content>()
+
         for ((idx, chunk) in chunkRanges.withIndex()) {
-            val verses = findVerseRange(mapCuesToRanges(verseMarkers), chunk)
-            val start = verses.first()
-            val end = verses.last()
-            val v = accessor.getChunkText(projectSlug, chapterNumber, start, end)
-            val text = StringBuilder().apply { v.forEach { append("$it\n") } }.toString()
+            val verses = findVerseRange(verseRanges, chunk)
+
+            // use the chapter range and text if there are no verse markers (which would make the verse range empty)
+            val chapterText = accessor.getChapterText(projectSlug, chapterNumber)
+            var start = 1
+            var end = chapterText.size
+            var text = ""
+
+            // adjust verse range and text based on verse markers
+            if (verses.isNotEmpty()) {
+                start = verses.first()
+                end = verses.last()
+                val v = accessor.getChunkText(projectSlug, chapterNumber, start, end)
+                text = StringBuilder().apply { v.forEach { append("$it\n") } }.toString()
+            } else {
+                text = StringBuilder().apply { chapterText.forEach { append(it) } }.toString()
+            }
+
             chunksToAdd.add(
                 Content(
                     idx + 1,
                     "chunk",
-                    verses.first(),
-                    verses.last(),
+                    start,
+                    end,
                     null,
                     text,
                     "usfm",
@@ -134,20 +151,39 @@ class CreateChunks(
 
     private fun findVerseRange(verseMarkers: List<VerseRange>, chunk: VerseRange): List<Int> {
         val verses = mutableListOf<Int>()
+        if (verseMarkers.isEmpty()) {
+            logger.error("Cannot find verse range, verse markers list is empty")
+            return verses
+        }
 
         for (verse in verseMarkers) {
+            val chunkStartsAfterVerseStart = chunk.startLoc >= verse.startLoc
+            val chunkStartsBeforeVerseEnd = chunk.startLoc <= verse.endLoc
+
+            val chunkEndsAfterVerseStart = chunk.endLoc >= verse.startLoc
+            val chunkEndsBeforeVerseEnd = chunk.endLoc <= verse.endLoc
+
+            val verseStartsAfterChunkStart = verse.startLoc >= chunk.startLoc
+            val verseEndsBeforeChunkEnd = verse.endLoc <= chunk.endLoc
+
             // chunk start inside verse
-            if (chunk.startLoc >= verse.startLoc && chunk.startLoc <= verse.endLoc) {
+            if (chunkStartsAfterVerseStart && chunkStartsBeforeVerseEnd) {
                 verses.add(verse.sort)
             }
             // chunk end inside verse
-            else if (chunk.endLoc >= verse.startLoc && chunk.endLoc <= verse.endLoc) {
+            else if (chunkEndsAfterVerseStart && chunkEndsBeforeVerseEnd) {
                 verses.add(verse.sort)
             }
             // verse inside chunk
-            else if (verse.startLoc >= chunk.startLoc && verse.endLoc <= chunk.endLoc) {
+            else if (verseStartsAfterChunkStart && verseEndsBeforeChunkEnd) {
                 verses.add(verse.sort)
             }
+        }
+
+        // If nothing is found, given that the last verse should reach end of file, or Int.MAX, it is likely that
+        // the first verse has been moved forward, and that the chunk exists before any verse markers.
+        if (verses.isEmpty()) {
+            verses.add(verseMarkers.first().sort)
         }
         return verses
     }
