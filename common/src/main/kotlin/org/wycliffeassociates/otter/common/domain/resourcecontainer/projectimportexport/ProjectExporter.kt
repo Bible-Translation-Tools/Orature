@@ -43,6 +43,7 @@ import javax.inject.Inject
 abstract class ProjectExporter {
     @Inject
     lateinit var concatenateAudio: ConcatenateAudio
+
     @Inject
     lateinit var takeActions: TakeActions
 
@@ -98,13 +99,23 @@ abstract class ProjectExporter {
     ): Completable {
         return workbook.target
             .chapters
-            .filter {
-                // filter completed chapters which have not been compiled yet
-                it.audio.selected.value?.value == null &&
-                        it.chunks.all { chunk ->
-                            chunk.audio.selected.value?.value != null
-                        }.blockingGet()
-            }.flatMapCompletable { chapter ->
+            .filter { chapter ->
+                // filter chapter without selected take
+                chapter.audio.selected.value?.value == null
+            }
+            .flatMap { chapter ->
+                // filter chapter where all its content are ready to compile
+                chapter.chunks
+                    .all { chunk ->
+                        chunk.audio.selected.value?.value != null
+                    }
+                    .toObservable()
+                    .mapNotNull {
+                        if (it) chapter else null
+                    }
+            }
+            .flatMapCompletable { chapter ->
+                // compile the chapter
                 chapter.chunks
                     .mapNotNull { chunk -> chunk.audio.selected.value?.value?.file }
                     .toList()
