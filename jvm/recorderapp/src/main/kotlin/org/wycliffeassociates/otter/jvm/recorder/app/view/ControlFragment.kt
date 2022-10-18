@@ -72,7 +72,7 @@ class ControlFragment : Fragment() {
         }
 
         recordBtn.apply {
-            addClass("btn", "btn--icon", "btn--borderless", "record-button")
+            addClass("btn", "btn--cta", "record-button")
             graphic = FontIcon("gmi-mic")
             tooltip {
                 textProperty().bind(

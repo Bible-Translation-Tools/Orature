@@ -646,13 +646,29 @@ private class DefaultDatabaseAccessors(
     override fun addContentForCollection(collection: Collection, chunks: List<Content>): Completable {
         return Observable
             .fromArray(*chunks.toTypedArray())
-            .map {
-                contentRepo.insertForCollection(it, collection)
+            .map { content ->
+                contentRepo.insertForCollection(content, collection)
+                    .blockingGet()
+                    .let { contentId ->
+                        content.copy(
+                            id = contentId
+                        )
+                    }
             }
-            .map { it.toObservable() }
-            .flatMap { it }
-            .collectInto(mutableListOf<Int>()) { l, i -> l.add(i) }
-            .ignoreElement()
+            .toList()
+            .flatMapCompletable { contents ->
+                val sourceContents = collectionRepo.getSource(collection)
+                    .blockingGet()
+                    ?.let { collection ->
+                        contentRepo.getByCollection(collection).blockingGet()
+                    }
+
+                if (sourceContents == null || sourceContents.isEmpty()) {
+                    Completable.complete()
+                } else {
+                    contentRepo.linkDerivedToSource(contents, sourceContents)
+                }
+            }
     }
 
     override fun getChildren(collection: Collection) = collectionRepo.getChildren(collection)

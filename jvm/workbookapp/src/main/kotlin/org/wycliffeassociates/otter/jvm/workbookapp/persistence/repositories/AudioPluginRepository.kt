@@ -166,7 +166,9 @@ class AudioPluginRepository @Inject constructor(
                 } else {
                     Maybe
                         .fromCallable {
-                            mapper.mapFromEntity(audioPluginDao.fetchById(pluginId))
+                            audioPluginDao.fetchById(pluginId)?.let {
+                                mapper.mapFromEntity(it)
+                            }
                         }
                         .onErrorComplete()
                         .subscribeOn(Schedulers.io())

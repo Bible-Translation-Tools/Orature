@@ -56,6 +56,8 @@ class MediaMerge(
         if (toMedia == null) {
             to.media = fromMedia.copy()
         } else {
+
+            // TODO: media could be null if file doesn't exist
             val toMap = to.media!!.projects.associateBy { it.identifier } as MutableMap
             val fromMap = from.media!!.projects.associateBy { it.identifier }
 

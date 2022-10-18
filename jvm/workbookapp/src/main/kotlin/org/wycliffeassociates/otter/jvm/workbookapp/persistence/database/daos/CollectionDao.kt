@@ -38,7 +38,7 @@ class CollectionDao(
             .fetch(RecordMappers.Companion::mapToCollectionEntity)
     }
 
-    fun fetchSource(entity: CollectionEntity, dsl: DSLContext = instanceDsl): CollectionEntity {
+    fun fetchSource(entity: CollectionEntity, dsl: DSLContext = instanceDsl): CollectionEntity? {
         return dsl
             .select()
             .from(COLLECTION_ENTITY)

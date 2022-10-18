@@ -32,7 +32,7 @@ class RecorderView : PluginEntrypoint() {
 
     private var viewInflated = false
 
-    private lateinit var sourceAudioFragment: SourceAudioFragment
+    private var sourceAudioFragment: SourceAudioFragment? = null
     private val waveform = RecordingVisualizerFragment()
 
     private val spacer = region().apply {
@@ -48,9 +48,10 @@ class RecorderView : PluginEntrypoint() {
         add<InfoFragment>()
         add(spacer)
         add(waveform)
-        sourceAudioFragment = find<SourceAudioFragment>()
-        add(sourceAudioFragment)
-
+        if (!recorderViewModel.narrationMode) {
+            sourceAudioFragment = find()
+            add(sourceAudioFragment!!)
+        }
         add<ControlFragment>()
     }
 
@@ -61,17 +62,16 @@ class RecorderView : PluginEntrypoint() {
 
     override fun onUndock() {
         super.onUndock()
-        sourceAudioFragment.cleanup()
+        sourceAudioFragment?.cleanup()
         logger.info("Undocking RecorderView")
     }
 
     init {
         logger.info("Initializing RecorderView")
+        tryImportStylesheet(resources["/css/recorder.css"])
 
-        tryImportStylesheet(resources.get("/css/recorder.css"))
-
-        // notifies viewmodel that views have been inflated and the canvas now has a width
-        waveform.root.widthProperty().onChange { width ->
+        // notifies viewModel that views have been inflated and the canvas now has a width
+        recorderViewModel.waveformView.widthProperty().onChange { width ->
             if (!viewInflated && width.toInt() > 0) {
                 recorderViewModel.onViewReady(width.toInt())
                 viewInflated = true

@@ -19,9 +19,11 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos
 
 import jooq.Tables.*
+import jooq.tables.ContentDerivative
 import org.jooq.DSLContext
 import org.jooq.Record
 import org.jooq.Select
+import org.jooq.SelectConditionStep
 import org.jooq.SelectFieldOrAsterisk
 import org.jooq.impl.DSL
 import org.jooq.impl.DSL.max
@@ -170,6 +172,35 @@ class ContentDao(
             .fetch { RecordMappers.mapToContentEntity(it) }
     }
 
+    fun fetchContentByProjectSlug(
+        projectSlug: String,
+        dsl: DSLContext = instanceDsl
+    ): SelectConditionStep<Record> {
+        return dsl.select(CONTENT_ENTITY.asterisk())
+            .from(CONTENT_ENTITY)
+            .where(
+                CONTENT_ENTITY.COLLECTION_FK.`in`(
+                    // Look up the chapter collection the resource content belongs to
+                    dsl.select(COLLECTION_ENTITY.ID)
+                        .from(COLLECTION_ENTITY)
+                        .where(
+                            COLLECTION_ENTITY.PARENT_FK.`in`(
+                                // Look up the project the chapter collection belongs to
+                                dsl.select(COLLECTION_ENTITY.ID)
+                                    .from(COLLECTION_ENTITY)
+                                    .where(
+                                        // We need the source, not the derived,
+                                        // just use the slug. It will result in derived results
+                                        // in addition to source, but resources aren't attached
+                                        // to the derived anyway
+                                        COLLECTION_ENTITY.SLUG.eq(projectSlug)
+                                    )
+                            )
+                        )
+                )
+            )
+    }
+
     fun updateSources(entity: ContentEntity, sources: List<ContentEntity>, dsl: DSLContext = instanceDsl) {
         // Delete the existing sources
         dsl
@@ -308,6 +339,21 @@ class ContentDao(
                 CONTENT_ENTITY.COLLECTION_FK.eq(chapterCollection.id)
                     .and((CONTENT_ENTITY.TYPE_FK).eq(contentTypeId ?: 1))
             )
+            .execute()
+    }
+
+    fun linkDerivative(
+        contentId: Int,
+        sourceContentId: Int,
+        dsl: DSLContext = instanceDsl
+    ) {
+        dsl
+            .insertInto(
+                ContentDerivative.CONTENT_DERIVATIVE,
+                ContentDerivative.CONTENT_DERIVATIVE.CONTENT_FK,
+                ContentDerivative.CONTENT_DERIVATIVE.SOURCE_FK
+            )
+            .values(contentId, sourceContentId)
             .execute()
     }
 }

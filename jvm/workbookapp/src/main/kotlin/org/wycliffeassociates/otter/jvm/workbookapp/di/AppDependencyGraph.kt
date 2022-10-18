@@ -49,7 +49,6 @@ import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AppInfoViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.VerbalizeViewModel
 
 @Component(
     modules = [
@@ -78,7 +77,6 @@ interface AppDependencyGraph {
     fun inject(viewModel: BookWizardViewModel)
     fun inject(viewModel: ChapterPageViewModel)
     fun inject(viewModel: AppInfoViewModel)
-    fun inject(viewModel: VerbalizeViewModel)
     fun inject(viewModel: ChunkingViewModel)
     fun inject(viewModel: ExportChapterViewModel)
     fun injectDatabase(): AppDatabase

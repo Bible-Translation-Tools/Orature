@@ -18,7 +18,7 @@
  */
 package org.wycliffeassociates.otter.common.audio
 
-internal interface AudioFormatStrategy {
+interface AudioFormatStrategy {
     val sampleRate: Int
     val channels: Int
     val bitsPerSample: Int

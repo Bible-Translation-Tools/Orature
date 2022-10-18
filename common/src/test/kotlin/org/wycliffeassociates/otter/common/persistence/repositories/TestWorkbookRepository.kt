@@ -380,6 +380,12 @@ class TestWorkbookRepository {
         }
 
         whenever(
+            mockedDb.addContentForCollection(any(), any())
+        ).thenReturn(
+            Completable.complete()
+        )
+
+        whenever(
             mockedDb.insertTakeForContent(any(), any())
         ).thenReturn(
             Single.just(autoincrement)
@@ -566,6 +572,19 @@ class TestWorkbookRepository {
         val expected = 1
         Assert.assertEquals("This chunk should have $expected Resources", expected, resources.size)
         Assert.assertTrue("Expected resource text", resources.first().body?.textItem?.text?.contains("TDD") ?: false)
+    }
+
+    @Test
+    fun addingChunksCallsDbWrite() {
+        val mockedDb = buildBasicTestDb()
+        val workbook = buildBasicTestWorkbook(mockedDb)
+        val chapter = workbook.target.chapters.blockingIterable().minByOrNull { it.sort }!!
+
+        verify(mockedDb, times(0)).addContentForCollection(any(), any())
+
+        chapter.addChunk(listOf(mock()))
+
+        verify(mockedDb, times(1)).addContentForCollection(any(), any())
     }
 
     @Test

@@ -30,29 +30,14 @@
     -fx-pref-width: 200px;
 }
 
-.verbalize__btn--secondary {
-    -fx-pref-height: 75px;
-    -fx-pref-width: 75px;
-    -fx-border-radius: 90px;
-    -fx-background-radius: 90px;
-}
-
-.verbalize__btn--secondary .ikonli-font-icon {
-    -fx-icon-size: 36px;
-}
-
-.verbalize__btn--primary {
+.verbalize__btn {
     -fx-pref-height: 125px;
     -fx-pref-width: 125px;
     -fx-border-radius: 90px;
     -fx-background-radius: 90px;
+    -fx-background-color: -wa-foreground-hover;
 }
 
-.verbalize__btn--primary .ikonli-font-icon {
+.verbalize__btn .ikonli-font-icon {
     -fx-icon-size: 48px;
-}
-
-.verbalize__animation {
-    -fx-fill: rgba(0, 15, 33, .1);
-    -fx-background-color: transparent;
 }

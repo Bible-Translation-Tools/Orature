@@ -133,7 +133,7 @@ class ImportResourceContainer @Inject constructor(
         }
     }
 
-    private fun isAlreadyImported(file: File): Boolean {
+    fun isAlreadyImported(file: File): Boolean {
         val rc = ResourceContainer.load(file, true)
         val language = languageRepository.getBySlug(rc.manifest.dublinCore.language.identifier).blockingGet()
         val resourceMetadata = rc.manifest.dublinCore.mapToMetadata(file, language)

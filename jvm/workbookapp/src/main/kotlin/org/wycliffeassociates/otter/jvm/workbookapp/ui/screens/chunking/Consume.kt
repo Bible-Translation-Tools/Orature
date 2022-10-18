@@ -70,6 +70,8 @@ class Consume : Fragment() {
 
     override val root = borderpane {
         center = ScrollingWaveform().apply {
+            addClass("consume__scrolling-waveform")
+
             themeProperty.bind(settingsViewModel.appColorMode)
             positionProperty.bind(vm.positionProperty)
 
@@ -81,6 +83,10 @@ class Consume : Fragment() {
                 val final = Utils.clamp(0, curFrames - deltaFrames, duration)
                 vm.seek(final)
             }
+
+            setOnToggleMedia(vm::mediaToggle)
+            setOnRewind(vm::rewind)
+            setOnFastForward(vm::fastForward)
 
             vm.consumeImageCleanup = ::freeImages
         }
@@ -98,7 +104,7 @@ class Consume : Fragment() {
                         vm.isPlayingProperty
                     )
                 )
-                styleClass.addAll("btn--cta", "consume__btn")
+                styleClass.addAll("btn", "btn--cta", "consume__btn")
                 action {
                     vm.mediaToggle()
                 }

@@ -75,7 +75,9 @@ class ResourceContainerRepository @Inject constructor(
         return Completable
             .fromAction {
                 database.transaction { dsl ->
-                    val language = LanguageMapper().mapFromEntity(languageDao.fetchBySlug(languageSlug, dsl))
+                    val languageEntity = languageDao.fetchBySlug(languageSlug, dsl)
+                        ?: throw NullPointerException("Could not find language with slug $languageSlug.")
+                    val language = LanguageMapper().mapFromEntity(languageEntity)
                     val metadata = dublinCore.mapToMetadata(rc.file, language)
                         .let {
                             insertMetadataOrThrow(dsl, it)

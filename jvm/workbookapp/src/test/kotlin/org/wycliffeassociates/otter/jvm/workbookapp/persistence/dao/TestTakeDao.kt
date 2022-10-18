@@ -63,6 +63,7 @@ class TestTakeDao {
     fun teardown() {
         files.forEach { it.delete() }
         dao.fetchAll().forEach { dao.delete(it) }
+        database.close()
     }
 
     @Test

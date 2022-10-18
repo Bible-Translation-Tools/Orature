@@ -10,10 +10,10 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import java.io.File
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioCue
-import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.workbook.Book
+import org.wycliffeassociates.otter.common.domain.audio.SourceAudioFile
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 
@@ -33,7 +33,8 @@ class CreateChunks(
         draftNumber: Int
     ) {
         val chapAudio = sourceAudioAccessor.getChapter(chapterNumber, targetBook)
-        val verseMarkers = AudioFile(chapAudio!!.file).metadata.getCues()
+        val sa = SourceAudioFile(chapAudio!!.file)
+        val verseMarkers = sa.getVerses()
         val chunkRanges = mapCuesToRanges(chunks)
         val chunksToAdd = mutableListOf<Content>()
         for ((idx, chunk) in chunkRanges.withIndex()) {
@@ -42,17 +43,19 @@ class CreateChunks(
             val end = verses.last()
             val v = projectFilesAccessor.getChunkText(projectSlug, chapterNumber, start, end)
             val text = StringBuilder().apply { v.forEach { append("$it\n") } }.toString()
-            chunksToAdd.add(Content(
-                idx + 1,
-                "chunk",
-                verses.first(),
-                verses.last(),
-                null,
-                text,
-                "usfm",
-                ContentType.TEXT,
-                draftNumber
-            ))
+            chunksToAdd.add(
+                Content(
+                    idx + 1,
+                    "chunk",
+                    verses.first(),
+                    verses.last(),
+                    null,
+                    text,
+                    "usfm",
+                    ContentType.TEXT,
+                    draftNumber
+                )
+            )
         }
         chunkCreator(chunksToAdd)
         writeChunkFile(projectSlug, chapterNumber, chunksToAdd)
@@ -105,7 +108,7 @@ class CreateChunks(
             }
         } catch (e: MismatchedInputException) {
             // clear file if it can't be read
-            file.writer().use {  }
+            file.writer().use { }
         }
 
         logger.error("adding chunks to chapter: $chapterNumber")

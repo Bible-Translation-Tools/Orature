@@ -32,6 +32,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
 import java.io.File
 import java.time.LocalDate
 import javax.inject.Inject
@@ -44,6 +45,9 @@ class TestInitializeProjects {
 
     @Inject
     lateinit var directoryProvider: IDirectoryProvider
+
+    @Inject
+    lateinit var resourceMetadataRepository: IResourceMetadataRepository
 
     @Inject
     lateinit var env: DatabaseEnvironment

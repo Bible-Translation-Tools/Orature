@@ -143,27 +143,38 @@ object TestDataStore {
     )
 
     val content = listOf(
-            Content(
-                0,
-                "verse1",
-                1,
-                1,
-                null,
-                null,
-                null,
-                ContentType.TEXT,
-                1
-            ),
-            Content(
-                41,
-                "verse42",
-                42,
-                42,
-                takes.first(),
-                null,
-                null,
-                ContentType.TEXT,
-                1
-            )
+        Content(
+            0,
+            "verse1",
+            1,
+            1,
+            null,
+            null,
+            null,
+            ContentType.TEXT,
+            1
+        ),
+        Content(
+            41,
+            "verse42",
+            42,
+            42,
+            takes.first(),
+            null,
+            null,
+            ContentType.TEXT,
+            1
+        ),
+        Content(
+            0,
+            "chapter1",
+            1,
+            1,
+            null,
+            null,
+            null,
+            ContentType.META,
+            1
+        )
     )
 }

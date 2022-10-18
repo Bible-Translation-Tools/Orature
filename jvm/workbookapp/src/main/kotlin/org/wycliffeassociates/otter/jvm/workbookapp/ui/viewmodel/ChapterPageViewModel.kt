@@ -223,7 +223,10 @@ class ChapterPageViewModel : ViewModel() {
                     fire(PluginClosedEvent(PluginType.RECORDER))
                     when (result) {
                         TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noRecorder"])
-                        TakeActions.Result.SUCCESS, TakeActions.Result.NO_AUDIO -> {
+                        TakeActions.Result.SUCCESS -> {
+                            workbookDataStore.updateSelectedTakesFile()
+                        }
+                        TakeActions.Result.NO_AUDIO -> {
                             /* no-op */
                         }
                     }
