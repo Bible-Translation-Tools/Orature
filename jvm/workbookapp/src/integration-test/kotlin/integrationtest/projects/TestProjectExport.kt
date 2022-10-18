@@ -19,6 +19,7 @@
 package integrationtest.projects
 
 import integrationtest.di.DaggerTestPersistenceComponent
+import integrationtest.enUlbTestMetadata
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull

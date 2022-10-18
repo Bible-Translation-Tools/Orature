@@ -18,16 +18,32 @@
  */
 package org.wycliffeassociates.otter.common
 
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.core.JsonFactory
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.nhaarman.mockitokotlin2.mock
 import java.io.File
 import java.util.*
 import org.junit.Assert
-import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
-import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
-import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
+import org.wycliffeassociates.otter.common.audio.*
 import org.wycliffeassociates.otter.common.audio.wav.CueChunk
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.common.audio.wav.WavMetadata
 import org.wycliffeassociates.otter.common.audio.wav.WavOutputStream
+import org.wycliffeassociates.otter.common.data.primitives.Collection
+import org.wycliffeassociates.otter.common.data.primitives.ContainerType
+import org.wycliffeassociates.otter.common.data.primitives.Content
+import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.common.data.primitives.MimeType
+import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.RcConstants
+import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
+import org.wycliffeassociates.resourcecontainer.ResourceContainer
+import org.wycliffeassociates.resourcecontainer.entity.*
+import java.time.LocalDate
 
 /**
  * Applies the given transformation to each element in the keyset of the map, and uses [doAssertEquals]
@@ -83,3 +99,150 @@ fun createTestWavFile(dir: File): File {
     return testFile
 }
 
+fun getDublinCore(resource: ResourceMetadata): DublinCore {
+    return dublincore {
+        conformsTo = "0.2"
+        identifier = resource.identifier
+        issued = LocalDate.now().toString()
+        modified = LocalDate.now().toString()
+        language = language {
+            identifier = resource.language.slug
+            direction = resource.language.direction
+            title = resource.language.name
+        }
+        creator = "Orature"
+        version = resource.version
+        rights = resource.license
+        format = MimeType.of(resource.format).norm
+        subject = resource.subject
+        type = resource.type.slug
+        title = resource.title
+    }
+}
+
+fun getResourceMetadata(langauge: Language): ResourceMetadata {
+    return ResourceMetadata(
+        conformsTo = "rc0.2",
+        creator = "Door43 World Missions Community",
+        description = "Description",
+        format = "text/usfm",
+        identifier = "ulb",
+        issued = LocalDate.now(),
+        language = langauge,
+        modified = LocalDate.now(),
+        publisher = "unfoldingWord",
+        subject = "Bible",
+        type = ContainerType.Bundle,
+        title = "Unlocked Literal Bible",
+        version = "1",
+        license = "",
+        path = File(".")
+    )
+}
+
+fun getEnglishLanguage(id: Int): Language {
+    return Language(
+        "en",
+        "English",
+        "English",
+        "ltr",
+        isGateway = true,
+        region = "Europe",
+        id = id
+    )
+}
+
+fun getSpanishLanguage(id: Int = 0): Language {
+    return Language(
+        "es",
+        "Spanish",
+        "Spanish",
+        "ltr",
+        isGateway = false,
+        region = "Europe",
+        id = id
+    )
+}
+
+fun getGenesisCollection(): Collection {
+    return Collection(
+        sort = 1,
+        slug = "gen",
+        labelKey = "project",
+        titleKey = "Genesis",
+        resourceContainer = null
+    )
+}
+
+fun buildWorkbook(
+    db: WorkbookRepository.IDatabaseAccessors,
+    source: Collection,
+    target: Collection
+) = WorkbookRepository(
+    mock(),
+    db
+).get(source, target)
+
+fun createWavFile(dir: File, name: String, data: ByteArray): File {
+    val file = File(dir, name)
+    val audioFile = AudioFile(file, DEFAULT_CHANNELS, DEFAULT_SAMPLE_RATE, DEFAULT_BITS_PER_SAMPLE)
+    audioFile.writer().use { os ->
+        os.write(data)
+    }
+    return file
+}
+
+fun readTextFromAudioFile(audioFile: AudioFile, bufferSize: Int): String {
+    val reader = audioFile.reader()
+    val buffer = ByteArray(bufferSize)
+    reader.open()
+    var outStr = ""
+    while (reader.hasRemaining()) {
+        reader.getPcmBuffer(buffer)
+        outStr = buffer.decodeToString()
+    }
+    return outStr
+}
+
+fun templateAudioFileName(
+    language: String,
+    resource: String,
+    project: String,
+    chapterLabel: String,
+    extension: String? = null
+): String {
+    val ext = extension ?: ""
+    return "${language}_${resource}_${project}_c${chapterLabel}$ext"
+}
+
+fun createTestRc(
+    dir: File,
+    dublinCore: DublinCore,
+    sourceFiles: List<File> = listOf()
+): ResourceContainer {
+    return ResourceContainer.create(dir) {
+        manifest = Manifest(dublinCore, listOf(), Checking())
+
+        sourceFiles.forEach {
+            addFileToContainer(it, "${RcConstants.SOURCE_AUDIO_DIR}/${it.name}")
+        }
+
+        write()
+    }
+}
+
+fun readChunksFile(projectDir: File): Map<Int, List<Content>> {
+    val chunkFile = File(projectDir, RcConstants.CHUNKS_FILE)
+    val factory = JsonFactory()
+    factory.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET)
+    val mapper = ObjectMapper(factory)
+    mapper.registerModule(KotlinModule())
+    mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+
+    val chunks = mutableMapOf<Int, List<Content>>()
+    val typeRef: TypeReference<HashMap<Int, List<Content>>> =
+        object : TypeReference<HashMap<Int, List<Content>>>() {}
+    val map: Map<Int, List<Content>> = mapper.readValue(chunkFile, typeRef)
+    chunks.putAll(map)
+    return chunks
+}
