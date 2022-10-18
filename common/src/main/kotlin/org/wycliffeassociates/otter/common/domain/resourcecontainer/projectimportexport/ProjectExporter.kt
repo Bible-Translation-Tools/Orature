@@ -21,6 +21,8 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimpo
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
@@ -39,6 +41,7 @@ import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 abstract class ProjectExporter {
@@ -49,6 +52,7 @@ abstract class ProjectExporter {
     lateinit var takeActions: TakeActions
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
+    private val compositeDisposable = CompositeDisposable()
 
     abstract fun export(
         directory: File,
@@ -109,17 +113,22 @@ abstract class ProjectExporter {
                         concatenateAudio.execute(takes)
                     }
                     .flatMapCompletable { compiledTake ->
-                        logger.info("Importing the new compiled chapter take $compiledTake")
+                        logger.info("Importing the new compiled chapter take ${compiledTake.name}")
                         takeActions.import(
                             chapter.audio,
                             projectFilesAccessor.audioDir,
                             createFileNamer(workbook, chapter, projectMetadata.identifier),
                             compiledTake
+                        ).andThen(
+                            subscribeToSelectedChapter(chapter)
                         )
                     }
             }
             .doOnError {
                 logger.error("Error while compiling completed chapters.", it)
+            }
+            .doFinally {
+                compositeDisposable.clear()
             }
             .subscribeOn(Schedulers.io())
     }
@@ -157,5 +166,20 @@ abstract class ProjectExporter {
             recordable = chapter,
             rcSlug = rcSlug
         )
+    }
+
+    private fun subscribeToSelectedChapter(
+        chapter: Chapter
+    ): Completable {
+        return Completable
+            .create { emitter ->
+                chapter.audio.selected.subscribe {
+                    // wait for the new take to be selected in the relay after inserting.
+                    if (it.value != null) {
+                        emitter.onComplete()
+                    }
+                }.addTo(compositeDisposable)
+            }
+            .timeout(2, TimeUnit.SECONDS)
     }
 }
