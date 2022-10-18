@@ -82,7 +82,7 @@ class WavHeader {
         computeTotalAudioSize()
 
         // The fmt chunk is required in all WAV files, WAVs with extensions will have additional pre-data chunks.
-        preDataChunk.removeAll { it.label == FMT }
+        preDataChunk.removeAll { it.label == FMT || it.label == RIFF }
 
         val chunkLabels: List<String> = chunks.map { it.label }
         if (!chunkLabels.containsAll(listOf(FMT, DATA))) {
