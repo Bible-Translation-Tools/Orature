@@ -63,6 +63,7 @@ class AddFilesViewModel : ViewModel() {
 
     fun onDropFile(files: List<File>) {
         if (isValidImportFile(files)) {
+            logger.info("Drag-drop file to import: $files")
             importResourceContainer(files.first())
         }
     }
