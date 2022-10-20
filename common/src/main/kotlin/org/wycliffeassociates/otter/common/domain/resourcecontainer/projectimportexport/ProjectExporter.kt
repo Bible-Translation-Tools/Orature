@@ -18,20 +18,41 @@
  */
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
 
+import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.Single
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
+import io.reactivex.schedulers.Schedulers
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
+import org.wycliffeassociates.otter.common.domain.content.TakeActions
+import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
+import org.wycliffeassociates.otter.common.utils.mapNotNull
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 abstract class ProjectExporter {
+    @Inject
+    lateinit var concatenateAudio: ConcatenateAudio
+
+    @Inject
+    lateinit var takeActions: TakeActions
+
+    private val logger = LoggerFactory.getLogger(this.javaClass)
+    private val compositeDisposable = CompositeDisposable()
 
     abstract fun export(
         directory: File,
@@ -74,5 +95,91 @@ abstract class ProjectExporter {
             }
             rc.writeManifest()
         }
+    }
+
+    protected fun compileCompletedChapters(
+        workbook: Workbook,
+        projectMetadata: ResourceMetadata,
+        projectFilesAccessor: ProjectFilesAccessor
+    ): Completable {
+        return filterChaptersReadyToCompile(workbook.target.chapters)
+            .flatMapCompletable { chapter ->
+                // compile the chapter
+                chapter.chunks
+                    .mapNotNull { chunk -> chunk.audio.selected.value?.value?.file }
+                    .toList()
+                    .flatMap { takes ->
+                        logger.info("Compiling chunk/verse takes for completed chapter #${chapter.sort}")
+                        concatenateAudio.execute(takes)
+                    }
+                    .flatMapCompletable { compiledTake ->
+                        logger.info("Importing the new compiled chapter take ${compiledTake.name}")
+                        takeActions.import(
+                            chapter.audio,
+                            projectFilesAccessor.audioDir,
+                            createFileNamer(workbook, chapter, projectMetadata.identifier),
+                            compiledTake
+                        ).andThen(
+                            subscribeToSelectedChapter(chapter)
+                        )
+                    }
+            }
+            .doOnError {
+                logger.error("Error while compiling completed chapters.", it)
+            }
+            .doFinally {
+                compositeDisposable.clear()
+            }
+            .subscribeOn(Schedulers.io())
+    }
+
+    private fun filterChaptersReadyToCompile(
+        chapters: Observable<Chapter>
+    ): Observable<Chapter> {
+        return chapters
+            .filter { chapter ->
+                // filter chapter without selected take
+                chapter.audio.selected.value?.value == null
+            }
+            .flatMap { chapter ->
+                // filter chapter where all its content are ready to compile
+                chapter.chunks
+                    .all { chunk ->
+                        chunk.audio.selected.value?.value != null
+                    }
+                    .toObservable()
+                    .mapNotNull {
+                        if (it) chapter else null
+                    }
+            }
+    }
+
+    private fun createFileNamer(
+        wb: Workbook,
+        chapter: Chapter,
+        rcSlug: String
+    ): FileNamer {
+        return WorkbookFileNamerBuilder.createFileNamer(
+            workbook = wb,
+            chapter = chapter,
+            chunk = null,
+            recordable = chapter,
+            rcSlug = rcSlug
+        )
+    }
+
+    private fun subscribeToSelectedChapter(
+        chapter: Chapter
+    ): Completable {
+        return Completable
+            .create { emitter ->
+                chapter.audio.selected.subscribe {
+                    // wait for the new take to be selected in the relay after inserting.
+                    if (it.value != null) {
+                        emitter.onComplete()
+                    }
+                }.addTo(compositeDisposable)
+            }
+            .timeout(2, TimeUnit.SECONDS)
     }
 }
