@@ -28,7 +28,7 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 data class SourceAudio(val file: File, val start: Int, val end: Int)
 
 /**
- * Provides access to the source project's audio.
+ * Provides access to the audio of the source project.
  */
 class SourceAudioAccessor(
     val directoryProvider: IDirectoryProvider,
@@ -39,9 +39,6 @@ class SourceAudioAccessor(
     private val dir = File(directoryProvider.cacheDirectory, "source").apply { mkdirs() }
     private val cache = mutableMapOf<String, File>()
 
-    /**
-     * Gets the chapter's source audio.
-     */
     fun getChapter(chapter: Int): SourceAudio? {
         ResourceContainer.load(metadata.path).use { rc ->
             if (rc.media != null) {
@@ -101,9 +98,6 @@ class SourceAudioAccessor(
         }
     }
 
-    /**
-     * Gets the chunk's source audio.
-     */
     fun getChunk(chapter: Int, chunk: Int): SourceAudio? {
         val file = getChapter(chapter)?.file
         if (file != null) {

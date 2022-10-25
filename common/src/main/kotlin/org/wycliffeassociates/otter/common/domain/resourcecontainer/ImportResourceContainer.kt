@@ -108,9 +108,6 @@ class ImportResourceContainer @Inject constructor(
         }
     }
 
-    /**
-     * Imports resource container from an InputStream.
-     */
     fun import(filename: String, stream: InputStream): Single<ImportResult> {
         val outFile = createTempFile(filename, "zip")
 

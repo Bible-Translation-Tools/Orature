@@ -30,9 +30,6 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRep
 import java.io.File
 import javax.inject.Inject
 
-/**
- * Provides a use case to export an Orature project to a backup file.
- */
 class BackupProjectExporter @Inject constructor(
     private val directoryProvider: IDirectoryProvider,
     private val workbookRepository: IWorkbookRepository

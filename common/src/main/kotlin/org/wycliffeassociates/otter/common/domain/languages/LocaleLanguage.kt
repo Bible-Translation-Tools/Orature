@@ -29,7 +29,7 @@ import org.wycliffeassociates.otter.common.persistence.IAppPreferences
 private const val DEFAULT_LANGUAGE_SLUG = "en"
 
 /**
- * Provides configurations for the locale language displayed in the front end.
+ * The language preference for the app's UI.
  */
 class LocaleLanguage @Inject constructor(
     private val appPrefRepo: IAppPreferences,

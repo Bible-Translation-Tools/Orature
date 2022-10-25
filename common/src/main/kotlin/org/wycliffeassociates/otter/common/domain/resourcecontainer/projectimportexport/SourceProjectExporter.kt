@@ -43,7 +43,7 @@ import java.util.*
 import javax.inject.Inject
 
 /**
- * Provides a use case to export an Orature project as a source file.
+ * Provides a use case to export an Orature project as a source project.
  */
 class SourceProjectExporter @Inject constructor(
     private val directoryProvider: IDirectoryProvider

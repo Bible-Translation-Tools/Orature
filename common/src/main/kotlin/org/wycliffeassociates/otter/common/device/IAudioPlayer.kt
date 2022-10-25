@@ -50,10 +50,6 @@ interface IAudioPlayer : Closeable {
      * @param file the target audio file
      */
     fun loadSection(file: File, frameStart: Int, frameEnd: Int)
-
-    /**
-     * Returns the reader of the audio player.
-     */
     fun getAudioReader(): AudioFileReader?
 
     /**
@@ -61,14 +57,7 @@ interface IAudioPlayer : Closeable {
      */
     fun changeRate(rate: Double)
 
-    /**
-     * Starts playing the audio.
-     */
     fun play()
-
-    /**
-     * Pauses the playback.
-     */
     fun pause()
 
     /**
@@ -100,10 +89,6 @@ interface IAudioPlayer : Closeable {
      * @param position the target location (in frame)
      */
     fun seek(position: Int)
-
-    /**
-     * Returns the playing status of the player.
-     */
     fun isPlaying(): Boolean
 
     /**
