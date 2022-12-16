@@ -64,7 +64,7 @@ class WavHeader {
             if (!validateRiff(it)) {
                 throw InvalidWavFileException("File does not contain a RIFF header.")
             }
-            while (it.available() > CHUNK_HEADER_SIZE) {
+            while (it.available() >= CHUNK_HEADER_SIZE) {
                 parseChunk(it)
             }
         }
