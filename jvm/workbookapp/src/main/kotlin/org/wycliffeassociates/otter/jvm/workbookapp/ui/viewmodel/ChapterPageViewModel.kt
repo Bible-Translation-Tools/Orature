@@ -22,7 +22,6 @@ import com.github.thomasnield.rxkotlinfx.changes
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.binding.Bindings
@@ -287,14 +286,18 @@ class ChapterPageViewModel : ViewModel() {
             isCompilingProperty.set(true)
 
             val chapter = chapterCardProperty.value!!.chapterSource!!
-
             val takes = filteredContent.mapNotNull { chunk ->
                 chunk.chunkSource?.audio?.selected?.value?.value?.file
             }
 
             var compiled: File? = null
 
+            logger.info("Compiling chapter ${chapter.sort}...")
+
             concatenateAudio.execute(takes)
+                .doOnSuccess {
+                    logger.info("Chapter compiled successfully.")
+                }
                 .flatMapCompletable { file ->
                     compiled = file
                     audioPluginViewModel.import(chapter, file)
@@ -303,11 +306,11 @@ class ChapterPageViewModel : ViewModel() {
                 .doOnError { e ->
                     logger.error("Error in compiling chapter: $chapter", e)
                 }
+                .observeOnFx()
                 .doFinally {
                     isCompilingProperty.set(false)
                     compiled?.delete()
                 }
-                .observeOnFx()
                 .subscribe()
         }
     }
