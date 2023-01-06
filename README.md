@@ -34,3 +34,4 @@ Orature is made up of modular software that could be modified to run standalone.
 All modules fall under the package name "otter" which roughly stands for Oral Translation Tools and Resources. 
 
 As Orature is developed to be cross platform, with intentions to lead towards an Android version, the architecture is currently divided into two main sections: Common (intending to include anything that is completely cross platform) and JVM (which is specific to the desktop JVM platform). Thus, anything that is platform or device specific should define an interface in common, and implement that interface in the platform module (JVM or otherwise). It should be noted that common makes use of Java APIs and libraries, and is not common in the kotlin native sense. As such, common really should be considered a sort of "java common," and is only well suited to be "common" for desktop and Android, not iOS.
+
