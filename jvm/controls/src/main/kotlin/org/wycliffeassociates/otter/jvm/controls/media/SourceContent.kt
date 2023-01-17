@@ -46,6 +46,7 @@ class SourceTextZoomRateChangedEvent(val rate: Int) : FXEvent()
 
 private val minimizedIcon = FontIcon(MaterialDesign.MDI_WINDOW_MINIMIZE)
 private val maximizedIcon = FontIcon(MaterialDesign.MDI_WINDOW_MAXIMIZE)
+private const val SCROLL_BAR_OFFSET = 65
 
 class SourceContent : StackPane() {
     val contentTitleProperty = SimpleStringProperty()
@@ -469,7 +470,7 @@ class SourceContent : StackPane() {
             minHeight = Region.USE_PREF_SIZE // avoid ellipsis
 
             maxWidthProperty().bind(
-                sourceTextChunksContainer.widthProperty().minus(60) // scrollbar offset
+                sourceTextChunksContainer.widthProperty().minus(SCROLL_BAR_OFFSET) // scrollbar offset
             )
 
             highlightedChunk.onChangeAndDoNowWithDisposer { highlightedIndex ->
@@ -487,7 +488,7 @@ class SourceContent : StackPane() {
             addClass("source-content__license-text")
 
             prefWidthProperty().bind(
-                sourceTextChunksContainer.widthProperty().minus(60)
+                sourceTextChunksContainer.widthProperty().minus(SCROLL_BAR_OFFSET)
             )
             textProperty().bind(licenseTextProperty)
             styleProperty().bind(orientationProperty.objectBinding {
