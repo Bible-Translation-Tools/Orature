@@ -25,6 +25,7 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -192,7 +193,7 @@ class ProjectImporter @Inject constructor(
 
         translation.modifiedTs = LocalDateTime.now()
         languageRepository.updateTranslation(translation).subscribe()
-        resetChaptersWithoutTakes(derivedProject)
+        resetChaptersWithoutTakes(fileReader, derivedProject)
     }
 
     private fun importChunks(project: Collection, accessor: ProjectFilesAccessor, fileReader: IFileReader) {
@@ -231,8 +232,20 @@ class ProjectImporter @Inject constructor(
         }
     }
 
-    private fun resetChaptersWithoutTakes(derivedProject: Collection) {
-        val chaptersNotStarted = collectionRepository.collectionsWithoutTakes(derivedProject).blockingGet()
+    private fun resetChaptersWithoutTakes(fileReader: IFileReader, derivedProject: Collection) {
+        val chaptersHavingChunks = if (fileReader.exists(RcConstants.CHUNKS_FILE)) {
+            fileReader.stream(RcConstants.CHUNKS_FILE).let { input ->
+                val mapper = ObjectMapper().registerModule(KotlinModule())
+                val map: Map<Int, List<Content>> = mapper.readValue(input)
+                map.map { it.key }
+            }
+        } else {
+            listOf()
+        }
+        val chaptersNotStarted = collectionRepository
+            .collectionsWithoutTakes(derivedProject).blockingGet()
+            .filterNot { chaptersHavingChunks.contains(it.sort) }
+
         chaptersNotStarted.forEach { contentRepository.deleteForCollection(it).blockingGet() }
     }
 
