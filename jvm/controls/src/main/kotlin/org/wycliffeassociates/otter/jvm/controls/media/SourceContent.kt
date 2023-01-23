@@ -32,6 +32,7 @@ import javafx.geometry.Side
 import javafx.scene.Node
 import javafx.scene.control.*
 import javafx.scene.layout.*
+import javafx.scene.text.Text
 import javafx.stage.Popup
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
@@ -46,7 +47,7 @@ class SourceTextZoomRateChangedEvent(val rate: Int) : FXEvent()
 
 private val minimizedIcon = FontIcon(MaterialDesign.MDI_WINDOW_MINIMIZE)
 private val maximizedIcon = FontIcon(MaterialDesign.MDI_WINDOW_MAXIMIZE)
-private const val SCROLL_BAR_OFFSET = 65
+private const val SCROLL_BAR_OFFSET = 70
 
 class SourceContent : StackPane() {
     val contentTitleProperty = SimpleStringProperty()
@@ -86,7 +87,7 @@ class SourceContent : StackPane() {
     val listeners = mutableListOf<ListenerDisposer>()
 
     private lateinit var minimizeBtn: Button
-    private lateinit var sourceTextChunksContainer: ListView<Label>
+    private lateinit var sourceTextChunksContainer: ListView<Text>
     private lateinit var playTargetBtn: Button
     private lateinit var targetPlayer: SimpleAudioPlayer
     private lateinit var playSourceBtn: Button
@@ -191,7 +192,7 @@ class SourceContent : StackPane() {
                         addClass("source-content__text-container")
                         vgrow = Priority.ALWAYS
 
-                        listview<Label> {
+                        listview<Text> {
                             sourceTextChunksContainer = this
                             addClass("wa-list-view", "source-content__chunk-list")
                             vgrow = Priority.ALWAYS
@@ -413,6 +414,7 @@ class SourceContent : StackPane() {
                 maxHeightProperty().bind(
                     FX.primaryStage.scene.heightProperty().multiply(2.0/3)
                 )
+                minHeightProperty().bind(FX.primaryStage.scene.heightProperty().multiply(1.0/3))
 
                 vbox {
                     vgrow = Priority.ALWAYS
@@ -421,11 +423,11 @@ class SourceContent : StackPane() {
                     minHeightProperty().bind(sp.heightProperty().minus(10))
 
                     label {
-                        addClass("source-content__text", "source-content__text-popup__title")
+                        addClass("source-content__text-popup__title")
                         textProperty().bind(contentTitleProperty)
                     }
                     label {
-                        addClass("source-content__text", "source-content__text-popup__text")
+                        addClass("source-content__text-popup__text")
                         textProperty().bind(sourceTextProperty)
                     }
                     region { vgrow = Priority.ALWAYS }
@@ -464,12 +466,11 @@ class SourceContent : StackPane() {
         }
     }
 
-    private fun buildChunkText(textContent: String, index: Int): Label {
-        return Label(textContent).apply {
+    private fun buildChunkText(textContent: String, index: Int): Text {
+        return Text(textContent).apply {
             addClass("source-content__text")
-            minHeight = Region.USE_PREF_SIZE // avoid ellipsis
 
-            maxWidthProperty().bind(
+            wrappingWidthProperty().bind(
                 sourceTextChunksContainer.widthProperty().minus(SCROLL_BAR_OFFSET) // scrollbar offset
             )
 
@@ -483,11 +484,11 @@ class SourceContent : StackPane() {
         }
     }
 
-    private fun buildLicenseText(): Label {
-        return Label().apply {
+    private fun buildLicenseText(): Text {
+        return Text().apply {
             addClass("source-content__license-text")
 
-            prefWidthProperty().bind(
+            wrappingWidthProperty().bind(
                 sourceTextChunksContainer.widthProperty().minus(SCROLL_BAR_OFFSET)
             )
             textProperty().bind(licenseTextProperty)

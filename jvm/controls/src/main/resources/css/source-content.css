@@ -117,20 +117,16 @@
 }
 
 .source-content__text {
-    -fx-text-fill: -wa-regular-text;
-    -fx-wrap-text: true;
-    -fx-padding: 10px 0 0 0;
+    -fx-fill: -wa-regular-text;
 }
 
 .source-content__text--highlighted {
-    -fx-text-fill: -wa-highlight-text;
+    -fx-fill: -wa-highlight-text;
 }
 
 .source-content__license-text {
-    -fx-padding: 10px 15px 0 15px;
-    -fx-font-size: 18px !important;
-    -fx-text-fill: -wa-note-text;
-    -fx-wrap-text: true;
+    -fx-font-size: 16px !important;
+    -fx-fill: -wa-note-text;
 }
 
 .source-content__title {
@@ -160,12 +156,15 @@
     -fx-font-weight: bold;
     -fx-padding: 5 12;
     -fx-font-size: 1.2em;
+    -fx-text-fill: -wa-regular-text;
 }
 
 .source-content__text-popup__text {
     -fx-padding: 10 12;
     -fx-font-size: 1.2em;
     -fx-line-spacing: 3px;
+    -fx-text-fill: -wa-regular-text;
+    -fx-wrap-text: true;
 }
 
 .source-content__text-popup__license-text {
