@@ -15,7 +15,7 @@ class ResetChunks @Inject constructor() {
     fun resetChapter(accessor: ProjectFilesAccessor, chapter: Chapter) {
         markTakesForDeletion(chapter)
         deleteChunkedSourceAudio(accessor, chapter)
-        writeChunkFile(accessor, chapter.sort)
+        removeChapterFromChunkFile(accessor.getChunkFile(), chapter.sort)
         chapter.reset()
     }
 
@@ -42,8 +42,7 @@ class ResetChunks @Inject constructor() {
         }
     }
 
-    private fun writeChunkFile(accessor: ProjectFilesAccessor, chapterNumber: Int) {
-        val chunkFile = accessor.getChunkFile()
+    private fun removeChapterFromChunkFile(chunkFile: File, chapterNumber: Int) {
         if (!chunkFile.exists() || chunkFile.length() == 0L) {
             return
         }
