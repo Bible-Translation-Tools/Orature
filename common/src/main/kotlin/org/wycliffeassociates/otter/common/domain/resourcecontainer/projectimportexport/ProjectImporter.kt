@@ -25,10 +25,12 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.Chunkification
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
@@ -192,7 +194,7 @@ class ProjectImporter @Inject constructor(
 
         translation.modifiedTs = LocalDateTime.now()
         languageRepository.updateTranslation(translation).subscribe()
-        resetChaptersWithoutTakes(derivedProject)
+        resetChaptersWithoutTakes(fileReader, derivedProject)
     }
 
     private fun importChunks(project: Collection, accessor: ProjectFilesAccessor, fileReader: IFileReader) {
@@ -231,8 +233,26 @@ class ProjectImporter @Inject constructor(
         }
     }
 
-    private fun resetChaptersWithoutTakes(derivedProject: Collection) {
-        val chaptersNotStarted = collectionRepository.collectionsWithoutTakes(derivedProject).blockingGet()
+    private fun resetChaptersWithoutTakes(fileReader: IFileReader, derivedProject: Collection) {
+        val chunkFileExists = fileReader.exists(RcConstants.CHUNKS_FILE)
+        val chapterStarted = if (!chunkFileExists) {
+            listOf()
+        } else {
+            try {
+                fileReader.stream(RcConstants.CHUNKS_FILE).let { input ->
+                    val mapper = ObjectMapper(JsonFactory()).registerModule(KotlinModule())
+                    val chunks: Chunkification = mapper.readValue(input)
+                    val chapters = chunks.map { it.key }
+                    chapters
+                }
+            } catch (e: Exception) {
+                listOf()
+            }
+        }
+        val chaptersNotStarted = collectionRepository
+            .collectionsWithoutTakes(derivedProject).blockingGet()
+            .filterNot { chapterStarted.contains(it.sort) }
+
         chaptersNotStarted.forEach { contentRepository.deleteForCollection(it).blockingGet() }
     }
 

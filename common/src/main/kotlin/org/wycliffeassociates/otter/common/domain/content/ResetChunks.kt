@@ -1,5 +1,10 @@
 package org.wycliffeassociates.otter.common.domain.content
 
+import com.fasterxml.jackson.core.JsonFactory
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.readValue
+import org.wycliffeassociates.otter.common.data.Chunkification
 import java.io.File
 import javax.inject.Inject
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
@@ -10,6 +15,7 @@ class ResetChunks @Inject constructor() {
     fun resetChapter(accessor: ProjectFilesAccessor, chapter: Chapter) {
         markTakesForDeletion(chapter)
         deleteChunkedSourceAudio(accessor, chapter)
+        removeChapterFromChunkFile(accessor.getChunkFile(), chapter.sort)
         chapter.reset()
     }
 
@@ -33,6 +39,20 @@ class ResetChunks @Inject constructor() {
                 .forEach { take ->
                     take.deletedTimestamp.accept(DateHolder.now())
                 }
+        }
+    }
+
+    private fun removeChapterFromChunkFile(chunkFile: File, chapterNumber: Int) {
+        if (!chunkFile.exists() || chunkFile.length() == 0L) {
+            return
+        }
+
+        val mapper = ObjectMapper(JsonFactory()).registerModule(KotlinModule())
+        val chunks: Chunkification = mapper.readValue(chunkFile)
+        chunks.remove(chapterNumber)
+
+        chunkFile.writer().use {
+            mapper.writeValue(it, chunks)
         }
     }
 }
