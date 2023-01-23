@@ -30,6 +30,7 @@ import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.ChunksMetadata
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
@@ -233,18 +234,18 @@ class ProjectImporter @Inject constructor(
     }
 
     private fun resetChaptersWithoutTakes(fileReader: IFileReader, derivedProject: Collection) {
-        val chaptersHavingChunks = if (fileReader.exists(RcConstants.CHUNKS_FILE)) {
+        val chapterStarted = if (fileReader.exists(RcConstants.CHUNKS_FILE)) {
             fileReader.stream(RcConstants.CHUNKS_FILE).let { input ->
                 val mapper = ObjectMapper().registerModule(KotlinModule())
-                val map: Map<Int, List<Content>> = mapper.readValue(input)
-                map.map { it.key }
+                val chunks: ChunksMetadata = mapper.readValue(input)
+                chunks.map { it.key }
             }
         } else {
             listOf()
         }
         val chaptersNotStarted = collectionRepository
             .collectionsWithoutTakes(derivedProject).blockingGet()
-            .filterNot { chaptersHavingChunks.contains(it.sort) }
+            .filterNot { chapterStarted.contains(it.sort) }
 
         chaptersNotStarted.forEach { contentRepository.deleteForCollection(it).blockingGet() }
     }

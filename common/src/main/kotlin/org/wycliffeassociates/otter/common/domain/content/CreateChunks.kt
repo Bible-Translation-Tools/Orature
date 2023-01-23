@@ -3,20 +3,20 @@ package org.wycliffeassociates.otter.common.domain.content
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.readValue
 import java.io.File
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioCue
+import org.wycliffeassociates.otter.common.data.ChunksMetadata
 import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.workbook.Book
 import org.wycliffeassociates.otter.common.domain.audio.SourceAudioFile
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
-
 
 class CreateChunks(
     private val projectFilesAccessor: ProjectFilesAccessor,
@@ -115,9 +115,7 @@ class CreateChunks(
         }
         try {
             if (file.exists() && file.length() > 0) {
-                val typeRef: TypeReference<HashMap<Int, List<Content>>> =
-                    object : TypeReference<HashMap<Int, List<Content>>>() {}
-                val map: Map<Int, List<Content>> = mapper.readValue(file, typeRef)
+                val map: ChunksMetadata = mapper.readValue(file)
                 chunks.putAll(map)
                 logger.error("restoring chunks")
             }
