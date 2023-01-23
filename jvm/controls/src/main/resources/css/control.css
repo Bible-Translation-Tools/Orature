@@ -94,13 +94,11 @@
 
 .btn--primary:hover {
     -fx-background-color: -wa-primary;
-    -fx-effect: -wa-level1;
     -fx-underline: false;
 }
 
 .btn--primary:pressed {
     -fx-background-color: -wa-primary-dark;
-    -fx-effect: -wa-level1;
     -fx-underline: false;
 }
 
@@ -137,7 +135,6 @@
 }
 .btn--cta:hover {
     -fx-background-color: -wa-accent;
-    -fx-effect: -wa-level1;
     -fx-underline: false;
 
 }
