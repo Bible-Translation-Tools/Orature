@@ -10,7 +10,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import java.io.File
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioCue
-import org.wycliffeassociates.otter.common.data.ChunksMetadata
+import org.wycliffeassociates.otter.common.data.Chunkification
 import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.workbook.Book
@@ -115,7 +115,7 @@ class CreateChunks(
         }
         try {
             if (file.exists() && file.length() > 0) {
-                val map: ChunksMetadata = mapper.readValue(file)
+                val map: Chunkification = mapper.readValue(file)
                 chunks.putAll(map)
                 logger.error("restoring chunks")
             }

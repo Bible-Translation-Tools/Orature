@@ -30,7 +30,7 @@ import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.ChunksMetadata
+import org.wycliffeassociates.otter.common.data.Chunkification
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
@@ -241,7 +241,7 @@ class ProjectImporter @Inject constructor(
             try {
                 fileReader.stream(RcConstants.CHUNKS_FILE).let { input ->
                     val mapper = ObjectMapper(JsonFactory()).registerModule(KotlinModule())
-                    val chunks: ChunksMetadata = mapper.readValue(input)
+                    val chunks: Chunkification = mapper.readValue(input)
                     val chapters = chunks.map { it.key }
                     chapters
                 }
