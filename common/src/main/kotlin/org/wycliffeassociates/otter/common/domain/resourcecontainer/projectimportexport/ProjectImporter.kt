@@ -234,14 +234,20 @@ class ProjectImporter @Inject constructor(
     }
 
     private fun resetChaptersWithoutTakes(fileReader: IFileReader, derivedProject: Collection) {
-        val chapterStarted = if (fileReader.exists(RcConstants.CHUNKS_FILE)) {
-            fileReader.stream(RcConstants.CHUNKS_FILE).let { input ->
-                val mapper = ObjectMapper().registerModule(KotlinModule())
-                val chunks: ChunksMetadata = mapper.readValue(input)
-                chunks.map { it.key }
-            }
-        } else {
+        val chunkFileExists = fileReader.exists(RcConstants.CHUNKS_FILE)
+        val chapterStarted = if (!chunkFileExists) {
             listOf()
+        } else {
+            try {
+                fileReader.stream(RcConstants.CHUNKS_FILE).let { input ->
+                    val mapper = ObjectMapper(JsonFactory()).registerModule(KotlinModule())
+                    val chunks: ChunksMetadata = mapper.readValue(input)
+                    val chapters = chunks.map { it.key }
+                    chapters
+                }
+            } catch (e: Exception) {
+                listOf()
+            }
         }
         val chaptersNotStarted = collectionRepository
             .collectionsWithoutTakes(derivedProject).blockingGet()
