@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import javafx.animation.AnimationTimer
+import javafx.geometry.Orientation
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
@@ -106,55 +107,56 @@ class MarkerView : PluginEntrypoint() {
         disposables.clear()
     }
 
-    override val root =
-        borderpane {
-            center = vbox {
-                add<TitleFragment>()
-                add<MinimapFragment> {
-                    this@MarkerView.minimap = this
-                    this@MarkerView.slider = slider
+    override val root = splitpane(Orientation.HORIZONTAL) {
+        setDividerPositions(0.33)
+
+        vbox {
+            add(
+                SourceTextFragment().apply {
+                    highlightedChunkNumberProperty.bind(viewModel.currentMarkerNumberProperty)
                 }
-                addClass("vm-marker-waveform__container")
-                add(
-                    waveform.apply {
-                        addClass("vm-marker-waveform")
-                        themeProperty.bind(viewModel.themeColorProperty)
-                        viewModel.compositeDisposable.add(
-                            viewModel.waveform.observeOnFx().subscribe { addWaveformImage(it) }
-                        )
-                        markerStateProperty.bind(viewModel.markerStateProperty)
-                        positionProperty.bind(viewModel.positionProperty)
-
-                        onSeekNext = viewModel::seekNext
-                        onSeekPrevious = viewModel::seekPrevious
-
-                        onPlaceMarker = viewModel::placeMarker
-                        onWaveformClicked = { viewModel.pause() }
-                        onWaveformDragReleased = { deltaPos ->
-                            val deltaFrames = pixelsToFrames(deltaPos)
-                            val curFrames = viewModel.getLocationInFrames()
-                            val duration = viewModel.getDurationInFrames()
-                            val final = Utils.clamp(0, curFrames - deltaFrames, duration)
-                            viewModel.seek(final)
-                        }
-                        onRewind = viewModel::rewind
-                        onFastForward = viewModel::fastForward
-                        onToggleMedia = viewModel::mediaToggle
-                        onResumeMedia = viewModel::resumeMedia
-                    }
-                )
-                add<PlaybackControlsFragment>()
-            }
-            left = vbox {
-                add(
-                    SourceTextFragment().apply {
-                        highlightedChunkNumberProperty.bind(viewModel.currentMarkerNumberProperty)
-                    }
-                )
-            }
-            shortcut(Shortcut.ADD_MARKER.value, viewModel::placeMarker)
-            shortcut(Shortcut.GO_BACK.value, viewModel::saveAndQuit)
+            )
         }
+        vbox {
+            add<TitleFragment>()
+            add<MinimapFragment> {
+                this@MarkerView.minimap = this
+                this@MarkerView.slider = slider
+            }
+            addClass("vm-marker-waveform__container")
+            add(
+                waveform.apply {
+                    addClass("vm-marker-waveform")
+                    themeProperty.bind(viewModel.themeColorProperty)
+                    viewModel.compositeDisposable.add(
+                        viewModel.waveform.observeOnFx().subscribe { addWaveformImage(it) }
+                    )
+                    markerStateProperty.bind(viewModel.markerStateProperty)
+                    positionProperty.bind(viewModel.positionProperty)
+
+                    onSeekNext = viewModel::seekNext
+                    onSeekPrevious = viewModel::seekPrevious
+
+                    onPlaceMarker = viewModel::placeMarker
+                    onWaveformClicked = { viewModel.pause() }
+                    onWaveformDragReleased = { deltaPos ->
+                        val deltaFrames = pixelsToFrames(deltaPos)
+                        val curFrames = viewModel.getLocationInFrames()
+                        val duration = viewModel.getDurationInFrames()
+                        val final = Utils.clamp(0, curFrames - deltaFrames, duration)
+                        viewModel.seek(final)
+                    }
+                    onRewind = viewModel::rewind
+                    onFastForward = viewModel::fastForward
+                    onToggleMedia = viewModel::mediaToggle
+                    onResumeMedia = viewModel::resumeMedia
+                }
+            )
+            add<PlaybackControlsFragment>()
+        }
+        shortcut(Shortcut.ADD_MARKER.value, viewModel::placeMarker)
+        shortcut(Shortcut.GO_BACK.value, viewModel::saveAndQuit)
+    }
 
     private fun initThemeProperty() {
         primaryStage.scene.root.styleClass.onChangeAndDoNowWithDisposer {
