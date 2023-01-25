@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import javafx.animation.AnimationTimer
+import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
@@ -107,14 +108,12 @@ class MarkerView : PluginEntrypoint() {
 
     override val root =
         borderpane {
-            top = vbox {
+            center = vbox {
                 add<TitleFragment>()
                 add<MinimapFragment> {
                     this@MarkerView.minimap = this
                     this@MarkerView.slider = slider
                 }
-            }
-            center = vbox {
                 addClass("vm-marker-waveform__container")
                 add(
                     waveform.apply {
@@ -144,14 +143,14 @@ class MarkerView : PluginEntrypoint() {
                         onResumeMedia = viewModel::resumeMedia
                     }
                 )
+                add<PlaybackControlsFragment>()
             }
-            bottom = vbox {
+            left = vbox {
                 add(
                     SourceTextFragment().apply {
                         highlightedChunkNumberProperty.bind(viewModel.currentMarkerNumberProperty)
                     }
                 )
-                add<PlaybackControlsFragment>()
             }
             shortcut(Shortcut.ADD_MARKER.value, viewModel::placeMarker)
             shortcut(Shortcut.GO_BACK.value, viewModel::saveAndQuit)
