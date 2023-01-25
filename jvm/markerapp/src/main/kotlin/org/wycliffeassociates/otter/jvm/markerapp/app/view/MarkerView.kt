@@ -117,42 +117,48 @@ class MarkerView : PluginEntrypoint() {
                 }
             )
         }
-        vbox {
-            add<TitleFragment>()
-            add<MinimapFragment> {
-                this@MarkerView.minimap = this
-                this@MarkerView.slider = slider
-            }
-            addClass("vm-marker-waveform__container")
-            add(
-                waveform.apply {
-                    addClass("vm-marker-waveform")
-                    themeProperty.bind(viewModel.themeColorProperty)
-                    viewModel.compositeDisposable.add(
-                        viewModel.waveform.observeOnFx().subscribe { addWaveformImage(it) }
-                    )
-                    markerStateProperty.bind(viewModel.markerStateProperty)
-                    positionProperty.bind(viewModel.positionProperty)
-
-                    onSeekNext = viewModel::seekNext
-                    onSeekPrevious = viewModel::seekPrevious
-
-                    onPlaceMarker = viewModel::placeMarker
-                    onWaveformClicked = { viewModel.pause() }
-                    onWaveformDragReleased = { deltaPos ->
-                        val deltaFrames = pixelsToFrames(deltaPos)
-                        val curFrames = viewModel.getLocationInFrames()
-                        val duration = viewModel.getDurationInFrames()
-                        val final = Utils.clamp(0, curFrames - deltaFrames, duration)
-                        viewModel.seek(final)
-                    }
-                    onRewind = viewModel::rewind
-                    onFastForward = viewModel::fastForward
-                    onToggleMedia = viewModel::mediaToggle
-                    onResumeMedia = viewModel::resumeMedia
+        borderpane {
+            top {
+                add<TitleFragment>()
+                add<MinimapFragment> {
+                    this@MarkerView.minimap = this
+                    this@MarkerView.slider = slider
                 }
-            )
-            add<PlaybackControlsFragment>()
+            }
+            center {
+                addClass("vm-marker-waveform__container")
+                add(
+                    waveform.apply {
+                        addClass("vm-marker-waveform")
+                        themeProperty.bind(viewModel.themeColorProperty)
+                        viewModel.compositeDisposable.add(
+                            viewModel.waveform.observeOnFx().subscribe { addWaveformImage(it) }
+                        )
+                        markerStateProperty.bind(viewModel.markerStateProperty)
+                        positionProperty.bind(viewModel.positionProperty)
+
+                        onSeekNext = viewModel::seekNext
+                        onSeekPrevious = viewModel::seekPrevious
+
+                        onPlaceMarker = viewModel::placeMarker
+                        onWaveformClicked = { viewModel.pause() }
+                        onWaveformDragReleased = { deltaPos ->
+                            val deltaFrames = pixelsToFrames(deltaPos)
+                            val curFrames = viewModel.getLocationInFrames()
+                            val duration = viewModel.getDurationInFrames()
+                            val final = Utils.clamp(0, curFrames - deltaFrames, duration)
+                            viewModel.seek(final)
+                        }
+                        onRewind = viewModel::rewind
+                        onFastForward = viewModel::fastForward
+                        onToggleMedia = viewModel::mediaToggle
+                        onResumeMedia = viewModel::resumeMedia
+                    }
+                )
+            }
+            bottom {
+                add<PlaybackControlsFragment>()
+            }
         }
         shortcut(Shortcut.ADD_MARKER.value, viewModel::placeMarker)
         shortcut(Shortcut.GO_BACK.value, viewModel::saveAndQuit)

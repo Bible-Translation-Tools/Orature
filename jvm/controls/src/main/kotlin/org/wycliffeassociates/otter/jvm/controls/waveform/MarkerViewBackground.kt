@@ -25,10 +25,6 @@ import tornadofx.*
 class MarkerViewBackground : BorderPane() {
 
     init {
-        fitToParentSize()
-        hgrow = Priority.ALWAYS
-        vgrow = Priority.ALWAYS
-
         with(this) {
             top {
                 region {

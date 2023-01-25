@@ -39,10 +39,6 @@ class PlaceMarkerLayer : VBox() {
     init {
         with(this) {
             isPickOnBounds = false
-
-            hgrow = Priority.ALWAYS
-            vgrow = Priority.ALWAYS
-
             alignment = Pos.BOTTOM_CENTER
 
             add(
