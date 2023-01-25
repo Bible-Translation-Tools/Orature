@@ -119,10 +119,12 @@ class MarkerView : PluginEntrypoint() {
         }
         borderpane {
             top {
-                add<TitleFragment>()
-                add<MinimapFragment> {
-                    this@MarkerView.minimap = this
-                    this@MarkerView.slider = slider
+                vbox {
+                    add<TitleFragment>()
+                    add<MinimapFragment> {
+                        this@MarkerView.minimap = this
+                        this@MarkerView.slider = slider
+                    }
                 }
             }
             center {
