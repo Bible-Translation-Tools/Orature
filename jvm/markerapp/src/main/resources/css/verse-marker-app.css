@@ -17,11 +17,12 @@
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+.vm-split-container {
+    -fx-background-color: -wa-background,-wa-background;
+}
+
 .vm-header {
     -fx-padding: 20px;
-    -fx-border-color: -wa-border-light;
-    -fx-border-width: 1px 0 1px 0;
-    -fx-border-style: solid;
 }
 
 .vm-header__title {
@@ -155,7 +156,6 @@
 }
 
 .vm-marker-waveform__container {
-    -fx-padding: 4px;
     -fx-background-color: transparent;
 }
 

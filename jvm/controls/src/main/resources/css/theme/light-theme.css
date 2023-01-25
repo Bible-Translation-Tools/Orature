@@ -182,3 +182,7 @@
 .light-theme .scroll-bar .decrement-button:hover {
     -fx-background-color: -wa-foreground-hover;
 }
+
+.light-theme .split-pane:horizontal > .split-pane-divider {
+    -fx-background-color: -wa-primary-dark;
+ }

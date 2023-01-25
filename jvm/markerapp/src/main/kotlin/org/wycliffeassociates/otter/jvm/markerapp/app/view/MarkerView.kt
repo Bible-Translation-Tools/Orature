@@ -109,6 +109,7 @@ class MarkerView : PluginEntrypoint() {
 
     override val root = splitpane(Orientation.HORIZONTAL) {
         setDividerPositions(0.33)
+        addClass("vm-split-container")
 
         vbox {
             add(
