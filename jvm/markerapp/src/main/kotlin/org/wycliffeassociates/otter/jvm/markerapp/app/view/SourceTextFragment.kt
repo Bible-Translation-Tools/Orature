@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.geometry.NodeOrientation
+import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
@@ -60,12 +61,14 @@ class SourceTextFragment : Fragment() {
         }
 
         return SourceContent().apply {
+            vgrow = Priority.ALWAYS
             sourceTextProperty.set(sourceText)
             highlightedChunk.bind(this@SourceTextFragment.highlightedChunkNumberProperty)
             textNotAvailableTextProperty.set(messages["textNotAvailable"])
             contentTitleProperty.set(sourceContentTitle)
             licenseProperty.set(license)
             enableAudioProperty.set(false)
+            isMinimizableProperty.set(false)
             orientationProperty.set(
                 when (direction) {
                     "rtl" -> NodeOrientation.RIGHT_TO_LEFT

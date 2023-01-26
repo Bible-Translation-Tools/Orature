@@ -99,16 +99,8 @@ class WaveformFrame(
 
     init {
         addClass("vm-waveform-frame")
-
-        fitToParentSize()
-        hgrow = Priority.ALWAYS
-        vgrow = Priority.ALWAYS
-
         with(this) {
             bindTranslateX()
-
-            hgrow = Priority.ALWAYS
-            vgrow = Priority.ALWAYS
 
             top {
                 region {

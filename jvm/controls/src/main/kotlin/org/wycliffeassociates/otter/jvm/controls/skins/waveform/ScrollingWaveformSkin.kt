@@ -41,9 +41,6 @@ open class ScrollingWaveformSkin(control: ScrollingWaveform) : SkinBase<Scrollin
 
     open fun initialize() {
         val root = StackPane().apply {
-            hgrow = Priority.ALWAYS
-            vgrow = Priority.ALWAYS
-
             nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
 
             add(MarkerViewBackground())

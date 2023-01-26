@@ -53,9 +53,6 @@ class MarkerPlacementWaveformSkin(val control: MarkerPlacementWaveform) : Scroll
 
     override fun initialize() {
         val root = StackPane().apply {
-            hgrow = Priority.ALWAYS
-            vgrow = Priority.ALWAYS
-
             nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
 
             add(MarkerViewBackground())
