@@ -39,7 +39,7 @@ class WaveformOverlay : StackPane() {
                 // managed will prevent responsive resizing of the app
                 managedProperty().set(false)
                 styleClass.add("scrolling-waveform-holder--played")
-                heightProperty().bind(this@WaveformOverlay.heightProperty().minus(90.0))
+                heightProperty().bind(this@WaveformOverlay.heightProperty().minus(80.0))
                 widthProperty().bind(playbackPositionProperty)
 
                 translateYProperty().set(40.0)

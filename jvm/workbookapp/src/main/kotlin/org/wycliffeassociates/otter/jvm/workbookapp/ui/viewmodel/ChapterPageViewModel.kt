@@ -290,6 +290,9 @@ class ChapterPageViewModel : ViewModel() {
             // Don't place verse markers if the draft comes from user chunks
             val shouldIncludeMarkers = filteredContent.any { it.chunkSource?.label?.lowercase() == "chunk" }.not()
             concatenateAudio.execute(takes, shouldIncludeMarkers)
+                .doOnSuccess {
+                    logger.info("Chapter compiled successfully.")
+                }
                 .flatMapCompletable { file ->
                     compiled = file
                     audioPluginViewModel.import(chapter, file)
@@ -297,9 +300,6 @@ class ChapterPageViewModel : ViewModel() {
                 .subscribeOn(Schedulers.io())
                 .doOnError { e ->
                     logger.error("Error in compiling chapter: $chapter", e)
-                }
-                .doOnSuccess {
-                    logger.info("Chapter compiled successfully.")
                 }
                 .observeOnFx()
                 .doFinally {
