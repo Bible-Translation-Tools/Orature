@@ -20,6 +20,10 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
+import javafx.animation.AnimationTimer
+import javafx.geometry.Orientation
+import javafx.scene.layout.Priority
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
@@ -65,19 +69,49 @@ class MarkerView : PluginEntrypoint() {
         }
     }
 
-    override val root =
+    override fun onUndock() {
+        super.onUndock()
+        timer?.stop()
+        timer = null
+        waveform.markerStateProperty.unbind()
+        waveform.positionProperty.unbind()
+        minimap?.cleanUpOnUndock()
+        disposables.forEach { it.dispose() }
+        disposables.clear()
+    }
+
+    override val root = splitpane(Orientation.HORIZONTAL) {
+        setDividerPositions(0.33)
+        addClass("vm-split-container")
+
+        vbox {
+            add(
+                SourceTextFragment().apply {
+                    highlightedChunkNumberProperty.bind(viewModel.currentMarkerNumberProperty)
+                }
+            )
+        }
         borderpane {
-            top = vbox {
-                add<TitleFragment>()
-                add<MinimapFragment> {
-                    this@MarkerView.minimap = this
-                    this@MarkerView.slider = slider
+            top {
+                vbox {
+                    add<TitleFragment>()
+                    add<MinimapFragment> {
+                        this@MarkerView.minimap = this
+                        this@MarkerView.slider = slider
+                    }
                 }
             }
-            center = waveform.apply {
-                addClass("vm-marker-waveform")
-                themeProperty.bind(viewModel.themeColorProperty)
-                positionProperty.bind(viewModel.positionProperty)
+            center {
+                addClass("vm-marker-waveform__container")
+                add(
+                    waveform.apply {
+                        addClass("vm-marker-waveform")
+                        themeProperty.bind(viewModel.themeColorProperty)
+                        viewModel.compositeDisposable.add(
+                            viewModel.waveform.observeOnFx().subscribe { addWaveformImage(it) }
+                        )
+                        markerStateProperty.bind(viewModel.markerStateProperty)
+                        positionProperty.bind(viewModel.positionProperty)
 
                 setOnSeekNext { viewModel.seekNext() }
                 setOnSeekPrevious { viewModel.seekPrevious() }
@@ -101,13 +135,21 @@ class MarkerView : PluginEntrypoint() {
                 setOnPositionChanged { id, position -> slider!!.updateMarker(id, position) }
                 setOnLocationRequest { viewModel.requestAudioLocation() }
             }
-            bottom = vbox {
-                add<SourceTextFragment> {
-                    highlightedChunkNumberProperty.bind(viewModel.currentMarkerNumberProperty)
-                }
+            bottom {
                 add<PlaybackControlsFragment>()
             }
-            shortcut(Shortcut.ADD_MARKER.value, viewModel::placeMarker)
-            shortcut(Shortcut.GO_BACK.value, viewModel::saveAndQuit)
         }
+        shortcut(Shortcut.ADD_MARKER.value, viewModel::placeMarker)
+        shortcut(Shortcut.GO_BACK.value, viewModel::saveAndQuit)
+    }
+
+    private fun initThemeProperty() {
+        primaryStage.scene.root.styleClass.onChangeAndDoNowWithDisposer {
+            if (it.contains(ColorTheme.DARK.styleClass)) {
+                viewModel.themeColorProperty.set(ColorTheme.DARK)
+            } else {
+                viewModel.themeColorProperty.set(ColorTheme.LIGHT)
+            }
+        }.apply { disposables.add(this) }
+    }
 }

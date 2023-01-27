@@ -195,6 +195,28 @@ class SourceContent : StackPane() {
                             addClass("wa-list-view", "source-content__chunk-list")
                             vgrow = Priority.ALWAYS
                             enableScrollByKey()
+
+                            setCellFactory {
+                                object : ListCell<Label>() {
+                                    override fun updateItem(item: Label?, empty: Boolean) {
+                                        super.updateItem(item, empty)
+
+                                        /*
+                                        allows the list cell width to be overridden to listview.width - insets,
+                                        without this the cell width will extend beyond the listview boundary causing
+                                        a horizontal scroll bar and no word wrapping on the label elements.
+                                        */
+                                        prefWidthProperty().set(0.0)
+
+                                        if (item == null) {
+                                            graphic = null
+                                            text = null
+                                        } else {
+                                            graphic = item
+                                        }
+                                    }
+                                }
+                            }
                         }
 
                         visibleWhen(sourceTextAvailableProperty.and(sourceTextCompactMode.not()))
@@ -410,7 +432,7 @@ class SourceContent : StackPane() {
                 addClass("source-content__text-popup__scroll")
                 vgrow = Priority.ALWAYS
                 maxHeightProperty().bind(
-                    FX.primaryStage.scene.heightProperty().multiply(2.0/3)
+                    FX.primaryStage.scene.heightProperty().multiply(2.0 / 3)
                 )
 
                 vbox {
@@ -468,10 +490,6 @@ class SourceContent : StackPane() {
             addClass("source-content__text")
             minHeight = Region.USE_PREF_SIZE // avoid ellipsis
 
-            maxWidthProperty().bind(
-                sourceTextChunksContainer.widthProperty().minus(60) // scrollbar offset
-            )
-
             highlightedChunk.onChangeAndDoNowWithDisposer { highlightedIndex ->
                 val isHighlighted = highlightedIndex == index
                 toggleClass("source-content__text--highlighted", isHighlighted)
@@ -486,9 +504,6 @@ class SourceContent : StackPane() {
         return Label().apply {
             addClass("source-content__license-text")
 
-            prefWidthProperty().bind(
-                sourceTextChunksContainer.widthProperty().minus(60)
-            )
             textProperty().bind(licenseTextProperty)
             styleProperty().bind(orientationProperty.objectBinding {
                 when (it) {
@@ -508,14 +523,14 @@ class SourceContent : StackPane() {
         sourceTextChunksContainer.apply {
             focusTraversableProperty().bind(
                 Bindings.createBooleanBinding(
-                {
-                    getScrollBar(Orientation.VERTICAL)?.isVisible ?: false
-                },
-                skinProperty().select {
-                    getScrollBar(Orientation.VERTICAL)?.visibleProperty()
-                        ?: visibleProperty()
-                }
-            ))
+                    {
+                        getScrollBar(Orientation.VERTICAL)?.isVisible ?: false
+                    },
+                    skinProperty().select {
+                        getScrollBar(Orientation.VERTICAL)?.visibleProperty()
+                            ?: visibleProperty()
+                    }
+                ))
         }
     }
 

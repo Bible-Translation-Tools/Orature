@@ -180,3 +180,7 @@
 .dark-theme .scroll-bar .decrement-button:hover {
     -fx-background-color: transparent;
 }
+
+.dark-theme .split-pane:horizontal > .split-pane-divider {
+    -fx-background-color: -wa-primary-dark;
+ }

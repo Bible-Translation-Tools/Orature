@@ -63,24 +63,37 @@ class SourceProjectExporter @Inject constructor(
 
         val contributors = projectFilesAccessor.getContributorInfo()
         val zipFilename = makeExportFilename(workbook, projectSourceMetadata)
-        val zipFile = directory.resolve(zipFilename)
+        val targetZip = directory.resolve(zipFilename)
 
-        logger.info("Exporting project as source: ${zipFile.nameWithoutExtension}")
+        logger.info("Exporting project as source: ${targetZip.nameWithoutExtension}")
 
-        projectFilesAccessor.initializeResourceContainerInFile(workbook, zipFile)
-        setContributorInfo(contributors, projectSourceMetadata, zipFile)
+        projectFilesAccessor.initializeResourceContainerInFile(workbook, targetZip)
+        setContributorInfo(contributors, projectSourceMetadata, targetZip)
+        
+        return compileCompletedChapters(workbook, projectSourceMetadata, projectFilesAccessor)
+            .onErrorComplete()
+            .andThen(
+                export(targetZip, workbook, contributors)
+            )
+    }
 
-        val fileWriter = directoryProvider.newFileWriter(zipFile)
+    private fun export(
+        exportFile: File,
+        workbook: Workbook,
+        contributors: List<Contributor>
+    ): Single<ExportResult> {
+        val fileWriter = directoryProvider.newFileWriter(exportFile)
 
         return exportSelectedTakes(workbook, fileWriter, contributors)
             .doOnComplete {
                 fileWriter.close() // must close before changing file extension or NoSuchFileException
                 buildSourceProjectMetadata(
-                    zipFile,
+                    exportFile,
                     workbook.source.resourceMetadata.path,
                     workbook
                 )
-                restoreFileExtension(zipFile, OratureFileFormat.ORATURE.extension)
+                // change extension app-specific format
+                restoreFileExtension(exportFile, OratureFileFormat.ORATURE.extension)
             }
             .doOnError {
                 logger.error("Error while exporting project as source.", it)

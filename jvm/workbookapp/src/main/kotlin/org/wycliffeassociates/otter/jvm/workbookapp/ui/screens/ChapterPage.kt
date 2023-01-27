@@ -36,6 +36,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.common.utils.capitalizeString
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
+import org.wycliffeassociates.otter.jvm.controls.dialog.ConfirmDialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
@@ -74,6 +75,7 @@ class ChapterPage : View() {
     private val audioPluginViewModel: AudioPluginViewModel by inject()
     private val navigator: NavigationMediator by inject()
     private lateinit var chunkListView: ListView<CardData>
+    private lateinit var progressDialog: ConfirmDialog
 
     private val pluginOpenedPage: PluginOpenedPage
     private var listeners = mutableListOf<ListenerDisposer>()
@@ -551,37 +553,67 @@ class ChapterPage : View() {
 
     private fun initializeProgressDialog() {
         confirmdialog {
-            viewModel.showExportProgressDialogProperty.onChangeWithDisposer {
-                if (it == true) {
-                    titleTextProperty.bind(
-                        workbookDataStore.activeChapterProperty.stringBinding { chapter ->
-                            chapter?.let {
-                                MessageFormat.format(
-                                    messages["exportChapterTitle"],
-                                    messages["export"],
-                                    messages[chapter.label],
-                                    chapter.title
-                                )
-                            }
-                        }
-                    )
-                    messageTextProperty.set(
-                        MessageFormat.format(
-                            messages["exportProjectMessage"],
-                            messages["chapter"]
-                        )
-                    )
-                    open()
-                } else {
-                    close()
-                }
-            }.let(listeners::add)
-
+            progressDialog = this
             progressTitleProperty.set(messages["pleaseWait"])
             showProgressBarProperty.set(true)
             orientationProperty.set(settingsViewModel.orientationProperty.value)
             themeProperty.set(settingsViewModel.appColorMode.value)
         }
+
+        initExportProgressListener()
+        initCompileProgressListener()
+    }
+
+    private fun initExportProgressListener() {
+        viewModel.showExportProgressDialogProperty.onChangeWithDisposer {
+            if (it == true) {
+                workbookDataStore.activeChapterProperty.value?.let { chapter ->
+                    progressDialog.titleTextProperty.set(
+                        MessageFormat.format(
+                            messages["exportChapterTitle"],
+                            messages["export"],
+                            messages[chapter.label],
+                            chapter.title
+                        )
+                    )
+                }
+                progressDialog.messageTextProperty.set(
+                    MessageFormat.format(
+                        messages["exportProjectMessage"],
+                        messages["chapter"]
+                    )
+                )
+                progressDialog.open()
+            } else {
+                progressDialog.close()
+            }
+        }.let(listeners::add)
+    }
+
+    private fun initCompileProgressListener() {
+        viewModel.isCompilingProperty.onChangeWithDisposer {
+            if (it == true) {
+                workbookDataStore.activeChapterProperty.value?.let { chapter ->
+                    val title = MessageFormat.format(
+                        messages["exportChapterTitle"],
+                        messages["compile"],
+                        messages[chapter.label],
+                        chapter.title
+                    )
+                    val msg = MessageFormat.format(
+                        messages["compileChapterMessage"],
+                        messages[chapter.label],
+                        chapter.title
+                    )
+
+                    progressDialog.titleTextProperty.set(title)
+                    progressDialog.messageTextProperty.set(msg)
+                }
+                progressDialog.open()
+            } else {
+                progressDialog.close()
+            }
+        }.let(listeners::add)
     }
 
     private fun removeListeners() {

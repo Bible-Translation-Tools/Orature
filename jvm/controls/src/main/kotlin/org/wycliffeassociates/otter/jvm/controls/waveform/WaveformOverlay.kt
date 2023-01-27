@@ -24,10 +24,7 @@ import javafx.geometry.Pos
 import javafx.scene.layout.StackPane
 import javafx.scene.shape.Line
 import javafx.scene.shape.Rectangle
-import tornadofx.add
-import tornadofx.div
-import tornadofx.minus
-import tornadofx.unaryMinus
+import tornadofx.*
 
 class WaveformOverlay : StackPane() {
 
@@ -39,20 +36,23 @@ class WaveformOverlay : StackPane() {
 
         add(
             Rectangle().apply {
+                // managed will prevent responsive resizing of the app
+                managedProperty().set(false)
                 styleClass.add("scrolling-waveform-holder--played")
-                heightProperty().bind(this@WaveformOverlay.heightProperty().minus(80.0))
-                widthProperty().bind(
-                    Bindings.min(
-                        playbackPositionProperty,
-                        this@WaveformOverlay.widthProperty().divide(2)
-                    )
+                heightProperty().bind(this@WaveformOverlay.heightProperty().minus(90.0))
+                widthProperty().bind(playbackPositionProperty)
+
+                translateYProperty().set(40.0)
+                translateXProperty().bind(
+                    this@WaveformOverlay.widthProperty().divide(2).minus(playbackPositionProperty)
                 )
-                translateYProperty().set(-40.0)
-                translateXProperty().bind(-widthProperty() / 2)
             }
         )
         add(
             Line(0.0, 40.0, 0.0, 0.0).apply {
+                managedProperty().set(false)
+                startXProperty().bind(this@WaveformOverlay.widthProperty().divide(2))
+                endXProperty().bind(this@WaveformOverlay.widthProperty().divide(2))
                 endYProperty().bind(this@WaveformOverlay.heightProperty())
                 styleClass.add("scrolling-waveform__playback-line")
             }

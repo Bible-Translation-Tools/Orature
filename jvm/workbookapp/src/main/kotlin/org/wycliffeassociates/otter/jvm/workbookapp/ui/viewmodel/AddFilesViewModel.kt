@@ -63,6 +63,7 @@ class AddFilesViewModel : ViewModel() {
 
     fun onDropFile(files: List<File>) {
         if (isValidImportFile(files)) {
+            logger.info("Drag-drop file to import: ${files.first()}")
             importResourceContainer(files.first())
         }
     }
@@ -120,14 +121,23 @@ class AddFilesViewModel : ViewModel() {
         return when {
             files.size > 1 -> {
                 snackBarObservable.onNext(messages["importMultipleError"])
+                logger.error(
+                    "(Drag-Drop) Multi-files import is not supported. Input files: $files"
+                )
                 false
             }
             files.first().isDirectory -> {
                 snackBarObservable.onNext(messages["importDirectoryError"])
+                logger.error(
+                    "(Drag-Drop) Directory import is not supported. Input path: ${files.first()}"
+                )
                 false
             }
             files.first().extension !in OratureFileFormat.extensionList -> {
                 snackBarObservable.onNext(messages["importInvalidFileError"])
+                logger.error(
+                    "(Drag-Drop) Invalid import file extension. Input files: ${files.first()}"
+                )
                 false
             }
             else -> true

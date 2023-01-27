@@ -281,7 +281,6 @@ class ChapterPageViewModel : ViewModel() {
             isCompilingProperty.set(true)
 
             val chapter = chapterCardProperty.value!!.chapterSource!!
-
             val takes = filteredContent.mapNotNull { chunk ->
                 chunk.chunkSource?.audio?.selected?.value?.value?.file
             }
@@ -299,11 +298,14 @@ class ChapterPageViewModel : ViewModel() {
                 .doOnError { e ->
                     logger.error("Error in compiling chapter: $chapter", e)
                 }
+                .doOnSuccess {
+                    logger.info("Chapter compiled successfully.")
+                }
+                .observeOnFx()
                 .doFinally {
                     isCompilingProperty.set(false)
                     compiled?.delete()
                 }
-                .observeOnFx()
                 .subscribe()
         }
     }
