@@ -381,8 +381,7 @@ class ProjectFilesAccessor(
             .getSoftDeletedTakes(workbook.target)
             .blockingGet()
             .map { relativeTakePath(it.path) }
-        deletedTakes.toMutableList().addAll(targetTakes)
-        return deletedTakes
+        return deletedTakes + targetTakes
     }
 
     private fun getAudioForCurrentResource(
