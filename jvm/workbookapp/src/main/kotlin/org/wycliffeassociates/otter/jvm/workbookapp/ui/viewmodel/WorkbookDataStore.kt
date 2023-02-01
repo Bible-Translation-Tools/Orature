@@ -146,14 +146,20 @@ class WorkbookDataStore : Component(), ScopedInstance {
         activeProjectFilesAccessorProperty.set(projectFilesAccessor)
     }
 
-    fun updateSelectedTakesFile(wb: Workbook = this.workbook) {
-        Completable
+    fun updateSelectedTakesFile() {
+        updateSelectedTakesFileAsync().subscribe()
+    }
+
+    fun updateSelectedTakesFileAsync(): Completable {
+        val wb = workbook
+        val projectIsBook = activeResourceMetadata.identifier == wb.target.resourceMetadata.identifier
+        val projectFilesAccessor = activeProjectFilesAccessor
+
+        return Completable
             .fromCallable {
-                val projectIsBook = activeResourceMetadata.identifier == wb.target.resourceMetadata.identifier
-                activeProjectFilesAccessor.writeSelectedTakesFile(wb, projectIsBook)
+                projectFilesAccessor.writeSelectedTakesFile(wb, projectIsBook)
             }
             .subscribeOn(Schedulers.io())
-            .subscribe()
     }
 
     fun updateSourceAudio() {
