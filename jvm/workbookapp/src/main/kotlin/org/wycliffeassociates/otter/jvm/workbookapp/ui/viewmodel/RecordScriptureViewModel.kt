@@ -383,6 +383,8 @@ class RecordScriptureViewModel : ViewModel() {
         closePlayers()
         recordable?.let { rec ->
             contextProperty.set(PluginType.RECORDER)
+            val workbook = workbookDataStore.workbook
+
             rec.audio.getNewTakeNumber()
                 .flatMapMaybe { takeNumber ->
                     workbookDataStore.activeTakeNumberProperty.set(takeNumber)
@@ -404,7 +406,7 @@ class RecordScriptureViewModel : ViewModel() {
                         TakeActions.Result.SUCCESS -> {
                             setMarker()
                             loadTakes()
-                            workbookDataStore.updateSelectedTakesFile()
+                            workbookDataStore.updateSelectedTakesFile(workbook)
                         }
                         TakeActions.Result.NO_AUDIO -> {
                             setMarker()
