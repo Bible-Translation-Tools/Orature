@@ -146,11 +146,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
         activeProjectFilesAccessorProperty.set(projectFilesAccessor)
     }
 
-    fun updateSelectedTakesFile() {
-        updateSelectedTakesFileAsync().subscribe()
-    }
-
-    fun updateSelectedTakesFileAsync(): Completable {
+    fun updateSelectedTakesFile(): Completable {
         val wb = workbook
         val projectIsBook = activeResourceMetadata.identifier == wb.target.resourceMetadata.identifier
         val projectFilesAccessor = activeProjectFilesAccessor

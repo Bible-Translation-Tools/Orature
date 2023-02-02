@@ -383,7 +383,7 @@ class RecordScriptureViewModel : ViewModel() {
         closePlayers()
         recordable?.let { rec ->
             contextProperty.set(PluginType.RECORDER)
-            val updateOnSuccess = workbookDataStore.updateSelectedTakesFileAsync()
+            val updateOnSuccess = workbookDataStore.updateSelectedTakesFile()
 
             rec.audio.getNewTakeNumber()
                 .flatMapMaybe { takeNumber ->
@@ -450,7 +450,7 @@ class RecordScriptureViewModel : ViewModel() {
 
     fun selectTake(take: Take) {
         recordable?.audio?.selectTake(take) ?: throw IllegalStateException("Recordable is null")
-        workbookDataStore.updateSelectedTakesFile()
+        workbookDataStore.updateSelectedTakesFile().subscribe()
         take.file.setLastModified(System.currentTimeMillis())
     }
 
