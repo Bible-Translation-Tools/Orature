@@ -14,8 +14,13 @@ data class ParatextVersification(
     val excludedVerses: List<String>?,
     val partialVerses: PartialVerses?
 ): Versification {
+
+    override fun getChaptersInBook(bookSlug: String): Int {
+        return maxVerses[bookSlug]?.size ?: 0
+    }
+
     override fun getVersesInChapter(bookSlug: String, chapterNumber: Int): Int {
-        return maxVerses[bookSlug]?.get(chapterNumber)?.toInt() ?: 0
+        return maxVerses[bookSlug]?.get(chapterNumber-1)?.toInt() ?: 0
     }
 }
 
