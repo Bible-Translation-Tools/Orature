@@ -189,7 +189,7 @@ open class RecordableViewModel(
         }
         found?.let { takeModel ->
             recordable?.audio?.selectTake(takeModel.take) ?: throw IllegalStateException("Recordable is null")
-            workbookDataStore.updateSelectedTakesFile()
+            workbookDataStore.updateSelectedTakesFile().subscribe()
             take.file.setLastModified(System.currentTimeMillis())
             loadTakes()
         }
