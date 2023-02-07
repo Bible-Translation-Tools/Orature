@@ -33,9 +33,8 @@ import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.utils.overrideDefaultKeyEventHandler
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ComboboxItem
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.DeviceComboboxCell
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.LanguageComboboxCell
+import org.wycliffeassociates.otter.jvm.controls.combobox.ComboboxItem
+import org.wycliffeassociates.otter.jvm.controls.combobox.IconComboBoxCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.AddPluginDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
@@ -102,7 +101,9 @@ class SettingsView : View() {
                             }
                         }
 
-                        buttonCell = ThemeComboboxCell(FontIcon(MaterialDesign.MDI_BRIGHTNESS_6))
+                        buttonCell = IconComboBoxCell(FontIcon(MaterialDesign.MDI_BRIGHTNESS_6)) {
+                            it?.let { FX.messages[it.titleKey] } ?: ""
+                        }
                         overrideDefaultKeyEventHandler {
                             fire(ThemeColorEvent(this@SettingsView::class, it))
                         }
@@ -132,7 +133,7 @@ class SettingsView : View() {
                             }
                         }
 
-                        buttonCell = LanguageComboboxCell()
+                        buttonCell = IconComboBoxCell(FontIcon(MaterialDesign.MDI_WEB)) { it?.name ?: "" }
                         overrideDefaultKeyEventHandler {
                             viewModel.updateLanguage(it)
                         }
@@ -165,7 +166,7 @@ class SettingsView : View() {
                             }
                         }
 
-                        buttonCell = DeviceComboboxCell(FontIcon(MaterialDesign.MDI_VOLUME_HIGH))
+                        buttonCell = IconComboBoxCell(FontIcon(MaterialDesign.MDI_VOLUME_HIGH))
                         overrideDefaultKeyEventHandler {
                             viewModel.updateOutputDevice(it)
                         }
@@ -189,7 +190,7 @@ class SettingsView : View() {
                             }
                         }
 
-                        buttonCell = DeviceComboboxCell(FontIcon(MaterialDesign.MDI_MICROPHONE))
+                        buttonCell = IconComboBoxCell(FontIcon(MaterialDesign.MDI_MICROPHONE))
                         overrideDefaultKeyEventHandler {
                             viewModel.updateInputDevice(it)
                         }

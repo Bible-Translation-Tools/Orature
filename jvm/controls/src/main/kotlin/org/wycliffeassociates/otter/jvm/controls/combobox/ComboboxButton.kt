@@ -16,28 +16,23 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
+package org.wycliffeassociates.otter.jvm.controls.combobox
 
-import javafx.scene.control.ListCell
-import org.kordamp.ikonli.javafx.FontIcon
-import org.wycliffeassociates.otter.common.data.ColorTheme
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ComboboxButton
-import tornadofx.FX.Companion.messages
+import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
+import javafx.scene.Node
+import javafx.scene.layout.HBox
 import tornadofx.*
 
-class ThemeComboboxCell(private val icon: FontIcon) : ListCell<ColorTheme>() {
-    val view = ComboboxButton()
-    override fun updateItem(item: ColorTheme?, empty: Boolean) {
-        super.updateItem(item, empty)
+class ComboboxButton : HBox() {
+    val iconProperty = SimpleObjectProperty<Node>()
+    val textProperty = SimpleStringProperty()
 
-        if (item == null || empty) {
-            graphic = null
-            return
+    init {
+        addClass("wa-combobox-button")
+        label {
+            graphicProperty().bind(iconProperty)
         }
-
-        graphic = view.apply {
-            textProperty.set(messages[item.titleKey])
-            iconProperty.set(icon)
-        }
+        label(textProperty)
     }
 }
