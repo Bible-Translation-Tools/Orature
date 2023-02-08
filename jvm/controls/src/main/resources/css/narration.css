@@ -1,0 +1,64 @@
+.narration__recorder {
+    -fx-pref-height: 200px;
+    -fx-background-color: -wa-background-dark;
+}
+
+.narration__recorder-tip {
+    -fx-max-width: 800px;
+    -fx-font-size: 20px;
+    -fx-padding: 15px;
+}
+
+.narration__recorder-tip .label {
+    -fx-font-family: 'sans-serif';
+    -fx-text-fill: -wa-regular-text;
+}
+
+.narration__recorder-tip-title {
+    -fx-font-weight: bold;
+}
+
+.narration-list__verse-cell {
+    -fx-pref-width: 0;
+}
+
+.narration-list__verse-item {
+    -fx-max-width: 800px;
+    -fx-background-color: -wa-foreground;
+    -fx-background-radius: 15px;
+    -fx-effect: -wa-card-shadow-lower-right;
+    -fx-spacing: 5px;
+}
+
+.narration-list__verse-item:disabled {
+    -fx-background-color: -wa-background;
+    -fx-effect: null;
+}
+
+.narration-list__verse-block {
+    -fx-padding: 10px;
+}
+
+.narration-list__verse-item-text {
+    -fx-text-fill: -wa-regular-text;
+    -fx-font-size: 24px;
+}
+
+.narration-list__verse-item-text__title {
+    -fx-font-size: 12px;
+    -fx-padding: 0 5px 0 0;
+}
+
+.narration-list__buttons {
+    -fx-spacing: 20px;
+    -fx-padding: 10px;
+}
+
+.narration-list__buttons .btn {
+    -fx-pref-height: 24px;
+}
+
+.narration-list__separator .line {
+    -fx-border-color: -wa-border-light;
+    -fx-pref-height: 1px;
+}

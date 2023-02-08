@@ -1,14 +1,10 @@
 .demo__menu {
     -fx-padding: 10px;
     -fx-max-width: 300px;
-    -fx-border-color: -wa-card-border;
+    -fx-border-color: -wa-border-light;
     -fx-border-width: 0 1px 0 0;
 }
 
 .demo__content {
     -fx-padding: 10px;
-}
-
-.demo__content .btn {
-    -fx-pref-width: 300px;
 }
