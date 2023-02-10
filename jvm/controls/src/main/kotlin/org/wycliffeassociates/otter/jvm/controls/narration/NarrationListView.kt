@@ -19,10 +19,18 @@ class NarrationListView(items: ObservableList<Verse>? = null) : ListView<Verse>(
     val selectedVerseLabelProperty = SimpleStringProperty()
     val onSelectedVerseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
+    private val onRecordActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+
     init {
         addClass("wa-list-view")
 
-        setCellFactory { NarrationVerseCell() }
+        setCellFactory {
+            NarrationVerseCell().apply {
+                setOnRecord {
+                    onRecordActionProperty.value?.handle(ActionEvent(item, null))
+                }
+            }
+        }
 
         itemsProperty().onChange {
             selectionModel.select(0)
@@ -51,6 +59,12 @@ class NarrationListView(items: ObservableList<Verse>? = null) : ListView<Verse>(
                 }
             }
         }
+    }
+
+    fun setOnRecord(op: (verse: Verse) -> Unit) {
+        onRecordActionProperty.set(EventHandler {
+            op.invoke(it.source as Verse)
+        })
     }
 }
 

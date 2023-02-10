@@ -5,6 +5,7 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
+import javafx.geometry.Orientation
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
@@ -19,18 +20,54 @@ class Narration(verses: ObservableList<Verse>? = null) : VBox() {
 
     init {
         stackpane {
-            addClass("narration__recorder")
+            addClass("narration__recording")
             alignment = Pos.CENTER
 
+            hbox {
+                listview(verses) {
+                    hgrow = Priority.ALWAYS
+
+                    addClass("wa-list-view")
+
+                    setCellFactory {
+                        NarrationRecordCell().apply {
+                            setOnPlay {
+                                println("Playing verse ${item.label}")
+                            }
+
+                            setOnOpenApp {
+                                println("Opening verse ${item.label} in external app...")
+                            }
+
+                            setOnRecordAgain {
+                                println("Recording verse ${item.label} again")
+                            }
+                        }
+                    }
+                    orientation = Orientation.HORIZONTAL
+                }
+                stackpane {
+                    addClass("narration__volume-bar")
+
+                    vbox {
+                        addClass("narration__volume-bar__value")
+
+                        maxHeight = 50.0
+                    }
+                }
+            }
+
             vbox {
-                addClass("narration__recorder-tip")
+                addClass("narration__recording-tip")
                 alignment = Pos.CENTER_LEFT
 
                 label("Tip") {
-                    addClass("narration__recorder-tip-title")
+                    addClass("narration__recording-tip-title")
                     style = "-fx-font-weight: bold;"
                 }
                 label("Press the down key on your keyboard to navigate to the next verse.")
+
+                isVisible = false
             }
         }
         stackpane {
@@ -41,6 +78,10 @@ class Narration(verses: ObservableList<Verse>? = null) : VBox() {
 
                 currentVerseLabelProperty.bind(selectedVerseLabelProperty)
                 onCurrentVerseActionProperty.bind(onSelectedVerseActionProperty)
+
+                setOnRecord {
+                    println("Recording verse ${it.label}")
+                }
             }
 
             vbox {

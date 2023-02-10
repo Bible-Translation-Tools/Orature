@@ -1,6 +1,8 @@
 package org.wycliffeassociates.otter.jvm.controls.narration
 
-import javafx.geometry.Pos
+import javafx.beans.property.SimpleObjectProperty
+import javafx.event.ActionEvent
+import javafx.event.EventHandler
 import javafx.scene.control.ListCell
 import org.wycliffeassociates.otter.common.data.primitives.Verse
 import tornadofx.addClass
@@ -8,9 +10,10 @@ import tornadofx.addClass
 class NarrationVerseCell : ListCell<Verse>() {
     private val view = NarrationVerseItem()
 
+    private val onRecordActionCellProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+
     init {
         addClass("narration-list__verse-cell")
-        alignment = Pos.TOP_CENTER
     }
 
     override fun updateItem(item: Verse?, empty: Boolean) {
@@ -28,14 +31,18 @@ class NarrationVerseCell : ListCell<Verse>() {
             verseLabelProperty.set(item.label)
             verseTextProperty.set(item.text)
 
-            setOnRecord {
-                println("Recording...")
-            }
+            onRecordActionProperty.set(onRecordActionCellProperty.value)
 
             setOnNextVerse {
                 listView.selectionModel.selectNext()
                 listView.scrollTo(item)
             }
         }
+    }
+
+    fun setOnRecord(op: () -> Unit) {
+        onRecordActionCellProperty.set(EventHandler {
+            op.invoke()
+        })
     }
 }

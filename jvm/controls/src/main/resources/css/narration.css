@@ -1,25 +1,26 @@
-.narration__recorder {
+.narration__recording {
     -fx-pref-height: 200px;
-    -fx-background-color: -wa-background-dark;
+    /*-fx-background-color: -wa-background-dark;*/
 }
 
-.narration__recorder-tip {
+.narration__recording-tip {
     -fx-max-width: 800px;
     -fx-font-size: 20px;
     -fx-padding: 15px;
 }
 
-.narration__recorder-tip .label {
+.narration__recording-tip .label {
     -fx-font-family: 'sans-serif';
     -fx-text-fill: -wa-regular-text;
 }
 
-.narration__recorder-tip-title {
+.narration__recording-tip-title {
     -fx-font-weight: bold;
 }
 
 .narration-list__verse-cell {
     -fx-pref-width: 0;
+    -fx-alignment: top-center;
 }
 
 .narration__list {
@@ -87,4 +88,70 @@
     -fx-text-fill: -wa-regular-text;
     -fx-font-size: 20px;
     -fx-font-weight: 600;
+}
+
+.narration__recording .list-view {
+    -fx-background-color: -wa-background-primary-gradient;
+}
+
+.narration-record__verse-cell {
+    -fx-pref-height: 0;
+    -fx-border-color: -wa-regular-text;
+    -fx-border-width: 0 2px 0 0;
+    -fx-padding: 0;
+}
+
+.narration-record__verse-item {
+
+}
+
+.narration-record__waveform {
+    -fx-pref-width: 300px;
+    -fx-max-height: 88px;
+}
+
+.narration-record__verse-controls {
+    -fx-spacing: 10px;
+    -fx-alignment: center;
+    -fx-padding: 10px 10px 0 10px;
+}
+
+.narration-record__verse-controls .btn {
+    -fx-pref-width: 56px;
+    -fx-pref-height: 48px;
+    -fx-background-color: -wa-foreground;
+    -fx-background-radius: 16px;
+}
+
+.narration-record__verse-controls .btn .ikonli-font-icon {
+    -fx-fill: -wa-regular-text;
+}
+
+.narration-record__verse-text {
+    -fx-font-size: 24px;
+    -fx-font-weight: 500;
+    -fx-text-fill: -wa-primary;
+}
+
+.narration-record__verse-text .ikonli-font-icon {
+    -fx-fill: -wa-primary;
+}
+
+.narration__volume-bar {
+    -fx-pref-width: 16px;
+    -fx-background-color: #001533;
+    -fx-alignment: center;
+}
+
+.narration__volume-bar__value {
+    -fx-background-color: -wa-success-color;
+}
+
+.narration-record__verse-controls .wa-menu-button {
+    -fx-padding: 0;
+}
+
+.narration-record__verse-controls .wa-menu-button .arrow-button,
+.narration-record__verse-controls .wa-menu-button .arrow-button .arrow {
+    -fx-padding: 0;
 }

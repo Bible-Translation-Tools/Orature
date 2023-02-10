@@ -17,8 +17,8 @@ class NarrationVerseItem : VBox() {
     val isActiveProperty = SimpleBooleanProperty()
     val isLastVerseProperty = SimpleBooleanProperty()
 
-    private val onRecordActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
-    private val onNextVerseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val onRecordActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val onNextVerseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
         styleClass.setAll("narration-list__verse-item")
