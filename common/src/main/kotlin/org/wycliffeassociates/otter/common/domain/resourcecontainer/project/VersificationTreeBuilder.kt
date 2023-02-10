@@ -3,7 +3,6 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.project
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.wycliffeassociates.otter.common.collections.OtterTree
 import org.wycliffeassociates.otter.common.collections.OtterTreeNode
@@ -13,7 +12,6 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.toCollection
 import org.wycliffeassociates.otter.common.versification.ParatextVersification
 import org.wycliffeassociates.otter.common.versification.Versification
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
-import org.wycliffeassociates.resourcecontainer.entity.resource
 
 private const val FORMAT = "text/usfm"
 

@@ -23,6 +23,7 @@ import integrationtest.initialization.TestInitializeProjects
 import integrationtest.initialization.TestInitializeSources
 import integrationtest.initialization.TestInitializeUlb
 import integrationtest.persistence.repository.TestCollectionRepository
+import integrationtest.persistence.repository.TestResourceContainerRepository
 import integrationtest.projects.TestProjectCreate
 import integrationtest.projects.TestProjectExport
 import integrationtest.projects.TestProjectImport
@@ -58,4 +59,5 @@ interface TestPersistenceComponent : AppDependencyGraph {
     fun inject(test: TestProjectExport)
     fun inject(test: TestExportSourceProject)
     fun inject(test: TestCollectionRepository)
+    fun inject(test: TestResourceContainerRepository)
 }

@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.common.domain.resourcecontainer
 
+import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
@@ -29,6 +30,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IProjectReader
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.VersificationTreeBuilder
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.MediaMerge
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectImporter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -246,15 +248,32 @@ class ImportResourceContainer @Inject constructor(
             return cleanUp(fileToLoad, e.result)
         }
 
+        val root = OtterTree<CollectionOrContent>(container.toCollection())
+        val versificationTree = VersificationTreeBuilder().build(container)
+        for (node in versificationTree) {
+            root.addChild(node)
+        }
+
         return resourceContainerRepository
-            .importResourceContainer(container, tree, container.manifest.dublinCore.language.identifier)
+            .importResourceContainer(container, root, container.manifest.dublinCore.language.identifier)
             .doOnEvent { result, err ->
                 if (err != null) {
                     logger.error("Error in importFromInternalDirectory importing rc, file: $fileToLoad", err)
                 }
                 if (result != ImportResult.SUCCESS || err != null) fileToLoad.deleteRecursively()
             }
+            .flatMap {
+                updateContentFromTextContent(container, tree)
+            }
             .subscribeOn(Schedulers.io())
+    }
+
+    private fun updateContentFromTextContent(
+        container: ResourceContainer,
+        tree: OtterTree<CollectionOrContent>
+    ): Single<ImportResult> {
+        return resourceContainerRepository
+            .updateContent(container, tree, container.manifest.dublinCore.language.identifier)
     }
 
     private fun cleanUp(container: File, result: ImportResult): Single<ImportResult> = Single.fromCallable {

@@ -42,6 +42,7 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportExcept
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.castOrFindImportException
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
@@ -54,6 +55,7 @@ import org.wycliffeassociates.resourcecontainer.ResourceContainer
 class ResourceContainerRepository @Inject constructor(
     private val database: AppDatabase,
     private val collectionRepository: ICollectionRepository,
+    private val contentRepository: IContentRepository,
     private val resourceRepository: IResourceRepository
 ) : IResourceContainerRepository {
     private val logger = LoggerFactory.getLogger(ResourceContainerRepository::class.java)
@@ -108,6 +110,101 @@ class ResourceContainerRepository @Inject constructor(
             }
             .doFinally { rc.close() }
             .subscribeOn(Schedulers.io())
+    }
+
+    override fun updateContent(
+        rc: ResourceContainer,
+        rcTree: OtterTree<CollectionOrContent>,
+        languageSlug: String
+    ): Single<ImportResult> {
+        val rcMetadata = getMetadataForContainer(rc) ?: run { return Single.just(ImportResult.IMPORT_ERROR)}
+        val projects = collectionRepository.getSourceProjects().map { it.filter { it.resourceContainer == rcMetadata } }.blockingGet()
+
+        val databaseMap = hashMapOf<Collection, MutableList<Content>>()
+        projects.map { getProjectAsOtterTree(it, rcMetadata).toChapterContentMap() }.forEach { databaseMap.putAll(it) }
+        val parsedTextMap = rcTree.toChapterContentMap()
+        updateTextContent(databaseMap, parsedTextMap)
+        return Single.just(ImportResult.SUCCESS)
+    }
+
+    fun updateTextContent(databaseMap: Map<Collection, List<Content>>, parsedTextMap: Map<Collection, List<Content>>) {
+        parsedTextMap.keys.forEach {  collection ->
+            val textMapContent = parsedTextMap[collection]
+            val matchingCollection = databaseMap.keys.find { it.slug == collection.slug } ?: return@forEach
+            val databaseContent = databaseMap[matchingCollection]!!
+
+            textMapContent!!.forEach { content ->
+                val match = databaseContent.find { it.start == content.start && it.type == content.type}
+                match?.let {
+                    match.text = content.text ?: ""
+                    contentRepository.update(match).blockingGet()
+                }
+            }
+        }
+    }
+
+    private fun getProjectAsOtterTree(book: Collection, rc: ResourceMetadata): OtterTree<CollectionOrContent> {
+        val tree = OtterTree<CollectionOrContent>(book)
+        val chapters = collectionDao.fetchChildren(CollectionMapper().mapToEntity(book))
+        chapters.forEach { collectionEntity ->
+            val collection = CollectionMapper().mapFromEntity(collectionEntity, rc)
+            val chapterTree = OtterTree<CollectionOrContent>(collection)
+            val content = contentRepository.getByCollection(collection).blockingGet()
+            content.forEach {
+                val node = OtterTreeNode<CollectionOrContent>(it)
+                chapterTree.addChild(node)
+            }
+            tree.addChild(chapterTree)
+        }
+        return tree
+    }
+
+    fun OtterTree<CollectionOrContent>.toChapterContentMap(): Map<Collection, MutableList<Content>> {
+        val isBook = children.any { it.value is Collection && (it as OtterTree<CollectionOrContent>).children.any{ it.value is Content } }
+        return if (isBook) {
+            toChapterContentMapFromBook()
+        } else {
+            toChapterContentMapFromResource()
+        }
+    }
+
+    private fun OtterTree<CollectionOrContent>.toChapterContentMapFromResource(): Map<Collection, MutableList<Content>> {
+        val bigMap = hashMapOf<Collection, MutableList<Content>>()
+
+        val trees = children.map { it as OtterTree<CollectionOrContent> }
+        val maps = trees.map { it.toChapterContentMap() }
+        maps.forEach {
+            bigMap.putAll(it)
+        }
+        return bigMap
+    }
+
+    private fun OtterTree<CollectionOrContent>.toChapterContentMapFromBook(): Map<Collection, MutableList<Content>> {
+        val isBook = children.any { it.value is Collection && (it as OtterTree<CollectionOrContent>).children.any{ it.value is Content } }
+
+        val bigMap = hashMapOf<Collection, MutableList<Content>>()
+        if (isBook) {
+            for (child in children) {
+                val collection = child.value
+                if (collection !is Collection) {
+                    continue
+                }
+                val content = (child as OtterTree<CollectionOrContent>).children.map { it.value }.map { it as Content }
+                bigMap[collection] = content.toMutableList()
+            }
+        }
+        return bigMap
+    }
+
+    private fun getMetadataForContainer(rc: ResourceContainer): ResourceMetadata? {
+        val language = languageDao.fetchBySlug(rc.manifest.dublinCore.language.identifier) ?: run {
+            return null
+        }
+        val metadata = resourceMetadataDao.fetchAll().filter { entity ->
+            entity.derivedFromFk == null && entity.identifier == rc.manifest.dublinCore.identifier && entity.languageFk == language.id
+        }.firstOrNull() ?: run { return null }
+
+        return ResourceMetadataMapper().mapFromEntity(metadata, LanguageMapper().mapFromEntity(language))
     }
 
     /**
@@ -177,10 +274,12 @@ class ResourceContainerRepository @Inject constructor(
                         result = DeleteResult.NOT_FOUND
                         return@transaction
                     }
+
                     derivedRcExists -> {
                         result = DeleteResult.DEPENDENCY_EXISTS
                         return@transaction
                     }
+
                     else -> metadataEntity!!
                 }
 
@@ -196,11 +295,11 @@ class ResourceContainerRepository @Inject constructor(
 
             result
         }
-        .doOnError { e ->
-            logger.error("Error in removeResourceContainer.", e)
-        }
-        .doFinally { resourceContainer.close() }
-        .subscribeOn(Schedulers.io())
+            .doOnError { e ->
+                logger.error("Error in removeResourceContainer.", e)
+            }
+            .doFinally { resourceContainer.close() }
+            .subscribeOn(Schedulers.io())
     }
 
     private fun findRootCollectionsForRc(dublinCoreId: Int): List<Collection> {
