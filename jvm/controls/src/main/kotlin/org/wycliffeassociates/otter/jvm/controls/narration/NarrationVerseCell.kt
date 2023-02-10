@@ -5,7 +5,7 @@ import javafx.scene.control.ListCell
 import org.wycliffeassociates.otter.common.data.primitives.Verse
 import tornadofx.addClass
 
-class NarrationVerseListCell : ListCell<Verse>() {
+class NarrationVerseCell : ListCell<Verse>() {
     private val view = NarrationVerseItem()
 
     init {

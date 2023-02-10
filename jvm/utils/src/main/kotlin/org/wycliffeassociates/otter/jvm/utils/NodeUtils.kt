@@ -34,14 +34,16 @@ import javafx.scene.input.MouseEvent
 import javafx.util.Duration
 import kotlin.reflect.KClass
 
-inline fun <reified T: Node> Node.findChild(): Node? = findChildren<T>().firstOrNull()
-inline fun <reified T: Node> Node.findChildren(): List<Node> = findChildren(T::class)
-fun <T: Node> Node.findChildren(type: KClass<T>): List<Node> {
+inline fun <reified T: Node> Node.findChild(includeInvisible: Boolean = false): Node? =
+    findChildren<T>(includeInvisible).firstOrNull()
+inline fun <reified T: Node> Node.findChildren(includeInvisible: Boolean = false): List<T> =
+    findChildren(T::class, includeInvisible)
+fun <T: Node> Node.findChildren(type: KClass<T>, includeInvisible: Boolean = false): List<T> {
     if (this !is Parent) return listOf()
 
-    val list = this.childrenUnmodifiable
-        .filter { type.isInstance(it) }
-        .filter { it.isVisible }
+    val list: MutableList<T> = this.childrenUnmodifiable
+        .filterIsInstance(type.java)
+        .filter { it.isVisible || includeInvisible }
         .toMutableList()
 
     for (node: Node in this.childrenUnmodifiable) {

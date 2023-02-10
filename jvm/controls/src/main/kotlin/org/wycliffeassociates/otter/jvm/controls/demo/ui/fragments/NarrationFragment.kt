@@ -28,9 +28,7 @@ class NarrationFragment : Fragment() {
     )
 
     override val root = stackpane {
-        add(Narration(verses).apply {
-
-        })
+        add(Narration(verses))
     }
 
     init {

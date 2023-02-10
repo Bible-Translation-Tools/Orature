@@ -22,6 +22,10 @@
     -fx-pref-width: 0;
 }
 
+.narration__list {
+    -fx-padding: 10px 0 0 0;
+}
+
 .narration-list__verse-item {
     -fx-max-width: 800px;
     -fx-background-color: -wa-foreground;
@@ -61,4 +65,26 @@
 .narration-list__separator .line {
     -fx-border-color: -wa-border-light;
     -fx-pref-height: 1px;
+}
+
+.narration__verses {
+    -fx-alignment: top-left;
+}
+
+.narration__selected-verse {
+    -fx-background-color: -wa-foreground;
+    -fx-alignment: center;
+    -fx-max-height: 80px;
+    -fx-effect: -wa-level2;
+}
+
+.narration__selected-verse-controls {
+    -fx-max-width: 800px;
+    -fx-alignment: center;
+}
+
+.narration__selected-verse-controls .label {
+    -fx-text-fill: -wa-regular-text;
+    -fx-font-size: 20px;
+    -fx-font-weight: 600;
 }
