@@ -31,7 +31,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.ArtworkAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectImporter
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.OngoingProjectImporter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
@@ -46,7 +46,7 @@ class AddFilesViewModel : ViewModel() {
 
     @Inject lateinit var directoryProvider: IDirectoryProvider
     @Inject lateinit var importRcProvider: Provider<ImportResourceContainer>
-    @Inject lateinit var importProvider: Provider<ProjectImporter>
+    @Inject lateinit var importProvider: Provider<OngoingProjectImporter>
 
     val showImportDialogProperty = SimpleBooleanProperty(false)
     val showImportSuccessDialogProperty = SimpleBooleanProperty(false)
@@ -105,7 +105,7 @@ class AddFilesViewModel : ViewModel() {
                         showImportSuccessDialogProperty.value = true
                         find<HomePageViewModel>().loadTranslations()
                     }
-                    ImportResult.DEPENDENCY_ERROR -> {
+                    ImportResult.FAILED -> {
                         importErrorMessage.set(messages["importErrorDependencyExists"])
                         showImportErrorDialogProperty.value = true
                     }

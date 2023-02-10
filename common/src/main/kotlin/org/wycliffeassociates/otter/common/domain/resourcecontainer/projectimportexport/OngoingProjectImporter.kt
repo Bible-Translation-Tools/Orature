@@ -66,7 +66,7 @@ import java.time.LocalDateTime
 import java.util.regex.Pattern
 import javax.inject.Inject
 
-class ProjectImporter @Inject constructor(
+class OngoingProjectImporter @Inject constructor(
     private val resourceContainerImporter: ImportResourceContainer,
     private val directoryProvider: IDirectoryProvider,
     private val resourceMetadataRepository: IResourceMetadataRepository,

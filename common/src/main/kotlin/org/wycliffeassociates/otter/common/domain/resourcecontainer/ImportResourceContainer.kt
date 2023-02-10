@@ -30,7 +30,7 @@ import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IProjectReader
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.MediaMerge
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectImporter
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.OngoingProjectImporter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
@@ -52,7 +52,7 @@ class ImportResourceContainer @Inject constructor(
 ) {
     private val logger = LoggerFactory.getLogger(ImportResourceContainer::class.java)
 
-    @Inject lateinit var importProvider: Provider<ProjectImporter>
+    @Inject lateinit var importProvider: Provider<OngoingProjectImporter>
     @Inject lateinit var deleteProvider: Provider<DeleteResourceContainer>
 
     fun import(file: File): Single<ImportResult> {
@@ -99,8 +99,8 @@ class ImportResourceContainer @Inject constructor(
                 importContainer(rcFile)
             }
             else -> {
-                logger.error("Could not import RC $rcFile - ${ImportResult.DEPENDENCY_ERROR}")
-                Single.just(ImportResult.DEPENDENCY_ERROR)
+                logger.error("Could not import RC $rcFile - ${ImportResult.FAILED}")
+                Single.just(ImportResult.FAILED)
             }
         }
     }
