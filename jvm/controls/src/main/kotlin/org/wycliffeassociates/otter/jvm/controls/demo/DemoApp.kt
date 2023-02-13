@@ -16,26 +16,21 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
+package org.wycliffeassociates.otter.jvm.controls.demo
 
-import javafx.scene.control.ListCell
-import org.kordamp.ikonli.javafx.FontIcon
-import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.common.data.primitives.Language
+import javafx.stage.Stage
+import org.wycliffeassociates.otter.jvm.controls.demo.ui.screens.DemoView
+import org.wycliffeassociates.otter.jvm.controls.demo.ui.screens.RootView
+import tornadofx.App
+import tornadofx.UIComponent
 
-class LanguageComboboxCell : ListCell<Language>() {
-    val view = ComboboxButton()
-    override fun updateItem(item: Language?, empty: Boolean) {
-        super.updateItem(item, empty)
+class DemoApp : App(RootView::class) {
+    override fun start(stage: Stage) {
+        super.start(stage)
+        stage.isMaximized = true
+    }
 
-        if (item == null || empty) {
-            graphic = null
-            return
-        }
-
-        graphic = view.apply {
-            textProperty.set(item.name)
-            iconProperty.set(FontIcon(MaterialDesign.MDI_WEB))
-        }
+    override fun onBeforeShow(view: UIComponent) {
+        workspace.dock<DemoView>()
     }
 }
