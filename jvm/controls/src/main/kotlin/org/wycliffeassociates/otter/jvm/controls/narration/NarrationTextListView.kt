@@ -66,24 +66,28 @@ class NarrationListView(items: ObservableList<Chunk>? = null) : ListView<Chunk>(
 
         skinProperty().onChange {
             it?.let {
-                val scrollBar = virtualFlow().findChildren<ScrollBar>(true).singleOrNull { node ->
-                    node.orientation == Orientation.VERTICAL
-                }
-                scrollBar?.valueProperty()?.onChange {
-                    val current = selectionModel.selectedIndex
-                    val first = virtualFlow().firstVisibleCell.index
-                    val last = virtualFlow().lastVisibleCell.index
-
-                    if (current !in (first..last)) {
-                        selectedVerseLabelProperty.set(selectedItem?.label)
-                        onSelectedVerseActionProperty.set(EventHandler {
-                            selectionModel.select(current)
-                            scrollTo(current)
-                        })
-                    } else {
-                        selectedVerseLabelProperty.set(null)
-                        onSelectedVerseActionProperty.set(null)
+                try {
+                    val scrollBar = virtualFlow().findChildren<ScrollBar>(true).singleOrNull { node ->
+                        node.orientation == Orientation.VERTICAL
                     }
+                    scrollBar?.valueProperty()?.onChange {
+                        val current = selectionModel.selectedIndex
+                        val first = virtualFlow().firstVisibleCell.index
+                        val last = virtualFlow().lastVisibleCell.index
+
+                        if (current !in (first..last)) {
+                            selectedVerseLabelProperty.set(selectedItem?.label)
+                            onSelectedVerseActionProperty.set(EventHandler {
+                                selectionModel.select(current)
+                                scrollTo(current)
+                            })
+                        } else {
+                            selectedVerseLabelProperty.set(null)
+                            onSelectedVerseActionProperty.set(null)
+                        }
+                    }
+                } catch (e: NullPointerException) {
+                    e.printStackTrace()
                 }
             }
         }
