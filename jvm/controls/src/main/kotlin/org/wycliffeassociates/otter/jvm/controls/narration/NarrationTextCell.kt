@@ -19,21 +19,25 @@
 package org.wycliffeassociates.otter.jvm.controls.narration
 
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.scene.control.ListCell
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import tornadofx.addClass
 
-class NarrationRecordCell : ListCell<Chunk>() {
-    private val view = NarrationRecordItem()
+class NarrationTextCell : ListCell<Chunk>() {
+    private val view = NarrationTextItem()
 
-    private val onPlayActionCellProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
-    private val onOpenAppActionCellProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
-    private val onRecordAgainActionCellProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val beginRecordingTextCellProperty = SimpleStringProperty()
+    val pauseRecordingTextCellProperty = SimpleStringProperty()
+    val resumeRecordingTextCellProperty = SimpleStringProperty()
+    val nextChunkTextCellProperty = SimpleStringProperty()
+
+    private val onRecordActionCellProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
-        addClass("narration-record__verse-cell")
+        addClass("narration-list__verse-cell")
     }
 
     override fun updateItem(item: Chunk?, empty: Boolean) {
@@ -44,29 +48,29 @@ class NarrationRecordCell : ListCell<Chunk>() {
             return
         }
 
+        view.isActiveProperty.set(isSelected)
+        view.isLastVerseProperty.set(index == listView.items.lastIndex)
+
         graphic = view.apply {
             verseLabelProperty.set(item.title)
+            verseTextProperty.set(item.textItem.text)
 
-            onPlayActionProperty.set(onPlayActionCellProperty.value)
-            onOpenAppActionProperty.set(onOpenAppActionCellProperty.value)
-            onRecordAgainActionProperty.set(onRecordAgainActionCellProperty.value)
+            beginRecordingTextProperty.set(beginRecordingTextCellProperty.value)
+            pauseRecordingTextProperty.set(pauseRecordingTextCellProperty.value)
+            resumeRecordingTextProperty.set(resumeRecordingTextCellProperty.value)
+            nextChunkTextProperty.set(nextChunkTextCellProperty.value)
+
+            onRecordActionProperty.set(onRecordActionCellProperty.value)
+
+            setOnNextVerse {
+                listView.selectionModel.selectNext()
+                listView.scrollTo(item)
+            }
         }
     }
 
-    fun setOnPlay(op: () -> Unit) {
-        onPlayActionCellProperty.set(EventHandler {
-            op.invoke()
-        })
-    }
-
-    fun setOnOpenApp(op: () -> Unit) {
-        onOpenAppActionCellProperty.set(EventHandler {
-            op.invoke()
-        })
-    }
-
-    fun setOnRecordAgain(op: () -> Unit) {
-        onRecordAgainActionCellProperty.set(EventHandler {
+    fun setOnRecord(op: () -> Unit) {
+        onRecordActionCellProperty.set(EventHandler {
             op.invoke()
         })
     }

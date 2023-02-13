@@ -1,34 +1,233 @@
+/**
+ * Copyright (C) 2020-2022 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.controls.demo.ui.fragments
 
+import com.jakewharton.rxrelay2.ReplayRelay
+import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
-import org.wycliffeassociates.otter.common.data.primitives.Verse
-import org.wycliffeassociates.otter.jvm.controls.narration.Narration
+import javafx.event.ActionEvent
+import javafx.event.EventHandler
+import javafx.geometry.Pos
+import javafx.scene.layout.Priority
+import org.wycliffeassociates.otter.common.data.primitives.ContentType
+import org.wycliffeassociates.otter.common.data.primitives.MimeType
+import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
+import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.common.data.workbook.TextItem
+import org.wycliffeassociates.otter.jvm.controls.narration.floatingnarrationcard
+import org.wycliffeassociates.otter.jvm.controls.narration.narrationrecordlistview
+import org.wycliffeassociates.otter.jvm.controls.narration.narrationtextlistview
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.*
 
 class NarrationFragment : Fragment() {
-    private val verses = FXCollections.observableArrayList(
-        Verse("1", "Then Jonah prayed to Yahweh his God from the fish's stomach."),
-        Verse("2", "He said, I called out to Yahweh about my distress and he answered me; " +
-                "from the belly of Sheol I cried out for help! You heard my voice."),
-        Verse("3", "You had thrown me into the depths, into the heart of the seas, " +
-                "and the currents surrounded me; all your waves and billows passed over me."),
-        Verse("4", "I said, 'I am driven out from before your eyes; yet I will again " +
-                "look toward your holy temple.'"),
-        Verse("5", "The waters closed around me up to my neck; the deep was all around me; " +
-                "seaweed wrapped around my head."),
-        Verse("6", "I went down to the bases of the mountains; the earth with its bars " +
-                "closed upon me forever. Yet you brought up my life from the pit, Yahweh, my God!"),
-        Verse("7", "When my soul fainted within me, I called Yahweh to mind; then my " +
-                "prayer came to you to your holy temple."),
-        Verse("8", "They give attention to meaningless gods while they abandon covenant faithfulness."),
-        Verse("9", "But as for me, I will sacrifice to you with a voice of thanksgiving; " +
-                "I will fulfill that which I have vowed. Salvation comes from Yahweh!"),
-        Verse("10", "Then Yahweh spoke to the fish, and it vomited up Jonah upon the dry land."),
+    private val currentVerseLabelProperty = SimpleStringProperty()
+    private val onCurrentVerseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+
+    private val chunks = FXCollections.observableArrayList(
+        Chunk(
+            1,
+            "1",
+            AssociatedAudio(ReplayRelay.create()),
+            listOf(),
+            TextItem("Then Jonah prayed to Yahweh his God from the fish's stomach.", MimeType.USFM),
+            1,
+            1,
+            ContentType.TEXT
+        ),
+        Chunk(
+            2,
+            "2",
+            AssociatedAudio(ReplayRelay.create()),
+            listOf(),
+            TextItem("He said, I called out to Yahweh about my distress and he answered me;", MimeType.USFM),
+            2,
+            2,
+            ContentType.TEXT
+        ),Chunk(
+            3,
+            "3",
+            AssociatedAudio(ReplayRelay.create()),
+            listOf(),
+            TextItem("You had thrown me into the depths, into the heart of the seas, and the currents " +
+                    "surrounded me; all your waves and billows passed over me.", MimeType.USFM),
+            3,
+            3,
+            ContentType.TEXT
+        ),
+        Chunk(
+            4,
+            "4",
+            AssociatedAudio(ReplayRelay.create()),
+            listOf(),
+            TextItem("I said, 'I am driven out from before your eyes; yet I will again " +
+                    "look toward your holy temple.'", MimeType.USFM),
+            4,
+            4,
+            ContentType.TEXT
+        ),
+        Chunk(
+            5,
+            "5",
+            AssociatedAudio(ReplayRelay.create()),
+            listOf(),
+            TextItem("The waters closed around me up to my neck; the deep was all around me; " +
+                    "seaweed wrapped around my head.", MimeType.USFM),
+            5,
+            5,
+            ContentType.TEXT
+        ),
+        Chunk(
+            6,
+            "6",
+            AssociatedAudio(ReplayRelay.create()),
+            listOf(),
+            TextItem("I went down to the bases of the mountains; the earth with its bars closed " +
+                    "upon me forever. Yet you brought up my life from the pit, Yahweh, my God!", MimeType.USFM),
+            6,
+            6,
+            ContentType.TEXT
+        ),
+        Chunk(
+            7,
+            "7",
+            AssociatedAudio(ReplayRelay.create()),
+            listOf(),
+            TextItem("When my soul fainted within me, I called Yahweh to mind; then my prayer came to " +
+                    "you to your holy temple.", MimeType.USFM),
+            7,
+            7,
+            ContentType.TEXT
+        ),
+        Chunk(
+            8,
+            "8",
+            AssociatedAudio(ReplayRelay.create()),
+            listOf(),
+            TextItem("They give attention to meaningless gods while they abandon covenant " +
+                    "faithfulness.", MimeType.USFM),
+            8,
+            8,
+            ContentType.TEXT
+        ),
+        Chunk(
+            9,
+            "9",
+            AssociatedAudio(ReplayRelay.create()),
+            listOf(),
+            TextItem("But as for me, I will sacrifice to you with a voice of thanksgiving; I will fulfill " +
+                    "that which I have vowed. Salvation comes from Yahweh!\"", MimeType.USFM),
+            9,
+            9,
+            ContentType.TEXT
+        ),
+        Chunk(
+            10,
+            "10",
+            AssociatedAudio(ReplayRelay.create()),
+            listOf(),
+            TextItem("Then Yahweh spoke to the fish, and it vomited up Jonah upon the dry land.", MimeType.USFM),
+            10,
+            10,
+            ContentType.TEXT
+        )
     )
 
     override val root = stackpane {
-        add(Narration(verses))
+        vbox {
+            stackpane {
+                addClass("narration__recording")
+                alignment = Pos.CENTER
+
+                hbox {
+                    narrationrecordlistview(chunks) {
+                        hgrow = Priority.ALWAYS
+
+                        setOnPlay {
+                            println("Playing verse ${it.label}")
+                        }
+
+                        setOnOpenApp {
+                            println("Opening verse ${it.label} in external app...")
+                        }
+
+                        setOnRecordAgain {
+                            println("Recording verse ${it.label} again")
+                        }
+                    }
+
+                    stackpane {
+                        addClass("narration__volume-bar")
+
+                        vbox {
+                            addClass("narration__volume-bar__value")
+
+                            maxHeight = 50.0
+                        }
+                    }
+                }
+
+                vbox {
+                    addClass("narration__recording-tip")
+                    alignment = Pos.CENTER_LEFT
+
+                    label("Tip") {
+                        addClass("narration__recording-tip-title")
+                        style = "-fx-font-weight: bold;"
+                    }
+                    label("Press the down key on your keyboard to navigate to the next verse.")
+
+                    isVisible = false
+                }
+            }
+            stackpane {
+                addClass("narration__verses")
+
+                narrationtextlistview(chunks) {
+                    addClass("narration__list")
+
+                    currentVerseLabelProperty.bind(selectedVerseLabelProperty)
+                    onCurrentVerseActionProperty.bind(onSelectedVerseActionProperty)
+
+                    // Maybe instead of having 3 properties for recording status
+                    // it's better to have only one property and change text according to the state
+                    // in a view model???
+                    beginRecordingTextProperty.set("Begin Recording")
+                    pauseRecordingTextProperty.set("Pause Recording")
+                    resumeRecordingTextProperty.set("Resume Recording")
+                    nextChunkTextProperty.set("Next Verse")
+
+                    setOnRecord {
+                        println("Recording verse ${it.label}")
+                    }
+                }
+
+                floatingnarrationcard {
+                    floatingLabelProperty.bind(currentVerseLabelProperty)
+                    onFloatingChunkActionProperty.bind(onCurrentVerseActionProperty)
+
+                    currentChunkTextProperty.set("Current: Verse {0}")
+                    resumeTextProperty.set("Resume")
+                }
+            }
+        }
     }
 
     init {

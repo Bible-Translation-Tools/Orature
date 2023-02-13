@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020-2022 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.controls.narration
 
 import javafx.beans.property.SimpleObjectProperty
@@ -10,14 +28,19 @@ import javafx.event.EventTarget
 import javafx.geometry.Orientation
 import javafx.scene.control.ListView
 import javafx.scene.control.ScrollBar
-import org.wycliffeassociates.otter.common.data.primitives.Verse
+import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.jvm.utils.findChildren
 import org.wycliffeassociates.otter.jvm.utils.virtualFlow
 import tornadofx.*
 
-class NarrationListView(items: ObservableList<Verse>? = null) : ListView<Verse>(items) {
+class NarrationListView(items: ObservableList<Chunk>? = null) : ListView<Chunk>(items) {
     val selectedVerseLabelProperty = SimpleStringProperty()
     val onSelectedVerseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+
+    val beginRecordingTextProperty = SimpleStringProperty()
+    val pauseRecordingTextProperty = SimpleStringProperty()
+    val resumeRecordingTextProperty = SimpleStringProperty()
+    val nextChunkTextProperty = SimpleStringProperty()
 
     private val onRecordActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
@@ -25,7 +48,12 @@ class NarrationListView(items: ObservableList<Verse>? = null) : ListView<Verse>(
         addClass("wa-list-view")
 
         setCellFactory {
-            NarrationVerseCell().apply {
+            NarrationTextCell().apply {
+                beginRecordingTextCellProperty.bind(beginRecordingTextProperty)
+                pauseRecordingTextCellProperty.bind(pauseRecordingTextProperty)
+                resumeRecordingTextCellProperty.bind(resumeRecordingTextProperty)
+                nextChunkTextCellProperty.bind(nextChunkTextProperty)
+
                 setOnRecord {
                     onRecordActionProperty.value?.handle(ActionEvent(item, null))
                 }
@@ -61,23 +89,26 @@ class NarrationListView(items: ObservableList<Verse>? = null) : ListView<Verse>(
         }
     }
 
-    fun setOnRecord(op: (verse: Verse) -> Unit) {
+    fun setOnRecord(op: (verse: Chunk) -> Unit) {
         onRecordActionProperty.set(EventHandler {
-            op.invoke(it.source as Verse)
+            op.invoke(it.source as Chunk)
         })
     }
 }
 
-fun EventTarget.narrationlistview(values: ObservableList<Verse>?, op: NarrationListView.() -> Unit = {}) =
+fun EventTarget.narrationtextlistview(values: ObservableList<Chunk>?, op: NarrationListView.() -> Unit = {}) =
     NarrationListView().attachTo(this, op) {
-        if (values is SortedFilteredList<Verse>) values.bindTo(it)
+        if (values is SortedFilteredList<Chunk>) values.bindTo(it)
         else it.items = values
 }
 
-fun EventTarget.narrationlistview(values: ObservableValue<ObservableList<Verse>>?, op: NarrationListView.() -> Unit = {}) =
+fun EventTarget.narrationtextlistview(
+    values: ObservableValue<ObservableList<Chunk>>?,
+    op: NarrationListView.() -> Unit = {}
+) =
     NarrationListView().attachTo(this, op) {
     fun rebinder() {
-        (it.items as? SortedFilteredList<Verse>)?.bindTo(it)
+        (it.items as? SortedFilteredList<Chunk>)?.bindTo(it)
     }
     it.itemsProperty().bind(values)
     rebinder()

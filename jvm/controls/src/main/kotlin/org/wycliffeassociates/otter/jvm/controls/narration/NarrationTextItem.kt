@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020-2022 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.controls.narration
 
 import javafx.beans.property.SimpleBooleanProperty
@@ -11,11 +29,16 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import tornadofx.*
 
-class NarrationVerseItem : VBox() {
+class NarrationTextItem : VBox() {
     val verseLabelProperty = SimpleStringProperty()
     val verseTextProperty = SimpleStringProperty()
     val isActiveProperty = SimpleBooleanProperty()
     val isLastVerseProperty = SimpleBooleanProperty()
+
+    val beginRecordingTextProperty = SimpleStringProperty()
+    val pauseRecordingTextProperty = SimpleStringProperty()
+    val resumeRecordingTextProperty = SimpleStringProperty()
+    val nextChunkTextProperty = SimpleStringProperty()
 
     val onRecordActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onNextVerseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
@@ -33,7 +56,7 @@ class NarrationVerseItem : VBox() {
                 addClass("narration-list__verse-item-text")
                 isWrapText = true
 
-                prefWidthProperty().bind(this@NarrationVerseItem.maxWidthProperty().subtract(50))
+                prefWidthProperty().bind(this@NarrationTextItem.maxWidthProperty().subtract(50))
             }
 
         }
@@ -46,13 +69,13 @@ class NarrationVerseItem : VBox() {
             addClass("narration-list__buttons")
             alignment = Pos.BASELINE_LEFT
 
-            button("Begin Recording") {
+            button(beginRecordingTextProperty) {
                 addClass("btn", "btn--primary")
                 graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
 
                 onActionProperty().bind(onRecordActionProperty)
             }
-            button("Next Verse") {
+            button(nextChunkTextProperty) {
                 addClass("btn", "btn--secondary")
                 graphic = FontIcon(MaterialDesign.MDI_ARROW_DOWN)
 
