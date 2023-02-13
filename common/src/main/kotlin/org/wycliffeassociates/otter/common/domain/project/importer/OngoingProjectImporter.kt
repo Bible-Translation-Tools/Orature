@@ -1,22 +1,4 @@
-/**
- * Copyright (C) 2020-2022 Wycliffe Associates
- *
- * This file is part of Orature.
- *
- * Orature is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Orature is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
- */
-package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
+package org.wycliffeassociates.otter.common.domain.project.importer
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.JsonFactory
@@ -47,6 +29,7 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportExcept
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.RcConstants
 import org.wycliffeassociates.otter.common.io.zip.IFileReader
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
@@ -66,6 +49,7 @@ import java.time.LocalDateTime
 import java.util.regex.Pattern
 import javax.inject.Inject
 
+
 class OngoingProjectImporter @Inject constructor(
     private val resourceContainerImporter: ImportResourceContainer,
     private val directoryProvider: IDirectoryProvider,
@@ -75,7 +59,7 @@ class OngoingProjectImporter @Inject constructor(
     private val takeRepository: ITakeRepository,
     private val languageRepository: ILanguageRepository,
     private val resourceRepository: IResourceRepository
-) {
+) : RCImporter() {
     private val log = LoggerFactory.getLogger(this.javaClass)
 
     private val contentCache = mutableMapOf<ContentSignature, Content>()
@@ -87,6 +71,18 @@ class OngoingProjectImporter @Inject constructor(
         val take = """_t(\d+)"""
         val extensionDelim = """\."""
         Pattern.compile(chapter + verse + sort + type + take + extensionDelim)
+    }
+
+    override fun import(
+        file: File,
+        options: ImportOptions,
+        callback: ProjectImporterCallback
+    ): Single<ImportResult> {
+        return if (isResumableProject(file)) {
+            importResumableProject(file)
+        } else {
+            passToNextImporter(file, options, callback)
+        }
     }
 
     fun isResumableProject(resourceContainer: File): Boolean {

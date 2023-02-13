@@ -7,7 +7,13 @@ import java.io.File
 abstract class RCImporter : IProjectImporter {
     private var next: RCImporter? = null
 
-    override fun import(
+    abstract override fun import(
+        file: File,
+        options: ImportOptions,
+        callback: ProjectImporterCallback
+    ): Single<ImportResult>
+
+    protected fun passToNextImporter(
         file: File,
         options: ImportOptions,
         callback: ProjectImporterCallback
@@ -19,4 +25,6 @@ abstract class RCImporter : IProjectImporter {
     fun setNext(next: RCImporter) {
         this.next = next
     }
+
+    fun getNext() = next
 }
