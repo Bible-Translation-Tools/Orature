@@ -20,13 +20,22 @@ package org.wycliffeassociates.otter.jvm.controls.demo.ui.viewmodels
 
 import com.jthemedetecor.OsThemeDetector
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
+import javafx.event.ActionEvent
+import javafx.event.EventHandler
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import tornadofx.*
 
 class DemoViewModel : ViewModel() {
     val supportedThemes = observableListOf<ColorTheme>()
     val selectedThemeProperty = SimpleObjectProperty<ColorTheme>()
+
+    val currentVerseLabelProperty = SimpleStringProperty()
+    val onCurrentVerseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+
+    val currentChapterProperty = SimpleIntegerProperty(2)
 
     val appColorMode = SimpleObjectProperty<ColorTheme>()
     private val osThemeDetector = OsThemeDetector.getDetector()

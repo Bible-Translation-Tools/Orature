@@ -16,6 +16,38 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
+.narration__header {
+    -fx-alignment: center;
+    -fx-pref-height: 80px;
+}
+
+.narration__header .btn {
+    -fx-pref-width: 56px;
+    -fx-pref-height: 48px;
+    -fx-background-color: -wa-foreground;
+    -fx-background-radius: 16px;
+}
+
+.narration__header .btn .ikonli-font-icon {
+    -fx-fill: -wa-regular-text;
+}
+
+.narration__header .chapter-selector {
+    -fx-pref-height: 48px;
+    -fx-max-height: 48px;
+}
+
+.narration__header-title {
+    -fx-text-fill: -wa-regular-text;
+    -fx-font-size: 24px;
+    -fx-font-weight: 500;
+}
+
+.narration__header-controls {
+    -fx-alignment: center;
+    -fx-spacing: 10px;
+}
+
 .narration__recording {
     -fx-pref-height: 200px;
     -fx-alignment: top-left;

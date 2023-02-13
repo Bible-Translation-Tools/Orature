@@ -19,27 +19,27 @@
 package org.wycliffeassociates.otter.jvm.controls.demo.ui.fragments
 
 import com.jakewharton.rxrelay2.ReplayRelay
-import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
-import javafx.event.ActionEvent
-import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
+import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.TextItem
+import org.wycliffeassociates.otter.jvm.controls.chapterselector.ChapterSelector
+import org.wycliffeassociates.otter.jvm.controls.demo.ui.viewmodels.DemoViewModel
 import org.wycliffeassociates.otter.jvm.controls.narration.floatingnarrationcard
 import org.wycliffeassociates.otter.jvm.controls.narration.narrationrecordlistview
 import org.wycliffeassociates.otter.jvm.controls.narration.narrationtextlistview
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.*
+import java.text.MessageFormat
 
 class NarrationFragment : Fragment() {
-    private val currentVerseLabelProperty = SimpleStringProperty()
-    private val onCurrentVerseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    private val viewModel: DemoViewModel by inject()
 
     private val chunks = FXCollections.observableArrayList(
         Chunk(
@@ -152,6 +152,46 @@ class NarrationFragment : Fragment() {
 
     override val root = stackpane {
         vbox {
+            hbox {
+                addClass("narration__header")
+
+                label("Jonah") {
+                    addClass("narration__header-title")
+                }
+                region {
+                    hgrow = Priority.ALWAYS
+                }
+                hbox {
+                    addClass("narration__header-controls")
+
+                    button {
+                        addClass("btn", "btn--primary", "btn--borderless")
+                        graphic = FontIcon(MaterialDesign.MDI_UNDO)
+
+                        action {
+                            println("Chapter has been reset")
+                        }
+                    }
+                    add(
+                        ChapterSelector().apply {
+                            chapterTitleProperty.bind(viewModel.currentChapterProperty.stringBinding {
+                                it?.let {
+                                    MessageFormat.format("Chapter {0}", it)
+                                } ?: ""
+                            })
+
+                            prevDisabledProperty.set(true)
+
+                            setOnPreviousChapter {
+                                println("Previous chapter selected")
+                            }
+                            setOnNextChapter {
+                                println("Next chapter selected")
+                            }
+                        }
+                    )
+                }
+            }
             stackpane {
                 addClass("narration__recording")
                 alignment = Pos.CENTER
@@ -203,8 +243,8 @@ class NarrationFragment : Fragment() {
                 narrationtextlistview(chunks) {
                     addClass("narration__list")
 
-                    currentVerseLabelProperty.bind(selectedVerseLabelProperty)
-                    onCurrentVerseActionProperty.bind(onSelectedVerseActionProperty)
+                    viewModel.currentVerseLabelProperty.bind(selectedVerseLabelProperty)
+                    viewModel.onCurrentVerseActionProperty.bind(onSelectedVerseActionProperty)
 
                     // Maybe instead of having 3 properties for recording status
                     // it's better to have only one property and change text according to the state
@@ -220,8 +260,8 @@ class NarrationFragment : Fragment() {
                 }
 
                 floatingnarrationcard {
-                    floatingLabelProperty.bind(currentVerseLabelProperty)
-                    onFloatingChunkActionProperty.bind(onCurrentVerseActionProperty)
+                    floatingLabelProperty.bind(viewModel.currentVerseLabelProperty)
+                    onFloatingChunkActionProperty.bind(viewModel.onCurrentVerseActionProperty)
 
                     currentChunkTextProperty.set("Current: Verse {0}")
                     resumeTextProperty.set("Resume")
@@ -232,5 +272,6 @@ class NarrationFragment : Fragment() {
 
     init {
         tryImportStylesheet(resources["/css/narration.css"])
+        tryImportStylesheet(resources["/css/chapter-selector.css"])
     }
 }
