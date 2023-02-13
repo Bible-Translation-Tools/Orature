@@ -28,5 +28,6 @@ data class ContentEntity(
     var text: String?,
     var format: String?,
     var type_fk: Int,
-    var draftNumber: Int
+    var draftNumber: Int,
+    var bridged: Boolean = false
 )

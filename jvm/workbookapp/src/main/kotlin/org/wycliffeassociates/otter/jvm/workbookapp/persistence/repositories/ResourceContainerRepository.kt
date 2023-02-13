@@ -29,13 +29,8 @@ import org.jooq.impl.DSL
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.collections.OtterTree
 import org.wycliffeassociates.otter.common.collections.OtterTreeNode
+import org.wycliffeassociates.otter.common.data.primitives.*
 import org.wycliffeassociates.otter.common.data.primitives.Collection
-import org.wycliffeassociates.otter.common.data.primitives.CollectionOrContent
-import org.wycliffeassociates.otter.common.data.primitives.ContainerType
-import org.wycliffeassociates.otter.common.data.primitives.Content
-import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
-import org.wycliffeassociates.otter.common.data.primitives.helpContentTypes
-import org.wycliffeassociates.otter.common.data.primitives.primaryContentTypes
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.DeleteResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
@@ -124,6 +119,7 @@ class ResourceContainerRepository @Inject constructor(
         projects.map { getProjectAsOtterTree(it, rcMetadata).toChapterContentMap() }.forEach { databaseMap.putAll(it) }
         val parsedTextMap = rcTree.toChapterContentMap()
         updateTextContent(databaseMap, parsedTextMap)
+        updateBridges(databaseMap, parsedTextMap)
         return Single.just(ImportResult.SUCCESS)
     }
 
@@ -138,6 +134,32 @@ class ResourceContainerRepository @Inject constructor(
                 match?.let {
                     match.text = content.text ?: ""
                     contentRepository.update(match).blockingGet()
+                }
+            }
+        }
+    }
+
+    fun updateBridges(databaseMap: Map<Collection, List<Content>>, parsedTextMap: Map<Collection, List<Content>>) {
+        parsedTextMap.keys.forEach {  collection ->
+            val textMapContent = parsedTextMap[collection]
+            val matchingCollection = databaseMap.keys.find { it.slug == collection.slug } ?: return@forEach
+            val databaseContent = databaseMap[matchingCollection]!!
+
+            textMapContent!!.forEach { content ->
+                val match = databaseContent.find { it.start == content.start && it.type == content.type}
+                match?.let {
+                    if (match.end != content.end && match.type != ContentType.META) {
+                        match.end = content.end
+                        logger.error("Bridging ${collection.slug}:${match.start}-${match.end}")
+                        contentRepository.update(match).blockingGet()
+                        for (i in (match.start+1)..match.end) {
+                            val found = databaseContent.find { it.start == i && it.type != ContentType.META }
+                            if (found != null && found is Content) {
+                                found.bridged = true
+                                contentRepository.update(found).blockingGet()
+                            }
+                        }
+                    }
                 }
             }
         }

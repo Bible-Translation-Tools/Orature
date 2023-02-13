@@ -59,7 +59,8 @@ CREATE TABLE IF NOT EXISTS content_entity (
     sort             INTEGER NOT NULL,
     text             TEXT,
     format           TEXT,
-    draft_number     INTEGER DEFAULT 1 NOT NULL
+    draft_number     INTEGER DEFAULT 1 NOT NULL,
+    bridged          INTEGER DEFAULT 0 NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_content_entity_collection_start ON content_entity (collection_fk, start, type_fk);
 
@@ -149,3 +150,9 @@ CREATE TABLE IF NOT EXISTS translation_entity (
     target_rate      DOUBLE DEFAULT 1.0,
     UNIQUE (source_fk, target_fk)
 );
+
+CREATE TABLE IF NOT EXISTS versification_entity (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    slug            TEXT NOT NULL UNIQUE,
+    path            TEXT NOT NULL
+)

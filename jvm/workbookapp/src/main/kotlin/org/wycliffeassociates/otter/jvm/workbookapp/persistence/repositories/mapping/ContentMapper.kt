@@ -35,7 +35,8 @@ class ContentMapper(private val contentTypeDao: ContentTypeDao) {
             format = entity.format,
             type = contentTypeDao.fetchForId(entity.type_fk)!!,
             draftNumber = entity.draftNumber,
-            id = entity.id
+            id = entity.id,
+            bridged = entity.bridged
         )
     }
 
@@ -50,7 +51,8 @@ class ContentMapper(private val contentTypeDao: ContentTypeDao) {
             text = obj.text,
             format = obj.format,
             type_fk = contentTypeDao.fetchId(obj.type),
-            draftNumber = obj.draftNumber
+            draftNumber = obj.draftNumber,
+            bridged = obj.bridged
         )
     }
 }

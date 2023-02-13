@@ -31,5 +31,6 @@ data class Content(
     var type: ContentType,
     var draftNumber: Int,
     @JsonIgnore
-    var id: Int = 0
+    var id: Int = 0,
+    var bridged: Boolean = false
 ) : CollectionOrContent
