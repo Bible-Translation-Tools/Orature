@@ -38,7 +38,8 @@ class Chunk(
 
 ) : BookElement, ResourceRecordable {
     override val title
-        get() = start.toString()
+        get() = if (start != end) "${start}-${end}" else "$start"
+
 
     override fun hashCode(): Int {
         return Objects.hash(
