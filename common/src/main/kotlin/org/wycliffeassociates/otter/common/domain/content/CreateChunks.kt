@@ -81,7 +81,7 @@ class CreateChunks(
         draftNumber: Int
     ) {
         val chunksToAdd = mutableListOf<Content>()
-        projectFilesAccessor.getChapterContent(projectSlug, chapterNumber).forEachIndexed { idx, content ->
+        projectFilesAccessor.getChapterContent(projectSlug, chapterNumber, false).forEachIndexed { idx, content ->
             content.sort = idx + 1
             content.draftNumber = draftNumber
             chunksToAdd.add(content)
