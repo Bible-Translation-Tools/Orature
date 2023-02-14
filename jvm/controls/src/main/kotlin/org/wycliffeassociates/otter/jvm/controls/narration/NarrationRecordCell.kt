@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.controls.narration
 
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.scene.control.ListCell
@@ -27,6 +28,9 @@ import tornadofx.addClass
 
 class NarrationRecordCell : ListCell<Chunk>() {
     private val view = NarrationRecordItem()
+
+    val openInTextCellProperty = SimpleStringProperty()
+    val recordAgainTextCellProperty = SimpleStringProperty()
 
     private val onPlayActionCellProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     private val onOpenAppActionCellProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
@@ -46,6 +50,9 @@ class NarrationRecordCell : ListCell<Chunk>() {
 
         graphic = view.apply {
             verseLabelProperty.set(item.title)
+
+            openInTextProperty.set(openInTextCellProperty.value)
+            recordAgainTextProperty.set(recordAgainTextCellProperty.value)
 
             onPlayActionProperty.set(onPlayActionCellProperty.value)
             onOpenAppActionProperty.set(onOpenAppActionCellProperty.value)

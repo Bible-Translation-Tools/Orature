@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.controls.narration
 
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.ObservableValue
 import javafx.collections.ObservableList
 import javafx.event.ActionEvent
@@ -37,11 +38,17 @@ class NarrationRecordListView(items: ObservableList<Chunk>? = null) : ListView<C
     private val onOpenAppActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     private val onRecordAgainActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
+    val openInTextProperty = SimpleStringProperty()
+    val recordAgainTextProperty = SimpleStringProperty()
+
     init {
         addClass("wa-list-view")
 
         setCellFactory {
             NarrationRecordCell().apply {
+                openInTextCellProperty.bind(openInTextProperty)
+                recordAgainTextCellProperty.bind(recordAgainTextProperty)
+
                 setOnPlay {
                     onPlayActionProperty.value?.handle(ActionEvent(item, null))
                 }

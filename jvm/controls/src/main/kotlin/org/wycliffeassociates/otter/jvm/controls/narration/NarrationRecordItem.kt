@@ -66,11 +66,13 @@ class NarrationRecordItem : VBox() {
                 addClass("btn", "btn--primary", "btn--borderless", "wa-menu-button")
                 graphic = FontIcon(MaterialDesign.MDI_DOTS_HORIZONTAL)
 
-                item("Open In...") {
+                item("") {
+                    textProperty().bind(openInTextProperty)
                     graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
                     onActionProperty().bind(onOpenAppActionProperty)
                 }
-                item("Record Again") {
+                item("") {
+                    textProperty().bind(recordAgainTextProperty)
                     graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                     onActionProperty().bind(onRecordAgainActionProperty)
                 }

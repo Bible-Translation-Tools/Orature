@@ -210,6 +210,9 @@ class NarrationFragment : Fragment() {
                     narrationrecordlistview(chunks) {
                         hgrow = Priority.ALWAYS
 
+                        openInTextProperty.set("Open In...")
+                        recordAgainTextProperty.set("Record Again")
+
                         setOnPlay {
                             println("Playing verse ${it.label}")
                         }
