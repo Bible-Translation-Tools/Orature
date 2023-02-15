@@ -7,7 +7,23 @@ import java.io.File
 interface IProjectImporter {
     fun import(
         file: File,
-        options: ImportOptions,
-        callback: ProjectImporterCallback
+        callback: ProjectImporterCallback,
+        options: ImportOptions = ImportOptions()
     ): Single<ImportResult>
+
+    fun import(file: File): Single<ImportResult> {
+        val callback = object : ProjectImporterCallback {
+            override fun onRequestUserInput(): Single<ImportOptions> {
+                TODO("Unimplemented")
+            }
+            override fun onRequestUserInput(parameter: ImportCallbackParameter): Single<ImportOptions> {
+                TODO("Unimplemented")
+            }
+            override fun onError() {
+                TODO("Unimplemented")
+            }
+        }
+
+        return import(file, callback)
+    }
 }

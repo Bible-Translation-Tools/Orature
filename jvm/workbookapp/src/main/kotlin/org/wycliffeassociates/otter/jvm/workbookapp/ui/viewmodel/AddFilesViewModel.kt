@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
@@ -28,10 +29,13 @@ import javafx.stage.FileChooser
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
+import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
+import org.wycliffeassociates.otter.common.domain.project.importer.ImportCallbackParameter
+import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.ArtworkAccessor
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.project.importer.OngoingProjectImporter
+import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
@@ -45,7 +49,7 @@ class AddFilesViewModel : ViewModel() {
     private val logger = LoggerFactory.getLogger(AddFilesViewModel::class.java)
 
     @Inject lateinit var directoryProvider: IDirectoryProvider
-    @Inject lateinit var importRcProvider: Provider<ImportResourceContainer>
+    @Inject lateinit var importProjectProvider : Provider<ImportProjectUseCase>
     @Inject lateinit var importProvider: Provider<OngoingProjectImporter>
 
     val showImportDialogProperty = SimpleBooleanProperty(false)
@@ -64,7 +68,7 @@ class AddFilesViewModel : ViewModel() {
     fun onDropFile(files: List<File>) {
         if (isValidImportFile(files)) {
             logger.info("Drag-drop file to import: ${files.first()}")
-            importResourceContainer(files.first())
+            importProject(files.first())
         }
     }
 
@@ -81,15 +85,16 @@ class AddFilesViewModel : ViewModel() {
         ).firstOrNull()
         file?.let {
             setProjectInfo(file)
-            importResourceContainer(file)
+            importProject(file)
         }
     }
 
-    private fun importResourceContainer(file: File) {
+    private fun importProject(file: File) {
         showImportDialogProperty.set(true)
+        val callback = setupImportCallback()
 
-        importRcProvider.get()
-            .import(file)
+        importProjectProvider.get()
+            .import(file, callback)
             .subscribeOn(Schedulers.io())
             .observeOnFx()
             .doOnError { e ->
@@ -115,6 +120,23 @@ class AddFilesViewModel : ViewModel() {
                 }
                 showImportDialogProperty.value = false
             }
+    }
+
+    private fun setupImportCallback(): ProjectImporterCallback {
+        return object : ProjectImporterCallback {
+            override fun onRequestUserInput(): Single<ImportOptions> {
+                TODO("Not yet implemented")
+            }
+
+            override fun onRequestUserInput(parameter: ImportCallbackParameter): Single<ImportOptions> {
+                TODO("Not yet implemented")
+            }
+
+            override fun onError() {
+                TODO("Not yet implemented")
+            }
+
+        }
     }
 
     private fun isValidImportFile(files: List<File>): Boolean {

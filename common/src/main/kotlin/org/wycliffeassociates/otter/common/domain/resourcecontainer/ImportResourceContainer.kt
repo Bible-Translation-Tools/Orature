@@ -27,8 +27,13 @@ import org.wycliffeassociates.otter.common.data.primitives.CollectionOrContent
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
+import org.wycliffeassociates.otter.common.domain.project.importer.ExistingSourceImporter
+import org.wycliffeassociates.otter.common.domain.project.importer.ImportCallbackParameter
+import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
 import org.wycliffeassociates.otter.common.domain.project.importer.NewSourceImporter
 import org.wycliffeassociates.otter.common.domain.project.importer.OngoingProjectImporter
+import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
+import org.wycliffeassociates.otter.common.domain.project.importer.RCImporterFactory
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IProjectReader
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.MediaMerge
@@ -55,7 +60,9 @@ class ImportResourceContainer @Inject constructor(
 
     @Inject lateinit var importProvider: Provider<OngoingProjectImporter>
     @Inject lateinit var newImportProvider: Provider<NewSourceImporter>
+    @Inject lateinit var existingImportProvider: Provider<ExistingSourceImporter>
     @Inject lateinit var deleteProvider: Provider<DeleteResourceContainer>
+    @Inject lateinit var factoryProvider: Provider<RCImporterFactory>
 
     fun import(file: File): Single<ImportResult> {
         logger.info("Importing resource container: $file")

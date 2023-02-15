@@ -8,7 +8,6 @@ import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.CollectionOrContent
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.OtterResourceContainerConfig
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.castOrFindImportException
@@ -21,21 +20,21 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IResourceCon
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.io.IOException
-import java.nio.file.Files
+import java.io.InputStream
 import javax.inject.Inject
 
 class NewSourceImporter @Inject constructor(
     private val directoryProvider: IDirectoryProvider,
     private val resourceContainerRepository: IResourceContainerRepository,
     private val zipEntryTreeBuilder: IZipEntryTreeBuilder
-) : RCImporter() {
+) : RCImporter(directoryProvider) {
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
     override fun import(
         file: File,
-        options: ImportOptions, callback:
-        ProjectImporterCallback
+        callback: ProjectImporterCallback,
+        options: ImportOptions
     ): Single<ImportResult> {
         return importContainer(file)
     }

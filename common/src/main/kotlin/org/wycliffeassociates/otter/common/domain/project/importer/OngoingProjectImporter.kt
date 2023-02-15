@@ -51,7 +51,6 @@ import javax.inject.Inject
 
 
 class OngoingProjectImporter @Inject constructor(
-    private val resourceContainerImporter: ImportResourceContainer,
     private val directoryProvider: IDirectoryProvider,
     private val resourceMetadataRepository: IResourceMetadataRepository,
     private val collectionRepository: ICollectionRepository,
@@ -59,7 +58,7 @@ class OngoingProjectImporter @Inject constructor(
     private val takeRepository: ITakeRepository,
     private val languageRepository: ILanguageRepository,
     private val resourceRepository: IResourceRepository
-) : RCImporter() {
+) : RCImporter(directoryProvider) {
     private val log = LoggerFactory.getLogger(this.javaClass)
 
     private val contentCache = mutableMapOf<ContentSignature, Content>()
@@ -75,13 +74,13 @@ class OngoingProjectImporter @Inject constructor(
 
     override fun import(
         file: File,
-        options: ImportOptions,
-        callback: ProjectImporterCallback
+        callback: ProjectImporterCallback,
+        options: ImportOptions
     ): Single<ImportResult> {
         return if (isResumableProject(file)) {
             importResumableProject(file)
         } else {
-            passToNextImporter(file, options, callback)
+            super.passToNextImporter(file, callback, options)
         }
     }
 
@@ -404,8 +403,7 @@ class OngoingProjectImporter @Inject constructor(
 
     private fun importSource(fileInZip: String, fileReader: IFileReader): Pair<String, ImportResult> {
         val name = File(fileInZip).nameWithoutExtension
-        val result = resourceContainerImporter
-            .import(name, fileReader.stream(fileInZip))
+        val result = importAsStream(name, fileReader.stream(fileInZip))
             .blockingGet()
         log.debug("Import source resource container {} result {}", name, result)
         return fileInZip to result

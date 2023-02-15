@@ -17,7 +17,7 @@ import javax.inject.Provider
 class ExistingSourceImporter @Inject constructor(
     private val directoryProvider: IDirectoryProvider,
     private val resourceMetadataRepository: IResourceMetadataRepository
-) : RCImporter() {
+) : RCImporter(directoryProvider) {
 
     @Inject
     lateinit var deleteProvider: Provider<DeleteResourceContainer>
@@ -26,11 +26,11 @@ class ExistingSourceImporter @Inject constructor(
 
     override fun import(
         file: File,
-        options: ImportOptions,
-        callback: ProjectImporterCallback
+        callback: ProjectImporterCallback,
+        options: ImportOptions
     ): Single<ImportResult> {
         val existingSource = findExistingResourceMetadata(file)
-            ?: return super.passToNextImporter(file, options, callback)
+            ?: return super.passToNextImporter(file, callback, options)
 
         var sameVersion: Boolean
         ResourceContainer.load(file).use { rc ->
@@ -48,7 +48,7 @@ class ExistingSourceImporter @Inject constructor(
             if (result != DeleteResult.SUCCESS) {
                 Single.just(ImportResult.FAILED)
             } else {
-                super.passToNextImporter(file, options, callback)
+                super.passToNextImporter(file, callback, options)
             }
         }
     }
@@ -83,5 +83,9 @@ class ExistingSourceImporter @Inject constructor(
                             it.identifier == dublinCore.identifier
                 }
         }
+    }
+
+    fun isRCAlreadyImported(file: File): Boolean {
+        return findExistingResourceMetadata(file) != null
     }
 }

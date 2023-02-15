@@ -3,7 +3,7 @@ package org.wycliffeassociates.otter.common.domain.project.importer
 import javax.inject.Inject
 import javax.inject.Provider
 
-class RCImporterFactory : IProjectImporterFactory {
+class RCImporterFactory @Inject constructor() : IProjectImporterFactory {
 
     @Inject lateinit var ongoingProjectImporter: Provider<OngoingProjectImporter>
     @Inject lateinit var existingProjectImporter: Provider<ExistingSourceImporter>
