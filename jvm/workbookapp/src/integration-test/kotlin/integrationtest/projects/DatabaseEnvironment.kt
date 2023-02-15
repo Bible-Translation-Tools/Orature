@@ -20,13 +20,17 @@ package integrationtest.projects
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonPropertyOrder
+import io.reactivex.Single
 import jooq.Tables.CONTENT_DERIVATIVE
 import org.junit.Assert
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
+import org.wycliffeassociates.otter.common.domain.project.importer.ImportCallbackParameter
+import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
+import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
+import org.wycliffeassociates.otter.common.domain.project.importer.RCImporterFactory
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
@@ -37,7 +41,7 @@ import javax.inject.Provider
 class DatabaseEnvironment @Inject constructor(
     val db: AppDatabase,
     val directoryProvider: IDirectoryProvider,
-    val importRcProvider: Provider<ImportResourceContainer>,
+    val importRcFactory: RCImporterFactory,
     val createProjectProvider: Provider<CreateProject>,
     val importLanguagesProvider: Provider<ImportLanguages>
 ) {
@@ -45,20 +49,46 @@ class DatabaseEnvironment @Inject constructor(
         setUpDatabase()
     }
 
+    private val cb = object : ProjectImporterCallback {
+        override fun onRequestUserInput(): Single<ImportOptions> {
+            TODO("Not yet implemented")
+        }
+
+        override fun onRequestUserInput(parameter: ImportCallbackParameter): Single<ImportOptions> {
+            TODO("Not yet implemented")
+        }
+
+        override fun onError() {
+            TODO("Not yet implemented")
+        }
+    }
+
     private val importer
-        get() = importRcProvider.get()
+        get() = importRcFactory.makeImporter()
 
     fun import(rcFile: String, importAsStream: Boolean = false, unzip: Boolean = false): DatabaseEnvironment {
-        val result = if (importAsStream) {
-            importer.import(rcFile, rcResourceStream(rcFile)).blockingGet()
-        } else {
-            val resourceFile = if (unzip) {
-                unzipProject(rcFile)
-            } else {
-                rcResourceFile(rcFile)
+        if (importAsStream) {
+            val tempFile = directoryProvider.createTempFile("db-env-import-test", ".zip")
+            rcResourceStream(rcFile).use { input ->
+                tempFile.outputStream().use { output ->
+                    input.transferTo(output)
+                }
             }
-            importer.import(resourceFile).blockingGet()
+            val result = importer.import(tempFile, cb).blockingGet()
+            Assert.assertEquals(
+                ImportResult.SUCCESS,
+                result
+            )
+            return this
         }
+
+        val resourceFile = if (unzip) {
+            unzipProject(rcFile)
+        } else {
+            rcResourceFile(rcFile)
+        }
+
+        val result =importer.import(resourceFile, cb).blockingGet()
         Assert.assertEquals(
             ImportResult.SUCCESS,
             result

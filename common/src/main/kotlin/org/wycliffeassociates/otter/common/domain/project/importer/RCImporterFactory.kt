@@ -9,7 +9,7 @@ class RCImporterFactory @Inject constructor() : IProjectImporterFactory {
     @Inject lateinit var existingProjectImporter: Provider<ExistingSourceImporter>
     @Inject lateinit var newSourceImporter: Provider<NewSourceImporter>
 
-    override fun makeImporter(): RCImporter {
+    private val importer: RCImporter by lazy {
         val importer1 = ongoingProjectImporter.get()
         val importer2 = existingProjectImporter.get()
         val importer3 = newSourceImporter.get()
@@ -17,6 +17,8 @@ class RCImporterFactory @Inject constructor() : IProjectImporterFactory {
         importer1.setNext(importer2)
         importer2.setNext(importer3)
 
-        return importer1
+        importer1
     }
+
+    override fun makeImporter(): RCImporter = importer
 }
