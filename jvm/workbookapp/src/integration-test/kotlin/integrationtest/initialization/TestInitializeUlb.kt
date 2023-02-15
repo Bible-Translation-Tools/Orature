@@ -18,14 +18,23 @@
  */
 package integrationtest.initialization
 
+import com.nhaarman.mockitokotlin2.any
 import integrationtest.di.DaggerTestPersistenceComponent
 import io.reactivex.Completable
 import io.reactivex.observers.TestObserver
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.mockito.Mockito
+import org.mockito.Mockito.doReturn
+import org.mockito.Mockito.never
+import org.mockito.Mockito.verify
 import org.wycliffeassociates.otter.assets.initialization.InitializeUlb
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
+import org.wycliffeassociates.otter.common.domain.project.importer.ExistingSourceImporter
+import org.wycliffeassociates.otter.common.domain.project.importer.IProjectImporter
+import org.wycliffeassociates.otter.common.domain.project.importer.RCImporter
+import org.wycliffeassociates.otter.common.domain.project.importer.RCImporterFactory
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
@@ -49,6 +58,11 @@ class TestInitializeUlb {
     @Inject
     lateinit var installedEntityRepo: IInstalledEntityRepository
 
+    @Inject
+    lateinit var rcImporterFactory: RCImporterFactory
+
+    private val importer: IProjectImporter
+        get() = rcImporterFactory.makeImporter()
 
     @Before
     fun setup() {
@@ -73,25 +87,28 @@ class TestInitializeUlb {
 
     @Test
     fun `test en_ulb import skipped when already imported`() {
-//        val importer = importRCProvider.get()
-//        val importerSpy = Mockito.spy(importer)
-//        doReturn(true).`when`(importerSpy).isAlreadyImported(any())
-//
-//        val init = InitializeUlb(
-//            directoryProvider,
-//            installedEntityRepo,
-//            importerSpy
-//        )
-//        val testSub = TestObserver<Completable>()
-//
-//        init.exec()
-//            .subscribe(testSub)
-//
-//        testSub.assertComplete()
-//        testSub.assertNoErrors()
-//
-//        verify(importerSpy).isAlreadyImported(any())
-//        verify(importerSpy, never()).import(any<File>())
-//        verify(importerSpy, never()).import(any<String>(), any<InputStream>())
+        val importer = Mockito.mock(ExistingSourceImporter::class.java)
+        val importerSpy = Mockito.spy(importer)
+        val factory = Mockito.mock(RCImporterFactory::class.java)
+
+        doReturn(true).`when`(importerSpy).isRCAlreadyImported(any())
+        doReturn(importerSpy).`when`(factory).makeImporter()
+
+        val init = InitializeUlb(
+            directoryProvider,
+            installedEntityRepo,
+            factory,
+            importerSpy
+        )
+        val testSub = TestObserver<Completable>()
+
+        init.exec()
+            .subscribe(testSub)
+
+        testSub.assertComplete()
+        testSub.assertNoErrors()
+
+        verify(importerSpy).isRCAlreadyImported(any())
+        verify(importerSpy, never()).import(any())
     }
 }

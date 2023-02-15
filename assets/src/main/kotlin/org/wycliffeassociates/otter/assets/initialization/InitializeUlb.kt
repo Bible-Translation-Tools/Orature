@@ -46,7 +46,6 @@ class InitializeUlb @Inject constructor(
 
     private val log = LoggerFactory.getLogger(InitializeUlb::class.java)
 
-    private lateinit var enUlbFile: File
     private val importer: RCImporter
         get() = rcImporterFactory.makeImporter()
 
@@ -55,7 +54,8 @@ class InitializeUlb @Inject constructor(
             .fromCallable {
                 val installedVersion = installedEntityRepo.getInstalledVersion(this)
                 if (installedVersion != version) {
-                    if (isAlreadyImported()) {
+                    val enUlbFile = prepareImportFile()
+                    if (isAlreadyImported(enUlbFile)) {
                         log.info("$EN_ULB_FILENAME already exists, skipped.")
                         return@fromCallable Completable.complete()
                     }
@@ -84,16 +84,20 @@ class InitializeUlb @Inject constructor(
             }
     }
 
-    private fun isAlreadyImported(): Boolean {
+    private fun isAlreadyImported(file: File): Boolean {
+        return existingSourceImporter.isRCAlreadyImported(file)
+    }
+
+    private fun prepareImportFile(): File {
         val enUlbResource = javaClass.classLoader.getResource(EN_ULB_PATH)!!
-        enUlbFile = directoryProvider.createTempFile("en_ulb-test", ".zip")
+        val tempFile = directoryProvider.createTempFile("en_ulb-test", ".zip")
             .also(File::deleteOnExit)
 
         enUlbResource.openStream().use { input ->
-            enUlbFile.outputStream().use { output ->
+            tempFile.outputStream().use { output ->
                 input.transferTo(output)
             }
         }
-        return existingSourceImporter.isRCAlreadyImported(enUlbFile)
+        return tempFile
     }
 }
