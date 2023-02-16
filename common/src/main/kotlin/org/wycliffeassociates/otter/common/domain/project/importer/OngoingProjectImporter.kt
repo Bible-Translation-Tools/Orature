@@ -37,6 +37,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRep
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Manifest
 import org.wycliffeassociates.resourcecontainer.entity.Project
@@ -51,6 +52,7 @@ import javax.inject.Inject
 class OngoingProjectImporter @Inject constructor(
     private val directoryProvider: IDirectoryProvider,
     private val resourceMetadataRepository: IResourceMetadataRepository,
+    private val workbookRepository: WorkbookRepository,
     private val collectionRepository: ICollectionRepository,
     private val contentRepository: IContentRepository,
     private val takeRepository: ITakeRepository,
@@ -75,18 +77,64 @@ class OngoingProjectImporter @Inject constructor(
         callback: ProjectImporterCallback?,
         options: ImportOptions?
     ): Single<ImportResult> {
-        return if (isResumableProject(file)) {
-            importResumableProject(file)
-        } else {
-            super.passToNextImporter(file, callback, options)
+        val isOngoingProject = isResumableProject(file)
+        if (!isOngoingProject) {
+            return super.passToNextImporter(file, callback, options)
+        }
+
+        return if (projectExists(file)) {
+            val availableChapters = getChapterList(file).map { it.toString() }
+            val callbackParam = ImportCallbackParameter(availableChapters)
+            val options = callback?.onRequestUserInput(callbackParam)
+                ?.blockingGet()
+
+            importResumableProject(file, options)
+        }
+        else {
+            importResumableProject(file, null)
         }
     }
 
-    fun isResumableProject(resourceContainer: File): Boolean {
+    private fun isResumableProject(rcFile: File): Boolean {
         return try {
-            hasInProgressMarker(resourceContainer)
+            hasInProgressMarker(rcFile)
         } catch (e: IOException) {
             false
+        }
+    }
+
+    private fun projectExists(file: File): Boolean {
+        ResourceContainer.load(file).use { rc ->
+            rc.manifest.dublinCore.let {
+                val languageSlug = it.language.identifier
+                val sourceLanguageSlug = it.source.firstOrNull()?.language ?: return false
+
+                val projects = workbookRepository.getProjects().blockingGet()
+                return projects.any { existingProject ->
+                    sourceLanguageSlug == existingProject.source.language.slug &&
+                            languageSlug == existingProject.target.language.slug
+                }
+            }
+        }
+    }
+
+    private fun getChapterList(file: File): List<Int> {
+        ResourceContainer.load(file).use { rc ->
+            val fileStreamMap = rc.accessor.getInputStreams(RcConstants.MEDIA_DIR)
+            try {
+                val chapters = fileStreamMap.keys
+                    .mapNotNull {
+                        parseNumbers(it)
+                    }
+                    .filter { it.contentSignature.type == ContentType.META }
+                    .map {
+                        it.contentSignature.chapter
+                    }
+
+                return chapters
+            } finally {
+                fileStreamMap.values.forEach { it.close() }
+            }
         }
     }
 
@@ -100,7 +148,10 @@ class OngoingProjectImporter @Inject constructor(
         }
     }
 
-    fun importResumableProject(resourceContainer: File): Single<ImportResult> {
+    fun importResumableProject(
+        resourceContainer: File,
+        options: ImportOptions?
+    ): Single<ImportResult> {
         return Single.fromCallable {
             try {
                 val manifest: Manifest = ResourceContainer.load(resourceContainer).use { it.manifest }
