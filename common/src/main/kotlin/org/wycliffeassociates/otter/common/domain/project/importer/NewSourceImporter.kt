@@ -17,6 +17,7 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZip
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.toCollection
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.io.IOException
@@ -25,15 +26,16 @@ import javax.inject.Inject
 class NewSourceImporter @Inject constructor(
     private val directoryProvider: IDirectoryProvider,
     private val resourceContainerRepository: IResourceContainerRepository,
+    resourceMetadataRepository: IResourceMetadataRepository,
     private val zipEntryTreeBuilder: IZipEntryTreeBuilder
-) : RCImporter(directoryProvider) {
+) : RCImporter(directoryProvider, resourceMetadataRepository) {
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
     override fun import(
         file: File,
-        callback: ProjectImporterCallback,
-        options: ImportOptions
+        callback: ProjectImporterCallback?,
+        options: ImportOptions?
     ): Single<ImportResult> {
         return importContainer(file)
     }

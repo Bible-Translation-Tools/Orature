@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.assets.initialization
 
 import io.reactivex.Completable
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
 import org.wycliffeassociates.otter.common.domain.project.importer.ExistingSourceImporter
 import org.wycliffeassociates.otter.common.domain.project.importer.RCImporter
 import org.wycliffeassociates.otter.common.domain.project.importer.RCImporterFactory
@@ -30,6 +31,7 @@ import org.wycliffeassociates.otter.common.persistence.config.Installable
 import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
 import java.io.File
 import javax.inject.Inject
+import javax.inject.Provider
 
 const val EN_ULB_FILENAME = "en_ulb"
 private const val EN_ULB_PATH = "content/$EN_ULB_FILENAME.zip"
@@ -37,8 +39,7 @@ private const val EN_ULB_PATH = "content/$EN_ULB_FILENAME.zip"
 class InitializeUlb @Inject constructor(
     private val directoryProvider: IDirectoryProvider,
     private val installedEntityRepo: IInstalledEntityRepository,
-    private val rcImporterFactory: RCImporterFactory,
-    private val existingSourceImporter: ExistingSourceImporter
+    private val importer: ImportProjectUseCase
 ) : Installable {
 
     override val name = "EN_ULB"
@@ -46,16 +47,13 @@ class InitializeUlb @Inject constructor(
 
     private val log = LoggerFactory.getLogger(InitializeUlb::class.java)
 
-    private val importer: RCImporter
-        get() = rcImporterFactory.makeImporter()
-
     override fun exec(): Completable {
         return Completable
             .fromCallable {
                 val installedVersion = installedEntityRepo.getInstalledVersion(this)
                 if (installedVersion != version) {
                     val enUlbFile = prepareImportFile()
-                    if (isAlreadyImported(enUlbFile)) {
+                    if (importer.isRCAlreadyImported(enUlbFile)) {
                         log.info("$EN_ULB_FILENAME already exists, skipped.")
                         return@fromCallable Completable.complete()
                     }
@@ -82,10 +80,6 @@ class InitializeUlb @Inject constructor(
             .doOnError { e ->
                 log.error("Error in initializeUlb", e)
             }
-    }
-
-    private fun isAlreadyImported(file: File): Boolean {
-        return existingSourceImporter.isRCAlreadyImported(file)
     }
 
     private fun prepareImportFile(): File {

@@ -23,13 +23,23 @@ class ImportProjectUseCase @Inject constructor() {
     )
     fun import(
         file: File,
-        callback: ProjectImporterCallback,
-        options: ImportOptions = ImportOptions()
+        callback: ProjectImporterCallback?,
+        options: ImportOptions? = null
     ): Single<ImportResult> {
         val format = ProjectFormatIdentifier.getProjectFormat(file)
         val importer = getImporter(format)
 
         return importer.import(file, callback, options)
+    }
+
+    fun import(file: File): Single<ImportResult> {
+        return import(file, null, null)
+    }
+
+    fun isRCAlreadyImported(file: File): Boolean {
+        return rcFactoryProvider.get()
+            .makeImporter()
+            .isRCAlreadyImported(file)
     }
 
     /**

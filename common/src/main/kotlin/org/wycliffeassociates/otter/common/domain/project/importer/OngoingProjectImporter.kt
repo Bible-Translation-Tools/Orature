@@ -56,7 +56,7 @@ class OngoingProjectImporter @Inject constructor(
     private val takeRepository: ITakeRepository,
     private val languageRepository: ILanguageRepository,
     private val resourceRepository: IResourceRepository
-) : RCImporter(directoryProvider) {
+) : RCImporter(directoryProvider, resourceMetadataRepository) {
     private val log = LoggerFactory.getLogger(this.javaClass)
 
     private val contentCache = mutableMapOf<ContentSignature, Content>()
@@ -72,8 +72,8 @@ class OngoingProjectImporter @Inject constructor(
 
     override fun import(
         file: File,
-        callback: ProjectImporterCallback,
-        options: ImportOptions
+        callback: ProjectImporterCallback?,
+        options: ImportOptions?
     ): Single<ImportResult> {
         return if (isResumableProject(file)) {
             importResumableProject(file)

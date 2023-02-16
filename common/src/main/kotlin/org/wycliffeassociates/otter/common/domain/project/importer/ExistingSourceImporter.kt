@@ -17,7 +17,7 @@ import javax.inject.Provider
 class ExistingSourceImporter @Inject constructor(
     private val directoryProvider: IDirectoryProvider,
     private val resourceMetadataRepository: IResourceMetadataRepository
-) : RCImporter(directoryProvider) {
+) : RCImporter(directoryProvider, resourceMetadataRepository) {
 
     @Inject
     lateinit var deleteProvider: Provider<DeleteResourceContainer>
@@ -26,8 +26,8 @@ class ExistingSourceImporter @Inject constructor(
 
     override fun import(
         file: File,
-        callback: ProjectImporterCallback,
-        options: ImportOptions
+        callback: ProjectImporterCallback?,
+        options: ImportOptions?
     ): Single<ImportResult> {
         val existingSource = findExistingResourceMetadata(file)
             ?: return super.passToNextImporter(file, callback, options)
@@ -77,15 +77,12 @@ class ExistingSourceImporter @Inject constructor(
     private fun findExistingResourceMetadata(file: File): ResourceMetadata? {
         ResourceContainer.load(file, true).use { rc ->
             val dublinCore = rc.manifest.dublinCore
-            return resourceMetadataRepository.getAllSources().blockingGet()
+            return resourceMetadataRepository.getAllSources()
+                .blockingGet()
                 .find {
                     it.language.slug == dublinCore.language.identifier &&
                             it.identifier == dublinCore.identifier
                 }
         }
-    }
-
-    fun isRCAlreadyImported(file: File): Boolean {
-        return findExistingResourceMetadata(file) != null
     }
 }

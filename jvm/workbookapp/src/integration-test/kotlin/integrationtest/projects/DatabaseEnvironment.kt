@@ -49,20 +49,6 @@ class DatabaseEnvironment @Inject constructor(
         setUpDatabase()
     }
 
-    private val cb = object : ProjectImporterCallback {
-        override fun onRequestUserInput(): Single<ImportOptions> {
-            TODO("Not yet implemented")
-        }
-
-        override fun onRequestUserInput(parameter: ImportCallbackParameter): Single<ImportOptions> {
-            TODO("Not yet implemented")
-        }
-
-        override fun onError() {
-            TODO("Not yet implemented")
-        }
-    }
-
     private val importer
         get() = importRcFactory.makeImporter()
 
@@ -74,7 +60,7 @@ class DatabaseEnvironment @Inject constructor(
                     input.transferTo(output)
                 }
             }
-            val result = importer.import(tempFile, cb).blockingGet()
+            val result = importer.import(tempFile).blockingGet()
             Assert.assertEquals(
                 ImportResult.SUCCESS,
                 result
@@ -88,7 +74,7 @@ class DatabaseEnvironment @Inject constructor(
             rcResourceFile(rcFile)
         }
 
-        val result =importer.import(resourceFile, cb).blockingGet()
+        val result =importer.import(resourceFile).blockingGet()
         Assert.assertEquals(
             ImportResult.SUCCESS,
             result
