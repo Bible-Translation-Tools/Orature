@@ -12,17 +12,7 @@ abstract class RCImporter(
     private val directoryProvider: IDirectoryProvider
 ) : IProjectImporter {
     private var next: RCImporter? = null
-
     private val logger = LoggerFactory.getLogger(javaClass)
-    private val defaultCallback = object : ProjectImporterCallback {
-        override fun onRequestUserInput(): Single<ImportOptions> {
-            TODO("Not yet implemented")
-        }
-        override fun onRequestUserInput(parameter: ImportCallbackParameter): Single<ImportOptions> {
-            TODO("Not yet implemented")
-        }
-        override fun onError() {}
-    }
 
     abstract override fun import(
         file: File,
@@ -47,7 +37,7 @@ abstract class RCImporter(
                 stream.transferTo(outFile.outputStream())
             }
             .flatMap {
-                import(outFile, defaultCallback)
+                import(outFile)
             }
             .doOnError { e ->
                 logger.error("Error in import, filename: $filename", e)

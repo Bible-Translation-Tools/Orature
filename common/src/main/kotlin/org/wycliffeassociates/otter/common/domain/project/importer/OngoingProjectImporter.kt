@@ -48,7 +48,6 @@ import java.time.LocalDateTime
 import java.util.regex.Pattern
 import javax.inject.Inject
 
-
 class OngoingProjectImporter @Inject constructor(
     private val directoryProvider: IDirectoryProvider,
     private val resourceMetadataRepository: IResourceMetadataRepository,
@@ -212,7 +211,7 @@ class OngoingProjectImporter @Inject constructor(
             }
         } catch (e: MismatchedInputException) {
             // clear file if it can't be read
-            file.writer().use {  }
+            file.writer().use { }
         }
 
         val chapters = collectionRepository.getChildren(project).blockingGet()

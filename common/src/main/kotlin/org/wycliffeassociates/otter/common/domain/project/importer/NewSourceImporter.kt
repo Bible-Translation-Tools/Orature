@@ -20,7 +20,6 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IResourceCon
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.io.IOException
-import java.io.InputStream
 import javax.inject.Inject
 
 class NewSourceImporter @Inject constructor(

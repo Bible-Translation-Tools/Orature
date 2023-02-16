@@ -43,4 +43,4 @@ object ProjectFormatIdentifier {
 
 class InvalidResourceContainerException(
     override val message: String
-): InvalidObjectException(message)
+) : InvalidObjectException(message)

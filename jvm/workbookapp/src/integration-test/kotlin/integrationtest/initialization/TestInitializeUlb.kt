@@ -32,8 +32,6 @@ import org.mockito.Mockito.verify
 import org.wycliffeassociates.otter.assets.initialization.InitializeUlb
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.domain.project.importer.ExistingSourceImporter
-import org.wycliffeassociates.otter.common.domain.project.importer.IProjectImporter
-import org.wycliffeassociates.otter.common.domain.project.importer.RCImporter
 import org.wycliffeassociates.otter.common.domain.project.importer.RCImporterFactory
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
@@ -60,9 +58,6 @@ class TestInitializeUlb {
 
     @Inject
     lateinit var rcImporterFactory: RCImporterFactory
-
-    private val importer: IProjectImporter
-        get() = rcImporterFactory.makeImporter()
 
     @Before
     fun setup() {

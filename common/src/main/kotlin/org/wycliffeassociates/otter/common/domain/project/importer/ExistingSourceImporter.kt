@@ -37,7 +37,7 @@ class ExistingSourceImporter @Inject constructor(
             sameVersion = (rc.manifest.dublinCore.version == existingSource.version)
         }
 
-        return if (sameVersion)  {
+        return if (sameVersion) {
             mergeMedia(file, existingSource.path)
         } else {
             // existing resource has a different version, confirms overwrite/delete

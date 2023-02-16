@@ -14,13 +14,13 @@ interface IProjectImporter {
     fun import(file: File): Single<ImportResult> {
         val callback = object : ProjectImporterCallback {
             override fun onRequestUserInput(): Single<ImportOptions> {
-                TODO("Unimplemented")
+                throw NotImplementedError("This method has no implementation.")
             }
             override fun onRequestUserInput(parameter: ImportCallbackParameter): Single<ImportOptions> {
-                TODO("Unimplemented")
+                throw NotImplementedError("This method has no implementation.")
             }
             override fun onError() {
-                TODO("Unimplemented")
+                throw NotImplementedError("This method has no implementation.")
             }
         }
 
