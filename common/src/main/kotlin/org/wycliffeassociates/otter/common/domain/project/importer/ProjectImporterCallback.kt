@@ -8,4 +8,4 @@ interface ProjectImporterCallback {
     fun onError()
 }
 
-data class ImportCallbackParameter(val options: List<String>)
+data class ImportCallbackParameter(val options: List<Int>)

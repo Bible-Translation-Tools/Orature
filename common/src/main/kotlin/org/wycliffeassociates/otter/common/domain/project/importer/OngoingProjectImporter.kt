@@ -11,6 +11,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
+import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.Chunkification
@@ -63,7 +64,7 @@ class OngoingProjectImporter @Inject constructor(
     private val log = LoggerFactory.getLogger(this.javaClass)
 
     private val contentCache = mutableMapOf<ContentSignature, Content>()
-    private var takeChapterMap: Map<String, Int>? = null
+    private var takesInChapterFilter: Map<String, Int>? = null
 
     private val takeFilenamePattern = run {
         val chapter = """_c(\d+)"""
@@ -84,23 +85,16 @@ class OngoingProjectImporter @Inject constructor(
         if (!isOngoingProject) {
             return super.passToNextImporter(file, callback, options)
         }
-        takeChapterMap = null
+        takesInChapterFilter = null
 
-        if (projectExists(file)) {
-            val takes = fetchTakesInRC(file)
-            val callbackParam = ImportCallbackParameter(
-                takes.values.distinct().sorted().map { it.toString() }
-            )
-            val selection = callback?.onRequestUserInput(callbackParam)?.blockingGet()?.chapters
-
-            selection?.let { selectedChapters ->
-                takeChapterMap = takes.filter {
-                    it.value in selectedChapters
+        return projectExists(file)
+            .flatMap { exists ->
+                if (exists && callback != null) {
+                    updateTakesImportFilter(file, callback)
                 }
+                importResumableProject(file)
             }
-        }
-
-        return importResumableProject(file)
+            .subscribeOn(Schedulers.io())
     }
 
     private fun isResumableProject(rcFile: File): Boolean {
@@ -111,20 +105,37 @@ class OngoingProjectImporter @Inject constructor(
         }
     }
 
-    private fun projectExists(file: File): Boolean {
-        ResourceContainer.load(file).use { rc ->
-            rc.manifest.dublinCore.let {
-                val sourceLanguageSlug = it.source.firstOrNull()?.language ?: return false
-                val languageSlug = it.language.identifier
-                val projectSlug = rc.manifest.projects.first().identifier
+    private fun projectExists(file: File): Single<Boolean> {
+        return Single
+            .fromCallable {
+                ResourceContainer.load(file).use { rc ->
+                    rc.manifest.dublinCore.let {
+                        val sourceLanguageSlug = it.source.firstOrNull()?.language
+                            ?: return@fromCallable false
 
-                val projects = workbookRepository.getProjects().blockingGet()
-                return projects.any { existingProject ->
-                    sourceLanguageSlug == existingProject.source.language.slug &&
-                        languageSlug == existingProject.target.language.slug &&
-                            projectSlug == existingProject.target.slug
+                        val languageSlug = it.language.identifier
+                        val projectSlug = rc.manifest.projects.first().identifier
+
+                        val projects = workbookRepository.getProjects().blockingGet()
+                        return@fromCallable projects.any { existingProject ->
+                            sourceLanguageSlug == existingProject.source.language.slug &&
+                                    languageSlug == existingProject.target.language.slug &&
+                                    projectSlug == existingProject.target.slug
+                        }
+                    }
                 }
             }
+            .subscribeOn(Schedulers.io())
+    }
+
+    private fun updateTakesImportFilter(file: File, callback: ProjectImporterCallback) {
+        val takesChapterMap = fetchTakesInRC(file)
+        val chapterList = takesChapterMap.values.distinct().sorted()
+        val callbackParam = ImportCallbackParameter(chapterList)
+        val valueFromCallback = callback.onRequestUserInput(callbackParam).blockingGet().chapters
+
+        takesInChapterFilter = valueFromCallback?.let { selectedChapters ->
+            takesChapterMap.filter { entry -> entry.value in selectedChapters }
         }
     }
 
@@ -341,7 +352,6 @@ class OngoingProjectImporter @Inject constructor(
         val selectedTakes = prepareSelectedTakes(fileReader)
 
         projectFilesAccessor.copySelectedTakesFile(fileReader)
-
         projectFilesAccessor.copyTakeFiles(fileReader, manifestProject, this::takeFileFilter)
             .doOnError { e ->
                 log.error("Error in importTakes, project: $project, manifestProject: $manifestProject")
@@ -360,6 +370,7 @@ class OngoingProjectImporter @Inject constructor(
     }
 
     private fun prepareSelectedTakes(fileReader: IFileReader): Set<String> {
+        println(takesInChapterFilter)
         return fileReader
             .bufferedReader(RcConstants.SELECTED_TAKES_FILE)
             .useLines { it.toSet() }
@@ -369,7 +380,7 @@ class OngoingProjectImporter @Inject constructor(
                 }
             }
             .filter { (takePath, signature) ->
-                takeChapterMap?.values?.contains(signature.contentSignature.chapter)
+                takesInChapterFilter?.values?.contains(signature.contentSignature.chapter)
                     ?: true
             }
             .map { (path, _) ->
@@ -379,7 +390,7 @@ class OngoingProjectImporter @Inject constructor(
     }
 
     private fun takeFileFilter(path: String): Boolean {
-        return takeChapterMap?.let {
+        return takesInChapterFilter?.let {
             it.keys.any { pathInRC ->
                 File(pathInRC).name == File(path).name
             }
