@@ -61,7 +61,7 @@ class OngoingProjectImporter @Inject constructor(
     private val languageRepository: ILanguageRepository,
     private val resourceRepository: IResourceRepository
 ) : RCImporter(directoryProvider, resourceMetadataRepository) {
-    private val log = LoggerFactory.getLogger(this.javaClass)
+    private val logger = LoggerFactory.getLogger(this.javaClass)
 
     private val contentCache = mutableMapOf<ContentSignature, Content>()
     private var takesInChapterFilter: Map<String, Int>? = null
@@ -87,7 +87,11 @@ class OngoingProjectImporter @Inject constructor(
         }
         takesInChapterFilter = null
 
-        return projectExists(file)
+        return Single
+            .fromCallable { projectExists(file) }
+            .doOnError {
+                logger.error("Error while checking whether project already exists.", it)
+            }
             .flatMap { exists ->
                 if (exists && callback != null) {
                     updateTakesImportFilter(file, callback)
@@ -105,27 +109,23 @@ class OngoingProjectImporter @Inject constructor(
         }
     }
 
-    private fun projectExists(file: File): Single<Boolean> {
-        return Single
-            .fromCallable {
-                ResourceContainer.load(file).use { rc ->
-                    rc.manifest.dublinCore.let {
-                        val sourceLanguageSlug = it.source.firstOrNull()?.language
-                            ?: return@fromCallable false
+    private fun projectExists(file: File): Boolean {
+        ResourceContainer.load(file).use { rc ->
+            rc.manifest.dublinCore.let {
+                val sourceLanguageSlug = it.source.firstOrNull()?.language
+                    ?: return false
 
-                        val languageSlug = it.language.identifier
-                        val projectSlug = rc.manifest.projects.first().identifier
+                val languageSlug = it.language.identifier
+                val projectSlug = rc.manifest.projects.first().identifier
 
-                        val projects = workbookRepository.getProjects().blockingGet()
-                        return@fromCallable projects.any { existingProject ->
-                            sourceLanguageSlug == existingProject.source.language.slug &&
-                                    languageSlug == existingProject.target.language.slug &&
-                                    projectSlug == existingProject.target.slug
-                        }
-                    }
+                val projects = workbookRepository.getProjects().blockingGet()
+                return projects.any { existingProject ->
+                    sourceLanguageSlug == existingProject.source.language.slug &&
+                            languageSlug == existingProject.target.language.slug &&
+                            projectSlug == existingProject.target.slug
                 }
             }
-            .subscribeOn(Schedulers.io())
+        }
     }
 
     private fun updateTakesImportFilter(file: File, callback: ProjectImporterCallback) {
@@ -181,7 +181,7 @@ class OngoingProjectImporter @Inject constructor(
                 val manifestProject = try {
                     manifest.projects.single()
                 } catch (t: Throwable) {
-                    log.error("In-progress import must have 1 project, but this has {}", manifest.projects.count())
+                    logger.error("In-progress import must have 1 project, but this has {}", manifest.projects.count())
                     throw ImportException(ImportResult.INVALID_RC)
                 }
 
@@ -191,7 +191,7 @@ class OngoingProjectImporter @Inject constructor(
                         // Import Sources even if existing source exists in order to potentially merge source audio
                         importSources(fileReader)
                     } catch (e: ImportException) {
-                        log.error("Error importing source of resumable project", e)
+                        logger.error("Error importing source of resumable project", e)
                     }
                     val sourceCollection = if (existingSource == null) {
                         findSourceCollection(manifestSources, manifestProject)
@@ -214,7 +214,7 @@ class OngoingProjectImporter @Inject constructor(
             } catch (e: ImportException) {
                 e.result
             } catch (e: Exception) {
-                log.error("Failed to import in-progress project", e)
+                logger.error("Failed to import in-progress project", e)
                 ImportResult.IMPORT_ERROR
             }
         }
@@ -354,9 +354,9 @@ class OngoingProjectImporter @Inject constructor(
         projectFilesAccessor.copySelectedTakesFile(fileReader)
         projectFilesAccessor.copyTakeFiles(fileReader, manifestProject, this::takeFileFilter)
             .doOnError { e ->
-                log.error("Error in importTakes, project: $project, manifestProject: $manifestProject")
-                log.error("metadata: $metadata, sourceMetadata: $sourceMetadata")
-                log.error("sourceCollection: $sourceCollection", e)
+                logger.error("Error in importTakes, project: $project, manifestProject: $manifestProject")
+                logger.error("metadata: $metadata, sourceMetadata: $sourceMetadata")
+                logger.error("sourceCollection: $sourceCollection", e)
             }
             .subscribe { newTakeFile ->
                 insertTake(
@@ -447,7 +447,7 @@ class OngoingProjectImporter @Inject constructor(
             .firstOrNull()
 
         if (sourceCollection == null) {
-            log.error("Failed to find source that matches requested import.")
+            logger.error("Failed to find source that matches requested import.")
             throw ImportException(ImportResult.IMPORT_ERROR)
         }
         return sourceCollection
@@ -501,7 +501,7 @@ class OngoingProjectImporter @Inject constructor(
         val name = File(fileInZip).nameWithoutExtension
         val result = importAsStream(name, fileReader.stream(fileInZip))
             .blockingGet()
-        log.debug("Import source resource container {} result {}", name, result)
+        logger.debug("Import source resource container {} result {}", name, result)
         return fileInZip to result
     }
 
@@ -510,7 +510,7 @@ class OngoingProjectImporter @Inject constructor(
         val id = languageRepository
             .insertTranslation(translation)
             .doOnError { e ->
-                log.error("Error in inserting translation", e)
+                logger.error("Error in inserting translation", e)
             }
             .onErrorReturnItem(0)
             .blockingGet()
