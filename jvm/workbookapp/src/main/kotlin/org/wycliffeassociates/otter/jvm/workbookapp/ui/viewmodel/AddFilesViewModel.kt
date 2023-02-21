@@ -129,6 +129,8 @@ class AddFilesViewModel : ViewModel() {
             }
 
             override fun onRequestUserInput(parameter: ImportCallbackParameter): Single<ImportOptions> {
+                println("select options: " + parameter.options)
+                return Single.just(ImportOptions(listOf(5)))
                 TODO("Not yet implemented")
             }
 

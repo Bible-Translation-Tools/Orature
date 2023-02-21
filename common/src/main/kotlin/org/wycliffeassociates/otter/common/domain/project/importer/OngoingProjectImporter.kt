@@ -12,6 +12,7 @@ import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.Chunkification
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Collection
@@ -62,6 +63,8 @@ class OngoingProjectImporter @Inject constructor(
     private val log = LoggerFactory.getLogger(this.javaClass)
 
     private val contentCache = mutableMapOf<ContentSignature, Content>()
+    private var takeChapterMap: Map<String, Int>? = null
+
     private val takeFilenamePattern = run {
         val chapter = """_c(\d+)"""
         val verse = """(?:_v(\d+))?"""
@@ -81,18 +84,23 @@ class OngoingProjectImporter @Inject constructor(
         if (!isOngoingProject) {
             return super.passToNextImporter(file, callback, options)
         }
+        takeChapterMap = null
 
-        return if (projectExists(file)) {
-            val availableChapters = getChapterList(file).map { it.toString() }
-            val callbackParam = ImportCallbackParameter(availableChapters)
-            val options = callback?.onRequestUserInput(callbackParam)
-                ?.blockingGet()
+        if (projectExists(file)) {
+            val takes = fetchTakesInRC(file)
+            val callbackParam = ImportCallbackParameter(
+                takes.values.distinct().sorted().map { it.toString() }
+            )
+            val selection = callback?.onRequestUserInput(callbackParam)?.blockingGet()?.chapters
 
-            importResumableProject(file, options)
+            selection?.let { selectedChapters ->
+                takeChapterMap = takes.filter {
+                    it.value in selectedChapters
+                }
+            }
         }
-        else {
-            importResumableProject(file, null)
-        }
+
+        return importResumableProject(file)
     }
 
     private fun isResumableProject(rcFile: File): Boolean {
@@ -106,32 +114,36 @@ class OngoingProjectImporter @Inject constructor(
     private fun projectExists(file: File): Boolean {
         ResourceContainer.load(file).use { rc ->
             rc.manifest.dublinCore.let {
-                val languageSlug = it.language.identifier
                 val sourceLanguageSlug = it.source.firstOrNull()?.language ?: return false
+                val languageSlug = it.language.identifier
+                val projectSlug = rc.manifest.projects.first().identifier
 
                 val projects = workbookRepository.getProjects().blockingGet()
                 return projects.any { existingProject ->
                     sourceLanguageSlug == existingProject.source.language.slug &&
-                            languageSlug == existingProject.target.language.slug
+                        languageSlug == existingProject.target.language.slug &&
+                            projectSlug == existingProject.target.slug
                 }
             }
         }
     }
 
-    private fun getChapterList(file: File): List<Int> {
+    private fun fetchTakesInRC(file: File): Map<String, Int> {
         ResourceContainer.load(file).use { rc ->
-            val fileStreamMap = rc.accessor.getInputStreams(RcConstants.MEDIA_DIR)
+            val extensionFilter = AudioFileFormat.values().map { it.extension }
+            val fileStreamMap = rc.accessor.getInputStreams(".", extensionFilter)
             try {
-                val chapters = fileStreamMap.keys
-                    .mapNotNull {
-                        parseNumbers(it)
+                val takesMap: Map<String, Int> = fileStreamMap.keys
+                    .mapNotNull { path ->
+                        parseNumbers(path)?.let {
+                            Pair(path, it)
+                        }
                     }
-                    .filter { it.contentSignature.type == ContentType.META }
-                    .map {
-                        it.contentSignature.chapter
+                    .associate {
+                        Pair(it.first, it.second.contentSignature.chapter)
                     }
 
-                return chapters
+                return takesMap
             } finally {
                 fileStreamMap.values.forEach { it.close() }
             }
@@ -149,8 +161,7 @@ class OngoingProjectImporter @Inject constructor(
     }
 
     fun importResumableProject(
-        resourceContainer: File,
-        options: ImportOptions?
+        resourceContainer: File
     ): Single<ImportResult> {
         return Single.fromCallable {
             try {
@@ -327,13 +338,11 @@ class OngoingProjectImporter @Inject constructor(
         }
         val sourceMetadata = sourceCollection.resourceContainer!!
 
-        val selectedTakes = fileReader
-            .bufferedReader(RcConstants.SELECTED_TAKES_FILE)
-            .useLines { it.toSet() }
+        val selectedTakes = prepareSelectedTakes(fileReader)
 
         projectFilesAccessor.copySelectedTakesFile(fileReader)
 
-        projectFilesAccessor.copyTakeFiles(fileReader, manifestProject)
+        projectFilesAccessor.copyTakeFiles(fileReader, manifestProject, this::takeFileFilter)
             .doOnError { e ->
                 log.error("Error in importTakes, project: $project, manifestProject: $manifestProject")
                 log.error("metadata: $metadata, sourceMetadata: $sourceMetadata")
@@ -348,6 +357,33 @@ class OngoingProjectImporter @Inject constructor(
                     selectedTakes
                 )
             }
+    }
+
+    private fun prepareSelectedTakes(fileReader: IFileReader): Set<String> {
+        return fileReader
+            .bufferedReader(RcConstants.SELECTED_TAKES_FILE)
+            .useLines { it.toSet() }
+            .mapNotNull { takePath ->
+                parseNumbers(takePath)?.let {
+                    Pair(takePath, it)
+                }
+            }
+            .filter { (takePath, signature) ->
+                takeChapterMap?.values?.contains(signature.contentSignature.chapter)
+                    ?: true
+            }
+            .map { (path, _) ->
+                path
+            }
+            .toSet()
+    }
+
+    private fun takeFileFilter(path: String): Boolean {
+        return takeChapterMap?.let {
+            it.keys.any { pathInRC ->
+                File(pathInRC).name == File(path).name
+            }
+        } ?: true
     }
 
     private fun insertTake(
