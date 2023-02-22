@@ -370,7 +370,6 @@ class OngoingProjectImporter @Inject constructor(
     }
 
     private fun prepareSelectedTakes(fileReader: IFileReader): Set<String> {
-        println(takesInChapterFilter)
         return fileReader
             .bufferedReader(RcConstants.SELECTED_TAKES_FILE)
             .useLines { it.toSet() }
