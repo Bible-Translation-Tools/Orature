@@ -65,6 +65,7 @@ class OngoingProjectImporter @Inject constructor(
 
     private val contentCache = mutableMapOf<ContentSignature, Content>()
     private var takesInChapterFilter: Map<String, Int>? = null
+    private var duplicatedTakes: MutableList<String> = mutableListOf()
 
     private val takeFilenamePattern = run {
         val chapter = """_c(\d+)"""
@@ -349,10 +350,19 @@ class OngoingProjectImporter @Inject constructor(
         }
         val sourceMetadata = sourceCollection.resourceContainer!!
 
+        val existingTakes = projectFilesAccessor.audioDir.walk()
+            .filter { AudioFileFormat.isSupported(it.extension) }
+            .map { it.name }
+
         val selectedTakes = prepareSelectedTakes(fileReader)
+        duplicatedTakes = takesInChapterFilter
+            ?.keys
+            ?.filter { takePath -> existingTakes.contains(File(takePath).name) }
+            ?.toMutableList()
+            ?: mutableListOf()
 
         projectFilesAccessor.copySelectedTakesFile(fileReader)
-        projectFilesAccessor.copyTakeFiles(fileReader, manifestProject, this::takeFileFilter)
+        projectFilesAccessor.copyTakeFiles(fileReader, manifestProject, ::takeCopyFilter)
             .doOnError { e ->
                 logger.error("Error in importTakes, project: $project, manifestProject: $manifestProject")
                 logger.error("metadata: $metadata, sourceMetadata: $sourceMetadata")
@@ -367,6 +377,14 @@ class OngoingProjectImporter @Inject constructor(
                     selectedTakes
                 )
             }
+
+        importDuplicatedTakes(
+            fileReader,
+            projectFilesAccessor.audioDir,
+            collectionForTakes,
+            sourceMetadata,
+            selectedTakes
+        )
     }
 
     private fun prepareSelectedTakes(fileReader: IFileReader): Set<String> {
@@ -388,11 +406,16 @@ class OngoingProjectImporter @Inject constructor(
             .toSet()
     }
 
-    private fun takeFileFilter(path: String): Boolean {
-        return takesInChapterFilter?.let {
-            it.keys.any { pathInRC ->
-                File(pathInRC).name == File(path).name
+    /**
+     * Filters only takes that are chosen to import (based on the callback result)
+     * AND excludes duplicated takes (takes that already exist).
+     */
+    private fun takeCopyFilter(path: String): Boolean {
+        return takesInChapterFilter?.let { takesInChapter ->
+            val takePath = takesInChapter.keys.firstOrNull { filterPath ->
+                File(filterPath).name == File(path).name
             }
+            takePath != null && takePath !in duplicatedTakes
         } ?: true
     }
 
@@ -450,6 +473,52 @@ class OngoingProjectImporter @Inject constructor(
             throw ImportException(ImportResult.IMPORT_ERROR)
         }
         return sourceCollection
+    }
+
+    private fun importDuplicatedTakes(
+        fileReader: IFileReader,
+        projectAudioDir: File,
+        project: Collection,
+        metadata: ResourceMetadata,
+        selectedTakes: Set<String>
+    ) {
+        if (duplicatedTakes.isEmpty()) {
+            return
+        }
+
+        duplicatedTakes.forEach { takePath ->
+            parseNumbers(takePath)?.let { (sig, _) ->
+                getContent(sig, project, metadata)?.let { chunk ->
+                    val now = LocalDate.now()
+                    val newTakeNumber = takeRepository.getByContent(chunk, false)
+                        .blockingGet()
+                        .maxByOrNull { it.number }
+                        ?.let { it.number + 1 }
+                        ?: 1
+
+                    val newFileName = File(takePath).name
+                        .replaceFirst(Regex("_t\\d"), "_t$newTakeNumber")
+
+                    val targetTakeFile = projectAudioDir
+                        .resolve("c" + sig.chapter.toString().padStart(2, '0'))
+                        .apply { mkdirs() }
+                        .resolve(newFileName)
+                        .apply { createNewFile() }
+
+                    fileReader.stream(takePath).buffered().use { input ->
+                        targetTakeFile.outputStream().use {
+                            input.copyTo(it)
+                        }
+                    }
+                    val take = Take(newFileName, targetTakeFile, newTakeNumber, now, null, false, listOf())
+                    take.id = takeRepository.insertForContent(take, chunk).blockingGet()
+                    if (selectedTakes.any { it.contains(File(takePath).name)}) {
+                        chunk.selectedTake = take
+                        contentRepository.update(chunk).blockingAwait()
+                    }
+                }
+            }
+        }
     }
 
     private fun hasInProgressMarker(resourceContainer: File): Boolean {
