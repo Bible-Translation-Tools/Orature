@@ -487,31 +487,15 @@ class OngoingProjectImporter @Inject constructor(
         duplicatedTakes.forEach { takePath ->
             parseNumbers(takePath)?.let { (sig, _) ->
                 getContent(sig, project, metadata)?.let { content ->
-                    val now = LocalDate.now()
-                    val newTakeNumber = takeRepository.getByContent(content, false)
-                        .blockingGet()
-                        .maxByOrNull { it.number }
-                        ?.let { it.number + 1 }
-                        ?: 1
-
-                    val newFileName = File(takePath).name
-                        .replaceFirst(Regex("_t\\d"), "_t$newTakeNumber")
-
-                    val targetTakeFile = projectAudioDir
-                        .resolve(getRelativeTakePath(takePath, manifestProject.path))
-                        .parentFile.resolve(newFileName)
-                        .apply {
-                            parentFile.mkdirs()
-                            createNewFile()
-                        }
-
-                    fileReader.stream(takePath).buffered().use { input ->
-                        targetTakeFile.outputStream().use {
-                            input.transferTo(it)
-                        }
+                    val take = copyDuplicatedTakeToProjectDir(
+                        takePath,
+                        projectAudioDir,
+                        content,
+                        manifestProject,
+                        fileReader
+                    ).apply {
+                        id = takeRepository.insertForContent(this, content).blockingGet()
                     }
-                    val take = Take(newFileName, targetTakeFile, newTakeNumber, now, null, false, listOf())
-                    take.id = takeRepository.insertForContent(take, content).blockingGet()
 
                     if (selectedTakes.any { it.contains(File(takePath).name)}) {
                         content.selectedTake = take
@@ -630,6 +614,40 @@ class OngoingProjectImporter @Inject constructor(
 
             content.blockingGet()
         }
+    }
+
+    private fun copyDuplicatedTakeToProjectDir(
+        takePath: String,
+        projectAudioDir: File,
+        content: Content,
+        manifestProject: Project,
+        fileReader: IFileReader
+    ): Take {
+        val now = LocalDate.now()
+        val newTakeNumber = takeRepository.getByContent(content, false)
+            .blockingGet()
+            .maxByOrNull { it.number }
+            ?.let { it.number + 1 }
+            ?: 1
+
+        val newFileName = File(takePath).name
+            .replaceFirst(Regex("_t\\d"), "_t$newTakeNumber")
+
+        val targetTakeFile = projectAudioDir
+            .resolve(getRelativeTakePath(takePath, manifestProject.path))
+            .parentFile.resolve(newFileName)
+            .apply {
+                parentFile.mkdirs()
+                createNewFile()
+            }
+
+        fileReader.stream(takePath).buffered().use { input ->
+            targetTakeFile.outputStream().use {
+                input.transferTo(it)
+            }
+        }
+
+        return Take(newFileName, targetTakeFile, newTakeNumber, now, null, false, listOf())
     }
 
     private fun getRelativeTakePath(pathInRC: String, metaProjectPath: String): String {
