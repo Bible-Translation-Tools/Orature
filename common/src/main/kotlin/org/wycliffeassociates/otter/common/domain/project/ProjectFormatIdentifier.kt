@@ -18,11 +18,7 @@ object ProjectFormatIdentifier {
         file: File
     ): ProjectFormat {
         return when {
-            OratureFileFormat.isSupported(file.extension) -> {
-                validateOratureFile(file)
-                ProjectFormat.RESOURCE_CONTAINER
-            }
-            file.isDirectory -> {
+            OratureFileFormat.isSupported(file.extension) || file.isDirectory -> {
                 validateOratureFile(file)
                 ProjectFormat.RESOURCE_CONTAINER
             }

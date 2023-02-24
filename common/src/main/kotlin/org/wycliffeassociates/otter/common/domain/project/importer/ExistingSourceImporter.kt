@@ -12,15 +12,12 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMet
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import javax.inject.Inject
-import javax.inject.Provider
 
 class ExistingSourceImporter @Inject constructor(
     private val directoryProvider: IDirectoryProvider,
-    private val resourceMetadataRepository: IResourceMetadataRepository
+    private val resourceMetadataRepository: IResourceMetadataRepository,
+    private val deleteUseCase: DeleteResourceContainer
 ) : RCImporter(directoryProvider, resourceMetadataRepository) {
-
-    @Inject
-    lateinit var deleteProvider: Provider<DeleteResourceContainer>
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
@@ -44,7 +41,7 @@ class ExistingSourceImporter @Inject constructor(
             /*
             val confirmDelete = callback.onRequestUserInput()
             */
-            val result = deleteProvider.get().deleteSync(existingSource.path)
+            val result = deleteUseCase.deleteSync(existingSource.path)
             if (result != DeleteResult.SUCCESS) {
                 Single.just(ImportResult.FAILED)
             } else {

@@ -52,7 +52,7 @@ abstract class RCImporter(
             .subscribeOn(Schedulers.io())
     }
 
-    fun isRCAlreadyImported(file: File): Boolean {
+    fun isAlreadyImported(file: File): Boolean {
         ResourceContainer.load(file, true).use { rc ->
             val dublinCore = rc.manifest.dublinCore
 
