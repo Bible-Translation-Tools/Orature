@@ -382,6 +382,7 @@ class OngoingProjectImporter @Inject constructor(
             fileReader,
             projectFilesAccessor.audioDir,
             collectionForTakes,
+            manifestProject,
             sourceMetadata,
             selectedTakes
         )
@@ -479,6 +480,7 @@ class OngoingProjectImporter @Inject constructor(
         fileReader: IFileReader,
         projectAudioDir: File,
         project: Collection,
+        manifestProject: Project,
         metadata: ResourceMetadata,
         selectedTakes: Set<String>
     ) {
@@ -496,18 +498,21 @@ class OngoingProjectImporter @Inject constructor(
                         .replaceFirst(Regex("_t\\d"), "_t$newTakeNumber")
 
                     val targetTakeFile = projectAudioDir
-                        .resolve("c" + sig.chapter.toString().padStart(2, '0'))
-                        .apply { mkdirs() }
-                        .resolve(newFileName)
-                        .apply { createNewFile() }
+                        .resolve(getRelativeTakePath(takePath, manifestProject.path))
+                        .parentFile.resolve(newFileName)
+                        .apply {
+                            parentFile.mkdirs()
+                            createNewFile()
+                        }
 
                     fileReader.stream(takePath).buffered().use { input ->
                         targetTakeFile.outputStream().use {
-                            input.copyTo(it)
+                            input.transferTo(it)
                         }
                     }
                     val take = Take(newFileName, targetTakeFile, newTakeNumber, now, null, false, listOf())
                     take.id = takeRepository.insertForContent(take, content).blockingGet()
+
                     if (selectedTakes.any { it.contains(File(takePath).name)}) {
                         content.selectedTake = take
                         contentRepository.update(content).blockingAwait()
@@ -624,6 +629,18 @@ class OngoingProjectImporter @Inject constructor(
                 .firstElement()
 
             content.blockingGet()
+        }
+    }
+
+    private fun getRelativeTakePath(pathInRC: String, metaProjectPath: String): String {
+        val metaProjectDir = File(metaProjectPath).normalize()
+        val takeDirInRC = File(RcConstants.TAKE_DIR)
+        val filePath = File(pathInRC)
+
+        return if (pathInRC.startsWith(metaProjectDir.invariantSeparatorsPath)) {
+            filePath.relativeTo(metaProjectDir).invariantSeparatorsPath
+        } else {
+            filePath.relativeTo(takeDirInRC).invariantSeparatorsPath
         }
     }
 
