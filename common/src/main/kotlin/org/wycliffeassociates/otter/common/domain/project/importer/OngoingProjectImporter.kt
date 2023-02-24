@@ -482,15 +482,11 @@ class OngoingProjectImporter @Inject constructor(
         metadata: ResourceMetadata,
         selectedTakes: Set<String>
     ) {
-        if (duplicatedTakes.isEmpty()) {
-            return
-        }
-
         duplicatedTakes.forEach { takePath ->
             parseNumbers(takePath)?.let { (sig, _) ->
-                getContent(sig, project, metadata)?.let { chunk ->
+                getContent(sig, project, metadata)?.let { content ->
                     val now = LocalDate.now()
-                    val newTakeNumber = takeRepository.getByContent(chunk, false)
+                    val newTakeNumber = takeRepository.getByContent(content, false)
                         .blockingGet()
                         .maxByOrNull { it.number }
                         ?.let { it.number + 1 }
@@ -511,10 +507,10 @@ class OngoingProjectImporter @Inject constructor(
                         }
                     }
                     val take = Take(newFileName, targetTakeFile, newTakeNumber, now, null, false, listOf())
-                    take.id = takeRepository.insertForContent(take, chunk).blockingGet()
+                    take.id = takeRepository.insertForContent(take, content).blockingGet()
                     if (selectedTakes.any { it.contains(File(takePath).name)}) {
-                        chunk.selectedTake = take
-                        contentRepository.update(chunk).blockingAwait()
+                        content.selectedTake = take
+                        contentRepository.update(content).blockingAwait()
                     }
                 }
             }
