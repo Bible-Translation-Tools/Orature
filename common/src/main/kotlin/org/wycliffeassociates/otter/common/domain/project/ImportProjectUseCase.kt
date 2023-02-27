@@ -36,7 +36,7 @@ class ImportProjectUseCase @Inject constructor() {
         return import(file, null, null)
     }
 
-    fun isRCAlreadyImported(file: File): Boolean {
+    fun isAlreadyImported(file: File): Boolean {
         return rcFactoryProvider.get()
             .makeImporter()
             .isAlreadyImported(file)

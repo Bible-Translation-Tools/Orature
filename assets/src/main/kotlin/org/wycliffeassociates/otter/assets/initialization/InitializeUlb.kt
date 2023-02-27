@@ -21,9 +21,6 @@ package org.wycliffeassociates.otter.assets.initialization
 import io.reactivex.Completable
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
-import org.wycliffeassociates.otter.common.domain.project.importer.ExistingSourceImporter
-import org.wycliffeassociates.otter.common.domain.project.importer.RCImporter
-import org.wycliffeassociates.otter.common.domain.project.importer.RCImporterFactory
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -31,7 +28,6 @@ import org.wycliffeassociates.otter.common.persistence.config.Installable
 import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
 import java.io.File
 import javax.inject.Inject
-import javax.inject.Provider
 
 const val EN_ULB_FILENAME = "en_ulb"
 private const val EN_ULB_PATH = "content/$EN_ULB_FILENAME.zip"
@@ -53,7 +49,7 @@ class InitializeUlb @Inject constructor(
                 val installedVersion = installedEntityRepo.getInstalledVersion(this)
                 if (installedVersion != version) {
                     val enUlbFile = prepareImportFile()
-                    if (importer.isRCAlreadyImported(enUlbFile)) {
+                    if (importer.isAlreadyImported(enUlbFile)) {
                         log.info("$EN_ULB_FILENAME already exists, skipped.")
                         return@fromCallable Completable.complete()
                     }

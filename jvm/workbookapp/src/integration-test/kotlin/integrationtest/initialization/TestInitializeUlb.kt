@@ -32,7 +32,6 @@ import org.mockito.Mockito.verify
 import org.wycliffeassociates.otter.assets.initialization.InitializeUlb
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
-import org.wycliffeassociates.otter.common.domain.project.importer.ExistingSourceImporter
 import org.wycliffeassociates.otter.common.domain.project.importer.RCImporterFactory
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
@@ -86,7 +85,7 @@ class TestInitializeUlb {
         val importer = Mockito.mock(ImportProjectUseCase::class.java)
         val importerSpy = Mockito.spy(importer)
 
-        doReturn(true).`when`(importerSpy).isRCAlreadyImported(any())
+        doReturn(true).`when`(importerSpy).isAlreadyImported(any())
 
         val init = InitializeUlb(
             directoryProvider,
@@ -101,7 +100,7 @@ class TestInitializeUlb {
         testSub.assertComplete()
         testSub.assertNoErrors()
 
-        verify(importerSpy).isRCAlreadyImported(any())
+        verify(importerSpy).isAlreadyImported(any())
         verify(importerSpy, never()).import(any(), any(), any())
         verify(importerSpy, never()).import(any())
     }
