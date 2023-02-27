@@ -156,15 +156,26 @@ class ImportResourceContainer @Inject constructor(
             var exists = false
             logger.info("Importing RC...")
             val internalDir = getInternalDirectory(file) ?: throw ImportException(ImportResult.LOAD_RC_ERROR)
+            val internalFile = File(internalDir, file.name)
             if (internalDir.exists()) {
                 val rcFileExists = file.isFile && internalDir.contains(file.name)
                 val rcDirExists = file.isDirectory && internalDir.listFiles().isNotEmpty()
+
+                // if the imported file has the same name as an internal RC, merge them
+                if (internalFile.absolutePath != file.absolutePath) {
+                    ResourceContainer.load(file).use { from ->
+                        ResourceContainer.load(internalFile).use { to ->
+                            MediaMerge(directoryProvider, from, to).merge()
+                        }
+                    }
+                }
                 if (rcFileExists || rcDirExists) {
                     exists = true
                 }
             }
             val rcToImport = if (exists) {
-                file
+                // if the RC exists, import the one in the internal directory, otherwise the path can be set to a temp file
+                internalFile
             } else {
                 copyToInternalDirectory(file, internalDir)
             }
