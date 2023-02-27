@@ -10,6 +10,9 @@ import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.io.InputStream
 
+/**
+ * An importer for Resource Container project format.
+ */
 abstract class RCImporter(
     private val directoryProvider: IDirectoryProvider,
     private val resourceMetadataRepository: IResourceMetadataRepository
