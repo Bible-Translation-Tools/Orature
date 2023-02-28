@@ -30,6 +30,8 @@ import integrationtest.projects.TestRcImport
 import integrationtest.projects.TestRemoveRc
 import integrationtest.projects.importer.TestExistingSourceImporter
 import integrationtest.projects.export.TestExportSourceProject
+import integrationtest.projects.importer.TestOngoingProjectImporter
+import integrationtest.projects.importer.TestRCImporterFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.di.AppDependencyGraph
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppDatabaseModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppPreferencesModule
@@ -56,6 +58,7 @@ interface TestPersistenceComponent : AppDependencyGraph {
     fun inject(test: TestRcImport)
     fun inject(test: TestProjectImport)
     fun inject(test: TestExistingSourceImporter)
+    fun inject(test: TestRCImporterFactory)
     fun inject(test: TestRemoveRc)
     fun inject(test: TestProjectExport)
     fun inject(test: TestExportSourceProject)
