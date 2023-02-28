@@ -58,6 +58,7 @@ interface TestPersistenceComponent : AppDependencyGraph {
     fun inject(test: TestRcImport)
     fun inject(test: TestProjectImport)
     fun inject(test: TestExistingSourceImporter)
+    fun inject(test: TestOngoingProjectImporter)
     fun inject(test: TestRCImporterFactory)
     fun inject(test: TestRemoveRc)
     fun inject(test: TestProjectExport)
