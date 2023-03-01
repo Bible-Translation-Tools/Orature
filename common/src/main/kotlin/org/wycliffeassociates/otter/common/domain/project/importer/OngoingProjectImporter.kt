@@ -216,7 +216,7 @@ class OngoingProjectImporter @Inject constructor(
                 e.result
             } catch (e: Exception) {
                 logger.error("Failed to import in-progress project", e)
-                ImportResult.IMPORT_ERROR
+                ImportResult.FAILED
             }
         }
     }
@@ -471,7 +471,7 @@ class OngoingProjectImporter @Inject constructor(
 
         if (sourceCollection == null) {
             logger.error("Failed to find source that matches requested import.")
-            throw ImportException(ImportResult.IMPORT_ERROR)
+            throw ImportException(ImportResult.FAILED)
         }
         return sourceCollection
     }

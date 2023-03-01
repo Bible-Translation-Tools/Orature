@@ -26,10 +26,17 @@ class ImportProjectUseCase @Inject constructor() {
         callback: ProjectImporterCallback?,
         options: ImportOptions? = null
     ): Single<ImportResult> {
-        val format = ProjectFormatIdentifier.getProjectFormat(file)
-        val importer = getImporter(format)
-
-        return importer.import(file, callback, options)
+        return Single
+            .fromCallable {
+                val format = ProjectFormatIdentifier.getProjectFormat(file)
+                getImporter(format)
+            }
+            .flatMap {
+                it.import(file, callback, options)
+            }
+            .onErrorReturn {
+                ImportResult.FAILED
+            }
     }
 
     fun import(file: File): Single<ImportResult> {
