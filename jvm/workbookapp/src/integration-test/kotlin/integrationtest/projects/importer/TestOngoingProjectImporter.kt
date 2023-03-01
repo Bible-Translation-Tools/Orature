@@ -56,7 +56,11 @@ class TestOngoingProjectImporter {
         importOngoingProject(callback = null)
         val originalTakes = db.db.takeDao.fetchAll()
 
-        Assert.assertEquals(takesInProject, originalTakes.size)
+        Assert.assertEquals(
+            "There should be $takesInProject takes after the initial import.",
+            takesInProject,
+            originalTakes.size
+        )
 
         /* Import the same project with chapter selection provided from callback */
         importOngoingProject(callback = this.callback)
@@ -70,7 +74,12 @@ class TestOngoingProjectImporter {
             .sorted()
             .distinct()
 
-        Assert.assertEquals(takesInProject + takesAdded, currentTakes.size)
+        Assert.assertEquals(
+            "There should be $takesInProject + $takesAdded takes " +
+                    "after importing chapter: $chaptersSelected",
+            takesInProject + takesAdded,
+            currentTakes.size
+        )
         Assert.assertEquals(takesAdded, addedTakes.size)
         Assert.assertEquals(chaptersSelected, chaptersImported)
     }

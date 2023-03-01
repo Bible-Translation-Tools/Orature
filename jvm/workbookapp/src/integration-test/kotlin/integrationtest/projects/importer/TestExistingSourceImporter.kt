@@ -134,8 +134,12 @@ class TestExistingSourceImporter {
 
         val newSource = resourceMetadataRepository.getAllSources().blockingGet().single()
 
-        Assert.assertEquals("999", newSource.version)
-        Assert.assertFalse(existingSource.path.exists())
+        Assert.assertEquals("999",newSource.version)
+        Assert.assertTrue(newSource.path.exists())
+        Assert.assertFalse(
+            "Old source file should be deleted after replacing with different source version.",
+            existingSource.path.exists()
+        )
         verify(callbackMock).onRequestUserInput()
         verify(spyDeleteUseCase).deleteSync(any())
         verify(spyMergeMedia, never()).merge(any(), any())
