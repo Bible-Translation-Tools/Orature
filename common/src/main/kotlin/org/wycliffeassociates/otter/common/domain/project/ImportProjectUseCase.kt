@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.common.domain.project
 
 import io.reactivex.Single
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.project.importer.IProjectImporter
 import org.wycliffeassociates.otter.common.domain.project.importer.IProjectImporterFactory
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
@@ -16,6 +17,8 @@ class ImportProjectUseCase @Inject constructor() {
 
     @Inject
     lateinit var rcFactoryProvider: Provider<RCImporterFactory>
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     @Throws(
         IllegalArgumentException::class,
@@ -35,6 +38,7 @@ class ImportProjectUseCase @Inject constructor() {
                 it.import(file, callback, options)
             }
             .onErrorReturn {
+                logger.error("Failed to import project file: $file. See exception detail below.", it)
                 ImportResult.FAILED
             }
     }
