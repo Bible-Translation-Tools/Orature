@@ -11,8 +11,15 @@ interface ProjectImporterCallback {
      * Called when the importer requires input from the user. This method
      * should be implemented by the client code.
      *
+     * @return the user's input
+     */
+    fun onRequestUserInput(): Single<ImportOptions>
+    /**
+     * Requests for user input with the parameter provided.
+     *
      * @param parameter presents the available options for the user.
      * @return the user's selection
+     * @see ProjectImporterCallback.onRequestUserInput
      */
     fun onRequestUserInput(parameter: ImportCallbackParameter): Single<ImportOptions>
 

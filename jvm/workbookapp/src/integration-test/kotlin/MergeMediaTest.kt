@@ -50,8 +50,8 @@ class MergeMediaTest {
         val fromRc = ResourceContainer.load(fromFile)
         val toRc = ResourceContainer.load(toFile)
 
-        val mergeMedia = MediaMerge(directoryProvider, fromRc, toRc)
-        mergeMedia.merge()
+        val mergeMedia = MediaMerge(directoryProvider)
+        mergeMedia.merge(fromRc, toRc)
         fromRc.write()
         assertTrue(validateAfterWrite(toRc))
         toFile.deleteRecursively()

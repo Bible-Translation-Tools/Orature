@@ -27,5 +27,6 @@ enum class ImportResult {
     LOAD_RC_ERROR,
     ALREADY_EXISTS,
     UNMATCHED_HELP,
-    FAILED
+    FAILED,
+    ABORTED
 }

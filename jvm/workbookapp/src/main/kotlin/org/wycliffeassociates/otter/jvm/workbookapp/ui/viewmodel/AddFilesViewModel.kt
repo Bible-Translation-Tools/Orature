@@ -125,14 +125,14 @@ class AddFilesViewModel : ViewModel() {
     private fun setupImportCallback(): ProjectImporterCallback {
         return object : ProjectImporterCallback {
             override fun onRequestUserInput(): Single<ImportOptions> {
-                TODO("Not yet implemented")
+                return Single.just(ImportOptions(confirmed = true))
             }
 
             override fun onRequestUserInput(parameter: ImportCallbackParameter): Single<ImportOptions> {
                 return Single.just(ImportOptions(null))
             }
 
-            override fun onError() {
+            override fun onError(messageKey: String) {
                 TODO("Not yet implemented")
             }
 

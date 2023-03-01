@@ -18,6 +18,7 @@ import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImport
 import org.wycliffeassociates.otter.common.domain.project.importer.RCImporter
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import java.io.File
+import java.io.FileNotFoundException
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -100,9 +101,11 @@ class TestOngoingProjectImporter {
      * There are 3 chapters having audio. Each includes one chapter take and one verse take.
      */
     private fun getProjectFileWith3Chapters(): File {
-        val path = javaClass.classLoader.getResource(
-            "resource-containers/john-3-chapters-translation.orature"
-        ).file
-        return File(path)
+        val name = "resource-containers/john-3-chapters-translation.orature"
+        val path = javaClass.classLoader.getResource(name)
+        if (path == null) {
+            throw FileNotFoundException("Test resource not found: $name")
+        }
+        return File(path.file)
     }
 }
