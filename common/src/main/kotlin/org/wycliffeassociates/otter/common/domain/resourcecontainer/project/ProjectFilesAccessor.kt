@@ -344,20 +344,35 @@ class ProjectFilesAccessor(
                             true -> "${vm.verseNumber}. ${vm.getText()}"
                             false -> vm.getText()
                         }
-
                         val content = Content(
-                            sort = idx,
+                            sort = chapterContent.size,
                             labelKey = ContentLabel.VERSE.value,
                             start = vm.startingVerse,
                             end = vm.endingVerse,
                             text = text,
-                            bridged = vm.startingVerse != vm.endingVerse,
+                            bridged = false,
                             type = ContentType.TEXT,
                             format = "usfm",
                             draftNumber = 0
                         )
-
                         chapterContent.add(content)
+
+                        // the rest of bridged verses should be marked bridged
+                        for (i in vm.startingVerse+1..vm.endingVerse) {
+                            chapterContent.add(
+                                Content(
+                                    sort = chapterContent.size,
+                                    labelKey = ContentLabel.VERSE.value,
+                                    start = vm.startingVerse,
+                                    end = vm.endingVerse,
+                                    text = "",
+                                    bridged = true,
+                                    type = ContentType.TEXT,
+                                    format = "usfm",
+                                    draftNumber = 0
+                                )
+                            )
+                        }
                     }
                 }
             }
