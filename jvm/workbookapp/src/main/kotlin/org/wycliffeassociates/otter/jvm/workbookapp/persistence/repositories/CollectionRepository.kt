@@ -608,7 +608,8 @@ class CollectionRepository @Inject constructor(
             CONTENT_ENTITY.START,
             CONTENT_ENTITY.SORT,
             CONTENT_ENTITY.TYPE_FK,
-            CONTENT_ENTITY.DRAFT_NUMBER
+            CONTENT_ENTITY.DRAFT_NUMBER,
+            CONTENT_ENTITY.BRIDGED
         )
             .select(
                 dsl.select(
@@ -617,7 +618,8 @@ class CollectionRepository @Inject constructor(
                     field("versestart", Int::class.java),
                     field("versesort", Int::class.java),
                     field("typefk", Int::class.java),
-                    field("draftnumber", Int::class.java)
+                    field("draftnumber", Int::class.java),
+                    field("bridged", Int::class.java)
                 )
                     .from(
                         dsl.select(
@@ -627,7 +629,8 @@ class CollectionRepository @Inject constructor(
                             CONTENT_ENTITY.START.`as`("versestart"),
                             CONTENT_ENTITY.SORT.`as`("versesort"),
                             CONTENT_ENTITY.TYPE_FK.`as`("typefk"),
-                            CONTENT_ENTITY.DRAFT_NUMBER.`as`("draftnumber")
+                            CONTENT_ENTITY.DRAFT_NUMBER.`as`("draftnumber"),
+                            CONTENT_ENTITY.BRIDGED.`as`("bridged")
                         )
                             .from(CONTENT_ENTITY)
                             .where(
