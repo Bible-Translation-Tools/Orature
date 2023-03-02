@@ -21,7 +21,10 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.MaybeSubject
 import io.reactivex.subjects.PublishSubject
+import io.reactivex.subjects.SingleSubject
+import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -38,6 +41,7 @@ import org.wycliffeassociates.otter.common.domain.project.importer.OngoingProjec
 import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ImportSelectionDialog
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
 import java.io.File
@@ -129,7 +133,15 @@ class AddFilesViewModel : ViewModel() {
             }
 
             override fun onRequestUserInput(parameter: ImportCallbackParameter): Single<ImportOptions> {
-                return Single.just(ImportOptions(null))
+                val resultSubject = SingleSubject.create<ImportOptions>()
+                find<ImportSelectionDialog>().apply {
+                    options.setAll(parameter.options)
+
+                    Platform.runLater {
+                        openDialog(resultSubject)
+                    }
+                }
+                return resultSubject
             }
 
             override fun onError(messageKey: String) {

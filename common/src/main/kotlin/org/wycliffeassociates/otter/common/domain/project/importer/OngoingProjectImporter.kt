@@ -95,7 +95,10 @@ class OngoingProjectImporter @Inject constructor(
             }
             .flatMap { exists ->
                 if (exists && callback != null) {
-                    updateTakesImportFilter(file, callback)
+                    val filterProvided = updateTakesImportFilter(file, callback)
+                    if (!filterProvided) {
+                        return@flatMap Single.just(ImportResult.ABORTED)
+                    }
                 }
                 importResumableProject(file)
             }
@@ -129,15 +132,18 @@ class OngoingProjectImporter @Inject constructor(
         }
     }
 
-    private fun updateTakesImportFilter(file: File, callback: ProjectImporterCallback) {
+    private fun updateTakesImportFilter(
+        file: File,
+        callback: ProjectImporterCallback
+    ): Boolean {
         val takesChapterMap = fetchTakesInRC(file)
         val chapterList = takesChapterMap.values.distinct().sorted()
         val callbackParam = ImportCallbackParameter(chapterList)
-        val valueFromCallback = callback.onRequestUserInput(callbackParam).blockingGet().chapters
+        val chaptersToImport = callback.onRequestUserInput(callbackParam).blockingGet().chapters
+            ?: return false
 
-        takesInChapterFilter = valueFromCallback?.let { selectedChapters ->
-            takesChapterMap.filter { entry -> entry.value in selectedChapters }
-        }
+        takesInChapterFilter = takesChapterMap.filter { entry -> entry.value in chaptersToImport }
+        return true
     }
 
     private fun fetchTakesInRC(file: File): Map<String, Int> {
