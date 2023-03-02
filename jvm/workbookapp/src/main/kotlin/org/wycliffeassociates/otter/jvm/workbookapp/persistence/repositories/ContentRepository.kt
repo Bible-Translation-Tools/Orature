@@ -62,7 +62,7 @@ class ContentRepository @Inject constructor(
                     .map(this::buildContent)
                     .filter {
                         if (it.bridged) {
-                            logger.info("Ignoring bridged content: ${it}")
+                            logger.info("Ignoring bridged content: ${it}, start is ${it.start} end is ${it.end}")
                         }
                         !it.bridged
                     }
