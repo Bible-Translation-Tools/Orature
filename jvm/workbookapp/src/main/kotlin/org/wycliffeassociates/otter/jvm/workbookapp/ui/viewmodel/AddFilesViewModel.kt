@@ -110,7 +110,7 @@ class AddFilesViewModel : ViewModel() {
                         showImportSuccessDialogProperty.value = true
                         find<HomePageViewModel>().loadTranslations()
                     }
-                    ImportResult.FAILED -> {
+                    ImportResult.DEPENDENCY_CONSTRAINT -> {
                         importErrorMessage.set(messages["importErrorDependencyExists"])
                         showImportErrorDialogProperty.value = true
                     }
