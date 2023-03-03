@@ -240,7 +240,6 @@ class ContentRepository @Inject constructor(
     private fun buildContent(entity: ContentEntity): Content {
         // Check for sources
         val sources = contentDao.fetchSources(entity)
-        val contentEnd = sources.map { it.start }.maxOrNull() ?: entity.start
         val selectedTake = entity
             .selectedTakeFk?.let { selectedTakeFk ->
                 // Retrieve the markers
@@ -249,6 +248,6 @@ class ContentRepository @Inject constructor(
                     .map(markerMapper::mapFromEntity)
                 takeMapper.mapFromEntity(takeDao.fetchById(selectedTakeFk), markers)
             }
-        return contentMapper.mapFromEntity(entity, selectedTake, contentEnd)
+        return contentMapper.mapFromEntity(entity, selectedTake)
     }
 }

@@ -228,6 +228,7 @@ class ContentDao(
                 CONTENT_ENTITY.COLLECTION_FK,
                 CONTENT_ENTITY.SORT,
                 CONTENT_ENTITY.START,
+                CONTENT_ENTITY.V_END,
                 CONTENT_ENTITY.LABEL,
                 CONTENT_ENTITY.SELECTED_TAKE_FK,
                 CONTENT_ENTITY.TEXT,
@@ -240,6 +241,7 @@ class ContentDao(
                 entity.collectionFk,
                 entity.sort,
                 entity.start,
+                entity.end,
                 entity.labelKey,
                 entity.selectedTakeFk,
                 entity.text,
@@ -267,6 +269,7 @@ class ContentDao(
                 CONTENT_ENTITY.COLLECTION_FK,
                 CONTENT_ENTITY.SORT,
                 CONTENT_ENTITY.START,
+                CONTENT_ENTITY.V_END,
                 CONTENT_ENTITY.LABEL,
                 CONTENT_ENTITY.SELECTED_TAKE_FK,
                 CONTENT_ENTITY.TEXT,
@@ -281,6 +284,7 @@ class ContentDao(
                 e.collectionFk,
                 e.sort,
                 e.start,
+                e.end,
                 e.labelKey,
                 e.selectedTakeFk,
                 e.text,
@@ -318,6 +322,7 @@ class ContentDao(
             .set(CONTENT_ENTITY.SORT, entity.sort)
             .set(CONTENT_ENTITY.LABEL, entity.labelKey)
             .set(CONTENT_ENTITY.START, entity.start)
+            .set(CONTENT_ENTITY.V_END, entity.end)
             .set(CONTENT_ENTITY.COLLECTION_FK, entity.collectionFk)
             .set(CONTENT_ENTITY.SELECTED_TAKE_FK, entity.selectedTakeFk)
             .set(CONTENT_ENTITY.TEXT, entity.text)

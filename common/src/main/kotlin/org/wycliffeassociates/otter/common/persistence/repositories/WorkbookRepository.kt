@@ -252,7 +252,8 @@ class WorkbookRepository(
             start = content.start,
             end = content.end,
             contentType = content.type,
-            draftNumber = content.draftNumber
+            draftNumber = content.draftNumber,
+            bridged = content.bridged
         )
     }
 

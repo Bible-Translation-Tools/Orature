@@ -400,7 +400,7 @@ class ChapterPageViewModel : ViewModel() {
                     filteredContent.add(it)
                 }
 
-                filteredContent.removeIf { it.chunkSource != null && it.chunkSource.draftNumber < 0 }
+                filteredContent.removeIf { (it.chunkSource != null && it.chunkSource.draftNumber < 0) || (it.chunkSource != null && it.chunkSource.bridged) }
                 filteredContent.sortBy { it.sort }
                 setWorkChunk()
                 it

@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS content_entity (
     label            TEXT NOT NULL,
     selected_take_fk INTEGER REFERENCES take_entity(id) ON DELETE SET NULL,
     start            INTEGER NOT NULL,
+    v_end            INTEGER DEFAULT 0 NOT NULL,
     sort             INTEGER NOT NULL,
     text             TEXT,
     format           TEXT,

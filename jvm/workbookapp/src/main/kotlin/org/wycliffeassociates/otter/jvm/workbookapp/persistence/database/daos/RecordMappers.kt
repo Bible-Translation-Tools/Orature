@@ -87,6 +87,7 @@ class RecordMappers {
                 record.getValue(table.SORT),
                 record.getValue(table.LABEL),
                 record.getValue(table.START),
+                record.getValue(table.V_END),
                 record.getValue(table.COLLECTION_FK),
                 record.getValue(table.SELECTED_TAKE_FK),
                 record.getValue(table.TEXT),

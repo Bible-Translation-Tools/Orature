@@ -283,6 +283,11 @@ class DatabaseMigrator {
                     .execute()
 
                 dsl
+                    .alterTable(ContentEntity.CONTENT_ENTITY)
+                    .addColumn(ContentEntity.CONTENT_ENTITY.V_END)
+                    .execute()
+
+                dsl
                     .createTableIfNotExists(
                         VersificationEntity.VERSIFICATION_ENTITY
                     )

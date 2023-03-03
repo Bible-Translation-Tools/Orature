@@ -24,12 +24,12 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.Co
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ContentEntity
 
 class ContentMapper(private val contentTypeDao: ContentTypeDao) {
-    fun mapFromEntity(entity: ContentEntity, selectedTake: Take?, end: Int): Content {
+    fun mapFromEntity(entity: ContentEntity, selectedTake: Take?): Content {
         return Content(
             sort = entity.sort,
             labelKey = entity.labelKey,
             start = entity.start,
-            end = end,
+            end = entity.end,
             selectedTake = selectedTake,
             text = entity.text,
             format = entity.format,
@@ -46,6 +46,7 @@ class ContentMapper(private val contentTypeDao: ContentTypeDao) {
             sort = obj.sort,
             labelKey = obj.labelKey,
             start = obj.start,
+            end = obj.end,
             collectionFk = collectionFk,
             selectedTakeFk = obj.selectedTake?.id,
             text = obj.text,

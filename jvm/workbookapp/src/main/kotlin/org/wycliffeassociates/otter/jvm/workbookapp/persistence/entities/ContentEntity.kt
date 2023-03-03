@@ -23,6 +23,7 @@ data class ContentEntity(
     var sort: Int,
     var labelKey: String,
     var start: Int,
+    var end: Int,
     var collectionFk: Int,
     var selectedTakeFk: Int?,
     var text: String?,

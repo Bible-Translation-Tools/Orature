@@ -363,7 +363,7 @@ class ProjectFilesAccessor(
                                 Content(
                                     sort = chapterContent.size,
                                     labelKey = ContentLabel.VERSE.value,
-                                    start = vm.startingVerse,
+                                    start = i,
                                     end = vm.endingVerse,
                                     text = "",
                                     bridged = true,
