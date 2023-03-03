@@ -49,7 +49,7 @@ class ExistingSourceImporter @Inject constructor(
                     super.passToNextImporter(file, callback, options)
                 }
                 else -> {
-                    Single.just(ImportResult.FAILED)
+                    Single.just(ImportResult.DEPENDENCY_CONSTRAINT)
                 }
             }
         }
@@ -71,7 +71,7 @@ class ExistingSourceImporter @Inject constructor(
             }
             .onErrorReturn {
                 logger.error("Merge media failed!", it)
-                ImportResult.IMPORT_ERROR
+                ImportResult.FAILED
             }
     }
 

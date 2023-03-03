@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.common.domain.project
 
 import io.reactivex.Single
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.project.importer.IProjectImporter
 import org.wycliffeassociates.otter.common.domain.project.importer.IProjectImporterFactory
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
@@ -17,6 +18,8 @@ class ImportProjectUseCase @Inject constructor() {
     @Inject
     lateinit var rcFactoryProvider: Provider<RCImporterFactory>
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     @Throws(
         IllegalArgumentException::class,
         InvalidResourceContainerException::class
@@ -26,10 +29,18 @@ class ImportProjectUseCase @Inject constructor() {
         callback: ProjectImporterCallback?,
         options: ImportOptions? = null
     ): Single<ImportResult> {
-        val format = ProjectFormatIdentifier.getProjectFormat(file)
-        val importer = getImporter(format)
-
-        return importer.import(file, callback, options)
+        return Single
+            .fromCallable {
+                val format = ProjectFormatIdentifier.getProjectFormat(file)
+                getImporter(format)
+            }
+            .flatMap {
+                it.import(file, callback, options)
+            }
+            .onErrorReturn {
+                logger.error("Failed to import project file: $file. See exception detail below.", it)
+                ImportResult.FAILED
+            }
     }
 
     fun import(file: File): Single<ImportResult> {

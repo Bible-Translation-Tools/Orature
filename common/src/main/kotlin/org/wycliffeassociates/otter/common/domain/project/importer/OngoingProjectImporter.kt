@@ -95,8 +95,10 @@ class OngoingProjectImporter @Inject constructor(
             }
             .flatMap { exists ->
                 if (exists && callback != null) {
-                    updateTakesImportFilter(file, callback)
-                }
+                    val filterProvided = updateTakesImportFilter(file, callback)
+                    if (!filterProvided) {
+                        return@flatMap Single.just(ImportResult.ABORTED)
+                    }                }
                 importResumableProject(file)
             }
             .subscribeOn(Schedulers.io())
@@ -129,15 +131,18 @@ class OngoingProjectImporter @Inject constructor(
         }
     }
 
-    private fun updateTakesImportFilter(file: File, callback: ProjectImporterCallback) {
+    private fun updateTakesImportFilter(
+        file: File,
+        callback: ProjectImporterCallback
+    ): Boolean {
         val takesChapterMap = fetchTakesInRC(file)
         val chapterList = takesChapterMap.values.distinct().sorted()
         val callbackParam = ImportCallbackParameter(chapterList)
-        val valueFromCallback = callback.onRequestUserInput(callbackParam).blockingGet().chapters
+        val chaptersToImport = callback.onRequestUserInput(callbackParam).blockingGet().chapters
+            ?: return false
 
-        takesInChapterFilter = valueFromCallback?.let { selectedChapters ->
-            takesChapterMap.filter { entry -> entry.value in selectedChapters }
-        }
+        takesInChapterFilter = takesChapterMap.filter { entry -> entry.value in chaptersToImport }
+        return true
     }
 
     private fun fetchTakesInRC(file: File): Map<String, Int> {
@@ -216,7 +221,7 @@ class OngoingProjectImporter @Inject constructor(
                 e.result
             } catch (e: Exception) {
                 logger.error("Failed to import in-progress project", e)
-                ImportResult.IMPORT_ERROR
+                ImportResult.FAILED
             }
         }
     }
@@ -471,7 +476,7 @@ class OngoingProjectImporter @Inject constructor(
 
         if (sourceCollection == null) {
             logger.error("Failed to find source that matches requested import.")
-            throw ImportException(ImportResult.IMPORT_ERROR)
+            throw ImportException(ImportResult.FAILED)
         }
         return sourceCollection
     }
