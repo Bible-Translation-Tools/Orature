@@ -21,7 +21,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.MaybeSubject
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.SingleSubject
 import javafx.application.Platform
@@ -40,6 +39,8 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.project.importer.OngoingProjectImporter
 import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.jvm.controls.dialog.ConfirmDialog
+import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ImportSelectionDialog
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
@@ -51,6 +52,7 @@ import javax.inject.Provider
 class AddFilesViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(AddFilesViewModel::class.java)
+    private val settingsViewModel: SettingsViewModel by inject()
 
     @Inject lateinit var directoryProvider: IDirectoryProvider
     @Inject lateinit var importProjectProvider : Provider<ImportProjectUseCase>
@@ -129,7 +131,31 @@ class AddFilesViewModel : ViewModel() {
     private fun setupImportCallback(): ProjectImporterCallback {
         return object : ProjectImporterCallback {
             override fun onRequestUserInput(): Single<ImportOptions> {
-                return Single.just(ImportOptions(confirmed = true))
+                val responseObservable = SingleSubject.create<ImportOptions>()
+                confirmdialog {
+                    titleTextProperty.set("Confirm import")
+                    messageTextProperty.set("Do you wish to overwrite the existing source?")
+                    confirmButtonTextProperty.set("Yes")
+                    cancelButtonTextProperty.set("No")
+                    themeProperty.bind(settingsViewModel.appColorMode)
+
+                    onConfirmAction {
+                        responseObservable.onSuccess(ImportOptions(confirmed = true))
+                        showImportDialogProperty.set(true)
+                        close()
+                    }
+                    onCancelAction {
+                        responseObservable.onSuccess(ImportOptions(confirmed = false))
+                        showImportDialogProperty.set(true)
+                        close()
+                    }
+
+                }.apply {
+                    runLater {
+                        open()
+                    }
+                }
+                return responseObservable
             }
 
             override fun onRequestUserInput(parameter: ImportCallbackParameter): Single<ImportOptions> {

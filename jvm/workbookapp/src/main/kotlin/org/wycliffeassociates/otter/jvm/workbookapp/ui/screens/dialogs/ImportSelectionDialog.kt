@@ -94,9 +94,4 @@ class ImportSelectionDialog : OtterDialog() {
         result = resultSubject
         open()
     }
-
-    fun closeDialog() {
-        options.clear()
-        close()
-    }
 }
