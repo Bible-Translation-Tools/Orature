@@ -162,7 +162,7 @@ class ImportResourceContainer @Inject constructor(
                 val rcDirExists = file.isDirectory && internalDir.listFiles().isNotEmpty()
 
                 // if the imported file has the same name as an internal RC, merge them
-                if (internalFile.absolutePath != file.absolutePath) {
+                if (internalFile.absolutePath != file.absolutePath && internalFile.exists()) {
                     ResourceContainer.load(file).use { from ->
                         ResourceContainer.load(internalFile).use { to ->
                             MediaMerge(directoryProvider, from, to).merge()
