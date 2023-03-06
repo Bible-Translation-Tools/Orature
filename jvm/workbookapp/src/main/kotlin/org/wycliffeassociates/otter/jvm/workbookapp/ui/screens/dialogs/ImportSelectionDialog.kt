@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs
 
-import io.reactivex.subjects.SingleSubject
+import io.reactivex.SingleEmitter
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
@@ -14,7 +14,7 @@ class ImportSelectionDialog : OtterDialog() {
     private val settingsViewModel: SettingsViewModel by inject()
 
     val options = observableListOf<Int>()
-    lateinit var result: SingleSubject<ImportOptions>
+    lateinit var result: SingleEmitter<ImportOptions>
 
     private val selectedList = observableListOf<Int>()
 
@@ -90,8 +90,8 @@ class ImportSelectionDialog : OtterDialog() {
         orientationProperty.set(settingsViewModel.orientationProperty.value)
     }
 
-    fun openDialog(resultSubject: SingleSubject<ImportOptions>) {
-        result = resultSubject
+    fun openDialog(emitter: SingleEmitter<ImportOptions>) {
+        result = emitter
         open()
     }
 }

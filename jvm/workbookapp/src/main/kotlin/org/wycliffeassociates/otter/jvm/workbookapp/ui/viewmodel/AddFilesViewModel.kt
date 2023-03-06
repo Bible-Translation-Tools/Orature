@@ -22,7 +22,6 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
-import io.reactivex.subjects.SingleSubject
 import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -39,7 +38,6 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.project.importer.OngoingProjectImporter
 import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.jvm.controls.dialog.ConfirmDialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ImportSelectionDialog
@@ -130,44 +128,45 @@ class AddFilesViewModel : ViewModel() {
 
     private fun setupImportCallback(): ProjectImporterCallback {
         return object : ProjectImporterCallback {
+
             override fun onRequestUserInput(): Single<ImportOptions> {
-                val responseObservable = SingleSubject.create<ImportOptions>()
-                confirmdialog {
-                    titleTextProperty.set("Confirm import")
-                    messageTextProperty.set("Do you wish to overwrite the existing source?")
-                    confirmButtonTextProperty.set("Yes")
-                    cancelButtonTextProperty.set("No")
-                    themeProperty.bind(settingsViewModel.appColorMode)
+                return Single.create<ImportOptions> { emitter ->
+                    confirmdialog {
+                        titleTextProperty.set("Confirm import")
+                        messageTextProperty.set("Do you wish to overwrite the existing source?")
+                        confirmButtonTextProperty.set("Yes")
+                        cancelButtonTextProperty.set("No")
+                        themeProperty.bind(settingsViewModel.appColorMode)
 
-                    onConfirmAction {
-                        responseObservable.onSuccess(ImportOptions(confirmed = true))
-                        showImportDialogProperty.set(true)
-                        close()
-                    }
-                    onCancelAction {
-                        responseObservable.onSuccess(ImportOptions(confirmed = false))
-                        showImportDialogProperty.set(true)
-                        close()
-                    }
+                        onConfirmAction {
+                            emitter.onSuccess(ImportOptions(confirmed = true))
+                            showImportDialogProperty.set(true)
+                            close()
+                        }
+                        onCancelAction {
+                            emitter.onSuccess(ImportOptions(confirmed = false))
+                            showImportDialogProperty.set(true)
+                            close()
+                        }
 
-                }.apply {
-                    runLater {
-                        open()
+                    }.apply {
+                        runLater {
+                            open()
+                        }
                     }
                 }
-                return responseObservable
             }
 
             override fun onRequestUserInput(parameter: ImportCallbackParameter): Single<ImportOptions> {
-                val resultSubject = SingleSubject.create<ImportOptions>()
-                find<ImportSelectionDialog>().apply {
-                    options.setAll(parameter.options)
+                return Single.create<ImportOptions> { emitter ->
+                    find<ImportSelectionDialog>().apply {
+                        options.setAll(parameter.options)
 
-                    Platform.runLater {
-                        openDialog(resultSubject)
+                        Platform.runLater {
+                            openDialog(emitter)
+                        }
                     }
                 }
-                return resultSubject
             }
 
             override fun onError(messageKey: String) {
