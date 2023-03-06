@@ -23,7 +23,7 @@ import javafx.scene.control.ListCell
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportOption
+import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOption
 import tornadofx.FX.Companion.messages
 import tornadofx.addClass
 import tornadofx.get

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
+package org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer
 
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -33,8 +33,8 @@ import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.content.TakeActions
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
+import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
-import org.wycliffeassociates.otter.common.utils.mapNotNull
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.nio.file.Files
@@ -44,7 +44,7 @@ import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-abstract class ProjectExporter {
+abstract class RCProjectExporter {
     @Inject
     lateinit var concatenateAudio: ConcatenateAudio
 

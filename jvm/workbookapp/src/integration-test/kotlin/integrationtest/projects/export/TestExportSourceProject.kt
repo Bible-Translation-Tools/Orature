@@ -42,8 +42,8 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.SourceProjectExporter
+import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
+import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.SourceProjectExporter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer

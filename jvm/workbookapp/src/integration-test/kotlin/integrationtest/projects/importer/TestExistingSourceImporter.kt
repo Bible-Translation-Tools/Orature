@@ -20,7 +20,7 @@ import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImport
 import org.wycliffeassociates.otter.common.domain.project.importer.RCImporter
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.DeleteResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.MediaMerge
+import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.MediaMerge
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository

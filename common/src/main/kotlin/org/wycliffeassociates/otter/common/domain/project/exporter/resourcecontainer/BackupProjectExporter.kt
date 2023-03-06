@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
+package org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer
 
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
@@ -33,7 +34,7 @@ import javax.inject.Inject
 class BackupProjectExporter @Inject constructor(
     private val directoryProvider: IDirectoryProvider,
     private val workbookRepository: IWorkbookRepository
-) : ProjectExporter() {
+) : RCProjectExporter() {
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
 

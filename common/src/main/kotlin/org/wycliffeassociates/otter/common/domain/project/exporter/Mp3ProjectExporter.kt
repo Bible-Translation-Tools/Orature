@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
+package org.wycliffeassociates.otter.common.domain.project.exporter
 
 import io.reactivex.Single
 import io.reactivex.rxkotlin.toObservable
@@ -26,6 +26,7 @@ import org.wycliffeassociates.otter.common.data.primitives.License
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.audio.AudioExporter
+import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.RCProjectExporter
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
@@ -35,7 +36,7 @@ import javax.inject.Inject
 class Mp3ProjectExporter @Inject constructor(
     private val directoryProvider: IDirectoryProvider,
     private val workbookRepository: IWorkbookRepository
-) : ProjectExporter() {
+) : RCProjectExporter() {
 
     @Inject
     lateinit var audioExporter: AudioExporter

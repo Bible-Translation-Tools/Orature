@@ -31,7 +31,7 @@ import javafx.scene.control.Skin
 import javafx.scene.image.Image
 import org.wycliffeassociates.otter.jvm.controls.skins.banner.WorkbookBannerSkin
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.Artwork
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportOption
+import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOption
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import java.util.function.Predicate

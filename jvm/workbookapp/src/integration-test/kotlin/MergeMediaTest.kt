@@ -19,7 +19,7 @@
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.mockito.Mockito
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.MediaMerge
+import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.MediaMerge
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 

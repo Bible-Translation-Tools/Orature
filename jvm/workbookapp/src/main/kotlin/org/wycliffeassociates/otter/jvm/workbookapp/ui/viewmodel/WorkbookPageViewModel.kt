@@ -35,12 +35,12 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.BackupProjectExporter
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportOption
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.Mp3ProjectExporter
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.SourceProjectExporter
+import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.BackupProjectExporter
+import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOption
+import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
+import org.wycliffeassociates.otter.common.domain.project.exporter.Mp3ProjectExporter
+import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.RCProjectExporter
+import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.SourceProjectExporter
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -217,7 +217,7 @@ class WorkbookPageViewModel : ViewModel() {
             workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
         )
 
-        val exporter: ProjectExporter = when (option) {
+        val exporter: RCProjectExporter = when (option) {
             ExportOption.LISTEN -> exportMp3Provider.get()
             ExportOption.SOURCE_AUDIO, ExportOption.PUBLISH -> exportSourceProvider.get()
             ExportOption.BACKUP -> exportBackupProvider.get()

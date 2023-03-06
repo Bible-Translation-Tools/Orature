@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
+package org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer
 
 import io.reactivex.Completable
 import io.reactivex.Single
@@ -31,7 +31,9 @@ import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.audio.AudioExporter
+import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.RcConstants
 import org.wycliffeassociates.otter.common.io.zip.IFileWriter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
@@ -44,7 +46,7 @@ import javax.inject.Inject
 
 class SourceProjectExporter @Inject constructor(
     private val directoryProvider: IDirectoryProvider
-) : ProjectExporter() {
+) : RCProjectExporter() {
     @Inject
     lateinit var audioExporter: AudioExporter
 

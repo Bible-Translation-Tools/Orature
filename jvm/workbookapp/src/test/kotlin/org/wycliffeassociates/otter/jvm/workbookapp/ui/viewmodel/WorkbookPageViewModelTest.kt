@@ -20,7 +20,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.jakewharton.rxrelay2.ReplayRelay
 import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.times
 import io.reactivex.Observable
 import io.reactivex.Single
 import javafx.beans.property.SimpleObjectProperty
@@ -44,14 +43,13 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.ArtworkAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
+import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import tornadofx.*
 import java.io.File
 import java.time.LocalDateTime
 import javax.inject.Provider
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.BackupProjectExporter
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportOption
+import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.BackupProjectExporter
+import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOption
 
 class WorkbookPageViewModelTest {
     companion object {

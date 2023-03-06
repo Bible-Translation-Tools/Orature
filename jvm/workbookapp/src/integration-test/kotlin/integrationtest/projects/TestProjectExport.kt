@@ -23,7 +23,6 @@ import integrationtest.enUlbTestMetadata
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.slf4j.LoggerFactory
@@ -36,25 +35,21 @@ import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.common.audio.wav.WavMetadata
 import org.wycliffeassociates.otter.common.audio.wav.WavOutputStream
 import org.wycliffeassociates.otter.common.data.primitives.Collection
-import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
-import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
+import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
-import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.io.path.createTempDirectory
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.BackupProjectExporter
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.Mp3ProjectExporter
+import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.BackupProjectExporter
+import org.wycliffeassociates.otter.common.domain.project.exporter.Mp3ProjectExporter
 
 class TestProjectExport {
     @Inject lateinit var dbEnvProvider: Provider<DatabaseEnvironment>

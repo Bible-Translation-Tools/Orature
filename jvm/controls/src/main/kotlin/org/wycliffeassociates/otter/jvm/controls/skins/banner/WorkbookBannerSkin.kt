@@ -29,7 +29,7 @@ import javafx.scene.control.SkinBase
 import javafx.scene.image.ImageView
 import javafx.scene.layout.HBox
 import javafx.scene.shape.Rectangle
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportOption
+import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOption
 import org.wycliffeassociates.otter.jvm.controls.banner.WorkbookBanner
 import org.wycliffeassociates.otter.jvm.controls.listview.DummyExportComboBoxButton
 import org.wycliffeassociates.otter.jvm.controls.listview.ExportOptionListCell
