@@ -280,9 +280,11 @@ class ProjectFilesAccessor(
     fun writeChunksFile(fileWriter: IFileWriter) {
         val inFile = projectDir.resolve(RcConstants.CHUNKS_FILE)
 
-        fileWriter.bufferedWriter(RcConstants.CHUNKS_FILE).use { _fileWriter ->
-            inFile.reader().use { _fileReader ->
-                _fileReader.transferTo(_fileWriter)
+        if (inFile.exists()) {
+            fileWriter.bufferedWriter(RcConstants.CHUNKS_FILE).use { _fileWriter ->
+                inFile.reader().use { _fileReader ->
+                    _fileReader.transferTo(_fileWriter)
+                }
             }
         }
     }
@@ -553,8 +555,7 @@ class ProjectFilesAccessor(
             .getSoftDeletedTakes(workbook.target)
             .blockingGet()
             .map { relativeTakePath(it.path) }
-        deletedTakes.toMutableList().addAll(targetTakes)
-        return deletedTakes
+        return deletedTakes + targetTakes
     }
 
     private fun getAudioForCurrentResource(

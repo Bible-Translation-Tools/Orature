@@ -204,6 +204,7 @@ class ChapterPageViewModel : ViewModel() {
     fun recordChapter() {
         chapterCardProperty.value?.chapterSource?.let { rec ->
             contextProperty.set(PluginType.RECORDER)
+            val updateOnSuccess = workbookDataStore.updateSelectedTakesFile()
 
             rec.audio.getNewTakeNumber()
                 .flatMapMaybe { takeNumber ->
@@ -224,7 +225,7 @@ class ChapterPageViewModel : ViewModel() {
                     when (result) {
                         TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noRecorder"])
                         TakeActions.Result.SUCCESS -> {
-                            workbookDataStore.updateSelectedTakesFile()
+                            updateOnSuccess.subscribe()
                         }
                         TakeActions.Result.NO_AUDIO -> {
                             /* no-op */
@@ -431,7 +432,7 @@ class ChapterPageViewModel : ViewModel() {
 
     private fun onTakeSelected(chunk: CardData, take: TakeModel) {
         chunk.chunkSource?.audio?.selectTake(take.take)
-        workbookDataStore.updateSelectedTakesFile()
+        workbookDataStore.updateSelectedTakesFile().subscribe()
         take.take.file.setLastModified(System.currentTimeMillis())
         buildTakes(chunk)
     }

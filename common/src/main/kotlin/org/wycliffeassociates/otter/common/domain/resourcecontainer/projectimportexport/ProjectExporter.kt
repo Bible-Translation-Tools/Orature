@@ -105,10 +105,9 @@ abstract class ProjectExporter {
         return filterChaptersReadyToCompile(workbook.target.chapters)
             .flatMapCompletable { chapter ->
                 // compile the chapter
-                chapter.chunks
+                chapter.chunks.getValues(emptyArray())
                     .mapNotNull { chunk -> chunk.audio.selected.value?.value?.file }
-                    .toList()
-                    .flatMap { takes ->
+                    .let { takes ->
                         logger.info("Compiling chunk/verse takes for completed chapter #${chapter.sort}")
                         concatenateAudio.execute(takes)
                     }
@@ -141,16 +140,13 @@ abstract class ProjectExporter {
                 // filter chapter without selected take
                 chapter.audio.selected.value?.value == null
             }
-            .flatMap { chapter ->
+            .filter { chapter ->
+                val chunks = chapter.chunks.getValues(emptyArray())
+
                 // filter chapter where all its content are ready to compile
-                chapter.chunks
-                    .all { chunk ->
-                        chunk.audio.selected.value?.value != null
-                    }
-                    .toObservable()
-                    .mapNotNull {
-                        if (it) chapter else null
-                    }
+                chunks.isNotEmpty() && chunks.all { chunk ->
+                    chunk.audio.selected.value?.value != null
+                }
             }
     }
 
