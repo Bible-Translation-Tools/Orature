@@ -20,6 +20,7 @@ package integrationtest.di
 
 import integrationtest.projects.importer.MergeMediaTest
 import dagger.Component
+import integrationtest.ResourceContainerBuilder
 import integrationtest.initialization.TestInitializeProjects
 import integrationtest.initialization.TestInitializeSources
 import integrationtest.initialization.TestInitializeUlb
@@ -66,4 +67,5 @@ interface TestPersistenceComponent : AppDependencyGraph {
     fun inject(test: TestExportSourceProject)
     fun inject(test: TestCollectionRepository)
     fun inject(test: MergeMediaTest)
+    fun inject(test: ResourceContainerBuilder)
 }
