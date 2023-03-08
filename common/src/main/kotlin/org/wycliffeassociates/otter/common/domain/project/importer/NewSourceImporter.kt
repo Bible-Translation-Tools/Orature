@@ -1,24 +1,5 @@
-/**
- * Copyright (C) 2020-2022 Wycliffe Associates
- *
- * This file is part of Orature.
- *
- * Orature is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Orature is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
- */
-package org.wycliffeassociates.otter.common.domain.resourcecontainer
+package org.wycliffeassociates.otter.common.domain.project.importer
 
-import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
@@ -26,132 +7,42 @@ import org.wycliffeassociates.otter.common.collections.OtterTree
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.CollectionOrContent
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
-import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
-import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.OtterResourceContainerConfig
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.castOrFindImportException
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.otterConfigCategories
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IProjectReader
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.VersificationTreeBuilder
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.MediaMerge
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectImporter
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.toCollection
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.io.IOException
-import java.io.InputStream
-import java.nio.file.Files
 import javax.inject.Inject
-import javax.inject.Provider
 
-class ImportResourceContainer @Inject constructor(
-    private val resourceMetadataRepository: IResourceMetadataRepository,
-    private val resourceContainerRepository: IResourceContainerRepository,
-    private val languageRepository: ILanguageRepository,
+class NewSourceImporter @Inject constructor(
     private val directoryProvider: IDirectoryProvider,
+    private val resourceContainerRepository: IResourceContainerRepository,
+    resourceMetadataRepository: IResourceMetadataRepository,
     private val zipEntryTreeBuilder: IZipEntryTreeBuilder
-) {
-    private val logger = LoggerFactory.getLogger(ImportResourceContainer::class.java)
+) : RCImporter(directoryProvider, resourceMetadataRepository) {
 
-    @Inject lateinit var importProvider: Provider<ProjectImporter>
-    @Inject lateinit var deleteProvider: Provider<DeleteResourceContainer>
+    private val logger = LoggerFactory.getLogger(this.javaClass)
 
-    fun import(file: File): Single<ImportResult> {
-        logger.info("Importing resource container: $file")
-
-        val rcFile = if (file.isDirectory) {
-            val zip = createTempFile(file.name, "zip")
-            directoryProvider.newFileWriter(zip).use { fileWriter ->
-                fileWriter.copyDirectory(file, "/")
-            }
-            zip
-        } else {
-            file
-        }
-
-        val projectImporter = importProvider.get()
-        val isValid = validateRc(rcFile)
-        val isResumable = isValid && projectImporter.isResumableProject(rcFile)
-        val canMergeMedia = isValid && isAlreadyImported(rcFile)
-
-        return when {
-            !isValid -> {
-                logger.error("Import failed, $rcFile is an invalid RC")
-                return Single.just(ImportResult.INVALID_RC)
-            }
-            isResumable -> {
-                logger.info("Importing rc as a resumable project")
-                projectImporter.importResumableProject(rcFile)
-            }
-            canMergeMedia -> {
-                logger.info("RC already imported, merging media")
-                Single.fromCallable {
-                    val existingRC = getExistingMetadata(rcFile)
-                    MediaMerge(
-                        directoryProvider,
-                        ResourceContainer.load(rcFile),
-                        ResourceContainer.load(existingRC.path)
-                    ).merge()
-                    ImportResult.SUCCESS
-                }
-            }
-            tryUpdateExistingRC(rcFile) -> {
-                logger.info("Importing RC as default")
-                importContainer(rcFile)
-            }
-            else -> {
-                logger.error("Could not import RC $rcFile - ${ImportResult.DEPENDENCY_ERROR}")
-                Single.just(ImportResult.DEPENDENCY_ERROR)
-            }
-        }
+    override fun import(
+        file: File,
+        callback: ProjectImporterCallback?,
+        options: ImportOptions?
+    ): Single<ImportResult> {
+        return importContainer(file)
     }
 
-    fun import(filename: String, stream: InputStream): Single<ImportResult> {
-        val outFile = createTempFile(filename, "zip")
-
-        return Single
-            .fromCallable {
-                stream.transferTo(outFile.outputStream())
-            }
-            .flatMap {
-                import(outFile)
-            }
-            .doOnError { e ->
-                logger.error("Error in import, filename: $filename", e)
-            }
-            .doFinally {
-                outFile.parentFile.deleteRecursively()
-            }
-            .subscribeOn(Schedulers.io())
-    }
-
-    private fun validateRc(rc: File): Boolean {
-        return try {
-            ResourceContainer.load(rc, true).use { true }
-        } catch (e: Exception) {
-            logger.error("Error in validateRc: $rc", e)
-            false
-        }
-    }
-
-    fun isAlreadyImported(file: File): Boolean {
-        val rc = ResourceContainer.load(file, true)
-        val language = languageRepository.getBySlug(rc.manifest.dublinCore.language.identifier).blockingGet()
-        val resourceMetadata = rc.manifest.dublinCore.mapToMetadata(file, language)
-        rc.close()
-        return resourceMetadataRepository.exists(resourceMetadata).blockingGet()
-    }
-
-    private fun getExistingMetadata(file: File): ResourceMetadata {
-        val rc = ResourceContainer.load(file, true)
-        val language = languageRepository.getBySlug(rc.manifest.dublinCore.language.identifier).blockingGet()
-        val resourceMetadata = rc.manifest.dublinCore.mapToMetadata(file, language)
-        rc.close()
-        return resourceMetadataRepository.get(resourceMetadata).blockingGet()
-    }
-
-    private fun importContainer(file: File): Single<ImportResult> {
+    fun importContainer(file: File): Single<ImportResult> {
         return Single.fromCallable {
             var exists = false
             logger.info("Importing RC...")
@@ -165,7 +56,7 @@ class ImportResourceContainer @Inject constructor(
                 if (internalFile.absolutePath != file.absolutePath && internalFile.exists()) {
                     ResourceContainer.load(file).use { from ->
                         ResourceContainer.load(internalFile).use { to ->
-                            MediaMerge(directoryProvider, from, to).merge()
+                            MediaMerge.merge(from, to)
                         }
                     }
                 }
@@ -186,50 +77,6 @@ class ImportResourceContainer @Inject constructor(
         }.subscribeOn(Schedulers.io())
     }
 
-    /**
-     * Attempts to delete the existing RC before
-     * importing the new one if they have different versions.
-     * Returns false if it could not delete the existing RC.
-     */
-    private fun tryUpdateExistingRC(newFile: File): Boolean {
-        ResourceContainer.load(newFile).use { newRc ->
-            val dublinCore = newRc.manifest.dublinCore
-            resourceMetadataRepository.getAllSources().blockingGet()
-                .find {
-                    it.language.slug == dublinCore.language.identifier &&
-                            it.identifier == dublinCore.identifier
-                }?.let { existingRc ->
-                    var isDeleted = false
-
-                    // delete if matching rc has different version
-                    if (existingRc.version != newRc.manifest.dublinCore.version) {
-                        logger.info("Existing RC has different version, updating...")
-
-                        val result = deleteProvider.get().delete(existingRc.path).blockingGet()
-                        if (result == DeleteResult.SUCCESS) {
-                            isDeleted = true
-                            logger.info("Removed old RC successfully!")
-                        } else {
-                            isDeleted = false
-                            logger.error(
-                                "Failed to update RC " +
-                                        "${existingRc.language.slug}-${existingRc.identifier}: ${result.name}."
-                            )
-                        }
-                    }
-
-                    return isDeleted
-                } ?: return true
-        }
-    }
-
-    private fun File.contains(name: String): Boolean {
-        if (!this.isDirectory) {
-            throw Exception("Cannot call contains on non-directory file")
-        }
-        return this.listFiles().map { it.name }.contains(name)
-    }
-
     private fun getInternalDirectory(file: File): File? {
         // Load the external container to get the metadata we need to figure out where to copy to
         val extContainer = try {
@@ -240,6 +87,11 @@ class ImportResourceContainer @Inject constructor(
             return null
         }
         return directoryProvider.getSourceContainerDirectory(extContainer)
+    }
+
+    private fun cleanUp(container: File, result: ImportResult): Single<ImportResult> = Single.fromCallable {
+        container.deleteRecursively()
+        return@fromCallable result
     }
 
     private fun importFromInternalDir(fileToLoad: File): Single<ImportResult> {
@@ -287,11 +139,6 @@ class ImportResourceContainer @Inject constructor(
             .updateContent(container, tree, container.manifest.dublinCore.language.identifier)
     }
 
-    private fun cleanUp(container: File, result: ImportResult): Single<ImportResult> = Single.fromCallable {
-        container.deleteRecursively()
-        return@fromCallable result
-    }
-
     private fun copyToInternalDirectory(file: File, destinationDirectory: File): File {
         return if (file.isDirectory) {
             copyRecursivelyToInternalDirectory(file, destinationDirectory)
@@ -309,6 +156,13 @@ class ImportResourceContainer @Inject constructor(
             }
         }
         return destinationDirectory
+    }
+
+    private fun File.contains(name: String): Boolean {
+        if (!this.isDirectory) {
+            throw Exception("Cannot call contains on non-directory file")
+        }
+        return this.listFiles().map { it.name }.contains(name)
     }
 
     private fun copyFileToInternalDirectory(filepath: File, destinationDirectory: File): File {
@@ -361,13 +215,5 @@ class ImportResourceContainer @Inject constructor(
             parent.addChild(projectTree)
         }
         return root
-    }
-
-    private fun createTempFile(name: String, extension: String): File {
-        val tempDir = Files.createTempDirectory("orature_temp")
-        val tempPath = tempDir.resolve("$name.$extension")
-        val tempFile = tempPath.toFile()
-        tempFile.deleteOnExit()
-        return tempFile
     }
 }
