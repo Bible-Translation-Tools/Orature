@@ -34,7 +34,9 @@ val ImportResult.errorMessage: String?
             ImportResult.LOAD_RC_ERROR -> FX.messages["importErrorLoadRcError"]
             ImportResult.ALREADY_EXISTS -> FX.messages["importErrorAlreadyExists"]
             ImportResult.UNMATCHED_HELP -> FX.messages["importErrorUnmatchedHelp"]
-            ImportResult.DEPENDENCY_ERROR -> FX.messages["importErrorDependencyExists"]
+            ImportResult.DEPENDENCY_CONSTRAINT -> FX.messages["importErrorDependencyExists"]
+            ImportResult.ABORTED -> FX.messages["importCanceled"]
+            ImportResult.FAILED -> FX.messages["importResourceFailMessage"]
         }
     }
 
