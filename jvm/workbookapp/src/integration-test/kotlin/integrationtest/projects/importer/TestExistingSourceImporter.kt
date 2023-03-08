@@ -13,6 +13,7 @@ import io.reactivex.Single
 import org.junit.Assert
 import org.junit.Test
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
+import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
 import org.wycliffeassociates.otter.common.domain.project.importer.ExistingSourceImporter
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
 import org.wycliffeassociates.otter.common.domain.project.importer.NewSourceImporter
@@ -45,13 +46,17 @@ class TestExistingSourceImporter {
     @Inject
     lateinit var dbEnvProvider: Provider<DatabaseEnvironment>
 
+    @Inject
+    lateinit var importUseCaseProvider: Provider<ImportProjectUseCase>
+
     init {
         DaggerTestPersistenceComponent.create().inject(this)
     }
 
     private val db = dbEnvProvider.get()
 
-    private val spyMergeMedia = MediaMerge(directoryProvider).let { spy(it) }
+    private val spyImportUseCase = spy(importUseCaseProvider.get())
+    private val spyMergeMedia = spy(MediaMerge(directoryProvider))
     private val spyDeleteUseCase = DeleteResourceContainer(
         directoryProvider,
         resourceContainerRepository
@@ -66,6 +71,7 @@ class TestExistingSourceImporter {
             directoryProvider,
             resourceMetadataRepository,
             spyDeleteUseCase,
+            spyImportUseCase,
             spyMergeMedia
         )
         // there will be a source file in the project file and we need to import it
@@ -116,11 +122,13 @@ class TestExistingSourceImporter {
         Assert.assertEquals("12", existingSource.version)
         Assert.assertTrue(existingSource.path.exists())
         verify(spyDeleteUseCase, never()).deleteSync(any())
+        verify(spyImportUseCase, never()).import(any())
 
         // Import new source with a different version
+        val file = getSourceFile("resource-containers/en_ulb_newer_ver.zip")
         importer
             .import(
-                getSourceFile("resource-containers/en_ulb_newer_ver.zip"),
+                file,
                 callback = callbackMock
             )
             .blockingGet()
@@ -142,6 +150,7 @@ class TestExistingSourceImporter {
         )
         verify(callbackMock).onRequestUserInput()
         verify(spyDeleteUseCase).deleteSync(any())
+        verify(spyImportUseCase).import(file) // re-import after deleting source
         verify(spyMergeMedia, never()).merge(any(), any())
     }
 
