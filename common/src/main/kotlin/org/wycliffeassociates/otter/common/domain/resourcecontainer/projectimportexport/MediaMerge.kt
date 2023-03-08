@@ -18,29 +18,21 @@
  */
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
 
-import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Media
 import org.wycliffeassociates.resourcecontainer.entity.MediaProject
 import java.io.File
-import javax.inject.Inject
 
 /**
  * Merges the media contents from one resource container to the other.
- * This will overwrite media with matching names.
+ * This will overwrite media files with matching names.
  */
-class MediaMerge @Inject constructor(val directoryProvider: IDirectoryProvider) {
-    private lateinit var fromRC: ResourceContainer
-    private lateinit var toRC: ResourceContainer
-
-    fun merge(from: ResourceContainer, to: ResourceContainer) {
-        fromRC = from
-        toRC = to
-
+object MediaMerge {
+    fun merge(fromRC: ResourceContainer, toRC: ResourceContainer) {
         try {
-            if (from.media != null) {
-                mergeManifest()
-                mergeMediaFiles()
+            if (fromRC.media != null) {
+                mergeManifest(fromRC, toRC)
+                mergeMediaFiles(fromRC, toRC)
             }
         } finally {
             fromRC.close()
@@ -48,7 +40,7 @@ class MediaMerge @Inject constructor(val directoryProvider: IDirectoryProvider) 
         }
     }
 
-    private fun mergeManifest() {
+    private fun mergeManifest(fromRC: ResourceContainer, toRC: ResourceContainer) {
         val fromMedia = fromRC.media
         val toMedia = toRC.media
 
@@ -90,7 +82,7 @@ class MediaMerge @Inject constructor(val directoryProvider: IDirectoryProvider) 
         }
     }
 
-    private fun mergeMediaFiles() {
+    private fun mergeMediaFiles(fromRC: ResourceContainer, toRC: ResourceContainer) {
         val _fromMedia = fromRC.media
         val filesToMerge = mutableMapOf<String, File>()
         try {
@@ -98,7 +90,7 @@ class MediaMerge @Inject constructor(val directoryProvider: IDirectoryProvider) 
                 fromMedia.projects.forEach {
                     it.media.forEach { media ->
                         val files = mediaFilePermutations(media)
-                        filesToMerge.putAll(getMediaFilesToMerge(files))
+                        filesToMerge.putAll(getMediaFilesToMerge(files, fromRC))
                     }
                 }
             }
@@ -146,7 +138,10 @@ class MediaMerge @Inject constructor(val directoryProvider: IDirectoryProvider) 
         return list
     }
 
-    private fun getMediaFilesToMerge(files: List<String>): Map<String, File> {
+    private fun getMediaFilesToMerge(
+        files: List<String>,
+        fromRC: ResourceContainer
+    ): Map<String, File> {
         val filtered = files.filter { !it.isURL() }
         val filesToMerge = mutableMapOf<String, File>()
         filtered.forEach { filename ->

@@ -18,10 +18,8 @@ import org.wycliffeassociates.otter.common.domain.project.importer.ExistingSourc
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
 import org.wycliffeassociates.otter.common.domain.project.importer.NewSourceImporter
 import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
-import org.wycliffeassociates.otter.common.domain.project.importer.RCImporter
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.DeleteResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.MediaMerge
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
@@ -56,7 +54,6 @@ class TestExistingSourceImporter {
     private val db = dbEnvProvider.get()
 
     private val spyImportUseCase = spy(importUseCaseProvider.get())
-    private val spyMergeMedia = spy(MediaMerge(directoryProvider))
     private val spyDeleteUseCase = DeleteResourceContainer(
         directoryProvider,
         resourceContainerRepository
@@ -66,13 +63,12 @@ class TestExistingSourceImporter {
         on { onRequestUserInput() } doReturn (Single.just(ImportOptions(confirmed = true)))
     }
 
-    private val importer: RCImporter by lazy {
+    private val importer: ExistingSourceImporter by lazy {
         val imp = ExistingSourceImporter(
             directoryProvider,
             resourceMetadataRepository,
             spyDeleteUseCase,
-            spyImportUseCase,
-            spyMergeMedia
+            spyImportUseCase
         )
         // there will be a source file in the project file and we need to import it
         imp.setNext(newSourceImporterProvider.get())
@@ -81,21 +77,22 @@ class TestExistingSourceImporter {
 
     @Test
     fun mergeExistingSourceWhenVersionMatching() {
-        importer.import(getSourceFile("resource-containers/en_ulb.zip"))
+        val spyImporter = spy(importer)
+        spyImporter.import(getSourceFile("resource-containers/en_ulb.zip"))
             .blockingGet()
             .let {
                 Assert.assertEquals(ImportResult.SUCCESS, it)
             }
 
-        verify(spyMergeMedia, never()).merge(any(), any())
+        verify(spyImporter, never()).mergeMedia(any(), any())
 
-        importer.import(getSourceFile("resource-containers/en_ulb_media_merge_test.zip"))
+        spyImporter.import(getSourceFile("resource-containers/en_ulb_media_merge_test.zip"))
             .blockingGet()
             .let {
                 Assert.assertEquals(ImportResult.SUCCESS, it)
             }
 
-        verify(spyMergeMedia).merge(any(), any())
+        verify(spyImporter).mergeMedia(any(), any())
         verify(spyDeleteUseCase, never()).deleteSync(any())
     }
 
@@ -151,7 +148,6 @@ class TestExistingSourceImporter {
         verify(callbackMock).onRequestUserInput()
         verify(spyDeleteUseCase).deleteSync(any())
         verify(spyImportUseCase).import(file) // re-import after deleting source
-        verify(spyMergeMedia, never()).merge(any(), any())
     }
 
     private fun getSourceFile(name: String): File {

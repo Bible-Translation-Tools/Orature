@@ -18,8 +18,7 @@ class ExistingSourceImporter @Inject constructor(
     directoryProvider: IDirectoryProvider,
     private val resourceMetadataRepository: IResourceMetadataRepository,
     private val deleteUseCase: DeleteResourceContainer,
-    private val importUseCase: ImportProjectUseCase,
-    private val mediaMerge: MediaMerge
+    private val importUseCase: ImportProjectUseCase
 ) : RCImporter(directoryProvider, resourceMetadataRepository) {
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
@@ -58,14 +57,14 @@ class ExistingSourceImporter @Inject constructor(
         }
     }
 
-    private fun mergeMedia(
+    fun mergeMedia(
         newRC: File,
         existingRC: File
     ): Single<ImportResult> {
         logger.info("RC already imported, merging media...")
         return Single
             .fromCallable {
-                mediaMerge.merge(
+                MediaMerge.merge(
                     ResourceContainer.load(newRC),
                     ResourceContainer.load(existingRC)
                 )
