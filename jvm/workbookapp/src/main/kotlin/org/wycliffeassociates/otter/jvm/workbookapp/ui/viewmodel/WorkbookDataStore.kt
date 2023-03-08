@@ -297,7 +297,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
                         MessageFormat.format(
                             messages["chunkTitle"],
                             messages[activeChunkProperty.value.label],
-                            activeChunkProperty.value.sort
+                            activeChunkProperty.value.title
                         )
                     } else {
                         null
@@ -321,7 +321,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
                             messages["bookChapterChunkTitle"],
                             activeWorkbookProperty.value.source.title,
                             activeChapterProperty.value.title,
-                            activeChunkProperty.value.sort
+                            activeChunkProperty.value.title
                         )
                     } else {
                         MessageFormat.format(
