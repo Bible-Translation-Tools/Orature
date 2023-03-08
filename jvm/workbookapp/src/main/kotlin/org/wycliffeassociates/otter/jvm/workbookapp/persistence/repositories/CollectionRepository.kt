@@ -606,18 +606,22 @@ class CollectionRepository @Inject constructor(
             CONTENT_ENTITY.COLLECTION_FK,
             CONTENT_ENTITY.LABEL,
             CONTENT_ENTITY.START,
+            CONTENT_ENTITY.V_END,
             CONTENT_ENTITY.SORT,
             CONTENT_ENTITY.TYPE_FK,
-            CONTENT_ENTITY.DRAFT_NUMBER
+            CONTENT_ENTITY.DRAFT_NUMBER,
+            CONTENT_ENTITY.BRIDGED
         )
             .select(
                 dsl.select(
                     COLLECTION_ENTITY.ID,
                     field("verselabel", String::class.java),
                     field("versestart", Int::class.java),
+                    field("verseend", Int::class.java),
                     field("versesort", Int::class.java),
                     field("typefk", Int::class.java),
-                    field("draftnumber", Int::class.java)
+                    field("draftnumber", Int::class.java),
+                    field("bridged", Int::class.java)
                 )
                     .from(
                         dsl.select(
@@ -625,9 +629,11 @@ class CollectionRepository @Inject constructor(
                             CONTENT_ENTITY.COLLECTION_FK.`as`("chapterid"),
                             CONTENT_ENTITY.LABEL.`as`("verselabel"),
                             CONTENT_ENTITY.START.`as`("versestart"),
+                            CONTENT_ENTITY.V_END.`as`("verseend"),
                             CONTENT_ENTITY.SORT.`as`("versesort"),
                             CONTENT_ENTITY.TYPE_FK.`as`("typefk"),
-                            CONTENT_ENTITY.DRAFT_NUMBER.`as`("draftnumber")
+                            CONTENT_ENTITY.DRAFT_NUMBER.`as`("draftnumber"),
+                            CONTENT_ENTITY.BRIDGED.`as`("bridged")
                         )
                             .from(CONTENT_ENTITY)
                             .where(
@@ -653,6 +659,7 @@ class CollectionRepository @Inject constructor(
             CONTENT_ENTITY.COLLECTION_FK,
             CONTENT_ENTITY.LABEL,
             CONTENT_ENTITY.START,
+            CONTENT_ENTITY.V_END,
             CONTENT_ENTITY.SORT,
             CONTENT_ENTITY.TYPE_FK,
             CONTENT_ENTITY.DRAFT_NUMBER
@@ -662,6 +669,7 @@ class CollectionRepository @Inject constructor(
                     COLLECTION_ENTITY.ID,
                     field("verselabel", String::class.java),
                     field("versestart", Int::class.java),
+                    field("verseend", Int::class.java),
                     field("versesort", Int::class.java),
                     field("typefk", Int::class.java),
                     field("draftnumber", Int::class.java)
@@ -672,6 +680,7 @@ class CollectionRepository @Inject constructor(
                             CONTENT_ENTITY.COLLECTION_FK.`as`("chapterid"),
                             CONTENT_ENTITY.LABEL.`as`("verselabel"),
                             CONTENT_ENTITY.START.`as`("versestart"),
+                            CONTENT_ENTITY.V_END.`as`("verseend"),
                             CONTENT_ENTITY.SORT.`as`("versesort"),
                             CONTENT_ENTITY.TYPE_FK.`as`("typefk"),
                             CONTENT_ENTITY.DRAFT_NUMBER.`as`("draftnumber")

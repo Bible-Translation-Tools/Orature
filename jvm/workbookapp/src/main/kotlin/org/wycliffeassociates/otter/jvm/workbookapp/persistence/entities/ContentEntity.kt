@@ -23,10 +23,12 @@ data class ContentEntity(
     var sort: Int,
     var labelKey: String,
     var start: Int,
+    var end: Int,
     var collectionFk: Int,
     var selectedTakeFk: Int?,
     var text: String?,
     var format: String?,
     var type_fk: Int,
-    var draftNumber: Int
+    var draftNumber: Int,
+    var bridged: Boolean = false
 )
