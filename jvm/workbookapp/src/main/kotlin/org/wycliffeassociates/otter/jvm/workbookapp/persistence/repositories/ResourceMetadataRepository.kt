@@ -55,15 +55,6 @@ class ResourceMetadataRepository @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
-    override fun exists(predicate: (ResourceMetadata) -> Boolean): Single<Boolean> {
-        return getAll()
-            .map { list -> list.any(predicate) }
-            .doOnError { e ->
-                logger.error("Error in checking metadata exists.", e)
-            }
-            .subscribeOn(Schedulers.io())
-    }
-
     override fun get(metadata: ResourceMetadata): Single<ResourceMetadata> {
         return Single
             .fromCallable {

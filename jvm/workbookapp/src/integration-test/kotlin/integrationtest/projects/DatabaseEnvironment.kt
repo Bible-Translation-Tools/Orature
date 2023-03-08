@@ -20,17 +20,13 @@ package integrationtest.projects
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonPropertyOrder
-import io.reactivex.Single
 import jooq.Tables.CONTENT_DERIVATIVE
 import org.junit.Assert
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
-import org.wycliffeassociates.otter.common.domain.project.importer.ImportCallbackParameter
-import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
-import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
-import org.wycliffeassociates.otter.common.domain.project.importer.RCImporterFactory
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
@@ -41,7 +37,7 @@ import javax.inject.Provider
 class DatabaseEnvironment @Inject constructor(
     val db: AppDatabase,
     val directoryProvider: IDirectoryProvider,
-    val importRcFactory: RCImporterFactory,
+    val importRcProvider: Provider<ImportResourceContainer>,
     val createProjectProvider: Provider<CreateProject>,
     val importLanguagesProvider: Provider<ImportLanguages>
 ) {
@@ -50,33 +46,19 @@ class DatabaseEnvironment @Inject constructor(
     }
 
     private val importer
-        get() = importRcFactory.makeImporter()
+        get() = importRcProvider.get()
 
     fun import(rcFile: String, importAsStream: Boolean = false, unzip: Boolean = false): DatabaseEnvironment {
-        if (importAsStream) {
-            val tempFile = directoryProvider.createTempFile("db-env-import-test", ".zip")
-                .apply { deleteOnExit() }
-
-            rcResourceStream(rcFile).use { input ->
-                tempFile.outputStream().use { output ->
-                    input.transferTo(output)
-                }
-            }
-            val result = importer.import(tempFile).blockingGet()
-            Assert.assertEquals(
-                ImportResult.SUCCESS,
-                result
-            )
-            return this
-        }
-
-        val resourceFile = if (unzip) {
-            unzipProject(rcFile)
+        val result = if (importAsStream) {
+            importer.import(rcFile, rcResourceStream(rcFile)).blockingGet()
         } else {
-            rcResourceFile(rcFile)
+            val resourceFile = if (unzip) {
+                unzipProject(rcFile)
+            } else {
+                rcResourceFile(rcFile)
+            }
+            importer.import(resourceFile).blockingGet()
         }
-
-        val result =importer.import(resourceFile).blockingGet()
         Assert.assertEquals(
             ImportResult.SUCCESS,
             result

@@ -1,4 +1,22 @@
-package org.wycliffeassociates.otter.common.domain.project.importer
+/**
+ * Copyright (C) 2020-2022 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.JsonFactory
@@ -11,9 +29,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
-import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.Chunkification
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Collection
@@ -28,9 +44,9 @@ import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.RcConstants
 import org.wycliffeassociates.otter.common.io.zip.IFileReader
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
@@ -39,7 +55,6 @@ import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRep
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Manifest
 import org.wycliffeassociates.resourcecontainer.entity.Project
@@ -51,22 +66,19 @@ import java.time.LocalDateTime
 import java.util.regex.Pattern
 import javax.inject.Inject
 
-class OngoingProjectImporter @Inject constructor(
+class ProjectImporter @Inject constructor(
+    private val resourceContainerImporter: ImportResourceContainer,
     private val directoryProvider: IDirectoryProvider,
     private val resourceMetadataRepository: IResourceMetadataRepository,
-    private val workbookRepository: WorkbookRepository,
     private val collectionRepository: ICollectionRepository,
     private val contentRepository: IContentRepository,
     private val takeRepository: ITakeRepository,
     private val languageRepository: ILanguageRepository,
     private val resourceRepository: IResourceRepository
-) : RCImporter(directoryProvider, resourceMetadataRepository) {
-    private val logger = LoggerFactory.getLogger(this.javaClass)
+) {
+    private val log = LoggerFactory.getLogger(this.javaClass)
 
     private val contentCache = mutableMapOf<ContentSignature, Content>()
-    private var takesInChapterFilter: Map<String, Int>? = null
-    private var duplicatedTakes: MutableList<String> = mutableListOf()
-
     private val takeFilenamePattern = run {
         val chapter = """_c(\d+)"""
         val verse = """(?:_v(\d+))?"""
@@ -77,93 +89,11 @@ class OngoingProjectImporter @Inject constructor(
         Pattern.compile(chapter + verse + sort + type + take + extensionDelim)
     }
 
-    override fun import(
-        file: File,
-        callback: ProjectImporterCallback?,
-        options: ImportOptions?
-    ): Single<ImportResult> {
-        val isOngoingProject = isResumableProject(file)
-        if (!isOngoingProject) {
-            return super.passToNextImporter(file, callback, options)
-        }
-        takesInChapterFilter = null
-
-        return Single
-            .fromCallable { projectExists(file) }
-            .doOnError {
-                logger.error("Error while checking whether project already exists.", it)
-            }
-            .flatMap { exists ->
-                if (exists && callback != null) {
-                    val filterProvided = updateTakesImportFilter(file, callback)
-                    if (!filterProvided) {
-                        return@flatMap Single.just(ImportResult.ABORTED)
-                    }                }
-                importResumableProject(file)
-            }
-            .subscribeOn(Schedulers.io())
-    }
-
-    private fun isResumableProject(rcFile: File): Boolean {
+    fun isResumableProject(resourceContainer: File): Boolean {
         return try {
-            hasInProgressMarker(rcFile)
+            hasInProgressMarker(resourceContainer)
         } catch (e: IOException) {
             false
-        }
-    }
-
-    private fun projectExists(file: File): Boolean {
-        ResourceContainer.load(file).use { rc ->
-            rc.manifest.dublinCore.let {
-                val sourceLanguageSlug = it.source.firstOrNull()?.language
-                    ?: return false
-
-                val languageSlug = it.language.identifier
-                val projectSlug = rc.manifest.projects.first().identifier
-
-                val projects = workbookRepository.getProjects().blockingGet()
-                return projects.any { existingProject ->
-                    sourceLanguageSlug == existingProject.source.language.slug &&
-                            languageSlug == existingProject.target.language.slug &&
-                            projectSlug == existingProject.target.slug
-                }
-            }
-        }
-    }
-
-    private fun updateTakesImportFilter(
-        file: File,
-        callback: ProjectImporterCallback
-    ): Boolean {
-        val takesChapterMap = fetchTakesInRC(file)
-        val chapterList = takesChapterMap.values.distinct().sorted()
-        val callbackParam = ImportCallbackParameter(chapterList)
-        val chaptersToImport = callback.onRequestUserInput(callbackParam).blockingGet().chapters
-            ?: return false
-
-        takesInChapterFilter = takesChapterMap.filter { entry -> entry.value in chaptersToImport }
-        return true
-    }
-
-    private fun fetchTakesInRC(file: File): Map<String, Int> {
-        ResourceContainer.load(file).use { rc ->
-            val extensionFilter = AudioFileFormat.values().map { it.extension }
-            val fileStreamMap = rc.accessor.getInputStreams(".", extensionFilter)
-            try {
-                val takesMap: Map<String, Int> = fileStreamMap.keys
-                    .mapNotNull { path ->
-                        parseNumbers(path)?.let {
-                            Pair(path, it)
-                        }
-                    }
-                    .associate {
-                        Pair(it.first, it.second.contentSignature.chapter)
-                    }
-
-                return takesMap
-            } finally {
-                fileStreamMap.values.forEach { it.close() }
-            }
         }
     }
 
@@ -177,9 +107,7 @@ class OngoingProjectImporter @Inject constructor(
         }
     }
 
-    fun importResumableProject(
-        resourceContainer: File
-    ): Single<ImportResult> {
+    fun importResumableProject(resourceContainer: File): Single<ImportResult> {
         return Single.fromCallable {
             try {
                 val manifest: Manifest = ResourceContainer.load(resourceContainer).use { it.manifest }
@@ -187,7 +115,7 @@ class OngoingProjectImporter @Inject constructor(
                 val manifestProject = try {
                     manifest.projects.single()
                 } catch (t: Throwable) {
-                    logger.error("In-progress import must have 1 project, but this has {}", manifest.projects.count())
+                    log.error("In-progress import must have 1 project, but this has {}", manifest.projects.count())
                     throw ImportException(ImportResult.INVALID_RC)
                 }
 
@@ -197,7 +125,7 @@ class OngoingProjectImporter @Inject constructor(
                         // Import Sources even if existing source exists in order to potentially merge source audio
                         importSources(fileReader)
                     } catch (e: ImportException) {
-                        logger.error("Error importing source of resumable project", e)
+                        log.error("Error importing source of resumable project", e)
                     }
                     val sourceCollection = if (existingSource == null) {
                         findSourceCollection(manifestSources, manifestProject)
@@ -220,8 +148,8 @@ class OngoingProjectImporter @Inject constructor(
             } catch (e: ImportException) {
                 e.result
             } catch (e: Exception) {
-                logger.error("Failed to import in-progress project", e)
-                ImportResult.FAILED
+                log.error("Failed to import in-progress project", e)
+                ImportResult.IMPORT_ERROR
             }
         }
     }
@@ -290,7 +218,7 @@ class OngoingProjectImporter @Inject constructor(
             }
         } catch (e: MismatchedInputException) {
             // clear file if it can't be read
-            file.writer().use { }
+            file.writer().use {  }
         }
 
         val chapters = collectionRepository.getChildren(project).blockingGet()
@@ -355,23 +283,17 @@ class OngoingProjectImporter @Inject constructor(
         }
         val sourceMetadata = sourceCollection.resourceContainer!!
 
-        val existingTakes = projectFilesAccessor.audioDir.walk()
-            .filter { AudioFileFormat.isSupported(it.extension) }
-            .map { it.name }
-
-        val selectedTakes = prepareSelectedTakes(fileReader)
-        duplicatedTakes = takesInChapterFilter
-            ?.keys
-            ?.filter { takePath -> existingTakes.contains(File(takePath).name) }
-            ?.toMutableList()
-            ?: mutableListOf()
+        val selectedTakes = fileReader
+            .bufferedReader(RcConstants.SELECTED_TAKES_FILE)
+            .useLines { it.toSet() }
 
         projectFilesAccessor.copySelectedTakesFile(fileReader)
-        projectFilesAccessor.copyTakeFiles(fileReader, manifestProject, ::takeCopyFilter)
+
+        projectFilesAccessor.copyTakeFiles(fileReader, manifestProject)
             .doOnError { e ->
-                logger.error("Error in importTakes, project: $project, manifestProject: $manifestProject")
-                logger.error("metadata: $metadata, sourceMetadata: $sourceMetadata")
-                logger.error("sourceCollection: $sourceCollection", e)
+                log.error("Error in importTakes, project: $project, manifestProject: $manifestProject")
+                log.error("metadata: $metadata, sourceMetadata: $sourceMetadata")
+                log.error("sourceCollection: $sourceCollection", e)
             }
             .subscribe { newTakeFile ->
                 insertTake(
@@ -382,47 +304,6 @@ class OngoingProjectImporter @Inject constructor(
                     selectedTakes
                 )
             }
-
-        importDuplicatedTakes(
-            fileReader,
-            projectFilesAccessor.audioDir,
-            collectionForTakes,
-            manifestProject,
-            sourceMetadata,
-            selectedTakes
-        )
-    }
-
-    private fun prepareSelectedTakes(fileReader: IFileReader): Set<String> {
-        return fileReader
-            .bufferedReader(RcConstants.SELECTED_TAKES_FILE)
-            .useLines { it.toSet() }
-            .mapNotNull { takePath ->
-                parseNumbers(takePath)?.let {
-                    Pair(takePath, it)
-                }
-            }
-            .filter { (takePath, signature) ->
-                takesInChapterFilter?.values?.contains(signature.contentSignature.chapter)
-                    ?: true
-            }
-            .map { (path, _) ->
-                path
-            }
-            .toSet()
-    }
-
-    /**
-     * Filters only takes that are chosen to import (based on the callback result)
-     * AND excludes duplicated takes (takes that already exist).
-     */
-    private fun takeCopyFilter(path: String): Boolean {
-        return takesInChapterFilter?.let { takesInChapter ->
-            val takePath = takesInChapter.keys.firstOrNull { filterPath ->
-                File(filterPath).name == File(path).name
-            }
-            takePath != null && takePath !in duplicatedTakes
-        } ?: true
     }
 
     private fun insertTake(
@@ -475,40 +356,10 @@ class OngoingProjectImporter @Inject constructor(
             .firstOrNull()
 
         if (sourceCollection == null) {
-            logger.error("Failed to find source that matches requested import.")
-            throw ImportException(ImportResult.FAILED)
+            log.error("Failed to find source that matches requested import.")
+            throw ImportException(ImportResult.IMPORT_ERROR)
         }
         return sourceCollection
-    }
-
-    private fun importDuplicatedTakes(
-        fileReader: IFileReader,
-        projectAudioDir: File,
-        project: Collection,
-        manifestProject: Project,
-        metadata: ResourceMetadata,
-        selectedTakes: Set<String>
-    ) {
-        duplicatedTakes.forEach { takePath ->
-            parseNumbers(takePath)?.let { (sig, _) ->
-                getContent(sig, project, metadata)?.let { content ->
-                    val take = copyDuplicatedTakeToProjectDir(
-                        takePath,
-                        projectAudioDir,
-                        content,
-                        manifestProject,
-                        fileReader
-                    ).apply {
-                        id = takeRepository.insertForContent(this, content).blockingGet()
-                    }
-
-                    if (selectedTakes.any { it.contains(File(takePath).name)}) {
-                        content.selectedTake = take
-                        contentRepository.update(content).blockingAwait()
-                    }
-                }
-            }
-        }
     }
 
     private fun hasInProgressMarker(resourceContainer: File): Boolean {
@@ -557,9 +408,10 @@ class OngoingProjectImporter @Inject constructor(
 
     private fun importSource(fileInZip: String, fileReader: IFileReader): Pair<String, ImportResult> {
         val name = File(fileInZip).nameWithoutExtension
-        val result = importAsStream(name, fileReader.stream(fileInZip))
+        val result = resourceContainerImporter
+            .import(name, fileReader.stream(fileInZip))
             .blockingGet()
-        logger.debug("Import source resource container {} result {}", name, result)
+        log.debug("Import source resource container {} result {}", name, result)
         return fileInZip to result
     }
 
@@ -568,7 +420,7 @@ class OngoingProjectImporter @Inject constructor(
         val id = languageRepository
             .insertTranslation(translation)
             .doOnError { e ->
-                logger.error("Error in inserting translation", e)
+                log.error("Error in inserting translation", e)
             }
             .onErrorReturnItem(0)
             .blockingGet()
@@ -618,52 +470,6 @@ class OngoingProjectImporter @Inject constructor(
                 .firstElement()
 
             content.blockingGet()
-        }
-    }
-
-    private fun copyDuplicatedTakeToProjectDir(
-        takePath: String,
-        projectAudioDir: File,
-        content: Content,
-        manifestProject: Project,
-        fileReader: IFileReader
-    ): Take {
-        val now = LocalDate.now()
-        val newTakeNumber = takeRepository.getByContent(content, false)
-            .blockingGet()
-            .maxByOrNull { it.number }
-            ?.let { it.number + 1 }
-            ?: 1
-
-        val newFileName = File(takePath).name
-            .replaceFirst(Regex("_t\\d"), "_t$newTakeNumber")
-
-        val targetTakeFile = projectAudioDir
-            .resolve(getRelativeTakePath(takePath, manifestProject.path))
-            .parentFile.resolve(newFileName)
-            .apply {
-                parentFile.mkdirs()
-                createNewFile()
-            }
-
-        fileReader.stream(takePath).buffered().use { input ->
-            targetTakeFile.outputStream().use {
-                input.transferTo(it)
-            }
-        }
-
-        return Take(newFileName, targetTakeFile, newTakeNumber, now, null, false, listOf())
-    }
-
-    private fun getRelativeTakePath(pathInRC: String, metaProjectPath: String): String {
-        val metaProjectDir = File(metaProjectPath).normalize()
-        val takeDirInRC = File(RcConstants.TAKE_DIR)
-        val filePath = File(pathInRC)
-
-        return if (pathInRC.startsWith(metaProjectDir.invariantSeparatorsPath)) {
-            filePath.relativeTo(metaProjectDir).invariantSeparatorsPath
-        } else {
-            filePath.relativeTo(takeDirInRC).invariantSeparatorsPath
         }
     }
 

@@ -37,7 +37,7 @@ import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.common.domain.project.importer.RCImporterFactory
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
@@ -63,10 +63,10 @@ class TestExportSourceProject {
     @Inject
     lateinit var exportSourceProvider: Provider<SourceProjectExporter>
     @Inject
-    lateinit var importRcFactoryProvider: Provider<RCImporterFactory>
+    lateinit var importRcProvider: Provider<ImportResourceContainer>
 
     private val importer
-        get() = importRcFactoryProvider.get().makeImporter()
+        get() = importRcProvider.get()
 
     init {
         DaggerTestPersistenceComponent.create().inject(this)

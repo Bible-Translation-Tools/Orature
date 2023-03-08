@@ -3,7 +3,7 @@ package org.wycliffeassociates.otter.assets.initialization
 import io.reactivex.Completable
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
-import org.wycliffeassociates.otter.common.domain.project.importer.RCImporterFactory
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.config.Installable
 import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
@@ -15,7 +15,7 @@ class InitializeSources @Inject constructor(
     private val directoryProvider: IDirectoryProvider,
     private val resourceMetadataRepo: IResourceMetadataRepository,
     private val installedEntityRepo: IInstalledEntityRepository,
-    private val rcImporterFactory: RCImporterFactory
+    private val rcImporter: ImportResourceContainer
 ): Installable {
 
     override val name = "SOURCES"
@@ -75,7 +75,7 @@ class InitializeSources @Inject constructor(
     }
 
     private fun importFile(file: File) {
-        rcImporterFactory.makeImporter().import(file).toObservable()
+        rcImporter.import(file).toObservable()
             .doOnError { e ->
                 logger.error("Error importing $file.", e)
             }

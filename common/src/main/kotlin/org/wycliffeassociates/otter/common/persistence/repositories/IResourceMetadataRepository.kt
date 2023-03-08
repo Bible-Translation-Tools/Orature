@@ -25,7 +25,6 @@ import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 
 interface IResourceMetadataRepository : IRepository<ResourceMetadata> {
     fun exists(metadata: ResourceMetadata): Single<Boolean>
-    fun exists(predicate: (ResourceMetadata) -> Boolean): Single<Boolean>
     fun get(metadata: ResourceMetadata): Single<ResourceMetadata>
     fun insert(metadata: ResourceMetadata): Single<Int>
     fun updateSource(metadata: ResourceMetadata, source: ResourceMetadata?): Completable

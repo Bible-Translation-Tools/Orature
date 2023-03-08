@@ -289,18 +289,12 @@ class ProjectFilesAccessor(
         }
     }
 
-    fun copyTakeFiles(
-        fileReader: IFileReader,
-        manifestProject: Project,
-        filter: (String) -> Boolean = { true }
-    ): Observable<String> {
+    fun copyTakeFiles(fileReader: IFileReader, manifestProject: Project): Observable<String> {
         return Observable.just(RcConstants.TAKE_DIR, manifestProject.path)
             .filter(fileReader::exists)
             .flatMap { audioDirInRc ->
                 val normalized = File(audioDirInRc).normalize().path
-                fileReader.copyDirectory(normalized, audioDir) {
-                    isAudioFile(it) && filter(it)
-                }
+                fileReader.copyDirectory(normalized, audioDir, this::isAudioFile)
             }
     }
 

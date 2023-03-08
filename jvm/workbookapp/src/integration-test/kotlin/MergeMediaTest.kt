@@ -1,5 +1,3 @@
-package integrationtest.projects.importer
-
 /**
  * Copyright (C) 2020-2022 Wycliffe Associates
  *
@@ -18,48 +16,33 @@ package integrationtest.projects.importer
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-import integrationtest.di.DaggerTestPersistenceComponent
-import org.junit.After
 import org.junit.Assert.assertTrue
-import org.junit.Before
 import org.junit.Test
+import org.mockito.Mockito
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.MediaMerge
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
-import javax.inject.Inject
 
 class MergeMediaTest {
 
-    @Inject
-    lateinit var directoryProvider: IDirectoryProvider
+    val directoryProvider = Mockito.mock(IDirectoryProvider::class.java)
+
+    val fromFile = createTempFile("fromRc", ".zip")
+    val toFile = createTempFile("toRc", ".zip")
 
     init {
-        DaggerTestPersistenceComponent.create().inject(this)
-    }
-
-    val fromFile = directoryProvider.createTempFile("fromRc", ".zip")
-    val toFile = directoryProvider.createTempFile("toRc", ".zip")
-
-    @Before
-    fun setup() {
-        javaClass.classLoader.getResource("resource-containers/en_ulb_media_merge_test.zip")
-            .openStream().use { ifs ->
-                fromFile.outputStream().use { ofs ->
-                    ifs.transferTo(ofs)
-                }
+        javaClass.getResource("resource-containers/en_ulb_media_merge_test.zip").openStream().use { ifs ->
+            fromFile.outputStream().use { ofs ->
+                ifs.transferTo(ofs)
             }
-        javaClass.classLoader.getResource("resource-containers/en_ulb.zip")
-            .openStream().use { ifs ->
-                toFile.outputStream().use { ofs ->
-                    ifs.transferTo(ofs)
-                }
+        }
+        javaClass.getResource("resource-containers/en_ulb.zip").openStream().use { ifs ->
+            toFile.outputStream().use { ofs ->
+                ifs.transferTo(ofs)
             }
-    }
-
-    @After
-    fun cleanUp() {
-        fromFile.deleteRecursively()
-        toFile.deleteRecursively()
+        }
+        fromFile.deleteOnExit()
+        toFile.deleteOnExit()
     }
 
     @Test
@@ -67,9 +50,11 @@ class MergeMediaTest {
         val fromRc = ResourceContainer.load(fromFile)
         val toRc = ResourceContainer.load(toFile)
 
-        MediaMerge.merge(fromRc, toRc)
+        val mergeMedia = MediaMerge(directoryProvider, fromRc, toRc)
+        mergeMedia.merge()
         fromRc.write()
         assertTrue(validateAfterWrite(toRc))
+        toFile.deleteRecursively()
     }
 
     fun validateAfterWrite(rc: ResourceContainer): Boolean {

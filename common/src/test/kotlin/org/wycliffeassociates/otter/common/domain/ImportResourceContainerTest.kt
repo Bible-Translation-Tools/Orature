@@ -16,16 +16,3 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.common.domain.resourcecontainer
-
-enum class ImportResult {
-    SUCCESS,
-    INVALID_RC,
-    INVALID_CONTENT,
-    UNSUPPORTED_CONTENT,
-    IMPORT_ERROR,
-    LOAD_RC_ERROR,
-    ALREADY_EXISTS,
-    UNMATCHED_HELP,
-    DEPENDENCY_ERROR
-}

@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
 
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Media
 import org.wycliffeassociates.resourcecontainer.entity.MediaProject
@@ -25,44 +26,49 @@ import java.io.File
 
 /**
  * Merges the media contents from one resource container to the other.
- * This will overwrite media files with matching names.
+ * This will overwrite media with matching names.
  */
-object MediaMerge {
-    fun merge(fromRC: ResourceContainer, toRC: ResourceContainer) {
+class MediaMerge(
+    val directoryProvider: IDirectoryProvider,
+    val from: ResourceContainer,
+    val to: ResourceContainer
+) {
+
+    fun merge() {
         try {
-            if (fromRC.media != null) {
-                mergeManifest(fromRC, toRC)
-                mergeMediaFiles(fromRC, toRC)
+            if (from.media != null) {
+                mergeManifest()
+                mergeMediaFiles()
             }
         } finally {
-            fromRC.close()
-            toRC.close()
+            from.close()
+            to.close()
         }
     }
 
-    private fun mergeManifest(fromRC: ResourceContainer, toRC: ResourceContainer) {
-        val fromMedia = fromRC.media
-        val toMedia = toRC.media
+    private fun mergeManifest() {
+        val fromMedia = from.media
+        val toMedia = to.media
 
         if (fromMedia == null) {
             return
         }
         if (toMedia == null) {
-            toRC.media = fromMedia.copy()
+            to.media = fromMedia.copy()
         } else {
 
             // TODO: media could be null if file doesn't exist
-            val toMap = toRC.media!!.projects.associateBy { it.identifier } as MutableMap
-            val fromMap = fromRC.media!!.projects.associateBy { it.identifier }
+            val toMap = to.media!!.projects.associateBy { it.identifier } as MutableMap
+            val fromMap = from.media!!.projects.associateBy { it.identifier }
 
             val notInTo = fromMap.minus(toMap.keys).toMutableMap()
             val inBoth = fromMap.minus(notInTo.keys).toMutableMap()
 
             toMap.putAll(notInTo)
             mergeMatchingProjects(inBoth, toMap)
-            toRC.media!!.projects = toMap.values.toList()
+            to.media!!.projects = toMap.values.toList()
         }
-        toRC.write()
+        to.write()
     }
 
     private fun mergeMatchingProjects(
@@ -82,19 +88,19 @@ object MediaMerge {
         }
     }
 
-    private fun mergeMediaFiles(fromRC: ResourceContainer, toRC: ResourceContainer) {
-        val _fromMedia = fromRC.media
+    private fun mergeMediaFiles() {
+        val _fromMedia = from.media
         val filesToMerge = mutableMapOf<String, File>()
         try {
             _fromMedia?.let { fromMedia ->
                 fromMedia.projects.forEach {
                     it.media.forEach { media ->
                         val files = mediaFilePermutations(media)
-                        filesToMerge.putAll(getMediaFilesToMerge(files, fromRC))
+                        filesToMerge.putAll(getMediaFilesToMerge(files))
                     }
                 }
             }
-            toRC.addFilesToContainer(filesToMerge)
+            to.addFilesToContainer(filesToMerge)
         } finally {
             filesToMerge.values.forEach { it.delete() }
         }
@@ -138,15 +144,12 @@ object MediaMerge {
         return list
     }
 
-    private fun getMediaFilesToMerge(
-        files: List<String>,
-        fromRC: ResourceContainer
-    ): Map<String, File> {
+    private fun getMediaFilesToMerge(files: List<String>): Map<String, File> {
         val filtered = files.filter { !it.isURL() }
         val filesToMerge = mutableMapOf<String, File>()
         filtered.forEach { filename ->
-            if (fromRC.accessor.fileExists(filename)) {
-                fromRC.accessor.getInputStream(filename).use { ifs ->
+            if (from.accessor.fileExists(filename)) {
+                from.accessor.getInputStream(filename).use { ifs ->
                     val temp = createTempFile()
                     temp.outputStream().use { ofs ->
                         ifs.transferTo(ofs)

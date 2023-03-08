@@ -23,6 +23,9 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper
 import com.fasterxml.jackson.dataformat.csv.CsvSchema
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import integrationtest.di.DaggerTestPersistenceComponent
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import javax.inject.Inject
 import javax.inject.Provider
 import org.junit.Test
@@ -30,6 +33,8 @@ import org.wycliffeassociates.otter.common.data.primitives.ContentType.BODY
 import org.wycliffeassociates.otter.common.data.primitives.ContentType.META
 import org.wycliffeassociates.otter.common.data.primitives.ContentType.TEXT
 import org.wycliffeassociates.otter.common.data.primitives.ContentType.TITLE
+import org.wycliffeassociates.resourcecontainer.ResourceContainer
+import java.io.File
 
 class TestRcImport {
 
@@ -194,5 +199,51 @@ class TestRcImport {
         dbEnvProvider.get()
             .import("en_ulb.zip", true)
             .assertChapters("ulb", *tests.toTypedArray())
+    }
+
+
+    @Test
+    fun `import override when existing rc has different version`() {
+        val oldRCVer = "12"
+        val newRCVer = "999"
+        var oldRCFile: File? = null
+
+        dbEnvProvider.get()
+            .import("en_ulb.zip")
+            .assertRowCounts(
+                RowCount(
+                    collections = 1256,
+                    contents = mapOf(
+                        META to 1189,
+                        TEXT to 31104
+                    )
+                )
+            )
+            .apply {
+                assertEquals(
+                    oldRCVer,
+                    db.resourceMetadataDao.fetchAll().single().version
+                )
+                oldRCFile = File(db.resourceMetadataDao.fetchAll().single().path)
+                assertTrue(oldRCFile!!.exists())
+            }
+            .import("en_ulb_newer_ver.zip")
+            .assertRowCounts(
+                RowCount(
+                    collections = 1,
+                    contents = mapOf(),
+                    links = 0
+                )
+            )
+            .apply {
+                assertEquals(
+                    newRCVer,
+                    db.resourceMetadataDao.fetchAll().single().version
+                )
+                assertFalse(
+                    "Old rc should no longer exist after overwrite import.",
+                    oldRCFile!!.exists()
+                )
+            }
     }
 }
