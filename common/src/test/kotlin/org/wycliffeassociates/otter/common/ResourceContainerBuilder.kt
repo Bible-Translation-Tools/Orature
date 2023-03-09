@@ -1,34 +1,33 @@
-package integrationtest
+package org.wycliffeassociates.otter.common
 
-import integrationtest.di.DaggerTestPersistenceComponent
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
-import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.RcConstants
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
+import org.wycliffeassociates.resourcecontainer.entity.Checking
 import org.wycliffeassociates.resourcecontainer.entity.Manifest
 import org.wycliffeassociates.resourcecontainer.entity.Project
+import org.wycliffeassociates.resourcecontainer.entity.Source
 import java.io.File
-import javax.inject.Inject
+import kotlin.io.path.createTempDirectory
 import org.wycliffeassociates.resourcecontainer.entity.Language as RCLanguage
 
 class ResourceContainerBuilder(baseRC: File? = null) {
 
-    @Inject
-    lateinit var directoryProvider: IDirectoryProvider
+    private val tempDir = createTempDirectory("orature-test").toFile()
+        .apply { deleteOnExit() }
 
-    init {
-        DaggerTestPersistenceComponent.create().inject(this)
-    }
-
-    private val manifest: Manifest by lazy {
-        ResourceContainer.load(rcFile).use {
-            it.manifest
-        }
-    }
     private val selectedTakes: MutableList<String> = mutableListOf()
     private val rcFile: File = baseRC ?: getDefaultRCFile()
+    private val manifest: Manifest
+
+    init {
+        ResourceContainer.load(rcFile).use {
+            this.manifest = it.manifest
+        }
+    }
 
     fun setTargetLanguage(language: Language): ResourceContainerBuilder {
         manifest.dublinCore.language = RCLanguage(
@@ -39,17 +38,36 @@ class ResourceContainerBuilder(baseRC: File? = null) {
         return this
     }
 
+    fun setManifestSource(
+        identifier: String,
+        languageSlug: String,
+        version: String
+    ): ResourceContainerBuilder {
+        manifest.dublinCore.source = mutableListOf(
+            Source(identifier, languageSlug, version)
+        )
+        return this
+    }
+
     fun setProjectManifest(
         title: String,
         identifier: String,
         sort: Int,
         path: String
     ): ResourceContainerBuilder {
-        TODO()
+        manifest.projects = listOf(
+            Project(
+                title = title,
+                identifier = identifier,
+                sort = sort,
+                path = path
+            )
+        )
+        return this
     }
 
     fun setProjectManifest(projects: List<Project>) {
-        TODO()
+        manifest.projects = projects
     }
 
     /**
@@ -81,7 +99,7 @@ class ResourceContainerBuilder(baseRC: File? = null) {
             chapterSort = chapter
         ).generateName(takeNumber, AudioFileFormat.WAV)
 
-        val tempTakeFile = createTestWavFile(directoryProvider.tempDirectory)
+        val tempTakeFile = createTestWavFile(tempDir)
         val takeToAdd = tempTakeFile.parentFile.resolve(fileName)
             .apply {
                 parentFile.mkdirs()
@@ -91,9 +109,9 @@ class ResourceContainerBuilder(baseRC: File? = null) {
 
         val chapterDirTokens = "c${chapter.toString().padStart(2, '0')}"
         val pathInRC = if (selected && contentType == ContentType.META) {
-            "content/$chapterDirTokens/$fileName"
+            "${RcConstants.MEDIA_DIR}/$chapterDirTokens/$fileName"
         } else {
-            ".apps/orature/takes/$chapterDirTokens/$fileName"
+            "${RcConstants.TAKE_DIR}/$chapterDirTokens/$fileName"
         }
         ResourceContainer.load(rcFile).use {
             it.addFileToContainer(takeToAdd, pathInRC)
@@ -105,7 +123,7 @@ class ResourceContainerBuilder(baseRC: File? = null) {
 
     fun build(): ResourceContainer = ResourceContainer.load(rcFile).also { rc ->
         if (selectedTakes.isNotEmpty()) {
-            rc.accessor.write(".apps/orature/selected.txt") { outputStream ->
+            rc.accessor.write(RcConstants.SELECTED_TAKES_FILE) { outputStream ->
                 outputStream.write(
                     selectedTakes.joinToString("\n").byteInputStream().readAllBytes()
                 )
@@ -122,14 +140,50 @@ class ResourceContainerBuilder(baseRC: File? = null) {
     }
 
     private fun getDefaultRCFile(): File {
-        val defaultPath = javaClass.classLoader.getResource(
-            "resource-containers/ade-jhn-base-project.orature"
+        val sourcePath = javaClass.classLoader.getResource(
+            "resource-containers/en_ulb.zip"
         ).file
+        val sourceFile = File(sourcePath)
+        val tempFile = tempDir.resolve("rc_test_generated.orature")
+            .apply {
+                deleteOnExit()
+            }
+        val rcMetadata = getResourceMetadata(getEnglishLanguage(1))
 
-        val tempFile = directoryProvider.createTempFile("rc_test_generated", ".orature")
-            .apply { deleteOnExit() }
+        ResourceContainer.create(tempFile) {
+            manifest = Manifest(
+                getDublinCore(rcMetadata),
+                listOf(),
+                Checking()
+            )
+            write()
+        }.use { rc ->
+            // add source
+            rc.addFileToContainer(sourceFile, "${RcConstants.SOURCE_DIR}/${sourceFile.name}")
+        }
 
-        File(defaultPath).copyTo(tempFile, overwrite = true)
+
         return tempFile
+    }
+
+    companion object {
+        fun setUpEmptyProjectBuilder(): ResourceContainerBuilder {
+            return ResourceContainerBuilder()
+                .setManifestSource(
+                    identifier = "ulb",
+                    languageSlug = "en",
+                    version = "12"
+                )
+                .setProjectManifest(
+                    title = "John",
+                    identifier = "jhn",
+                    sort = 1,
+                    path = "./content"
+                )
+        }
+
+        fun buildEmptyProjectFile(): File {
+            return setUpEmptyProjectBuilder().buildFile()
+        }
     }
 }

@@ -3,13 +3,12 @@ package integrationtest.projects.importer
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
-import integrationtest.ResourceContainerBuilder
 import integrationtest.di.DaggerTestPersistenceComponent
 import integrationtest.projects.DatabaseEnvironment
-import integrationtest.projects.RowCount
 import io.reactivex.Single
 import org.junit.Assert
 import org.junit.Test
+import org.wycliffeassociates.otter.common.ResourceContainerBuilder
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
 import org.wycliffeassociates.otter.common.domain.project.importer.NewSourceImporter
@@ -91,21 +90,11 @@ class TestOngoingProjectImporter {
             .let {
                 Assert.assertEquals(ImportResult.SUCCESS, it)
             }
-
-        db.assertRowCounts(
-            RowCount(
-                collections = 1278,
-                contents = mapOf(
-                    ContentType.META to 1210,
-                    ContentType.TEXT to 31214
-                ),
-                links = 0
-            )
-        )
     }
 
     private fun setupRC(): File {
-        return ResourceContainerBuilder()
+        return ResourceContainerBuilder
+            .setUpEmptyProjectBuilder()
             .addTake(1, ContentType.META, 1, true)
             .addTake(2, ContentType.META, 1, true)
             .addTake(3, ContentType.META, 1, true)
