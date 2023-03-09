@@ -34,7 +34,7 @@ import java.io.OutputStream
 // arbitrary size, though setting this too small results in choppy playback
 private const val MP3_BUFFER_SIZE = 24576
 
-internal class MP3FileReader(
+class MP3FileReader(
     val file: File,
     start: Int? = null,
     end: Int? = null

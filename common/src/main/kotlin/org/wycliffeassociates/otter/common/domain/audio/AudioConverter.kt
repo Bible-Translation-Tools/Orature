@@ -47,35 +47,39 @@ class AudioConverter @Inject constructor() {
         }
     }
 
-    fun wavToPcm(wavFile: File, pcmFile: File) {
-        val wavReader = WavFile(wavFile).reader().also { it.open() }
-        val pcmWriter = PcmFile(pcmFile).writer(append = false)
+    fun wavToPcm(wavFile: File, pcmFile: File): Completable {
+        return Completable.fromCallable {
+            val wavReader = WavFile(wavFile).reader().also { it.open() }
+            val pcmWriter = PcmFile(pcmFile).writer(append = false)
 
-        val buffer = ByteArray(10240)
-        while (wavReader.hasRemaining()) {
-            val written = wavReader.getPcmBuffer(buffer)
-            pcmWriter.write(buffer, 0, written)
+            val buffer = ByteArray(10240)
+            while (wavReader.hasRemaining()) {
+                val written = wavReader.getPcmBuffer(buffer)
+                pcmWriter.write(buffer, 0, written)
+            }
+
+            cleanup(wavReader, pcmWriter)
         }
-
-        cleanup(wavReader, pcmWriter)
     }
 
-    fun pcmToWav(pcmFile: File, wavFile: File) {
-        val pcmReader = PcmFile(pcmFile).reader().also { it.open() }
-        val wavWriter = WavFile(
-            wavFile,
-            DEFAULT_CHANNELS,
-            DEFAULT_SAMPLE_RATE,
-            DEFAULT_BITS_PER_SAMPLE
-        ).writer(append = false)
+    fun pcmToWav(pcmFile: File, wavFile: File): Completable {
+        return Completable.fromCallable {
+            val pcmReader = PcmFile(pcmFile).reader().also { it.open() }
+            val wavWriter = WavFile(
+                wavFile,
+                DEFAULT_CHANNELS,
+                DEFAULT_SAMPLE_RATE,
+                DEFAULT_BITS_PER_SAMPLE
+            ).writer(append = false)
 
-        val buffer = ByteArray(10240)
-        while (pcmReader.hasRemaining()) {
-            val written = pcmReader.getPcmBuffer(buffer)
-            wavWriter.write(buffer, 0, written)
+            val buffer = ByteArray(10240)
+            while (pcmReader.hasRemaining()) {
+                val written = pcmReader.getPcmBuffer(buffer)
+                wavWriter.write(buffer, 0, written)
+            }
+
+            cleanup(pcmReader, wavWriter)
         }
-
-        cleanup(pcmReader, wavWriter)
     }
 
     private fun cleanup(reader: AudioFileReader, writer: OutputStream) {

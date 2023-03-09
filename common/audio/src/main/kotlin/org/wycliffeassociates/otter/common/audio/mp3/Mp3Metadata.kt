@@ -44,7 +44,7 @@ import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 private const val CUE_FRAME_SIZE = 75.0
 private const val DEFAULT_CUE_TRACK_INDEX = 1 // see https://en.wikipedia.org/wiki/Cue_sheet_(computing) or look up "cue sheet file"
 
-internal class Mp3Metadata(val mp3File: File, val cueFile: File) : AudioMetadata {
+class Mp3Metadata(val mp3File: File, val cueFile: File) : AudioMetadata {
 
     private val logger = LoggerFactory.getLogger(Mp3Metadata::class.java)
 
