@@ -3,6 +3,7 @@ package integrationtest.projects.importer
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
+import integrationtest.ResourceContainerBuilder
 import integrationtest.di.DaggerTestPersistenceComponent
 import integrationtest.projects.DatabaseEnvironment
 import integrationtest.projects.RowCount
@@ -42,6 +43,7 @@ class TestOngoingProjectImporter {
         imp.setNext(sourceImporterProvider.get())
         imp
     }
+    private val projectFile: File by lazy { setupRC() }
     private val takesInProject = 6
     private val takesPerChapter = 2
     private val chaptersSelected = listOf(1, 2)
@@ -85,8 +87,6 @@ class TestOngoingProjectImporter {
     }
 
     private fun importOngoingProject(callback: ProjectImporterCallback?) {
-        val projectFile = getProjectFileWith3Chapters()
-
         importer
             .import(projectFile, callback)
             .blockingGet()
@@ -106,15 +106,14 @@ class TestOngoingProjectImporter {
         )
     }
 
-    /**
-     * There are 3 chapters having audio. Each includes one chapter take and one verse take.
-     */
-    private fun getProjectFileWith3Chapters(): File {
-        val name = "resource-containers/john-3-chapters-translation.orature"
-        val path = javaClass.classLoader.getResource(name)
-        if (path == null) {
-            throw FileNotFoundException("Test resource not found: $name")
-        }
-        return File(path.file)
+    private fun setupRC(): File {
+        return ResourceContainerBuilder()
+            .addTake(1, ContentType.META, 1, true)
+            .addTake(2, ContentType.META, 1, true)
+            .addTake(3, ContentType.META, 1, true)
+            .addTake(1, ContentType.TEXT, 1, true, chapter = 1, start = 1, end = 1)
+            .addTake(2, ContentType.TEXT, 1, true, chapter = 2, start = 1, end = 1)
+            .addTake(3, ContentType.TEXT, 1, true, chapter = 3, start = 1, end = 1)
+            .buildFile()
     }
 }

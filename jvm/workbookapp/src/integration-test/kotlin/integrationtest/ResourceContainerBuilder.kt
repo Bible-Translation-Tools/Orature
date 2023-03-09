@@ -18,17 +18,17 @@ class ResourceContainerBuilder(baseRC: File? = null) {
     @Inject
     lateinit var directoryProvider: IDirectoryProvider
 
-    private val rcFile: File = baseRC ?: getDefaultRCFile()
+    init {
+        DaggerTestPersistenceComponent.create().inject(this)
+    }
+
     private val manifest: Manifest by lazy {
         ResourceContainer.load(rcFile).use {
             it.manifest
         }
     }
     private val selectedTakes: MutableList<String> = mutableListOf()
-
-    init {
-        DaggerTestPersistenceComponent.create().inject(this)
-    }
+    private val rcFile: File = baseRC ?: getDefaultRCFile()
 
     fun setTargetLanguage(language: Language): ResourceContainerBuilder {
         manifest.dublinCore.language = RCLanguage(
@@ -52,15 +52,21 @@ class ResourceContainerBuilder(baseRC: File? = null) {
         TODO()
     }
 
+    /**
+     * Inserts a take to the current resource container.
+     * If a take is selected, it will be added to the list of selected takes.
+     *
+     * For verse take, start and end must be provided
+     */
     fun addTake(
-        takeNumber: Int,
-        contentType: ContentType,
-        selected: Boolean,
         sort: Int,
-        chapter: Int,
+        contentType: ContentType,
+        takeNumber: Int,
+        selected: Boolean,
+        chapter: Int = sort,
         start: Int? = null,
         end: Int? = null
-    ) {
+    ): ResourceContainerBuilder {
         val fileName = FileNamer(
             start = start,
             end = end,
@@ -78,12 +84,13 @@ class ResourceContainerBuilder(baseRC: File? = null) {
         val tempTakeFile = createTestWavFile(directoryProvider.tempDirectory)
         val takeToAdd = tempTakeFile.parentFile.resolve(fileName)
             .apply {
-                tempTakeFile.renameTo(this)
+                parentFile.mkdirs()
+                tempTakeFile.copyTo(this, overwrite = true)
                 deleteOnExit()
             }
 
         val chapterDirTokens = "c${chapter.toString().padStart(2, '0')}"
-        val pathInRC = if (selected) {
+        val pathInRC = if (selected && contentType == ContentType.META) {
             "content/$chapterDirTokens/$fileName"
         } else {
             ".apps/orature/takes/$chapterDirTokens/$fileName"
@@ -92,21 +99,21 @@ class ResourceContainerBuilder(baseRC: File? = null) {
             it.addFileToContainer(takeToAdd, pathInRC)
         }
         selectedTakes.add("$chapterDirTokens/$fileName")
+
+        return this
     }
 
     fun build(): ResourceContainer = ResourceContainer.load(rcFile).also { rc ->
-        rc.manifest = this.manifest
-        rc.writeManifest()
-
         if (selectedTakes.isNotEmpty()) {
             rc.accessor.write(".apps/orature/selected.txt") { outputStream ->
-                outputStream.bufferedWriter().use { writer ->
-                    selectedTakes.forEach {
-                        writer.appendLine(it)
-                    }
-                }
+                outputStream.write(
+                    selectedTakes.joinToString("\n").byteInputStream().readAllBytes()
+                )
             }
         }
+
+        rc.manifest = this.manifest
+        rc.writeManifest()
     }
 
     fun buildFile(): File {
@@ -120,9 +127,9 @@ class ResourceContainerBuilder(baseRC: File? = null) {
         ).file
 
         val tempFile = directoryProvider.createTempFile("rc_test_generated", ".orature")
-            .apply { parentFile.deleteOnExit() }
+            .apply { deleteOnExit() }
 
-        File(defaultPath).copyTo(tempFile)
+        File(defaultPath).copyTo(tempFile, overwrite = true)
         return tempFile
     }
 }
