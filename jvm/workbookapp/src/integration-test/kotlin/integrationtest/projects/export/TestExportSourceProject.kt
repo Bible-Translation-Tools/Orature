@@ -91,7 +91,7 @@ class TestExportSourceProject {
         "",
         targetMetadata
     )
-    private val projectMetadata = ProjectMetadata(targetCollection.slug, targetMetadata)
+    private val projectMetadata = ProjectMetadata(targetMetadata)
     private lateinit var projectFilesAccessor: ProjectFilesAccessor
 
     @Before

@@ -86,7 +86,7 @@ class TestProjectExport {
         "",
         targetMetadata
     )
-    private val projectMetadata = ProjectMetadata(targetCollection.slug, targetMetadata)
+    private val projectMetadata = ProjectMetadata(targetMetadata)
 
     @Before
     fun setUp() {
