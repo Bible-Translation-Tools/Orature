@@ -35,6 +35,7 @@ import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.common.domain.audio.PcmConverter
 import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.content.TakeActions
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
@@ -202,7 +203,18 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     fun recordChapter() {
-        chapterCardProperty.value?.chapterSource?.let { rec ->
+        selectedChapterTakeProperty.value?.file?.let {
+            val wav = it
+            val pcm = File("/Users/mxaln/Desktop", "${wav.nameWithoutExtension}.pcm")
+            val converter = PcmConverter(pcm, wav)
+            converter.wavToPcm()
+
+            val newWav = File("/Users/mxaln/Desktop", wav.name)
+            val newConverter = PcmConverter(pcm, newWav)
+            newConverter.pcmToWav()
+        }
+
+        /*chapterCardProperty.value?.chapterSource?.let { rec ->
             contextProperty.set(PluginType.RECORDER)
             val updateOnSuccess = workbookDataStore.updateSelectedTakesFile()
 
@@ -228,11 +240,11 @@ class ChapterPageViewModel : ViewModel() {
                             updateOnSuccess.subscribe()
                         }
                         TakeActions.Result.NO_AUDIO -> {
-                            /* no-op */
+                            *//* no-op *//*
                         }
                     }
                 }
-        } ?: throw IllegalStateException("Recordable is null")
+        } ?: throw IllegalStateException("Recordable is null")*/
     }
 
     fun processTakeWithPlugin(pluginType: PluginType) {
