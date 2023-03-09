@@ -18,19 +18,13 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database
 
-import jooq.tables.AudioPluginEntity
-import jooq.tables.CollectionEntity
-import jooq.tables.ContentEntity
-import jooq.tables.DublinCoreEntity
-import jooq.tables.InstalledEntity
-import jooq.tables.LanguageEntity
-import jooq.tables.TranslationEntity
+import jooq.tables.*
 import org.jooq.DSLContext
 import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
 import org.slf4j.LoggerFactory
 
-const val SCHEMA_VERSION = 9
+const val SCHEMA_VERSION = 10
 const val DATABASE_INSTALLABLE_NAME = "DATABASE"
 
 class DatabaseMigrator {
@@ -48,6 +42,7 @@ class DatabaseMigrator {
             currentVersion = migrate6to7(dsl, currentVersion)
             currentVersion = migrate7to8(dsl, currentVersion)
             currentVersion = migrate8to9(dsl, currentVersion)
+            currentVersion = migrate9to10(dsl, currentVersion)
             updateDatabaseVersion(dsl, currentVersion)
         }
     }
@@ -276,5 +271,28 @@ class DatabaseMigrator {
         } else {
             current
         }
+    }
+
+    /**
+     * Version 10
+     * Adds a table for Versification
+     */
+    private fun migrate9to10(dsl: DSLContext, current: Int): Int {
+        return if (current < 10) {
+            dsl
+                .createTableIfNotExists(
+                    VersificationEntity.VERSIFICATION_ENTITY
+                )
+                .column(VersificationEntity.VERSIFICATION_ENTITY.ID)
+                .column(VersificationEntity.VERSIFICATION_ENTITY.SLUG)
+                .column(VersificationEntity.VERSIFICATION_ENTITY.PATH)
+                .constraints(
+                    DSL.primaryKey(VersificationEntity.VERSIFICATION_ENTITY.ID),
+                    DSL.unique(VersificationEntity.VERSIFICATION_ENTITY.SLUG)
+                )
+                .execute()
+            logger.info("Updated database from version 9 to 10")
+            return 10
+        } else current
     }
 }

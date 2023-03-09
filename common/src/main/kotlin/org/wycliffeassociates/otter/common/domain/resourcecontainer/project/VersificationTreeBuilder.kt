@@ -11,19 +11,30 @@ import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.toCollection
 import org.wycliffeassociates.otter.common.domain.versification.ParatextVersification
 import org.wycliffeassociates.otter.common.domain.versification.Versification
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.IVersificationRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
+import javax.inject.Inject
 
 private const val FORMAT = "text/usfm"
+private const val DEFAULT_VERSIFICATION = "ulb"
 
-class VersificationTreeBuilder {
+class VersificationTreeBuilder @Inject constructor(
+    val directoryProvider: IDirectoryProvider,
+    val versificationRepository: IVersificationRepository
+) {
     fun build(container: ResourceContainer): List<OtterTree<CollectionOrContent>> {
-        val vrsFile = javaClass.classLoader.getResourceAsStream("versification/ulb_versification.json")
-        val mapper = ObjectMapper(JsonFactory())
-        mapper.registerModule(KotlinModule())
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
-        val versification = mapper.readValue(vrsFile, ParatextVersification::class.java)
+        val versification = getVersification(container)
 
         return constructTree(versification, container)
+    }
+
+    private fun getVersification(container: ResourceContainer): Versification {
+        var versificationCode = container.manifest.projects.first()?.versification ?: DEFAULT_VERSIFICATION
+        if (versificationCode == "") {
+            versificationCode = DEFAULT_VERSIFICATION
+        }
+        return versificationRepository.getVersification(versificationCode).blockingGet()
     }
 
     fun constructTree(
