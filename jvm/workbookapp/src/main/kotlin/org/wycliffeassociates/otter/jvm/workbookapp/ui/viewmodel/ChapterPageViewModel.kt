@@ -228,7 +228,7 @@ class ChapterPageViewModel : ViewModel() {
                             updateOnSuccess.subscribe()
                         }
                         TakeActions.Result.NO_AUDIO -> {
-                           /* no-op */
+                            /* no-op */
                         }
                     }
                 }
