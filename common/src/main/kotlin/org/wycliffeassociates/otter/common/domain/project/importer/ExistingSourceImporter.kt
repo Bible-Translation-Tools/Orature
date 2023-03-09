@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.common.domain.project.importer
 import io.reactivex.Single
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.DeleteResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.DeleteResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
@@ -17,7 +18,7 @@ class ExistingSourceImporter @Inject constructor(
     directoryProvider: IDirectoryProvider,
     private val resourceMetadataRepository: IResourceMetadataRepository,
     private val deleteUseCase: DeleteResourceContainer,
-    private val mediaMerge: MediaMerge
+    private val importUseCase: ImportProjectUseCase
 ) : RCImporter(directoryProvider, resourceMetadataRepository) {
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
@@ -46,7 +47,8 @@ class ExistingSourceImporter @Inject constructor(
             when {
                 !confirmDelete -> Single.just(ImportResult.ABORTED)
                 deleteUseCase.deleteSync(existingSource.path) == DeleteResult.SUCCESS -> {
-                    super.passToNextImporter(file, callback, options)
+                    // re-import the file after deleting the existing source
+                    importUseCase.import(file)
                 }
                 else -> {
                     Single.just(ImportResult.DEPENDENCY_CONSTRAINT)
@@ -55,14 +57,14 @@ class ExistingSourceImporter @Inject constructor(
         }
     }
 
-    private fun mergeMedia(
+    fun mergeMedia(
         newRC: File,
         existingRC: File
     ): Single<ImportResult> {
         logger.info("RC already imported, merging media...")
         return Single
             .fromCallable {
-                mediaMerge.merge(
+                MediaMerge.merge(
                     ResourceContainer.load(newRC),
                     ResourceContainer.load(existingRC)
                 )

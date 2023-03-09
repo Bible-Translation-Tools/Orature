@@ -55,6 +55,8 @@ class DatabaseEnvironment @Inject constructor(
     fun import(rcFile: String, importAsStream: Boolean = false, unzip: Boolean = false): DatabaseEnvironment {
         if (importAsStream) {
             val tempFile = directoryProvider.createTempFile("db-env-import-test", ".zip")
+                .apply { deleteOnExit() }
+
             rcResourceStream(rcFile).use { input ->
                 tempFile.outputStream().use { output ->
                     input.transferTo(output)
