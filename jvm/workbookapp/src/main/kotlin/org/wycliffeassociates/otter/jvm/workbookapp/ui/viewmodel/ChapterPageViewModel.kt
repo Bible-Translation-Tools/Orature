@@ -203,18 +203,7 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     fun recordChapter() {
-        selectedChapterTakeProperty.value?.file?.let {
-            val wav = it
-            val pcm = File("/Users/mxaln/Desktop", "${wav.nameWithoutExtension}.pcm")
-            val converter = PcmConverter(pcm, wav)
-            converter.wavToPcm()
-
-            val newWav = File("/Users/mxaln/Desktop", wav.name)
-            val newConverter = PcmConverter(pcm, newWav)
-            newConverter.pcmToWav()
-        }
-
-        /*chapterCardProperty.value?.chapterSource?.let { rec ->
+        chapterCardProperty.value?.chapterSource?.let { rec ->
             contextProperty.set(PluginType.RECORDER)
             val updateOnSuccess = workbookDataStore.updateSelectedTakesFile()
 
@@ -240,11 +229,11 @@ class ChapterPageViewModel : ViewModel() {
                             updateOnSuccess.subscribe()
                         }
                         TakeActions.Result.NO_AUDIO -> {
-                            *//* no-op *//*
+                             /* no-op */
                         }
                     }
                 }
-        } ?: throw IllegalStateException("Recordable is null")*/
+        } ?: throw IllegalStateException("Recordable is null")
     }
 
     fun processTakeWithPlugin(pluginType: PluginType) {
