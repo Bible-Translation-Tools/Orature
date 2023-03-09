@@ -27,12 +27,12 @@ import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.License
-import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.audio.AudioExporter
+import org.wycliffeassociates.otter.common.domain.project.ProjectMetadata
+import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOptions
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.RcConstants
 import org.wycliffeassociates.otter.common.io.zip.IFileWriter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -45,8 +45,8 @@ import java.util.*
 import javax.inject.Inject
 
 class SourceProjectExporter @Inject constructor(
-    private val directoryProvider: IDirectoryProvider
-) : RCProjectExporter() {
+    directoryProvider: IDirectoryProvider
+) : RCProjectExporter(directoryProvider) {
     @Inject
     lateinit var audioExporter: AudioExporter
 
@@ -54,25 +54,26 @@ class SourceProjectExporter @Inject constructor(
     private val exportMediaTypes = listOf(AudioFileFormat.MP3.extension, "cue")
 
     override fun export(
-        directory: File,
-        projectMetadataToExport: ResourceMetadata,
+        outputDirectory: File,
+        projectMetadata: ProjectMetadata,
         workbook: Workbook,
-        projectFilesAccessor: ProjectFilesAccessor
+        options: ExportOptions?
     ): Single<ExportResult> {
         val projectSourceMetadata = workbook.source.linkedResources
-            .firstOrNull { it.identifier == projectMetadataToExport.identifier }
+            .firstOrNull { it.identifier == projectMetadata.resourceSlug }
             ?: workbook.source.resourceMetadata
 
-        val contributors = projectFilesAccessor.getContributorInfo()
+        val projectAccessor = getProjectFileAccessor(workbook)
+        val contributors = projectAccessor.getContributorInfo()
         val zipFilename = makeExportFilename(workbook, projectSourceMetadata)
-        val targetZip = directory.resolve(zipFilename)
+        val targetZip = outputDirectory.resolve(zipFilename)
 
         logger.info("Exporting project as source: ${targetZip.nameWithoutExtension}")
 
-        projectFilesAccessor.initializeResourceContainerInFile(workbook, targetZip)
-        setContributorInfo(contributors, projectSourceMetadata, targetZip)
+        projectAccessor.initializeResourceContainerInFile(workbook, targetZip)
+        setContributorInfo(contributors, projectSourceMetadata.creator, targetZip)
 
-        return compileCompletedChapters(workbook, projectSourceMetadata, projectFilesAccessor)
+        return compileCompletedChapters(workbook, projectSourceMetadata, projectAccessor)
             .onErrorComplete()
             .andThen(
                 export(targetZip, workbook, contributors)

@@ -33,8 +33,11 @@ import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.content.TakeActions
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
+import org.wycliffeassociates.otter.common.domain.project.ProjectMetadata
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
+import org.wycliffeassociates.otter.common.domain.project.exporter.ProjectExporter
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.nio.file.Files
@@ -44,7 +47,9 @@ import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-abstract class RCProjectExporter {
+abstract class RCProjectExporter(
+    protected val directoryProvider:IDirectoryProvider
+) : ProjectExporter {
     @Inject
     lateinit var concatenateAudio: ConcatenateAudio
 
@@ -54,12 +59,14 @@ abstract class RCProjectExporter {
     private val logger = LoggerFactory.getLogger(this.javaClass)
     private val compositeDisposable = CompositeDisposable()
 
-    abstract fun export(
-        directory: File,
-        projectMetadataToExport: ResourceMetadata,
-        workbook: Workbook,
-        projectFilesAccessor: ProjectFilesAccessor
-    ): Single<ExportResult>
+    protected fun getProjectFileAccessor(workbook: Workbook): ProjectFilesAccessor {
+        return ProjectFilesAccessor(
+            directoryProvider,
+            workbook.source.resourceMetadata,
+            workbook.target.resourceMetadata,
+            workbook.target.toCollection()
+        )
+    }
 
     protected fun makeExportFilename(workbook: Workbook, metadata: ResourceMetadata): String {
         val lang = workbook.target.language.slug
@@ -85,13 +92,13 @@ abstract class RCProjectExporter {
 
     protected fun setContributorInfo(
         contributors: List<Contributor>,
-        metadata: ResourceMetadata,
+        creator: String,
         projectFile: File
     ) {
         ResourceContainer.load(projectFile).use { rc ->
             rc.manifest.dublinCore.apply {
                 contributor = contributors.map { it.name }.toMutableList()
-                creator = metadata.creator
+                this.creator = creator
             }
             rc.writeManifest()
         }

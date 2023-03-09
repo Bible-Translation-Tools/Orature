@@ -39,6 +39,7 @@ import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.project.ProjectMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -85,6 +86,7 @@ class TestProjectExport {
         "",
         targetMetadata
     )
+    private val projectMetadata = ProjectMetadata(targetCollection.slug, targetMetadata)
 
     @Before
     fun setUp() {
@@ -136,7 +138,7 @@ class TestProjectExport {
         workbook.target.chapters.blockingFirst().audio.selectTake(take)
 
         val result = exportMp3UseCase.get()
-            .export(outputDir, targetMetadata, workbook, projectFilesAccessor)
+            .export(outputDir, projectMetadata, workbook, null)
             .blockingGet()
 
         assertEquals(ExportResult.SUCCESS, result)

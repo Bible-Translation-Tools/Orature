@@ -34,11 +34,13 @@ import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
+import org.wycliffeassociates.otter.common.domain.project.ProjectMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.BackupProjectExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOption
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import org.wycliffeassociates.otter.common.domain.project.exporter.Mp3ProjectExporter
+import org.wycliffeassociates.otter.common.domain.project.exporter.ProjectExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.RCProjectExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.SourceProjectExporter
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
@@ -217,14 +219,19 @@ class WorkbookPageViewModel : ViewModel() {
             workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
         )
 
-        val exporter: RCProjectExporter = when (option) {
+        val exporter: ProjectExporter = when (option) {
             ExportOption.LISTEN -> exportMp3Provider.get()
             ExportOption.SOURCE_AUDIO, ExportOption.PUBLISH -> exportSourceProvider.get()
             ExportOption.BACKUP -> exportBackupProvider.get()
         }
 
         exporter
-            .export(directory, resourceMetadata, workbook, projectFileAccessor)
+            .export(
+                directory,
+                ProjectMetadata(resourceMetadata),
+                workbook,
+                null
+            )
             .observeOnFx()
             .doOnError { e ->
                 logger.error("Error in exporting project for project: ${workbook.target.slug}")
