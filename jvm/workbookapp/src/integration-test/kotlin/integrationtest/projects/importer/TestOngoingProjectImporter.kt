@@ -11,7 +11,6 @@ import io.reactivex.Single
 import org.junit.Assert
 import org.junit.Test
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
-import org.wycliffeassociates.otter.common.domain.project.importer.ImportCallbackParameter
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
 import org.wycliffeassociates.otter.common.domain.project.importer.NewSourceImporter
 import org.wycliffeassociates.otter.common.domain.project.importer.OngoingProjectImporter
@@ -19,7 +18,6 @@ import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImport
 import org.wycliffeassociates.otter.common.domain.project.importer.RCImporter
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import java.io.File
-import java.io.FileNotFoundException
 import javax.inject.Inject
 import javax.inject.Provider
 
