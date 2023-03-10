@@ -77,7 +77,7 @@ class MP3FileReader(
     }
 
     override fun reader(start: Int?, end: Int?): AudioFileReader {
-        return this
+        return MP3FileReader(file, start, end)
     }
 
     override fun writer(append: Boolean, buffered: Boolean): OutputStream {

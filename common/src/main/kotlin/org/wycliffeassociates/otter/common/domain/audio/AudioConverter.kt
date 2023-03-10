@@ -49,22 +49,25 @@ class AudioConverter @Inject constructor() {
 
     fun wavToPcm(wavFile: File, pcmFile: File): Completable {
         return Completable.fromCallable {
-            val wavReader = WavFile(wavFile).reader().also { it.open() }
+            val wavReader = WavFile(wavFile).reader()
             val pcmWriter = PcmFile(pcmFile).writer(append = false)
 
-            val buffer = ByteArray(10240)
-            while (wavReader.hasRemaining()) {
-                val written = wavReader.getPcmBuffer(buffer)
-                pcmWriter.write(buffer, 0, written)
+            try {
+                wavReader.open()
+                val buffer = ByteArray(10240)
+                while (wavReader.hasRemaining()) {
+                    val written = wavReader.getPcmBuffer(buffer)
+                    pcmWriter.write(buffer, 0, written)
+                }
+            } finally {
+                cleanup(wavReader, pcmWriter)
             }
-
-            cleanup(wavReader, pcmWriter)
         }
     }
 
     fun pcmToWav(pcmFile: File, wavFile: File): Completable {
         return Completable.fromCallable {
-            val pcmReader = PcmFile(pcmFile).reader().also { it.open() }
+            val pcmReader = PcmFile(pcmFile).reader()
             val wavWriter = WavFile(
                 wavFile,
                 DEFAULT_CHANNELS,
@@ -72,13 +75,16 @@ class AudioConverter @Inject constructor() {
                 DEFAULT_BITS_PER_SAMPLE
             ).writer(append = false)
 
-            val buffer = ByteArray(10240)
-            while (pcmReader.hasRemaining()) {
-                val written = pcmReader.getPcmBuffer(buffer)
-                wavWriter.write(buffer, 0, written)
+            try {
+                pcmReader.open()
+                val buffer = ByteArray(10240)
+                while (pcmReader.hasRemaining()) {
+                    val written = pcmReader.getPcmBuffer(buffer)
+                    wavWriter.write(buffer, 0, written)
+                }
+            } finally {
+                cleanup(pcmReader, wavWriter)
             }
-
-            cleanup(pcmReader, wavWriter)
         }
     }
 
