@@ -25,7 +25,7 @@ import org.jooq.impl.DSL
 import org.slf4j.LoggerFactory
 
 
-const val SCHEMA_VERSION = 10
+const val SCHEMA_VERSION = 11
 const val DATABASE_INSTALLABLE_NAME = "DATABASE"
 
 class DatabaseMigrator {
@@ -43,7 +43,8 @@ class DatabaseMigrator {
             currentVersion = migrate6to7(dsl, currentVersion)
             currentVersion = migrate7to8(dsl, currentVersion)
             currentVersion = migrate8to9(dsl, currentVersion)
-            currentVersion = migrate9to10(dsl, currentVersion)
+
+            currentVersion = migrate10to11(dsl, currentVersion)
             updateDatabaseVersion(dsl, currentVersion)
         }
     }
@@ -274,8 +275,8 @@ class DatabaseMigrator {
         }
     }
 
-    private fun migrate9to10(dsl: DSLContext, current: Int): Int {
-        return if (current < 10) {
+    private fun migrate10to11(dsl: DSLContext, current: Int): Int {
+        return if (current < 11) {
             try {
                 dsl
                     .alterTable(ContentEntity.CONTENT_ENTITY)
@@ -287,30 +288,15 @@ class DatabaseMigrator {
                     .addColumn(ContentEntity.CONTENT_ENTITY.V_END)
                     .execute()
 
-                dsl
-                    .createTableIfNotExists(
-                        VersificationEntity.VERSIFICATION_ENTITY
-                    )
-                    .column(VersificationEntity.VERSIFICATION_ENTITY.ID)
-                    .column(VersificationEntity.VERSIFICATION_ENTITY.SLUG)
-                    .column(VersificationEntity.VERSIFICATION_ENTITY.PATH)
-                    .constraints(
-                        DSL.primaryKey(VersificationEntity.VERSIFICATION_ENTITY.ID),
-                        DSL.unique(
-                            VersificationEntity.VERSIFICATION_ENTITY.SLUG
-                        )
-                    )
-                    .execute()
-
                 clearProjectTables(dsl)
 
-                logger.info("Updated database from version 9 to 10")
-                return 10
+                logger.info("Updated database from version 10 to 11")
+                return 11
             } catch (e: DataAccessException) {
                 // Exception is thrown because the column might already exist but an existence check cannot
                 // be performed in sqlite.
-                logger.error("Error in migrate9to10", e)
-                return 9
+                logger.error("Error in migrate10to11", e)
+                return 10
             }
         } else {
             current
