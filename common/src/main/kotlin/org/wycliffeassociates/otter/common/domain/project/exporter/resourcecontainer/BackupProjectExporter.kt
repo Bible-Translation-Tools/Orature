@@ -26,9 +26,11 @@ import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.project.ProjectMetadata
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOptions
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
+import org.wycliffeassociates.otter.common.domain.project.takeFilenamePattern
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import java.io.File
+import java.lang.Exception
 import javax.inject.Inject
 
 class BackupProjectExporter @Inject constructor(
@@ -69,7 +71,9 @@ class BackupProjectExporter @Inject constructor(
                         workbook,
                         workbookRepository,
                         projectToExportIsBook
-                    )
+                    ) {
+                        takesFilter(it, options)
+                    }
 
                     val linkedResource = workbook.source.linkedResources
                         .firstOrNull { it.identifier == projectMetadata.resourceSlug }
@@ -90,5 +94,20 @@ class BackupProjectExporter @Inject constructor(
             }
             .onErrorReturnItem(ExportResult.FAILURE)
             .subscribeOn(Schedulers.io())
+    }
+
+    private fun takesFilter(path: String, exportOptions: ExportOptions?): Boolean {
+        if (exportOptions == null) {
+            return true
+        }
+
+        return try {
+            takeFilenamePattern
+                .matcher(path)
+                .group(1)
+                .toInt() in exportOptions.chapters
+        } catch (e: Exception) {
+            false
+        }
     }
 }

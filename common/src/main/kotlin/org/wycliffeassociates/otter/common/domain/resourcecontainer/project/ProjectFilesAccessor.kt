@@ -307,17 +307,19 @@ class ProjectFilesAccessor(
         fileWriter: IFileWriter,
         workbook: Workbook,
         workbookRepository: IWorkbookRepository,
-        isBook: Boolean
+        isBook: Boolean,
+        filter: (String) -> Boolean = { true }
     ) {
         val selectedChapters = selectedChapterFilePaths(workbook, isBook)
         val deletedTakes = deletedTakeFilePaths(workbook, workbookRepository)
         fileWriter.copyDirectory(audioDir, RcConstants.TAKE_DIR) {
             val normalized = File(it).invariantSeparatorsPath
             !selectedChapters.contains(normalized) && !deletedTakes.contains(normalized)
+                    && filter(it)
         }
         fileWriter.copyDirectory(audioDir, RcConstants.MEDIA_DIR) {
             val normalized = File(it).invariantSeparatorsPath
-            selectedChapters.contains(normalized)
+            selectedChapters.contains(normalized) && filter(it)
         }
     }
 

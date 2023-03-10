@@ -27,6 +27,7 @@ import org.wycliffeassociates.otter.common.data.primitives.Take
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
+import org.wycliffeassociates.otter.common.domain.project.takeFilenamePattern
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
@@ -66,16 +67,6 @@ class OngoingProjectImporter @Inject constructor(
     private val contentCache = mutableMapOf<ContentSignature, Content>()
     private var takesInChapterFilter: Map<String, Int>? = null
     private var duplicatedTakes: MutableList<String> = mutableListOf()
-
-    private val takeFilenamePattern = run {
-        val chapter = """_c(\d+)"""
-        val verse = """(?:_v(\d+))?"""
-        val sort = """(?:_s(\d+))?"""
-        val type = """(?:_([A-Za-z]+))?"""
-        val take = """_t(\d+)"""
-        val extensionDelim = """\."""
-        Pattern.compile(chapter + verse + sort + type + take + extensionDelim)
-    }
 
     override fun import(
         file: File,
