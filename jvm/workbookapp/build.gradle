@@ -166,6 +166,8 @@ dependencies {
     implementation project(':jvm:workbookplugin')
     implementation "org.wycliffeassociates:kotlin-resource-container:$kotlinresourcecontainerVer"
     implementation "org.wycliffeassociates:usfmtools:$usfmToolsVer"
+    testImplementation project(':common').sourceSets.test.output
+    integrationTestImplementation project(':common').sourceSets.test.output // dependent on another project's test source
 
     // Atlassian commonmark (for rendering markdown)
     implementation "com.atlassian.commonmark:commonmark:$commonmarkVer"
