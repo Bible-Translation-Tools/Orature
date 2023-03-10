@@ -36,7 +36,7 @@ class InitializeVersification @Inject constructor(
     val versificationRepository: IVersificationRepository
 ) : Initializable {
 
-    private val log = LoggerFactory.getLogger(this::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun exec(): Completable {
         return Single.fromCallable {
@@ -44,6 +44,7 @@ class InitializeVersification @Inject constructor(
 
             directoryProvider.versificationDirectory.listFiles()?.forEach { file ->
                 if (file.extension == "json") {
+                    logger.info("Inserting versification: ${file.name}")
                     versificationRepository.insertVersification(file.nameWithoutExtension, file)
                 }
             }
@@ -54,7 +55,7 @@ class InitializeVersification @Inject constructor(
     private fun copyUlbVersification() {
         if (!File(directoryProvider.versificationDirectory, "ulb.json").exists()) {
             directoryProvider.versificationDirectory.mkdirs()
-            log.info("Copying ulb versification")
+            logger.info("Copying ulb versification")
             ClassLoader.getSystemResourceAsStream("versification/ulb_versification.json")
                 .transferTo(
                     File(

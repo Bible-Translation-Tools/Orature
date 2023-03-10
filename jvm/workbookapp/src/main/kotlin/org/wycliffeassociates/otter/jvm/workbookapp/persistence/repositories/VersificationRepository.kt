@@ -43,7 +43,7 @@ class VersificationRepository @Inject constructor(
 
     override fun insertVersification(slug: String, path: File): Completable {
         return Single.fromCallable {
-            versificationDao.insertVersification(slug, path.name)
+            versificationDao.upsertVersification(slug, path.name)
         }.ignoreElement()
             .subscribeOn(Schedulers.io())
 

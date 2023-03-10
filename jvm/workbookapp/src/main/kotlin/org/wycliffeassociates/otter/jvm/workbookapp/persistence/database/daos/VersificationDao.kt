@@ -16,14 +16,16 @@ class VersificationDao(
             ?.get(Tables.VERSIFICATION_ENTITY.PATH)
     }
 
-    fun insertVersification(slug: String, path: String, dsl: DSLContext = instanceDsl) {
+    fun upsertVersification(slug: String, path: String, dsl: DSLContext = instanceDsl) {
         dsl
             .insertInto(
                 Tables.VERSIFICATION_ENTITY,
                 Tables.VERSIFICATION_ENTITY.SLUG,
                 Tables.VERSIFICATION_ENTITY.PATH
             )
-            .values(slug, path)
+            .onDuplicateKeyUpdate()
+            .set(Tables.VERSIFICATION_ENTITY.SLUG, slug)
+            .set(Tables.VERSIFICATION_ENTITY.PATH, path)
             .execute()
     }
 }
