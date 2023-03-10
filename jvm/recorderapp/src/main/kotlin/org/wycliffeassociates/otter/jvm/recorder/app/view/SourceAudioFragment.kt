@@ -59,7 +59,7 @@ class SourceAudioFragment : Fragment() {
                 sourceContentTitle = getSourceContentTitle(
                     parameters.named["book"],
                     parameters.named["chapter_number"],
-                    parameters.named["unit_number"]
+                    parameters.named["unit_title"]
                 )
             }
         }
