@@ -18,6 +18,8 @@
  */
 package org.wycliffeassociates.otter.common.audio
 
+import java.io.OutputStream
+
 interface AudioFormatStrategy {
     val sampleRate: Int
     val channels: Int
@@ -28,4 +30,6 @@ interface AudioFormatStrategy {
     fun addCue(location: Int, label: String)
     fun getCues(): List<AudioCue>
     fun update()
+    fun reader(start: Int? = null, end: Int? = null): AudioFileReader
+    fun writer(append: Boolean = false, buffered: Boolean = true): OutputStream
 }

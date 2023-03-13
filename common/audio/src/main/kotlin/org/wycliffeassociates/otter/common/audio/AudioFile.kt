@@ -18,13 +18,12 @@
  */
 package org.wycliffeassociates.otter.common.audio
 
+import org.wycliffeassociates.otter.common.audio.mp3.MP3FileReader
 import java.io.File
 import java.io.OutputStream
-import org.wycliffeassociates.otter.common.audio.mp3.MP3FileReader
+import org.wycliffeassociates.otter.common.audio.pcm.PcmFile
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
-import org.wycliffeassociates.otter.common.audio.wav.WavFileReader
 import org.wycliffeassociates.otter.common.audio.wav.WavMetadata
-import org.wycliffeassociates.otter.common.audio.wav.WavOutputStream
 
 const val DEFAULT_SAMPLE_RATE = 44100
 const val DEFAULT_CHANNELS = 1
@@ -47,6 +46,7 @@ open class AudioFile private constructor() {
             AudioFileFormat.MP3 -> MP3FileReader(file).apply {
                 release() // clean up resource after parsing the metadata
             }
+            AudioFileFormat.PCM -> PcmFile(file)
         }
     }
 
@@ -57,6 +57,7 @@ open class AudioFile private constructor() {
             AudioFileFormat.MP3 -> MP3FileReader(file).apply {
                 release()
             }
+            AudioFileFormat.PCM -> PcmFile(file)
         }
     }
 
@@ -72,6 +73,7 @@ open class AudioFile private constructor() {
             AudioFileFormat.MP3 -> MP3FileReader(file).apply {
                 release()
             }
+            AudioFileFormat.PCM -> PcmFile(file)
         }
     }
 
@@ -88,6 +90,7 @@ open class AudioFile private constructor() {
             AudioFileFormat.MP3 -> MP3FileReader(file).apply {
                 release()
             }
+            AudioFileFormat.PCM -> PcmFile(file)
         }
     }
 
@@ -108,16 +111,10 @@ open class AudioFile private constructor() {
     }
 
     fun reader(start: Int? = null, end: Int? = null): AudioFileReader {
-        return when (AudioFileFormat.of(file.extension)) {
-            AudioFileFormat.WAV -> WavFileReader(strategy as WavFile, start, end)
-            AudioFileFormat.MP3 -> MP3FileReader(file, start, end)
-        }
+        return strategy.reader(start, end)
     }
 
     fun writer(append: Boolean = false, buffered: Boolean = true): OutputStream {
-        return when (AudioFileFormat.of(file.extension)) {
-            AudioFileFormat.WAV -> WavOutputStream(strategy as WavFile, append, buffered)
-            AudioFileFormat.MP3 -> TODO()
-        }
+        return strategy.writer(append, buffered)
     }
 }

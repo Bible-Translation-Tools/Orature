@@ -29,11 +29,12 @@ import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
 import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.yellowcouch.javazoom.RandomAccessDecoder
+import java.io.OutputStream
 
 // arbitrary size, though setting this too small results in choppy playback
 private const val MP3_BUFFER_SIZE = 24576
 
-internal class MP3FileReader(
+class MP3FileReader(
     val file: File,
     start: Int? = null,
     end: Int? = null
@@ -73,6 +74,14 @@ internal class MP3FileReader(
     override fun update() {
         decoder?.stop()
         metadata.write()
+    }
+
+    override fun reader(start: Int?, end: Int?): AudioFileReader {
+        return MP3FileReader(file, start, end)
+    }
+
+    override fun writer(append: Boolean, buffered: Boolean): OutputStream {
+        TODO("Not yet implemented")
     }
 
     private fun getPCMData(outBuff: ByteArray, pos: Int) {
@@ -115,7 +124,7 @@ internal class MP3FileReader(
     override fun seek(sample: Int) {
         // seek API should not be aware of audio outside of start and end;
         // so that a selected section can be treated as its own "track"
-        var mappedSample = sample + start
+        val mappedSample = sample + start
         pos = max(start, min(mappedSample, end))
     }
 
