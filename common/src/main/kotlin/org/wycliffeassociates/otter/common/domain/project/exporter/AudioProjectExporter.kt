@@ -23,6 +23,7 @@ import io.reactivex.rxkotlin.toObservable
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.License
+import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.audio.AudioExporter
 import org.wycliffeassociates.otter.common.domain.project.ProjectMetadata
@@ -31,7 +32,7 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
 import javax.inject.Inject
 
-class Mp3ProjectExporter @Inject constructor(
+class AudioProjectExporter @Inject constructor(
     private val directoryProvider: IDirectoryProvider
 ) : IDirectoryExporter {
 
@@ -41,7 +42,7 @@ class Mp3ProjectExporter @Inject constructor(
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
     override fun export(
-        directory: File,
+        outputDirectory: File,
         projectMetadata: ProjectMetadata,
         workbook: Workbook,
         options: ExportOptions?
@@ -55,24 +56,25 @@ class Mp3ProjectExporter @Inject constructor(
         val isBook = projectMetadata.resourceSlug == workbook.target.resourceMetadata.identifier
         return if (isBook) {
             logger.info("Exporting Scripture project as mp3: ${workbook.target.slug}")
-            exportBookMp3(directory, workbook, projectAccessor)
+            exportBookMp3(outputDirectory, workbook, projectAccessor, options)
         } else {
             logger.info("Exporting help project as mp3: ${workbook.target.slug}")
-            exportResourceMp3(directory, projectMetadata, workbook, projectAccessor)
+            exportResourceMp3(outputDirectory, projectMetadata, workbook, projectAccessor)
         }
     }
 
     private fun exportBookMp3(
         directory: File,
         workbook: Workbook,
-        projectFilesAccessor: ProjectFilesAccessor
+        projectFilesAccessor: ProjectFilesAccessor,
+        options: ExportOptions?
     ): Single<ExportResult> {
         val outputProjectDir = directory.resolve(workbook.target.slug).apply { mkdirs() }
         val contributors = projectFilesAccessor.getContributorInfo()
         val license = License.get(workbook.target.resourceMetadata.license)
 
         return workbook.target.chapters
-            .filter { it.audio.selected.value?.value != null }
+            .filter { chapterFilter(it, options) }
             .flatMapCompletable { chapter ->
                 chapter.audio.selected.value!!.value!!.let {
                     val outputFile = outputProjectDir.resolve("chapter-${chapter.sort}.mp3")
@@ -118,5 +120,10 @@ class Mp3ProjectExporter @Inject constructor(
             }
             .onErrorReturnItem(ExportResult.FAILURE)
             .subscribeOn(Schedulers.io())
+    }
+
+    private fun chapterFilter(chapter: Chapter, options: ExportOptions?): Boolean {
+        val included = options?.let { chapter.sort in it.chapters } ?: true
+        return included && chapter.audio.selected.value?.value != null
     }
 }

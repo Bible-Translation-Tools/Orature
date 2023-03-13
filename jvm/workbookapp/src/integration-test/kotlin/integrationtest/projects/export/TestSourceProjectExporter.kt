@@ -54,7 +54,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.io.path.createTempDirectory
 
-class TestExportSourceProject {
+class TestSourceProjectExporter {
     @Inject
     lateinit var dbEnvProvider: Provider<DatabaseEnvironment>
     @Inject

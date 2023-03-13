@@ -39,9 +39,8 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.Proj
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.BackupProjectExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOption
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
-import org.wycliffeassociates.otter.common.domain.project.exporter.Mp3ProjectExporter
+import org.wycliffeassociates.otter.common.domain.project.exporter.AudioProjectExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.ProjectExporter
-import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.RCProjectExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.SourceProjectExporter
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
@@ -72,7 +71,7 @@ class WorkbookPageViewModel : ViewModel() {
     lateinit var exportBackupProvider: Provider<BackupProjectExporter>
 
     @Inject
-    lateinit var exportMp3Provider: Provider<Mp3ProjectExporter>
+    lateinit var exportAudioProvider: Provider<AudioProjectExporter>
 
     @Inject
     lateinit var workbookRepository: IWorkbookRepository
@@ -220,7 +219,7 @@ class WorkbookPageViewModel : ViewModel() {
         )
 
         val exporter: ProjectExporter = when (option) {
-            ExportOption.LISTEN -> exportMp3Provider.get()
+            ExportOption.LISTEN -> exportAudioProvider.get()
             ExportOption.SOURCE_AUDIO, ExportOption.PUBLISH -> exportSourceProvider.get()
             ExportOption.BACKUP -> exportBackupProvider.get()
         }
