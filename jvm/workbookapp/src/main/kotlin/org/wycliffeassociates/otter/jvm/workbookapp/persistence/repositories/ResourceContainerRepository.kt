@@ -136,14 +136,17 @@ class ResourceContainerRepository @Inject constructor(
         }.subscribeOn(Schedulers.io())
     }
 
-    fun updateTextContent(databaseMap: Map<Collection, List<Content>>, parsedTextMap: Map<Collection, List<Content>>) {
-        parsedTextMap.keys.forEach {  collection ->
+    private fun updateTextContent(
+        databaseMap: Map<Collection, List<Content>>,
+        parsedTextMap: Map<Collection, List<Content>>
+    ) {
+        parsedTextMap.keys.forEach { collection ->
             val textMapContent = parsedTextMap[collection]
             val matchingCollection = databaseMap.keys.find { it.slug == collection.slug } ?: return@forEach
             val databaseContent = databaseMap[matchingCollection]!!
 
             textMapContent!!.forEach { content ->
-                val match = databaseContent.find { it.start == content.start && it.type == content.type}
+                val match = databaseContent.find { it.start == content.start && it.type == content.type }
                 match?.let {
                     match.text = content.text ?: ""
                     contentRepository.update(match).blockingGet()
@@ -152,22 +155,25 @@ class ResourceContainerRepository @Inject constructor(
         }
     }
 
-    fun updateBridges(databaseMap: Map<Collection, List<Content>>, parsedTextMap: Map<Collection, List<Content>>) {
-        parsedTextMap.keys.forEach {  collection ->
+    private fun updateBridges(
+        databaseMap: Map<Collection, List<Content>>,
+        parsedTextMap: Map<Collection, List<Content>>
+    ) {
+        parsedTextMap.keys.forEach { collection ->
             val textMapContent = parsedTextMap[collection]
             val matchingCollection = databaseMap.keys.find { it.slug == collection.slug } ?: return@forEach
             val databaseContent = databaseMap[matchingCollection]!!
 
             textMapContent!!.forEach { content ->
-                val match = databaseContent.find { it.start == content.start && it.type == content.type}
+                val match = databaseContent.find { it.start == content.start && it.type == content.type }
                 match?.let {
                     if (match.end != content.end && match.type != ContentType.META) {
                         match.end = content.end
                         logger.info("Bridging ${collection.slug}:${match.start}-${match.end}")
                         contentRepository.update(match).blockingGet()
-                        for (i in (match.start+1)..match.end) {
+                        for (i in (match.start + 1)..match.end) {
                             val found = databaseContent.find { it.start == i && it.type != ContentType.META }
-                            if (found != null && found is Content) {
+                            if (found != null) {
                                 found.bridged = true
                                 contentRepository.update(found).blockingGet()
                             }
@@ -195,11 +201,19 @@ class ResourceContainerRepository @Inject constructor(
     }
 
     fun OtterTree<CollectionOrContent>.toChapterContentMap(): Map<Collection, MutableList<Content>> {
-        val isBook = children.any { it.value is Collection && (it as OtterTree<CollectionOrContent>).children.any{ it.value is Content } }
+        val isBook = children.any { it.hasContent() }
         return if (isBook) {
             toChapterContentMapFromBook()
         } else {
             toChapterContentMapFromResource()
+        }
+    }
+
+    private fun OtterTreeNode<CollectionOrContent>.hasContent(): Boolean {
+        if (value is Collection) {
+            return (value as OtterTree<CollectionOrContent>).children.any { it.value is Content }
+        } else {
+            return false
         }
     }
 
@@ -215,7 +229,7 @@ class ResourceContainerRepository @Inject constructor(
     }
 
     private fun OtterTree<CollectionOrContent>.toChapterContentMapFromBook(): Map<Collection, MutableList<Content>> {
-        val isBook = children.any { it.value is Collection && (it as OtterTree<CollectionOrContent>).children.any{ it.value is Content } }
+        val isBook = children.any { it.hasContent() }
 
         val bigMap = hashMapOf<Collection, MutableList<Content>>()
         if (isBook) {
@@ -235,9 +249,14 @@ class ResourceContainerRepository @Inject constructor(
         val language = languageDao.fetchBySlug(rc.manifest.dublinCore.language.identifier) ?: run {
             return null
         }
-        val metadata = resourceMetadataDao.fetchAll().filter { entity ->
-            entity.derivedFromFk == null && entity.identifier == rc.manifest.dublinCore.identifier && entity.languageFk == language.id
-        }.firstOrNull() ?: run { return null }
+        val metadata = resourceMetadataDao
+            .fetchAll()
+            .firstOrNull { entity ->
+                val isSource = entity.derivedFromFk == null
+                val rcSlugMatches = entity.identifier == rc.manifest.dublinCore.identifier
+                val languagesMatch = entity.languageFk == language.id
+                isSource && rcSlugMatches && languagesMatch
+            } ?: run { return null }
 
         return ResourceMetadataMapper().mapFromEntity(metadata, LanguageMapper().mapFromEntity(language))
     }
