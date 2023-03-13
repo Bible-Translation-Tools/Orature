@@ -20,7 +20,6 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.project
 
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.cast
-import io.reactivex.rxkotlin.toObservable
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Collection
@@ -265,9 +264,14 @@ class ProjectFilesAccessor(
         }
     }
 
-    fun writeSelectedTakesFile(fileWriter: IFileWriter, workbook: Workbook, isBook: Boolean) {
+    fun writeSelectedTakesFile(
+        fileWriter: IFileWriter,
+        workbook: Workbook,
+        isBook: Boolean,
+        takeFilter: (String) -> Boolean = { true }
+    ) {
         fileWriter.bufferedWriter(RcConstants.SELECTED_TAKES_FILE).use { _fileWriter ->
-            fetchSelectedTakes(workbook, isBook)
+            fetchSelectedTakes(workbook, isBook, filter = takeFilter)
                 .map(::relativeTakePath)
                 .doOnError { e ->
                     log.error("Error in writeSelectedTakesFile", e)
@@ -480,7 +484,8 @@ class ProjectFilesAccessor(
     private fun fetchSelectedTakes(
         workbook: Workbook,
         isBook: Boolean,
-        chaptersOnly: Boolean = false
+        chaptersOnly: Boolean = false,
+        filter: (String) -> Boolean = { true }
     ): Observable<Take> {
         val chapters = when {
             isBook -> workbook.target.chapters
@@ -498,6 +503,9 @@ class ProjectFilesAccessor(
             .mapNotNull { audio ->
                 val take = audio.selected.value?.value
                 take
+            }
+            .filter {
+                filter(it.file.name)
             }
     }
 

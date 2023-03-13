@@ -20,7 +20,6 @@ import org.wycliffeassociates.otter.common.domain.project.takeFilenamePattern
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
-import tornadofx.mapEach
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Provider
@@ -117,6 +116,11 @@ class TestBackupProjectExporter {
             takesPerChapter * chapterFilter.chapters.size,
             chapterToTakes.values.sum()
         )
+        Assert.assertEquals(
+            "Chapters from selected metadata file should match filter.",
+            chapterFilter.chapters,
+            chaptersFromSelectedTakesFile(file)
+        )
     }
 
     private fun buildProjectFile(): File {
@@ -157,5 +161,27 @@ class TestBackupProjectExporter {
         }
 
         return chapterToTakeCount
+    }
+
+    private fun chaptersFromSelectedTakesFile(projectFile: File): List<Int> {
+        var lines = mutableListOf<String>()
+        ResourceContainer.load(projectFile).use {
+            if (it.accessor.fileExists(".apps/orature/selected.txt"))
+                {
+                    it.accessor.getReader(".apps/orature/selected.txt").use {
+                        lines.addAll(it.readText().split("\n"))
+                    }
+                }
+        }
+        return lines
+            .filter { it.isNotBlank() }
+            .map {
+                takeFilenamePattern
+                    .matcher(it)
+                    .apply { find() }
+                    .group(1)
+                    .toInt()
+            }
+            .distinct()
     }
 }

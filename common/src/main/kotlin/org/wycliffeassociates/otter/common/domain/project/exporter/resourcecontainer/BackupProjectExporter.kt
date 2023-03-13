@@ -81,7 +81,13 @@ class BackupProjectExporter @Inject constructor(
                     projectAccessor.copySourceFilesWithRelatedMedia(
                         fileWriter, directoryProvider.tempDirectory, linkedResource
                     )
-                    projectAccessor.writeSelectedTakesFile(fileWriter, workbook, projectToExportIsBook)
+                    projectAccessor.writeSelectedTakesFile(
+                        fileWriter,
+                        workbook,
+                        projectToExportIsBook
+                    ) { takeName ->
+                        takesFilter(takeName, options)
+                    }
                     projectAccessor.writeChunksFile(fileWriter)
                 }
 
