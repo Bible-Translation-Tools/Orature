@@ -279,22 +279,23 @@ class DatabaseMigrator {
      * Adds a table for Versification
      */
     private fun migrate9to10(dsl: DSLContext, current: Int): Int {
-        return if (current < 10) {
-            dsl
-                .createTableIfNotExists(
-                    VersificationEntity.VERSIFICATION_ENTITY
-                )
-                .column(VersificationEntity.VERSIFICATION_ENTITY.ID)
-                .column(VersificationEntity.VERSIFICATION_ENTITY.SLUG)
-                .column(VersificationEntity.VERSIFICATION_ENTITY.PATH)
-                .constraints(
-                    DSL.primaryKey(VersificationEntity.VERSIFICATION_ENTITY.ID),
-                    DSL.unique(VersificationEntity.VERSIFICATION_ENTITY.SLUG)
-                )
-                .execute()
-            logger.info("Updated database from version 9 to 10")
-            return 10
-        } else current
+         return if (current < 10) {
+             dsl
+                 .createTableIfNotExists(
+                     VersificationEntity.VERSIFICATION_ENTITY
+                 )
+                 .column(VersificationEntity.VERSIFICATION_ENTITY.ID)
+                 .column(VersificationEntity.VERSIFICATION_ENTITY.SLUG)
+                 .column(VersificationEntity.VERSIFICATION_ENTITY.PATH)
+                 .constraints(
+                     DSL.primaryKey(VersificationEntity.VERSIFICATION_ENTITY.ID),
+                     DSL.unique(VersificationEntity.VERSIFICATION_ENTITY.SLUG)
+                 )
+                 .execute()
+             logger.info("Updated database from version 9 to 10")
+             return 10
+         } else current
+     }
 
     private fun migrate10to11(dsl: DSLContext, current: Int): Int {
         return if (current < 11) {
