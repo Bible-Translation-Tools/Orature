@@ -297,6 +297,17 @@ class DatabaseMigrator {
          } else current
      }
 
+    /**
+     * Version 11
+     * Adds a column for the bridged and v_end to the content table
+     *
+     * The tables related to projects are truncated, which effectively is deleting the database. This is because
+     * verse bridges and verse end are difficult to construct and migration code is nontrivial. As projects existing
+     * in the project directory but not in the database are re-imported, this serves as an alternative to database
+     * migrations here.
+     *
+     * The DataAccessException is caught in the event that the column already exists.
+     */
     private fun migrate10to11(dsl: DSLContext, current: Int): Int {
         return if (current < 11) {
             try {
