@@ -112,15 +112,28 @@ class ResourceContainerRepository @Inject constructor(
         rcTree: OtterTree<CollectionOrContent>,
         languageSlug: String
     ): Single<ImportResult> {
-        val rcMetadata = getMetadataForContainer(rc) ?: run { return Single.just(ImportResult.IMPORT_ERROR)}
-        val projects = collectionRepository.getSourceProjects().map { it.filter { it.resourceContainer == rcMetadata } }.blockingGet()
+        return Single.fromCallable {
+            val rcMetadata = getMetadataForContainer(rc) ?: run {
+                return@fromCallable ImportResult.IMPORT_ERROR
 
-        val databaseMap = hashMapOf<Collection, MutableList<Content>>()
-        projects.map { getProjectAsOtterTree(it, rcMetadata).toChapterContentMap() }.forEach { databaseMap.putAll(it) }
-        val parsedTextMap = rcTree.toChapterContentMap()
-        updateTextContent(databaseMap, parsedTextMap)
-        updateBridges(databaseMap, parsedTextMap)
-        return Single.just(ImportResult.SUCCESS)
+            }
+            val projects = collectionRepository
+                .getSourceProjects()
+                .map { it.filter { it.resourceContainer == rcMetadata } }
+                .blockingGet()
+
+            val databaseMap = hashMapOf<Collection, MutableList<Content>>()
+
+            projects
+                .map { getProjectAsOtterTree(it, rcMetadata).toChapterContentMap() }
+                .forEach { databaseMap.putAll(it) }
+
+            val parsedTextMap = rcTree.toChapterContentMap()
+            updateTextContent(databaseMap, parsedTextMap)
+            updateBridges(databaseMap, parsedTextMap)
+
+            return@fromCallable ImportResult.SUCCESS
+        }.subscribeOn(Schedulers.io())
     }
 
     fun updateTextContent(databaseMap: Map<Collection, List<Content>>, parsedTextMap: Map<Collection, List<Content>>) {
