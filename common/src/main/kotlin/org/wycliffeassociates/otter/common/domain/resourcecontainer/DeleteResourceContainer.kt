@@ -56,4 +56,6 @@ class DeleteResourceContainer @Inject constructor(
             return delete(it)
         }
     }
+
+    fun deleteSync(rcFile: File) = delete(rcFile).blockingGet()
 }
