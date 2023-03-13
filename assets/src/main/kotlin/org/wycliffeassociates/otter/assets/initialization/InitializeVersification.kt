@@ -31,6 +31,9 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IVersificati
 import java.io.File
 import javax.inject.Inject
 
+private const val ULB_VERSIFICATION_FILE = "ulb.json"
+private const val ULB_VERSIFICATION_RESOURCE_PATH = "versification/ulb_versification.json"
+
 class InitializeVersification @Inject constructor(
     val directoryProvider: IDirectoryProvider,
     val versificationRepository: IVersificationRepository
@@ -53,14 +56,14 @@ class InitializeVersification @Inject constructor(
     }
 
     private fun copyUlbVersification() {
-        if (!File(directoryProvider.versificationDirectory, "ulb.json").exists()) {
+        if (!File(directoryProvider.versificationDirectory, ULB_VERSIFICATION_FILE).exists()) {
             directoryProvider.versificationDirectory.mkdirs()
             logger.info("Copying ulb versification")
-            ClassLoader.getSystemResourceAsStream("versification/ulb_versification.json")
+            ClassLoader.getSystemResourceAsStream(ULB_VERSIFICATION_RESOURCE_PATH)
                 .transferTo(
                     File(
                         directoryProvider.versificationDirectory.absolutePath,
-                        "ulb.json"
+                        ULB_VERSIFICATION_FILE
                     ).outputStream()
                 )
         }
