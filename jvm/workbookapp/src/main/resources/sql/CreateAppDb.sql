@@ -156,4 +156,4 @@ CREATE TABLE IF NOT EXISTS versification_entity (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     slug            TEXT NOT NULL UNIQUE,
     path            TEXT NOT NULL
-)
+);

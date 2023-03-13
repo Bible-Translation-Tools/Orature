@@ -237,6 +237,9 @@ class DirectoryProvider(
     override val audioPluginDirectory: File
         get() = getAppDataDirectory("plugins")
 
+    override val versificationDirectory: File
+        get() = getAppDataDirectory("versification")
+
     override val logsDirectory: File
         get() = getAppDataDirectory("logs")
 

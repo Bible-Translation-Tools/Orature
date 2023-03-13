@@ -24,7 +24,6 @@ import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
 import org.slf4j.LoggerFactory
 
-
 const val SCHEMA_VERSION = 11
 const val DATABASE_INSTALLABLE_NAME = "DATABASE"
 
@@ -43,7 +42,7 @@ class DatabaseMigrator {
             currentVersion = migrate6to7(dsl, currentVersion)
             currentVersion = migrate7to8(dsl, currentVersion)
             currentVersion = migrate8to9(dsl, currentVersion)
-
+            currentVersion = migrate9to10(dsl, currentVersion)
             currentVersion = migrate10to11(dsl, currentVersion)
             updateDatabaseVersion(dsl, currentVersion)
         }
@@ -274,6 +273,28 @@ class DatabaseMigrator {
             current
         }
     }
+    
+     /**
+     * Version 10
+     * Adds a table for Versification
+     */
+    private fun migrate9to10(dsl: DSLContext, current: Int): Int {
+        return if (current < 10) {
+            dsl
+                .createTableIfNotExists(
+                    VersificationEntity.VERSIFICATION_ENTITY
+                )
+                .column(VersificationEntity.VERSIFICATION_ENTITY.ID)
+                .column(VersificationEntity.VERSIFICATION_ENTITY.SLUG)
+                .column(VersificationEntity.VERSIFICATION_ENTITY.PATH)
+                .constraints(
+                    DSL.primaryKey(VersificationEntity.VERSIFICATION_ENTITY.ID),
+                    DSL.unique(VersificationEntity.VERSIFICATION_ENTITY.SLUG)
+                )
+                .execute()
+            logger.info("Updated database from version 9 to 10")
+            return 10
+        } else current
 
     private fun migrate10to11(dsl: DSLContext, current: Int): Int {
         return if (current < 11) {
