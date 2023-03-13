@@ -258,7 +258,11 @@ class ResourceContainerRepository @Inject constructor(
                 isSource && rcSlugMatches && languagesMatch
             } ?: run { return null }
 
-        return ResourceMetadataMapper().mapFromEntity(metadata, LanguageMapper().mapFromEntity(language))
+        return ResourceMetadataMapper()
+            .mapFromEntity(
+                metadata,
+                LanguageMapper().mapFromEntity(language)
+            )
     }
 
     /**
