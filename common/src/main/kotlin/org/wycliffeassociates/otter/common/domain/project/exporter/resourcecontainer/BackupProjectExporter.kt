@@ -104,6 +104,7 @@ class BackupProjectExporter @Inject constructor(
         return try {
             takeFilenamePattern
                 .matcher(path)
+                .apply { find() }
                 .group(1)
                 .toInt() in exportOptions.chapters
         } catch (e: Exception) {

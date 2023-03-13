@@ -29,6 +29,7 @@ import integrationtest.projects.TestProjectExport
 import integrationtest.projects.TestProjectImport
 import integrationtest.projects.TestRcImport
 import integrationtest.projects.TestRemoveRc
+import integrationtest.projects.export.TestExportBackupProject
 import integrationtest.projects.importer.TestExistingSourceImporter
 import integrationtest.projects.export.TestExportSourceProject
 import integrationtest.projects.importer.TestOngoingProjectImporter
@@ -64,6 +65,7 @@ interface TestPersistenceComponent : AppDependencyGraph {
     fun inject(test: TestRemoveRc)
     fun inject(test: TestProjectExport)
     fun inject(test: TestExportSourceProject)
+    fun inject(test: TestExportBackupProject)
     fun inject(test: TestCollectionRepository)
     fun inject(test: MergeMediaTest)
 }

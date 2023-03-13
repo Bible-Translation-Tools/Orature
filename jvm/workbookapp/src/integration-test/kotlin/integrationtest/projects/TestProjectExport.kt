@@ -21,6 +21,7 @@ package integrationtest.projects
 import integrationtest.di.DaggerTestPersistenceComponent
 import integrationtest.enUlbTestMetadata
 import org.junit.After
+import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
@@ -51,6 +52,7 @@ import javax.inject.Provider
 import kotlin.io.path.createTempDirectory
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.BackupProjectExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.Mp3ProjectExporter
+import org.wycliffeassociates.resourcecontainer.ResourceContainer
 
 class TestProjectExport {
     @Inject lateinit var dbEnvProvider: Provider<DatabaseEnvironment>
@@ -105,24 +107,6 @@ class TestProjectExport {
     fun cleanUp() {
         outputDir.deleteRecursively()
     }
-
-//    @Test
-//    fun exportOratureProjectWithMetadata() {
-//        val result = exportBackupUseCase.get()
-//            .export(outputDir, targetMetadata, workbook, projectFilesAccessor)
-//            .blockingGet()
-//
-//        assertEquals(ExportResult.SUCCESS, result)
-//
-//        val file = outputDir.listFiles().singleOrNull()
-//
-//        assertNotNull(file)
-//
-//        val exportedContributorList = ResourceContainer.load(file!!).use {
-//            it.manifest.dublinCore.contributor.toList()
-//        }
-//        assertTrue(exportedContributorList.isNotEmpty())
-//    }
 
     @Test
     fun exportMp3ProjectWithMetadata() {
