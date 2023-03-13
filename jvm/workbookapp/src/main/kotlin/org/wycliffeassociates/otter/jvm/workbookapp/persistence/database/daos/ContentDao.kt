@@ -327,6 +327,7 @@ class ContentDao(
             .set(CONTENT_ENTITY.SELECTED_TAKE_FK, entity.selectedTakeFk)
             .set(CONTENT_ENTITY.TEXT, entity.text)
             .set(CONTENT_ENTITY.FORMAT, entity.format)
+            .set(CONTENT_ENTITY.DRAFT_NUMBER, entity.draftNumber)
             .set(CONTENT_ENTITY.BRIDGED, if (entity.bridged) 1 else 0)
             .where(CONTENT_ENTITY.ID.eq(entity.id))
             .execute()
