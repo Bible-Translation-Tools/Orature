@@ -24,6 +24,7 @@
     -wa-primary-05: #015AD90D;
     -wa-primary-10: #015AD91A;
     -wa-primary-20: #015AD933;
+    -wa-primary-30: #015AD94C;
     -wa-primary-light: #CEE6FF;
     -wa-primary-dark: #00377C;
 
@@ -32,6 +33,7 @@
     -wa-primary-variant-dark: -wa-primary;
 
     -wa-background: #f4f4f4;
+    -wa-background-dark: #B3B9C2;
 
     -wa-foreground: white;
     -wa-foreground-hover: #e6e6e6;
@@ -47,6 +49,7 @@
     /* Gradients */
     -wa-primary-gradient: linear-gradient(to top, -wa-primary, #267CF7);
     -wa-cta-gradient: linear-gradient(to bottom, -wa-accent-light, -wa-accent);
+    -wa-background-primary-gradient: linear-gradient(to top, -wa-primary-20, -wa-primary-05);
 
     -wa-warning: rgba(184, 86, 89, 1);
     -wa-warning-overlay: rgba(184, 86, 89, 0.1);

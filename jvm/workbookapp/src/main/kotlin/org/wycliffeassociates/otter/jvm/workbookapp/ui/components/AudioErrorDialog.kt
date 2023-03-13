@@ -35,6 +35,8 @@ import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.jvm.controls.combobox.ComboboxItem
+import org.wycliffeassociates.otter.jvm.controls.combobox.IconComboBoxCell
 import org.wycliffeassociates.otter.jvm.controls.dialog.OtterDialog
 import org.wycliffeassociates.otter.jvm.device.audio.AudioErrorType
 import org.wycliffeassociates.otter.jvm.utils.overrideDefaultKeyEventHandler
@@ -137,7 +139,7 @@ class AudioErrorDialog : OtterDialog() {
                     }
                 }
 
-                buttonCell = DeviceComboboxCell(FontIcon(MaterialDesign.MDI_MICROPHONE))
+                buttonCell = IconComboBoxCell(FontIcon(MaterialDesign.MDI_MICROPHONE))
                 overrideDefaultKeyEventHandler {
                     settingsViewModel.updateOutputDevice(it)
                 }
@@ -158,7 +160,7 @@ class AudioErrorDialog : OtterDialog() {
                     }
                 }
 
-                buttonCell = DeviceComboboxCell(FontIcon(MaterialDesign.MDI_MICROPHONE))
+                buttonCell = IconComboBoxCell(FontIcon(MaterialDesign.MDI_MICROPHONE))
                 overrideDefaultKeyEventHandler {
                     settingsViewModel.updateInputDevice(it)
                 }

@@ -16,28 +16,27 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
+package org.wycliffeassociates.otter.jvm.controls.demo.ui.components
 
-import javafx.scene.control.ListCell
-import org.kordamp.ikonli.javafx.FontIcon
-import org.wycliffeassociates.otter.common.data.ColorTheme
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ComboboxButton
-import tornadofx.FX.Companion.messages
+import javafx.scene.layout.Priority
+import org.wycliffeassociates.otter.jvm.controls.demo.ui.viewmodels.DemoViewModel
 import tornadofx.*
 
-class ThemeComboboxCell(private val icon: FontIcon) : ListCell<ColorTheme>() {
-    val view = ComboboxButton()
-    override fun updateItem(item: ColorTheme?, empty: Boolean) {
-        super.updateItem(item, empty)
+class ControlContent : Workspace() {
+    private val viewModel: DemoViewModel by inject()
 
-        if (item == null || empty) {
-            graphic = null
-            return
-        }
+    init {
+        header.removeFromParent()
+        root.vgrow = Priority.ALWAYS
 
-        graphic = view.apply {
-            textProperty.set(messages[item.titleKey])
-            iconProperty.set(icon)
+        root.apply {
+            addClass("demo__content")
+
+            viewModel.shownFragment.onChange {
+                it?.let {
+                    dock(it)
+                }
+            }
         }
     }
 }
