@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.common
 
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
+import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.RcConstants
@@ -68,6 +69,11 @@ class ResourceContainerBuilder(baseRC: File? = null) {
 
     fun setProjectManifest(projects: List<Project>) {
         manifest.projects = projects
+    }
+
+    fun setContributors(contributors: List<String>): ResourceContainerBuilder {
+        manifest.dublinCore.contributor = contributors.toMutableList()
+        return this
     }
 
     /**

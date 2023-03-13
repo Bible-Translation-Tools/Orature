@@ -47,11 +47,12 @@ class TestExportBackupProject {
         DaggerTestPersistenceComponent.create().inject(this)
     }
 
+    private val db = dbEnvProvider.get() // bootstrap the db
+    private val takesPerChapter = 2
+    private val contributors = listOf("user1", "user2")
     private val seedProject = buildProjectFile()
     private lateinit var workbook: Workbook
-    private val db = dbEnvProvider.get()
     private lateinit var outputDir: File
-    private val takesPerChapter = 2
 
     @Before
     fun setUp() {
@@ -63,6 +64,29 @@ class TestExportBackupProject {
     @After
     fun cleanUp() {
         outputDir.deleteRecursively()
+    }
+
+    @Test
+    fun exportProjectWithContributorInfo() {
+        val result = exportBackupUseCase.get()
+            .export(
+                outputDir,
+                ProjectMetadata(enUlbTestMetadata),
+                workbook,
+                null
+            )
+            .blockingGet()
+
+        Assert.assertEquals(ExportResult.SUCCESS, result)
+
+        val file = outputDir.listFiles().singleOrNull()
+
+        Assert.assertNotNull(file)
+
+        val exportedContributorList = ResourceContainer.load(file!!).use {
+            it.manifest.dublinCore.contributor.toList()
+        }
+        Assert.assertEquals(contributors, exportedContributorList)
     }
 
     @Test
@@ -98,6 +122,7 @@ class TestExportBackupProject {
     private fun buildProjectFile(): File {
         return ResourceContainerBuilder
             .setUpEmptyProjectBuilder()
+            .setContributors(contributors)
             .addTake(1, ContentType.META, 1, true)
             .addTake(2, ContentType.META, 1, true)
             .addTake(3, ContentType.META, 1, true)
