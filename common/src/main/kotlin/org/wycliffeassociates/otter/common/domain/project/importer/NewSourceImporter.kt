@@ -14,10 +14,12 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.castOrFindIm
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.otterConfigCategories
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IProjectReader
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.VersificationTreeBuilder
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.toCollection
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IVersificationRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.io.IOException
@@ -27,6 +29,7 @@ class NewSourceImporter @Inject constructor(
     private val directoryProvider: IDirectoryProvider,
     private val resourceContainerRepository: IResourceContainerRepository,
     resourceMetadataRepository: IResourceMetadataRepository,
+    private val versificationRepository: IVersificationRepository,
     private val zipEntryTreeBuilder: IZipEntryTreeBuilder
 ) : RCImporter(directoryProvider, resourceMetadataRepository) {
 
@@ -98,15 +101,35 @@ class NewSourceImporter @Inject constructor(
             return cleanUp(fileToLoad, e.result)
         }
 
+        val root = OtterTree<CollectionOrContent>(container.toCollection())
+        val versificationTree = VersificationTreeBuilder(directoryProvider, versificationRepository).build(container)
+        for (node in versificationTree) {
+            root.addChild(node)
+        }
+
         return resourceContainerRepository
-            .importResourceContainer(container, tree, container.manifest.dublinCore.language.identifier)
+            .importResourceContainer(container, root, container.manifest.dublinCore.language.identifier)
             .doOnEvent { result, err ->
                 if (err != null) {
                     logger.error("Error in importFromInternalDirectory importing rc, file: $fileToLoad", err)
                 }
                 if (result != ImportResult.SUCCESS || err != null) fileToLoad.deleteRecursively()
+            }.flatMap {
+                updateContentFromTextContent(container, tree)
             }
             .subscribeOn(Schedulers.io())
+    }
+
+    private fun updateContentFromTextContent(
+        container: ResourceContainer,
+        tree: OtterTree<CollectionOrContent>
+    ): Single<ImportResult> {
+        return resourceContainerRepository
+            .updateContent(
+                container,
+                tree,
+                container.manifest.dublinCore.language.identifier
+            )
     }
 
     private fun copyToInternalDirectory(file: File, destinationDirectory: File): File {
