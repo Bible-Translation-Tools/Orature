@@ -149,3 +149,9 @@ CREATE TABLE IF NOT EXISTS translation_entity (
     target_rate      DOUBLE DEFAULT 1.0,
     UNIQUE (source_fk, target_fk)
 );
+
+CREATE TABLE IF NOT EXISTS versification_entity (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    slug            TEXT NOT NULL UNIQUE,
+    path            TEXT NOT NULL
+);
