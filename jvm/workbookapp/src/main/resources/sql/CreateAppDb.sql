@@ -56,10 +56,12 @@ CREATE TABLE IF NOT EXISTS content_entity (
     label            TEXT NOT NULL,
     selected_take_fk INTEGER REFERENCES take_entity(id) ON DELETE SET NULL,
     start            INTEGER NOT NULL,
+    v_end            INTEGER DEFAULT 0 NOT NULL,
     sort             INTEGER NOT NULL,
     text             TEXT,
     format           TEXT,
-    draft_number     INTEGER DEFAULT 1 NOT NULL
+    draft_number     INTEGER DEFAULT 1 NOT NULL,
+    bridged          INTEGER DEFAULT 0 NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_content_entity_collection_start ON content_entity (collection_fk, start, type_fk);
 
