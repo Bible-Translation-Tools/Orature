@@ -89,7 +89,8 @@ class OngoingProjectImporter @Inject constructor(
                     val filterProvided = updateTakesImportFilter(file, callback)
                     if (!filterProvided) {
                         return@flatMap Single.just(ImportResult.ABORTED)
-                    }                }
+                    }
+                }
                 importResumableProject(file)
             }
             .subscribeOn(Schedulers.io())
