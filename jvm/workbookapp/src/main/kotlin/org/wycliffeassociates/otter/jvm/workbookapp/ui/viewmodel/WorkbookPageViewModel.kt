@@ -37,7 +37,7 @@ import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
 import org.wycliffeassociates.otter.common.domain.project.ProjectMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.BackupProjectExporter
-import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOption
+import org.wycliffeassociates.otter.common.domain.project.exporter.ExportType
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import org.wycliffeassociates.otter.common.domain.project.exporter.AudioProjectExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.ProjectExporter
@@ -206,22 +206,21 @@ class WorkbookPageViewModel : ViewModel() {
         }
     }
 
-    fun exportWorkbook(directory: File, option: ExportOption) {
+    fun exportWorkbook(directory: File, type: ExportType) {
         showExportProgressDialogProperty.set(true)
 
         val workbook = workbookDataStore.workbook
         val resourceMetadata = workbookDataStore.activeResourceMetadata
-        val projectFileAccessor = workbookDataStore.activeProjectFilesAccessor
 
         activeProjectTitleProperty.set(workbook.target.title)
         activeProjectCoverProperty.set(
             workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
         )
 
-        val exporter: ProjectExporter = when (option) {
-            ExportOption.LISTEN -> exportAudioProvider.get()
-            ExportOption.SOURCE_AUDIO, ExportOption.PUBLISH -> exportSourceProvider.get()
-            ExportOption.BACKUP -> exportBackupProvider.get()
+        val exporter: ProjectExporter = when (type) {
+            ExportType.LISTEN -> exportAudioProvider.get()
+            ExportType.SOURCE_AUDIO, ExportType.PUBLISH -> exportSourceProvider.get()
+            ExportType.BACKUP -> exportBackupProvider.get()
         }
 
         exporter

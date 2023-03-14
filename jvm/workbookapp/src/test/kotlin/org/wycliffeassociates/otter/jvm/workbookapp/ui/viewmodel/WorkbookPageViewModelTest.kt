@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.jakewharton.rxrelay2.ReplayRelay
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.anyOrNull
 import io.reactivex.Observable
 import io.reactivex.Single
 import javafx.beans.property.SimpleObjectProperty
@@ -36,20 +37,20 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.testfx.api.FxToolkit
 import org.testfx.util.WaitForAsyncUtils
+import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Book
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.ArtworkAccessor
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import tornadofx.*
 import java.io.File
 import java.time.LocalDateTime
 import javax.inject.Provider
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.BackupProjectExporter
-import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOption
+import org.wycliffeassociates.otter.common.domain.project.exporter.ExportType
 
 class WorkbookPageViewModelTest {
     companion object {
@@ -57,6 +58,11 @@ class WorkbookPageViewModelTest {
         private lateinit var vm: WorkbookPageViewModel
         private val mockWorkbookDS = mock(WorkbookDataStore::class.java)
         private val chapters = initChapters()
+        private val mockResourceMetadata = mock(ResourceMetadata::class.java).apply {
+            `when`(identifier).thenReturn("ulb")
+            `when`(language).thenReturn(mock(Language::class.java))
+            `when`(creator).thenReturn("test")
+        }
         private val mockBook = Book(
             1,
             1,
@@ -64,7 +70,7 @@ class WorkbookPageViewModelTest {
             "test",
             "test",
             Observable.fromIterable(chapters),
-            mock(ResourceMetadata::class.java),
+            mockResourceMetadata,
             listOf(),
             LocalDateTime.now(),
             listOf()
@@ -86,10 +92,6 @@ class WorkbookPageViewModelTest {
                 .thenReturn(SimpleObjectProperty())
             `when`(mockWorkbookDS.activeResourceMetadata)
                 .thenReturn(mockBook.resourceMetadata)
-            `when`(mockWorkbookDS.activeProjectFilesAccessor)
-                .thenReturn(mock(ProjectFilesAccessor::class.java))
-            `when`(mockWorkbookDS.activeProjectFilesAccessorProperty)
-                .thenReturn(SimpleObjectProperty())
 
             return mockWorkbookDS
         }
@@ -144,7 +146,6 @@ class WorkbookPageViewModelTest {
     fun openWorkbook_loadChapters() {
         assertEquals(0, vm.chapters.size)
 
-        val lockObject = Object()
         val chapterSizeChanges = mutableListOf<Int>()
         vm.chapters.onChange {
             chapterSizeChanges.add(vm.chapters.size)
@@ -166,7 +167,7 @@ class WorkbookPageViewModelTest {
     @Test
     fun exportWorkbook() {
         val mockProjectExporter = mock(BackupProjectExporter::class.java)
-        `when`(mockProjectExporter.export(any(), any(), any(), any()))
+        `when`(mockProjectExporter.export(any(), any(), any(), anyOrNull()))
             .thenReturn(Single.just(ExportResult.SUCCESS))
         val exportProvider: Provider<BackupProjectExporter> = Provider {
             mockProjectExporter
@@ -182,7 +183,7 @@ class WorkbookPageViewModelTest {
         vm.showExportProgressDialogProperty.onChange {
             showProgressChanges.add(it)
         }
-        vm.exportWorkbook(mock(File::class.java), ExportOption.BACKUP)
+        vm.exportWorkbook(mock(File::class.java), ExportType.BACKUP)
 
         WaitForAsyncUtils.waitForFxEvents()
 
@@ -190,9 +191,8 @@ class WorkbookPageViewModelTest {
         assertNull(projectTitleChanges[1])
         assertTrue(showProgressChanges[0])
         assertFalse(showProgressChanges[1])
-        verify(mockProjectExporter).export(any(), any(), any(), any())
+        verify(mockProjectExporter).export(any(), any(), any(), anyOrNull())
         verify(mockWorkbookDS, atLeastOnce()).workbook
         verify(mockWorkbookDS).activeResourceMetadata
-        verify(mockWorkbookDS).activeProjectFilesAccessor
     }
 }

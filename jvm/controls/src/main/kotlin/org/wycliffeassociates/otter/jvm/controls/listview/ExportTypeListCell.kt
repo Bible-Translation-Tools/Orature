@@ -23,21 +23,21 @@ import javafx.scene.control.ListCell
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOption
+import org.wycliffeassociates.otter.common.domain.project.exporter.ExportType
 import tornadofx.FX.Companion.messages
 import tornadofx.addClass
 import tornadofx.get
 
-class ExportOptionListCell : ListCell<ExportOption>() {
+class ExportTypeListCell : ListCell<ExportType>() {
 
-    private fun associatedIcon(option: ExportOption): FontIcon = when (option) {
-        ExportOption.BACKUP -> FontIcon(MaterialDesign.MDI_FOLDER_MULTIPLE_OUTLINE)
-        ExportOption.LISTEN -> FontIcon(MaterialDesign.MDI_PLAY)
-        ExportOption.SOURCE_AUDIO -> FontIcon(Material.HEARING)
-        ExportOption.PUBLISH -> FontIcon(Material.CLOUD_UPLOAD)
+    private fun associatedIcon(type: ExportType): FontIcon = when (type) {
+        ExportType.BACKUP -> FontIcon(MaterialDesign.MDI_FOLDER_MULTIPLE_OUTLINE)
+        ExportType.LISTEN -> FontIcon(MaterialDesign.MDI_PLAY)
+        ExportType.SOURCE_AUDIO -> FontIcon(Material.HEARING)
+        ExportType.PUBLISH -> FontIcon(Material.CLOUD_UPLOAD)
     }
 
-    override fun updateItem(item: ExportOption?, empty: Boolean) {
+    override fun updateItem(item: ExportType?, empty: Boolean) {
         super.updateItem(item, empty)
         if (item == null || empty) {
             return

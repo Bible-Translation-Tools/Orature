@@ -18,7 +18,7 @@
  */
 package org.wycliffeassociates.otter.common.domain.project.exporter
 
-enum class ExportOption(val titleKey: String) {
+enum class ExportType(val titleKey: String) {
     LISTEN("listen"),
     SOURCE_AUDIO("sourceAudio"),
     BACKUP("backup"),
