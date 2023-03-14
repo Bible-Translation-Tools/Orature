@@ -120,7 +120,7 @@ fun getDublinCore(resource: ResourceMetadata): DublinCore {
     }
 }
 
-fun getResourceMetadata(langauge: Language): ResourceMetadata {
+fun getResourceMetadata(language: Language): ResourceMetadata {
     return ResourceMetadata(
         conformsTo = "rc0.2",
         creator = "Door43 World Missions Community",
@@ -128,7 +128,7 @@ fun getResourceMetadata(langauge: Language): ResourceMetadata {
         format = "text/usfm",
         identifier = "ulb",
         issued = LocalDate.now(),
-        language = langauge,
+        language = language,
         modified = LocalDate.now(),
         publisher = "unfoldingWord",
         subject = "Bible",

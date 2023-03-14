@@ -23,7 +23,7 @@ import io.reactivex.Completable
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
+import org.wycliffeassociates.otter.common.domain.project.importer.RCImporterFactory
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.config.Installable
@@ -42,7 +42,7 @@ class InitializeProjects @Inject constructor(
     private val directoryProvider: IDirectoryProvider,
     private val installedEntityRepo: IInstalledEntityRepository,
     private val workbookRepository: IWorkbookRepository,
-    private val rcImporter: ImportResourceContainer
+    private val rcImporterFactory: RCImporterFactory
 ) : Installable {
     override val name = "PROJECTS"
     override val version = 1
@@ -179,7 +179,8 @@ class InitializeProjects @Inject constructor(
     }
 
     private fun importProject(project: File) {
-        rcImporter.import(project).toObservable()
+        rcImporterFactory.makeImporter()
+            .import(project).toObservable()
             .doOnError { e ->
                 log.error("Error importing ${project.name}.", e)
             }

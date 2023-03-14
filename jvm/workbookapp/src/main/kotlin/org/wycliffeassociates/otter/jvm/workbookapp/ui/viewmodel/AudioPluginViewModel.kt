@@ -98,6 +98,7 @@ class AudioPluginViewModel : ViewModel() {
             messages[workbookDataStore.activeChunkProperty.value.label]
         }
         val chunkNumber = workbookDataStore.activeChunkProperty.value?.sort
+        val chunkTitle = workbookDataStore.activeChunkProperty.value?.title
         val resourceLabel = workbookDataStore.activeResourceComponentProperty.value?.let {
             messages[workbookDataStore.activeResourceComponentProperty.value.label]
         }
@@ -115,6 +116,7 @@ class AudioPluginViewModel : ViewModel() {
             verseTotal = verseTotal,
             chunkLabel = chunkLabel,
             chunkNumber = chunkNumber,
+            chunkTitle = chunkTitle,
             resourceLabel = resourceLabel,
             sourceChapterAudio = sourceAudio?.file,
             sourceChunkStart = sourceAudio?.start,
