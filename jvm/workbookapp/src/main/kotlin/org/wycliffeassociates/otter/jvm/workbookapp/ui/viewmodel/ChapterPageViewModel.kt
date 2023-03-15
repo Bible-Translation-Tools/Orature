@@ -402,8 +402,7 @@ class ChapterPageViewModel : ViewModel() {
                 }
 
                 filteredContent.removeIf { card ->
-                    (card.chunkSource != null && card.chunkSource.draftNumber < 0) ||
-                        (card.chunkSource != null && card.chunkSource.bridged)
+                    card.chunkSource != null && (card.chunkSource.draftNumber < 0 || card.chunkSource.bridged)
                 }
                 filteredContent.sortBy { it.sort }
                 setWorkChunk()
