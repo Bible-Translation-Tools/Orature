@@ -49,15 +49,13 @@ class PcmFile private constructor() : AudioFormatStrategy {
     fun sampleIndex(sample: Int) = sample * frameSizeInBytes
 
     override fun addCue(location: Int, label: String) {
-        TODO("Not yet implemented")
     }
 
     override fun getCues(): List<AudioCue> {
-        TODO("Not yet implemented")
+        return listOf()
     }
 
     override fun update() {
-        TODO("Not yet implemented")
     }
 
     override fun reader(start: Int?, end: Int?): AudioFileReader {
