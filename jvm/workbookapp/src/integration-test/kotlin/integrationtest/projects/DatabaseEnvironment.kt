@@ -76,7 +76,7 @@ class DatabaseEnvironment @Inject constructor(
             rcResourceFile(rcFile)
         }
 
-        val result =importer.import(resourceFile).blockingGet()
+        val result = importer.import(resourceFile).blockingGet()
         Assert.assertEquals(
             ImportResult.SUCCESS,
             result
