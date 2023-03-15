@@ -211,7 +211,7 @@ class ResourceContainerRepository @Inject constructor(
 
     private fun OtterTreeNode<CollectionOrContent>.hasContent(): Boolean {
         if (value is Collection) {
-            return (value as OtterTree<CollectionOrContent>).children.any { it.value is Content }
+            return (this as OtterTree<CollectionOrContent>).children.any { it.value is Content }
         } else {
             return false
         }
