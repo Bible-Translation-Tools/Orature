@@ -20,8 +20,10 @@ package org.wycliffeassociates.otter.common.domain.content
 
 import io.reactivex.Completable
 import io.reactivex.Single
+import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
+import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.audio.wav.EMPTY_WAVE_FILE_SIZE
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
 import org.wycliffeassociates.otter.common.audio.wav.InvalidWavFileException
@@ -32,6 +34,7 @@ import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
 import org.wycliffeassociates.otter.common.domain.plugins.PluginParameters
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import java.io.File
+import java.io.IOException
 import java.lang.Exception
 import java.time.LocalDate
 import javax.inject.Inject
@@ -80,6 +83,27 @@ class TakeActions @Inject constructor(
             }.map { (take, result) ->
                 handleRecorderPluginResult(audio::insertTake, take, result)
             }
+    }
+
+    fun saveChunk(
+        chunk: Recordable,
+        audio: AssociatedAudio,
+        projectAudioDir: File,
+        namer: FileNamer
+    ): Single<Result> {
+        return Single.fromCallable {
+            val chapterAudioDir = getChapterAudioDirectory(
+                projectAudioDir,
+                namer.formatChapterNumber()
+            )
+            val filename = namer.generateName(1, AudioFileFormat.PCM)
+            val takeFile = chapterAudioDir.resolve(File(filename))
+            val chapterFile = audio.selected.value!!.value!!.file
+
+            createChunkFromChapterAudio(chunk, takeFile, chapterFile)
+        }.map { (take, result) ->
+            handleRecorderPluginResult(chunk.audio::insertTake, take, result)
+        }
     }
 
     fun import(
@@ -154,6 +178,63 @@ class TakeActions @Inject constructor(
                 input.copyTo(output)
             }
         }
+    }
+
+    private fun getChunkAudioRange(sort: Int, max: Int, cues: List<AudioCue>): Pair<Int, Int> {
+        val current = cues[sort - 1].location
+        val next = if (sort in 0..cues.lastIndex) {
+            cues[sort].location
+        } else {
+            max
+        }
+
+        return Pair(current, next)
+    }
+
+    private fun createChunkFromChapterAudio(
+        chunk: Recordable,
+        takeFile: File,
+        chapterFile: File
+    ): Pair<Take, Result> {
+        var reader: AudioFileReader? = null
+        var result: Result
+
+        try {
+            val audioFile = AudioFile(chapterFile)
+            val cues = audioFile.metadata.getCues()
+            val sort = chunk.sort
+            val totalFrames = audioFile.totalFrames
+
+            val location = getChunkAudioRange(sort, totalFrames, cues)
+            reader = audioFile.reader(location.first, location.second)
+            reader.open()
+
+            val pcmAudio = AudioFile(takeFile)
+            pcmAudio.writer().use { writer ->
+                val buffer = ByteArray(10240)
+                while (reader.hasRemaining()) {
+                    val written = reader.getPcmBuffer(buffer)
+                    writer.write(buffer, 0, written)
+                }
+            }
+            result = Result.SUCCESS
+        } catch (e: InvalidWavFileException) {
+            result = Result.NO_AUDIO
+        } catch (e: IOException) {
+            result = Result.NO_AUDIO
+        } finally {
+            reader?.release()
+        }
+
+        val newTake = Take(
+            name = takeFile.name,
+            file = takeFile,
+            number = 1,
+            format = MimeType.WAV,
+            createdTimestamp = LocalDate.now()
+        )
+
+        return Pair(newTake, result)
     }
 
     internal fun handleRecorderPluginResult(
