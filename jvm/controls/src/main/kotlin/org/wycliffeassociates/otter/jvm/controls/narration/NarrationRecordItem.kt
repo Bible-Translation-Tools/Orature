@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.narration
 
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
@@ -36,10 +37,12 @@ import tornadofx.*
 class NarrationRecordItem : VBox() {
     val verseLabelProperty = SimpleStringProperty()
     val waveformProperty = SimpleObjectProperty<Image>()
+    val waveformLoadingProperty = SimpleBooleanProperty()
     val audioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
 
     val openInTextProperty = SimpleStringProperty()
     val recordAgainTextProperty = SimpleStringProperty()
+    val loadingImageTextProperty = SimpleStringProperty()
 
     val onOpenAppActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onRecordAgainActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
@@ -91,13 +94,17 @@ class NarrationRecordItem : VBox() {
             }
         }
 
-        hbox {
+        stackpane {
             alignment = Pos.CENTER
             vgrow = Priority.ALWAYS
 
             hbox {
                 addClass("narration-record__waveform")
                 imageview(waveformProperty)
+            }
+
+            label(loadingImageTextProperty) {
+                visibleProperty().bind(waveformLoadingProperty)
             }
         }
     }

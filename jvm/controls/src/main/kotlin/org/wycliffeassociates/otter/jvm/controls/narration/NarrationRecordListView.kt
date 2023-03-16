@@ -38,6 +38,7 @@ class NarrationRecordListView<T>(items: ObservableList<T>? = null) : ListView<T>
 
     val openInTextProperty = SimpleStringProperty()
     val recordAgainTextProperty = SimpleStringProperty()
+    val loadingImageTextProperty = SimpleStringProperty()
 
     init {
         addClass("wa-list-view")

@@ -117,11 +117,13 @@ class ChapterNarrationPage : View() {
 
                         openInTextProperty.set(messages["openIn"])
                         recordAgainTextProperty.set(messages["recordAgain"])
+                        loadingImageTextProperty.set(messages["loading"])
 
                         setCellFactory {
                             NarrationRecordCell().apply {
                                 openInTextCellProperty.bind(openInTextProperty)
                                 recordAgainTextCellProperty.bind(recordAgainTextProperty)
+                                loadingImageTextCellProperty.bind(loadingImageTextProperty)
 
                                 onOpenAppActionCellProperty.bind(onOpenAppActionProperty)
                                 onRecordAgainActionCellProperty.bind(onRecordAgainActionProperty)

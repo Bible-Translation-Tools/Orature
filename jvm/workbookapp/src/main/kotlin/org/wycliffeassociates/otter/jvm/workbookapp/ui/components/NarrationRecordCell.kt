@@ -32,6 +32,7 @@ class NarrationRecordCell : ListCell<ChunkData>() {
 
     val openInTextCellProperty = SimpleStringProperty()
     val recordAgainTextCellProperty = SimpleStringProperty()
+    val loadingImageTextCellProperty = SimpleStringProperty()
 
     val onOpenAppActionCellProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onRecordAgainActionCellProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
@@ -52,6 +53,10 @@ class NarrationRecordCell : ListCell<ChunkData>() {
             verseLabelProperty.set(item.title)
             audioPlayerProperty.set(item.player)
 
+            waveformProperty.bind(item.imageProperty)
+            waveformLoadingProperty.bind(item.imageLoadingProperty)
+
+            loadingImageTextProperty.set(loadingImageTextCellProperty.value)
             openInTextProperty.set(openInTextCellProperty.value)
             recordAgainTextProperty.set(recordAgainTextCellProperty.value)
 
