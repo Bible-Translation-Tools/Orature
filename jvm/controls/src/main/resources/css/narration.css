@@ -19,6 +19,7 @@
 .narration__header {
     -fx-alignment: center;
     -fx-pref-height: 80px;
+    -fx-padding: 0 16px;
 }
 
 .narration__header .btn {
