@@ -36,6 +36,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.map
 import java.lang.IllegalStateException
 import javax.inject.Inject
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.CollectionMapper
+import kotlin.math.log
 
 class ContentRepository @Inject constructor(
     database: AppDatabase
@@ -59,6 +60,12 @@ class ContentRepository @Inject constructor(
                 contentDao
                     .fetchByCollectionId(collection.id)
                     .map(this::buildContent)
+                    .filter {
+                        if (it.bridged) {
+                            logger.info("Ignoring bridged content: ${it}, start is ${it.start} end is ${it.end}")
+                        }
+                        !it.bridged
+                    }
             }
             .doOnError { e ->
                 logger.error("Error in getByCollection for collection: $collection", e)
@@ -164,6 +171,12 @@ class ContentRepository @Inject constructor(
                 contentDao
                     .fetchAll()
                     .map(this::buildContent)
+                    .filter {
+                        if (it.bridged) {
+                            logger.info("Ignoring bridged content: ${it}")
+                        }
+                        !it.bridged
+                    }
             }
             .doOnError { e ->
                 logger.error("Error in getAll", e)
@@ -175,7 +188,10 @@ class ContentRepository @Inject constructor(
         return Single
             .fromCallable {
                 val id = contentDao.insert(
-                    contentMapper.mapToEntity(content, collection.id).apply { collectionFk = collection.id })
+                    contentMapper
+                        .mapToEntity(content, collection.id)
+                        .apply { collectionFk = collection.id }
+                )
                 content.id = id
                 activeConnections.getOrDefault(collection, null)?.let { it.accept(content) }
                 id
@@ -211,7 +227,7 @@ class ContentRepository @Inject constructor(
 
         return Completable.fromAction {
             derivedContents.forEach { content ->
-                for (verse in content.start .. content.end) {
+                for (verse in content.start..content.end) {
                     val sourceId = sourceContents.firstOrNull { it.sort == verse }?.id
                     if (sourceId != null) {
                         contentDao.linkDerivative(content.id, sourceId)
@@ -224,7 +240,6 @@ class ContentRepository @Inject constructor(
     private fun buildContent(entity: ContentEntity): Content {
         // Check for sources
         val sources = contentDao.fetchSources(entity)
-        val contentEnd = sources.map { it.start }.maxOrNull() ?: entity.start
         val selectedTake = entity
             .selectedTakeFk?.let { selectedTakeFk ->
                 // Retrieve the markers
@@ -233,6 +248,6 @@ class ContentRepository @Inject constructor(
                     .map(markerMapper::mapFromEntity)
                 takeMapper.mapFromEntity(takeDao.fetchById(selectedTakeFk), markers)
             }
-        return contentMapper.mapFromEntity(entity, selectedTake, contentEnd)
+        return contentMapper.mapFromEntity(entity, selectedTake)
     }
 }

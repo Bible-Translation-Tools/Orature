@@ -24,29 +24,9 @@ import org.wycliffeassociates.otter.common.domain.languages.LanguageDataSource
 import org.wycliffeassociates.otter.common.domain.plugins.IAudioPluginRegistrar
 import org.wycliffeassociates.otter.common.persistence.ILanguageDataSource
 import org.wycliffeassociates.otter.common.persistence.ILocaleDataSource
-import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.*
 import org.wycliffeassociates.otter.jvm.workbookapp.domain.LocaleDataSource
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.AppPreferencesRepository
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.AudioPluginRepository
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.CollectionRepository
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.ContentRepository
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.InstalledEntityRepository
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.LanguageRepository
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.ResourceContainerRepository
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.ResourceMetadataRepository
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.ResourceRepository
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.TakeRepository
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.*
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.AudioPluginRegistrar
 import javax.inject.Singleton
 
@@ -123,6 +103,12 @@ abstract class AppRepositoriesModule {
     abstract fun providesAppPreferencesRepository(
         repository: AppPreferencesRepository
     ): IAppPreferencesRepository
+
+    @Binds
+    @Singleton
+    abstract fun providesVersificationRepository(
+        repository: VersificationRepository
+    ): IVersificationRepository
 
     @Binds
     @Singleton

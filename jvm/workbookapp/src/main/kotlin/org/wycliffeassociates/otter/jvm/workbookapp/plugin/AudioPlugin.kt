@@ -134,6 +134,7 @@ class AudioPlugin(
                     "--marker_total=${pluginParameters.verseTotal}",
                     (if (pluginParameters.chunkLabel != null) "--unit=${pluginParameters.chunkLabel}" else ""),
                     (if (pluginParameters.chunkNumber != null) "--unit_number=${pluginParameters.chunkNumber}" else ""),
+                    (if (pluginParameters.chunkTitle != null) "--unit_title=${pluginParameters.chunkTitle}" else ""),
                     (if (pluginParameters.resourceLabel != null) "--resource=${pluginParameters.resourceLabel}" else ""),
                     "--chapter_audio=${pluginParameters.sourceChapterAudio?.absolutePath}",
                     "--source_chunk_start=${pluginParameters.sourceChunkStart}",

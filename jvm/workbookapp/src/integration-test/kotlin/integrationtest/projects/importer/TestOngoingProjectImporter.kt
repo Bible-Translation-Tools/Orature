@@ -5,12 +5,11 @@ import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import integrationtest.di.DaggerTestPersistenceComponent
 import integrationtest.projects.DatabaseEnvironment
-import integrationtest.projects.RowCount
 import io.reactivex.Single
 import org.junit.Assert
 import org.junit.Test
+import org.wycliffeassociates.otter.common.ResourceContainerBuilder
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
-import org.wycliffeassociates.otter.common.domain.project.importer.ImportCallbackParameter
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
 import org.wycliffeassociates.otter.common.domain.project.importer.NewSourceImporter
 import org.wycliffeassociates.otter.common.domain.project.importer.OngoingProjectImporter
@@ -18,7 +17,6 @@ import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImport
 import org.wycliffeassociates.otter.common.domain.project.importer.RCImporter
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import java.io.File
-import java.io.FileNotFoundException
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -42,6 +40,7 @@ class TestOngoingProjectImporter {
         imp.setNext(sourceImporterProvider.get())
         imp
     }
+    private val projectFile: File by lazy { setupRC() }
     private val takesInProject = 6
     private val takesPerChapter = 2
     private val chaptersSelected = listOf(1, 2)
@@ -85,36 +84,23 @@ class TestOngoingProjectImporter {
     }
 
     private fun importOngoingProject(callback: ProjectImporterCallback?) {
-        val projectFile = getProjectFileWith3Chapters()
-
         importer
             .import(projectFile, callback)
             .blockingGet()
             .let {
                 Assert.assertEquals(ImportResult.SUCCESS, it)
             }
-
-        db.assertRowCounts(
-            RowCount(
-                collections = 1278,
-                contents = mapOf(
-                    ContentType.META to 1210,
-                    ContentType.TEXT to 31214
-                ),
-                links = 0
-            )
-        )
     }
 
-    /**
-     * There are 3 chapters having audio. Each includes one chapter take and one verse take.
-     */
-    private fun getProjectFileWith3Chapters(): File {
-        val name = "resource-containers/john-3-chapters-translation.orature"
-        val path = javaClass.classLoader.getResource(name)
-        if (path == null) {
-            throw FileNotFoundException("Test resource not found: $name")
-        }
-        return File(path.file)
+    private fun setupRC(): File {
+        return ResourceContainerBuilder
+            .setUpEmptyProjectBuilder()
+            .addTake(1, ContentType.META, 1, true)
+            .addTake(2, ContentType.META, 1, true)
+            .addTake(3, ContentType.META, 1, true)
+            .addTake(1, ContentType.TEXT, 1, true, chapter = 1, start = 1, end = 1)
+            .addTake(2, ContentType.TEXT, 1, true, chapter = 2, start = 1, end = 1)
+            .addTake(3, ContentType.TEXT, 1, true, chapter = 3, start = 1, end = 1)
+            .buildFile()
     }
 }

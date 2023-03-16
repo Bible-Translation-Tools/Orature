@@ -281,9 +281,11 @@ class ProjectFilesAccessor(
     fun writeChunksFile(fileWriter: IFileWriter) {
         val inFile = projectDir.resolve(RcConstants.CHUNKS_FILE)
 
-        fileWriter.bufferedWriter(RcConstants.CHUNKS_FILE).use { _fileWriter ->
-            inFile.reader().use { _fileReader ->
-                _fileReader.transferTo(_fileWriter)
+        if (inFile.exists()) {
+            fileWriter.bufferedWriter(RcConstants.CHUNKS_FILE).use { _fileWriter ->
+                inFile.reader().use { _fileReader ->
+                    _fileReader.transferTo(_fileWriter)
+                }
             }
         }
     }
