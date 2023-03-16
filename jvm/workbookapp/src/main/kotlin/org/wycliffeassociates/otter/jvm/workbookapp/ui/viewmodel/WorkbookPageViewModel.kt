@@ -47,6 +47,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ContributorCellData
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChapterNarrationPage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChapterPage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ResourcePage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.errorMessage
@@ -200,7 +201,8 @@ class WorkbookPageViewModel : ViewModel() {
         val resourceMetadata = workbookDataStore.activeResourceMetadata
         updateLastResource(resourceMetadata.identifier)
         when (resourceMetadata.type) {
-            ContainerType.Book, ContainerType.Bundle -> navigator.dock<ChapterPage>()
+            ContainerType.Book, ContainerType.Bundle -> navigator.dock<ChapterNarrationPage>()
+            //ContainerType.Book, ContainerType.Bundle -> navigator.dock<ChapterPage>()
             ContainerType.Help -> navigator.dock<ResourcePage>()
         }
     }

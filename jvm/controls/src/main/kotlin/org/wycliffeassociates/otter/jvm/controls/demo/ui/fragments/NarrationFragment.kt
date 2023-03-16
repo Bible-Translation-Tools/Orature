@@ -305,7 +305,8 @@ class NarrationFragment : Fragment() {
                     floatingCardVisibleProperty.bind(viewModel.floatingCardVisibleProperty)
                     onFloatingChunkActionProperty.bind(viewModel.onCurrentVerseActionProperty)
 
-                    currentChunkTextProperty.set("Current: Verse {0}")
+                    currentChunkTextProperty.set("Current: {0} {1}")
+                    currentVerseTextProperty.set("Verse")
                     resumeTextProperty.set("Resume")
                 }
             }
