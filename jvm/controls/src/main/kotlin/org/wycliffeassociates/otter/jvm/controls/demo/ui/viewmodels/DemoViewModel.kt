@@ -33,6 +33,7 @@ class DemoViewModel : ViewModel() {
     val selectedThemeProperty = SimpleObjectProperty<ColorTheme>()
 
     val currentVerseLabelProperty = SimpleStringProperty()
+    val floatingCardVisibleProperty = SimpleBooleanProperty()
     val onCurrentVerseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     val currentChapterProperty = SimpleIntegerProperty(2)

@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.controls.narration
 
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
@@ -34,6 +35,7 @@ import java.text.MessageFormat
 
 class FloatingNarrationCard : VBox() {
     val floatingLabelProperty = SimpleStringProperty()
+    val floatingCardVisibleProperty = SimpleBooleanProperty()
     val onFloatingChunkActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     val currentChunkTextProperty = SimpleStringProperty()
@@ -58,7 +60,7 @@ class FloatingNarrationCard : VBox() {
             }
         }
 
-        visibleProperty().bind(floatingLabelProperty.isNotNull)
+        visibleProperty().bind(floatingCardVisibleProperty)
         managedProperty().bind(visibleProperty())
     }
 

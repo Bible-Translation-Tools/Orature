@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.narration
 
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.ObservableValue
@@ -28,13 +29,12 @@ import javafx.event.EventTarget
 import javafx.geometry.Orientation
 import javafx.scene.control.ListView
 import javafx.scene.control.ScrollBar
-import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.jvm.utils.findChildren
 import org.wycliffeassociates.otter.jvm.utils.virtualFlow
 import tornadofx.*
 
-class NarrationListView(items: ObservableList<Chunk>? = null) : ListView<Chunk>(items) {
-    val selectedVerseLabelProperty = SimpleStringProperty()
+class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(items) {
+    val cardIsOutOfViewProperty = SimpleBooleanProperty()
     val onSelectedVerseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     val beginRecordingTextProperty = SimpleStringProperty()
@@ -42,26 +42,17 @@ class NarrationListView(items: ObservableList<Chunk>? = null) : ListView<Chunk>(
     val resumeRecordingTextProperty = SimpleStringProperty()
     val nextChunkTextProperty = SimpleStringProperty()
 
-    private val onRecordActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val initialSelectedItemProperty = SimpleObjectProperty<T>()
+
+    val onRecordActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
         addClass("wa-list-view")
 
-        setCellFactory {
-            NarrationTextCell().apply {
-                beginRecordingTextCellProperty.bind(beginRecordingTextProperty)
-                pauseRecordingTextCellProperty.bind(pauseRecordingTextProperty)
-                resumeRecordingTextCellProperty.bind(resumeRecordingTextProperty)
-                nextChunkTextCellProperty.bind(nextChunkTextProperty)
-
-                setOnRecord {
-                    onRecordActionProperty.value?.handle(ActionEvent(item, null))
-                }
-            }
-        }
-
-        itemsProperty().onChange {
-            selectionModel.select(0)
+        initialSelectedItemProperty.onChange {
+            cardIsOutOfViewProperty.set(false)
+            selectionModel.select(it)
+            scrollTo(it)
         }
 
         skinProperty().onChange {
@@ -72,17 +63,17 @@ class NarrationListView(items: ObservableList<Chunk>? = null) : ListView<Chunk>(
                     }
                     scrollBar?.valueProperty()?.onChange {
                         val current = selectionModel.selectedIndex
-                        val first = virtualFlow().firstVisibleCell.index
-                        val last = virtualFlow().lastVisibleCell.index
+                        val first = virtualFlow().firstVisibleCell?.index ?: 0
+                        val last = virtualFlow().lastVisibleCell?.index ?: 0
 
                         if (current !in (first..last)) {
-                            selectedVerseLabelProperty.set(selectedItem?.label)
+                            cardIsOutOfViewProperty.set(true)
                             onSelectedVerseActionProperty.set(EventHandler {
                                 selectionModel.select(current)
                                 scrollTo(current)
                             })
                         } else {
-                            selectedVerseLabelProperty.set(null)
+                            cardIsOutOfViewProperty.set(false)
                             onSelectedVerseActionProperty.set(null)
                         }
                     }
@@ -93,26 +84,26 @@ class NarrationListView(items: ObservableList<Chunk>? = null) : ListView<Chunk>(
         }
     }
 
-    fun setOnRecord(op: (verse: Chunk) -> Unit) {
+    fun setOnRecord(op: (value: T) -> Unit) {
         onRecordActionProperty.set(EventHandler {
-            op.invoke(it.source as Chunk)
+            op.invoke(it.source as T)
         })
     }
 }
 
-fun EventTarget.narrationtextlistview(values: ObservableList<Chunk>?, op: NarrationListView.() -> Unit = {}) =
-    NarrationListView().attachTo(this, op) {
-        if (values is SortedFilteredList<Chunk>) values.bindTo(it)
+fun <T> EventTarget.narrationtextlistview(values: ObservableList<T>?, op: NarrationTextListView<T>.() -> Unit = {}) =
+    NarrationTextListView<T>().attachTo(this, op) {
+        if (values is SortedFilteredList<T>) values.bindTo(it)
         else it.items = values
     }
 
-fun EventTarget.narrationtextlistview(
-    values: ObservableValue<ObservableList<Chunk>>?,
-    op: NarrationListView.() -> Unit = {}
+fun <T> EventTarget.narrationtextlistview(
+    values: ObservableValue<ObservableList<T>>?,
+    op: NarrationTextListView<T>.() -> Unit = {}
 ) =
-    NarrationListView().attachTo(this, op) {
+    NarrationTextListView<T>().attachTo(this, op) {
         fun rebinder() {
-            (it.items as? SortedFilteredList<Chunk>)?.bindTo(it)
+            (it.items as? SortedFilteredList<T>)?.bindTo(it)
         }
         it.itemsProperty().bind(values)
         rebinder()

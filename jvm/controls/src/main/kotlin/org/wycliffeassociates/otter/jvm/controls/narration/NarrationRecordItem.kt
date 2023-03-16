@@ -23,23 +23,28 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.geometry.Pos
+import javafx.scene.control.Button
 import javafx.scene.image.Image
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import tornadofx.*
 
 class NarrationRecordItem : VBox() {
     val verseLabelProperty = SimpleStringProperty()
     val waveformProperty = SimpleObjectProperty<Image>()
+    val audioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
 
     val openInTextProperty = SimpleStringProperty()
     val recordAgainTextProperty = SimpleStringProperty()
 
-    val onPlayActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onOpenAppActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onRecordAgainActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+
+    private val audioPlayButtonProperty = SimpleObjectProperty<Button>()
 
     init {
         styleClass.setAll("narration-record__verse-item")
@@ -59,9 +64,16 @@ class NarrationRecordItem : VBox() {
             button {
                 addClass("btn", "btn--primary", "btn--borderless")
                 graphic = FontIcon(MaterialDesign.MDI_PLAY)
-
-                onActionProperty().bind(onPlayActionProperty)
+                audioPlayButtonProperty.set(this)
             }
+
+            simpleaudioplayer {
+                playerProperty.bind(audioPlayerProperty)
+                playButtonProperty.bind(audioPlayButtonProperty)
+                isVisible = false
+                isManaged = false
+            }
+
             menubutton {
                 addClass("btn", "btn--primary", "btn--borderless", "wa-menu-button")
                 graphic = FontIcon(MaterialDesign.MDI_DOTS_HORIZONTAL)
