@@ -39,6 +39,7 @@ class FloatingNarrationCard : VBox() {
     val onFloatingChunkActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     val currentChunkTextProperty = SimpleStringProperty()
+    val currentVerseTextProperty = SimpleStringProperty()
     val resumeTextProperty = SimpleStringProperty()
 
     init {
@@ -67,14 +68,23 @@ class FloatingNarrationCard : VBox() {
     private fun currentChunkTextBinding(): StringBinding {
         return Bindings.createStringBinding(
             {
-                if (currentChunkTextProperty.value != null && floatingLabelProperty.value != null) {
-                    MessageFormat.format(currentChunkTextProperty.value, floatingLabelProperty.value)
+                val title = currentChunkTextProperty.value
+                val verseTitle = currentVerseTextProperty.value
+                val floatingVerseLabel = floatingLabelProperty.value
+
+                if (title != null && verseTitle != null && floatingVerseLabel != null) {
+                    MessageFormat.format(
+                        title,
+                        verseTitle,
+                        floatingVerseLabel
+                    )
                 } else {
                     ""
                 }
             },
             floatingLabelProperty,
-            currentChunkTextProperty
+            currentChunkTextProperty,
+            currentVerseTextProperty
         )
     }
 }
