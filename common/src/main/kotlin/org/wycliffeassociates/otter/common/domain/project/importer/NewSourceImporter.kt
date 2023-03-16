@@ -101,23 +101,43 @@ class NewSourceImporter @Inject constructor(
             return cleanUp(fileToLoad, e.result)
         }
 
-        val root = OtterTree<CollectionOrContent>(container.toCollection())
-        val versificationTree = VersificationTreeBuilder(directoryProvider, versificationRepository).build(container)
-        for (node in versificationTree) {
-            root.addChild(node)
-        }
+        val preallocationTree = OtterTree<CollectionOrContent>(container.toCollection())
+        val versificationTree = VersificationTreeBuilder(versificationRepository)
+            .build(container)
+            ?.apply {
+                for (node in this) {
+                    preallocationTree.addChild(node)
+                }
+            }
 
+        return Single
+            .fromCallable {
+                if (versificationTree != null) {
+                    importTree(container, preallocationTree, fileToLoad)
+                        .flatMap {
+                            updateContentFromTextContent(container, tree)
+                        }
+                } else { // No versification found, just import the tree from the parsed text
+                    importTree(container, tree, fileToLoad)
+                }
+            }
+            .flatMap { it }
+            .subscribeOn(Schedulers.io())
+    }
+
+    private fun importTree(
+        container: ResourceContainer,
+        tree: OtterTree<CollectionOrContent>,
+        fileToLoad: File
+    ): Single<ImportResult> {
         return resourceContainerRepository
-            .importResourceContainer(container, root, container.manifest.dublinCore.language.identifier)
+            .importResourceContainer(container, tree, container.manifest.dublinCore.language.identifier)
             .doOnEvent { result, err ->
                 if (err != null) {
                     logger.error("Error in importFromInternalDirectory importing rc, file: $fileToLoad", err)
                 }
                 if (result != ImportResult.SUCCESS || err != null) fileToLoad.deleteRecursively()
-            }.flatMap {
-                updateContentFromTextContent(container, tree)
             }
-            .subscribeOn(Schedulers.io())
     }
 
     private fun updateContentFromTextContent(

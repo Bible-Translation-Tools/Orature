@@ -20,24 +20,20 @@ private const val FORMAT = "text/usfm"
 private const val DEFAULT_VERSIFICATION = "ulb"
 
 class VersificationTreeBuilder @Inject constructor(
-    val directoryProvider: IDirectoryProvider,
-    val versificationRepository: IVersificationRepository
+    private val versificationRepository: IVersificationRepository
 ) {
-    fun build(container: ResourceContainer): List<OtterTree<CollectionOrContent>> {
-        val versification = getVersification(container)
-
+    fun build(container: ResourceContainer): List<OtterTree<CollectionOrContent>>? {
+        val versification = getVersification(container) ?: return null
         return constructTree(versification, container)
     }
 
-    private fun getVersification(container: ResourceContainer): Versification {
-        var versificationCode = container.manifest.projects.first()?.versification ?: DEFAULT_VERSIFICATION
-        if (versificationCode == "") {
-            versificationCode = DEFAULT_VERSIFICATION
-        }
+    private fun getVersification(container: ResourceContainer): Versification? {
+        var versificationCode = container.manifest.projects.firstOrNull()?.versification ?: return null
+        if (versificationCode == "") return null
         return versificationRepository.getVersification(versificationCode).blockingGet()
     }
 
-    fun constructTree(
+    private fun constructTree(
         versification: Versification,
         container: ResourceContainer
     ): List<OtterTree<CollectionOrContent>> {
