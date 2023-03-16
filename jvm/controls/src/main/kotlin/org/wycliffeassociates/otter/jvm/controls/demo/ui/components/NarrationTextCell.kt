@@ -16,17 +16,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.controls.narration
+package org.wycliffeassociates.otter.jvm.controls.demo.ui.components
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.scene.control.ListCell
-import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.jvm.controls.demo.ui.models.ChunkData
+import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItem
 import tornadofx.addClass
 
-class NarrationTextCell : ListCell<Chunk>() {
+internal class NarrationTextCell : ListCell<ChunkData>() {
     private val view = NarrationTextItem()
 
     val beginRecordingTextCellProperty = SimpleStringProperty()
@@ -34,13 +35,13 @@ class NarrationTextCell : ListCell<Chunk>() {
     val resumeRecordingTextCellProperty = SimpleStringProperty()
     val nextChunkTextCellProperty = SimpleStringProperty()
 
-    private val onRecordActionCellProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val onRecordActionCellProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
         addClass("narration-list__verse-cell")
     }
 
-    override fun updateItem(item: Chunk?, empty: Boolean) {
+    override fun updateItem(item: ChunkData?, empty: Boolean) {
         super.updateItem(item, empty)
 
         if (empty || item == null) {
@@ -53,14 +54,16 @@ class NarrationTextCell : ListCell<Chunk>() {
 
         graphic = view.apply {
             verseLabelProperty.set(item.title)
-            verseTextProperty.set(item.textItem.text)
+            verseTextProperty.set(item.text)
 
             beginRecordingTextProperty.set(beginRecordingTextCellProperty.value)
             pauseRecordingTextProperty.set(pauseRecordingTextCellProperty.value)
             resumeRecordingTextProperty.set(resumeRecordingTextCellProperty.value)
             nextChunkTextProperty.set(nextChunkTextCellProperty.value)
 
-            onRecordActionProperty.set(onRecordActionCellProperty.value)
+            onRecordActionProperty.set(EventHandler {
+                onRecordActionCellProperty.value?.handle(ActionEvent(item, null))
+            })
 
             setOnNextVerse {
                 listView.selectionModel.selectNext()

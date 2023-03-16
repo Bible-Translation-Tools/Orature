@@ -27,76 +27,49 @@ import javafx.event.EventHandler
 import javafx.event.EventTarget
 import javafx.geometry.Orientation
 import javafx.scene.control.ListView
-import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import tornadofx.SortedFilteredList
 import tornadofx.addClass
 import tornadofx.attachTo
 import tornadofx.onChange
 
-class NarrationRecordListView(items: ObservableList<Chunk>? = null) : ListView<Chunk>(items) {
-    private val onPlayActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
-    private val onOpenAppActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
-    private val onRecordAgainActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+class NarrationRecordListView<T>(items: ObservableList<T>? = null) : ListView<T>(items) {
+    val onOpenAppActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val onRecordAgainActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     val openInTextProperty = SimpleStringProperty()
     val recordAgainTextProperty = SimpleStringProperty()
 
     init {
         addClass("wa-list-view")
-
-        setCellFactory {
-            NarrationRecordCell().apply {
-                openInTextCellProperty.bind(openInTextProperty)
-                recordAgainTextCellProperty.bind(recordAgainTextProperty)
-
-                setOnPlay {
-                    onPlayActionProperty.value?.handle(ActionEvent(item, null))
-                }
-
-                setOnOpenApp {
-                    onOpenAppActionProperty.value?.handle(ActionEvent(item, null))
-                }
-
-                setOnRecordAgain {
-                    onRecordAgainActionProperty.value?.handle(ActionEvent(item, null))
-                }
-            }
-        }
         orientation = Orientation.HORIZONTAL
     }
 
-    fun setOnPlay(op: (verse: Chunk) -> Unit) {
-        onPlayActionProperty.set(EventHandler {
-            op.invoke(it.source as Chunk)
-        })
-    }
-
-    fun setOnOpenApp(op: (verse: Chunk) -> Unit) {
+    fun setOnOpenApp(op: (verse: T) -> Unit) {
         onOpenAppActionProperty.set(EventHandler {
-            op.invoke(it.source as Chunk)
+            op.invoke(it.source as T)
         })
     }
 
-    fun setOnRecordAgain(op: (verse: Chunk) -> Unit) {
+    fun setOnRecordAgain(op: (verse: T) -> Unit) {
         onRecordAgainActionProperty.set(EventHandler {
-            op.invoke(it.source as Chunk)
+            op.invoke(it.source as T)
         })
     }
 }
 
-fun EventTarget.narrationrecordlistview(values: ObservableList<Chunk>?, op: NarrationRecordListView.() -> Unit = {}) =
-    NarrationRecordListView().attachTo(this, op) {
-        if (values is SortedFilteredList<Chunk>) values.bindTo(it)
+fun <T> EventTarget.narrationrecordlistview(values: ObservableList<T>?, op: NarrationRecordListView<T>.() -> Unit = {}) =
+    NarrationRecordListView<T>().attachTo(this, op) {
+        if (values is SortedFilteredList<T>) values.bindTo(it)
         else it.items = values
     }
 
-fun EventTarget.narrationrecordlistview(
-    values: ObservableValue<ObservableList<Chunk>>?,
-    op: NarrationRecordListView.() -> Unit = {}
+fun <T> EventTarget.narrationrecordlistview(
+    values: ObservableValue<ObservableList<T>>?,
+    op: NarrationRecordListView<T>.() -> Unit = {}
 ) =
-    NarrationRecordListView().attachTo(this, op) {
+    NarrationRecordListView<T>().attachTo(this, op) {
         fun rebinder() {
-            (it.items as? SortedFilteredList<Chunk>)?.bindTo(it)
+            (it.items as? SortedFilteredList<T>)?.bindTo(it)
         }
         it.itemsProperty().bind(values)
         rebinder()

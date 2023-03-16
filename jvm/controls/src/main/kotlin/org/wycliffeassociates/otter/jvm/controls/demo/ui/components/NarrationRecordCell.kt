@@ -16,31 +16,31 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.controls.narration
+package org.wycliffeassociates.otter.jvm.controls.demo.ui.components
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.scene.control.ListCell
-import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.jvm.controls.demo.ui.models.ChunkData
+import org.wycliffeassociates.otter.jvm.controls.narration.NarrationRecordItem
 import tornadofx.addClass
 
-class NarrationRecordCell : ListCell<Chunk>() {
+internal class NarrationRecordCell : ListCell<ChunkData>() {
     private val view = NarrationRecordItem()
 
     val openInTextCellProperty = SimpleStringProperty()
     val recordAgainTextCellProperty = SimpleStringProperty()
 
-    private val onPlayActionCellProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
-    private val onOpenAppActionCellProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
-    private val onRecordAgainActionCellProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val onOpenAppActionCellProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val onRecordAgainActionCellProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
         addClass("narration-record__verse-cell")
     }
 
-    override fun updateItem(item: Chunk?, empty: Boolean) {
+    override fun updateItem(item: ChunkData?, empty: Boolean) {
         super.updateItem(item, empty)
 
         if (empty || item == null) {
@@ -50,31 +50,17 @@ class NarrationRecordCell : ListCell<Chunk>() {
 
         graphic = view.apply {
             verseLabelProperty.set(item.title)
+            audioPlayerProperty.set(item.player)
 
             openInTextProperty.set(openInTextCellProperty.value)
             recordAgainTextProperty.set(recordAgainTextCellProperty.value)
 
-            onPlayActionProperty.set(onPlayActionCellProperty.value)
-            onOpenAppActionProperty.set(onOpenAppActionCellProperty.value)
-            onRecordAgainActionProperty.set(onRecordAgainActionCellProperty.value)
+            onOpenAppActionProperty.set(EventHandler {
+                onOpenAppActionCellProperty.value?.handle(ActionEvent(item, null))
+            })
+            onRecordAgainActionProperty.set(EventHandler {
+                onRecordAgainActionCellProperty.value?.handle(ActionEvent(item, null))
+            })
         }
-    }
-
-    fun setOnPlay(op: () -> Unit) {
-        onPlayActionCellProperty.set(EventHandler {
-            op.invoke()
-        })
-    }
-
-    fun setOnOpenApp(op: () -> Unit) {
-        onOpenAppActionCellProperty.set(EventHandler {
-            op.invoke()
-        })
-    }
-
-    fun setOnRecordAgain(op: () -> Unit) {
-        onRecordAgainActionCellProperty.set(EventHandler {
-            op.invoke()
-        })
     }
 }

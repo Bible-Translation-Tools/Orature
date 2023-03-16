@@ -30,6 +30,9 @@ import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.TextItem
 import org.wycliffeassociates.otter.jvm.controls.chapterselector.ChapterSelector
+import org.wycliffeassociates.otter.jvm.controls.demo.ui.components.NarrationRecordCell
+import org.wycliffeassociates.otter.jvm.controls.demo.ui.components.NarrationTextCell
+import org.wycliffeassociates.otter.jvm.controls.demo.ui.models.ChunkData
 import org.wycliffeassociates.otter.jvm.controls.demo.ui.viewmodels.DemoViewModel
 import org.wycliffeassociates.otter.jvm.controls.narration.floatingnarrationcard
 import org.wycliffeassociates.otter.jvm.controls.narration.narrationrecordlistview
@@ -44,7 +47,7 @@ class NarrationFragment : Fragment() {
     private val chunks = FXCollections.observableArrayList(
         Chunk(
             1,
-            "1",
+            "chunk",
             AssociatedAudio(ReplayRelay.create()),
             listOf(),
             TextItem("Then Jonah prayed to Yahweh his God from the fish's stomach.", MimeType.USFM),
@@ -55,7 +58,7 @@ class NarrationFragment : Fragment() {
         ),
         Chunk(
             2,
-            "2",
+            "chunk",
             AssociatedAudio(ReplayRelay.create()),
             listOf(),
             TextItem("He said, I called out to Yahweh about my distress and he answered me;", MimeType.USFM),
@@ -65,7 +68,7 @@ class NarrationFragment : Fragment() {
             ContentType.TEXT
         ),Chunk(
             3,
-            "3",
+            "chunk",
             AssociatedAudio(ReplayRelay.create()),
             listOf(),
             TextItem("You had thrown me into the depths, into the heart of the seas, and the currents " +
@@ -77,7 +80,7 @@ class NarrationFragment : Fragment() {
         ),
         Chunk(
             4,
-            "4",
+            "chunk",
             AssociatedAudio(ReplayRelay.create()),
             listOf(),
             TextItem("I said, 'I am driven out from before your eyes; yet I will again " +
@@ -89,7 +92,7 @@ class NarrationFragment : Fragment() {
         ),
         Chunk(
             5,
-            "5",
+            "chunk",
             AssociatedAudio(ReplayRelay.create()),
             listOf(),
             TextItem("The waters closed around me up to my neck; the deep was all around me; " +
@@ -101,7 +104,7 @@ class NarrationFragment : Fragment() {
         ),
         Chunk(
             6,
-            "6",
+            "chunk",
             AssociatedAudio(ReplayRelay.create()),
             listOf(),
             TextItem("I went down to the bases of the mountains; the earth with its bars closed " +
@@ -113,7 +116,7 @@ class NarrationFragment : Fragment() {
         ),
         Chunk(
             7,
-            "7",
+            "chunk",
             AssociatedAudio(ReplayRelay.create()),
             listOf(),
             TextItem("When my soul fainted within me, I called Yahweh to mind; then my prayer came to " +
@@ -125,7 +128,7 @@ class NarrationFragment : Fragment() {
         ),
         Chunk(
             8,
-            "8",
+            "chunk",
             AssociatedAudio(ReplayRelay.create()),
             listOf(),
             TextItem("They give attention to meaningless gods while they abandon covenant " +
@@ -137,7 +140,7 @@ class NarrationFragment : Fragment() {
         ),
         Chunk(
             9,
-            "9",
+            "chunk",
             AssociatedAudio(ReplayRelay.create()),
             listOf(),
             TextItem("But as for me, I will sacrifice to you with a voice of thanksgiving; I will fulfill " +
@@ -149,7 +152,7 @@ class NarrationFragment : Fragment() {
         ),
         Chunk(
             10,
-            "10",
+            "chunk",
             AssociatedAudio(ReplayRelay.create()),
             listOf(),
             TextItem("Then Yahweh spoke to the fish, and it vomited up Jonah upon the dry land.", MimeType.USFM),
@@ -159,6 +162,8 @@ class NarrationFragment : Fragment() {
             ContentType.TEXT
         )
     )
+
+    private val chunkDataList = chunks.map { ChunkData(it) }.toObservable()
 
     override val root = stackpane {
         vbox {
@@ -207,22 +212,28 @@ class NarrationFragment : Fragment() {
                 alignment = Pos.CENTER
 
                 hbox {
-                    narrationrecordlistview(chunks) {
+                    narrationrecordlistview(chunkDataList) {
                         hgrow = Priority.ALWAYS
 
                         openInTextProperty.set("Open In...")
                         recordAgainTextProperty.set("Record Again")
 
-                        setOnPlay {
-                            println("Playing verse ${it.label}")
+                        setCellFactory {
+                            NarrationRecordCell().apply {
+                                openInTextCellProperty.bind(openInTextProperty)
+                                recordAgainTextCellProperty.bind(recordAgainTextProperty)
+
+                                onOpenAppActionCellProperty.bind(onOpenAppActionProperty)
+                                onRecordAgainActionCellProperty.bind(onRecordAgainActionProperty)
+                            }
                         }
 
                         setOnOpenApp {
-                            println("Opening verse ${it.label} in external app...")
+                            println("Opening verse ${it.title} in external app...")
                         }
 
                         setOnRecordAgain {
-                            println("Recording verse ${it.label} again")
+                            println("Recording verse ${it.title} again")
                         }
                     }
 
@@ -253,11 +264,17 @@ class NarrationFragment : Fragment() {
             stackpane {
                 addClass("narration__verses")
 
-                narrationtextlistview(chunks) {
+                narrationtextlistview(chunkDataList) {
                     addClass("narration__list")
 
-                    viewModel.currentVerseLabelProperty.bind(selectedVerseLabelProperty)
+                    initialSelectedItemProperty.set(chunkDataList[0])
+
                     viewModel.onCurrentVerseActionProperty.bind(onSelectedVerseActionProperty)
+                    viewModel.floatingCardVisibleProperty.bind(cardIsOutOfViewProperty)
+
+                    viewModel.currentVerseLabelProperty.bind(selectionModel.selectedItemProperty().stringBinding {
+                        it?.title
+                    })
 
                     // Maybe instead of having 3 properties for recording status
                     // it's better to have only one property and change text according to the state
@@ -267,13 +284,25 @@ class NarrationFragment : Fragment() {
                     resumeRecordingTextProperty.set("Resume Recording")
                     nextChunkTextProperty.set("Next Verse")
 
+                    setCellFactory {
+                        NarrationTextCell().apply {
+                            beginRecordingTextCellProperty.bind(beginRecordingTextProperty)
+                            pauseRecordingTextCellProperty.bind(pauseRecordingTextProperty)
+                            resumeRecordingTextCellProperty.bind(resumeRecordingTextProperty)
+                            nextChunkTextCellProperty.bind(nextChunkTextProperty)
+
+                            onRecordActionCellProperty.bind(onRecordActionProperty)
+                        }
+                    }
+
                     setOnRecord {
-                        println("Recording verse ${it.label}")
+                        println("Recording verse ${it.title}")
                     }
                 }
 
                 floatingnarrationcard {
                     floatingLabelProperty.bind(viewModel.currentVerseLabelProperty)
+                    floatingCardVisibleProperty.bind(viewModel.floatingCardVisibleProperty)
                     onFloatingChunkActionProperty.bind(viewModel.onCurrentVerseActionProperty)
 
                     currentChunkTextProperty.set("Current: Verse {0}")
