@@ -46,120 +46,120 @@ class NarrationFragment : Fragment() {
 
     private val chunks = FXCollections.observableArrayList(
         Chunk(
-            1,
-            "chunk",
-            AssociatedAudio(ReplayRelay.create()),
-            listOf(),
-            TextItem("Then Jonah prayed to Yahweh his God from the fish's stomach.", MimeType.USFM),
-            1,
-            1,
-            1,
-            ContentType.TEXT
+            sort = 1,
+            label = "chunk",
+            audio = AssociatedAudio(ReplayRelay.create()),
+            resources = listOf(),
+            textItem = TextItem("Then Jonah prayed to Yahweh his God from the fish's stomach.", MimeType.USFM),
+            start = 1,
+            end = 1,
+            draftNumber = 1,
+            contentType = ContentType.TEXT
         ),
         Chunk(
-            2,
-            "chunk",
-            AssociatedAudio(ReplayRelay.create()),
-            listOf(),
-            TextItem("He said, I called out to Yahweh about my distress and he answered me;", MimeType.USFM),
-            2,
-            2,
-            1,
-            ContentType.TEXT
+            sort = 2,
+            label = "chunk",
+            audio = AssociatedAudio(ReplayRelay.create()),
+            resources = listOf(),
+            textItem = TextItem("He said, I called out to Yahweh about my distress and he answered me;", MimeType.USFM),
+            start = 2,
+            end = 2,
+            draftNumber = 1,
+            contentType = ContentType.TEXT
         ),Chunk(
-            3,
-            "chunk",
-            AssociatedAudio(ReplayRelay.create()),
-            listOf(),
-            TextItem("You had thrown me into the depths, into the heart of the seas, and the currents " +
+            sort = 3,
+            label = "chunk",
+            audio = AssociatedAudio(ReplayRelay.create()),
+            resources = listOf(),
+            textItem = TextItem("You had thrown me into the depths, into the heart of the seas, and the currents " +
                     "surrounded me; all your waves and billows passed over me.", MimeType.USFM),
-            3,
-            3,
-            1,
-            ContentType.TEXT
+            start = 3,
+            end = 3,
+            draftNumber = 1,
+            contentType = ContentType.TEXT
         ),
         Chunk(
-            4,
-            "chunk",
-            AssociatedAudio(ReplayRelay.create()),
-            listOf(),
-            TextItem("I said, 'I am driven out from before your eyes; yet I will again " +
+            sort = 4,
+            label = "chunk",
+            audio = AssociatedAudio(ReplayRelay.create()),
+            resources = listOf(),
+            textItem = TextItem("I said, 'I am driven out from before your eyes; yet I will again " +
                     "look toward your holy temple.'", MimeType.USFM),
-            4,
-            4,
-            1,
-            ContentType.TEXT
+            start = 4,
+            end = 4,
+            draftNumber = 1,
+            contentType = ContentType.TEXT
         ),
         Chunk(
-            5,
-            "chunk",
-            AssociatedAudio(ReplayRelay.create()),
-            listOf(),
-            TextItem("The waters closed around me up to my neck; the deep was all around me; " +
+            sort = 5,
+            label = "chunk",
+            audio = AssociatedAudio(ReplayRelay.create()),
+            resources = listOf(),
+            textItem = TextItem("The waters closed around me up to my neck; the deep was all around me; " +
                     "seaweed wrapped around my head.", MimeType.USFM),
-            5,
-            5,
-            1,
-            ContentType.TEXT
+            start = 5,
+            end = 5,
+            draftNumber = 1,
+            contentType = ContentType.TEXT
         ),
         Chunk(
-            6,
-            "chunk",
-            AssociatedAudio(ReplayRelay.create()),
-            listOf(),
-            TextItem("I went down to the bases of the mountains; the earth with its bars closed " +
+            sort = 6,
+            label = "chunk",
+            audio = AssociatedAudio(ReplayRelay.create()),
+            resources = listOf(),
+            textItem = TextItem("I went down to the bases of the mountains; the earth with its bars closed " +
                     "upon me forever. Yet you brought up my life from the pit, Yahweh, my God!", MimeType.USFM),
-            6,
-            6,
-            1,
-            ContentType.TEXT
+            start = 6,
+            end = 6,
+            draftNumber = 1,
+            contentType = ContentType.TEXT
         ),
         Chunk(
-            7,
-            "chunk",
-            AssociatedAudio(ReplayRelay.create()),
-            listOf(),
-            TextItem("When my soul fainted within me, I called Yahweh to mind; then my prayer came to " +
+            sort = 7,
+            label = "chunk",
+            audio = AssociatedAudio(ReplayRelay.create()),
+            resources = listOf(),
+            textItem = TextItem("When my soul fainted within me, I called Yahweh to mind; then my prayer came to " +
                     "you to your holy temple.", MimeType.USFM),
-            7,
-            7,
-            1,
-            ContentType.TEXT
+            start = 7,
+            end = 7,
+            draftNumber = 1,
+            contentType = ContentType.TEXT
         ),
         Chunk(
-            8,
-            "chunk",
-            AssociatedAudio(ReplayRelay.create()),
-            listOf(),
-            TextItem("They give attention to meaningless gods while they abandon covenant " +
+            sort = 8,
+            label = "chunk",
+            audio = AssociatedAudio(ReplayRelay.create()),
+            resources = listOf(),
+            textItem = TextItem("They give attention to meaningless gods while they abandon covenant " +
                     "faithfulness.", MimeType.USFM),
-            8,
-            8,
-            1,
-            ContentType.TEXT
+            start = 8,
+            end = 8,
+            draftNumber = 1,
+            contentType = ContentType.TEXT
         ),
         Chunk(
-            9,
-            "chunk",
-            AssociatedAudio(ReplayRelay.create()),
-            listOf(),
-            TextItem("But as for me, I will sacrifice to you with a voice of thanksgiving; I will fulfill " +
+            sort = 9,
+            label = "chunk",
+            audio = AssociatedAudio(ReplayRelay.create()),
+            resources = listOf(),
+            textItem = TextItem("But as for me, I will sacrifice to you with a voice of thanksgiving; I will fulfill " +
                     "that which I have vowed. Salvation comes from Yahweh!\"", MimeType.USFM),
-            9,
-            9,
-            1,
-            ContentType.TEXT
+            start = 9,
+            end = 9,
+            draftNumber = 1,
+            contentType = ContentType.TEXT
         ),
         Chunk(
-            10,
-            "chunk",
-            AssociatedAudio(ReplayRelay.create()),
-            listOf(),
-            TextItem("Then Yahweh spoke to the fish, and it vomited up Jonah upon the dry land.", MimeType.USFM),
-            10,
-            10,
-            1,
-            ContentType.TEXT
+            sort = 10,
+            label = "chunk",
+            audio = AssociatedAudio(ReplayRelay.create()),
+            resources = listOf(),
+            textItem = TextItem("Then Yahweh spoke to the fish, and it vomited up Jonah upon the dry land.", MimeType.USFM),
+            start = 10,
+            end = 10,
+            draftNumber = 1,
+            contentType = ContentType.TEXT
         )
     )
 
