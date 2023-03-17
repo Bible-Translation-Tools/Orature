@@ -94,9 +94,10 @@ class NewSourceImporter @Inject constructor(
         }
 
         val tree = try {
-            constructContainerTree(container)
+            IProjectReader.constructContainerTree(container, zipEntryTreeBuilder)
         } catch (e: ImportException) {
             logger.error("Error constructing container tree, file: $fileToLoad", e)
+            logger.error("Container had format: ${container.manifest.dublinCore.format}")
             container.close()
             return cleanUp(fileToLoad, e.result)
         }
@@ -189,44 +190,5 @@ class NewSourceImporter @Inject constructor(
             }
         }
         return destinationFile
-    }
-
-    /** @throws ImportException */
-    private fun constructContainerTree(container: ResourceContainer): OtterTree<CollectionOrContent> {
-        val projectReader = try {
-            IProjectReader.build(
-                format = container.manifest.dublinCore.format,
-                isHelp = ContainerType.of(container.manifest.dublinCore.type) == ContainerType.Help
-            )
-        } catch (e: IllegalArgumentException) {
-            logger.error("Error Importing project of type: ${container.manifest.dublinCore.format}", e)
-            null
-        } ?: throw ImportException(ImportResult.UNSUPPORTED_CONTENT)
-
-        val root = OtterTree<CollectionOrContent>(container.toCollection())
-        val categoryInfo = container.otterConfigCategories()
-        for (project in container.manifest.projects) {
-            var parent = root
-            for (categorySlug in project.categories) {
-                // use the `latest` RC spec to treat categories as hierarchical
-                // look for a matching category under the parent
-                val existingCategory = parent.children
-                    .map { it as? OtterTree<CollectionOrContent> }
-                    .filter { (it?.value as? Collection)?.slug == categorySlug }
-                    .firstOrNull()
-                parent = if (existingCategory != null) {
-                    existingCategory
-                } else {
-                    // category node does not yet exist
-                    val category = categoryInfo.filter { it.identifier == categorySlug }.firstOrNull() ?: continue
-                    val categoryNode = OtterTree<CollectionOrContent>(category.toCollection())
-                    parent.addChild(categoryNode)
-                    categoryNode
-                }
-            }
-            val projectTree = projectReader.constructProjectTree(container, project, zipEntryTreeBuilder)
-            parent.addChild(projectTree)
-        }
-        return root
     }
 }

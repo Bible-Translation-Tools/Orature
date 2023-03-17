@@ -19,17 +19,24 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.project
 
 import org.wycliffeassociates.otter.common.collections.OtterTree
+import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.CollectionOrContent
+import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.otterConfigCategories
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.markdown.MarkdownProjectReader
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.usfm.UsfmProjectReader
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.toCollection
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Project
 
 interface IProjectReader {
-    /** @throws ImportException */
+    /**
+     * Constructs a tree of CollectionOrContent from the given project.
+     *
+     * @throws ImportException */
     fun constructProjectTree(
         container: ResourceContainer,
         project: Project,
@@ -49,5 +56,49 @@ interface IProjectReader {
             // MimeType.of will throw an IllegalArgumentException first
             else -> throw IllegalArgumentException("Mime type $format not supported")
         }
+
+        /**
+         * Constructs a tree of CollectionOrContent from all projects in the container
+         *
+         * @throws ImportException */
+        fun constructContainerTree(
+            container: ResourceContainer,
+            zipEntryTreeBuilder: IZipEntryTreeBuilder
+        ): OtterTree<CollectionOrContent> {
+            val projectReader = try {
+                IProjectReader.build(
+                    format = container.manifest.dublinCore.format,
+                    isHelp = ContainerType.of(container.manifest.dublinCore.type) == ContainerType.Help
+                )
+            } catch (e: IllegalArgumentException) {
+                null
+            } ?: throw ImportException(ImportResult.UNSUPPORTED_CONTENT)
+
+            val root = OtterTree<CollectionOrContent>(container.toCollection())
+            val categoryInfo = container.otterConfigCategories()
+            for (project in container.manifest.projects) {
+                var parent = root
+                for (categorySlug in project.categories) {
+                    // use the `latest` RC spec to treat categories as hierarchical
+                    // look for a matching category under the parent
+                    val existingCategory = parent.children
+                        .map { it as? OtterTree<CollectionOrContent> }
+                        .firstOrNull { (it?.value as? Collection)?.slug == categorySlug }
+                    parent = if (existingCategory != null) {
+                        existingCategory
+                    } else {
+                        // category node does not yet exist
+                        val category = categoryInfo.firstOrNull { it.identifier == categorySlug } ?: continue
+                        val categoryNode = OtterTree<CollectionOrContent>(category.toCollection())
+                        parent.addChild(categoryNode)
+                        categoryNode
+                    }
+                }
+                val projectTree = projectReader.constructProjectTree(container, project, zipEntryTreeBuilder)
+                parent.addChild(projectTree)
+            }
+            return root
+        }
+
     }
 }
