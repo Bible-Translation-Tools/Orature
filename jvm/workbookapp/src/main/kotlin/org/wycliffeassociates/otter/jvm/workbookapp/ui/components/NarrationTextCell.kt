@@ -18,24 +18,20 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
-import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
-import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.scene.control.ListCell
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItem
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkData
 import tornadofx.addClass
 
-class NarrationTextCell : ListCell<ChunkData>() {
+class NarrationTextCell(
+    private val beginRecordingText: String,
+    private val pauseRecordingText: String,
+    private val resumeRecordingText: String,
+    private val nextChunkText: String,
+    private val onRecord: (ChunkData) -> Unit,
+) : ListCell<ChunkData>() {
     private val view = NarrationTextItem()
-
-    val beginRecordingTextCellProperty = SimpleStringProperty()
-    val pauseRecordingTextCellProperty = SimpleStringProperty()
-    val resumeRecordingTextCellProperty = SimpleStringProperty()
-    val nextChunkTextCellProperty = SimpleStringProperty()
-
-    val onRecordActionCellProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
         addClass("narration-list__verse-cell")
@@ -56,13 +52,13 @@ class NarrationTextCell : ListCell<ChunkData>() {
             verseLabelProperty.set(item.title)
             verseTextProperty.set(item.text)
 
-            beginRecordingTextProperty.set(beginRecordingTextCellProperty.value)
-            pauseRecordingTextProperty.set(pauseRecordingTextCellProperty.value)
-            resumeRecordingTextProperty.set(resumeRecordingTextCellProperty.value)
-            nextChunkTextProperty.set(nextChunkTextCellProperty.value)
+            beginRecordingTextProperty.set(beginRecordingText)
+            pauseRecordingTextProperty.set(pauseRecordingText)
+            resumeRecordingTextProperty.set(resumeRecordingText)
+            nextChunkTextProperty.set(nextChunkText)
 
             onRecordActionProperty.set(EventHandler {
-                onRecordActionCellProperty.value?.handle(ActionEvent(item, null))
+                onRecord(item)
             })
 
             setOnNextVerse {
@@ -70,11 +66,5 @@ class NarrationTextCell : ListCell<ChunkData>() {
                 listView.scrollTo(item)
             }
         }
-    }
-
-    fun setOnRecord(op: () -> Unit) {
-        onRecordActionCellProperty.set(EventHandler {
-            op.invoke()
-        })
     }
 }

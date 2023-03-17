@@ -18,24 +18,20 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
-import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
-import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.scene.control.ListCell
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationRecordItem
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkData
 import tornadofx.addClass
 
-class NarrationRecordCell : ListCell<ChunkData>() {
+class NarrationRecordCell(
+    private val openInText: String,
+    private val recordAgainText: String,
+    private val loadingImageText: String,
+    private val onOpenApp: (ChunkData) -> Unit,
+    private val onRecordAgain: (ChunkData) -> Unit
+) : ListCell<ChunkData>() {
     private val view = NarrationRecordItem()
-
-    val openInTextCellProperty = SimpleStringProperty()
-    val recordAgainTextCellProperty = SimpleStringProperty()
-    val loadingImageTextCellProperty = SimpleStringProperty()
-
-    val onOpenAppActionCellProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
-    val onRecordAgainActionCellProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
         addClass("narration-record__verse-cell")
@@ -56,15 +52,15 @@ class NarrationRecordCell : ListCell<ChunkData>() {
             waveformProperty.bind(item.imageProperty)
             waveformLoadingProperty.bind(item.imageLoadingProperty)
 
-            loadingImageTextProperty.set(loadingImageTextCellProperty.value)
-            openInTextProperty.set(openInTextCellProperty.value)
-            recordAgainTextProperty.set(recordAgainTextCellProperty.value)
+            loadingImageTextProperty.set(loadingImageText)
+            openInTextProperty.set(openInText)
+            recordAgainTextProperty.set(recordAgainText)
 
             onOpenAppActionProperty.set(EventHandler {
-                onOpenAppActionCellProperty.value?.handle(ActionEvent(item, null))
+                onOpenApp(item)
             })
             onRecordAgainActionProperty.set(EventHandler {
-                onRecordAgainActionCellProperty.value?.handle(ActionEvent(item, null))
+                onRecordAgain(item)
             })
         }
     }
