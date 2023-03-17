@@ -98,7 +98,7 @@ class TakeActions @Inject constructor(
             )
             val filename = namer.generateName(1, AudioFileFormat.PCM)
             val takeFile = chapterAudioDir.resolve(File(filename))
-            val chapterFile = audio.selected.value!!.value!!.file
+            val chapterFile = audio.selected.value?.value?.file
 
             createChunkFromChapterAudio(chunk, takeFile, chapterFile)
         }.map { (take, result) ->
@@ -194,30 +194,34 @@ class TakeActions @Inject constructor(
     private fun createChunkFromChapterAudio(
         chunk: Recordable,
         takeFile: File,
-        chapterFile: File
+        chapterFile: File?
     ): Pair<Take, Result> {
         var reader: AudioFileReader? = null
         var result: Result
 
         try {
-            val audioFile = AudioFile(chapterFile)
-            val cues = audioFile.metadata.getCues()
-            val sort = chunk.sort
-            val totalFrames = audioFile.totalFrames
+            if (chapterFile !== null) {
+                val audioFile = AudioFile(chapterFile)
+                val cues = audioFile.metadata.getCues()
+                val sort = chunk.sort
+                val totalFrames = audioFile.totalFrames
 
-            val location = getChunkAudioRange(sort, totalFrames, cues)
-            reader = audioFile.reader(location.first, location.second)
-            reader.open()
+                val location = getChunkAudioRange(sort, totalFrames, cues)
+                reader = audioFile.reader(location.first, location.second)
+                reader.open()
 
-            val pcmAudio = AudioFile(takeFile)
-            pcmAudio.writer().use { writer ->
-                val buffer = ByteArray(10240)
-                while (reader.hasRemaining()) {
-                    val written = reader.getPcmBuffer(buffer)
-                    writer.write(buffer, 0, written)
+                val pcmAudio = AudioFile(takeFile)
+                pcmAudio.writer().use { writer ->
+                    val buffer = ByteArray(10240)
+                    while (reader.hasRemaining()) {
+                        val written = reader.getPcmBuffer(buffer)
+                        writer.write(buffer, 0, written)
+                    }
                 }
+                result = Result.SUCCESS
+            } else {
+                result = Result.NO_AUDIO
             }
-            result = Result.SUCCESS
         } catch (e: InvalidWavFileException) {
             result = Result.NO_AUDIO
         } catch (e: IOException) {
