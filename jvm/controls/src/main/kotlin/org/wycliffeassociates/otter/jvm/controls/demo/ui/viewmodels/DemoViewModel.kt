@@ -26,9 +26,10 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import org.wycliffeassociates.otter.common.data.ColorTheme
+import org.wycliffeassociates.otter.jvm.controls.demo.ui.models.ChunkData
 import tornadofx.*
 
-class DemoViewModel : ViewModel() {
+internal class DemoViewModel : ViewModel() {
     val supportedThemes = observableListOf<ColorTheme>()
     val selectedThemeProperty = SimpleObjectProperty<ColorTheme>()
 
@@ -62,6 +63,18 @@ class DemoViewModel : ViewModel() {
             appColorMode.unbind()
             appColorMode.set(selectedTheme)
         }
+    }
+
+    fun onChunkOpenIn(chunk: ChunkData) {
+        println("Opening verse ${chunk.title} in external app...")
+    }
+
+    fun onRecordChunkAgain(chunk: ChunkData) {
+        println("Recording verse ${chunk.title} again")
+    }
+
+    fun onRecord(chunk: ChunkData) {
+        println("Recording verse ${chunk.title}")
     }
 
     inline fun <reified T: UIComponent> showContent() {

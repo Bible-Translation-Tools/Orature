@@ -215,25 +215,14 @@ class NarrationFragment : Fragment() {
                     narrationrecordlistview(chunkDataList) {
                         hgrow = Priority.ALWAYS
 
-                        openInTextProperty.set("Open In...")
-                        recordAgainTextProperty.set("Record Again")
-
                         setCellFactory {
-                            NarrationRecordCell().apply {
-                                openInTextCellProperty.bind(openInTextProperty)
-                                recordAgainTextCellProperty.bind(recordAgainTextProperty)
-
-                                onOpenAppActionCellProperty.bind(onOpenAppActionProperty)
-                                onRecordAgainActionCellProperty.bind(onRecordAgainActionProperty)
-                            }
-                        }
-
-                        setOnOpenApp {
-                            println("Opening verse ${it.title} in external app...")
-                        }
-
-                        setOnRecordAgain {
-                            println("Recording verse ${it.title} again")
+                            NarrationRecordCell(
+                                "Open In...",
+                                "Record Again",
+                                "Loading...",
+                                viewModel::onChunkOpenIn,
+                                viewModel::onRecordChunkAgain
+                            )
                         }
                     }
 
@@ -276,27 +265,14 @@ class NarrationFragment : Fragment() {
                         it?.title
                     })
 
-                    // Maybe instead of having 3 properties for recording status
-                    // it's better to have only one property and change text according to the state
-                    // in a view model???
-                    beginRecordingTextProperty.set("Begin Recording")
-                    pauseRecordingTextProperty.set("Pause Recording")
-                    resumeRecordingTextProperty.set("Resume Recording")
-                    nextChunkTextProperty.set("Next Verse")
-
                     setCellFactory {
-                        NarrationTextCell().apply {
-                            beginRecordingTextCellProperty.bind(beginRecordingTextProperty)
-                            pauseRecordingTextCellProperty.bind(pauseRecordingTextProperty)
-                            resumeRecordingTextCellProperty.bind(resumeRecordingTextProperty)
-                            nextChunkTextCellProperty.bind(nextChunkTextProperty)
-
-                            onRecordActionCellProperty.bind(onRecordActionProperty)
-                        }
-                    }
-
-                    setOnRecord {
-                        println("Recording verse ${it.title}")
+                        NarrationTextCell(
+                            "Begin Recording",
+                            "Pause Recording",
+                            "Resume Recording",
+                            "Next Verse",
+                            viewModel::onRecord
+                        )
                     }
                 }
 
@@ -305,7 +281,8 @@ class NarrationFragment : Fragment() {
                     floatingCardVisibleProperty.bind(viewModel.floatingCardVisibleProperty)
                     onFloatingChunkActionProperty.bind(viewModel.onCurrentVerseActionProperty)
 
-                    currentChunkTextProperty.set("Current: Verse {0}")
+                    currentChunkTextProperty.set("Current: {0} {1}")
+                    currentVerseTextProperty.set("Verse")
                     resumeTextProperty.set("Resume")
                 }
             }

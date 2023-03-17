@@ -20,7 +20,6 @@ package org.wycliffeassociates.otter.jvm.controls.narration
 
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.ObservableValue
 import javafx.collections.ObservableList
 import javafx.event.ActionEvent
@@ -37,14 +36,7 @@ class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(i
     val cardIsOutOfViewProperty = SimpleBooleanProperty()
     val onSelectedVerseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
-    val beginRecordingTextProperty = SimpleStringProperty()
-    val pauseRecordingTextProperty = SimpleStringProperty()
-    val resumeRecordingTextProperty = SimpleStringProperty()
-    val nextChunkTextProperty = SimpleStringProperty()
-
     val initialSelectedItemProperty = SimpleObjectProperty<T>()
-
-    val onRecordActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
         addClass("wa-list-view")
@@ -82,12 +74,6 @@ class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(i
                 }
             }
         }
-    }
-
-    fun setOnRecord(op: (value: T) -> Unit) {
-        onRecordActionProperty.set(EventHandler {
-            op.invoke(it.source as T)
-        })
     }
 }
 
