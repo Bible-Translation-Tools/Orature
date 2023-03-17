@@ -28,8 +28,10 @@ class NarrationRecordCell(
     private val openInText: String,
     private val recordAgainText: String,
     private val loadingImageText: String,
+    private val goToVerseText: String,
     private val onOpenApp: (ChunkData) -> Unit,
-    private val onRecordAgain: (ChunkData) -> Unit
+    private val onRecordAgain: (ChunkData) -> Unit,
+    private val onWaveformClicked: (ChunkData) -> Unit
 ) : ListCell<ChunkData>() {
     private val view = NarrationRecordItem()
 
@@ -55,12 +57,16 @@ class NarrationRecordCell(
             loadingImageTextProperty.set(loadingImageText)
             openInTextProperty.set(openInText)
             recordAgainTextProperty.set(recordAgainText)
+            goToVerseTextProperty.set(goToVerseText)
 
             onOpenAppActionProperty.set(EventHandler {
                 onOpenApp(item)
             })
             onRecordAgainActionProperty.set(EventHandler {
                 onRecordAgain(item)
+            })
+            onWaveformClickActionProperty.set(EventHandler {
+                onWaveformClicked(item)
             })
         }
     }

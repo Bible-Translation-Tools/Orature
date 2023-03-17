@@ -120,9 +120,12 @@ class ChapterNarrationPage : View() {
                                 messages["openIn"],
                                 messages["recordAgain"],
                                 messages["loading"],
+                                messages["goToVerse"],
                                 viewModel::onChunkOpenIn,
                                 viewModel::onRecordChunkAgain
-                            )
+                            ) {
+                                viewModel.onWaveformClicked(it)
+                            }
                         }
                     }
 
@@ -154,7 +157,7 @@ class ChapterNarrationPage : View() {
             stackpane {
                 addClass("narration__verses")
 
-                narrationtextlistview(viewModel.chunks) {
+                narrationtextlistview(viewModel.allChunks) {
                     addClass("narration__list")
 
                     viewModel.onCurrentVerseActionProperty.bind(onSelectedVerseActionProperty)
@@ -164,6 +167,11 @@ class ChapterNarrationPage : View() {
                     viewModel.currentVerseLabelProperty.bind(selectionModel.selectedItemProperty().stringBinding {
                         it?.title
                     })
+
+                    viewModel.onWaveformClicked = {
+                        selectionModel.select(it)
+                        scrollTo(it)
+                    }
 
                     setCellFactory {
                         NarrationTextCell(

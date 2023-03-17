@@ -1,13 +1,15 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import io.reactivex.Observable
+import com.github.thomasnield.rxkotlinfx.onChangedObservable
 import io.reactivex.Single
+import io.reactivex.disposables.CompositeDisposable
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
+import javafx.collections.transformation.FilteredList
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.scene.image.Image
@@ -19,6 +21,8 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.TakeActions
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkData
 import tornadofx.*
@@ -33,46 +37,52 @@ class ChapterNarrationViewModel : ViewModel() {
     val workbookDataStore: WorkbookDataStore by inject()
     val audioPluginViewModel: AudioPluginViewModel by inject()
 
-    val chunks: ObservableList<ChunkData> = FXCollections.observableArrayList()
-    val recordedChunks: ObservableList<ChunkData> = FXCollections.observableArrayList()
+    val allChunks: ObservableList<ChunkData> = FXCollections.observableArrayList()
+    val recordedChunks = FilteredList(allChunks) { it.hasAudio() }
 
     val currentVerseLabelProperty = SimpleStringProperty()
     val floatingCardVisibleProperty = SimpleBooleanProperty()
     val onCurrentVerseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
-
     val initialSelectedItemProperty = SimpleObjectProperty<ChunkData>()
 
-    private val asyncBuilder = ObservableWaveformBuilder()
-    val waveformMinimapImage = SimpleObjectProperty<Image>()
+    var onWaveformClicked: (ChunkData) -> Unit = {}
 
+    private val asyncBuilder = ObservableWaveformBuilder()
     private var loading: Boolean by property(false)
-    val loadingProperty = getProperty(ChapterNarrationViewModel::loading)
+    private val loadingProperty = getProperty(ChapterNarrationViewModel::loading)
+
+    private var allChunksLoaded: Boolean by property(false)
+    private val allChunksLoadedProperty = getProperty(ChapterNarrationViewModel::allChunksLoaded)
+
+    private val disposables = CompositeDisposable()
+    private val listeners = mutableListOf<ListenerDisposer>()
 
     fun dock() {
+        allChunksLoadedProperty.onChangeWithDisposer { loaded ->
+            if (loaded == true) {
+                if (recordedChunks.isNotEmpty()) {
+                    initialSelectedItemProperty.set(recordedChunks.last())
+                } else {
+                    initialSelectedItemProperty.set(allChunks.first())
+                }
+            }
+        }.let { listeners.add(it) }
+
         workbookDataStore.activeChapterProperty.value?.let { chapter ->
-            splitChapter(chapter)
-            loadChapterContents(chapter).subscribe()
+            loadChapterContents(chapter)
         }
     }
 
     fun undock() {
         workbookDataStore.selectedChapterPlayerProperty.set(null)
         initialSelectedItemProperty.set(null)
+        allChunksLoaded = false
 
         closePlayers()
-
-        chunks.clear()
-        recordedChunks.clear()
-        //disposables.clear()
-    }
-
-    fun closePlayers() {
-        recordedChunks.forEach {
-            it.player?.apply {
-                stop()
-                release()
-            }
-        }
+        allChunks.clear()
+        disposables.clear()
+        listeners.forEach(ListenerDisposer::dispose)
+        listeners.clear()
     }
 
     fun onChunkOpenIn(chunk: ChunkData) {
@@ -87,62 +97,57 @@ class ChapterNarrationViewModel : ViewModel() {
         println("Recording verse ${chunk.title} again")
     }
 
-    private fun splitChapter(chapter: Chapter) {
-        val hasAudio = chapter.audio.selected.value?.value != null
-        if (hasAudio) {
-            chapter.chunks
-                .flatMapSingle { chunk ->
-                    audioPluginViewModel.saveChunk(chunk, chapter.audio)
-                        .map { Pair(it, chunk) }
-                }
-                .doOnError { e ->
-                    logger.error("Error in splitting chapter into chunks for chapter: $chapter", e)
-                }
-                .observeOnFx()
-                .subscribe { (result, chunk) ->
-                    if (result == TakeActions.Result.SUCCESS) {
-                        chunk.audio.selected.value?.value?.file?.let { file ->
-                            val chunkData = ChunkData(chunk)
-                            chunkData.player = getPlayer()
-                            chunkData.player?.load(file)
-                            recordedChunks.add(chunkData)
-
-                            val audioFile = AudioFile(file)
-                            chunkData.imageLoadingProperty.set(true)
-                            createWaveformImage(audioFile)
-                                .observeOnFx()
-                                .subscribe { image ->
-                                    chunkData.imageProperty.set(image)
-                                    chunkData.imageLoadingProperty.set(false)
-                                }
-                        }
-                    }
-                }
+    private fun closePlayers() {
+        allChunks.forEach {
+            it.player?.apply {
+                stop()
+                release()
+            }
         }
     }
 
-    private fun loadChapterContents(chapter: Chapter): Observable<ChunkData> {
-        // Remove existing content so the user knows they are outdated
+    private fun loadChapterContents(chapter: Chapter) {
         loading = true
-        return chapter.chunks
-            .doOnComplete {
-                loading = false
+        chapter.chunks
+            .flatMapSingle { chunk ->
+                audioPluginViewModel.saveChunk(chunk, chapter.audio)
+                    .map { Pair(it, chunk) }
+            }
+            .doOnError { e ->
+                logger.error("Error in splitting chapter into chunks for chapter: $chapter", e)
             }
             .observeOnFx()
-            .doOnError { e ->
-                logger.error("Error in loading chapter contents for chapter: $chapter", e)
-            }
-            .map { ChunkData(it) }
-            .map {
-                chunks.add(it)
-                chunks.sortBy { it.sort }
+            .subscribe { (result, chunk) ->
+                if (result == TakeActions.Result.SUCCESS) {
+                    chunk.audio.selected.value?.value?.file?.let { file ->
+                        val chunkData = ChunkData(chunk)
+                        chunkData.player = getPlayer()
+                        chunkData.file = file
+                        chunkData.player?.load(file)
+                        allChunks.add(chunkData)
 
-                if (it.sort == 1) {
-                    initialSelectedItemProperty.set(it)
+                        val audioFile = AudioFile(file)
+                        chunkData.imageLoading = true
+                        createWaveformImage(audioFile)
+                            .observeOnFx()
+                            .subscribe { image ->
+                                chunkData.image = image
+                                chunkData.imageLoading = false
+                            }
+                    }
+                } else {
+                    val chunkData = ChunkData(chunk)
+                    allChunks.add(chunkData)
                 }
+            }
 
-                it
-            }.observeOnFx()
+        val totalChunks = chapter.chunkCount.blockingGet()
+        allChunks.onChangedObservable().subscribe {
+            if (totalChunks == it.size) {
+                allChunksLoaded = true
+                loading = false
+            }
+        }.let(disposables::add)
     }
 
     private fun createWaveformImage(audio: AudioFile): Single<Image> {
@@ -152,7 +157,7 @@ class ChapterNarrationViewModel : ViewModel() {
             .build(
                 reader = reader,
                 width = width,
-                height = 100,
+                height = 88,
                 wavColor = Color.web(WAV_COLOR),
                 background = Color.web(BACKGROUND_COLOR)
             )

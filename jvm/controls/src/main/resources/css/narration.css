@@ -172,7 +172,7 @@
 .narration-record__waveform-overlay .label {
     -fx-text-fill: -wa-white;
     -fx-font-weight: 400;
-    -fx-font-size: 20px;A
+    -fx-font-size: 20px;
 }
 
 .narration-record__verse-controls {
