@@ -126,14 +126,7 @@ class ChapterNarrationViewModel : ViewModel() {
                         chunkData.player?.load(file)
                         allChunks.add(chunkData)
 
-                        val audioFile = AudioFile(file)
-                        chunkData.imageLoading = true
-                        createWaveformImage(audioFile)
-                            .observeOnFx()
-                            .subscribe { image ->
-                                chunkData.image = image
-                                chunkData.imageLoading = false
-                            }
+                        createWaveformImage(chunkData)
                     }
                 } else {
                     val chunkData = ChunkData(chunk)
@@ -150,10 +143,12 @@ class ChapterNarrationViewModel : ViewModel() {
         }.let(disposables::add)
     }
 
-    private fun createWaveformImage(audio: AudioFile): Single<Image> {
+    private fun createWaveformImage(chunkData: ChunkData) {
+        val audio = AudioFile(chunkData.file!!)
+        chunkData.imageLoading = true
         val reader = audio.reader()
         val width = (audio.reader().totalFrames / DEFAULT_SAMPLE_RATE) * 100
-        return asyncBuilder
+        asyncBuilder
             .build(
                 reader = reader,
                 width = width,
@@ -161,6 +156,11 @@ class ChapterNarrationViewModel : ViewModel() {
                 wavColor = Color.web(WAV_COLOR),
                 background = Color.web(BACKGROUND_COLOR)
             )
+            .observeOnFx()
+            .subscribe { image ->
+                chunkData.image = image
+                chunkData.imageLoading = false
+            }
     }
 
     private fun getPlayer(): IAudioPlayer {

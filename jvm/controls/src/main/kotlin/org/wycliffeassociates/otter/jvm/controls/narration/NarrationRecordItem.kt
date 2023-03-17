@@ -19,8 +19,10 @@
 package org.wycliffeassociates.otter.jvm.controls.narration
 
 import javafx.beans.binding.Bindings
+import javafx.beans.binding.DoubleBinding
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
@@ -31,7 +33,6 @@ import javafx.scene.image.Image
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
-import javafx.scene.paint.Color
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -55,6 +56,11 @@ class NarrationRecordItem : VBox() {
     val onWaveformClickActionProperty = SimpleObjectProperty<EventHandler<MouseEvent>>()
 
     private val audioPlayButtonProperty = SimpleObjectProperty<Button>()
+    private val playbackPositionProperty = SimpleDoubleProperty()
+    private val totalFramesProperty = SimpleDoubleProperty()
+    private val playerWidthProperty = SimpleDoubleProperty()
+
+    private val cursorWidth = 2.0
 
     init {
         styleClass.setAll("narration-record__verse-item")
@@ -82,6 +88,14 @@ class NarrationRecordItem : VBox() {
                 playButtonProperty.bind(audioPlayButtonProperty)
                 isVisible = false
                 isManaged = false
+
+                totalFramesProperty.bind(playerProperty.doubleBinding {
+                    it?.getDurationInFrames()?.toDouble() ?: 0.0
+                })
+
+                onPlaybackProgressChanged = {
+                    playbackPositionProperty.set(it)
+                }
             }
 
             menubutton {
@@ -102,12 +116,22 @@ class NarrationRecordItem : VBox() {
         }
 
         stackpane {
-            alignment = Pos.CENTER
+            alignment = Pos.CENTER_LEFT
             vgrow = Priority.ALWAYS
 
             hbox {
                 addClass("narration-record__waveform")
                 imageview(waveformProperty)
+            }
+
+            region {
+                addClass("narration-record__waveform-cursor")
+                translateXProperty().bind(playbackPositionBinding())
+
+                // Hide cursor when playback position is less that cursor width
+                visibleProperty().bind(playbackPositionBinding().booleanBinding {
+                    it?.let { it.toDouble() > cursorWidth } ?: false
+                })
             }
 
             hbox {
@@ -122,6 +146,8 @@ class NarrationRecordItem : VBox() {
             label(loadingImageTextProperty) {
                 visibleProperty().bind(waveformLoadingProperty)
             }
+
+            playerWidthProperty.bind(widthProperty())
         }
     }
 
@@ -137,6 +163,17 @@ class NarrationRecordItem : VBox() {
             },
             verseLabelProperty,
             goToVerseTextProperty
+        )
+    }
+
+    private fun playbackPositionBinding(): DoubleBinding {
+        return Bindings.createDoubleBinding(
+            {
+                (playerWidthProperty.value * playbackPositionProperty.value) / totalFramesProperty.value
+            },
+            playbackPositionProperty,
+            totalFramesProperty,
+            playerWidthProperty
         )
     }
 }
