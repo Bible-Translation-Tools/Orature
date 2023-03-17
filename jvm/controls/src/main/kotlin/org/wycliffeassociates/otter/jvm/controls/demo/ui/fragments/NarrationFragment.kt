@@ -220,6 +220,7 @@ class NarrationFragment : Fragment() {
                                 "Open In...",
                                 "Record Again",
                                 "Loading...",
+                                "Go to Verse {0}",
                                 viewModel::onChunkOpenIn,
                                 viewModel::onRecordChunkAgain
                             )

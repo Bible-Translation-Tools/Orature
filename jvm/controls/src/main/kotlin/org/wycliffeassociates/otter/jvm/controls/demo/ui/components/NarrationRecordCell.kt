@@ -28,6 +28,7 @@ internal class NarrationRecordCell(
     private val openInText: String,
     private val recordAgainText: String,
     private val loadingImageText: String,
+    private val goToVerseText: String,
     private val onOpenApp: (ChunkData) -> Unit,
     private val onRecordAgain: (ChunkData) -> Unit
 ) : ListCell<ChunkData>() {
@@ -51,6 +52,7 @@ internal class NarrationRecordCell(
 
             openInTextProperty.set(openInText)
             recordAgainTextProperty.set(recordAgainText)
+            goToVerseTextProperty.set(goToVerseText)
 
             onOpenAppActionProperty.set(EventHandler {
                 onOpenApp(item)
