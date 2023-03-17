@@ -43,6 +43,7 @@ import java.text.MessageFormat
 class NarrationRecordItem : VBox() {
     val verseLabelProperty = SimpleStringProperty()
     val waveformProperty = SimpleObjectProperty<Image>()
+    val invertedWaveformProperty = SimpleObjectProperty<Image>()
     val waveformLoadingProperty = SimpleBooleanProperty()
     val audioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
 
@@ -60,7 +61,7 @@ class NarrationRecordItem : VBox() {
     private val totalFramesProperty = SimpleDoubleProperty()
     private val playerWidthProperty = SimpleDoubleProperty()
 
-    private val cursorWidth = 2.0
+    private val cursorWidth = 3.0
 
     init {
         styleClass.setAll("narration-record__verse-item")
@@ -121,7 +122,18 @@ class NarrationRecordItem : VBox() {
 
             hbox {
                 addClass("narration-record__waveform")
-                imageview(waveformProperty)
+                imageview(waveformProperty).apply {
+                    visibleProperty().bind(playbackPositionProperty.booleanBinding {
+                        it?.let { it.toDouble() <= 0.0 } ?: true
+                    })
+                    managedProperty().bind(visibleProperty())
+                }
+                imageview(invertedWaveformProperty).apply {
+                    visibleProperty().bind(playbackPositionProperty.booleanBinding {
+                        it?.let { it.toDouble() > 0.0 } ?: false
+                    })
+                    managedProperty().bind(visibleProperty())
+                }
             }
 
             region {

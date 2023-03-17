@@ -18,6 +18,9 @@ class ChunkData(
     var image: Image by property(null)
     val imageProperty = getProperty(ChunkData::image)
 
+    var invertedImage: Image by property(null)
+    val invertedImageProperty = getProperty(ChunkData::invertedImage)
+
     var imageLoading: Boolean by property(false)
     val imageLoadingProperty = getProperty(ChunkData::imageLoading)
 

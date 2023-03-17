@@ -52,6 +52,7 @@ class NarrationRecordCell(
             audioPlayerProperty.set(item.player)
 
             waveformProperty.bind(item.imageProperty)
+            invertedWaveformProperty.bind(item.invertedImageProperty)
             waveformLoadingProperty.bind(item.imageLoadingProperty)
 
             loadingImageTextProperty.set(loadingImageText)

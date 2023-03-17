@@ -26,9 +26,13 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkData
 import tornadofx.*
+import java.io.File
 
 private const val WAV_COLOR = "#015AD990"
 private const val BACKGROUND_COLOR = "#FFFFFF00"
+
+private const val INVERTED_WAV_COLOR = "#F2F5F3FF"
+private const val INVERTED_BACKGROUND_COLOR = "#015AD9EE"
 
 class ChapterNarrationViewModel : ViewModel() {
 
@@ -47,7 +51,6 @@ class ChapterNarrationViewModel : ViewModel() {
 
     var onWaveformClicked: (ChunkData) -> Unit = {}
 
-    private val asyncBuilder = ObservableWaveformBuilder()
     private var loading: Boolean by property(false)
     private val loadingProperty = getProperty(ChapterNarrationViewModel::loading)
 
@@ -126,7 +129,22 @@ class ChapterNarrationViewModel : ViewModel() {
                         chunkData.player?.load(file)
                         allChunks.add(chunkData)
 
-                        createWaveformImage(chunkData)
+                        chunkData.imageLoading = true
+
+                        createWaveformImage(file)
+                            .observeOnFx()
+                            .subscribe { image ->
+                                chunkData.image = image
+                                chunkData.imageLoading = false
+                            }
+
+                        createWaveformImage(file, true)
+                            .observeOnFx()
+                            .subscribe { image ->
+                                println(image)
+                                chunkData.invertedImage = image
+                                chunkData.imageLoading = false
+                            }
                     }
                 } else {
                     val chunkData = ChunkData(chunk)
@@ -143,24 +161,22 @@ class ChapterNarrationViewModel : ViewModel() {
         }.let(disposables::add)
     }
 
-    private fun createWaveformImage(chunkData: ChunkData) {
-        val audio = AudioFile(chunkData.file!!)
-        chunkData.imageLoading = true
+    private fun createWaveformImage(file: File, inverted: Boolean = false): Single<Image> {
+        val color = if (inverted) INVERTED_WAV_COLOR else WAV_COLOR
+        val backgroundColor = if (inverted) INVERTED_BACKGROUND_COLOR else BACKGROUND_COLOR
+
+        val audio = AudioFile(file)
         val reader = audio.reader()
         val width = (audio.reader().totalFrames / DEFAULT_SAMPLE_RATE) * 100
-        asyncBuilder
+
+        return ObservableWaveformBuilder()
             .build(
                 reader = reader,
                 width = width,
-                height = 88,
-                wavColor = Color.web(WAV_COLOR),
-                background = Color.web(BACKGROUND_COLOR)
+                height = 120,
+                wavColor = Color.web(color),
+                background = Color.web(backgroundColor)
             )
-            .observeOnFx()
-            .subscribe { image ->
-                chunkData.image = image
-                chunkData.imageLoading = false
-            }
     }
 
     private fun getPlayer(): IAudioPlayer {
