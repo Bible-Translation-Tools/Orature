@@ -22,12 +22,14 @@ import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.resourcecontainer.ResourceContainer
 
 interface IResourceMetadataRepository : IRepository<ResourceMetadata> {
     fun exists(metadata: ResourceMetadata): Single<Boolean>
     fun exists(predicate: (ResourceMetadata) -> Boolean): Single<Boolean>
     fun get(metadata: ResourceMetadata): Single<ResourceMetadata>
     fun insert(metadata: ResourceMetadata): Single<Int>
+    fun update(metadata: ResourceMetadata, rc: ResourceContainer): Completable
     fun updateSource(metadata: ResourceMetadata, source: ResourceMetadata?): Completable
     fun getSource(metadata: ResourceMetadata): Maybe<ResourceMetadata>
     fun getAllSources(): Single<List<ResourceMetadata>>

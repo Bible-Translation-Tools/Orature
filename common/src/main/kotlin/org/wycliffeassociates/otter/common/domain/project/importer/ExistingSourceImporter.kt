@@ -60,7 +60,8 @@ class ExistingSourceImporter @Inject constructor(
             mergeMedia(file, existingSource.path)
         } else if (sameVersification) {
             logger.info("RC ${file.name} already imported but uses the same versification, updating source...")
-            updateSource(file)
+            updateSource(existingSource, file).blockingGet()
+            mergeMedia(file, existingSource.path)
         } else {
             // existing resource has a different version, confirms overwrite/delete
             logger.info("RC ${file.name} already imported, but with a different version and different versification.")
@@ -74,6 +75,7 @@ class ExistingSourceImporter @Inject constructor(
                     logger.info("User chose to abort import.")
                     Single.just(ImportResult.ABORTED)
                 }
+
                 deleteUseCase.deleteSync(existingSource.path) == DeleteResult.SUCCESS -> {
                     // re-import the file after deleting the existing source
                     logger.info("Deleted existing source, re-importing ${file.name}...")
@@ -88,9 +90,9 @@ class ExistingSourceImporter @Inject constructor(
         }
     }
 
-    private fun updateSource(file: File): Single<ImportResult> {
+    private fun updateSource(metadata: ResourceMetadata, file: File): Single<ImportResult> {
         return Single
-            .fromCallable{
+            .fromCallable {
                 try {
                     ResourceContainer.load(file).use { rc ->
                         val tree = try {
@@ -103,7 +105,12 @@ class ExistingSourceImporter @Inject constructor(
                             rc,
                             tree,
                             rc.manifest.dublinCore.language.identifier
-                        ).blockingGet()
+                        ).map {
+                            if (it == ImportResult.SUCCESS) {
+                                resourceMetadataRepository.update(metadata, rc).blockingAwait()
+                            }
+                            it
+                        }.blockingGet()
                     }
                 } catch (e: IOException) {
                     logger.error("Error loading RC", e)
