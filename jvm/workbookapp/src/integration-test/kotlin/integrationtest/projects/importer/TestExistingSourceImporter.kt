@@ -20,9 +20,11 @@ import org.wycliffeassociates.otter.common.domain.project.importer.NewSourceImpo
 import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.DeleteResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
+import org.wycliffeassociates.otter.jvm.workbookapp.domain.resourcecontainer.project.ZipEntryTreeBuilder
 import java.io.File
 import java.io.FileNotFoundException
 import javax.inject.Inject
@@ -40,6 +42,9 @@ class TestExistingSourceImporter {
 
     @Inject
     lateinit var resourceContainerRepository: IResourceContainerRepository
+
+    @Inject
+    lateinit var zipEntryTreeBuilder: IZipEntryTreeBuilder
 
     @Inject
     lateinit var dbEnvProvider: Provider<DatabaseEnvironment>
@@ -67,6 +72,8 @@ class TestExistingSourceImporter {
         val imp = ExistingSourceImporter(
             directoryProvider,
             resourceMetadataRepository,
+            resourceContainerRepository,
+            zipEntryTreeBuilder,
             spyDeleteUseCase,
             spyImportUseCase
         )
