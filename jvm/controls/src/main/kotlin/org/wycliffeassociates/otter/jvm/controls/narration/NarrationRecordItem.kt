@@ -18,6 +18,9 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.narration
 
+import javafx.beans.binding.Bindings
+import javafx.beans.binding.StringBinding
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
@@ -25,24 +28,31 @@ import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.image.Image
+import javafx.scene.input.MouseEvent
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
+import javafx.scene.paint.Color
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import tornadofx.*
+import java.text.MessageFormat
 
 class NarrationRecordItem : VBox() {
     val verseLabelProperty = SimpleStringProperty()
     val waveformProperty = SimpleObjectProperty<Image>()
+    val waveformLoadingProperty = SimpleBooleanProperty()
     val audioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
 
     val openInTextProperty = SimpleStringProperty()
     val recordAgainTextProperty = SimpleStringProperty()
+    val loadingImageTextProperty = SimpleStringProperty()
+    val goToVerseTextProperty = SimpleStringProperty()
 
     val onOpenAppActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onRecordAgainActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val onWaveformClickActionProperty = SimpleObjectProperty<EventHandler<MouseEvent>>()
 
     private val audioPlayButtonProperty = SimpleObjectProperty<Button>()
 
@@ -91,7 +101,7 @@ class NarrationRecordItem : VBox() {
             }
         }
 
-        hbox {
+        stackpane {
             alignment = Pos.CENTER
             vgrow = Priority.ALWAYS
 
@@ -99,6 +109,34 @@ class NarrationRecordItem : VBox() {
                 addClass("narration-record__waveform")
                 imageview(waveformProperty)
             }
+
+            hbox {
+                addClass("narration-record__waveform-overlay")
+
+                label(goToVerseTextBinding())
+
+                onMouseClickedProperty().bind(onWaveformClickActionProperty)
+                visibleProperty().bind(this@stackpane.hoverProperty())
+            }
+
+            label(loadingImageTextProperty) {
+                visibleProperty().bind(waveformLoadingProperty)
+            }
         }
+    }
+
+    private fun goToVerseTextBinding(): StringBinding {
+        return Bindings.createStringBinding(
+            {
+                if (goToVerseTextProperty.value != null && verseLabelProperty.value != null) {
+                    MessageFormat.format(
+                        goToVerseTextProperty.value,
+                        verseLabelProperty.value
+                    )
+                } else ""
+            },
+            verseLabelProperty,
+            goToVerseTextProperty
+        )
     }
 }

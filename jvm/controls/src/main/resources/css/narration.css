@@ -158,7 +158,21 @@
 
 .narration-record__waveform {
     -fx-pref-width: 300px;
-    -fx-max-height: 88px;
+    -fx-max-height: 176px;
+    -fx-alignment: center-right;
+}
+
+.narration-record__waveform-overlay {
+    -fx-background-color: #00000070;
+    -fx-alignment: bottom-center;
+    -fx-padding: 0 0 10px 0;
+    -fx-cursor: hand;
+}
+
+.narration-record__waveform-overlay .label {
+    -fx-text-fill: -wa-white;
+    -fx-font-weight: 400;
+    -fx-font-size: 20px;A
 }
 
 .narration-record__verse-controls {
