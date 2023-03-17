@@ -18,12 +18,8 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.narration
 
-import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.ObservableValue
 import javafx.collections.ObservableList
-import javafx.event.ActionEvent
-import javafx.event.EventHandler
 import javafx.event.EventTarget
 import javafx.geometry.Orientation
 import javafx.scene.control.ListView
@@ -33,28 +29,9 @@ import tornadofx.attachTo
 import tornadofx.onChange
 
 class NarrationRecordListView<T>(items: ObservableList<T>? = null) : ListView<T>(items) {
-    val onOpenAppActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
-    val onRecordAgainActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
-
-    val openInTextProperty = SimpleStringProperty()
-    val recordAgainTextProperty = SimpleStringProperty()
-    val loadingImageTextProperty = SimpleStringProperty()
-
     init {
         addClass("wa-list-view")
         orientation = Orientation.HORIZONTAL
-    }
-
-    fun setOnOpenApp(op: (verse: T) -> Unit) {
-        onOpenAppActionProperty.set(EventHandler {
-            op.invoke(it.source as T)
-        })
-    }
-
-    fun setOnRecordAgain(op: (verse: T) -> Unit) {
-        onRecordAgainActionProperty.set(EventHandler {
-            op.invoke(it.source as T)
-        })
     }
 }
 

@@ -18,23 +18,20 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.demo.ui.components
 
-import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
-import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.scene.control.ListCell
 import org.wycliffeassociates.otter.jvm.controls.demo.ui.models.ChunkData
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationRecordItem
 import tornadofx.addClass
 
-internal class NarrationRecordCell : ListCell<ChunkData>() {
+internal class NarrationRecordCell(
+    private val openInText: String,
+    private val recordAgainText: String,
+    private val loadingImageText: String,
+    private val onOpenApp: (ChunkData) -> Unit,
+    private val onRecordAgain: (ChunkData) -> Unit
+) : ListCell<ChunkData>() {
     private val view = NarrationRecordItem()
-
-    val openInTextCellProperty = SimpleStringProperty()
-    val recordAgainTextCellProperty = SimpleStringProperty()
-
-    val onOpenAppActionCellProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
-    val onRecordAgainActionCellProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
         addClass("narration-record__verse-cell")
@@ -52,14 +49,14 @@ internal class NarrationRecordCell : ListCell<ChunkData>() {
             verseLabelProperty.set(item.title)
             audioPlayerProperty.set(item.player)
 
-            openInTextProperty.set(openInTextCellProperty.value)
-            recordAgainTextProperty.set(recordAgainTextCellProperty.value)
+            openInTextProperty.set(openInText)
+            recordAgainTextProperty.set(recordAgainText)
 
             onOpenAppActionProperty.set(EventHandler {
-                onOpenAppActionCellProperty.value?.handle(ActionEvent(item, null))
+                onOpenApp(item)
             })
             onRecordAgainActionProperty.set(EventHandler {
-                onRecordAgainActionCellProperty.value?.handle(ActionEvent(item, null))
+                onRecordAgain(item)
             })
         }
     }
