@@ -14,10 +14,12 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.castOrFindIm
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.otterConfigCategories
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IProjectReader
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.VersificationTreeBuilder
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.toCollection
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IVersificationRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.io.IOException
@@ -27,6 +29,7 @@ class NewSourceImporter @Inject constructor(
     private val directoryProvider: IDirectoryProvider,
     private val resourceContainerRepository: IResourceContainerRepository,
     resourceMetadataRepository: IResourceMetadataRepository,
+    private val versificationRepository: IVersificationRepository,
     private val zipEntryTreeBuilder: IZipEntryTreeBuilder
 ) : RCImporter(directoryProvider, resourceMetadataRepository) {
 
@@ -98,6 +101,35 @@ class NewSourceImporter @Inject constructor(
             return cleanUp(fileToLoad, e.result)
         }
 
+        val preallocationTree = OtterTree<CollectionOrContent>(container.toCollection())
+        val versificationTree = VersificationTreeBuilder(versificationRepository)
+            .build(container)
+            ?.apply {
+                for (node in this) {
+                    preallocationTree.addChild(node)
+                }
+            }
+
+        return Single
+            .fromCallable {
+                if (versificationTree != null) {
+                    importTree(container, preallocationTree, fileToLoad)
+                        .flatMap {
+                            updateContentFromTextContent(container, tree)
+                        }
+                } else { // No versification found, just import the tree from the parsed text
+                    importTree(container, tree, fileToLoad)
+                }
+            }
+            .flatMap { it }
+            .subscribeOn(Schedulers.io())
+    }
+
+    private fun importTree(
+        container: ResourceContainer,
+        tree: OtterTree<CollectionOrContent>,
+        fileToLoad: File
+    ): Single<ImportResult> {
         return resourceContainerRepository
             .importResourceContainer(container, tree, container.manifest.dublinCore.language.identifier)
             .doOnEvent { result, err ->
@@ -106,7 +138,18 @@ class NewSourceImporter @Inject constructor(
                 }
                 if (result != ImportResult.SUCCESS || err != null) fileToLoad.deleteRecursively()
             }
-            .subscribeOn(Schedulers.io())
+    }
+
+    private fun updateContentFromTextContent(
+        container: ResourceContainer,
+        tree: OtterTree<CollectionOrContent>
+    ): Single<ImportResult> {
+        return resourceContainerRepository
+            .updateContent(
+                container,
+                tree,
+                container.manifest.dublinCore.language.identifier
+            )
     }
 
     private fun copyToInternalDirectory(file: File, destinationDirectory: File): File {

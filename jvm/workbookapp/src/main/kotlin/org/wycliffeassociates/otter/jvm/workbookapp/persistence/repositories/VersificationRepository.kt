@@ -20,31 +20,34 @@ import javax.inject.Inject
 class VersificationRepository @Inject constructor(
     database: AppDatabase,
     private val directoryProvider: IDirectoryProvider
-): IVersificationRepository {
+) : IVersificationRepository {
 
     private val logger = LoggerFactory.getLogger(LanguageRepository::class.java)
 
     private val versificationDao = database.versificationDao
 
     override fun getVersification(slug: String): Maybe<Versification> {
-        return Maybe.fromCallable {
-            directoryProvider.versificationDirectory.mkdirs()
-            val vrsFileName = versificationDao.fetchVersificationFile(slug)
-            val vrsFile = File(directoryProvider.versificationDirectory, vrsFileName)
-            val mapper = ObjectMapper(JsonFactory())
-            mapper.registerModule(KotlinModule())
-            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
-            val versification = mapper.readValue(vrsFile, ParatextVersification::class.java)
-            if (versification is Versification) Maybe.just(versification as Versification) else Maybe.empty()
-        }
+        return Maybe
+            .fromCallable {
+                directoryProvider.versificationDirectory.mkdirs()
+                val vrsFileName = versificationDao.fetchVersificationFile(slug)
+                val vrsFile = File(directoryProvider.versificationDirectory, vrsFileName)
+                val mapper = ObjectMapper(JsonFactory())
+                mapper.registerModule(KotlinModule())
+                mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                val versification = mapper.readValue(vrsFile, ParatextVersification::class.java)
+                if (versification is Versification) Maybe.just(versification as Versification) else Maybe.empty()
+            }
             .flatMap { it }
             .subscribeOn(Schedulers.io())
     }
 
     override fun insertVersification(slug: String, path: File): Completable {
-        return Single.fromCallable {
-            versificationDao.upsertVersification(slug, path.name)
-        }.ignoreElement()
+        return Single
+            .fromCallable {
+                versificationDao.upsert(slug, path.name)
+            }
+            .ignoreElement()
             .subscribeOn(Schedulers.io())
 
     }

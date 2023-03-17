@@ -46,8 +46,8 @@ import javax.inject.Singleton
         AppDatabaseModule::class,
         AppPreferencesModule::class,
         TestDirectoryProviderModule::class,
-        AppRepositoriesModule::class,
-        ZipEntryTreeBuilderModule::class
+        TestRepositoriesModule::class,
+        ZipEntryTreeBuilderModule::class,
     ]
 )
 @Singleton

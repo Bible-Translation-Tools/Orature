@@ -32,6 +32,7 @@ import java.io.File
 import javax.inject.Inject
 
 private const val ULB_VERSIFICATION_FILE = "ulb.json"
+private const val UFW_VERSIFICATION_FILE = "ufw.json"
 private const val ULB_VERSIFICATION_RESOURCE_PATH = "versification/ulb_versification.json"
 
 class InitializeVersification @Inject constructor(
@@ -48,7 +49,7 @@ class InitializeVersification @Inject constructor(
             directoryProvider.versificationDirectory.listFiles()?.forEach { file ->
                 if (file.extension == "json") {
                     logger.info("Inserting versification: ${file.name}")
-                    versificationRepository.insertVersification(file.nameWithoutExtension, file)
+                    versificationRepository.insertVersification(file.nameWithoutExtension, file).blockingAwait()
                 }
             }
         }.subscribeOn(Schedulers.io())
@@ -64,6 +65,13 @@ class InitializeVersification @Inject constructor(
                     File(
                         directoryProvider.versificationDirectory.absolutePath,
                         ULB_VERSIFICATION_FILE
+                    ).outputStream()
+                )
+            ClassLoader.getSystemResourceAsStream(ULB_VERSIFICATION_RESOURCE_PATH)
+                .transferTo(
+                    File(
+                        directoryProvider.versificationDirectory.absolutePath,
+                        UFW_VERSIFICATION_FILE
                     ).outputStream()
                 )
         }
