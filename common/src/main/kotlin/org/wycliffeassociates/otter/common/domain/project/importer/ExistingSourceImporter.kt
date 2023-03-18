@@ -12,6 +12,7 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IPro
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.VersificationTreeBuilder
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.MediaMerge
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.MergeTextContent
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
@@ -62,6 +63,7 @@ class ExistingSourceImporter @Inject constructor(
             logger.info("RC ${file.name} already imported but uses the same versification, updating source...")
             updateSource(existingSource, file).blockingGet()
             mergeMedia(file, existingSource.path)
+            mergeText(file, existingSource.path)
         } else {
             // existing resource has a different version, confirms overwrite/delete
             logger.info("RC ${file.name} already imported, but with a different version and different versification.")
@@ -135,6 +137,26 @@ class ExistingSourceImporter @Inject constructor(
             }
             .onErrorReturn {
                 logger.error("Merge media failed!", it)
+                ImportResult.FAILED
+            }
+    }
+
+    fun mergeText(
+        newRC: File,
+        existingRC: File
+    ): Single<ImportResult> {
+        logger.info("RC already imported, merging text...")
+        return Single
+            .fromCallable {
+                MergeTextContent.merge(
+                    ResourceContainer.load(newRC),
+                    ResourceContainer.load(existingRC)
+                )
+                logger.info("Merge text completed.")
+                ImportResult.SUCCESS
+            }
+            .onErrorReturn {
+                logger.error("Merge text failed!", it)
                 ImportResult.FAILED
             }
     }
