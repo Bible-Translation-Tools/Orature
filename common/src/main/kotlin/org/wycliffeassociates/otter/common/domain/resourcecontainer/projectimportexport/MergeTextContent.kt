@@ -32,10 +32,8 @@ import java.io.InputStream
 object MergeTextContent {
     fun merge(fromRC: ResourceContainer, toRC: ResourceContainer) {
         try {
-            if (fromRC.media != null) {
-                mergeManifest(fromRC, toRC)
-                mergeTextFiles(fromRC, toRC)
-            }
+            mergeManifest(fromRC, toRC)
+            mergeTextFiles(fromRC, toRC)
         } finally {
             fromRC.close()
             toRC.close()
@@ -84,14 +82,19 @@ object MergeTextContent {
                 }
             }
             toRC.addFilesToContainer(filesToMerge)
-        } finally {
+        } catch (e: Exception) {
+            println(e)
+        }
+        finally {
             filesToMerge.values.forEach { it.delete() }
         }
     }
 
     private fun manifestFilePermutations(fromRc: ResourceContainer, project: Project): Map<String, InputStream> {
-        val content = fromRc.getProjectContent(project.identifier, fromRc.manifest.dublinCore.format)
-        return content?.streams ?: mapOf<String, InputStream>()
+        //val content = fromRc.getProjectContent(project.identifier, fromRc.manifest.dublinCore.format)
+        val path = if (project.path.startsWith("./")) project.path.substringAfter("./") else project.path
+        val map = if (fromRc.accessor.fileExists(path)) mapOf(path to fromRc.accessor.getInputStream(path)) else null
+        return map ?: mapOf<String, InputStream>()
     }
 
     private fun getMediaFilesToMerge(
