@@ -84,17 +84,26 @@ object MergeTextContent {
             toRC.addFilesToContainer(filesToMerge)
         } catch (e: Exception) {
             println(e)
-        }
-        finally {
+        } finally {
             filesToMerge.values.forEach { it.delete() }
         }
     }
 
     private fun manifestFilePermutations(fromRc: ResourceContainer, project: Project): Map<String, InputStream> {
+        // TODO: get input streams of all files under a project directory for non-bundle RCs
         //val content = fromRc.getProjectContent(project.identifier, fromRc.manifest.dublinCore.format)
-        val path = if (project.path.startsWith("./")) project.path.substringAfter("./") else project.path
-        val map = if (fromRc.accessor.fileExists(path)) mapOf(path to fromRc.accessor.getInputStream(path)) else null
-        return map ?: mapOf<String, InputStream>()
+        if (fromRc.manifest.dublinCore.type == "bundle") {
+            // TODO: ./ breaks file access, this should be fixed in the RC library
+            val path = if (project.path.startsWith("./")) {
+                project.path.substringAfter("./")
+            } else {
+                project.path
+            }
+            if (fromRc.accessor.fileExists(path)) {
+                return mapOf(path to fromRc.accessor.getInputStream(path))
+            }
+        }
+        return mapOf()
     }
 
     private fun getMediaFilesToMerge(
