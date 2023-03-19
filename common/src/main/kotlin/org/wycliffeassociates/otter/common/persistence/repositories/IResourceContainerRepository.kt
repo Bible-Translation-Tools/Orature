@@ -38,6 +38,12 @@ interface IResourceContainerRepository {
         languageSlug: String
     ): Single<ImportResult>
 
+    fun updateCollections(
+        rc: ResourceContainer,
+        rcTree: OtterTree<CollectionOrContent>,
+        languageSlug: String
+    ): Single<ImportResult>
+
     fun removeResourceContainer(
         resourceContainer: ResourceContainer
     ): Single<DeleteResult>

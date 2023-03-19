@@ -14,6 +14,7 @@ import org.wycliffeassociates.otter.common.domain.versification.Versification
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IVersificationRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
+import org.wycliffeassociates.resourcecontainer.entity.Project
 import javax.inject.Inject
 
 private const val FORMAT = "text/usfm"
@@ -39,7 +40,19 @@ class VersificationTreeBuilder @Inject constructor(
     ): List<OtterTree<CollectionOrContent>> {
         val projectTrees: MutableList<OtterTree<CollectionOrContent>> = mutableListOf()
 
-        for (project in container.manifest.projects) {
+        val versificationSlug = container.manifest.projects.firstOrNull()?.versification ?: DEFAULT_VERSIFICATION
+        val bookSlugs = versification.getBookSlugs()
+        for (book in bookSlugs) {
+            val project = container.manifest.projects
+                .firstOrNull {it.identifier == book}
+                ?: Project(
+                    title = "",
+                    versification = versificationSlug,
+                    identifier = book,
+                    sort = Int.MAX_VALUE,
+                    path = "",
+                    categories = listOf(),
+                )
             val projectTree = OtterTree<CollectionOrContent>(project.toCollection())
             val chapters = versification.getChaptersInBook(project.identifier)
             for (i in 1..chapters) {

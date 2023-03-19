@@ -2,6 +2,8 @@ package org.wycliffeassociates.otter.common.domain.project.importer
 
 import io.reactivex.Single
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.collections.OtterTree
+import org.wycliffeassociates.otter.common.data.primitives.CollectionOrContent
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.DeleteResourceContainer
@@ -112,6 +114,11 @@ class ExistingSourceImporter @Inject constructor(
                                 resourceMetadataRepository.update(metadata, rc).blockingAwait()
                             }
                             it
+                        }.map {
+                            if (it == ImportResult.SUCCESS) {
+                                return@map updateCollections(rc, tree).blockingGet()
+                            }
+                            it
                         }.blockingGet()
                     }
                 } catch (e: IOException) {
@@ -160,6 +167,19 @@ class ExistingSourceImporter @Inject constructor(
                 ImportResult.FAILED
             }
     }
+
+    private fun updateCollections(
+        container: ResourceContainer,
+        tree: OtterTree<CollectionOrContent>
+    ): Single<ImportResult> {
+        return resourceContainerRepository
+            .updateCollections(
+                container,
+                tree,
+                container.manifest.dublinCore.language.identifier
+            )
+    }
+
 
     private fun findExistingResourceMetadata(file: File): ResourceMetadata? {
         ResourceContainer.load(file, true).use { rc ->

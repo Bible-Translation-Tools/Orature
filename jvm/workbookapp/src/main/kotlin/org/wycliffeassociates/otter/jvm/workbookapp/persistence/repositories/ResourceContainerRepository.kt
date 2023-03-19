@@ -46,6 +46,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.map
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.LanguageMapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.ResourceMetadataMapper
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
+import java.time.LocalDateTime
 
 class ResourceContainerRepository @Inject constructor(
     private val database: AppDatabase,
@@ -115,7 +116,6 @@ class ResourceContainerRepository @Inject constructor(
         return Single.fromCallable {
             val rcMetadata = getMetadataForContainer(rc) ?: run {
                 return@fromCallable ImportResult.IMPORT_ERROR
-
             }
             val projects = collectionRepository
                 .getSourceProjects()
@@ -132,6 +132,36 @@ class ResourceContainerRepository @Inject constructor(
             updateTextContent(databaseMap, parsedTextMap)
             updateBridges(databaseMap, parsedTextMap)
 
+            return@fromCallable ImportResult.SUCCESS
+        }.subscribeOn(Schedulers.io())
+    }
+
+    override fun updateCollections(
+        rc: ResourceContainer,
+        rcTree: OtterTree<CollectionOrContent>,
+        languageSlug: String
+    ): Single<ImportResult> {
+        return Single.fromCallable {
+            val rcMetadata = getMetadataForContainer(rc) ?: run {
+                return@fromCallable ImportResult.IMPORT_ERROR
+            }
+            val projects = collectionRepository
+                .getSourceProjects()
+                .map { it.filter { it.resourceContainer == rcMetadata } }
+                .blockingGet()
+
+            val updateFrom = rcTree.toCollectionList()
+
+            updateFrom.forEach { updatedCollection ->
+                projects.firstOrNull { it.slug == updatedCollection.slug }?.let { match ->
+                    val copy = match.copy(
+                        sort = if (updatedCollection.sort != Int.MAX_VALUE) updatedCollection.sort else match.sort,
+                        titleKey = updatedCollection.titleKey.ifBlank { match.titleKey },
+                        labelKey = updatedCollection.labelKey
+                    )
+                    collectionRepository.update(copy).blockingGet()
+                }
+            }
             return@fromCallable ImportResult.SUCCESS
         }.subscribeOn(Schedulers.io())
     }
@@ -198,6 +228,18 @@ class ResourceContainerRepository @Inject constructor(
             tree.addChild(chapterTree)
         }
         return tree
+    }
+
+    fun OtterTree<CollectionOrContent>.toCollectionList(): List<Collection> {
+        if (value is Content) {
+            return mutableListOf()
+        } else {
+            val list = mutableListOf(value as Collection)
+            children.forEach {
+                list.addAll((it as? OtterTree<CollectionOrContent>)?.toCollectionList() ?: mutableListOf())
+            }
+            return list
+        }
     }
 
     fun OtterTree<CollectionOrContent>.toChapterContentMap(): Map<Collection, MutableList<Content>> {

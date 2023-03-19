@@ -22,6 +22,10 @@ data class ParatextVersification(
     override fun getVersesInChapter(bookSlug: String, chapterNumber: Int): Int {
         return maxVerses[bookSlug]?.get(chapterNumber-1)?.toInt() ?: 0
     }
+
+    override fun getBookSlugs(): List<String> {
+        return maxVerses.keys.toList()
+    }
 }
 
 typealias MaxVerses = Map<String, List<String>>
