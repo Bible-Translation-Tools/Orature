@@ -36,10 +36,7 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.DeleteResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.castOrFindImportException
-import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.*
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.CollectionMapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.ContentMapper
@@ -52,7 +49,8 @@ class ResourceContainerRepository @Inject constructor(
     private val database: AppDatabase,
     private val collectionRepository: ICollectionRepository,
     private val contentRepository: IContentRepository,
-    private val resourceRepository: IResourceRepository
+    private val resourceRepository: IResourceRepository,
+    private val resourceMetadataRepository: IResourceMetadataRepository
 ) : IResourceContainerRepository {
     private val logger = LoggerFactory.getLogger(ResourceContainerRepository::class.java)
 
@@ -141,29 +139,60 @@ class ResourceContainerRepository @Inject constructor(
         rcTree: OtterTree<CollectionOrContent>,
         languageSlug: String
     ): Single<ImportResult> {
-        return Single.fromCallable {
-            val rcMetadata = getMetadataForContainer(rc) ?: run {
-                return@fromCallable ImportResult.IMPORT_ERROR
+        return Single
+            .fromCallable {
+                val rcMetadata = getMetadataForContainer(rc) ?: run {
+                    return@fromCallable ImportResult.IMPORT_ERROR
+                }
+
+                val derivedMetadata = resourceMetadataRepository
+                    .getAllDerivatives(rcMetadata)
+                    .blockingGet()
+
+                val sourceProjects = collectionRepository
+                    .getSourceProjects()
+                    .map { it.filter { it.resourceContainer == rcMetadata } }
+                    .blockingGet()
+
+                val derivativeProjects = collectionRepository
+                    .getDerivedProjects()
+                    .map { it.filter { it.resourceContainer in derivedMetadata } }
+                    .blockingGet()
+
+                val updateFrom = rcTree.toCollectionList()
+                updateCollections(
+                    listOf(*sourceProjects.toTypedArray(), *derivativeProjects.toTypedArray()),
+                    updateFrom
+                )
+
+                return@fromCallable ImportResult.SUCCESS
             }
-            val projects = collectionRepository
-                .getSourceProjects()
-                .map { it.filter { it.resourceContainer == rcMetadata } }
-                .blockingGet()
+            .onErrorReturn { ImportResult.LOAD_RC_ERROR }
+            .subscribeOn(Schedulers.io())
+    }
 
-            val updateFrom = rcTree.toCollectionList()
-
-            updateFrom.forEach { updatedCollection ->
-                projects.firstOrNull { it.slug == updatedCollection.slug }?.let { match ->
-                    val copy = match.copy(
-                        sort = if (updatedCollection.sort != Int.MAX_VALUE) updatedCollection.sort else match.sort,
-                        titleKey = updatedCollection.titleKey.ifBlank { match.titleKey },
-                        labelKey = updatedCollection.labelKey
-                    )
+    private fun updateCollections(
+        updateTo: List<Collection>,
+        updateFrom: List<Collection>,
+    ) {
+        updateFrom.forEach { updatedCollection ->
+            val toUpdate = updateTo.filter {
+                it.slug == updatedCollection.slug && (it.titleKey.isNullOrEmpty() || it.sort == Int.MAX_VALUE)
+            }
+            toUpdate.forEach { match ->
+                val copy = match.copy(
+                    sort = if (updatedCollection.sort != Int.MAX_VALUE) updatedCollection.sort else match.sort,
+                    titleKey = updatedCollection.titleKey.ifBlank { match.titleKey },
+                    labelKey = updatedCollection.labelKey
+                )
+                logger.info("Updating collection of title: ${copy.titleKey} to updated title: ${updatedCollection.titleKey}")
+                try {
                     collectionRepository.update(copy).blockingGet()
+                } catch (e: Exception) {
+                    logger.error("Error updating collection: $copy", e)
                 }
             }
-            return@fromCallable ImportResult.SUCCESS
-        }.subscribeOn(Schedulers.io())
+        }
     }
 
     private fun updateTextContent(

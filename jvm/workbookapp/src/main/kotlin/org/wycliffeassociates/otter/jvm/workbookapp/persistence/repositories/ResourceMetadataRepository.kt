@@ -124,6 +124,20 @@ class ResourceMetadataRepository @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
+    override fun getAllDerivatives(metadata: ResourceMetadata): Single<List<ResourceMetadata>> {
+        return Single
+            .fromCallable {
+                resourceMetadataDao
+                    .fetchAll()
+                    .filter { it.derivedFromFk == metadata.id }
+                    .map(this::buildMetadata)
+            }
+            .doOnError { e ->
+                logger.error("Error in getAllDerivatives", e)
+            }
+            .subscribeOn(Schedulers.io())
+    }
+
     override fun getSource(metadata: ResourceMetadata): Maybe<ResourceMetadata> {
         return Maybe
             .fromCallable {

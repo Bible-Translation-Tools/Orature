@@ -27,27 +27,27 @@ import javax.inject.Inject
 class CollectionMapper @Inject constructor() {
     fun mapFromEntity(entity: CollectionEntity, metadata: ResourceMetadata?): Collection {
         return Collection(
-            entity.sort,
-            entity.slug,
-            entity.label,
-            entity.title,
-            metadata,
-            entity.modifiedTs?.let(LocalDateTime::parse),
-            entity.id
+            sort = entity.sort,
+            slug = entity.slug,
+            labelKey = entity.label,
+            titleKey = entity.title,
+            resourceContainer = metadata,
+            modifiedTs = entity.modifiedTs?.let(LocalDateTime::parse),
+            id = entity.id
         )
     }
 
     fun mapToEntity(obj: Collection, parentFk: Int? = null, sourceFk: Int? = null): CollectionEntity {
         return CollectionEntity(
-            obj.id,
-            parentFk,
-            sourceFk,
-            obj.labelKey,
-            obj.titleKey,
-            obj.slug,
-            obj.sort,
+            id = obj.id,
+            parentFk = parentFk,
+            sourceFk = sourceFk,
+            label = obj.labelKey,
+            title = obj.titleKey,
+            slug = obj.slug,
+            sort = obj.sort,
             dublinCoreFk = obj.resourceContainer?.id,
-            obj.modifiedTs?.toString()
+            modifiedTs = obj.modifiedTs?.toString()
         )
     }
 }
