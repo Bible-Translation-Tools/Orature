@@ -142,18 +142,19 @@
 }
 
 .narration__recording .list-view {
-    -fx-background-color: -wa-background-primary-gradient;
+    -fx-background-color: -wa-black-30;
 }
 
 .narration-record__verse-cell {
     -fx-pref-height: 0;
-    -fx-border-color: -wa-regular-text;
-    -fx-border-width: 0 2px 0 0;
     -fx-padding: 0;
 }
 
 .narration-record__verse-item {
     -fx-spacing: 10px;
+    -fx-border-color: -wa-regular-text;
+    -fx-border-width: 0 2px 0 0;
+    -fx-background-color: -wa-background-primary-gradient;
 }
 
 .narration-record__verse-item.playing {

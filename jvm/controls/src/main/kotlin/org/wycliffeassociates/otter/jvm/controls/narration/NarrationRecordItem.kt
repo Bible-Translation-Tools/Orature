@@ -27,6 +27,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
+import javafx.geometry.NodeOrientation
 import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.image.Image
@@ -65,6 +66,8 @@ class NarrationRecordItem : VBox() {
 
     init {
         styleClass.setAll("narration-record__verse-item")
+
+        nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
 
         playbackPositionProperty.onChange {
             toggleClass("playing", it > 0)

@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
+import javafx.geometry.NodeOrientation
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
@@ -114,6 +115,8 @@ class ChapterNarrationPage : View() {
                 hbox {
                     narrationrecordlistview(viewModel.recordedChunks) {
                         hgrow = Priority.ALWAYS
+
+                        nodeOrientation = NodeOrientation.RIGHT_TO_LEFT
 
                         setCellFactory {
                             NarrationRecordCell(

@@ -11,6 +11,7 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.collections.transformation.FilteredList
+import javafx.collections.transformation.SortedList
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.scene.image.Image
@@ -43,7 +44,8 @@ class ChapterNarrationViewModel : ViewModel() {
     val audioPluginViewModel: AudioPluginViewModel by inject()
 
     val allChunks: ObservableList<ChunkData> = FXCollections.observableArrayList()
-    val recordedChunks = FilteredList(allChunks) { it.hasAudio() }
+    val sortedChunks = SortedList(allChunks, compareByDescending<ChunkData>  { it.sort })
+    val recordedChunks = FilteredList(sortedChunks) { it.hasAudio() }
 
     val currentVerseLabelProperty = SimpleStringProperty()
     val floatingCardVisibleProperty = SimpleBooleanProperty()
@@ -87,6 +89,8 @@ class ChapterNarrationViewModel : ViewModel() {
         disposables.clear()
         listeners.forEach(ListenerDisposer::dispose)
         listeners.clear()
+
+        recordedChunks.setPredicate { it.hasAudio() }
     }
 
     fun onChunkOpenIn(chunk: ChunkData) {
@@ -98,7 +102,9 @@ class ChapterNarrationViewModel : ViewModel() {
     }
 
     fun onRecordChunkAgain(chunk: ChunkData) {
-        println("Recording verse ${chunk.title} again")
+        recordedChunks.setPredicate {
+            it.sort <= chunk.sort
+        }
     }
 
     private fun closePlayers() {
