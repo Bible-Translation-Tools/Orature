@@ -43,7 +43,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.map
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.LanguageMapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.ResourceMetadataMapper
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
-import java.time.LocalDateTime
 
 class ResourceContainerRepository @Inject constructor(
     private val database: AppDatabase,
@@ -108,8 +107,7 @@ class ResourceContainerRepository @Inject constructor(
 
     override fun updateContent(
         rc: ResourceContainer,
-        rcTree: OtterTree<CollectionOrContent>,
-        languageSlug: String
+        rcTree: OtterTree<CollectionOrContent>
     ): Single<ImportResult> {
         return Single.fromCallable {
             val rcMetadata = getMetadataForContainer(rc) ?: run {
@@ -134,10 +132,9 @@ class ResourceContainerRepository @Inject constructor(
         }.subscribeOn(Schedulers.io())
     }
 
-    override fun updateCollections(
+    override fun updateCollectionTitles(
         rc: ResourceContainer,
-        rcTree: OtterTree<CollectionOrContent>,
-        languageSlug: String
+        rcTree: OtterTree<CollectionOrContent>
     ): Single<ImportResult> {
         return Single
             .fromCallable {
@@ -160,7 +157,7 @@ class ResourceContainerRepository @Inject constructor(
                     .blockingGet()
 
                 val updateFrom = rcTree.toCollectionList()
-                updateCollections(
+                updateCollectionTitles(
                     listOf(*sourceProjects.toTypedArray(), *derivativeProjects.toTypedArray()),
                     updateFrom
                 )
@@ -171,7 +168,7 @@ class ResourceContainerRepository @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
-    private fun updateCollections(
+    private fun updateCollectionTitles(
         updateTo: List<Collection>,
         updateFrom: List<Collection>,
     ) {

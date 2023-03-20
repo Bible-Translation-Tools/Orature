@@ -12,7 +12,6 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportExcept
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IProjectReader
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.VersificationTreeBuilder
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.MediaMerge
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.MergeTextContent
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -107,8 +106,7 @@ class ExistingSourceImporter @Inject constructor(
                         }
                         return@fromCallable resourceContainerRepository.updateContent(
                             rc,
-                            tree,
-                            rc.manifest.dublinCore.language.identifier
+                            tree
                         ).map {
                             if (it == ImportResult.SUCCESS) {
                                 resourceMetadataRepository.update(metadata, rc).blockingAwait()
@@ -173,10 +171,9 @@ class ExistingSourceImporter @Inject constructor(
         tree: OtterTree<CollectionOrContent>
     ): Single<ImportResult> {
         return resourceContainerRepository
-            .updateCollections(
+            .updateCollectionTitles(
                 container,
-                tree,
-                container.manifest.dublinCore.language.identifier
+                tree
             )
     }
 

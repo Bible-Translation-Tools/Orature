@@ -32,16 +32,34 @@ interface IResourceContainerRepository {
         languageSlug: String
     ): Single<ImportResult>
 
+    /**
+     * Updates the content entities in the database with the content in the rcTree.
+     *
+     * The content could update the text in the content, or if a verse was bridged.
+     *
+     * @param rc The resource container of the source being updated
+     * @param rcTree The tree with the content to update
+     */
     fun updateContent(
         rc: ResourceContainer,
-        rcTree: OtterTree<CollectionOrContent>,
-        languageSlug: String
+        rcTree: OtterTree<CollectionOrContent>
     ): Single<ImportResult>
 
-    fun updateCollections(
+    /**
+     * Updates the sort and title of collections in the database with the content in the rcTree.
+     *
+     * The sort and title could have been set to default values due to being preallocated by versification
+     * without being available in an earlier version of the source container.
+     *
+     * This will update collections with a sort of Int.MAX_VALUE and a title of empty string.
+     * This affects source collections, as well as all projects derived from the source resource container.
+     *
+     * @param rc The resource container of the source being updated
+     * @param rcTree The tree with the collections to update
+     */
+    fun updateCollectionTitles(
         rc: ResourceContainer,
-        rcTree: OtterTree<CollectionOrContent>,
-        languageSlug: String
+        rcTree: OtterTree<CollectionOrContent>
     ): Single<ImportResult>
 
     fun removeResourceContainer(
