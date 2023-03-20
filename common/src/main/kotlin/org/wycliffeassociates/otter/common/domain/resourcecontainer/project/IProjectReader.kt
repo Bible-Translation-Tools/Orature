@@ -50,6 +50,7 @@ interface IProjectReader {
                 if (isHelp) throw ImportException(ImportResult.INVALID_RC)
                 UsfmProjectReader()
             }
+
             MimeType.MARKDOWN -> {
                 MarkdownProjectReader(isHelp)
             }
@@ -88,13 +89,20 @@ interface IProjectReader {
                         existingCategory
                     } else {
                         // category node does not yet exist
-                        val category = categoryInfo.firstOrNull { it.identifier == categorySlug } ?: continue
+                        val category = categoryInfo
+                            .firstOrNull { it.identifier == categorySlug }
+                            ?: continue
                         val categoryNode = OtterTree<CollectionOrContent>(category.toCollection())
                         parent.addChild(categoryNode)
                         categoryNode
                     }
                 }
-                val projectTree = projectReader.constructProjectTree(container, project, zipEntryTreeBuilder)
+                val projectTree = projectReader
+                    .constructProjectTree(
+                        container,
+                        project,
+                        zipEntryTreeBuilder
+                    )
                 parent.addChild(projectTree)
             }
             return root
