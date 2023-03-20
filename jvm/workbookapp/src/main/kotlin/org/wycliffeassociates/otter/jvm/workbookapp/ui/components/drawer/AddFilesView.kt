@@ -31,6 +31,7 @@ import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
@@ -56,80 +57,114 @@ class AddFilesView : View() {
             addClass("app-drawer__scroll-pane")
             fitToParentHeight()
 
-            vbox {
-                isFitToWidth = true
-                isFitToHeight = true
+            stackpane {
+                vbox {
+                    isFitToWidth = true
+                    isFitToHeight = true
+                    visibleProperty().bind(viewModel.showImportFilterSectionProperty.not())
 
-                addClass("app-drawer-container")
+                    addClass("app-drawer-container")
 
-                hbox {
-                    label(messages["importFiles"]).apply {
+                    hbox {
+                        label(messages["importFiles"]).apply {
+                            addClass("app-drawer__title")
+                        }
+                        region { hgrow = Priority.ALWAYS }
+                        button {
+                            addClass("btn", "btn--secondary")
+                            graphic = FontIcon(MaterialDesign.MDI_CLOSE)
+                            tooltip(messages["close"])
+                            action { collapse() }
+                            closeButton = this
+                        }
+                    }
+
+                    vbox {
+                        addClass("app-drawer__section")
+                        label(messages["dragAndDrop"]).apply {
+                            addClass("app-drawer__subtitle")
+                        }
+
+                        textflow {
+                            text(messages["dragAndDropDescription"]).apply {
+                                addClass("app-drawer__text")
+                            }
+                            hyperlink("audio.bibleineverylanguage.org").apply {
+                                addClass("wa-text--hyperlink", "app-drawer__text--link")
+                                tooltip {
+                                    text = "audio.bibleineverylanguage.org/gl"
+                                }
+                                action {
+                                    hostServices.showDocument("https://audio.bibleineverylanguage.org/gl")
+                                }
+                            }
+                        }
+                    }
+                    vbox {
+                        addClass("app-drawer__drag-drop-section")
+                        vgrow = Priority.ALWAYS
+                        addClass("app-drawer__drag-drop-area")
+
+                        label {
+                            addClass("app-drawer__drag-drop-area__icon")
+                            graphic = FontIcon(MaterialDesign.MDI_FILE_MULTIPLE)
+                        }
+
+                        label(messages["dragToImport"]) {
+                            fitToParentWidth()
+                            addClass("app-drawer__text--centered")
+                        }
+
+                        button(messages["browseFiles"]) {
+                            addClass(
+                                "btn",
+                                "btn--primary"
+                            )
+                            tooltip {
+                                textProperty().bind(this@button.textProperty())
+                            }
+                            graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
+                            action {
+                                viewModel.onChooseFile()
+                            }
+                        }
+
+                        onDragOver = onDragOverHandler()
+                        onDragDropped = onDragDroppedHandler()
+                    }
+                }
+
+                vbox {
+                    addClass("app-drawer-container")
+                    visibleWhen { viewModel.showImportFilterSectionProperty }
+                    managedProperty().bind(visibleProperty())
+
+                    label("Import Project") {
                         addClass("app-drawer__title")
                     }
-                    region { hgrow = Priority.ALWAYS }
-                    button {
-                        addClass("btn", "btn--secondary")
-                        graphic = FontIcon(MaterialDesign.MDI_CLOSE)
-                        tooltip(messages["close"])
-                        action { collapse() }
-                        closeButton = this
-                    }
-                }
-
-                vbox {
-                    addClass("app-drawer__section")
-                    label(messages["dragAndDrop"]).apply {
-                        addClass("app-drawer__subtitle")
-                    }
-
-                    textflow {
-                        text(messages["dragAndDropDescription"]).apply {
-                            addClass("app-drawer__text")
-                        }
-                        hyperlink("audio.bibleineverylanguage.org").apply {
-                            addClass("wa-text--hyperlink", "app-drawer__text--link")
-                            tooltip {
-                                text = "audio.bibleineverylanguage.org/gl"
+                    add(
+                        ImportProjectFilterSection(viewModel.chaptersToExport).apply {
+                            setOnImportAction {
+                                viewModel.showImportDialogProperty.set(true)
+                                val chapters = viewModel.chaptersToExport
+                                    .filter { it.selected }
+                                    .map {
+                                        it.chapter
+                                    }
+                                viewModel.importCallbackEmitter.onSuccess(ImportOptions(chapters = chapters))
+                                viewModel.showImportFilterSectionProperty.set(false)
+                                viewModel.chaptersToExport.clear()
                             }
-                            action {
-                                hostServices.showDocument("https://audio.bibleineverylanguage.org/gl")
+                            setOnCancelAction {
+                                viewModel.showImportDialogProperty.set(true)
+                                viewModel.importCallbackEmitter.onSuccess(ImportOptions(chapters = null))
+                                viewModel.showImportFilterSectionProperty.set(false)
+                                viewModel.chaptersToExport.clear()
                             }
                         }
-                    }
+                    )
                 }
 
-                vbox {
-                    addClass("app-drawer__drag-drop-area")
-
-                    vgrow = Priority.ALWAYS
-
-                    label {
-                        addClass("app-drawer__drag-drop-area__icon")
-                        graphic = FontIcon(MaterialDesign.MDI_FILE_MULTIPLE)
-                    }
-
-                    label(messages["dragToImport"]) {
-                        fitToParentWidth()
-                        addClass("app-drawer__text--centered")
-                    }
-
-                    button(messages["browseFiles"]) {
-                        addClass(
-                            "btn",
-                            "btn--primary"
-                        )
-                        tooltip {
-                            textProperty().bind(this@button.textProperty())
-                        }
-                        graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
-                        action {
-                            viewModel.onChooseFile()
-                        }
-                    }
-
-                    onDragOver = onDragOverHandler()
-                    onDragDropped = onDragDroppedHandler()
-                }
             }
         }
 
@@ -141,6 +176,7 @@ class AddFilesView : View() {
     init {
         tryImportStylesheet(resources["/css/app-drawer.css"])
         tryImportStylesheet(resources["/css/confirm-dialog.css"])
+        tryImportStylesheet(resources["/css/import-project-filter.css"])
 
         initImportDialog()
         initSuccessDialog()

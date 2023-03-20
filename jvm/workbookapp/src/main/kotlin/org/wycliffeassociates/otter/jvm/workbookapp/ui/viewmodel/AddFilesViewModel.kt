@@ -20,9 +20,9 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Single
+import io.reactivex.SingleEmitter
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
-import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -40,7 +40,7 @@ import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImport
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ImportSelectionDialog
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterSelection
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
 import java.io.File
@@ -62,7 +62,10 @@ class AddFilesViewModel : ViewModel() {
     val importErrorMessage = SimpleStringProperty(null)
     val importedProjectTitleProperty = SimpleStringProperty()
     val importedProjectCoverProperty = SimpleObjectProperty<File>()
+    val showImportFilterSectionProperty = SimpleBooleanProperty(false)
 
+    lateinit var importCallbackEmitter: SingleEmitter<ImportOptions>
+    val chaptersToExport = observableListOf<ChapterSelection>()
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
     init {
@@ -159,13 +162,14 @@ class AddFilesViewModel : ViewModel() {
 
             override fun onRequestUserInput(parameter: ImportCallbackParameter): Single<ImportOptions> {
                 return Single.create<ImportOptions> { emitter ->
-                    find<ImportSelectionDialog>().apply {
-                        options.setAll(parameter.options)
-
-                        Platform.runLater {
-                            openDialog(emitter)
-                        }
+                    runLater{
+                        chaptersToExport.setAll(
+                            parameter.options.map { ChapterSelection(it) }
+                        )
+                        showImportDialogProperty.set(false)
+                        showImportFilterSectionProperty.set(true)
                     }
+                    importCallbackEmitter = emitter
                 }
             }
 

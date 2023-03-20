@@ -1,0 +1,13 @@
+.import-filter__container {
+    -fx-spacing: 1em;
+}
+
+.import-filter__list__check-box {
+    -fx-text-fill: -wa-regular-text;
+}
+
+.import-filter__sub-text {
+    -fx-text-fill: -wa-regular-text;
+    -fx-font-size: 1.4em;
+    -fx-wrap-text: true;
+}

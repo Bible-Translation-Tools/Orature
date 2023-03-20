@@ -150,8 +150,7 @@
     -fx-background-color: transparent;
 }
 
-.app-drawer__drag-drop-area {
-    -fx-alignment: center;
+.app-drawer__drag-drop-section {
     -fx-border-width: 2px;
     -fx-border-radius: 6px;
     -fx-border-color: -wa-primary;
@@ -160,6 +159,10 @@
     -fx-background-radius: 6px;
     -fx-padding: 25px;
     -fx-spacing: 10px;
+}
+
+.app-drawer__drag-drop-area {
+    -fx-alignment: center;
 }
 
 .app-drawer__drag-drop-area__icon .ikonli-font-icon {
