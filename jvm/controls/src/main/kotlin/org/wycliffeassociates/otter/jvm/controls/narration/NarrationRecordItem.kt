@@ -66,6 +66,10 @@ class NarrationRecordItem : VBox() {
     init {
         styleClass.setAll("narration-record__verse-item")
 
+        playbackPositionProperty.onChange {
+            toggleClass("playing", it > 0)
+        }
+
         hbox {
             addClass("narration-record__verse-controls")
 
@@ -74,6 +78,10 @@ class NarrationRecordItem : VBox() {
 
                 graphic = FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE)
                 textProperty().bind(verseLabelProperty)
+
+                playbackPositionProperty.onChange {
+                    toggleClass("playing", it > 0)
+                }
             }
             region {
                 hgrow = Priority.ALWAYS
@@ -82,6 +90,10 @@ class NarrationRecordItem : VBox() {
                 addClass("btn", "btn--primary", "btn--borderless")
                 graphic = FontIcon(MaterialDesign.MDI_PLAY)
                 audioPlayButtonProperty.set(this)
+
+                playbackPositionProperty.onChange {
+                    toggleClass("playing", it > 0)
+                }
             }
 
             simpleaudioplayer {
@@ -124,13 +136,13 @@ class NarrationRecordItem : VBox() {
                 addClass("narration-record__waveform")
                 imageview(waveformProperty).apply {
                     visibleProperty().bind(playbackPositionProperty.booleanBinding {
-                        it?.let { it.toDouble() <= 0.0 } ?: true
+                        it?.let { it.toDouble() <= 0 } ?: true
                     })
                     managedProperty().bind(visibleProperty())
                 }
                 imageview(invertedWaveformProperty).apply {
                     visibleProperty().bind(playbackPositionProperty.booleanBinding {
-                        it?.let { it.toDouble() > 0.0 } ?: false
+                        it?.let { it.toDouble() > 0 } ?: false
                     })
                     managedProperty().bind(visibleProperty())
                 }

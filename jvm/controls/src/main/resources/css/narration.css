@@ -50,7 +50,7 @@
 }
 
 .narration__recording {
-    -fx-pref-height: 200px;
+    -fx-pref-height: 240px;
     -fx-alignment: top-left;
 }
 
@@ -153,7 +153,11 @@
 }
 
 .narration-record__verse-item {
+    -fx-spacing: 10px;
+}
 
+.narration-record__verse-item.playing {
+    -fx-background-color: -wa-primary;
 }
 
 .narration-record__waveform {
@@ -190,11 +194,24 @@
     -fx-pref-width: 56px;
     -fx-pref-height: 48px;
     -fx-background-color: -wa-foreground;
+    -fx-border-radius: 16px;
     -fx-background-radius: 16px;
+}
+
+.narration-record__verse-controls .btn.playing {
+    -fx-background-color: -wa-primary-dark
+}
+
+.narration-record__verse-controls .btn:focused.playing {
+    -fx-border-color: -wa-white;
 }
 
 .narration-record__verse-controls .btn .ikonli-font-icon {
     -fx-fill: -wa-regular-text;
+}
+
+.narration-record__verse-controls .btn.playing .ikonli-font-icon {
+    -fx-fill: -wa-white;
 }
 
 .narration-record__verse-text {
@@ -203,8 +220,16 @@
     -fx-text-fill: -wa-primary;
 }
 
+.narration-record__verse-text.playing {
+    -fx-text-fill: -wa-white;
+}
+
 .narration-record__verse-text .ikonli-font-icon {
     -fx-fill: -wa-primary;
+}
+
+.narration-record__verse-text.playing .ikonli-font-icon {
+    -fx-fill: -wa-white;
 }
 
 .narration__volume-bar {
