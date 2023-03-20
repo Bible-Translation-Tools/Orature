@@ -4,14 +4,11 @@ import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.collections.OtterTree
-import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.CollectionOrContent
-import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.OtterResourceContainerConfig
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.castOrFindImportException
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.otterConfigCategories
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IProjectReader
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.VersificationTreeBuilder
@@ -148,8 +145,7 @@ class NewSourceImporter @Inject constructor(
         return resourceContainerRepository
             .updateContent(
                 container,
-                tree,
-                container.manifest.dublinCore.language.identifier
+                tree
             )
     }
 
