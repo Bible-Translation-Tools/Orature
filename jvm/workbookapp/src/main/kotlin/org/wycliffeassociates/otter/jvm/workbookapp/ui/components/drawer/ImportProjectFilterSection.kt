@@ -1,22 +1,28 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
 
+import com.github.thomasnield.rxkotlinfx.onChangedObservable
 import io.reactivex.SingleEmitter
 import javafx.collections.ObservableList
+import javafx.collections.ObservableSet
 import javafx.scene.control.CheckBox
 import javafx.scene.control.ListCell
+import javafx.scene.control.ListView
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
+import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterSelection
 import tornadofx.*
 
 class ImportProjectFilterSection(
-    val chapters: ObservableList<ChapterSelection>
+    private val availableChapters: ObservableList<Int>
 ) : VBox() {
 
+    lateinit var lv: ListView<Int>
     lateinit var result: SingleEmitter<ImportOptions>
-    private var onImportAction: () -> Unit = {}
+    val selectedChapters = observableSetOf<Int>()
+    private var onImportAction: (List<Int>) -> Unit = {}
     private var onCancelAction: () -> Unit = {}
 
     init {
@@ -29,12 +35,32 @@ class ImportProjectFilterSection(
 //            wrapIn(this@ImportProjectFilterSection)
         }
 
-        listview(chapters) {
+        hbox {
+            checkbox {
+                setOnAction {
+                    if (this.isSelected) {
+                        selectedChapters.addAll(availableChapters)
+                    } else {
+                        selectedChapters.clear()
+                    }
+                    lv.refresh()
+                }
+            }
+            label("Select") {
+                graphic = FontIcon(MaterialDesign.MDI_MENU_DOWN)
+            }
+            label() {
+                selectedChapters.onChangedObservable().subscribe { text = it.toString() }
+            }
+        }
+
+        listview(availableChapters) {
 //            addClass("wa-list-view")
+            lv = this
             multiSelect(true)
 
             setCellFactory {
-                ImportFilterSelectionCell(chapters)
+                ImportFilterSelectionCell(selectedChapters)
             }
         }
         hbox {
@@ -44,8 +70,7 @@ class ImportProjectFilterSection(
                     textProperty().bind(this@button.textProperty())
                 }
                 setOnAction {
-                    println(chapters)
-                    onImportAction()
+                    onImportAction(selectedChapters.toList())
                 }
             }
             button("Cancel") {
@@ -58,7 +83,7 @@ class ImportProjectFilterSection(
         }
     }
 
-    fun setOnImportAction(action: () -> Unit) {
+    fun setOnImportAction(action: (List<Int>) -> Unit) {
         onImportAction = action
     }
 
@@ -68,15 +93,22 @@ class ImportProjectFilterSection(
 }
 
 class ImportFilterSelectionCell(
-    chapters: ObservableList<ChapterSelection>
-) : ListCell<ChapterSelection>() {
+    private val selectedChapters: ObservableSet<Int>
+) : ListCell<Int>() {
 
     val node = CheckBox().apply {
+        val cb = this
 //        addClass("import-filter__list__check-box")
 
         selectedProperty().onChange {
-            chapters[index].selected = this.isSelected
+            if (it) selectedChapters.add(item)
+            else selectedChapters.remove(item)
         }
+
+//        setOnAction {
+//            if (cb.isSelected) selectedChapters.add(item)
+//            else selectedChapters.remove(item)
+//        }
     }
 
     init {
@@ -89,7 +121,7 @@ class ImportFilterSelectionCell(
         }
     }
 
-    override fun updateItem(item: ChapterSelection?, empty: Boolean) {
+    override fun updateItem(item: Int?, empty: Boolean) {
         super.updateItem(item, empty)
 
         if (item == null || empty) {
@@ -97,6 +129,9 @@ class ImportFilterSelectionCell(
             return
         }
 
-        graphic = node.apply { text = item.chapter.toString() }
+        graphic = node.apply {
+            text = item.toString()
+            isSelected = item in selectedChapters
+        }
     }
 }

@@ -40,7 +40,6 @@ import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImport
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterSelection
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
 import java.io.File
@@ -65,11 +64,20 @@ class AddFilesViewModel : ViewModel() {
     val showImportFilterSectionProperty = SimpleBooleanProperty(false)
 
     lateinit var importCallbackEmitter: SingleEmitter<ImportOptions>
-    val chaptersToExport = observableListOf<ChapterSelection>()
+    val availableChapters = observableListOf<Int>()
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+
+
+        availableChapters.setAll(1,2,3)
+
+//        availableChapters.setAll(
+//            ChapterSelection(1, true),
+//            ChapterSelection(2, true),
+//            ChapterSelection(3, true)
+//        )
     }
 
     fun onDropFile(files: List<File>) {
@@ -163,9 +171,9 @@ class AddFilesViewModel : ViewModel() {
             override fun onRequestUserInput(parameter: ImportCallbackParameter): Single<ImportOptions> {
                 return Single.create<ImportOptions> { emitter ->
                     runLater{
-                        chaptersToExport.setAll(
-                            parameter.options.map { ChapterSelection(it) }
-                        )
+//                        availableChapters.setAll(
+//                            parameter.options.map { ChapterSelection(it) }
+//                        )
                         showImportDialogProperty.set(false)
                         showImportFilterSectionProperty.set(true)
                     }

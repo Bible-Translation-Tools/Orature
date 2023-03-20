@@ -31,7 +31,6 @@ import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
@@ -136,30 +135,30 @@ class AddFilesView : View() {
 
                 vbox {
                     addClass("app-drawer-container")
-                    visibleWhen { viewModel.showImportFilterSectionProperty }
+//                    visibleWhen { viewModel.showImportFilterSectionProperty }
                     managedProperty().bind(visibleProperty())
 
                     label("Import Project") {
                         addClass("app-drawer__title")
                     }
                     add(
-                        ImportProjectFilterSection(viewModel.chaptersToExport).apply {
+                        ImportProjectFilterSection(viewModel.availableChapters).apply {
                             setOnImportAction {
-                                viewModel.showImportDialogProperty.set(true)
-                                val chapters = viewModel.chaptersToExport
-                                    .filter { it.selected }
-                                    .map {
-                                        it.chapter
-                                    }
-                                viewModel.importCallbackEmitter.onSuccess(ImportOptions(chapters = chapters))
-                                viewModel.showImportFilterSectionProperty.set(false)
-                                viewModel.chaptersToExport.clear()
+//                                viewModel.showImportDialogProperty.set(true)
+//                                val chapters = viewModel.chaptersToExport
+//                                    .filter { it.selected }
+//                                    .map {
+//                                        it.chapter
+//                                    }
+//                                viewModel.importCallbackEmitter.onSuccess(ImportOptions(chapters = chapters))
+//                                viewModel.showImportFilterSectionProperty.set(false)
+//                                viewModel.chaptersToExport.clear()
                             }
                             setOnCancelAction {
-                                viewModel.showImportDialogProperty.set(true)
-                                viewModel.importCallbackEmitter.onSuccess(ImportOptions(chapters = null))
-                                viewModel.showImportFilterSectionProperty.set(false)
-                                viewModel.chaptersToExport.clear()
+//                                viewModel.showImportDialogProperty.set(true)
+//                                viewModel.importCallbackEmitter.onSuccess(ImportOptions(chapters = null))
+//                                viewModel.showImportFilterSectionProperty.set(false)
+//                                viewModel.chaptersToExport.clear()
                             }
                         }
                     )
