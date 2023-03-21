@@ -135,7 +135,7 @@ class AddFilesView : View() {
 
                 vbox {
                     addClass("app-drawer-container")
-//                    visibleWhen { viewModel.showImportFilterSectionProperty }
+                    visibleWhen { viewModel.showImportFilterSectionProperty }
                     managedProperty().bind(visibleProperty())
 
                     label("Import Project") {
@@ -143,27 +143,11 @@ class AddFilesView : View() {
                     }
                     add(
                         ImportProjectFilterSection(viewModel.availableChapters).apply {
-                            setOnImportAction {
-//                                viewModel.showImportDialogProperty.set(true)
-//                                val chapters = viewModel.chaptersToExport
-//                                    .filter { it.selected }
-//                                    .map {
-//                                        it.chapter
-//                                    }
-//                                viewModel.importCallbackEmitter.onSuccess(ImportOptions(chapters = chapters))
-//                                viewModel.showImportFilterSectionProperty.set(false)
-//                                viewModel.chaptersToExport.clear()
-                            }
-                            setOnCancelAction {
-//                                viewModel.showImportDialogProperty.set(true)
-//                                viewModel.importCallbackEmitter.onSuccess(ImportOptions(chapters = null))
-//                                viewModel.showImportFilterSectionProperty.set(false)
-//                                viewModel.chaptersToExport.clear()
-                            }
+                            setOnImportAction(viewModel::onImportFilterChapterAction)
+                            setOnCancelAction(viewModel::onImportFilterChapterCancel)
                         }
                     )
                 }
-
             }
         }
 

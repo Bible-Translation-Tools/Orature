@@ -1,6 +1,5 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
 
-import com.github.thomasnield.rxkotlinfx.onChangedObservable
 import io.reactivex.SingleEmitter
 import javafx.collections.ObservableList
 import javafx.collections.ObservableSet
@@ -14,6 +13,8 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
 import tornadofx.*
+import tornadofx.FX.Companion.messages
+import java.text.MessageFormat
 
 class ImportProjectFilterSection(
     private val availableChapters: ObservableList<Int>
@@ -21,7 +22,7 @@ class ImportProjectFilterSection(
 
     lateinit var lv: ListView<Int>
     lateinit var result: SingleEmitter<ImportOptions>
-    val selectedChapters = observableSetOf<Int>()
+    private val selectedChapters = observableSetOf<Int>()
     private var onImportAction: (List<Int>) -> Unit = {}
     private var onCancelAction: () -> Unit = {}
 
@@ -32,7 +33,6 @@ class ImportProjectFilterSection(
         label("We found a matching project in Orature. Please select the chapters you want to import from this file.") {
             addClass("import-filter__sub-text")
             minHeight = Region.USE_PREF_SIZE
-//            wrapIn(this@ImportProjectFilterSection)
         }
 
         hbox {
@@ -48,9 +48,6 @@ class ImportProjectFilterSection(
             }
             label("Select") {
                 graphic = FontIcon(MaterialDesign.MDI_MENU_DOWN)
-            }
-            label() {
-                selectedChapters.onChangedObservable().subscribe { text = it.toString() }
             }
         }
 
@@ -71,6 +68,7 @@ class ImportProjectFilterSection(
                 }
                 setOnAction {
                     onImportAction(selectedChapters.toList())
+                    selectedChapters.clear()
                 }
             }
             button("Cancel") {
@@ -78,7 +76,10 @@ class ImportProjectFilterSection(
                 tooltip {
                     textProperty().bind(this@button.textProperty())
                 }
-                setOnAction { onCancelAction() }
+                setOnAction {
+                    selectedChapters.clear()
+                    onCancelAction()
+                }
             }
         }
     }
@@ -97,18 +98,12 @@ class ImportFilterSelectionCell(
 ) : ListCell<Int>() {
 
     val node = CheckBox().apply {
-        val cb = this
 //        addClass("import-filter__list__check-box")
 
         selectedProperty().onChange {
             if (it) selectedChapters.add(item)
             else selectedChapters.remove(item)
         }
-
-//        setOnAction {
-//            if (cb.isSelected) selectedChapters.add(item)
-//            else selectedChapters.remove(item)
-//        }
     }
 
     init {
@@ -130,7 +125,11 @@ class ImportFilterSelectionCell(
         }
 
         graphic = node.apply {
-            text = item.toString()
+            text = MessageFormat.format(
+                messages["chapterTitle"],
+                messages["chapter"],
+                item
+            )
             isSelected = item in selectedChapters
         }
     }

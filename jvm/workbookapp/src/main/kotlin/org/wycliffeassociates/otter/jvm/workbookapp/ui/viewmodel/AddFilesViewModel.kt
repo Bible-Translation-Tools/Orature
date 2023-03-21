@@ -63,21 +63,12 @@ class AddFilesViewModel : ViewModel() {
     val importedProjectCoverProperty = SimpleObjectProperty<File>()
     val showImportFilterSectionProperty = SimpleBooleanProperty(false)
 
-    lateinit var importCallbackEmitter: SingleEmitter<ImportOptions>
     val availableChapters = observableListOf<Int>()
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
+    private lateinit var importCallbackEmitter: SingleEmitter<ImportOptions>
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
-
-
-        availableChapters.setAll(1,2,3)
-
-//        availableChapters.setAll(
-//            ChapterSelection(1, true),
-//            ChapterSelection(2, true),
-//            ChapterSelection(3, true)
-//        )
     }
 
     fun onDropFile(files: List<File>) {
@@ -170,14 +161,12 @@ class AddFilesViewModel : ViewModel() {
 
             override fun onRequestUserInput(parameter: ImportCallbackParameter): Single<ImportOptions> {
                 return Single.create<ImportOptions> { emitter ->
+                    importCallbackEmitter = emitter
                     runLater{
-//                        availableChapters.setAll(
-//                            parameter.options.map { ChapterSelection(it) }
-//                        )
+                        availableChapters.setAll(parameter.options)
                         showImportDialogProperty.set(false)
                         showImportFilterSectionProperty.set(true)
                     }
-                    importCallbackEmitter = emitter
                 }
             }
 
@@ -238,5 +227,19 @@ class AddFilesViewModel : ViewModel() {
         } catch (e: Exception) {
             logger.error("Error in getting info from resource container $rc", e)
         }
+    }
+
+    fun onImportFilterChapterAction(selectedChapters: List<Int>) {
+        showImportDialogProperty.set(true)
+        showImportFilterSectionProperty.set(false)
+        availableChapters.clear()
+        importCallbackEmitter.onSuccess(ImportOptions(chapters = selectedChapters))
+    }
+
+    fun onImportFilterChapterCancel() {
+        showImportDialogProperty.set(true)
+        showImportFilterSectionProperty.set(false)
+        availableChapters.clear()
+        importCallbackEmitter.onSuccess(ImportOptions(chapters = null))
     }
 }
