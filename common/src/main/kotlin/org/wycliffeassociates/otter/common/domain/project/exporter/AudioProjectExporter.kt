@@ -123,7 +123,7 @@ class AudioProjectExporter @Inject constructor(
     }
 
     private fun chapterFilter(chapter: Chapter, options: ExportOptions?): Boolean {
-        val included = options?.let { chapter.sort in it.chapters } ?: true
-        return included && chapter.audio.selected.value?.value != null
+        val included = options?.chapters?.contains(chapter.sort) ?: true
+        return included && chapter.hasSelectedAudio()
     }
 }

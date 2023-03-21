@@ -20,7 +20,6 @@ package org.wycliffeassociates.otter.common.domain.project.exporter.resourcecont
 
 import io.reactivex.Completable
 import io.reactivex.Observable
-import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
@@ -33,9 +32,7 @@ import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.content.TakeActions
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
-import org.wycliffeassociates.otter.common.domain.project.ProjectMetadata
-import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
-import org.wycliffeassociates.otter.common.domain.project.exporter.ProjectExporter
+import org.wycliffeassociates.otter.common.domain.project.exporter.IProjectExporter
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
@@ -49,7 +46,7 @@ import javax.inject.Inject
 
 abstract class RCProjectExporter(
     protected val directoryProvider:IDirectoryProvider
-) : ProjectExporter {
+) : IProjectExporter {
     @Inject
     lateinit var concatenateAudio: ConcatenateAudio
 

@@ -5,7 +5,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.project.ProjectMetadata
 import java.io.File
 
-interface ProjectExporter {
+interface IProjectExporter {
     fun export(
         outputDirectory: File,
         projectMetadata: ProjectMetadata,

@@ -26,8 +26,8 @@ import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.primitives.Take
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
+import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.takeFilenamePattern
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
-import org.wycliffeassociates.otter.common.domain.project.takeFilenamePattern
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor

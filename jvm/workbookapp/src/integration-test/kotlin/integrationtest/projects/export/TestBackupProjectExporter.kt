@@ -11,12 +11,12 @@ import org.wycliffeassociates.otter.common.ResourceContainerBuilder
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.takeFilenamePattern
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
 import org.wycliffeassociates.otter.common.domain.project.ProjectMetadata
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOptions
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.BackupProjectExporter
-import org.wycliffeassociates.otter.common.domain.project.takeFilenamePattern
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer

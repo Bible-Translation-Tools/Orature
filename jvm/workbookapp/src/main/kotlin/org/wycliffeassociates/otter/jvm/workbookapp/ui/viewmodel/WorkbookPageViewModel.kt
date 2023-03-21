@@ -40,7 +40,7 @@ import org.wycliffeassociates.otter.common.domain.project.exporter.resourceconta
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportType
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import org.wycliffeassociates.otter.common.domain.project.exporter.AudioProjectExporter
-import org.wycliffeassociates.otter.common.domain.project.exporter.ProjectExporter
+import org.wycliffeassociates.otter.common.domain.project.exporter.IProjectExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.SourceProjectExporter
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
@@ -217,7 +217,7 @@ class WorkbookPageViewModel : ViewModel() {
             workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
         )
 
-        val exporter: ProjectExporter = when (type) {
+        val exporter: IProjectExporter = when (type) {
             ExportType.LISTEN -> exportAudioProvider.get()
             ExportType.SOURCE_AUDIO, ExportType.PUBLISH -> exportSourceProvider.get()
             ExportType.BACKUP -> exportBackupProvider.get()
