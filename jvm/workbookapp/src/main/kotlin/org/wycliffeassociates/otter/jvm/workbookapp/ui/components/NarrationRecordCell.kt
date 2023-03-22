@@ -29,6 +29,7 @@ class NarrationRecordCell(
     private val recordAgainText: String,
     private val loadingImageText: String,
     private val goToVerseText: String,
+    private val onPlay: (ChunkData) -> Unit,
     private val onOpenApp: (ChunkData) -> Unit,
     private val onRecordAgain: (ChunkData) -> Unit,
     private val onWaveformClicked: (ChunkData) -> Unit
@@ -49,7 +50,10 @@ class NarrationRecordCell(
 
         graphic = view.apply {
             verseLabelProperty.set(item.title)
-            audioPlayerProperty.set(item.player)
+
+            isPlayingProperty.bind(item.isPlayingProperty)
+            playbackPositionProperty.bind(item.playbackPositionProperty)
+            totalFramesProperty.bind(item.totalFramesProperty)
 
             waveformProperty.bind(item.imageProperty)
             invertedWaveformProperty.bind(item.invertedImageProperty)
@@ -60,6 +64,9 @@ class NarrationRecordCell(
             recordAgainTextProperty.set(recordAgainText)
             goToVerseTextProperty.set(goToVerseText)
 
+            onPlayActionProperty.set(EventHandler {
+                onPlay(item)
+            })
             onOpenAppActionProperty.set(EventHandler {
                 onOpenApp(item)
             })

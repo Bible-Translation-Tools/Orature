@@ -124,6 +124,7 @@ class ChapterNarrationPage : View() {
                                 messages["recordAgain"],
                                 messages["loading"],
                                 messages["goToVerse"],
+                                viewModel::onPlay,
                                 viewModel::onChunkOpenIn,
                                 viewModel::onRecordChunkAgain
                             ) {
@@ -160,7 +161,7 @@ class ChapterNarrationPage : View() {
             stackpane {
                 addClass("narration__verses")
 
-                narrationtextlistview(viewModel.allChunks) {
+                narrationtextlistview(viewModel.allSortedChunks) {
                     addClass("narration__list")
 
                     viewModel.onCurrentVerseActionProperty.bind(onSelectedVerseActionProperty)

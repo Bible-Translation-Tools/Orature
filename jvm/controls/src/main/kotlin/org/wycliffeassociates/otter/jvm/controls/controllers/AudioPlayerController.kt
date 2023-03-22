@@ -202,7 +202,7 @@ class AudioPlayerController(
         }
     }
 
-    private fun play() {
+    fun play() {
         isPlayingProperty.set(true)
         if (startAtLocation != 0) {
             seek(startAtLocation)

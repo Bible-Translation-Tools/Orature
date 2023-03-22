@@ -23,13 +23,13 @@ import javafx.beans.binding.DoubleBinding
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.geometry.NodeOrientation
 import javafx.geometry.Pos
-import javafx.scene.control.Button
 import javafx.scene.image.Image
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.Priority
@@ -53,15 +53,18 @@ class NarrationRecordItem : VBox() {
     val loadingImageTextProperty = SimpleStringProperty()
     val goToVerseTextProperty = SimpleStringProperty()
 
+    val onPlayActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onOpenAppActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onRecordAgainActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onWaveformClickActionProperty = SimpleObjectProperty<EventHandler<MouseEvent>>()
 
-    private val audioPlayButtonProperty = SimpleObjectProperty<Button>()
-    private val playbackPositionProperty = SimpleDoubleProperty()
-    private val totalFramesProperty = SimpleDoubleProperty()
+    val isPlayingProperty = SimpleBooleanProperty()
+    val playbackPositionProperty = SimpleIntegerProperty()
+    val totalFramesProperty = SimpleIntegerProperty()
     private val playerWidthProperty = SimpleDoubleProperty()
 
+    private val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
+    private val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
     private val cursorWidth = 3.0
 
     init {
@@ -92,25 +95,17 @@ class NarrationRecordItem : VBox() {
             button {
                 addClass("btn", "btn--primary", "btn--borderless")
                 graphic = FontIcon(MaterialDesign.MDI_PLAY)
-                audioPlayButtonProperty.set(this)
+
+                graphicProperty().bind(
+                    isPlayingProperty.objectBinding { isPlaying ->
+                        if (isPlaying == true) pauseIcon else playIcon
+                    }
+                )
+
+                onActionProperty().bind(onPlayActionProperty)
 
                 playbackPositionProperty.onChange {
                     toggleClass("playing", it > 0)
-                }
-            }
-
-            simpleaudioplayer {
-                playerProperty.bind(audioPlayerProperty)
-                playButtonProperty.bind(audioPlayButtonProperty)
-                isVisible = false
-                isManaged = false
-
-                totalFramesProperty.bind(playerProperty.doubleBinding {
-                    it?.getDurationInFrames()?.toDouble() ?: 0.0
-                })
-
-                onPlaybackProgressChanged = {
-                    playbackPositionProperty.set(it)
                 }
             }
 
