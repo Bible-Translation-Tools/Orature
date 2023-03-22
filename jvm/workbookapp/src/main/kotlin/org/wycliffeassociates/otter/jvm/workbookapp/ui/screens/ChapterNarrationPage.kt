@@ -123,13 +123,12 @@ class ChapterNarrationPage : View() {
                                 messages["openIn"],
                                 messages["recordAgain"],
                                 messages["loading"],
-                                messages["goToVerse"],
-                                viewModel::onPlay,
-                                viewModel::onChunkOpenIn,
-                                viewModel::onRecordChunkAgain
-                            ) {
-                                viewModel.onWaveformClicked(it)
-                            }
+                                messages["goToVerse"]
+                            )
+                        }
+
+                        viewModel.onPlaybackStarted = {
+                            scrollTo(it)
                         }
                     }
 
@@ -182,8 +181,7 @@ class ChapterNarrationPage : View() {
                             messages["beginRecording"],
                             messages["pauseRecording"],
                             messages["resumeRecording"],
-                            messages["nextVerse"],
-                            viewModel::onChunkRecord
+                            messages["nextVerse"]
                         )
                     }
                 }

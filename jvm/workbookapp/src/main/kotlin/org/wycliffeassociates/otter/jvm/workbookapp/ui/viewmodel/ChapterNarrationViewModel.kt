@@ -68,6 +68,7 @@ class ChapterNarrationViewModel : ViewModel() {
     val initialSelectedItemProperty = SimpleObjectProperty<ChunkData>()
 
     var onWaveformClicked: (ChunkData) -> Unit = {}
+    var onPlaybackStarted: (ChunkData) -> Unit = {}
     private val playingChunkProperty = SimpleObjectProperty<ChunkData>()
 
     private var loading: Boolean by property(false)
@@ -126,7 +127,7 @@ class ChapterNarrationViewModel : ViewModel() {
         recordedChunks.setPredicate { it.hasAudio() }
     }
 
-    fun onPlay(chunk: ChunkData) {
+    private fun onPlay(chunk: ChunkData) {
         if (playingChunkProperty.value == chunk) {
             audioController.toggle()
         } else {
@@ -138,6 +139,8 @@ class ChapterNarrationViewModel : ViewModel() {
             }
 
             chunk.file?.let {
+                onPlaybackStarted(chunk)
+
                 player.load(it)
                 audioController.load(player)
                 audioController.play()
@@ -152,15 +155,15 @@ class ChapterNarrationViewModel : ViewModel() {
         }
     }
 
-    fun onChunkOpenIn(chunk: ChunkData) {
+    private fun onChunkOpenIn(chunk: ChunkData) {
         println("Opening verse ${chunk.title} in external app...")
     }
 
-    fun onChunkRecord(chunk: ChunkData) {
+    private fun onChunkRecord(chunk: ChunkData) {
         println("Recording verse ${chunk.title}")
     }
 
-    fun onRecordChunkAgain(chunk: ChunkData) {
+    private fun onRecordChunkAgain(chunk: ChunkData) {
         recordedChunks.setPredicate {
             it.sort <= chunk.sort
         }
@@ -181,6 +184,14 @@ class ChapterNarrationViewModel : ViewModel() {
             .observeOnFx()
             .flatMap {
                 val data = ChunkData(it)
+                data.onPlay = ::onPlay
+                data.onOpenApp = ::onChunkOpenIn
+                data.onRecordAgain = ::onRecordChunkAgain
+                data.onWaveformClicked = { chunk ->
+                    onWaveformClicked(chunk)
+                }
+                data.onRecord = ::onChunkRecord
+
                 loadChunkMedia(it.audio.selected.value?.value?.file, data)
             }
             .observeOnFx()

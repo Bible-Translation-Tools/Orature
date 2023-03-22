@@ -7,7 +7,7 @@ import tornadofx.property
 import java.io.File
 import java.util.*
 
-class ChunkData(
+data class ChunkData(
     val sort: Int,
     val title: String,
     val text: String
@@ -31,6 +31,12 @@ class ChunkData(
 
     var totalFrames: Int by property(0)
     val totalFramesProperty = getProperty(ChunkData::totalFrames)
+
+    var onPlay: (ChunkData) -> Unit = {}
+    var onOpenApp: (ChunkData) -> Unit = {}
+    var onRecordAgain: (ChunkData) -> Unit = {}
+    var onWaveformClicked: (ChunkData) -> Unit = {}
+    var onRecord: (ChunkData) -> Unit = {}
 
     constructor(chunk: Chunk) : this(
         sort = chunk.sort,

@@ -28,8 +28,7 @@ class NarrationTextCell(
     private val beginRecordingText: String,
     private val pauseRecordingText: String,
     private val resumeRecordingText: String,
-    private val nextChunkText: String,
-    private val onRecord: (ChunkData) -> Unit,
+    private val nextChunkText: String
 ) : ListCell<ChunkData>() {
     private val view = NarrationTextItem()
 
@@ -58,7 +57,7 @@ class NarrationTextCell(
             nextChunkTextProperty.set(nextChunkText)
 
             onRecordActionProperty.set(EventHandler {
-                onRecord(item)
+                item.onRecord(item)
             })
 
             setOnNextVerse {
