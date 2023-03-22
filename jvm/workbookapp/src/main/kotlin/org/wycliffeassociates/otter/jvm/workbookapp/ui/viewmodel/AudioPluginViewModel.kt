@@ -25,7 +25,6 @@ import io.reactivex.Single
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
-import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.content.Recordable
@@ -143,16 +142,6 @@ class AudioPluginViewModel : ViewModel() {
         )
     }
 
-    private fun createChunkFileNamer(chunk: Recordable): FileNamer {
-        return WorkbookFileNamerBuilder.createFileNamer(
-            workbook = workbookDataStore.workbook,
-            chapter = workbookDataStore.chapter,
-            chunk = chunk as Chunk,
-            recordable = chunk,
-            rcSlug = workbookDataStore.activeResourceMetadata.identifier
-        )
-    }
-
     fun edit(audio: AssociatedAudio, take: Take): Single<TakeActions.Result> {
         val params = constructPluginParameters()
         return takeActions.edit(audio, take, params)
@@ -161,15 +150,6 @@ class AudioPluginViewModel : ViewModel() {
     fun mark(audio: AssociatedAudio, take: Take): Single<TakeActions.Result> {
         val params = constructPluginParameters(messages["markAction"])
         return takeActions.mark(audio, take, params)
-    }
-
-    fun saveChunk(chunk: Recordable, chapterAudio: AssociatedAudio): Single<TakeActions.Result> {
-        return takeActions.saveChunk(
-            chunk = chunk,
-            audio = chapterAudio,
-            projectAudioDir = workbookDataStore.activeProjectFilesAccessor.audioDir,
-            namer = createChunkFileNamer(chunk)
-        )
     }
 
     fun addPlugin(record: Boolean, edit: Boolean) {
