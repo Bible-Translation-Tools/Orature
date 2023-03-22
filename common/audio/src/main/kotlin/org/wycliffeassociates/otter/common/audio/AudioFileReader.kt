@@ -18,7 +18,9 @@
  */
 package org.wycliffeassociates.otter.common.audio
 
-interface AudioFileReader {
+import java.io.Closeable
+
+interface AudioFileReader: Closeable, AutoCloseable {
     val sampleRate: Int
     val channels: Int
     val sampleSize: Int

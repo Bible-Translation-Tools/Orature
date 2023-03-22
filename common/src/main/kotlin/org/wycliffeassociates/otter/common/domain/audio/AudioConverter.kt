@@ -50,14 +50,15 @@ class AudioConverter @Inject constructor() {
             val wavReader = WavFile(wavFile).reader()
             val pcmWriter = PcmFile(pcmFile).writer(append = false)
 
-            pcmWriter.use { writer ->
-                wavReader.open()
-                val buffer = ByteArray(10240)
-                while (wavReader.hasRemaining()) {
-                    val written = wavReader.getPcmBuffer(buffer)
-                    writer.write(buffer, 0, written)
+            wavReader.use { reader ->
+                pcmWriter.use { writer ->
+                    reader.open()
+                    val buffer = ByteArray(10240)
+                    while (reader.hasRemaining()) {
+                        val written = reader.getPcmBuffer(buffer)
+                        writer.write(buffer, 0, written)
+                    }
                 }
-                wavReader.release()
             }
         }
     }
@@ -72,14 +73,15 @@ class AudioConverter @Inject constructor() {
                 DEFAULT_BITS_PER_SAMPLE
             ).writer(append = false)
 
-            wavWriter.use { writer ->
-                pcmReader.open()
-                val buffer = ByteArray(10240)
-                while (pcmReader.hasRemaining()) {
-                    val written = pcmReader.getPcmBuffer(buffer)
-                    writer.write(buffer, 0, written)
+            pcmReader.use { reader ->
+                wavWriter.use { writer ->
+                    reader.open()
+                    val buffer = ByteArray(10240)
+                    while (reader.hasRemaining()) {
+                        val written = reader.getPcmBuffer(buffer)
+                        writer.write(buffer, 0, written)
+                    }
                 }
-                pcmReader.release()
             }
         }
     }

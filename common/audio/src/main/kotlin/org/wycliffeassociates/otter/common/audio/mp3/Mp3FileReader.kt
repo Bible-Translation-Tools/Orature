@@ -137,4 +137,8 @@ class MP3FileReader(
         pos = 0
         System.gc()
     }
+
+    override fun close() {
+        release()
+    }
 }
