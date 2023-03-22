@@ -100,6 +100,10 @@ internal class PcmFileReader(
         }
     }
 
+    override fun close() {
+        release()
+    }
+
     private fun computeBounds(): Pair<Int, Int> {
         val fileLength = pcm.file.length().toInt()
         val begin = if (start != null) Integer.min(Integer.max(0, start), fileLength) else 0

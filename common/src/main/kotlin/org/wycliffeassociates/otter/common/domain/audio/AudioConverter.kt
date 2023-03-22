@@ -19,14 +19,12 @@
 package org.wycliffeassociates.otter.common.domain.audio
 
 import io.reactivex.Completable
-import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
 import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.audio.pcm.PcmFile
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import java.io.File
-import java.io.OutputStream
 import javax.inject.Inject
 import de.sciss.jump3r.Main as jump3r
 
@@ -52,15 +50,15 @@ class AudioConverter @Inject constructor() {
             val wavReader = WavFile(wavFile).reader()
             val pcmWriter = PcmFile(pcmFile).writer(append = false)
 
-            try {
-                wavReader.open()
-                val buffer = ByteArray(10240)
-                while (wavReader.hasRemaining()) {
-                    val written = wavReader.getPcmBuffer(buffer)
-                    pcmWriter.write(buffer, 0, written)
+            wavReader.use { reader ->
+                pcmWriter.use { writer ->
+                    reader.open()
+                    val buffer = ByteArray(10240)
+                    while (reader.hasRemaining()) {
+                        val written = reader.getPcmBuffer(buffer)
+                        writer.write(buffer, 0, written)
+                    }
                 }
-            } finally {
-                cleanup(wavReader, pcmWriter)
             }
         }
     }
@@ -75,22 +73,16 @@ class AudioConverter @Inject constructor() {
                 DEFAULT_BITS_PER_SAMPLE
             ).writer(append = false)
 
-            try {
-                pcmReader.open()
-                val buffer = ByteArray(10240)
-                while (pcmReader.hasRemaining()) {
-                    val written = pcmReader.getPcmBuffer(buffer)
-                    wavWriter.write(buffer, 0, written)
+            pcmReader.use { reader ->
+                wavWriter.use { writer ->
+                    reader.open()
+                    val buffer = ByteArray(10240)
+                    while (reader.hasRemaining()) {
+                        val written = reader.getPcmBuffer(buffer)
+                        writer.write(buffer, 0, written)
+                    }
                 }
-            } finally {
-                cleanup(pcmReader, wavWriter)
             }
         }
-    }
-
-    private fun cleanup(reader: AudioFileReader, writer: OutputStream) {
-        reader.release()
-        writer.flush()
-        writer.close()
     }
 }
