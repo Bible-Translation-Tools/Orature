@@ -30,14 +30,17 @@ class SplitAudioOnCues @Inject constructor(private val directoryProvider: IDirec
     }
 
     private fun writeAudio(source: AudioFile, target: AudioFile, startEnd: Pair<Int, Int>) {
-        val reader = source.reader(startEnd.first, startEnd.second)
-        reader.open()
+        val sourceReader = source.reader(startEnd.first, startEnd.second)
+        val targetWriter = target.writer()
 
-        target.writer().use { writer ->
-            val buffer = ByteArray(10240)
-            while (reader.hasRemaining()) {
-                val written = reader.getPcmBuffer(buffer)
-                writer.write(buffer, 0, written)
+        sourceReader.use { reader ->
+            reader.open()
+            targetWriter.use { writer ->
+                val buffer = ByteArray(10240)
+                while (reader.hasRemaining()) {
+                    val written = reader.getPcmBuffer(buffer)
+                    writer.write(buffer, 0, written)
+                }
             }
         }
     }
