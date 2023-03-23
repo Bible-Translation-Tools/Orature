@@ -16,7 +16,8 @@ import org.wycliffeassociates.resourcecontainer.entity.Language as RCLanguage
 
 class ResourceContainerBuilder(baseRC: File? = null) {
 
-    private val tempDir = createTempDirectory("orature-test").toFile()
+    private val tempDir = createTempDirectory("orature-test")
+        .toFile()
         .apply { deleteOnExit() }
 
     private val selectedTakes: MutableList<String> = mutableListOf()
@@ -66,8 +67,9 @@ class ResourceContainerBuilder(baseRC: File? = null) {
         return this
     }
 
-    fun setProjectManifest(projects: List<Project>) {
+    fun setProjectManifest(projects: List<Project>): ResourceContainerBuilder {
         manifest.projects = projects
+        return this
     }
 
     /**
@@ -121,17 +123,19 @@ class ResourceContainerBuilder(baseRC: File? = null) {
         return this
     }
 
-    fun build(): ResourceContainer = ResourceContainer.load(rcFile).also { rc ->
-        if (selectedTakes.isNotEmpty()) {
-            rc.accessor.write(RcConstants.SELECTED_TAKES_FILE) { outputStream ->
-                outputStream.write(
-                    selectedTakes.joinToString("\n").byteInputStream().readAllBytes()
-                )
+    fun build(): ResourceContainer {
+        return ResourceContainer.load(rcFile).also { rc ->
+            if (selectedTakes.isNotEmpty()) {
+                rc.accessor.write(RcConstants.SELECTED_TAKES_FILE) { outputStream ->
+                    outputStream.write(
+                        selectedTakes.joinToString("\n").byteInputStream().readAllBytes()
+                    )
+                }
             }
-        }
 
-        rc.manifest = this.manifest
-        rc.writeManifest()
+            rc.manifest = this.manifest
+            rc.writeManifest()
+        }
     }
 
     fun buildFile(): File {
