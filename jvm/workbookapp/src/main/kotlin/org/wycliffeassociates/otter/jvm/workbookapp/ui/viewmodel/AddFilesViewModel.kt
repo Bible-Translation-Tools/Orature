@@ -129,7 +129,7 @@ class AddFilesViewModel : ViewModel() {
             }
 
             override fun onRequestUserInput(parameter: ImportCallbackParameter): Single<ImportOptions> {
-                return Single.just(ImportOptions(null))
+                return Single.just(ImportOptions(parameter.options))
             }
 
             override fun onError(messageKey: String) {
