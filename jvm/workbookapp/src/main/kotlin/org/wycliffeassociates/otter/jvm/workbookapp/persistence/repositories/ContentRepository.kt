@@ -210,6 +210,11 @@ class ContentRepository @Inject constructor(
                 // Make sure we don't over write the collection relationship
                 entity.collectionFk = existing.collectionFk
                 contentDao.update(entity)
+
+                // removes the entry in the cache where the content is updated in the database to avoid out-of-sync
+                activeConnections.keys.find { it.id == entity.collectionFk }?.let { collection ->
+                    activeConnections.remove(collection)
+                }
             }
             .doOnError { e ->
                 logger.error("Error in update for content: $obj", e)
