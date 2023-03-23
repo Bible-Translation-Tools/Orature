@@ -16,23 +16,23 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
+package org.wycliffeassociates.otter.jvm.controls.combobox
 
+import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.scene.layout.VBox
+import javafx.scene.Node
+import javafx.scene.layout.HBox
 import tornadofx.*
 
-class ComboboxItem : VBox() {
-    val topTextProperty = SimpleStringProperty()
-    val bottomTextProperty = SimpleStringProperty()
+class ComboboxButton : HBox() {
+    val iconProperty = SimpleObjectProperty<Node>()
+    val textProperty = SimpleStringProperty()
+
     init {
-        addClass("wa-combobox-item")
-        label(topTextProperty).apply {
-            addClass("wa-combobox-item__top")
+        addClass("wa-combobox-button")
+        label {
+            graphicProperty().bind(iconProperty)
         }
-        label(bottomTextProperty).apply {
-            addClass("wa-combobox-item__bottom")
-            managedProperty().bind(bottomTextProperty.isNotNull)
-        }
+        label(textProperty)
     }
 }

@@ -32,14 +32,16 @@ class Chunk(
     val start: Int,
     val end: Int,
 
+    val bridged: Boolean = false,
+
     var draftNumber: Int,
 
     override val contentType: ContentType
 
 ) : BookElement, ResourceRecordable {
     override val title
-        get() = start.toString()
-
+        get() = if (start != end) "${start}-${end}" else "$start"
+    
     override fun hashCode(): Int {
         return Objects.hash(
             sort,

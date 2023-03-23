@@ -108,6 +108,7 @@ interface IDirectoryProvider {
     val userProfileImageDirectory: File
     val userProfileAudioDirectory: File
     val audioPluginDirectory: File
+    val versificationDirectory: File
     val logsDirectory: File
     val cacheDirectory: File
     val tempDirectory: File

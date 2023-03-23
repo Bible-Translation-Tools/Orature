@@ -69,7 +69,7 @@ class SourceProjectExporter @Inject constructor(
 
         projectFilesAccessor.initializeResourceContainerInFile(workbook, targetZip)
         setContributorInfo(contributors, projectSourceMetadata, targetZip)
-        
+
         return compileCompletedChapters(workbook, projectSourceMetadata, projectFilesAccessor)
             .onErrorComplete()
             .andThen(
@@ -225,7 +225,7 @@ class SourceProjectExporter @Inject constructor(
                 version = "",
                 url = "",
                 quality = listOf(),
-                chapterUrl = "${RcConstants.SOURCE_MEDIA_DIR}/${fileName}"
+                chapterUrl = "${RcConstants.SOURCE_MEDIA_DIR}/$fileName"
             )
         }
 
@@ -241,6 +241,6 @@ class SourceProjectExporter @Inject constructor(
         chapterLabel: String,
         extension: String
     ): String {
-        return "${language}_${resource}_${project}_c${chapterLabel}.$extension"
+        return "${language}_${resource}_${project}_c$chapterLabel.$extension"
     }
 }

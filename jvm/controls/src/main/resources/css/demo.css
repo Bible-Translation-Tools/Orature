@@ -16,24 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
+.demo__menu {
+    -fx-padding: 10px;
+    -fx-max-width: 300px;
+    -fx-border-color: -wa-border-light;
+    -fx-border-width: 0 1px 0 0;
+}
 
-import javafx.scene.control.ListCell
-import org.kordamp.ikonli.javafx.FontIcon
-
-class DeviceComboboxCell(private val icon: FontIcon) : ListCell<String>() {
-    val view = ComboboxButton()
-    override fun updateItem(item: String?, empty: Boolean) {
-        super.updateItem(item, empty)
-
-        if (item == null || empty) {
-            graphic = null
-            return
-        }
-
-        graphic = view.apply {
-            textProperty.set(item)
-            iconProperty.set(icon)
-        }
-    }
+.demo__content {
+    -fx-padding: 10px;
 }

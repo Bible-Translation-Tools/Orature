@@ -25,11 +25,12 @@ data class Content(
     var labelKey: String,
     var start: Int,
     var end: Int,
-    var selectedTake: Take?,
+    var selectedTake: Take? = null,
     var text: String?,
     var format: String?,
     var type: ContentType,
     var draftNumber: Int,
     @JsonIgnore
-    var id: Int = 0
+    var id: Int = 0,
+    var bridged: Boolean = false
 ) : CollectionOrContent

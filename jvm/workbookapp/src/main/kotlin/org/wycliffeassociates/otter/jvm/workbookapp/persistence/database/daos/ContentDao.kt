@@ -228,23 +228,27 @@ class ContentDao(
                 CONTENT_ENTITY.COLLECTION_FK,
                 CONTENT_ENTITY.SORT,
                 CONTENT_ENTITY.START,
+                CONTENT_ENTITY.V_END,
                 CONTENT_ENTITY.LABEL,
                 CONTENT_ENTITY.SELECTED_TAKE_FK,
                 CONTENT_ENTITY.TEXT,
                 CONTENT_ENTITY.FORMAT,
                 CONTENT_ENTITY.TYPE_FK,
-                CONTENT_ENTITY.DRAFT_NUMBER
+                CONTENT_ENTITY.DRAFT_NUMBER,
+                CONTENT_ENTITY.BRIDGED
             )
             .values(
                 entity.collectionFk,
                 entity.sort,
                 entity.start,
+                entity.end,
                 entity.labelKey,
                 entity.selectedTakeFk,
                 entity.text,
                 entity.format,
                 entity.type_fk,
-                entity.draftNumber
+                entity.draftNumber,
+                if (entity.bridged) 1 else 0
             )
             .execute()
 
@@ -265,12 +269,14 @@ class ContentDao(
                 CONTENT_ENTITY.COLLECTION_FK,
                 CONTENT_ENTITY.SORT,
                 CONTENT_ENTITY.START,
+                CONTENT_ENTITY.V_END,
                 CONTENT_ENTITY.LABEL,
                 CONTENT_ENTITY.SELECTED_TAKE_FK,
                 CONTENT_ENTITY.TEXT,
                 CONTENT_ENTITY.FORMAT,
                 CONTENT_ENTITY.TYPE_FK,
-                CONTENT_ENTITY.DRAFT_NUMBER
+                CONTENT_ENTITY.DRAFT_NUMBER,
+                CONTENT_ENTITY.BRIDGED
             )
         val insertWithValues = entities.fold(bareInsert) { q, e ->
             if (e.id != 0) throw InsertionException("Entity ID was not 0")
@@ -278,12 +284,14 @@ class ContentDao(
                 e.collectionFk,
                 e.sort,
                 e.start,
+                e.end,
                 e.labelKey,
                 e.selectedTakeFk,
                 e.text,
                 e.format,
                 e.type_fk,
-                e.draftNumber
+                e.draftNumber,
+                if (e.bridged) 1 else 0
             )
         }
         insertWithValues.execute()
@@ -314,10 +322,13 @@ class ContentDao(
             .set(CONTENT_ENTITY.SORT, entity.sort)
             .set(CONTENT_ENTITY.LABEL, entity.labelKey)
             .set(CONTENT_ENTITY.START, entity.start)
+            .set(CONTENT_ENTITY.V_END, entity.end)
             .set(CONTENT_ENTITY.COLLECTION_FK, entity.collectionFk)
             .set(CONTENT_ENTITY.SELECTED_TAKE_FK, entity.selectedTakeFk)
             .set(CONTENT_ENTITY.TEXT, entity.text)
             .set(CONTENT_ENTITY.FORMAT, entity.format)
+            .set(CONTENT_ENTITY.DRAFT_NUMBER, entity.draftNumber)
+            .set(CONTENT_ENTITY.BRIDGED, if (entity.bridged) 1 else 0)
             .where(CONTENT_ENTITY.ID.eq(entity.id))
             .execute()
     }

@@ -51,6 +51,7 @@ class InfoFragment : Fragment() {
                 val cnum = parameters.named["chapter_number"]
                 val unit = parameters.named["unit"]
                 val unum = parameters.named["unit_number"]
+                val unitTitle = parameters.named["unit_title"]
                 val resource = parameters.named["resource"]
 
                 language?.let {
@@ -63,7 +64,7 @@ class InfoFragment : Fragment() {
                     root.add(InfoItem(it, cnum, chapterIcon))
                 }
                 unit?.let {
-                    root.add(InfoItem(it, unum, unitIcon))
+                    root.add(InfoItem(it, unitTitle, unitIcon))
                 }
                 resource?.let {
                     root.add(InfoItem(it, null, resourceIcon))

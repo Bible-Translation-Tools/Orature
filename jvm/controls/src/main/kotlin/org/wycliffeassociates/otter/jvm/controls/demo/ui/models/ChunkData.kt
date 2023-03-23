@@ -16,23 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
+package org.wycliffeassociates.otter.jvm.controls.demo.ui.models
 
-import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
-import javafx.scene.Node
-import javafx.scene.layout.HBox
-import tornadofx.*
+import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.common.device.IAudioPlayer
 
-class ComboboxButton : HBox() {
-    val iconProperty = SimpleObjectProperty<Node>()
-    val textProperty = SimpleStringProperty()
+internal class ChunkData(val sort: Int, val title: String, val text: String) {
+    var player: IAudioPlayer? = null
 
-    init {
-        addClass("wa-combobox-button")
-        label {
-            graphicProperty().bind(iconProperty)
-        }
-        label(textProperty)
-    }
+    constructor(chunk: Chunk) : this(
+        sort = chunk.sort,
+        title = chunk.title,
+        text = chunk.textItem.text
+    )
 }
