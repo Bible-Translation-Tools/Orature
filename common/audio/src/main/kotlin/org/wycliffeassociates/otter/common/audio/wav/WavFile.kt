@@ -21,17 +21,11 @@ package org.wycliffeassociates.otter.common.audio.wav
 import java.io.File
 import java.io.OutputStream
 import java.io.FileOutputStream
-import java.io.RandomAccessFile
 import java.io.IOException
 import java.lang.Exception
 import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.audio.AudioFormatStrategy
-import org.wycliffeassociates.otter.common.audio.AudioCue
-import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
-import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
-import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
+import org.wycliffeassociates.otter.common.audio.*
 
 
 enum class WavType {
@@ -193,5 +187,13 @@ class WavFile private constructor() : AudioFormatStrategy {
             append = true,
             buffered = true
         ).use {}
+    }
+
+    override fun reader(start: Int?, end: Int?): AudioFileReader {
+        return WavFileReader(this, start, end)
+    }
+
+    override fun writer(append: Boolean, buffered: Boolean): OutputStream {
+        return WavOutputStream(this, append, buffered)
     }
 }

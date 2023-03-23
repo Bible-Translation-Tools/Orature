@@ -16,77 +16,33 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.common.audio.wav
+package org.wycliffeassociates.otter.common.audio.pcm
 
-import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.audio.AudioFileReader
+import org.wycliffeassociates.otter.common.audio.*
 import java.io.RandomAccessFile
 import java.lang.Exception
 import java.lang.IllegalStateException
-import java.lang.Integer.max
-import java.lang.Integer.min
 import java.nio.ByteBuffer
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 
-internal class WavFileReader(val wav: WavFile, val start: Int? = null, val end: Int? = null) : AudioFileReader {
-
-    private val logger = LoggerFactory.getLogger(WavFileReader::class.java)
-
-    override val totalFrames = wav.totalFrames
-    override val sampleRate: Int = wav.sampleRate
-    override val channels: Int = wav.channels
-    override val sampleSize: Int = wav.bitsPerSample
+internal class PcmFileReader(
+    val pcm: PcmFile,
+    val start: Int? = null,
+    val end: Int? = null
+) : AudioFileReader {
+    override val sampleRate: Int = pcm.sampleRate
+    override val channels: Int = pcm.channels
+    override val sampleSize: Int = pcm.bitsPerSample
     override val framePosition: Int
-        get() = (mappedFile?.position() ?: 0) / wav.frameSizeInBytes
+        get() = (mappedFile?.position() ?: 0) / pcm.frameSizeInBytes
+    override val totalFrames: Int = pcm.totalFrames
 
     private var mappedFile: MappedByteBuffer? = null
     private var channel: FileChannel? = null
 
-    override fun open() {
-        mappedFile?.let { release() }
-        val (begin, end) = computeBounds(wav)
-        mappedFile =
-            RandomAccessFile(wav.file, "r").use {
-                channel = it.channel
-                channel!!.map(
-                    FileChannel.MapMode.READ_ONLY,
-                    begin.toLong(),
-                    (end - begin).toLong()
-                )
-            }
-    }
-
-    fun computeBounds(wav: WavFile): Pair<Int, Int> {
-        val headerSize = wav.headerSize
-
-        if (wav.file.length() <= headerSize) {
-            logger.info("Wav file ${wav.file.name} is just a header or empty, size is ${wav.file.length()}")
-            return Pair(0, 0)
-        }
-
-        val totalFrames = wav.totalFrames
-        var begin = if (start != null) min(max(0, start), totalFrames) else 0
-        var end = if (end != null) min(max(begin, end), totalFrames) else totalFrames
-
-
-        // Convert from frames to array index
-        begin *= wav.frameSizeInBytes
-        begin += headerSize
-        end *= wav.frameSizeInBytes
-        end += headerSize
-
-        // Should be clamped between header size, computed beginning, and the file length
-        val clampedBegin = max(headerSize, min(begin, max(wav.file.length().toInt(), headerSize)))
-        val clampedEnd = max(clampedBegin, min(end, max(wav.file.length().toInt(), headerSize)))
-
-        if (clampedBegin != begin || clampedEnd != end) {
-            logger.error("Error in file ${wav.file.name}")
-            logger.error("Wanted to open for bounds: $begin to $end; file length is ${wav.file.length()}")
-            logger.error("Bounds clamped to: $clampedBegin to $clampedEnd")
-        }
-
-        return Pair(clampedBegin, clampedEnd)
+    override fun hasRemaining(): Boolean {
+        return mappedFile?.hasRemaining() ?: throw IllegalStateException("hasRemaining called before opening file")
     }
 
     override fun getPcmBuffer(bytes: ByteArray): Int {
@@ -102,15 +58,25 @@ internal class WavFileReader(val wav: WavFile, val start: Int? = null, val end: 
     @Throws(ArrayIndexOutOfBoundsException::class)
     override fun seek(sample: Int) {
         mappedFile?.let { _mappedFile ->
-            val index = min(wav.sampleIndex(sample), _mappedFile.limit())
+            val index = Integer.min(pcm.sampleIndex(sample), _mappedFile.limit())
             _mappedFile.position(index)
         } ?: run {
             throw IllegalStateException("Tried to seek before opening file")
         }
     }
 
-    override fun hasRemaining(): Boolean {
-        return mappedFile?.hasRemaining() ?: throw IllegalStateException("hasRemaining called before opening file")
+    override fun open() {
+        mappedFile?.let { release() }
+        val (begin, end) = computeBounds()
+        mappedFile =
+            RandomAccessFile(pcm.file, "r").use {
+                channel = it.channel
+                channel!!.map(
+                    FileChannel.MapMode.READ_ONLY,
+                    begin.toLong(),
+                    (end - begin).toLong()
+                )
+            }
     }
 
     override fun release() {
@@ -125,7 +91,7 @@ internal class WavFileReader(val wav: WavFile, val start: Int? = null, val end: 
                 val invokeCleaner = unsafeClass.getMethod("invokeCleaner", ByteBuffer::class.java)
                 invokeCleaner.invoke(unsafe, mappedFile)
             } catch (e: Exception) {
-                logger.error("Error releasing memory mapped file: ${wav.file.name}", e)
+
             }
             channel?.close()
             mappedFile = null
@@ -137,4 +103,13 @@ internal class WavFileReader(val wav: WavFile, val start: Int? = null, val end: 
     override fun close() {
         release()
     }
+
+    private fun computeBounds(): Pair<Int, Int> {
+        val fileLength = pcm.file.length().toInt()
+        val begin = if (start != null) Integer.min(Integer.max(0, start), fileLength) else 0
+        val end = if (end != null) Integer.min(Integer.max(begin, end), fileLength) else fileLength
+
+        return Pair(begin, end)
+    }
+
 }
