@@ -203,10 +203,6 @@ class TestExistingSourceImporter {
         val collectionDao = db.getCollectionDao()
         val contentDao = db.getContentDao()
 
-        var existingSource = resourceMetadataRepository
-            .getAllSources()
-            .blockingGet()
-            .firstOrNull { it.language.slug == "aa" }
         var startingBook = collectionDao
             .fetchAll()
             .firstOrNull { it.slug == "gen_1" }
@@ -261,6 +257,14 @@ class TestExistingSourceImporter {
         assertEquals("Overwritten.", startingContent?.text)
         assertNotNull(secondContent)
         assertEquals("Text added.", secondContent?.text)
+
+
+        // Verify that the RC version was updated
+        val startingRcMetadata = resourceMetadataRepository
+            .getAllSources()
+            .blockingGet()
+            .firstOrNull { it.language.slug == "aa" }
+        assertEquals("2", startingRcMetadata!!.version)
 
         val differentVersification = ResourceContainerBuilder()
             .setVersion(2)
