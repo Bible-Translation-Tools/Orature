@@ -48,6 +48,7 @@ class NarrationRecordCell(
             verseLabelProperty.set(item.title)
 
             isPlayingProperty.bind(item.isPlayingProperty)
+            isRecordingProperty.bind(item.isRecordingProperty)
             playbackPositionProperty.bind(item.playbackPositionProperty)
             totalFramesProperty.bind(item.totalFramesProperty)
 

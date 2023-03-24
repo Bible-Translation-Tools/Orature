@@ -36,8 +36,6 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import tornadofx.*
 import java.text.MessageFormat
 
@@ -46,7 +44,6 @@ class NarrationRecordItem : VBox() {
     val waveformProperty = SimpleObjectProperty<Image>()
     val invertedWaveformProperty = SimpleObjectProperty<Image>()
     val waveformLoadingProperty = SimpleBooleanProperty()
-    val audioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
 
     val openInTextProperty = SimpleStringProperty()
     val recordAgainTextProperty = SimpleStringProperty()
@@ -58,6 +55,7 @@ class NarrationRecordItem : VBox() {
     val onRecordAgainActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onWaveformClickActionProperty = SimpleObjectProperty<EventHandler<MouseEvent>>()
 
+    val isRecordingProperty = SimpleBooleanProperty()
     val isPlayingProperty = SimpleBooleanProperty()
     val playbackPositionProperty = SimpleIntegerProperty()
     val totalFramesProperty = SimpleIntegerProperty()
@@ -135,13 +133,13 @@ class NarrationRecordItem : VBox() {
                 imageview(waveformProperty).apply {
                     visibleProperty().bind(playbackPositionProperty.booleanBinding {
                         it?.let { it.toDouble() <= 0 } ?: true
-                    })
+                    }.and(isRecordingProperty.not()))
                     managedProperty().bind(visibleProperty())
                 }
                 imageview(invertedWaveformProperty).apply {
                     visibleProperty().bind(playbackPositionProperty.booleanBinding {
                         it?.let { it.toDouble() > 0 } ?: false
-                    })
+                    }.and(isRecordingProperty.not()))
                     managedProperty().bind(visibleProperty())
                 }
             }

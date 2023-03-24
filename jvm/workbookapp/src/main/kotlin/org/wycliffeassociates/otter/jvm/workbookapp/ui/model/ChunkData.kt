@@ -1,7 +1,9 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.model
 
+import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.jvm.controls.recorder.Drawable
 import tornadofx.getProperty
 import tornadofx.property
 import java.io.File
@@ -20,11 +22,17 @@ data class ChunkData(
     var invertedImage: Image by property(null)
     val invertedImageProperty = getProperty(ChunkData::invertedImage)
 
+    val waveformDrawableProperty = SimpleObjectProperty<Drawable>()
+    val volumebarDrawableProperty = SimpleObjectProperty<Drawable>()
+
     var imageLoading: Boolean by property(false)
     val imageLoadingProperty = getProperty(ChunkData::imageLoading)
 
     var isPlaying: Boolean by property(false)
     val isPlayingProperty = getProperty(ChunkData::isPlaying)
+
+    var isRecording: Boolean by property(false)
+    val isRecordingProperty = getProperty(ChunkData::isRecording)
 
     var playbackPosition: Int by property(0)
     val playbackPositionProperty = getProperty(ChunkData::playbackPosition)
@@ -52,10 +60,7 @@ data class ChunkData(
         return Objects.hash(
             sort,
             title,
-            text,
-            file,
-            image,
-            invertedImage
+            text
         )
     }
 
@@ -68,9 +73,6 @@ data class ChunkData(
         if (sort != other.sort) return false
         if (title != other.title) return false
         if (text != other.text) return false
-        if (file != other.file) return false
-        if (image != other.image) return false
-        if (invertedImage != other.invertedImage) return false
 
         return true
     }

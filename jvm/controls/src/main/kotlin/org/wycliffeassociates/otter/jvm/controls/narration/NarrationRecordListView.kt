@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.narration
 
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.value.ObservableValue
 import javafx.collections.ObservableList
 import javafx.event.EventTarget
@@ -27,11 +28,18 @@ import tornadofx.SortedFilteredList
 import tornadofx.addClass
 import tornadofx.attachTo
 import tornadofx.onChange
+import tornadofx.toggleClass
 
 class NarrationRecordListView<T>(items: ObservableList<T>? = null) : ListView<T>(items) {
+    val isRecordingProperty = SimpleBooleanProperty()
+
     init {
-        addClass("wa-list-view")
+        addClass("wa-list-view", "narration-record__list-view")
         orientation = Orientation.HORIZONTAL
+
+        isRecordingProperty.onChange {
+            toggleClass("recording", it)
+        }
     }
 }
 

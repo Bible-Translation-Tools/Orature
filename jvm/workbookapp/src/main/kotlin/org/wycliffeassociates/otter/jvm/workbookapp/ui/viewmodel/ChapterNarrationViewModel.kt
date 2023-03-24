@@ -23,10 +23,18 @@ import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.domain.narration.ImportChunks
 import org.wycliffeassociates.otter.common.domain.narration.SplitAudioOnCues
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
+import org.wycliffeassociates.otter.common.recorder.WavFileWriter
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
+import org.wycliffeassociates.otter.jvm.controls.recorder.Drawable
+import org.wycliffeassociates.otter.jvm.controls.recorder.VolumeBar
+import org.wycliffeassociates.otter.jvm.controls.recorder.WaveformLayer
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
+import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -54,6 +62,11 @@ class ChapterNarrationViewModel : ViewModel() {
     @Inject
     lateinit var importChunks: ImportChunks
 
+    @Inject
+    lateinit var audioConnectionFactory: AudioConnectionFactory
+    @Inject
+    lateinit var directoryProvider: IDirectoryProvider
+
     val workbookDataStore: WorkbookDataStore by inject()
     val audioPluginViewModel: AudioPluginViewModel by inject()
 
@@ -69,8 +82,15 @@ class ChapterNarrationViewModel : ViewModel() {
 
     var onWaveformClicked: (ChunkData) -> Unit = {}
     var onPlaybackStarted: (ChunkData) -> Unit = {}
-    private val playingChunkProperty = SimpleObjectProperty<ChunkData>()
 
+    var isRecordingProperty = SimpleBooleanProperty(false)
+    var isRecording by isRecordingProperty
+
+    val waveformDrawableProperty = SimpleObjectProperty<Drawable>()
+    val volumebarDrawableProperty = SimpleObjectProperty<Drawable>()
+
+    private val playingChunkProperty = SimpleObjectProperty<ChunkData>()
+    val recordingChunkProperty = SimpleObjectProperty<ChunkData>()
     private var loading: Boolean by property(false)
     private val loadingProperty = getProperty(ChapterNarrationViewModel::loading)
 
@@ -80,8 +100,13 @@ class ChapterNarrationViewModel : ViewModel() {
     private val disposables = CompositeDisposable()
     private val listeners = mutableListOf<ListenerDisposer>()
 
+    private val recorder: IAudioRecorder
+    private var writer: WavFileWriter? = null
+    private var renderer: ActiveRecordingRenderer? = null
+
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+        recorder = audioConnectionFactory.getRecorder()
     }
 
     fun dock() {
@@ -124,6 +149,11 @@ class ChapterNarrationViewModel : ViewModel() {
         listeners.forEach(ListenerDisposer::dispose)
         listeners.clear()
 
+        playingChunkProperty.set(null)
+        recordingChunkProperty.value?.let {
+            completeRecording(it)
+        }
+        recordingChunkProperty.set(null)
         recordedChunks.setPredicate { it.hasAudio() }
     }
 
@@ -164,8 +194,27 @@ class ChapterNarrationViewModel : ViewModel() {
     }
 
     private fun onRecordChunkAgain(chunk: ChunkData) {
-        recordedChunks.setPredicate {
-            it.sort <= chunk.sort
+        // Make it `it.sort < chunk.sort` to hide the chunk
+        // that is currently being recorded,
+        // but you won't be able to stop recording
+        recordedChunks.setPredicate { it.sort <= chunk.sort }
+        playingChunkProperty.set(null)
+
+        if (recordingChunkProperty.value == chunk) {
+            completeRecording(chunk)
+            recordedChunks.setPredicate { it.hasAudio() }
+        } else {
+            recordingChunkProperty.value?.let {
+                completeRecording(it)
+            }
+
+            recordingChunkProperty.set(chunk)
+            isRecording = true
+
+            initializeRecordingAudio(chunk.file!!)
+
+            recorder.start()
+            writer?.start()
         }
     }
 
@@ -250,5 +299,43 @@ class ChapterNarrationViewModel : ViewModel() {
                 wavColor = Color.web(color),
                 background = Color.web(background)
             )
+    }
+
+    private fun pauseRecording() {
+        writer?.pause()
+        recorder.pause()
+        renderer?.clearData()
+        writer?.let {
+            renderer?.setRecordingStatusObservable(it.isWriting)
+        }
+        writer?.writer?.dispose()
+        isRecording = false
+    }
+
+    private fun completeRecording(chunk: ChunkData) {
+        pauseRecording()
+        waveformDrawableProperty.set(null)
+        volumebarDrawableProperty.set(null)
+        loadChunkMedia(chunk.file, chunk).subscribe {
+            it.imageLoading = false
+        }
+        recordingChunkProperty.set(null)
+    }
+
+    private fun initializeRecordingAudio(file: File) {
+        val pcmAudio = AudioFile(file)
+        writer = WavFileWriter(pcmAudio, recorder.getAudioStream()) { /* no op */ }
+
+        renderer = ActiveRecordingRenderer(
+            recorder.getAudioStream(),
+            writer!!.isWriting,
+            width = 300,
+            secondsOnScreen = 10
+        )
+        val waveformLayer = WaveformLayer(renderer!!)
+        val volumeBar = VolumeBar(recorder.getAudioStream())
+
+        waveformDrawableProperty.set(waveformLayer)
+        volumebarDrawableProperty.set(volumeBar)
     }
 }

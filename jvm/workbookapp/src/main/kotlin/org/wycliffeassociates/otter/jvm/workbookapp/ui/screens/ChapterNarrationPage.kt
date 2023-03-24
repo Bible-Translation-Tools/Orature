@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.chapterselector.ChapterSelector
 import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
+import org.wycliffeassociates.otter.jvm.controls.narration.activerecordingcard
 import org.wycliffeassociates.otter.jvm.controls.narration.floatingnarrationcard
 import org.wycliffeassociates.otter.jvm.controls.narration.narrationrecordlistview
 import org.wycliffeassociates.otter.jvm.controls.narration.narrationtextlistview
@@ -130,9 +131,23 @@ class ChapterNarrationPage : View() {
                         viewModel.onPlaybackStarted = {
                             scrollTo(it)
                         }
+
+                        isRecordingProperty.bind(viewModel.isRecordingProperty)
                     }
 
-                    stackpane {
+                    activerecordingcard {
+                        verseLabelProperty.bind(viewModel.recordingChunkProperty.stringBinding { it?.title })
+
+                        waveformDrawableProperty.bind(viewModel.waveformDrawableProperty)
+                        volumebarDrawableProperty.bind(viewModel.volumebarDrawableProperty)
+
+                        isRecordingProperty.bind(viewModel.isRecordingProperty)
+
+                        visibleProperty().bind(viewModel.isRecordingProperty)
+                        managedProperty().bind(visibleProperty())
+                    }
+
+                    /*stackpane {
                         addClass("narration__volume-bar")
 
                         vbox {
@@ -140,7 +155,7 @@ class ChapterNarrationPage : View() {
 
                             maxHeight = 50.0
                         }
-                    }
+                    }*/
                 }
 
                 vbox {

@@ -233,16 +233,6 @@
     -fx-fill: -wa-white;
 }
 
-.narration__volume-bar {
-    -fx-pref-width: 16px;
-    -fx-background-color: #001533;
-    -fx-alignment: center;
-}
-
-.narration__volume-bar__value {
-    -fx-background-color: -wa-success-color;
-}
-
 .narration-record__verse-controls .wa-menu-button {
     -fx-padding: 0;
 }
@@ -250,4 +240,25 @@
 .narration-record__verse-controls .wa-menu-button .arrow-button,
 .narration-record__verse-controls .wa-menu-button .arrow-button .arrow {
     -fx-padding: 0;
+}
+
+.narration-record__active-card {
+    -fx-background-color: -wa-background-primary-gradient;
+}
+
+.narration-record__volume-bar {
+    -fx-pref-width: 16px;
+    -fx-background-color: #001533;
+    -fx-alignment: bottom-center;
+}
+
+.narration-record__list-view.recording .scroll-bar:horizontal .increment-arrow,
+.narration-record__list-view.recording .scroll-bar:horizontal .decrement-arrow,
+.narration-record__list-view.recording .scroll-bar:horizontal .increment-button,
+.narration-record__list-view.recording .scroll-bar:horizontal .decrement-button {
+    -fx-padding: 0px;
+}
+
+.narration-record__list-view.recording .scroll-bar:horizontal {
+    -fx-padding: 0px;
 }

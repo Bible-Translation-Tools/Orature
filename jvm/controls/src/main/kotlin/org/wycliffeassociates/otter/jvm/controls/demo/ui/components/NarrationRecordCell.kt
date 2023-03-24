@@ -48,7 +48,6 @@ internal class NarrationRecordCell(
 
         graphic = view.apply {
             verseLabelProperty.set(item.title)
-            audioPlayerProperty.set(item.player)
 
             openInTextProperty.set(openInText)
             recordAgainTextProperty.set(recordAgainText)
