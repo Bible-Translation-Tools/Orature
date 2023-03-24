@@ -10,9 +10,12 @@ import integrationtest.di.DaggerTestPersistenceComponent
 import integrationtest.projects.DatabaseEnvironment
 import integrationtest.projects.RowCount
 import io.reactivex.Single
+import junit.framework.TestCase.*
 import org.junit.Assert
 import org.junit.Test
+import org.wycliffeassociates.otter.common.ResourceContainerBuilder
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
+import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
 import org.wycliffeassociates.otter.common.domain.project.importer.ExistingSourceImporter
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
@@ -25,6 +28,8 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.domain.resourcecontainer.project.ZipEntryTreeBuilder
+import org.wycliffeassociates.resourcecontainer.ResourceContainer
+import org.wycliffeassociates.resourcecontainer.entity.Project
 import java.io.File
 import java.io.FileNotFoundException
 import javax.inject.Inject
@@ -141,12 +146,12 @@ class TestExistingSourceImporter {
             }
 
         db.assertRowCounts(
-            RowCount(collections = 1,contents = mapOf(),links = 0)
+            RowCount(collections = 1, contents = mapOf(), links = 0)
         )
 
         val newSource = resourceMetadataRepository.getAllSources().blockingGet().single()
 
-        Assert.assertEquals("999",newSource.version)
+        Assert.assertEquals("999", newSource.version)
         Assert.assertTrue(newSource.path.exists())
         Assert.assertFalse(
             "Old source file should be deleted after replacing with different source version.",
@@ -163,5 +168,138 @@ class TestExistingSourceImporter {
             throw FileNotFoundException("Test resource not found")
         }
         return File(path.file)
+    }
+
+    @Test
+    fun `test text is updated in database when version is different`() {
+        val base = ResourceContainerBuilder()
+            .setVersion(1)
+            .setTargetLanguage(Language("aa", "Afar", "aa", "ltr", false, "Africa"))
+            .setProjectManifest(
+                listOf(
+                    Project("Genesis", "ulb", "gen", 1, "./gen.usfm")
+                )
+            )
+
+        val start = base.buildFile()
+            .apply { deleteOnExit() }
+        val startRc = ResourceContainer.load(start)
+        startRc.accessor.write("gen.usfm") {
+            it.write(
+                """
+                \c 1
+                \p
+                \v 1 In the beginning, God created the heavens and the earth.
+            """.trimIndent().toByteArray()
+            )
+        }
+
+        importer.import(start)
+            .blockingGet()
+            .let {
+                Assert.assertEquals(ImportResult.SUCCESS, it)
+            }
+
+        val collectionDao = db.getCollectionDao()
+        val contentDao = db.getContentDao()
+
+        var existingSource = resourceMetadataRepository
+            .getAllSources()
+            .blockingGet()
+            .firstOrNull { it.language.slug == "aa" }
+        var startingBook = collectionDao
+            .fetchAll()
+            .firstOrNull { it.slug == "gen_1" }
+        var startingContent = contentDao
+            .fetchAll()
+            .firstOrNull { it.collectionFk == startingBook?.id && it.type_fk == 1 }
+        var secondContent = contentDao
+            .fetchAll()
+            .firstOrNull { it.collectionFk == startingBook?.id && it.type_fk == 1 && it.sort == 2 }
+
+        // First verse should have text, second verse should be allocated from versification but should not have text
+        assertEquals("In the beginning, God created the heavens and the earth.", startingContent?.text)
+        assertNotNull(secondContent)
+        assertNull(secondContent?.text)
+
+        val end = ResourceContainerBuilder()
+            .setVersion(2)
+            .setTargetLanguage(Language("aa", "Afar", "aa", "ltr", false, "Africa"))
+            .setProjectManifest(
+                listOf(
+                    Project("Genesis", "ulb", "gen", 1, "./gen.usfm")
+                )
+            )
+            .buildFile()
+            .apply { deleteOnExit() }
+        val endRc = ResourceContainer.load(end)
+        endRc.accessor.write("gen.usfm") {
+            it.write(
+                """
+                \c 1
+                \p
+                \v 1 Overwritten.
+                \v 2 Text added.
+            """.trimIndent().toByteArray()
+            )
+        }
+
+        importer.import(end)
+            .blockingGet()
+            .let {
+                Assert.assertEquals(ImportResult.SUCCESS, it)
+            }
+
+        startingContent = contentDao
+            .fetchAll()
+            .firstOrNull { it.collectionFk == startingBook?.id && it.type_fk == 1 }
+        secondContent = contentDao
+            .fetchAll()
+            .firstOrNull { it.collectionFk == startingBook?.id && it.type_fk == 1 && it.sort == 2 }
+
+        // Both verses should be updated now
+        assertEquals("Overwritten.", startingContent?.text)
+        assertNotNull(secondContent)
+        assertEquals("Text added.", secondContent?.text)
+
+        val differentVersification = ResourceContainerBuilder()
+            .setVersion(2)
+            .setTargetLanguage(Language("aa", "Afar", "aa", "ltr", false, "Africa"))
+            .setProjectManifest(
+                listOf(
+                    Project("Genesis", "rsc", "gen", 1, "./gen.usfm")
+                )
+            )
+            .buildFile()
+            .apply { deleteOnExit() }
+        val differentVersificationRc = ResourceContainer.load(end)
+        differentVersificationRc.accessor.write("gen.usfm") {
+            it.write(
+                """
+                \c 1
+                \p
+                \v 1 Different Versification
+                \v 2 Different Versification
+            """.trimIndent().toByteArray()
+            )
+        }
+
+        importer.import(end)
+            .blockingGet()
+            .let {
+                Assert.assertEquals(ImportResult.SUCCESS, it)
+            }
+
+        startingContent = contentDao
+            .fetchAll()
+            .firstOrNull { it.collectionFk == startingBook?.id && it.type_fk == 1 }
+        secondContent = contentDao
+            .fetchAll()
+            .firstOrNull { it.collectionFk == startingBook?.id && it.type_fk == 1 && it.sort == 2 }
+
+        // Text should not be updated after importing an RC with different versification
+        assertEquals("Overwritten.", startingContent?.text)
+        assertNotNull(secondContent)
+        assertEquals("Text added.", secondContent?.text)
     }
 }

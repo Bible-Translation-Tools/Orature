@@ -34,6 +34,7 @@ import org.wycliffeassociates.otter.common.domain.project.importer.RCImporterFac
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.CollectionDao
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Provider
@@ -48,6 +49,10 @@ class DatabaseEnvironment @Inject constructor(
     init {
         setUpDatabase()
     }
+
+    fun getCollectionDao() = db.collectionDao
+    fun getContentDao() = db.contentDao
+    fun getMetadataDao() = db.resourceMetadataDao
 
     private val importer
         get() = importRcFactory.makeImporter()

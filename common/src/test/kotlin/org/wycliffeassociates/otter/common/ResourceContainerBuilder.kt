@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.common
 
+import junit.runner.Version
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.Language
@@ -28,6 +29,11 @@ class ResourceContainerBuilder(baseRC: File? = null) {
         ResourceContainer.load(rcFile).use {
             this.manifest = it.manifest
         }
+    }
+
+    fun setVersion(version: Int): ResourceContainerBuilder {
+        manifest.dublinCore.version = version.toString()
+        return this
     }
 
     fun setTargetLanguage(language: Language): ResourceContainerBuilder {
