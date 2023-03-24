@@ -34,7 +34,6 @@ import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
-import org.wycliffeassociates.otter.common.domain.project.ProjectMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.BackupProjectExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportType
@@ -226,7 +225,7 @@ class WorkbookPageViewModel : ViewModel() {
         exporter
             .export(
                 directory,
-                ProjectMetadata(resourceMetadata),
+                resourceMetadata,
                 workbook,
                 null
             )

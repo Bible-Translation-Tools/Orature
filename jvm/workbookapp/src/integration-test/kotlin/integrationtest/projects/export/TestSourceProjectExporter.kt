@@ -37,7 +37,6 @@ import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.common.domain.project.ProjectMetadata
 import org.wycliffeassociates.otter.common.domain.project.importer.RCImporterFactory
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
@@ -91,7 +90,6 @@ class TestSourceProjectExporter {
         "",
         targetMetadata
     )
-    private val projectMetadata = ProjectMetadata(targetMetadata)
     private lateinit var projectFilesAccessor: ProjectFilesAccessor
 
     @Before
@@ -119,7 +117,7 @@ class TestSourceProjectExporter {
         val result = exportSourceProvider.get()
             .export(
                 outputDir,
-                projectMetadata,
+                targetMetadata,
                 workbook,
                 null
             )
@@ -148,7 +146,7 @@ class TestSourceProjectExporter {
     @Test
     fun `export source project has no media when no take selected`() {
         val result = exportSourceProvider.get()
-            .export(outputDir, projectMetadata, workbook, null)
+            .export(outputDir, targetMetadata, workbook, null)
             .blockingGet()
 
         assertEquals(ExportResult.SUCCESS, result)
@@ -163,7 +161,7 @@ class TestSourceProjectExporter {
         // export as source
         prepareTakeForExport()
         val result = exportSourceProvider.get()
-            .export(outputDir, projectMetadata, workbook, null)
+            .export(outputDir, targetMetadata, workbook, null)
             .blockingGet()
 
         assertEquals(ExportResult.SUCCESS, result)
@@ -193,7 +191,7 @@ class TestSourceProjectExporter {
         prepareChapterContentReadyToCompile()
 
         val result = exportSourceProvider.get()
-            .export(outputDir, projectMetadata, workbook, null)
+            .export(outputDir, targetMetadata, workbook, null)
             .blockingGet()
 
         assertEquals(ExportResult.SUCCESS, result)

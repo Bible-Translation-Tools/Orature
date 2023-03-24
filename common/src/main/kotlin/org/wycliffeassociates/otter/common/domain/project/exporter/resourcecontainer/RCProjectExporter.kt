@@ -103,7 +103,7 @@ abstract class RCProjectExporter(
 
     protected fun compileCompletedChapters(
         workbook: Workbook,
-        projectMetadata: ResourceMetadata,
+        resourceMetadata: ResourceMetadata,
         projectFilesAccessor: ProjectFilesAccessor
     ): Completable {
         return filterChaptersReadyToCompile(workbook.target.chapters)
@@ -120,7 +120,7 @@ abstract class RCProjectExporter(
                         takeActions.import(
                             chapter.audio,
                             projectFilesAccessor.audioDir,
-                            createFileNamer(workbook, chapter, projectMetadata.identifier),
+                            createFileNamer(workbook, chapter, resourceMetadata.identifier),
                             compiledTake
                         ).andThen(
                             subscribeToSelectedChapter(chapter)

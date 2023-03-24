@@ -27,10 +27,10 @@ import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.License
+import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.audio.AudioExporter
-import org.wycliffeassociates.otter.common.domain.project.ProjectMetadata
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOptions
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.RcConstants
@@ -55,12 +55,12 @@ class SourceProjectExporter @Inject constructor(
 
     override fun export(
         outputDirectory: File,
-        projectMetadata: ProjectMetadata,
+        resourceMetadata: ResourceMetadata,
         workbook: Workbook,
         options: ExportOptions?
     ): Single<ExportResult> {
         val projectSourceMetadata = workbook.source.linkedResources
-            .firstOrNull { it.identifier == projectMetadata.resourceSlug }
+            .firstOrNull { it.identifier == resourceMetadata.identifier }
             ?: workbook.source.resourceMetadata
 
         val projectAccessor = getProjectFileAccessor(workbook)

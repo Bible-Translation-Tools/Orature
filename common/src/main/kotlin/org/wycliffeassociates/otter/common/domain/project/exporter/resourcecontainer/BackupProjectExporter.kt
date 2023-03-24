@@ -22,9 +22,9 @@ import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
+import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.takeFilenamePattern
-import org.wycliffeassociates.otter.common.domain.project.ProjectMetadata
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOptions
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -42,18 +42,18 @@ class BackupProjectExporter @Inject constructor(
 
     override fun export(
         outputDirectory: File,
-        projectMetadata: ProjectMetadata,
+        resourceMetadata: ResourceMetadata,
         workbook: Workbook,
         options: ExportOptions?
     ): Single<ExportResult> {
         return Single
             .fromCallable {
                 val projectSourceMetadata = workbook.source.linkedResources
-                    .firstOrNull { it.identifier == projectMetadata.resourceSlug }
+                    .firstOrNull { it.identifier == resourceMetadata.identifier }
                     ?: workbook.source.resourceMetadata
 
                 val projectToExportIsBook: Boolean =
-                    projectMetadata.resourceSlug == workbook.target.resourceMetadata.identifier
+                    resourceMetadata.identifier == workbook.target.resourceMetadata.identifier
 
                 val projectAccessor = getProjectFileAccessor(workbook)
                 val contributors = projectAccessor.getContributorInfo()
@@ -63,7 +63,7 @@ class BackupProjectExporter @Inject constructor(
                 logger.info("Exporting backup project: ${zipFile.nameWithoutExtension}")
 
                 projectAccessor.initializeResourceContainerInFile(workbook, zipFile)
-                setContributorInfo(contributors, projectMetadata.creator, zipFile)
+                setContributorInfo(contributors, resourceMetadata.creator, zipFile)
 
                 directoryProvider.newFileWriter(zipFile).use { fileWriter ->
                     projectAccessor.copyTakeFiles(
@@ -76,7 +76,7 @@ class BackupProjectExporter @Inject constructor(
                     }
 
                     val linkedResource = workbook.source.linkedResources
-                        .firstOrNull { it.identifier == projectMetadata.resourceSlug }
+                        .firstOrNull { it.identifier == resourceMetadata.identifier }
 
                     projectAccessor.copySourceFilesWithRelatedMedia(
                         fileWriter, directoryProvider.tempDirectory, linkedResource
