@@ -52,9 +52,6 @@ class BackupProjectExporter @Inject constructor(
                     .firstOrNull { it.identifier == resourceMetadata.identifier }
                     ?: workbook.source.resourceMetadata
 
-                val projectToExportIsBook: Boolean =
-                    resourceMetadata.identifier == workbook.target.resourceMetadata.identifier
-
                 val projectAccessor = getProjectFileAccessor(workbook)
                 val contributors = projectAccessor.getContributorInfo()
                 val zipFilename = makeExportFilename(workbook, projectSourceMetadata)
@@ -70,7 +67,7 @@ class BackupProjectExporter @Inject constructor(
                         fileWriter,
                         workbook,
                         workbookRepository,
-                        projectToExportIsBook
+                        isBook = true
                     ) {
                         takesFilter(it, options)
                     }
@@ -84,7 +81,7 @@ class BackupProjectExporter @Inject constructor(
                     projectAccessor.writeSelectedTakesFile(
                         fileWriter,
                         workbook,
-                        projectToExportIsBook
+                        isBook = true
                     ) { takeName ->
                         takesFilter(takeName, options)
                     }
