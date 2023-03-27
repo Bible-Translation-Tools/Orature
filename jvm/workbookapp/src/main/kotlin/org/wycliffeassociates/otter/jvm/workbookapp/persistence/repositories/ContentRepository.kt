@@ -36,7 +36,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.map
 import java.lang.IllegalStateException
 import javax.inject.Inject
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.CollectionMapper
-import kotlin.math.log
 
 class ContentRepository @Inject constructor(
     database: AppDatabase
@@ -211,9 +210,14 @@ class ContentRepository @Inject constructor(
                 entity.collectionFk = existing.collectionFk
                 contentDao.update(entity)
 
-                // removes the entry in the cache where the content is updated in the database to avoid out-of-sync
                 activeConnections.keys.find { it.id == entity.collectionFk }?.let { collection ->
-                    activeConnections.remove(collection)
+                    activeConnections[collection]!!.getValues(emptyArray()).find {
+                        it.id == obj.id
+                    }?.let { contentInRelay ->
+                        contentInRelay.id = -1
+                        contentInRelay.draftNumber = -1
+                    }
+                    activeConnections[collection]?.accept(obj)
                 }
             }
             .doOnError { e ->
