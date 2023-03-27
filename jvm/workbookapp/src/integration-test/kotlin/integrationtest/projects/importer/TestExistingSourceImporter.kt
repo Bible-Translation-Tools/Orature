@@ -276,7 +276,7 @@ class TestExistingSourceImporter {
             )
             .buildFile()
             .apply { deleteOnExit() }
-        val differentVersificationRc = ResourceContainer.load(end)
+        val differentVersificationRc = ResourceContainer.load(differentVersification)
         differentVersificationRc.accessor.write("gen.usfm") {
             it.write(
                 """
@@ -288,7 +288,7 @@ class TestExistingSourceImporter {
             )
         }
 
-        importer.import(end)
+        importer.import(differentVersification)
             .blockingGet()
             .let {
                 Assert.assertEquals(ImportResult.SUCCESS, it)
