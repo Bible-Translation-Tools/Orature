@@ -211,13 +211,15 @@ class ContentRepository @Inject constructor(
                 contentDao.update(entity)
 
                 activeConnections.keys.find { it.id == entity.collectionFk }?.let { collection ->
-                    activeConnections[collection]!!.getValues(emptyArray()).find {
-                        it.id == obj.id
-                    }?.let { contentInRelay ->
-                        contentInRelay.id = -1
-                        contentInRelay.draftNumber = -1
+                    activeConnections[collection]?.let { connection ->
+                        connection.getValues(emptyArray()).find {
+                            it.id == obj.id
+                        }?.let { contentInRelay ->
+                            contentInRelay.id = -1
+                            contentInRelay.draftNumber = -1
+                        }
+                        connection.accept(obj)
                     }
-                    activeConnections[collection]?.accept(obj)
                 }
             }
             .doOnError { e ->
