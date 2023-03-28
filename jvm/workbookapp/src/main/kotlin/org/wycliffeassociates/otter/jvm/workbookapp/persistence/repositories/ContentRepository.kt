@@ -215,10 +215,19 @@ class ContentRepository @Inject constructor(
                         connection.getValues(emptyArray()).find {
                             it.id == obj.id
                         }?.let { contentInRelay ->
-                            contentInRelay.id = -1
-                            contentInRelay.draftNumber = -1
+                            contentInRelay.apply {
+                                sort = obj.sort
+                                labelKey = obj.labelKey
+                                start = obj.start
+                                end = obj.end
+                                selectedTake = obj.selectedTake
+                                text = obj.text
+                                format = obj.format
+                                type = obj.type
+                                draftNumber = obj.draftNumber
+                                bridged = obj.bridged
+                            }
                         }
-                        connection.accept(obj)
                     }
                 }
             }
