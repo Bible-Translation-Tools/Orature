@@ -56,15 +56,6 @@ abstract class RCProjectExporter(
     private val logger = LoggerFactory.getLogger(this.javaClass)
     private val compositeDisposable = CompositeDisposable()
 
-    protected fun getProjectFileAccessor(workbook: Workbook): ProjectFilesAccessor {
-        return ProjectFilesAccessor(
-            directoryProvider,
-            workbook.source.resourceMetadata,
-            workbook.target.resourceMetadata,
-            workbook.target.toCollection()
-        )
-    }
-
     protected fun makeExportFilename(workbook: Workbook, metadata: ResourceMetadata): String {
         val lang = workbook.target.language.slug
         val resource = if (workbook.source.language.slug == workbook.target.language.slug) {

@@ -63,7 +63,7 @@ class SourceProjectExporter @Inject constructor(
             .firstOrNull { it.identifier == resourceMetadata.identifier }
             ?: workbook.source.resourceMetadata
 
-        val projectAccessor = getProjectFileAccessor(workbook)
+        val projectAccessor = workbook.getProjectAccessor(directoryProvider)
         val contributors = projectAccessor.getContributorInfo()
         val zipFilename = makeExportFilename(workbook, projectSourceMetadata)
         val targetZip = outputDirectory.resolve(zipFilename)
