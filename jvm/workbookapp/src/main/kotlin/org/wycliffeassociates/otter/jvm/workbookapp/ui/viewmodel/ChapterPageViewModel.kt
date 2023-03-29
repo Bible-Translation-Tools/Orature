@@ -53,6 +53,7 @@ import javax.inject.Inject
 import org.wycliffeassociates.otter.common.domain.content.CreateChunks
 import org.wycliffeassociates.otter.common.domain.content.ResetChunks
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.IVersificationRepository
 
 
 class ChapterPageViewModel : ViewModel() {
@@ -73,6 +74,9 @@ class ChapterPageViewModel : ViewModel() {
 
     @Inject
     lateinit var appPreferencesRepo: IAppPreferencesRepository
+
+    @Inject
+    lateinit var versificationRepository: IVersificationRepository
 
     // List of content to display on the screen
     // Boolean tracks whether the content has takes associated with it
@@ -484,9 +488,9 @@ class ChapterPageViewModel : ViewModel() {
             wkbk.sourceAudioAccessor,
             chapter.addChunk,
             chapter.sort,
-            wkbk.target
+            wkbk
         )
-            .createChunksFromVerses(wkbk.source.slug, 1)
+            .createChunksFromVerses(versificationRepository, wkbk.source.slug, 1)
     }
 
     fun resetChapter() {
