@@ -1,13 +1,41 @@
-.import-filter__container {
+.import-project-filter__container {
     -fx-spacing: 1em;
 }
 
-.import-filter__list__check-box {
+.import-project-filter__list__check-box {
     -fx-text-fill: -wa-regular-text;
 }
 
-.import-filter__sub-text {
+.import-project-filter__sub-text {
     -fx-text-fill: -wa-regular-text;
     -fx-font-size: 1.4em;
     -fx-wrap-text: true;
+}
+
+.import-project-filter__list-action-group {
+    -fx-alignment: center-left;
+    -fx-spacing: 10px;
+}
+
+.import-project-filter__select-all-checkbox {
+    -fx-padding: 0 0 0 10px;
+}
+
+.import-project-filter__dropdown {
+    -fx-pref-width: 60px;
+    -fx-pref-height: 35px;
+}
+
+.import-project-filter__dropdown.combo-box > .arrow-button {
+    -fx-padding: 5px;
+}
+
+.import-project-filter__dropdown.combo-box > .list-cell {
+    -fx-opacity: 0;
+    -fx-padding: 0;
+}
+
+.import-project-filter__dropdown .combo-box-popup .import-project-filter__dropdown__item {
+    -fx-text-fill: -wa-regular-text;
+    -fx-font-size: 1em;
 }

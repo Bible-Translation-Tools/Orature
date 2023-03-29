@@ -1,18 +1,21 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
 
 import io.reactivex.SingleEmitter
+import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import javafx.collections.ObservableSet
+import javafx.geometry.Pos
 import javafx.scene.control.CheckBox
 import javafx.scene.control.ListCell
 import javafx.scene.control.ListView
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
-import org.kordamp.ikonli.javafx.FontIcon
-import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
+import org.wycliffeassociates.otter.jvm.utils.overrideDefaultKeyEventHandler
 import tornadofx.*
+import tornadofx.FX.Companion.defaultScope
 import tornadofx.FX.Companion.messages
 import java.text.MessageFormat
 
@@ -21,34 +24,92 @@ class ImportProjectFilterSection(
 ) : VBox() {
 
     lateinit var lv: ListView<Int>
+    lateinit var selectAllCheckbox: CheckBox
     lateinit var result: SingleEmitter<ImportOptions>
+    private val selectionMode = SimpleObjectProperty<ListSelectionMode>(ListSelectionMode.ALL)
+    private val selectionModes = ListSelectionMode.values().asList().asObservable()
     private val selectedChapters = observableSetOf<Int>()
+    private val showCustomSelectProperty = SimpleBooleanProperty(false)
+
     private var onImportAction: (List<Int>) -> Unit = {}
     private var onCancelAction: () -> Unit = {}
 
     init {
-        addClass("import-filter__container")
+        addClass("import-project-filter__container")
         vgrow = Priority.ALWAYS
 
         label("We found a matching project in Orature. Please select the chapters you want to import from this file.") {
-            addClass("import-filter__sub-text")
+            addClass("import-project-filter__sub-text")
             minHeight = Region.USE_PREF_SIZE
         }
 
         hbox {
-            checkbox {
-                setOnAction {
-                    if (this.isSelected) {
-                        selectedChapters.addAll(availableChapters)
-                    } else {
-                        selectedChapters.clear()
+            addClass("import-project-filter__list-action-group")
+
+            stackpane {
+                alignment = Pos.CENTER_LEFT
+
+                combobox(selectionMode, selectionModes) {
+                    addClass("wa-combobox", "import-project-filter__dropdown")
+
+                    cellFormat(defaultScope) {
+                        graphic = label(messages[item.titleKey]) {
+                            addClass("import-project-filter__dropdown__item")
+                        }
                     }
-                    lv.refresh()
+
+                    overrideDefaultKeyEventHandler {
+                        when(it) {
+                            ListSelectionMode.ALL -> {
+                                selectAllCheckbox.isSelected = true
+                                showCustomSelectProperty.set(false)
+                                selectedChapters.addAll(availableChapters)
+                                lv.refresh()
+                            }
+                            ListSelectionMode.NONE -> {
+                                selectAllCheckbox.isSelected = false
+                                selectedChapters.clear()
+                                lv.refresh()
+                            }
+                            else -> {
+                                selectAllCheckbox.isSelected = false
+                                showCustomSelectProperty.set(true)
+                            }
+                        }
+                    }
+                }
+                checkbox {
+                    addClass("import-project-filter__select-all-checkbox")
+                    selectAllCheckbox = this
+
+                    setOnAction {
+                        if (this.isSelected) {
+                            selectedChapters.addAll(availableChapters)
+                        } else {
+                            selectedChapters.clear()
+                        }
+                        lv.refresh()
+                    }
                 }
             }
-            label("Select") {
-                graphic = FontIcon(MaterialDesign.MDI_MENU_DOWN)
+
+            label(messages["select"]) {
+                addClass("import-project-filter__sub-text")
+                textProperty().bind(selectionMode.stringBinding { mode ->
+                    if (mode == ListSelectionMode.CUSTOM) {
+                        messages[mode.titleKey]
+                    } else {
+                        messages["select"]
+                    }
+                })
+                isMouseTransparent = true
             }
+        }
+
+        textfield {
+            promptText = "e.g. 1-5, 8, 10"
+            visibleWhen(showCustomSelectProperty)
+            managedWhen(visibleProperty())
         }
 
         listview(availableChapters) {
@@ -97,8 +158,8 @@ class ImportFilterSelectionCell(
     private val selectedChapters: ObservableSet<Int>
 ) : ListCell<Int>() {
 
-    val node = CheckBox().apply {
-//        addClass("import-filter__list__check-box")
+    val checkBox = CheckBox().apply {
+        addClass("import-project-filter__list__check-box")
 
         selectedProperty().onChange {
             if (it) selectedChapters.add(item)
@@ -107,11 +168,9 @@ class ImportFilterSelectionCell(
     }
 
     init {
-        addClass("import-filter__list-cell")
-
         setOnMouseClicked {
             if (graphic != null) {
-                node.isSelected = !node.isSelected
+                checkBox.isSelected = !checkBox.isSelected
             }
         }
     }
@@ -124,7 +183,7 @@ class ImportFilterSelectionCell(
             return
         }
 
-        graphic = node.apply {
+        graphic = checkBox.apply {
             text = MessageFormat.format(
                 messages["chapterTitle"],
                 messages["chapter"],
@@ -133,4 +192,10 @@ class ImportFilterSelectionCell(
             isSelected = item in selectedChapters
         }
     }
+}
+
+enum class ListSelectionMode(val titleKey: String) {
+    ALL("all"),
+    NONE("none"),
+    CUSTOM("custom")
 }
