@@ -236,7 +236,7 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
             wkbk.sourceAudioAccessor,
             chapter.addChunk,
             chapter.sort,
-            wkbk.target
+            wkbk
         )
             .createUserDefinedChunks(wkbk.source.slug, cues, 1)
 
