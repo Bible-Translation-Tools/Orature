@@ -7,9 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.reactivex.MaybeSource
-import io.reactivex.Single
-import io.reactivex.schedulers.Schedulers
 import java.io.File
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioCue
@@ -17,22 +14,16 @@ import org.wycliffeassociates.otter.common.data.Chunkification
 import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.workbook.Book
-import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.audio.SourceAudioFile
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.VersificationTreeBuilder
-import org.wycliffeassociates.otter.common.domain.versification.Versification
-import org.wycliffeassociates.otter.common.persistence.repositories.IVersificationRepository
-import org.wycliffeassociates.resourcecontainer.ResourceContainer
 
 class CreateChunks(
     private val projectFilesAccessor: ProjectFilesAccessor,
     private val sourceAudioAccessor: SourceAudioAccessor,
     private val chunkCreator: (List<Content>) -> Unit,
     private val chapterNumber: Int,
-    private val workbook: Workbook
+    private val targetBook: Book
 ) {
     private val logger = LoggerFactory.getLogger(CreateChunks::class.java)
 
@@ -42,7 +33,7 @@ class CreateChunks(
         draftNumber: Int
     ) {
         logger.info("Creating ${chunks.size} user defined chunks for project: $projectSlug chapter: $chapterNumber")
-        val chapAudio = sourceAudioAccessor.getChapter(chapterNumber, workbook.target)
+        val chapAudio = sourceAudioAccessor.getChapter(chapterNumber, targetBook)
         val sa = SourceAudioFile(chapAudio!!.file)
         val verseMarkers = sa.getVerses()
         val chunkRanges = mapCuesToRanges(chunks)
@@ -86,68 +77,10 @@ class CreateChunks(
     }
 
     fun createChunksFromVerses(
-        versificationRepository: IVersificationRepository,
         projectSlug: String,
         draftNumber: Int
     ) {
-        ResourceContainer
-            .load(workbook.source.resourceMetadata.path).use { rc ->
-                val vrsSlug = rc.manifest.projects.firstOrNull { !it.versification.isNullOrEmpty() }?.versification ?: ""
-                versificationRepository.getVersification(vrsSlug)
-            }.map {
-                val allocatedVerses = preallocateVerses(it, workbook.target, chapterNumber, draftNumber)
-                val versesFromText = getVersesFromText(projectSlug, chapterNumber, draftNumber)
-                val finalizedVerses = overlayVerses(allocatedVerses, versesFromText)
-                chunkCreator(finalizedVerses)
-                ImportResult.SUCCESS
-            }
-            .switchIfEmpty(Single.just(ImportResult.IMPORT_ERROR))
-            .subscribeOn(Schedulers.io())
-            .subscribe()
-    }
-
-    private fun overlayVerses(allocatedVerses: List<Content>, versesFromText: List<Content>): List<Content> {
-        val verses = mutableListOf<Content>()
-        allocatedVerses.forEach {
-            val found = versesFromText.find { v -> v.start == it.start }
-            if (found != null) {
-                val overwritten = it.copy(text = found.text)
-                verses.add(overwritten)
-            } else {
-                verses.add(it)
-            }
-        }
-        return verses
-    }
-
-    private fun preallocateVerses(
-        versification: Versification,
-        book: Book,
-        chapterNumber: Int,
-        draftNumber: Int
-    ): List<Content> {
-        val chunks = mutableListOf<Content>()
-        val verseCount = versification.getVersesInChapter(book.slug, chapterNumber)
-        for (verseNumber in 1..verseCount) {
-            chunks.add(
-                Content(
-                    verseNumber,
-                    "verse",
-                    verseNumber,
-                    verseNumber,
-                    null,
-                    "",
-                    "usfm",
-                    ContentType.TEXT,
-                    draftNumber
-                )
-            )
-        }
-        return chunks
-    }
-
-    private fun getVersesFromText(projectSlug: String, chapterNumber: Int, draftNumber: Int): List<Content> {
-        val verses = mutableListOf<Content>()
+        val chunksToAdd = mutableListOf<Content>()
         projectFilesAccessor.getChapterContent(
             projectSlug,
             chapterNumber,
@@ -156,9 +89,9 @@ class CreateChunks(
             logger.info("Creating chunks from project $projectSlug from verses, draft $draftNumber")
             content.sort = idx + 1
             content.draftNumber = draftNumber
-            verses.add(content)
+            chunksToAdd.add(content)
         }
-        return verses
+        chunkCreator(chunksToAdd)
     }
 
     private fun writeChunkFile(projectSlug: String, chapterNumber: Int, chunksToAdd: List<Content>) {
