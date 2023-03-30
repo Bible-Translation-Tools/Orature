@@ -85,6 +85,13 @@ class CreateChunks(
         writeChunkFile(projectSlug, chapterNumber, chunksToAdd)
     }
 
+    /**
+     * Creates chunks from the verses in the text of the project.
+     *
+     * @param versificationRepository the versification repository to load the appropriate versification to preallocate
+     * @param projectSlug the slug of the project to create chunks for
+     * @param draftNumber the draft number to create chunks for
+     */
     fun createChunksFromVerses(
         versificationRepository: IVersificationRepository,
         projectSlug: String,
@@ -99,13 +106,16 @@ class CreateChunks(
                 val versesFromText = getVersesFromText(projectSlug, chapterNumber, draftNumber)
                 val finalizedVerses = overlayVerses(allocatedVerses, versesFromText)
                 chunkCreator(finalizedVerses)
-                ImportResult.SUCCESS
             }
-            .switchIfEmpty(Single.just(ImportResult.IMPORT_ERROR))
             .subscribeOn(Schedulers.io())
             .subscribe()
     }
 
+    /**
+     * Fill in the text of the versification allocated content using the content retrieved from the text.
+     *
+     * @return a list of content objects based on the versification, with the text field filled in
+     */
     private fun overlayVerses(allocatedVerses: List<Content>, versesFromText: List<Content>): List<Content> {
         val verses = mutableListOf<Content>()
         allocatedVerses.forEach {
@@ -120,6 +130,17 @@ class CreateChunks(
         return verses
     }
 
+    /**
+     * Creates a list of content using the versification of the project. As it is being allocated from versification,
+     * the text entry will be empty.
+     *
+     * @param versification the versification to use for preallocation
+     * @param book the book to allocate
+     * @param chapterNumber the chapter to allocate
+     * @param draftNumber the number for the draft being created
+     *
+     * @return a list of content objects, one for each verse in the chapter
+     */
     private fun preallocateVerses(
         versification: Versification,
         book: Book,
@@ -146,6 +167,14 @@ class CreateChunks(
         return chunks
     }
 
+    /**
+     * Gets all content from parsing text content of the resource container
+     *
+     * @param projectSlug the project to get content from
+     * @param chapterNumber the chapter to get content from
+     * @param draftNumber the number for the draft being created
+     * @return a list of content objects from the text content
+     */
     private fun getVersesFromText(projectSlug: String, chapterNumber: Int, draftNumber: Int): List<Content> {
         val verses = mutableListOf<Content>()
         projectFilesAccessor.getChapterContent(
