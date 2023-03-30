@@ -166,9 +166,21 @@ class AddFilesViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Sets the project title and cover art for the import dialog
+     *
+     * if the resource container has more than one project, the title and cover art will not be set
+     *
+     * @param rc The resource container file being imported
+     */
     private fun setProjectInfo(rc: File) {
         try {
-            val project = ResourceContainer.load(rc, true).use { it.project() }
+            val project = ResourceContainer.load(rc, true).use {
+                if (it.manifest.projects.size != 1) {
+                    return@use null
+                }
+                it.project()
+            }
             project?.let {
                 importProvider.get()
                     .getSourceMetadata(rc)

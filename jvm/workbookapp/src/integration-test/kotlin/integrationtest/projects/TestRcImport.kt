@@ -69,7 +69,7 @@ class TestRcImport {
             .assertRowCounts(
                 RowCount(
                     contents = mapOf(
-                        TEXT to 31102,
+                        TEXT to 31104,
                         META to 1189
                     ),
                     collections = 1256,

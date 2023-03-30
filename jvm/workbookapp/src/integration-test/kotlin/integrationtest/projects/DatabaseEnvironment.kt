@@ -34,6 +34,7 @@ import org.wycliffeassociates.otter.common.domain.project.importer.RCImporterFac
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.CollectionDao
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Provider
@@ -48,6 +49,10 @@ class DatabaseEnvironment @Inject constructor(
     init {
         setUpDatabase()
     }
+
+    fun getCollectionDao() = db.collectionDao
+    fun getContentDao() = db.contentDao
+    fun getMetadataDao() = db.resourceMetadataDao
 
     private val importer
         get() = importRcFactory.makeImporter()
@@ -76,7 +81,7 @@ class DatabaseEnvironment @Inject constructor(
             rcResourceFile(rcFile)
         }
 
-        val result =importer.import(resourceFile).blockingGet()
+        val result = importer.import(resourceFile).blockingGet()
         Assert.assertEquals(
             ImportResult.SUCCESS,
             result
@@ -137,8 +142,11 @@ class DatabaseEnvironment @Inject constructor(
             val entity = db.collectionDao.fetch(containerId = rc!!.id, label = "chapter", slug = slug)
             Assert.assertNotNull("Retrieving chapter $slug", entity)
             val content = db.contentDao.fetchByCollectionId(entity!!.id)
-            val verses = content.filter { it.type_fk == 1 }.count()
+
+            // filter null text to remove content allocated from versification without a matching verse in ULB
+            val verses = content.filter { it.type_fk == 1 && it.text != null }.count()
             val meta = content.filter { it.type_fk == 2 }.count()
+            
             Assert.assertEquals("Verses for $slug", verseCount, verses)
             Assert.assertEquals("Meta for $slug", 1, meta)
         }

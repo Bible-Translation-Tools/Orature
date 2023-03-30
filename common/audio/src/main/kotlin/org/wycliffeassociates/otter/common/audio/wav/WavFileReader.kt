@@ -133,4 +133,8 @@ internal class WavFileReader(val wav: WavFile, val start: Int? = null, val end: 
             System.gc()
         }
     }
+
+    override fun close() {
+        release()
+    }
 }

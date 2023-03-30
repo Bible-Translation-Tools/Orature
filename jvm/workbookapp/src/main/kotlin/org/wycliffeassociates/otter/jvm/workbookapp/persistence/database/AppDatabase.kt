@@ -104,6 +104,7 @@ class AppDatabase(
     val preferenceDao = PreferenceDao(dsl)
     val installedEntityDao = InstalledEntityDao(dsl)
     val translationDao = TranslationDao(dsl)
+    val versificationDao = VersificationDao(dsl)
 
     // Transaction support
     fun transaction(block: (DSLContext) -> Unit) {

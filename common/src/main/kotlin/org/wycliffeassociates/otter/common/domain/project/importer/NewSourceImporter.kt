@@ -4,20 +4,19 @@ import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.collections.OtterTree
-import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.CollectionOrContent
-import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.OtterResourceContainerConfig
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.castOrFindImportException
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.otterConfigCategories
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IProjectReader
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.VersificationTreeBuilder
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.toCollection
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IVersificationRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.io.IOException
@@ -27,6 +26,7 @@ class NewSourceImporter @Inject constructor(
     private val directoryProvider: IDirectoryProvider,
     private val resourceContainerRepository: IResourceContainerRepository,
     resourceMetadataRepository: IResourceMetadataRepository,
+    private val versificationRepository: IVersificationRepository,
     private val zipEntryTreeBuilder: IZipEntryTreeBuilder
 ) : RCImporter(directoryProvider, resourceMetadataRepository) {
 
@@ -91,13 +91,43 @@ class NewSourceImporter @Inject constructor(
         }
 
         val tree = try {
-            constructContainerTree(container)
+            IProjectReader.constructContainerTree(container, zipEntryTreeBuilder)
         } catch (e: ImportException) {
             logger.error("Error constructing container tree, file: $fileToLoad", e)
+            logger.error("Container had format: ${container.manifest.dublinCore.format}")
             container.close()
             return cleanUp(fileToLoad, e.result)
         }
 
+        val preallocationTree = OtterTree<CollectionOrContent>(container.toCollection())
+        val versificationTree = VersificationTreeBuilder(versificationRepository)
+            .build(container)
+            ?.apply {
+                for (node in this) {
+                    preallocationTree.addChild(node)
+                }
+            }
+
+        return Single
+            .fromCallable {
+                if (versificationTree != null) {
+                    importTree(container, preallocationTree, fileToLoad)
+                        .flatMap {
+                            updateContentFromTextContent(container, tree)
+                        }
+                } else { // No versification found, just import the tree from the parsed text
+                    importTree(container, tree, fileToLoad)
+                }
+            }
+            .flatMap { it }
+            .subscribeOn(Schedulers.io())
+    }
+
+    private fun importTree(
+        container: ResourceContainer,
+        tree: OtterTree<CollectionOrContent>,
+        fileToLoad: File
+    ): Single<ImportResult> {
         return resourceContainerRepository
             .importResourceContainer(container, tree, container.manifest.dublinCore.language.identifier)
             .doOnEvent { result, err ->
@@ -106,7 +136,17 @@ class NewSourceImporter @Inject constructor(
                 }
                 if (result != ImportResult.SUCCESS || err != null) fileToLoad.deleteRecursively()
             }
-            .subscribeOn(Schedulers.io())
+    }
+
+    private fun updateContentFromTextContent(
+        container: ResourceContainer,
+        tree: OtterTree<CollectionOrContent>
+    ): Single<ImportResult> {
+        return resourceContainerRepository
+            .updateContent(
+                container,
+                tree
+            )
     }
 
     private fun copyToInternalDirectory(file: File, destinationDirectory: File): File {
@@ -146,44 +186,5 @@ class NewSourceImporter @Inject constructor(
             }
         }
         return destinationFile
-    }
-
-    /** @throws ImportException */
-    private fun constructContainerTree(container: ResourceContainer): OtterTree<CollectionOrContent> {
-        val projectReader = try {
-            IProjectReader.build(
-                format = container.manifest.dublinCore.format,
-                isHelp = ContainerType.of(container.manifest.dublinCore.type) == ContainerType.Help
-            )
-        } catch (e: IllegalArgumentException) {
-            logger.error("Error Importing project of type: ${container.manifest.dublinCore.format}", e)
-            null
-        } ?: throw ImportException(ImportResult.UNSUPPORTED_CONTENT)
-
-        val root = OtterTree<CollectionOrContent>(container.toCollection())
-        val categoryInfo = container.otterConfigCategories()
-        for (project in container.manifest.projects) {
-            var parent = root
-            for (categorySlug in project.categories) {
-                // use the `latest` RC spec to treat categories as hierarchical
-                // look for a matching category under the parent
-                val existingCategory = parent.children
-                    .map { it as? OtterTree<CollectionOrContent> }
-                    .filter { (it?.value as? Collection)?.slug == categorySlug }
-                    .firstOrNull()
-                parent = if (existingCategory != null) {
-                    existingCategory
-                } else {
-                    // category node does not yet exist
-                    val category = categoryInfo.filter { it.identifier == categorySlug }.firstOrNull() ?: continue
-                    val categoryNode = OtterTree<CollectionOrContent>(category.toCollection())
-                    parent.addChild(categoryNode)
-                    categoryNode
-                }
-            }
-            val projectTree = projectReader.constructProjectTree(container, project, zipEntryTreeBuilder)
-            parent.addChild(projectTree)
-        }
-        return root
     }
 }

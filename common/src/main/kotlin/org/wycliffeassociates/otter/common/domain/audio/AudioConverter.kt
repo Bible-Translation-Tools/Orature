@@ -19,6 +19,11 @@
 package org.wycliffeassociates.otter.common.domain.audio
 
 import io.reactivex.Completable
+import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
+import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
+import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
+import org.wycliffeassociates.otter.common.audio.pcm.PcmFile
+import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import java.io.File
 import javax.inject.Inject
 import de.sciss.jump3r.Main as jump3r
@@ -37,6 +42,47 @@ class AudioConverter @Inject constructor() {
                 mp3File.invariantSeparatorsPath
             )
             jump3r().run(args)
+        }
+    }
+
+    fun wavToPcm(wavFile: File, pcmFile: File): Completable {
+        return Completable.fromCallable {
+            val wavReader = WavFile(wavFile).reader()
+            val pcmWriter = PcmFile(pcmFile).writer(append = false)
+
+            wavReader.use { reader ->
+                pcmWriter.use { writer ->
+                    reader.open()
+                    val buffer = ByteArray(10240)
+                    while (reader.hasRemaining()) {
+                        val written = reader.getPcmBuffer(buffer)
+                        writer.write(buffer, 0, written)
+                    }
+                }
+            }
+        }
+    }
+
+    fun pcmToWav(pcmFile: File, wavFile: File): Completable {
+        return Completable.fromCallable {
+            val pcmReader = PcmFile(pcmFile).reader()
+            val wavWriter = WavFile(
+                wavFile,
+                DEFAULT_CHANNELS,
+                DEFAULT_SAMPLE_RATE,
+                DEFAULT_BITS_PER_SAMPLE
+            ).writer(append = false)
+
+            pcmReader.use { reader ->
+                wavWriter.use { writer ->
+                    reader.open()
+                    val buffer = ByteArray(10240)
+                    while (reader.hasRemaining()) {
+                        val written = reader.getPcmBuffer(buffer)
+                        writer.write(buffer, 0, written)
+                    }
+                }
+            }
         }
     }
 }

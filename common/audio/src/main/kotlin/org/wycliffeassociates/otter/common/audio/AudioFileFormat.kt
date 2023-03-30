@@ -20,7 +20,8 @@ package org.wycliffeassociates.otter.common.audio
 
 enum class AudioFileFormat(val extension: String) {
     WAV("wav"),
-    MP3("mp3");
+    MP3("mp3"),
+    PCM("pcm");
 
     companion object {
         private val extensionList: List<String> = values().map { it.extension }
