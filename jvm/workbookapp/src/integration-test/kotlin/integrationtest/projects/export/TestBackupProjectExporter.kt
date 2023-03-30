@@ -109,7 +109,7 @@ class TestBackupProjectExporter {
 
         Assert.assertEquals(
             chapterFilter.chapters,
-            chapterToTakes.keys.toList()
+            chapterToTakes.keys.toList().sorted()
         )
         Assert.assertEquals(
             takesPerChapter * chapterFilter.chapters.size,
