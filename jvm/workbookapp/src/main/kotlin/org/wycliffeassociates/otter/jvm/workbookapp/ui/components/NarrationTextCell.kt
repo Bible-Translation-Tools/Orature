@@ -24,12 +24,7 @@ import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItem
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkData
 import tornadofx.addClass
 
-class NarrationTextCell(
-    private val beginRecordingText: String,
-    private val pauseRecordingText: String,
-    private val resumeRecordingText: String,
-    private val nextChunkText: String
-) : ListCell<ChunkData>() {
+class NarrationTextCell(private val nextChunkText: String) : ListCell<ChunkData>() {
     private val view = NarrationTextItem()
 
     init {
@@ -51,19 +46,20 @@ class NarrationTextCell(
             verseLabelProperty.set(item.title)
             verseTextProperty.set(item.text)
 
-            beginRecordingTextProperty.set(beginRecordingText)
-            pauseRecordingTextProperty.set(pauseRecordingText)
-            resumeRecordingTextProperty.set(resumeRecordingText)
+            recordButtonTextProperty.bind(item.recordButtonTextProperty)
+            isRecordingProperty.bind(item.isRecordingProperty)
+            isRecordingPausedProperty.bind(item.isRecordingPausedProperty)
             nextChunkTextProperty.set(nextChunkText)
 
             onRecordActionProperty.set(EventHandler {
                 item.onRecord(item)
             })
 
-            setOnNextVerse {
+            onNextVerseActionProperty.set(EventHandler {
                 listView.selectionModel.selectNext()
                 listView.scrollTo(item)
-            }
+                item.onNext(listView.selectionModel.selectedItem)
+            })
         }
     }
 }

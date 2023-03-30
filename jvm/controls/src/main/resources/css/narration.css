@@ -262,3 +262,7 @@
 .narration-record__list-view.recording .scroll-bar:horizontal {
     -fx-padding: 0px;
 }
+
+.narration-list__buttons .btn.recording {
+    -fx-background-color: -wa-primary-dark;
+}

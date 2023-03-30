@@ -1,9 +1,9 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.model
 
-import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
-import org.wycliffeassociates.otter.jvm.controls.recorder.Drawable
+import tornadofx.FX.Companion.messages
+import tornadofx.get
 import tornadofx.getProperty
 import tornadofx.property
 import java.io.File
@@ -15,6 +15,9 @@ data class ChunkData(
     val text: String
 ) {
     var file: File? = null
+    var start: Int = -1
+    var end: Int = 0
+    var isDraft = false
 
     var image: Image by property(null)
     val imageProperty = getProperty(ChunkData::image)
@@ -22,20 +25,23 @@ data class ChunkData(
     var invertedImage: Image by property(null)
     val invertedImageProperty = getProperty(ChunkData::invertedImage)
 
-    val waveformDrawableProperty = SimpleObjectProperty<Drawable>()
-    val volumebarDrawableProperty = SimpleObjectProperty<Drawable>()
-
     var imageLoading: Boolean by property(false)
     val imageLoadingProperty = getProperty(ChunkData::imageLoading)
 
     var isPlaying: Boolean by property(false)
     val isPlayingProperty = getProperty(ChunkData::isPlaying)
 
+    var isRecordingPaused: Boolean by property(false)
+    val isRecordingPausedProperty = getProperty(ChunkData::isRecordingPaused)
+
     var isRecording: Boolean by property(false)
     val isRecordingProperty = getProperty(ChunkData::isRecording)
 
     var playbackPosition: Int by property(0)
     val playbackPositionProperty = getProperty(ChunkData::playbackPosition)
+
+    var recordButtonText: String by property(messages["beginRecording"])
+    val recordButtonTextProperty = getProperty(ChunkData::recordButtonText)
 
     var totalFrames: Int by property(0)
     val totalFramesProperty = getProperty(ChunkData::totalFrames)
@@ -45,6 +51,7 @@ data class ChunkData(
     var onRecordAgain: (ChunkData) -> Unit = {}
     var onWaveformClicked: (ChunkData) -> Unit = {}
     var onRecord: (ChunkData) -> Unit = {}
+    var onNext: (ChunkData) -> Unit = {}
 
     constructor(chunk: Chunk) : this(
         sort = chunk.sort,

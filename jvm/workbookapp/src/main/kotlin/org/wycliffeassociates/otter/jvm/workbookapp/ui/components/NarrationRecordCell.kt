@@ -49,6 +49,7 @@ class NarrationRecordCell(
 
             isPlayingProperty.bind(item.isPlayingProperty)
             isRecordingProperty.bind(item.isRecordingProperty)
+            isRecordingPausedProperty.bind(item.isRecordingPausedProperty)
             playbackPositionProperty.bind(item.playbackPositionProperty)
             totalFramesProperty.bind(item.totalFramesProperty)
 

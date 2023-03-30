@@ -268,9 +268,6 @@ class NarrationFragment : Fragment() {
 
                     setCellFactory {
                         NarrationTextCell(
-                            "Begin Recording",
-                            "Pause Recording",
-                            "Resume Recording",
                             "Next Verse",
                             viewModel::onRecord
                         )

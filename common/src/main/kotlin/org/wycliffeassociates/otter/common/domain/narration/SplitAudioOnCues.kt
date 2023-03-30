@@ -12,21 +12,30 @@ class SplitAudioOnCues @Inject constructor(private val directoryProvider: IDirec
 
     fun execute(file: File): Single<Map<String, File>> {
         return Single.fromCallable {
-            val chunks = mutableMapOf<String, File>()
-
             val sourceAudio = AudioFile(file)
             val cues = sourceAudio.metadata.getCues()
-
-            val totalFrames = sourceAudio.totalFrames
-            cues.forEachIndexed { index, cue ->
-                val audioStartEnd = getChunkAudioRange(index, totalFrames, cues)
-                val pcmFile = directoryProvider.createTempFile("output", ".${AudioFileFormat.PCM.extension}")
-                val pcmAudio = AudioFile(pcmFile)
-                writeAudio(sourceAudio, pcmAudio, audioStartEnd)
-                chunks[cue.label] = pcmFile
-            }
-            chunks
+            splitAudio(file, cues)
         }
+    }
+
+    fun execute(file: File, cues: List<AudioCue>): Single<Map<String, File>> {
+        return Single.fromCallable {
+            splitAudio(file, cues)
+        }
+    }
+
+    private fun splitAudio(file: File, cues: List<AudioCue>): Map<String, File> {
+        val chunks = mutableMapOf<String, File>()
+        val sourceAudio = AudioFile(file)
+        val totalFrames = sourceAudio.totalFrames
+        cues.forEachIndexed { index, cue ->
+            val audioStartEnd = getChunkAudioRange(index, totalFrames, cues)
+            val pcmFile = directoryProvider.createTempFile("output", ".${AudioFileFormat.PCM.extension}")
+            val pcmAudio = AudioFile(pcmFile)
+            writeAudio(sourceAudio, pcmAudio, audioStartEnd)
+            chunks[cue.label] = pcmFile
+        }
+        return chunks
     }
 
     private fun writeAudio(source: AudioFile, target: AudioFile, startEnd: Pair<Int, Int>) {

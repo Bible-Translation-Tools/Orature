@@ -35,13 +35,15 @@ class NarrationTextItem : VBox() {
     val isActiveProperty = SimpleBooleanProperty()
     val isLastVerseProperty = SimpleBooleanProperty()
 
-    val beginRecordingTextProperty = SimpleStringProperty()
-    val pauseRecordingTextProperty = SimpleStringProperty()
-    val resumeRecordingTextProperty = SimpleStringProperty()
+    val isRecordingProperty = SimpleBooleanProperty()
+    val isRecordingPausedProperty = SimpleBooleanProperty()
+    val recordButtonTextProperty = SimpleStringProperty()
     val nextChunkTextProperty = SimpleStringProperty()
 
     val onRecordActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onNextVerseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+
+    private val isRecordingActiveProperty = isRecordingProperty.and(isRecordingPausedProperty.not())
 
     init {
         styleClass.setAll("narration-list__verse-item")
@@ -69,9 +71,13 @@ class NarrationTextItem : VBox() {
             addClass("narration-list__buttons")
             alignment = Pos.BASELINE_LEFT
 
-            button(beginRecordingTextProperty) {
+            button(recordButtonTextProperty) {
                 addClass("btn", "btn--primary")
                 graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
+
+                isRecordingActiveProperty.onChange {
+                    toggleClass("recording", it)
+                }
 
                 onActionProperty().bind(onRecordActionProperty)
             }
@@ -89,18 +95,5 @@ class NarrationTextItem : VBox() {
 
         disableProperty().bind(isActiveProperty.not())
     }
-
-    fun setOnRecord(op: () -> Unit) {
-        onRecordActionProperty.set(EventHandler {
-            op.invoke()
-        })
-    }
-
-    fun setOnNextVerse(op: () -> Unit) {
-        onNextVerseActionProperty.set(
-            EventHandler {
-                op.invoke()
-            }
-        )
-    }
 }
+

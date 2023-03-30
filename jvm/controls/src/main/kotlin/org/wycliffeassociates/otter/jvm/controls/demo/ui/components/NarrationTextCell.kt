@@ -25,9 +25,6 @@ import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItem
 import tornadofx.addClass
 
 internal class NarrationTextCell(
-    private val beginRecordingText: String,
-    private val pauseRecordingText: String,
-    private val resumeRecordingText: String,
     private val nextChunkText: String,
     private val onRecord: (ChunkData) -> Unit,
 ) : ListCell<ChunkData>() {
@@ -52,19 +49,11 @@ internal class NarrationTextCell(
             verseLabelProperty.set(item.title)
             verseTextProperty.set(item.text)
 
-            beginRecordingTextProperty.set(beginRecordingText)
-            pauseRecordingTextProperty.set(pauseRecordingText)
-            resumeRecordingTextProperty.set(resumeRecordingText)
             nextChunkTextProperty.set(nextChunkText)
 
             onRecordActionProperty.set(EventHandler {
                 onRecord(item)
             })
-
-            setOnNextVerse {
-                listView.selectionModel.selectNext()
-                listView.scrollTo(item)
-            }
         }
     }
 }

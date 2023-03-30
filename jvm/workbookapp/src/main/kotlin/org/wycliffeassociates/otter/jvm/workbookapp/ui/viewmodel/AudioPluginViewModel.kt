@@ -75,12 +75,13 @@ class AudioPluginViewModel : ViewModel() {
         )
     }
 
-    fun import(recordable: Recordable, take: File): Completable {
+    fun import(recordable: Recordable, take: File, takeNumber: Int? = null): Completable {
         return takeActions.import(
             audio = recordable.audio,
             projectAudioDir = workbookDataStore.activeProjectFilesAccessor.audioDir,
             namer = createFileNamer(recordable),
-            take = take
+            take = take,
+            takeNumber = takeNumber
         )
     }
 

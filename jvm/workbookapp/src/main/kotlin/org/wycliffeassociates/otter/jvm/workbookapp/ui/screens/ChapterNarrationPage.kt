@@ -132,7 +132,12 @@ class ChapterNarrationPage : View() {
                             scrollTo(it)
                         }
 
+                        viewModel.onScrollToChunk = {
+                            scrollTo(it)
+                        }
+
                         isRecordingProperty.bind(viewModel.isRecordingProperty)
+                        isRecordingPausedProperty.bind(viewModel.isRecordingPausedProperty)
                     }
 
                     activerecordingcard {
@@ -143,19 +148,13 @@ class ChapterNarrationPage : View() {
 
                         isRecordingProperty.bind(viewModel.isRecordingProperty)
 
-                        visibleProperty().bind(viewModel.isRecordingProperty)
+                        visibleProperty().bind(
+                            viewModel.isRecordingProperty.and(
+                                viewModel.isRecordingPausedProperty.not()
+                            )
+                        )
                         managedProperty().bind(visibleProperty())
                     }
-
-                    /*stackpane {
-                        addClass("narration__volume-bar")
-
-                        vbox {
-                            addClass("narration__volume-bar__value")
-
-                            maxHeight = 50.0
-                        }
-                    }*/
                 }
 
                 vbox {
@@ -169,7 +168,7 @@ class ChapterNarrationPage : View() {
 
                     visibleProperty().bind(viewModel.recordedChunks.booleanBinding {
                         it.isEmpty()
-                    })
+                    }.and(viewModel.isRecordingProperty.not()))
                 }
             }
             stackpane {
@@ -186,18 +185,13 @@ class ChapterNarrationPage : View() {
                         it?.title
                     })
 
-                    viewModel.onWaveformClicked = {
+                    viewModel.onScrollToChunk = {
                         selectionModel.select(it)
                         scrollTo(it)
                     }
 
                     setCellFactory {
-                        NarrationTextCell(
-                            messages["beginRecording"],
-                            messages["pauseRecording"],
-                            messages["resumeRecording"],
-                            messages["nextVerse"]
-                        )
+                        NarrationTextCell(messages["nextVerse"])
                     }
                 }
 

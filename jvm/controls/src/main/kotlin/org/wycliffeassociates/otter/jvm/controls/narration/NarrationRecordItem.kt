@@ -56,9 +56,11 @@ class NarrationRecordItem : VBox() {
     val onWaveformClickActionProperty = SimpleObjectProperty<EventHandler<MouseEvent>>()
 
     val isRecordingProperty = SimpleBooleanProperty()
+    val isRecordingPausedProperty = SimpleBooleanProperty()
     val isPlayingProperty = SimpleBooleanProperty()
     val playbackPositionProperty = SimpleIntegerProperty()
     val totalFramesProperty = SimpleIntegerProperty()
+
     private val playerWidthProperty = SimpleDoubleProperty()
 
     private val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
@@ -101,6 +103,7 @@ class NarrationRecordItem : VBox() {
                 )
 
                 onActionProperty().bind(onPlayActionProperty)
+                disableProperty().bind(isRecordingProperty.and(isRecordingPausedProperty.not()))
 
                 playbackPositionProperty.onChange {
                     toggleClass("playing", it > 0)
@@ -121,6 +124,8 @@ class NarrationRecordItem : VBox() {
                     graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                     onActionProperty().bind(onRecordAgainActionProperty)
                 }
+
+                disableProperty().bind(isRecordingProperty.and(isRecordingPausedProperty.not()))
             }
         }
 
@@ -133,13 +138,13 @@ class NarrationRecordItem : VBox() {
                 imageview(waveformProperty).apply {
                     visibleProperty().bind(playbackPositionProperty.booleanBinding {
                         it?.let { it.toDouble() <= 0 } ?: true
-                    }.and(isRecordingProperty.not()))
+                    })
                     managedProperty().bind(visibleProperty())
                 }
                 imageview(invertedWaveformProperty).apply {
                     visibleProperty().bind(playbackPositionProperty.booleanBinding {
                         it?.let { it.toDouble() > 0 } ?: false
-                    }.and(isRecordingProperty.not()))
+                    })
                     managedProperty().bind(visibleProperty())
                 }
             }

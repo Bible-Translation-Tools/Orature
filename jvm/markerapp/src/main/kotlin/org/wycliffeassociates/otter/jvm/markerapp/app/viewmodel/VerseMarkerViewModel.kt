@@ -196,33 +196,37 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
     private fun createWaveformImages(audio: AudioFile) {
         imageWidthProperty.set(computeImageWidth(SECONDS_ON_SCREEN))
 
-        waveform = asyncBuilder.buildAsync(
-            audio.reader(),
-            width = imageWidthProperty.value.toInt(),
-            height = Screen.getMainScreen().platformHeight,
-            wavColor = Color.web(WAV_COLOR),
-            background = Color.web(BACKGROUND_COLOR)
-        )
-
-        asyncBuilder
-            .build(
-                audio.reader(),
-                width = Screen.getMainScreen().platformWidth,
-                height = 50,
+        audio.reader().use { reader ->
+            waveform = asyncBuilder.buildAsync(
+                reader,
+                width = imageWidthProperty.value.toInt(),
+                height = Screen.getMainScreen().platformHeight,
                 wavColor = Color.web(WAV_COLOR),
                 background = Color.web(BACKGROUND_COLOR)
             )
-            .observeOnFx()
-            .map { image ->
-                waveformMinimapImage.set(image)
-            }
-            .ignoreElement()
-            .andThen(waveform)
-            .subscribe {
-                runLater {
-                    isLoadingProperty.set(false)
+        }
+
+        audio.reader().use { reader ->
+            asyncBuilder
+                .build(
+                    reader,
+                    width = Screen.getMainScreen().platformWidth,
+                    height = 50,
+                    wavColor = Color.web(WAV_COLOR),
+                    background = Color.web(BACKGROUND_COLOR)
+                )
+                .observeOnFx()
+                .map { image ->
+                    waveformMinimapImage.set(image)
                 }
-            }
+                .ignoreElement()
+                .andThen(waveform)
+                .subscribe {
+                    runLater {
+                        isLoadingProperty.set(false)
+                    }
+                }
+        }
     }
 
     private fun computeImageWidth(secondsOnScreen: Int): Double {

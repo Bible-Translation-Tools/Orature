@@ -24,22 +24,26 @@ import javafx.collections.ObservableList
 import javafx.event.EventTarget
 import javafx.geometry.Orientation
 import javafx.scene.control.ListView
-import tornadofx.SortedFilteredList
-import tornadofx.addClass
-import tornadofx.attachTo
-import tornadofx.onChange
-import tornadofx.toggleClass
+import tornadofx.*
 
 class NarrationRecordListView<T>(items: ObservableList<T>? = null) : ListView<T>(items) {
     val isRecordingProperty = SimpleBooleanProperty()
+    val isRecordingPausedProperty = SimpleBooleanProperty()
+
+    private val isRecordingActiveProperty = isRecordingProperty.and(isRecordingPausedProperty.not())
 
     init {
         addClass("wa-list-view", "narration-record__list-view")
         orientation = Orientation.HORIZONTAL
 
-        isRecordingProperty.onChange {
+        isRecordingActiveProperty.onChange {
             toggleClass("recording", it)
         }
+
+        disableProperty().bind(isRecordingActiveProperty)
+        styleProperty().bind(isRecordingActiveProperty.stringBinding {
+            if (it == true) "-fx-opacity: 1" else ""
+        })
     }
 }
 

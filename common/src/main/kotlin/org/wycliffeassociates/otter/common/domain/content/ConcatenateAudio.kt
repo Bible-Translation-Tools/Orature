@@ -43,13 +43,13 @@ class ConcatenateAudio @Inject constructor(private val directoryProvider: IDirec
                 files.forEach { file ->
                     val audioFile = AudioFile(file)
                     val buffer = ByteArray(10240)
-                    val reader = audioFile.reader()
-                    reader.open()
-                    while (reader.hasRemaining()) {
-                        val written = reader.getPcmBuffer(buffer)
-                        os.write(buffer, 0, written)
+                    audioFile.reader().use { reader ->
+                        reader.open()
+                        while (reader.hasRemaining()) {
+                            val written = reader.getPcmBuffer(buffer)
+                            os.write(buffer, 0, written)
+                        }
                     }
-                    reader.release()
                 }
             }
             if (includeMarkers) generateMarkers(files, outputFile)
@@ -61,9 +61,9 @@ class ConcatenateAudio @Inject constructor(private val directoryProvider: IDirec
     private fun generateMarkers(inputFiles: List<File>, outputAudio: AudioFile) {
         var markerLocation = 0
 
-        inputFiles.forEach { file ->
+        inputFiles.forEachIndexed { index, file ->
             val audioFile = AudioFile(file)
-            val marker = audioFile.metadata.getCues().first().label
+            val marker = audioFile.metadata.getCues().firstOrNull()?.label ?: (index + 1).toString()
             outputAudio.metadata.addCue(markerLocation, marker)
             markerLocation += audioFile.totalFrames
         }

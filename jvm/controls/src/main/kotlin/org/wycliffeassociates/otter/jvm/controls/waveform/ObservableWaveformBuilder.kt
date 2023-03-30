@@ -90,9 +90,6 @@ class ObservableWaveformBuilder {
             .doOnError { e ->
                 logger.error("Error in building WaveformImage", e)
             }
-            .doAfterTerminate {
-                reader.release()
-            }
             .subscribeOn(Schedulers.computation())
     }
 
