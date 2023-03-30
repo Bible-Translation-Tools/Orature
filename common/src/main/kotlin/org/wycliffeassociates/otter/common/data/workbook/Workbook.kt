@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.common.data.workbook
 
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.ArtworkAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import java.util.*
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 
@@ -46,6 +47,15 @@ class Workbook(
     val modifiedTs = target.modifiedTs
     val sourceMetadataSlug: String
         get() = source.resourceMetadata.identifier
+
+    fun getProjectAccessor(directoryProvider: IDirectoryProvider): ProjectFilesAccessor {
+        return ProjectFilesAccessor(
+            directoryProvider,
+            source.resourceMetadata,
+            target.resourceMetadata,
+            target.toCollection()
+        )
+    }
 
     override fun hashCode(): Int {
         return Objects.hash(

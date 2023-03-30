@@ -16,11 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
+package org.wycliffeassociates.otter.common.domain.project.exporter
 
-enum class ExportOption(val titleKey: String) {
-    LISTEN("listen"),
-    SOURCE_AUDIO("sourceAudio"),
-    BACKUP("backup"),
-    PUBLISH("publish")
+enum class ExportResult {
+    SUCCESS,
+    FAILURE
 }

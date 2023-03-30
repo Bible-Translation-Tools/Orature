@@ -5,7 +5,7 @@ import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.RcConstants
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Checking
 import org.wycliffeassociates.resourcecontainer.entity.Manifest
@@ -75,6 +75,11 @@ class ResourceContainerBuilder(baseRC: File? = null) {
 
     fun setProjectManifest(projects: List<Project>): ResourceContainerBuilder {
         manifest.projects = projects
+        return this
+    }
+
+    fun setContributors(contributors: List<String>): ResourceContainerBuilder {
+        manifest.dublinCore.contributor = contributors.toMutableList()
         return this
     }
 

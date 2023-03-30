@@ -19,7 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.system
 
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
+import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import tornadofx.*
 
 /** Null on success, otherwise localized error text. */
