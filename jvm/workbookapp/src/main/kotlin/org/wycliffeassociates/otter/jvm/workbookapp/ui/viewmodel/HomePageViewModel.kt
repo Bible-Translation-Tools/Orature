@@ -76,7 +76,9 @@ class HomePageViewModel : ViewModel() {
                 if (id != NO_RESUMABLE_PROJECT) {
                     collectionRepo
                         .getProject(id)
-                        .flatMap { workbookRepo.getWorkbook(it) }
+                        .flatMap {
+                            workbookRepo.getWorkbook(it)
+                        }
                         .onErrorComplete()
                         .observeOnFx()
                         .subscribe {
@@ -103,11 +105,28 @@ class HomePageViewModel : ViewModel() {
             }
     }
 
-    fun clearSelectedProject() {
+    /**
+     * Closes all open projects, closing their connections in the workbook repository.
+     *
+     * Also removes the workbooks from the workbook data store and resumeBookProperty.
+     */
+    private fun clearProjects() {
         workbookDataStore.activeWorkbookProperty.value?.let {
+            logger.info("Clearing active project")
             workbookRepo.closeWorkbook(it)
         }
         workbookDataStore.activeWorkbookProperty.set(null)
+        resumeBookProperty.value?.let {
+            logger.info("Clearing resume project")
+            workbookRepo.closeWorkbook(it)
+        }
+        resumeBookProperty.set(null)
+        logger.info("Closing open workbooks")
+        translationModels.forEach {
+            it.books.forEach {
+                workbookRepo.closeWorkbook(it)
+            }
+        }
     }
 
     fun createProject(translation: TranslationCardModel) {
@@ -135,8 +154,21 @@ class HomePageViewModel : ViewModel() {
         navigator.dock<WorkbookPage>()
     }
 
+    fun dock() {
+        clearProjects() // close project before loading
+        loadResumeBook()
+        loadTranslations()
+    }
+
     fun undock() {
         translationModels.clear()
+    }
+
+    fun refresh() {
+        clearProjects()
+        translationModels.clear()
+        loadTranslations()
+        loadResumeBook()
     }
 
     private fun mapToTranslationCardModel(translation: Translation): TranslationCardModel {
