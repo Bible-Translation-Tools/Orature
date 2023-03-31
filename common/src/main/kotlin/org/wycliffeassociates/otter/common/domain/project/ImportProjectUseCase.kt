@@ -1,10 +1,13 @@
 package org.wycliffeassociates.otter.common.domain.project
 
+import io.reactivex.Maybe
 import io.reactivex.Single
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.domain.project.importer.IProjectImporter
 import org.wycliffeassociates.otter.common.domain.project.importer.IProjectImporterFactory
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
+import org.wycliffeassociates.otter.common.domain.project.importer.OngoingProjectImporter
 import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
 import org.wycliffeassociates.otter.common.domain.project.importer.RCImporterFactory
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
@@ -17,6 +20,9 @@ class ImportProjectUseCase @Inject constructor() {
 
     @Inject
     lateinit var rcFactoryProvider: Provider<RCImporterFactory>
+
+    @Inject
+    lateinit var rcImporterProvider: Provider<OngoingProjectImporter>
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -51,6 +57,15 @@ class ImportProjectUseCase @Inject constructor() {
         return rcFactoryProvider.get()
             .makeImporter()
             .isAlreadyImported(file)
+    }
+
+    fun getSourceMetadata(file: File): Maybe<ResourceMetadata> {
+        return when (ProjectFormatIdentifier.getProjectFormat(file)) {
+            ProjectFormat.RESOURCE_CONTAINER -> {
+                rcImporterProvider.get().getSourceMetadata(file)
+            }
+            else -> Maybe.empty()
+        }
     }
 
     /**
