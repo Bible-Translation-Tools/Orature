@@ -202,7 +202,7 @@ class CreateChunksTest {
 
         rc = createRcWithAudio()
 
-        CreateChunks(projectFilesAccessor, audioSourceAudioAccessor, chapter.addChunk, chapter.sort, workbook.target)
+        CreateChunks(projectFilesAccessor, audioSourceAudioAccessor, chapter.addChunk, chapter.sort, workbook)
             .createUserDefinedChunks(workbook.source.slug, customCues, 1)
     }
 
