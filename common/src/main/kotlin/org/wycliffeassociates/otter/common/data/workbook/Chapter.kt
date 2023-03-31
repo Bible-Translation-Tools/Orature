@@ -55,6 +55,18 @@ class Chapter(
     override val textItem
         get() = textItem()
 
+    fun hasSelectedAudio() = audio.selected.value?.value != null
+
+    fun getDraft(): Observable<Chunk> {
+        return chunkCount
+            .toObservable()
+            .map {
+                (getLatestDraftFromRelay().blockingGet()).toObservable()
+            }
+            .flatMap { it }
+            .subscribeOn(Schedulers.io())
+    }
+
     private fun getLatestDraftFromRelay(): Single<List<Chunk>> {
         return Single.fromCallable {
             val draft = mutableListOf<Chunk>()
@@ -69,16 +81,6 @@ class Chapter(
             disposable.dispose()
             draft.toList()
         }.subscribeOn(Schedulers.io())
-    }
-
-    fun getDraft(): Observable<Chunk> {
-        return chunkCount
-            .toObservable()
-            .map {
-                (getLatestDraftFromRelay().blockingGet()).toObservable()
-            }
-            .flatMap { it }
-            .subscribeOn(Schedulers.io())
     }
 
     private fun textItem(): TextItem {

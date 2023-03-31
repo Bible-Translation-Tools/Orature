@@ -31,7 +31,7 @@ import javafx.scene.control.Skin
 import javafx.scene.image.Image
 import org.wycliffeassociates.otter.jvm.controls.skins.banner.WorkbookBannerSkin
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.Artwork
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportOption
+import org.wycliffeassociates.otter.common.domain.project.exporter.ExportType
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import java.util.function.Predicate
@@ -52,10 +52,10 @@ class WorkbookBanner : Control() {
     val onExportActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     val exportOptions = observableListOf(
-        ExportOption.LISTEN,
-        ExportOption.SOURCE_AUDIO,
-        ExportOption.BACKUP,
-        ExportOption.PUBLISH
+        ExportType.LISTEN,
+        ExportType.SOURCE_AUDIO,
+        ExportType.BACKUP,
+        ExportType.PUBLISH
     )
     val filteredExportOptions = FilteredList(exportOptions)
 
@@ -74,7 +74,7 @@ class WorkbookBanner : Control() {
         }
         isBookResourceProperty.onChange { isBook ->
             filteredExportOptions.predicate = Predicate {
-                it != ExportOption.SOURCE_AUDIO || isBook
+                it != ExportType.SOURCE_AUDIO || isBook
             }
         }
     }
@@ -96,9 +96,9 @@ class WorkbookBanner : Control() {
         onDeleteActionProperty.set(EventHandler { op.invoke() })
     }
 
-    fun onExportAction(op: (ExportOption) -> Unit) {
+    fun onExportAction(op: (ExportType) -> Unit) {
         onExportActionProperty.set(
-            EventHandler { op.invoke(it.source as ExportOption) }
+            EventHandler { op.invoke(it.source as ExportType) }
         )
     }
 

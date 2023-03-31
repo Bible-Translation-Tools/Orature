@@ -20,14 +20,13 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.project
 
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.cast
-import io.reactivex.rxkotlin.toObservable
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.BookElement
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.RcConstants
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.buildManifest
 import org.wycliffeassociates.otter.common.io.zip.IFileReader
 import org.wycliffeassociates.otter.common.io.zip.IFileWriter
@@ -264,9 +263,14 @@ class ProjectFilesAccessor(
         }
     }
 
-    fun writeSelectedTakesFile(fileWriter: IFileWriter, workbook: Workbook, isBook: Boolean) {
+    fun writeSelectedTakesFile(
+        fileWriter: IFileWriter,
+        workbook: Workbook,
+        isBook: Boolean,
+        takeFilter: (String) -> Boolean = { true }
+    ) {
         fileWriter.bufferedWriter(RcConstants.SELECTED_TAKES_FILE).use { _fileWriter ->
-            fetchSelectedTakes(workbook, isBook)
+            fetchSelectedTakes(workbook, isBook, filter = takeFilter)
                 .map(::relativeTakePath)
                 .doOnError { e ->
                     log.error("Error in writeSelectedTakesFile", e)
@@ -308,17 +312,19 @@ class ProjectFilesAccessor(
         fileWriter: IFileWriter,
         workbook: Workbook,
         workbookRepository: IWorkbookRepository,
-        isBook: Boolean
+        isBook: Boolean,
+        filter: (String) -> Boolean = { true }
     ) {
         val selectedChapters = selectedChapterFilePaths(workbook, isBook)
         val deletedTakes = deletedTakeFilePaths(workbook, workbookRepository)
         fileWriter.copyDirectory(audioDir, RcConstants.TAKE_DIR) {
             val normalized = File(it).invariantSeparatorsPath
             !selectedChapters.contains(normalized) && !deletedTakes.contains(normalized)
+                    && filter(it)
         }
         fileWriter.copyDirectory(audioDir, RcConstants.MEDIA_DIR) {
             val normalized = File(it).invariantSeparatorsPath
-            selectedChapters.contains(normalized)
+            selectedChapters.contains(normalized) && filter(it)
         }
     }
 
@@ -531,7 +537,8 @@ class ProjectFilesAccessor(
     private fun fetchSelectedTakes(
         workbook: Workbook,
         isBook: Boolean,
-        chaptersOnly: Boolean = false
+        chaptersOnly: Boolean = false,
+        filter: (String) -> Boolean = { true }
     ): Observable<Take> {
         val chapters = when {
             isBook -> workbook.target.chapters
@@ -549,6 +556,9 @@ class ProjectFilesAccessor(
             .mapNotNull { audio ->
                 val take = audio.selected.value?.value
                 take
+            }
+            .filter {
+                filter(it.file.name)
             }
     }
 

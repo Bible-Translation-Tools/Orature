@@ -29,10 +29,10 @@ import javafx.scene.control.SkinBase
 import javafx.scene.image.ImageView
 import javafx.scene.layout.HBox
 import javafx.scene.shape.Rectangle
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportOption
+import org.wycliffeassociates.otter.common.domain.project.exporter.ExportType
 import org.wycliffeassociates.otter.jvm.controls.banner.WorkbookBanner
 import org.wycliffeassociates.otter.jvm.controls.listview.DummyExportComboBoxButton
-import org.wycliffeassociates.otter.jvm.controls.listview.ExportOptionListCell
+import org.wycliffeassociates.otter.jvm.controls.listview.ExportTypeListCell
 import org.wycliffeassociates.otter.jvm.utils.overrideDefaultKeyEventHandler
 import tornadofx.*
 import tornadofx.FX.Companion.messages
@@ -55,7 +55,7 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
     lateinit var deleteBtn: Button
 
     @FXML
-    lateinit var exportSelectMenu: ComboBox<ExportOption>
+    lateinit var exportSelectMenu: ComboBox<ExportType>
 
     @FXML
     lateinit var fakeExportMenu: ComboBox<String> // this menu displays on top of the actual menu
@@ -87,7 +87,7 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
         exportSelectMenu.apply {
             items = banner.filteredExportOptions
             setCellFactory {
-                ExportOptionListCell()
+                ExportTypeListCell()
             }
             tooltip {
                 text = messages["exportOptions"]
