@@ -210,31 +210,43 @@ class ContentRepository @Inject constructor(
                 entity.collectionFk = existing.collectionFk
                 contentDao.update(entity)
 
-                activeConnections.keys.find { it.id == entity.collectionFk }?.let { collection ->
-                    activeConnections[collection]?.let { connection ->
-                        connection.getValues(emptyArray()).find {
-                            it.id == obj.id
-                        }?.let { contentInRelay ->
-                            contentInRelay.apply {
-                                sort = obj.sort
-                                labelKey = obj.labelKey
-                                start = obj.start
-                                end = obj.end
-                                selectedTake = obj.selectedTake
-                                text = obj.text
-                                format = obj.format
-                                type = obj.type
-                                draftNumber = obj.draftNumber
-                                bridged = obj.bridged
-                            }
-                        }
-                    }
-                }
+                updateConnection(obj, entity.collectionFk)
             }
             .doOnError { e ->
                 logger.error("Error in update for content: $obj", e)
             }
             .subscribeOn(Schedulers.io())
+    }
+
+    /**
+     * Updates the content stored inside the active connections.
+     * Calls this method when making a change to the content in the database
+     * to avoid out-of-sync between the database and connections.
+     */
+    private fun updateConnection(
+        newContent: Content,
+        collectionId: Int
+    ) {
+        activeConnections.keys.find { it.id == collectionId }?.let { collection ->
+            activeConnections[collection]?.let { connection ->
+                connection.getValues(emptyArray()).find {
+                    it.id == newContent.id
+                }?.let { contentInRelay ->
+                    contentInRelay.apply {
+                        sort = newContent.sort
+                        labelKey = newContent.labelKey
+                        start = newContent.start
+                        end = newContent.end
+                        selectedTake = newContent.selectedTake
+                        text = newContent.text
+                        format = newContent.format
+                        type = newContent.type
+                        draftNumber = newContent.draftNumber
+                        bridged = newContent.bridged
+                    }
+                }
+            }
+        }
     }
 
     override fun linkDerivedToSource(
