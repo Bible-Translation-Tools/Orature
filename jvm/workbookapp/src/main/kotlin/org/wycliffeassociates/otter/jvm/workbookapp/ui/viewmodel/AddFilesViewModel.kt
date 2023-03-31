@@ -66,7 +66,9 @@ class AddFilesViewModel : ViewModel() {
     fun onDropFile(files: List<File>) {
         if (isValidImportFile(files)) {
             logger.info("Drag-drop file to import: ${files.first()}")
-            importProject(files.first())
+            val fileToImport = files.first()
+            setProjectInfo(fileToImport)
+            importProject(fileToImport)
         }
     }
 
