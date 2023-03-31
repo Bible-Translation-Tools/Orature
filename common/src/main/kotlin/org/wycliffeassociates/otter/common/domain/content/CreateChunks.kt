@@ -121,14 +121,45 @@ class CreateChunks(
         allocatedVerses.forEach {
             val found = versesFromText.find { v -> v.start == it.start }
             if (found != null) {
-                val overwritten = it.copy(text = found.text)
+                val overwritten = it.copy(
+                    text = found.text,
+                    start = found.start,
+                    end = found.end,
+                    bridged = found.bridged
+                )
                 verses.add(overwritten)
             } else {
                 verses.add(it)
             }
         }
+        markBridgedVerses(verses)
         return verses
     }
+
+    /**
+     * Scans through the list of verses and marks any verses that are bridged.
+     *
+     * It does this by finding the first instance of the start and end matching and marks all future verses
+     * through the start and end matching again (which would signify the last verse in the bridge).
+     *
+     * @param verses the list of verses to mark, this updates the list in place
+     */
+    private fun markBridgedVerses(verses: MutableList<Content>) {
+        verses.sortBy { it.sort }
+        var bridge = false
+        for (i in 0 until verses.size) {
+            if (bridge) {
+                verses[i].bridged = true
+            }
+            if (verses[i].start == verses[i].end) {
+                bridge = false
+            }
+            if (verses[i].start != verses[i].end) {
+                bridge = true
+            }
+        }
+    }
+
 
     /**
      * Creates a list of content using the versification of the project. As it is being allocated from versification,
@@ -176,13 +207,13 @@ class CreateChunks(
      * @return a list of content objects from the text content
      */
     private fun getVersesFromText(projectSlug: String, chapterNumber: Int, draftNumber: Int): List<Content> {
+        logger.info("Creating chunks from project $projectSlug from verses, draft $draftNumber")
         val verses = mutableListOf<Content>()
         projectFilesAccessor.getChapterContent(
             projectSlug,
             chapterNumber,
             showVerseNumber = false
         ).forEachIndexed { idx, content ->
-            logger.info("Creating chunks from project $projectSlug from verses, draft $draftNumber")
             content.sort = idx + 1
             content.draftNumber = draftNumber
             verses.add(content)

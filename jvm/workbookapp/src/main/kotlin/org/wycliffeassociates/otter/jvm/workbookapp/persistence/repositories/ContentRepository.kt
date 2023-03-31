@@ -60,12 +60,7 @@ class ContentRepository @Inject constructor(
                 contentDao
                     .fetchByCollectionId(collection.id)
                     .map(this::buildContent)
-                    .filter {
-                        if (it.bridged) {
-                            logger.info("Ignoring bridged content: ${it}, start is ${it.start} end is ${it.end}")
-                        }
-                        !it.bridged
-                    }
+                    .filter { !it.bridged }
             }
             .doOnError { e ->
                 logger.error("Error in getByCollection for collection: $collection", e)
