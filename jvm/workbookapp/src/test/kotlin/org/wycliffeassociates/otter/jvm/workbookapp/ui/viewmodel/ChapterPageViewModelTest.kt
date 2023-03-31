@@ -18,52 +18,6 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
-import com.jakewharton.rxrelay2.ReplayRelay
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.mock
-import io.reactivex.Completable
-import io.reactivex.Maybe
-import io.reactivex.Observable
-import io.reactivex.Single
-import javafx.beans.property.SimpleStringProperty
-import javafx.beans.value.ChangeListener
-import org.junit.After
-import org.junit.AfterClass
-import org.junit.Assert
-import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.Test
-import org.testfx.api.FxToolkit
-import org.testfx.util.WaitForAsyncUtils
-import org.wycliffeassociates.otter.common.data.primitives.ContentType
-import org.wycliffeassociates.otter.common.data.primitives.Language
-import org.wycliffeassociates.otter.common.data.primitives.MimeType
-import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
-import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
-import org.wycliffeassociates.otter.common.data.workbook.Book
-import org.wycliffeassociates.otter.common.data.workbook.Chapter
-import org.wycliffeassociates.otter.common.data.workbook.Chunk
-import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.common.data.workbook.TextItem
-import org.wycliffeassociates.otter.common.data.workbook.Translation
-import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.common.domain.content.TakeActions
-import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
-import org.wycliffeassociates.otter.common.domain.plugins.IAudioPlugin
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
-import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
-import org.wycliffeassociates.otter.jvm.device.ConfigureAudioSystem
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
-import org.wycliffeassociates.otter.jvm.workbookapp.utils.writeWavFile
-import tornadofx.*
-import java.io.File
-import java.time.LocalDate
-import java.util.*
-
 class ChapterPageViewModelTest {
 //    companion object {
 //        private val testApp: TestApp = TestApp()
