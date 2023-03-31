@@ -1,26 +1,19 @@
 package org.wycliffeassociates.otter.common.domain.project
 
-import io.reactivex.Maybe
 import io.reactivex.Single
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.domain.project.importer.IProjectImporter
 import org.wycliffeassociates.otter.common.domain.project.importer.IProjectImporterFactory
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
 import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
 import org.wycliffeassociates.otter.common.domain.project.importer.RCImporterFactory
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
-import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
-import org.wycliffeassociates.resourcecontainer.ResourceContainer
-import org.wycliffeassociates.resourcecontainer.entity.Source
 import java.io.File
 import java.lang.IllegalArgumentException
 import javax.inject.Inject
 import javax.inject.Provider
 
-class ImportProjectUseCase @Inject constructor(
-    val collectionRepo: ICollectionRepository
-) {
+class ImportProjectUseCase @Inject constructor() {
 
     @Inject
     lateinit var rcFactoryProvider: Provider<RCImporterFactory>
@@ -58,26 +51,6 @@ class ImportProjectUseCase @Inject constructor(
         return rcFactoryProvider.get()
             .makeImporter()
             .isAlreadyImported(file)
-    }
-
-    fun getSourceMetadata(resourceContainer: File): Maybe<ResourceMetadata> {
-        val manifest = try {
-            ResourceContainer.load(resourceContainer).use { it.manifest }
-        } catch(e: Exception) {
-            return Maybe.empty()
-        }
-
-        val manifestSources = manifest.dublinCore.source.toSet()
-        val manifestProject = manifest.projects.single()
-
-        return Maybe.fromCallable {
-            collectionRepo.getSourceProjects().blockingGet()
-                .filter { it.slug == manifestProject.identifier }
-                .mapNotNull { it.resourceContainer }
-                .firstOrNull {
-                    Source(it.identifier, it.language.slug, it.version) in manifestSources
-                }
-        }
     }
 
     /**

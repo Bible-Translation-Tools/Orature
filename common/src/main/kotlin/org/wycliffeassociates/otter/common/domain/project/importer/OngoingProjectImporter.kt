@@ -158,6 +158,16 @@ class OngoingProjectImporter @Inject constructor(
         }
     }
 
+    fun getSourceMetadata(resourceContainer: File): Maybe<ResourceMetadata> {
+        return Maybe.fromCallable {
+            val manifest: Manifest = ResourceContainer.load(resourceContainer).use { it.manifest }
+            val manifestSources = manifest.dublinCore.source.toSet()
+            val manifestProject = manifest.projects.single()
+            val sourceCollection = findSourceCollection(manifestSources, manifestProject)
+            sourceCollection.resourceContainer
+        }
+    }
+
     fun importResumableProject(
         resourceContainer: File
     ): Single<ImportResult> {

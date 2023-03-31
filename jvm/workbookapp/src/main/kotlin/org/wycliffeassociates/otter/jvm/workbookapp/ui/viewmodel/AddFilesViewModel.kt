@@ -50,6 +50,7 @@ class AddFilesViewModel : ViewModel() {
 
     @Inject lateinit var directoryProvider: IDirectoryProvider
     @Inject lateinit var importProjectProvider : Provider<ImportProjectUseCase>
+    @Inject lateinit var importProvider: Provider<OngoingProjectImporter>
 
     val showImportDialogProperty = SimpleBooleanProperty(false)
     val showImportSuccessDialogProperty = SimpleBooleanProperty(false)
@@ -67,7 +68,6 @@ class AddFilesViewModel : ViewModel() {
     fun onDropFile(files: List<File>) {
         if (isValidImportFile(files)) {
             logger.info("Drag-drop file to import: ${files.first()}")
-            setProjectInfo(files.first())
             importProject(files.first())
         }
     }
@@ -129,7 +129,7 @@ class AddFilesViewModel : ViewModel() {
             }
 
             override fun onRequestUserInput(parameter: ImportCallbackParameter): Single<ImportOptions> {
-                return Single.just(ImportOptions(parameter.options))
+                return Single.just(ImportOptions(null))
             }
 
             override fun onError(messageKey: String) {
@@ -182,7 +182,7 @@ class AddFilesViewModel : ViewModel() {
                 it.project()
             }
             project?.let {
-                importProjectProvider.get()
+                importProvider.get()
                     .getSourceMetadata(rc)
                     .doOnError {
                         logger.debug("Error in getSourceMetadata: $rc")
