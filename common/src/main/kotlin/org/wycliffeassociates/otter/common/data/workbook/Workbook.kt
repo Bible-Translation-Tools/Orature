@@ -44,18 +44,20 @@ class Workbook(
             source.slug
         )
     }
-    val modifiedTs = target.modifiedTs
-    val sourceMetadataSlug: String
-        get() = source.resourceMetadata.identifier
 
-    fun getProjectAccessor(directoryProvider: IDirectoryProvider): ProjectFilesAccessor {
-        return ProjectFilesAccessor(
+    val projectFilesAccessor: ProjectFilesAccessor by lazy {
+        ProjectFilesAccessor(
             directoryProvider,
             source.resourceMetadata,
             target.resourceMetadata,
             target.toCollection()
         )
     }
+
+
+    val modifiedTs = target.modifiedTs
+    val sourceMetadataSlug: String
+        get() = source.resourceMetadata.identifier
 
     override fun hashCode(): Int {
         return Objects.hash(
