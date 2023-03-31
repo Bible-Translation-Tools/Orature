@@ -36,7 +36,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.map
 import java.lang.IllegalStateException
 import javax.inject.Inject
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.CollectionMapper
-import kotlin.math.log
 
 class ContentRepository @Inject constructor(
     database: AppDatabase
@@ -205,11 +204,44 @@ class ContentRepository @Inject constructor(
                 // Make sure we don't over write the collection relationship
                 entity.collectionFk = existing.collectionFk
                 contentDao.update(entity)
+
+                updateConnection(obj, entity.collectionFk)
             }
             .doOnError { e ->
                 logger.error("Error in update for content: $obj", e)
             }
             .subscribeOn(Schedulers.io())
+    }
+
+    /**
+     * Updates the content stored inside the active connections.
+     * Calls this method when making a change to the content in the database
+     * to avoid out-of-sync between the database and connections.
+     */
+    private fun updateConnection(
+        newContent: Content,
+        collectionId: Int
+    ) {
+        activeConnections.keys.find { it.id == collectionId }?.let { collection ->
+            activeConnections[collection]?.let { connection ->
+                connection.getValues(emptyArray()).find {
+                    it.id == newContent.id
+                }?.let { contentInRelay ->
+                    contentInRelay.apply {
+                        sort = newContent.sort
+                        labelKey = newContent.labelKey
+                        start = newContent.start
+                        end = newContent.end
+                        selectedTake = newContent.selectedTake
+                        text = newContent.text
+                        format = newContent.format
+                        type = newContent.type
+                        draftNumber = newContent.draftNumber
+                        bridged = newContent.bridged
+                    }
+                }
+            }
+        }
     }
 
     override fun linkDerivedToSource(

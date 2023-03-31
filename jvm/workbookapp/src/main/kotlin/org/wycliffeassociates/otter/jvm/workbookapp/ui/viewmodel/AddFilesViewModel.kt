@@ -34,7 +34,6 @@ import org.wycliffeassociates.otter.common.domain.project.importer.ImportCallbac
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.ArtworkAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
-import org.wycliffeassociates.otter.common.domain.project.importer.OngoingProjectImporter
 import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -51,7 +50,6 @@ class AddFilesViewModel : ViewModel() {
 
     @Inject lateinit var directoryProvider: IDirectoryProvider
     @Inject lateinit var importProjectProvider : Provider<ImportProjectUseCase>
-    @Inject lateinit var importProvider: Provider<OngoingProjectImporter>
 
     val showImportDialogProperty = SimpleBooleanProperty(false)
     val showImportSuccessDialogProperty = SimpleBooleanProperty(false)
@@ -69,7 +67,9 @@ class AddFilesViewModel : ViewModel() {
     fun onDropFile(files: List<File>) {
         if (isValidImportFile(files)) {
             logger.info("Drag-drop file to import: ${files.first()}")
-            importProject(files.first())
+            val fileToImport = files.first()
+            setProjectInfo(fileToImport)
+            importProject(fileToImport)
         }
     }
 
@@ -130,7 +130,7 @@ class AddFilesViewModel : ViewModel() {
             }
 
             override fun onRequestUserInput(parameter: ImportCallbackParameter): Single<ImportOptions> {
-                return Single.just(ImportOptions(null))
+                return Single.just(ImportOptions(parameter.options))
             }
 
             override fun onError(messageKey: String) {
@@ -183,7 +183,7 @@ class AddFilesViewModel : ViewModel() {
                 it.project()
             }
             project?.let {
-                importProvider.get()
+                importProjectProvider.get()
                     .getSourceMetadata(rc)
                     .doOnError {
                         logger.debug("Error in getSourceMetadata: $rc")
