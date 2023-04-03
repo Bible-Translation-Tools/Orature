@@ -76,7 +76,7 @@ class ChapterPageViewModel : ViewModel() {
     lateinit var appPreferencesRepo: IAppPreferencesRepository
 
     @Inject
-    lateinit var versificationRepository: IVersificationRepository
+    lateinit var createChunks: CreateChunks
 
     // List of content to display on the screen
     // Boolean tracks whether the content has takes associated with it
@@ -480,17 +480,10 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     fun createChunksFromVerses() {
-        val accessor = workbookDataStore.activeProjectFilesAccessorProperty.value
         val wkbk = workbookDataStore.activeWorkbookProperty.value
         val chapter = workbookDataStore.activeChapterProperty.value
-        CreateChunks(
-            accessor,
-            wkbk.sourceAudioAccessor,
-            chapter.addChunk,
-            chapter.sort,
-            wkbk
-        )
-            .createChunksFromVerses(versificationRepository, wkbk.source.slug, 1)
+
+        createChunks.createChunksFromVerses(wkbk, chapter, 1)
     }
 
     fun resetChapter() {

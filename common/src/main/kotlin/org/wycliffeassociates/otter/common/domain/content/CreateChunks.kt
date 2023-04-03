@@ -7,8 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
-import io.reactivex.MaybeSource
-import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import java.io.File
 import org.slf4j.LoggerFactory
@@ -17,32 +15,52 @@ import org.wycliffeassociates.otter.common.data.Chunkification
 import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.workbook.Book
+import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.audio.SourceAudioFile
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.VersificationTreeBuilder
 import org.wycliffeassociates.otter.common.domain.versification.Versification
 import org.wycliffeassociates.otter.common.persistence.repositories.IVersificationRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
+import javax.inject.Inject
 
-class CreateChunks(
-    private val projectFilesAccessor: ProjectFilesAccessor,
-    private val sourceAudioAccessor: SourceAudioAccessor,
-    private val chunkCreator: (List<Content>) -> Unit,
-    private val chapterNumber: Int,
-    private val workbook: Workbook
+
+/**
+ * Creates chunks for a given chapter of a book and adds the chunks the the workbook.
+ * Chunks can either be user defined, or automatically generated based on the versification of the book and the
+ * text content.
+ *
+ * @param chunkCreator A function that takes a list of Content and creates chunks for that list
+ * @param chapterNumber The chapter number to create chunks for
+ * @param workbook The workbook to add the created chunks to
+ */
+class CreateChunks @Inject constructor(
+    private val versificationRepository: IVersificationRepository
 ) {
     private val logger = LoggerFactory.getLogger(CreateChunks::class.java)
 
+
+    /**
+     * Creates chunks based on a list of audio cues, ultimately allowing for chunking based on placing markers
+     * in a source audio.
+     *
+     * The range of verses will be determined by comparing the cues to the verse markers in the source audio corresponding
+     * to the workbook.
+     *
+     * @param projectSlug The slug of the project to create chunks for
+     * @param cues The list of audio cues to use to create chunks
+     * @param draftNumber The draft number to create chunks form
+     */
     fun createUserDefinedChunks(
-        projectSlug: String,
+        workbook: Workbook,
+        chapter: Chapter,
         chunks: List<AudioCue>,
         draftNumber: Int
     ) {
+        val chapterNumber = chapter.sort
+        val projectSlug = workbook.target.slug
+
         logger.info("Creating ${chunks.size} user defined chunks for project: $projectSlug chapter: $chapterNumber")
-        val chapAudio = sourceAudioAccessor.getChapter(chapterNumber, workbook.target)
+        val chapAudio = workbook.sourceAudioAccessor.getChapter(chapter.sort, workbook.target)
         val sa = SourceAudioFile(chapAudio!!.file)
         val verseMarkers = sa.getVerses()
         val chunkRanges = mapCuesToRanges(chunks)
@@ -53,7 +71,7 @@ class CreateChunks(
             val verses = findVerseRange(verseRanges, chunk)
 
             // use the chapter range and text if there are no verse markers (which would make the verse range empty)
-            val chapterText = projectFilesAccessor.getChapterText(projectSlug, chapterNumber)
+            val chapterText = workbook.projectFilesAccessor.getChapterText(projectSlug, chapterNumber)
             var start = 1
             var end = chapterText.size
             var text = ""
@@ -62,7 +80,7 @@ class CreateChunks(
             if (verses.isNotEmpty()) {
                 start = verses.first()
                 end = verses.last()
-                val v = projectFilesAccessor.getChunkText(projectSlug, chapterNumber, start, end)
+                val v = workbook.projectFilesAccessor.getChunkText(projectSlug, chapterNumber, start, end)
                 text = StringBuilder().apply { v.forEach { append("$it\n") } }.toString()
             } else {
                 text = StringBuilder().apply { chapterText.forEach { append(it) } }.toString()
@@ -81,8 +99,8 @@ class CreateChunks(
                 )
             )
         }
-        chunkCreator(chunksToAdd)
-        writeChunkFile(projectSlug, chapterNumber, chunksToAdd)
+        chapter.addChunk(chunksToAdd)
+        writeChunkFile(workbook, chapterNumber, chunksToAdd)
     }
 
     /**
@@ -93,20 +111,25 @@ class CreateChunks(
      * @param draftNumber the draft number to create chunks for
      */
     fun createChunksFromVerses(
-        versificationRepository: IVersificationRepository,
-        projectSlug: String,
+        workbook: Workbook,
+        chapter: Chapter,
         draftNumber: Int
     ) {
+        val chapterNumber = chapter.sort
+        val projectSlug = workbook.target.slug
+
         ResourceContainer
             .load(workbook.source.resourceMetadata.path).use { rc ->
-                val vrsSlug = rc.manifest.projects.firstOrNull { !it.versification.isNullOrEmpty() }?.versification ?: ""
+                val vrsSlug =
+                    rc.manifest.projects.firstOrNull { !it.versification.isNullOrEmpty() }?.versification ?: ""
                 versificationRepository.getVersification(vrsSlug)
             }.map {
                 val allocatedVerses = preallocateVerses(it, workbook.target, chapterNumber, draftNumber)
-                val versesFromText = getVersesFromText(projectSlug, chapterNumber, draftNumber)
+                val versesFromText = getVersesFromText(workbook, projectSlug, chapterNumber, draftNumber)
                 val finalizedVerses = overlayVerses(allocatedVerses, versesFromText)
-                chunkCreator(finalizedVerses)
+                chapter.addChunk(finalizedVerses)
             }
+            .doOnError { logger.error("Error creating chunks from verses", it) }
             .subscribeOn(Schedulers.io())
             .subscribe()
     }
@@ -206,10 +229,15 @@ class CreateChunks(
      * @param draftNumber the number for the draft being created
      * @return a list of content objects from the text content
      */
-    private fun getVersesFromText(projectSlug: String, chapterNumber: Int, draftNumber: Int): List<Content> {
+    private fun getVersesFromText(
+        workbook: Workbook,
+        projectSlug: String,
+        chapterNumber: Int,
+        draftNumber: Int
+    ): List<Content> {
         logger.info("Creating chunks from project $projectSlug from verses, draft $draftNumber")
         val verses = mutableListOf<Content>()
-        projectFilesAccessor.getChapterContent(
+        workbook.projectFilesAccessor.getChapterContent(
             projectSlug,
             chapterNumber,
             showVerseNumber = false
@@ -221,7 +249,11 @@ class CreateChunks(
         return verses
     }
 
-    private fun writeChunkFile(projectSlug: String, chapterNumber: Int, chunksToAdd: List<Content>) {
+    private fun writeChunkFile(
+        workbook: Workbook,
+        chapterNumber: Int,
+        chunksToAdd: List<Content>
+    ) {
         val factory = JsonFactory()
         factory.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET)
         val mapper = ObjectMapper(factory)
@@ -230,7 +262,7 @@ class CreateChunks(
 
         val chunks = mutableMapOf<Int, List<Content>>()
 
-        val file: File = projectFilesAccessor.getChunkFile().apply {
+        val file: File = workbook.projectFilesAccessor.getChunkFile().apply {
             // Create empty file if it doesn't exist
             parentFile.mkdirs()
             createNewFile()
