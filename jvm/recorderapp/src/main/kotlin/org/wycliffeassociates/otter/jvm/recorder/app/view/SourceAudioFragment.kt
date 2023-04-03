@@ -38,6 +38,7 @@ class SourceAudioFragment : Fragment() {
     private fun initializeSourceContent(): SourceContent {
 
         var sourceText: String? = null
+        var sourceTextZoom: Int? = null
         var sourceContentTitle: String? = null
         var license: String? = null
         var direction: String? = null
@@ -50,6 +51,7 @@ class SourceAudioFragment : Fragment() {
 
             parameters?.let {
                 sourceText = parameters.named["source_text"]
+                sourceTextZoom = parameters.named["source_text_zoom"]?.toInt()
                 license = parameters.named["license"]
                 direction = parameters.named["direction"]
                 sourceDirection = parameters.named["source_direction"]
@@ -92,6 +94,7 @@ class SourceAudioFragment : Fragment() {
 
             sourceSpeedRateProperty.set(sourceRate ?: 1.0)
             targetSpeedRateProperty.set(targetRate ?: 1.0)
+            zoomRateProperty.set(sourceTextZoom ?: 100)
         }
     }
 
