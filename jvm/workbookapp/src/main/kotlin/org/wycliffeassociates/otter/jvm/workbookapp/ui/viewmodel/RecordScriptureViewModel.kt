@@ -42,7 +42,7 @@ import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.Recordable
-import org.wycliffeassociates.otter.common.domain.content.TakeActions
+import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.common.utils.capitalizeString
 import org.wycliffeassociates.otter.jvm.controls.ListAnimationMediator
@@ -398,17 +398,17 @@ class RecordScriptureViewModel : ViewModel() {
                 .doOnError { e ->
                     logger.error("Error in recording a new take", e)
                 }
-                .onErrorReturn { TakeActions.Result.NO_PLUGIN }
-                .subscribe { result: TakeActions.Result ->
+                .onErrorReturn { PluginActions.Result.NO_PLUGIN }
+                .subscribe { result: PluginActions.Result ->
                     fire(PluginClosedEvent(PluginType.RECORDER))
                     when (result) {
-                        TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noRecorder"])
-                        TakeActions.Result.SUCCESS -> {
+                        PluginActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noRecorder"])
+                        PluginActions.Result.SUCCESS -> {
                             setMarker()
                             loadTakes()
                             updateOnSuccess.subscribe()
                         }
-                        TakeActions.Result.NO_AUDIO -> {
+                        PluginActions.Result.NO_AUDIO -> {
                             setMarker()
                             loadTakes()
                         }
@@ -435,12 +435,12 @@ class RecordScriptureViewModel : ViewModel() {
             .doOnError { e ->
                 logger.error("Error in processing take with plugin type: $pluginType", e)
             }
-            .onErrorReturn { TakeActions.Result.NO_PLUGIN }
-            .subscribe { result: TakeActions.Result ->
+            .onErrorReturn { PluginActions.Result.NO_PLUGIN }
+            .subscribe { result: PluginActions.Result ->
                 fire(PluginClosedEvent(pluginType))
                 when (result) {
-                    TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noEditor"])
-                    TakeActions.Result.SUCCESS -> {
+                    PluginActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noEditor"])
+                    PluginActions.Result.SUCCESS -> {
                         takeEvent.onComplete()
                         loadTakes()
                     }

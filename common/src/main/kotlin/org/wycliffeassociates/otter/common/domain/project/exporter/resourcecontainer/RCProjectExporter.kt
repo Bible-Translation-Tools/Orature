@@ -30,7 +30,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
-import org.wycliffeassociates.otter.common.domain.content.TakeActions
+import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
 import org.wycliffeassociates.otter.common.domain.project.exporter.IProjectExporter
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
@@ -51,7 +51,7 @@ abstract class RCProjectExporter(
     lateinit var concatenateAudio: ConcatenateAudio
 
     @Inject
-    lateinit var takeActions: TakeActions
+    lateinit var pluginActions: PluginActions
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
     private val compositeDisposable = CompositeDisposable()
@@ -108,7 +108,7 @@ abstract class RCProjectExporter(
                     }
                     .flatMapCompletable { compiledTake ->
                         logger.info("Importing the new compiled chapter take ${compiledTake.name}")
-                        takeActions.import(
+                        pluginActions.import(
                             chapter.audio,
                             projectFilesAccessor.audioDir,
                             createFileNamer(workbook, chapter, resourceMetadata.identifier),

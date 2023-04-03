@@ -46,7 +46,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.TextItem
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.common.domain.content.TakeActions
+import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.plugins.IAudioPlugin
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
@@ -161,10 +161,10 @@ class RecordScriptureViewModelTest {
             on { launch(any(), any()) } doReturn Completable.complete()
         }
 
-        private val takeActions = mock<TakeActions> {
-            on { record(any(), any(), any(), any()) } doReturn Single.just(TakeActions.Result.SUCCESS)
-            on { mark(any(), any(), any()) } doReturn Single.just(TakeActions.Result.SUCCESS)
-            on { edit(any(), any(), any()) } doReturn Single.just(TakeActions.Result.SUCCESS)
+        private val pluginActions = mock<PluginActions> {
+            on { record(any(), any(), any(), any()) } doReturn Single.just(PluginActions.Result.SUCCESS)
+            on { mark(any(), any(), any()) } doReturn Single.just(PluginActions.Result.SUCCESS)
+            on { edit(any(), any(), any()) } doReturn Single.just(PluginActions.Result.SUCCESS)
             on { import(any(), any(), any(), any()) } doReturn Completable.complete()
         }
 
@@ -196,7 +196,7 @@ class RecordScriptureViewModelTest {
 
             audioPluginViewModel = find()
             audioPluginViewModel.pluginRepository = pluginRepository
-            audioPluginViewModel.takeActions = takeActions
+            audioPluginViewModel.pluginActions = pluginActions
         }
 
         @AfterClass
