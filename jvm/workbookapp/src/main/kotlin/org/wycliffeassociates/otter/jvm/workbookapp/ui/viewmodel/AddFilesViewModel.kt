@@ -37,6 +37,7 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ImportEvent
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
 import java.io.File
@@ -108,7 +109,7 @@ class AddFilesViewModel : ViewModel() {
                 when (result) {
                     ImportResult.SUCCESS -> {
                         showImportSuccessDialogProperty.value = true
-                        find<HomePageViewModel>().loadTranslations()
+                        fire(ImportEvent)
                     }
                     ImportResult.DEPENDENCY_CONSTRAINT -> {
                         importErrorMessage.set(messages["importErrorDependencyExists"])

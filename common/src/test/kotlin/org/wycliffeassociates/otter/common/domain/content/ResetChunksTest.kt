@@ -212,7 +212,7 @@ class ResetChunksTest {
         projectFilesAccessor = ProjectFilesAccessor(mockedDirectoryProvider, rcSource, rcTarget, collTarget)
         audioSourceAudioAccessor = SourceAudioAccessor(mockedDirectoryProvider, rcSource, collSource.slug)
 
-        workbook = buildWorkbook(mockedDb, collSource, collTarget)
+        workbook = buildWorkbook(mockedDirectoryProvider, mockedDb, collSource, collTarget)
         chapter = workbook.target.chapters.blockingFirst()
 
         rc = createRcWithAudio()

@@ -22,7 +22,9 @@ import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
+import org.wycliffeassociates.otter.common.domain.versification.Versification
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.IVersificationRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.*
@@ -197,13 +199,12 @@ class CreateChunksTest {
 
         projectFilesAccessor = ProjectFilesAccessor(mockedDirectoryProvider, rcSource, rcTarget, collTarget)
         audioSourceAudioAccessor = SourceAudioAccessor(mockedDirectoryProvider, rcSource, collSource.slug)
-        workbook = buildWorkbook(mockedDb, collSource, collTarget)
+        workbook = buildWorkbook(mockedDirectoryProvider, mockedDb, collSource, collTarget)
         chapter = workbook.target.chapters.blockingFirst()
 
         rc = createRcWithAudio()
 
-        CreateChunks(projectFilesAccessor, audioSourceAudioAccessor, chapter.addChunk, chapter.sort, workbook.target)
-            .createUserDefinedChunks(workbook.source.slug, customCues, 1)
+        CreateChunks(mock()).createUserDefinedChunks(workbook, chapter, customCues, 1)
     }
 
     @After
