@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.common.recorder
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.PublishSubject
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.collections.FloatRingBuffer
 import java.nio.ByteBuffer
@@ -34,7 +35,8 @@ class ActiveRecordingRenderer(
     stream: Observable<ByteArray>,
     recordingStatus: Observable<Boolean>,
     width: Int,
-    secondsOnScreen: Int
+    secondsOnScreen: Int,
+    private val isContinuous: Boolean
 ) {
     private val logger = LoggerFactory.getLogger(ActiveRecordingRenderer::class.java)
 
@@ -43,10 +45,14 @@ class ActiveRecordingRenderer(
 
     // double the width as for each pixel there will be a min and max value
     val floatBuffer = FloatRingBuffer(width * 2)
-    private val pcmCompressor = PCMCompressor(floatBuffer, samplesToCompress(width, secondsOnScreen))
+    val audioData = ArrayList<Float>()
+
+    private val dataReceiver = PublishSubject.create<Float>()
+
+    private val pcmCompressor = PCMCompressor(samplesToCompress(width, secondsOnScreen), dataReceiver)
     val bb = ByteBuffer.allocate(DEFAULT_BUFFER_SIZE)
 
-    val compositeDisposable = CompositeDisposable()
+    private val compositeDisposable = CompositeDisposable()
 
     init {
         recordingActive
@@ -78,7 +84,7 @@ class ActiveRecordingRenderer(
         }
 
     private fun samplesToCompress(width: Int, secondsOnScreen: Int): Int {
-        // TODO: get samplerate from wav file, don't assume 44.1khz
+        // TODO: get sampleRate from wav file, don't assume 44.1khz
         return (DEFAULT_SAMPLE_RATE * secondsOnScreen) / width
     }
 
@@ -95,10 +101,21 @@ class ActiveRecordingRenderer(
             .also {
                 compositeDisposable.add(it)
             }
+
+        dataReceiver.subscribe {
+            if (isContinuous) {
+                audioData.add(it)
+            } else {
+                floatBuffer.add(it)
+            }
+        }.also {
+            compositeDisposable.add(it)
+        }
     }
 
     /** Clears rendered data from buffer */
     fun clearData() {
         floatBuffer.clear()
+        audioData.clear()
     }
 }

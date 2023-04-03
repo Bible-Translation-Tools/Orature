@@ -18,10 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.narration
 
-import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleDoubleProperty
-import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
+import javafx.beans.property.*
 import javafx.event.EventTarget
 import javafx.geometry.Pos
 import javafx.scene.layout.HBox
@@ -37,7 +34,10 @@ class ActiveRecordingCard : HBox() {
     val waveformDrawableProperty = SimpleObjectProperty<Drawable>()
     val volumebarDrawableProperty = SimpleObjectProperty<Drawable>()
 
-    private val waveformHeightProperty = SimpleDoubleProperty()
+    private val waveformWidth = ReadOnlyDoubleWrapper()
+    val waveformWidthProperty = waveformWidth.readOnlyProperty
+    private val waveformHeight = ReadOnlyDoubleWrapper()
+    val waveformHeightProperty = waveformHeight.readOnlyProperty
 
     val isRecordingProperty = SimpleBooleanProperty()
 
@@ -71,7 +71,8 @@ class ActiveRecordingCard : HBox() {
                     isDrawingProperty.bind(isRecordingProperty)
                     drawableProperty.bind(waveformDrawableProperty)
 
-                    waveformHeightProperty.bind(heightProperty())
+                    waveformWidth.bind(widthProperty())
+                    waveformHeight.bind(heightProperty())
                 })
             }
         }
@@ -80,7 +81,7 @@ class ActiveRecordingCard : HBox() {
             addClass("narration-record__volume-bar")
 
             add(CanvasFragment().apply {
-                hgrow = Priority.NEVER
+                hgrow = Priority.ALWAYS
 
                 isDrawingProperty.bind(isRecordingProperty)
                 drawableProperty.bind(volumebarDrawableProperty)

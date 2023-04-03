@@ -131,7 +131,9 @@ class NarrationRecordItem : VBox() {
 
         stackpane {
             alignment = Pos.CENTER_LEFT
-            vgrow = Priority.ALWAYS
+            //vgrow = Priority.ALWAYS
+
+            maxHeight = 176.0
 
             hbox {
                 addClass("narration-record__waveform")

@@ -7,8 +7,10 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import javafx.beans.binding.Bindings
+import javafx.beans.binding.DoubleBinding
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
@@ -34,7 +36,7 @@ import org.wycliffeassociates.otter.common.recorder.WavFileWriter
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.recorder.Drawable
 import org.wycliffeassociates.otter.jvm.controls.recorder.VolumeBar
-import org.wycliffeassociates.otter.jvm.controls.recorder.WaveformLayer
+import org.wycliffeassociates.otter.jvm.controls.recorder.ContinuousWaveform
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
@@ -50,6 +52,8 @@ private const val BACKGROUND_COLOR = "#FFFFFF00"
 
 private const val INVERTED_WAV_COLOR = "#F2F5F3FF"
 private const val INVERTED_BACKGROUND_COLOR = "#015AD9FF"
+
+private const val PIXELS_PER_SECOND = 100
 
 class ChapterNarrationViewModel : ViewModel() {
 
@@ -83,6 +87,8 @@ class ChapterNarrationViewModel : ViewModel() {
     val floatingCardVisibleProperty = SimpleBooleanProperty()
     val onCurrentVerseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val initialSelectedItemProperty = SimpleObjectProperty<ChunkData>()
+    val waveformWidthProperty = SimpleDoubleProperty()
+    val recordListWidthProperty = SimpleDoubleProperty()
 
     var onScrollToChunk: (ChunkData) -> Unit = {}
     var onPlaybackStarted: (ChunkData) -> Unit = {}
@@ -419,13 +425,13 @@ class ChapterNarrationViewModel : ViewModel() {
         color: String,
         background: String
     ): Single<Image> {
-        val width = (reader.totalFrames / DEFAULT_SAMPLE_RATE) * 100
+        val width = (reader.totalFrames / DEFAULT_SAMPLE_RATE) * PIXELS_PER_SECOND
 
         return ObservableWaveformBuilder()
             .build(
                 reader = reader,
                 width = width,
-                height = 120,
+                height = 176,
                 wavColor = Color.web(color),
                 background = Color.web(background)
             )
@@ -440,17 +446,18 @@ class ChapterNarrationViewModel : ViewModel() {
             renderer = ActiveRecordingRenderer(
                 _recorder.getAudioStream(),
                 writer!!.isWriting,
-                width = 300,
-                secondsOnScreen = 10
+                width = PIXELS_PER_SECOND,
+                secondsOnScreen = 1,
+                isContinuous = true
             )
-            val waveformLayer = WaveformLayer(renderer!!)
+            val continuousWaveform = ContinuousWaveform(renderer!!)
             val volumeBar = VolumeBar(_recorder.getAudioStream())
 
             writer?.let {
                 renderer?.setRecordingStatusObservable(it.isWriting)
             }
 
-            waveformDrawableProperty.set(waveformLayer)
+            waveformDrawableProperty.set(continuousWaveform)
             volumebarDrawableProperty.set(volumeBar)
         }
     }
@@ -561,5 +568,21 @@ class ChapterNarrationViewModel : ViewModel() {
         return recordedChunks.filter { it.isDraft }.map {
             AudioCue(location = it.start, label = it.sort.toString())
         }.sortedBy { it.location }
+    }
+
+    fun recordListWidthBinding(): DoubleBinding {
+        return Bindings.createDoubleBinding(
+            {
+                if (isRecording && isRecordingPaused.not()) {
+                    recordListWidthProperty.value - waveformWidthProperty.value
+                } else {
+                    Double.MAX_VALUE
+                }
+            },
+            recordListWidthProperty,
+            waveformWidthProperty,
+            isRecordingProperty,
+            isRecordingPausedProperty
+        )
     }
 }

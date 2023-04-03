@@ -18,19 +18,22 @@
  */
 package org.wycliffeassociates.otter.common.recorder
 
-import org.wycliffeassociates.otter.common.collections.FloatRingBuffer
+import io.reactivex.subjects.PublishSubject
 
-class PCMCompressor(private val ringBuffer: FloatRingBuffer, samplesToCompress: Int) {
+class PCMCompressor(
+    samplesToCompress: Int,
+    private val dataSender: PublishSubject<Float>
+) {
 
     // size is how small the waveform is being shrunk for visualization
     // arbitrary for now, could be based on number of seconds to show and resolution
-    val accumulator = FloatArray(samplesToCompress)
-    var index = 0
+    private val accumulator = FloatArray(samplesToCompress)
+    private var index = 0
 
     fun add(data: FloatArray) {
         for (sample in data) {
             if (index >= accumulator.size) {
-                sendDataToRingBuffer()
+                sendData()
                 index = 0
             }
             accumulator[index] = sample
@@ -40,14 +43,14 @@ class PCMCompressor(private val ringBuffer: FloatRingBuffer, samplesToCompress: 
 
     fun add(data: Float) {
         if (index >= accumulator.size) {
-            sendDataToRingBuffer()
+            sendData()
             index = 0
         }
         accumulator[index] = data
         index++
     }
 
-    fun sendDataToRingBuffer() {
+    private fun sendData() {
         var min = Float.MAX_VALUE
         var max = Float.MIN_VALUE
 
@@ -55,7 +58,8 @@ class PCMCompressor(private val ringBuffer: FloatRingBuffer, samplesToCompress: 
             if (max < sample) max = sample
             if (min > sample) min = sample
         }
-        ringBuffer.add(min)
-        ringBuffer.add(max)
+
+        dataSender.onNext(min)
+        dataSender.onNext(max)
     }
 }

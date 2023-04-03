@@ -94,7 +94,8 @@ class RecorderViewModel : ViewModel() {
             recorder.getAudioStream(),
             writer.isWriting,
             width,
-            secondsOnScreen = 10
+            secondsOnScreen = 10,
+            isContinuous = false
         )
         val waveformLayer = WaveformLayer(renderer)
         waveformView.addDrawable(waveformLayer)

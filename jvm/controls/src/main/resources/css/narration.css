@@ -50,7 +50,7 @@
 }
 
 .narration__recording {
-    -fx-pref-height: 240px;
+    -fx-pref-height: 270px;
     -fx-alignment: top-left;
 }
 
@@ -162,9 +162,9 @@
 }
 
 .narration-record__waveform {
-    -fx-pref-width: 300px;
+    -fx-min-width: 1px;
     -fx-max-height: 176px;
-    -fx-alignment: center-right;
+    -fx-alignment: center-left;
 }
 
 .narration-record__waveform-overlay {
@@ -189,6 +189,7 @@
     -fx-spacing: 10px;
     -fx-alignment: center;
     -fx-padding: 10px 10px 0 10px;
+    -fx-max-height: 67px;
 }
 
 .narration-record__verse-controls .btn {

@@ -111,13 +111,12 @@ class ChapterNarrationPage : View() {
             }
             stackpane {
                 addClass("narration__recording")
-                alignment = Pos.CENTER
 
                 hbox {
                     narrationrecordlistview(viewModel.recordedChunks) {
-                        hgrow = Priority.ALWAYS
-
                         nodeOrientation = NodeOrientation.RIGHT_TO_LEFT
+                        hgrow = Priority.ALWAYS
+                        alignment = Pos.CENTER_LEFT
 
                         setCellFactory {
                             NarrationRecordCell(
@@ -138,15 +137,19 @@ class ChapterNarrationPage : View() {
 
                         isRecordingProperty.bind(viewModel.isRecordingProperty)
                         isRecordingPausedProperty.bind(viewModel.isRecordingPausedProperty)
+
+                        maxWidthProperty().bind(viewModel.recordListWidthBinding())
                     }
 
                     activerecordingcard {
-                        verseLabelProperty.bind(viewModel.recordingChunkProperty.stringBinding { it?.title })
+                        alignment = Pos.CENTER_RIGHT
 
+                        verseLabelProperty.bind(viewModel.recordingChunkProperty.stringBinding { it?.title })
                         waveformDrawableProperty.bind(viewModel.waveformDrawableProperty)
                         volumebarDrawableProperty.bind(viewModel.volumebarDrawableProperty)
-
                         isRecordingProperty.bind(viewModel.isRecordingProperty)
+
+                        viewModel.waveformWidthProperty.bind(waveformWidthProperty)
 
                         visibleProperty().bind(
                             viewModel.isRecordingProperty.and(
@@ -155,6 +158,8 @@ class ChapterNarrationPage : View() {
                         )
                         managedProperty().bind(visibleProperty())
                     }
+
+                    viewModel.recordListWidthProperty.bind(widthProperty())
                 }
 
                 vbox {
