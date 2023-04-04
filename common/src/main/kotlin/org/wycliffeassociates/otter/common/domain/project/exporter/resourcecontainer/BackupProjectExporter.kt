@@ -60,7 +60,7 @@ class BackupProjectExporter @Inject constructor(
                 logger.info("Exporting backup project: ${zipFile.nameWithoutExtension}")
 
                 projectAccessor.initializeResourceContainerInFile(workbook, zipFile)
-                setContributorInfo(contributors, resourceMetadata.creator, zipFile)
+                setContributorInfo(contributors, zipFile)
 
                 directoryProvider.newFileWriter(zipFile).use { fileWriter ->
                     projectAccessor.copyTakeFiles(

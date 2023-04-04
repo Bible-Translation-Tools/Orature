@@ -71,7 +71,7 @@ class SourceProjectExporter @Inject constructor(
         logger.info("Exporting project as source: ${targetZip.nameWithoutExtension}")
 
         projectAccessor.initializeResourceContainerInFile(workbook, targetZip)
-        setContributorInfo(contributors, resourceMetadata.creator, targetZip)
+        setContributorInfo(contributors, targetZip)
 
         return compileCompletedChapters(workbook, projectSourceMetadata, projectAccessor)
             .onErrorComplete()
