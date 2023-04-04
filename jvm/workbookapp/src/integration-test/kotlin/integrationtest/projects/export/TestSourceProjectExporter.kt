@@ -37,13 +37,13 @@ import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
+import org.wycliffeassociates.otter.common.domain.project.importer.RCImporterFactory
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.SourceProjectExporter
+import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
+import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.SourceProjectExporter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
@@ -53,7 +53,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.io.path.createTempDirectory
 
-class TestExportSourceProject {
+class TestSourceProjectExporter {
     @Inject
     lateinit var dbEnvProvider: Provider<DatabaseEnvironment>
     @Inject
@@ -63,10 +63,10 @@ class TestExportSourceProject {
     @Inject
     lateinit var exportSourceProvider: Provider<SourceProjectExporter>
     @Inject
-    lateinit var importRcProvider: Provider<ImportResourceContainer>
+    lateinit var importRcFactoryProvider: Provider<RCImporterFactory>
 
     private val importer
-        get() = importRcProvider.get()
+        get() = importRcFactoryProvider.get().makeImporter()
 
     init {
         DaggerTestPersistenceComponent.create().inject(this)
@@ -115,7 +115,12 @@ class TestExportSourceProject {
         prepareTakeForExport()
 
         val result = exportSourceProvider.get()
-            .export(outputDir, targetMetadata, workbook, projectFilesAccessor)
+            .export(
+                outputDir,
+                targetMetadata,
+                workbook,
+                null
+            )
             .blockingGet()
 
         assertEquals(ExportResult.SUCCESS, result)
@@ -141,7 +146,7 @@ class TestExportSourceProject {
     @Test
     fun `export source project has no media when no take selected`() {
         val result = exportSourceProvider.get()
-            .export(outputDir, targetMetadata, workbook, projectFilesAccessor)
+            .export(outputDir, targetMetadata, workbook, null)
             .blockingGet()
 
         assertEquals(ExportResult.SUCCESS, result)
@@ -156,7 +161,7 @@ class TestExportSourceProject {
         // export as source
         prepareTakeForExport()
         val result = exportSourceProvider.get()
-            .export(outputDir, targetMetadata, workbook, projectFilesAccessor)
+            .export(outputDir, targetMetadata, workbook, null)
             .blockingGet()
 
         assertEquals(ExportResult.SUCCESS, result)
@@ -186,7 +191,7 @@ class TestExportSourceProject {
         prepareChapterContentReadyToCompile()
 
         val result = exportSourceProvider.get()
-            .export(outputDir, targetMetadata, workbook, projectFilesAccessor)
+            .export(outputDir, targetMetadata, workbook, null)
             .blockingGet()
 
         assertEquals(ExportResult.SUCCESS, result)

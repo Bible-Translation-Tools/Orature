@@ -22,7 +22,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.RcConstants
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
@@ -212,7 +212,7 @@ class ResetChunksTest {
         projectFilesAccessor = ProjectFilesAccessor(mockedDirectoryProvider, rcSource, rcTarget, collTarget)
         audioSourceAudioAccessor = SourceAudioAccessor(mockedDirectoryProvider, rcSource, collSource.slug)
 
-        workbook = buildWorkbook(mockedDb, collSource, collTarget)
+        workbook = buildWorkbook(mockedDirectoryProvider, mockedDb, collSource, collTarget)
         chapter = workbook.target.chapters.blockingFirst()
 
         rc = createRcWithAudio()

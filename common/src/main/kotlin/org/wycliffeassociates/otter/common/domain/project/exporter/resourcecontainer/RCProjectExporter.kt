@@ -16,11 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
+package org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer
 
 import io.reactivex.Completable
 import io.reactivex.Observable
-import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
@@ -31,10 +30,11 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
-import org.wycliffeassociates.otter.common.domain.content.TakeActions
+import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
+import org.wycliffeassociates.otter.common.domain.project.exporter.IProjectExporter
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
-import org.wycliffeassociates.otter.common.utils.mapNotNull
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.nio.file.Files
@@ -44,22 +44,17 @@ import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-abstract class ProjectExporter {
+abstract class RCProjectExporter(
+    protected val directoryProvider:IDirectoryProvider
+) : IProjectExporter {
     @Inject
     lateinit var concatenateAudio: ConcatenateAudio
 
     @Inject
-    lateinit var takeActions: TakeActions
+    lateinit var pluginActions: PluginActions
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
     private val compositeDisposable = CompositeDisposable()
-
-    abstract fun export(
-        directory: File,
-        projectMetadataToExport: ResourceMetadata,
-        workbook: Workbook,
-        projectFilesAccessor: ProjectFilesAccessor
-    ): Single<ExportResult>
 
     protected fun makeExportFilename(workbook: Workbook, metadata: ResourceMetadata): String {
         val lang = workbook.target.language.slug
@@ -85,13 +80,13 @@ abstract class ProjectExporter {
 
     protected fun setContributorInfo(
         contributors: List<Contributor>,
-        metadata: ResourceMetadata,
+        creator: String,
         projectFile: File
     ) {
         ResourceContainer.load(projectFile).use { rc ->
             rc.manifest.dublinCore.apply {
                 contributor = contributors.map { it.name }.toMutableList()
-                creator = metadata.creator
+                this.creator = creator
             }
             rc.writeManifest()
         }
@@ -99,7 +94,7 @@ abstract class ProjectExporter {
 
     protected fun compileCompletedChapters(
         workbook: Workbook,
-        projectMetadata: ResourceMetadata,
+        resourceMetadata: ResourceMetadata,
         projectFilesAccessor: ProjectFilesAccessor
     ): Completable {
         return filterChaptersReadyToCompile(workbook.target.chapters)
@@ -113,10 +108,10 @@ abstract class ProjectExporter {
                     }
                     .flatMapCompletable { compiledTake ->
                         logger.info("Importing the new compiled chapter take ${compiledTake.name}")
-                        takeActions.import(
+                        pluginActions.import(
                             chapter.audio,
                             projectFilesAccessor.audioDir,
-                            createFileNamer(workbook, chapter, projectMetadata.identifier),
+                            createFileNamer(workbook, chapter, resourceMetadata.identifier),
                             compiledTake
                         ).andThen(
                             subscribeToSelectedChapter(chapter)

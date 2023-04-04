@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.common.data.workbook
 
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.ArtworkAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import java.util.*
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 
@@ -43,6 +44,17 @@ class Workbook(
             source.slug
         )
     }
+
+    val projectFilesAccessor: ProjectFilesAccessor by lazy {
+        ProjectFilesAccessor(
+            directoryProvider,
+            source.resourceMetadata,
+            target.resourceMetadata,
+            target.toCollection()
+        )
+    }
+
+
     val modifiedTs = target.modifiedTs
     val sourceMetadataSlug: String
         get() = source.resourceMetadata.identifier

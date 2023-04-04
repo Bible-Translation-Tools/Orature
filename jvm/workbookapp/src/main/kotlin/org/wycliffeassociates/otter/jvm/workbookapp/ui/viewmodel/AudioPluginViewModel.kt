@@ -28,7 +28,7 @@ import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.content.Recordable
-import org.wycliffeassociates.otter.common.domain.content.TakeActions
+import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
 import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
@@ -46,7 +46,7 @@ import javax.inject.Inject
 class AudioPluginViewModel : ViewModel() {
     @Inject lateinit var pluginRepository: IAudioPluginRepository
     @Inject lateinit var launchPlugin: LaunchPlugin
-    @Inject lateinit var takeActions: TakeActions
+    @Inject lateinit var pluginActions: PluginActions
     @Inject lateinit var localeLanguage: LocaleLanguage
 
     private val workbookDataStore: WorkbookDataStore by inject()
@@ -65,9 +65,9 @@ class AudioPluginViewModel : ViewModel() {
         return pluginRepository.getPlugin(pluginType)
     }
 
-    fun record(recordable: Recordable): Single<TakeActions.Result> {
+    fun record(recordable: Recordable): Single<PluginActions.Result> {
         val params = constructPluginParameters()
-        return takeActions.record(
+        return pluginActions.record(
             audio = recordable.audio,
             projectAudioDir = workbookDataStore.activeProjectFilesAccessor.audioDir,
             namer = createFileNamer(recordable),
@@ -76,7 +76,7 @@ class AudioPluginViewModel : ViewModel() {
     }
 
     fun import(recordable: Recordable, take: File, takeNumber: Int? = null): Completable {
-        return takeActions.import(
+        return pluginActions.import(
             audio = recordable.audio,
             projectAudioDir = workbookDataStore.activeProjectFilesAccessor.audioDir,
             namer = createFileNamer(recordable),
@@ -145,14 +145,14 @@ class AudioPluginViewModel : ViewModel() {
         )
     }
 
-    fun edit(audio: AssociatedAudio, take: Take): Single<TakeActions.Result> {
+    fun edit(audio: AssociatedAudio, take: Take): Single<PluginActions.Result> {
         val params = constructPluginParameters()
-        return takeActions.edit(audio, take, params)
+        return pluginActions.edit(audio, take, params)
     }
 
-    fun mark(audio: AssociatedAudio, take: Take): Single<TakeActions.Result> {
+    fun mark(audio: AssociatedAudio, take: Take): Single<PluginActions.Result> {
         val params = constructPluginParameters(messages["markAction"])
-        return takeActions.mark(audio, take, params)
+        return pluginActions.mark(audio, take, params)
     }
 
     fun addPlugin(record: Boolean, edit: Boolean) {

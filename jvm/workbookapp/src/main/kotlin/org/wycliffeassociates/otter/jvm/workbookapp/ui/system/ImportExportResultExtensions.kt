@@ -19,7 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.system
 
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
+import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import tornadofx.*
 
 /** Null on success, otherwise localized error text. */
@@ -34,7 +34,9 @@ val ImportResult.errorMessage: String?
             ImportResult.LOAD_RC_ERROR -> FX.messages["importErrorLoadRcError"]
             ImportResult.ALREADY_EXISTS -> FX.messages["importErrorAlreadyExists"]
             ImportResult.UNMATCHED_HELP -> FX.messages["importErrorUnmatchedHelp"]
-            ImportResult.DEPENDENCY_ERROR -> FX.messages["importErrorDependencyExists"]
+            ImportResult.DEPENDENCY_CONSTRAINT -> FX.messages["importErrorDependencyExists"]
+            ImportResult.ABORTED -> FX.messages["importCanceled"]
+            ImportResult.FAILED -> FX.messages["importResourceFailMessage"]
         }
     }
 

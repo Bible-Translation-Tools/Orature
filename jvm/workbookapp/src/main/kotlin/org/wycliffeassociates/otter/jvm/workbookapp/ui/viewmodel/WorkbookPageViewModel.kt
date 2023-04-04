@@ -35,12 +35,12 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.BackupProjectExporter
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportOption
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.Mp3ProjectExporter
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.SourceProjectExporter
+import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.BackupProjectExporter
+import org.wycliffeassociates.otter.common.domain.project.exporter.ExportType
+import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
+import org.wycliffeassociates.otter.common.domain.project.exporter.AudioProjectExporter
+import org.wycliffeassociates.otter.common.domain.project.exporter.IProjectExporter
+import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.SourceProjectExporter
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -71,7 +71,7 @@ class WorkbookPageViewModel : ViewModel() {
     lateinit var exportBackupProvider: Provider<BackupProjectExporter>
 
     @Inject
-    lateinit var exportMp3Provider: Provider<Mp3ProjectExporter>
+    lateinit var exportAudioProvider: Provider<AudioProjectExporter>
 
     @Inject
     lateinit var workbookRepository: IWorkbookRepository
@@ -207,26 +207,30 @@ class WorkbookPageViewModel : ViewModel() {
         }
     }
 
-    fun exportWorkbook(directory: File, option: ExportOption) {
+    fun exportWorkbook(directory: File, type: ExportType) {
         showExportProgressDialogProperty.set(true)
 
         val workbook = workbookDataStore.workbook
         val resourceMetadata = workbookDataStore.activeResourceMetadata
-        val projectFileAccessor = workbookDataStore.activeProjectFilesAccessor
 
         activeProjectTitleProperty.set(workbook.target.title)
         activeProjectCoverProperty.set(
             workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
         )
 
-        val exporter: ProjectExporter = when (option) {
-            ExportOption.LISTEN -> exportMp3Provider.get()
-            ExportOption.SOURCE_AUDIO, ExportOption.PUBLISH -> exportSourceProvider.get()
-            ExportOption.BACKUP -> exportBackupProvider.get()
+        val exporter: IProjectExporter = when (type) {
+            ExportType.LISTEN -> exportAudioProvider.get()
+            ExportType.SOURCE_AUDIO, ExportType.PUBLISH -> exportSourceProvider.get()
+            ExportType.BACKUP -> exportBackupProvider.get()
         }
 
         exporter
-            .export(directory, resourceMetadata, workbook, projectFileAccessor)
+            .export(
+                directory,
+                resourceMetadata,
+                workbook,
+                null
+            )
             .observeOnFx()
             .doOnError { e ->
                 logger.error("Error in exporting project for project: ${workbook.target.slug}")

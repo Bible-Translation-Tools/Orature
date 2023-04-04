@@ -20,17 +20,13 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.project
 
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.cast
-import io.reactivex.rxkotlin.toObservable
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
-import org.wycliffeassociates.otter.common.data.primitives.Collection
-import org.wycliffeassociates.otter.common.data.primitives.Contributor
-import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.BookElement
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.RcConstants
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.buildManifest
 import org.wycliffeassociates.otter.common.io.zip.IFileReader
 import org.wycliffeassociates.otter.common.io.zip.IFileWriter
@@ -46,6 +42,8 @@ import kotlin.io.path.createTempDirectory
 import kotlin.io.path.outputStream
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.AudioMetadataFileFormat
+import org.wycliffeassociates.otter.common.data.primitives.*
+import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.workbook.Book
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.usfm.getText
 import org.wycliffeassociates.usfmtools.USFMParser
@@ -265,9 +263,14 @@ class ProjectFilesAccessor(
         }
     }
 
-    fun writeSelectedTakesFile(fileWriter: IFileWriter, workbook: Workbook, isBook: Boolean) {
+    fun writeSelectedTakesFile(
+        fileWriter: IFileWriter,
+        workbook: Workbook,
+        isBook: Boolean,
+        takeFilter: (String) -> Boolean = { true }
+    ) {
         fileWriter.bufferedWriter(RcConstants.SELECTED_TAKES_FILE).use { _fileWriter ->
-            fetchSelectedTakes(workbook, isBook)
+            fetchSelectedTakes(workbook, isBook, filter = takeFilter)
                 .map(::relativeTakePath)
                 .doOnError { e ->
                     log.error("Error in writeSelectedTakesFile", e)
@@ -290,12 +293,18 @@ class ProjectFilesAccessor(
         }
     }
 
-    fun copyTakeFiles(fileReader: IFileReader, manifestProject: Project): Observable<String> {
+    fun copyTakeFiles(
+        fileReader: IFileReader,
+        manifestProject: Project,
+        filter: (String) -> Boolean = { true }
+    ): Observable<String> {
         return Observable.just(RcConstants.TAKE_DIR, manifestProject.path)
             .filter(fileReader::exists)
             .flatMap { audioDirInRc ->
                 val normalized = File(audioDirInRc).normalize().path
-                fileReader.copyDirectory(normalized, audioDir, this::isAudioFile)
+                fileReader.copyDirectory(normalized, audioDir) {
+                    isAudioFile(it) && filter(it)
+                }
             }
     }
 
@@ -303,17 +312,19 @@ class ProjectFilesAccessor(
         fileWriter: IFileWriter,
         workbook: Workbook,
         workbookRepository: IWorkbookRepository,
-        isBook: Boolean
+        isBook: Boolean,
+        filter: (String) -> Boolean = { true }
     ) {
         val selectedChapters = selectedChapterFilePaths(workbook, isBook)
         val deletedTakes = deletedTakeFilePaths(workbook, workbookRepository)
         fileWriter.copyDirectory(audioDir, RcConstants.TAKE_DIR) {
             val normalized = File(it).invariantSeparatorsPath
             !selectedChapters.contains(normalized) && !deletedTakes.contains(normalized)
+                    && filter(it)
         }
         fileWriter.copyDirectory(audioDir, RcConstants.MEDIA_DIR) {
             val normalized = File(it).invariantSeparatorsPath
-            selectedChapters.contains(normalized)
+            selectedChapters.contains(normalized) && filter(it)
         }
     }
 
@@ -328,6 +339,60 @@ class ProjectFilesAccessor(
             rc.manifest.dublinCore.contributor = contributors.map { it.toString() }.toMutableList()
             rc.writeManifest()
         }
+    }
+
+    fun getChapterContent(projectSlug: String, chapterNumber: Int, showVerseNumber: Boolean = true): List<Content> {
+        val chapterContent = arrayListOf<Content>()
+
+        ResourceContainer.load(sourceMetadata.path).use { rc ->
+            val projectEntry = rc.manifest.projects.find { it.identifier == projectSlug }
+            projectEntry?.let {
+                val text = rc.accessor.getReader(it.path.removePrefix("./")).readText()
+                val parser = USFMParser(arrayListOf("s5"))
+                val doc = parser.parseFromString(text)
+                val chapters = doc.getChildMarkers(CMarker::class.java)
+                val chap = chapters.find { it.number == chapterNumber }
+                chap?.let {
+                    it.getChildMarkers(VMarker::class.java).forEachIndexed { idx, vm ->
+                        val text = when (showVerseNumber) {
+                            true -> "${vm.verseNumber}. ${vm.getText()}"
+                            false -> vm.getText()
+                        }
+                        val content = Content(
+                            sort = chapterContent.size,
+                            labelKey = ContentLabel.VERSE.value,
+                            start = vm.startingVerse,
+                            end = vm.endingVerse,
+                            text = text,
+                            bridged = false,
+                            type = ContentType.TEXT,
+                            format = "usfm",
+                            draftNumber = 0
+                        )
+                        chapterContent.add(content)
+
+                        // the rest of bridged verses should be marked bridged
+                        for (i in vm.startingVerse+1..vm.endingVerse) {
+                            chapterContent.add(
+                                Content(
+                                    sort = chapterContent.size,
+                                    labelKey = ContentLabel.VERSE.value,
+                                    start = i,
+                                    end = vm.endingVerse,
+                                    text = "",
+                                    bridged = true,
+                                    type = ContentType.TEXT,
+                                    format = "usfm",
+                                    draftNumber = 0
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        return chapterContent
     }
 
     fun getChapterText(projectSlug: String, chapterNumber: Int, showVerseNumber: Boolean = true): List<String> {
@@ -472,7 +537,8 @@ class ProjectFilesAccessor(
     private fun fetchSelectedTakes(
         workbook: Workbook,
         isBook: Boolean,
-        chaptersOnly: Boolean = false
+        chaptersOnly: Boolean = false,
+        filter: (String) -> Boolean = { true }
     ): Observable<Take> {
         val chapters = when {
             isBook -> workbook.target.chapters
@@ -490,6 +556,9 @@ class ProjectFilesAccessor(
             .mapNotNull { audio ->
                 val take = audio.selected.value?.value
                 take
+            }
+            .filter {
+                filter(it.file.name)
             }
     }
 

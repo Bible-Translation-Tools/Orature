@@ -59,6 +59,7 @@ class ContentRepository @Inject constructor(
                 contentDao
                     .fetchByCollectionId(collection.id)
                     .map(this::buildContent)
+                    .filter { !it.bridged }
             }
             .doOnError { e ->
                 logger.error("Error in getByCollection for collection: $collection", e)
@@ -164,6 +165,12 @@ class ContentRepository @Inject constructor(
                 contentDao
                     .fetchAll()
                     .map(this::buildContent)
+                    .filter {
+                        if (it.bridged) {
+                            logger.info("Ignoring bridged content: ${it}")
+                        }
+                        !it.bridged
+                    }
             }
             .doOnError { e ->
                 logger.error("Error in getAll", e)
@@ -175,7 +182,10 @@ class ContentRepository @Inject constructor(
         return Single
             .fromCallable {
                 val id = contentDao.insert(
-                    contentMapper.mapToEntity(content, collection.id).apply { collectionFk = collection.id })
+                    contentMapper
+                        .mapToEntity(content, collection.id)
+                        .apply { collectionFk = collection.id }
+                )
                 content.id = id
                 activeConnections.getOrDefault(collection, null)?.let { it.accept(content) }
                 id
@@ -194,11 +204,44 @@ class ContentRepository @Inject constructor(
                 // Make sure we don't over write the collection relationship
                 entity.collectionFk = existing.collectionFk
                 contentDao.update(entity)
+
+                updateConnection(obj, entity.collectionFk)
             }
             .doOnError { e ->
                 logger.error("Error in update for content: $obj", e)
             }
             .subscribeOn(Schedulers.io())
+    }
+
+    /**
+     * Updates the content stored inside the active connections.
+     * Calls this method when making a change to the content in the database
+     * to avoid out-of-sync between the database and connections.
+     */
+    private fun updateConnection(
+        newContent: Content,
+        collectionId: Int
+    ) {
+        activeConnections.keys.find { it.id == collectionId }?.let { collection ->
+            activeConnections[collection]?.let { connection ->
+                connection.getValues(emptyArray()).find {
+                    it.id == newContent.id
+                }?.let { contentInRelay ->
+                    contentInRelay.apply {
+                        sort = newContent.sort
+                        labelKey = newContent.labelKey
+                        start = newContent.start
+                        end = newContent.end
+                        selectedTake = newContent.selectedTake
+                        text = newContent.text
+                        format = newContent.format
+                        type = newContent.type
+                        draftNumber = newContent.draftNumber
+                        bridged = newContent.bridged
+                    }
+                }
+            }
+        }
     }
 
     override fun linkDerivedToSource(
@@ -211,7 +254,7 @@ class ContentRepository @Inject constructor(
 
         return Completable.fromAction {
             derivedContents.forEach { content ->
-                for (verse in content.start .. content.end) {
+                for (verse in content.start..content.end) {
                     val sourceId = sourceContents.firstOrNull { it.sort == verse }?.id
                     if (sourceId != null) {
                         contentDao.linkDerivative(content.id, sourceId)
@@ -224,7 +267,6 @@ class ContentRepository @Inject constructor(
     private fun buildContent(entity: ContentEntity): Content {
         // Check for sources
         val sources = contentDao.fetchSources(entity)
-        val contentEnd = sources.map { it.start }.maxOrNull() ?: entity.start
         val selectedTake = entity
             .selectedTakeFk?.let { selectedTakeFk ->
                 // Retrieve the markers
@@ -233,6 +275,6 @@ class ContentRepository @Inject constructor(
                     .map(markerMapper::mapFromEntity)
                 takeMapper.mapFromEntity(takeDao.fetchById(selectedTakeFk), markers)
             }
-        return contentMapper.mapFromEntity(entity, selectedTake, contentEnd)
+        return contentMapper.mapFromEntity(entity, selectedTake)
     }
 }

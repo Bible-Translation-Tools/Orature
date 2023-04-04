@@ -16,9 +16,16 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
+package org.wycliffeassociates.otter.common.domain.resourcecontainer
 
-enum class ExportResult {
-    SUCCESS,
-    FAILURE
+internal object RcConstants {
+    const val MEDIA_DIR = "content"
+    const val APP_SPECIFIC_DIR = ".apps/orature"
+    const val TAKE_DIR = "$APP_SPECIFIC_DIR/takes"
+    const val SOURCE_DIR = "$APP_SPECIFIC_DIR/source"
+    const val SOURCE_AUDIO_DIR = "$APP_SPECIFIC_DIR/source/audio"
+    const val SELECTED_TAKES_FILE = "$APP_SPECIFIC_DIR/selected.txt"
+    const val CHUNKS_FILE = "$APP_SPECIFIC_DIR/chunks.json"
+    const val LICENSE_FILE = "LICENSE.md"
+    const val SOURCE_MEDIA_DIR = "media"
 }
