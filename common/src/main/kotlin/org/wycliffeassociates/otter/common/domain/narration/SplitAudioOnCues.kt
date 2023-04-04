@@ -30,7 +30,7 @@ class SplitAudioOnCues @Inject constructor(private val directoryProvider: IDirec
         val totalFrames = sourceAudio.totalFrames
         cues.forEachIndexed { index, cue ->
             val audioStartEnd = getChunkAudioRange(index, totalFrames, cues)
-            val pcmFile = directoryProvider.createTempFile("output", ".${AudioFileFormat.PCM.extension}")
+            val pcmFile = directoryProvider.createTempFile(index.toString(), ".${AudioFileFormat.PCM.extension}")
             val pcmAudio = AudioFile(pcmFile)
             writeAudio(sourceAudio, pcmAudio, audioStartEnd)
             chunks[cue.label] = pcmFile
