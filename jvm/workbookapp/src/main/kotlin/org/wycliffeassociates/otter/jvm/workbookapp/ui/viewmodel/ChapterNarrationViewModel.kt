@@ -7,10 +7,8 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import javafx.beans.binding.Bindings
-import javafx.beans.binding.DoubleBinding
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
@@ -28,7 +26,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
-import org.wycliffeassociates.otter.common.domain.narration.ImportChunks
+import org.wycliffeassociates.otter.common.domain.narration.InsertTakeAudio
 import org.wycliffeassociates.otter.common.domain.narration.SplitAudioOnCues
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
@@ -66,7 +64,7 @@ class ChapterNarrationViewModel : ViewModel() {
     @Inject
     lateinit var splitAudioOnCues: SplitAudioOnCues
     @Inject
-    lateinit var importChunks: ImportChunks
+    lateinit var insertTakeAudio: InsertTakeAudio
     @Inject
     lateinit var concatenateAudio: ConcatenateAudio
 
@@ -87,8 +85,6 @@ class ChapterNarrationViewModel : ViewModel() {
     val floatingCardVisibleProperty = SimpleBooleanProperty()
     val onCurrentVerseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val initialSelectedItemProperty = SimpleObjectProperty<ChunkData>()
-    val waveformWidthProperty = SimpleDoubleProperty()
-    val recordListWidthProperty = SimpleDoubleProperty()
 
     var onScrollToChunk: (ChunkData) -> Unit = {}
     var onPlaybackStarted: (ChunkData) -> Unit = {}
@@ -127,10 +123,9 @@ class ChapterNarrationViewModel : ViewModel() {
     fun dock() {
         allChunksLoadedProperty.onChangeWithDisposer { loaded ->
             if (loaded == true) {
-                if (recordedChunks.isNotEmpty()) {
-                    initialSelectedItemProperty.set(recordedChunks.last())
-                } else {
-                    initialSelectedItemProperty.set(allChunks.first())
+                when {
+                    recordedChunks.isNotEmpty() -> initialSelectedItemProperty.set(recordedChunks.last())
+                    allChunks.isNotEmpty() -> initialSelectedItemProperty.set(allChunks.first())
                 }
             }
         }.let { listeners.add(it) }
@@ -176,14 +171,10 @@ class ChapterNarrationViewModel : ViewModel() {
         return chapter.audio.selected.value?.value?.file?.let {
             splitAudioOnCues.execute(it)
                 .flatMapCompletable { chunkFiles ->
-                    val chunks = chapter.chunks.getValues(emptyArray())
-                    importChunks.execute(
+                    insertTakeAudio.insertChunksAudio(
                         workbookDataStore.workbook,
                         chapter,
-                        workbookDataStore.activeResourceMetadata,
-                        workbookDataStore.activeProjectFilesAccessor,
-                        chunkFiles,
-                        chunks
+                        chunkFiles
                     )
                 }
         } ?: Completable.complete()
@@ -510,7 +501,6 @@ class ChapterNarrationViewModel : ViewModel() {
 
     private fun saveRecordings(compile: Boolean): Completable {
         val chapter = workbookDataStore.chapter
-        val chunks = chapter.chunks.getValues(emptyArray())
 
         return recordAudio?.let {
             val cues = mapChunkDataToCues()
@@ -520,13 +510,10 @@ class ChapterNarrationViewModel : ViewModel() {
                 }
                 .flatMapCompletable { chunkFiles ->
                     updateRecordedChunks(chunkFiles)
-                    importChunks.execute(
+                    insertTakeAudio.insertChunksAudio(
                         workbookDataStore.workbook,
                         chapter,
-                        workbookDataStore.activeResourceMetadata,
-                        workbookDataStore.activeProjectFilesAccessor,
-                        chunkFiles,
-                        chunks
+                        chunkFiles
                     )
                         .doOnError { e ->
                             logger.error("Error in importing recorded chunks", e)
@@ -540,7 +527,11 @@ class ChapterNarrationViewModel : ViewModel() {
                                 logger.error("Error in concatenating chunks into temp chapter file", e)
                             }
                             .flatMapCompletable { chapterFile ->
-                            audioPluginViewModel.import(chapter, chapterFile, takeNumber = 1)
+                                insertTakeAudio.insertChapterAudio(
+                                    workbookDataStore.workbook,
+                                    chapter,
+                                    chapterFile
+                                )
                                 .doOnError { e ->
                                     logger.error("Error in importing temp chapter file", e)
                                 }
@@ -577,21 +568,5 @@ class ChapterNarrationViewModel : ViewModel() {
         return recordedChunks.filter { it.isDraft }.map {
             AudioCue(location = it.start, label = it.sort.toString())
         }.sortedBy { it.location }
-    }
-
-    fun recordListWidthBinding(): DoubleBinding {
-        return Bindings.createDoubleBinding(
-            {
-                if (recordStarted && recordPaused.not()) {
-                    recordListWidthProperty.value - waveformWidthProperty.value
-                } else {
-                    Double.MAX_VALUE
-                }
-            },
-            recordListWidthProperty,
-            waveformWidthProperty,
-            recordStartedProperty,
-            recordPausedProperty
-        )
     }
 }
