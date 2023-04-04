@@ -39,7 +39,7 @@ class NarrationTextCell(private val nextChunkText: String) : ListCell<ChunkData>
             return
         }
 
-        view.isActiveProperty.set(isSelected)
+        view.isSelectedProperty.set(isSelected)
         view.isLastVerseProperty.set(index == listView.items.lastIndex)
 
         graphic = view.apply {
@@ -48,7 +48,6 @@ class NarrationTextCell(private val nextChunkText: String) : ListCell<ChunkData>
 
             recordButtonTextProperty.bind(item.recordButtonTextProperty)
             isRecordingProperty.bind(item.isRecordingProperty)
-            isRecordingPausedProperty.bind(item.isRecordingPausedProperty)
             nextChunkTextProperty.set(nextChunkText)
 
             onRecordActionProperty.set(EventHandler {

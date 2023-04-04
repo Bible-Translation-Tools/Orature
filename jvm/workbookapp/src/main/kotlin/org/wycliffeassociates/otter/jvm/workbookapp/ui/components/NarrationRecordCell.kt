@@ -49,13 +49,15 @@ class NarrationRecordCell(
 
             isPlayingProperty.bind(item.isPlayingProperty)
             isRecordingProperty.bind(item.isRecordingProperty)
-            isRecordingPausedProperty.bind(item.isRecordingPausedProperty)
             playbackPositionProperty.bind(item.playbackPositionProperty)
             totalFramesProperty.bind(item.totalFramesProperty)
 
             waveformProperty.bind(item.imageProperty)
             invertedWaveformProperty.bind(item.invertedImageProperty)
             waveformLoadingProperty.bind(item.imageLoadingProperty)
+
+            waveformDrawableProperty.bind(item.waveformProperty)
+            volumebarDrawableProperty.bind(item.volumeBarProperty)
 
             loadingImageTextProperty.set(loadingImageText)
             openInTextProperty.set(openInText)

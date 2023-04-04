@@ -151,7 +151,6 @@
 }
 
 .narration-record__verse-item {
-    -fx-spacing: 10px;
     -fx-border-color: -wa-regular-text;
     -fx-border-width: 0 2px 0 0;
     -fx-background-color: -wa-background-primary-gradient;
@@ -163,7 +162,6 @@
 
 .narration-record__waveform {
     -fx-min-width: 1px;
-    -fx-max-height: 176px;
     -fx-alignment: center-left;
 }
 
@@ -187,8 +185,9 @@
 
 .narration-record__verse-controls {
     -fx-spacing: 10px;
-    -fx-alignment: center;
-    -fx-padding: 10px 10px 0 10px;
+    -fx-alignment: center-right;
+    -fx-padding: 10px;
+    -fx-pref-height: 67px;
     -fx-max-height: 67px;
 }
 
@@ -243,25 +242,15 @@
     -fx-padding: 0;
 }
 
-.narration-record__active-card {
-    -fx-background-color: -wa-background-primary-gradient;
-}
-
 .narration-record__volume-bar {
     -fx-pref-width: 16px;
     -fx-background-color: #001533;
     -fx-alignment: bottom-center;
 }
 
-.narration-record__list-view.recording .scroll-bar:horizontal .increment-arrow,
-.narration-record__list-view.recording .scroll-bar:horizontal .decrement-arrow,
-.narration-record__list-view.recording .scroll-bar:horizontal .increment-button,
-.narration-record__list-view.recording .scroll-bar:horizontal .decrement-button {
-    -fx-padding: 0px;
-}
-
-.narration-record__list-view.recording .scroll-bar:horizontal {
-    -fx-padding: 0px;
+.narration-record__volumebar-filler {
+    -fx-pref-width: 16px;
+    -fx-background-color: #001533;
 }
 
 .narration-list__buttons .btn.recording {

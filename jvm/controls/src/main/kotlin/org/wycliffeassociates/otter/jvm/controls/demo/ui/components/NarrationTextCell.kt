@@ -42,7 +42,7 @@ internal class NarrationTextCell(
             return
         }
 
-        view.isActiveProperty.set(isSelected)
+        view.isRecordingProperty.set(isSelected)
         view.isLastVerseProperty.set(index == listView.items.lastIndex)
 
         graphic = view.apply {

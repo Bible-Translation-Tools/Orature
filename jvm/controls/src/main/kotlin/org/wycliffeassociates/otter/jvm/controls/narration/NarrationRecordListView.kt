@@ -28,20 +28,13 @@ import tornadofx.*
 
 class NarrationRecordListView<T>(items: ObservableList<T>? = null) : ListView<T>(items) {
     val isRecordingProperty = SimpleBooleanProperty()
-    val isRecordingPausedProperty = SimpleBooleanProperty()
-
-    private val isRecordingActiveProperty = isRecordingProperty.and(isRecordingPausedProperty.not())
 
     init {
-        addClass("wa-list-view", "narration-record__list-view")
+        addClass("wa-list-view")
         orientation = Orientation.HORIZONTAL
 
-        isRecordingActiveProperty.onChange {
-            toggleClass("recording", it)
-        }
-
-        disableProperty().bind(isRecordingActiveProperty)
-        styleProperty().bind(isRecordingActiveProperty.stringBinding {
+        disableProperty().bind(isRecordingProperty)
+        styleProperty().bind(isRecordingProperty.stringBinding {
             if (it == true) "-fx-opacity: 1" else ""
         })
     }

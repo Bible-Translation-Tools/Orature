@@ -93,11 +93,11 @@ class ChapterNarrationViewModel : ViewModel() {
     var onScrollToChunk: (ChunkData) -> Unit = {}
     var onPlaybackStarted: (ChunkData) -> Unit = {}
 
-    var isRecordingProperty = SimpleBooleanProperty(false)
-    var isRecording by isRecordingProperty
+    var recordStartedProperty = SimpleBooleanProperty(false)
+    var recordStarted by recordStartedProperty
 
-    var isRecordingPausedProperty = SimpleBooleanProperty(false)
-    var isRecordingPaused by isRecordingPausedProperty
+    var recordPausedProperty = SimpleBooleanProperty(false)
+    var recordPaused by recordPausedProperty
 
     val waveformDrawableProperty = SimpleObjectProperty<Drawable>()
     val volumebarDrawableProperty = SimpleObjectProperty<Drawable>()
@@ -207,8 +207,6 @@ class ChapterNarrationViewModel : ViewModel() {
                 data.onNext = ::onNext
 
                 data.recordButtonTextProperty.bind(recordButtonTextProperty)
-                data.isRecordingProperty.bind(isRecordingProperty)
-                data.isRecordingPausedProperty.bind(isRecordingPausedProperty)
 
                 it.audio.selected.value?.value?.file?.let { file ->
                     val audio = AudioFile(file)
@@ -276,14 +274,14 @@ class ChapterNarrationViewModel : ViewModel() {
     private fun onRecord(chunk: ChunkData) {
         stopPlayer()
 
-        val thisChunkInProgress = isRecording && recordingChunkProperty.value == chunk
+        val thisChunkInProgress = recordStarted && recordingChunkProperty.value == chunk
         val isNextChunkRecording = recordingChunkProperty.value?.let {
             it.sort == (chunk.sort - 1)
         } ?: true
 
         when {
-            thisChunkInProgress && !isRecordingPaused -> pauseRecording(chunk)
-            thisChunkInProgress && isRecordingPaused -> resumeRecording(chunk)
+            thisChunkInProgress && !recordPaused -> pauseRecording(chunk)
+            thisChunkInProgress && recordPaused -> resumeRecording(chunk)
             !isNextChunkRecording -> {
                 recordingChunkProperty.value?.let {
                     pauseRecording(it)
@@ -303,14 +301,13 @@ class ChapterNarrationViewModel : ViewModel() {
     }
 
     private fun onNext(chunk: ChunkData) {
-        if (isRecording && !isRecordingPaused) {
+        if (recordStarted && !recordPaused) {
             onRecord(chunk)
         }
     }
 
     private fun record(chunk: ChunkData) {
         onScrollToChunk(chunk)
-        recordedChunks.setPredicate { it.sort < chunk.sort && it.hasAudio() }
 
         renderer?.clearData()
 
@@ -318,8 +315,8 @@ class ChapterNarrationViewModel : ViewModel() {
             updateChunkData(it)
         }
 
-        if (!isRecording || isRecordingPaused) {
-            if (!isRecording) {
+        if (!recordStarted || recordPaused) {
+            if (!recordStarted) {
                 initializeRecordAudio()
             }
 
@@ -332,9 +329,14 @@ class ChapterNarrationViewModel : ViewModel() {
         }
 
         chunk.isDraft = true
+        chunk.isRecording = true
+        chunk.waveformProperty.bind(waveformDrawableProperty)
+        chunk.volumeBarProperty.bind(volumebarDrawableProperty)
+
+        recordedChunks.setPredicate { it.sort <= chunk.sort && it.hasAudio() }
         recordingChunkProperty.set(chunk)
-        isRecording = true
-        isRecordingPaused = false
+        recordStarted = true
+        recordPaused = false
     }
 
     private fun saveAndRecord(chunk: ChunkData) {
@@ -354,7 +356,7 @@ class ChapterNarrationViewModel : ViewModel() {
 
         updateChunkData(chunk)
 
-        isRecordingPaused = true
+        recordPaused = true
         recordedChunks.setPredicate { it.hasAudio() }
         onScrollToChunk(chunk)
     }
@@ -363,8 +365,12 @@ class ChapterNarrationViewModel : ViewModel() {
         recorder?.start()
         writer?.start()
 
-        isRecordingPaused = false
-        recordedChunks.setPredicate { it.sort < chunk.sort && it.hasAudio() }
+        chunk.isRecording = true
+        chunk.waveformProperty.bind(waveformDrawableProperty)
+        chunk.volumeBarProperty.bind(volumebarDrawableProperty)
+
+        recordPaused = false
+        recordedChunks.setPredicate { it.sort <= chunk.sort && it.hasAudio() }
     }
 
     private fun stopRecording() {
@@ -373,15 +379,15 @@ class ChapterNarrationViewModel : ViewModel() {
         renderer?.clearData()
 
         writer?.writer?.dispose()
-        isRecording = false
-        isRecordingPaused = true
+        recordStarted = false
+        recordPaused = true
         recordingChunkProperty.set(null)
     }
 
     private fun saveAndQuit() {
-        if (isRecording) {
+        if (recordStarted) {
             recordingChunkProperty.value?.let {
-                if (!isRecordingPaused) {
+                if (!recordPaused) {
                     pauseRecording(it)
                 }
             }
@@ -488,6 +494,9 @@ class ChapterNarrationViewModel : ViewModel() {
     }
 
     private fun updateChunkData(chunk: ChunkData) {
+        chunk.isRecording = false
+        chunk.waveformProperty.unbind()
+        chunk.volumeBarProperty.unbind()
         updateAudioLocations(chunk)
 
         recordAudio?.reader(chunk.start, chunk.end)?.use { reader ->
@@ -553,13 +562,13 @@ class ChapterNarrationViewModel : ViewModel() {
         return Bindings.createStringBinding(
             {
                 when {
-                    isRecording && !isRecordingPaused -> messages["pauseRecording"]
-                    recordedChunks.isNotEmpty() || isRecordingPaused -> messages["resumeRecording"]
+                    recordStarted && !recordPaused -> messages["pauseRecording"]
+                    recordedChunks.isNotEmpty() || recordPaused -> messages["resumeRecording"]
                     else -> messages["beginRecording"]
                 }
             },
-            isRecordingProperty,
-            isRecordingPausedProperty,
+            recordStartedProperty,
+            recordPausedProperty,
             recordedChunks
         )
     }
@@ -573,7 +582,7 @@ class ChapterNarrationViewModel : ViewModel() {
     fun recordListWidthBinding(): DoubleBinding {
         return Bindings.createDoubleBinding(
             {
-                if (isRecording && isRecordingPaused.not()) {
+                if (recordStarted && recordPaused.not()) {
                     recordListWidthProperty.value - waveformWidthProperty.value
                 } else {
                     Double.MAX_VALUE
@@ -581,8 +590,8 @@ class ChapterNarrationViewModel : ViewModel() {
             },
             recordListWidthProperty,
             waveformWidthProperty,
-            isRecordingProperty,
-            isRecordingPausedProperty
+            recordStartedProperty,
+            recordPausedProperty
         )
     }
 }

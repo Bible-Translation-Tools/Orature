@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.chapterselector.ChapterSelector
 import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
-import org.wycliffeassociates.otter.jvm.controls.narration.activerecordingcard
 import org.wycliffeassociates.otter.jvm.controls.narration.floatingnarrationcard
 import org.wycliffeassociates.otter.jvm.controls.narration.narrationrecordlistview
 import org.wycliffeassociates.otter.jvm.controls.narration.narrationtextlistview
@@ -135,31 +134,8 @@ class ChapterNarrationPage : View() {
                             scrollTo(it)
                         }
 
-                        isRecordingProperty.bind(viewModel.isRecordingProperty)
-                        isRecordingPausedProperty.bind(viewModel.isRecordingPausedProperty)
-
-                        maxWidthProperty().bind(viewModel.recordListWidthBinding())
+                        isRecordingProperty.bind(viewModel.recordStartedProperty.and(viewModel.recordPausedProperty.not()))
                     }
-
-                    activerecordingcard {
-                        alignment = Pos.CENTER_RIGHT
-
-                        verseLabelProperty.bind(viewModel.recordingChunkProperty.stringBinding { it?.title })
-                        waveformDrawableProperty.bind(viewModel.waveformDrawableProperty)
-                        volumebarDrawableProperty.bind(viewModel.volumebarDrawableProperty)
-                        isRecordingProperty.bind(viewModel.isRecordingProperty)
-
-                        viewModel.waveformWidthProperty.bind(waveformWidthProperty)
-
-                        visibleProperty().bind(
-                            viewModel.isRecordingProperty.and(
-                                viewModel.isRecordingPausedProperty.not()
-                            )
-                        )
-                        managedProperty().bind(visibleProperty())
-                    }
-
-                    viewModel.recordListWidthProperty.bind(widthProperty())
                 }
 
                 vbox {
@@ -173,7 +149,7 @@ class ChapterNarrationPage : View() {
 
                     visibleProperty().bind(viewModel.recordedChunks.booleanBinding {
                         it.isEmpty()
-                    }.and(viewModel.isRecordingProperty.not()))
+                    }.and(viewModel.recordStartedProperty.not()))
                 }
             }
             stackpane {

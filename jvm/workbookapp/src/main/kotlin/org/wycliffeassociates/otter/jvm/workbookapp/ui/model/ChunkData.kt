@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.model
 
 import javafx.scene.image.Image
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.jvm.controls.recorder.Drawable
 import tornadofx.FX.Companion.messages
 import tornadofx.get
 import tornadofx.getProperty
@@ -25,14 +26,17 @@ data class ChunkData(
     var invertedImage: Image by property(null)
     val invertedImageProperty = getProperty(ChunkData::invertedImage)
 
+    var waveform: Drawable by property(null)
+    val waveformProperty = getProperty(ChunkData::waveform)
+
+    var volumeBar: Drawable by property(null)
+    val volumeBarProperty = getProperty(ChunkData::volumeBar)
+
     var imageLoading: Boolean by property(false)
     val imageLoadingProperty = getProperty(ChunkData::imageLoading)
 
     var isPlaying: Boolean by property(false)
     val isPlayingProperty = getProperty(ChunkData::isPlaying)
-
-    var isRecordingPaused: Boolean by property(false)
-    val isRecordingPausedProperty = getProperty(ChunkData::isRecordingPaused)
 
     var isRecording: Boolean by property(false)
     val isRecordingProperty = getProperty(ChunkData::isRecording)

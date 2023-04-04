@@ -32,18 +32,15 @@ import tornadofx.*
 class NarrationTextItem : VBox() {
     val verseLabelProperty = SimpleStringProperty()
     val verseTextProperty = SimpleStringProperty()
-    val isActiveProperty = SimpleBooleanProperty()
+    val isRecordingProperty = SimpleBooleanProperty()
+    val isSelectedProperty = SimpleBooleanProperty()
     val isLastVerseProperty = SimpleBooleanProperty()
 
-    val isRecordingProperty = SimpleBooleanProperty()
-    val isRecordingPausedProperty = SimpleBooleanProperty()
     val recordButtonTextProperty = SimpleStringProperty()
     val nextChunkTextProperty = SimpleStringProperty()
 
     val onRecordActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onNextVerseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
-
-    private val isRecordingActiveProperty = isRecordingProperty.and(isRecordingPausedProperty.not())
 
     init {
         styleClass.setAll("narration-list__verse-item")
@@ -64,7 +61,7 @@ class NarrationTextItem : VBox() {
         }
         separator {
             addClass("narration-list__separator")
-            visibleProperty().bind(isActiveProperty)
+            visibleProperty().bind(isSelectedProperty)
             managedProperty().bind(visibleProperty())
         }
         hbox {
@@ -75,7 +72,7 @@ class NarrationTextItem : VBox() {
                 addClass("btn", "btn--primary")
                 graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
 
-                isRecordingActiveProperty.onChange {
+                isRecordingProperty.onChange {
                     toggleClass("recording", it)
                 }
 
@@ -89,11 +86,11 @@ class NarrationTextItem : VBox() {
                 disableProperty().bind(isLastVerseProperty)
             }
 
-            visibleProperty().bind(isActiveProperty)
+            visibleProperty().bind(isSelectedProperty)
             managedProperty().bind(visibleProperty())
         }
 
-        disableProperty().bind(isActiveProperty.not())
+        disableProperty().bind(isSelectedProperty.not())
     }
 }
 

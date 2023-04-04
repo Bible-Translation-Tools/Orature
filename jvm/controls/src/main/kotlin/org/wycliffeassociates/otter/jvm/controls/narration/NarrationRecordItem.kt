@@ -36,6 +36,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.recorder.Drawable
 import tornadofx.*
 import java.text.MessageFormat
 
@@ -44,6 +45,9 @@ class NarrationRecordItem : VBox() {
     val waveformProperty = SimpleObjectProperty<Image>()
     val invertedWaveformProperty = SimpleObjectProperty<Image>()
     val waveformLoadingProperty = SimpleBooleanProperty()
+
+    val waveformDrawableProperty = SimpleObjectProperty<Drawable>()
+    val volumebarDrawableProperty = SimpleObjectProperty<Drawable>()
 
     val openInTextProperty = SimpleStringProperty()
     val recordAgainTextProperty = SimpleStringProperty()
@@ -55,11 +59,10 @@ class NarrationRecordItem : VBox() {
     val onRecordAgainActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onWaveformClickActionProperty = SimpleObjectProperty<EventHandler<MouseEvent>>()
 
-    val isRecordingProperty = SimpleBooleanProperty()
-    val isRecordingPausedProperty = SimpleBooleanProperty()
     val isPlayingProperty = SimpleBooleanProperty()
     val playbackPositionProperty = SimpleIntegerProperty()
     val totalFramesProperty = SimpleIntegerProperty()
+    val isRecordingProperty = SimpleBooleanProperty()
 
     private val playerWidthProperty = SimpleDoubleProperty()
 
@@ -77,76 +80,110 @@ class NarrationRecordItem : VBox() {
         }
 
         hbox {
-            addClass("narration-record__verse-controls")
+            hbox {
+                addClass("narration-record__verse-controls")
 
-            label {
-                addClass("narration-record__verse-text")
-
-                graphic = FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE)
-                textProperty().bind(verseLabelProperty)
-
-                playbackPositionProperty.onChange {
-                    toggleClass("playing", it > 0)
-                }
-            }
-            region {
                 hgrow = Priority.ALWAYS
-            }
-            button {
-                addClass("btn", "btn--primary", "btn--borderless")
-                graphic = FontIcon(MaterialDesign.MDI_PLAY)
 
-                graphicProperty().bind(
-                    isPlayingProperty.objectBinding { isPlaying ->
-                        if (isPlaying == true) pauseIcon else playIcon
+                label {
+                    addClass("narration-record__verse-text")
+
+                    graphic = FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE)
+                    textProperty().bind(verseLabelProperty)
+
+                    playbackPositionProperty.onChange {
+                        toggleClass("playing", it > 0)
                     }
-                )
+                }
+                region {
+                    hgrow = Priority.ALWAYS
+                }
+                button {
+                    addClass("btn", "btn--primary", "btn--borderless")
+                    graphic = FontIcon(MaterialDesign.MDI_PLAY)
 
-                onActionProperty().bind(onPlayActionProperty)
-                disableProperty().bind(isRecordingProperty.and(isRecordingPausedProperty.not()))
+                    graphicProperty().bind(
+                        isPlayingProperty.objectBinding { isPlaying ->
+                            if (isPlaying == true) pauseIcon else playIcon
+                        }
+                    )
 
-                playbackPositionProperty.onChange {
-                    toggleClass("playing", it > 0)
+                    onActionProperty().bind(onPlayActionProperty)
+                    visibleProperty().bind(isRecordingProperty.not())
+                    managedProperty().bind(visibleProperty())
+
+                    playbackPositionProperty.onChange {
+                        toggleClass("playing", it > 0)
+                    }
+                }
+
+                menubutton {
+                    addClass("btn", "btn--primary", "btn--borderless", "wa-menu-button")
+                    graphic = FontIcon(MaterialDesign.MDI_DOTS_HORIZONTAL)
+
+                    item("") {
+                        textProperty().bind(openInTextProperty)
+                        graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
+                        onActionProperty().bind(onOpenAppActionProperty)
+                    }
+                    item("") {
+                        textProperty().bind(recordAgainTextProperty)
+                        graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
+                        onActionProperty().bind(onRecordAgainActionProperty)
+                    }
+
+                    visibleProperty().bind(isRecordingProperty.not())
+                    managedProperty().bind(visibleProperty())
                 }
             }
 
-            menubutton {
-                addClass("btn", "btn--primary", "btn--borderless", "wa-menu-button")
-                graphic = FontIcon(MaterialDesign.MDI_DOTS_HORIZONTAL)
+            region {
+                addClass("narration-record__volumebar-filler")
 
-                item("") {
-                    textProperty().bind(openInTextProperty)
-                    graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
-                    onActionProperty().bind(onOpenAppActionProperty)
-                }
-                item("") {
-                    textProperty().bind(recordAgainTextProperty)
-                    graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
-                    onActionProperty().bind(onRecordAgainActionProperty)
-                }
-
-                disableProperty().bind(isRecordingProperty.and(isRecordingPausedProperty.not()))
+                visibleProperty().bind(isRecordingProperty)
+                managedProperty().bind(visibleProperty())
             }
         }
 
         stackpane {
+            vgrow = Priority.ALWAYS
             alignment = Pos.CENTER_LEFT
-            //vgrow = Priority.ALWAYS
 
-            maxHeight = 176.0
-
-            hbox {
+            stackpane {
                 addClass("narration-record__waveform")
-                imageview(waveformProperty).apply {
-                    visibleProperty().bind(playbackPositionProperty.booleanBinding {
-                        it?.let { it.toDouble() <= 0 } ?: true
-                    })
+
+                stackpane {
+                    imageview(waveformProperty).apply {
+                        visibleProperty().bind(playbackPositionProperty.booleanBinding {
+                            it?.let { it.toDouble() <= 0 } ?: true
+                        })
+                    }
+                    imageview(invertedWaveformProperty).apply {
+                        visibleProperty().bind(playbackPositionProperty.booleanBinding {
+                            it?.let { it.toDouble() > 0 } ?: false
+                        })
+                    }
+
+                    visibleProperty().bind(isRecordingProperty.not())
                     managedProperty().bind(visibleProperty())
                 }
-                imageview(invertedWaveformProperty).apply {
-                    visibleProperty().bind(playbackPositionProperty.booleanBinding {
-                        it?.let { it.toDouble() > 0 } ?: false
+
+                hbox {
+                    hgrow = Priority.ALWAYS
+                    alignment = Pos.CENTER_RIGHT
+
+                    add(CanvasFragment().apply {
+                        isDrawingProperty.bind(isRecordingProperty)
+                        drawableProperty.bind(waveformDrawableProperty)
                     })
+                    add(CanvasFragment().apply {
+                        addClass("narration-record__volume-bar")
+
+                        isDrawingProperty.bind(isRecordingProperty)
+                        drawableProperty.bind(volumebarDrawableProperty)
+                    })
+
+                    visibleProperty().bind(isRecordingProperty)
                     managedProperty().bind(visibleProperty())
                 }
             }
@@ -167,7 +204,8 @@ class NarrationRecordItem : VBox() {
                 label(goToVerseTextBinding())
 
                 onMouseClickedProperty().bind(onWaveformClickActionProperty)
-                visibleProperty().bind(this@stackpane.hoverProperty())
+                visibleProperty().bind(this@stackpane.hoverProperty().and(isRecordingProperty.not()))
+                managedProperty().bind(visibleProperty())
             }
 
             label(loadingImageTextProperty) {
