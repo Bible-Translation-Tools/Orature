@@ -39,8 +39,10 @@ import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.RcConstants
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
+import org.wycliffeassociates.resourcecontainer.DirectoryAccessor
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.*
 import java.time.LocalDate
@@ -175,11 +177,12 @@ fun getGenesisCollection(): Collection {
 }
 
 fun buildWorkbook(
+    directoryProvider: IDirectoryProvider,
     db: WorkbookRepository.IDatabaseAccessors,
     source: Collection,
     target: Collection
 ) = WorkbookRepository(
-    mock(),
+    directoryProvider,
     db
 ).get(source, target)
 

@@ -42,8 +42,8 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.SourceProjectExporter
+import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
+import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.SourceProjectExporter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
@@ -53,7 +53,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.io.path.createTempDirectory
 
-class TestExportSourceProject {
+class TestSourceProjectExporter {
     @Inject
     lateinit var dbEnvProvider: Provider<DatabaseEnvironment>
     @Inject
@@ -115,7 +115,12 @@ class TestExportSourceProject {
         prepareTakeForExport()
 
         val result = exportSourceProvider.get()
-            .export(outputDir, targetMetadata, workbook, projectFilesAccessor)
+            .export(
+                outputDir,
+                targetMetadata,
+                workbook,
+                null
+            )
             .blockingGet()
 
         assertEquals(ExportResult.SUCCESS, result)
@@ -141,7 +146,7 @@ class TestExportSourceProject {
     @Test
     fun `export source project has no media when no take selected`() {
         val result = exportSourceProvider.get()
-            .export(outputDir, targetMetadata, workbook, projectFilesAccessor)
+            .export(outputDir, targetMetadata, workbook, null)
             .blockingGet()
 
         assertEquals(ExportResult.SUCCESS, result)
@@ -156,7 +161,7 @@ class TestExportSourceProject {
         // export as source
         prepareTakeForExport()
         val result = exportSourceProvider.get()
-            .export(outputDir, targetMetadata, workbook, projectFilesAccessor)
+            .export(outputDir, targetMetadata, workbook, null)
             .blockingGet()
 
         assertEquals(ExportResult.SUCCESS, result)
@@ -186,7 +191,7 @@ class TestExportSourceProject {
         prepareChapterContentReadyToCompile()
 
         val result = exportSourceProvider.get()
-            .export(outputDir, targetMetadata, workbook, projectFilesAccessor)
+            .export(outputDir, targetMetadata, workbook, null)
             .blockingGet()
 
         assertEquals(ExportResult.SUCCESS, result)

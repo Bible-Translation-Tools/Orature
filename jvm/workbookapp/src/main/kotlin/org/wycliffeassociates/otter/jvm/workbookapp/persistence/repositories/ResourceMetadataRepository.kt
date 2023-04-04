@@ -24,11 +24,13 @@ import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ResourceMetadataEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.LanguageMapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.ResourceMetadataMapper
+import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import javax.inject.Inject
 
 class ResourceMetadataRepository @Inject constructor(
@@ -122,6 +124,20 @@ class ResourceMetadataRepository @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
+    override fun getAllDerivatives(metadata: ResourceMetadata): Single<List<ResourceMetadata>> {
+        return Single
+            .fromCallable {
+                resourceMetadataDao
+                    .fetchAll()
+                    .filter { it.derivedFromFk == metadata.id }
+                    .map(this::buildMetadata)
+            }
+            .doOnError { e ->
+                logger.error("Error in getAllDerivatives", e)
+            }
+            .subscribeOn(Schedulers.io())
+    }
+
     override fun getSource(metadata: ResourceMetadata): Maybe<ResourceMetadata> {
         return Maybe
             .fromCallable {
@@ -171,6 +187,19 @@ class ResourceMetadataRepository @Inject constructor(
                 logger.error("Error in update for metadata: $obj", e)
             }
             .subscribeOn(Schedulers.io())
+    }
+
+    override fun update(metadata: ResourceMetadata, rc: ResourceContainer): Completable {
+        return Completable.fromAction {
+            val language = LanguageMapper()
+                .mapFromEntity(languageDao.fetchBySlug(rc.manifest.dublinCore.language.identifier)!!)
+            val mappedMetadata = rc.manifest.dublinCore.mapToMetadata(rc.file, language)
+            val updatedMetadata = mappedMetadata.copy(
+                id = metadata.id,
+                path = metadata.path // Don't update the path, the RC could be a different file from the internal RC
+            )
+            update(updatedMetadata).blockingGet()
+        }
     }
 
     override fun addLink(firstMetadata: ResourceMetadata, secondMetadata: ResourceMetadata): Completable {

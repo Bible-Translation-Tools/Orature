@@ -24,4 +24,6 @@ interface Versification {
     fun getVersesInChapter(book: Book, chapterNumber: Int): Int {
         return getVersesInChapter(book.slug, chapterNumber)
     }
+
+    fun getBookSlugs(): List<String>
 }

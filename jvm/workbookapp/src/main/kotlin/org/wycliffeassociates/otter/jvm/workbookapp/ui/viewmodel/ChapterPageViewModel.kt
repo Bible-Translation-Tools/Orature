@@ -36,7 +36,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
-import org.wycliffeassociates.otter.common.domain.content.TakeActions
+import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -53,6 +53,7 @@ import javax.inject.Inject
 import org.wycliffeassociates.otter.common.domain.content.CreateChunks
 import org.wycliffeassociates.otter.common.domain.content.ResetChunks
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.IVersificationRepository
 
 
 class ChapterPageViewModel : ViewModel() {
@@ -73,6 +74,9 @@ class ChapterPageViewModel : ViewModel() {
 
     @Inject
     lateinit var appPreferencesRepo: IAppPreferencesRepository
+
+    @Inject
+    lateinit var createChunks: CreateChunks
 
     // List of content to display on the screen
     // Boolean tracks whether the content has takes associated with it
@@ -219,15 +223,15 @@ class ChapterPageViewModel : ViewModel() {
                 .doOnError { e ->
                     logger.error("Error in recording a new take", e)
                 }
-                .onErrorReturn { TakeActions.Result.NO_PLUGIN }
-                .subscribe { result: TakeActions.Result ->
+                .onErrorReturn { PluginActions.Result.NO_PLUGIN }
+                .subscribe { result: PluginActions.Result ->
                     fire(PluginClosedEvent(PluginType.RECORDER))
                     when (result) {
-                        TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noRecorder"])
-                        TakeActions.Result.SUCCESS -> {
+                        PluginActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noRecorder"])
+                        PluginActions.Result.SUCCESS -> {
                             updateOnSuccess.subscribe()
                         }
-                        TakeActions.Result.NO_AUDIO -> {
+                        PluginActions.Result.NO_AUDIO -> {
                             /* no-op */
                         }
                     }
@@ -258,11 +262,11 @@ class ChapterPageViewModel : ViewModel() {
                 .doOnError { e ->
                     logger.error("Error in processing take with plugin type: $pluginType - $e")
                 }
-                .onErrorReturn { TakeActions.Result.NO_PLUGIN }
-                .subscribe { result: TakeActions.Result ->
+                .onErrorReturn { PluginActions.Result.NO_PLUGIN }
+                .subscribe { result: PluginActions.Result ->
                     fire(PluginClosedEvent(pluginType))
                     when (result) {
-                        TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noEditor"])
+                        PluginActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noEditor"])
                         else -> {
                             when (pluginType) {
                                 PluginType.EDITOR, PluginType.MARKER -> {
@@ -476,17 +480,10 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     fun createChunksFromVerses() {
-        val accessor = workbookDataStore.activeProjectFilesAccessorProperty.value
         val wkbk = workbookDataStore.activeWorkbookProperty.value
         val chapter = workbookDataStore.activeChapterProperty.value
-        CreateChunks(
-            accessor,
-            wkbk.sourceAudioAccessor,
-            chapter.addChunk,
-            chapter.sort,
-            wkbk.target
-        )
-            .createChunksFromVerses(wkbk.source.slug, 1)
+
+        createChunks.createChunksFromVerses(wkbk, chapter, 1)
     }
 
     fun resetChapter() {

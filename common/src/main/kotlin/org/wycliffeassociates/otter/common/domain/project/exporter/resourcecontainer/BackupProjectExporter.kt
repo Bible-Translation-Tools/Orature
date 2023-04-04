@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
+package org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer
 
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
@@ -24,59 +24,68 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
+import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.takeFilenamePattern
+import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOptions
+import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import java.io.File
+import java.lang.Exception
 import javax.inject.Inject
 
 class BackupProjectExporter @Inject constructor(
-    private val directoryProvider: IDirectoryProvider,
+    directoryProvider: IDirectoryProvider,
     private val workbookRepository: IWorkbookRepository
-) : ProjectExporter() {
+) : RCProjectExporter(directoryProvider) {
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
     override fun export(
-        directory: File,
-        projectMetadataToExport: ResourceMetadata,
+        outputDirectory: File,
+        resourceMetadata: ResourceMetadata,
         workbook: Workbook,
-        projectFilesAccessor: ProjectFilesAccessor
+        options: ExportOptions?
     ): Single<ExportResult> {
         return Single
             .fromCallable {
                 val projectSourceMetadata = workbook.source.linkedResources
-                    .firstOrNull { it.identifier == projectMetadataToExport.identifier }
+                    .firstOrNull { it.identifier == resourceMetadata.identifier }
                     ?: workbook.source.resourceMetadata
 
-                val projectToExportIsBook: Boolean =
-                    projectMetadataToExport.identifier == workbook.target.resourceMetadata.identifier
-
-                val contributors = projectFilesAccessor.getContributorInfo()
+                val projectAccessor = workbook.projectFilesAccessor
+                val contributors = projectAccessor.getContributorInfo()
                 val zipFilename = makeExportFilename(workbook, projectSourceMetadata)
-                val zipFile = directory.resolve(zipFilename)
+                val zipFile = outputDirectory.resolve(zipFilename)
 
                 logger.info("Exporting backup project: ${zipFile.nameWithoutExtension}")
 
-                projectFilesAccessor.initializeResourceContainerInFile(workbook, zipFile)
-                setContributorInfo(contributors, projectMetadataToExport, zipFile)
+                projectAccessor.initializeResourceContainerInFile(workbook, zipFile)
+                setContributorInfo(contributors, resourceMetadata.creator, zipFile)
 
                 directoryProvider.newFileWriter(zipFile).use { fileWriter ->
-                    projectFilesAccessor.copyTakeFiles(
+                    projectAccessor.copyTakeFiles(
                         fileWriter,
                         workbook,
                         workbookRepository,
-                        projectToExportIsBook
-                    )
+                        isBook = true
+                    ) {
+                        takesFilter(it, options)
+                    }
 
                     val linkedResource = workbook.source.linkedResources
-                        .firstOrNull { it.identifier == projectMetadataToExport.identifier }
+                        .firstOrNull { it.identifier == resourceMetadata.identifier }
 
-                    projectFilesAccessor.copySourceFilesWithRelatedMedia(
+                    projectAccessor.copySourceFilesWithRelatedMedia(
                         fileWriter, directoryProvider.tempDirectory, linkedResource
                     )
-                    projectFilesAccessor.writeSelectedTakesFile(fileWriter, workbook, projectToExportIsBook)
-                    projectFilesAccessor.writeChunksFile(fileWriter)
+                    projectAccessor.writeSelectedTakesFile(
+                        fileWriter,
+                        workbook,
+                        isBook = true
+                    ) { takeName ->
+                        takesFilter(takeName, options)
+                    }
+                    projectAccessor.writeChunksFile(fileWriter)
                 }
 
                 restoreFileExtension(zipFile, OratureFileFormat.ORATURE.extension)
@@ -88,5 +97,21 @@ class BackupProjectExporter @Inject constructor(
             }
             .onErrorReturnItem(ExportResult.FAILURE)
             .subscribeOn(Schedulers.io())
+    }
+
+    private fun takesFilter(path: String, exportOptions: ExportOptions?): Boolean {
+        if (exportOptions == null) {
+            return true
+        }
+
+        return try {
+            takeFilenamePattern
+                .matcher(path)
+                .apply { find() }
+                .group(1)
+                .toInt() in exportOptions.chapters
+        } catch (e: Exception) {
+            false
+        }
     }
 }

@@ -1,10 +1,11 @@
 package org.wycliffeassociates.otter.common
 
+import junit.runner.Version
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.RcConstants
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Checking
 import org.wycliffeassociates.resourcecontainer.entity.Manifest
@@ -16,7 +17,8 @@ import org.wycliffeassociates.resourcecontainer.entity.Language as RCLanguage
 
 class ResourceContainerBuilder(baseRC: File? = null) {
 
-    private val tempDir = createTempDirectory("orature-test").toFile()
+    private val tempDir = createTempDirectory("orature-test")
+        .toFile()
         .apply { deleteOnExit() }
 
     private val selectedTakes: MutableList<String> = mutableListOf()
@@ -27,6 +29,11 @@ class ResourceContainerBuilder(baseRC: File? = null) {
         ResourceContainer.load(rcFile).use {
             this.manifest = it.manifest
         }
+    }
+
+    fun setVersion(version: Int): ResourceContainerBuilder {
+        manifest.dublinCore.version = version.toString()
+        return this
     }
 
     fun setTargetLanguage(language: Language): ResourceContainerBuilder {
@@ -66,8 +73,14 @@ class ResourceContainerBuilder(baseRC: File? = null) {
         return this
     }
 
-    fun setProjectManifest(projects: List<Project>) {
+    fun setProjectManifest(projects: List<Project>): ResourceContainerBuilder {
         manifest.projects = projects
+        return this
+    }
+
+    fun setContributors(contributors: List<String>): ResourceContainerBuilder {
+        manifest.dublinCore.contributor = contributors.toMutableList()
+        return this
     }
 
     /**
@@ -121,17 +134,19 @@ class ResourceContainerBuilder(baseRC: File? = null) {
         return this
     }
 
-    fun build(): ResourceContainer = ResourceContainer.load(rcFile).also { rc ->
-        if (selectedTakes.isNotEmpty()) {
-            rc.accessor.write(RcConstants.SELECTED_TAKES_FILE) { outputStream ->
-                outputStream.write(
-                    selectedTakes.joinToString("\n").byteInputStream().readAllBytes()
-                )
+    fun build(): ResourceContainer {
+        return ResourceContainer.load(rcFile).also { rc ->
+            if (selectedTakes.isNotEmpty()) {
+                rc.accessor.write(RcConstants.SELECTED_TAKES_FILE) { outputStream ->
+                    outputStream.write(
+                        selectedTakes.joinToString("\n").byteInputStream().readAllBytes()
+                    )
+                }
             }
-        }
 
-        rc.manifest = this.manifest
-        rc.writeManifest()
+            rc.manifest = this.manifest
+            rc.writeManifest()
+        }
     }
 
     fun buildFile(): File {
