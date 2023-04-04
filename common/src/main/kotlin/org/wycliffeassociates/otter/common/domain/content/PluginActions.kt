@@ -150,7 +150,7 @@ class PluginActions @Inject constructor(
                 }
             }
     }
-
+    
     private fun launchPlugin(
         pluginType: PluginType,
         take: Take,
