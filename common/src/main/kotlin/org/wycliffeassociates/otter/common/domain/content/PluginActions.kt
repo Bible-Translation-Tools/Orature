@@ -131,19 +131,18 @@ class PluginActions @Inject constructor(
         audio: AssociatedAudio,
         projectAudioDir: File,
         namer: FileNamer,
-        take: File,
-        takeNumber: Int? = null
+        take: File
     ): Completable {
         return audio.getNewTakeNumber()
             .map { newTakeNumber ->
                 val format = AudioFileFormat.of(take.extension)
-                val filename = namer.generateName(takeNumber ?: newTakeNumber, format)
+                val filename = namer.generateName(newTakeNumber, format)
                 val chapterAudioDir = getChapterAudioDirectory(
                     projectAudioDir,
                     namer.formatChapterNumber()
                 )
                 writeTakeFile(chapterAudioDir, filename, take)
-                createNewTake(takeNumber ?: newTakeNumber, filename, chapterAudioDir, false)
+                createNewTake(newTakeNumber, filename, chapterAudioDir, false)
             }
             .flatMapCompletable {
                 Completable.fromAction {
@@ -151,7 +150,7 @@ class PluginActions @Inject constructor(
                 }
             }
     }
-    
+
     private fun launchPlugin(
         pluginType: PluginType,
         take: Take,
