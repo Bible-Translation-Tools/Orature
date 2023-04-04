@@ -80,13 +80,11 @@ abstract class RCProjectExporter(
 
     protected fun setContributorInfo(
         contributors: List<Contributor>,
-        creator: String,
         projectFile: File
     ) {
         ResourceContainer.load(projectFile).use { rc ->
             rc.manifest.dublinCore.apply {
                 contributor = contributors.map { it.name }.toMutableList()
-                this.creator = creator
             }
             rc.writeManifest()
         }
