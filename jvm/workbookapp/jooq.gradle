@@ -14,8 +14,8 @@ dependencies {
     // Jooq
     implementation group: 'org.xerial', name: 'sqlite-jdbc', version: "$sqliteJdbcVer"
     implementation "org.jooq:jooq:$jooqVer"
-    jooqRuntime group: 'org.jooq', name: 'jooq-meta-extensions', version: "$jooqVer"
-    jooqRuntime "org.xerial:sqlite-jdbc:$sqliteJdbcVer"
+    jooqGenerator group: 'org.jooq', name: 'jooq-meta-extensions', version: "$jooqVer"
+    jooqGenerator "org.xerial:sqlite-jdbc:$sqliteJdbcVer"
     sqllite "org.xerial:sqlite-jdbc:$sqliteJdbcVer"
 }
 
@@ -40,29 +40,45 @@ task createDb {
 
 jooq {
     version = "$jooqVer"
-    edition = 'OSS'
-    sample(sourceSets.main) {
-        jdbc {
-            driver = 'org.sqlite.JDBC'
-            url = sqliteConnect
-        }
-        generator {
-            database {
-                name = 'org.jooq.meta.sqlite.SQLiteDatabase'
-            }
 
-            target {
-                packageName = 'jooq'
-                directory = 'src/main/java'
+    configurations {
+        main {  // name of the jOOQ configuration
+            generateSchemaSourceOnCompilation = true  // default (can be omitted)
+
+            generationTool {
+                jdbc {
+                    driver = 'org.sqlite.JDBC'
+                    url = sqliteConnect
+                }
+                generator {
+                    name = "org.jooq.codegen.DefaultGenerator"
+                    database {
+                        name = 'org.jooq.meta.sqlite.SQLiteDatabase'
+                    }
+                    generate {
+                        deprecated = false
+                        records = true
+                        immutablePojos = true
+                        fluentSetters = true
+                    }
+                    target {
+                        packageName = 'jooq'
+                        directory = 'src/main/java/jooq'
+                    }
+                    strategy.name = "org.jooq.codegen.DefaultGeneratorStrategy"
+                }
             }
         }
     }
 }
 
-clean.doLast {
-    project.file(sqliteFile).delete()
+generateJooq.doFirst {
     project.file('src/main/java/jooq').deleteDir()
 }
 
-generateSampleJooqSchemaSource.dependsOn createDb
-compileKotlin.dependsOn generateSampleJooqSchemaSource
+generateJooq.doLast {
+    project.file(sqliteFile).delete()
+}
+
+generateJooq.dependsOn createDb
+compileKotlin.dependsOn generateJooq
