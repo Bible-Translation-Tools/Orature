@@ -50,12 +50,12 @@ sourceSets {
 }
 
 configurations {
-    integrationTestCompile.extendsFrom main
+    integrationTestImplementation.extendsFrom main
     integrationTestRuntime.extendsFrom main
 }
 
 application {
-    mainClassName = "org.wycliffeassociates.otter.jvm.workbookapp.MainKt"
+    mainClass = "org.wycliffeassociates.otter.jvm.workbookapp.MainKt"
 }
 
 test {
@@ -333,6 +333,15 @@ compileJava.dependsOn createSentryProperties
 compileJava.dependsOn createLocalesProperties
 compileJava.dependsOn copyMessages
 compileJava.dependsOn copyTestResources
+processResources.dependsOn ':jvm:markerapp:copyJarToWorkbookAppResources'
+processResources.dependsOn ':jvm:recorderapp:copyJarToWorkbookAppResources'
+copyTestResources.dependsOn ':jvm:workbookapp:copyMessages'
+distTar.dependsOn ':jvm:workbookapp:shadowJar'
+distZip.dependsOn ':jvm:workbookapp:shadowJar'
+startScripts.dependsOn ':jvm:workbookapp:shadowJar'
+startShadowScripts.dependsOn ':jvm:workbookapp:jar'
+shadowDistTar.dependsOn ':jvm:workbookapp:jar'
+shadowDistZip.dependsOn ':jvm:workbookapp:jar'
 integrationTest.shouldRunAfter test
 integrationTest.dependsOn ':assets:build'
 integrationTest.dependsOn ':assets:copyToResources'
