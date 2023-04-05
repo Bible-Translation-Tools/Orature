@@ -191,6 +191,7 @@
     -fx-max-height: 67px;
 }
 
+.narration__header-controls .btn,
 .narration-record__verse-controls .btn {
     -fx-pref-width: 56px;
     -fx-pref-height: 48px;
@@ -233,10 +234,13 @@
     -fx-fill: -wa-white;
 }
 
+.narration__header-controls .wa-menu-button,
 .narration-record__verse-controls .wa-menu-button {
     -fx-padding: 0;
 }
 
+.narration__header-controls .wa-menu-button .arrow-button,
+.narration__header-controls .wa-menu-button .arrow-button .arrow,
 .narration-record__verse-controls .wa-menu-button .arrow-button,
 .narration-record__verse-controls .wa-menu-button .arrow-button .arrow {
     -fx-padding: 0;

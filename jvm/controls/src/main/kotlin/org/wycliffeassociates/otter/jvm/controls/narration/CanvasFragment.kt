@@ -24,7 +24,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Pos
 import javafx.scene.layout.StackPane
 import org.wycliffeassociates.otter.jvm.controls.canvas.ResizableCanvas
-import org.wycliffeassociates.otter.jvm.controls.recorder.Drawable
+import org.wycliffeassociates.otter.jvm.controls.waveform.Drawable
 import tornadofx.*
 
 class CanvasFragment : StackPane() {

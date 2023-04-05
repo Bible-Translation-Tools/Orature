@@ -2,7 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.model
 
 import javafx.scene.image.Image
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
-import org.wycliffeassociates.otter.jvm.controls.recorder.Drawable
+import org.wycliffeassociates.otter.jvm.controls.waveform.Drawable
 import tornadofx.FX.Companion.messages
 import tornadofx.get
 import tornadofx.getProperty

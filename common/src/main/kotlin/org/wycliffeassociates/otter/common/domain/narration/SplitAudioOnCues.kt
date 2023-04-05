@@ -13,7 +13,9 @@ class SplitAudioOnCues @Inject constructor(private val directoryProvider: IDirec
     fun execute(file: File): Single<Map<String, File>> {
         return Single.fromCallable {
             val sourceAudio = AudioFile(file)
-            val cues = sourceAudio.metadata.getCues()
+            val cues = sourceAudio.metadata.getCues().ifEmpty {
+                listOf(AudioCue(location = 0, label = "1"))
+            }
             splitAudio(file, cues)
         }
     }

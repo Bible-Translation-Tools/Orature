@@ -36,7 +36,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.jvm.controls.recorder.Drawable
+import org.wycliffeassociates.otter.jvm.controls.waveform.Drawable
 import tornadofx.*
 import java.text.MessageFormat
 
@@ -204,7 +204,11 @@ class NarrationRecordItem : VBox() {
                 label(goToVerseTextBinding())
 
                 onMouseClickedProperty().bind(onWaveformClickActionProperty)
-                visibleProperty().bind(this@stackpane.hoverProperty().and(isRecordingProperty.not()))
+                visibleProperty().bind(
+                    this@stackpane.hoverProperty()
+                        .and(isRecordingProperty.not())
+                        .and(isPlayingProperty.not())
+                )
                 managedProperty().bind(visibleProperty())
             }
 

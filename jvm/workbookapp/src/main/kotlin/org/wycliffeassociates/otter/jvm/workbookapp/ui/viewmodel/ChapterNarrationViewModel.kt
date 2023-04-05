@@ -6,6 +6,7 @@ import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.subjects.PublishSubject
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
@@ -26,20 +27,26 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
+import org.wycliffeassociates.otter.common.domain.content.PluginActions
+import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.common.domain.narration.InsertTakeAudio
 import org.wycliffeassociates.otter.common.domain.narration.SplitAudioOnCues
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
 import org.wycliffeassociates.otter.common.recorder.WavFileWriter
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
-import org.wycliffeassociates.otter.jvm.controls.recorder.Drawable
-import org.wycliffeassociates.otter.jvm.controls.recorder.VolumeBar
-import org.wycliffeassociates.otter.jvm.controls.recorder.ContinuousWaveform
+import org.wycliffeassociates.otter.jvm.controls.waveform.Drawable
+import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
+import org.wycliffeassociates.otter.jvm.controls.waveform.ContinuousWaveformLayer
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkData
 import tornadofx.*
 import java.io.File
@@ -81,6 +88,10 @@ class ChapterNarrationViewModel : ViewModel() {
     private val recordedSortedChunks = SortedList(allChunks, compareByDescending<ChunkData>  { it.sort })
     val recordedChunks = FilteredList(recordedSortedChunks) { it.hasAudio() }
 
+    private val chapterList: ObservableList<Chapter> = observableListOf()
+    val hasNextChapter = SimpleBooleanProperty(false)
+    val hasPreviousChapter = SimpleBooleanProperty(false)
+
     val currentVerseLabelProperty = SimpleStringProperty()
     val floatingCardVisibleProperty = SimpleBooleanProperty()
     val onCurrentVerseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
@@ -113,11 +124,23 @@ class ChapterNarrationViewModel : ViewModel() {
     private var recorder: IAudioRecorder? = null
     private var writer: WavFileWriter? = null
     private var renderer: ActiveRecordingRenderer? = null
-    private var recordAudio: AudioFile? = null
+    private var recordedAudio: AudioFile? = null
+
+    val snackBarObservable: PublishSubject<String> = PublishSubject.create()
+    val contextProperty = SimpleObjectProperty(PluginType.RECORDER)
+    val sourceAudioAvailableProperty = workbookDataStore.sourceAudioAvailableProperty
+    val sourceAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer?>(null)
+
+    private enum class StepDirection {
+        FORWARD,
+        BACKWARD
+    }
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+
         recordButtonTextProperty.bind(recordButtonTextBinding())
+        audioPluginViewModel.pluginNameProperty.bind(pluginNameBinding())
     }
 
     fun dock() {
@@ -130,41 +153,58 @@ class ChapterNarrationViewModel : ViewModel() {
             }
         }.let { listeners.add(it) }
 
-        workbookDataStore.activeChapterProperty.value?.let { chapter ->
-            loading = true
-            val totalChunks = chapter.chunkCount.blockingGet()
+        workbookDataStore.activeWorkbookProperty.onChangeAndDoNowWithDisposer { workbook ->
+            workbook?.let {
+                getChapterList(workbook.target.chapters)
+            }
+        }.let(listeners::add)
 
-            allChunks.onChangedObservable().subscribe {
-                if (totalChunks == it.size) {
-                    allChunksLoaded = true
-                    loading = false
-                } else {
-                    allChunksLoaded = false
-                }
-            }.also(disposables::add)
+        workbookDataStore.activeChapterProperty.onChangeAndDoNowWithDisposer { chapter ->
+            chapter?.let {
+                clearChapterState()
 
-            splitChapter(chapter)
-                .andThen(loadChunks(chapter))
-                .subscribe()
-                .also(disposables::add)
-        }
+                loading = true
+                val totalChunks = chapter.chunkCount.blockingGet()
 
-        recordedChunks.setPredicate { it.hasAudio() }
-        openRecorder()
+                setHasNextAndPreviousChapter()
+
+                allChunks.onChangedObservable().subscribe {
+                    if (totalChunks == it.size) {
+                        allChunksLoaded = true
+                        loading = false
+                    } else {
+                        allChunksLoaded = false
+                    }
+                }.also(disposables::add)
+
+                splitChapter(chapter)
+                    .andThen(loadChunks(chapter))
+                    .subscribe()
+                    .also(disposables::add)
+
+                recordedChunks.setPredicate { it.hasAudio() }
+                openRecorder()
+                openSourcePlayer()
+            }
+        }.let(listeners::add)
     }
 
     fun undock() {
-        workbookDataStore.selectedChapterPlayerProperty.set(null)
+        clearChapterState()
+
+        listeners.forEach(ListenerDisposer::dispose)
+        listeners.clear()
+    }
+
+    private fun clearChapterState() {
         initialSelectedItemProperty.set(null)
         allChunksLoaded = false
 
-        closePlayer()
+        closePlayers()
         saveAndQuit()
 
         allChunks.clear()
         disposables.clear()
-        listeners.forEach(ListenerDisposer::dispose)
-        listeners.clear()
     }
 
     private fun splitChapter(chapter: Chapter): Completable {
@@ -189,7 +229,7 @@ class ChapterNarrationViewModel : ViewModel() {
             .flatMap {
                 val data = ChunkData(it)
                 data.onPlay = ::onPlay
-                data.onOpenApp = ::onOpenIn
+                data.onOpenApp = ::onChunkOpenIn
                 data.onRecordAgain = ::onRecordAgain
                 data.onWaveformClicked = { chunk ->
                     onScrollToChunk(chunk)
@@ -232,6 +272,43 @@ class ChapterNarrationViewModel : ViewModel() {
                 chunkData.invertedImage = it
                 Observable.just(chunkData)
             }
+    }
+
+    fun onUndoAction() {
+        println("On undo action")
+    }
+
+    fun onChapterOpenIn() {
+        processWithPlugin(workbookDataStore.chapter, PluginType.EDITOR)
+    }
+
+    fun onEditVerseMarkers() {
+        processWithPlugin(workbookDataStore.chapter, PluginType.MARKER)
+    }
+
+    fun onChapterReset() {
+        println("On chapter reset")
+    }
+
+    fun nextChapter() {
+        closePlayers()
+        stepToChapter(StepDirection.FORWARD)
+    }
+
+    fun previousChapter() {
+        closePlayers()
+        stepToChapter(StepDirection.BACKWARD)
+    }
+
+    private fun stepToChapter(direction: StepDirection) {
+        val step = when (direction) {
+            StepDirection.FORWARD -> 1
+            StepDirection.BACKWARD -> -1
+        }
+        val nextIndex = chapterList.indexOf(workbookDataStore.chapter) + step
+        chapterList.elementAtOrNull(nextIndex)?.let {
+            workbookDataStore.activeChapterProperty.set(it)
+        }
     }
 
     private fun onPlay(chunk: ChunkData) {
@@ -287,8 +364,12 @@ class ChapterNarrationViewModel : ViewModel() {
         saveAndRecord(chunk)
     }
 
-    private fun onOpenIn(chunk: ChunkData) {
-        println("Opening the verse ${chunk.title} in an external app...")
+    private fun onChunkOpenIn(chunkData: ChunkData) {
+        val chunk = workbookDataStore.chapter.chunks.getValues(emptyArray())
+            .singleOrNull { it.sort == chunkData.sort }
+        chunk?.let {
+            processWithPlugin(it, PluginType.EDITOR)
+        }
     }
 
     private fun onNext(chunk: ChunkData) {
@@ -315,7 +396,7 @@ class ChapterNarrationViewModel : ViewModel() {
             writer?.start()
         }
 
-        recordAudio?.file?.let {
+        recordedAudio?.file?.let {
             chunk.file = it
         }
 
@@ -398,6 +479,20 @@ class ChapterNarrationViewModel : ViewModel() {
     private fun closeRecorder() {
         recorder?.stop()
         recorder = null
+
+        writer?.writer?.dispose()
+        writer = null
+
+        renderer?.disposeOfListeners()
+        renderer = null
+    }
+
+    fun openSourcePlayer() {
+        workbookDataStore.sourceAudioProperty.value?.let { source ->
+            val audioPlayer = (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
+            audioPlayer.loadSection(source.file, source.start, source.end)
+            sourceAudioPlayerProperty.set(audioPlayer)
+        }
     }
 
     private fun stopPlayer() {
@@ -410,11 +505,13 @@ class ChapterNarrationViewModel : ViewModel() {
         playingChunkProperty.set(null)
     }
 
-    private fun closePlayer() {
+    private fun closePlayers() {
         player.stop()
         player.release()
         audioController.release()
         playingChunkProperty.set(null)
+        sourceAudioPlayerProperty.value?.close()
+        sourceAudioPlayerProperty.set(null)
     }
 
     private fun createWaveformImage(
@@ -437,24 +534,24 @@ class ChapterNarrationViewModel : ViewModel() {
     private fun initializeRecordAudio() {
         val tempFile = directoryProvider.createTempFile("audio", ".${AudioFileFormat.PCM.extension}")
         recorder?.let { _recorder ->
-            recordAudio = AudioFile(tempFile)
-            writer = WavFileWriter(recordAudio!!, _recorder.getAudioStream()) { /* no op */ }
+            recordedAudio = AudioFile(tempFile)
+            writer = WavFileWriter(recordedAudio!!, _recorder.getAudioStream()) { /* no op */ }
 
             renderer = ActiveRecordingRenderer(
                 _recorder.getAudioStream(),
                 writer!!.isWriting,
                 width = PIXELS_PER_SECOND,
                 secondsOnScreen = 1,
-                isContinuous = true
+                continuous = true
             )
-            val continuousWaveform = ContinuousWaveform(renderer!!)
+            val continuousWaveformLayer = ContinuousWaveformLayer(renderer!!)
             val volumeBar = VolumeBar(_recorder.getAudioStream())
 
             writer?.let {
                 renderer?.setRecordingStatusObservable(it.isWriting)
             }
 
-            waveformDrawableProperty.set(continuousWaveform)
+            waveformDrawableProperty.set(continuousWaveformLayer)
             volumebarDrawableProperty.set(volumeBar)
         }
     }
@@ -476,10 +573,10 @@ class ChapterNarrationViewModel : ViewModel() {
             val prevChunk = getPrevChunkData(chunkData.sort)
             prevChunk?.let {
                 chunkData.start = prevChunk.end
-                chunkData.end = recordAudio?.totalFrames ?: 0
+                chunkData.end = recordedAudio?.totalFrames ?: 0
             } ?: run {
                 chunkData.start = 0
-                chunkData.end = recordAudio?.totalFrames ?: 0
+                chunkData.end = recordedAudio?.totalFrames ?: 0
             }
         }
     }
@@ -490,7 +587,7 @@ class ChapterNarrationViewModel : ViewModel() {
         chunk.volumeBarProperty.unbind()
         updateAudioLocations(chunk)
 
-        recordAudio?.reader(chunk.start, chunk.end)?.use { reader ->
+        recordedAudio?.reader(chunk.start, chunk.end)?.use { reader ->
             loadChunkMedia(reader, chunk)
                 .subscribe {
                     it.imageLoading = false
@@ -502,7 +599,7 @@ class ChapterNarrationViewModel : ViewModel() {
     private fun saveRecordings(compile: Boolean): Completable {
         val chapter = workbookDataStore.chapter
 
-        return recordAudio?.let {
+        return recordedAudio?.let {
             val cues = mapChunkDataToCues()
             splitAudioOnCues.execute(it.file, cues)
                 .doOnError { e ->
@@ -568,5 +665,129 @@ class ChapterNarrationViewModel : ViewModel() {
         return recordedChunks.filter { it.isDraft }.map {
             AudioCue(location = it.start, label = it.sort.toString())
         }.sortedBy { it.location }
+    }
+
+    private fun processWithPlugin(rec: Recordable, pluginType: PluginType) {
+        val audio = rec.audio
+        val selectedTake = audio.selected.value?.value
+        selectedTake?.let { take ->
+            contextProperty.set(pluginType)
+            workbookDataStore.activeTakeNumberProperty.set(take.number)
+
+            audioPluginViewModel
+                .getPlugin(pluginType)
+                .doOnError { e ->
+                    logger.error("Error in processing take with plugin type: $pluginType, ${e.message}")
+                }
+                .flatMapSingle { plugin ->
+                    fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
+                    when (pluginType) {
+                        PluginType.EDITOR -> audioPluginViewModel.edit(audio, take)
+                        PluginType.MARKER -> audioPluginViewModel.mark(audio, take)
+                        else -> null
+                    }
+                }
+                .observeOnFx()
+                .doOnError { e ->
+                    logger.error("Error in processing take with plugin type: $pluginType - $e")
+                }
+                .onErrorReturn { PluginActions.Result.NO_PLUGIN }
+                .subscribe { result: PluginActions.Result ->
+                    fire(PluginClosedEvent(pluginType))
+                    when (result) {
+                        PluginActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noEditor"])
+                        else -> {
+                            when (pluginType) {
+                                PluginType.EDITOR, PluginType.MARKER -> {
+                                    /* no-op */
+                                }
+                            }
+                        }
+                    }
+                }
+        }
+    }
+
+    fun pluginNameBinding(): StringBinding {
+        return Bindings.createStringBinding(
+            {
+                when (contextProperty.value) {
+                    PluginType.RECORDER -> {
+                        audioPluginViewModel.selectedRecorderProperty.value?.name
+                    }
+                    PluginType.EDITOR -> {
+                        audioPluginViewModel.selectedEditorProperty.value?.name
+                    }
+                    PluginType.MARKER -> {
+                        audioPluginViewModel.selectedMarkerProperty.value?.name
+                    }
+                    null -> throw IllegalStateException("Action is not supported!")
+                }
+            },
+            contextProperty,
+            audioPluginViewModel.selectedRecorderProperty,
+            audioPluginViewModel.selectedEditorProperty,
+            audioPluginViewModel.selectedMarkerProperty
+        )
+    }
+
+    fun dialogTitleBinding(): StringBinding {
+        return Bindings.createStringBinding(
+            {
+                String.format(
+                    messages["sourceDialogTitle"],
+                    workbookDataStore.activeTakeNumberProperty.value,
+                    audioPluginViewModel.pluginNameProperty.value
+                )
+            },
+            audioPluginViewModel.pluginNameProperty,
+            workbookDataStore.activeTakeNumberProperty
+        )
+    }
+
+    fun dialogTextBinding(): StringBinding {
+        return Bindings.createStringBinding(
+            {
+                String.format(
+                    messages["sourceDialogMessage"],
+                    workbookDataStore.activeTakeNumberProperty.value,
+                    audioPluginViewModel.pluginNameProperty.value,
+                    audioPluginViewModel.pluginNameProperty.value
+                )
+            },
+            audioPluginViewModel.pluginNameProperty,
+            workbookDataStore.activeTakeNumberProperty
+        )
+    }
+
+    private fun getChapterList(chapters: Observable<Chapter>) {
+        chapters
+            .toList()
+            .map { it.sortedBy { chapter -> chapter.sort } }
+            .observeOnFx()
+            .doOnError { e ->
+                logger.error("Error in getting the chapter list", e)
+            }
+            .subscribe { list ->
+                chapterList.setAll(list)
+            }
+    }
+
+    private fun setHasNextAndPreviousChapter() {
+        workbookDataStore.activeChapterProperty.value?.let { chapter ->
+            if (chapterList.isNotEmpty()) {
+                hasNextChapter.set(chapter.sort < chapterList.last().sort)
+                hasPreviousChapter.set(chapter.sort > chapterList.first().sort)
+            } else {
+                hasNextChapter.set(false)
+                hasPreviousChapter.set(false)
+                chapterList.sizeProperty.onChangeOnce {
+                    setHasNextAndPreviousChapter()
+                }
+            }
+        } ?: run {
+            hasNextChapter.set(false)
+            hasPreviousChapter.set(false)
+        }
     }
 }

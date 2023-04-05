@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.controls.recorder
+package org.wycliffeassociates.otter.jvm.controls.waveform
 
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext

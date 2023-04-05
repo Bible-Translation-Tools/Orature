@@ -36,7 +36,7 @@ class ActiveRecordingRenderer(
     recordingStatus: Observable<Boolean>,
     width: Int,
     secondsOnScreen: Int,
-    private val isContinuous: Boolean
+    private val continuous: Boolean
 ) {
     private val logger = LoggerFactory.getLogger(ActiveRecordingRenderer::class.java)
 
@@ -60,9 +60,8 @@ class ActiveRecordingRenderer(
                 logger.error("Error in active recording listener", e)
             }
             .subscribe { isActive.set(it) }
-            .also {
-                compositeDisposable.add(it)
-            }
+            .also(compositeDisposable::add)
+
         bb.order(ByteOrder.LITTLE_ENDIAN)
     }
 
@@ -83,6 +82,18 @@ class ActiveRecordingRenderer(
             bb.clear()
         }
 
+    private val dataReceiverDisposable = dataReceiver
+        .doOnError { e ->
+            logger.error("Error in data receiver stream", e)
+        }
+        .subscribe {
+            if (continuous) {
+                audioData.add(it)
+            } else {
+                floatBuffer.add(it)
+            }
+        }
+
     private fun samplesToCompress(width: Int, secondsOnScreen: Int): Int {
         // TODO: get sampleRate from wav file, don't assume 44.1khz
         return (DEFAULT_SAMPLE_RATE * secondsOnScreen) / width
@@ -98,24 +109,18 @@ class ActiveRecordingRenderer(
                 logger.error("Error in active recording listener", e)
             }
             .subscribe { isActive.set(it) }
-            .also {
-                compositeDisposable.add(it)
-            }
-
-        dataReceiver.subscribe {
-            if (isContinuous) {
-                audioData.add(it)
-            } else {
-                floatBuffer.add(it)
-            }
-        }.also {
-            compositeDisposable.add(it)
-        }
+            .also(compositeDisposable::add)
     }
 
     /** Clears rendered data from buffer */
     fun clearData() {
         floatBuffer.clear()
         audioData.clear()
+    }
+
+    fun disposeOfListeners() {
+        compositeDisposable.clear()
+        activeRenderer.dispose()
+        dataReceiverDisposable.dispose()
     }
 }

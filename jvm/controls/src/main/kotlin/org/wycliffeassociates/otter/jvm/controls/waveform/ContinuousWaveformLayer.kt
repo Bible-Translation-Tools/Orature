@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.controls.recorder
+package org.wycliffeassociates.otter.jvm.controls.waveform
 
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
@@ -7,7 +7,7 @@ import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
 
 private const val USHORT_SIZE = 65535.0
 
-class ContinuousWaveform(private val renderer: ActiveRecordingRenderer) : Drawable {
+class ContinuousWaveformLayer(private val renderer: ActiveRecordingRenderer) : Drawable {
 
     override fun draw(context: GraphicsContext, canvas: Canvas) {
         val audioData = renderer.audioData
