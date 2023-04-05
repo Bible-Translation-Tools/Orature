@@ -94,7 +94,7 @@ class TestDatabaseMigrator {
             // Test that marker column does not exist before migration
             var exceptionThrown = false
             try {
-                var pluginRecord = _dsl.select().from(AudioPluginEntity.AUDIO_PLUGIN_ENTITY).fetchOne()
+                var pluginRecord = _dsl.select().from(AudioPluginEntity.AUDIO_PLUGIN_ENTITY).fetchOne()!!
                 pluginRecord.fields().contains(AudioPluginEntity.AUDIO_PLUGIN_ENTITY.MARK)
             } catch (e: Exception) {
                 Assert.assertTrue(
@@ -114,7 +114,7 @@ class TestDatabaseMigrator {
             }
 
             // Test that marker exists and the default value is provided after migration
-            val pluginRecord = _dsl.select().from(AudioPluginEntity.AUDIO_PLUGIN_ENTITY).fetchOne()
+            val pluginRecord = _dsl.select().from(AudioPluginEntity.AUDIO_PLUGIN_ENTITY).fetchOne()!!
             Assert.assertEquals(
                 true,
                 pluginRecord.fields().contains(AudioPluginEntity.AUDIO_PLUGIN_ENTITY.MARK)
@@ -148,7 +148,7 @@ class TestDatabaseMigrator {
             // Test that region column does not exist before migration
             var exceptionThrown = false
             try {
-                var languageRecord = _dsl.select().from(LanguageEntity.LANGUAGE_ENTITY).fetchOne()
+                var languageRecord = _dsl.select().from(LanguageEntity.LANGUAGE_ENTITY).fetchOne()!!
                 languageRecord.fields().contains(LanguageEntity.LANGUAGE_ENTITY.REGION)
             } catch (e: Exception) {
                 Assert.assertTrue(
@@ -168,7 +168,7 @@ class TestDatabaseMigrator {
             }
 
             // Test that region exists and the default value is null
-            val languageRecord = _dsl.select().from(LanguageEntity.LANGUAGE_ENTITY).fetchOne()
+            val languageRecord = _dsl.select().from(LanguageEntity.LANGUAGE_ENTITY).fetchOne()!!
             Assert.assertEquals(
                 true,
                 languageRecord.fields().contains(LanguageEntity.LANGUAGE_ENTITY.REGION)
