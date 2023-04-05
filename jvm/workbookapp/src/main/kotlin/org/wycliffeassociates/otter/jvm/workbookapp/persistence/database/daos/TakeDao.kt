@@ -78,7 +78,7 @@ class TakeDao(
             .from(TAKE_ENTITY)
             .fetchOne {
                 it.getValue(max(TAKE_ENTITY.ID))
-            }
+            }!!
     }
 
     fun fetchById(id: Int, dsl: DSLContext = instanceDsl): TakeEntity {
@@ -88,7 +88,7 @@ class TakeDao(
             .where(TAKE_ENTITY.ID.eq(id))
             .fetchOne {
                 RecordMappers.mapToTakeEntity(it)
-            }
+            }!!
     }
 
     fun fetchAll(dsl: DSLContext = instanceDsl): List<TakeEntity> {

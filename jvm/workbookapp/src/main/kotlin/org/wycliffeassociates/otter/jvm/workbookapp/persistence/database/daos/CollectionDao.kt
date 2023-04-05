@@ -107,7 +107,7 @@ class CollectionDao(
             .from(COLLECTION_ENTITY)
             .fetchOne {
                 it.getValue(max(COLLECTION_ENTITY.ID))
-            }
+            }!!
     }
 
     fun fetchById(id: Int, dsl: DSLContext = instanceDsl): CollectionEntity {
@@ -117,7 +117,7 @@ class CollectionDao(
             .where(COLLECTION_ENTITY.ID.eq(id))
             .fetchOne {
                 RecordMappers.mapToCollectionEntity(it)
-            }
+            }!!
     }
 
     fun fetchAll(dsl: DSLContext = instanceDsl): List<CollectionEntity> {

@@ -20,17 +20,13 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos
 
 import jooq.Tables.*
 import jooq.tables.ContentDerivative
-import org.jooq.DSLContext
-import org.jooq.Record
-import org.jooq.Select
-import org.jooq.SelectConditionStep
-import org.jooq.SelectFieldOrAsterisk
-import org.jooq.impl.DSL
+import org.jooq.*
 import org.jooq.impl.DSL.max
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.InsertionException
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.CollectionEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ContentEntity
+
 
 class ContentDao(
     private val instanceDsl: DSLContext,
@@ -258,7 +254,7 @@ class ContentDao(
             .from(CONTENT_ENTITY)
             .fetchOne {
                 it.getValue(max(CONTENT_ENTITY.ID))
-            }
+            }!!
     }
 
     @Synchronized
@@ -304,7 +300,7 @@ class ContentDao(
             .where(CONTENT_ENTITY.ID.eq(id))
             .fetchOne {
                 RecordMappers.mapToContentEntity(it)
-            }
+            }!!
     }
 
     fun fetchAll(dsl: DSLContext = instanceDsl): List<ContentEntity> {
