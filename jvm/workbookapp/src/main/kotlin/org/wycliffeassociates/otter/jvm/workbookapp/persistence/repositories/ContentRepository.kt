@@ -196,6 +196,17 @@ class ContentRepository @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
+    override fun updateAll(content: List<Content>): Completable {
+        return Completable
+            .fromAction {
+                val entities = content.map { obj ->
+                    val entity = contentMapper.mapToEntity(obj)
+                    entity
+                }
+                contentDao.updateAll(entities)
+            }.subscribeOn(Schedulers.io())
+    }
+
     override fun update(obj: Content): Completable {
         return Completable
             .fromAction {
