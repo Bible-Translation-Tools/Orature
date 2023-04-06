@@ -28,6 +28,7 @@ import org.wycliffeassociates.otter.common.audio.wav.InvalidWavFileException
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.domain.narration.PcmTakeTransformer
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
 import org.wycliffeassociates.otter.common.domain.plugins.PluginParameters
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
@@ -49,7 +50,8 @@ import javax.inject.Inject
  */
 class PluginActions @Inject constructor(
     private val waveFileCreator: IWaveFileCreator,
-    private val launchPlugin: LaunchPlugin
+    private val launchPlugin: LaunchPlugin,
+    private val pcmTakeTransformer: PcmTakeTransformer
 ) {
     enum class Result {
         SUCCESS,
@@ -70,9 +72,11 @@ class PluginActions @Inject constructor(
      * @return A Single that will execute the plugin on subscribe and emits the result of the plugin execution
      */
     fun edit(audio: AssociatedAudio, take: Take, pluginParameters: PluginParameters): Single<Result> {
-        return launchPlugin(PluginType.EDITOR, take, pluginParameters)
+        val preTake = pcmTakeTransformer.preTransform(take)
+        return launchPlugin(PluginType.EDITOR, preTake, pluginParameters)
             .map { (take, result) ->
-                handleModifyTake(audio::selectTake, take, result)
+                val postTake = pcmTakeTransformer.postTransform(take)
+                handleModifyTake(audio::selectTake, postTake, result)
             }
     }
 

@@ -80,8 +80,10 @@ class ObservableWaveformBuilder {
                 if (width > 0) {
                     val framesPerPixel = reader.totalFrames / width
                     val img = WritableImage(width, height)
-                    reader.open()
-                    renderImage(img, reader, width, height, framesPerPixel)
+                    reader.use {
+                        reader.open()
+                        renderImage(img, reader, width, height, framesPerPixel)
+                    }
                     img
                 } else {
                     WritableImage(1, 1) as Image

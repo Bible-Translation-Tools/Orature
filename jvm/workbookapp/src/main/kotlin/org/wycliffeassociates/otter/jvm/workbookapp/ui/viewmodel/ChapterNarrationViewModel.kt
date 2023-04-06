@@ -24,6 +24,8 @@ import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.*
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
+import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
@@ -241,13 +243,11 @@ class ChapterNarrationViewModel : ViewModel() {
 
                 it.audio.selected.value?.value?.file?.let { file ->
                     val audio = AudioFile(file)
-                    audio.reader().use { reader ->
-                        data.file = file
-                        data.start = 0
-                        data.end = reader.totalFrames
+                    data.file = file
+                    data.start = 0
+                    data.end = audio.reader().totalFrames
 
-                        loadChunkMedia(reader, data)
-                    }
+                    loadChunkMedia(audio.reader(), data)
                 } ?: Observable.just(data)
             }
             .observeOnFx()
@@ -416,7 +416,7 @@ class ChapterNarrationViewModel : ViewModel() {
             updateChunkData(it)
         }
         stopRecording()
-        saveRecordings(compile = false)
+        saveRecordedAudio(compile = false)
             .subscribe {
                 onRecord(chunk)
             }
@@ -465,11 +465,11 @@ class ChapterNarrationViewModel : ViewModel() {
             }
             stopRecording()
             closeRecorder()
-
-            val shouldCompile = allChunks.size == recordedChunks.size
-            saveRecordings(shouldCompile)
-                .subscribe()
         }
+
+        val shouldCompile = allChunks.size == recordedChunks.size && recordedChunks.isNotEmpty()
+        saveRecordedAudio(shouldCompile)
+            .subscribe()
     }
 
     private fun openRecorder() {
@@ -587,7 +587,7 @@ class ChapterNarrationViewModel : ViewModel() {
         chunk.volumeBarProperty.unbind()
         updateAudioLocations(chunk)
 
-        recordedAudio?.reader(chunk.start, chunk.end)?.use { reader ->
+        recordedAudio?.reader(chunk.start, chunk.end)?.let { reader ->
             loadChunkMedia(reader, chunk)
                 .subscribe {
                     it.imageLoading = false
@@ -596,7 +596,7 @@ class ChapterNarrationViewModel : ViewModel() {
         }
     }
 
-    private fun saveRecordings(compile: Boolean): Completable {
+    private fun saveRecordedAudio(compile: Boolean): Completable {
         val chapter = workbookDataStore.chapter
 
         return recordedAudio?.let {
@@ -618,26 +618,30 @@ class ChapterNarrationViewModel : ViewModel() {
                 }
                 .andThen(Completable.defer {
                     if (compile) {
-                        val files = recordedChunks.sortedBy { it.sort }.mapNotNull { it.file }
-                        concatenateAudio.execute(files)
-                            .doOnError { e ->
-                                logger.error("Error in concatenating chunks into temp chapter file", e)
-                            }
-                            .flatMapCompletable { chapterFile ->
-                                insertTakeAudio.insertChapterAudio(
-                                    workbookDataStore.workbook,
-                                    chapter,
-                                    chapterFile
-                                )
-                                .doOnError { e ->
-                                    logger.error("Error in importing temp chapter file", e)
-                                }
-                        }
+                        compileChapter(chapter)
                     } else {
                         Completable.complete()
                     }
                 })
         } ?: Completable.complete()
+    }
+
+    private fun compileChapter(chapter: Chapter): Completable {
+        val files = recordedChunks.sortedBy { it.sort }.mapNotNull { it.file }
+        return concatenateAudio.execute(files)
+            .doOnError { e ->
+                logger.error("Error in concatenating chunks into temp chapter file", e)
+            }
+            .flatMapCompletable { chapterFile ->
+                insertTakeAudio.insertChapterAudio(
+                    workbookDataStore.workbook,
+                    chapter,
+                    chapterFile
+                )
+                    .doOnError { e ->
+                        logger.error("Error in importing temp chapter file", e)
+                    }
+            }
     }
 
     private fun getPrevChunkData(sort: Int): ChunkData? {
@@ -668,47 +672,48 @@ class ChapterNarrationViewModel : ViewModel() {
     }
 
     private fun processWithPlugin(rec: Recordable, pluginType: PluginType) {
-        val audio = rec.audio
-        val selectedTake = audio.selected.value?.value
-        selectedTake?.let { take ->
-            contextProperty.set(pluginType)
-            workbookDataStore.activeTakeNumberProperty.set(take.number)
+        contextProperty.set(pluginType)
 
-            audioPluginViewModel
-                .getPlugin(pluginType)
-                .doOnError { e ->
-                    logger.error("Error in processing take with plugin type: $pluginType, ${e.message}")
-                }
-                .flatMapSingle { plugin ->
+        saveRecordedAudio(false)
+            .andThen(audioPluginViewModel
+                .getPlugin(pluginType))
+            .doOnError { e ->
+                logger.error("Error in processing take with plugin type: $pluginType, ${e.message}")
+            }
+            .flatMapSingle { plugin ->
+                val audio = rec.audio
+                // Taking first take instead of selected one
+                // Because newly inserted take might not be selected yet
+                val firstTake = audio.getAllTakes().firstOrNull()
+                firstTake?.let { take ->
+                    workbookDataStore.activeTakeNumberProperty.set(take.number)
                     fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
                     when (pluginType) {
                         PluginType.EDITOR -> audioPluginViewModel.edit(audio, take)
                         PluginType.MARKER -> audioPluginViewModel.mark(audio, take)
                         else -> null
                     }
+                } ?: Single.just(PluginActions.Result.NO_PLUGIN)
+            }
+            .observeOnFx()
+            .doOnError { e ->
+                logger.error("Error in processing take with plugin type: $pluginType - $e")
+            }
+            .onErrorReturn { PluginActions.Result.NO_PLUGIN }
+            .subscribe { result ->
+                if (rec is Chunk) {
+                    val chapterTake = workbookDataStore.chapter.audio.selected.value?.value
+                    chapterTake?.deletedTimestamp?.accept(DateHolder.now())
                 }
-                .observeOnFx()
-                .doOnError { e ->
-                    logger.error("Error in processing take with plugin type: $pluginType - $e")
+                fire(PluginClosedEvent(pluginType))
+                when (result) {
+                    PluginActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noEditor"])
+                    else -> { /* no-op */ }
                 }
-                .onErrorReturn { PluginActions.Result.NO_PLUGIN }
-                .subscribe { result: PluginActions.Result ->
-                    fire(PluginClosedEvent(pluginType))
-                    when (result) {
-                        PluginActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noEditor"])
-                        else -> {
-                            when (pluginType) {
-                                PluginType.EDITOR, PluginType.MARKER -> {
-                                    /* no-op */
-                                }
-                            }
-                        }
-                    }
-                }
-        }
+            }
     }
 
-    fun pluginNameBinding(): StringBinding {
+    private fun pluginNameBinding(): StringBinding {
         return Bindings.createStringBinding(
             {
                 when (contextProperty.value) {
