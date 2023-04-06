@@ -40,28 +40,70 @@ class NewSourceImporter @Inject constructor(
         return importContainer(file)
     }
 
-    fun importContainer(file: File): Single<ImportResult> {
-        return Single.fromCallable {
-            var exists = false
+    private fun importContainer(
+        file: File
+    ): Single<ImportResult> {
+        return Single.create<ImportResult> { emitter ->
             logger.info("Importing RC...")
-            val internalDir = getInternalDirectory(file) ?: throw ImportException(ImportResult.LOAD_RC_ERROR)
-            if (internalDir.exists()) {
-                val rcFileExists = file.isFile && internalDir.contains(file.name)
-                val rcDirExists = file.isDirectory && internalDir.listFiles().isNotEmpty()
-                if (rcFileExists || rcDirExists) {
-                    exists = true
+            val fileToImport = prepareFileToImport(file)
+
+            val container = try {
+                ResourceContainer.load(fileToImport, OtterResourceContainerConfig())
+            } catch (e: Exception) {
+                logger.error("Error loading rc in importFromInternalDir, file: $fileToImport", e)
+                cleanUp(fileToImport, ImportResult.LOAD_RC_ERROR).subscribe(emitter::onSuccess)
+                return@create
+            }
+
+            val tree = try {
+                IProjectReader.constructContainerTree(container, zipEntryTreeBuilder)
+            } catch (e: ImportException) {
+                logger.error("Error constructing container tree, file: $fileToImport", e)
+                logger.error("Container had format: ${container.manifest.dublinCore.format}")
+                container.close()
+                cleanUp(fileToImport, e.result).subscribe(emitter::onSuccess)
+                return@create
+            }
+
+            val preallocationTree = OtterTree<CollectionOrContent>(container.toCollection())
+            val versificationTree = VersificationTreeBuilder(versificationRepository)
+                .build(container)
+                ?.apply {
+                    for (node in this) {
+                        preallocationTree.addChild(node)
+                    }
                 }
+            if (versificationTree != null) {
+                importTree(container, preallocationTree, fileToImport)
+                    .flatMap {
+                        updateContentFromTextContent(container, tree)
+                    }
+                    .subscribe(emitter::onSuccess)
+            } else { // No versification found, just import the tree from the parsed text
+                importTree(container, tree, fileToImport)
+                    .subscribe(emitter::onSuccess)
             }
-            val rcToImport = if (exists) {
-                file
-            } else {
-                copyToInternalDirectory(file, internalDir)
-            }
-            importFromInternalDir(rcToImport).blockingGet()
         }.onErrorReturn { e ->
             logger.error("Error in importContainer, file: $file", e)
             e.castOrFindImportException()?.result ?: throw e
         }.subscribeOn(Schedulers.io())
+    }
+
+    private fun prepareFileToImport(file: File): File {
+        var exists = false
+        val internalDir = getInternalDirectory(file) ?: throw ImportException(ImportResult.LOAD_RC_ERROR)
+        if (internalDir.exists()) {
+            val rcFileExists = file.isFile && internalDir.contains(file.name)
+            val rcDirExists = file.isDirectory && internalDir.listFiles().isNotEmpty()
+            if (rcFileExists || rcDirExists) {
+                exists = true
+            }
+        }
+        return if (exists) {
+            file
+        } else {
+            copyToInternalDirectory(file, internalDir)
+        }
     }
 
     private fun getInternalDirectory(file: File): File? {
@@ -79,48 +121,6 @@ class NewSourceImporter @Inject constructor(
     private fun cleanUp(container: File, result: ImportResult): Single<ImportResult> = Single.fromCallable {
         container.deleteRecursively()
         return@fromCallable result
-    }
-
-    private fun importFromInternalDir(fileToLoad: File): Single<ImportResult> {
-        // Load the internal container
-        val container = try {
-            ResourceContainer.load(fileToLoad, OtterResourceContainerConfig())
-        } catch (e: Exception) {
-            logger.error("Error loading rc in importFromInternalDir, file: $fileToLoad", e)
-            return cleanUp(fileToLoad, ImportResult.LOAD_RC_ERROR)
-        }
-
-        val tree = try {
-            IProjectReader.constructContainerTree(container, zipEntryTreeBuilder)
-        } catch (e: ImportException) {
-            logger.error("Error constructing container tree, file: $fileToLoad", e)
-            logger.error("Container had format: ${container.manifest.dublinCore.format}")
-            container.close()
-            return cleanUp(fileToLoad, e.result)
-        }
-
-        val preallocationTree = OtterTree<CollectionOrContent>(container.toCollection())
-        val versificationTree = VersificationTreeBuilder(versificationRepository)
-            .build(container)
-            ?.apply {
-                for (node in this) {
-                    preallocationTree.addChild(node)
-                }
-            }
-
-        return Single
-            .fromCallable {
-                if (versificationTree != null) {
-                    importTree(container, preallocationTree, fileToLoad)
-                        .flatMap {
-                            updateContentFromTextContent(container, tree)
-                        }
-                } else { // No versification found, just import the tree from the parsed text
-                    importTree(container, tree, fileToLoad)
-                }
-            }
-            .flatMap { it }
-            .subscribeOn(Schedulers.io())
     }
 
     private fun importTree(
