@@ -64,7 +64,7 @@ class MarkerDao(
             .from(MARKER_ENTITY)
             .fetchOne {
                 it.getValue(max(MARKER_ENTITY.ID))
-            }
+            }!!
     }
 
     fun fetchById(id: Int, dsl: DSLContext = instanceDsl): MarkerEntity {
@@ -74,7 +74,7 @@ class MarkerDao(
             .where(MARKER_ENTITY.ID.eq(id))
             .fetchOne {
                 RecordMappers.mapToMarkerEntity(it)
-            }
+            }!!
     }
 
     fun fetchAll(dsl: DSLContext = instanceDsl): List<MarkerEntity> {

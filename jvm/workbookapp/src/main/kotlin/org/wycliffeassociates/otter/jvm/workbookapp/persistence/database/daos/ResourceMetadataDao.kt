@@ -45,7 +45,7 @@ class ResourceMetadataDao(
                     .and(DUBLIN_CORE_ENTITY.CREATOR.eq(creator))
             ).fetchOne {
                 it.value1() > 0
-            }
+            }!!
     }
 
     fun fetch(
@@ -162,7 +162,7 @@ class ResourceMetadataDao(
             .from(DUBLIN_CORE_ENTITY)
             .fetchOne {
                 it.getValue(max(DUBLIN_CORE_ENTITY.ID))
-            }
+            }!!
     }
 
     fun fetchById(id: Int, dsl: DSLContext = instanceDsl): ResourceMetadataEntity? {

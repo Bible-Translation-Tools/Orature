@@ -80,8 +80,8 @@ class TestDatabaseInitializer {
         JooqTestConfiguration.createDatabase(databaseFile.absolutePath, schemaFile)
         JooqTestConfiguration.createDatabase(oldDbFile.absolutePath, oldSchemaFile)
             .dsl()
-            .use {
-                it.fetch("""INSERT INTO "installed_entity" VALUES ('DATABASE',1);""")
+            .apply {
+                fetch("""INSERT INTO "installed_entity" VALUES ('DATABASE',1);""")
             }
 
         Assert.assertTrue(databaseFile.exists() && databaseFile.length() > 0)
@@ -144,15 +144,14 @@ class TestDatabaseInitializer {
         sqLiteDataSource.url = "jdbc:sqlite:${dbFile.path}"
         sqLiteDataSource.config.toProperties().setProperty("foreign_keys", "true")
 
-        DSL.using(sqLiteDataSource, SQLDialect.SQLITE).use { _dsl ->
-            _dsl
-                .update(InstalledEntity.INSTALLED_ENTITY)
-                .set(
-                    InstalledEntity.INSTALLED_ENTITY.VERSION,
-                    version
-                )
-                .where(InstalledEntity.INSTALLED_ENTITY.NAME.eq(DATABASE_INSTALLABLE_NAME))
-                .execute()
-        }
+        val dsl = DSL.using(sqLiteDataSource, SQLDialect.SQLITE)
+        dsl
+            .update(InstalledEntity.INSTALLED_ENTITY)
+            .set(
+                InstalledEntity.INSTALLED_ENTITY.VERSION,
+                version
+            )
+            .where(InstalledEntity.INSTALLED_ENTITY.NAME.eq(DATABASE_INSTALLABLE_NAME))
+            .execute()
     }
 }

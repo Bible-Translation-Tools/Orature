@@ -84,7 +84,7 @@ class AudioPluginDao(
             .from(AUDIO_PLUGIN_ENTITY)
             .fetchOne {
                 it.getValue(max(AUDIO_PLUGIN_ENTITY.ID))
-            }
+            }!!
     }
 
     fun fetchById(id: Int, dsl: DSLContext = instanceDsl): AudioPluginEntity? {
