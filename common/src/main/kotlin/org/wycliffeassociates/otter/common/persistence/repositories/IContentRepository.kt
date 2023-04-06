@@ -45,4 +45,6 @@ interface IContentRepository : IRepository<Content> {
         derivedContents: List<Content>,
         sourceContents: List<Content>
     ): Completable
+
+    fun updateAll(content: List<Content>): Completable
 }
