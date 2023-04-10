@@ -29,6 +29,7 @@ import javafx.geometry.Orientation
 import javafx.scene.control.ListView
 import javafx.scene.control.ScrollBar
 import org.wycliffeassociates.otter.jvm.utils.findChildren
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.utils.virtualFlow
 import tornadofx.*
 
@@ -41,10 +42,12 @@ class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(i
     init {
         addClass("wa-list-view")
 
-        initialSelectedItemProperty.onChange {
-            cardIsOutOfViewProperty.set(false)
-            selectionModel.select(it)
-            scrollTo(it)
+        initialSelectedItemProperty.onChangeAndDoNow {
+            it?.let {
+                cardIsOutOfViewProperty.set(false)
+                selectionModel.select(it)
+                scrollTo(it)
+            }
         }
 
         skinProperty().onChange {

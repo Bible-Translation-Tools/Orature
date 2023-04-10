@@ -148,9 +148,17 @@ class ChapterNarrationViewModel : ViewModel() {
     fun dock() {
         allChunksLoadedProperty.onChangeWithDisposer { loaded ->
             if (loaded == true) {
+                println(recordedChunks.size)
                 when {
-                    recordedChunks.isNotEmpty() -> initialSelectedItemProperty.set(recordedChunks.last())
-                    allChunks.isNotEmpty() -> initialSelectedItemProperty.set(allChunks.first())
+                    recordedChunks.isNotEmpty() -> {
+                        // Getting first() element because recordedChunks list is reverse sorted
+                        val lastRecorded = recordedChunks.first()
+                        val next = allSortedChunks.singleOrNull { it.sort == lastRecorded.sort + 1 }
+                        next?.let {
+                            initialSelectedItemProperty.set(it)
+                        }
+                    }
+                    allSortedChunks.isNotEmpty() -> initialSelectedItemProperty.set(allSortedChunks.first())
                 }
             }
         }.let { listeners.add(it) }
@@ -301,7 +309,7 @@ class ChapterNarrationViewModel : ViewModel() {
 
         recordedChunks.forEach { it.file = null }
         recordedChunks.setPredicate { it.hasAudio() }
-        initialSelectedItemProperty.set(allChunks.first())
+        initialSelectedItemProperty.set(allSortedChunks.first())
     }
 
     fun nextChapter() {
