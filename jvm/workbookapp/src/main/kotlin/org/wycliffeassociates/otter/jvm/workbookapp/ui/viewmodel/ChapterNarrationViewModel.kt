@@ -287,7 +287,21 @@ class ChapterNarrationViewModel : ViewModel() {
     }
 
     fun onChapterReset() {
-        println("On chapter reset")
+        recordedAudio = null
+        stopRecording()
+
+        val chapterTake = workbookDataStore.chapter.audio.selected.value?.value
+        chapterTake?.deletedTimestamp?.accept(DateHolder.now())
+
+        workbookDataStore.chapter.chunks.getValues(emptyArray())
+            .forEach {
+                val chunkTake = it.audio.selected.value?.value
+                chunkTake?.deletedTimestamp?.accept(DateHolder.now())
+            }
+
+        recordedChunks.forEach { it.file = null }
+        recordedChunks.setPredicate { it.hasAudio() }
+        initialSelectedItemProperty.set(allChunks.first())
     }
 
     fun nextChapter() {
