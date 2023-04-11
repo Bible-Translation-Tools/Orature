@@ -20,7 +20,9 @@ package org.wycliffeassociates.otter.assets.initialization
 
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.PublishSubject
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.persistence.config.ProgressStatus
 import javax.inject.Inject
 
 class InitializeApp @Inject constructor(
@@ -39,8 +41,10 @@ class InitializeApp @Inject constructor(
 
     private val logger = LoggerFactory.getLogger(InitializeApp::class.java)
 
-    fun initApp(): Observable<Double> {
-        return Observable
+    fun initApp(): ProgressObservables {
+        val progressStatusEmitter = PublishSubject.create<ProgressStatus>()
+
+        val progressObservable = Observable
             .fromPublisher<Double> { progress ->
                 val initializers = listOf(
                     initializeVersification,
@@ -61,13 +65,21 @@ class InitializeApp @Inject constructor(
                 initializers.forEach {
                     total += increment
                     progress.onNext(total)
-                    it.exec().blockingAwait()
+                    it.exec(progressStatusEmitter).blockingAwait()
                 }
                 progress.onComplete()
+                progressStatusEmitter.onComplete()
             }
             .doOnError { e ->
                 logger.error("Error in initApp", e)
             }
             .subscribeOn(Schedulers.io())
+
+        return ProgressObservables(progressObservable, progressStatusEmitter)
     }
 }
+
+class ProgressObservables(
+    val progressValueObservable: Observable<Double>,
+    val progressStatusObservable: Observable<ProgressStatus>
+)

@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.common.persistence.config
 
 import io.reactivex.Completable
+import io.reactivex.Observer
 
 /**
  * An initialization task that can be executed.
@@ -27,5 +28,12 @@ interface Initializable {
     /**
      * Executes the initializable task
      * */
-    fun exec(): Completable
+    fun exec(progressEmitter: Observer<ProgressStatus>): Completable
 }
+
+data class ProgressStatus(
+    val titleKey: String? = null,
+    val titleMessage: String? = null,
+    val subTitleKey: String? = null,
+    val subTitleMessage: String? = null
+)

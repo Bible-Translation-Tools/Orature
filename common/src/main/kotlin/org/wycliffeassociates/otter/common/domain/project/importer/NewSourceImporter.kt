@@ -37,11 +37,12 @@ class NewSourceImporter @Inject constructor(
         callback: ProjectImporterCallback?,
         options: ImportOptions?
     ): Single<ImportResult> {
-        return importContainer(file)
+        return importContainer(file, callback)
     }
 
     private fun importContainer(
-        file: File
+        file: File,
+        callback: ProjectImporterCallback?
     ): Single<ImportResult> {
         return Single.create<ImportResult> { emitter ->
             logger.info("Importing RC...")
@@ -64,6 +65,9 @@ class NewSourceImporter @Inject constructor(
                 cleanUp(fileToImport, e.result).subscribe(emitter::onSuccess)
                 return@create
             }
+            callback?.onNotifyProgress(
+                localizeKey = "loadingSomething", message = "${file.name}"
+            )
 
             val preallocationTree = OtterTree<CollectionOrContent>(container.toCollection())
             val versificationTree = VersificationTreeBuilder(versificationRepository)
@@ -73,6 +77,7 @@ class NewSourceImporter @Inject constructor(
                         preallocationTree.addChild(node)
                     }
                 }
+
             if (versificationTree != null) {
                 importTree(container, preallocationTree, fileToImport)
                     .flatMap {

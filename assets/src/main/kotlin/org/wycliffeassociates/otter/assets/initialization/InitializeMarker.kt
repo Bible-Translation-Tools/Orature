@@ -19,11 +19,13 @@
 package org.wycliffeassociates.otter.assets.initialization
 
 import io.reactivex.Completable
+import io.reactivex.Observer
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
 import org.wycliffeassociates.otter.common.persistence.IAppPreferences
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.config.Installable
+import org.wycliffeassociates.otter.common.persistence.config.ProgressStatus
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
@@ -42,12 +44,13 @@ class InitializeMarker @Inject constructor(
     override val version = 30
     private val log = LoggerFactory.getLogger(InitializeMarker::class.java)
 
-    override fun exec(): Completable {
+    override fun exec(progressEmitter: Observer<ProgressStatus>): Completable {
         return Completable
             .fromCallable {
                 var installedVersion = installedEntityRepo.getInstalledVersion(this) ?: 0
                 migrate(installedVersion)
                 log.info("Initializing $name version: $version...")
+
                 importOtterMarker()
                     .doOnComplete {
                         installedEntityRepo.install(this)

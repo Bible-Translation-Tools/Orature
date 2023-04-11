@@ -20,10 +20,12 @@
 package org.wycliffeassociates.otter.assets.initialization
 
 import io.reactivex.Completable
+import io.reactivex.Observer
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.persistence.config.Installable
+import org.wycliffeassociates.otter.common.persistence.config.ProgressStatus
 import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
@@ -40,7 +42,7 @@ class InitializeTranslations @Inject constructor(
 
     private val log = LoggerFactory.getLogger(InitializeTranslations::class.java)
 
-    override fun exec(): Completable {
+    override fun exec(progressEmitter: Observer<ProgressStatus>): Completable {
         return Completable.fromCallable {
             var installedVersion = installedEntityRepo.getInstalledVersion(this)
             if (installedVersion != version) {

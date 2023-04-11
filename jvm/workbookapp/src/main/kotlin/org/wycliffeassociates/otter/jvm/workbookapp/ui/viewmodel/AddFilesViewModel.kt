@@ -137,6 +137,9 @@ class AddFilesViewModel : ViewModel() {
                 TODO("Not yet implemented")
             }
 
+            override fun onNotifyProgress(localizeKey: String?, message: String?) {
+                super.onNotifyProgress(localizeKey, message)
+            }
         }
     }
 

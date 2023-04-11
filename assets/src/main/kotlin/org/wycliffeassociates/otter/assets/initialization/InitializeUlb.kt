@@ -19,12 +19,14 @@
 package org.wycliffeassociates.otter.assets.initialization
 
 import io.reactivex.Completable
+import io.reactivex.Observer
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.config.Installable
+import org.wycliffeassociates.otter.common.persistence.config.ProgressStatus
 import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
 import java.io.File
 import javax.inject.Inject
@@ -43,7 +45,7 @@ class InitializeUlb @Inject constructor(
 
     private val log = LoggerFactory.getLogger(InitializeUlb::class.java)
 
-    override fun exec(): Completable {
+    override fun exec(progressEmitter: Observer<ProgressStatus>): Completable {
         return Completable
             .fromCallable {
                 val installedVersion = installedEntityRepo.getInstalledVersion(this)
@@ -55,8 +57,16 @@ class InitializeUlb @Inject constructor(
                     }
 
                     log.info("Initializing $name version: $version...")
+                    progressEmitter.onNext(
+                        ProgressStatus(
+                            titleKey = "initializingSources",
+                            subTitleKey = "loadingSomething",
+                            subTitleMessage = name
+                        )
+                    )
+                    val callback = setupImportCallback(progressEmitter)
                     importer
-                        .import(enUlbFile)
+                        .import(enUlbFile, callback)
                         .toObservable()
                         .doOnError { e ->
                             log.error("Error importing $EN_ULB_FILENAME.", e)
@@ -80,7 +90,7 @@ class InitializeUlb @Inject constructor(
 
     private fun prepareImportFile(): File {
         val enUlbResource = javaClass.classLoader.getResource(EN_ULB_PATH)!!
-        val tempFile = directoryProvider.createTempFile("en_ulb-test", ".zip")
+        val tempFile = directoryProvider.createTempFile("en_ulb-default", ".zip")
             .also(File::deleteOnExit)
 
         enUlbResource.openStream().use { input ->

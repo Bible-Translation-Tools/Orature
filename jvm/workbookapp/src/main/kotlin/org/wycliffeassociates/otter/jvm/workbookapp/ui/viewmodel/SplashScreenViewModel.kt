@@ -19,8 +19,9 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import io.reactivex.Observable
+import io.reactivex.Completable
 import javafx.beans.property.SimpleDoubleProperty
+import javafx.beans.property.SimpleStringProperty
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.assets.initialization.InitializeApp
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -42,17 +43,33 @@ class SplashScreenViewModel : ViewModel() {
     lateinit var theme: AppTheme
 
     val progressProperty = SimpleDoubleProperty(0.0)
+    val progressTitleProperty = SimpleStringProperty()
+    val progressBodyProperty = SimpleStringProperty()
 
-    fun initApp(): Observable<Double> {
+    fun initApp(): Completable {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
-
-        return initApp.initApp()
+        val observables = initApp.initApp()
+        observables.progressStatusObservable
             .observeOnFx()
-            .doOnError { logger.error("Error initializing app: ", it) }
-            .map {
-                progressProperty.value = it
-                it
+            .subscribe { status ->
+                status.titleKey?.let { title ->
+                    progressTitleProperty.set(messages.format(title, status.titleMessage ?: ""))
+                    progressBodyProperty.set(null)
+                }
+                status.subTitleKey?.let { body ->
+                    progressBodyProperty.set(messages.format(body, status.subTitleMessage ?: ""))
+                }
             }
+
+        return observables.progressValueObservable
+                .observeOnFx()
+                .doOnError { logger.error("Error initializing app: ", it) }
+                .map {
+                    progressProperty.value = it
+                    it
+                }
+                .ignoreElements()
+
     }
 
     fun initAudioSystem() {
