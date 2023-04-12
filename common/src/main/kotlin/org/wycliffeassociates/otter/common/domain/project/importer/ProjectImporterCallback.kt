@@ -23,9 +23,7 @@ interface ProjectImporterCallback {
      */
     fun onRequestUserInput(parameter: ImportCallbackParameter): Single<ImportOptions>
 
-    fun onNotifyProgress(localizeKey: String? = null, message: String? = null) {
-
-    }
+    fun onNotifyProgress(localizeKey: String? = null, message: String? = null)
 
     /**
      * Called when the importer encounters an error that needs to alert the user.
