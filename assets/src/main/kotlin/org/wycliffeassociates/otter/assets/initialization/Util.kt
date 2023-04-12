@@ -12,15 +12,15 @@ internal fun setupImportCallback(
 ): ProjectImporterCallback {
     return object : ProjectImporterCallback {
         override fun onRequestUserInput(): Single<ImportOptions> {
-            TODO("Not yet implemented")
+            throw NotImplementedError("no op")
         }
 
         override fun onRequestUserInput(parameter: ImportCallbackParameter): Single<ImportOptions> {
-            TODO("Not yet implemented")
+            throw NotImplementedError("no op")
         }
 
         override fun onError(messageKey: String) {
-            TODO("Not yet implemented")
+            throw NotImplementedError("no op")
         }
 
         override fun onNotifyProgress(localizeKey: String?, message: String?) {
