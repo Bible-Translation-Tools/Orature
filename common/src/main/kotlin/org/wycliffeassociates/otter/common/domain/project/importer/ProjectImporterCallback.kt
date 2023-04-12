@@ -23,6 +23,12 @@ interface ProjectImporterCallback {
      */
     fun onRequestUserInput(parameter: ImportCallbackParameter): Single<ImportOptions>
 
+    /**
+     * Sends progress status information to the UI.
+     *
+     * @param localizeKey the identifier for localization string
+     * @param message the value to be formatted with the given key
+     */
     fun onNotifyProgress(localizeKey: String? = null, message: String? = null)
 
     /**
