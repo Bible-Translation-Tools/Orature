@@ -23,8 +23,6 @@ import javafx.scene.canvas.GraphicsContext
 import javafx.scene.paint.Paint
 import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
 
-private const val USHORT_SIZE = 65535.0
-
 class WaveformLayer(private val renderer: ActiveRecordingRenderer) : Drawable {
 
     override fun draw(context: GraphicsContext, canvas: Canvas) {
@@ -50,6 +48,6 @@ class WaveformLayer(private val renderer: ActiveRecordingRenderer) : Drawable {
     // This scales the sample to fit within the canvas height, and moves the
     // sample down (-y translate) by half the height
     private fun scaleAmplitude(sample: Double, height: Double): Double {
-        return height * (sample / USHORT_SIZE) + height / 2
+        return height * (sample / UShort.MAX_VALUE.toDouble()) + height / 2
     }
 }
