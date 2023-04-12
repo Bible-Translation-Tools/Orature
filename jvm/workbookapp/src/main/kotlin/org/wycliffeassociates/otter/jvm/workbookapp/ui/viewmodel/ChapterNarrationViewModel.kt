@@ -148,7 +148,6 @@ class ChapterNarrationViewModel : ViewModel() {
     fun dock() {
         allChunksLoadedProperty.onChangeWithDisposer { loaded ->
             if (loaded == true) {
-                println(recordedChunks.size)
                 when {
                     recordedChunks.isNotEmpty() -> {
                         // Getting first() element because recordedChunks list is reverse sorted
@@ -354,7 +353,9 @@ class ChapterNarrationViewModel : ViewModel() {
                 playingChunkProperty.set(chunk)
                 chunk.isPlayingProperty.bind(audioController.isPlayingProperty)
                 audioController.audioSlider?.let { slider ->
-                    chunk.playbackPositionProperty.bind(slider.valueProperty().map(Number::toInt))
+                    chunk.playbackPositionProperty.bind(
+                        slider.valueProperty().objectBinding { it?.toInt() ?: 0 }
+                    )
                 }
                 chunk.totalFrames = player.getDurationInFrames()
             }
