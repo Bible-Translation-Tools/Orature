@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database
 
 import jooq.tables.InstalledEntity
+import org.jooq.CloseableDSLContext
 import org.jooq.DSLContext
 import org.jooq.SQLDialect
 import org.jooq.exception.DataAccessException
@@ -122,7 +123,6 @@ class AppDatabase(
     }
 
     fun close() {
-        dsl.close()
         connection.close()
     }
 
@@ -136,18 +136,17 @@ class AppDatabase(
                 return null
             }
             val sqliteDataSource = createSQLiteDataSource(databaseFile)
-            DSL.using(sqliteDataSource, SQLDialect.SQLITE).use { dsl ->
-                return try {
-                    dsl
-                        .select()
-                        .from(InstalledEntity.INSTALLED_ENTITY)
-                        .where(InstalledEntity.INSTALLED_ENTITY.NAME.eq(DATABASE_INSTALLABLE_NAME))
-                        .fetchSingle {
-                            it.get(InstalledEntity.INSTALLED_ENTITY.VERSION)
-                        }
-                } catch (e: DataAccessException) {
-                    null
-                }
+            val dsl = DSL.using(sqliteDataSource, SQLDialect.SQLITE)
+            return try {
+                dsl
+                    .select()
+                    .from(InstalledEntity.INSTALLED_ENTITY)
+                    .where(InstalledEntity.INSTALLED_ENTITY.NAME.eq(DATABASE_INSTALLABLE_NAME))
+                    .fetchSingle {
+                        it.get(InstalledEntity.INSTALLED_ENTITY.VERSION)
+                    }
+            } catch (e: DataAccessException) {
+                null
             }
         }
 

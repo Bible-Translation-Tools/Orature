@@ -20,17 +20,13 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos
 
 import jooq.Tables.*
 import jooq.tables.ContentDerivative
-import org.jooq.DSLContext
-import org.jooq.Record
-import org.jooq.Select
-import org.jooq.SelectConditionStep
-import org.jooq.SelectFieldOrAsterisk
-import org.jooq.impl.DSL
+import org.jooq.*
 import org.jooq.impl.DSL.max
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.InsertionException
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.CollectionEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ContentEntity
+
 
 class ContentDao(
     private val instanceDsl: DSLContext,
@@ -258,7 +254,7 @@ class ContentDao(
             .from(CONTENT_ENTITY)
             .fetchOne {
                 it.getValue(max(CONTENT_ENTITY.ID))
-            }
+            }!!
     }
 
     @Synchronized
@@ -304,7 +300,7 @@ class ContentDao(
             .where(CONTENT_ENTITY.ID.eq(id))
             .fetchOne {
                 RecordMappers.mapToContentEntity(it)
-            }
+            }!!
     }
 
     fun fetchAll(dsl: DSLContext = instanceDsl): List<ContentEntity> {
@@ -314,6 +310,30 @@ class ContentDao(
             .fetch {
                 RecordMappers.mapToContentEntity(it)
             }
+    }
+
+    /**
+     * Updates all content in the list.
+     * Updates will not update the ID or collection foreign key.
+     */
+    fun updateAll(entities: List<ContentEntity>, dsl: DSLContext = instanceDsl) {
+        dsl.transaction { config ->
+            entities.forEach { entity ->
+                config.dsl().update(CONTENT_ENTITY)
+                    .set(CONTENT_ENTITY.SORT, entity.sort)
+                    .set(CONTENT_ENTITY.LABEL, entity.labelKey)
+                    .set(CONTENT_ENTITY.START, entity.start)
+                    .set(CONTENT_ENTITY.V_END, entity.end)
+                    .set(CONTENT_ENTITY.SELECTED_TAKE_FK, entity.selectedTakeFk)
+                    .set(CONTENT_ENTITY.TEXT, entity.text)
+                    .set(CONTENT_ENTITY.FORMAT, entity.format)
+                    .set(CONTENT_ENTITY.TYPE_FK, entity.type_fk)
+                    .set(CONTENT_ENTITY.DRAFT_NUMBER, entity.draftNumber)
+                    .set(CONTENT_ENTITY.BRIDGED, if (entity.bridged) 1 else 0)
+                    .where(CONTENT_ENTITY.ID.eq(entity.id))
+                    .execute()
+            }
+        }
     }
 
     fun update(entity: ContentEntity, dsl: DSLContext = instanceDsl) {

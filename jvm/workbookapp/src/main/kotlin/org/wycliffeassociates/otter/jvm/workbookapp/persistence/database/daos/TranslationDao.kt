@@ -90,7 +90,7 @@ class TranslationDao(
             .from(Tables.TRANSLATION_ENTITY)
             .fetchOne {
                 it.getValue(DSL.max(Tables.TRANSLATION_ENTITY.ID))
-            }
+            }!!
     }
 
     @Synchronized

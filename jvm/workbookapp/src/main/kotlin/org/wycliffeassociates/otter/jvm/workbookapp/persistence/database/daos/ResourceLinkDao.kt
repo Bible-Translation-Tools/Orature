@@ -76,7 +76,7 @@ class ResourceLinkDao(
             .from(RESOURCE_LINK)
             .fetchOne {
                 it.getValue(max(RESOURCE_LINK.ID))
-            }
+            }!!
     }
 
     @Synchronized
@@ -136,7 +136,7 @@ class ResourceLinkDao(
             .where(RESOURCE_LINK.ID.eq(id))
             .fetchOne {
                 RecordMappers.mapToResourceLinkEntity(it)
-            }
+            }!!
     }
 
     fun fetchAll(dsl: DSLContext = instanceDsl): List<ResourceLinkEntity> {

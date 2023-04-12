@@ -56,7 +56,7 @@ class ContentTypeDao(
         .insertInto(CONTENT_TYPE, CONTENT_TYPE.NAME)
         .values(contentType.name)
         .returning(CONTENT_TYPE.ID)
-        .fetchOne()
+        .fetchOne()!!
         .get(CONTENT_TYPE.ID)
 
     private fun getAll(dsl: DSLContext): List<Pair<ContentType, Int>> {

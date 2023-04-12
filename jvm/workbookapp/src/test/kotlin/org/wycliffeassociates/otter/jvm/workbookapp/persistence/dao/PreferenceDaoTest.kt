@@ -146,6 +146,6 @@ class PreferenceDaoTest {
             .from(PREFERENCES)
             .fetchOne {
                 it.value1()
-            }
+            }!!
     }
 }

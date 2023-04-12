@@ -90,7 +90,7 @@ class LanguageDao(
             .from(LANGUAGE_ENTITY)
             .fetchOne {
                 it.getValue(max(LANGUAGE_ENTITY.ID))
-            }
+            }!!
     }
 
     @Synchronized
@@ -132,7 +132,7 @@ class LanguageDao(
             .from(LANGUAGE_ENTITY)
             .fetchOne {
                 it.getValue(max(LANGUAGE_ENTITY.ID))
-            }
+            }!!
 
         // Return the ids
         return ((initialLargest + 1)..finalLargest).toList()
