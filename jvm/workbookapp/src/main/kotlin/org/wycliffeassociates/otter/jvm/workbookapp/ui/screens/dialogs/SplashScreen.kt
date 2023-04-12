@@ -73,10 +73,10 @@ class SplashScreen : View() {
         viewModel.theme.preferredTheme
             .observeOnFx()
             .doFinally {
-//                close()
-//                settingsViewModel.setAppOrientation()
-//                primaryStage.show()
-//                navigator.dock<HomePage>()
+                close()
+                settingsViewModel.setAppOrientation()
+                primaryStage.show()
+                navigator.dock<HomePage>()
             }
             .observeOnFx()
             .subscribe { theme ->
