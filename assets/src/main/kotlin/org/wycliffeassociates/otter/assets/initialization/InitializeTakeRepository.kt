@@ -23,7 +23,7 @@ import io.reactivex.Observer
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.persistence.config.Initializable
-import org.wycliffeassociates.otter.common.persistence.config.ProgressStatus
+import org.wycliffeassociates.otter.common.data.ProgressStatus
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 import javax.inject.Inject
 

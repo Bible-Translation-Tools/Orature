@@ -5,7 +5,7 @@ import io.reactivex.Single
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportCallbackParameter
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
 import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
-import org.wycliffeassociates.otter.common.persistence.config.ProgressStatus
+import org.wycliffeassociates.otter.common.data.ProgressStatus
 
 /**
  * Sets up the callback for pushing progress status to the UI

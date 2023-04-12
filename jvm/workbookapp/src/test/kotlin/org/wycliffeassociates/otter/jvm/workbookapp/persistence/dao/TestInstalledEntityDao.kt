@@ -24,7 +24,7 @@ import jooq.Tables.INSTALLED_ENTITY
 import org.junit.Assert
 import org.junit.Test
 import org.wycliffeassociates.otter.common.persistence.config.Installable
-import org.wycliffeassociates.otter.common.persistence.config.ProgressStatus
+import org.wycliffeassociates.otter.common.data.ProgressStatus
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import java.io.File
 
