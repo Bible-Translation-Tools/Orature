@@ -18,11 +18,14 @@
  */
 package integrationtest.initialization
 
+import com.nhaarman.mockitokotlin2.mock
 import integrationtest.di.DaggerTestPersistenceComponent
 import integrationtest.projects.DatabaseEnvironment
 import integrationtest.projects.RowCount
 import io.reactivex.Completable
+import io.reactivex.Observer
 import io.reactivex.observers.TestObserver
+import io.reactivex.subjects.PublishSubject
 import org.junit.Assert
 import org.junit.Test
 import org.wycliffeassociates.otter.assets.initialization.InitializeProjects
@@ -32,6 +35,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.config.ProgressStatus
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
 import java.io.File
 import java.time.LocalDate
@@ -90,11 +94,14 @@ class TestInitializeProjects {
     @Test
     fun testInitializeProjects() {
         prepareInitialProject()
+        val mockProgressEmitter = PublishSubject.create<ProgressStatus>().apply {
+                onComplete()
+            }
 
         val testSub = TestObserver<Completable>()
         val init = initProjectsProvider.get()
         init
-            .exec()
+            .exec(mockProgressEmitter)
             .subscribe(testSub)
 
         testSub.assertComplete()

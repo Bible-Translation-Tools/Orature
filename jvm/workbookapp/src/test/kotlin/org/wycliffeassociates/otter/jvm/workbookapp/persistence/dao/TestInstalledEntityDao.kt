@@ -19,10 +19,12 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.dao
 
 import io.reactivex.Completable
+import io.reactivex.Observer
 import jooq.Tables.INSTALLED_ENTITY
 import org.junit.Assert
 import org.junit.Test
 import org.wycliffeassociates.otter.common.persistence.config.Installable
+import org.wycliffeassociates.otter.common.persistence.config.ProgressStatus
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import java.io.File
 
@@ -53,7 +55,7 @@ class TestInstalledEntityDao {
 }
 
 private class SimpleInstallable(override val name: String, override val version: Int) : Installable {
-    override fun exec(): Completable {
+    override fun exec(progressEmitter: Observer<ProgressStatus>): Completable {
         return Completable.complete()
     }
 }

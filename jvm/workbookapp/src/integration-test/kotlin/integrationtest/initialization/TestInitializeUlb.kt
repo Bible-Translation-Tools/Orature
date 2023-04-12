@@ -22,6 +22,7 @@ import com.nhaarman.mockitokotlin2.any
 import integrationtest.di.DaggerTestPersistenceComponent
 import io.reactivex.Completable
 import io.reactivex.observers.TestObserver
+import io.reactivex.subjects.PublishSubject
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -34,6 +35,7 @@ import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
 import org.wycliffeassociates.otter.common.domain.project.importer.RCImporterFactory
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.config.ProgressStatus
 import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import javax.inject.Inject
@@ -69,9 +71,11 @@ class TestInitializeUlb {
     @Test
     fun testImportEnUlb() {
         val testSub = TestObserver<Completable>()
+        val mockProgressEmitter = PublishSubject.create<ProgressStatus>()
+        mockProgressEmitter.onComplete()
 
         val init = initUlbProvider.get()
-        init.exec()
+        init.exec(mockProgressEmitter)
             .subscribe(testSub)
 
         testSub.assertComplete()
@@ -84,6 +88,9 @@ class TestInitializeUlb {
     fun `test en_ulb import skipped when already imported`() {
         val importer = Mockito.mock(ImportProjectUseCase::class.java)
         val importerSpy = Mockito.spy(importer)
+        val mockProgressEmitter = PublishSubject.create<ProgressStatus>().apply {
+            onComplete()
+        }
 
         doReturn(true).`when`(importerSpy).isAlreadyImported(any())
 
@@ -94,7 +101,7 @@ class TestInitializeUlb {
         )
         val testSub = TestObserver<Completable>()
 
-        init.exec()
+        init.exec(mockProgressEmitter)
             .subscribe(testSub)
 
         testSub.assertComplete()
