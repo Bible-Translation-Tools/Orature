@@ -91,11 +91,6 @@
     -fx-icon-color: -wa-regular-text;
 }
 
-.contributor__save-btn:focused {
-    -fx-border-color: -wa-card-border;
-    -fx-border-insets: -4;
-}
-
 .contributor__license-link:focused {
     -fx-border-color: -wa-card-border;
     -fx-border-insets: -3;
