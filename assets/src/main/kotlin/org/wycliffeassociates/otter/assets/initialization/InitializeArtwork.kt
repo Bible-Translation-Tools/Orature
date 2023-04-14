@@ -19,14 +19,14 @@
 package org.wycliffeassociates.otter.assets.initialization
 
 import io.reactivex.Completable
-import io.reactivex.Observer
+import io.reactivex.ObservableEmitter
 import java.io.File
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.ProgressStatus
 import org.wycliffeassociates.otter.common.persistence.config.Installable
 import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
 import javax.inject.Inject
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.data.ProgressStatus
 
 class InitializeArtwork @Inject constructor(
     private val installedEntityRepo: IInstalledEntityRepository,
@@ -38,7 +38,7 @@ class InitializeArtwork @Inject constructor(
 
     private val log = LoggerFactory.getLogger(InitializeArtwork::class.java)
 
-    override fun exec(progressEmitter: Observer<ProgressStatus>): Completable {
+    override fun exec(progressEmitter: ObservableEmitter<ProgressStatus>): Completable {
         return Completable
             .fromCallable {
                 val installedVersion = installedEntityRepo.getInstalledVersion(this)

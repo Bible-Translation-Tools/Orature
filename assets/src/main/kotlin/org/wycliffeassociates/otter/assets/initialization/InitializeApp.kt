@@ -20,7 +20,6 @@ package org.wycliffeassociates.otter.assets.initialization
 
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.PublishSubject
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ProgressStatus
 import javax.inject.Inject
@@ -41,11 +40,9 @@ class InitializeApp @Inject constructor(
 
     private val logger = LoggerFactory.getLogger(InitializeApp::class.java)
 
-    fun initApp(): ProgressObservables {
-        val progressStatusEmitter = PublishSubject.create<ProgressStatus>()
-
+    fun initApp(): Observable<ProgressStatus> {
         val progressObservable = Observable
-            .fromPublisher<Double> { progress ->
+            .create<ProgressStatus> { progressStatusEmitter ->
                 val initializers = listOf(
                     initializeVersification,
                     initializeLanguages,
@@ -64,10 +61,11 @@ class InitializeApp @Inject constructor(
                 val increment = (1.0).div(initializers.size)
                 initializers.forEach {
                     total += increment
-                    progress.onNext(total)
+                    progressStatusEmitter.onNext(
+                        ProgressStatus(percent = total)
+                    )
                     it.exec(progressStatusEmitter).blockingAwait()
                 }
-                progress.onComplete()
                 progressStatusEmitter.onComplete()
             }
             .doOnError { e ->
@@ -75,11 +73,6 @@ class InitializeApp @Inject constructor(
             }
             .subscribeOn(Schedulers.io())
 
-        return ProgressObservables(progressObservable, progressStatusEmitter)
+        return progressObservable
     }
 }
-
-class ProgressObservables(
-    val progressValueObservable: Observable<Double>,
-    val progressStatusObservable: Observable<ProgressStatus>
-)

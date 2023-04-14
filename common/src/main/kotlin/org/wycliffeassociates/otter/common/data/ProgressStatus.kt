@@ -12,5 +12,6 @@ data class ProgressStatus(
     val titleKey: String? = null,
     val titleMessage: String? = null,
     val subTitleKey: String? = null,
-    val subTitleMessage: String? = null
+    val subTitleMessage: String? = null,
+    val percent: Double? = null
 )

@@ -19,7 +19,7 @@
 package org.wycliffeassociates.otter.assets.initialization
 
 import io.reactivex.Completable
-import io.reactivex.Observer
+import io.reactivex.ObservableEmitter
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
@@ -45,7 +45,7 @@ class InitializeUlb @Inject constructor(
 
     private val log = LoggerFactory.getLogger(InitializeUlb::class.java)
 
-    override fun exec(progressEmitter: Observer<ProgressStatus>): Completable {
+    override fun exec(progressEmitter: ObservableEmitter<ProgressStatus>): Completable {
         return Completable
             .fromCallable {
                 val installedVersion = installedEntityRepo.getInstalledVersion(this)

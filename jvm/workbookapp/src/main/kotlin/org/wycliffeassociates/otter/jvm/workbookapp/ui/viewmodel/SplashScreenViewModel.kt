@@ -48,10 +48,11 @@ class SplashScreenViewModel : ViewModel() {
 
     fun initApp(): Completable {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
-        val observables = initApp.initApp()
-        observables.progressStatusObservable
+
+        return initApp.initApp()
+            .doOnError { logger.error("Error initializing app: ", it) }
             .observeOnFx()
-            .subscribe { status ->
+            .doOnNext { status ->
                 status.titleKey?.let { title ->
                     progressTitleProperty.set(messages.format(title, status.titleMessage ?: ""))
                     progressBodyProperty.set(null)
@@ -59,17 +60,9 @@ class SplashScreenViewModel : ViewModel() {
                 status.subTitleKey?.let { body ->
                     progressBodyProperty.set(messages.format(body, status.subTitleMessage ?: ""))
                 }
+                status.percent?.let { progressProperty.set(it) }
             }
-
-        return observables.progressValueObservable
-                .observeOnFx()
-                .doOnError { logger.error("Error initializing app: ", it) }
-                .map {
-                    progressProperty.value = it
-                    it
-                }
-                .ignoreElements()
-
+            .ignoreElements()
     }
 
     fun initAudioSystem() {

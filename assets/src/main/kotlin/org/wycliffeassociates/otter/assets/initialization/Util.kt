@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.assets.initialization
 
-import io.reactivex.Observer
+import io.reactivex.ObservableEmitter
 import io.reactivex.Single
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportCallbackParameter
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
@@ -13,7 +13,7 @@ import org.wycliffeassociates.otter.common.data.ProgressStatus
  * @param progressStatusEmitter the interface to emit status info to the channel
  */
 internal fun setupImportCallback(
-    progressStatusEmitter: Observer<ProgressStatus>
+    progressStatusEmitter: ObservableEmitter<ProgressStatus>
 ): ProjectImporterCallback {
     return object : ProjectImporterCallback {
         override fun onRequestUserInput(): Single<ImportOptions> {

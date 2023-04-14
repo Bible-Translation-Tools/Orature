@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.assets.initialization
 
 import io.reactivex.Completable
-import io.reactivex.Observer
+import io.reactivex.ObservableEmitter
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
@@ -27,7 +27,7 @@ class InitializeSources @Inject constructor(
     private val logger = LoggerFactory.getLogger(javaClass)
     private lateinit var callback: ProjectImporterCallback
 
-    override fun exec(progressEmitter: Observer<ProgressStatus>): Completable {
+    override fun exec(progressEmitter: ObservableEmitter<ProgressStatus>): Completable {
         return Completable
             .fromAction {
                 val installedVersion = installedEntityRepo.getInstalledVersion(this)

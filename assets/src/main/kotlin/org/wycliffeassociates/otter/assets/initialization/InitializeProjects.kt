@@ -20,7 +20,7 @@
 package org.wycliffeassociates.otter.assets.initialization
 
 import io.reactivex.Completable
-import io.reactivex.Observer
+import io.reactivex.ObservableEmitter
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
@@ -53,7 +53,7 @@ class InitializeProjects @Inject constructor(
     private val log = LoggerFactory.getLogger(InitializeProjects::class.java)
     private lateinit var callback: ProjectImporterCallback
 
-    override fun exec(progressEmitter: Observer<ProgressStatus>): Completable {
+    override fun exec(progressEmitter: ObservableEmitter<ProgressStatus>): Completable {
         return Completable.fromCallable {
             var installedVersion = installedEntityRepo.getInstalledVersion(this)
             if (installedVersion != version) {

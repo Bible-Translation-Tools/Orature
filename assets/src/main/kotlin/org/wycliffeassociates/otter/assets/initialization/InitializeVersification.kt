@@ -19,7 +19,7 @@
 package org.wycliffeassociates.otter.assets.initialization
 
 import io.reactivex.Completable
-import io.reactivex.Observer
+import io.reactivex.ObservableEmitter
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
@@ -41,7 +41,7 @@ class InitializeVersification @Inject constructor(
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun exec(progressEmitter: Observer<ProgressStatus>): Completable {
+    override fun exec(progressEmitter: ObservableEmitter<ProgressStatus>): Completable {
         return Single.fromCallable {
             progressEmitter.onNext(ProgressStatus(titleKey = "initializingVersification"))
             copyUlbVersification()
