@@ -19,10 +19,12 @@
 package integrationtest.initialization
 
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.doAnswer
+import com.nhaarman.mockitokotlin2.mock
 import integrationtest.di.DaggerTestPersistenceComponent
 import io.reactivex.Completable
+import io.reactivex.ObservableEmitter
 import io.reactivex.observers.TestObserver
-import io.reactivex.subjects.PublishSubject
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -71,8 +73,9 @@ class TestInitializeUlb {
     @Test
     fun testImportEnUlb() {
         val testSub = TestObserver<Completable>()
-        val mockProgressEmitter = PublishSubject.create<ProgressStatus>()
-        mockProgressEmitter.onComplete()
+        val mockProgressEmitter = mock<ObservableEmitter<ProgressStatus>>{
+            on { onNext(any()) } doAnswer { }
+        }
 
         val init = initUlbProvider.get()
         init.exec(mockProgressEmitter)
@@ -88,8 +91,8 @@ class TestInitializeUlb {
     fun `test en_ulb import skipped when already imported`() {
         val importer = Mockito.mock(ImportProjectUseCase::class.java)
         val importerSpy = Mockito.spy(importer)
-        val mockProgressEmitter = PublishSubject.create<ProgressStatus>().apply {
-            onComplete()
+        val mockProgressEmitter = mock<ObservableEmitter<ProgressStatus>>{
+            on { onNext(any()) } doAnswer { }
         }
 
         doReturn(true).`when`(importerSpy).isAlreadyImported(any())

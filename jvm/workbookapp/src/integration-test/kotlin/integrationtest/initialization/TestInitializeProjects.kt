@@ -18,12 +18,15 @@
  */
 package integrationtest.initialization
 
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.doAnswer
+import com.nhaarman.mockitokotlin2.mock
 import integrationtest.di.DaggerTestPersistenceComponent
 import integrationtest.projects.DatabaseEnvironment
 import integrationtest.projects.RowCount
 import io.reactivex.Completable
+import io.reactivex.ObservableEmitter
 import io.reactivex.observers.TestObserver
-import io.reactivex.subjects.PublishSubject
 import org.junit.Assert
 import org.junit.Test
 import org.wycliffeassociates.otter.assets.initialization.InitializeProjects
@@ -92,9 +95,9 @@ class TestInitializeProjects {
     @Test
     fun testInitializeProjects() {
         prepareInitialProject()
-        val mockProgressEmitter = PublishSubject.create<ProgressStatus>().apply {
-                onComplete()
-            }
+        val mockProgressEmitter = mock<ObservableEmitter<ProgressStatus>>{
+            on { onNext(any()) } doAnswer { }
+        }
 
         val testSub = TestObserver<Completable>()
         val init = initProjectsProvider.get()
