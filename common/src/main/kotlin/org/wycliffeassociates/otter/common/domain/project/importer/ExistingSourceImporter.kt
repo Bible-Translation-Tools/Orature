@@ -58,15 +58,18 @@ class ExistingSourceImporter @Inject constructor(
         }
 
         return if (sameVersion) {
+            callback?.onNotifyProgress(localizeKey = "mergingSource")
             logger.info("RC ${file.name} already imported, merging media...")
             mergeMedia(file, existingSource.path)
         } else if (sameVersification) {
+            callback?.onNotifyProgress(localizeKey = "updatingVersification")
             logger.info("RC ${file.name} already imported but uses the same versification, updating source...")
             updateSource(existingSource, file).blockingGet()
             mergeMedia(file, existingSource.path)
             mergeText(file, existingSource.path)
         } else {
             // existing resource has a different version, confirms overwrite/delete
+            callback?.onNotifyProgress(localizeKey = "overridingSource")
             logger.info("RC ${file.name} already imported, but with a different version and different versification.")
             logger.info("Requesting user input to overwrite/delete existing source...")
             val confirmDelete = callback?.onRequestUserInput()

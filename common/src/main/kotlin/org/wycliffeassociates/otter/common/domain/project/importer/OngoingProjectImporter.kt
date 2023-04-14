@@ -90,7 +90,7 @@ class OngoingProjectImporter @Inject constructor(
                         return@flatMap Single.just(ImportResult.ABORTED)
                     }
                 }
-                importResumableProject(file)
+                importResumableProject(file, callback)
             }
             .subscribeOn(Schedulers.io())
     }
@@ -168,8 +168,9 @@ class OngoingProjectImporter @Inject constructor(
         }
     }
 
-    fun importResumableProject(
-        resourceContainer: File
+    private fun importResumableProject(
+        resourceContainer: File,
+        callback: ProjectImporterCallback?
     ): Single<ImportResult> {
         return Single.fromCallable {
             try {
@@ -182,6 +183,10 @@ class OngoingProjectImporter @Inject constructor(
                     throw ImportException(ImportResult.INVALID_RC)
                 }
 
+                callback?.onNotifyProgress(
+                    localizeKey = "loadingSomething",
+                    message = "${manifest.dublinCore.language.identifier}_${manifestProject.identifier}"
+                )
                 directoryProvider.newFileReader(resourceContainer).use { fileReader ->
                     val existingSource = fetchExistingSource(manifestProject, manifestSources)
                     try {

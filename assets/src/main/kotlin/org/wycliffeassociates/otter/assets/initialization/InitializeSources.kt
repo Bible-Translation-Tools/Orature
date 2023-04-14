@@ -1,11 +1,14 @@
 package org.wycliffeassociates.otter.assets.initialization
 
 import io.reactivex.Completable
+import io.reactivex.ObservableEmitter
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
+import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
 import org.wycliffeassociates.otter.common.domain.project.importer.RCImporterFactory
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.config.Installable
+import org.wycliffeassociates.otter.common.data.ProgressStatus
 import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
 import java.io.File
@@ -22,13 +25,18 @@ class InitializeSources @Inject constructor(
     override val version = 1
 
     private val logger = LoggerFactory.getLogger(javaClass)
+    private lateinit var callback: ProjectImporterCallback
 
-    override fun exec(): Completable {
+    override fun exec(progressEmitter: ObservableEmitter<ProgressStatus>): Completable {
         return Completable
             .fromAction {
                 val installedVersion = installedEntityRepo.getInstalledVersion(this)
                 if (installedVersion != version) {
                     logger.info("Initializing sources...")
+                    progressEmitter.onNext(
+                        ProgressStatus(titleKey = "initializingSources")
+                    )
+                    callback = setupImportCallback(progressEmitter)
 
                     migrate()
 
@@ -75,7 +83,7 @@ class InitializeSources @Inject constructor(
     }
 
     private fun importFile(file: File) {
-        rcImporterFactory.makeImporter().import(file).toObservable()
+        rcImporterFactory.makeImporter().import(file, callback).toObservable()
             .doOnError { e ->
                 logger.error("Error importing $file.", e)
             }

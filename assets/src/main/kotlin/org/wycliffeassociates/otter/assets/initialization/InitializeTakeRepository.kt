@@ -19,8 +19,10 @@
 package org.wycliffeassociates.otter.assets.initialization
 
 import io.reactivex.Completable
+import io.reactivex.ObservableEmitter
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.ProgressStatus
 import org.wycliffeassociates.otter.common.persistence.config.Initializable
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 import javax.inject.Inject
@@ -31,7 +33,7 @@ class InitializeTakeRepository @Inject constructor(
 
     private val log = LoggerFactory.getLogger(InitializeTakeRepository::class.java)
 
-    override fun exec(): Completable {
+    override fun exec(progressEmitter: ObservableEmitter<ProgressStatus>): Completable {
         log.info("Initializing take repository...")
         return takeRepository
             .removeNonExistentTakes()

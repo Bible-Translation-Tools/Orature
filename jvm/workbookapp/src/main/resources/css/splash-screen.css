@@ -20,13 +20,27 @@
     -fx-alignment: center;
 }
 
-.splash__progress {
-    -fx-padding: 0 7em;
-    -fx-translate-y: 130px;
+.splash__status {
+    -fx-padding: 0 6em 2em 6em;
+    -fx-spacing: 20px;
+}
+
+.splash__text-block {
+    -fx-text-alignment: center;
+    -fx-spacing: 5px;
 }
 
 .splash__progress .bar {
     -fx-background-insets: 1;
     -fx-padding: 0.3em;
     -fx-fill: -wa-primary;
+}
+
+.splash__status-title {
+    -fx-font-size: 1.1em;
+    -fx-text-fill: #e6e6e6;
+}
+
+.splash__status-text {
+    -fx-text-fill: #cccccc;
 }
