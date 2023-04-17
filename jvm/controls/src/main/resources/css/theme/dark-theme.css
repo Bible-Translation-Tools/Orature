@@ -175,15 +175,14 @@
 
 .dark-theme .scroll-bar .thumb {
     -fx-background-color: #768198;
-    -fx-background-insets: 0;
-    -fx-background-radius: 0;
-}
-
-.dark-theme .scroll-bar .increment-button:hover,
-.dark-theme .scroll-bar .decrement-button:hover {
-    -fx-background-color: transparent;
 }
 
 .dark-theme .split-pane:horizontal > .split-pane-divider {
     -fx-background-color: -wa-primary-dark;
  }
+
+.dark-theme .virtual-flow .scroll-bar:vertical .track,
+.dark-theme .virtual-flow .scroll-bar:horizontal .track {
+    -fx-background-color: #2a2d34;
+    -fx-background-radius: 8;
+}
