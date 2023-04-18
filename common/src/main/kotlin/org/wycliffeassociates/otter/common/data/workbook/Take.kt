@@ -29,7 +29,8 @@ data class Take(
     val number: Int,
     val format: MimeType,
     val createdTimestamp: LocalDate,
-    val deletedTimestamp: BehaviorRelay<DateHolder> = BehaviorRelay.createDefault(DateHolder.empty)
+    val deletedTimestamp: BehaviorRelay<DateHolder> = BehaviorRelay.createDefault(DateHolder.empty),
+    val savedInDb: BehaviorRelay<Boolean> = BehaviorRelay.createDefault(false)
 ) {
     override fun equals(other: Any?): Boolean {
         return (other as? Take)?.let {

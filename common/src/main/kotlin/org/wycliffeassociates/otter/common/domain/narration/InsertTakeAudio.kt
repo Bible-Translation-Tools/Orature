@@ -75,8 +75,17 @@ class InsertTakeAudio @Inject constructor() {
             rcSlug = workbook.source.resourceMetadata.identifier
         )
 
+        val lastTake = recordable.audio.getAllTakes().lastOrNull()
+        val takeNumber: Int = when {
+            lastTake == null -> 1
+            lastTake.deletedTimestamp.value?.value != null -> {
+                recordable.audio.getNewTakeNumber().blockingGet()
+            }
+            else -> lastTake.number
+        }
+
         val format = AudioFileFormat.of(audioFile.extension)
-        val filename = namer.generateName(1, format)
+        val filename = namer.generateName(takeNumber, format)
 
         val chapterDir = getChapterAudioDirectory(
             workbook.projectFilesAccessor.audioDir,
@@ -91,15 +100,19 @@ class InsertTakeAudio @Inject constructor() {
             }
         }
 
-        val newTake = Take(
-            name = takeFile.name,
-            file = takeFile,
-            number = 1,
-            format = MimeType.WAV,
-            createdTimestamp = LocalDate.now()
-        )
+        val takeDeleted = lastTake?.deletedTimestamp?.value?.value != null
 
-        recordable.audio.insertTake(newTake)
+        if (lastTake == null || takeDeleted) {
+            val newTake = Take(
+                name = takeFile.name,
+                file = takeFile,
+                number = takeNumber,
+                format = MimeType.WAV,
+                createdTimestamp = LocalDate.now()
+            )
+
+            recordable.audio.insertTake(newTake)
+        }
     }
 
     private fun getChapterAudioDirectory(projectAudioDir: File, chapterNum: String): File {

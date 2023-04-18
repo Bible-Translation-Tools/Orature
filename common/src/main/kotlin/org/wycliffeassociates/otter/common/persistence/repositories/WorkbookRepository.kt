@@ -376,9 +376,13 @@ class WorkbookRepository(
                 logger.error("Error in deleteFromDbUponDelete, wb take: $take, model take: $modelTake", e)
             }
             .subscribe {
-                db.deleteTake(modelTake, it)
-                    .doOnError { e -> logger.error("Error in deleteTake: wb take: $take, model take: $modelTake", e) }
-                    .subscribe()
+                take.savedInDb.subscribe { saved ->
+                    if (saved) {
+                        db.deleteTake(modelTake, it)
+                            .doOnError { e -> logger.error("Error in deleteTake: wb take: $take, model take: $modelTake", e) }
+                            .subscribe()
+                    }
+                }
             }
     }
 
@@ -503,6 +507,7 @@ class WorkbookRepository(
                     content.selectedTake -> initialSelectedTake
                     else -> workbookTake(modelTake)
                 }
+                wbTake?.savedInDb?.accept(true)
                 wbTake to modelTake
             }
 
@@ -544,6 +549,7 @@ class WorkbookRepository(
                     .subscribe { insertionId ->
                         modelTake.id = insertionId
                         selectedTakeRelay.accept(TakeHolder(wbTake))
+                        wbTake.savedInDb.accept(true)
                     }
             }
 

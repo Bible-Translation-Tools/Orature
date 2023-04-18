@@ -115,13 +115,23 @@ class ChapterNarrationPage : View() {
                         item(messages["undoAction"]) {
                             graphic = FontIcon(MaterialDesign.MDI_UNDO)
                             action { viewModel.onUndoAction() }
+
+                            enableWhen(viewModel.narrationHistory.hasUndoProperty)
+                        }
+                        item(messages["redoAction"]) {
+                            graphic = FontIcon(MaterialDesign.MDI_REDO)
+                            action { viewModel.onRedoAction() }
+
+                            enableWhen(viewModel.narrationHistory.hasRedoProperty)
                         }
                         item(messages["openChapterIn"]) {
                             graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
                             action { viewModel.onChapterOpenIn() }
 
                             disableProperty().bind(workbookDataStore.activeChapterProperty.booleanBinding {
-                                it?.hasSelectedAudio()?.not() ?: true
+                                it?.audio?.getAllTakes()?.firstOrNull { take ->
+                                    take.deletedTimestamp.value?.value == null
+                                } == null
                             })
                         }
                         item(messages["editVerseMarkers"]) {
@@ -129,7 +139,9 @@ class ChapterNarrationPage : View() {
                             action { viewModel.onEditVerseMarkers() }
 
                             disableProperty().bind(workbookDataStore.activeChapterProperty.booleanBinding {
-                                it?.hasSelectedAudio()?.not() ?: true
+                                it?.audio?.getAllTakes()?.firstOrNull { take ->
+                                    take.deletedTimestamp.value?.value == null
+                                } == null
                             })
                         }
                         item(messages["restartChapter"]) {
