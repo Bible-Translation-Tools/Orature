@@ -49,8 +49,7 @@ fun <T> EventTarget.narrationrecordlistview(values: ObservableList<T>?, op: Narr
 fun <T> EventTarget.narrationrecordlistview(
     values: ObservableValue<ObservableList<T>>?,
     op: NarrationRecordListView<T>.() -> Unit = {}
-) =
-    NarrationRecordListView<T>().attachTo(this, op) {
+) = NarrationRecordListView<T>().attachTo(this, op) {
         fun rebinder() {
             (it.items as? SortedFilteredList<T>)?.bindTo(it)
         }

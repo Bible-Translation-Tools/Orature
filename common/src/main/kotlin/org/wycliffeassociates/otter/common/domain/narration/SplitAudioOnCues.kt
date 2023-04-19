@@ -26,6 +26,8 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
 import javax.inject.Inject
 
+private const val BUFFER_SIZE = 10240
+
 class SplitAudioOnCues @Inject constructor(private val directoryProvider: IDirectoryProvider) {
 
     fun execute(file: File): Single<Map<String, File>> {
@@ -65,7 +67,7 @@ class SplitAudioOnCues @Inject constructor(private val directoryProvider: IDirec
         sourceReader.use { reader ->
             reader.open()
             targetWriter.use { writer ->
-                val buffer = ByteArray(10240)
+                val buffer = ByteArray(BUFFER_SIZE)
                 while (reader.hasRemaining()) {
                     val written = reader.getPcmBuffer(buffer)
                     writer.write(buffer, 0, written)

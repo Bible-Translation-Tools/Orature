@@ -129,7 +129,7 @@ class RecorderViewModel : ViewModel() {
         pause()
         at.stop()
         recorder.stop()
-        renderer.disposeOfListeners()
+        renderer.removeListeners()
         writer.writer.dispose()
         wavAudio.file.copyTo(targetFile, true)
 

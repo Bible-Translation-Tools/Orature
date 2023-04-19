@@ -73,7 +73,7 @@ class NarrationTextItem : VBox() {
                 graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
 
                 isRecordingProperty.onChange {
-                    toggleClass("recording", it)
+                    toggleClass("recording-btn", it)
                 }
 
                 onActionProperty().bind(onRecordActionProperty)

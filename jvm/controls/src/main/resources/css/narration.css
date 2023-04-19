@@ -257,6 +257,6 @@
     -fx-background-color: #001533;
 }
 
-.narration-list__buttons .btn.recording {
+.narration-list__buttons .recording-btn {
     -fx-background-color: -wa-primary-dark;
 }

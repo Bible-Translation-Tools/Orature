@@ -28,9 +28,7 @@ import javafx.event.EventTarget
 import javafx.geometry.Orientation
 import javafx.scene.control.ListView
 import javafx.scene.control.ScrollBar
-import org.wycliffeassociates.otter.jvm.utils.findChildren
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import org.wycliffeassociates.otter.jvm.utils.virtualFlow
+import org.wycliffeassociates.otter.jvm.utils.*
 import tornadofx.*
 
 class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(items) {
@@ -39,24 +37,28 @@ class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(i
 
     val initialSelectedItemProperty = SimpleObjectProperty<T>()
 
+    private val listeners = mutableListOf<ListenerDisposer>()
+
     init {
         addClass("wa-list-view")
+    }
 
-        initialSelectedItemProperty.onChangeAndDoNow {
+    fun addListeners() {
+        initialSelectedItemProperty.onChangeAndDoNowWithDisposer {
             it?.let {
                 cardIsOutOfViewProperty.set(false)
                 selectionModel.select(it)
                 scrollTo(it)
             }
-        }
+        }.also(listeners::add)
 
-        skinProperty().onChange {
+        skinProperty().onChangeWithDisposer {
             it?.let {
                 try {
                     val scrollBar = virtualFlow().findChildren<ScrollBar>(true).singleOrNull { node ->
                         node.orientation == Orientation.VERTICAL
                     }
-                    scrollBar?.valueProperty()?.onChange {
+                    scrollBar?.valueProperty()?.onChangeWithDisposer {
                         val current = selectionModel.selectedIndex
                         val first = virtualFlow().firstVisibleCell?.index ?: 0
                         val last = virtualFlow().lastVisibleCell?.index ?: 0
@@ -71,17 +73,24 @@ class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(i
                             cardIsOutOfViewProperty.set(false)
                             onSelectedVerseActionProperty.set(null)
                         }
-                    }
+                    }?.also(listeners::add)
                 } catch (e: NullPointerException) {
                     e.printStackTrace()
                 }
             }
-        }
+        }.also(listeners::add)
+    }
+
+    fun removeListeners() {
+        listeners.forEach(ListenerDisposer::dispose)
+        listeners.clear()
     }
 }
 
-fun <T> EventTarget.narrationtextlistview(values: ObservableList<T>?, op: NarrationTextListView<T>.() -> Unit = {}) =
-    NarrationTextListView<T>().attachTo(this, op) {
+fun <T> EventTarget.narrationtextlistview(
+    values: ObservableList<T>?,
+    op: NarrationTextListView<T>.() -> Unit = {}
+) = NarrationTextListView<T>().attachTo(this, op) {
         if (values is SortedFilteredList<T>) values.bindTo(it)
         else it.items = values
     }
@@ -89,8 +98,7 @@ fun <T> EventTarget.narrationtextlistview(values: ObservableList<T>?, op: Narrat
 fun <T> EventTarget.narrationtextlistview(
     values: ObservableValue<ObservableList<T>>?,
     op: NarrationTextListView<T>.() -> Unit = {}
-) =
-    NarrationTextListView<T>().attachTo(this, op) {
+) = NarrationTextListView<T>().attachTo(this, op) {
         fun rebinder() {
             (it.items as? SortedFilteredList<T>)?.bindTo(it)
         }

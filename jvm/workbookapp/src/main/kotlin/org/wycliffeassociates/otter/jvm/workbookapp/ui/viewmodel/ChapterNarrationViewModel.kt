@@ -540,7 +540,7 @@ class ChapterNarrationViewModel : ViewModel() {
         writer?.writer?.dispose()
         writer = null
 
-        renderer?.disposeOfListeners()
+        renderer?.removeListeners()
         renderer = null
     }
 

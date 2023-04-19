@@ -118,7 +118,7 @@ class ActiveRecordingRenderer(
         audioData.clear()
     }
 
-    fun disposeOfListeners() {
+    fun removeListeners() {
         compositeDisposable.clear()
         activeRenderer.dispose()
         dataReceiverDisposable.dispose()

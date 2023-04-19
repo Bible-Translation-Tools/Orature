@@ -14,6 +14,7 @@ import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.chapterselector.ChapterSelector
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
+import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextListView
 import org.wycliffeassociates.otter.jvm.controls.narration.floatingnarrationcard
 import org.wycliffeassociates.otter.jvm.controls.narration.narrationrecordlistview
 import org.wycliffeassociates.otter.jvm.controls.narration.narrationtextlistview
@@ -24,6 +25,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NarrationRecordCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NarrationTextCell
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterNarrationViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
@@ -60,6 +62,7 @@ class ChapterNarrationPage : View() {
     }
 
     private val pluginOpenedPage: PluginOpenedPage
+    private lateinit var textListView: NarrationTextListView<ChunkData>
 
     init {
         pluginOpenedPage = createPluginOpenedPage()
@@ -79,11 +82,13 @@ class ChapterNarrationPage : View() {
     override fun onDock() {
         super.onDock()
         navigator.dock(this, breadCrumb)
+        addListeners()
         viewModel.dock()
     }
 
     override fun onUndock() {
         super.onUndock()
+        removeListeners()
         viewModel.undock()
     }
 
@@ -225,6 +230,8 @@ class ChapterNarrationPage : View() {
                 narrationtextlistview(viewModel.allSortedChunks) {
                     addClass("narration__list")
 
+                    textListView = this
+
                     viewModel.onCurrentVerseActionProperty.bind(onSelectedVerseActionProperty)
                     viewModel.floatingCardVisibleProperty.bind(cardIsOutOfViewProperty)
 
@@ -307,5 +314,13 @@ class ChapterNarrationPage : View() {
                 workbookDataStore.sourceTextZoomRateProperty
             )
         }
+    }
+
+    private fun addListeners() {
+        textListView.addListeners()
+    }
+
+    private fun removeListeners() {
+        textListView.removeListeners()
     }
 }
