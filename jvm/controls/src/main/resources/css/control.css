@@ -653,6 +653,107 @@
     -fx-background-color: -wa-transparent;
 }
 
+/********************************
+*
+* Table
+*
+********************************* */
+.wa-table-view {
+    -fx-table-cell-border-color: transparent;
+    -fx-background-color: -wa-foreground;
+    -fx-background-radius: 10;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+/* header */
+.wa-table-view .corner,
+.wa-table-view .column-header,
+.wa-table-view .column-header-background .filler {
+    -fx-background-color: transparent;
+}
+
+.wa-table-view .column-header {
+    -fx-cursor: hand;
+    -fx-padding: 0 0 0 15;
+}
+
+.wa-table-view .column-header .label {
+    -fx-alignment: center-left;
+    -fx-text-fill: gray;
+}
+
+.wa-table-view .column-header-background {
+    -fx-background-color: -wa-table-header-background;
+    -fx-background-radius: 8 8 0 0;
+    -fx-padding: 8 0;
+}
+
+/* cells */
+.wa-table-view .table-cell {
+    -fx-border-color: transparent transparent lightgray transparent;
+    -fx-border-width: 0.5px;
+    -fx-padding: 0 15;
+    -fx-alignment: center-left;
+}
+
+.wa-table-view .table-row-cell {
+    -fx-pref-height: 50px;
+    -fx-background-color: transparent;
+    -fx-alignment: center-left;
+    -fx-cursor: hand;
+}
+
+.wa-table-view .table-row-cell:hover {
+    -fx-background-color: lightblue;
+}
+
+.wa-table-view .table-row-cell:focused:selected .label {
+    -fx-text-fill: -wa-regular-text;
+}
+
+.wa-table-view .table-view__title-cell {
+    -fx-text-fill: -wa-regular-text;
+    -fx-font-size: 1.2em;
+    -fx-font-weight: bold;
+}
+/* scroll-bar */
+.wa-table-view .virtual-flow .scroll-bar:vertical,
+.wa-table-view .virtual-flow .scroll-bar:vertical .track,
+.wa-table-view .virtual-flow .scroll-bar:vertical .track-background,
+.wa-table-view .virtual-flow .scroll-bar:horizontal,
+.wa-table-view .virtual-flow .scroll-bar:horizontal .track,
+.wa-table-view .virtual-flow .scroll-bar:horizontal .track-background {
+    -fx-background-color: transparent;
+}
+
+.wa-table-view .virtual-flow .scroll-bar .increment-button,
+.wa-table-view .virtual-flow .scroll-bar .decrement-button {
+    -fx-opacity: 0;
+    -fx-padding: 2;
+}
+
+.wa-table-view .progress-bar {
+    -fx-pref-height: 7px;
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+}
+
+.wa-table-view .progress-bar .track {
+    -fx-background-color: -wa-progress-track-background;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8px;
+}
+
+.wa-table-view .progress-bar .bar {
+    -fx-background-color: -wa-progress-foreground;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8px 0 0 8px;
+}
+
+.wa-table-view .ikonli-font-icon {
+    -fx-icon-size: 23px;
+}
 /* ------------------- Menu Button --------------- */
 .wa-menu-button {
     -fx-pref-height: 48px;

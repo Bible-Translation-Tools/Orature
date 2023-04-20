@@ -63,6 +63,8 @@ class HomePageViewModel : ViewModel() {
     val resumeBookProperty = SimpleObjectProperty<Workbook>()
     private val settingsViewModel: SettingsViewModel by inject()
 
+    val workbookList = observableListOf<Workbook>()
+
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
         settingsViewModel.refreshPlugins()
@@ -232,5 +234,13 @@ class HomePageViewModel : ViewModel() {
         val project = workbook.target.toCollection()
         project.modifiedTs = LocalDateTime.now()
         updateProjectUseCase.update(project).subscribe()
+    }
+
+    fun loadBookList() {
+        workbookRepo.getProjects()
+            .observeOnFx()
+            .subscribe { workbooks ->
+                workbookList.setAll(workbooks)
+            }
     }
 }

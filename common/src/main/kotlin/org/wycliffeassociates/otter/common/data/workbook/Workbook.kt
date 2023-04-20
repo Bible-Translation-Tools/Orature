@@ -54,10 +54,15 @@ class Workbook(
         )
     }
 
-
     val modifiedTs = target.modifiedTs
     val sourceMetadataSlug: String
         get() = source.resourceMetadata.identifier
+
+    val progress: Double
+        get() {
+            val chapters = target.chapters.blockingIterable().toList()
+            return chapters.count { it.hasSelectedAudio() }.toDouble() / chapters.size
+        }
 
     override fun hashCode(): Int {
         return Objects.hash(
