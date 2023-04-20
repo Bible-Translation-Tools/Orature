@@ -705,7 +705,7 @@
 }
 
 .wa-table-view .table-row-cell:hover {
-    -fx-background-color: lightblue;
+    -fx-background-color: -wa-table-row-hover;
 }
 
 .wa-table-view .table-row-cell:focused:selected .label {

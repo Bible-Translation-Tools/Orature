@@ -6,10 +6,8 @@ import javafx.scene.control.TableCell
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookActionCallback
-import tornadofx.FX
-import tornadofx.action
-import tornadofx.addClass
-import tornadofx.button
+import tornadofx.*
+import tornadofx.FX.Companion.messages
 
 class WorkbookOptionTableCell(
     private val actionCallback: WorkbookActionCallback
@@ -55,18 +53,17 @@ class WorkbookOptionTableCell(
         onExportAction: () -> Unit,
         onDeleteAction: () -> Unit
     ): ContextMenu {
-        val openOption = MenuItem("Open Book").apply {
+        val openOption = MenuItem(messages["openBook"]).apply {
             action { onOpenAction() }
         }
-        val exportOption = MenuItem("Export Book...").apply {
+        val exportOption = MenuItem(messages["exportProject"]).apply {
             action { onExportAction() }
         }
-        val deleteOption = MenuItem("Delete Book").apply {
+        val deleteOption = MenuItem(messages["deleteBook"]).apply {
             action { onDeleteAction() }
         }
         return ContextMenu(openOption, exportOption, deleteOption).apply {
             isAutoHide = true
-            prefWidth = -1.0
         }
     }
 }
