@@ -717,6 +717,10 @@
     -fx-font-size: 1.2em;
     -fx-font-weight: bold;
 }
+
+.wa-table-view .table-cell__normal-text.label {
+    -fx-text-fill: -wa-regular-text;
+}
 /* scroll-bar */
 .wa-table-view .virtual-flow .scroll-bar:vertical,
 .wa-table-view .virtual-flow .scroll-bar:vertical .track,
@@ -742,7 +746,7 @@
 .wa-table-view .progress-bar .track {
     -fx-background-color: -wa-progress-track-background;
     -fx-background-insets: 0;
-    -fx-background-radius: 8px;
+    -fx-background-radius: 5px;
 }
 
 .wa-table-view .progress-bar .bar {
@@ -751,8 +755,13 @@
     -fx-background-radius: 8px 0 0 8px;
 }
 
+.wa-table-view .progress-bar.full .bar {
+    -fx-background-radius: 8px;
+}
+
 .wa-table-view .ikonli-font-icon {
-    -fx-icon-size: 23px;
+    -fx-icon-color: -wa-regular-text;
+    -fx-icon-size: 24px;
 }
 /* ------------------- Menu Button --------------- */
 .wa-menu-button {

@@ -10,12 +10,13 @@ import javafx.scene.control.TableView
 import javafx.scene.control.cell.PropertyValueFactory
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.common.data.workbook.Book
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.WorkbookOptionTableCell
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookActionCallback
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel
 import tornadofx.*
 
@@ -31,7 +32,7 @@ class HomePage2 : View() {
         }
     }
 
-    private val actionCallback: WorkbookActionCallback = setupWorkbookActionCallback()
+    private val workbookActionCallback: WorkbookActionCallback = setupWorkbookOptionCallback()
 
     init {
         tryImportStylesheet(resources["/css/control.css"])
@@ -47,25 +48,36 @@ class HomePage2 : View() {
 
             column("Book", Workbook::target.getter).apply {
                 setCellValueFactory { it.value.target.toProperty() }
-                setCellFactory { TableHeaderCell() }
+                cellFormat {
+                    graphic = label(item.title) {
+                        addClass("table-view__title-cell")
+                    }
+                }
                 isReorderable = false
             }
             column("Anthology", Workbook::target.getter).apply {
                 setCellValueFactory { it.value.target.toProperty() }
-                setCellFactory { TableTextCell() }
+                cellFormat {
+                    graphic = label("Anthology") {
+                        addClass("table-cell__normal-text")
+                    }
+                }
                 isReorderable = false
             }
             column("Progress", Workbook::progress.getter).apply {
                 cellValueFactory = PropertyValueFactory(Workbook::progress.name)
-                setCellFactory { TableProgressCell() }
+                cellFormat {
+                    graphic = progressbar(item) {
+                        if (item == 1.0) { addClass("full") }
+                    }
+                }
                 isReorderable = false
-                isSortable = false
             }
             columns.add(
                 TableColumn<Workbook, Workbook>().apply {
                     setCellValueFactory { SimpleObjectProperty(it.value) }
                     setCellFactory {
-                        TableActionCell(actionCallback)
+                        WorkbookOptionTableCell(workbookActionCallback)
                     }
 
                     maxWidth = 100.0
@@ -81,7 +93,7 @@ class HomePage2 : View() {
                 row.setOnMouseClicked {
                     // clicking on a row opens workbook
                     row.item?.let { workbook ->
-                        actionCallback.openWorkbook(workbook)
+                        workbookActionCallback.openWorkbook(workbook)
                     }
                 }
                 row
@@ -101,9 +113,11 @@ class HomePage2 : View() {
         viewModel.undock()
     }
 
-    private fun setupWorkbookActionCallback(): WorkbookActionCallback {
+    private fun setupWorkbookOptionCallback(): WorkbookActionCallback {
         return object : WorkbookActionCallback {
             override fun openWorkbook(workbook: Workbook) {
+                // TODO: FIX BUG: WORKBOOK PAGE IS EMPTY AFTER SELECTING A SECOND BOOK
+                
                 viewModel.selectProject(workbook)
             }
 
@@ -116,108 +130,4 @@ class HomePage2 : View() {
             }
         }
     }
-}
-
-
-open class TableTextCell : TableCell<Workbook, Book>() {
-    override fun updateItem(item: Book?, empty: Boolean) {
-        super.updateItem(item, empty)
-        if (item == null || empty) {
-            graphic = null
-            return
-        }
-
-        graphic = label("Anthology")
-    }
-}
-
-class TableHeaderCell : TableTextCell() {
-    override fun updateItem(item: Book?, empty: Boolean) {
-        super.updateItem(item, empty)
-        if (item == null || empty) {
-            graphic = null
-            return
-        }
-
-        graphic = label(item.title) {
-            addClass("table-view__title-cell")
-        }
-    }
-}
-
-class TableProgressCell : TableCell<Workbook, Double>() {
-    override fun updateItem(item: Double?, empty: Boolean) {
-        super.updateItem(item, empty)
-        if (item == null || empty) {
-            graphic = null
-            return
-        }
-
-        graphic = progressbar(item)
-    }
-}
-
-class TableActionCell(
-    private val callback: WorkbookActionCallback
-) : TableCell<Workbook, Workbook>() {
-
-    private lateinit var popupMenu: ContextMenu
-
-    private val actionButton = button {
-        addClass("btn", "btn--icon", "btn--borderless")
-        graphic = FontIcon("mdi-dots-horizontal").apply {
-            addClass("table-view__action-icon")
-        }
-    }
-
-    override fun updateItem(item: Workbook?, empty: Boolean) {
-        super.updateItem(item, empty)
-        if (item == null || empty) {
-            graphic = null
-            return
-        }
-
-        popupMenu = setUpPopupMenu(
-            { callback.openWorkbook(item) },
-            { callback.exportWorkbook(item) },
-            { callback.deleteWorkbook(item) }
-        )
-
-        graphic = actionButton.apply {
-            action {
-                val bound = this.boundsInLocal
-                val screenBound = this.localToScreen(bound)
-                popupMenu.show(
-                    FX.primaryStage
-                )
-                popupMenu.x = screenBound.centerX - popupMenu.width + this.width
-                popupMenu.y = screenBound.maxY
-            }
-        }
-    }
-
-    private fun setUpPopupMenu(
-        onOpen: () -> Unit,
-        onExport: () -> Unit,
-        onDelete: () -> Unit
-    ): ContextMenu {
-        val openOption = MenuItem("Open Book").apply {
-            action { onOpen() }
-        }
-        val exportOption = MenuItem("Export Book...").apply {
-            action { onExport() }
-        }
-        val deleteOption = MenuItem("Delete Book").apply {
-            action { onDelete() }
-        }
-        return ContextMenu(openOption, exportOption, deleteOption).apply {
-            isAutoHide = true
-            prefWidth = -1.0
-        }
-    }
-}
-interface WorkbookActionCallback {
-    fun openWorkbook(workbook: Workbook)
-    fun deleteWorkbook(workbook: Workbook)
-    fun exportWorkbook(workbook: Workbook)
 }

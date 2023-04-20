@@ -61,7 +61,8 @@ class Workbook(
     val progress: Double
         get() {
             val chapters = target.chapters.blockingIterable().toList()
-            return chapters.count { it.hasSelectedAudio() }.toDouble() / chapters.size
+            val completedChapters = chapters.count { it.hasSelectedAudio() }
+            return completedChapters.toDouble() / chapters.size
         }
 
     override fun hashCode(): Int {
