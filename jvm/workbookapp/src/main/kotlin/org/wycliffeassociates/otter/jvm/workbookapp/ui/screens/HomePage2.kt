@@ -1,13 +1,9 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import javafx.beans.property.SimpleObjectProperty
-import javafx.scene.control.ContextMenu
-import javafx.scene.control.MenuItem
-import javafx.scene.control.TableCell
-import javafx.scene.control.TableColumn
+import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.TableRow
 import javafx.scene.control.TableView
-import javafx.scene.control.cell.PropertyValueFactory
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
@@ -46,17 +42,17 @@ class HomePage2 : View() {
             addClass("wa-table-view", "home__book-table")
             columnResizePolicy = TableView.CONSTRAINED_RESIZE_POLICY
 
-            column("Book", Workbook::target.getter).apply {
-                setCellValueFactory { it.value.target.toProperty() }
+            column(messages["book"], String::class).apply {
+                setCellValueFactory { it.value.target.title.toProperty() }
                 cellFormat {
-                    graphic = label(item.title) {
+                    graphic = label(item) {
                         addClass("table-view__title-cell")
                     }
                 }
                 isReorderable = false
             }
-            column("Anthology", Workbook::target.getter).apply {
-                setCellValueFactory { it.value.target.toProperty() }
+            column(messages["anthology"], String::class).apply {
+                setCellValueFactory { SimpleStringProperty("") }
                 cellFormat {
                     graphic = label("Anthology") {
                         addClass("table-cell__normal-text")
@@ -64,29 +60,28 @@ class HomePage2 : View() {
                 }
                 isReorderable = false
             }
-            column("Progress", Workbook::progress.getter).apply {
-                cellValueFactory = PropertyValueFactory(Workbook::progress.name)
+            column(messages["progress"], Number::class) {
+                setCellValueFactory { it.value.progress.toProperty() }
                 cellFormat {
-                    graphic = progressbar(item) {
-                        if (item == 1.0) { addClass("full") }
+                    val percent = item.toDouble()
+                    graphic = progressbar(percent) {
+                        if (percent == 1.0) { addClass("full") }
                     }
                 }
                 isReorderable = false
             }
-            columns.add(
-                TableColumn<Workbook, Workbook>().apply {
-                    setCellValueFactory { SimpleObjectProperty(it.value) }
-                    setCellFactory {
-                        WorkbookOptionTableCell(workbookActionCallback)
-                    }
-
-                    maxWidth = 100.0
-                    minWidth = 80.0
-                    isReorderable = false
-                    isResizable = false
-                    isSortable = false
+            column("", Workbook::class) {
+                setCellValueFactory { SimpleObjectProperty(it.value) }
+                setCellFactory {
+                    WorkbookOptionTableCell(workbookActionCallback)
                 }
-            )
+
+                maxWidth = 100.0
+                minWidth = 80.0
+                isReorderable = false
+                isResizable = false
+                isSortable = false
+            }
 
             setRowFactory {
                 val row = TableRow<Workbook>()
