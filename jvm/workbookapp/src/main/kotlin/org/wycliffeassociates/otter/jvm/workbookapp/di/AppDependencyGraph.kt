@@ -82,7 +82,6 @@ interface AppDependencyGraph {
     fun inject(viewModel: AppInfoViewModel)
     fun inject(viewModel: ChunkingViewModel)
     fun inject(viewModel: ExportChapterViewModel)
-    fun inject(narrationHistory: NarrationHistory)
     fun injectDatabase(): AppDatabase
     fun injectDirectoryProvider(): IDirectoryProvider
     fun injectAppPreferencesRepository(): IAppPreferencesRepository

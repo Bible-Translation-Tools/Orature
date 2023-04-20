@@ -8,24 +8,19 @@ import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
-import tornadofx.Component
-import tornadofx.ScopedInstance
 import tornadofx.observableListOf
-import tornadofx.onChange
 import java.io.File
 import java.time.LocalDate
+import java.util.Stack
 import javax.inject.Inject
 
-class NarrationHistory : Component(), ScopedInstance {
-    val workbookDataStore: WorkbookDataStore by inject()
-
-    @Inject
-    lateinit var directoryProvider: IDirectoryProvider
+class NarrationHistory @Inject constructor(private val directoryProvider: IDirectoryProvider) {
 
     private val undoHistory = SimpleListProperty<Snapshot>(observableListOf())
     private val redoHistory = SimpleListProperty<Snapshot>(observableListOf())
+
+    private lateinit var workbookDataStore: WorkbookDataStore
 
     val hasUndoProperty = SimpleBooleanProperty()
     val hasRedoProperty = SimpleBooleanProperty()
@@ -36,14 +31,12 @@ class NarrationHistory : Component(), ScopedInstance {
     )
 
     init {
-        (app as IDependencyGraphProvider).dependencyGraph.inject(this)
-
         hasUndoProperty.bind(undoHistory.emptyProperty().not())
         hasRedoProperty.bind(redoHistory.emptyProperty().not())
+    }
 
-        workbookDataStore.activeChapterProperty.onChange {
-            clear()
-        }
+    fun setWorkbookDataStore(workbookDataStore: WorkbookDataStore) {
+        this.workbookDataStore = workbookDataStore
     }
 
     fun snapshot() {
@@ -84,7 +77,7 @@ class NarrationHistory : Component(), ScopedInstance {
     fun undo() {
         val lastSnapshot = undoHistory.lastOrNull()
         lastSnapshot?.let { snapshot ->
-            val redoSnapshot = makeChange(snapshot)
+            val redoSnapshot = revert(snapshot)
 
             undoHistory.remove(snapshot)
             redoHistory.add(redoSnapshot)
@@ -94,7 +87,7 @@ class NarrationHistory : Component(), ScopedInstance {
     fun redo() {
         val lastSnapshot = redoHistory.lastOrNull()
         lastSnapshot?.let { snapshot ->
-            val undoSnapshot = makeChange(snapshot)
+            val undoSnapshot = revert(snapshot)
 
             redoHistory.remove(snapshot)
             undoHistory.add(undoSnapshot)
@@ -107,7 +100,7 @@ class NarrationHistory : Component(), ScopedInstance {
         }
     }
 
-    private fun makeChange(snapshot: Snapshot): Snapshot {
+    private fun revert(snapshot: Snapshot): Snapshot {
         val workbook = workbookDataStore.workbook
         val chapter = workbookDataStore.chapter
 
@@ -201,7 +194,7 @@ class NarrationHistory : Component(), ScopedInstance {
         )
     }
 
-    private fun clear() {
+    fun clear() {
         redoHistory.clear()
         undoHistory.clear()
     }

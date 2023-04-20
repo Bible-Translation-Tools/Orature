@@ -80,10 +80,11 @@ class ChapterNarrationViewModel : ViewModel() {
     lateinit var audioConnectionFactory: AudioConnectionFactory
     @Inject
     lateinit var directoryProvider: IDirectoryProvider
+    @Inject
+    lateinit var narrationHistory: NarrationHistory
 
     val workbookDataStore: WorkbookDataStore by inject()
     val audioPluginViewModel: AudioPluginViewModel by inject()
-    val narrationHistory: NarrationHistory by inject()
 
     private val allChunks: ObservableList<ChunkData> = FXCollections.observableArrayList()
     val allSortedChunks = SortedList(allChunks, compareBy { it.sort })
@@ -143,6 +144,12 @@ class ChapterNarrationViewModel : ViewModel() {
 
         recordButtonTextProperty.bind(recordButtonTextBinding())
         audioPluginViewModel.pluginNameProperty.bind(pluginNameBinding())
+
+        workbookDataStore.activeChapterProperty.onChange {
+            narrationHistory.clear()
+        }
+
+        narrationHistory.setWorkbookDataStore(workbookDataStore)
     }
 
     fun dock() {
