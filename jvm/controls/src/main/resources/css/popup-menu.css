@@ -1,0 +1,41 @@
+.popup {
+    -fx-background-color: transparent;
+}
+
+.wa-context-menu {
+    -fx-padding: 5;
+    -fx-background-radius: 8px;
+    -fx-background-color: -wa-foreground;
+    -fx-effect: -wa-level3;
+}
+
+.wa-context-menu .menu-item {
+    -fx-background-radius: 4px;
+    -fx-cursor: hand;
+    -fx-font-size: 1.3em;
+}
+
+.wa-context-menu .menu-item > .label {
+    -fx-text-fill: -wa-regular-text;
+}
+
+.wa-context-menu .menu-item .ikonli-font-icon {
+    -fx-icon-color: -wa-regular-text;
+    -fx-icon-size: 18px;
+}
+
+.wa-context-menu .menu-item.danger > .label {
+    -fx-text-fill: #B85659;
+}
+
+.wa-context-menu .menu-item.danger .ikonli-font-icon {
+    -fx-icon-color: #B85659;
+}
+
+.wa-context-menu .menu-item:focused {
+    -fx-background-color: -wa-foreground-hover;
+}
+
+.wa-context-menu .menu-item:focused > .label {
+    -fx-text-fill: -wa-regular-text;
+}

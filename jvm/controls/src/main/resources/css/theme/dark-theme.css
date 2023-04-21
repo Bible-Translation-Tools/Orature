@@ -56,6 +56,7 @@
 
 /* -------------------- Components mappings --------------------*/
     -wa-regular-text: #e6e6e6;
+    -wa-regular-text-80: -wa-regular-text;
     -wa-note-text: #c0bfbf;
     -wa-highlight-text: -wa-accent-light;
     -wa-disabled-text: gray;
@@ -165,10 +166,10 @@
     -wa-error-color: #B85659;
 
     /* TABLE */
-    -wa-table-header-text: gray;
-    -wa-table-header-background: #dce0e5;
+    -wa-table-header-background: #4d4d4d;
     -wa-progress-track-background: #e0edf9;
     -wa-progress-foreground: #015AD9;
+    -wa-table-row-border: -wa-list-item-border-light;
     -wa-table-row-hover: -wa-foreground-hover;
 }
 

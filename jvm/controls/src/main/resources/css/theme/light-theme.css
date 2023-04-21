@@ -36,7 +36,7 @@
     -wa-background-dark: #B3B9C2;
 
     -wa-foreground: white;
-    -wa-foreground-hover: #e6e6e6;
+    -wa-foreground-hover: #E5E8EB;
     -wa-foreground-pressed: -wa-black-10;
 
     -wa-surface: inherit;
@@ -56,6 +56,7 @@
 
 /* -------------------- Components mappings --------------------*/
     -wa-regular-text: -wa-black;
+    -wa-regular-text-80: #33445C;
     -wa-note-text: -wa-black-70;
     -wa-highlight-text: -wa-primary;
     -wa-disabled-text: -wa-gray-light;
@@ -165,11 +166,11 @@
     -wa-error-color: #B85659;
 
     /* TABLE */
-    -wa-table-header-text: gray;
     -wa-table-header-background: #dce0e5;
     -wa-progress-track-background: #e0edf9;
     -wa-progress-foreground: #015AD9;
-    -wa-table-row-hover: #E5E8EB;
+    -wa-table-row-border: -wa-list-item-border-light;
+    -wa-table-row-hover: -wa-foreground-hover;
 }
 
 .scroll-bar {

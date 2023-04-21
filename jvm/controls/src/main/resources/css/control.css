@@ -680,7 +680,9 @@
 
 .wa-table-view .column-header .label {
     -fx-alignment: center-left;
-    -fx-text-fill: gray;
+    -fx-font-size: 1.1em;
+    -fx-font-weight: 600;
+    -fx-text-fill: -wa-regular-text-80;
 }
 
 .wa-table-view .column-header-background {
@@ -691,8 +693,8 @@
 
 /* cells */
 .wa-table-view .table-cell {
-    -fx-border-color: transparent transparent lightgray transparent;
-    -fx-border-width: 0.5px;
+    -fx-border-color: transparent transparent -wa-table-row-border transparent;
+    -fx-border-width: 1px;
     -fx-padding: 0 15;
     -fx-alignment: center-left;
 }
@@ -705,7 +707,7 @@
 }
 
 .wa-table-view .table-row-cell:hover {
-    -fx-background-color: -wa-table-row-hover;
+    -fx-background-color: -wa-foreground-hover;
 }
 
 .wa-table-view .table-row-cell:focused:selected .label {
@@ -713,14 +715,15 @@
 }
 
 .wa-table-view .table-view__title-cell {
-    -fx-text-fill: -wa-regular-text;
-    -fx-font-size: 1.2em;
+    -fx-text-fill: -wa-regular-text-80;
+    -fx-font-size: 1.4em;
     -fx-font-weight: bold;
 }
 
 .wa-table-view .table-cell__normal-text.label {
-    -fx-text-fill: -wa-regular-text;
+    -fx-text-fill: -wa-regular-text-80;
 }
+
 /* scroll-bar */
 .wa-table-view .virtual-flow .scroll-bar:vertical,
 .wa-table-view .virtual-flow .scroll-bar:vertical .track,
@@ -761,8 +764,13 @@
 
 .wa-table-view .ikonli-font-icon {
     -fx-icon-color: -wa-regular-text;
-    -fx-icon-size: 24px;
+    -fx-icon-size: 20px;
 }
+
+.wa-table-view .active-icon {
+    -fx-icon-color: -wa-secondary-btn-text-fill;
+}
+
 /* ------------------- Menu Button --------------- */
 .wa-menu-button {
     -fx-pref-height: 48px;
