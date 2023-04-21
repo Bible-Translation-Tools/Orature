@@ -20,26 +20,24 @@ package org.wycliffeassociates.otter.common.recorder
 
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
-import org.wycliffeassociates.otter.common.collections.FloatRingBuffer
 
-class ActiveRecordingRenderer(
+class ContinuousRecordingRenderer(
     val stream: Observable<ByteArray>,
     val recordingStatus: Observable<Boolean>,
     val width: Int,
     val secondsOnScreen: Int
 ) : RecordingRenderer(stream, recordingStatus, width, secondsOnScreen) {
-    // double the width as for each pixel there will be a min and max value
-    val floatBuffer = FloatRingBuffer(width * 2)
+    val audioData = ArrayList<Float>(10_000)
 
     override val dataReceiverDisposable: Disposable = dataReceiver
         .doOnError { e ->
             logger.error("Error in data receiver stream", e)
         }
         .subscribe {
-            floatBuffer.add(it)
+            audioData.add(it)
         }
 
     override fun clearData() {
-        floatBuffer.clear()
+        audioData.clear()
     }
 }

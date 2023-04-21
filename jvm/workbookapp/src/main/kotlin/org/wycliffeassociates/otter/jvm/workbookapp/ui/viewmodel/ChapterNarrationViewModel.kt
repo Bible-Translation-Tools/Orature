@@ -34,7 +34,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.NarrationHistory
 import org.wycliffeassociates.otter.common.domain.narration.SplitAudioOnCues
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
-import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
+import org.wycliffeassociates.otter.common.recorder.ContinuousRecordingRenderer
 import org.wycliffeassociates.otter.common.recorder.WavFileWriter
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.waveform.Drawable
@@ -126,7 +126,7 @@ class ChapterNarrationViewModel : ViewModel() {
 
     private var recorder: IAudioRecorder? = null
     private var writer: WavFileWriter? = null
-    private var renderer: ActiveRecordingRenderer? = null
+    private var renderer: ContinuousRecordingRenderer? = null
     private var recordedAudio: AudioFile? = null
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
@@ -601,12 +601,11 @@ class ChapterNarrationViewModel : ViewModel() {
             recordedAudio = AudioFile(tempFile)
             writer = WavFileWriter(recordedAudio!!, _recorder.getAudioStream()) { /* no op */ }
 
-            renderer = ActiveRecordingRenderer(
+            renderer = ContinuousRecordingRenderer(
                 _recorder.getAudioStream(),
                 writer!!.isWriting,
                 width = PIXELS_PER_SECOND,
-                secondsOnScreen = 1,
-                continuous = true
+                secondsOnScreen = 1
             )
             val continuousWaveformLayer = ContinuousWaveformLayer(renderer!!)
             val volumeBar = VolumeBar(_recorder.getAudioStream())

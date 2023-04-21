@@ -21,17 +21,25 @@ package org.wycliffeassociates.otter.jvm.controls.waveform
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.paint.Paint
-import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
+import org.wycliffeassociates.otter.common.recorder.ContinuousRecordingRenderer
 
+private const val MAX_CANVAS_WIDTH = 5000
 
-class ContinuousWaveformLayer(private val renderer: ActiveRecordingRenderer) : Drawable {
+class ContinuousWaveformLayer(private val renderer: ContinuousRecordingRenderer) : Drawable {
 
     override fun draw(context: GraphicsContext, canvas: Canvas) {
         val audioData = renderer.audioData
 
         context.stroke = Paint.valueOf("#015AD990")
         context.lineWidth = 1.0
-        canvas.width = audioData.size.toDouble() / 2
+
+        var width = audioData.size.toDouble() / 2
+        if (width >= MAX_CANVAS_WIDTH) {
+            audioData.subList(0, MAX_CANVAS_WIDTH).clear()
+            width = audioData.size.toDouble() / 2
+        }
+
+        canvas.width = width
 
         var i = audioData.size - 1
         var x = canvas.width
