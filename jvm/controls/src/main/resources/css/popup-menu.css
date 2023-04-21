@@ -6,7 +6,7 @@
     -fx-padding: 5;
     -fx-background-radius: 8px;
     -fx-background-color: -wa-foreground;
-    -fx-effect: -wa-level3;
+    -fx-effect: -wa-level2;
 }
 
 .wa-context-menu .menu-item {

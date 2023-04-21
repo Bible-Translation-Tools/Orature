@@ -711,7 +711,7 @@
 }
 
 .wa-table-view .table-row-cell:focused:selected .label {
-    -fx-text-fill: -wa-regular-text;
+    -fx-text-fill: -wa-regular-text-80;
 }
 
 .wa-table-view .table-view__title-cell {

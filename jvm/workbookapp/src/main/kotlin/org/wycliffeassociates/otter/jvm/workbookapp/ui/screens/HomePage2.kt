@@ -1,9 +1,11 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.TableRow
 import javafx.scene.control.TableView
+import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
@@ -33,6 +35,7 @@ class HomePage2 : View() {
     init {
         tryImportStylesheet(resources["/css/control.css"])
         tryImportStylesheet(resources["/css/home-page.css"])
+        tryImportStylesheet(resources["/css/popup-menu.css"])
     }
 
     override val root = vbox {
@@ -40,6 +43,7 @@ class HomePage2 : View() {
 
         tableview(viewModel.workbookList) {
             addClass("wa-table-view", "home__book-table")
+            vgrow = Priority.ALWAYS
             columnResizePolicy = TableView.CONSTRAINED_RESIZE_POLICY
 
             column(messages["book"], String::class).apply {
@@ -47,15 +51,6 @@ class HomePage2 : View() {
                 cellFormat {
                     graphic = label(item) {
                         addClass("table-view__title-cell")
-                    }
-                }
-                isReorderable = false
-            }
-            column(messages["anthology"], String::class).apply {
-                setCellValueFactory { SimpleStringProperty("") }
-                cellFormat {
-                    graphic = label("Anthology") {
-                        addClass("table-cell__normal-text")
                     }
                 }
                 isReorderable = false
@@ -69,6 +64,23 @@ class HomePage2 : View() {
                     }
                 }
                 isReorderable = false
+            }
+            column("", Boolean::class) {
+                setCellValueFactory { SimpleBooleanProperty(true) }
+                cellFormat {
+                    graphic = if (it) {
+                        FontIcon(MaterialDesign.MDI_VOLUME_HIGH).apply {
+                            addClass("active-icon")
+                        }
+                    } else {
+                        null
+                    }
+                }
+                maxWidth = 50.0
+                minWidth = 50.0
+                isReorderable = false
+                isResizable = false
+                isSortable = false
             }
             column("", Workbook::class) {
                 setCellValueFactory { SimpleObjectProperty(it.value) }

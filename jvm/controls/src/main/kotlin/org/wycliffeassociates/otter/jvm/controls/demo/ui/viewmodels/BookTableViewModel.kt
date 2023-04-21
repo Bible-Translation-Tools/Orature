@@ -10,9 +10,9 @@ class BookTableViewModel : ViewModel() {
         WorkbookDemo("Leviticus", 0.5),
         WorkbookDemo("Psalms", 0.8),
         WorkbookDemo("Revelation", 1.0),
-        WorkbookDemo("Mark", 1.0),
+        WorkbookDemo("Mark", 0.5),
         WorkbookDemo("Malachi", 1.0),
-        WorkbookDemo("Proverbs", 1.0),
+        WorkbookDemo("Proverbs", 0.2),
         WorkbookDemo("Colossians", 1.0, true)
     )
 }
