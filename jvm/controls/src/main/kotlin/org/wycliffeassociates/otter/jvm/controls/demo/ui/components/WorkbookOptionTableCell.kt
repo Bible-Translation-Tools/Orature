@@ -14,7 +14,7 @@ class WorkbookOptionTableCell() : TableCell<WorkbookDemo, WorkbookDemo>() {
 
     private val actionButton = button {
         addClass("btn", "btn--icon", "btn--borderless")
-        graphic = FontIcon("mdi-dots-horizontal").apply {
+        graphic = FontIcon(MaterialDesign.MDI_DOTS_HORIZONTAL).apply {
             addClass("table-view__action-icon")
         }
     }

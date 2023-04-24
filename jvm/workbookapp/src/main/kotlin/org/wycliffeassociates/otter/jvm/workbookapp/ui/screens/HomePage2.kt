@@ -14,6 +14,7 @@ import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.WorkbookOptionTableCell
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.WorkbookTableRow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookActionCallback
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel
 import tornadofx.*
@@ -96,14 +97,7 @@ class HomePage2 : View() {
             }
 
             setRowFactory {
-                val row = TableRow<Workbook>()
-                row.setOnMouseClicked {
-                    // clicking on a row opens workbook
-                    row.item?.let { workbook ->
-                        workbookActionCallback.openWorkbook(workbook)
-                    }
-                }
-                row
+                WorkbookTableRow(workbookActionCallback::openWorkbook)
             }
         }
 
