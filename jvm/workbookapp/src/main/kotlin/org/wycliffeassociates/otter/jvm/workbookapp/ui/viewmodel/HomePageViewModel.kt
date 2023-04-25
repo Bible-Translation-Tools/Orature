@@ -23,7 +23,6 @@ import javafx.beans.property.SimpleObjectProperty
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.common.data.workbook.WorkbookStatus
 import org.wycliffeassociates.otter.common.domain.collections.UpdateProject
 import org.wycliffeassociates.otter.common.domain.collections.UpdateTranslation
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -63,8 +62,6 @@ class HomePageViewModel : ViewModel() {
     val translations = observableListOf<Translation>()
     val resumeBookProperty = SimpleObjectProperty<Workbook>()
     private val settingsViewModel: SettingsViewModel by inject()
-
-    val workbookList = observableListOf<WorkbookStatus>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -235,13 +232,5 @@ class HomePageViewModel : ViewModel() {
         val project = workbook.target.toCollection()
         project.modifiedTs = LocalDateTime.now()
         updateProjectUseCase.update(project).subscribe()
-    }
-
-    fun loadBookList() {
-        workbookRepo.getProjects()
-            .observeOnFx()
-            .subscribe { workbooks ->
-//                workbookList.setAll(workbooks)
-            }
     }
 }
