@@ -3,11 +3,9 @@ package org.wycliffeassociates.otter.jvm.controls.tableview
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
-import javafx.geometry.Pos
 import javafx.scene.control.TableView
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
-import org.controlsfx.control.textfield.CustomTextField
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookStatus
@@ -19,32 +17,6 @@ class BookTableView(
 
     init {
         spacing = 10.0
-        hbox {
-            spacing = 5.0
-            alignment = Pos.CENTER_LEFT
-            /* Page title*/
-            button {
-                addClass("btn", "btn--icon", "btn--borderless")
-                graphic = FontIcon(MaterialDesign.MDI_DOTS_HORIZONTAL).apply {
-                    addClass("table-view__action-icon")
-                }
-            }
-            label("Your English Translations") {
-                addClass("home-page__main-header")
-            }
-            region { hgrow = Priority.ALWAYS }
-            hbox {
-                /* Search bar */
-                alignment = Pos.CENTER_LEFT
-                add(
-                    CustomTextField().apply {
-                        addClass("txt-input", "filtered-search-bar__input")
-                        promptText = "Search..."
-                        right = FontIcon(MaterialDesign.MDI_MAGNIFY)
-                    }
-                )
-            }
-        }
         tableview(books) {
             addClass("wa-table-view", "home__book-table")
             vgrow = Priority.ALWAYS
