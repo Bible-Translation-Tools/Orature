@@ -1,14 +1,17 @@
-package org.wycliffeassociates.otter.jvm.controls.demo.ui.components
+package org.wycliffeassociates.otter.jvm.controls.tableview
 
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.MenuItem
 import javafx.scene.control.TableCell
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.jvm.controls.demo.ui.viewmodels.WorkbookDemo
+import org.wycliffeassociates.otter.common.data.workbook.WorkbookStatus
+import org.wycliffeassociates.otter.jvm.controls.event.WorkbookDeleteEvent
+import org.wycliffeassociates.otter.jvm.controls.event.WorkbookExportEvent
+import org.wycliffeassociates.otter.jvm.controls.event.WorkbookOpenEvent
 import tornadofx.*
 
-class WorkbookOptionTableCell() : TableCell<WorkbookDemo, WorkbookDemo>() {
+class WorkbookOptionTableCell : TableCell<WorkbookStatus, WorkbookStatus>() {
 
     private lateinit var popupMenu: ContextMenu
 
@@ -19,18 +22,14 @@ class WorkbookOptionTableCell() : TableCell<WorkbookDemo, WorkbookDemo>() {
         }
     }
 
-    override fun updateItem(item: WorkbookDemo?, empty: Boolean) {
+    override fun updateItem(item: WorkbookStatus?, empty: Boolean) {
         super.updateItem(item, empty)
         if (item == null || empty) {
             graphic = null
             return
         }
 
-        popupMenu = createPopupMenu(
-            { },
-            { },
-            { }
-        )
+        popupMenu = createPopupMenu(item)
 
         graphic = actionButton.apply {
             action {
@@ -45,23 +44,21 @@ class WorkbookOptionTableCell() : TableCell<WorkbookDemo, WorkbookDemo>() {
         }
     }
 
-    private fun createPopupMenu(
-        onOpenAction: () -> Unit,
-        onExportAction: () -> Unit,
-        onDeleteAction: () -> Unit
-    ): ContextMenu {
+    private fun createPopupMenu(workbookStatus: WorkbookStatus): ContextMenu {
         val openOption = MenuItem("Open Book").apply {
             graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
-            action { onOpenAction() }
+            action {
+                FX.eventbus.fire(WorkbookOpenEvent(workbookStatus))
+            }
         }
         val exportOption = MenuItem("Export Book...").apply {
             graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
-            action { onExportAction() }
+            action { FX.eventbus.fire(WorkbookExportEvent(workbookStatus)) }
         }
         val deleteOption = MenuItem("Delete Book").apply {
             addClass("danger")
             graphic = FontIcon(MaterialDesign.MDI_DELETE)
-            action { onDeleteAction() }
+            action { FX.eventbus.fire(WorkbookDeleteEvent(workbookStatus)) }
         }
         return ContextMenu(openOption, exportOption, deleteOption).apply {
             isAutoHide = true
