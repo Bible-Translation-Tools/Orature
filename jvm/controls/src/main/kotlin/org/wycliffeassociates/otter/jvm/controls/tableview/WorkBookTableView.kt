@@ -2,24 +2,28 @@ package org.wycliffeassociates.otter.jvm.controls.tableview
 
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.value.ObservableValue
 import javafx.collections.ObservableList
+import javafx.event.EventTarget
 import javafx.scene.control.TableView
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookStatus
+import org.wycliffeassociates.otter.jvm.controls.demo.ui.components.HomeHeaderWithSearch
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
-class BookTableView(
+class WorkBookTableView(
     books: ObservableList<WorkbookStatus>
 ) : VBox() {
 
     init {
         spacing = 10.0
+        add(HomeHeaderWithSearch())
         tableview(books) {
-            addClass("wa-table-view", "home__book-table")
+            addClass("wa-table-view")
             vgrow = Priority.ALWAYS
             columnResizePolicy = TableView.CONSTRAINED_RESIZE_POLICY
 
@@ -79,3 +83,11 @@ class BookTableView(
         }
     }
 }
+
+/**
+ * Constructs a workbook table and attach it to the parent.
+ */
+fun EventTarget.workbookTableView(
+    values: ObservableList<WorkbookStatus>,
+    op: WorkBookTableView.() -> Unit = {}
+) = WorkBookTableView(values).attachTo(this, op)

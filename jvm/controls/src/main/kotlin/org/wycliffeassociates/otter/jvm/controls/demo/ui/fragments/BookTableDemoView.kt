@@ -1,12 +1,11 @@
 package org.wycliffeassociates.otter.jvm.controls.demo.ui.fragments
 
-import javafx.scene.Parent
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookStatus
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookDeleteEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookExportEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookOpenEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
-import org.wycliffeassociates.otter.jvm.controls.tableview.BookTableView
+import org.wycliffeassociates.otter.jvm.controls.tableview.workbookTableView
 import tornadofx.View
 import tornadofx.observableListOf
 
@@ -46,6 +45,5 @@ class BookTableDemoView : View() {
         }
     }
 
-    override val root: Parent
-        get() = BookTableView(workbookList)
+    override val root = workbookTableView(workbookList)
 }

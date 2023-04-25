@@ -48,9 +48,7 @@ class WorkbookOptionTableCell : TableCell<WorkbookStatus, WorkbookStatus>() {
     private fun createPopupMenu(workbookStatus: WorkbookStatus): ContextMenu {
         val openOption = MenuItem(messages["openBook"]).apply {
             graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
-            action {
-                FX.eventbus.fire(WorkbookOpenEvent(workbookStatus))
-            }
+            action { FX.eventbus.fire(WorkbookOpenEvent(workbookStatus)) }
         }
         val exportOption = MenuItem(messages["exportProject"]).apply {
             graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
