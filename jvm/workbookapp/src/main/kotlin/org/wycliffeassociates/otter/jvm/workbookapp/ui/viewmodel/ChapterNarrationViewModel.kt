@@ -27,6 +27,7 @@ import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
+import org.wycliffeassociates.otter.common.domain.content.CreateChunks
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.common.domain.narration.InsertTakeAudio
@@ -75,6 +76,8 @@ class ChapterNarrationViewModel : ViewModel() {
     lateinit var insertTakeAudio: InsertTakeAudio
     @Inject
     lateinit var concatenateAudio: ConcatenateAudio
+    @Inject
+    lateinit var createChunks: CreateChunks
 
     @Inject
     lateinit var audioConnectionFactory: AudioConnectionFactory
@@ -177,13 +180,18 @@ class ChapterNarrationViewModel : ViewModel() {
 
         workbookDataStore.activeChapterProperty.onChangeAndDoNowWithDisposer { chapter ->
             chapter?.let {
+                var totalChunks = chapter.chunkCount.blockingGet()
+                if (totalChunks == 0) {
+                    createChunksFromVerses()
+                }
+
                 loading = true
-                val totalChunks = chapter.chunkCount.blockingGet()
+                totalChunks = chapter.chunkCount.blockingGet()
 
                 setHasNextAndPreviousChapter()
 
                 allChunks.onChangedObservable().subscribe {
-                    if (totalChunks == it.size) {
+                    if (totalChunks > 0 && totalChunks == it.size) {
                         allChunksLoaded = true
                         loading = false
                     } else {
@@ -212,6 +220,13 @@ class ChapterNarrationViewModel : ViewModel() {
             .andThen(loadChunks(chapter))
             .subscribe()
             .also(disposables::add)
+    }
+
+    private fun createChunksFromVerses() {
+        val workbook = workbookDataStore.workbook
+        val chapter = workbookDataStore.chapter
+
+        createChunks.createChunksFromVerses(workbook, chapter, 1)
     }
 
     private fun clearChapterState() {
