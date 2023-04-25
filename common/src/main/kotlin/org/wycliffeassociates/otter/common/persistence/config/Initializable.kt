@@ -19,6 +19,9 @@
 package org.wycliffeassociates.otter.common.persistence.config
 
 import io.reactivex.Completable
+import io.reactivex.ObservableEmitter
+import io.reactivex.Observer
+import org.wycliffeassociates.otter.common.data.ProgressStatus
 
 /**
  * An initialization task that can be executed.
@@ -27,5 +30,5 @@ interface Initializable {
     /**
      * Executes the initializable task
      * */
-    fun exec(): Completable
+    fun exec(progressEmitter: ObservableEmitter<ProgressStatus>): Completable
 }

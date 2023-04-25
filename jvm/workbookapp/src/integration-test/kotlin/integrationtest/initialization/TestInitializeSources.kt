@@ -1,13 +1,18 @@
 package integrationtest.initialization
 
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.doAnswer
+import com.nhaarman.mockitokotlin2.mock
 import integrationtest.di.DaggerTestPersistenceComponent
 import io.reactivex.Completable
+import io.reactivex.ObservableEmitter
 import io.reactivex.observers.TestObserver
 import org.junit.Assert
 import org.junit.Test
 import org.wycliffeassociates.otter.assets.initialization.InitializeSources
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.data.ProgressStatus
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import java.io.File
@@ -46,9 +51,12 @@ class TestInitializeSources {
 
         val testSub = TestObserver<Completable>()
         val init = initSourcesProvider.get()
+        val mockProgressEmitter = mock<ObservableEmitter<ProgressStatus>>{
+            on { onNext(any()) } doAnswer { }
+        }
 
         init
-            .exec()
+            .exec(mockProgressEmitter)
             .subscribe(testSub)
 
         testSub.assertComplete()

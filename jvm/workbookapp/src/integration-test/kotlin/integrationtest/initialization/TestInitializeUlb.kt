@@ -19,8 +19,11 @@
 package integrationtest.initialization
 
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.doAnswer
+import com.nhaarman.mockitokotlin2.mock
 import integrationtest.di.DaggerTestPersistenceComponent
 import io.reactivex.Completable
+import io.reactivex.ObservableEmitter
 import io.reactivex.observers.TestObserver
 import org.junit.Assert
 import org.junit.Before
@@ -34,6 +37,7 @@ import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
 import org.wycliffeassociates.otter.common.domain.project.importer.RCImporterFactory
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.data.ProgressStatus
 import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import javax.inject.Inject
@@ -69,9 +73,12 @@ class TestInitializeUlb {
     @Test
     fun testImportEnUlb() {
         val testSub = TestObserver<Completable>()
+        val mockProgressEmitter = mock<ObservableEmitter<ProgressStatus>>{
+            on { onNext(any()) } doAnswer { }
+        }
 
         val init = initUlbProvider.get()
-        init.exec()
+        init.exec(mockProgressEmitter)
             .subscribe(testSub)
 
         testSub.assertComplete()
@@ -84,6 +91,9 @@ class TestInitializeUlb {
     fun `test en_ulb import skipped when already imported`() {
         val importer = Mockito.mock(ImportProjectUseCase::class.java)
         val importerSpy = Mockito.spy(importer)
+        val mockProgressEmitter = mock<ObservableEmitter<ProgressStatus>>{
+            on { onNext(any()) } doAnswer { }
+        }
 
         doReturn(true).`when`(importerSpy).isAlreadyImported(any())
 
@@ -94,7 +104,7 @@ class TestInitializeUlb {
         )
         val testSub = TestObserver<Completable>()
 
-        init.exec()
+        init.exec(mockProgressEmitter)
             .subscribe(testSub)
 
         testSub.assertComplete()

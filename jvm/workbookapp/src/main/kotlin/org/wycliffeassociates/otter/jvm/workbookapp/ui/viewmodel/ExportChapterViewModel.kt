@@ -83,14 +83,17 @@ class ExportChapterViewModel : ViewModel() {
 
     fun addContributor(name: String) {
         contributors.add(0, Contributor(name))
+        saveContributors()
     }
 
     fun editContributor(data: ContributorCellData) {
         // replace the object in list to trigger onChange
         contributors[data.index] = Contributor(data.name)
+        saveContributors()
     }
 
     fun removeContributor(index: Int) {
         contributors.removeAt(index)
+        saveContributors()
     }
 }

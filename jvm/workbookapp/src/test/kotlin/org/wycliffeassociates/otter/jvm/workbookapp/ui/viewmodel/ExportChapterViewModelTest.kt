@@ -18,8 +18,12 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
+import com.nhaarman.mockitokotlin2.doAnswer
+import com.nhaarman.mockitokotlin2.doNothing
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.spy
+import com.nhaarman.mockitokotlin2.whenever
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.BeforeClass
@@ -53,7 +57,9 @@ class ExportChapterViewModelTest {
             FxToolkit.setupApplication { testApp }
             FX.getComponents()[WorkbookPageViewModel::class] = mockWorkbookPageVM
 
-            vm = find()
+            val viewModel = find<ExportChapterViewModel>()
+            vm = spy(viewModel)
+            doNothing().`when`(vm).saveContributors()
         }
 
         @AfterClass
