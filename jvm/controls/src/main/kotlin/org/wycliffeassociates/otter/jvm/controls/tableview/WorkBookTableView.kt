@@ -18,7 +18,6 @@ class WorkBookTableView(
 ) : VBox() {
 
     init {
-        spacing = 10.0
         tableview(books) {
             addClass("wa-table-view")
             vgrow = Priority.ALWAYS
@@ -45,6 +44,7 @@ class WorkBookTableView(
                 isReorderable = false
             }
             column("", Boolean::class) {
+                addClass("table-column__status-icon-col")
                 setCellValueFactory { SimpleBooleanProperty(it.value.hasSourceAudio) }
                 cellFormat {
                     graphic = if (it) {
@@ -55,6 +55,7 @@ class WorkBookTableView(
                         null
                     }
                 }
+
                 maxWidth = 50.0
                 minWidth = 50.0
                 isReorderable = false

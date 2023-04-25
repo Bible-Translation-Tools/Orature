@@ -26,6 +26,7 @@ class BookTableDemoView : View() {
     init {
         tryImportStylesheet("/css/popup-menu.css")
         tryImportStylesheet("/css/filtered-search-bar.css")
+        tryImportStylesheet("/css/table-view.css")
 
         subscribeToWorkbookEvent()
     }
@@ -37,11 +38,11 @@ class BookTableDemoView : View() {
         }
         workspace.subscribe<WorkbookExportEvent> {
             val targetBook = it.data
-            println("export event")
+            println("export ${targetBook.title}")
         }
         workspace.subscribe<WorkbookDeleteEvent> {
             val targetBook = it.data
-            println("delete event")
+            println("delete ${targetBook.title}")
         }
     }
 
