@@ -10,6 +10,7 @@ import org.wycliffeassociates.otter.jvm.controls.event.WorkbookDeleteEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookExportEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookOpenEvent
 import tornadofx.*
+import tornadofx.FX.Companion.messages
 
 class WorkbookOptionTableCell : TableCell<WorkbookStatus, WorkbookStatus>() {
 
@@ -45,17 +46,17 @@ class WorkbookOptionTableCell : TableCell<WorkbookStatus, WorkbookStatus>() {
     }
 
     private fun createPopupMenu(workbookStatus: WorkbookStatus): ContextMenu {
-        val openOption = MenuItem("Open Book").apply {
+        val openOption = MenuItem(messages["openBook"]).apply {
             graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
             action {
                 FX.eventbus.fire(WorkbookOpenEvent(workbookStatus))
             }
         }
-        val exportOption = MenuItem("Export Book...").apply {
+        val exportOption = MenuItem(messages["exportProject"]).apply {
             graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
             action { FX.eventbus.fire(WorkbookExportEvent(workbookStatus)) }
         }
-        val deleteOption = MenuItem("Delete Book").apply {
+        val deleteOption = MenuItem(messages["deleteBook"]).apply {
             addClass("danger")
             graphic = FontIcon(MaterialDesign.MDI_DELETE)
             action { FX.eventbus.fire(WorkbookDeleteEvent(workbookStatus)) }

@@ -10,6 +10,7 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookStatus
 import tornadofx.*
+import tornadofx.FX.Companion.messages
 
 class BookTableView(
     books: ObservableList<WorkbookStatus>
@@ -22,7 +23,7 @@ class BookTableView(
             vgrow = Priority.ALWAYS
             columnResizePolicy = TableView.CONSTRAINED_RESIZE_POLICY
 
-            column("Book", String::class).apply {
+            column(messages["book"], String::class).apply {
                 addClass("table-view__column-header-row")
                 setCellValueFactory { it.value.title.toProperty() }
                 cellFormat {
@@ -32,7 +33,7 @@ class BookTableView(
                 }
                 isReorderable = false
             }
-            column("Progress", Number::class) {
+            column(messages["progress"], Number::class) {
                 setCellValueFactory { it.value.progress.toProperty() }
                 cellFormat {
                     val percent = item.toDouble()
