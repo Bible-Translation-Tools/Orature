@@ -1,13 +1,13 @@
 package org.wycliffeassociates.otter.jvm.controls.tableview
 
 import javafx.scene.control.TableRow
-import org.wycliffeassociates.otter.common.data.workbook.WorkbookStatus
+import org.wycliffeassociates.otter.common.data.workbook.WorkbookInfo
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookOpenEvent
 import tornadofx.FX
 
-class WorkbookTableRow : TableRow<WorkbookStatus>() {
+class WorkbookTableRow : TableRow<WorkbookInfo>() {
 
-    override fun updateItem(item: WorkbookStatus?, empty: Boolean) {
+    override fun updateItem(item: WorkbookInfo?, empty: Boolean) {
         super.updateItem(item, empty)
 
         if (item == null || isEmpty) {

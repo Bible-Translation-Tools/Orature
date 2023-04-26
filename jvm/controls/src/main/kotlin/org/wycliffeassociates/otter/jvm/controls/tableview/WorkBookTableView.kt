@@ -8,13 +8,13 @@ import javafx.scene.control.TableView
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.common.data.workbook.WorkbookStatus
+import org.wycliffeassociates.otter.common.data.workbook.WorkbookInfo
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class WorkBookTableView(
-    books: ObservableList<WorkbookStatus>
-) : TableView<WorkbookStatus>(books) {
+    books: ObservableList<WorkbookInfo>
+) : TableView<WorkbookInfo>(books) {
 
     init {
         addClass("wa-table-view")
@@ -60,7 +60,7 @@ class WorkBookTableView(
             isResizable = false
             isSortable = false
         }
-        column("", WorkbookStatus::class) {
+        column("", WorkbookInfo::class) {
             setCellValueFactory { SimpleObjectProperty(it.value) }
             setCellFactory {
                 WorkbookOptionTableCell()
@@ -83,6 +83,6 @@ class WorkBookTableView(
  * Constructs a workbook table and attach it to the parent.
  */
 fun EventTarget.workbookTableView(
-    values: ObservableList<WorkbookStatus>,
+    values: ObservableList<WorkbookInfo>,
     op: WorkBookTableView.() -> Unit = {}
 ) = WorkBookTableView(values).attachTo(this, op)

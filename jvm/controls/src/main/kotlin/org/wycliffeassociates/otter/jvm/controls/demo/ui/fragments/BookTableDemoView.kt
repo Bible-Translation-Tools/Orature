@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.jvm.controls.demo.ui.fragments
 
-import org.wycliffeassociates.otter.common.data.workbook.WorkbookStatus
+import org.wycliffeassociates.otter.common.data.workbook.WorkbookInfo
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookDeleteEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookExportEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookOpenEvent
@@ -8,19 +8,20 @@ import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.tableview.workbookTableView
 import tornadofx.View
 import tornadofx.observableListOf
+import java.time.LocalDateTime
 
 class BookTableDemoView : View() {
-    val workbookList = observableListOf<WorkbookStatus>(
-        WorkbookStatus(0, "John", "", 0.3, null, true),
-        WorkbookStatus(0, "Acts", "", 0.0, null, true),
-        WorkbookStatus(0, "Genesis", "", 0.1, null, true),
-        WorkbookStatus(0, "Leviticus", "", 0.5, null, false),
-        WorkbookStatus(0, "Psalms", "", 0.8, null, false),
-        WorkbookStatus(0, "Revelation", "", 1.0, null, false),
-        WorkbookStatus(0, "Mark", "", 0.5, null, false),
-        WorkbookStatus(0, "Malachi", "", 1.0, null, false),
-        WorkbookStatus(0, "Proverbs", "", 0.2, null, true),
-        WorkbookStatus(0, "Colossians", "", 1.0, null, true),
+    val workbookList = observableListOf<WorkbookInfo>(
+        WorkbookInfo(0, "John", "", 0.3, LocalDateTime.now(), true),
+        WorkbookInfo(0, "Acts", "", 0.0, LocalDateTime.now(), true),
+        WorkbookInfo(0, "Genesis", "", 0.1, LocalDateTime.now(), true),
+        WorkbookInfo(0, "Leviticus", "", 0.5, LocalDateTime.now(), false),
+        WorkbookInfo(0, "Psalms", "", 0.8, LocalDateTime.now(), false),
+        WorkbookInfo(0, "Revelation", "", 1.0, LocalDateTime.now(), false),
+        WorkbookInfo(0, "Mark", "", 0.5, LocalDateTime.now(), false),
+        WorkbookInfo(0, "Malachi", "", 1.0, LocalDateTime.now(), false),
+        WorkbookInfo(0, "Proverbs", "", 0.2, LocalDateTime.now(), true),
+        WorkbookInfo(0, "Colossians", "", 1.0, LocalDateTime.now(), true),
     )
 
     init {

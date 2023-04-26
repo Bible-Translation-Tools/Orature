@@ -3,11 +3,11 @@ package org.wycliffeassociates.otter.jvm.controls.tableview
 import javafx.scene.control.TableCell
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.common.data.workbook.WorkbookStatus
+import org.wycliffeassociates.otter.common.data.workbook.WorkbookInfo
 import org.wycliffeassociates.otter.jvm.controls.popup.WorkbookOptionMenu
 import tornadofx.*
 
-class WorkbookOptionTableCell : TableCell<WorkbookStatus, WorkbookStatus>() {
+class WorkbookOptionTableCell : TableCell<WorkbookInfo, WorkbookInfo>() {
 
     private val popupMenu = WorkbookOptionMenu()
 
@@ -18,15 +18,15 @@ class WorkbookOptionTableCell : TableCell<WorkbookStatus, WorkbookStatus>() {
         }
     }
 
-    override fun updateItem(item: WorkbookStatus?, empty: Boolean) {
+    override fun updateItem(item: WorkbookInfo?, empty: Boolean) {
         super.updateItem(item, empty)
         if (item == null || empty) {
-            popupMenu.workbookStatusProperty.set(null)
+            popupMenu.workbookInfoProperty.set(null)
             graphic = null
             return
         }
 
-        popupMenu.workbookStatusProperty.set(item)
+        popupMenu.workbookInfoProperty.set(item)
 
         graphic = actionButton.apply {
             action {
