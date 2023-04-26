@@ -26,11 +26,12 @@
 }
 
 .filtered-search-bar__input {
+    -fx-pref-height: 36px;
     -fx-pref-width: 240px;
     -fx-background-radius: 20;
     -fx-border-radius: 16;
     -fx-padding: 3 0 3 14;
-    -fx-font-size: 1.5em;
+    -fx-font-size: 1.4em;
 }
 
 .filtered-search-bar__input:focused {

@@ -27,6 +27,7 @@ import org.wycliffeassociates.otter.jvm.controls.demo.ui.fragments.BookTableDemo
 import org.wycliffeassociates.otter.jvm.controls.demo.ui.viewmodels.DemoViewModel
 import org.wycliffeassociates.otter.jvm.controls.demo.ui.fragments.ButtonFragment
 import org.wycliffeassociates.otter.jvm.controls.demo.ui.fragments.ComboBoxFragment
+import org.wycliffeassociates.otter.jvm.controls.demo.ui.fragments.HeaderSearchFragment
 import org.wycliffeassociates.otter.jvm.controls.demo.ui.fragments.NarrationFragment
 import org.wycliffeassociates.otter.jvm.utils.overrideDefaultKeyEventHandler
 import tornadofx.*
@@ -93,6 +94,15 @@ class ControlMenu : View() {
 
                 action {
                     viewModel.showContent<BookTableDemoView>()
+                }
+            }
+
+            button("Header search bar") {
+                addClass("btn", "btn--primary")
+                fitToParentWidth()
+
+                action {
+                    viewModel.showContent<HeaderSearchFragment>()
                 }
             }
         }
