@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.controls.popup
+package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.popup
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.ContextMenu

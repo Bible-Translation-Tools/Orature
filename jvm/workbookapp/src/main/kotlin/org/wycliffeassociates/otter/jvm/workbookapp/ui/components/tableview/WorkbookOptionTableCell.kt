@@ -4,7 +4,7 @@ import javafx.scene.control.TableCell
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookInfo
-import org.wycliffeassociates.otter.jvm.controls.popup.WorkbookOptionMenu
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.popup.WorkbookOptionMenu
 import tornadofx.*
 
 class WorkbookOptionTableCell : TableCell<WorkbookInfo, WorkbookInfo>() {
