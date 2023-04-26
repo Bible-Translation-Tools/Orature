@@ -1,0 +1,38 @@
+package org.wycliffeassociates.otter.jvm.workbookapp.ui.dev
+
+import javafx.stage.Stage
+import org.wycliffeassociates.otter.common.data.ColorTheme
+import org.wycliffeassociates.otter.jvm.controls.demo.ui.screens.RootView
+import tornadofx.*
+
+class WorkbookDemoApp : App(RootView::class) {
+    override fun start(stage: Stage) {
+        super.start(stage)
+        stage.isMaximized = true
+    }
+
+    override fun onBeforeShow(view: UIComponent) {
+        workspace.dock<WorkbookTableDemoView>()
+        workspace.root.apply {
+            contextmenu {
+                item("Change Theme") {
+                    action { toggleTheme() }
+                }
+            }
+        }
+    }
+
+    private fun toggleTheme() {
+        if (workspace.root.hasClass(ColorTheme.LIGHT.styleClass)) {
+            workspace.root.removeClass(ColorTheme.LIGHT.styleClass)
+            workspace.root.addClass(ColorTheme.DARK.styleClass)
+        } else {
+            workspace.root.removeClass(ColorTheme.DARK.styleClass)
+            workspace.root.addClass(ColorTheme.LIGHT.styleClass)
+        }
+    }
+}
+
+fun main(args: Array<String>) {
+    launch<WorkbookDemoApp>(args)
+}

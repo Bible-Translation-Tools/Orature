@@ -46,5 +46,8 @@ class WorkbookTableDemoView : View() {
         }
     }
 
-    override val root = workbookTableView(workbookList)
+    override val root = vbox {
+        paddingAll = 20.0
+        workbookTableView(workbookList)
+    }
 }
