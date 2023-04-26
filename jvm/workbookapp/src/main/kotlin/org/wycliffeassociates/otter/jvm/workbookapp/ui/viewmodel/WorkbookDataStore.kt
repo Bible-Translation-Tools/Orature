@@ -34,7 +34,6 @@ import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.TargetAudio
-import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -56,9 +55,6 @@ class WorkbookDataStore : Component(), ScopedInstance {
 
     @Inject
     lateinit var appPreferenceRepo: IAppPreferencesRepository
-
-    @Inject
-    lateinit var localeLanguage: LocaleLanguage
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
