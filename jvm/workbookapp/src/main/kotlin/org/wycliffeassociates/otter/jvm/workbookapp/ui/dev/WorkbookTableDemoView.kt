@@ -1,16 +1,15 @@
-package org.wycliffeassociates.otter.jvm.controls.demo.ui.fragments
+package org.wycliffeassociates.otter.jvm.workbookapp.ui.dev
 
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookInfo
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookDeleteEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookExportEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookOpenEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
-import org.wycliffeassociates.otter.jvm.controls.tableview.workbookTableView
-import tornadofx.View
-import tornadofx.observableListOf
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview.workbookTableView
 import java.time.LocalDateTime
+import tornadofx.*
 
-class BookTableDemoView : View() {
+class WorkbookTableDemoView : View() {
     val workbookList = observableListOf<WorkbookInfo>(
         WorkbookInfo(0, "John", "", 0.3, LocalDateTime.now(), true),
         WorkbookInfo(0, "Acts", "", 0.0, LocalDateTime.now(), true),

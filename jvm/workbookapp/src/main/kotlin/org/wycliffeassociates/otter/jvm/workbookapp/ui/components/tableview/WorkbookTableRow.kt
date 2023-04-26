@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.controls.tableview
+package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview
 
 import javafx.scene.control.TableRow
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookInfo

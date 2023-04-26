@@ -23,7 +23,6 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.combobox.ComboboxItem
 import org.wycliffeassociates.otter.jvm.controls.combobox.IconComboBoxCell
-import org.wycliffeassociates.otter.jvm.controls.demo.ui.fragments.BookTableDemoView
 import org.wycliffeassociates.otter.jvm.controls.demo.ui.viewmodels.DemoViewModel
 import org.wycliffeassociates.otter.jvm.controls.demo.ui.fragments.ButtonFragment
 import org.wycliffeassociates.otter.jvm.controls.demo.ui.fragments.ComboBoxFragment
@@ -84,15 +83,6 @@ class ControlMenu : View() {
 
                 action {
                     viewModel.showContent<NarrationFragment>()
-                }
-            }
-
-            button("Table View") {
-                addClass("btn", "btn--primary")
-                fitToParentWidth()
-
-                action {
-                    viewModel.showContent<BookTableDemoView>()
                 }
             }
         }
