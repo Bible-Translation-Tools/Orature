@@ -25,9 +25,26 @@
     -fx-spacing: 10px;
 }
 
+.filtered-search-bar__input {
+    -fx-pref-width: 240px;
+    -fx-background-radius: 20;
+    -fx-border-radius: 16;
+    -fx-padding: 3 0 3 14;
+    -fx-font-size: 1.5em;
+}
+
+.filtered-search-bar__input:focused {
+    -fx-effect: none;
+}
+
 .filtered-search-bar__input .left-pane,
 .filtered-search-bar__input .right-pane {
     -fx-padding: 0 10px;
+}
+
+.filtered-search-bar__input .right-pane {
+    -fx-border-color: -wa-border-light;
+    -fx-border-width: 0 0 0 1px;
 }
 
 .filtered-search-bar__input .ikonli-font-icon {

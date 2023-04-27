@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import javafx.geometry.Pos
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.ThemeColorEvent
@@ -35,9 +36,24 @@ class SplashScreen : View() {
     override val root = stackpane {
         addClass("splash__root")
         add(resources.imageview("/orature_splash.png"))
-        progressbar(viewModel.progressProperty) {
-            addClass("splash__progress")
-            fitToParentWidth()
+        vbox {
+            addClass("splash__status")
+            alignment = Pos.BOTTOM_CENTER
+
+            progressbar(viewModel.progressProperty) {
+                addClass("splash__progress")
+                fitToParentWidth()
+            }
+            vbox {
+                addClass("splash__text-block")
+                alignment = Pos.CENTER
+                label(viewModel.progressTitleProperty) {
+                    addClass("splash__status-title")
+                }
+                label(viewModel.progressBodyProperty) {
+                    addClass("splash__status-text")
+                }
+            }
         }
     }
 
@@ -48,7 +64,6 @@ class SplashScreen : View() {
         viewModel
             .initApp()
             .subscribe(
-                {},
                 { finish() },
                 { finish() }
             )

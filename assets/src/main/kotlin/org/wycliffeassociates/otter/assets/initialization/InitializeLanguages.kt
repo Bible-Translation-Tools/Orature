@@ -19,7 +19,9 @@
 package org.wycliffeassociates.otter.assets.initialization
 
 import io.reactivex.Completable
+import io.reactivex.ObservableEmitter
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.ProgressStatus
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.persistence.ILanguageDataSource
 import org.wycliffeassociates.otter.common.persistence.config.Installable
@@ -40,7 +42,7 @@ class InitializeLanguages @Inject constructor(
 
     private val log = LoggerFactory.getLogger(InitializeLanguages::class.java)
 
-    override fun exec(): Completable {
+    override fun exec(progressEmitter: ObservableEmitter<ProgressStatus>): Completable {
         return Completable
             .fromCallable {
                 val installedVersion = installedEntityRepo.getInstalledVersion(this)

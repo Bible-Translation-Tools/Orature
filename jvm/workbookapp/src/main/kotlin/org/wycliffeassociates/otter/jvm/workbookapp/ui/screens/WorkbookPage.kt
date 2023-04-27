@@ -466,21 +466,6 @@ class WorkbookPage : View() {
                 )
                 contributorsListenerDisposer?.let(listeners::add)
 
-                button(messages["saveContributors"]) {
-                    addClass("btn", "btn--primary", "btn--borderless", "contributor__save-btn")
-                    fitToParentWidth()
-                    tooltip(this.text)
-                    isDisable = true
-
-                    viewModel.contributors.onChangeWithDisposer {
-                        isDisable = false
-                    }.let(listeners::add)
-
-                    setOnAction {
-                        viewModel.saveContributorInfo()
-                        isDisable = true
-                    }
-                }
                 vbox {
                     label(messages["licenseDescription"]) {
                         addClass("contributor__section-text")

@@ -19,14 +19,13 @@
 package org.wycliffeassociates.otter.assets.initialization
 
 import io.reactivex.Completable
+import io.reactivex.ObservableEmitter
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.domain.plugins.IAudioPluginRegistrar
-import org.wycliffeassociates.otter.common.domain.plugins.ImportAudioPlugins
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.config.Initializable
-import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
+import org.wycliffeassociates.otter.common.data.ProgressStatus
 import org.wycliffeassociates.otter.common.persistence.repositories.IVersificationRepository
 import java.io.File
 import javax.inject.Inject
@@ -42,8 +41,9 @@ class InitializeVersification @Inject constructor(
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun exec(): Completable {
+    override fun exec(progressEmitter: ObservableEmitter<ProgressStatus>): Completable {
         return Single.fromCallable {
+            progressEmitter.onNext(ProgressStatus(titleKey = "initializingVersification"))
             copyUlbVersification()
 
             directoryProvider.versificationDirectory.listFiles()?.forEach { file ->

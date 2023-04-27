@@ -312,6 +312,30 @@ class ContentDao(
             }
     }
 
+    /**
+     * Updates all content in the list.
+     * Updates will not update the ID or collection foreign key.
+     */
+    fun updateAll(entities: List<ContentEntity>, dsl: DSLContext = instanceDsl) {
+        dsl.transaction { config ->
+            entities.forEach { entity ->
+                config.dsl().update(CONTENT_ENTITY)
+                    .set(CONTENT_ENTITY.SORT, entity.sort)
+                    .set(CONTENT_ENTITY.LABEL, entity.labelKey)
+                    .set(CONTENT_ENTITY.START, entity.start)
+                    .set(CONTENT_ENTITY.V_END, entity.end)
+                    .set(CONTENT_ENTITY.SELECTED_TAKE_FK, entity.selectedTakeFk)
+                    .set(CONTENT_ENTITY.TEXT, entity.text)
+                    .set(CONTENT_ENTITY.FORMAT, entity.format)
+                    .set(CONTENT_ENTITY.TYPE_FK, entity.type_fk)
+                    .set(CONTENT_ENTITY.DRAFT_NUMBER, entity.draftNumber)
+                    .set(CONTENT_ENTITY.BRIDGED, if (entity.bridged) 1 else 0)
+                    .where(CONTENT_ENTITY.ID.eq(entity.id))
+                    .execute()
+            }
+        }
+    }
+
     fun update(entity: ContentEntity, dsl: DSLContext = instanceDsl) {
         dsl
             .update(CONTENT_ENTITY)

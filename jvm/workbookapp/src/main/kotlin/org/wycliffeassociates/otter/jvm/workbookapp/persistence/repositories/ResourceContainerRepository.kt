@@ -196,6 +196,7 @@ class ResourceContainerRepository @Inject constructor(
         databaseMap: Map<Collection, List<Content>>,
         parsedTextMap: Map<Collection, List<Content>>
     ) {
+        val toUpdate = mutableListOf<Content>()
         parsedTextMap.keys.forEach { collection ->
             val textMapContent = parsedTextMap[collection]
             val matchingCollection = databaseMap.keys.find { it.slug == collection.slug } ?: return@forEach
@@ -205,16 +206,18 @@ class ResourceContainerRepository @Inject constructor(
                 val match = databaseContent.find { it.start == content.start && it.type == content.type }
                 match?.let {
                     match.text = content.text ?: ""
-                    contentRepository.update(match).blockingGet()
+                    toUpdate.add(match)
                 }
             }
         }
+        contentRepository.updateAll(toUpdate).blockingGet()
     }
 
     private fun updateBridges(
         databaseMap: Map<Collection, List<Content>>,
         parsedTextMap: Map<Collection, List<Content>>
     ) {
+        val toUpdate = mutableListOf<Content>()
         parsedTextMap.keys.forEach { collection ->
             val textMapContent = parsedTextMap[collection]
             val matchingCollection = databaseMap.keys.find { it.slug == collection.slug } ?: return@forEach
@@ -231,13 +234,14 @@ class ResourceContainerRepository @Inject constructor(
                             val found = databaseContent.find { it.start == i && it.type != ContentType.META }
                             if (found != null) {
                                 found.bridged = true
-                                contentRepository.update(found).blockingGet()
+                                toUpdate.add(found)
                             }
                         }
                     }
                 }
             }
         }
+        contentRepository.updateAll(toUpdate).blockingGet()
     }
 
     private fun getProjectAsOtterTree(book: Collection, rc: ResourceMetadata): OtterTree<CollectionOrContent> {

@@ -19,7 +19,9 @@
 package org.wycliffeassociates.otter.assets.initialization
 
 import io.reactivex.Completable
+import io.reactivex.ObservableEmitter
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.ProgressStatus
 import org.wycliffeassociates.otter.common.domain.plugins.IAudioPluginRegistrar
 import org.wycliffeassociates.otter.common.domain.plugins.ImportAudioPlugins
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -36,7 +38,7 @@ class InitializePlugins @Inject constructor(
 
     private val log = LoggerFactory.getLogger(InitializePlugins::class.java)
 
-    override fun exec(): Completable {
+    override fun exec(progressEmitter: ObservableEmitter<ProgressStatus>): Completable {
         copyOcenaudioPlugin()
 
         // Always import new plugins

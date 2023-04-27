@@ -285,15 +285,18 @@ class WorkbookPageViewModel : ViewModel() {
 
     fun addContributor(name: String) {
         contributors.add(0, Contributor(name))
+        saveContributorInfo()
     }
 
     fun editContributor(data: ContributorCellData) {
         // replace the object in list to trigger onChange
         contributors[data.index] = Contributor(data.name)
+        saveContributorInfo()
     }
 
     fun removeContributor(index: Int) {
         contributors.removeAt(index)
+        saveContributorInfo()
     }
 
     fun saveContributorInfo() {

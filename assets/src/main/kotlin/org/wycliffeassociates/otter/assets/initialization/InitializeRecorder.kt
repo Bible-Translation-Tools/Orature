@@ -19,7 +19,9 @@
 package org.wycliffeassociates.otter.assets.initialization
 
 import io.reactivex.Completable
+import io.reactivex.ObservableEmitter
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.ProgressStatus
 import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
 import org.wycliffeassociates.otter.common.persistence.IAppPreferences
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -43,7 +45,7 @@ class InitializeRecorder @Inject constructor(
 
     private val log = LoggerFactory.getLogger(InitializeRecorder::class.java)
 
-    override fun exec(): Completable {
+    override fun exec(progressEmitter: ObservableEmitter<ProgressStatus>): Completable {
         return Completable
             .fromCallable {
                 var installedVersion = installedEntityRepo.getInstalledVersion(this) ?: 0

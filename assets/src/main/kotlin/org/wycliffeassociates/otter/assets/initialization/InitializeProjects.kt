@@ -20,13 +20,16 @@
 package org.wycliffeassociates.otter.assets.initialization
 
 import io.reactivex.Completable
+import io.reactivex.ObservableEmitter
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
 import org.wycliffeassociates.otter.common.domain.project.importer.RCImporterFactory
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.config.Installable
+import org.wycliffeassociates.otter.common.data.ProgressStatus
 import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
@@ -48,12 +51,14 @@ class InitializeProjects @Inject constructor(
     override val version = 1
 
     private val log = LoggerFactory.getLogger(InitializeProjects::class.java)
+    private lateinit var callback: ProjectImporterCallback
 
-    override fun exec(): Completable {
+    override fun exec(progressEmitter: ObservableEmitter<ProgressStatus>): Completable {
         return Completable.fromCallable {
             var installedVersion = installedEntityRepo.getInstalledVersion(this)
             if (installedVersion != version) {
                 log.info("Initializing $name version: $version...")
+                progressEmitter.onNext(ProgressStatus(titleKey = "initializingProjects"))
 
                 migrate()
 
@@ -65,6 +70,7 @@ class InitializeProjects @Inject constructor(
 
             if (fetchProjects().isEmpty()) {
                 log.info("Importing projects...")
+                callback = setupImportCallback(progressEmitter)
 
                 val dir = directoryProvider.getUserDataDirectory("/")
                 importProjects(dir)
@@ -180,7 +186,7 @@ class InitializeProjects @Inject constructor(
 
     private fun importProject(project: File) {
         rcImporterFactory.makeImporter()
-            .import(project).toObservable()
+            .import(project, callback).toObservable()
             .doOnError { e ->
                 log.error("Error importing ${project.name}.", e)
             }
