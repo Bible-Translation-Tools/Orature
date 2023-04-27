@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.controls.bar
 
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.ObjectBinding
+import javafx.beans.property.SimpleStringProperty
 import javafx.event.EventTarget
 import javafx.scene.Node
 import javafx.scene.control.Button
@@ -9,9 +10,10 @@ import org.controlsfx.control.textfield.CustomTextField
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import tornadofx.*
-import tornadofx.FX.Companion.messages
 
 class SearchBar : CustomTextField() {
+
+    val placeholderTextProperty = SimpleStringProperty(null)
 
     private val searchIcon = FontIcon(MaterialDesign.MDI_MAGNIFY)
     private val clearBtn = Button().apply {
@@ -21,7 +23,7 @@ class SearchBar : CustomTextField() {
 
     init {
         addClass("txt-input", "filtered-search-bar__input")
-        promptText = messages["searchPlaceholder"]
+        promptTextProperty().bind(placeholderTextProperty)
 
         clearBtn.setOnAction {
             text = ""
