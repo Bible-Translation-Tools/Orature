@@ -87,7 +87,7 @@ class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(i
     }
 }
 
-fun <T> EventTarget.narrationtextlistview(
+fun <T> EventTarget.narrationTextListview(
     values: ObservableList<T>?,
     op: NarrationTextListView<T>.() -> Unit = {}
 ) = NarrationTextListView<T>().attachTo(this, op) {
@@ -95,7 +95,7 @@ fun <T> EventTarget.narrationtextlistview(
         else it.items = values
     }
 
-fun <T> EventTarget.narrationtextlistview(
+fun <T> EventTarget.narrationTextListview(
     values: ObservableValue<ObservableList<T>>?,
     op: NarrationTextListView<T>.() -> Unit = {}
 ) = NarrationTextListView<T>().attachTo(this, op) {

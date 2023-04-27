@@ -15,9 +15,7 @@ import org.wycliffeassociates.otter.jvm.controls.chapterselector.ChapterSelector
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextListView
-import org.wycliffeassociates.otter.jvm.controls.narration.floatingnarrationcard
 import org.wycliffeassociates.otter.jvm.controls.narration.narrationrecordlistview
-import org.wycliffeassociates.otter.jvm.controls.narration.narrationtextlistview
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
@@ -161,38 +159,39 @@ class ChapterNarrationPage : View() {
             stackpane {
                 addClass("narration__verses")
 
-                narrationtextlistview(viewModel.allSortedChunks) {
-                    addClass("narration__list")
-
-                    textListView = this
-
-                    viewModel.onCurrentVerseActionProperty.bind(onSelectedVerseActionProperty)
-                    viewModel.floatingCardVisibleProperty.bind(cardIsOutOfViewProperty)
-
-                    initialSelectedItemProperty.bind(viewModel.initialSelectedItemProperty)
-                    viewModel.currentVerseLabelProperty.bind(selectionModel.selectedItemProperty().stringBinding {
-                        it?.title
-                    })
-
-                    viewModel.onScrollToChunk = {
-                        selectionModel.select(it)
-                        scrollTo(it)
-                    }
-
-                    setCellFactory {
-                        NarrationTextCell(messages["nextVerse"])
-                    }
-                }
-
-                floatingnarrationcard {
-                    floatingLabelProperty.bind(viewModel.currentVerseLabelProperty)
-                    floatingCardVisibleProperty.bind(viewModel.floatingCardVisibleProperty)
-                    onFloatingChunkActionProperty.bind(viewModel.onCurrentVerseActionProperty)
-
-                    currentChunkTextProperty.set(messages["currentVerseTitle"])
-                    currentVerseTextProperty.set(messages["verse"])
-                    resumeTextProperty.set(messages["resume"])
-                }
+//                narrationtextlistview(viewModel.allSortedChunks) {
+//                    addClass("narration__list")
+//
+//                    textListView = this
+//
+//                    viewModel.onCurrentVerseActionProperty.bind(onSelectedVerseActionProperty)
+//                    viewModel.floatingCardVisibleProperty.bind(cardIsOutOfViewProperty)
+//
+//                    initialSelectedItemProperty.bind(viewModel.initialSelectedItemProperty)
+//                    viewModel.currentVerseLabelProperty.bind(selectionModel.selectedItemProperty().stringBinding {
+//                        it?.title
+//                    })
+//
+//                    viewModel.onScrollToChunk = {
+//                        selectionModel.select(it)
+//                        scrollTo(it)
+//                    }
+//
+//                    setCellFactory {
+//                        NarrationTextCell(messages["nextVerse"])
+//                    }
+//                }
+//
+//                floatingnarrationcard {
+//                    floatingLabelProperty.bind(viewModel.currentVerseLabelProperty)
+//                    floatingCardVisibleProperty.bind(viewModel.floatingCardVisibleProperty)
+//                    onFloatingChunkActionProperty.bind(viewModel.onCurrentVerseActionProperty)
+//
+//                    currentChunkTextProperty.set(messages["currentVerseTitle"])
+//                    currentVerseTextProperty.set(messages["verse"])
+//                    resumeTextProperty.set(messages["resume"])
+//                }
+//            }
             }
         }
     }

@@ -33,13 +33,9 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import tornadofx.*
 import java.text.MessageFormat
 
-class FloatingNarrationCard : VBox() {
-    val floatingLabelProperty = SimpleStringProperty()
-    val floatingCardVisibleProperty = SimpleBooleanProperty()
-    val onFloatingChunkActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
-
-    val currentChunkTextProperty = SimpleStringProperty()
-    val currentVerseTextProperty = SimpleStringProperty()
+class StickyVerse : VBox() {
+    val verseLabelProperty = SimpleStringProperty()
+    val onResumeVerseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val resumeTextProperty = SimpleStringProperty()
 
     init {
@@ -49,7 +45,7 @@ class FloatingNarrationCard : VBox() {
             addClass("narration__selected-verse-controls")
 
             label {
-                textProperty().bind(currentChunkTextBinding())
+                textProperty().bind(verseLabelProperty)
             }
             region {
                 hgrow = Priority.ALWAYS
@@ -57,38 +53,18 @@ class FloatingNarrationCard : VBox() {
             button(resumeTextProperty) {
                 addClass("btn", "btn--primary")
                 graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
-                onActionProperty().bind(onFloatingChunkActionProperty)
+                onActionProperty().bind(onResumeVerseActionProperty)
             }
         }
 
-        visibleProperty().bind(floatingCardVisibleProperty)
         managedProperty().bind(visibleProperty())
     }
 
-    private fun currentChunkTextBinding(): StringBinding {
-        return Bindings.createStringBinding(
-            {
-                val title = currentChunkTextProperty.value
-                val verseTitle = currentVerseTextProperty.value
-                val floatingVerseLabel = floatingLabelProperty.value
-
-                if (title != null && verseTitle != null && floatingVerseLabel != null) {
-                    MessageFormat.format(
-                        title,
-                        verseTitle,
-                        floatingVerseLabel
-                    )
-                } else {
-                    ""
-                }
-            },
-            floatingLabelProperty,
-            currentChunkTextProperty,
-            currentVerseTextProperty
-        )
+    fun onResumeVerse(op: () -> Unit) {
+        onResumeVerseActionProperty.set(EventHandler { op() })
     }
 }
 
-fun EventTarget.floatingnarrationcard(op: FloatingNarrationCard.() -> Unit = {}) =
-    FloatingNarrationCard().attachTo(this, op) {
+fun EventTarget.stickyVerse(op: StickyVerse.() -> Unit = {}) =
+    StickyVerse().attachTo(this, op) {
     }

@@ -18,22 +18,25 @@ class NarrationHeader() : View() {
             narrationTitle(viewModel.titleProperty)
             hgrow = Priority.SOMETIMES
         }
-        narrationMenu {
-            hasUndoProperty.bind(viewModel.hasUndoProperty)
-            hasRedoProperty.bind(viewModel.hasRedoProperty)
-            hasChapterFileProperty.bind(viewModel.hasChapterFileProperty)
-        }
-        chapterSelector {
-            chapterTitleProperty.bind(viewModel.chapterTitleProperty)
-
-            prevDisabledProperty.bind(viewModel.hasPreviousChapter.not())
-            nextDisabledProperty.bind(viewModel.hasNextChapter.not())
-
-            setOnPreviousChapter {
-                viewModel.selectPreviousChapter()
+        hbox {
+            addClass("narration__header-controls")
+            narrationMenu {
+                hasUndoProperty.bind(viewModel.hasUndoProperty)
+                hasRedoProperty.bind(viewModel.hasRedoProperty)
+                hasChapterFileProperty.bind(viewModel.hasChapterFileProperty)
             }
-            setOnNextChapter {
-                viewModel.selectNextChapter()
+            chapterSelector {
+                chapterTitleProperty.bind(viewModel.chapterTitleProperty)
+
+                prevDisabledProperty.bind(viewModel.hasPreviousChapter.not())
+                nextDisabledProperty.bind(viewModel.hasNextChapter.not())
+
+                setOnPreviousChapter {
+                    viewModel.selectPreviousChapter()
+                }
+                setOnNextChapter {
+                    viewModel.selectNextChapter()
+                }
             }
         }
     }

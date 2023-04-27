@@ -34,9 +34,9 @@ import org.wycliffeassociates.otter.jvm.controls.demo.ui.components.NarrationRec
 import org.wycliffeassociates.otter.jvm.controls.demo.ui.components.NarrationTextCell
 import org.wycliffeassociates.otter.jvm.controls.demo.ui.models.ChunkData
 import org.wycliffeassociates.otter.jvm.controls.demo.ui.viewmodels.DemoViewModel
-import org.wycliffeassociates.otter.jvm.controls.narration.floatingnarrationcard
+import org.wycliffeassociates.otter.jvm.controls.narration.stickyVerse
 import org.wycliffeassociates.otter.jvm.controls.narration.narrationrecordlistview
-import org.wycliffeassociates.otter.jvm.controls.narration.narrationtextlistview
+import org.wycliffeassociates.otter.jvm.controls.narration.narrationTextListview
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.*
 import java.text.MessageFormat
@@ -254,7 +254,7 @@ class NarrationFragment : Fragment() {
             stackpane {
                 addClass("narration__verses")
 
-                narrationtextlistview(chunkDataList) {
+                narrationTextListview(chunkDataList) {
                     addClass("narration__list")
 
                     initialSelectedItemProperty.set(chunkDataList[0])
@@ -274,15 +274,15 @@ class NarrationFragment : Fragment() {
                     }
                 }
 
-                floatingnarrationcard {
-                    floatingLabelProperty.bind(viewModel.currentVerseLabelProperty)
-                    floatingCardVisibleProperty.bind(viewModel.floatingCardVisibleProperty)
-                    onFloatingChunkActionProperty.bind(viewModel.onCurrentVerseActionProperty)
-
-                    currentChunkTextProperty.set("Current: {0} {1}")
-                    currentVerseTextProperty.set("Verse")
-                    resumeTextProperty.set("Resume")
-                }
+//                floatingnarrationcard {
+//                    floatingLabelProperty.bind(viewModel.currentVerseLabelProperty)
+//                    floatingCardVisibleProperty.bind(viewModel.floatingCardVisibleProperty)
+//                    onFloatingChunkActionProperty.bind(viewModel.onCurrentVerseActionProperty)
+//
+//                    currentChunkTextProperty.set("Current: {0} {1}")
+//                    currentVerseTextProperty.set("Verse")
+//                    resumeTextProperty.set("Resume")
+//                }
             }
         }
     }
