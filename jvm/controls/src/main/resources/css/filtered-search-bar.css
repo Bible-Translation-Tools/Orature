@@ -48,6 +48,11 @@
     -fx-border-width: 0 0 0 1px;
 }
 
+.filtered-search-bar__input .right-pane > .button {
+    -fx-pref-width: 24px;
+    -fx-pref-height: 24px;
+}
+
 .filtered-search-bar__input .ikonli-font-icon {
     -fx-fill: -wa-regular-text;
     -fx-font-size: 24px;
