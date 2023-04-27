@@ -36,7 +36,7 @@
     -wa-background-dark: #B3B9C2;
 
     -wa-foreground: white;
-    -wa-foreground-hover: #e6e6e6;
+    -wa-foreground-hover: #E5E8EB;
     -wa-foreground-pressed: -wa-black-10;
 
     -wa-surface: inherit;
@@ -56,6 +56,7 @@
 
 /* -------------------- Components mappings --------------------*/
     -wa-regular-text: -wa-black;
+    -wa-regular-text-80: #33445C;
     -wa-note-text: -wa-black-70;
     -wa-highlight-text: -wa-primary;
     -wa-disabled-text: -wa-gray-light;
@@ -163,15 +164,17 @@
     /* status */
     -wa-success-color: #82A93F;
     -wa-error-color: #B85659;
+
+    /* TABLE */
+    -wa-table-header-background: #dce0e5;
+    -wa-progress-track-background: #e0edf9;
+    -wa-progress-foreground: #015AD9;
+    -wa-table-row-border: -wa-list-item-border-light;
+    -wa-table-row-hover: -wa-foreground-hover;
 }
 
 .scroll-bar {
     -fx-font-size: 10px;
-}
-
-.scroll-bar .increment-button,
-.scroll-bar .decrement-button {
-    -fx-padding: 8 4;
 }
 
 .light-theme .workspace {
@@ -180,15 +183,14 @@
 
 .light-theme .scroll-bar .thumb {
     -fx-background-color: #b3b3b3;
-    -fx-background-insets: 0;
-    -fx-background-radius: 0;
-}
-
-.light-theme .scroll-bar .increment-button:hover,
-.light-theme .scroll-bar .decrement-button:hover {
-    -fx-background-color: -wa-foreground-hover;
 }
 
 .light-theme .split-pane:horizontal > .split-pane-divider {
     -fx-background-color: -wa-primary-dark;
- }
+}
+
+.light-theme .virtual-flow .scroll-bar:vertical .track,
+.light-theme .virtual-flow .scroll-bar:horizontal .track {
+    -fx-background-color: #e6e6e6;
+    -fx-background-radius: 8;
+}
