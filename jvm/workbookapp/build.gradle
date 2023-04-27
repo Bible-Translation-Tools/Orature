@@ -143,6 +143,9 @@ dependencies {
     kapt "com.google.dagger:dagger-compiler:$daggerVer"
     kaptIntegrationTest "com.google.dagger:dagger-compiler:$daggerVer"
 
+    implementation "org.mockito:mockito-core:$mockitoVer"
+    implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVer"
+
     // Testing
     testImplementation "junit:junit:$junitVer"
     testImplementation "org.mockito:mockito-core:$mockitoVer"

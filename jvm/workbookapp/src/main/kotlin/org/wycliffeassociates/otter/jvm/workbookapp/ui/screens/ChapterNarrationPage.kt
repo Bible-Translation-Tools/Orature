@@ -102,10 +102,9 @@ class ChapterNarrationPage : View() {
 
         vbox {
             hbox {
-                addClass("narration__header")
 
                 label(workbookDataStore.activeWorkbookProperty.stringBinding { it?.target?.title }) {
-                    addClass("narration__header-title")
+
                 }
                 region {
                     hgrow = Priority.ALWAYS
@@ -113,71 +112,6 @@ class ChapterNarrationPage : View() {
                 hbox {
                     addClass("narration__header-controls")
 
-                    menubutton {
-                        addClass("btn", "btn--primary", "btn--borderless", "wa-menu-button")
-                        graphic = FontIcon(MaterialDesign.MDI_DOTS_HORIZONTAL)
-
-                        item(messages["undoAction"]) {
-                            graphic = FontIcon(MaterialDesign.MDI_UNDO)
-                            action { viewModel.onUndoAction() }
-
-                            enableWhen(viewModel.narrationHistory.hasUndoProperty)
-                        }
-                        item(messages["redoAction"]) {
-                            graphic = FontIcon(MaterialDesign.MDI_REDO)
-                            action { viewModel.onRedoAction() }
-
-                            enableWhen(viewModel.narrationHistory.hasRedoProperty)
-                        }
-                        item(messages["openChapterIn"]) {
-                            graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
-                            action { viewModel.onChapterOpenIn() }
-
-                            disableProperty().bind(workbookDataStore.activeChapterProperty.booleanBinding {
-                                it?.audio?.getAllTakes()?.firstOrNull { take ->
-                                    take.deletedTimestamp.value?.value == null
-                                } == null
-                            })
-                        }
-                        item(messages["editVerseMarkers"]) {
-                            graphic = FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE)
-                            action { viewModel.onEditVerseMarkers() }
-
-                            disableProperty().bind(workbookDataStore.activeChapterProperty.booleanBinding {
-                                it?.audio?.getAllTakes()?.firstOrNull { take ->
-                                    take.deletedTimestamp.value?.value == null
-                                } == null
-                            })
-                        }
-                        item(messages["restartChapter"]) {
-                            graphic = FontIcon(MaterialDesign.MDI_DELETE)
-                            action { viewModel.onChapterReset() }
-                        }
-                    }
-
-                    add(
-                        ChapterSelector().apply {
-                            chapterTitleProperty.bind(workbookDataStore.activeChapterProperty.stringBinding {
-                                it?.let {
-                                    MessageFormat.format(
-                                        messages["chapterTitle"],
-                                        messages["chapter"],
-                                        it.sort
-                                    )
-                                } ?: ""
-                            })
-
-                            prevDisabledProperty.bind(viewModel.hasPreviousChapter.not())
-                            nextDisabledProperty.bind(viewModel.hasNextChapter.not())
-
-                            setOnPreviousChapter {
-                                viewModel.previousChapter()
-                            }
-                            setOnNextChapter {
-                                viewModel.nextChapter()
-                            }
-                        }
-                    )
                 }
             }
             stackpane {
