@@ -70,17 +70,6 @@ class WorkbookDataStore : Component(), ScopedInstance {
         }
     }
 
-    fun updateSelectedTakesFile(): Completable {
-        val wb = workbook
-        //val projectIsBook = activeResourceMetadata.identifier == wb.target.resourceMetadata.identifier
-
-        return Completable
-            .fromCallable {
-                workbook.projectFilesAccessor.writeSelectedTakesFile(wb, true)
-            }
-            .subscribeOn(Schedulers.io())
-    }
-
     fun getSourceText(): Maybe<String> {
         return when {
             activeResourceComponent != null -> Maybe.just(

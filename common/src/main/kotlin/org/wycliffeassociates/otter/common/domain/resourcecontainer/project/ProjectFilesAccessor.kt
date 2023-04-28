@@ -18,8 +18,10 @@
  */
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.project
 
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.cast
+import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
@@ -247,6 +249,14 @@ class ProjectFilesAccessor(
         if (!outFile.exists()) {
             fileReader.stream(RcConstants.SELECTED_TAKES_FILE).transferTo(outFile.outputStream())
         }
+    }
+
+    fun updateSelectedTakesFile(workbook: Workbook): Completable {
+        return Completable
+            .fromCallable {
+                writeSelectedTakesFile(workbook, true)
+            }
+            .subscribeOn(Schedulers.io())
     }
 
     fun writeSelectedTakesFile(workbook: Workbook, isBook: Boolean) {
