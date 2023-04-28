@@ -87,10 +87,6 @@ class RecordResourceViewModel : ViewModel() {
             updateRecordables(it)
         }
 
-        workbookDataStore.activeResourceMetadataProperty.onChangeAndDoNow { metadata ->
-            metadata?.let { setTabLabels(metadata.identifier) }
-        }
-
         workbookDataStore.activeChapterProperty.onChangeAndDoNow { chapter ->
             chapter?.let {
                 if (activeChunkProperty.value == null) {
@@ -128,6 +124,9 @@ class RecordResourceViewModel : ViewModel() {
     private fun initTabs() {
         recordableList.forEach {
             addRecordableToTabViewModel(it)
+        }
+        workbookDataStore.activeWorkbookProperty.value?.let { workbook ->
+            setTabLabels(workbook.sourceMetadataSlug)
         }
     }
 

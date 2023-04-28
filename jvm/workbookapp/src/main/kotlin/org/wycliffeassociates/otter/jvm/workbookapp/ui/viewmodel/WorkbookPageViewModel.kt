@@ -121,7 +121,6 @@ class WorkbookPageViewModel : ViewModel() {
      */
     fun openTab(resourceMetadata: ResourceMetadata) {
         currentTabProperty.set(resourceMetadata.identifier)
-        workbookDataStore.activeResourceMetadataProperty.set(resourceMetadata)
         workbookDataStore.initializeProjectFiles()
     }
 
@@ -184,7 +183,7 @@ class WorkbookPageViewModel : ViewModel() {
      */
     fun navigate(chapter: Chapter) {
         workbookDataStore.activeChapterProperty.set(chapter)
-        val resourceMetadata = workbookDataStore.activeResourceMetadata
+        val resourceMetadata = workbookDataStore.workbook.target.resourceMetadata
         updateLastResource(resourceMetadata.identifier)
         when (resourceMetadata.type) {
             ContainerType.Book, ContainerType.Bundle -> navigator.dock<ChapterPage>()
@@ -196,7 +195,7 @@ class WorkbookPageViewModel : ViewModel() {
         showExportProgressDialogProperty.set(true)
 
         val workbook = workbookDataStore.workbook
-        val resourceMetadata = workbookDataStore.activeResourceMetadata
+        val resourceMetadata = workbookDataStore.workbook.target.resourceMetadata
 
         activeProjectTitleProperty.set(workbook.target.title)
         activeProjectCoverProperty.set(

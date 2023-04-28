@@ -91,7 +91,7 @@ class ResourceListViewModel : ViewModel() {
             .mapNotNull { bookElement ->
                 resourceGroupCardItem(
                     element = bookElement,
-                    slug = workbookDataStore.activeResourceMetadata.identifier,
+                    slug = workbookDataStore.workbook.sourceMetadataSlug,
                     onSelect = this::setActiveChunkAndRecordables
                 )
             }

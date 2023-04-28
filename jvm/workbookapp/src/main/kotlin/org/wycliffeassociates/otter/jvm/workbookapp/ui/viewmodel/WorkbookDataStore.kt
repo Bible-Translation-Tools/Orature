@@ -27,7 +27,6 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Resource
@@ -56,10 +55,6 @@ class WorkbookDataStore : Component(), ScopedInstance {
     val activeResourceComponent by activeResourceComponentProperty
     val activeResourceProperty = SimpleObjectProperty<Resource>()
 
-    val activeResourceMetadataProperty = SimpleObjectProperty<ResourceMetadata>()
-    val activeResourceMetadata
-        get() = activeResourceMetadataProperty.value ?: throw IllegalStateException("Resource Metadata is null")
-
     val activeTakeNumberProperty = SimpleIntegerProperty()
     val sourceLicenseProperty = SimpleStringProperty()
 
@@ -79,7 +74,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
         val linkedResource = workbook
             .source
             .linkedResources
-            .firstOrNull { it.identifier == workbook.target.resourceMetadata.identifier }
+            .firstOrNull { it.identifier == workbook.source.resourceMetadata.identifier }
 
         workbook.projectFilesAccessor.initializeResourceContainerInDir(false)
         workbook.projectFilesAccessor.copySourceFiles(linkedResource)
@@ -88,11 +83,11 @@ class WorkbookDataStore : Component(), ScopedInstance {
 
     fun updateSelectedTakesFile(): Completable {
         val wb = workbook
-        val projectIsBook = activeResourceMetadata.identifier == wb.target.resourceMetadata.identifier
+        //val projectIsBook = activeResourceMetadata.identifier == wb.target.resourceMetadata.identifier
 
         return Completable
             .fromCallable {
-                workbook.projectFilesAccessor.writeSelectedTakesFile(wb, projectIsBook)
+                workbook.projectFilesAccessor.writeSelectedTakesFile(wb, true)
             }
             .subscribeOn(Schedulers.io())
     }

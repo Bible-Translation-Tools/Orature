@@ -142,7 +142,7 @@ class AudioPluginViewModel : ViewModel() {
             chapter = workbookDataStore.chapter,
             chunk = workbookDataStore.chunk,
             recordable = recordable,
-            rcSlug = workbookDataStore.activeResourceMetadata.identifier
+            rcSlug = workbookDataStore.workbook.sourceMetadataSlug
         )
     }
 

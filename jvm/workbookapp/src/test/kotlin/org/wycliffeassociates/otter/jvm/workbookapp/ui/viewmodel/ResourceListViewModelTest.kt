@@ -218,7 +218,6 @@ class ResourceListViewModelTest {
             resourceListViewModel = find()
 
             workbookDataStore = find()
-            workbookDataStore.activeResourceMetadataProperty.set(resourceMetadataTn)
 
             recordResourceViewModel = find()
         }

@@ -90,7 +90,7 @@ class WorkbookPageViewModelTest {
                 .thenReturn(mockWorkbook)
             `when`(mockWorkbookDS.activeChapterProperty)
                 .thenReturn(SimpleObjectProperty())
-            `when`(mockWorkbookDS.activeResourceMetadata)
+            `when`(mockWorkbookDS.workbook.target.resourceMetadata)
                 .thenReturn(mockBook.resourceMetadata)
 
             return mockWorkbookDS
@@ -193,6 +193,6 @@ class WorkbookPageViewModelTest {
         assertFalse(showProgressChanges[1])
         verify(mockProjectExporter).export(any(), any(), any(), anyOrNull())
         verify(mockWorkbookDS, atLeastOnce()).workbook
-        verify(mockWorkbookDS).activeResourceMetadata
+        verify(mockWorkbookDS).workbook.target.resourceMetadata
     }
 }
