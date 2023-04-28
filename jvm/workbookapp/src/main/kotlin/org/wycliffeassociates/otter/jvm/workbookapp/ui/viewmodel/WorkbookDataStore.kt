@@ -70,17 +70,6 @@ class WorkbookDataStore : Component(), ScopedInstance {
         }
     }
 
-    fun initializeProjectFiles() {
-        val linkedResource = workbook
-            .source
-            .linkedResources
-            .firstOrNull { it.identifier == workbook.source.resourceMetadata.identifier }
-
-        workbook.projectFilesAccessor.initializeResourceContainerInDir(false)
-        workbook.projectFilesAccessor.copySourceFiles(linkedResource)
-        workbook.projectFilesAccessor.createSelectedTakesFile()
-    }
-
     fun updateSelectedTakesFile(): Completable {
         val wb = workbook
         //val projectIsBook = activeResourceMetadata.identifier == wb.target.resourceMetadata.identifier

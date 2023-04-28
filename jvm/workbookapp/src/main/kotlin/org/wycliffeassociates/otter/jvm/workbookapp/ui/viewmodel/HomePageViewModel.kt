@@ -147,11 +147,22 @@ class HomePageViewModel : ViewModel() {
     fun selectProject(workbook: Workbook) {
         setResumeBook(workbook)
         workbookDataStore.activeWorkbookProperty.set(workbook)
-        workbookDataStore.initializeProjectFiles()
+        initializeProjectFiles(workbook)
         updateTranslationModifiedDate(workbook)
         updateWorkbookModifiedDate(workbook)
 
         navigator.dock<WorkbookPage>()
+    }
+
+    private fun initializeProjectFiles(workbook: Workbook) {
+        val linkedResource = workbook
+            .source
+            .linkedResources
+            .firstOrNull { it.identifier == workbook.source.resourceMetadata.identifier }
+
+        workbook.projectFilesAccessor.initializeResourceContainerInDir(false)
+        workbook.projectFilesAccessor.copySourceFiles(linkedResource)
+        workbook.projectFilesAccessor.createSelectedTakesFile()
     }
 
     fun dock() {

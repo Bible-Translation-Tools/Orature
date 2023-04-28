@@ -121,7 +121,6 @@ class WorkbookPageViewModel : ViewModel() {
      */
     fun openTab(resourceMetadata: ResourceMetadata) {
         currentTabProperty.set(resourceMetadata.identifier)
-        workbookDataStore.initializeProjectFiles()
     }
 
     /**
