@@ -32,8 +32,6 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateChangedEvent
-import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateType
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
 import java.text.MessageFormat
@@ -76,10 +74,6 @@ class WorkbookDataStore : Component(), ScopedInstance {
             } else {
                 sourceLicenseProperty.set(it.source.resourceMetadata.license)
             }
-        }
-
-        workspace.subscribe<PlaybackRateChangedEvent> { event ->
-            updatePlaybackSpeedRate(event)
         }
     }
 
@@ -233,12 +227,5 @@ class WorkbookDataStore : Component(), ScopedInstance {
                     }
                     .firstElement()
             }
-    }
-
-    private fun updatePlaybackSpeedRate(event: PlaybackRateChangedEvent) {
-        when (event.type) {
-            PlaybackRateType.SOURCE -> workbook.translation.updateSourceRate(event.rate)
-            PlaybackRateType.TARGET -> workbook.translation.updateTargetRate(event.rate)
-        }
     }
 }

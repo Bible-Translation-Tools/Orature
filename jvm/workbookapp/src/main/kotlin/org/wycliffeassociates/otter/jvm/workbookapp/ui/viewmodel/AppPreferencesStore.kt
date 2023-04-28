@@ -20,6 +20,8 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import javafx.beans.property.SimpleIntegerProperty
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
+import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateChangedEvent
+import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateType
 import org.wycliffeassociates.otter.jvm.controls.media.SourceTextZoomRateChangedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.Component
@@ -31,13 +33,25 @@ class AppPreferencesStore : Component(), ScopedInstance {
     @Inject
     lateinit var appPrefRepository: IAppPreferencesRepository
 
+    val workbookDataStore: WorkbookDataStore by inject()
+
     val sourceTextZoomRateProperty = SimpleIntegerProperty()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
-        subscribe<SourceTextZoomRateChangedEvent> { event ->
+        workspace.subscribe<SourceTextZoomRateChangedEvent> { event ->
             sourceTextZoomRateProperty.set(event.rate)
             appPrefRepository.setSourceTextZoomRate(event.rate).subscribe()
+        }
+        workspace.subscribe<PlaybackRateChangedEvent> { event ->
+            updatePlaybackSpeedRate(event)
+        }
+    }
+
+    private fun updatePlaybackSpeedRate(event: PlaybackRateChangedEvent) {
+        when (event.type) {
+            PlaybackRateType.SOURCE -> workbookDataStore.workbook.translation.updateSourceRate(event.rate)
+            PlaybackRateType.TARGET -> workbookDataStore.workbook.translation.updateTargetRate(event.rate)
         }
     }
 }
