@@ -47,7 +47,7 @@ class AudioDataStore : Component(), ScopedInstance {
             target.player.load(target.file)
         }
         sourceAudioProperty.value?.let { source ->
-            val audioPlayer = (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
+            val audioPlayer = getNewAudioPlayer()
             audioPlayer.loadSection(source.file, source.start, source.end)
             sourceAudioPlayerProperty.set(audioPlayer)
         }
@@ -55,7 +55,7 @@ class AudioDataStore : Component(), ScopedInstance {
 
     fun openSourceAudioPlayer() {
         sourceAudioProperty.value?.let { source ->
-            val audioPlayer = (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
+            val audioPlayer = getNewAudioPlayer()
             audioPlayer.loadSection(source.file, source.start, source.end)
             sourceAudioPlayerProperty.set(audioPlayer)
         } ?: sourceAudioPlayerProperty.set(null)
@@ -96,7 +96,7 @@ class AudioDataStore : Component(), ScopedInstance {
                 take?.let {
                     updateTargetAudio(it.file)
 
-                    val audioPlayer = (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
+                    val audioPlayer = getNewAudioPlayer()
                     audioPlayer.load(it.file)
                     selectedChapterPlayerProperty.set(audioPlayer)
                 } ?: run {
@@ -122,7 +122,7 @@ class AudioDataStore : Component(), ScopedInstance {
         )
         file.copyTo(tempFile, true)
 
-        val audioPlayer = (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
+        val audioPlayer = getNewAudioPlayer()
         audioPlayer.load(tempFile)
         val targetAudio = TargetAudio(tempFile, audioPlayer)
 
@@ -168,5 +168,9 @@ class AudioDataStore : Component(), ScopedInstance {
         } ?: run {
             sourceAudio.getChapter(chapter.sort, meta)
         }
+    }
+
+    private fun getNewAudioPlayer(): IAudioPlayer {
+        return (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
     }
 }
