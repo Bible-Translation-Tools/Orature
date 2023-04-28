@@ -65,8 +65,6 @@ class ChunkingDebugView : View(){
     override val root = StackPane().apply { addClass("light-theme") }
 
     init {
-        val audio: AudioDataStore = tornadofx.find()
-        audio.sourceAudioProperty.set(SourceAudio(File("/Users/jsara/Documents/test12345.mp3"), 0, 1))
         add<ChunkingWizard>()
     }
 }
