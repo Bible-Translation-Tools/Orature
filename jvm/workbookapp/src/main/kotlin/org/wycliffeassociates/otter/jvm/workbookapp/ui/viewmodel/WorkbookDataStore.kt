@@ -32,26 +32,17 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.common.domain.content.TargetAudio
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
-import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateChangedEvent
 import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateType
 import org.wycliffeassociates.otter.jvm.controls.media.SourceTextZoomRateChangedEvent
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
-import java.io.File
 import java.text.MessageFormat
 import java.util.concurrent.Callable
 import javax.inject.Inject
 
 class WorkbookDataStore : Component(), ScopedInstance {
-    @Inject
-    lateinit var directoryProvider: IDirectoryProvider
 
     @Inject
     lateinit var appPreferenceRepo: IAppPreferencesRepository
@@ -78,32 +69,13 @@ class WorkbookDataStore : Component(), ScopedInstance {
     val activeResourceMetadata
         get() = activeResourceMetadataProperty.value ?: throw IllegalStateException("Resource Metadata is null")
 
-    val activeProjectFilesAccessorProperty = SimpleObjectProperty<ProjectFilesAccessor>()
-    val activeProjectFilesAccessor: ProjectFilesAccessor
-        get() = activeProjectFilesAccessorProperty.value
-            ?: throw IllegalStateException("ProjectFilesAccessor is null")
-
     val activeTakeNumberProperty = SimpleIntegerProperty()
-
-    val sourceAudioProperty = SimpleObjectProperty<SourceAudio>()
-    val sourceAudioAvailableProperty = sourceAudioProperty.booleanBinding { it?.file?.exists() ?: false }
-    val targetAudioProperty = SimpleObjectProperty<TargetAudio>()
-    val selectedChapterPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
 
     val sourceTextZoomRateProperty = SimpleIntegerProperty()
     val sourceLicenseProperty = SimpleStringProperty()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
-        activeChapterProperty.onChange {
-            logger.info("Active chapter: ${it?.sort}")
-            if (it == null) cleanUpTargetAudio()
-            updateSourceAudio()
-        }
-        activeChunkProperty.onChangeAndDoNow {
-            logger.info("Active chunk: ${it?.sort}")
-            updateSourceAudio()
-        }
         activeWorkbookProperty.onChange {
             logger.info("Active workbook: ${it?.target?.slug}")
             if (it == null) {
@@ -123,109 +95,26 @@ class WorkbookDataStore : Component(), ScopedInstance {
         }
     }
 
-    fun setProjectFilesAccessor(resourceMetadata: ResourceMetadata) {
-        val projectFilesAccessor = ProjectFilesAccessor(
-            directoryProvider,
-            workbook.source.resourceMetadata,
-            resourceMetadata,
-            workbook.target.toCollection()
-        )
-
+    fun initializeProjectFiles() {
         val linkedResource = workbook
             .source
             .linkedResources
-            .firstOrNull { it.identifier == resourceMetadata.identifier }
+            .firstOrNull { it.identifier == workbook.target.resourceMetadata.identifier }
 
-        projectFilesAccessor.initializeResourceContainerInDir(false)
-        projectFilesAccessor.copySourceFiles(linkedResource)
-        projectFilesAccessor.createSelectedTakesFile()
-        activeProjectFilesAccessorProperty.set(projectFilesAccessor)
+        workbook.projectFilesAccessor.initializeResourceContainerInDir(false)
+        workbook.projectFilesAccessor.copySourceFiles(linkedResource)
+        workbook.projectFilesAccessor.createSelectedTakesFile()
     }
 
     fun updateSelectedTakesFile(): Completable {
         val wb = workbook
         val projectIsBook = activeResourceMetadata.identifier == wb.target.resourceMetadata.identifier
-        val projectFilesAccessor = activeProjectFilesAccessor
 
         return Completable
             .fromCallable {
-                projectFilesAccessor.writeSelectedTakesFile(wb, projectIsBook)
+                workbook.projectFilesAccessor.writeSelectedTakesFile(wb, projectIsBook)
             }
             .subscribeOn(Schedulers.io())
-    }
-
-    fun updateSourceAudio() {
-        val _chunk = activeChunkProperty.get()
-        val _chapter = activeChapterProperty.get()
-        if (_chapter != null && _chunk != null) {
-            sourceAudioProperty.set(workbook.sourceAudioAccessor.getChunk(_chapter.sort, _chunk.sort, workbook.target))
-        } else if (_chapter != null) {
-            sourceAudioProperty.set(workbook.sourceAudioAccessor.getChapter(_chapter.sort, workbook.target))
-        } else {
-            sourceAudioProperty.set(null)
-        }
-    }
-
-    fun updateSelectedChapterPlayer() {
-        val _chunk = activeChunkProperty.get()
-        val _chapter = activeChapterProperty.get()
-        when {
-            _chapter != null && _chunk == null -> {
-                val take = _chapter.audio.selected.value?.value
-                take?.let {
-                    updateTargetAudio(it.file)
-
-                    val audioPlayer = (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
-                    audioPlayer.load(it.file)
-                    selectedChapterPlayerProperty.set(audioPlayer)
-                } ?: run {
-                    selectedChapterPlayerProperty.set(null)
-                    targetAudioProperty.set(null)
-                }
-            }
-            _chapter != null -> { /* no-op */
-            } // preserve targetAudio for clean up
-            else -> {
-                selectedChapterPlayerProperty.set(null)
-                targetAudioProperty.set(null)
-            }
-        }
-    }
-
-    private fun updateTargetAudio(file: File) {
-        cleanUpTargetAudio()
-
-        val tempFile = directoryProvider.createTempFile(
-            file.nameWithoutExtension,
-            ".${file.extension}"
-        )
-        file.copyTo(tempFile, true)
-
-        val audioPlayer = (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
-        audioPlayer.load(tempFile)
-        val targetAudio = TargetAudio(tempFile, audioPlayer)
-
-        targetAudioProperty.set(targetAudio)
-    }
-
-    private fun cleanUpTargetAudio() {
-        targetAudioProperty.value?.let {
-            it.player.release()
-            it.file.delete()
-        }
-        targetAudioProperty.set(null)
-    }
-
-    fun getSourceAudio(): SourceAudio? {
-        val sourceAudio = workbook.sourceAudioAccessor
-        val meta = workbook.target
-        return chunk?.let { chunk ->
-            sourceAudio.getChunk(
-                chapter.sort,
-                chunk.sort,
-                meta
-            )
-        } ?: run { sourceAudio.getChapter(chapter.sort, meta) }
     }
 
     fun getSourceText(): Maybe<String> {
@@ -235,7 +124,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
             )
             chunk != null -> getChunkSourceText()
             else -> getSourceChapter().map { _chapter ->
-                val verses = activeProjectFilesAccessor.getChapterText(workbook.source.slug, _chapter.sort)
+                val verses = workbook.projectFilesAccessor.getChapterText(workbook.source.slug, _chapter.sort)
                 combineVerses(verses)
             }
         }
@@ -243,7 +132,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
 
     private fun getChunkSourceText(): Maybe<String> {
         chunk?.let { chunk ->
-            val verses = activeProjectFilesAccessor.getChunkText(workbook.source.slug, chapter.sort, chunk.start, chunk.end)
+            val verses = workbook.projectFilesAccessor.getChunkText(workbook.source.slug, chapter.sort, chunk.start, chunk.end)
             val text = combineVerses(verses)
             return Maybe.just(text)
         }

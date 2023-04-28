@@ -54,10 +54,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChunkCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChunkItem
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ExportChapterDialog
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterPageViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.text.MessageFormat
 import java.util.*
@@ -65,6 +61,7 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Pos
 import kotlin.math.max
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.ChunkingWizard
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.*
 
 class ChapterPage : View() {
     private val logger = LoggerFactory.getLogger(ChapterPage::class.java)
@@ -72,6 +69,7 @@ class ChapterPage : View() {
     private val viewModel: ChapterPageViewModel by inject()
     private val settingsViewModel: SettingsViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
+    private val audioDataStore: AudioDataStore by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
     private val navigator: NavigationMediator by inject()
     private lateinit var chunkListView: ListView<CardData>
@@ -193,7 +191,7 @@ class ChapterPage : View() {
 
                     simpleaudioplayer {
                         hgrow = Priority.ALWAYS
-                        playerProperty.bind(workbookDataStore.selectedChapterPlayerProperty)
+                        playerProperty.bind(audioDataStore.selectedChapterPlayerProperty)
                         visibleWhen(playerProperty.isNotNull)
                         managedProperty().bind(visibleProperty())
                     }
@@ -204,7 +202,7 @@ class ChapterPage : View() {
 
                         label(messages["draftingNotStarted"])
 
-                        visibleWhen(workbookDataStore.selectedChapterPlayerProperty.isNull)
+                        visibleWhen(audioDataStore.selectedChapterPlayerProperty.isNull)
                         managedProperty().bind(visibleProperty())
                     }
                 }
@@ -415,7 +413,7 @@ class ChapterPage : View() {
                                 workspace.dock<ChunkingWizard>(chunkingScope)
                             }
 
-                            enableWhen(viewModel.sourceAudioAvailableProperty)
+                            enableWhen(audioDataStore.sourceAudioAvailableProperty)
                         }
                     }
 
@@ -503,9 +501,9 @@ class ChapterPage : View() {
         return find<PluginOpenedPage>().apply {
             dialogTitleProperty.bind(viewModel.dialogTitleBinding())
             dialogTextProperty.bind(viewModel.dialogTextBinding())
-            playerProperty.bind(viewModel.sourceAudioPlayerProperty)
-            targetAudioPlayerProperty.bind(workbookDataStore.targetAudioProperty.objectBinding { it?.player })
-            audioAvailableProperty.bind(viewModel.sourceAudioAvailableProperty)
+            playerProperty.bind(audioDataStore.sourceAudioPlayerProperty)
+            targetAudioPlayerProperty.bind(audioDataStore.targetAudioProperty.objectBinding { it?.player })
+            audioAvailableProperty.bind(audioDataStore.sourceAudioAvailableProperty)
             licenseProperty.bind(workbookDataStore.sourceLicenseProperty)
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
             sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())

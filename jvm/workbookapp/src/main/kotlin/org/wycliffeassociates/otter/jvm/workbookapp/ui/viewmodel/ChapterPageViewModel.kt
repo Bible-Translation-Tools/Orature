@@ -35,8 +35,7 @@ import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
-import org.wycliffeassociates.otter.common.domain.content.PluginActions
+import org.wycliffeassociates.otter.common.domain.content.*
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -50,10 +49,7 @@ import tornadofx.*
 import java.io.File
 import java.util.concurrent.Callable
 import javax.inject.Inject
-import org.wycliffeassociates.otter.common.domain.content.CreateChunks
-import org.wycliffeassociates.otter.common.domain.content.ResetChunks
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.persistence.repositories.IVersificationRepository
 
 
 class ChapterPageViewModel : ViewModel() {
@@ -61,6 +57,7 @@ class ChapterPageViewModel : ViewModel() {
     private val logger = LoggerFactory.getLogger(ChapterPageViewModel::class.java)
 
     val workbookDataStore: WorkbookDataStore by inject()
+    val audioDataStore: AudioDataStore by inject()
     val audioPluginViewModel: AudioPluginViewModel by inject()
 
     @Inject
@@ -100,9 +97,6 @@ class ChapterPageViewModel : ViewModel() {
     val chapterCardProperty = SimpleObjectProperty<CardData>()
     val contextProperty = SimpleObjectProperty(PluginType.RECORDER)
 
-    val sourceAudioAvailableProperty = workbookDataStore.sourceAudioAvailableProperty
-    val sourceAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer?>(null)
-
     val showExportProgressDialogProperty = SimpleBooleanProperty(false)
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
@@ -137,7 +131,7 @@ class ChapterPageViewModel : ViewModel() {
 
     fun undock() {
         selectedChapterTakeProperty.set(null)
-        workbookDataStore.selectedChapterPlayerProperty.set(null)
+        audioDataStore.selectedChapterPlayerProperty.set(null)
 
         filteredContent.clear()
         allContent.clear()
@@ -154,21 +148,11 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     fun openPlayers() {
-        workbookDataStore.targetAudioProperty.value?.let { target ->
-            target.player.load(target.file)
-        }
-        workbookDataStore.sourceAudioProperty.value?.let { source ->
-            val audioPlayer = (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
-            audioPlayer.loadSection(source.file, source.start, source.end)
-            sourceAudioPlayerProperty.set(audioPlayer)
-        }
+        audioDataStore.openPlayers()
     }
 
     fun closePlayers() {
-        workbookDataStore.selectedChapterPlayerProperty.value?.close()
-        workbookDataStore.targetAudioProperty.value?.player?.close()
-        sourceAudioPlayerProperty.value?.close()
-        sourceAudioPlayerProperty.set(null)
+        audioDataStore.closePlayers()
     }
 
     fun checkCanCompile() {
@@ -425,7 +409,7 @@ class ChapterPageViewModel : ViewModel() {
                 takeHolder.value?.let {
                     logger.info("Setting selected chapter take to ${takeHolder.value?.name}")
                     setSelectedChapterTake(takeHolder.value)
-                    workbookDataStore.updateSelectedChapterPlayer()
+                    audioDataStore.updateSelectedChapterPlayer()
                 }
             }
             .let { disposables.add(it) }
@@ -490,7 +474,7 @@ class ChapterPageViewModel : ViewModel() {
         closePlayers()
         filteredContent.clear()
         val chapter = workbookDataStore.activeChapterProperty.value
-        resetChunks.resetChapter(workbookDataStore.activeProjectFilesAccessor, chapter)
-        workbookDataStore.updateSourceAudio()
+        resetChunks.resetChapter(workbookDataStore.workbook.projectFilesAccessor, chapter)
+        audioDataStore.updateSourceAudio()
     }
 }

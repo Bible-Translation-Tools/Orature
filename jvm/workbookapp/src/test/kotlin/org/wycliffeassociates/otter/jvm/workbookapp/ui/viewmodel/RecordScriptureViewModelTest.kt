@@ -189,7 +189,6 @@ class RecordScriptureViewModelTest {
             workbookDataStore = find()
             workbookDataStore.activeWorkbookProperty.set(workbook)
             workbookDataStore.activeChapterProperty.set(chapter)
-            workbookDataStore.activeProjectFilesAccessorProperty.set(projectFilesAccessor)
             workbookDataStore.activeResourceMetadataProperty.set(resourceMetadata)
 
             recordScriptureViewModel = find()

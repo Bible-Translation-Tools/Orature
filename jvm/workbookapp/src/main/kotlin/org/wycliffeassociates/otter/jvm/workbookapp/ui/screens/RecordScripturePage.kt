@@ -56,10 +56,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordScriptureViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.*
 import tornadofx.*
 import java.text.MessageFormat
 import java.util.*
@@ -72,6 +69,7 @@ class RecordScripturePage : View() {
     private val recordScriptureViewModel: RecordScriptureViewModel by inject()
     private val settingsViewModel: SettingsViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
+    private val audioDataStore: AudioDataStore by inject()
     private val navigator: NavigationMediator by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
@@ -84,7 +82,7 @@ class RecordScripturePage : View() {
     private val sourceContent =
         SourceContent().apply {
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
-            sourceAudioPlayerProperty.bind(recordScriptureViewModel.sourceAudioPlayerProperty)
+            sourceAudioPlayerProperty.bind(audioDataStore.sourceAudioPlayerProperty)
             licenseProperty.bind(workbookDataStore.sourceLicenseProperty)
             isMinimizableProperty.set(false)
             highlightedChunk.bind(recordScriptureViewModel.highlightedChunkProperty)
@@ -384,12 +382,12 @@ class RecordScripturePage : View() {
         return find<PluginOpenedPage>().apply {
             dialogTitleProperty.bind(recordScriptureViewModel.dialogTitleBinding())
             dialogTextProperty.bind(recordScriptureViewModel.dialogTextBinding())
-            playerProperty.bind(recordScriptureViewModel.sourceAudioPlayerProperty)
-            audioAvailableProperty.bind(recordScriptureViewModel.sourceAudioAvailableProperty)
+            playerProperty.bind(audioDataStore.sourceAudioPlayerProperty)
+            audioAvailableProperty.bind(audioDataStore.sourceAudioAvailableProperty)
             licenseProperty.bind(workbookDataStore.sourceLicenseProperty)
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
             sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())
-            targetAudioPlayerProperty.bind(workbookDataStore.targetAudioProperty.objectBinding { it?.player })
+            targetAudioPlayerProperty.bind(audioDataStore.targetAudioProperty.objectBinding { it?.player })
             orientationProperty.bind(settingsViewModel.orientationProperty)
             sourceOrientationProperty.bind(settingsViewModel.sourceOrientationProperty)
 

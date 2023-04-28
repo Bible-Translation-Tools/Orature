@@ -147,7 +147,7 @@ class HomePageViewModel : ViewModel() {
     fun selectProject(workbook: Workbook) {
         setResumeBook(workbook)
         workbookDataStore.activeWorkbookProperty.set(workbook)
-        workbook.target.resourceMetadata.let(workbookDataStore::setProjectFilesAccessor)
+        workbookDataStore.initializeProjectFiles()
         updateTranslationModifiedDate(workbook)
         updateWorkbookModifiedDate(workbook)
 

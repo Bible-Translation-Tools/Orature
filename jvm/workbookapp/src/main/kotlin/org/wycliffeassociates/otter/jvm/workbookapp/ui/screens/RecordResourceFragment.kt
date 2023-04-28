@@ -53,11 +53,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordResourceViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordableViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.*
 import tornadofx.*
 import java.util.*
 
@@ -68,6 +64,7 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
     private val settingsViewModel: SettingsViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
+    private val audioDataStore: AudioDataStore by inject()
 
     val formattedTextProperty = SimpleStringProperty()
     private val isDraggingTakeProperty = SimpleBooleanProperty(false)
@@ -354,8 +351,8 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
         return find<PluginOpenedPage>().apply {
             dialogTitleProperty.bind(recordableViewModel.dialogTitleBinding())
             dialogTextProperty.bind(recordableViewModel.dialogTextBinding())
-            playerProperty.bind(recordableViewModel.sourceAudioPlayerProperty)
-            audioAvailableProperty.bind(recordableViewModel.sourceAudioAvailableProperty)
+            playerProperty.bind(audioDataStore.sourceAudioPlayerProperty)
+            audioAvailableProperty.bind(audioDataStore.sourceAudioAvailableProperty)
             licenseProperty.bind(workbookDataStore.sourceLicenseProperty)
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
             sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())

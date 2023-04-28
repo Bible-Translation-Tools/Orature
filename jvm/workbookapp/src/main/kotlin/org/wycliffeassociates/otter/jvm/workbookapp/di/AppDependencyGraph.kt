@@ -42,6 +42,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewMod
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SplashScreenViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioDataStore
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookPageViewModel
 import javax.inject.Singleton
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
@@ -69,6 +70,7 @@ interface AppDependencyGraph {
     fun inject(viewModel: HomePageViewModel)
     fun inject(viewModel: AddPluginViewModel)
     fun inject(dataStore: WorkbookDataStore)
+    fun inject(dataStore: AudioDataStore)
     fun inject(viewModel: AudioPluginViewModel)
     fun inject(viewModel: WorkbookPageViewModel)
     fun inject(viewModel: SettingsViewModel)
