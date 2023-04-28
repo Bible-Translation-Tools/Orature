@@ -32,7 +32,6 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
 import java.text.MessageFormat
 import java.util.concurrent.Callable
@@ -65,7 +64,6 @@ class WorkbookDataStore : Component(), ScopedInstance {
     val sourceLicenseProperty = SimpleStringProperty()
 
     init {
-        (app as IDependencyGraphProvider).dependencyGraph.inject(this)
         activeWorkbookProperty.onChange {
             logger.info("Active workbook: ${it?.target?.slug}")
             if (it == null) {

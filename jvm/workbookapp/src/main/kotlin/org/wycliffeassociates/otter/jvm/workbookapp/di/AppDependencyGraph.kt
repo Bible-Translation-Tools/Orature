@@ -41,7 +41,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewMod
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SplashScreenViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioDataStore
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AppPreferencesStore
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookPageViewModel
@@ -70,7 +69,6 @@ interface AppDependencyGraph {
     fun inject(viewModel: SplashScreenViewModel)
     fun inject(viewModel: HomePageViewModel)
     fun inject(viewModel: AddPluginViewModel)
-    fun inject(dataStore: WorkbookDataStore)
     fun inject(dataStore: AudioDataStore)
     fun inject(dataStore: AppPreferencesStore)
     fun inject(viewModel: AudioPluginViewModel)
