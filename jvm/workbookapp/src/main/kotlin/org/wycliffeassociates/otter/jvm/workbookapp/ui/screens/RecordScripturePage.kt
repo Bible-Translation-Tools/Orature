@@ -402,7 +402,7 @@ class RecordScripturePage : View() {
                 }
             )
             sourceTextZoomRateProperty.bind(
-                workbookDataStore.sourceTextZoomRateProperty
+                recordScriptureViewModel.sourceTextZoomRateProperty
             )
         }
     }
@@ -485,7 +485,7 @@ class RecordScripturePage : View() {
         initializeSourceContentListeners()
         recordScriptureViewModel.dock()
 
-        sourceContent.zoomRateProperty.set(workbookDataStore.sourceTextZoomRateProperty.value)
+        sourceContent.zoomRateProperty.set(recordScriptureViewModel.sourceTextZoomRateProperty.value)
         navigator.dock(this, breadCrumb)
 
         initializeImportProgressDialog()

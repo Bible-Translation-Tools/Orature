@@ -51,6 +51,7 @@ class AudioPluginViewModel : ViewModel() {
 
     private val workbookDataStore: WorkbookDataStore by inject()
     private val audioDataStore: AudioDataStore by inject()
+    private val appPreferencesStore: AppPreferencesStore by inject()
     private val settingsViewModel: SettingsViewModel by inject()
 
     val pluginNameProperty = SimpleStringProperty()
@@ -107,7 +108,7 @@ class AudioPluginViewModel : ViewModel() {
 
         val sourceRate = (workbookDataStore.workbook.translation.sourceRate as BehaviorRelay).value ?: 1.0
         val targetRate = (workbookDataStore.workbook.translation.targetRate as BehaviorRelay).value ?: 1.0
-        val sourceTextZoom = workbookDataStore.sourceTextZoomRateProperty.value
+        val sourceTextZoom = appPreferencesStore.sourceTextZoomRateProperty.value
 
         return PluginParameters(
             languageName = workbook.target.language.name,

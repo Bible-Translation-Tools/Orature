@@ -32,20 +32,14 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateChangedEvent
 import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateType
-import org.wycliffeassociates.otter.jvm.controls.media.SourceTextZoomRateChangedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
 import java.text.MessageFormat
 import java.util.concurrent.Callable
-import javax.inject.Inject
 
 class WorkbookDataStore : Component(), ScopedInstance {
-
-    @Inject
-    lateinit var appPreferenceRepo: IAppPreferencesRepository
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -70,8 +64,6 @@ class WorkbookDataStore : Component(), ScopedInstance {
         get() = activeResourceMetadataProperty.value ?: throw IllegalStateException("Resource Metadata is null")
 
     val activeTakeNumberProperty = SimpleIntegerProperty()
-
-    val sourceTextZoomRateProperty = SimpleIntegerProperty()
     val sourceLicenseProperty = SimpleStringProperty()
 
     init {
@@ -88,10 +80,6 @@ class WorkbookDataStore : Component(), ScopedInstance {
 
         workspace.subscribe<PlaybackRateChangedEvent> { event ->
             updatePlaybackSpeedRate(event)
-        }
-        workspace.subscribe<SourceTextZoomRateChangedEvent> { event ->
-            sourceTextZoomRateProperty.set(event.rate)
-            appPreferenceRepo.setSourceTextZoomRate(event.rate).subscribe()
         }
     }
 

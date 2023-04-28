@@ -74,6 +74,7 @@ class RecordScriptureViewModel : ViewModel() {
 
     private val workbookDataStore: WorkbookDataStore by inject()
     private val audioDataStore: AudioDataStore by inject()
+    private val appPreferencesStore: AppPreferencesStore by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
     private val titleProperty = SimpleStringProperty()
@@ -106,11 +107,14 @@ class RecordScriptureViewModel : ViewModel() {
     val showImportSuccessDialogProperty = SimpleBooleanProperty(false)
     val showImportFailDialogProperty = SimpleBooleanProperty(false)
 
+    val sourceTextZoomRateProperty = SimpleIntegerProperty()
+
     private val disposables = CompositeDisposable()
     val listeners = mutableListOf<ListenerDisposer>()
 
     init {
         audioPluginViewModel.pluginNameProperty.bind(pluginNameBinding())
+        sourceTextZoomRateProperty.bind(appPreferencesStore.sourceTextZoomRateProperty)
     }
 
     fun dock() {

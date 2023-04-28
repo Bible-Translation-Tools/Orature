@@ -26,6 +26,7 @@ import io.reactivex.subjects.PublishSubject
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -58,6 +59,7 @@ class ChapterPageViewModel : ViewModel() {
 
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
+    val appPreferencesStore: AppPreferencesStore by inject()
     val audioPluginViewModel: AudioPluginViewModel by inject()
 
     @Inject
@@ -97,6 +99,8 @@ class ChapterPageViewModel : ViewModel() {
     val chapterCardProperty = SimpleObjectProperty<CardData>()
     val contextProperty = SimpleObjectProperty(PluginType.RECORDER)
 
+    val sourceTextZoomRateProperty = SimpleIntegerProperty()
+
     val showExportProgressDialogProperty = SimpleBooleanProperty(false)
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
@@ -112,6 +116,8 @@ class ChapterPageViewModel : ViewModel() {
         filteredContent.onChange {
             checkCanCompile()
         }
+
+        sourceTextZoomRateProperty.bindBidirectional(appPreferencesStore.sourceTextZoomRateProperty)
     }
 
     fun dock() {
@@ -124,7 +130,7 @@ class ChapterPageViewModel : ViewModel() {
             subscribeSelectedTakePropertyToRelay(chapter.audio)
         }
         appPreferencesRepo.sourceTextZoomRate().subscribe { rate ->
-            workbookDataStore.sourceTextZoomRateProperty.set(rate)
+            sourceTextZoomRateProperty.set(rate)
         }.let { disposables.add(it) }
         checkCanCompile()
     }

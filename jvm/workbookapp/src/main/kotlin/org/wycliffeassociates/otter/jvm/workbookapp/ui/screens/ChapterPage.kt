@@ -522,7 +522,7 @@ class ChapterPage : View() {
                 }
             )
             sourceTextZoomRateProperty.bind(
-                workbookDataStore.sourceTextZoomRateProperty
+                viewModel.sourceTextZoomRateProperty
             )
         }
     }
