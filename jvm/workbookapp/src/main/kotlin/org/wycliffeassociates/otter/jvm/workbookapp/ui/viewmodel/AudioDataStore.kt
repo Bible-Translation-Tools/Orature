@@ -138,14 +138,17 @@ class AudioDataStore : Component(), ScopedInstance {
     }
 
     fun updateSourceAudio() {
-        val workbook = workbookDataStore.workbook
-        val chunk = workbookDataStore.activeChunkProperty.get()
-        val chapter = workbookDataStore.activeChapterProperty.get()
-        if (chapter != null && chunk != null) {
-            sourceAudioProperty.set(workbook.sourceAudioAccessor.getChunk(chapter.sort, chunk.sort, workbook.target))
-        } else if (chapter != null) {
-            sourceAudioProperty.set(workbook.sourceAudioAccessor.getChapter(chapter.sort, workbook.target))
-        } else {
+        workbookDataStore.activeWorkbookProperty.value?.let { workbook ->
+            val chunk = workbookDataStore.activeChunkProperty.get()
+            val chapter = workbookDataStore.activeChapterProperty.get()
+            if (chapter != null && chunk != null) {
+                sourceAudioProperty.set(workbook.sourceAudioAccessor.getChunk(chapter.sort, chunk.sort, workbook.target))
+            } else if (chapter != null) {
+                sourceAudioProperty.set(workbook.sourceAudioAccessor.getChapter(chapter.sort, workbook.target))
+            } else {
+                sourceAudioProperty.set(null)
+            }
+        } ?: run {
             sourceAudioProperty.set(null)
         }
     }
@@ -162,6 +165,8 @@ class AudioDataStore : Component(), ScopedInstance {
                 _chunk.sort,
                 meta
             )
-        } ?: run { sourceAudio.getChapter(chapter.sort, meta) }
+        } ?: run {
+            sourceAudio.getChapter(chapter.sort, meta)
+        }
     }
 }
