@@ -18,24 +18,16 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.narration
 
-import javafx.beans.binding.Bindings
-import javafx.beans.binding.StringBinding
-import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.event.ActionEvent
-import javafx.event.EventHandler
 import javafx.event.EventTarget
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import tornadofx.*
-import java.text.MessageFormat
 
 class StickyVerse : VBox() {
     val verseLabelProperty = SimpleStringProperty()
-    val onResumeVerseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val resumeTextProperty = SimpleStringProperty()
 
     init {
@@ -53,17 +45,18 @@ class StickyVerse : VBox() {
             button(resumeTextProperty) {
                 addClass("btn", "btn--primary")
                 graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
-                onActionProperty().bind(onResumeVerseActionProperty)
+
+                action {
+                    FX.eventbus.fire(ResumeVerse())
+                }
             }
         }
 
         managedProperty().bind(visibleProperty())
     }
-
-    fun onResumeVerse(op: () -> Unit) {
-        onResumeVerseActionProperty.set(EventHandler { op() })
-    }
 }
+
+class ResumeVerse: FXEvent()
 
 fun EventTarget.stickyVerse(op: StickyVerse.() -> Unit = {}) =
     StickyVerse().attachTo(this, op) {

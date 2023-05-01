@@ -22,6 +22,8 @@ import javafx.event.EventHandler
 import javafx.scene.control.ListCell
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationRecordItem
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkData
+import tornadofx.FX
+import tornadofx.FXEvent
 import tornadofx.addClass
 
 class NarrationRecordCell(
@@ -65,17 +67,22 @@ class NarrationRecordCell(
             goToVerseTextProperty.set(goToVerseText)
 
             onPlayActionProperty.set(EventHandler {
-                item.onPlay(item)
+                FX.eventbus.fire(PlayVerseEvent(item))
             })
             onOpenAppActionProperty.set(EventHandler {
-                item.onOpenApp(item)
+                FX.eventbus.fire(OpenInAppEvent(item))
             })
             onRecordAgainActionProperty.set(EventHandler {
-                item.onRecordAgain(item)
+                FX.eventbus.fire(RecordAgainEvent(item))
             })
             onWaveformClickActionProperty.set(EventHandler {
-                item.onWaveformClicked(item)
+                FX.eventbus.fire(WaveformClickedEvent(item))
             })
         }
     }
 }
+
+class PlayVerseEvent(val data: ChunkData) : FXEvent()
+class OpenInAppEvent(val data: ChunkData) : FXEvent()
+class RecordAgainEvent(val data: ChunkData) : FXEvent()
+class WaveformClickedEvent(val data: ChunkData) : FXEvent()

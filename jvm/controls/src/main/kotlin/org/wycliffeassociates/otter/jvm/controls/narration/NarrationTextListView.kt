@@ -18,12 +18,9 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.narration
 
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.value.ObservableValue
 import javafx.collections.ObservableList
-import javafx.event.ActionEvent
-import javafx.event.EventHandler
 import javafx.event.EventTarget
 import javafx.geometry.Orientation
 import javafx.scene.control.ListView
@@ -32,11 +29,6 @@ import org.wycliffeassociates.otter.jvm.utils.*
 import tornadofx.*
 
 class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(items) {
-    val cardIsOutOfViewProperty = SimpleBooleanProperty()
-    val onSelectedVerseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
-
-    val initialSelectedItemProperty = SimpleObjectProperty<T>()
-
     private val listeners = mutableListOf<ListenerDisposer>()
 
     init {
@@ -44,14 +36,6 @@ class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(i
     }
 
     fun addListeners() {
-        initialSelectedItemProperty.onChangeAndDoNowWithDisposer {
-            it?.let {
-                cardIsOutOfViewProperty.set(false)
-                selectionModel.select(it)
-                scrollTo(it)
-            }
-        }.also(listeners::add)
-
         skinProperty().onChangeWithDisposer {
             it?.let {
                 try {
@@ -64,14 +48,9 @@ class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(i
                         val last = virtualFlow().lastVisibleCell?.index ?: 0
 
                         if (current !in (first..last)) {
-                            cardIsOutOfViewProperty.set(true)
-                            onSelectedVerseActionProperty.set(EventHandler {
-                                selectionModel.select(current)
-                                scrollTo(current)
-                            })
+                            FX.eventbus.fire(StickyVerseChangedEvent(selectionModel.selectedItem))
                         } else {
-                            cardIsOutOfViewProperty.set(false)
-                            onSelectedVerseActionProperty.set(null)
+                            FX.eventbus.fire(StickyVerseChangedEvent(null))
                         }
                     }?.also(listeners::add)
                 } catch (e: NullPointerException) {
@@ -86,6 +65,8 @@ class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(i
         listeners.clear()
     }
 }
+
+class StickyVerseChangedEvent<T>(val data: T?) : FXEvent()
 
 fun <T> EventTarget.narrationTextListview(
     values: ObservableList<T>?,

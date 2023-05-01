@@ -34,7 +34,6 @@ import org.wycliffeassociates.otter.jvm.controls.demo.ui.components.NarrationRec
 import org.wycliffeassociates.otter.jvm.controls.demo.ui.components.NarrationTextCell
 import org.wycliffeassociates.otter.jvm.controls.demo.ui.models.ChunkData
 import org.wycliffeassociates.otter.jvm.controls.demo.ui.viewmodels.DemoViewModel
-import org.wycliffeassociates.otter.jvm.controls.narration.stickyVerse
 import org.wycliffeassociates.otter.jvm.controls.narration.narrationrecordlistview
 import org.wycliffeassociates.otter.jvm.controls.narration.narrationTextListview
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
@@ -260,7 +259,7 @@ class NarrationFragment : Fragment() {
                     initialSelectedItemProperty.set(chunkDataList[0])
 
                     viewModel.onCurrentVerseActionProperty.bind(onSelectedVerseActionProperty)
-                    viewModel.floatingCardVisibleProperty.bind(cardIsOutOfViewProperty)
+                    viewModel.floatingCardVisibleProperty.bind(selectedVerseIsOutOfViewProperty)
 
                     viewModel.currentVerseLabelProperty.bind(selectionModel.selectedItemProperty().stringBinding {
                         it?.title

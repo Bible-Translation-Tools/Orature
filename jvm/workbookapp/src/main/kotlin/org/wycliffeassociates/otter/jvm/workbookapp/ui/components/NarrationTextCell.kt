@@ -20,8 +20,11 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
 import javafx.event.EventHandler
 import javafx.scene.control.ListCell
+import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItem
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkData
+import tornadofx.FX
+import tornadofx.FXEvent
 import tornadofx.addClass
 
 class NarrationTextCell(private val nextChunkText: String) : ListCell<ChunkData>() {
@@ -53,14 +56,18 @@ class NarrationTextCell(private val nextChunkText: String) : ListCell<ChunkData>
             nextChunkTextProperty.set(nextChunkText)
 
             onRecordActionProperty.set(EventHandler {
-                item.onRecord(item)
+                FX.eventbus.fire(RecordVerseEvent(item))
             })
 
-            onNextVerseActionProperty.set(EventHandler {
-                listView.selectionModel.selectNext()
-                listView.scrollTo(item)
-                item.onNext(listView.selectionModel.selectedItem)
+            onNextVerseActionProperty.set(EventHandler  {
+                FX.eventbus.fire(NextVerseEvent(item))
+//                listView.selectionModel.selectNext()
+//                listView.scrollTo(item)
+//                item.onNext(listView.selectionModel.selectedItem)
             })
         }
     }
 }
+
+class NextVerseEvent(val currentVerse: ChunkData) : FXEvent()
+class RecordVerseEvent(val data: ChunkData) : FXEvent()
