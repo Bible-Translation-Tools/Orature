@@ -28,7 +28,7 @@ import org.wycliffeassociates.otter.jvm.device.audio.DEFAULT_AUDIO_FORMAT
 import org.wycliffeassociates.otter.jvm.workbookapp.di.DaggerAppDependencyGraph
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.logging.ConfigureLogger
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioDataStore
 import tornadofx.App
 import tornadofx.View
 import tornadofx.addClass
@@ -65,8 +65,6 @@ class ChunkingDebugView : View(){
     override val root = StackPane().apply { addClass("light-theme") }
 
     init {
-        val wkbk: WorkbookDataStore = tornadofx.find()
-        wkbk.sourceAudioProperty.set(SourceAudio(File("/Users/jsara/Documents/test12345.mp3"), 0, 1))
         add<ChunkingWizard>()
     }
 }

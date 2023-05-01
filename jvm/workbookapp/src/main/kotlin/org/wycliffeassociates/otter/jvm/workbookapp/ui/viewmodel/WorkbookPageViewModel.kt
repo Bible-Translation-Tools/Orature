@@ -23,7 +23,6 @@ import io.reactivex.Completable
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.beans.value.ChangeListener
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
@@ -34,7 +33,6 @@ import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.BackupProjectExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportType
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
@@ -49,7 +47,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ContributorCellData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChapterNarrationPage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChapterPage
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ResourcePage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.errorMessage
 import tornadofx.*
 import java.io.File
@@ -100,23 +97,9 @@ class WorkbookPageViewModel : ViewModel() {
     val selectedResourceMetadata = SimpleObjectProperty<ResourceMetadata>()
 
     private val navigator: NavigationMediator by inject()
-    private var projectFilesAccessorListener: ChangeListener<ProjectFilesAccessor>? = null
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
-
-        projectFilesAccessorListener = ChangeListener<ProjectFilesAccessor> { _, _, projectAccessor ->
-            if (projectAccessor != null) {
-                val projectContributors = projectAccessor.getContributorInfo()
-                contributors.setAll(projectContributors)
-            }
-        }
-    }
-
-    fun dock() {
-        workbookDataStore.activeProjectFilesAccessorProperty.addListener(
-            projectFilesAccessorListener
-        )
     }
 
     /**
@@ -126,7 +109,8 @@ class WorkbookPageViewModel : ViewModel() {
      * we null out the active chapter, as we have returned from being in a chapter.
      */
     fun openWorkbook() {
-        workbookDataStore.activeChapterProperty.set(null)
+        val projectContributors = workbookDataStore.workbook.projectFilesAccessor.getContributorInfo()
+        contributors.setAll(projectContributors)
         loadChapters(workbookDataStore.workbook)
     }
 
@@ -135,8 +119,6 @@ class WorkbookPageViewModel : ViewModel() {
      */
     fun openTab(resourceMetadata: ResourceMetadata) {
         currentTabProperty.set(resourceMetadata.identifier)
-        workbookDataStore.activeResourceMetadataProperty.set(resourceMetadata)
-        workbookDataStore.setProjectFilesAccessor(resourceMetadata)
     }
 
     /**
@@ -198,20 +180,16 @@ class WorkbookPageViewModel : ViewModel() {
      */
     fun navigate(chapter: Chapter) {
         workbookDataStore.activeChapterProperty.set(chapter)
-        val resourceMetadata = workbookDataStore.activeResourceMetadata
+        val resourceMetadata = workbookDataStore.workbook.target.resourceMetadata
         updateLastResource(resourceMetadata.identifier)
-        when (resourceMetadata.type) {
-            ContainerType.Book, ContainerType.Bundle -> navigator.dock<ChapterNarrationPage>()
-            //ContainerType.Book, ContainerType.Bundle -> navigator.dock<ChapterPage>()
-            ContainerType.Help -> navigator.dock<ResourcePage>()
-        }
+        navigator.dock<ChapterPage>()
     }
 
     fun exportWorkbook(directory: File, type: ExportType) {
         showExportProgressDialogProperty.set(true)
 
         val workbook = workbookDataStore.workbook
-        val resourceMetadata = workbookDataStore.activeResourceMetadata
+        val resourceMetadata = workbookDataStore.workbook.target.resourceMetadata
 
         activeProjectTitleProperty.set(workbook.target.title)
         activeProjectCoverProperty.set(
@@ -304,7 +282,7 @@ class WorkbookPageViewModel : ViewModel() {
     fun saveContributorInfo() {
         Completable
             .fromAction {
-                workbookDataStore.activeProjectFilesAccessor.setContributorInfo(contributors)
+                workbookDataStore.workbook.projectFilesAccessor.setContributorInfo(contributors)
             }
             .observeOnFx()
             .doOnError {
@@ -315,9 +293,6 @@ class WorkbookPageViewModel : ViewModel() {
 
     fun undock() {
         chapters.clear()
-        workbookDataStore.activeProjectFilesAccessorProperty.removeListener(
-            projectFilesAccessorListener
-        )
     }
 
     fun goBack() {
