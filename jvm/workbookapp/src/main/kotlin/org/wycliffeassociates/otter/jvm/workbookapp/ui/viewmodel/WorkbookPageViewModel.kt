@@ -46,7 +46,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ContributorCellData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChapterPage
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ResourcePage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.errorMessage
 import tornadofx.*
 import java.io.File
@@ -100,9 +99,6 @@ class WorkbookPageViewModel : ViewModel() {
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
-
-        val projectContributors = workbookDataStore.workbook.projectFilesAccessor.getContributorInfo()
-        contributors.setAll(projectContributors)
     }
 
     /**
@@ -112,7 +108,8 @@ class WorkbookPageViewModel : ViewModel() {
      * we null out the active chapter, as we have returned from being in a chapter.
      */
     fun openWorkbook() {
-        workbookDataStore.activeChapterProperty.set(null)
+        val projectContributors = workbookDataStore.workbook.projectFilesAccessor.getContributorInfo()
+        contributors.setAll(projectContributors)
         loadChapters(workbookDataStore.workbook)
     }
 
@@ -184,10 +181,7 @@ class WorkbookPageViewModel : ViewModel() {
         workbookDataStore.activeChapterProperty.set(chapter)
         val resourceMetadata = workbookDataStore.workbook.target.resourceMetadata
         updateLastResource(resourceMetadata.identifier)
-        when (resourceMetadata.type) {
-            ContainerType.Book, ContainerType.Bundle -> navigator.dock<ChapterPage>()
-            ContainerType.Help -> navigator.dock<ResourcePage>()
-        }
+        navigator.dock<ChapterPage>()
     }
 
     fun exportWorkbook(directory: File, type: ExportType) {

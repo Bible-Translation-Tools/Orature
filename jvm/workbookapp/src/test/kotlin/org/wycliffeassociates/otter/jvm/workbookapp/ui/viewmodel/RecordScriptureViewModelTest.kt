@@ -106,10 +106,16 @@ class RecordScriptureViewModelTest {
             on { getChapter(any(), eq(null)) } doReturn SourceAudio(sourceTakeFile, 0, 1)
         }
 
+        private val projectFilesAccessor = mock<ProjectFilesAccessor> {
+            on { audioDir } doReturn tempDir
+            on { updateSelectedTakesFile(any()) } doReturn Completable.complete()
+        }
+
         private val workbook = mock<Workbook> {
             on { source } doReturn book
             on { target } doReturn book
             on { sourceAudioAccessor } doReturn sourceAudioAccessor
+            on { projectFilesAccessor } doReturn projectFilesAccessor
         }
 
         private fun createAssociatedAudio() = AssociatedAudio(ReplayRelay.create())
@@ -118,10 +124,6 @@ class RecordScriptureViewModelTest {
             return ChangeListener { _, _, value ->
                 callback(value)
             }
-        }
-
-        private val projectFilesAccessor = mock<ProjectFilesAccessor> {
-            on { audioDir } doReturn tempDir
         }
 
         private fun createChunk(): Chunk {
