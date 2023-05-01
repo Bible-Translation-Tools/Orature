@@ -60,14 +60,16 @@ class NarrationTextCell(private val nextChunkText: String) : ListCell<ChunkData>
             })
 
             onNextVerseActionProperty.set(EventHandler  {
-                FX.eventbus.fire(NextVerseEvent(item))
-//                listView.selectionModel.selectNext()
-//                listView.scrollTo(item)
-//                item.onNext(listView.selectionModel.selectedItem)
+                listView.apply {
+                    selectionModel.selectNext()
+                    scrollTo(selectionModel.selectedItem)
+
+                    FX.eventbus.fire(NextVerseEvent(selectionModel.selectedItem))
+                }
             })
         }
     }
 }
 
-class NextVerseEvent(val currentVerse: ChunkData) : FXEvent()
+class NextVerseEvent(val data: ChunkData) : FXEvent()
 class RecordVerseEvent(val data: ChunkData) : FXEvent()

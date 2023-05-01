@@ -10,7 +10,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.controls.chapterSelector
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.narrationMenu
 import tornadofx.*
 
-class NarrationHeader() : View() {
+class NarrationHeader : View() {
     private val viewModel by inject<NarrationHeaderViewModel>()
 
     override val root = hbox {
@@ -42,7 +42,7 @@ class NarrationHeader() : View() {
     }
 }
 
-class NarrationHeaderViewModel() : ViewModel() {
+class NarrationHeaderViewModel : ViewModel() {
     // private val workbookDataStore by inject<WorkbookDataStore>()
     val titleProperty = SimpleStringProperty("Narration Title")
     val chapterTitleProperty = SimpleStringProperty("Chapter Title")

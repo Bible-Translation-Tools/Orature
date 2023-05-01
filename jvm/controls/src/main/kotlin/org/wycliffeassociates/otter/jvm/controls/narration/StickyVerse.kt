@@ -47,7 +47,7 @@ class StickyVerse : VBox() {
                 graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
 
                 action {
-                    FX.eventbus.fire(ResumeVerse())
+                    FX.eventbus.fire(ResumeVerseEvent())
                 }
             }
         }
@@ -56,7 +56,7 @@ class StickyVerse : VBox() {
     }
 }
 
-class ResumeVerse: FXEvent()
+class ResumeVerseEvent: FXEvent()
 
 fun EventTarget.stickyVerse(op: StickyVerse.() -> Unit = {}) =
     StickyVerse().attachTo(this, op) {
