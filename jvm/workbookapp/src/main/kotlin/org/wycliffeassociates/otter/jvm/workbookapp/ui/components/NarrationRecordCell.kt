@@ -76,7 +76,7 @@ class NarrationRecordCell(
                 FX.eventbus.fire(RecordAgainEvent(item))
             })
             onWaveformClickActionProperty.set(EventHandler {
-                FX.eventbus.fire(WaveformClickedEvent(item))
+                FX.eventbus.fire(WaveformClickedEvent(index))
             })
         }
     }
@@ -85,4 +85,4 @@ class NarrationRecordCell(
 class PlayVerseEvent(val data: ChunkData) : FXEvent()
 class OpenInAppEvent(val data: ChunkData) : FXEvent()
 class RecordAgainEvent(val data: ChunkData) : FXEvent()
-class WaveformClickedEvent(val data: ChunkData) : FXEvent()
+class WaveformClickedEvent(val index: Int) : FXEvent()

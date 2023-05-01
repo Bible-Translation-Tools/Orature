@@ -26,7 +26,6 @@ import org.wycliffeassociates.otter.jvm.controls.combobox.IconComboBoxCell
 import org.wycliffeassociates.otter.jvm.controls.demo.ui.viewmodels.DemoViewModel
 import org.wycliffeassociates.otter.jvm.controls.demo.ui.fragments.ButtonFragment
 import org.wycliffeassociates.otter.jvm.controls.demo.ui.fragments.ComboBoxFragment
-import org.wycliffeassociates.otter.jvm.controls.demo.ui.fragments.NarrationFragment
 import org.wycliffeassociates.otter.jvm.utils.overrideDefaultKeyEventHandler
 import tornadofx.*
 
@@ -74,15 +73,6 @@ class ControlMenu : View() {
 
                 action {
                     viewModel.showContent<ComboBoxFragment>()
-                }
-            }
-
-            button("Narration") {
-                addClass("btn", "btn--primary")
-                fitToParentWidth()
-
-                action {
-                    viewModel.showContent<NarrationFragment>()
                 }
             }
         }

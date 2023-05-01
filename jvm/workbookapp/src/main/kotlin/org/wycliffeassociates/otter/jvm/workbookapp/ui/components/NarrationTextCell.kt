@@ -18,23 +18,27 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
+import javafx.beans.value.ObservableValue
 import javafx.event.EventHandler
 import javafx.scene.control.ListCell
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItem
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkData
 import tornadofx.FX
 import tornadofx.FXEvent
 import tornadofx.addClass
 
-class NarrationTextCell(private val nextChunkText: String) : ListCell<ChunkData>() {
+class NarrationTextCell(
+    private val nextChunkText: String,
+    private val recordButtonTextProperty: ObservableValue<String>,
+    private val isRecordingProperty: ObservableValue<Boolean>
+) : ListCell<Chunk>() {
     private val view = NarrationTextItem()
 
     init {
         addClass("narration-list__verse-cell")
     }
 
-    override fun updateItem(item: ChunkData?, empty: Boolean) {
+    override fun updateItem(item: Chunk?, empty: Boolean) {
         super.updateItem(item, empty)
 
         if (empty || item == null) {
@@ -49,10 +53,10 @@ class NarrationTextCell(private val nextChunkText: String) : ListCell<ChunkData>
 
         graphic = view.apply {
             verseLabelProperty.set(item.title)
-            verseTextProperty.set(item.text)
+            verseTextProperty.set(item.textItem.text)
 
-            recordButtonTextProperty.bind(item.recordButtonTextProperty)
-            isRecordingProperty.bind(item.isRecordingProperty)
+            recordButtonTextProperty.bind(this@NarrationTextCell.recordButtonTextProperty)
+            isRecordingProperty.bind(this@NarrationTextCell.isRecordingProperty)
             nextChunkTextProperty.set(nextChunkText)
 
             onRecordActionProperty.set(EventHandler {
@@ -71,5 +75,5 @@ class NarrationTextCell(private val nextChunkText: String) : ListCell<ChunkData>
     }
 }
 
-class NextVerseEvent(val data: ChunkData) : FXEvent()
-class RecordVerseEvent(val data: ChunkData) : FXEvent()
+class NextVerseEvent(val data: Chunk) : FXEvent()
+class RecordVerseEvent(val data: Chunk) : FXEvent()

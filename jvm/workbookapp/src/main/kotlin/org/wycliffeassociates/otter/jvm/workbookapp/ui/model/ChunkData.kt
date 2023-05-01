@@ -66,25 +66,4 @@ data class ChunkData(
     fun hasAudio(): Boolean {
         return file != null
     }
-
-    override fun hashCode(): Int {
-        return Objects.hash(
-            sort,
-            title,
-            text
-        )
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as ChunkData
-
-        if (sort != other.sort) return false
-        if (title != other.title) return false
-        if (text != other.text) return false
-
-        return true
-    }
 }
