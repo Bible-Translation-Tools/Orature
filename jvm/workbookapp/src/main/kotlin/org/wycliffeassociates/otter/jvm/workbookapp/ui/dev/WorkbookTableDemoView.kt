@@ -1,11 +1,15 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.dev
 
+import javafx.beans.property.SimpleObjectProperty
+import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookInfo
+import org.wycliffeassociates.otter.jvm.controls.card.NewTranslationCard2
+import org.wycliffeassociates.otter.jvm.controls.card.translationCardWrapper
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookDeleteEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookExportEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookOpenEvent
+import org.wycliffeassociates.otter.jvm.controls.model.TranslationMode
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview.workbookTableView
 import java.time.LocalDateTime
 import tornadofx.*
 
@@ -27,6 +31,7 @@ class WorkbookTableDemoView : View() {
         tryImportStylesheet("/css/popup-menu.css")
         tryImportStylesheet("/css/filtered-search-bar.css")
         tryImportStylesheet("/css/table-view.css")
+        tryImportStylesheet("/css/translation-card-2.css")
 
         subscribeToWorkbookEvent()
     }
@@ -47,7 +52,32 @@ class WorkbookTableDemoView : View() {
     }
 
     override val root = vbox {
+        spacing = 10.0
         paddingAll = 20.0
-        workbookTableView(workbookList)
+        maxWidth = 300.0
+
+        borderpane {
+            center = translationCardWrapper(
+                Language("en", "English", "English", "", true, ""),
+                Language("fr", "français", "French", "", true, ""),
+                TranslationMode.TRANSLATION
+            ) {
+                top = button("Reset") {
+                    action {
+                        this@translationCardWrapper.isActiveProperty.set(false)
+                    }
+                }
+            }
+        }
+
+        add(
+            NewTranslationCard2(
+                SimpleObjectProperty<Language>(
+                    Language("en", "English", "English", "", true, "")
+                ),
+                SimpleObjectProperty<Language>(null),
+                mode = TranslationMode.NARRATION
+            )
+        )
     }
 }

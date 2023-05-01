@@ -83,6 +83,10 @@
     -fx-text-fill: -wa-regular-text-80;
 }
 
+.label-normal {
+    -fx-font-size: 1.4em;
+}
+
 .icon-default-color.ikonli-font-icon {
     -fx-icon-color: -wa-regular-text-80;
 }
