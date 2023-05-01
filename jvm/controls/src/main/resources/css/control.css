@@ -832,3 +832,22 @@
     -fx-font-family: "Noto Sans";
     -fx-font-weight: NORMAL;
 }
+
+/* Common scrollbar styles */
+.virtual-flow .scroll-bar:vertical,
+.virtual-flow .scroll-bar:vertical .track-background,
+.virtual-flow .scroll-bar:horizontal,
+.virtual-flow .scroll-bar:horizontal .track-background {
+     -fx-background-color: transparent;
+ }
+
+.virtual-flow .scroll-bar .increment-button,
+.virtual-flow .scroll-bar .decrement-button {
+     -fx-opacity: 0;
+     -fx-padding: 0 2;
+ }
+
+.virtual-flow .scroll-bar:vertical .thumb,
+.virtual-flow .scroll-bar:horizontal .thumb {
+    -fx-background-radius: 8;
+}

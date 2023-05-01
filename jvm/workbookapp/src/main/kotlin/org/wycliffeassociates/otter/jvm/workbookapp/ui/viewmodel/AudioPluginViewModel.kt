@@ -50,6 +50,8 @@ class AudioPluginViewModel : ViewModel() {
     @Inject lateinit var localeLanguage: LocaleLanguage
 
     private val workbookDataStore: WorkbookDataStore by inject()
+    private val audioDataStore: AudioDataStore by inject()
+    private val appPreferencesStore: AppPreferencesStore by inject()
     private val settingsViewModel: SettingsViewModel by inject()
 
     val pluginNameProperty = SimpleStringProperty()
@@ -69,7 +71,7 @@ class AudioPluginViewModel : ViewModel() {
         val params = constructPluginParameters()
         return pluginActions.record(
             audio = recordable.audio,
-            projectAudioDir = workbookDataStore.activeProjectFilesAccessor.audioDir,
+            projectAudioDir = workbookDataStore.workbook.projectFilesAccessor.audioDir,
             namer = createFileNamer(recordable),
             pluginParameters = params
         )
@@ -78,7 +80,7 @@ class AudioPluginViewModel : ViewModel() {
     fun import(recordable: Recordable, take: File): Completable {
         return pluginActions.import(
             audio = recordable.audio,
-            projectAudioDir = workbookDataStore.activeProjectFilesAccessor.audioDir,
+            projectAudioDir = workbookDataStore.workbook.projectFilesAccessor.audioDir,
             namer = createFileNamer(recordable),
             take = take
         )
@@ -86,7 +88,7 @@ class AudioPluginViewModel : ViewModel() {
 
     private fun constructPluginParameters(action: String = ""): PluginParameters {
         val workbook = workbookDataStore.workbook
-        val sourceAudio = workbookDataStore.getSourceAudio()
+        val sourceAudio = audioDataStore.getSourceAudio()
         val sourceText = workbookDataStore.sourceTextBinding().value
 
         val chapterLabel = messages[workbookDataStore.activeChapterProperty.value.label]
@@ -102,11 +104,11 @@ class AudioPluginViewModel : ViewModel() {
         val resourceLabel = workbookDataStore.activeResourceComponentProperty.value?.let {
             messages[workbookDataStore.activeResourceComponentProperty.value.label]
         }
-        val targetAudio = workbookDataStore.targetAudioProperty.value
+        val targetAudio = audioDataStore.targetAudioProperty.value
 
         val sourceRate = (workbookDataStore.workbook.translation.sourceRate as BehaviorRelay).value ?: 1.0
         val targetRate = (workbookDataStore.workbook.translation.targetRate as BehaviorRelay).value ?: 1.0
-        val sourceTextZoom = workbookDataStore.sourceTextZoomRateProperty.value
+        val sourceTextZoom = appPreferencesStore.sourceTextZoomRateProperty.value
 
         return PluginParameters(
             languageName = workbook.target.language.name,
@@ -141,7 +143,7 @@ class AudioPluginViewModel : ViewModel() {
             chapter = workbookDataStore.chapter,
             chunk = workbookDataStore.chunk,
             recordable = recordable,
-            rcSlug = workbookDataStore.activeResourceMetadata.identifier
+            rcSlug = workbookDataStore.workbook.sourceMetadataSlug
         )
     }
 
