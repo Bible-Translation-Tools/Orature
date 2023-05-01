@@ -133,6 +133,7 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
     private fun loadMarkers(audio: AudioFile) {
         val initialMarkerCount = audio.metadata.getCues().size
         scope as ParameterizedScope
+        val markersList: List<String> = getVerseLabelList(scope.parameters.named["marker_labels"])
         val totalMarkers: Int = scope.parameters.named["marker_total"]?.toInt() ?: initialMarkerCount
         markerModel = VerseMarkerModel(audio, totalMarkers)
 
@@ -145,6 +146,10 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
         markerModel?.let { markerModel ->
             markers.setAll(markerModel.markers)
         }
+    }
+
+    private fun getVerseLabelList(s: String?): List<String> {
+        return s?.removeSurrounding("[", "]")?.split(",") ?: emptyList()
     }
 
     private fun loadTitles() {
