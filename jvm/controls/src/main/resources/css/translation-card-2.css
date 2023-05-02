@@ -35,6 +35,7 @@
 }
 
 .translation-card__language {
+    -fx-graphic-text-gap: 0.6em;
     -fx-text-fill: -wa-active-text;
     -fx-font-size: 20px;
 }
@@ -46,4 +47,11 @@
 .translation-card__language:unset .ikonli-font-icon,
 .translation-card__divider:unset .ikonli-font-icon {
     -fx-icon-color: -wa-regular-text;
+}
+
+.create-translation-card {
+    -fx-background-color: -wa-card-image-placeholder-background;
+    -fx-background-radius: 16;
+    -fx-alignment: center-right;
+    -fx-padding: 12;
 }

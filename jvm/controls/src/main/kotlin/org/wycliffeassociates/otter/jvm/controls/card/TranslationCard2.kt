@@ -24,11 +24,7 @@ class TranslationCard2(
 ) : VBox() {
 
     private val cardTitleProperty = SimpleStringProperty(
-        when (mode) {
-            TranslationMode.TRANSLATION, TranslationMode.NARRATION -> {
-                MessageFormat.format(FX.messages["translationMode"], FX.messages[mode.titleKey])
-            }
-        }
+        MessageFormat.format(FX.messages["translationMode"], FX.messages[mode.titleKey])
     )
 
     init {

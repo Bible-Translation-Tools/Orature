@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.controls.card
 
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.event.EventTarget
+import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.jvm.controls.model.TranslationMode
@@ -13,7 +14,7 @@ class TranslationCardWrapper(
     sourceLanguage: Language,
     targetLanguage: Language,
     mode: TranslationMode
-): VBox() {
+): StackPane() {
 
     val isActiveProperty = SimpleBooleanProperty(false)
 

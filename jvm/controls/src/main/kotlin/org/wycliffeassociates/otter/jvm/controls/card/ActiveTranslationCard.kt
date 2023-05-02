@@ -18,12 +18,8 @@ class ActiveTranslationCard(
     mode: TranslationMode
 ) : VBox() {
 
-    val cardTitleProperty = SimpleStringProperty(
-        when (mode) {
-            TranslationMode.TRANSLATION, TranslationMode.NARRATION -> {
-                MessageFormat.format(messages["translationMode"], messages[mode.titleKey])
-            }
-        }
+    private val cardTitleProperty = SimpleStringProperty(
+        MessageFormat.format(messages["translationMode"], messages[mode.titleKey])
     )
 
     init {

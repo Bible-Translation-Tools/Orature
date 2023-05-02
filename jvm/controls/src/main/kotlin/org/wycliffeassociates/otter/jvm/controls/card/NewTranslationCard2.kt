@@ -1,7 +1,8 @@
 package org.wycliffeassociates.otter.jvm.controls.card
 
 import javafx.beans.property.SimpleObjectProperty
-import javafx.scene.layout.Priority
+import javafx.beans.value.ObservableValue
+import javafx.event.EventTarget
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
@@ -13,10 +14,12 @@ import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class NewTranslationCard2(
-    val sourceLanguageProperty: SimpleObjectProperty<Language>,
-    val targetLanguageProperty: SimpleObjectProperty<Language>,
+    val sourceLanguageProperty: ObservableValue<Language>,
+    val targetLanguageProperty: ObservableValue<Language>,
     mode: TranslationMode
 ) : VBox() {
+
+    private var onCancel: () -> Unit = {}
 
     init {
         addClass("translation-card")
@@ -61,7 +64,39 @@ class NewTranslationCard2(
         button(messages["cancel"]) {
             addClass("btn", "btn--secondary")
             graphic = FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE)
+
+            action {
+                onCancel()
+            }
         }
     }
 
+    fun setOnCancelAction(op: () -> Unit) {
+        onCancel = op
+    }
 }
+
+class CreateTranslationCard : VBox() {
+
+    private var onCreate: () -> Unit = {}
+
+    init {
+        addClass("create-translation-card")
+        button {
+            addClass("btn", "btn--primary")
+            graphic = FontIcon(MaterialDesign.MDI_PLUS)
+            action { onCreate() }
+        }
+    }
+
+    fun setOnAction(op: () -> Unit) {
+        onCreate = op
+    }
+}
+
+fun EventTarget.newTranslationCard(
+    sourceLanguage: ObservableValue<Language>,
+    targetLanguage: ObservableValue<Language>,
+    mode: TranslationMode,
+    op: NewTranslationCard2.() -> Unit = {}
+) = NewTranslationCard2(sourceLanguage, targetLanguage, mode).attachTo(this, op)

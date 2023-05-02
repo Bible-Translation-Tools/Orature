@@ -1,9 +1,13 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.dev
 
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookInfo
-import org.wycliffeassociates.otter.jvm.controls.card.NewTranslationCard2
+import org.wycliffeassociates.otter.jvm.controls.card.CreateTranslationCard
+import org.wycliffeassociates.otter.jvm.controls.card.activeTranslationCard
+import org.wycliffeassociates.otter.jvm.controls.card.newTranslationCard
+import org.wycliffeassociates.otter.jvm.controls.card.translationCard
 import org.wycliffeassociates.otter.jvm.controls.card.translationCardWrapper
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookDeleteEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookExportEvent
@@ -27,6 +31,11 @@ class WorkbookTableDemoView : View() {
         WorkbookInfo(0, "Colossians", "", 1.0, LocalDateTime.now(), true),
     )
 
+    val languages = listOf(
+        Language("en", "English", "English", "", true, ""),
+        Language("fr", "français", "French", "", true, ""),
+    )
+
     init {
         tryImportStylesheet("/css/popup-menu.css")
         tryImportStylesheet("/css/filtered-search-bar.css")
@@ -35,6 +44,8 @@ class WorkbookTableDemoView : View() {
 
         subscribeToWorkbookEvent()
     }
+
+    private val showNewTranslationCard = SimpleBooleanProperty(false)
 
     private fun subscribeToWorkbookEvent() {
         workspace.subscribe<WorkbookOpenEvent> {
@@ -58,26 +69,42 @@ class WorkbookTableDemoView : View() {
 
         borderpane {
             center = translationCardWrapper(
-                Language("en", "English", "English", "", true, ""),
-                Language("fr", "français", "French", "", true, ""),
+                languages[0],
+                languages[1],
                 TranslationMode.TRANSLATION
             ) {
                 top = button("Reset") {
                     action {
                         this@translationCardWrapper.isActiveProperty.set(false)
+                        showNewTranslationCard.set(false)
                     }
                 }
             }
         }
 
+        newTranslationCard(
+            SimpleObjectProperty<Language>(
+                Language("en", "English", "English", "", true, "")
+            ),
+            SimpleObjectProperty<Language>(null),
+            mode = TranslationMode.NARRATION
+        ) {
+            visibleWhen(showNewTranslationCard)
+            managedWhen(visibleProperty())
+
+            setOnCancelAction {
+                showNewTranslationCard.set(false)
+            }
+        }
         add(
-            NewTranslationCard2(
-                SimpleObjectProperty<Language>(
-                    Language("en", "English", "English", "", true, "")
-                ),
-                SimpleObjectProperty<Language>(null),
-                mode = TranslationMode.NARRATION
-            )
+            CreateTranslationCard().apply {
+                visibleWhen(showNewTranslationCard.not())
+                managedWhen(visibleProperty())
+
+                setOnAction {
+                    showNewTranslationCard.set(true)
+                }
+            }
         )
     }
 }
