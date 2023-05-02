@@ -87,6 +87,6 @@
     -fx-font-size: 1.4em;
 }
 
-.icon-default-color.ikonli-font-icon {
+.wa-icon {
     -fx-icon-color: -wa-regular-text-80;
 }
