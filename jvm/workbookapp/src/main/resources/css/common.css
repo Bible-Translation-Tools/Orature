@@ -83,6 +83,11 @@
     -fx-text-fill: -wa-regular-text-80;
 }
 
+.normal-text {
+    -fx-font-size: 1.4em;
+    -fx-text-fill: -wa-regular-text-80;
+}
+
 .wa-icon {
     -fx-icon-color: -wa-regular-text-80;
 }
