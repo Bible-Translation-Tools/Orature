@@ -1,14 +1,11 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.dev
 
-import javafx.beans.property.SimpleBooleanProperty
-import javafx.scene.layout.Priority
-import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookInfo
-import org.wycliffeassociates.otter.jvm.controls.card.translationTypeCard
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookDeleteEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookExportEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookOpenEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview.workbookTableView
 import java.time.LocalDateTime
 import tornadofx.*
 
@@ -26,21 +23,13 @@ class WorkbookTableDemoView : View() {
         WorkbookInfo(0, "Colossians", "", 1.0, LocalDateTime.now(), true),
     )
 
-    val languages = listOf(
-        Language("en", "English", "English", "", true, ""),
-        Language("fr", "français", "French", "", true, ""),
-    )
-
     init {
         tryImportStylesheet("/css/popup-menu.css")
         tryImportStylesheet("/css/filtered-search-bar.css")
         tryImportStylesheet("/css/table-view.css")
-        tryImportStylesheet("/css/translation-card-2.css")
 
         subscribeToWorkbookEvent()
     }
-
-    private val showNewTranslationCard = SimpleBooleanProperty(false)
 
     private fun subscribeToWorkbookEvent() {
         workspace.subscribe<WorkbookOpenEvent> {
@@ -58,21 +47,7 @@ class WorkbookTableDemoView : View() {
     }
 
     override val root = vbox {
-        spacing = 10.0
         paddingAll = 20.0
-        maxWidth = 800.0
-
-        vbox {
-            addClass("translation-wizard__main")
-            vgrow = Priority.ALWAYS
-
-            translationTypeCard("oralTranslation", "oralTranslationDesc")
-            translationTypeCard("narration", "narrationDesc")
-            translationTypeCard("dialect", "dialectDesc") {
-                addPseudoClass("last")
-            }
-        }
-
-
+        workbookTableView(workbookList)
     }
 }
