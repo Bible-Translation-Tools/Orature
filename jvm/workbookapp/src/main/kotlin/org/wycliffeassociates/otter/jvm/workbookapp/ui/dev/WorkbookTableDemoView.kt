@@ -66,9 +66,9 @@ class WorkbookTableDemoView : View() {
             addClass("translation-wizard__main")
             vgrow = Priority.ALWAYS
 
-            translationTypeCard("oralTranslation", "description")
-            translationTypeCard("narration", "description")
-            translationTypeCard("dialect", "description") {
+            translationTypeCard("oralTranslation", "oralTranslationDesc")
+            translationTypeCard("narration", "narrationDesc")
+            translationTypeCard("dialect", "dialectDesc") {
                 addPseudoClass("last")
             }
         }
