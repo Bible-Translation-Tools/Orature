@@ -86,17 +86,16 @@
     -fx-border-color: -wa-primary-dark;
     -fx-text-fill: -wa-primary-btn-text-fill;
     -fx-font-size: 20px;
-    -fx-underline: true;
 }
 
 .btn--primary .ikonli-font-icon {
     -fx-fill: -wa-primary-btn-text-fill;
-    -fx-font-size: 20px;
+    -fx-font-size: 24px;
 }
 
 .btn--primary:hover {
     -fx-background-color: -wa-primary;
-    -fx-underline: false;
+    -fx-underline: true;
 }
 
 .btn--primary:pressed {

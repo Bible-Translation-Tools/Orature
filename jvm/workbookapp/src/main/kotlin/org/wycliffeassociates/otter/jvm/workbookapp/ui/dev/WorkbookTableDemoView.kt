@@ -1,18 +1,14 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.dev
 
 import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleObjectProperty
+import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookInfo
-import org.wycliffeassociates.otter.jvm.controls.card.CreateTranslationCard
-import org.wycliffeassociates.otter.jvm.controls.card.activeTranslationCard
-import org.wycliffeassociates.otter.jvm.controls.card.newTranslationCard
-import org.wycliffeassociates.otter.jvm.controls.card.translationCard
-import org.wycliffeassociates.otter.jvm.controls.card.translationCardWrapper
+import org.wycliffeassociates.otter.jvm.controls.card.translationTypeCard
+import org.wycliffeassociates.otter.jvm.controls.card.translationTypeGrid
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookDeleteEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookExportEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookOpenEvent
-import org.wycliffeassociates.otter.jvm.controls.model.TranslationMode
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import java.time.LocalDateTime
 import tornadofx.*
@@ -65,46 +61,20 @@ class WorkbookTableDemoView : View() {
     override val root = vbox {
         spacing = 10.0
         paddingAll = 20.0
-        maxWidth = 300.0
+        maxWidth = 800.0
 
-        borderpane {
-            center = translationCardWrapper(
-                languages[0],
-                languages[1],
-                TranslationMode.TRANSLATION
-            ) {
-                top = button("Reset") {
-                    action {
-                        this@translationCardWrapper.isActiveProperty.set(false)
-                        showNewTranslationCard.set(false)
-                    }
-                }
-            }
+        vbox {
+            addClass("translation-wizard__main")
+            vgrow = Priority.ALWAYS
+
+            translationTypeGrid()
+//            translationTypeCard("oralTranslation", "description")
+//            translationTypeCard("narration", "description")
+//            translationTypeCard("dialect", "description") {
+//                addPseudoClass("last")
+//            }
         }
 
-        newTranslationCard(
-            SimpleObjectProperty<Language>(
-                Language("en", "English", "English", "", true, "")
-            ),
-            SimpleObjectProperty<Language>(null),
-            mode = TranslationMode.NARRATION
-        ) {
-            visibleWhen(showNewTranslationCard)
-            managedWhen(visibleProperty())
 
-            setOnCancelAction {
-                showNewTranslationCard.set(false)
-            }
-        }
-        add(
-            CreateTranslationCard().apply {
-                visibleWhen(showNewTranslationCard.not())
-                managedWhen(visibleProperty())
-
-                setOnAction {
-                    showNewTranslationCard.set(true)
-                }
-            }
-        )
     }
 }
