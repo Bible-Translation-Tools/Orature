@@ -11,6 +11,8 @@ import tornadofx.FX.Companion.messages
 
 class TranslationTypeCard(titleKey: String, descriptionKey: String) : HBox() {
 
+    private var onSelectAction: () -> Unit = {}
+
     init {
         addClass("translation-type-card")
         vgrow = Priority.ALWAYS
@@ -34,8 +36,14 @@ class TranslationTypeCard(titleKey: String, descriptionKey: String) : HBox() {
                 addClass("btn", "btn--primary")
                 graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
                 minWidth = Button.USE_PREF_SIZE
+
+                setOnAction { onSelectAction() }
             }
         }
+    }
+
+    fun setOnSelectAction(op: () -> Unit) {
+        onSelectAction = op
     }
 }
 
