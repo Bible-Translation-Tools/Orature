@@ -63,16 +63,6 @@
     -fx-background-radius: 12px;
 }
 
-.translation-type-grid {
-    -fx-padding: 12px;
-}
-
-.translation-type-grid .separator:horizontal .line {
-    -fx-border-width: 1px 0 0 0;
-    -fx-border-color: -wa-border-light;
-    -fx-border-insets: 0;
-}
-
 .translation-type-card {
     -fx-spacing: 25px;
     -fx-border-width: 0 0 1px 0;
@@ -82,9 +72,6 @@
 
 .translation-type-card:last {
     -fx-border-color: transparent;
-}
-
-.translation-type-card {
 }
 
 .translation-type-card__text-cell {

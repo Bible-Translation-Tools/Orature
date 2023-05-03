@@ -5,7 +5,6 @@ import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookInfo
 import org.wycliffeassociates.otter.jvm.controls.card.translationTypeCard
-import org.wycliffeassociates.otter.jvm.controls.card.translationTypeGrid
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookDeleteEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookExportEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookOpenEvent
@@ -67,12 +66,11 @@ class WorkbookTableDemoView : View() {
             addClass("translation-wizard__main")
             vgrow = Priority.ALWAYS
 
-            translationTypeGrid()
-//            translationTypeCard("oralTranslation", "description")
-//            translationTypeCard("narration", "description")
-//            translationTypeCard("dialect", "description") {
-//                addPseudoClass("last")
-//            }
+            translationTypeCard("oralTranslation", "description")
+            translationTypeCard("narration", "description")
+            translationTypeCard("dialect", "description") {
+                addPseudoClass("last")
+            }
         }
 
 
