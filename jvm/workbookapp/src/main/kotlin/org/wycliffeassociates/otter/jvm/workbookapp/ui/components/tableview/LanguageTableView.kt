@@ -25,7 +25,6 @@ class LanguageTableView(
                     tooltip(text)
                 }
             }
-            isReorderable = false
         }
         column(messages["anglicizedTitle"], String::class) {
             setCellValueFactory { it.value.anglicizedName.toProperty() }
@@ -53,6 +52,8 @@ class LanguageTableView(
                 }
             }
         }
+
+        setRowFactory { LanguageTableRow() }
     }
 }
 
