@@ -21,7 +21,7 @@ class WorkBookTableView(
         vgrow = Priority.ALWAYS
         columnResizePolicy = CONSTRAINED_RESIZE_POLICY
 
-        column(messages["book"], String::class).apply {
+        column(messages["book"], String::class) {
             addClass("table-view__column-header-row")
             setCellValueFactory { it.value.title.toProperty() }
             cellFormat {
