@@ -30,7 +30,7 @@ class LanguageTableView(
             setCellValueFactory { it.value.anglicizedName.toProperty() }
             cellFormat {
                 graphic = label(item) {
-                    addClass("label-normal")
+                    addClass("normal-text")
                     tooltip(text)
                 }
             }
@@ -39,7 +39,7 @@ class LanguageTableView(
             setCellValueFactory { it.value.slug.toProperty() }
             cellFormat {
                 graphic = label(item) {
-                    addClass("label-normal")
+                    addClass("normal-text")
                 }
             }
         }
@@ -48,7 +48,7 @@ class LanguageTableView(
             cellFormat {
                 graphic = label {
                     text = if (item) messages["Yes"] else messages["No"]
-                    addClass("label-normal")
+                    addClass("normal-text")
                 }
             }
         }
