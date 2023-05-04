@@ -4,12 +4,16 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import javafx.event.EventTarget
+import javafx.geometry.Pos
 import javafx.scene.control.TableView
 import javafx.scene.layout.Priority
+import javafx.scene.layout.VBox
+import javafx.scene.text.TextAlignment
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookInfo
 import tornadofx.*
+import tornadofx.FX.Companion.icon
 import tornadofx.FX.Companion.messages
 
 class WorkBookTableView(
@@ -27,9 +31,19 @@ class WorkBookTableView(
             cellFormat {
                 graphic = label(item) {
                     addClass("table-view__title-cell")
+                    tooltip(item)
                 }
             }
-            isReorderable = false
+            prefWidthProperty().bind(this@WorkBookTableView.widthProperty().multiply(0.25))
+            minWidth = 120.0 // this may not be replaced with css
+        }
+        column(messages["code"], String::class).apply {
+            addClass("table-view__column-header-row")
+            setCellValueFactory { it.value.slug.toProperty() }
+            cellFormat {
+                graphic = label(item)
+            }
+            minWidth = 80.0 // this may not be replaced with css
         }
         column(messages["progress"], Number::class) {
             setCellValueFactory { it.value.progress.toProperty() }
@@ -39,26 +53,11 @@ class WorkBookTableView(
                     if (percent == 1.0) addClass("full")
                 }
             }
-            isReorderable = false
         }
         column("", Boolean::class) {
             addClass("table-column__status-icon-col")
             setCellValueFactory { SimpleBooleanProperty(it.value.hasSourceAudio) }
-            cellFormat {
-                graphic = if (it) {
-                    FontIcon(MaterialDesign.MDI_VOLUME_HIGH).apply {
-                        addClass("active-icon")
-                    }
-                } else {
-                    null
-                }
-            }
-
-            maxWidth = 50.0
-            minWidth = 50.0
-            isReorderable = false
-            isResizable = false
-            isSortable = false
+            setCellFactory { WorkbookSourceAudioTableCell() }
         }
         column("", WorkbookInfo::class) {
             setCellValueFactory { SimpleObjectProperty(it.value) }
@@ -66,10 +65,6 @@ class WorkBookTableView(
                 WorkbookOptionTableCell()
             }
 
-            maxWidth = 100.0
-            minWidth = 80.0
-            isReorderable = false
-            isResizable = false
             isSortable = false
         }
 

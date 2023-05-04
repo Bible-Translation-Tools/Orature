@@ -11,16 +11,16 @@ import tornadofx.*
 
 class WorkbookTableDemoView : View() {
     val workbookList = observableListOf<WorkbookInfo>(
-        WorkbookInfo(0, "John", "", 0.3, LocalDateTime.now(), true),
-        WorkbookInfo(0, "Acts", "", 0.0, LocalDateTime.now(), true),
-        WorkbookInfo(0, "Genesis", "", 0.1, LocalDateTime.now(), true),
-        WorkbookInfo(0, "Leviticus", "", 0.5, LocalDateTime.now(), false),
-        WorkbookInfo(0, "Psalms", "", 0.8, LocalDateTime.now(), false),
-        WorkbookInfo(0, "Revelation", "", 1.0, LocalDateTime.now(), false),
-        WorkbookInfo(0, "Mark", "", 0.5, LocalDateTime.now(), false),
-        WorkbookInfo(0, "Malachi", "", 1.0, LocalDateTime.now(), false),
-        WorkbookInfo(0, "Proverbs", "", 0.2, LocalDateTime.now(), true),
-        WorkbookInfo(0, "Colossians", "", 1.0, LocalDateTime.now(), true),
+        WorkbookInfo(0, "jhn",  "John", "", 0.3, LocalDateTime.now(), true,),
+        WorkbookInfo(0, "act", "Acts", "", 0.0, LocalDateTime.now(), true,),
+        WorkbookInfo(0, "gen", "Genesis", "", 0.1, LocalDateTime.now(), true,),
+        WorkbookInfo(0, "lev", "Leviticus", "", 0.5, LocalDateTime.now(), false,),
+        WorkbookInfo(0, "psa", "Psalms", "", 0.8, LocalDateTime.now(), false,),
+        WorkbookInfo(0, "rev", "Revelation", "", 1.0, LocalDateTime.now(), false,),
+        WorkbookInfo(0, "mrk", "Mark", "", 0.5, LocalDateTime.now(), false,),
+        WorkbookInfo(0, "mal", "Malachi", "", 1.0, LocalDateTime.now(), false,),
+        WorkbookInfo(0, "pro", "Proverbs", "", 0.2, LocalDateTime.now(), true,),
+        WorkbookInfo(0, "col", "Colossians", "", 1.0, LocalDateTime.now(), true,),
     )
 
     init {
