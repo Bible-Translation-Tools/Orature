@@ -34,7 +34,7 @@ class NewTranslationCard2(
         vbox {
             addClass("translation-card__body")
             label {
-                addClass("translation-card__language", "label-normal")
+                addClass("translation-card__language")
                 textProperty().bind(
                     sourceLanguageProperty.stringBinding { source ->
                         togglePseudoClass("unset", source == null)
@@ -51,7 +51,7 @@ class NewTranslationCard2(
                 graphic = FontIcon(MaterialDesign.MDI_MENU_DOWN)
             }
             label {
-                addClass("translation-card__language", "label-normal")
+                addClass("translation-card__language")
                 textProperty().bind(
                     targetLanguageProperty.stringBinding { target ->
                         togglePseudoClass("unset", target == null)

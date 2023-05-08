@@ -37,7 +37,7 @@
 .translation-card__language {
     -fx-graphic-text-gap: 0.6em;
     -fx-text-fill: -wa-active-text;
-    -fx-font-size: 20px;
+    -fx-font-size: 1.4em;
 }
 
 .translation-card__language:unset {

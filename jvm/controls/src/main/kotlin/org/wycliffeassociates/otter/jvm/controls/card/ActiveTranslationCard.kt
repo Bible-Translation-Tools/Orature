@@ -39,7 +39,7 @@ class ActiveTranslationCard(
         vbox {
             addClass("translation-card__body")
             label(sourceLanguage) {
-                addClass("translation-card__language", "label-normal")
+                addClass("translation-card__language")
                 graphic = FontIcon(Material.HEARING)
             }
             label {
@@ -47,7 +47,7 @@ class ActiveTranslationCard(
                 graphic = FontIcon(MaterialDesign.MDI_MENU_DOWN)
             }
             label(targetLanguage) {
-                addClass("translation-card__language", "label-normal")
+                addClass("translation-card__language")
                 graphic = FontIcon(MaterialDesign.MDI_VOICE)
             }
         }
