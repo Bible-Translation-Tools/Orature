@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories
 import io.reactivex.Single
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
+import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookInfo
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
@@ -26,27 +27,34 @@ class WorkbookInfoRepository @Inject constructor(
                     }
                     .mapNotNull { project ->
                         val sourceCollection = collectionRepo.getSource(project).blockingGet()
-                        if (sourceCollection.resourceContainer?.language == translation.source) {
-                            Pair(project, sourceCollection.resourceContainer!!)
+                        val sourceLanguage = sourceCollection.resourceContainer?.language
+                        if (sourceLanguage == translation.source) {
+                            buildWorkbookInfo(project, sourceCollection.resourceContainer!!)
                         } else {
                             null
                         }
                     }
-                    .map { (collection, sourceMetadata) ->
-                        WorkbookInfo(
-                            collection.id,
-                            collection.slug,
-                            collection.titleKey,
-                            collection.labelKey,
-                            getProgress(collection),
-                            collection.modifiedTs!!,
-                            SourceAudioAccessor.hasSourceAudio(
-                                sourceMetadata,
-                                collection.slug
-                            )
-                        )
-                    }
             }
+    }
+
+    private fun buildWorkbookInfo(
+        project: Collection,
+        sourceMetadata: ResourceMetadata
+    ): WorkbookInfo {
+        val progress = getProgress(project)
+        val hasSourceAudio = SourceAudioAccessor.hasSourceAudio(
+            sourceMetadata,
+            project.slug
+        )
+        return WorkbookInfo(
+            project.id,
+            project.slug,
+            project.titleKey,
+            project.labelKey,
+            progress,
+            project.modifiedTs!!,
+            hasSourceAudio
+        )
     }
 
     private fun getProgress(collection: Collection): Double {
