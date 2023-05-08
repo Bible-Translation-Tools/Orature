@@ -50,12 +50,12 @@ sourceSets {
 }
 
 configurations {
-    integrationTestCompile.extendsFrom main
+    integrationTestImplementation.extendsFrom main
     integrationTestRuntime.extendsFrom main
 }
 
 application {
-    mainClassName = "org.wycliffeassociates.otter.jvm.workbookapp.MainKt"
+    mainClass = "org.wycliffeassociates.otter.jvm.workbookapp.MainKt"
 }
 
 test {
@@ -153,8 +153,8 @@ dependencies {
     testImplementation "org.testfx:testfx-core:$testFxVer"
     testImplementation "org.testfx:testfx-junit:$testFxVer"
     testImplementation "org.testfx:openjfx-monocle:$testFxMonocleVer"
-    integrationTestCompile group: 'junit', name: 'junit', version: "$junitVer"
-    integrationTestCompile "org.mockito:mockito-core:$mockitoVer"
+    integrationTestImplementation group: 'junit', name: 'junit', version: "$junitVer"
+    integrationTestImplementation "org.mockito:mockito-core:$mockitoVer"
     integrationTestImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVer"
     integrationTestImplementation sourceSets.main.compileClasspath
     integrationTestImplementation sourceSets.main.output
@@ -336,6 +336,15 @@ compileJava.dependsOn createSentryProperties
 compileJava.dependsOn createLocalesProperties
 compileJava.dependsOn copyMessages
 compileJava.dependsOn copyTestResources
+processResources.dependsOn ':jvm:markerapp:copyJarToWorkbookAppResources'
+processResources.dependsOn ':jvm:recorderapp:copyJarToWorkbookAppResources'
+copyTestResources.dependsOn ':jvm:workbookapp:copyMessages'
+distTar.dependsOn ':jvm:workbookapp:shadowJar'
+distZip.dependsOn ':jvm:workbookapp:shadowJar'
+startScripts.dependsOn ':jvm:workbookapp:shadowJar'
+startShadowScripts.dependsOn ':jvm:workbookapp:jar'
+shadowDistTar.dependsOn ':jvm:workbookapp:jar'
+shadowDistZip.dependsOn ':jvm:workbookapp:jar'
 integrationTest.shouldRunAfter test
 integrationTest.dependsOn ':assets:build'
 integrationTest.dependsOn ':assets:copyToResources'

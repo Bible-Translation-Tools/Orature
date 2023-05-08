@@ -17,7 +17,7 @@ plugins {
     id 'nebula.lint' version "$nebulaLintPluginVer"
     id 'io.gitlab.arturbosch.detekt' version "$detektPluginVer"
     id "org.sonarqube" version "$sonarcloudPluginVer"
-    id "com.github.hierynomus.license" version "$licensePluginVer"
+    // id "com.github.hierynomus.license" version "$licensePluginVer"
 }
 
 apply plugin: 'io.gitlab.arturbosch.detekt'
@@ -73,18 +73,18 @@ tasks.withType(io.gitlab.arturbosch.detekt.Detekt) {
 }
 
 allprojects {
-    apply plugin: "license"
+//    apply plugin: "license"
 
-    license {
-        ignoreFailures = true
-        header = rootProject.file("LICENSE")
-        mapping {
-            gradle = 'JAVADOC_STYLE'
-            fxml = 'XML_STYLE'
-        }
-        includes(["**/*.kt", "**/*.java", "**/*.properties", "**/*.css", "**/*.fxml", "**/*.gradle"])
-        excludes(["**/src/main/java/jooq/**/*.java", "**/*.sqlite"])
-    }
+//    license {
+//        ignoreFailures = true
+//        header = rootProject.file("LICENSE")
+//        mapping {
+//            gradle = 'JAVADOC_STYLE'
+//            fxml = 'XML_STYLE'
+//        }
+//        includes(["**/*.kt", "**/*.java", "**/*.properties", "**/*.css", "**/*.fxml", "**/*.gradle"])
+//        excludes(["**/src/main/java/jooq/**/*.java", "**/*.sqlite"])
+//    }
 }
 
 subprojects {
