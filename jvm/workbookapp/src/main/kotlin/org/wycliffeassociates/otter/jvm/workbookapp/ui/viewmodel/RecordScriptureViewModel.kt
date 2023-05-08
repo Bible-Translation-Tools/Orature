@@ -73,17 +73,9 @@ class RecordScriptureViewModel : ViewModel() {
     }
 
     private val workbookDataStore: WorkbookDataStore by inject()
+    private val audioDataStore: AudioDataStore by inject()
+    private val appPreferencesStore: AppPreferencesStore by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
-
-    // This will be bidirectionally bound to workbookDataStore's activeChapterProperty
-    private val activeChapterProperty = SimpleObjectProperty<Chapter>()
-    private val activeChapter: Chapter
-        get() = activeChapterProperty.value ?: throw IllegalStateException("Chapter is null")
-
-    // This will be bidirectionally bound to workbookDataStore's activeChunkProperty
-    private val activeChunkProperty = SimpleObjectProperty<Chunk>()
-    private val activeChunk: Chunk
-        get() = activeChunkProperty.value ?: throw IllegalStateException("Chunk is null")
 
     private val titleProperty = SimpleStringProperty()
     private var title by titleProperty
@@ -96,7 +88,7 @@ class RecordScriptureViewModel : ViewModel() {
     val hasNextChunk = SimpleBooleanProperty(false)
     val hasPreviousChunk = SimpleBooleanProperty(false)
 
-    val isChunk = activeChunkProperty.isNotNull
+    val isChunk = workbookDataStore.activeChunkProperty.isNotNull
     val highlightedChunkProperty = SimpleIntegerProperty(NO_HIGHLIGHT_INDEX)
     val verseCountProperty = SimpleIntegerProperty()
 
@@ -106,8 +98,6 @@ class RecordScriptureViewModel : ViewModel() {
     var recordable by recordableProperty
 
     val contextProperty = SimpleObjectProperty(PluginType.RECORDER)
-    val sourceAudioAvailableProperty = workbookDataStore.sourceAudioAvailableProperty
-    val sourceAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer?>(null)
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
     val takeCardModels: ObservableList<TakeCardModel> = FXCollections.observableArrayList()
@@ -117,13 +107,14 @@ class RecordScriptureViewModel : ViewModel() {
     val showImportSuccessDialogProperty = SimpleBooleanProperty(false)
     val showImportFailDialogProperty = SimpleBooleanProperty(false)
 
+    val sourceTextZoomRateProperty = SimpleIntegerProperty()
+
     private val disposables = CompositeDisposable()
     val listeners = mutableListOf<ListenerDisposer>()
 
     init {
-        activeChapterProperty.bindBidirectional(workbookDataStore.activeChapterProperty)
-        activeChunkProperty.bindBidirectional(workbookDataStore.activeChunkProperty)
         audioPluginViewModel.pluginNameProperty.bind(pluginNameBinding())
+        sourceTextZoomRateProperty.bind(appPreferencesStore.sourceTextZoomRateProperty)
     }
 
     fun dock() {
@@ -149,24 +140,21 @@ class RecordScriptureViewModel : ViewModel() {
             Bindings.createIntegerBinding(
                 {
                     // no verse count in chunk/verse page
-                    if (activeChunkProperty.value != null) {
+                    if (workbookDataStore.activeChunkProperty.value != null) {
                         0
                     } else {
-                        val projectAccessor = workbookDataStore.activeProjectFilesAccessorProperty
-                        projectAccessor.value?.let {
-                            it.getChapterText(
-                                workbookDataStore.workbook.target.slug,
-                                activeChapter.sort
-                            ).size
-                        } ?: 0
+                        val projectAccessor = workbookDataStore.workbook.projectFilesAccessor
+                        projectAccessor.getChapterText(
+                            workbookDataStore.workbook.target.slug,
+                            workbookDataStore.chapter.sort
+                        ).size
                     }
                 },
-                workbookDataStore.activeProjectFilesAccessorProperty,
-                activeChunkProperty
+                workbookDataStore.activeChunkProperty
             )
         )
 
-        activeChapterProperty.onChangeAndDoNowWithDisposer { chapter ->
+        workbookDataStore.activeChapterProperty.onChangeAndDoNowWithDisposer { chapter ->
             setHasNextAndPreviousChapter()
             chapter?.let {
                 getChunkList(chapter.chunks)
@@ -174,14 +162,14 @@ class RecordScriptureViewModel : ViewModel() {
             }
         }.let(listeners::add)
 
-        activeChunkProperty.onChangeAndDoNowWithDisposer { chunk ->
+        workbookDataStore.activeChunkProperty.onChangeAndDoNowWithDisposer { chunk ->
             setHasNextAndPreviousChunk()
             if (chunk != null) {
                 setTitle(chunk)
                 // This will trigger loading takes
                 recordable = chunk
             } else {
-                activeChapterProperty.value?.let {
+                workbookDataStore.activeChapterProperty.value?.let {
                     recordable = it
                 }
             }
@@ -193,7 +181,7 @@ class RecordScriptureViewModel : ViewModel() {
             loadTakes()
         }.let(listeners::add)
 
-        workbookDataStore.sourceAudioProperty.onChangeAndDoNowWithDisposer {
+        audioDataStore.sourceAudioProperty.onChangeAndDoNowWithDisposer {
             openSourceAudioPlayer()
         }.let(listeners::add)
 
@@ -279,7 +267,7 @@ class RecordScriptureViewModel : ViewModel() {
     }
 
     private fun setHasNextAndPreviousChapter() {
-        activeChapterProperty.value?.let { chapter ->
+        workbookDataStore.activeChapterProperty.value?.let { chapter ->
             if (chapterList.isNotEmpty()) {
                 hasNextChapter.set(chapter.sort < chapterList.last().sort)
                 hasPreviousChapter.set(chapter.sort > chapterList.first().sort)
@@ -297,7 +285,7 @@ class RecordScriptureViewModel : ViewModel() {
     }
 
     private fun setHasNextAndPreviousChunk() {
-        activeChunkProperty.value?.let { chunk ->
+        workbookDataStore.activeChunkProperty.value?.let { chunk ->
             if (chunkList.isNotEmpty()) {
                 hasNextChunk.set(chunk.sort < chunkList.last().sort)
                 hasPreviousChunk.set(chunk.sort > chunkList.first().sort)
@@ -359,8 +347,10 @@ class RecordScriptureViewModel : ViewModel() {
             StepDirection.FORWARD -> 1
             StepDirection.BACKWARD -> -1
         }
-        val nextIndex = chapterList.indexOf(activeChapter) + amount
-        chapterList.elementAtOrNull(nextIndex)?.let { activeChapterProperty.set(it) }
+        val nextIndex = chapterList.indexOf(workbookDataStore.chapter) + amount
+        chapterList.elementAtOrNull(nextIndex)?.let {
+            workbookDataStore.activeChapterProperty.set(it)
+        }
         highlightedChunkProperty.set(NO_HIGHLIGHT_INDEX)
     }
 
@@ -372,10 +362,10 @@ class RecordScriptureViewModel : ViewModel() {
 
         val currentChunks = chunkList.filter { it.draftNumber > 0 }
         currentChunks
-            .indexOf(activeChunk)
+            .indexOf(workbookDataStore.chunk)
             .let { currentIndex ->
                 currentChunks.elementAtOrNull(currentIndex + amount)
-                    ?.let { activeChunkProperty.set(it) }
+                    ?.let { workbookDataStore.activeChunkProperty.set(it) }
             }
     }
 
@@ -383,7 +373,8 @@ class RecordScriptureViewModel : ViewModel() {
         closePlayers()
         recordable?.let { rec ->
             contextProperty.set(PluginType.RECORDER)
-            val updateOnSuccess = workbookDataStore.updateSelectedTakesFile()
+            val workbook = workbookDataStore.workbook
+            val updateOnSuccess = workbook.projectFilesAccessor.updateSelectedTakesFile(workbook)
 
             rec.audio.getNewTakeNumber()
                 .flatMapMaybe { takeNumber ->
@@ -450,7 +441,8 @@ class RecordScriptureViewModel : ViewModel() {
 
     fun selectTake(take: Take) {
         recordable?.audio?.selectTake(take) ?: throw IllegalStateException("Recordable is null")
-        workbookDataStore.updateSelectedTakesFile().subscribe()
+        val workbook = workbookDataStore.workbook
+        workbook.projectFilesAccessor.updateSelectedTakesFile(workbook).subscribe()
         take.file.setLastModified(System.currentTimeMillis())
     }
 
@@ -569,13 +561,13 @@ class RecordScriptureViewModel : ViewModel() {
     }
 
     private fun setMarker() {
-        if (activeChunkProperty.value == null) return
+        if (workbookDataStore.activeChunkProperty.value == null) return
 
         recordable?.audio?.let { audio ->
             audio.selected.value?.value?.let {
                 AudioFile(it.file).apply {
                     if (metadata.getCues().isEmpty()) {
-                        metadata.addCue(0, activeChunk.start.toString())
+                        metadata.addCue(0, workbookDataStore.chunk?.start.toString())
                         update()
                     }
                 }
@@ -612,31 +604,21 @@ class RecordScriptureViewModel : ViewModel() {
     }
 
     fun openSourceAudioPlayer() {
-        workbookDataStore.sourceAudioProperty.value?.let { source ->
-            val audioPlayer = (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
-            audioPlayer.loadSection(source.file, source.start, source.end)
-            sourceAudioPlayerProperty.set(audioPlayer)
-        } ?: sourceAudioPlayerProperty.set(null)
+        audioDataStore.openSourceAudioPlayer()
     }
 
     fun openTargetAudioPlayer() {
-        workbookDataStore.targetAudioProperty.value?.let { target ->
-            target.player.load(target.file)
-        }
+        audioDataStore.openTargetAudioPlayer()
     }
 
     fun closePlayers() {
         takeCardModels.forEach { it.audioPlayer.close() }
-        sourceAudioPlayerProperty.value?.close()
-        sourceAudioPlayerProperty.set(null)
-        workbookDataStore.targetAudioProperty.value?.player?.close()
-        workbookDataStore.selectedChapterPlayerProperty.value?.close()
+        audioDataStore.closePlayers()
     }
 
     fun stopPlayers() {
         takeCardModels.forEach { it.audioPlayer.stop() }
-        sourceAudioPlayerProperty.value?.stop()
-        workbookDataStore.targetAudioProperty.value?.player?.stop()
+        audioDataStore.stopPlayers()
     }
 
     private fun subscribeSelectedTakePropertyToRelay() {
@@ -649,7 +631,7 @@ class RecordScriptureViewModel : ViewModel() {
                 .observeOnFx()
                 .subscribe {
                     loadTakes()
-                    workbookDataStore.updateSelectedChapterPlayer()
+                    audioDataStore.updateSelectedChapterPlayer()
                 }
                 .let { disposables.add(it) }
         }

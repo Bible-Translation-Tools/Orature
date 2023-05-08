@@ -97,13 +97,13 @@ class WorkbookPage : View() {
      * created and added to the view.
      */
     override fun onDock() {
-        viewModel.dock()
         createTabs()
         root.tabs.setAll(tabMap.values)
         viewModel.openWorkbook()
-        viewModel.workbookDataStore.activeChunkProperty.set(null)
-        viewModel.workbookDataStore.activeResourceComponentProperty.set(null)
-        viewModel.workbookDataStore.activeResourceProperty.set(null)
+        workbookDataStore.activeChunkProperty.set(null)
+        workbookDataStore.activeChapterProperty.set(null)
+        workbookDataStore.activeResourceComponentProperty.set(null)
+        workbookDataStore.activeResourceProperty.set(null)
         navigator.dock(this, breadCrumb)
         selectLastResourceTab()
         initializeProgressDialogs()

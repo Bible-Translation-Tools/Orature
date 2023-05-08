@@ -72,6 +72,7 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
     var timer: AnimationTimer? = null
 
     val workbookDataStore: WorkbookDataStore by inject()
+    val audioDataStore: AudioDataStore by inject()
 
     val consumeStepColor = SimpleStringProperty(ACTIVE)
     val verbalizeStepColor = SimpleStringProperty(INACTIVE)
@@ -82,7 +83,7 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
     val titleProperty = SimpleStringProperty("")
     val stepProperty = SimpleStringProperty("")
 
-    val sourceAudio by workbookDataStore.sourceAudioProperty
+    val sourceAudio by audioDataStore.sourceAudioProperty
 
     @Inject
     lateinit var directoryProvider: IDirectoryProvider
@@ -228,7 +229,7 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
         audioPlayer.value.close()
         audioController = null
 
-        val accessor = workbookDataStore.activeProjectFilesAccessorProperty.value
+        val accessor = workbookDataStore.workbook.projectFilesAccessor
         val wkbk = workbookDataStore.activeWorkbookProperty.value
         val chapter = workbookDataStore.activeChapterProperty.value
         val cues = markers.filter { it.placed }.map { it.toAudioCue() }

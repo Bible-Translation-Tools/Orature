@@ -55,6 +55,7 @@ open class RecordableViewModel(
     private val logger = LoggerFactory.getLogger(RecordableViewModel::class.java)
 
     val workbookDataStore: WorkbookDataStore by inject()
+    val audioDataStore: AudioDataStore by inject()
 
     val recordableProperty = SimpleObjectProperty<Recordable?>()
     var recordable by recordableProperty
@@ -65,9 +66,6 @@ open class RecordableViewModel(
 
     val takeCardModels: ObservableList<TakeCardModel> = FXCollections.observableArrayList()
     val selectedTakeProperty = SimpleObjectProperty<TakeCardModel?>()
-
-    val sourceAudioAvailableProperty = workbookDataStore.sourceAudioAvailableProperty
-    val sourceAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer?>(null)
 
     val showImportProgressDialogProperty = SimpleBooleanProperty(false)
     val showImportSuccessDialogProperty = SimpleBooleanProperty(false)
@@ -83,7 +81,7 @@ open class RecordableViewModel(
             loadTakes()
         }
 
-        workbookDataStore.sourceAudioProperty.onChangeAndDoNow {
+        audioDataStore.sourceAudioProperty.onChangeAndDoNow {
             openSourceAudioPlayer()
         }
 
@@ -189,7 +187,8 @@ open class RecordableViewModel(
         }
         found?.let { takeModel ->
             recordable?.audio?.selectTake(takeModel.take) ?: throw IllegalStateException("Recordable is null")
-            workbookDataStore.updateSelectedTakesFile().subscribe()
+            val workbook = workbookDataStore.workbook
+            workbook.projectFilesAccessor.updateSelectedTakesFile(workbook).subscribe()
             take.file.setLastModified(System.currentTimeMillis())
             loadTakes()
         }
@@ -349,22 +348,18 @@ open class RecordableViewModel(
     }
 
     fun openSourceAudioPlayer() {
-        workbookDataStore.sourceAudioProperty.value?.let { source ->
-            val audioPlayer = (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
-            audioPlayer.loadSection(source.file, source.start, source.end)
-            sourceAudioPlayerProperty.set(audioPlayer)
-        }
+        audioDataStore.openSourceAudioPlayer()
     }
 
     fun closePlayers() {
         takeCardModels.forEach { it.audioPlayer.close() }
-        sourceAudioPlayerProperty.value?.close()
+        audioDataStore.closeSourceAudioPlayer()
     }
 
     fun stopPlayers() {
         takeCardModels.forEach { it.audioPlayer.stop() }
         selectedTakeProperty.value?.audioPlayer?.stop()
-        sourceAudioPlayerProperty.value?.stop()
+        audioDataStore.stopSourceAudioPlayer()
     }
 
     fun Take.mapToCardModel(selected: Boolean): TakeCardModel {
