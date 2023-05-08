@@ -258,12 +258,15 @@ class MarkerTrackControl : Region() {
                     }
                     focusMarker(e)
                 }
+
+                else -> {}
             }
         }
 
         setOnKeyReleased {
             when (it.code) {
                 KeyCode.ENTER, KeyCode.SPACE -> it.consume()
+                else -> {}
             }
         }
     }

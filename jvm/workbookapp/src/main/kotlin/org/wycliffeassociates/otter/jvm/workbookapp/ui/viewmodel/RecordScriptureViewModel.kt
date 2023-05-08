@@ -435,6 +435,8 @@ class RecordScriptureViewModel : ViewModel() {
                         takeEvent.onComplete()
                         loadTakes()
                     }
+
+                    else -> {}
                 }
             }
     }

@@ -8,7 +8,9 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.chapterSelector
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.narrationMenu
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
+import java.text.MessageFormat
 
 class NarrationHeader : View() {
     private val viewModel by inject<NarrationHeaderViewModel>()
@@ -43,18 +45,28 @@ class NarrationHeader : View() {
 }
 
 class NarrationHeaderViewModel : ViewModel() {
-    // private val workbookDataStore by inject<WorkbookDataStore>()
-    val titleProperty = SimpleStringProperty("Narration Title")
-    val chapterTitleProperty = SimpleStringProperty("Chapter Title")
-//    workbookDataStore.activeChapterProperty.stringBinding {
-//        it?.let {
-//            MessageFormat.format(
-//                messages["chapterTitle"],
-//                messages["chapter"],
-//                it.sort
-//            )
-//        } ?: ""
-//    }
+    private val workbookDataStore by inject<WorkbookDataStore>()
+    // val titleProperty = SimpleStringProperty("Narration Title")
+    // val chapterTitleProperty = SimpleStringProperty("Chapter Title")
+
+    val titleProperty = workbookDataStore.activeWorkbookProperty.stringBinding {
+        it?.let {
+            MessageFormat.format(
+                // messages["narrationTitle"],
+                it.target.title
+            )
+        } ?: ""
+    }
+
+    val chapterTitleProperty = workbookDataStore.activeChapterProperty.stringBinding {
+        it?.let {
+            MessageFormat.format(
+                messages["chapterTitle"],
+                messages["chapter"],
+                it.title
+            )
+        } ?: ""
+    }
 
     val hasNextChapter = SimpleBooleanProperty(false)
     val hasPreviousChapter = SimpleBooleanProperty(false)

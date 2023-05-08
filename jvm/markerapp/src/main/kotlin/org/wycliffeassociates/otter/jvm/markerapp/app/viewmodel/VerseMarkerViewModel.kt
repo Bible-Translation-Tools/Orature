@@ -132,8 +132,8 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
 
     private fun loadMarkers(audio: AudioFile) {
         val initialMarkerCount = audio.metadata.getCues().size
-        scope as ParameterizedScope
-        val totalMarkers: Int = scope.parameters.named["marker_total"]?.toInt() ?: initialMarkerCount
+        val paramScope = scope as ParameterizedScope
+        val totalMarkers: Int = (paramScope).parameters.named["marker_total"]?.toInt() ?: initialMarkerCount
         markerModel = VerseMarkerModel(audio, totalMarkers)
 
         markerRatioProperty.bind(
@@ -148,9 +148,9 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
     }
 
     private fun loadTitles() {
-        scope as ParameterizedScope
-        headerTitle.set(scope.parameters.named["action_title"])
-        headerSubtitle.set(scope.parameters.named["content_title"])
+        val paramScope = scope as ParameterizedScope
+        headerTitle.set(paramScope.parameters.named["action_title"])
+        headerSubtitle.set(paramScope.parameters.named["content_title"])
     }
 
     private fun writeMarkers(): Completable {

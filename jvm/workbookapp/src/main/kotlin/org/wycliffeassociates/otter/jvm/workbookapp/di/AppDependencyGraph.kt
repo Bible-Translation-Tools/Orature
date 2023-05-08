@@ -47,11 +47,9 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookPageVie
 import javax.inject.Singleton
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.NarrationHistory
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AppInfoViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterNarrationViewModel
 
 @Component(
     modules = [
@@ -80,7 +78,6 @@ interface AppDependencyGraph {
     fun inject(viewModel: TranslationViewModel)
     fun inject(viewModel: BookWizardViewModel)
     fun inject(viewModel: ChapterPageViewModel)
-    fun inject(viewModel: ChapterNarrationViewModel)
     fun inject(viewModel: AppInfoViewModel)
     fun inject(viewModel: ChunkingViewModel)
     fun inject(viewModel: ExportChapterViewModel)

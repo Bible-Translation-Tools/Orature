@@ -337,6 +337,8 @@ class ChapterPage : View() {
                                 val delta = if (it.isShiftDown || it.code == KeyCode.UP) -1 else 1
                                 scrollListTo(delta)
                             }
+
+                            else -> {}
                         }
                     }
                 }

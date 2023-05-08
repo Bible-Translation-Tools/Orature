@@ -120,6 +120,7 @@ class BookSelection : View() {
                     when (it) {
                         KeyCode.UP -> index--
                         KeyCode.DOWN -> index++
+                        else -> {}
                     }
                     val item = availableItems.getOrElse(index) { current }
                     selectionModel.select(item)

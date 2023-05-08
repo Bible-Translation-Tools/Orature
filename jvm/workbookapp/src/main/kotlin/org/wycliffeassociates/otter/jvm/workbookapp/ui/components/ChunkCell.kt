@@ -116,6 +116,7 @@ class ChunkCell(
                         }
                     }
                     KeyCode.ESCAPE -> hideTakes()
+                    else -> {}
                 }
             }
         }

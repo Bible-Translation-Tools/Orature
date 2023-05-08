@@ -48,6 +48,8 @@ class ChapterCell : ListCell<ChapterCardModel>() {
                                 item.onClick(chapter)
                             }
                         }
+
+                        else -> {}
                     }
                 }
             }

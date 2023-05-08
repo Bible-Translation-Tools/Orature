@@ -58,6 +58,7 @@ class BookCell(
                 listView.setOnKeyPressed {
                     when (it.code) {
                         KeyCode.ENTER, KeyCode.SPACE -> onSelected(item)
+                        else -> {}
                     }
                 }
             }

@@ -114,6 +114,8 @@ class RootView : View() {
                     root.addClass(ColorTheme.DARK.styleClass)
                     root.removeClass(ColorTheme.LIGHT.styleClass)
                 }
+
+                else -> {}
             }
         }
     }

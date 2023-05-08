@@ -142,6 +142,8 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
                     verbalizeStepColor.set(COMPLETE)
                     chunkStepColor.set(ACTIVE)
                 }
+
+                else -> {}
             }
         }
     }
