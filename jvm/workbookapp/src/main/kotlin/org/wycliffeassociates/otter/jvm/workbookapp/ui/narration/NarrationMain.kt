@@ -7,6 +7,7 @@ import javafx.stage.Stage
 import org.wycliffeassociates.otter.common.data.workbook.Book
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 
@@ -16,6 +17,13 @@ class NarrationApp() : App(NarrationView::class) {
 
     init {
         mockWorkbook()
+
+        tryImportStylesheet(resources["/css/theme/dark-theme.css"])
+        tryImportStylesheet(resources["/css/theme/light-theme.css"])
+        tryImportStylesheet(resources["/css/common.css"])
+        tryImportStylesheet(resources["/css/control.css"])
+        tryImportStylesheet(resources["/css/app-bar.css"])
+
     }
 
 
@@ -23,8 +31,9 @@ class NarrationApp() : App(NarrationView::class) {
         super.start(stage)
         stage.height = 600.0
         stage.width = 800.0
+        stage.scene.root.addClass(org.wycliffeassociates.otter.common.data.ColorTheme.LIGHT.styleClass)
     }
-
+    
     private fun mockWorkbook() {
         val workbook = mockk<Workbook>()
         val target = mockk<Book>()

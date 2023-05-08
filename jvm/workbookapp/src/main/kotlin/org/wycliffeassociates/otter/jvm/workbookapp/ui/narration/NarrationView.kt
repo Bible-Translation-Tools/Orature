@@ -10,6 +10,8 @@ class NarrationView : View() {
     }
 
     override val root = stackpane {
+        addClass(org.wycliffeassociates.otter.common.data.ColorTheme.LIGHT.styleClass)
+
         borderpane {
             top<NarrationHeader>()
             bottom<NarrationFooter>()
