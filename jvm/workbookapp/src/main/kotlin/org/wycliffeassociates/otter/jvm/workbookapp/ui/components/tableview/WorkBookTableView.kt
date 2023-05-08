@@ -26,7 +26,7 @@ class WorkBookTableView(
             setCellValueFactory { it.value.title.toProperty() }
             cellFormat {
                 graphic = label(item) {
-                    addClass("table-view__title-cell")
+                    addClass("h4", "h4--80")
                 }
             }
             isReorderable = false
