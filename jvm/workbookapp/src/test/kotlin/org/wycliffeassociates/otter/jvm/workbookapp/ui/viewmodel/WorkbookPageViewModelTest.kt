@@ -21,6 +21,8 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 import com.jakewharton.rxrelay2.ReplayRelay
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.anyOrNull
+import com.nhaarman.mockitokotlin2.doReturn
+import com.nhaarman.mockitokotlin2.mock
 import io.reactivex.Observable
 import io.reactivex.Single
 import javafx.beans.property.SimpleObjectProperty
@@ -37,6 +39,7 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.testfx.api.FxToolkit
 import org.testfx.util.WaitForAsyncUtils
+import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
@@ -51,6 +54,7 @@ import java.time.LocalDateTime
 import javax.inject.Provider
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.BackupProjectExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportType
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 
 class WorkbookPageViewModelTest {
     companion object {
@@ -75,10 +79,16 @@ class WorkbookPageViewModelTest {
             LocalDateTime.now(),
             listOf()
         )
+        private val mockProjectFilesAccessor = mock<ProjectFilesAccessor> {
+            on { getContributorInfo() } doReturn listOf(Contributor("testContributor"))
+        }
 
         private fun createWorkbookDS(): WorkbookDataStore {
             val mockWorkbook = mock(Workbook::class.java)
             `when`(mockWorkbook.target).thenReturn(mockBook)
+
+            `when`(mockWorkbook.projectFilesAccessor)
+                .thenReturn(mockProjectFilesAccessor)
 
             val mockArtworkAccessor = mock(ArtworkAccessor::class.java)
             `when`(mockArtworkAccessor.getArtwork(any()))
@@ -90,8 +100,6 @@ class WorkbookPageViewModelTest {
                 .thenReturn(mockWorkbook)
             `when`(mockWorkbookDS.activeChapterProperty)
                 .thenReturn(SimpleObjectProperty())
-            `when`(mockWorkbookDS.activeResourceMetadata)
-                .thenReturn(mockBook.resourceMetadata)
 
             return mockWorkbookDS
         }
@@ -156,7 +164,6 @@ class WorkbookPageViewModelTest {
 
         assertEquals(2, vm.chapters.size)
         verify(mockWorkbookDS, atLeastOnce()).workbook
-        verify(mockWorkbookDS).activeChapterProperty
     }
 
     @Test
@@ -193,6 +200,5 @@ class WorkbookPageViewModelTest {
         assertFalse(showProgressChanges[1])
         verify(mockProjectExporter).export(any(), any(), any(), anyOrNull())
         verify(mockWorkbookDS, atLeastOnce()).workbook
-        verify(mockWorkbookDS).activeResourceMetadata
     }
 }
