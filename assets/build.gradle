@@ -64,3 +64,4 @@ task copyToResources(type: Copy) {
 }
 
 compileJava.dependsOn copyToResources
+processResources.dependsOn(copyToResources)
