@@ -53,10 +53,11 @@ import java.io.File
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-class WorkbookDataStoreTest {
+class AudioDataStoreTest {
     companion object {
         private val testApp: TestApp = TestApp()
 
+        private lateinit var audioDataStore: AudioDataStore
         private lateinit var workbookDataStore: WorkbookDataStore
 
         private val directoryProvider = testApp.dependencyGraph.injectDirectoryProvider()
@@ -168,6 +169,7 @@ class WorkbookDataStoreTest {
             )
             configureAudio.configure()
 
+            audioDataStore = find()
             workbookDataStore = find()
             workbookDataStore.activeWorkbookProperty.set(workbook)
         }
@@ -193,64 +195,100 @@ class WorkbookDataStoreTest {
     }
 
     @Test
-    fun `getting source chunk for active chunk`() {
+    fun `no source audio when there is no active chapter`() {
+        audioDataStore.updateSourceAudio()
+
+        Assert.assertNull(audioDataStore.sourceAudioProperty.value)
+    }
+
+    @Test
+    fun `there is chapter source audio for active chapter`() {
+        workbookDataStore.activeChapterProperty.set(targetChapter)
+        audioDataStore.updateSourceAudio()
+
+        Assert.assertEquals(sourceTakeFile, audioDataStore.sourceAudioProperty.value?.file)
+        Assert.assertEquals(0, audioDataStore.sourceAudioProperty.value?.start)
+        Assert.assertEquals(10, audioDataStore.sourceAudioProperty.value?.end)
+    }
+
+    @Test
+    fun `there is chunk source audio for active chunk`() {
         workbookDataStore.activeChapterProperty.set(targetChapter)
         workbookDataStore.activeChunkProperty.set(targetChunk)
+        audioDataStore.updateSourceAudio()
 
-        val observer = workbookDataStore.getSourceChunk().test()
-        observer.assertComplete()
-        observer.assertResult(sourceChunk)
+        Assert.assertEquals(sourceTakeFile, audioDataStore.sourceAudioProperty.value?.file)
+        Assert.assertEquals(0, audioDataStore.sourceAudioProperty.value?.start)
+        Assert.assertEquals(1, audioDataStore.sourceAudioProperty.value?.end)
     }
 
     @Test
-    fun `getting title for active chapter`() {
+    fun `no chapter player when there is no active chapter`() {
+        audioDataStore.updateSelectedChapterPlayer()
+
+        Assert.assertNull(audioDataStore.selectedChapterPlayerProperty.value)
+        Assert.assertNull(audioDataStore.targetAudioProperty.value)
+    }
+
+    @Test
+    fun `no chapter player when there is no selected take`() {
         workbookDataStore.activeChapterProperty.set(targetChapter)
+        audioDataStore.updateSelectedChapterPlayer()
 
-        val stringProperty = SimpleStringProperty()
-        stringProperty.bind(workbookDataStore.activeTitleBinding())
-
-        Assert.assertEquals("Genesis 1", stringProperty.value)
+        Assert.assertNull(audioDataStore.selectedChapterPlayerProperty.value)
+        Assert.assertNull(audioDataStore.targetAudioProperty.value)
     }
 
     @Test
-    fun `getting title for active chunk`() {
+    fun `there are chapter and target audio players for active chapter with selected take`() {
+        val take1 = Take("take1", takeFile, 1, MimeType.USFM, LocalDate.now())
+        targetChapter.audio.insertTake(take1)
+        targetChapter.audio.selectTake(take1)
+
         workbookDataStore.activeChapterProperty.set(targetChapter)
-        workbookDataStore.activeChunkProperty.set(targetChunk)
+        audioDataStore.updateSelectedChapterPlayer()
 
-        val stringProperty = SimpleStringProperty()
-        stringProperty.bind(workbookDataStore.activeTitleBinding())
-
-        Assert.assertEquals("Genesis 1:1", stringProperty.value)
+        Assert.assertNotNull(audioDataStore.selectedChapterPlayerProperty.value)
+        Assert.assertNotNull(audioDataStore.targetAudioProperty.value)
     }
 
     @Test
-    fun `getting title for active chapter (alternative)`() {
-        workbookDataStore.activeChapterProperty.set(targetChapter)
+    fun `no chapter player for chunk page`() {
+        val take1 = Take("take1", takeFile, 1, MimeType.USFM, LocalDate.now())
+        targetChapter.audio.insertTake(take1)
+        targetChapter.audio.selectTake(take1)
 
-        val stringProperty = SimpleStringProperty()
-        stringProperty.bind(workbookDataStore.activeChapterTitleBinding())
-
-        Assert.assertEquals("Genesis 1", stringProperty.value)
-    }
-
-    @Test
-    fun `chunk title is null when there is no active chunk`() {
-        workbookDataStore.activeChapterProperty.set(targetChapter)
-
-        val stringProperty = SimpleStringProperty()
-        stringProperty.bind(workbookDataStore.activeChunkTitleBinding())
-
-        Assert.assertNull(stringProperty.value)
-    }
-
-    @Test
-    fun `chunk title for active chunk`() {
         workbookDataStore.activeChapterProperty.set(targetChapter)
         workbookDataStore.activeChunkProperty.set(targetChunk)
+        audioDataStore.updateSelectedChapterPlayer()
 
-        val stringProperty = SimpleStringProperty()
-        stringProperty.bind(workbookDataStore.activeChunkTitleBinding())
+        Assert.assertNull(audioDataStore.selectedChapterPlayerProperty.value)
+        Assert.assertNull(audioDataStore.targetAudioProperty.value)
+    }
 
-        Assert.assertEquals("Chunk 1", stringProperty.value)
+    @Test(expected = IllegalStateException::class)
+    fun `getting source audio without active chapter throws exception`() {
+        audioDataStore.getSourceAudio()
+    }
+
+    @Test
+    fun `getting source audio for active chapter`() {
+        workbookDataStore.activeChapterProperty.set(targetChapter)
+        val sourceAudio = audioDataStore.getSourceAudio()
+
+        Assert.assertEquals(sourceTakeFile, sourceAudio?.file)
+        Assert.assertEquals(0, sourceAudio?.start)
+        Assert.assertEquals(10, sourceAudio?.end)
+    }
+
+    @Test
+    fun `getting source audio for active chunk`() {
+        workbookDataStore.activeChapterProperty.set(targetChapter)
+        workbookDataStore.activeChunkProperty.set(targetChunk)
+        val sourceAudio = audioDataStore.getSourceAudio()
+
+        Assert.assertEquals(sourceTakeFile, sourceAudio?.file)
+        Assert.assertEquals(0, sourceAudio?.start)
+        Assert.assertEquals(1, sourceAudio?.end)
     }
 }

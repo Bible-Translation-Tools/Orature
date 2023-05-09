@@ -40,7 +40,7 @@ class TranslationCard2(
             addClass("translation-card__body")
 
             label(sourceLanguage) {
-                addClass("translation-card__language", "label-normal")
+                addClass("translation-card__language")
             }
             hbox {
                 hgrow = Priority.ALWAYS
@@ -51,7 +51,7 @@ class TranslationCard2(
                 }
             }
             label(targetLanguage) {
-                addClass("translation-card__language", "label-normal")
+                addClass("translation-card__language")
             }
         }
     }

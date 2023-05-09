@@ -1,6 +1,5 @@
 package org.wycliffeassociates.otter.jvm.controls.card
 
-import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.value.ObservableValue
 import javafx.event.EventTarget
 import javafx.scene.layout.VBox
@@ -14,8 +13,8 @@ import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class NewTranslationCard2(
-    val sourceLanguageProperty: ObservableValue<Language>,
-    val targetLanguageProperty: ObservableValue<Language>,
+    private val sourceLanguageProperty: ObservableValue<Language>,
+    private val targetLanguageProperty: ObservableValue<Language>,
     mode: TranslationMode
 ) : VBox() {
 
@@ -34,7 +33,7 @@ class NewTranslationCard2(
         vbox {
             addClass("translation-card__body")
             label {
-                addClass("translation-card__language", "label-normal")
+                addClass("translation-card__language")
                 textProperty().bind(
                     sourceLanguageProperty.stringBinding { source ->
                         togglePseudoClass("unset", source == null)
@@ -51,7 +50,7 @@ class NewTranslationCard2(
                 graphic = FontIcon(MaterialDesign.MDI_MENU_DOWN)
             }
             label {
-                addClass("translation-card__language", "label-normal")
+                addClass("translation-card__language")
                 textProperty().bind(
                     targetLanguageProperty.stringBinding { target ->
                         togglePseudoClass("unset", target == null)

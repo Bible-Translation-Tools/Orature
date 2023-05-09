@@ -10,6 +10,10 @@ import tornadofx.attachTo
 import tornadofx.managedWhen
 import tornadofx.visibleWhen
 
+/**
+ * A container that displays the appropriate translation card
+ * based on the active selection status.
+ */
 class TranslationCardWrapper(
     sourceLanguage: Language,
     targetLanguage: Language,
