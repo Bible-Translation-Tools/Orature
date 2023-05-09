@@ -25,7 +25,7 @@ class TranslationTypeCard(titleKey: String, descriptionKey: String) : HBox() {
                 addClass("h3", "translation-type-card__text-cell__title")
             }
             label(messages[descriptionKey]) {
-                addClass("label-normal")
+                addClass("normal-text")
                 isWrapText = true
             }
         }
