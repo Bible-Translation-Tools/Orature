@@ -11,7 +11,7 @@ import org.wycliffeassociates.otter.jvm.controls.model.TranslationMode
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import tornadofx.FX.Companion.messages
-
+// TODO: remove number "2" suffix after deleting the original control.
 class NewTranslationCard2(
     private val sourceLanguageProperty: ObservableValue<Language>,
     private val targetLanguageProperty: ObservableValue<Language>,

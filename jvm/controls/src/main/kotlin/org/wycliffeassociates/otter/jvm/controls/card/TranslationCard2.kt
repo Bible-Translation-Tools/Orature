@@ -16,7 +16,7 @@ import tornadofx.hbox
 import tornadofx.hgrow
 import tornadofx.label
 import java.text.MessageFormat
-
+// TODO: remove number "2" suffix after deleting the original control. Same for css named translation-card-2.css
 class TranslationCard2(
     sourceLanguage: String,
     targetLanguage: String,
