@@ -8,6 +8,6 @@ data class WorkbookInfo(
     val title: String,
     val label: String,
     val progress: Double,
-    val modifiedTimestamp: LocalDateTime,
+    val lastModified: LocalDateTime,
     val hasSourceAudio: Boolean = false
 )
