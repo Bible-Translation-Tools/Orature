@@ -4,21 +4,15 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import javafx.event.EventTarget
-import javafx.geometry.Pos
 import javafx.scene.control.TableView
 import javafx.scene.layout.Priority
-import javafx.scene.layout.VBox
-import javafx.scene.text.TextAlignment
-import org.kordamp.ikonli.javafx.FontIcon
-import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.common.data.workbook.WorkbookInfo
+import org.wycliffeassociates.otter.common.data.workbook.ProjectInfo
 import tornadofx.*
-import tornadofx.FX.Companion.icon
 import tornadofx.FX.Companion.messages
 
 class WorkBookTableView(
-    books: ObservableList<WorkbookInfo>
-) : TableView<WorkbookInfo>(books) {
+    books: ObservableList<ProjectInfo>
+) : TableView<ProjectInfo>(books) {
 
     init {
         addClass("wa-table-view")
@@ -59,7 +53,7 @@ class WorkBookTableView(
             setCellValueFactory { SimpleBooleanProperty(it.value.hasSourceAudio) }
             setCellFactory { WorkbookSourceAudioTableCell() }
         }
-        column("", WorkbookInfo::class) {
+        column("", ProjectInfo::class) {
             setCellValueFactory { SimpleObjectProperty(it.value) }
             setCellFactory {
                 WorkbookOptionTableCell()
@@ -78,6 +72,6 @@ class WorkBookTableView(
  * Constructs a workbook table and attach it to the parent.
  */
 fun EventTarget.workbookTableView(
-    values: ObservableList<WorkbookInfo>,
+    values: ObservableList<ProjectInfo>,
     op: WorkBookTableView.() -> Unit = {}
 ) = WorkBookTableView(values).attachTo(this, op)

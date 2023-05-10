@@ -47,7 +47,7 @@ import org.wycliffeassociates.otter.common.data.workbook.TakeHolder
 import org.wycliffeassociates.otter.common.data.workbook.TextItem
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.common.data.workbook.WorkbookInfo
+import org.wycliffeassociates.otter.common.data.workbook.ProjectInfo
 import org.wycliffeassociates.otter.common.domain.collections.UpdateTranslation
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
 import java.util.WeakHashMap
@@ -172,7 +172,7 @@ class WorkbookRepository(
             }
     }
 
-    override fun getProjectInfo(translation: Translation): Single<List<WorkbookInfo>> {
+    override fun getProjectInfo(translation: Translation): Single<List<ProjectInfo>> {
         return db.getDerivedProjects()
             .map { projects ->
                 projects
@@ -184,7 +184,7 @@ class WorkbookRepository(
                         val sourceCollection = db.getSourceProject(project).blockingGet()
                         val sourceLanguage = sourceCollection.resourceContainer?.language
                         if (sourceLanguage == translation.source) {
-                            buildWorkbookInfo(project, sourceCollection.resourceContainer!!)
+                            buildProjectInfo(project, sourceCollection.resourceContainer!!)
                         } else {
                             null
                         }
@@ -192,16 +192,16 @@ class WorkbookRepository(
             }
     }
 
-    private fun buildWorkbookInfo(
+    private fun buildProjectInfo(
         project: Collection,
         sourceMetadata: ResourceMetadata
-    ): WorkbookInfo {
+    ): ProjectInfo {
         val progress = getProgress(project)
         val hasSourceAudio = SourceAudioAccessor.hasSourceAudio(
             sourceMetadata,
             project.slug
         )
-        return WorkbookInfo(
+        return ProjectInfo(
             project.id,
             project.slug,
             project.titleKey,
