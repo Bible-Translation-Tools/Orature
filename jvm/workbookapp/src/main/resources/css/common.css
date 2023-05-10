@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2023 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -58,4 +58,36 @@
 .jfx-snackbar-content .label {
     -fx-text-fill: -wa-white;
     -fx-font-size: 14pt;
+}
+
+.h3 {
+    -fx-font-size: 1.5em;
+    -fx-font-weight: 700;
+    -fx-text-fill: -wa-regular-text;
+}
+
+.h4 {
+    -fx-font-size: 1.4em;
+    -fx-font-weight: 700;
+    -fx-text-fill: -wa-regular-text;
+}
+
+.h5 {
+    -fx-font-size: 1.3em;
+    -fx-font-weight: 600;
+    -fx-text-fill: -wa-regular-text;
+}
+
+.h3--80,
+.h4--80 {
+    -fx-text-fill: -wa-regular-text-80;
+}
+
+.normal-text {
+    -fx-font-size: 1.4em;
+    -fx-text-fill: -wa-regular-text-80;
+}
+
+.wa-icon {
+    -fx-icon-color: -wa-regular-text-80;
 }

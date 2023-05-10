@@ -59,12 +59,6 @@
     -fx-text-fill: -wa-regular-text-80;
 }
 
-.wa-table-view .table-view__title-cell {
-    -fx-text-fill: -wa-regular-text-80;
-    -fx-font-size: 1.4em;
-    -fx-font-weight: bold;
-}
-
 .wa-table-view .table-cell__normal-text.label {
     -fx-text-fill: -wa-regular-text-80;
 }
@@ -108,7 +102,6 @@
 }
 
 .wa-table-view .ikonli-font-icon {
-    -fx-icon-color: -wa-regular-text;
     -fx-icon-size: 20px;
 }
 
