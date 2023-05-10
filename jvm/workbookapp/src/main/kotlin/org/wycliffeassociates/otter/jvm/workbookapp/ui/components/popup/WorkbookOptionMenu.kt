@@ -23,7 +23,7 @@ import javafx.scene.control.ContextMenu
 import javafx.scene.control.MenuItem
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.common.data.workbook.ProjectInfo
+import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookDeleteEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookExportEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookOpenEvent
@@ -34,7 +34,7 @@ import tornadofx.get
 
 class WorkbookOptionMenu : ContextMenu() {
 
-    val workbookInfoProperty = SimpleObjectProperty<ProjectInfo>(null)
+    val workbookInfoProperty = SimpleObjectProperty<WorkbookDescriptor>(null)
 
     init {
         val openOption = MenuItem(FX.messages["openBook"]).apply {

@@ -47,7 +47,7 @@ import org.wycliffeassociates.otter.common.data.workbook.TakeHolder
 import org.wycliffeassociates.otter.common.data.workbook.TextItem
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.common.data.workbook.ProjectInfo
+import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.collections.UpdateTranslation
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
 import java.util.WeakHashMap
@@ -172,42 +172,32 @@ class WorkbookRepository(
             }
     }
 
-    override fun getProjectInfo(translation: Translation): Single<List<ProjectInfo>> {
-        return db.getDerivedProjects()
-            .map { projects ->
-                projects
-                    .filter {
-                        it.resourceContainer?.type == ContainerType.Book &&
-                                it.resourceContainer?.language == translation.target
-                    }
-                    .mapNotNull { project ->
-                        val sourceCollection = db.getSourceProject(project).blockingGet()
-                        val sourceLanguage = sourceCollection.resourceContainer?.language
-                        if (sourceLanguage == translation.source) {
-                            buildProjectInfo(project, sourceCollection.resourceContainer!!)
-                        } else {
-                            null
-                        }
-                    }
+    override fun getWorkbookDescriptors(rootCollection: Collection): Single<List<WorkbookDescriptor>> {
+        return db.getChildren(rootCollection)
+            .map { sources ->
+                sources.map { collection ->
+                    val targetProject: Collection? = db.getDerivedProject(collection).blockingGet()
+                    buildWorkbookDescriptor(collection, targetProject)
+                }
             }
     }
 
-    private fun buildProjectInfo(
-        project: Collection,
-        sourceMetadata: ResourceMetadata
-    ): ProjectInfo {
-        val progress = getProgress(project)
+    private fun buildWorkbookDescriptor(
+        source: Collection,
+        targetProject: Collection?
+    ): WorkbookDescriptor {
+        val progress = targetProject?.let { getProgress(it) } ?: 0.0
         val hasSourceAudio = SourceAudioAccessor.hasSourceAudio(
-            sourceMetadata,
-            project.slug
+            source.resourceContainer!!,
+            source.slug
         )
-        return ProjectInfo(
-            project.id,
-            project.slug,
-            project.titleKey,
-            project.labelKey,
+        return WorkbookDescriptor(
+            source.id,
+            source.slug,
+            source.titleKey,
+            source.labelKey,
             progress,
-            project.modifiedTs!!,
+            source.modifiedTs,
             hasSourceAudio
         )
     }
@@ -646,6 +636,7 @@ class WorkbookRepository(
         fun getTakeByContent(content: Content): Single<List<ModelTake>>
         fun deleteTake(take: ModelTake, date: DateHolder): Completable
         fun getSoftDeletedTakes(metadata: ResourceMetadata, projectSlug: String): Single<List<ModelTake>>
+        fun getDerivedProject(sourceCollection: Collection): Maybe<Collection>
         fun getDerivedProjects(): Single<List<Collection>>
         fun getSourceProject(targetProject: Collection): Maybe<Collection>
         fun getTranslation(sourceLanguage: Language, targetLanguage: Language): Single<Translation>
@@ -757,6 +748,10 @@ private class DefaultDatabaseAccessors(
 
     override fun getSoftDeletedTakes(metadata: ResourceMetadata, projectSlug: String) =
         takeRepo.getSoftDeletedTakes(collectionRepo.getProjectBySlugAndMetadata(projectSlug, metadata).blockingGet())
+
+    override fun getDerivedProject(sourceCollection: Collection): Maybe<Collection> {
+        return collectionRepo.getDerivedProject(sourceCollection)
+    }
 
     override fun getDerivedProjects(): Single<List<Collection>> = collectionRepo.getDerivedProjects()
 

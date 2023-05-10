@@ -24,13 +24,13 @@ import javafx.collections.ObservableList
 import javafx.event.EventTarget
 import javafx.scene.control.TableView
 import javafx.scene.layout.Priority
-import org.wycliffeassociates.otter.common.data.workbook.ProjectInfo
+import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class WorkBookTableView(
-    books: ObservableList<ProjectInfo>
-) : TableView<ProjectInfo>(books) {
+    books: ObservableList<WorkbookDescriptor>
+) : TableView<WorkbookDescriptor>(books) {
 
     init {
         addClass("wa-table-view")
@@ -71,7 +71,7 @@ class WorkBookTableView(
             setCellValueFactory { SimpleBooleanProperty(it.value.hasSourceAudio) }
             setCellFactory { WorkbookSourceAudioTableCell() }
         }
-        column("", ProjectInfo::class) {
+        column("", WorkbookDescriptor::class) {
             setCellValueFactory { SimpleObjectProperty(it.value) }
             setCellFactory {
                 WorkbookOptionTableCell()
@@ -90,6 +90,6 @@ class WorkBookTableView(
  * Constructs a workbook table and attach it to the parent.
  */
 fun EventTarget.workbookTableView(
-    values: ObservableList<ProjectInfo>,
+    values: ObservableList<WorkbookDescriptor>,
     op: WorkBookTableView.() -> Unit = {}
 ) = WorkBookTableView(values).attachTo(this, op)

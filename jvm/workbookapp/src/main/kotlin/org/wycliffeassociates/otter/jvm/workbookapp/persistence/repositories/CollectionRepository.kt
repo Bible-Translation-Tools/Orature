@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories
 
 import io.reactivex.Completable
 import io.reactivex.Maybe
+import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import jooq.Tables.DUBLIN_CORE_ENTITY
@@ -214,6 +215,23 @@ class CollectionRepository @Inject constructor(
             .doOnError { e ->
                 log.error("Error in getAll", e)
             }
+            .subscribeOn(Schedulers.io())
+    }
+
+    override fun getDerivedProject(sourceProject: Collection): Maybe<Collection> {
+        return Maybe
+            .fromCallable {
+                collectionDao
+                    .fetchByLabel("project")
+                    .find { it.sourceFk == sourceProject.id }
+                    ?.let(this::buildCollection)!!
+            }
+            .doOnError { e ->
+                if (e !is java.lang.NullPointerException) {
+                    log.error("Error in getDerivedProject", e)
+                }
+            }
+            .onErrorComplete()
             .subscribeOn(Schedulers.io())
     }
 

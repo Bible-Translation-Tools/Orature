@@ -22,12 +22,12 @@ import javafx.geometry.Pos
 import javafx.scene.control.TableCell
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.common.data.workbook.ProjectInfo
+import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.popup.WorkbookOptionMenu
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
-class WorkbookOptionTableCell : TableCell<ProjectInfo, ProjectInfo>() {
+class WorkbookOptionTableCell : TableCell<WorkbookDescriptor, WorkbookDescriptor>() {
 
     private val popupMenu = WorkbookOptionMenu()
 
@@ -44,7 +44,7 @@ class WorkbookOptionTableCell : TableCell<ProjectInfo, ProjectInfo>() {
         add(actionButton)
     }
 
-    override fun updateItem(item: ProjectInfo?, empty: Boolean) {
+    override fun updateItem(item: WorkbookDescriptor?, empty: Boolean) {
         super.updateItem(item, empty)
         if (item == null || empty) {
             popupMenu.workbookInfoProperty.set(null)
