@@ -47,7 +47,9 @@ import org.wycliffeassociates.otter.common.data.workbook.TakeHolder
 import org.wycliffeassociates.otter.common.data.workbook.TextItem
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.data.workbook.WorkbookInfo
 import org.wycliffeassociates.otter.common.domain.collections.UpdateTranslation
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
 import java.util.WeakHashMap
 import java.util.Collections.synchronizedMap
 import javax.inject.Inject
@@ -170,9 +172,61 @@ class WorkbookRepository(
             }
     }
 
+    override fun getProjectInfo(translation: Translation): Single<List<WorkbookInfo>> {
+        return db.getDerivedProjects()
+            .map { projects ->
+                projects
+                    .filter {
+                        it.resourceContainer?.type == ContainerType.Book &&
+                                it.resourceContainer?.language == translation.target
+                    }
+                    .mapNotNull { project ->
+                        val sourceCollection = db.getSourceProject(project).blockingGet()
+                        val sourceLanguage = sourceCollection.resourceContainer?.language
+                        if (sourceLanguage == translation.source) {
+                            buildWorkbookInfo(project, sourceCollection.resourceContainer!!)
+                        } else {
+                            null
+                        }
+                    }
+            }
+    }
+
+    private fun buildWorkbookInfo(
+        project: Collection,
+        sourceMetadata: ResourceMetadata
+    ): WorkbookInfo {
+        val progress = getProgress(project)
+        val hasSourceAudio = SourceAudioAccessor.hasSourceAudio(
+            sourceMetadata,
+            project.slug
+        )
+        return WorkbookInfo(
+            project.id,
+            project.slug,
+            project.titleKey,
+            project.labelKey,
+            progress,
+            project.modifiedTs!!,
+            hasSourceAudio
+        )
+    }
+
+    private fun getProgress(collection: Collection): Double {
+        val chapters = db.getChildren(collection)
+            .flattenAsObservable { it }
+            .flatMapSingle { chapter ->
+                db.getCollectionMetaContent(chapter)
+            }
+            .blockingIterable().toList()
+
+        return chapters.count { it.selectedTake != null }.toDouble() / chapters.size
+    }
+
     private fun book(bookCollection: Collection, disposables: MutableList<Disposable>): Book {
         val resourceMetadata = bookCollection.resourceContainer
             ?: throw IllegalStateException("Book collection with id=${bookCollection.id} has null resource container")
+
         return Book(
             collectionId = bookCollection.id,
             title = bookCollection.titleKey,

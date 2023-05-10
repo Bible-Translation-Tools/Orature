@@ -88,12 +88,6 @@ abstract class AppRepositoriesModule {
 
     @Binds
     @Singleton
-    abstract fun providesWorkbookInfoRepository(
-        repository: WorkbookInfoRepository
-    ): IWorkbookInfoRepository
-
-    @Binds
-    @Singleton
     abstract fun providesInstalledEntityRepository(
         repository: InstalledEntityRepository
     ): IInstalledEntityRepository
