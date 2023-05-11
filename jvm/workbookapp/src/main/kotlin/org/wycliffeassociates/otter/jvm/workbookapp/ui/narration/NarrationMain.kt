@@ -1,12 +1,12 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
+import com.jakewharton.rxrelay2.ReplayRelay
 import io.mockk.every
 import io.mockk.mockk
 import io.reactivex.Observable
 import javafx.stage.Stage
-import org.wycliffeassociates.otter.common.data.workbook.Book
-import org.wycliffeassociates.otter.common.data.workbook.Chapter
-import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.data.primitives.MimeType
+import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
@@ -33,7 +33,7 @@ class NarrationApp() : App(NarrationView::class) {
         stage.width = 800.0
         stage.scene.root.addClass(org.wycliffeassociates.otter.common.data.ColorTheme.LIGHT.styleClass)
     }
-    
+
     private fun mockWorkbook() {
         val workbook = mockk<Workbook>()
         val target = mockk<Book>()
@@ -71,10 +71,39 @@ class NarrationApp() : App(NarrationView::class) {
             val chapter = mockk<Chapter>()
             every { chapter.text } returns "Chapter Text $i"
             every { chapter.title } returns i.toString()
-            // every { chapter.chunks } returns mockVerses(chapter)
+            every { chapter.getDraft() } returns mockChunks()
             chapters.add(chapter)
         }
         return Observable.fromIterable(chapters)
+    }
+
+    private fun mockChunks(): ReplayRelay<Chunk> {
+        val chunkText = listOf(
+            "In the beginning, God created the heavens and the earth.",
+            "The earth was without form and empty. Darkness was upon the surface of the deep. The Spirit of God was moving above the surface of the waters.",
+            "God said, \"Let there be light,\" and there was light.",
+            "God saw the light, that it was good. He divided the light from the darkness.",
+            "God called the light \"day,\" and the darkness he called \"night.\" And there was evening and there was morning, the first day.",
+            "God said, \"Let there be an expanse between the waters, and let it divide the waters from the waters.\"",
+            "God made the expanse and divided the waters which were under the expanse from the waters which were above the expanse. It was so.",
+            "God called the expanse \"sky.\" And there was evening and there was morning, the second day.",
+            "God said, \"Let the waters under the sky be gathered together to one place, and let the dry land appear.\" It was so.",
+            "God called the dry land \"earth,\" and the gathered waters he called \"seas.\" He saw that it was good",
+        )
+
+        val chunks = mutableListOf<Chunk>()
+        for (i in 1..10) {
+            val item = TextItem(chunkText[i-1], MimeType.USFM)
+            val chunk = mockk<Chunk>()
+            every { chunk.sort } returns i
+            every { chunk.label } returns "verse"
+            every { chunk.textItem } returns item
+            every { chunk.title } returns "$i"
+            every { chunk.start } returns i
+            every { chunk.end } returns i
+            chunks.add(chunk)
+        }
+        return ReplayRelay.create<Chunk>().apply { chunks.forEach { this.accept(it) } }
     }
 }
 

@@ -7,16 +7,16 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.transformation.FilteredList
 import javafx.scene.control.ListView
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
-import org.wycliffeassociates.otter.jvm.controls.narration.ResumeVerseEvent
-import org.wycliffeassociates.otter.jvm.controls.narration.StickyVerseChangedEvent
-import org.wycliffeassociates.otter.jvm.controls.narration.stickyVerse
-import org.wycliffeassociates.otter.jvm.controls.narration.narrationTextListview
+import org.wycliffeassociates.otter.jvm.controls.narration.*
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NarrationTextCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.WaveformClickedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.text.MessageFormat
 
 class NarrationFooterViewModel : ViewModel() {
+    val workbookDataStore by inject<WorkbookDataStore>()
+
     val allSortedChunks = observableListOf<Chunk>()
 
     val stickyVerseProperty = SimpleObjectProperty<Chunk>()
@@ -38,6 +38,14 @@ class NarrationFooterViewModel : ViewModel() {
                 stickyVerseProperty.set(null)
             }
         }
+    }
+
+    fun onDock() {
+        val chapter = workbookDataStore.activeChapterProperty.value
+        chapter.getDraft().subscribe {
+            allSortedChunks.add(it)
+        }
+        println(allSortedChunks)
     }
 
     fun currentVerseTextBinding(): StringBinding {
@@ -76,9 +84,14 @@ class NarrationFooterViewModel : ViewModel() {
 class NarrationFooter : View() {
 
     private val viewModel: NarrationFooterViewModel by inject()
-    private var listView: ListView<Chunk> by singleAssign()
+    private var listView: NarrationTextListView<Chunk> by singleAssign()
 
-    init {
+    override fun onDock() {
+        super.onDock()
+        viewModel.onDock()
+
+        listView.addListeners()
+
         subscribe<WaveformClickedEvent> {
             listView.apply {
                 selectionModel.select(it.index)
@@ -98,6 +111,17 @@ class NarrationFooter : View() {
                 scrollTo(it.data)
             }
         }
+    }
+
+    override fun onUndock() {
+        super.onUndock()
+
+        listView.removeListeners()
+
+        //TODO: Verify that unsubscribe works
+        unsubscribe<WaveformClickedEvent> { }
+        unsubscribe<ResumeVerseEvent> {  }
+        unsubscribe<ResumeVerseEvent> {  }
     }
 
     override val root = stackpane {
