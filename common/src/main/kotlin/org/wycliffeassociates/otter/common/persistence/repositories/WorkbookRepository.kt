@@ -47,7 +47,9 @@ import org.wycliffeassociates.otter.common.data.workbook.TakeHolder
 import org.wycliffeassociates.otter.common.data.workbook.TextItem
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.collections.UpdateTranslation
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
 import java.util.WeakHashMap
 import java.util.Collections.synchronizedMap
 import javax.inject.Inject
@@ -170,9 +172,51 @@ class WorkbookRepository(
             }
     }
 
+    override fun getWorkbookDescriptors(rootCollection: Collection): Single<List<WorkbookDescriptor>> {
+        return db.getChildren(rootCollection)
+            .map { sources ->
+                sources.map { collection ->
+                    val targetProject: Collection? = db.getDerivedProject(collection).blockingGet()
+                    buildWorkbookDescriptor(collection, targetProject)
+                }
+            }
+    }
+
+    private fun buildWorkbookDescriptor(
+        source: Collection,
+        targetProject: Collection?
+    ): WorkbookDescriptor {
+        val progress = targetProject?.let { getProgress(it) } ?: 0.0
+        val hasSourceAudio = SourceAudioAccessor.hasSourceAudio(
+            source.resourceContainer!!,
+            source.slug
+        )
+        return WorkbookDescriptor(
+            source.id,
+            source.slug,
+            source.titleKey,
+            source.labelKey,
+            progress,
+            source.modifiedTs,
+            hasSourceAudio
+        )
+    }
+
+    private fun getProgress(collection: Collection): Double {
+        val chapters = db.getChildren(collection)
+            .flattenAsObservable { it }
+            .flatMapSingle { chapter ->
+                db.getCollectionMetaContent(chapter)
+            }
+            .blockingIterable().toList()
+
+        return chapters.count { it.selectedTake != null }.toDouble() / chapters.size
+    }
+
     private fun book(bookCollection: Collection, disposables: MutableList<Disposable>): Book {
         val resourceMetadata = bookCollection.resourceContainer
             ?: throw IllegalStateException("Book collection with id=${bookCollection.id} has null resource container")
+
         return Book(
             collectionId = bookCollection.id,
             title = bookCollection.titleKey,
@@ -592,6 +636,7 @@ class WorkbookRepository(
         fun getTakeByContent(content: Content): Single<List<ModelTake>>
         fun deleteTake(take: ModelTake, date: DateHolder): Completable
         fun getSoftDeletedTakes(metadata: ResourceMetadata, projectSlug: String): Single<List<ModelTake>>
+        fun getDerivedProject(sourceCollection: Collection): Maybe<Collection>
         fun getDerivedProjects(): Single<List<Collection>>
         fun getSourceProject(targetProject: Collection): Maybe<Collection>
         fun getTranslation(sourceLanguage: Language, targetLanguage: Language): Single<Translation>
@@ -703,6 +748,10 @@ private class DefaultDatabaseAccessors(
 
     override fun getSoftDeletedTakes(metadata: ResourceMetadata, projectSlug: String) =
         takeRepo.getSoftDeletedTakes(collectionRepo.getProjectBySlugAndMetadata(projectSlug, metadata).blockingGet())
+
+    override fun getDerivedProject(sourceCollection: Collection): Maybe<Collection> {
+        return collectionRepo.getDerivedProject(sourceCollection)
+    }
 
     override fun getDerivedProjects(): Single<List<Collection>> = collectionRepo.getDerivedProjects()
 

@@ -28,6 +28,7 @@ import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.workbook.Book
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import java.io.InputStream
 
 data class SourceAudio(val file: File, val start: Int, val end: Int)
 
@@ -139,5 +140,35 @@ class SourceAudioAccessor(
 
     private fun validAudioExtension(file: File): Boolean {
         return AudioFileFormat.values().map { it.extension }.contains(file.extension)
+    }
+
+    companion object {
+        fun hasSourceAudio(
+            metadata: ResourceMetadata,
+            projectSlug: String
+        ): Boolean {
+            ResourceContainer.load(metadata.path).use { rc ->
+                val mediaTemplatePaths = rc.media?.projects
+                    ?.find { it.identifier == projectSlug }
+                    ?.media
+                    ?.filter { AudioFileFormat.isSupported(it.identifier) }
+                    ?.map { it.chapterUrl } ?: return false
+
+                val fileNameRegex = mediaTemplatePaths
+                    .map { File(it).nameWithoutExtension.replace("{chapter}", "\\d{1,3}") }
+                    .joinToString("|")
+                    .let { Regex(it) }
+
+
+                val entries = rc.accessor.getInputStreams(RcConstants.SOURCE_MEDIA_DIR)
+                entries.values.forEach(InputStream::close)
+
+                val hasAudioFile = entries.keys.any {
+                    File(it).nameWithoutExtension.matches(fileNameRegex)
+                }
+
+                return hasAudioFile
+            }
+        }
     }
 }
