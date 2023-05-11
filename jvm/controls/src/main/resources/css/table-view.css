@@ -59,10 +59,6 @@
     -fx-text-fill: -wa-regular-text-80;
 }
 
-.wa-table-view .table-cell__normal-text.label {
-    -fx-text-fill: -wa-regular-text-80;
-}
-
 /* scroll-bar */
 .wa-table-view .virtual-flow .scroll-bar:vertical,
 .wa-table-view .virtual-flow .scroll-bar:vertical .track,
