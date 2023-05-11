@@ -75,7 +75,7 @@ class NewTranslationCard2(
     }
 }
 
-class CreateTranslationCard : VBox() {
+class TranslationCreationCard : VBox() {
 
     private var onCreate: () -> Unit = {}
 
@@ -99,3 +99,8 @@ fun EventTarget.newTranslationCard(
     mode: TranslationMode,
     op: NewTranslationCard2.() -> Unit = {}
 ) = NewTranslationCard2(sourceLanguage, targetLanguage, mode).attachTo(this, op)
+
+fun EventTarget.translationCreationCard(
+    op: TranslationCreationCard.() -> Unit = {}
+) = TranslationCreationCard().attachTo(this, op)
+

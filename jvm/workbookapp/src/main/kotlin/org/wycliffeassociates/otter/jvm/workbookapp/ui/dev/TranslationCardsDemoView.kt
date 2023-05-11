@@ -3,9 +3,10 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.dev
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import org.wycliffeassociates.otter.common.data.primitives.Language
-import org.wycliffeassociates.otter.jvm.controls.card.CreateTranslationCard
+import org.wycliffeassociates.otter.jvm.controls.card.TranslationCreationCard
 import org.wycliffeassociates.otter.jvm.controls.card.newTranslationCard
 import org.wycliffeassociates.otter.jvm.controls.card.translationCardWrapper
+import org.wycliffeassociates.otter.jvm.controls.card.translationCreationCard
 import org.wycliffeassociates.otter.jvm.controls.model.TranslationMode
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.View
@@ -64,15 +65,13 @@ class TranslationCardsDemoView : View() {
                 showNewTranslationCard.set(false)
             }
         }
-        add(
-            CreateTranslationCard().apply {
-                visibleWhen(showNewTranslationCard.not())
-                managedWhen(visibleProperty())
+        translationCreationCard {
+            visibleWhen(showNewTranslationCard.not())
+            managedWhen(visibleProperty())
 
-                setOnAction {
-                    showNewTranslationCard.set(true)
-                }
+            setOnAction {
+                showNewTranslationCard.set(true)
             }
-        )
+        }
     }
 }
