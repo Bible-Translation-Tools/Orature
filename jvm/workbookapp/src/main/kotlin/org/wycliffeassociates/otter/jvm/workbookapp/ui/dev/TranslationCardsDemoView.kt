@@ -3,16 +3,12 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.dev
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import org.wycliffeassociates.otter.common.data.primitives.Language
-import org.wycliffeassociates.otter.jvm.controls.card.TranslationCreationCard
 import org.wycliffeassociates.otter.jvm.controls.card.newTranslationCard
-import org.wycliffeassociates.otter.jvm.controls.card.translationCardWrapper
+import org.wycliffeassociates.otter.jvm.controls.card.translationCard
 import org.wycliffeassociates.otter.jvm.controls.card.translationCreationCard
 import org.wycliffeassociates.otter.jvm.controls.model.TranslationMode
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.View
-import tornadofx.action
-import tornadofx.borderpane
-import tornadofx.button
 import tornadofx.managedWhen
 import tornadofx.paddingAll
 import tornadofx.vbox
@@ -36,20 +32,11 @@ class TranslationCardsDemoView : View() {
         paddingAll = 20.0
         maxWidth = 300.0
 
-        borderpane {
-            center = translationCardWrapper(
-                languages[0],
-                languages[1],
-                TranslationMode.TRANSLATION
-            ) {
-                top = button("Reset") {
-                    action {
-                        this@translationCardWrapper.isActiveProperty.set(false)
-                        showNewTranslationCard.set(false)
-                    }
-                }
-            }
-        }
+        translationCard(
+            languages[0],
+            languages[1],
+            TranslationMode.TRANSLATION
+        )
 
         newTranslationCard(
             SimpleObjectProperty<Language>(
