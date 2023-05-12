@@ -1,6 +1,9 @@
 package org.wycliffeassociates.otter.jvm.controls.card
 
+import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.value.ObservableValue
+import javafx.event.ActionEvent
+import javafx.event.EventHandler
 import javafx.event.EventTarget
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
@@ -11,14 +14,14 @@ import org.wycliffeassociates.otter.jvm.controls.model.TranslationMode
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import tornadofx.FX.Companion.messages
-
+// TODO: remove number "2" suffix after deleting the original control.
 class NewTranslationCard2(
     private val sourceLanguageProperty: ObservableValue<Language>,
     private val targetLanguageProperty: ObservableValue<Language>,
     mode: TranslationMode
 ) : VBox() {
 
-    private var onCancel: () -> Unit = {}
+    private var onCancelProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
         addClass("translation-card")
@@ -64,33 +67,28 @@ class NewTranslationCard2(
             addClass("btn", "btn--secondary")
             graphic = FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE)
 
-            action {
-                onCancel()
-            }
+            onActionProperty().bind(onCancelProperty)
         }
     }
 
-    fun setOnCancelAction(op: () -> Unit) {
-        onCancel = op
-    }
+    fun setOnCancelAction(op: () -> Unit) = onCancelProperty.set { op() }
 }
 
-class CreateTranslationCard : VBox() {
+class TranslationCreationCard : VBox() {
 
-    private var onCreate: () -> Unit = {}
+    private var onCreateProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
         addClass("create-translation-card")
         button {
             addClass("btn", "btn--primary")
             graphic = FontIcon(MaterialDesign.MDI_PLUS)
-            action { onCreate() }
+
+            onActionProperty().bind(onCreateProperty)
         }
     }
 
-    fun setOnAction(op: () -> Unit) {
-        onCreate = op
-    }
+    fun setOnAction(op: () -> Unit) = onCreateProperty.set { op() }
 }
 
 fun EventTarget.newTranslationCard(
@@ -99,3 +97,8 @@ fun EventTarget.newTranslationCard(
     mode: TranslationMode,
     op: NewTranslationCard2.() -> Unit = {}
 ) = NewTranslationCard2(sourceLanguage, targetLanguage, mode).attachTo(this, op)
+
+fun EventTarget.translationCreationCard(
+    op: TranslationCreationCard.() -> Unit = {}
+) = TranslationCreationCard().attachTo(this, op)
+
