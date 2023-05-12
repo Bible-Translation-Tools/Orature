@@ -18,7 +18,6 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.narration
 
-import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.value.ObservableValue
 import javafx.collections.ObservableList
 import javafx.event.EventTarget
@@ -57,6 +56,10 @@ class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(i
                     e.printStackTrace()
                 }
             }
+        }.also(listeners::add)
+
+        selectionModel.selectedItemProperty().onChangeWithDisposer {
+            FX.eventbus.fire(StickyVerseChangedEvent(null))
         }.also(listeners::add)
     }
 
