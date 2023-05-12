@@ -1,6 +1,9 @@
 package org.wycliffeassociates.otter.jvm.controls.card
 
+import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.value.ObservableValue
+import javafx.event.ActionEvent
+import javafx.event.EventHandler
 import javafx.event.EventTarget
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
@@ -18,7 +21,7 @@ class NewTranslationCard2(
     mode: TranslationMode
 ) : VBox() {
 
-    private var onCancel: () -> Unit = {}
+    private var onCancelProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
         addClass("translation-card")
@@ -64,33 +67,28 @@ class NewTranslationCard2(
             addClass("btn", "btn--secondary")
             graphic = FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE)
 
-            action {
-                onCancel()
-            }
+            onActionProperty().bind(onCancelProperty)
         }
     }
 
-    fun setOnCancelAction(op: () -> Unit) {
-        onCancel = op
-    }
+    fun setOnCancelAction(op: () -> Unit) = onCancelProperty.set { op() }
 }
 
 class TranslationCreationCard : VBox() {
 
-    private var onCreate: () -> Unit = {}
+    private var onCreateProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
         addClass("create-translation-card")
         button {
             addClass("btn", "btn--primary")
             graphic = FontIcon(MaterialDesign.MDI_PLUS)
-            action { onCreate() }
+
+            onActionProperty().bind(onCreateProperty)
         }
     }
 
-    fun setOnAction(op: () -> Unit) {
-        onCreate = op
-    }
+    fun setOnAction(op: () -> Unit) = onCreateProperty.set { op() }
 }
 
 fun EventTarget.newTranslationCard(

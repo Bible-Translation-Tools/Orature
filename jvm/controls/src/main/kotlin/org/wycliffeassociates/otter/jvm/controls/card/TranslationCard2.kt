@@ -116,7 +116,6 @@ class TranslationCardSkin2(card: TranslationCard2) : SkinBase<TranslationCard2>(
 }
 
 class ActiveTranslationCardSkin(card: TranslationCard2) : SkinBase<TranslationCard2>(card) {
-    private val behavior = ButtonBehavior(card)
 
     private val titleProperty = SimpleStringProperty()
     private val sourceLanguageProperty = SimpleStringProperty()
@@ -161,11 +160,6 @@ class ActiveTranslationCardSkin(card: TranslationCard2) : SkinBase<TranslationCa
             children.clear()
         }
         children.add(graphic)
-    }
-
-    override fun dispose() {
-        super.dispose()
-        behavior.dispose()
     }
 }
 
