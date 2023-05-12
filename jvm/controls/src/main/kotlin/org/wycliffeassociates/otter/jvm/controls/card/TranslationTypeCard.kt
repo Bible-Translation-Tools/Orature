@@ -1,5 +1,8 @@
 package org.wycliffeassociates.otter.jvm.controls.card
 
+import javafx.beans.property.SimpleObjectProperty
+import javafx.event.ActionEvent
+import javafx.event.EventHandler
 import javafx.event.EventTarget
 import javafx.scene.control.Button
 import javafx.scene.layout.HBox
@@ -11,7 +14,7 @@ import tornadofx.FX.Companion.messages
 
 class TranslationTypeCard(titleKey: String, descriptionKey: String) : HBox() {
 
-    private var onSelectAction: () -> Unit = {}
+    private var onSelectActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
         addClass("translation-type-card")
@@ -37,14 +40,12 @@ class TranslationTypeCard(titleKey: String, descriptionKey: String) : HBox() {
                 graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
                 minWidth = Button.USE_PREF_SIZE
 
-                setOnAction { onSelectAction() }
+                onActionProperty().bind(onSelectActionProperty)
             }
         }
     }
 
-    fun setOnSelectAction(op: () -> Unit) {
-        onSelectAction = op
-    }
+    fun setOnSelectAction(op: () -> Unit) = onSelectActionProperty.set { op() }
 }
 
 fun EventTarget.translationTypeCard(
