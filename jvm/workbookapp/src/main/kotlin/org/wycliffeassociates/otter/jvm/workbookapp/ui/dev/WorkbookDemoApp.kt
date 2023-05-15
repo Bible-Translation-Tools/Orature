@@ -33,7 +33,7 @@ class WorkbookDemoApp : App(RootView::class) {
     }
 
     override fun onBeforeShow(view: UIComponent) {
-        workspace.dock<LanguageTableDemoView>() // set the view for demo here
+        workspace.dock<WorkbookTableDemoView>() // set the view for demo here
         workspace.root.apply {
             contextmenu {
                 item("Change Theme") {

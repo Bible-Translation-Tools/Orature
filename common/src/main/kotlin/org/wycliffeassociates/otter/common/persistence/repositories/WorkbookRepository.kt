@@ -27,6 +27,7 @@ import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.primitives.Anthology
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.Content
@@ -35,6 +36,7 @@ import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.Marker
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.primitives.bookAnthology
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedTranslation
 import org.wycliffeassociates.otter.common.data.workbook.Book
@@ -191,11 +193,14 @@ class WorkbookRepository(
             source.resourceContainer!!,
             source.slug
         )
+        val anthology = bookAnthology.getOrDefault(source.slug, Anthology.OTHER)
+
         return WorkbookDescriptor(
             source.id,
             source.slug,
             source.titleKey,
             source.labelKey,
+            anthology,
             progress,
             source.modifiedTs,
             hasSourceAudio

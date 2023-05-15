@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.dev
 
+import org.wycliffeassociates.otter.common.data.primitives.Anthology
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookDeleteEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookExportEvent
@@ -29,16 +30,17 @@ import tornadofx.*
 
 class WorkbookTableDemoView : View() {
     val workbookList = observableListOf<WorkbookDescriptor>(
-        WorkbookDescriptor(0, "jhn",  "John", "", 0.3, LocalDateTime.now(), true,),
-        WorkbookDescriptor(0, "act", "Acts", "", 0.0, LocalDateTime.now(), true,),
-        WorkbookDescriptor(0, "gen", "Genesis", "", 0.1, LocalDateTime.now(), true,),
-        WorkbookDescriptor(0, "lev", "Leviticus", "", 0.5, LocalDateTime.now(), false,),
-        WorkbookDescriptor(0, "psa", "Psalms", "", 0.8, LocalDateTime.now(), false,),
-        WorkbookDescriptor(0, "rev", "Revelation", "", 1.0, LocalDateTime.now(), false,),
-        WorkbookDescriptor(0, "mrk", "Mark", "", 0.5, LocalDateTime.now(), false,),
-        WorkbookDescriptor(0, "mal", "Malachi", "", 1.0, LocalDateTime.now(), false,),
-        WorkbookDescriptor(0, "pro", "Proverbs", "", 0.2, LocalDateTime.now(), true,),
-        WorkbookDescriptor(0, "col", "Colossians", "", 1.0, LocalDateTime.now(), true,),
+        WorkbookDescriptor(0, "jhn",  "John", "", Anthology.NEW_TESTAMENT,0.3, LocalDateTime.now(), true),
+        WorkbookDescriptor(0, "act", "Acts", "", Anthology.NEW_TESTAMENT,0.0, LocalDateTime.now(), true),
+        WorkbookDescriptor(0, "gen", "Genesis", "", Anthology.OLD_TESTAMENT,0.1, LocalDateTime.now(), true),
+        WorkbookDescriptor(0, "lev", "Leviticus", "", Anthology.OLD_TESTAMENT,0.5, LocalDateTime.now(), false),
+        WorkbookDescriptor(0, "psa", "Psalms", "", Anthology.OLD_TESTAMENT,0.8, LocalDateTime.now(), false),
+        WorkbookDescriptor(0, "rev", "Revelation", "", Anthology.NEW_TESTAMENT,1.0, LocalDateTime.now(), false),
+        WorkbookDescriptor(0, "mrk", "Mark", "", Anthology.NEW_TESTAMENT,0.5, LocalDateTime.now(), false),
+        WorkbookDescriptor(0, "mal", "Malachi", "", Anthology.OLD_TESTAMENT,1.0, LocalDateTime.now(), false),
+        WorkbookDescriptor(0, "pro", "Proverbs", "", Anthology.OLD_TESTAMENT,0.2, LocalDateTime.now(), true),
+        WorkbookDescriptor(0, "col", "Colossians", "", Anthology.NEW_TESTAMENT,1.0, LocalDateTime.now(), true),
+        WorkbookDescriptor(0, "unknown", "Non-scripture", "", Anthology.OTHER,1.0, LocalDateTime.now(), true),
     )
 
     init {

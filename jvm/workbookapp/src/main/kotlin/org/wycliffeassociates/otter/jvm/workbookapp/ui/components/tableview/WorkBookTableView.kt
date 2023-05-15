@@ -53,9 +53,16 @@ class WorkBookTableView(
             addClass("table-view__column-header-row")
             setCellValueFactory { it.value.slug.toProperty() }
             cellFormat {
-                graphic = label(item)
+                graphic = label(item) { addClass("normal-text") }
             }
             minWidth = 80.0 // this may not be replaced with css
+        }
+        column(messages["anthology"], String::class).apply {
+            addClass("table-view__column-header-row")
+            setCellValueFactory { it.value.anthology.titleKey.toProperty() }
+            cellFormat {
+                graphic = label(messages[item]) { addClass("h5") }
+            }
         }
         column(messages["progress"], Number::class) {
             setCellValueFactory { it.value.progress.toProperty() }
