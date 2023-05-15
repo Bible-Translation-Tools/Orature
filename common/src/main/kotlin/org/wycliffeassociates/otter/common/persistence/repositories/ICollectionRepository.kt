@@ -28,6 +28,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 interface ICollectionRepository : IRepository<Collection> {
     fun insert(collection: Collection): Single<Int>
     fun getProject(id: Int): Maybe<Collection>
+    fun getDerivedProject(sourceProject: Collection): Maybe<Collection>
     fun getDerivedProjects(): Single<List<Collection>>
     fun getSourceProjects(): Single<List<Collection>>
     fun getRootSources(): Single<List<Collection>>
