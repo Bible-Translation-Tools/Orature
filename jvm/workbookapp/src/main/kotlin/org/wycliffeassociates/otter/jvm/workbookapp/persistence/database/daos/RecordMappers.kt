@@ -155,5 +155,14 @@ class RecordMappers {
                 record.getValue(TRANSLATION_ENTITY.TARGET_RATE)
             )
         }
+
+        fun mapToWorkbookDescriptorEntity(record: Record): WorkbookDescriptorEntity {
+            return WorkbookDescriptorEntity(
+                record.getValue(WORKBOOK_DESCRIPTOR_ENTITY.ID),
+                record.getValue(WORKBOOK_DESCRIPTOR_ENTITY.SOURCE_FK),
+                record.getValue(WORKBOOK_DESCRIPTOR_ENTITY.TARGET_FK),
+                record.getValue(WORKBOOK_DESCRIPTOR_ENTITY.TYPE_FK)
+            )
+        }
     }
 }

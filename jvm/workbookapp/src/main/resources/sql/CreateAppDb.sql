@@ -157,3 +157,17 @@ CREATE TABLE IF NOT EXISTS versification_entity (
     slug            TEXT NOT NULL UNIQUE,
     path            TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS workbook_descriptor_entity (
+    id                INTEGER PRIMARY KEY AUTOINCREMENT,
+    source_FK         INTEGER NOT NULL REFERENCES collection_entity(id) ON DELETE CASCADE,
+    target_FK         INTEGER NOT NULL REFERENCES collection_entity(id) ON DELETE CASCADE,
+    type_fk           INTEGER NOT NULL REFERENCES workbook_type(id) ON DELETE RESTRICT,
+    UNIQUE (source_FK, target_FK, type_fk)
+);
+
+CREATE TABLE IF NOT EXISTS workbook_type (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    name             TEXT NOT NULL,
+    UNIQUE (name)
+);
