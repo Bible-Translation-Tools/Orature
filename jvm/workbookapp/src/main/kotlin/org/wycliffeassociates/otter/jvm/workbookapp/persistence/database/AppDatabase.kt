@@ -106,6 +106,7 @@ class AppDatabase(
     val installedEntityDao = InstalledEntityDao(dsl)
     val translationDao = TranslationDao(dsl)
     val versificationDao = VersificationDao(dsl)
+    val workbookDescriptorDao = WorkbookDescriptorDao(dsl)
 
     // Transaction support
     fun transaction(block: (DSLContext) -> Unit) {
