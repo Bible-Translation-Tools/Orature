@@ -14,6 +14,7 @@ import org.wycliffeassociates.otter.common.audio.*
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDatabaseAccessors
 import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
@@ -38,7 +39,7 @@ class ChunkAudioUseCaseTest {
     private val collTarget = collectionBase.copy(resourceContainer = rcTarget, id = autoincrement)
 
     private val mockedDirectoryProvider = mock<IDirectoryProvider>()
-    private val mockedDb = mock<WorkbookRepository.IDatabaseAccessors>()
+    private val mockedDb = mock<IWorkbookDatabaseAccessors>()
 
     private val cues = listOf(
         AudioCue(0, "1"),

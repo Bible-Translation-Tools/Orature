@@ -25,6 +25,7 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.otter.common.domain.versification.Versification
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IVersificationRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDatabaseAccessors
 import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.*
@@ -61,7 +62,7 @@ class CreateChunksTest {
     private lateinit var rc: ResourceContainer
 
     private val mockedDirectoryProvider = mock<IDirectoryProvider>()
-    private val mockedDb = mock<WorkbookRepository.IDatabaseAccessors>()
+    private val mockedDb = mock<IWorkbookDatabaseAccessors>()
 
     private val sourceCues = listOf(
         AudioCue(0, "1"),
