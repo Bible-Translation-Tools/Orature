@@ -339,34 +339,53 @@ class DatabaseMigrator {
 
     private fun migrate11to12(dsl: DSLContext, current: Int): Int {
         return if (current < 12) {
-            dsl
-                .createTableIfNotExists(
-                    WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY
-                )
-                .column(WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.ID)
-                .column(WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.SOURCE_FK)
-                .column(WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.TARGET_FK)
-                .column(WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.TYPE_FK)
-                .constraints(
-                    DSL.primaryKey(WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.ID),
-                    DSL.unique(
-                        WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.SOURCE_FK,
-                        WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.TARGET_FK,
-                        WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.TYPE_FK
-                    ),
-                    DSL.foreignKey(WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.SOURCE_FK)
-                        .references(CollectionEntity.COLLECTION_ENTITY),
-                    DSL.foreignKey(WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.TARGET_FK)
-                        .references(CollectionEntity.COLLECTION_ENTITY),
-                    DSL.foreignKey(WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.TYPE_FK)
-                        .references(WorkbookType.WORKBOOK_TYPE)
-                )
-                .execute()
+            createWorkbookTypeTable(dsl)
+            createWorkbookDescriptorTable(dsl)
             logger.info("Updated database from version 11 to 12")
             12
         } else {
             current
         }
+    }
+
+    private fun createWorkbookDescriptorTable(dsl: DSLContext) {
+        dsl
+            .createTableIfNotExists(
+                WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY
+            )
+            .column(WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.ID)
+            .column(WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.SOURCE_FK)
+            .column(WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.TARGET_FK)
+            .column(WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.TYPE_FK)
+            .constraints(
+                DSL.primaryKey(WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.ID),
+                DSL.unique(
+                    WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.SOURCE_FK,
+                    WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.TARGET_FK,
+                    WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.TYPE_FK
+                ),
+                DSL.foreignKey(WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.SOURCE_FK)
+                    .references(CollectionEntity.COLLECTION_ENTITY),
+                DSL.foreignKey(WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.TARGET_FK)
+                    .references(CollectionEntity.COLLECTION_ENTITY),
+                DSL.foreignKey(WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.TYPE_FK)
+                    .references(WorkbookType.WORKBOOK_TYPE)
+            )
+            .execute()
+    }
+
+    private fun createWorkbookTypeTable(dsl: DSLContext) {
+        dsl
+            .createTableIfNotExists(
+                WorkbookType.WORKBOOK_TYPE
+            )
+            .column(WorkbookType.WORKBOOK_TYPE.ID)
+            .column(WorkbookType.WORKBOOK_TYPE.NAME)
+            .constraints(
+                DSL.primaryKey(WorkbookType.WORKBOOK_TYPE.ID),
+                DSL.unique(WorkbookType.WORKBOOK_TYPE.NAME)
+            )
+            .execute()
     }
 
     private fun clearProjectTables(dsl: DSLContext) {
