@@ -15,9 +15,8 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.primitives.Language
-import org.wycliffeassociates.otter.jvm.controls.model.TranslationMode
+import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import tornadofx.FX
 import tornadofx.addClass
 import tornadofx.addPseudoClass
@@ -34,7 +33,7 @@ import java.text.MessageFormat
 class TranslationCard2(
     sourceLanguage: Language,
     targetLanguage: Language,
-    mode: TranslationMode
+    mode: ProjectMode
 ) : ButtonBase() {
 
     val cardTitleProperty = SimpleStringProperty(
@@ -166,6 +165,6 @@ class ActiveTranslationCardSkin(card: TranslationCard2) : SkinBase<TranslationCa
 fun EventTarget.translationCard(
     sourceLanguage: Language,
     targetLanguage: Language,
-    mode: TranslationMode,
+    mode: ProjectMode,
     op: TranslationCard2.() -> Unit = {}
 ) = TranslationCard2(sourceLanguage, targetLanguage, mode).attachTo(this, op)
