@@ -135,7 +135,7 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
         scope as ParameterizedScope
         val markersList: List<String> = getVerseLabelList(scope.parameters.named["marker_labels"])
         val totalMarkers: Int = scope.parameters.named["marker_total"]?.toInt() ?: initialMarkerCount
-        markerModel = VerseMarkerModel(audio, totalMarkers)
+        markerModel = VerseMarkerModel(audio, totalMarkers, markersList)
 
         markerRatioProperty.bind(
             Bindings.createStringBinding(

@@ -26,10 +26,16 @@ import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import tornadofx.*
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 private const val SEEK_EPSILON = 15_000
 
-class VerseMarkerModel(private val audio: AudioFile, private val markerTotal: Int) {
+class VerseMarkerModel(
+    private val audio: AudioFile,
+    private val markerTotal: Int,
+    private val markerLabels: List<String>
+) {
 
     private val undoStack: Deque<MarkerOperation> = ArrayDeque()
     private val redoStack: Deque<MarkerOperation> = ArrayDeque()
@@ -149,6 +155,8 @@ class VerseMarkerModel(private val audio: AudioFile, private val markerTotal: In
         cues as MutableList
         cues.sortBy { it.location }
 
+        val mappedCues = mapCuesToMarkerLabels(cues, markerLabels)
+
         val markers = mutableListOf<ChunkMarkerModel>()
         for ((idx, cue) in cues.withIndex()) {
             if (idx < markerTotal) {
@@ -157,6 +165,52 @@ class VerseMarkerModel(private val audio: AudioFile, private val markerTotal: In
         }
 
         return markers
+    }
+
+    fun mapCuesToMarkerLabels(cues: List<AudioCue>, markerLabels: List<String>): List<AudioCue> {
+        val bridgesExist = labelsContainBridges(markerLabels)
+        val mappedCues = mutableMapOf<String, AudioCue>()
+        val labels = markerLabels.map { it }.toMutableList()
+        for (cue in cues) {
+            if (cue.label in labels) {
+                mappedCues[cue.label] = cue
+                labels.remove(cue.label)
+            } else if (cueInRange(cue, labels)) {
+                bridgeCue(cue, labels, mappedCues)
+            }
+            mappedCues[cue.label] = cue
+
+        }
+        return emptyList()
+    }
+
+    fun cueInRange(cue: AudioCue, labels: List<String>): Boolean {
+        val bridges = labels.filter { it.contains("-") }
+        for (bridge in bridges) {
+            val range = bridge.split("-")
+            val start = range[0].toInt()
+            val end = range[1].toInt()
+            return cue.label.toInt() in start..end
+        }
+        return false
+    }
+
+    fun bridgeCue(cue: AudioCue, labels: MutableList<String>, mappedCues: MutableMap<String, AudioCue>) {
+        val label = labels.find { it.contains("-") }
+        if (label != null) {
+            val range = label.split("-")
+            val start = range[0].toInt()
+            val end = range[1].toInt()
+            if (cue.label.toInt() in start..end) {
+                val newCue = AudioCue(cue.location, label)
+                mappedCues[label] = newCue
+                labels.remove(label)
+            }
+        }
+    }
+
+    private fun labelsContainBridges(markerLabels: List<String>): Boolean {
+        return markerLabels.find { it.contains("-") } != null
     }
 
     private fun initializeHighlights(markers: List<ChunkMarkerModel>): List<MarkerHighlightState> {
@@ -178,7 +232,7 @@ class VerseMarkerModel(private val audio: AudioFile, private val markerTotal: In
         abstract fun undo()
     }
 
-    private inner class Add(val marker: ChunkMarkerModel): MarkerOperation(marker.id) {
+    private inner class Add(val marker: ChunkMarkerModel) : MarkerOperation(marker.id) {
         override fun apply() {
             markers.add(marker)
         }
@@ -188,7 +242,7 @@ class VerseMarkerModel(private val audio: AudioFile, private val markerTotal: In
         }
     }
 
-    private inner class Delete(id: Int): MarkerOperation(id) {
+    private inner class Delete(id: Int) : MarkerOperation(id) {
         var marker: ChunkMarkerModel? = null
 
         override fun apply() {
@@ -222,3 +276,52 @@ data class ChunkMarkerModel(
         var idGen = 0
     }
 }
+
+interface AudioMarker {
+    val label: String
+    val location: Int
+}
+
+class VerseMarker(val start: Int, val end: Int?, override val location: Int): AudioMarker {
+
+    override val label: String
+        get() = if (end != null) "$start-$end" else "$start"
+}
+
+//class OratureCueParser(val audio: AudioFile) {
+//    enum class OratureCueType {
+//        VERSE,
+//        CHAPTER_TITLE,
+//        BOOK_TITLE,
+//        LICENSE
+//    }
+//
+//    val cueMap: MutableMap<OratureCueType, MutableList<AudioMarker>> = mutableMapOf(
+//        OratureCueType.VERSE to mutableListOf()
+//    )
+//
+//    // val verseMatcher = Pattern.compile("^orature-vm-\((\\d+)-?(\\d*)\)\$")
+//
+//    fun getCues(type: OratureCueType): List<AudioMarker> {
+//        return cueMap[type] ?: listOf()
+//    }
+//
+//    init {
+//        parseCues(audio)
+//    }
+//
+//    private fun parseCues(audio: AudioFile) {
+//        audio.metadata.getCues().forEach {
+//            val start: Int
+//            val end: Int?
+//            val matcher = verseMatcher.matcher(it.label)
+//            if (matcher.matches()) {
+//                start = matcher.group(2).toInt()
+//                end = if (matcher.groupCount() > 2) {
+//                    matcher.group(3).toInt()
+//                } else null
+//                cueMap[OratureCueType.VERSE]!!.add(VerseMarker(start, end, it.location))
+//            }
+//        }
+//    }
+//}

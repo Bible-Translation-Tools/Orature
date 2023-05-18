@@ -196,7 +196,8 @@ class RecordScriptureViewModel : ViewModel() {
                         markerModelProperty.set(
                             VerseMarkerModel(
                                 AudioFile(takeCardModel.take.file),
-                                verseCountProperty.value
+                                verseCountProperty.value,
+                                listOf()
                             )
                         )
                         onChunkPlaybackUpdated = { chunkNumber -> highlightedChunkProperty.set(chunkNumber) }
