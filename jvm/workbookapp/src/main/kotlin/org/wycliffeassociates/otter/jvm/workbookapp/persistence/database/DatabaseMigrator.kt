@@ -348,6 +348,20 @@ class DatabaseMigrator {
         }
     }
 
+    private fun createWorkbookTypeTable(dsl: DSLContext) {
+        dsl
+            .createTableIfNotExists(
+                WorkbookType.WORKBOOK_TYPE
+            )
+            .column(WorkbookType.WORKBOOK_TYPE.ID)
+            .column(WorkbookType.WORKBOOK_TYPE.NAME)
+            .constraints(
+                DSL.primaryKey(WorkbookType.WORKBOOK_TYPE.ID),
+                DSL.unique(WorkbookType.WORKBOOK_TYPE.NAME)
+            )
+            .execute()
+    }
+
     private fun createWorkbookDescriptorTable(dsl: DSLContext) {
         dsl
             .createTableIfNotExists(
@@ -370,20 +384,6 @@ class DatabaseMigrator {
                     .references(CollectionEntity.COLLECTION_ENTITY),
                 DSL.foreignKey(WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.TYPE_FK)
                     .references(WorkbookType.WORKBOOK_TYPE)
-            )
-            .execute()
-    }
-
-    private fun createWorkbookTypeTable(dsl: DSLContext) {
-        dsl
-            .createTableIfNotExists(
-                WorkbookType.WORKBOOK_TYPE
-            )
-            .column(WorkbookType.WORKBOOK_TYPE.ID)
-            .column(WorkbookType.WORKBOOK_TYPE.NAME)
-            .constraints(
-                DSL.primaryKey(WorkbookType.WORKBOOK_TYPE.ID),
-                DSL.unique(WorkbookType.WORKBOOK_TYPE.NAME)
             )
             .execute()
     }

@@ -4,13 +4,7 @@ import jooq.Tables.WORKBOOK_DESCRIPTOR_ENTITY
 import org.jooq.DSLContext
 import org.jooq.impl.DSL.max
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.InsertionException
-
-data class WorkbookDescriptorEntity(
-    var id: Int,
-    var sourceFk: Int,
-    var targetFk: Int,
-    var typeFk: Int
-)
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.WorkbookDescriptorEntity
 
 class WorkbookDescriptorDao(
     private val instanceDsl: DSLContext

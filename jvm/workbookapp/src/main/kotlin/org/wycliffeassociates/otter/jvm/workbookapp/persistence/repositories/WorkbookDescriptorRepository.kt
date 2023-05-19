@@ -10,7 +10,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionR
 import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.WorkbookDescriptorEntity
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.WorkbookDescriptorEntity
 import javax.inject.Inject
 
 class WorkbookDescriptorRepository @Inject constructor(

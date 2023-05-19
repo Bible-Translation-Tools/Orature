@@ -13,7 +13,7 @@ class WorkbookTypeDao(instanceDsl: DSLContext) {
     fun fetchId(mode: ProjectMode) = mapToId[mode]
         ?: throw IllegalStateException("Mode: $mode does not exist in database table.")
 
-    fun fetchForId(databaseId: Int) = mapToEnum[databaseId]
+    fun fetchById(databaseId: Int) = mapToEnum[databaseId]
 
     private fun loadToDatabase(dsl: DSLContext): EnumMap<ProjectMode, Int> {
         val enumMap = EnumMap<ProjectMode, Int>(ProjectMode::class.java)
@@ -29,7 +29,7 @@ class WorkbookTypeDao(instanceDsl: DSLContext) {
 
     private fun insert(mode: ProjectMode, dsl: DSLContext): Int {
         return dsl
-            .insertInto(WORKBOOK_TYPE)
+            .insertInto(WORKBOOK_TYPE, WORKBOOK_TYPE.NAME)
             .values(mode.name)
             .returning(WORKBOOK_TYPE.ID)
             .fetchOne()!!
