@@ -19,7 +19,7 @@
 package org.wycliffeassociates.otter.common.domain.content
 
 import io.reactivex.Single
-import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
 import javax.inject.Inject
@@ -31,9 +31,9 @@ class ConcatenateAudio @Inject constructor(private val directoryProvider: IDirec
         includeMarkers: Boolean = true
     ): Single<File> {
         return Single.fromCallable {
-            val inputFile = AudioFile(files.first())
+            val inputFile = OratureAudioFile(files.first())
             val tempFile = directoryProvider.createTempFile("output", ".wav")
-            val outputFile = AudioFile(
+            val outputFile = OratureAudioFile(
                 tempFile,
                 inputFile.channels,
                 inputFile.sampleRate,
@@ -41,9 +41,9 @@ class ConcatenateAudio @Inject constructor(private val directoryProvider: IDirec
             )
             outputFile.writer(append = true).use { os ->
                 files.forEach { file ->
-                    val audioFile = AudioFile(file)
+                    val oratureAudioFile = OratureAudioFile(file)
                     val buffer = ByteArray(10240)
-                    val reader = audioFile.reader()
+                    val reader = oratureAudioFile.reader()
                     reader.open()
                     while (reader.hasRemaining()) {
                         val written = reader.getPcmBuffer(buffer)
@@ -58,14 +58,14 @@ class ConcatenateAudio @Inject constructor(private val directoryProvider: IDirec
         }
     }
 
-    private fun generateMarkers(inputFiles: List<File>, outputAudio: AudioFile) {
+    private fun generateMarkers(inputFiles: List<File>, outputAudio: OratureAudioFile) {
         var markerLocation = 0
 
         inputFiles.forEach { file ->
-            val audioFile = AudioFile(file)
-            val marker = audioFile.metadata.getCues().first().label
-            outputAudio.metadata.addCue(markerLocation, marker)
-            markerLocation += audioFile.totalFrames
+            val oratureAudioFile = OratureAudioFile(file)
+            val marker = oratureAudioFile.getCues().first().label
+            outputAudio.addCue(markerLocation, marker)
+            markerLocation += oratureAudioFile.totalFrames
         }
         outputAudio.update()
     }

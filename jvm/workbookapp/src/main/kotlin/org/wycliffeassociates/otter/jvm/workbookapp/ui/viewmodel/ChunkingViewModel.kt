@@ -33,7 +33,7 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import javax.inject.Inject
-import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.chunking.ChunkAudioUseCase
 import org.wycliffeassociates.otter.common.domain.content.CreateChunks
@@ -120,7 +120,7 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
 
     private val disposeables = mutableListOf<Disposable>()
 
-    lateinit var audio: AudioFile
+    lateinit var audio: OratureAudioFile
 
     var subscribeOnWaveformImages: () -> Unit = {}
 
@@ -197,17 +197,17 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
         timer = null
     }
 
-    fun loadAudio(audioFile: File): AudioFile {
+    fun loadAudio(audioFile: File): OratureAudioFile {
         val player = audioConnectionFactory.getPlayer()
-        val audio = AudioFile(audioFile)
+        val audio = OratureAudioFile(audioFile)
         player.load(audioFile)
         audioPlayer.set(player)
         return audio
     }
 
-    fun loadMarkers(audio: AudioFile) {
+    fun loadMarkers(audio: OratureAudioFile) {
         val totalMarkers: Int = 500
-        audio.metadata.clearMarkers()
+        audio.clearCues()
         markerModel = VerseMarkerModel(audio, totalMarkers, listOf())
         markerModel?.let { markerModel ->
             markers.setAll(markerModel.markers)
@@ -254,7 +254,7 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
         audioController?.pause()
     }
 
-    private fun createWaveformImages(audio: AudioFile) {
+    private fun createWaveformImages(audio: OratureAudioFile) {
         imageWidthProperty.set(computeImageWidth(SECONDS_ON_SCREEN))
 
         waveform = builder.buildAsync(

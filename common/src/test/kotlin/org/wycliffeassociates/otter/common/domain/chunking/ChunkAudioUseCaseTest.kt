@@ -103,11 +103,11 @@ class ChunkAudioUseCaseTest {
     @Test
     fun cuesWrittenToSourceAudio() {
         File(projectDir.root, ".apps/orature/source/audio/${sourceFile.name}").apply {
-            val audioFile = AudioFile(this)
-            val text = readTextFromAudioFile(audioFile, 6)
+            val oratureAudioFile = OratureAudioFile(this)
+            val text = readTextFromAudioFile(oratureAudioFile, 6)
 
             Assert.assertEquals(text, "123456")
-            Assert.assertEquals(audioFile.metadata.getCues(), cues)
+            Assert.assertEquals(oratureAudioFile.metadata.getCues(), cues)
         }
     }
 }

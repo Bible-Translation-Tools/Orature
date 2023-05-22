@@ -31,7 +31,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Take
@@ -454,9 +454,9 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     private fun setMarker(marker: String, take: Take) {
-        AudioFile(take.file).apply {
-            if (metadata.getCues().isEmpty()) {
-                metadata.addCue(0, marker)
+        OratureAudioFile(take.file).apply {
+            if (getCues().isEmpty()) {
+                addCue(0, marker)
                 update()
             }
         }

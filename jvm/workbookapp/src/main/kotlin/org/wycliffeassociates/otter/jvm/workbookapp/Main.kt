@@ -28,7 +28,7 @@ import tornadofx.launch
 
 fun main(args: Array<String>) {
     initLogger()
-    initAudioLib()
+    // initAudioLib()
     launch<OtterApp>(args)
 }
 

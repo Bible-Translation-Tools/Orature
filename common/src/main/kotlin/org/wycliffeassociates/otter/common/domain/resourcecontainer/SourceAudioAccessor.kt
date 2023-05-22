@@ -19,7 +19,7 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer
 
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
-import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Media
 import java.io.File
@@ -52,8 +52,8 @@ class SourceAudioAccessor(
             }
             file?.let {
                 logger.info("Found the source audio file! ${it.path}")
-                val audioFile = AudioFile(it)
-                val size = audioFile.totalFrames
+                val oratureAudioFile = OratureAudioFile(it)
+                val size = oratureAudioFile.totalFrames
                 return SourceAudio(it, 0, size)
             }
         }
@@ -105,8 +105,8 @@ class SourceAudioAccessor(
                     }
                 }
 
-                val audioFile = AudioFile(file)
-                val size = audioFile.totalFrames
+                val oratureAudioFile = OratureAudioFile(file)
+                val size = oratureAudioFile.totalFrames
                 SourceAudio(file, 0, size)
             } else {
                 null
@@ -120,13 +120,13 @@ class SourceAudioAccessor(
         val file = getChapter(chapter, target)?.file
         if (file != null) {
             logger.info("chunk file is ${file.absolutePath}")
-            val audioFile = AudioFile(file)
-            val cues = audioFile.metadata.getCues()
+            val oratureAudioFile = OratureAudioFile(file)
+            val cues = oratureAudioFile.getCues()
             cues.sortedBy { it.location }
             val index = chunk - 1
             if (cues.size > index) {
                 val start = cues[index].location
-                val end = if (cues.size > chunk) cues[chunk].location else audioFile.totalFrames
+                val end = if (cues.size > chunk) cues[chunk].location else oratureAudioFile.totalFrames
                 return SourceAudio(file, start, end)
             }
         }

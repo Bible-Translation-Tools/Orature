@@ -24,7 +24,7 @@ import io.reactivex.observers.TestObserver
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
 import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
 import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
@@ -56,8 +56,8 @@ class ConcatenateAudioTest {
         inputFiles.add(file3)
 
         inputFiles.forEachIndexed { index, file ->
-            AudioFile(file).apply {
-                metadata.addCue(index, "${index + 1}")
+            OratureAudioFile(file).apply {
+                addCue(index, "${index + 1}")
                 update()
             }
         }
@@ -77,8 +77,8 @@ class ConcatenateAudioTest {
         testObserver.assertResult(outputFile)
         testObserver.assertValue(outputFile)
         testObserver.assertValue { file ->
-            val audioFile = AudioFile(file)
-            val reader = audioFile.reader()
+            val oratureAudioFile = OratureAudioFile(file)
+            val reader = oratureAudioFile.reader()
             val buffer = ByteArray(6) // to store 6 characters (123456)
             reader.open()
             var outStr = ""
@@ -106,8 +106,8 @@ class ConcatenateAudioTest {
         testObserver.assertResult(outputFile)
         testObserver.assertValue(outputFile)
         testObserver.assertValue { file ->
-            val audioFile = AudioFile(file)
-            val reader = audioFile.reader()
+            val oratureAudioFile = OratureAudioFile(file)
+            val reader = oratureAudioFile.reader()
             val buffer = ByteArray(6) // to store 6 characters (123456)
             reader.open()
             var outStr = ""
@@ -118,8 +118,8 @@ class ConcatenateAudioTest {
             outStr == "123456"
         }
         testObserver.assertValue { file ->
-            val audioFile = AudioFile(file)
-            val cues = audioFile.metadata.getCues()
+            val oratureAudioFile = OratureAudioFile(file)
+            val cues = oratureAudioFile.getCues()
 
             cues.size == 3 && cues.all {
                 it.location == cues.indexOf(it)
@@ -137,8 +137,8 @@ class ConcatenateAudioTest {
         testObserver.assertResult(outputFile)
         testObserver.assertValue(outputFile)
         testObserver.assertValue { file ->
-            val audioFile = AudioFile(file)
-            val reader = audioFile.reader()
+            val oratureAudioFile = OratureAudioFile(file)
+            val reader = oratureAudioFile.reader()
             val buffer = ByteArray(6) // to store 6 characters (123456)
             reader.open()
             var outStr = ""
@@ -149,16 +149,16 @@ class ConcatenateAudioTest {
             outStr == "123456"
         }
         testObserver.assertValue { file ->
-            val audioFile = AudioFile(file)
-            val cues = audioFile.metadata.getCues()
+            val oratureAudioFile = OratureAudioFile(file)
+            val cues = oratureAudioFile.getCues()
             cues.isEmpty()
         }
     }
 
     private fun createWavFile(name: String, data: ByteArray): File {
         val file = File.createTempFile(name, ".wav")
-        val audioFile = AudioFile(file, DEFAULT_CHANNELS, DEFAULT_SAMPLE_RATE, DEFAULT_BITS_PER_SAMPLE)
-        audioFile.writer().use { os ->
+        val oratureAudioFile = OratureAudioFile(file, DEFAULT_CHANNELS, DEFAULT_SAMPLE_RATE, DEFAULT_BITS_PER_SAMPLE)
+        oratureAudioFile.writer().use { os ->
             os.write(data)
         }
         return file

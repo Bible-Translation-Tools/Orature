@@ -22,7 +22,7 @@ import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioCue
-import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.License
 import java.io.File
@@ -64,15 +64,15 @@ class AudioExporter @Inject constructor() {
     ): Completable {
         return Completable
             .fromAction {
-                val audioFile = AudioFile(file)
-                audioFile.metadata.setArtists(metadata.contributors.map { it.name })
+                val oratureAudioFile = OratureAudioFile(file)
+                oratureAudioFile.metadata.setArtists(metadata.contributors.map { it.name })
                 metadata.license?.url?.let {
-                    audioFile.metadata.setLegalInformationUrl(it)
+                    oratureAudioFile.metadata.setLegalInformationUrl(it)
                 }
                 metadata.markers.forEach {
-                    audioFile.metadata.addCue(it.location, it.label)
+                    oratureAudioFile.addCue(it.location, it.label)
                 }
-                audioFile.update()
+                oratureAudioFile.update()
             }
             .subscribeOn(Schedulers.io())
             .doOnError {

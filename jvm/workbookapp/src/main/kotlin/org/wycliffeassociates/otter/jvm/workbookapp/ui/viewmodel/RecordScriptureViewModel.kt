@@ -35,7 +35,7 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.scene.control.ButtonType
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
@@ -195,7 +195,7 @@ class RecordScriptureViewModel : ViewModel() {
                         audioPlayerProperty.set(takeCardModel.audioPlayer)
                         markerModelProperty.set(
                             VerseMarkerModel(
-                                AudioFile(takeCardModel.take.file),
+                                OratureAudioFile(takeCardModel.take.file),
                                 verseCountProperty.value,
                                 listOf()
                             )
@@ -566,9 +566,9 @@ class RecordScriptureViewModel : ViewModel() {
 
         recordable?.audio?.let { audio ->
             audio.selected.value?.value?.let {
-                AudioFile(it.file).apply {
-                    if (metadata.getCues().isEmpty()) {
-                        metadata.addCue(0, workbookDataStore.chunk?.start.toString())
+                OratureAudioFile(it.file).apply {
+                    if (getCues().isEmpty()) {
+                        addCue(0, workbookDataStore.chunk?.start.toString())
                         update()
                     }
                 }

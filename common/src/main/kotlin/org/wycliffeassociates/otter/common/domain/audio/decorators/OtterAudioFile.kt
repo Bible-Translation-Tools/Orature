@@ -11,6 +11,13 @@ class OratureAudioFile : AudioFile {
     private fun initializeCues() {
         val allCues = metadata.getCues()
         separateOratureCues(allCues)
+        metadata.clearMarkers()
+        cues.forEach {
+            metadata.addCue(it.location, it.label)
+        }
+        extraCues.forEach {
+            metadata.addCue(it.location, it.label)
+        }
     }
 
     constructor(): super() {
@@ -52,12 +59,13 @@ class OratureAudioFile : AudioFile {
         super.addCue(location, label)
         cues as MutableList
         cues.add(AudioCue(location, label))
+        metadata.addCue(location, label)
     }
 
     private fun separateOratureCues(allCues: List<AudioCue>) {
-        val oratureRegex = Regex("^orature-vm-(\\d+)$")
-        val loneDigitRegex = Regex("^\\d+$")
-        val numberRegex = Regex("(\\d+)")
+        val oratureRegex = Regex("^orature-vm-((\\d+)(?:-(\\d+))?)\$")
+        val loneDigitRegex = Regex("^((\\d+)(?:-(\\d+))?)$")
+        val numberRegex = Regex("((\\d+)(?:-(\\d+))?)")
 
         val oratureCues = allCues.filter { it.label.matches(oratureRegex) }
         val leftoverCues = allCues.filter { !oratureCues.contains(it) }
@@ -92,7 +100,7 @@ class OratureAudioFile : AudioFile {
             } else {
                 match!!.groupValues.first()!!
             }
-            AudioCue(it.location, label)
+            AudioCue(it.location, "orature-vm-${label}")
         }
         cues.addAll(mapped)
     }

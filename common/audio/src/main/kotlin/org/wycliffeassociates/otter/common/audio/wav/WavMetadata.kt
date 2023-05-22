@@ -52,7 +52,6 @@ class WavMetadata(parsableChunks: List<RiffChunk>? = null) : AudioMetadata {
     private val chunks: Set<RiffChunk>
 
     init {
-
         chunks = mutableSetOf()
         parsers.forEach {
             val chunk = it.getConstructor().newInstance()

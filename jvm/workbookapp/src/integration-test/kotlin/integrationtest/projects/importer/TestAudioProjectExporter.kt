@@ -8,7 +8,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.wycliffeassociates.otter.common.ResourceContainerBuilder
-import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
@@ -73,7 +73,7 @@ class TestAudioProjectExporter {
         val takes = outputDir.walk().filter { AudioFileFormat.isSupported(it.extension) }.toList()
         Assert.assertEquals(2, takes.size)
 
-        val takeContributors = AudioFile(takes.first()).metadata.artists()
+        val takeContributors = OratureAudioFile(takes.first()).metadata.artists()
         Assert.assertEquals(contributors, takeContributors)
     }
 

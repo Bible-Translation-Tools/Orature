@@ -25,14 +25,14 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioCue
-import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
 import tornadofx.*
 import java.util.regex.Pattern
 
 private const val SEEK_EPSILON = 15_000
 
 class VerseMarkerModel(
-    private val audio: AudioFile,
+    private val audio: OratureAudioFile,
     private val markerTotal: Int,
     private val markerLabels: List<String>
 ) {
@@ -140,7 +140,7 @@ class VerseMarkerModel(
                     cues.add(it.toAudioCue())
                 }
             }
-            val audioFileCues = audio.metadata.getCues() as MutableList
+            val audioFileCues = audio.getCues() as MutableList
             audioFileCues.clear()
             audioFileCues.addAll(cues)
             audio.update()
@@ -148,7 +148,7 @@ class VerseMarkerModel(
         }.ignoreElement()
     }
 
-    private fun sanitizeCues(audio: AudioFile): List<AudioCue> {
+    private fun sanitizeCues(audio: OratureAudioFile): List<AudioCue> {
         val cues = OratureCueParser(audio)
         val verses = cues.getCues(OratureCueParser.OratureCueType.VERSE)
         logger.info("Verses found: ${verses.size}")
@@ -293,7 +293,7 @@ class VerseMarker(val start: Int, val end: Int?, override val location: Int): Au
         get() = if (end != null) "$start-$end" else "$start"
 }
 
-class OratureCueParser(val audio: AudioFile) {
+class OratureCueParser(val audio: OratureAudioFile) {
     enum class OratureCueType {
         VERSE,
         CHAPTER_TITLE,
@@ -315,8 +315,8 @@ class OratureCueParser(val audio: AudioFile) {
         parseCues(audio)
     }
 
-    private fun parseCues(audio: AudioFile) {
-        audio.metadata.getCues().forEach {
+    private fun parseCues(audio: OratureAudioFile) {
+        audio.getCues().forEach {
             val start: Int
             val end: Int?
             val matcher = verseMatcher.matcher(it.label)

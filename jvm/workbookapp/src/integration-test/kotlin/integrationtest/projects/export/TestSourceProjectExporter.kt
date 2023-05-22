@@ -29,7 +29,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.Language
@@ -235,8 +235,8 @@ class TestSourceProjectExporter {
         )
         // select a take to be included when export
         workbook.target.chapters.blockingFirst().audio.selectTake(take)
-        AudioFile(testTake).apply {
-            metadata.addCue(1, "marker-1")
+        OratureAudioFile(testTake).apply {
+            addCue(1, "marker-1")
             update()
         }
     }
@@ -258,8 +258,8 @@ class TestSourceProjectExporter {
                 it.audio.selectTake(take)
             }
 
-        AudioFile(takeFile).apply {
-            metadata.addCue(1, "marker-1")
+        OratureAudioFile(takeFile).apply {
+            addCue(1, "marker-1")
             update()
         }
     }

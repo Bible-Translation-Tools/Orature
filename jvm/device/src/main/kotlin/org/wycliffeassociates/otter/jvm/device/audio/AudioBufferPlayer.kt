@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.sound.sampled.LineUnavailableException
 import javax.sound.sampled.SourceDataLine
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -74,7 +74,7 @@ class AudioBufferPlayer(
 
     override fun load(file: File) {
         reader?.let { close() }
-        reader = AudioFile(file).reader().let { _reader ->
+        reader = OratureAudioFile(file).reader().let { _reader ->
             begin = 0
             end = _reader.totalFrames
             bytes = ByteArray(processor.inputBufferSize * 2)
@@ -91,7 +91,7 @@ class AudioBufferPlayer(
         reader?.let { close() }
         begin = frameStart
         end = frameEnd
-        reader = AudioFile(file).reader(frameStart, frameEnd).let { _reader ->
+        reader = OratureAudioFile(file).reader(frameStart, frameEnd).let { _reader ->
             bytes = ByteArray(processor.inputBufferSize * 2)
             listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
             _reader.open()

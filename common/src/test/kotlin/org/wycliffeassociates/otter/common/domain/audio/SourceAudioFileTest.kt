@@ -24,7 +24,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.io.File
 import org.wycliffeassociates.otter.common.audio.AudioCue
-import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
 
 class SourceAudioFileTest {
 
@@ -88,9 +88,9 @@ class SourceAudioFileTest {
     fun testCreateCues() {
         for ((i, testCues) in testEnv.withIndex()) {
             val temp = File.createTempFile("test", ".wav").apply { deleteOnExit() }
-            val af = AudioFile(temp, 1, 41000, 16, WavMetadata(listOf(CueChunk())))
+            val af = OratureAudioFile(temp, 1, 41000, 16, WavMetadata(listOf(CueChunk())))
             for (cue in testCues) {
-                af.metadata.addCue(cue.location, cue.label)
+                af.addCue(cue.location, cue.label)
             }
             af.update()
 

@@ -10,7 +10,7 @@ class SourceAudioFile : AudioFile {
     constructor(
         file: File,
     ) : super(file, WavMetadata(listOf(CueChunk()))) {
-        cues.addAll(this.metadata.getCues())
+        cues.addAll(this.getCues())
         separateOratureCues(cues)
     }
 
@@ -29,10 +29,10 @@ class SourceAudioFile : AudioFile {
     }
 
     override fun update() {
-        metadata.clearMarkers()
-        verses.forEach { metadata.addCue(it.location, "orature-vm-${it.label}") }
-        chunks.forEach { metadata.addCue(it.location, "orature-chunk-${it.label}") }
-        extraCues.forEach { metadata.addCue(it.location, it.label) }
+        clearCues()
+        verses.forEach { addCue(it.location, "orature-vm-${it.label}") }
+        chunks.forEach { addCue(it.location, "orature-chunk-${it.label}") }
+        extraCues.forEach { addCue(it.location, it.label) }
         super.update()
     }
 
