@@ -19,6 +19,8 @@
 package org.wycliffeassociates.otter.jvm.workbookapp
 
 import org.wycliffeassociates.otter.common.OratureInfo
+import org.wycliffeassociates.otter.common.audio.wav.VerseMarkerChunk
+import org.wycliffeassociates.otter.common.audio.wav.WavMetadata
 import org.wycliffeassociates.otter.jvm.workbookapp.logging.ConfigureLogger
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.DirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
@@ -26,7 +28,12 @@ import tornadofx.launch
 
 fun main(args: Array<String>) {
     initLogger()
+    initAudioLib()
     launch<OtterApp>(args)
+}
+
+fun initAudioLib() {
+    WavMetadata.configureParsers(VerseMarkerChunk::class.java)
 }
 
 fun initLogger() {

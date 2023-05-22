@@ -29,7 +29,7 @@ const val DEFAULT_SAMPLE_RATE = 44100
 const val DEFAULT_CHANNELS = 1
 const val DEFAULT_BITS_PER_SAMPLE = 16
 
-open class AudioFile private constructor() {
+open class AudioFile protected constructor() {
 
     lateinit var file: File
         private set
@@ -41,24 +41,12 @@ open class AudioFile private constructor() {
 
     constructor(file: File, metadata: AudioMetadata) : this() {
         this.file = file
-        strategy = when (AudioFileFormat.of(file.extension)) {
-            AudioFileFormat.WAV -> WavFile(file, metadata as WavMetadata)
-            AudioFileFormat.MP3 -> MP3FileReader(file).apply {
-                release() // clean up resource after parsing the metadata
-            }
-            AudioFileFormat.PCM -> PcmFile(file)
-        }
+        strategy = strategySelector(file, metadata)
     }
 
     constructor(file: File) : this() {
         this.file = file
-        strategy = when (AudioFileFormat.of(file.extension)) {
-            AudioFileFormat.WAV -> WavFile(file)
-            AudioFileFormat.MP3 -> MP3FileReader(file).apply {
-                release()
-            }
-            AudioFileFormat.PCM -> PcmFile(file)
-        }
+        strategy = strategySelector(file)
     }
 
     constructor(
@@ -68,13 +56,7 @@ open class AudioFile private constructor() {
         bitsPerSample: Int = DEFAULT_BITS_PER_SAMPLE
     ) : this() {
         this.file = file
-        strategy = when (AudioFileFormat.of(file.extension)) {
-            AudioFileFormat.WAV -> WavFile(file, channels, sampleRate, bitsPerSample)
-            AudioFileFormat.MP3 -> MP3FileReader(file).apply {
-                release()
-            }
-            AudioFileFormat.PCM -> PcmFile(file)
-        }
+        strategy = strategySelector(file, channels, sampleRate, bitsPerSample)
     }
 
     constructor(
@@ -85,7 +67,52 @@ open class AudioFile private constructor() {
         metadata: AudioMetadata
     ) : this() {
         this.file = file
-        strategy = when (AudioFileFormat.of(file.extension)) {
+        strategy = strategySelector(file, channels, sampleRate, bitsPerSample, metadata)
+    }
+
+    open fun strategySelector(file: File): AudioFormatStrategy {
+        return when (AudioFileFormat.of(file.extension)) {
+            AudioFileFormat.WAV -> WavFile(file)
+            AudioFileFormat.MP3 -> MP3FileReader(file).apply {
+                release()
+            }
+            AudioFileFormat.PCM -> PcmFile(file)
+        }
+    }
+
+    open fun strategySelector(file: File, metadata: AudioMetadata): AudioFormatStrategy {
+        return when (AudioFileFormat.of(file.extension)) {
+            AudioFileFormat.WAV -> WavFile(file, metadata as WavMetadata)
+            AudioFileFormat.MP3 -> MP3FileReader(file).apply {
+                release() // clean up resource after parsing the metadata
+            }
+            AudioFileFormat.PCM -> PcmFile(file)
+        }
+    }
+
+    open fun strategySelector(
+        file: File,
+        channels: Int = DEFAULT_CHANNELS,
+        sampleRate: Int = DEFAULT_SAMPLE_RATE,
+        bitsPerSample: Int = DEFAULT_BITS_PER_SAMPLE
+    ): AudioFormatStrategy {
+        return when (AudioFileFormat.of(file.extension)) {
+            AudioFileFormat.WAV -> WavFile(file, channels, sampleRate, bitsPerSample)
+            AudioFileFormat.MP3 -> MP3FileReader(file).apply {
+                release()
+            }
+            AudioFileFormat.PCM -> PcmFile(file)
+        }
+    }
+
+    open fun strategySelector(
+        file: File,
+        channels: Int = DEFAULT_CHANNELS,
+        sampleRate: Int = DEFAULT_SAMPLE_RATE,
+        bitsPerSample: Int = DEFAULT_BITS_PER_SAMPLE,
+        metadata: AudioMetadata
+    ): AudioFormatStrategy {
+        return when (AudioFileFormat.of(file.extension)) {
             AudioFileFormat.WAV -> WavFile(file, channels, sampleRate, bitsPerSample, metadata as WavMetadata)
             AudioFileFormat.MP3 -> MP3FileReader(file).apply {
                 release()
@@ -108,6 +135,18 @@ open class AudioFile private constructor() {
 
     open fun update() {
         strategy.update()
+    }
+
+    open fun addCue(location: Int, label: String) {
+        metadata.addCue(location, label)
+    }
+
+    open fun getCues(): List<AudioCue> {
+        return metadata.getCues()
+    }
+
+    fun clearCues() {
+        metadata.clearMarkers()
     }
 
     fun reader(start: Int? = null, end: Int? = null): AudioFileReader {

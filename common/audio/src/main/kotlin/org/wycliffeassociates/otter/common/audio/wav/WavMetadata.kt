@@ -18,11 +18,11 @@
  */
 package org.wycliffeassociates.otter.common.audio.wav
 
+import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.AudioCue
+import org.wycliffeassociates.otter.common.audio.AudioMetadata
 import java.io.OutputStream
 import java.nio.ByteBuffer
-import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.audio.AudioMetadata
-import org.wycliffeassociates.otter.common.audio.AudioCue
 
 
 /**
@@ -38,13 +38,29 @@ import org.wycliffeassociates.otter.common.audio.AudioCue
  */
 class WavMetadata(parsableChunks: List<RiffChunk>? = null) : AudioMetadata {
 
+    companion object {
+        var parsers: List<Class<out RiffChunk?>> = arrayListOf<Class<out RiffChunk?>>(CueChunk::class.java)
+
+        fun configureParsers(vararg parsers: Class<out RiffChunk>) {
+            this.parsers = arrayListOf(*parsers)
+        }
+    }
+
     private val logger = LoggerFactory.getLogger(WavMetadata::class.java)
 
     private val cueChunk: CueChunk
     private val chunks: Set<RiffChunk>
 
     init {
+
         chunks = mutableSetOf()
+        parsers.forEach {
+            val chunk = it.getConstructor().newInstance()
+            chunk?.let { chunk ->
+                chunks.add(chunk)
+            }
+        }
+
         if (parsableChunks != null) {
             chunks.addAll(parsableChunks)
         }
@@ -52,7 +68,7 @@ class WavMetadata(parsableChunks: List<RiffChunk>? = null) : AudioMetadata {
         if (cue != null) {
             cueChunk = cue as CueChunk
         } else {
-            cueChunk = VerseMarkerChunk()
+            cueChunk = CueChunk()
             chunks.add(cueChunk)
         }
     }

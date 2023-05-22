@@ -23,10 +23,10 @@ import io.reactivex.Single
 import java.util.*
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.collections.ObservableList
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import tornadofx.*
-import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 private const val SEEK_EPSILON = 15_000
@@ -36,6 +36,7 @@ class VerseMarkerModel(
     private val markerTotal: Int,
     private val markerLabels: List<String>
 ) {
+    private val logger = LoggerFactory.getLogger(VerseMarkerModel::class.java)
 
     private val undoStack: Deque<MarkerOperation> = ArrayDeque()
     private val redoStack: Deque<MarkerOperation> = ArrayDeque()
@@ -148,7 +149,12 @@ class VerseMarkerModel(
     }
 
     private fun sanitizeCues(audio: AudioFile): List<AudioCue> {
-        return audio.metadata.getCues().filter { it.label.isInt() }
+        val cues = OratureCueParser(audio)
+        val verses = cues.getCues(OratureCueParser.OratureCueType.VERSE)
+        logger.info("Verses found: ${verses.size}")
+        return verses.map {
+            AudioCue(it.location, it.label)
+        }
     }
 
     private fun initializeMarkers(markerTotal: Int, cues: List<AudioCue>): List<ChunkMarkerModel> {
@@ -283,45 +289,44 @@ interface AudioMarker {
 }
 
 class VerseMarker(val start: Int, val end: Int?, override val location: Int): AudioMarker {
-
     override val label: String
         get() = if (end != null) "$start-$end" else "$start"
 }
 
-//class OratureCueParser(val audio: AudioFile) {
-//    enum class OratureCueType {
-//        VERSE,
-//        CHAPTER_TITLE,
-//        BOOK_TITLE,
-//        LICENSE
-//    }
-//
-//    val cueMap: MutableMap<OratureCueType, MutableList<AudioMarker>> = mutableMapOf(
-//        OratureCueType.VERSE to mutableListOf()
-//    )
-//
-//    // val verseMatcher = Pattern.compile("^orature-vm-\((\\d+)-?(\\d*)\)\$")
-//
-//    fun getCues(type: OratureCueType): List<AudioMarker> {
-//        return cueMap[type] ?: listOf()
-//    }
-//
-//    init {
-//        parseCues(audio)
-//    }
-//
-//    private fun parseCues(audio: AudioFile) {
-//        audio.metadata.getCues().forEach {
-//            val start: Int
-//            val end: Int?
-//            val matcher = verseMatcher.matcher(it.label)
-//            if (matcher.matches()) {
-//                start = matcher.group(2).toInt()
-//                end = if (matcher.groupCount() > 2) {
-//                    matcher.group(3).toInt()
-//                } else null
-//                cueMap[OratureCueType.VERSE]!!.add(VerseMarker(start, end, it.location))
-//            }
-//        }
-//    }
-//}
+class OratureCueParser(val audio: AudioFile) {
+    enum class OratureCueType {
+        VERSE,
+        CHAPTER_TITLE,
+        BOOK_TITLE,
+        LICENSE
+    }
+
+    private val cueMap: MutableMap<OratureCueType, MutableList<AudioMarker>> = mutableMapOf(
+        OratureCueType.VERSE to mutableListOf()
+    )
+
+    private val verseMatcher = Pattern.compile("^orature-vm-(\\d+)(?:-(\\d+))?\$")
+
+    fun getCues(type: OratureCueType): List<AudioMarker> {
+        return cueMap[type] ?: listOf()
+    }
+
+    init {
+        parseCues(audio)
+    }
+
+    private fun parseCues(audio: AudioFile) {
+        audio.metadata.getCues().forEach {
+            val start: Int
+            val end: Int?
+            val matcher = verseMatcher.matcher(it.label)
+            if (matcher.matches()) {
+                start = matcher.group(1).toInt()
+                end = if (matcher.groupCount() > 1 && !matcher.group(2).isNullOrBlank()) {
+                    matcher.group(2).toInt()
+                } else null
+                cueMap[OratureCueType.VERSE]!!.add(VerseMarker(start, end, it.location))
+            }
+        }
+    }
+}
