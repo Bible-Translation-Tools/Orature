@@ -22,6 +22,7 @@ import io.reactivex.Single
 import io.reactivex.rxkotlin.flatMapIterable
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
 import javax.inject.Inject
@@ -63,7 +64,20 @@ class CreateProject @Inject constructor(
         return matchingRcs
             .toList()
             .flatMap {
-                collectionRepo.deriveProject(it, sourceProject, targetLanguage, deriveProjectFromVerses)
+                collectionRepo.deriveProject(it, sourceProject, targetLanguage, deriveProjectFromVerses, ProjectMode.TRANSLATION)
+            }
+    }
+
+    fun createAllBooks(
+        rootCollection: Collection,
+        targetLanguage: Language,
+        projectMode: ProjectMode
+    ) {
+        // TODO: returns a list of WorkbookDescriptors
+        collectionRepo
+            .deriveProjects(rootCollection, targetLanguage, true, projectMode)
+            .subscribe { collections ->
+                println(collections.size)
             }
     }
 }

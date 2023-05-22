@@ -47,7 +47,6 @@ interface IWorkbookDatabaseAccessors {
 }
 
 class WorkbookDatabaseAccessor(
-
     private val collectionRepo: ICollectionRepository,
     private val contentRepo: IContentRepository,
     private val resourceRepo: IResourceRepository,

@@ -88,6 +88,12 @@ abstract class AppRepositoriesModule {
 
     @Binds
     @Singleton
+    abstract fun providesWorkbookDescriptorRepository(
+        repository: WorkbookDescriptorRepository
+    ): IWorkbookDescriptorRepository
+
+    @Binds
+    @Singleton
     abstract fun providesInstalledEntityRepository(
         repository: InstalledEntityRepository
     ): IInstalledEntityRepository

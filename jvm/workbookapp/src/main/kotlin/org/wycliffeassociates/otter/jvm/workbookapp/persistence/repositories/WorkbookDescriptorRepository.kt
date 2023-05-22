@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories
 import io.reactivex.Maybe
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
@@ -19,6 +20,7 @@ class WorkbookDescriptorRepository @Inject constructor(
     private val contentRepository: IContentRepository
 ) : IWorkbookDescriptorRepository {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
     private val workbookDao = database.workbookDescriptorDao
 
     override fun getById(id: Int): Maybe<WorkbookDescriptor> {
@@ -33,12 +35,17 @@ class WorkbookDescriptorRepository @Inject constructor(
     }
 
     override fun getAll(): Single<List<WorkbookDescriptor>> {
-        return Single.fromCallable {
-            workbookDao.fetchAll()
-                .map {
-                    buildWorkbookDescriptor(it)
-                }
-        }
+        return Single
+            .fromCallable {
+                workbookDao.fetchAll()
+                    .map {
+                        buildWorkbookDescriptor(it)
+                    }
+            }
+            .subscribeOn(Schedulers.io())
+            .doOnError {
+                logger.error("Error getting workbook descriptors.", it)
+            }
     }
 
     private fun buildWorkbookDescriptor(entity: WorkbookDescriptorEntity): WorkbookDescriptor {
