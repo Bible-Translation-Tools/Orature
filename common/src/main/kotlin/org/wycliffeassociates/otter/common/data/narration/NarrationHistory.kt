@@ -13,6 +13,8 @@ class NarrationHistory {
     }
 
     fun undo() {
+        if (undoStack.empty()) return
+
         val action = undoStack.pop()
         if (action != null) {
             action.undo()
@@ -21,6 +23,8 @@ class NarrationHistory {
     }
 
     fun redo() {
+        if (redoStack.empty()) return
+
         val action = redoStack.pop()
         if (action != null) {
             action.redo()
