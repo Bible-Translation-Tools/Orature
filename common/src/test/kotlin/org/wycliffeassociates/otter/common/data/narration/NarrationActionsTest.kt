@@ -288,6 +288,34 @@ class NarrationActionsTest {
         assertEquals(narrationList.last().end, secondFileUpdated.length().toInt())
     }
 
+    @Test
+    fun testUndoRedoResetAllVerses() {
+        val firstFile = makeNewFile(0)
+        addNextVerse(firstFile)
+        val firstFileUpdated = makeNewFile(100)
+        onPauseOrNext(narrationList.first(), firstFileUpdated)
+
+        val secondFile = makeNewFile(firstFileUpdated.length())
+        addNextVerse(secondFile)
+        val secondFileUpdated = makeNewFile(200)
+        onPauseOrNext(narrationList.last(), secondFileUpdated)
+
+        assertEquals(narrationList.size, 2)
+        assertEquals(narrationList.first().start, 0)
+        assertEquals(narrationList.first().end, firstFileUpdated.length().toInt())
+        assertEquals(narrationList.last().start, firstFileUpdated.length().toInt())
+        assertEquals(narrationList.last().end, secondFileUpdated.length().toInt())
+
+        val resetAction = ResetAllAction(narrationList)
+        narrationHistory.execute(resetAction)
+
+        assertEquals(narrationList.size, 0)
+
+        narrationHistory.undo()
+
+        assertEquals(narrationList.size, 2)
+    }
+
     private fun addNextVerse(file: File) {
         val action = NextVerseAction(narrationList, file)
         narrationHistory.execute(action)

@@ -115,3 +115,21 @@ class MarkerAction(
         }
     }
 }
+
+class ResetAllAction(private val list: ArrayList<VerseNode>): NarrationAction {
+    private val nodes = ArrayList<VerseNode>(list.size)
+
+    override fun execute() {
+        nodes.addAll(list)
+        list.clear()
+    }
+
+    override fun undo() {
+        list.addAll(nodes)
+    }
+
+    override fun redo() {
+        list.clear()
+    }
+
+}
