@@ -6,13 +6,9 @@ import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.jvm.controls.card.newTranslationCard
 import org.wycliffeassociates.otter.jvm.controls.card.translationCard
 import org.wycliffeassociates.otter.jvm.controls.card.translationCreationCard
-import org.wycliffeassociates.otter.jvm.controls.model.TranslationMode
+import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
-import tornadofx.View
-import tornadofx.managedWhen
-import tornadofx.paddingAll
-import tornadofx.vbox
-import tornadofx.visibleWhen
+import tornadofx.*
 
 class TranslationCardsDemoView : View() {
 
@@ -35,7 +31,7 @@ class TranslationCardsDemoView : View() {
         translationCard(
             languages[0],
             languages[1],
-            TranslationMode.TRANSLATION
+            ProjectMode.TRANSLATION
         )
 
         newTranslationCard(
@@ -43,7 +39,7 @@ class TranslationCardsDemoView : View() {
                 Language("en", "English", "English", "", true, "")
             ),
             SimpleObjectProperty<Language>(null),
-            mode = TranslationMode.NARRATION
+            mode = ProjectMode.NARRATION
         ) {
             visibleWhen(showNewTranslationCard)
             managedWhen(visibleProperty())

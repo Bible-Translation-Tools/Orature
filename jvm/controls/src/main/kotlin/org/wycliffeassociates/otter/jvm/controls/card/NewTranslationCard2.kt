@@ -10,15 +10,16 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.primitives.Language
-import org.wycliffeassociates.otter.jvm.controls.model.TranslationMode
+import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import tornadofx.FX.Companion.messages
+
 // TODO: remove number "2" suffix after deleting the original control.
 class NewTranslationCard2(
     private val sourceLanguageProperty: ObservableValue<Language>,
     private val targetLanguageProperty: ObservableValue<Language>,
-    mode: TranslationMode
+    mode: ProjectMode
 ) : VBox() {
 
     private var onCancelProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
@@ -94,7 +95,7 @@ class TranslationCreationCard : VBox() {
 fun EventTarget.newTranslationCard(
     sourceLanguage: ObservableValue<Language>,
     targetLanguage: ObservableValue<Language>,
-    mode: TranslationMode,
+    mode: ProjectMode,
     op: NewTranslationCard2.() -> Unit = {}
 ) = NewTranslationCard2(sourceLanguage, targetLanguage, mode).attachTo(this, op)
 
