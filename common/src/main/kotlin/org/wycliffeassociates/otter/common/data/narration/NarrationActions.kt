@@ -17,7 +17,7 @@ class NextVerseAction(
     private var node: VerseNode? = null
 
     override fun execute() {
-        val start = list.lastOrNull()?.end ?: 0
+        val start = file.length().toInt()
         val end = file.length().toInt()
 
         node = VerseNode (start, end).also {
