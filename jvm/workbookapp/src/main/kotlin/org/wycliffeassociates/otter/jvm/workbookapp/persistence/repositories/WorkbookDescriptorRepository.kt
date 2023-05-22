@@ -57,16 +57,15 @@ class WorkbookDescriptorRepository @Inject constructor(
             sourceCollection.slug
         )
         return WorkbookDescriptor(
-            sourceCollection.id,
-            sourceCollection.slug,
-            sourceCollection.titleKey,
-            sourceCollection.labelKey,
+            entity.id,
+            targetCollection.slug,
+            targetCollection.titleKey,
+            targetCollection.labelKey,
             progress,
-            sourceCollection.modifiedTs,
+            targetCollection.modifiedTs,
             hasSourceAudio
         )
     }
-
 
     private fun getProgress(collection: Collection): Double {
         val chapters = collectionRepository.getChildren(collection)

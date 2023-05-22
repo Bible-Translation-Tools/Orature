@@ -480,9 +480,9 @@ class CollectionRepository @Inject constructor(
                         database.workbookDescriptorDao.insert(
                             WorkbookDescriptorEntity(
                                 0,
-                                projectEntity!!.id,
                                 sourceCollection.id,
-                                workbookTypeDao.fetchId(ProjectMode.TRANSLATION)
+                                projectEntity!!.id,
+                                workbookTypeDao.fetchId(mode)
                             )
                         )
                     }
