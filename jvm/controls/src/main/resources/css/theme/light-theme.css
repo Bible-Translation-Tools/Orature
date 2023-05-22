@@ -59,6 +59,7 @@
     -wa-regular-text-80: #33445C;
     -wa-note-text: -wa-black-70;
     -wa-highlight-text: -wa-primary;
+    -wa-active-text: -wa-primary;
     -wa-disabled-text: -wa-gray-light;
     -wa-disabled-background: -wa-black-15;
     -wa-status-active: -wa-green;
@@ -96,13 +97,13 @@
 
     /* buttons */
     -wa-primary-btn-text-fill: -wa-white;
-    -wa-secondary-btn-text-fill: -wa-primary;
+    -wa-secondary-btn-text-fill: -wa-regular-text-80;
     -wa-secondary-btn-text-fill-hover: -wa-primary-dark;
     -wa-secondary-btn-text-fill-pressed: -wa-primary-dark;
     -wa-secondary-btn-background: transparent;
     -wa-secondary-btn-background-hover: -wa-primary-05;
     -wa-secondary-btn-background-pressed: -wa-primary-10;
-    -wa-secondary-btn-border: -wa-primary;
+    -wa-secondary-btn-border: -wa-border-light;
     -wa-btn-icon-background: -wa-transparent;
     -wa-btn-icon-background-hover: -wa-black-05;
     -wa-btn-icon-background-pressed: -wa-black-10;
