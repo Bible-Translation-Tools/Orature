@@ -17,18 +17,9 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import tornadofx.FX
-import tornadofx.addClass
-import tornadofx.addPseudoClass
-import tornadofx.attachTo
-import tornadofx.get
-import tornadofx.hbox
-import tornadofx.hgrow
-import tornadofx.label
-import tornadofx.region
-import tornadofx.stringBinding
-import tornadofx.vbox
+import tornadofx.*
 import java.text.MessageFormat
+
 // TODO: remove number "2" suffix after deleting the original control. Same for css named translation-card-2.css
 class TranslationCard2(
     sourceLanguage: Language,
