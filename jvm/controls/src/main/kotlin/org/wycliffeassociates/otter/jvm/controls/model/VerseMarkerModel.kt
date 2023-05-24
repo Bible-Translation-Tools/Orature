@@ -288,9 +288,9 @@ interface AudioMarker {
     val location: Int
 }
 
-class VerseMarker(val start: Int, val end: Int?, override val location: Int): AudioMarker {
+class VerseMarker(val start: Int, val end: Int, override val location: Int): AudioMarker {
     override val label: String
-        get() = if (end != null) "$start-$end" else "$start"
+        get() = if (end != start) "$start-$end" else "$start"
 }
 
 class OratureCueParser(val audio: OratureAudioFile) {
@@ -318,13 +318,13 @@ class OratureCueParser(val audio: OratureAudioFile) {
     private fun parseCues(audio: OratureAudioFile) {
         audio.getCues().forEach {
             val start: Int
-            val end: Int?
+            val end: Int
             val matcher = verseMatcher.matcher(it.label)
             if (matcher.matches()) {
                 start = matcher.group(1).toInt()
                 end = if (matcher.groupCount() > 1 && !matcher.group(2).isNullOrBlank()) {
                     matcher.group(2).toInt()
-                } else null
+                } else start
                 cueMap[OratureCueType.VERSE]!!.add(VerseMarker(start, end, it.location))
             }
         }
