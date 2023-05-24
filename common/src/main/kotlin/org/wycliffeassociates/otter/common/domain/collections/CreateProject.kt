@@ -64,6 +64,7 @@ class CreateProject @Inject constructor(
         return matchingRcs
             .toList()
             .flatMap {
+                // TODO: include project mode parameter and initialize project files here
                 collectionRepo.deriveProject(it, sourceProject, targetLanguage, deriveProjectFromVerses, ProjectMode.TRANSLATION)
             }
     }
