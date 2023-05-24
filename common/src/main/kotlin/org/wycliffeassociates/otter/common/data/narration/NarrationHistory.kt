@@ -3,33 +3,31 @@ package org.wycliffeassociates.otter.common.data.narration
 import java.util.*
 
 class NarrationHistory {
-    private val undoStack = Stack<NarrationAction>()
-    private val redoStack = Stack<NarrationAction>()
+    private val undoStack = ArrayDeque<NarrationAction>()
+    private val redoStack = ArrayDeque<NarrationAction>()
 
     fun execute(action: NarrationAction) {
         action.execute()
-        undoStack.push(action)
+        undoStack.addLast(action)
         redoStack.clear()
     }
 
     fun undo() {
-        if (undoStack.empty()) return
+        if (undoStack.isEmpty()) return
 
-        val action = undoStack.pop()
-        if (action != null) {
-            action.undo()
-            redoStack.push(action)
-        }
+        val action = undoStack.removeLast()
+
+        action.undo()
+        redoStack.addLast(action)
     }
 
     fun redo() {
-        if (redoStack.empty()) return
+        if (redoStack.isEmpty()) return
 
-        val action = redoStack.pop()
-        if (action != null) {
-            action.redo()
-            undoStack.push(action)
-        }
+        val action = redoStack.removeLast()
+
+        action.redo()
+        undoStack.addLast(action)
     }
 
     fun clear() {
