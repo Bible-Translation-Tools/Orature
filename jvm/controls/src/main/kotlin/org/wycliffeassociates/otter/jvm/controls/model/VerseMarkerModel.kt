@@ -26,6 +26,7 @@ import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureCueParser
 import tornadofx.*
 import java.util.regex.Pattern
 
@@ -46,6 +47,8 @@ class VerseMarkerModel(
 
     val markerCountProperty = SimpleIntegerProperty(1)
     private val audioEnd = audio.totalFrames
+
+    private var labelIndex = 0
     var changesSaved = true
         private set
 
@@ -62,14 +65,14 @@ class VerseMarkerModel(
         if (markers.size < markerTotal) {
             changesSaved = false
 
-            val marker = ChunkMarkerModel(AudioCue(location, "${markers.size + 1}"))
+            val marker = ChunkMarkerModel(AudioCue(location, "${markerLabels[labelIndex]}}"))
             val op = Add(marker)
             undoStack.push(op)
             op.apply()
             redoStack.clear()
 
             markers.sortBy { it.frame }
-            markers.forEachIndexed { index, chunkMarker -> chunkMarker.label = (index + 1).toString() }
+            markers.forEachIndexed { index, chunkMarker -> chunkMarker.label = markerLabels[index] }
             markerCountProperty.value = markers.filter { it.placed }.size
         }
     }
@@ -149,8 +152,7 @@ class VerseMarkerModel(
     }
 
     private fun sanitizeCues(audio: OratureAudioFile): List<AudioCue> {
-        val cues = OratureCueParser(audio)
-        val verses = cues.getCues(OratureCueParser.OratureCueType.VERSE)
+        val verses = audio.getMarker(OratureCueParser.OratureCueType.VERSE)
         logger.info("Verses found: ${verses.size}")
         return verses.map {
             AudioCue(it.location, it.label)
@@ -240,10 +242,12 @@ class VerseMarkerModel(
 
     private inner class Add(val marker: ChunkMarkerModel) : MarkerOperation(marker.id) {
         override fun apply() {
+            labelIndex++
             markers.add(marker)
         }
 
         override fun undo() {
+            labelIndex--
             markers.remove(marker)
         }
     }
@@ -252,6 +256,7 @@ class VerseMarkerModel(
         var marker: ChunkMarkerModel? = null
 
         override fun apply() {
+            labelIndex--
             marker = markers.find { it.id == markerId }
             marker?.let {
                 markers.remove(it)
@@ -259,6 +264,7 @@ class VerseMarkerModel(
         }
 
         override fun undo() {
+            labelIndex++
             marker?.let {
                 markers.add(it)
             }
@@ -280,53 +286,5 @@ data class ChunkMarkerModel(
 
     companion object {
         var idGen = 0
-    }
-}
-
-interface AudioMarker {
-    val label: String
-    val location: Int
-}
-
-class VerseMarker(val start: Int, val end: Int, override val location: Int): AudioMarker {
-    override val label: String
-        get() = if (end != start) "$start-$end" else "$start"
-}
-
-class OratureCueParser(val audio: OratureAudioFile) {
-    enum class OratureCueType {
-        VERSE,
-        CHAPTER_TITLE,
-        BOOK_TITLE,
-        LICENSE
-    }
-
-    private val cueMap: MutableMap<OratureCueType, MutableList<AudioMarker>> = mutableMapOf(
-        OratureCueType.VERSE to mutableListOf()
-    )
-
-    private val verseMatcher = Pattern.compile("^orature-vm-(\\d+)(?:-(\\d+))?\$")
-
-    fun getCues(type: OratureCueType): List<AudioMarker> {
-        return cueMap[type] ?: listOf()
-    }
-
-    init {
-        parseCues(audio)
-    }
-
-    private fun parseCues(audio: OratureAudioFile) {
-        audio.getCues().forEach {
-            val start: Int
-            val end: Int
-            val matcher = verseMatcher.matcher(it.label)
-            if (matcher.matches()) {
-                start = matcher.group(1).toInt()
-                end = if (matcher.groupCount() > 1 && !matcher.group(2).isNullOrBlank()) {
-                    matcher.group(2).toInt()
-                } else start
-                cueMap[OratureCueType.VERSE]!!.add(VerseMarker(start, end, it.location))
-            }
-        }
     }
 }
