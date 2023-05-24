@@ -8,11 +8,7 @@ import org.wycliffeassociates.otter.jvm.controls.card.translationCard
 import org.wycliffeassociates.otter.jvm.controls.card.translationCreationCard
 import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
-import tornadofx.View
-import tornadofx.managedWhen
-import tornadofx.paddingAll
-import tornadofx.vbox
-import tornadofx.visibleWhen
+import tornadofx.*
 
 class TranslationCardsDemoView : View() {
 
