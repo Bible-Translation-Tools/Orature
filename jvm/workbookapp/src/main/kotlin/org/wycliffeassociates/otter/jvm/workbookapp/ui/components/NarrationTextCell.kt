@@ -66,7 +66,12 @@ class NarrationTextCell(
             onNextVerseActionProperty.set(EventHandler  {
                 listView.apply {
                     selectionModel.selectNext()
-                    scrollTo(selectionModel.selectedItem)
+
+                    // Scroll to the previous verse because scrolling to the active verse will cause
+                    // the active verse to move slightly above the viewport. Scrolling -1 will mean that
+                    // the active verse won't be on the top and is unpredictably placed, but is still better
+                    // than the text needed to actively be narrated being off the screen.
+                    scrollTo(selectionModel.selectedIndex - 1)
 
                     FX.eventbus.fire(NextVerseEvent(selectionModel.selectedItem))
                 }
