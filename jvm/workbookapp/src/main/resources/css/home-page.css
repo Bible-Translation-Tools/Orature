@@ -25,10 +25,60 @@
 
 .home-page__translations {
     -fx-max-width: 800px;
-    -fx-spacing: 20px;
+    -fx-spacing: 20;
+}
+
+.homepage__left-pane {
+    -fx-pref-width: 250px;
+    -fx-spacing: 12;
+    -fx-border-width: 0 0.5px 0 0;
+    -fx-border-color: -wa-border-light;
+    -fx-background-color: -wa-foreground;
+    -fx-padding: 16;
+}
+
+.homepage__left-header {
+    -fx-padding: 8 0;
+}
+
+.homepage__left-pane__project-groups {
+    -fx-spacing: 12;
+}
+
+.homepage__main-region {
+    -fx-padding: 16;
+    -fx-background-color: -wa-background;
+    -fx-spacing: 16
+}
+
+.homepage__main-region .container {
+    -fx-spacing: 16;
+}
+
+.homepage__main-region__header-section {
+    -fx-alignment: center-left;
+    -fx-spacing: 8;
+}
+
+.homepage__main-region__body {
+    -fx-padding: 16;
+    -fx-background-color: -wa-foreground;
+    -fx-background-radius: 12px;
+}
+
+.homepage__main-region__empty-section {
+    -fx-alignment: center;
+}
+
+.option-button {
+    -fx-background-color: transparent;
 }
 
 .icon-xl .ikonli-font-icon {
     -fx-font-size: 6em;
     -fx-icon-color: -wa-primary;
+}
+
+.line-break {
+    -fx-padding: 6 0;
 }

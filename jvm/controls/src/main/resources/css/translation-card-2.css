@@ -31,6 +31,7 @@
 }
 
 .translation-card__body {
+    -fx-spacing: 3;
     -fx-alignment: center-left;
 }
 
@@ -57,12 +58,6 @@
 }
 
 /* translation wizard */
-.translation-wizard__main {
-    -fx-padding: 16px;
-    -fx-background-color: -wa-foreground;
-    -fx-background-radius: 12px;
-}
-
 .translation-type-card {
     -fx-spacing: 25px;
     -fx-border-width: 0 0 1px 0;

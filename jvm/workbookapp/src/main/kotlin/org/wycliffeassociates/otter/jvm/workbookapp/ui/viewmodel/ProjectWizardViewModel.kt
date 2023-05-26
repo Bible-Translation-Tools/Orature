@@ -29,6 +29,7 @@ class ProjectWizardViewModel : ViewModel() {
 
     val selectedModeProperty = SimpleObjectProperty<ProjectMode>(null)
     val selectedSourceLanguageProperty = SimpleObjectProperty<Language>(null)
+    val selectedTargetLanguageProperty = SimpleObjectProperty<Language>(null)
 
     private val disposableListeners = mutableListOf<ListenerDisposer>()
 
@@ -79,6 +80,7 @@ class ProjectWizardViewModel : ViewModel() {
     fun onLanguageSelected(language: Language, onNavigateBack: () -> Unit) {
         if (selectedSourceLanguageProperty.value != null) {
             // target language selected, creates project group
+            selectedTargetLanguageProperty.set(language)
             creationUseCase
                 .createAllBooks(
                     selectedSourceLanguageProperty.value,

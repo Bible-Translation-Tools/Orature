@@ -45,7 +45,15 @@ class WorkbookOptionMenu : ContextMenu() {
                 }
             }
         }
-        val exportOption = MenuItem(FX.messages["exportProject"]).apply {
+        val backupOption = MenuItem(FX.messages["backup"]).apply {
+            graphic = FontIcon(MaterialDesign.MDI_CONTENT_DUPLICATE)
+            action {
+                workbookInfoProperty.value?.let {
+                    FX.eventbus.fire(WorkbookExportEvent(it))
+                }
+            }
+        }
+        val exportOption = MenuItem(FX.messages["exportOptions"]).apply {
             graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
             action {
                 workbookInfoProperty.value?.let {
@@ -64,6 +72,6 @@ class WorkbookOptionMenu : ContextMenu() {
         }
         addClass("wa-context-menu")
         isAutoHide = true
-        items.setAll(openOption, exportOption, deleteOption)
+        items.setAll(openOption, backupOption, exportOption, deleteOption)
     }
 }

@@ -7,9 +7,10 @@ import org.wycliffeassociates.otter.jvm.controls.card.newTranslationCard
 import org.wycliffeassociates.otter.jvm.controls.card.translationCreationCard
 import org.wycliffeassociates.otter.jvm.controls.event.LanguageSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
+import org.wycliffeassociates.otter.jvm.utils.bindSingleChild
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.ProjectWizardSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.BookTableSection
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.EmptyHomeSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectWizardViewModel
 import tornadofx.*
@@ -19,17 +20,20 @@ class HomePage2 : View() {
     private val viewModel: HomePageViewModel2 by inject()
     private val wizardViewModel: ProjectWizardViewModel by inject()
 
-    private val mainComponentProperty = SimpleObjectProperty<Node>(null)
+    private val mainRegionProperty = SimpleObjectProperty<Node>(null)
     private val selectedProjectGroupProperty = SimpleObjectProperty<TranslationCard2>(null)
 
-    private val bookFragment = BookTableSection(viewModel.books)
-    private val wizardFragment: Node by lazy {
+    private val bookFragment = BookTableSection(viewModel.allBooks)
+    private val emptyHomeSection = EmptyHomeSection()
+    private val wizardFragment: ProjectWizardSection by lazy {
         ProjectWizardSection(
             wizardViewModel.sourceLanguages,
             wizardViewModel.targetLanguages,
             wizardViewModel.selectedModeProperty,
             wizardViewModel.selectedSourceLanguageProperty,
-        )
+        ).apply {
+            setOnCancelAction { exitWizard() }
+        }
     }
 
     init {
@@ -42,29 +46,36 @@ class HomePage2 : View() {
 
         subscribe<LanguageSelectedEvent> {
             wizardViewModel.onLanguageSelected(it.item) {
-                viewModel.loadTranslations()
-                mainComponentProperty.set(bookFragment)
+                viewModel.loadProjects().subscribe()
+                mainRegionProperty.set(bookFragment)
             }
         }
     }
 
     override val root = borderpane {
-        centerProperty().bind(mainComponentProperty)
+        center = stackpane {
+            bindSingleChild(mainRegionProperty)
+        }
         left = vbox {
+            addClass("homepage__left-pane")
+            label(messages["projects"]) {
+                addClass("h3", "h3--80", "homepage__left-header")
+            }
             stackpane {
                 translationCreationCard {
-                    visibleWhen { mainComponentProperty.isNotEqualTo(wizardFragment) }
+                    visibleWhen { mainRegionProperty.isNotEqualTo(wizardFragment) }
                     managedWhen(visibleProperty())
                     setOnAction {
                         selectedProjectGroupProperty.set(null)
-                        mainComponentProperty.set(wizardFragment)
+                        mainRegionProperty.set(wizardFragment)
                     }
                 }
                 newTranslationCard(
                     wizardViewModel.selectedSourceLanguageProperty,
+                    wizardViewModel.selectedTargetLanguageProperty,
                     wizardViewModel.selectedModeProperty
                 ) {
-                    visibleWhen { mainComponentProperty.isEqualTo(wizardFragment) }
+                    visibleWhen { mainRegionProperty.isEqualTo(wizardFragment) }
                     managedWhen(visibleProperty())
 
                     setOnCancelAction {
@@ -74,6 +85,7 @@ class HomePage2 : View() {
             }
 
             vbox { /* list of project groups */
+                addClass("homepage__left-pane__project-groups")
                 bindChildren(viewModel.translationModels2) { cardModel ->
                     TranslationCard2(
                         cardModel.sourceLanguage,
@@ -83,10 +95,10 @@ class HomePage2 : View() {
                     ).apply {
 
                         setOnAction {
-                            if (mainComponentProperty.value !is BookTableSection) {
+                            if (mainRegionProperty.value !is BookTableSection) {
                                 exitWizard()
                             }
-                            viewModel.books.setAll(cardModel.books)
+                            viewModel.allBooks.setAll(cardModel.books)
                             selectedProjectGroupProperty.set(this)
                         }
                     }
@@ -97,12 +109,18 @@ class HomePage2 : View() {
 
     override fun onDock() {
         super.onDock()
-        viewModel.loadTranslations()
-        mainComponentProperty.set(bookFragment)
+        viewModel.loadProjects()
+            .subscribe { list ->
+                if (list.isEmpty()) {
+                    mainRegionProperty.set(emptyHomeSection)
+                } else {
+                    mainRegionProperty.set(bookFragment)
+                }
+            }
     }
 
     private fun exitWizard() {
         wizardViewModel.resetWizard()
-        mainComponentProperty.set(bookFragment)
+        mainRegionProperty.set(bookFragment)
     }
 }

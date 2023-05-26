@@ -34,4 +34,3 @@ class TranslationCardModel2(
         return true
     }
 }
-

@@ -55,7 +55,7 @@ class WorkBookTableView(
             cellFormat {
                 graphic = label(item) { addClass("normal-text") }
             }
-            minWidth = 80.0 // this may not be replaced with css
+            minWidth = 70.0 // this may not be replaced with css
         }
         column(messages["progress"], Number::class) {
             setCellValueFactory { it.value.progress.toProperty() }

@@ -13,8 +13,6 @@ import tornadofx.*
 
 class SearchBar : CustomTextField() {
 
-    val placeholderTextProperty = SimpleStringProperty(null)
-
     private val searchIcon = FontIcon(MaterialDesign.MDI_MAGNIFY)
     private val clearBtn = Button().apply {
         addClass("btn", "btn--icon", "btn--borderless")
@@ -23,7 +21,6 @@ class SearchBar : CustomTextField() {
 
     init {
         addClass("txt-input", "filtered-search-bar__input")
-        promptTextProperty().bind(placeholderTextProperty)
 
         clearBtn.setOnAction {
             text = ""

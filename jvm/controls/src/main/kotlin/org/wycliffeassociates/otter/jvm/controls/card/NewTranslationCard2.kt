@@ -19,6 +19,7 @@ import java.text.MessageFormat
 // TODO: remove number "2" suffix after deleting the original control.
 class NewTranslationCard2(
     private val sourceLanguageProperty: ObservableValue<Language>,
+    private val targetLanguageProperty: ObservableValue<Language>,
     mode: ObservableValue<ProjectMode>
 ) : VBox() {
 
@@ -58,11 +59,16 @@ class NewTranslationCard2(
                 sourceLanguageProperty.onChangeAndDoNow { source ->
                     togglePseudoClass("unset", source == null)
                 }
-                graphic = FontIcon(MaterialDesign.MDI_MENU_DOWN)
+                graphic = FontIcon(MaterialDesign.MDI_CHEVRON_DOUBLE_DOWN)
             }
-            label("???") {
+            label {
                 addClass("translation-card__language")
-                addPseudoClass("unset")
+                textProperty().bind(
+                    targetLanguageProperty.stringBinding { target ->
+                        togglePseudoClass("unset", target == null)
+                        target?.name ?: "???"
+                    }
+                )
                 graphic = FontIcon(MaterialDesign.MDI_VOICE)
             }
         }
@@ -96,9 +102,10 @@ class TranslationCreationCard : VBox() {
 
 fun EventTarget.newTranslationCard(
     sourceLanguage: ObservableValue<Language>,
+    targetLanguage: ObservableValue<Language>,
     mode: ObservableValue<ProjectMode>,
     op: NewTranslationCard2.() -> Unit = {}
-) = NewTranslationCard2(sourceLanguage, mode).attachTo(this, op)
+) = NewTranslationCard2(sourceLanguage, targetLanguage, mode).attachTo(this, op)
 
 fun EventTarget.translationCreationCard(
     op: TranslationCreationCard.() -> Unit = {}

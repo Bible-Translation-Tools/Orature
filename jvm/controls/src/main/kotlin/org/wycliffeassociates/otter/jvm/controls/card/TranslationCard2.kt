@@ -106,7 +106,7 @@ class TranslationCardSkin2(card: TranslationCard2) : SkinBase<TranslationCard2>(
                 alignment = Pos.CENTER
                 label {
                     addClass("translation-card__divider")
-                    graphic = FontIcon(MaterialDesign.MDI_MENU_RIGHT)
+                    graphic = FontIcon(MaterialDesign.MDI_CHEVRON_DOUBLE_RIGHT)
                 }
             }
             label(targetLanguageProperty) {
@@ -158,7 +158,7 @@ class ActiveTranslationCardSkin(card: TranslationCard2) : SkinBase<TranslationCa
             }
             label {
                 addClass("translation-card__divider")
-                graphic = FontIcon(MaterialDesign.MDI_MENU_DOWN)
+                graphic = FontIcon(MaterialDesign.MDI_CHEVRON_DOUBLE_DOWN)
             }
             label(targetLanguageProperty) {
                 addClass("translation-card__language")

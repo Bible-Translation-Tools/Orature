@@ -36,8 +36,9 @@ class TranslationCardsDemoView : View() {
 
         newTranslationCard(
             SimpleObjectProperty<Language>(
-                Language("en", "English", "English", "", true, "")
+                languages[0]
             ),
+            SimpleObjectProperty<Language>(null),
             mode = SimpleObjectProperty<ProjectMode>()
         ) {
             visibleWhen(showNewTranslationCard)

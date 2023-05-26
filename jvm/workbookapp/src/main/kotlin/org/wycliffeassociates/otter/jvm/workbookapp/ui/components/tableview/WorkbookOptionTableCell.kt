@@ -32,7 +32,7 @@ class WorkbookOptionTableCell : TableCell<WorkbookDescriptor, WorkbookDescriptor
     private val popupMenu = WorkbookOptionMenu()
 
     private val actionButton = button {
-        addClass("btn", "btn--icon", "btn--borderless")
+        addClass("btn", "btn--icon", "btn--borderless", "option-button")
         graphic = FontIcon(MaterialDesign.MDI_DOTS_HORIZONTAL).apply {
             addClass("wa-icon")
         }
@@ -59,7 +59,7 @@ class WorkbookOptionTableCell : TableCell<WorkbookDescriptor, WorkbookDescriptor
                 popupMenu.show(
                     FX.primaryStage
                 )
-                popupMenu.x = screenBound.centerX - popupMenu.width + this.width
+                popupMenu.x = screenBound.minX - popupMenu.width + this.width
                 popupMenu.y = screenBound.maxY
         }
 
