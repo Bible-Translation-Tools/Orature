@@ -143,9 +143,8 @@ class VerseMarkerModel(
                     cues.add(it.toAudioCue())
                 }
             }
-            val audioFileCues = audio.getCues() as MutableList
-            audioFileCues.clear()
-            audioFileCues.addAll(cues)
+            audio.clearVerseMarkers()
+            cues.forEach { audio.addCue(it.location, it.label) }
             audio.update()
             changesSaved = true
         }.ignoreElement()
@@ -195,7 +194,7 @@ class VerseMarkerModel(
     fun cueInRange(cue: AudioCue, labels: List<String>): Boolean {
         val bridges = labels.filter { it.contains("-") }
         for (bridge in bridges) {
-            val range = bridge.split("-")
+            val range = bridge.trim().split("-")
             val start = range[0].toInt()
             val end = range[1].toInt()
             return cue.label.toInt() in start..end

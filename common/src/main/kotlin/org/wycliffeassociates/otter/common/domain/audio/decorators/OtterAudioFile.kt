@@ -74,6 +74,23 @@ class OratureAudioFile : AudioFile {
         metadata.addCue(location, label)
     }
 
+    fun clearVerseMarkers() {
+        cues as MutableList
+        cues.clear()
+        cueParser.clearCues(OratureCueParser.OratureCueType.VERSE)
+    }
+
+    override fun update() {
+        metadata.clearMarkers()
+        extraCues.forEach {
+            metadata.addCue(it)
+        }
+        cueParser.getCues(OratureCueParser.OratureCueType.VERSE).forEach {
+            metadata.addCue(it.toCue())
+        }
+        super.update()
+    }
+
     private fun separateOratureCues(allCues: List<AudioCue>) {
         val oratureRegex = Regex("^orature-vm-((\\d+)(?:-(\\d+))?)\$")
         val loneDigitRegex = Regex("^((\\d+)(?:-(\\d+))?)$")
@@ -121,6 +138,10 @@ class OratureAudioFile : AudioFile {
 interface AudioMarker {
     val label: String
     val location: Int
+
+    fun toCue(): AudioCue {
+        return AudioCue(location, label)
+    }
 }
 
 class VerseMarker(val start: Int, val end: Int, override val location: Int) : AudioMarker {
@@ -148,14 +169,18 @@ class OratureCueParser(val audio: OratureAudioFile) {
         return cueMap[type] ?: listOf()
     }
 
+    fun clearCues(type: OratureCueType) {
+        cueMap.remove(type)
+    }
+
     fun parse() {
         audio.getCues().forEach { cue ->
-            matchMarkers(cue, verseMatcher, OratureCueType.VERSE)
-            matchMarkers(cue, chunkMatcher, OratureCueType.CHUNK)
+            val matchedVerses = matchMarkers(cue, verseMatcher, OratureCueType.VERSE)
+            if (!matchedVerses) matchMarkers(cue, chunkMatcher, OratureCueType.CHUNK)
         }
     }
 
-    private fun matchMarkers(cue: AudioCue, matchPattern: Pattern, type: OratureCueType) {
+    private fun matchMarkers(cue: AudioCue, matchPattern: Pattern, type: OratureCueType): Boolean {
         val start: Int
         val end: Int
         val matcher = matchPattern.matcher(cue.label)
@@ -172,6 +197,8 @@ class OratureCueParser(val audio: OratureAudioFile) {
                 OratureCueType.LICENSE -> TODO()
             }
             cueMap[type]!!.add(marker)
+            return true
         }
+        return false
     }
 }

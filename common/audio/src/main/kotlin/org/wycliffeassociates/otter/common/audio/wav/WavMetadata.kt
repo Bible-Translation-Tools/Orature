@@ -87,6 +87,10 @@ class WavMetadata(parsableChunks: List<RiffChunk>? = null) : AudioMetadata {
         cueChunk.addCue(AudioCue(location, label))
     }
 
+    override fun addCue(audioCue: AudioCue) {
+        cueChunk.addCue(audioCue)
+    }
+
     override fun getCues(): List<AudioCue> {
         return cueChunk.cues
     }
