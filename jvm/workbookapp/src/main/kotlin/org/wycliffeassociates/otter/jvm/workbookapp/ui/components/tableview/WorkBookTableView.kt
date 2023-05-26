@@ -49,11 +49,11 @@ class WorkBookTableView(
             prefWidthProperty().bind(this@WorkBookTableView.widthProperty().multiply(0.25))
             minWidth = 120.0 // this may not be replaced with css
         }
-        column(messages["code"], String::class).apply {
+        column("", String::class).apply {
             addClass("table-view__column-header-row")
             setCellValueFactory { it.value.slug.toProperty() }
             cellFormat {
-                graphic = label(item)
+                graphic = label(item) { addClass("normal-text") }
             }
             minWidth = 80.0 // this may not be replaced with css
         }

@@ -27,3 +27,8 @@
     -fx-max-width: 800px;
     -fx-spacing: 20px;
 }
+
+.icon-xl .ikonli-font-icon {
+    -fx-font-size: 6em;
+    -fx-icon-color: -wa-primary;
+}

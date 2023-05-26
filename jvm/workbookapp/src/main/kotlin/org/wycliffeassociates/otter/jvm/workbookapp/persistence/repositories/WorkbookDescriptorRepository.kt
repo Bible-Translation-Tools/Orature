@@ -21,12 +21,13 @@ class WorkbookDescriptorRepository @Inject constructor(
 ) : IWorkbookDescriptorRepository {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-    private val workbookDao = database.workbookDescriptorDao
+    private val workbookDescriptorDao = database.workbookDescriptorDao
+    private val workbookTypeDao = database.workbookTypeDao
 
     override fun getById(id: Int): Maybe<WorkbookDescriptor> {
         return Maybe
             .fromCallable {
-                workbookDao.fetchById(id)
+                workbookDescriptorDao.fetchById(id)
             }
             .map {
                 buildWorkbookDescriptor(it)
@@ -37,7 +38,7 @@ class WorkbookDescriptorRepository @Inject constructor(
     override fun getAll(): Single<List<WorkbookDescriptor>> {
         return Single
             .fromCallable {
-                workbookDao.fetchAll()
+                workbookDescriptorDao.fetchAll()
                     .map {
                         buildWorkbookDescriptor(it)
                     }
@@ -56,11 +57,18 @@ class WorkbookDescriptorRepository @Inject constructor(
             sourceCollection.resourceContainer!!,
             sourceCollection.slug
         )
+        val sourceLanguage = sourceCollection.resourceContainer!!.language
+        val targetLanguage = targetCollection.resourceContainer!!.language
+        val mode = workbookTypeDao.fetchById(entity.typeFk)!!
+
         return WorkbookDescriptor(
             entity.id,
             targetCollection.slug,
             targetCollection.titleKey,
             targetCollection.labelKey,
+            sourceLanguage,
+            targetLanguage,
+            mode,
             progress,
             targetCollection.modifiedTs,
             hasSourceAudio

@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.dev
 
+import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookDeleteEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookExportEvent
@@ -29,16 +30,16 @@ import tornadofx.*
 
 class WorkbookTableDemoView : View() {
     val workbookList = observableListOf<WorkbookDescriptor>(
-        WorkbookDescriptor(0, "jhn",  "John", "", 0.3, LocalDateTime.now(), true,),
-        WorkbookDescriptor(0, "act", "Acts", "", 0.0, LocalDateTime.now(), true,),
-        WorkbookDescriptor(0, "gen", "Genesis", "", 0.1, LocalDateTime.now(), true,),
-        WorkbookDescriptor(0, "lev", "Leviticus", "", 0.5, LocalDateTime.now(), false,),
-        WorkbookDescriptor(0, "psa", "Psalms", "", 0.8, LocalDateTime.now(), false,),
-        WorkbookDescriptor(0, "rev", "Revelation", "", 1.0, LocalDateTime.now(), false,),
-        WorkbookDescriptor(0, "mrk", "Mark", "", 0.5, LocalDateTime.now(), false,),
-        WorkbookDescriptor(0, "mal", "Malachi", "", 1.0, LocalDateTime.now(), false,),
-        WorkbookDescriptor(0, "pro", "Proverbs", "", 0.2, LocalDateTime.now(), true,),
-        WorkbookDescriptor(0, "col", "Colossians", "", 1.0, LocalDateTime.now(), true,),
+//        WorkbookDescriptor(0, "jhn",  "John", "", ProjectMode.TRANSLATION, 0.3, LocalDateTime.now(), true,),
+//        WorkbookDescriptor(0, "act", "Acts", "", ProjectMode.TRANSLATION, 0.0, LocalDateTime.now(), true,),
+//        WorkbookDescriptor(0, "gen", "Genesis", "", ProjectMode.TRANSLATION, 0.1, LocalDateTime.now(), true,),
+//        WorkbookDescriptor(0, "lev", "Leviticus", "", ProjectMode.TRANSLATION, 0.5, LocalDateTime.now(), false,),
+//        WorkbookDescriptor(0, "psa", "Psalms", "", ProjectMode.DIALECT, 0.8, LocalDateTime.now(), false,),
+//        WorkbookDescriptor(0, "rev", "Revelation", "", ProjectMode.DIALECT, 1.0, LocalDateTime.now(), false,),
+//        WorkbookDescriptor(0, "mrk", "Mark", "", ProjectMode.NARRATION, 0.5, LocalDateTime.now(), false,),
+//        WorkbookDescriptor(0, "mal", "Malachi", "", ProjectMode.NARRATION, 1.0, LocalDateTime.now(), false,),
+//        WorkbookDescriptor(0, "pro", "Proverbs", "", ProjectMode.TRANSLATION, 0.2, LocalDateTime.now(), true,),
+//        WorkbookDescriptor(0, "col", "Colossians", "", ProjectMode.TRANSLATION, 1.0, LocalDateTime.now(), true,),
     )
 
     init {

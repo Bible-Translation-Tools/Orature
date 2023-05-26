@@ -14,12 +14,12 @@ import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import tornadofx.FX.Companion.messages
+import java.text.MessageFormat
 
 // TODO: remove number "2" suffix after deleting the original control.
 class NewTranslationCard2(
     private val sourceLanguageProperty: ObservableValue<Language>,
-    private val targetLanguageProperty: ObservableValue<Language>,
-    mode: ProjectMode
+    mode: ObservableValue<ProjectMode>
 ) : VBox() {
 
     private var onCancelProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
@@ -30,7 +30,14 @@ class NewTranslationCard2(
 
         hbox {
             addClass("translation-card__header")
-            label(messages["newProject"]) {
+            label {
+                textProperty().bind(
+                    mode.stringBinding {
+                        it?.let {
+                            MessageFormat.format(messages["newProjectWithMode"], messages[it.titleKey])
+                        } ?: messages["newProject"]
+                    }
+                )
                 addClass("h5", "translation-card__header__text")
             }
         }
@@ -53,14 +60,9 @@ class NewTranslationCard2(
                 }
                 graphic = FontIcon(MaterialDesign.MDI_MENU_DOWN)
             }
-            label {
+            label("???") {
                 addClass("translation-card__language")
-                textProperty().bind(
-                    targetLanguageProperty.stringBinding { target ->
-                        togglePseudoClass("unset", target == null)
-                        target?.name ?: "???"
-                    }
-                )
+                addPseudoClass("unset")
                 graphic = FontIcon(MaterialDesign.MDI_VOICE)
             }
         }
@@ -94,10 +96,9 @@ class TranslationCreationCard : VBox() {
 
 fun EventTarget.newTranslationCard(
     sourceLanguage: ObservableValue<Language>,
-    targetLanguage: ObservableValue<Language>,
-    mode: ProjectMode,
+    mode: ObservableValue<ProjectMode>,
     op: NewTranslationCard2.() -> Unit = {}
-) = NewTranslationCard2(sourceLanguage, targetLanguage, mode).attachTo(this, op)
+) = NewTranslationCard2(sourceLanguage, mode).attachTo(this, op)
 
 fun EventTarget.translationCreationCard(
     op: TranslationCreationCard.() -> Unit = {}

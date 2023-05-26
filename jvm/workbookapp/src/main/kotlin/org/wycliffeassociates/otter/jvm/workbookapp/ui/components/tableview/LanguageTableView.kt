@@ -17,7 +17,7 @@ class LanguageTableView(
         vgrow = Priority.ALWAYS
         columnResizePolicy = CONSTRAINED_RESIZE_POLICY
 
-        column(messages["languageName"], String::class) {
+        column(messages["language"], String::class) {
             setCellValueFactory { it.value.name.toProperty() }
             cellFormat {
                 graphic = label(item) {
@@ -26,7 +26,7 @@ class LanguageTableView(
                 }
             }
         }
-        column(messages["anglicizedTitle"], String::class) {
+        column(messages["anglicized"], String::class) {
             setCellValueFactory { it.value.anglicizedName.toProperty() }
             cellFormat {
                 graphic = label(item) {
@@ -47,7 +47,7 @@ class LanguageTableView(
             setCellValueFactory { it.value.isGateway.toProperty() }
             cellFormat {
                 graphic = label {
-                    text = if (item) messages["Yes"] else messages["No"]
+                    text = if (item) messages["yes"] else messages["no"]
                     addClass("normal-text")
                 }
             }
