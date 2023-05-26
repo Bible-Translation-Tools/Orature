@@ -24,8 +24,9 @@ class EmptyHomeSection : VBox() {
             vgrow = Priority.ALWAYS
 
             label {
-                addClass("icon-xl")
-                graphic = FontIcon(MaterialDesign.MDI_LIBRARY_BOOKS)
+                graphic = FontIcon(MaterialDesign.MDI_LIBRARY_BOOKS).apply {
+                    addClass("icon-xl")
+                }
             }
             label(FX.messages["createProjectMessageTitle"]) {
                 addClass("h4", "h4--80")

@@ -74,7 +74,7 @@
     -fx-background-color: transparent;
 }
 
-.icon-xl .ikonli-font-icon {
+.icon-xl {
     -fx-font-size: 6em;
     -fx-icon-color: -wa-primary;
 }

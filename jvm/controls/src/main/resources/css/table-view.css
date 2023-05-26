@@ -102,5 +102,5 @@
 }
 
 .wa-table-view .active-icon {
-    -fx-icon-color: -wa-secondary-btn-text-fill;
+    -fx-icon-color: -wa-primary;
 }
