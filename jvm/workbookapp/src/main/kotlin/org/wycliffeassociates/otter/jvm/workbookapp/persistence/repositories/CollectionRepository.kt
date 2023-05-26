@@ -32,6 +32,7 @@ import jooq.tables.ContentEntity.CONTENT_ENTITY
 import org.jooq.DSLContext
 import org.jooq.Record
 import org.jooq.SelectConditionStep
+import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL.`val`
 import org.jooq.impl.DSL.and
 import org.jooq.impl.DSL.field
@@ -45,12 +46,10 @@ import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
-import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.ContentDao
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.WorkbookDescriptorEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.CollectionEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ResourceMetadataEntity
@@ -396,7 +395,7 @@ class CollectionRepository @Inject constructor(
             .flattenAsObservable {
                 it
             }
-            .map { sourceCollection ->
+            .flatMapSingle { sourceCollection ->
                 val sourceMetadata = sourceCollection.resourceContainer!!
                 deriveProject(
                     listOf(sourceMetadata),
@@ -404,7 +403,7 @@ class CollectionRepository @Inject constructor(
                     language,
                     verseByVerse,
                     mode
-                ).blockingGet()
+                )
             }
             .toList()
     }
@@ -476,16 +475,9 @@ class CollectionRepository @Inject constructor(
                                 container.write()
                             }
                         }
-
-                        database.workbookDescriptorDao.insert(
-                            WorkbookDescriptorEntity(
-                                0,
-                                sourceCollection.id,
-                                projectEntity!!.id,
-                                workbookTypeDao.fetchId(mode)
-                            )
-                        )
                     }
+
+                    insertWorkbookDescriptor(sourceCollection.id, projectEntity.id, mode)
 
                     return@transactionResult collectionMapper.mapFromEntity(
                         projectEntity,
@@ -899,6 +891,23 @@ class CollectionRepository @Inject constructor(
                         )
                 )
         ).execute()
+    }
+
+    private fun insertWorkbookDescriptor(
+        sourceCollectionId: Int,
+        targetCollectionId: Int,
+        mode: ProjectMode
+    ) {
+        try {
+            database.workbookDescriptorDao.insert(
+                WorkbookDescriptorEntity(
+                    0,
+                    sourceCollectionId,
+                    targetCollectionId,
+                    workbookTypeDao.fetchId(mode)
+                )
+            )
+        } catch (_: DataAccessException) { /* ignore duplicate */ }
     }
 
     private fun buildCollection(entity: CollectionEntity): Collection {
