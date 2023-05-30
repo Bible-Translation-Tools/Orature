@@ -1,12 +1,13 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home
 
+import javafx.event.EventTarget
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import tornadofx.*
 
-class EmptyHomeSection : VBox() {
+class EmptyProjectSection : VBox() {
     init {
         addClass("homepage__main-region")
 
@@ -38,3 +39,5 @@ class EmptyHomeSection : VBox() {
         }
     }
 }
+
+fun EventTarget.emptyProjectSection(op: EmptyProjectSection.() -> Unit = {}) = EmptyProjectSection().attachTo(this, op)

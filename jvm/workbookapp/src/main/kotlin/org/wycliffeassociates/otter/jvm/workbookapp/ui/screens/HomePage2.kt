@@ -9,8 +9,7 @@ import org.wycliffeassociates.otter.jvm.controls.event.LanguageSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.bindSingleChild
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.ProjectWizardSection
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.BookTableSection
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.EmptyHomeSection
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.BookSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectWizardViewModel
 import tornadofx.*
@@ -18,21 +17,21 @@ import tornadofx.*
 class HomePage2 : View() {
 
     private val viewModel: HomePageViewModel2 by inject()
-    private val wizardViewModel: ProjectWizardViewModel by inject()
+    private val projectWizardViewModel: ProjectWizardViewModel by inject()
 
-    private val mainRegionProperty = SimpleObjectProperty<Node>(null)
-    private val selectedProjectGroupProperty = SimpleObjectProperty<TranslationCard2>(null)
+    private val mainSectionProperty = SimpleObjectProperty<Node>(null)
 
-    private val bookFragment = BookTableSection(viewModel.allBooks)
-    private val emptyHomeSection = EmptyHomeSection()
+    private val bookFragment = BookSection(viewModel.bookList)
     private val wizardFragment: ProjectWizardSection by lazy {
         ProjectWizardSection(
-            wizardViewModel.sourceLanguages,
-            wizardViewModel.targetLanguages,
-            wizardViewModel.selectedModeProperty,
-            wizardViewModel.selectedSourceLanguageProperty,
+            projectWizardViewModel.sourceLanguages,
+            projectWizardViewModel.targetLanguages,
+            projectWizardViewModel.selectedModeProperty,
+            projectWizardViewModel.selectedSourceLanguageProperty,
         ).apply {
-            setOnCancelAction { exitWizard() }
+            setOnCancelAction {
+                exitWizard()
+            }
         }
     }
 
@@ -45,16 +44,16 @@ class HomePage2 : View() {
         tryImportStylesheet("/css/table-view.css")
 
         subscribe<LanguageSelectedEvent> {
-            wizardViewModel.onLanguageSelected(it.item) {
-                viewModel.loadProjects().subscribe()
-                mainRegionProperty.set(bookFragment)
+            projectWizardViewModel.onLanguageSelected(it.item) {
+                viewModel.loadProjects()
+                mainSectionProperty.set(bookFragment)
             }
         }
     }
 
     override val root = borderpane {
         center = stackpane {
-            bindSingleChild(mainRegionProperty)
+            bindSingleChild(mainSectionProperty)
         }
         left = vbox {
             addClass("homepage__left-pane")
@@ -63,19 +62,20 @@ class HomePage2 : View() {
             }
             stackpane {
                 translationCreationCard {
-                    visibleWhen { mainRegionProperty.isNotEqualTo(wizardFragment) }
+                    visibleWhen { mainSectionProperty.isNotEqualTo(wizardFragment) }
                     managedWhen(visibleProperty())
                     setOnAction {
-                        selectedProjectGroupProperty.set(null)
-                        mainRegionProperty.set(wizardFragment)
+                        viewModel.selectedProjectGroup.set(null)
+                        mainSectionProperty.set(wizardFragment)
+                        projectWizardViewModel.dock()
                     }
                 }
                 newTranslationCard(
-                    wizardViewModel.selectedSourceLanguageProperty,
-                    wizardViewModel.selectedTargetLanguageProperty,
-                    wizardViewModel.selectedModeProperty
+                    projectWizardViewModel.selectedSourceLanguageProperty,
+                    projectWizardViewModel.selectedTargetLanguageProperty,
+                    projectWizardViewModel.selectedModeProperty
                 ) {
-                    visibleWhen { mainRegionProperty.isEqualTo(wizardFragment) }
+                    visibleWhen { mainSectionProperty.isEqualTo(wizardFragment) }
                     managedWhen(visibleProperty())
 
                     setOnCancelAction {
@@ -86,20 +86,20 @@ class HomePage2 : View() {
 
             vbox { /* list of project groups */
                 addClass("homepage__left-pane__project-groups")
-                bindChildren(viewModel.translationModels2) { cardModel ->
+                bindChildren(viewModel.projectGroups) { cardModel ->
                     TranslationCard2(
                         cardModel.sourceLanguage,
                         cardModel.targetLanguage,
                         cardModel.mode,
-                        selectedProjectGroupProperty
+                        viewModel.selectedProjectGroup
                     ).apply {
 
                         setOnAction {
-                            if (mainRegionProperty.value !is BookTableSection) {
+                            viewModel.bookList.setAll(cardModel.books)
+                            viewModel.selectedProjectGroup.set(cardModel.getKey())
+                            if (mainSectionProperty.value !is BookSection) {
                                 exitWizard()
                             }
-                            viewModel.allBooks.setAll(cardModel.books)
-                            selectedProjectGroupProperty.set(this)
                         }
                     }
                 }
@@ -109,18 +109,13 @@ class HomePage2 : View() {
 
     override fun onDock() {
         super.onDock()
+        mainSectionProperty.set(bookFragment)
         viewModel.loadProjects()
-            .subscribe { list ->
-                if (list.isEmpty()) {
-                    mainRegionProperty.set(emptyHomeSection)
-                } else {
-                    mainRegionProperty.set(bookFragment)
-                }
-            }
     }
 
     private fun exitWizard() {
-        wizardViewModel.resetWizard()
-        mainRegionProperty.set(bookFragment)
+        projectWizardViewModel.undock()
+        viewModel.loadProjects()
+        mainSectionProperty.set(bookFragment)
     }
 }

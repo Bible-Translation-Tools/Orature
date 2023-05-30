@@ -3,7 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
 import javafx.scene.layout.Priority
-import javafx.scene.layout.VBox
+import javafx.scene.layout.StackPane
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
@@ -13,7 +13,7 @@ import tornadofx.*
 import tornadofx.FX.Companion.messages
 import java.text.MessageFormat
 
-class BookTableSection(books: ObservableList<WorkbookDescriptor>) : VBox() {
+class BookSection(books: ObservableList<WorkbookDescriptor>) : StackPane() {
     private val projectsOptionMenu = ProjectGroupOptionMenu()
     private val titleProperty = SimpleStringProperty().apply {
         bind(books.stringBinding {
@@ -31,31 +31,39 @@ class BookTableSection(books: ObservableList<WorkbookDescriptor>) : VBox() {
     }
 
     init {
-        addClass("homepage__main-region")
+        vbox {
+            addClass("homepage__main-region")
 
-        hbox {
-            addClass("homepage__main-region__header-section")
-            button {
-                addClass("btn", "btn--icon", "btn--borderless", "option-button")
-                graphic = FontIcon(MaterialDesign.MDI_DOTS_HORIZONTAL)
+            hbox {
+                addClass("homepage__main-region__header-section")
+                button {
+                    addClass("btn", "btn--icon", "btn--borderless", "option-button")
+                    graphic = FontIcon(MaterialDesign.MDI_DOTS_HORIZONTAL)
 
-                projectsOptionMenu.books.setAll(books)
-                setOnAction {
-                    val bound = this.boundsInLocal
-                    val screenBound = this.localToScreen(bound)
-                    projectsOptionMenu.show(
-                        FX.primaryStage
-                    )
-                    projectsOptionMenu.x = screenBound.minX
-                    projectsOptionMenu.y = screenBound.maxY
+                    projectsOptionMenu.books.setAll(books)
+                    setOnAction {
+                        val bound = this.boundsInLocal
+                        val screenBound = this.localToScreen(bound)
+                        projectsOptionMenu.show(
+                            FX.primaryStage
+                        )
+                        projectsOptionMenu.x = screenBound.minX
+                        projectsOptionMenu.y = screenBound.maxY
+                    }
                 }
+                label(titleProperty) { addClass("h4") }
             }
-            label(titleProperty) { addClass("h4") }
+
+            workbookTableView(books) {
+                hgrow = Priority.ALWAYS
+            }
+
+            visibleWhen(books.booleanBinding { it.isNotEmpty() })
+            managedWhen(visibleProperty())
         }
 
-        workbookTableView(books) {
-            hgrow = Priority.ALWAYS
-            visibleWhen(books.booleanBinding { it.isNotEmpty() })
+        emptyProjectSection {
+            visibleWhen { books.booleanBinding { it.isEmpty() } }
             managedWhen(visibleProperty())
         }
     }

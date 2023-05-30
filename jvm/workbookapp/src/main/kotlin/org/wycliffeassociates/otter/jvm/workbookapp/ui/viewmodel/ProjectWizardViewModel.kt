@@ -35,22 +35,6 @@ class ProjectWizardViewModel : ViewModel() {
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
-
-        selectedModeProperty.onChangeWithDisposer {
-            loadSourceLanguages()
-        }.apply { disposableListeners.add(this) }
-
-        selectedSourceLanguageProperty.onChangeWithDisposer { sourceLanguage ->
-            when {
-                sourceLanguage == null -> return@onChangeWithDisposer
-                selectedModeProperty.value == ProjectMode.NARRATION -> {
-                    targetLanguages.setAll(sourceLanguage)
-                }
-                else -> {
-                    loadTargetLanguages()
-                }
-            }
-        }
     }
 
     fun loadSourceLanguages() {
@@ -89,7 +73,7 @@ class ProjectWizardViewModel : ViewModel() {
                 )
                 .observeOnFx()
                 .subscribe {
-                    resetWizard()
+                    reset()
                     onNavigateBack()
                 }
         }
@@ -99,8 +83,33 @@ class ProjectWizardViewModel : ViewModel() {
         }
     }
 
-    fun resetWizard() {
+    fun dock() {
+        selectedModeProperty.onChangeWithDisposer {
+            loadSourceLanguages()
+        }.apply { disposableListeners.add(this) }
+
+        selectedSourceLanguageProperty.onChangeWithDisposer { sourceLanguage ->
+            when {
+                sourceLanguage == null -> return@onChangeWithDisposer
+                selectedModeProperty.value == ProjectMode.NARRATION -> {
+                    targetLanguages.setAll(sourceLanguage)
+                }
+                else -> {
+                    loadTargetLanguages()
+                }
+            }
+        }.apply { disposableListeners.add(this) }
+    }
+
+    fun undock() {
+        reset()
+        disposableListeners.forEach { it.dispose() }
+        disposableListeners.clear()
+    }
+
+    private fun reset() {
         selectedModeProperty.set(null)
         selectedSourceLanguageProperty.set(null)
+        selectedTargetLanguageProperty.set(null)
     }
 }

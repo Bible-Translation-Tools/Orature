@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import io.reactivex.Single
+import javafx.beans.property.SimpleObjectProperty
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
@@ -19,21 +19,22 @@ class HomePageViewModel2 : ViewModel() {
 
     @Inject
     lateinit var workbookRepo: IWorkbookRepository
+
     @Inject
     lateinit var workbookDescriptorRepo: IWorkbookDescriptorRepository
 
-    val translationModels2 = observableListOf<TranslationCardModel2>()
-    val allBooks = observableListOf<WorkbookDescriptor>()
+    val projectGroups = observableListOf<TranslationCardModel2>()
+    val bookList = observableListOf<WorkbookDescriptor>()
+    val selectedProjectGroup = SimpleObjectProperty<ProjectGroupKey>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
     }
 
-    fun loadProjects(): Single<List<WorkbookDescriptor>> {
-        translationModels2.clear()
-        return workbookDescriptorRepo.getAll()
+    fun loadProjects() {
+        workbookDescriptorRepo.getAll()
             .observeOnFx()
-            .doOnSuccess { books ->
+            .subscribe { books ->
                 updateBookList(books)
             }
     }
@@ -42,18 +43,25 @@ class HomePageViewModel2 : ViewModel() {
         val projectGroups = books.groupBy {
             ProjectGroupKey(it.sourceLanguage.slug, it.targetLanguage.slug, it.mode)
         }
-        projectGroups.map {
-            val book = it.value.first()
-            val mostRecentBook = it.value.maxByOrNull { it.lastModified?.nano ?: -1 }
-            TranslationCardModel2(
-                book.sourceLanguage,
-                book.targetLanguage,
-                book.mode,
-                mostRecentBook?.lastModified,
-                it.value.toObservable()
-            )
-        }.let {
-            translationModels2.addAll(it)
-        }
+        projectGroups
+            .map {
+                val book = it.value.first()
+                val mostRecentBook = it.value.maxByOrNull { it.lastModified?.nano ?: -1 }
+                TranslationCardModel2(
+                    book.sourceLanguage,
+                    book.targetLanguage,
+                    book.mode,
+                    mostRecentBook?.lastModified,
+                    it.value.toObservable()
+                )
+            }
+            .sortedByDescending { it.modifiedTs }
+            .let { modelList ->
+                this.projectGroups.setAll(modelList)
+                modelList.firstOrNull()?.let { cardModel ->
+                    selectedProjectGroup.set(cardModel.getKey())
+                    bookList.setAll(cardModel.books)
+                }
+            }
     }
 }

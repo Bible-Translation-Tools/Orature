@@ -33,4 +33,6 @@ class TranslationCardModel2(
 
         return true
     }
+
+    fun getKey() = ProjectGroupKey(sourceLanguage.slug, targetLanguage.slug, mode)
 }
