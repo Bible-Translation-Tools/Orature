@@ -40,6 +40,7 @@ import java.io.File
 import java.lang.Integer.min
 import javafx.animation.AnimationTimer
 import javafx.beans.binding.Bindings
+import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureCueType
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseFinishedEvent
 import kotlin.math.max
@@ -130,7 +131,7 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
     }
 
     private fun loadMarkers(audio: OratureAudioFile) {
-        val initialMarkerCount = audio.getCues().size
+        val initialMarkerCount = audio.getMarker(OratureCueType.VERSE).size
         scope as ParameterizedScope
         val markersList: List<String> = getVerseLabelList(scope.parameters.named["marker_labels"])
         val totalMarkers: Int = scope.parameters.named["marker_total"]?.toInt() ?: initialMarkerCount

@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureCueParser
+import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureCueType
 import tornadofx.*
 import java.util.regex.Pattern
 
@@ -144,15 +145,14 @@ class VerseMarkerModel(
                 }
             }
             audio.clearVerseMarkers()
-            cues.forEach { audio.addCue(it.location, it.label) }
+            cues.forEach { audio.addVerseMarker(it.location, it.label) }
             audio.update()
             changesSaved = true
         }.ignoreElement()
     }
 
     private fun sanitizeCues(audio: OratureAudioFile): List<AudioCue> {
-        val verses = audio.getMarker(OratureCueParser.OratureCueType.VERSE)
-        logger.info("Verses found: ${verses.size}")
+        val verses = audio.getMarker(OratureCueType.VERSE)
         return verses.map {
             AudioCue(it.location, it.label)
         }
