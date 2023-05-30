@@ -395,7 +395,7 @@ class CollectionRepository @Inject constructor(
             .flattenAsObservable {
                 it
             }
-            .flatMapSingle { sourceCollection ->
+            .map { sourceCollection ->
                 val sourceMetadata = sourceCollection.resourceContainer!!
                 deriveProject(
                     listOf(sourceMetadata),
@@ -403,7 +403,7 @@ class CollectionRepository @Inject constructor(
                     language,
                     verseByVerse,
                     mode
-                )
+                ).blockingGet()
             }
             .toList()
     }
