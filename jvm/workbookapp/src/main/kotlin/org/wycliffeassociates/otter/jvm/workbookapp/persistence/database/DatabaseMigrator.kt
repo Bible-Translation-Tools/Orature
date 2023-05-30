@@ -337,6 +337,10 @@ class DatabaseMigrator {
         }
     }
 
+    /**
+     * Version 12
+     * Adds WorkbookDescriptor table and WorkbookType table
+     */
     private fun migrate11to12(dsl: DSLContext, current: Int): Int {
         return if (current < 12) {
             createWorkbookTypeTable(dsl)
