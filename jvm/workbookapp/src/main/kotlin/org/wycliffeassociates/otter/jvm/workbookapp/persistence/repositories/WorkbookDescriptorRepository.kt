@@ -61,14 +61,10 @@ class WorkbookDescriptorRepository @Inject constructor(
 
         return WorkbookDescriptor(
             entity.id,
-            targetCollection.slug,
-            targetCollection.titleKey,
-            targetCollection.labelKey,
             sourceCollection,
             targetCollection,
             mode,
             progress,
-            targetCollection.modifiedTs,
             hasSourceAudio
         )
     }
