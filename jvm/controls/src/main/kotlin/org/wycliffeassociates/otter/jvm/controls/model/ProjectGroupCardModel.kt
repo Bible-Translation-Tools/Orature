@@ -7,7 +7,7 @@ import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import java.time.LocalDateTime
 import java.util.*
 
-class TranslationCardModel2(
+class ProjectGroupCardModel(
     val sourceLanguage: Language,
     val targetLanguage: Language,
     val mode: ProjectMode,
@@ -22,7 +22,7 @@ class TranslationCardModel2(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as TranslationCardModel2
+        other as ProjectGroupCardModel
         if (
             sourceLanguage != other.sourceLanguage ||
             targetLanguage != other.targetLanguage ||

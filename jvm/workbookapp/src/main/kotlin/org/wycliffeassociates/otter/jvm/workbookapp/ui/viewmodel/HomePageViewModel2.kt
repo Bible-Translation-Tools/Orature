@@ -7,7 +7,7 @@ import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupKey
-import org.wycliffeassociates.otter.jvm.controls.model.TranslationCardModel2
+import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.ViewModel
 import tornadofx.observableListOf
@@ -23,7 +23,7 @@ class HomePageViewModel2 : ViewModel() {
     @Inject
     lateinit var workbookDescriptorRepo: IWorkbookDescriptorRepository
 
-    val projectGroups = observableListOf<TranslationCardModel2>()
+    val projectGroups = observableListOf<ProjectGroupCardModel>()
     val bookList = observableListOf<WorkbookDescriptor>()
     val selectedProjectGroup = SimpleObjectProperty<ProjectGroupKey>()
 
@@ -47,7 +47,7 @@ class HomePageViewModel2 : ViewModel() {
             .map {
                 val book = it.value.first()
                 val mostRecentBook = it.value.maxByOrNull { it.lastModified?.nano ?: -1 }
-                TranslationCardModel2(
+                ProjectGroupCardModel(
                     book.sourceLanguage,
                     book.targetLanguage,
                     book.mode,
