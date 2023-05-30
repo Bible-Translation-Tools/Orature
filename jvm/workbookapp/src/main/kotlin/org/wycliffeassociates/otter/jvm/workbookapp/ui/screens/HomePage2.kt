@@ -44,6 +44,10 @@ class HomePage2 : View() {
         tryImportStylesheet("/css/filtered-search-bar.css")
         tryImportStylesheet("/css/table-view.css")
 
+        subscribeActionEvents()
+    }
+
+    private fun subscribeActionEvents() {
         subscribe<LanguageSelectedEvent> {
             projectWizardViewModel.onLanguageSelected(it.item) {
                 viewModel.loadProjects()
