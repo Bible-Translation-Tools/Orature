@@ -76,10 +76,6 @@ class TranslationCard2(
         return false
     }
 
-    override fun hashCode(): Int {
-        return Objects.hash(sourceLanguage.slug, targetLanguage.slug, mode.name)
-    }
-
     private fun getKey() = ProjectGroupKey(sourceLanguage.slug, targetLanguage.slug, mode)
 }
 
