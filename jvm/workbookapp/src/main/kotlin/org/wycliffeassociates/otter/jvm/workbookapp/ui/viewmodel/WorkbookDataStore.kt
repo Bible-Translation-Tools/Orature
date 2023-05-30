@@ -27,6 +27,7 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Resource
@@ -42,6 +43,8 @@ class WorkbookDataStore : Component(), ScopedInstance {
     val activeWorkbookProperty = SimpleObjectProperty<Workbook>()
     val workbook: Workbook
         get() = activeWorkbookProperty.value ?: throw IllegalStateException("Workbook is null")
+
+    val currentModeProperty = SimpleObjectProperty<ProjectMode>()
 
     val activeChapterProperty = SimpleObjectProperty<Chapter>()
     val chapter: Chapter

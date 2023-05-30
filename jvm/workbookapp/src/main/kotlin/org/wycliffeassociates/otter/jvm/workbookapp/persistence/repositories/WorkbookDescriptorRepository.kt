@@ -57,8 +57,6 @@ class WorkbookDescriptorRepository @Inject constructor(
             sourceCollection.resourceContainer!!,
             sourceCollection.slug
         )
-        val sourceLanguage = sourceCollection.resourceContainer!!.language
-        val targetLanguage = targetCollection.resourceContainer!!.language
         val mode = workbookTypeDao.fetchById(entity.typeFk)!!
 
         return WorkbookDescriptor(
@@ -66,8 +64,8 @@ class WorkbookDescriptorRepository @Inject constructor(
             targetCollection.slug,
             targetCollection.titleKey,
             targetCollection.labelKey,
-            sourceLanguage,
-            targetLanguage,
+            sourceCollection,
+            targetCollection,
             mode,
             progress,
             targetCollection.modifiedTs,

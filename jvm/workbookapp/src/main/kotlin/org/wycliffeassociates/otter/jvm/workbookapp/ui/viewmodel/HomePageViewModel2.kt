@@ -3,15 +3,21 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import javafx.beans.property.SimpleObjectProperty
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
+import org.wycliffeassociates.otter.common.domain.collections.CreateProject
+import org.wycliffeassociates.otter.common.domain.collections.UpdateProject
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupKey
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.WorkbookPage
 import tornadofx.ViewModel
 import tornadofx.observableListOf
 import tornadofx.toObservable
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 class HomePageViewModel2 : ViewModel() {
@@ -19,9 +25,15 @@ class HomePageViewModel2 : ViewModel() {
 
     @Inject
     lateinit var workbookRepo: IWorkbookRepository
-
     @Inject
     lateinit var workbookDescriptorRepo: IWorkbookDescriptorRepository
+    @Inject
+    lateinit var createProjectUseCase: CreateProject
+    @Inject
+    lateinit var updateProjectUseCase: UpdateProject
+
+    private val workbookDS: WorkbookDataStore by inject()
+    private val navigator: NavigationMediator by inject()
 
     val projectGroups = observableListOf<ProjectGroupCardModel>()
     val bookList = observableListOf<WorkbookDescriptor>()
@@ -37,6 +49,23 @@ class HomePageViewModel2 : ViewModel() {
             .subscribe { books ->
                 updateBookList(books)
             }
+    }
+
+    fun selectBook(workbookDescriptor: WorkbookDescriptor) {
+        val projectGroup = selectedProjectGroup.value
+        workbookDS.currentModeProperty.set(selectedProjectGroup.value.mode)
+
+        val projects = workbookRepo.getProjects().blockingGet()
+        val existingProject = projects.firstOrNull { existingProject ->
+            projectGroup.sourceLanguage == existingProject.source.language.slug &&
+                    projectGroup.targetLanguage == existingProject.target.language.slug &&
+                    workbookDescriptor.slug == existingProject.target.slug
+        }
+
+        existingProject?.let { workbook ->
+            openWorkbook(workbook)
+            navigator.dock<WorkbookPage>()
+        }
     }
 
     private fun updateBookList(books: List<WorkbookDescriptor>) {
@@ -63,5 +92,29 @@ class HomePageViewModel2 : ViewModel() {
                     bookList.setAll(cardModel.books)
                 }
             }
+    }
+
+    private fun openWorkbook(workbook: Workbook) {
+        workbookDS.activeWorkbookProperty.set(workbook)
+        initializeProjectFiles(workbook)
+        updateWorkbookModifiedDate(workbook)
+    }
+
+    private fun initializeProjectFiles(workbook: Workbook) {
+        val linkedResource = workbook
+            .source
+            .linkedResources
+            .firstOrNull { it.identifier == workbook.source.resourceMetadata.identifier }
+
+        workbook.projectFilesAccessor.initializeResourceContainerInDir(false)
+        workbook.projectFilesAccessor.copySourceFiles(linkedResource)
+        workbook.projectFilesAccessor.createSelectedTakesFile()
+        workbook.projectFilesAccessor.createChunksFile()
+    }
+
+    private fun updateWorkbookModifiedDate(workbook: Workbook) {
+        val project = workbook.target.toCollection()
+        project.modifiedTs = LocalDateTime.now()
+        updateProjectUseCase.update(project).subscribe()
     }
 }
