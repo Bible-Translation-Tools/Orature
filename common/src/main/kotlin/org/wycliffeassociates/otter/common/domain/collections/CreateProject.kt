@@ -66,12 +66,18 @@ class CreateProject @Inject constructor(
             else -> sourceAndLinkedRcs.filter { resourceId == it.identifier }
         }
 
+        // TODO: use mode from method argument instead
+        val mode = if (sourceProject.resourceContainer?.language == targetLanguage) {
+            ProjectMode.NARRATION
+        }  else {
+            ProjectMode.TRANSLATION
+        }
+
         // Create derived projects for each of the sources
         return matchingRcs
             .toList()
             .flatMap {
-                // TODO: include project mode parameter and initialize project files here
-                collectionRepo.deriveProject(it, sourceProject, targetLanguage, deriveProjectFromVerses, ProjectMode.TRANSLATION)
+                collectionRepo.deriveProject(it, sourceProject, targetLanguage, deriveProjectFromVerses, mode)
             }
     }
 
