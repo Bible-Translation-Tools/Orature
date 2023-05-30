@@ -38,14 +38,19 @@ class ProjectWizardViewModel : ViewModel() {
     }
 
     fun loadSourceLanguages() {
-        languageRepo
-            .getGateway()
+        collectionRepo
+            .getRootSources()
             .observeOnFx()
-            .doOnError { e ->
-                logger.error("Error retrieving source languages.", e)
+            .map { collections ->
+                collections
+                    .mapNotNull { collection -> collection.resourceContainer }
+                    .distinctBy { it.language }
             }
-            .subscribe { retrieved ->
-                sourceLanguages.setAll(retrieved)
+            .doOnError { e ->
+                logger.error("Error in initializing source languages", e)
+            }
+            .subscribe { collections ->
+                sourceLanguages.setAll(collections.map { it.language })
             }
     }
 
