@@ -55,7 +55,7 @@ class VerseMarkerModel(
 
     init {
         cues as MutableList
-        if (cues.isEmpty()) cues.add(AudioCue(0, "1"))
+        if (cues.isEmpty() && markerLabels.isNotEmpty()) cues.add(AudioCue(0, markerLabels.first()))
         cues.sortBy { it.location }
         markerCountProperty.value = cues.size
 
@@ -73,7 +73,11 @@ class VerseMarkerModel(
             redoStack.clear()
 
             markers.sortBy { it.frame }
-            markers.forEachIndexed { index, chunkMarker -> chunkMarker.label = markerLabels[index] }
+            markers.forEachIndexed { index, chunkMarker ->
+                if (index < markerLabels.size) {
+                    chunkMarker.label = markerLabels[index]
+                }
+            }
             markerCountProperty.value = markers.filter { it.placed }.size
         }
     }
@@ -85,7 +89,11 @@ class VerseMarkerModel(
             op.undo()
 
             markers.sortBy { it.frame }
-            markers.forEachIndexed { index, chunkMarker -> chunkMarker.label = (index + 1).toString() }
+            markers.forEachIndexed { index, chunkMarker ->
+                if (index < markerLabels.size) {
+                    chunkMarker.label = markerLabels[index]
+                }
+            }
             markerCountProperty.value = markers.filter { it.placed }.size
         }
     }
@@ -97,7 +105,11 @@ class VerseMarkerModel(
             op.apply()
 
             markers.sortBy { it.frame }
-            markers.forEachIndexed { index, chunkMarker -> chunkMarker.label = (index + 1).toString() }
+            markers.forEachIndexed { index, chunkMarker ->
+                if (index < markerLabels.size) {
+                    chunkMarker.label = markerLabels[index]
+                }
+            }
             markerCountProperty.value = markers.filter { it.placed }.size
         }
     }

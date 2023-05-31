@@ -84,7 +84,7 @@ class OratureAudioFile : AudioFile {
         val match = regex.matcher(label.trim())
         if (match.matches()) {
             val verseStart = match.group(1).toInt()
-            val verseEnd = if (match.groupCount() == 3) match.group(2).toInt() else verseStart
+            val verseEnd = match.group(2)?.toInt() ?: verseStart
             val marker = VerseMarker(verseStart, verseEnd, location)
             cueMap[OratureCueType.VERSE]!!.add(marker)
         }

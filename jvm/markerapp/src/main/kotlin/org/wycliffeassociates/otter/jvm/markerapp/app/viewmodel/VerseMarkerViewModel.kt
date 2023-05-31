@@ -149,7 +149,7 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
     }
 
     private fun getVerseLabelList(s: String?): List<String> {
-        return s?.removeSurrounding("[", "]")?.split(",") ?: emptyList()
+        return s?.removeSurrounding("[", "]")?.split(",")?.map { it.trim() } ?: emptyList()
     }
 
     private fun loadTitles() {
