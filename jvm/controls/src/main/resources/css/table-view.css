@@ -104,3 +104,12 @@
 .wa-table-view .active-icon {
     -fx-icon-color: -wa-primary;
 }
+
+.wa-table-view .button--active,
+.wa-table-view .button--active:hover {
+    -fx-background-color: #001533;
+}
+
+.wa-table-view .button--active .option-icon {
+    -fx-icon-color: -wa-white;
+}
