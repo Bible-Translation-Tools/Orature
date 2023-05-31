@@ -68,6 +68,14 @@ class HomePageViewModel2 : ViewModel() {
         }
     }
 
+    fun deleteProjectGroup(books: List<WorkbookDescriptor>) {
+        workbookDescriptorRepo.delete(books)
+            .observeOnFx()
+            .subscribe {
+                loadProjects()
+            }
+    }
+
     private fun updateBookList(books: List<WorkbookDescriptor>) {
         val projectGroups = books.groupBy {
             ProjectGroupKey(it.sourceLanguage.slug, it.targetLanguage.slug, it.mode)

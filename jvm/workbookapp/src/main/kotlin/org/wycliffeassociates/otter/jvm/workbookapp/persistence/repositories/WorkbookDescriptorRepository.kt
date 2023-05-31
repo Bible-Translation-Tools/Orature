@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories
 
+import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
@@ -11,6 +12,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionR
 import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.WorkbookTypeDao
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.WorkbookDescriptorEntity
 import javax.inject.Inject
 
@@ -49,6 +51,21 @@ class WorkbookDescriptorRepository @Inject constructor(
             }
     }
 
+    override fun delete(list: List<WorkbookDescriptor>): Completable {
+        return Completable
+            .fromAction {
+                list
+                    .map(::mapToEntity)
+                    .forEach {
+                        workbookDescriptorDao.delete(it)
+                    }
+            }
+            .subscribeOn(Schedulers.io())
+            .doOnError {
+                logger.error("Error deleting workbook descriptors.", it)
+            }
+    }
+
     private fun buildWorkbookDescriptor(entity: WorkbookDescriptorEntity): WorkbookDescriptor {
         val targetCollection = collectionRepository.getProject(entity.targetFk).blockingGet()
         val sourceCollection = collectionRepository.getProject(entity.sourceFk).blockingGet()
@@ -78,5 +95,14 @@ class WorkbookDescriptorRepository @Inject constructor(
             .blockingIterable().toList()
 
         return chapters.count { it.selectedTake != null }.toDouble() / chapters.size
+    }
+
+    private fun mapToEntity(obj: WorkbookDescriptor): WorkbookDescriptorEntity {
+        return WorkbookDescriptorEntity(
+            obj.id,
+            obj.sourceCollection.id,
+            obj.targetCollection.id,
+            workbookTypeDao.fetchId(obj.mode)
+        )
     }
 }
