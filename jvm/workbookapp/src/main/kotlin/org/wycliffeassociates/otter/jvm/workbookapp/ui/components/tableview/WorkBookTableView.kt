@@ -61,7 +61,10 @@ class WorkBookTableView(
             addClass("table-view__column-header-row")
             setCellValueFactory { it.value.anthology.titleKey.toProperty() }
             cellFormat {
-                graphic = label(messages[item]) { addClass("h5") }
+                graphic = label {
+                    text = if (item.isEmpty()) "" else messages[item] // catch empty string for key
+                    addClass("h5")
+                }
             }
         }
         column(messages["progress"], Number::class) {

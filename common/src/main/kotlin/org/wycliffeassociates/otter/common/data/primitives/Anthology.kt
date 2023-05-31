@@ -3,7 +3,7 @@ package org.wycliffeassociates.otter.common.data.primitives
 enum class Anthology(val titleKey: String) {
     OLD_TESTAMENT("oldTestament"),
     NEW_TESTAMENT("newTestament"),
-    OTHER("other")
+    OTHER("")
 }
 
 val bookAnthology = mapOf(
