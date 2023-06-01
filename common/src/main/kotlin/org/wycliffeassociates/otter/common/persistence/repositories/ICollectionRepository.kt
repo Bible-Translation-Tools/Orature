@@ -23,6 +23,7 @@ import io.reactivex.Maybe
 import io.reactivex.Single
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 
 interface ICollectionRepository : IRepository<Collection> {
@@ -41,8 +42,15 @@ interface ICollectionRepository : IRepository<Collection> {
         sourceMetadatas: List<ResourceMetadata>,
         sourceCollection: Collection,
         language: Language,
-        verseByVerse: Boolean
+        verseByVerse: Boolean,
+        mode: ProjectMode
     ): Single<Collection>
+    fun deriveProjects(
+        rootCollection: Collection,
+        language: Language,
+        verseByVerse: Boolean,
+        mode: ProjectMode
+    ): Single<List<Collection>>
 
     /**
      * Deletes a derived project. This should remove all associated derived collections, content, and takes associated

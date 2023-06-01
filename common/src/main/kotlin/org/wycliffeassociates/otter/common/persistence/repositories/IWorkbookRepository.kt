@@ -32,7 +32,6 @@ interface IWorkbookRepository {
     fun getSoftDeletedTakes(book: Book): Single<List<Take>>
     fun getProjects(): Single<List<Workbook>>
     fun getProjects(translation: Translation): Single<List<Workbook>>
-    fun getWorkbookDescriptors(rootCollection: Collection): Single<List<WorkbookDescriptor>>
     fun getWorkbook(project: Collection): Maybe<Workbook>
     fun closeWorkbook(workbook: Workbook)
 }
