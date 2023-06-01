@@ -22,6 +22,7 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import javafx.event.EventTarget
+import javafx.scene.control.Label
 import javafx.scene.control.TableView
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
@@ -36,6 +37,7 @@ class WorkBookTableView(
         addClass("wa-table-view")
         vgrow = Priority.ALWAYS
         columnResizePolicy = CONSTRAINED_RESIZE_POLICY
+        placeholder = Label("")
 
         column(messages["book"], String::class) {
             addClass("table-view__column-header-row")

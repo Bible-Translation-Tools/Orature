@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.collections.transformation.FilteredList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
@@ -12,6 +13,8 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDes
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupKey
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupCardModel
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.WorkbookPage
@@ -19,6 +22,7 @@ import tornadofx.ViewModel
 import tornadofx.observableListOf
 import tornadofx.toObservable
 import java.time.LocalDateTime
+import java.util.function.Predicate
 import javax.inject.Inject
 
 class HomePageViewModel2 : ViewModel() {
@@ -38,10 +42,39 @@ class HomePageViewModel2 : ViewModel() {
 
     val projectGroups = observableListOf<ProjectGroupCardModel>()
     val bookList = observableListOf<WorkbookDescriptor>()
+    val filteredBooks = FilteredList<WorkbookDescriptor>(bookList)
+
     val selectedProjectGroup = SimpleObjectProperty<ProjectGroupKey>()
+    val bookSearchQueryProperty = SimpleStringProperty("")
+    private val disposableListeners = mutableListOf<ListenerDisposer>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+    }
+
+    fun dock() {
+        setupBookSearchListener()
+        loadProjects()
+    }
+
+    fun undock() {
+        bookList.clear()
+        disposableListeners.forEach { it.dispose() }
+        disposableListeners.clear()
+    }
+
+    private fun setupBookSearchListener() {
+        bookSearchQueryProperty.onChangeWithDisposer { q ->
+            val query = q?.trim() ?: ""
+            filteredBooks.predicate = if (query.isEmpty()) {
+                Predicate { true }
+            } else {
+                Predicate { book ->
+                    book.slug.contains(query, true)
+                        .or(book.title.contains(query, true))
+                }
+            }
+        }.apply { disposableListeners.add(this) }
     }
 
     fun loadProjects() {
