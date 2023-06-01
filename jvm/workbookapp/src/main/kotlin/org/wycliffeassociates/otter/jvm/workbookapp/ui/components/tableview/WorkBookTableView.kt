@@ -68,6 +68,7 @@ class WorkBookTableView(
                     addClass("h5")
                 }
             }
+            isReorderable = false
         }
         column(messages["progress"], Number::class) {
             setCellValueFactory { it.value.progress.toProperty() }
