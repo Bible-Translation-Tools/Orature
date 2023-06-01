@@ -39,7 +39,6 @@ class HomePageViewModel2 : ViewModel() {
     val projectGroups = observableListOf<ProjectGroupCardModel>()
     val bookList = observableListOf<WorkbookDescriptor>()
     val selectedProjectGroup = SimpleObjectProperty<ProjectGroupKey>()
-    val bookSearchQueryProperty = SimpleStringProperty("")
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
