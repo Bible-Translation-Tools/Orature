@@ -4,9 +4,9 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.jvm.controls.card.newTranslationCard
-import org.wycliffeassociates.otter.jvm.controls.card.translationCard
 import org.wycliffeassociates.otter.jvm.controls.card.translationCreationCard
 import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
+import org.wycliffeassociates.otter.jvm.controls.card.translationCard
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.*
 
@@ -36,10 +36,10 @@ class TranslationCardsDemoView : View() {
 
         newTranslationCard(
             SimpleObjectProperty<Language>(
-                Language("en", "English", "English", "", true, "")
+                languages[0]
             ),
             SimpleObjectProperty<Language>(null),
-            mode = ProjectMode.NARRATION
+            mode = SimpleObjectProperty<ProjectMode>()
         ) {
             visibleWhen(showNewTranslationCard)
             managedWhen(visibleProperty())

@@ -18,8 +18,10 @@
  */
 package org.wycliffeassociates.otter.common.domain.collections
 
+import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.rxkotlin.flatMapIterable
+import io.reactivex.schedulers.Schedulers
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
@@ -31,6 +33,10 @@ class CreateProject @Inject constructor(
     private val collectionRepo: ICollectionRepository,
     private val resourceMetadataRepo: IResourceMetadataRepository
 ) {
+
+    @Inject
+    lateinit var translationCreation: CreateTranslation
+
     /**
      * Create derived collections for each source RC that has content in sourceProject's subtree, optionally
      * limited to resourceId (if not null).
@@ -60,25 +66,47 @@ class CreateProject @Inject constructor(
             else -> sourceAndLinkedRcs.filter { resourceId == it.identifier }
         }
 
+        // TODO: use mode from method argument instead
+        val mode = if (sourceProject.resourceContainer?.language == targetLanguage) {
+            ProjectMode.NARRATION
+        }  else {
+            ProjectMode.TRANSLATION
+        }
+
         // Create derived projects for each of the sources
         return matchingRcs
             .toList()
             .flatMap {
-                // TODO: include project mode parameter and initialize project files here
-                collectionRepo.deriveProject(it, sourceProject, targetLanguage, deriveProjectFromVerses, ProjectMode.TRANSLATION)
+                collectionRepo.deriveProject(it, sourceProject, targetLanguage, deriveProjectFromVerses, mode)
             }
     }
 
     fun createAllBooks(
-        rootCollection: Collection,
+        sourceLanguage: Language,
         targetLanguage: Language,
         projectMode: ProjectMode
-    ) {
-        // TODO: returns a list of WorkbookDescriptors
-        collectionRepo
-            .deriveProjects(rootCollection, targetLanguage, true, projectMode)
-            .subscribe { collections ->
-                println(collections.size)
+    ): Completable {
+        return collectionRepo.getRootSources()
+            .flattenAsObservable {
+                it
             }
+            .filter {
+                it.resourceContainer?.language == sourceLanguage
+            }
+            .firstOrError()
+            .flatMap { rootCollection ->
+                collectionRepo
+                    .deriveProjects(
+                        rootCollection,
+                        targetLanguage,
+                        true,
+                        projectMode
+                    )
+            }
+            .subscribeOn(Schedulers.io())
+            .ignoreElement()
+            .concatWith(
+                translationCreation.create(sourceLanguage, targetLanguage).ignoreElement()
+            )
     }
 }

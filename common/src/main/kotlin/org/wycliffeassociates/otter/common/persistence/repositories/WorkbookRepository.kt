@@ -51,6 +51,7 @@ import java.util.WeakHashMap
 import java.util.Collections.synchronizedMap
 import javax.inject.Inject
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import java.util.concurrent.ConcurrentHashMap
 
 private typealias WorkbookTake = org.wycliffeassociates.otter.common.data.workbook.Take
 
@@ -89,7 +90,7 @@ class WorkbookRepository(
     )
 
     /** Disposers for Relays in the current workbook. */
-    private val connections = mutableMapOf<Workbook, CompositeDisposable>()
+    private val connections = ConcurrentHashMap<Workbook, CompositeDisposable>()
 
     override fun get(source: Collection, target: Collection): Workbook {
         val existing = getExistingWorkbookIfExists(source, target)

@@ -160,10 +160,8 @@ class SourceAudioAccessor(
                     .let { Regex(it) }
 
 
-                val entries = rc.accessor.getInputStreams(RcConstants.SOURCE_MEDIA_DIR)
-                entries.values.forEach(InputStream::close)
-
-                val hasAudioFile = entries.keys.any {
+                val pathsInRC = rc.accessor.list(RcConstants.SOURCE_MEDIA_DIR)
+                val hasAudioFile = pathsInRC.any {
                     File(it).nameWithoutExtension.matches(fileNameRegex)
                 }
 

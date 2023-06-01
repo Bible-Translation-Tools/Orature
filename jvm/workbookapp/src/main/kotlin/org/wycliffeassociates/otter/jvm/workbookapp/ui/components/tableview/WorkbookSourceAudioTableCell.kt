@@ -20,11 +20,11 @@ class WorkbookSourceAudioTableCell : TableCell<WorkbookDescriptor, Boolean>() {
 
     override fun updateItem(item: Boolean?, empty: Boolean) {
         super.updateItem(item, empty)
-        if (item == null || empty) {
-            graphic = null
-            return
-        }
 
-        graphic = graphicContent
+        graphic = if (item == true) {
+            graphicContent
+        } else {
+            null
+        }
     }
 }
