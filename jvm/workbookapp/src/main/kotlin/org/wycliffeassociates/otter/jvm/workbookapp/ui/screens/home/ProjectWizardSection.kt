@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home
 
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
@@ -21,8 +22,10 @@ class ProjectWizardSection(
     sourceLanguages: ObservableList<Language>,
     targetLanguages: ObservableList<Language>,
     selectedModeProperty: SimpleObjectProperty<ProjectMode>,
-    selectedSourceLanguageProperty: SimpleObjectProperty<Language>,
+    selectedSourceLanguageProperty: SimpleObjectProperty<Language>
 ) : StackPane() {
+    val sourceLanguageSearchQueryProperty =  SimpleStringProperty()
+    val targetLanguageSearchQueryProperty = SimpleStringProperty()
 
     private val onCancelActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
@@ -79,7 +82,10 @@ class ProjectWizardSection(
             }
             label(messages["selectSourceLanguageStep2"]) { addClass("h4") }
             region { hgrow = Priority.ALWAYS }
-            searchBar { promptText = messages["search"] }
+            searchBar {
+                textProperty().bindBidirectional(sourceLanguageSearchQueryProperty)
+                promptText = messages["search"]
+            }
         }
 
         languageTableView(sourceLanguages)
@@ -105,7 +111,10 @@ class ProjectWizardSection(
             }
             label(messages["selectTargetLanguageStep3"]) { addClass("h4") }
             region { hgrow = Priority.ALWAYS }
-            searchBar { promptText = messages["search"] }
+            searchBar {
+                textProperty().bindBidirectional(targetLanguageSearchQueryProperty)
+                promptText = messages["search"]
+            }
         }
 
         languageTableView(targetLanguages)

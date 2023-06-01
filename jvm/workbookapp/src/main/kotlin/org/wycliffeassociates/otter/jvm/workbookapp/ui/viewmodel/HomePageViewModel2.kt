@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
@@ -38,6 +39,7 @@ class HomePageViewModel2 : ViewModel() {
     val projectGroups = observableListOf<ProjectGroupCardModel>()
     val bookList = observableListOf<WorkbookDescriptor>()
     val selectedProjectGroup = SimpleObjectProperty<ProjectGroupKey>()
+    val bookSearchQueryProperty = SimpleStringProperty("")
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)

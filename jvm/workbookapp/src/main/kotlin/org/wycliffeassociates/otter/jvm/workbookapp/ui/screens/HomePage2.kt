@@ -37,11 +37,15 @@ class HomePage2 : View() {
     private val bookFragment = BookSection(viewModel.bookList)
     private val wizardFragment: ProjectWizardSection by lazy {
         ProjectWizardSection(
-            projectWizardViewModel.sourceLanguages,
-            projectWizardViewModel.targetLanguages,
+            projectWizardViewModel.sortedSourceLanguages,
+            projectWizardViewModel.sortedTargetLanguages,
             projectWizardViewModel.selectedModeProperty,
-            projectWizardViewModel.selectedSourceLanguageProperty,
+            projectWizardViewModel.selectedSourceLanguageProperty
         ).apply {
+
+            sourceLanguageSearchQueryProperty.bindBidirectional(projectWizardViewModel.sourceLanguageSearchQueryProperty)
+            targetLanguageSearchQueryProperty.bindBidirectional(projectWizardViewModel.targetLanguageSearchQueryProperty)
+
             setOnCancelAction {
                 exitWizard()
             }
