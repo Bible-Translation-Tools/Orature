@@ -48,6 +48,7 @@ class WorkBookTableView(
             }
             prefWidthProperty().bind(this@WorkBookTableView.widthProperty().multiply(0.25))
             minWidth = 120.0 // this may not be replaced with css
+            isReorderable = false
         }
         column("", String::class).apply {
             addClass("table-view__column-header-row")
@@ -56,6 +57,7 @@ class WorkBookTableView(
                 graphic = label(item) { addClass("normal-text") }
             }
             minWidth = 70.0 // this may not be replaced with css
+            isReorderable = false
         }
         column(messages["progress"], Number::class) {
             setCellValueFactory { it.value.progress.toProperty() }
@@ -65,18 +67,20 @@ class WorkBookTableView(
                     if (percent == 1.0) addClass("full")
                 }
             }
+            isReorderable = false
         }
         column("", Boolean::class) {
             addClass("table-column__status-icon-col")
             setCellValueFactory { SimpleBooleanProperty(it.value.hasSourceAudio) }
             setCellFactory { WorkbookSourceAudioTableCell() }
+            isReorderable = false
         }
         column("", WorkbookDescriptor::class) {
             setCellValueFactory { SimpleObjectProperty(it.value) }
             setCellFactory {
                 WorkbookOptionTableCell()
             }
-
+            isReorderable = false
             isSortable = false
         }
 
