@@ -32,8 +32,8 @@ class NarrationBody : View() {
                     spacing = 10.0
                     paddingHorizontal = 10.0
 
-                    bindChildren(viewModel.verses) { verse ->
-                        val index = viewModel.verses.indexOf(verse)
+                    bindChildren(viewModel.recordedVerses) { verse ->
+                        val index = viewModel.recordedVerses.indexOf(verse)
                         val label = (index + 1).toString()
 
                         menubutton(label) {
@@ -124,8 +124,8 @@ class NarrationBodyViewModel : ViewModel() {
     val isRecordingAgainProperty = SimpleBooleanProperty()
     private var isRecordingAgain by isRecordingAgainProperty
 
-    private val recordAgainVerseProperty = SimpleObjectProperty<Int?>()
-    private var recordAgainVerseIndex by recordAgainVerseProperty
+    private val recordAgainVerseIndexProperty = SimpleObjectProperty<Int?>()
+    private var recordAgainVerseIndex by recordAgainVerseIndexProperty
 
     private val playingVerseProperty = SimpleObjectProperty<VerseNode?>()
     private var playingVerse by playingVerseProperty
@@ -133,7 +133,7 @@ class NarrationBodyViewModel : ViewModel() {
     private val narrationHistory = NarrationHistory()
     private lateinit var pcmFile: File
 
-    val verses = observableListOf<VerseNode>()
+    val recordedVerses = observableListOf<VerseNode>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -155,11 +155,11 @@ class NarrationBodyViewModel : ViewModel() {
     }
 
     private fun loadVerses() {
-        // Load verses from database and map to verses list
-        // then based on the size of the list set start and resume properties
+        // Load verses from database and map to recordedVerses list
+        // then based on the size of the list set start, resume and potentiallyFinished properties
 
-        recordStart = verses.isEmpty()
-        recordResume = verses.isNotEmpty()
+        recordStart = recordedVerses.isEmpty()
+        recordResume = recordedVerses.isNotEmpty()
     }
 
     fun play(verse: VerseNode) {
@@ -181,7 +181,7 @@ class NarrationBodyViewModel : ViewModel() {
         stopPlayer()
 
         recordedAudio?.let {
-            val action = RecordAgainAction(verses, it, verseIndex)
+            val action = RecordAgainAction(recordedVerses, it, verseIndex)
             narrationHistory.execute(action)
         }
 
@@ -197,8 +197,8 @@ class NarrationBodyViewModel : ViewModel() {
         when {
             isRecording -> {
                 recordedAudio?.let {
-                    verses.lastOrNull()?.end = it.totalFrames
-                    val action = NextVerseAction(verses, it)
+                    recordedVerses.lastOrNull()?.end = it.totalFrames
+                    val action = NextVerseAction(recordedVerses, it)
                     narrationHistory.execute(action)
                 }
             }
@@ -224,7 +224,7 @@ class NarrationBodyViewModel : ViewModel() {
         stopPlayer()
 
         recordedAudio?.let {
-            val action = NextVerseAction(verses, it)
+            val action = NextVerseAction(recordedVerses, it)
             narrationHistory.execute(action)
         }
 
@@ -244,7 +244,7 @@ class NarrationBodyViewModel : ViewModel() {
         writer?.pause()
 
         recordedAudio?.let {
-            verses.lastOrNull()?.end = it.totalFrames
+            recordedVerses.lastOrNull()?.end = it.totalFrames
         }
     }
 
@@ -264,7 +264,7 @@ class NarrationBodyViewModel : ViewModel() {
             isRecordingAgain = false
             recordPause = true
             recordedAudio?.let {
-                verses[verseIndex].end = it.totalFrames
+                recordedVerses[verseIndex].end = it.totalFrames
             }
         }
     }
