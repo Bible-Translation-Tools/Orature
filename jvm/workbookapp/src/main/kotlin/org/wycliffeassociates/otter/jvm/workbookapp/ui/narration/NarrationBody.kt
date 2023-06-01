@@ -194,10 +194,19 @@ class NarrationBodyViewModel : ViewModel() {
     }
 
     fun onNext() {
-        recordedAudio?.let {
-            verses.lastOrNull()?.end = it.totalFrames
-            val action = NextVerseAction(verses, it)
-            narrationHistory.execute(action)
+        when {
+            isRecording -> {
+                recordedAudio?.let {
+                    verses.lastOrNull()?.end = it.totalFrames
+                    val action = NextVerseAction(verses, it)
+                    narrationHistory.execute(action)
+                }
+            }
+            recordPause -> {
+                recordPause = false
+                recordResume = true
+            }
+            else -> {}
         }
     }
 
