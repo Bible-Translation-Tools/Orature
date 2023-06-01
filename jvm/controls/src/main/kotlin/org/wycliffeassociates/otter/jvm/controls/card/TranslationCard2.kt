@@ -21,14 +21,13 @@ import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupKey
 import java.text.MessageFormat
 import tornadofx.*
-import java.util.Objects
 
 // TODO: remove number "2" suffix after deleting the original control. Same for css named translation-card-2.css
 class TranslationCard2(
     private val sourceLanguage: Language,
     private val targetLanguage: Language,
     private val mode: ProjectMode,
-    selectedCardProperty: ObservableValue<ProjectGroupKey>
+    selectedProjectGroupProperty: ObservableValue<ProjectGroupKey>
 ) : ButtonBase() {
 
     val cardTitleProperty = SimpleStringProperty(
@@ -39,9 +38,9 @@ class TranslationCard2(
 
     init {
         skinProperty().bind(
-            selectedCardProperty.objectBinding { selectedProjectKey ->
+            selectedProjectGroupProperty.objectBinding { selectedGroup ->
                 // if the selected card is this card, displays the active skin
-                if (selectedProjectKey?.equals(this.getKey()) == true) {
+                if (selectedGroup == this.getKey()) {
                     ActiveTranslationCardSkin(this)
                 } else {
                     TranslationCardSkin2(this)
@@ -58,26 +57,6 @@ class TranslationCard2(
         if (!isDisabled) {
             fireEvent(ActionEvent())
         }
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as TranslationCard2
-        if (
-            sourceLanguage == other.sourceLanguage &&
-            targetLanguage == other.targetLanguage &&
-            mode == other.mode
-        ) {
-            return true
-        }
-
-        return false
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(sourceLanguage.slug, targetLanguage.slug, mode.name)
     }
 
     private fun getKey() = ProjectGroupKey(sourceLanguage.slug, targetLanguage.slug, mode)
