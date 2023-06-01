@@ -16,6 +16,8 @@ class NarrationHeader : View() {
     private val viewModel by inject<NarrationHeaderViewModel>()
 
     override val root = hbox {
+        addClass("narration__header")
+
         hbox {
             narrationTitle(viewModel.titleProperty)
             hgrow = Priority.SOMETIMES

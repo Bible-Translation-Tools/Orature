@@ -30,7 +30,8 @@ import tornadofx.addClass
 class NarrationTextCell(
     private val nextChunkText: String,
     private val recordButtonTextProperty: ObservableValue<String>,
-    private val isRecordingProperty: ObservableValue<Boolean>
+    private val isRecordingProperty: ObservableValue<Boolean>,
+    private val isRecordingAgainProperty: ObservableValue<Boolean>
 ) : ListCell<Chunk>() {
     private val view = NarrationTextItem()
 
@@ -57,6 +58,7 @@ class NarrationTextCell(
 
             recordButtonTextProperty.bind(this@NarrationTextCell.recordButtonTextProperty)
             isRecordingProperty.bind(this@NarrationTextCell.isRecordingProperty)
+            isRecordingAgainProperty.bind(this@NarrationTextCell.isRecordingAgainProperty)
             nextChunkTextProperty.set(nextChunkText)
 
             onRecordActionProperty.set(EventHandler {

@@ -47,6 +47,8 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookPageVie
 import javax.inject.Singleton
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.NarrationApp
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.NarrationBodyViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AppInfoViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
@@ -64,6 +66,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
 @Singleton
 interface AppDependencyGraph {
     fun inject(app: OtterApp)
+    fun inject(app: NarrationApp)
 
     fun inject(viewModel: RootViewModel)
     fun inject(viewModel: SplashScreenViewModel)
@@ -81,6 +84,7 @@ interface AppDependencyGraph {
     fun inject(viewModel: AppInfoViewModel)
     fun inject(viewModel: ChunkingViewModel)
     fun inject(viewModel: ExportChapterViewModel)
+    fun inject(viewModel: NarrationBodyViewModel)
     fun injectDatabase(): AppDatabase
     fun injectDirectoryProvider(): IDirectoryProvider
     fun injectAppPreferencesRepository(): IAppPreferencesRepository

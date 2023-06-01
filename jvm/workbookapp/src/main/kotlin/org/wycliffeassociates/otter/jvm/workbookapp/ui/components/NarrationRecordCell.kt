@@ -67,22 +67,22 @@ class NarrationRecordCell(
             goToVerseTextProperty.set(goToVerseText)
 
             onPlayActionProperty.set(EventHandler {
-                FX.eventbus.fire(PlayVerseEvent(item))
+                //FX.eventbus.fire(PlayVerseEvent(item))
             })
             onOpenAppActionProperty.set(EventHandler {
-                FX.eventbus.fire(OpenInAppEvent(item))
+                //FX.eventbus.fire(OpenInAppEvent(item))
             })
             onRecordAgainActionProperty.set(EventHandler {
-                FX.eventbus.fire(RecordAgainEvent(item))
+                //FX.eventbus.fire(RecordAgainEvent(item))
             })
             onWaveformClickActionProperty.set(EventHandler {
-                FX.eventbus.fire(WaveformClickedEvent(index))
+                //FX.eventbus.fire(WaveformClickedEvent(index))
             })
         }
     }
 }
 
-class PlayVerseEvent(val data: ChunkData) : FXEvent()
-class OpenInAppEvent(val data: ChunkData) : FXEvent()
-class RecordAgainEvent(val data: ChunkData) : FXEvent()
-class WaveformClickedEvent(val index: Int) : FXEvent()
+//class PlayVerseEvent(val data: ChunkData) : FXEvent()
+//class OpenInAppEvent(val data: ChunkData) : FXEvent()
+//class RecordAgainEvent(val data: ChunkData) : FXEvent()
+//class WaveformClickedEvent(val index: Int) : FXEvent()

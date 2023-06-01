@@ -4,30 +4,36 @@ import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
-import javafx.collections.transformation.FilteredList
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.jvm.controls.narration.*
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NarrationTextCell
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.WaveformClickedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.RecordVerseEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.text.MessageFormat
 
 class NarrationFooterViewModel : ViewModel() {
-    val workbookDataStore by inject<WorkbookDataStore>()
+    private val workbookDataStore by inject<WorkbookDataStore>()
+    private val narrationViewViewModel: NarrationViewViewModel by inject()
 
-    val allSortedChunks = observableListOf<Chunk>()
+    val chunks = observableListOf<Chunk>()
 
     val stickyVerseProperty = SimpleObjectProperty<Chunk>()
 
-    var recordStartedProperty = SimpleBooleanProperty(false)
-    var recordStarted by recordStartedProperty
+    private val recordStartProperty = SimpleBooleanProperty()
+    private var recordStart by recordStartProperty
 
-    var recordPausedProperty = SimpleBooleanProperty(false)
-    var recordPaused by recordPausedProperty
+    private val recordPauseProperty = SimpleBooleanProperty()
+    private var recordPause by recordPauseProperty
 
-    // TODO: Should be only chunks that have been recorded
-    val recordedChunks = FilteredList(allSortedChunks)
+    private val recordResumeProperty = SimpleBooleanProperty()
+    private var recordResume by recordResumeProperty
+
+    val isRecordingProperty = SimpleBooleanProperty()
+    private var isRecording by isRecordingProperty
+
+    val isRecordingAgainProperty = SimpleBooleanProperty()
+    private var isRecordingAgain by isRecordingAgainProperty
 
     init {
         subscribe<StickyVerseChangedEvent<Chunk>> {
@@ -37,14 +43,23 @@ class NarrationFooterViewModel : ViewModel() {
                 stickyVerseProperty.set(null)
             }
         }
+
+        recordStartProperty.bind(narrationViewViewModel.recordStartProperty)
+        recordResumeProperty.bind(narrationViewViewModel.recordResumeProperty)
+        isRecordingProperty.bind(narrationViewViewModel.isRecordingProperty)
+        recordPauseProperty.bind(narrationViewViewModel.recordPauseProperty)
+        isRecordingAgainProperty.bind(narrationViewViewModel.isRecordingAgainProperty)
     }
 
     fun onDock() {
         val chapter = workbookDataStore.activeChapterProperty.value
         chapter.getDraft().subscribe {
-            allSortedChunks.add(it)
+            chunks.add(it)
         }
-        println(allSortedChunks)
+    }
+
+    fun onRecord() {
+
     }
 
     fun currentVerseTextBinding(): StringBinding {
@@ -68,14 +83,17 @@ class NarrationFooterViewModel : ViewModel() {
         return Bindings.createStringBinding(
             {
                 when {
-                    recordStarted && !recordPaused -> messages["pauseRecording"]
-                    recordedChunks.isNotEmpty() || recordPaused -> messages["resumeRecording"]
+                    isRecording -> messages["pauseRecording"]
+                    isRecordingAgain -> messages["stopRecording"]
+                    recordResume || recordPause -> messages["resumeRecording"]
                     else -> messages["beginRecording"]
                 }
             },
-            recordStartedProperty,
-            recordPausedProperty,
-            recordedChunks
+            recordStartProperty,
+            recordResumeProperty,
+            isRecordingProperty,
+            recordPauseProperty,
+            isRecordingAgainProperty
         )
     }
 }
@@ -91,12 +109,12 @@ class NarrationFooter : View() {
 
         listView.addListeners()
 
-        subscribe<WaveformClickedEvent> {
+        /*subscribe<WaveformClickedEvent> {
             listView.apply {
                 selectionModel.select(it.index)
                 scrollTo(it.index)
             }
-        }
+        }*/
 
         subscribe<ResumeVerseEvent> {
             viewModel.stickyVerseProperty.value?.let { verse ->
@@ -110,6 +128,17 @@ class NarrationFooter : View() {
                 scrollTo(it.data)
             }
         }
+
+        subscribe<RecordVerseEvent> {
+            viewModel.onRecord()
+        }
+
+        subscribe<RecordAgainEvent> {
+            listView.apply {
+                selectionModel.select(it.index)
+                scrollTo(it.index - 1)
+            }
+        }
     }
 
     override fun onUndock() {
@@ -118,15 +147,16 @@ class NarrationFooter : View() {
         listView.removeListeners()
 
         //TODO: Verify that unsubscribe works
-        unsubscribe<WaveformClickedEvent> { }
-        unsubscribe<ResumeVerseEvent> {  }
-        unsubscribe<ResumeVerseEvent> {  }
+        //unsubscribe<WaveformClickedEvent> {}
+        unsubscribe<ResumeVerseEvent> {}
+        unsubscribe<ResumeVerseEvent> {}
+        unsubscribe<RecordVerseEvent> {}
     }
 
     override val root = stackpane {
         addClass("narration__verses")
 
-        narrationTextListview(viewModel.allSortedChunks) {
+        narrationTextListview(viewModel.chunks) {
             addClass("narration__list")
 
             listView = this
@@ -135,7 +165,8 @@ class NarrationFooter : View() {
                 NarrationTextCell(
                     messages["nextVerse"],
                     viewModel.recordButtonTextBinding(),
-                    viewModel.recordPausedProperty.not()
+                    viewModel.isRecordingProperty,
+                    viewModel.isRecordingAgainProperty
                 )
             }
         }

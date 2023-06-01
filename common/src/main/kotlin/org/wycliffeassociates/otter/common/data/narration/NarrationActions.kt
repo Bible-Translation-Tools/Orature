@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.common.data.narration
 
+import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.primitives.VerseNode
-import java.io.File
 import kotlin.collections.ArrayList
 
 interface NarrationAction {
@@ -11,14 +11,14 @@ interface NarrationAction {
 }
 
 class NextVerseAction(
-    private val list: ArrayList<VerseNode>,
-    private val file: File
+    private val list: MutableList<VerseNode>,
+    private val file: AudioFile
 ) : NarrationAction {
     private var node: VerseNode? = null
 
     override fun execute() {
-        val start = file.length().toInt()
-        val end = file.length().toInt()
+        val start = file.totalFrames
+        val end = file.totalFrames
 
         node = VerseNode (start, end).also {
             list.add(it)
@@ -34,20 +34,19 @@ class NextVerseAction(
     }
 }
 
-class RerecordAction(
-    private val list: ArrayList<VerseNode>,
-    private val file: File,
+class RecordAgainAction(
+    private val list: MutableList<VerseNode>,
+    private val file: AudioFile,
     private val verseIndex: Int
 ) : NarrationAction {
     var node: VerseNode? = null
     var previous: VerseNode? = null
 
-    // Called when stop() is called after a re-record began
     override fun execute() {
         previous = list[verseIndex]
 
-        val start = list.lastOrNull()?.end ?: 0
-        val end = file.length().toInt()
+        val start = file.totalFrames
+        val end = file.totalFrames
 
         node = VerseNode (start, end).also {
             list[verseIndex] = it
@@ -67,8 +66,8 @@ class RerecordAction(
     }
 }
 
-class MarkerAction(
-    private val list: ArrayList<VerseNode>,
+class VerseMarkerAction(
+    private val list: MutableList<VerseNode>,
     private val firstVerseIndex: Int,
     private val secondVerseIndex: Int,
     private val marker: Int
@@ -116,7 +115,7 @@ class MarkerAction(
     }
 }
 
-class ResetAllAction(private val list: ArrayList<VerseNode>): NarrationAction {
+class ResetAllAction(private val list: MutableList<VerseNode>): NarrationAction {
     private val nodes = ArrayList<VerseNode>(list.size)
 
     override fun execute() {

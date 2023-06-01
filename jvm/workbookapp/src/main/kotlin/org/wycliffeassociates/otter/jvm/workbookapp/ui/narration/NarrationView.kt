@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
+import javafx.beans.property.SimpleBooleanProperty
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.*
 
@@ -14,7 +15,16 @@ class NarrationView : View() {
 
         borderpane {
             top<NarrationHeader>()
+            center<NarrationBody>()
             bottom<NarrationFooter>()
         }
     }
+}
+
+class NarrationViewViewModel : ViewModel() {
+    val recordStartProperty = SimpleBooleanProperty()
+    val recordPauseProperty = SimpleBooleanProperty()
+    val recordResumeProperty = SimpleBooleanProperty()
+    val isRecordingProperty = SimpleBooleanProperty()
+    val isRecordingAgainProperty = SimpleBooleanProperty()
 }

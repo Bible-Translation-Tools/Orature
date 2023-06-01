@@ -33,6 +33,7 @@ class NarrationTextItem : VBox() {
     val verseLabelProperty = SimpleStringProperty()
     val verseTextProperty = SimpleStringProperty()
     val isRecordingProperty = SimpleBooleanProperty()
+    val isRecordingAgainProperty = SimpleBooleanProperty()
     val isSelectedProperty = SimpleBooleanProperty()
     val isLastVerseProperty = SimpleBooleanProperty()
 
@@ -83,7 +84,7 @@ class NarrationTextItem : VBox() {
                 graphic = FontIcon(MaterialDesign.MDI_ARROW_DOWN)
 
                 onActionProperty().bind(onNextVerseActionProperty)
-                disableProperty().bind(isLastVerseProperty)
+                disableProperty().bind(isLastVerseProperty.or(isRecordingAgainProperty))
             }
 
             visibleProperty().bind(isSelectedProperty)

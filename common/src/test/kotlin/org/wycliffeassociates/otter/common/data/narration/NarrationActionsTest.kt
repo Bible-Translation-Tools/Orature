@@ -5,8 +5,8 @@ import com.nhaarman.mockitokotlin2.mock
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.primitives.VerseNode
-import java.io.File
 import java.util.ArrayList
 
 class NarrationActionsTest {
@@ -29,7 +29,7 @@ class NarrationActionsTest {
 
         assertEquals(narrationList.size, 1)
         assertEquals(narrationList.last().start, 0)
-        assertEquals(narrationList.last().end, fileUpdated.length().toInt())
+        assertEquals(narrationList.last().end, fileUpdated.totalFrames)
     }
 
     @Test
@@ -39,16 +39,16 @@ class NarrationActionsTest {
         val firstFileUpdated = makeNewFile(100)
         onPauseOrNext(narrationList.first(), firstFileUpdated)
 
-        val secondFile = makeNewFile(firstFileUpdated.length())
+        val secondFile = makeNewFile(firstFileUpdated.totalFrames)
         addNextVerse(secondFile)
         val secondFileUpdated = makeNewFile(200)
         onPauseOrNext(narrationList.last(), secondFileUpdated)
 
         assertEquals(narrationList.size, 2)
         assertEquals(narrationList.first().start, 0)
-        assertEquals(narrationList.first().end, firstFileUpdated.length().toInt())
-        assertEquals(narrationList.last().start, firstFileUpdated.length().toInt())
-        assertEquals(narrationList.last().end, secondFileUpdated.length().toInt())
+        assertEquals(narrationList.first().end, firstFileUpdated.totalFrames)
+        assertEquals(narrationList.last().start, firstFileUpdated.totalFrames)
+        assertEquals(narrationList.last().end, secondFileUpdated.totalFrames)
     }
 
     @Test
@@ -72,7 +72,7 @@ class NarrationActionsTest {
         val firstFileUpdated = makeNewFile(100)
         onPauseOrNext(narrationList.first(), firstFileUpdated)
 
-        val secondFile = makeNewFile(firstFileUpdated.length())
+        val secondFile = makeNewFile(firstFileUpdated.totalFrames)
         addNextVerse(secondFile)
         val secondFileUpdated = makeNewFile(200)
         onPauseOrNext(narrationList.last(), secondFileUpdated)
@@ -101,7 +101,7 @@ class NarrationActionsTest {
 
         assertEquals(narrationList.size, 1)
         assertEquals(narrationList.first().start, 0)
-        assertEquals(narrationList.first().end, fileUpdated.length().toInt())
+        assertEquals(narrationList.first().end, fileUpdated.totalFrames)
     }
 
     @Test
@@ -113,14 +113,14 @@ class NarrationActionsTest {
 
         assertEquals(narrationList.size, 1)
 
-        val reRecordedFile = makeNewFile(200)
-        val action = RerecordAction(narrationList, reRecordedFile, 0)
-
+        val action = RecordAgainAction(narrationList, fileUpdated, 0)
         narrationHistory.execute(action)
+        val reRecordedFile = makeNewFile(200)
+        onPauseOrNext(narrationList.first(), reRecordedFile)
 
         assertEquals(narrationList.size, 1)
-        assertEquals(narrationList.first().start, fileUpdated.length().toInt())
-        assertEquals(narrationList.first().end, reRecordedFile.length().toInt())
+        assertEquals(narrationList.first().start, fileUpdated.totalFrames)
+        assertEquals(narrationList.first().end, reRecordedFile.totalFrames)
     }
 
     @Test
@@ -130,27 +130,27 @@ class NarrationActionsTest {
         val firstFileUpdated = makeNewFile(100)
         onPauseOrNext(narrationList.first(), firstFileUpdated)
 
-        val secondFile = makeNewFile(firstFileUpdated.length())
+        val secondFile = makeNewFile(firstFileUpdated.totalFrames)
         addNextVerse(secondFile)
         val secondFileUpdated = makeNewFile(200)
         onPauseOrNext(narrationList[1], secondFileUpdated)
 
-        val thirdFile = makeNewFile(secondFileUpdated.length())
+        val thirdFile = makeNewFile(secondFileUpdated.totalFrames)
         addNextVerse(thirdFile)
         val thirdFileUpdated = makeNewFile(300)
         onPauseOrNext(narrationList.last(), thirdFileUpdated)
 
         assertEquals(narrationList.size, 3)
 
-        val reRecordedFile = makeNewFile(400)
         // Rerecording 2nd file, on index 1
-        val action = RerecordAction(narrationList, reRecordedFile, 1)
-
+        val action = RecordAgainAction(narrationList, thirdFileUpdated, 1)
         narrationHistory.execute(action)
+        val reRecordedFile = makeNewFile(400)
+        onPauseOrNext(narrationList[1], reRecordedFile)
 
         assertEquals(narrationList.size, 3)
-        assertEquals(narrationList[1].start, thirdFileUpdated.length().toInt())
-        assertEquals(narrationList[1].end, reRecordedFile.length().toInt())
+        assertEquals(narrationList[1].start, thirdFileUpdated.totalFrames)
+        assertEquals(narrationList[1].end, reRecordedFile.totalFrames)
     }
 
     @Test
@@ -160,25 +160,26 @@ class NarrationActionsTest {
         val fileUpdated = makeNewFile(100)
         onPauseOrNext(narrationList.first(), fileUpdated)
 
-        val reRecordedFile = makeNewFile(200)
-        val action = RerecordAction(narrationList, reRecordedFile, 0)
+        val action = RecordAgainAction(narrationList, fileUpdated, 0)
         narrationHistory.execute(action)
+        val reRecordedFile = makeNewFile(200)
+        onPauseOrNext(narrationList.first(), reRecordedFile)
 
         assertEquals(narrationList.size, 1)
-        assertEquals(narrationList.first().start, fileUpdated.length().toInt())
-        assertEquals(narrationList.first().end, reRecordedFile.length().toInt())
+        assertEquals(narrationList.first().start, fileUpdated.totalFrames)
+        assertEquals(narrationList.first().end, reRecordedFile.totalFrames)
 
         narrationHistory.undo()
 
         assertEquals(narrationList.size, 1)
         assertEquals(narrationList.first().start, 0)
-        assertEquals(narrationList.first().end, fileUpdated.length().toInt())
+        assertEquals(narrationList.first().end, fileUpdated.totalFrames)
 
         narrationHistory.redo()
 
         assertEquals(narrationList.size, 1)
-        assertEquals(narrationList.first().start, fileUpdated.length().toInt())
-        assertEquals(narrationList.first().end, reRecordedFile.length().toInt())
+        assertEquals(narrationList.first().start, fileUpdated.totalFrames)
+        assertEquals(narrationList.first().end, reRecordedFile.totalFrames)
     }
 
     @Test
@@ -188,21 +189,21 @@ class NarrationActionsTest {
         val firstFileUpdated = makeNewFile(100)
         onPauseOrNext(narrationList.first(), firstFileUpdated)
 
-        val secondFile = makeNewFile(firstFileUpdated.length())
+        val secondFile = makeNewFile(firstFileUpdated.totalFrames)
         addNextVerse(secondFile)
         val secondFileUpdated = makeNewFile(200)
         onPauseOrNext(narrationList.last(), secondFileUpdated)
 
         val newMarker = 120
 
-        val action = MarkerAction(narrationList, 0, 1, newMarker)
+        val action = VerseMarkerAction(narrationList, 0, 1, newMarker)
         narrationHistory.execute(action)
 
         assertEquals(narrationList.size, 2)
         assertEquals(narrationList.first().start, 0)
         assertEquals(narrationList.first().end, newMarker)
         assertEquals(narrationList.last().start, newMarker)
-        assertEquals(narrationList.last().end, secondFileUpdated.length().toInt())
+        assertEquals(narrationList.last().end, secondFileUpdated.totalFrames)
     }
 
     @Test
@@ -212,30 +213,30 @@ class NarrationActionsTest {
         val firstFileUpdated = makeNewFile(100)
         onPauseOrNext(narrationList.first(), firstFileUpdated)
 
-        val secondFile = makeNewFile(firstFileUpdated.length())
+        val secondFile = makeNewFile(firstFileUpdated.totalFrames)
         addNextVerse(secondFile)
         val secondFileUpdated = makeNewFile(200)
         onPauseOrNext(narrationList.last(), secondFileUpdated)
 
         val newMarker = 120
 
-        val action = MarkerAction(narrationList, 0, 1, newMarker)
+        val action = VerseMarkerAction(narrationList, 0, 1, newMarker)
         narrationHistory.execute(action)
 
         narrationHistory.undo()
 
         assertEquals(narrationList.size, 2)
         assertEquals(narrationList.first().start, 0)
-        assertEquals(narrationList.first().end, firstFileUpdated.length().toInt())
-        assertEquals(narrationList.last().start, secondFile.length().toInt())
-        assertEquals(narrationList.last().end, secondFileUpdated.length().toInt())
+        assertEquals(narrationList.first().end, firstFileUpdated.totalFrames)
+        assertEquals(narrationList.last().start, secondFile.totalFrames)
+        assertEquals(narrationList.last().end, secondFileUpdated.totalFrames)
 
         narrationHistory.redo()
 
         assertEquals(narrationList.first().start, 0)
         assertEquals(narrationList.first().end, newMarker)
         assertEquals(narrationList.last().start, newMarker)
-        assertEquals(narrationList.last().end, secondFileUpdated.length().toInt())
+        assertEquals(narrationList.last().end, secondFileUpdated.totalFrames)
     }
 
     @Test
@@ -245,20 +246,22 @@ class NarrationActionsTest {
         val firstFileUpdated = makeNewFile(100)
         onPauseOrNext(narrationList.first(), firstFileUpdated)
 
-        val reRecordedFile = makeNewFile(200)
-        val reRecordAction = RerecordAction(narrationList, reRecordedFile, 0)
-        narrationHistory.execute(reRecordAction)
 
-        val secondFile = makeNewFile(reRecordedFile.length())
+        val reRecordAction = RecordAgainAction(narrationList, firstFileUpdated, 0)
+        narrationHistory.execute(reRecordAction)
+        val reRecordedFile = makeNewFile(200)
+        onPauseOrNext(narrationList.first(), reRecordedFile)
+
+        val secondFile = makeNewFile(reRecordedFile.totalFrames)
         addNextVerse(secondFile)
         val secondFileUpdated = makeNewFile(300)
         onPauseOrNext(narrationList.last(), secondFileUpdated)
 
         assertEquals(narrationList.size, 2)
-        assertEquals(narrationList.first().start, firstFileUpdated.length().toInt())
-        assertEquals(narrationList.first().end, reRecordedFile.length().toInt())
-        assertEquals(narrationList.last().start, secondFile.length().toInt())
-        assertEquals(narrationList.last().end, secondFileUpdated.length().toInt())
+        assertEquals(narrationList.first().start, firstFileUpdated.totalFrames)
+        assertEquals(narrationList.first().end, reRecordedFile.totalFrames)
+        assertEquals(narrationList.last().start, secondFile.totalFrames)
+        assertEquals(narrationList.last().end, secondFileUpdated.totalFrames)
     }
 
     @Test
@@ -269,12 +272,12 @@ class NarrationActionsTest {
         onPauseOrNext(narrationList.first(), firstFileUpdated)
 
         val reRecordedFile = makeNewFile(200)
-        val reRecordAction = RerecordAction(narrationList, reRecordedFile, 0)
+        val reRecordAction = RecordAgainAction(narrationList, reRecordedFile, 0)
         narrationHistory.execute(reRecordAction)
 
         narrationHistory.undo()
 
-        val secondFile = makeNewFile(reRecordedFile.length())
+        val secondFile = makeNewFile(reRecordedFile.totalFrames)
         addNextVerse(secondFile)
         val secondFileUpdated = makeNewFile(300)
         onPauseOrNext(narrationList.last(), secondFileUpdated)
@@ -282,10 +285,10 @@ class NarrationActionsTest {
         narrationHistory.redo()
 
         assertEquals(narrationList.first().start, 0)
-        assertEquals(narrationList.first().end, firstFileUpdated.length().toInt())
+        assertEquals(narrationList.first().end, firstFileUpdated.totalFrames)
 
-        assertEquals(narrationList.last().start, reRecordedFile.length().toInt())
-        assertEquals(narrationList.last().end, secondFileUpdated.length().toInt())
+        assertEquals(narrationList.last().start, reRecordedFile.totalFrames)
+        assertEquals(narrationList.last().end, secondFileUpdated.totalFrames)
     }
 
     @Test
@@ -295,16 +298,16 @@ class NarrationActionsTest {
         val firstFileUpdated = makeNewFile(100)
         onPauseOrNext(narrationList.first(), firstFileUpdated)
 
-        val secondFile = makeNewFile(firstFileUpdated.length())
+        val secondFile = makeNewFile(firstFileUpdated.totalFrames)
         addNextVerse(secondFile)
         val secondFileUpdated = makeNewFile(200)
         onPauseOrNext(narrationList.last(), secondFileUpdated)
 
         assertEquals(narrationList.size, 2)
         assertEquals(narrationList.first().start, 0)
-        assertEquals(narrationList.first().end, firstFileUpdated.length().toInt())
-        assertEquals(narrationList.last().start, firstFileUpdated.length().toInt())
-        assertEquals(narrationList.last().end, secondFileUpdated.length().toInt())
+        assertEquals(narrationList.first().end, firstFileUpdated.totalFrames)
+        assertEquals(narrationList.last().start, firstFileUpdated.totalFrames)
+        assertEquals(narrationList.last().end, secondFileUpdated.totalFrames)
 
         val resetAction = ResetAllAction(narrationList)
         narrationHistory.execute(resetAction)
@@ -316,18 +319,18 @@ class NarrationActionsTest {
         assertEquals(narrationList.size, 2)
     }
 
-    private fun addNextVerse(file: File) {
-        val action = NextVerseAction(narrationList, file)
+    private fun addNextVerse(audioFile: AudioFile) {
+        val action = NextVerseAction(narrationList, audioFile)
         narrationHistory.execute(action)
     }
 
-    private fun makeNewFile(length: Long): File {
-        return mock<File> {
-            on { length() } doReturn length
+    private fun makeNewFile(length: Int): AudioFile {
+        return mock<AudioFile> {
+            on { totalFrames } doReturn length
         }
     }
 
-    private fun onPauseOrNext(verse: VerseNode, file: File) {
-        verse.end = file.length().toInt()
+    private fun onPauseOrNext(verse: VerseNode, audioFile: AudioFile) {
+        verse.end = audioFile.totalFrames
     }
 }
