@@ -7,7 +7,6 @@ import javafx.beans.property.SimpleObjectProperty
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.jvm.controls.narration.*
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NarrationTextCell
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.RecordVerseEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.text.MessageFormat
@@ -36,14 +35,6 @@ class NarrationFooterViewModel : ViewModel() {
     private var isRecordingAgain by isRecordingAgainProperty
 
     init {
-        subscribe<StickyVerseChangedEvent<Chunk>> {
-            it.data?.let { verse ->
-                stickyVerseProperty.set(verse)
-            } ?: run {
-                stickyVerseProperty.set(null)
-            }
-        }
-
         recordStartProperty.bind(narrationViewViewModel.recordStartProperty)
         recordResumeProperty.bind(narrationViewViewModel.recordResumeProperty)
         isRecordingProperty.bind(narrationViewViewModel.isRecordingProperty)
@@ -56,10 +47,6 @@ class NarrationFooterViewModel : ViewModel() {
         chapter.getDraft().subscribe {
             chunks.add(it)
         }
-    }
-
-    fun onRecord() {
-
     }
 
     fun currentVerseTextBinding(): StringBinding {
@@ -103,18 +90,21 @@ class NarrationFooter : View() {
     private val viewModel: NarrationFooterViewModel by inject()
     private var listView: NarrationTextListView<Chunk> by singleAssign()
 
-    override fun onDock() {
-        super.onDock()
-        viewModel.onDock()
-
-        listView.addListeners()
-
+    init {
         /*subscribe<WaveformClickedEvent> {
             listView.apply {
                 selectionModel.select(it.index)
                 scrollTo(it.index)
             }
         }*/
+
+        subscribe<StickyVerseChangedEvent<Chunk>> {
+            it.data?.let { verse ->
+                viewModel.stickyVerseProperty.set(verse)
+            } ?: run {
+                viewModel.stickyVerseProperty.set(null)
+            }
+        }
 
         subscribe<ResumeVerseEvent> {
             viewModel.stickyVerseProperty.value?.let { verse ->
@@ -124,13 +114,11 @@ class NarrationFooter : View() {
 
         subscribe<InitialSelectedVerseChangedEvent> {
             listView.apply {
-                selectionModel.select(it.data)
-                scrollTo(it.data)
-            }
-        }
+                println(it.index)
 
-        subscribe<RecordVerseEvent> {
-            viewModel.onRecord()
+                selectionModel.select(it.index)
+                scrollTo(it.index - 1)
+            }
         }
 
         subscribe<RecordAgainEvent> {
@@ -141,16 +129,15 @@ class NarrationFooter : View() {
         }
     }
 
+    override fun onDock() {
+        super.onDock()
+        viewModel.onDock()
+        listView.addListeners()
+    }
+
     override fun onUndock() {
         super.onUndock()
-
         listView.removeListeners()
-
-        //TODO: Verify that unsubscribe works
-        //unsubscribe<WaveformClickedEvent> {}
-        unsubscribe<ResumeVerseEvent> {}
-        unsubscribe<ResumeVerseEvent> {}
-        unsubscribe<RecordVerseEvent> {}
     }
 
     override val root = stackpane {
@@ -182,4 +169,4 @@ class NarrationFooter : View() {
     }
 }
 
-class InitialSelectedVerseChangedEvent(val data: Chunk) : FXEvent()
+class InitialSelectedVerseChangedEvent(val index: Int) : FXEvent()

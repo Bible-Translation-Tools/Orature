@@ -27,4 +27,7 @@ class NarrationViewViewModel : ViewModel() {
     val recordResumeProperty = SimpleBooleanProperty()
     val isRecordingProperty = SimpleBooleanProperty()
     val isRecordingAgainProperty = SimpleBooleanProperty()
+
+    val hasUndoProperty = SimpleBooleanProperty()
+    val hasRedoProperty = SimpleBooleanProperty()
 }

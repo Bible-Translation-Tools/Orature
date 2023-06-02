@@ -8,6 +8,7 @@ import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.narration.NarrationHistory
 import org.wycliffeassociates.otter.common.data.narration.NextVerseAction
 import org.wycliffeassociates.otter.common.data.narration.RecordAgainAction
+import org.wycliffeassociates.otter.common.data.narration.ResetAllAction
 import org.wycliffeassociates.otter.common.data.primitives.VerseNode
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
@@ -17,6 +18,9 @@ import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NextVerseEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.RecordVerseEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationRedoEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationResetChapterEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationUndoEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.io.File
@@ -61,8 +65,18 @@ class NarrationBody : View() {
         }
     }
 
-    override fun onDock() {
-        super.onDock()
+    init {
+        subscribe<NarrationUndoEvent> {
+            viewModel.undo()
+        }
+
+        subscribe<NarrationRedoEvent> {
+            viewModel.redo()
+        }
+
+        subscribe<NarrationResetChapterEvent> {
+            viewModel.resetChapter()
+        }
 
         subscribe<RecordVerseEvent> {
             viewModel.toggleRecording()
@@ -79,16 +93,15 @@ class NarrationBody : View() {
         subscribe<RecordAgainEvent> {
             viewModel.recordAgain(it.index)
         }
+    }
 
+    override fun onDock() {
+        super.onDock()
         viewModel.onDock()
     }
 
     override fun onUndock() {
         super.onUndock()
-
-        unsubscribe<RecordVerseEvent> {  }
-        unsubscribe<NextVerseEvent> {  }
-
         viewModel.onUndock()
     }
 }
@@ -130,6 +143,12 @@ class NarrationBodyViewModel : ViewModel() {
     private val playingVerseProperty = SimpleObjectProperty<VerseNode?>()
     private var playingVerse by playingVerseProperty
 
+    private val hasUndoProperty = SimpleBooleanProperty()
+    private var hasUndo by hasUndoProperty
+
+    private val hasRedoProperty = SimpleBooleanProperty()
+    private var hasRedo by hasRedoProperty
+
     private val narrationHistory = NarrationHistory()
     private lateinit var pcmFile: File
 
@@ -143,6 +162,9 @@ class NarrationBodyViewModel : ViewModel() {
         narrationViewViewModel.isRecordingProperty.bind(isRecordingProperty)
         narrationViewViewModel.recordPauseProperty.bind(recordPauseProperty)
         narrationViewViewModel.isRecordingAgainProperty.bind(isRecordingAgainProperty)
+
+        narrationViewViewModel.hasUndoProperty.bind(hasUndoProperty)
+        narrationViewViewModel.hasRedoProperty.bind(hasRedoProperty)
     }
 
     fun onDock() {
@@ -183,6 +205,7 @@ class NarrationBodyViewModel : ViewModel() {
         recordedAudio?.let {
             val action = RecordAgainAction(recordedVerses, it, verseIndex)
             narrationHistory.execute(action)
+            updateAvailableHistory()
         }
 
         recorder?.start()
@@ -200,6 +223,7 @@ class NarrationBodyViewModel : ViewModel() {
                     recordedVerses.lastOrNull()?.end = it.totalFrames
                     val action = NextVerseAction(recordedVerses, it)
                     narrationHistory.execute(action)
+                    updateAvailableHistory()
                 }
             }
             recordPause -> {
@@ -220,12 +244,48 @@ class NarrationBodyViewModel : ViewModel() {
         }
     }
 
+    fun resetChapter() {
+        val action = ResetAllAction(recordedVerses)
+        narrationHistory.execute(action)
+        updateAvailableHistory()
+
+        recordStart = true
+        recordResume = false
+        recordPause = false
+    }
+
+    fun undo() {
+        narrationHistory.undo()
+
+        recordPause = false
+        recordStart = recordedVerses.isEmpty()
+        recordResume = recordedVerses.isNotEmpty()
+
+        updateAvailableHistory()
+    }
+
+    fun redo() {
+        narrationHistory.redo()
+
+        recordPause = false
+        recordStart = recordedVerses.isEmpty()
+        recordResume = recordedVerses.isNotEmpty()
+
+        updateAvailableHistory()
+    }
+
+    private fun updateAvailableHistory() {
+        hasUndo = narrationHistory.hasUndo()
+        hasRedo = narrationHistory.hasRedo()
+    }
+
     private fun record() {
         stopPlayer()
 
         recordedAudio?.let {
             val action = NextVerseAction(recordedVerses, it)
             narrationHistory.execute(action)
+            updateAvailableHistory()
         }
 
         recorder?.start()

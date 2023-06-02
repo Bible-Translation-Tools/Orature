@@ -30,6 +30,14 @@ class NarrationHistory {
         undoStack.addLast(action)
     }
 
+    fun hasUndo(): Boolean {
+        return undoStack.isNotEmpty()
+    }
+
+    fun hasRedo(): Boolean {
+        return redoStack.isNotEmpty()
+    }
+
     fun clear() {
         undoStack.clear()
         redoStack.clear()

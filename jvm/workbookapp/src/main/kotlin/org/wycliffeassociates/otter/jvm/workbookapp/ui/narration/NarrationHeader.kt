@@ -48,6 +48,8 @@ class NarrationHeader : View() {
 
 class NarrationHeaderViewModel : ViewModel() {
     private val workbookDataStore by inject<WorkbookDataStore>()
+    private val narrationViewViewModel: NarrationViewViewModel by inject()
+
     // val titleProperty = SimpleStringProperty("Narration Title")
     // val chapterTitleProperty = SimpleStringProperty("Chapter Title")
 
@@ -70,12 +72,17 @@ class NarrationHeaderViewModel : ViewModel() {
         } ?: ""
     }
 
-    val hasNextChapter = SimpleBooleanProperty(false)
-    val hasPreviousChapter = SimpleBooleanProperty(false)
-    val hasChapterFileProperty = SimpleBooleanProperty(false)
+    val hasNextChapter = SimpleBooleanProperty()
+    val hasPreviousChapter = SimpleBooleanProperty()
+    val hasChapterFileProperty = SimpleBooleanProperty()
 
-    val hasUndoProperty = SimpleBooleanProperty(false)
-    val hasRedoProperty = SimpleBooleanProperty(false)
+    val hasUndoProperty = SimpleBooleanProperty()
+    val hasRedoProperty = SimpleBooleanProperty()
+
+    init {
+        hasUndoProperty.bind(narrationViewViewModel.hasUndoProperty)
+        hasRedoProperty.bind(narrationViewViewModel.hasRedoProperty)
+    }
 
     fun selectPreviousChapter() {
         TODO("Not yet implemented")

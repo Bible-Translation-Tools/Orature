@@ -17,9 +17,9 @@ class NarrationMenu : MenuButton() {
     val editVerseMarkersTextProperty = SimpleStringProperty(messages["editVerseMarkers"])
     val resetChapterTextProperty = SimpleStringProperty(messages["resetChapter"])
 
-    val hasUndoProperty = SimpleBooleanProperty(false)
-    val hasRedoProperty = SimpleBooleanProperty(false)
-    val hasChapterFileProperty = SimpleBooleanProperty(false)
+    val hasUndoProperty = SimpleBooleanProperty()
+    val hasRedoProperty = SimpleBooleanProperty()
+    val hasChapterFileProperty = SimpleBooleanProperty()
 
     init {
         addClass("btn", "btn--primary", "btn--borderless", "wa-menu-button")
