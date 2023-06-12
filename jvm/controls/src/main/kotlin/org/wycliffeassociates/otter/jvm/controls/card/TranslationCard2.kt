@@ -37,12 +37,15 @@ class TranslationCard2(
     val targetLanguageProperty = SimpleObjectProperty(targetLanguage)
 
     init {
+        addClass("translation-card-button")
         skinProperty().bind(
             selectedProjectGroupProperty.objectBinding { selectedGroup ->
                 // if the selected card is this card, displays the active skin
                 if (selectedGroup == this.getKey()) {
+                    isFocusTraversable = false
                     ActiveTranslationCardSkin(this)
                 } else {
+                    isFocusTraversable = true
                     TranslationCardSkin2(this)
                 }
             }
@@ -116,8 +119,7 @@ class ActiveTranslationCardSkin(card: TranslationCard2) : SkinBase<TranslationCa
     private val targetLanguageProperty = SimpleStringProperty()
 
     private val graphic = VBox().apply {
-        addClass("translation-card")
-        addPseudoClass("active")
+        addClass("translation-card", "translation-card--active")
 
         hbox {
             addClass("translation-card__header")

@@ -73,9 +73,6 @@ class HomePage2 : View() {
     }
 
     override val root = borderpane {
-        center = stackpane {
-            bindSingleChild(mainSectionProperty)
-        }
         left = vbox {
             addClass("homepage__left-pane")
             label(messages["projects"]) {
@@ -125,6 +122,9 @@ class HomePage2 : View() {
                     }
                 }
             }
+        }
+        center = stackpane {
+            bindSingleChild(mainSectionProperty)
         }
     }
 
