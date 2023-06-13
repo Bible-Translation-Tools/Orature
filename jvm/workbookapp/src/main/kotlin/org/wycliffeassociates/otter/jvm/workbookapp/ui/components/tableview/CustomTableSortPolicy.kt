@@ -38,7 +38,12 @@ internal val CUSTOM_SORT_POLICY: Callback<TableView<Any>, Boolean> = Callback { 
 }
 
 /**
- * Updates the comparator when the user toggles sorting type on the column.
+ * Updates the sort comparator when the user toggles between sorting types on the column.
+ * Use this method to allow sorting the table from the back-end, given the underlying
+ * table data is backed by a SortedList<T>.
+ *
+ * This method should be used in conjunction with [bindTableSortComparator] to handle
+ * the different states of the column sort.
  */
 fun <S, T> TableColumn<S, T>.bindColumnSortComparator() {
     val list = tableView.items
@@ -50,8 +55,11 @@ fun <S, T> TableColumn<S, T>.bindColumnSortComparator() {
 }
 
 /**
- * Update the backing sorted list comparator when the table comparator changes.
- * This handles the transition to "unsorted" state of the columns.
+ * Updates the backing sorted list comparator when the table comparator changes.
+ * This will handle the transition to "unsorted" state of the columns.
+ *
+ * Use this method in conjunction with [bindColumnSortComparator] to handle
+ * the different states of the column sort.
  */
 fun <S> TableView<S>.bindTableSortComparator() {
     val list = this.items
