@@ -10,8 +10,8 @@ import tornadofx.*
 
 /**
  * Custom implementation of javafx DEFAULT_SORT_POLICY callback.
- * This allows sorting from the backing collection and
- * automatic sorting from the query filter.
+ * This allows both manual sorting when then user clicks on the column
+ * and automatic sorting from the search filter.
  *
  * @see javafx.scene.control.TableView.DEFAULT_SORT_POLICY
  */
