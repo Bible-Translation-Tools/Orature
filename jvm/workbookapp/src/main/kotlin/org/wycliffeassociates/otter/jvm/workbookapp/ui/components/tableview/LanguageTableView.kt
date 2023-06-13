@@ -1,10 +1,13 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview
 
 import javafx.collections.ObservableList
+import javafx.collections.transformation.SortedList
 import javafx.event.EventTarget
 import javafx.scene.control.TableView
 import javafx.scene.layout.Priority
+import javafx.util.Callback
 import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
@@ -26,6 +29,9 @@ class LanguageTableView(
                 }
             }
             isReorderable = false
+            isSortable = true
+
+            bindColumnSortComparator()
         }
         column(messages["anglicized"], String::class) {
             setCellValueFactory { it.value.anglicizedName.toProperty() }
@@ -36,6 +42,9 @@ class LanguageTableView(
                 }
             }
             isReorderable = false
+            isSortable = true
+
+            bindColumnSortComparator()
         }
         column(messages["code"], String::class) {
             setCellValueFactory { it.value.slug.toProperty() }
@@ -45,6 +54,9 @@ class LanguageTableView(
                 }
             }
             isReorderable = false
+            isSortable = true
+
+            bindColumnSortComparator()
         }
         column(messages["gateway"], Boolean::class) {
             setCellValueFactory { it.value.isGateway.toProperty() }
@@ -55,9 +67,15 @@ class LanguageTableView(
                 }
             }
             isReorderable = false
+            isSortable = true
+
+            bindColumnSortComparator()
         }
 
+        sortPolicy = CUSTOM_SORT_POLICY as (Callback<TableView<Language>, Boolean>)
         setRowFactory { LanguageTableRow() }
+
+        bindTableSortComparator()
     }
 }
 
