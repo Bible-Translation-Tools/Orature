@@ -18,17 +18,10 @@ import tornadofx.*
 internal val CUSTOM_SORT_POLICY: Callback<TableView<Any>, Boolean> = Callback { table ->
     try {
         val itemsList = table.items
-        if (itemsList is SortedList<Any>) {
+        if (itemsList is SortedList<Any> || itemsList == null || itemsList.isEmpty()) {
             return@Callback true
         } else {
-            if (itemsList == null || itemsList.isEmpty()) {
-                // sorting is not supported on null or empty lists
-                return@Callback true
-            }
             val comparator = table.comparator ?: return@Callback true
-
-            // otherwise we attempt to do a manual sort, and if successful
-            // we return true
             FXCollections.sort(itemsList, comparator)
             return@Callback true
         }
