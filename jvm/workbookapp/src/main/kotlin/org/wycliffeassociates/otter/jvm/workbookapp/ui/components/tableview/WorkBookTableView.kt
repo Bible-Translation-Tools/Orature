@@ -19,18 +19,24 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview
 
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import javafx.event.EventTarget
 import javafx.scene.control.TableView
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
+import org.wycliffeassociates.otter.jvm.utils.overrideDefaultKeyEventHandler
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class WorkBookTableView(
     books: ObservableList<WorkbookDescriptor>
 ) : TableView<WorkbookDescriptor>(books) {
+
+    private val selectedIndexProperty = SimpleIntegerProperty(0)
 
     init {
         addClass("wa-table-view")
@@ -89,7 +95,7 @@ class WorkBookTableView(
         column("", WorkbookDescriptor::class) {
             setCellValueFactory { SimpleObjectProperty(it.value) }
             setCellFactory {
-                WorkbookOptionTableCell()
+                WorkbookOptionTableCell(selectedIndexProperty)
             }
             isReorderable = false
             isSortable = false
@@ -97,6 +103,20 @@ class WorkBookTableView(
 
         setRowFactory {
             WorkbookTableRow()
+        }
+
+        focusedProperty().onChange {
+            if (it && selectionModel.selectedIndex < 0) {
+                selectionModel.select(0)
+                focusModel.focus(0)
+            }
+        }
+
+        addEventFilter(KeyEvent.KEY_PRESSED) { keyEvent ->
+            if (keyEvent.code == KeyCode.SPACE || keyEvent.code == KeyCode.ENTER) {
+                selectedIndexProperty.set(selectionModel.selectedIndex)
+                keyEvent.consume()
+            }
         }
     }
 }

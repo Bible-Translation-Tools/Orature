@@ -188,17 +188,6 @@ fun <T> ListView<T>.overrideDefaultKeyEventHandler(action: (KeyCode) -> Unit = {
     }
 }
 
-fun <T> TableView<T>.overrideDefaultKeyEventHandler(action: (KeyCode) -> Unit = {}) {
-    this.addEventFilter(KeyEvent.KEY_PRESSED) {
-        when (it.code) {
-            KeyCode.UP, KeyCode.DOWN -> {
-                it.consume()
-                action(it.code)
-            }
-        }
-    }
-}
-
 fun <T> ListView<T>.virtualFlow(): VirtualFlow<*> {
     return (this.skin as ListViewSkin<*>).children.first() as VirtualFlow<*>
 }

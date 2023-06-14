@@ -18,6 +18,8 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview
 
+import javafx.beans.property.SimpleIntegerProperty
+import javafx.event.ActionEvent
 import javafx.geometry.Pos
 import javafx.scene.control.TableCell
 import org.kordamp.ikonli.javafx.FontIcon
@@ -27,7 +29,9 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.popup.Workbook
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
-class WorkbookOptionTableCell : TableCell<WorkbookDescriptor, WorkbookDescriptor>() {
+class WorkbookOptionTableCell(
+    private val selectedIndexProperty: SimpleIntegerProperty
+) : TableCell<WorkbookDescriptor, WorkbookDescriptor>() {
 
     private val actionButton = button {
         addClass("btn", "btn--icon", "btn--borderless", "option-button")
@@ -35,6 +39,8 @@ class WorkbookOptionTableCell : TableCell<WorkbookDescriptor, WorkbookDescriptor
             addClass("wa-icon", "option-icon")
         }
         tooltip(messages["options"])
+
+        isFocusTraversable = false
     }
 
     private val popupMenu = WorkbookOptionMenu().apply {
@@ -49,6 +55,15 @@ class WorkbookOptionTableCell : TableCell<WorkbookDescriptor, WorkbookDescriptor
     private val graphicContent = hbox {
         alignment = Pos.CENTER_RIGHT
         add(actionButton)
+    }
+
+    init {
+        selectedIndexProperty.onChange {
+            if (item != null && !isEmpty && it == index){
+                actionButton.onAction.handle(ActionEvent())
+                selectedIndexProperty.set(-1) // resets to allow subsequent invocations
+            }
+        }
     }
 
     override fun updateItem(item: WorkbookDescriptor?, empty: Boolean) {
