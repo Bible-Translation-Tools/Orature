@@ -29,7 +29,7 @@
 }
 
 .homepage__left-pane {
-    -fx-pref-width: 250px;
+    -fx-pref-width: 320px;
     -fx-spacing: 12;
     -fx-border-width: 0 0.5px 0 0;
     -fx-border-color: -wa-border-light;

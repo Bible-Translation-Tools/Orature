@@ -82,6 +82,7 @@ class WorkBookTableView(
                 val percent = item.toDouble()
                 graphic = progressbar(percent) {
                     if (percent == 1.0) addClass("full")
+                    fitToParentWidth()
                 }
             }
             isReorderable = false
