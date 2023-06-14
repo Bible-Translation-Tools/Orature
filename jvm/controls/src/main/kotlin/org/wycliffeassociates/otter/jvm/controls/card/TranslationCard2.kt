@@ -43,6 +43,7 @@ class TranslationCard2(
                 // if the selected card is this card, displays the active skin
                 if (selectedGroup == this.getKey()) {
                     isFocusTraversable = false
+                    removePseudoClass("focused")
                     ActiveTranslationCardSkin(this)
                 } else {
                     isFocusTraversable = true
