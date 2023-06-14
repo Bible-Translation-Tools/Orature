@@ -36,7 +36,7 @@ class WorkBookTableView(
     books: ObservableList<WorkbookDescriptor>
 ) : TableView<WorkbookDescriptor>(books) {
 
-    private val selectedIndexProperty = SimpleIntegerProperty(0)
+    private val selectedIndexProperty = SimpleIntegerProperty(-1)
 
     init {
         addClass("wa-table-view")

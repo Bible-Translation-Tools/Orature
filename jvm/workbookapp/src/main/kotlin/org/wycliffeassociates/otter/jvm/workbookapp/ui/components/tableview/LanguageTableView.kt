@@ -3,8 +3,11 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview
 import javafx.collections.ObservableList
 import javafx.event.EventTarget
 import javafx.scene.control.TableView
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.jvm.controls.event.LanguageSelectedEvent
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
@@ -58,6 +61,22 @@ class LanguageTableView(
         }
 
         setRowFactory { LanguageTableRow() }
+
+        focusedProperty().onChange {
+            if (it && selectionModel.selectedIndex < 0) {
+                selectionModel.select(0)
+                focusModel.focus(0)
+            }
+        }
+
+        addEventFilter(KeyEvent.KEY_PRESSED) { keyEvent ->
+            if (keyEvent.code == KeyCode.SPACE || keyEvent.code == KeyCode.ENTER) {
+                selectedItem?.let { language ->
+                    FX.eventbus.fire(LanguageSelectedEvent(language))
+                }
+                keyEvent.consume()
+            }
+        }
     }
 }
 
