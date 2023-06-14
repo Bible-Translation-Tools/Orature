@@ -14,8 +14,8 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.DaggerAppDependencyGraph
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
+import java.io.File
 import javax.inject.Inject
-import kotlin.io.path.createTempDirectory
 
 class NarrationApp : App(NarrationView::class), IDependencyGraphProvider {
 
@@ -128,8 +128,8 @@ class NarrationApp : App(NarrationView::class), IDependencyGraphProvider {
     }
 
     private fun mockProjectAudioDir(accessor: ProjectFilesAccessor) {
-        val tempDir = createTempDirectory("narration")
-        every { accessor.audioDir } returns tempDir.toFile()
+        val userHomeDir = File(System.getProperty("user.home"))
+        every { accessor.audioDir } returns userHomeDir
     }
 }
 

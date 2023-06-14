@@ -4,6 +4,7 @@ import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.concurrent.Task
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.jvm.controls.narration.*
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NarrationTextCell
@@ -112,12 +113,19 @@ class NarrationFooter : View() {
             }
         }
 
-        subscribe<InitialSelectedVerseChangedEvent> {
+        subscribe<InitialSelectedVerseChangedEvent> { event ->
             listView.apply {
-                println(it.index)
-
-                selectionModel.select(it.index)
-                scrollTo(it.index - 1)
+                val delay = object : Task<Unit>() {
+                    override fun call() {
+                        Thread.sleep(1000)
+                    }
+                }
+                delay.setOnSucceeded {
+                    val index = event.index.coerceIn(0, viewModel.chunks.size - 1)
+                    selectionModel.select(index)
+                    scrollTo(index)
+                }
+                Thread(delay).start()
             }
         }
 
@@ -133,6 +141,8 @@ class NarrationFooter : View() {
         super.onDock()
         viewModel.onDock()
         listView.addListeners()
+
+        FX.eventbus.fire(NarrationFooterDockedEvent())
     }
 
     override fun onUndock() {
@@ -170,3 +180,4 @@ class NarrationFooter : View() {
 }
 
 class InitialSelectedVerseChangedEvent(val index: Int) : FXEvent()
+class NarrationFooterDockedEvent : FXEvent()

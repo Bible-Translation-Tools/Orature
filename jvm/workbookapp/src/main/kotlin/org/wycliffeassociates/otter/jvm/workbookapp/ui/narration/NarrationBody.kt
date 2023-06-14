@@ -1,5 +1,8 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.Slider
@@ -44,14 +47,14 @@ class NarrationBody : View() {
                             item("") {
                                 text = "Play"
                                 action {
-                                    hide()
+                                    //hide()
                                     fire(PlayVerseEvent(verse))
                                 }
                             }
                             item("") {
                                 text = "Record Again"
                                 action {
-                                    hide()
+                                    //hide()
                                     fire(RecordAgainEvent(index))
                                 }
                                 disableWhen {
@@ -151,6 +154,7 @@ class NarrationBodyViewModel : ViewModel() {
 
     private val narrationHistory = NarrationHistory()
     private lateinit var pcmFile: File
+    private lateinit var jsonFile: File
 
     val recordedVerses = observableListOf<VerseNode>()
 
@@ -165,6 +169,10 @@ class NarrationBodyViewModel : ViewModel() {
 
         narrationViewViewModel.hasUndoProperty.bind(hasUndoProperty)
         narrationViewViewModel.hasRedoProperty.bind(hasRedoProperty)
+
+        subscribe<NarrationFooterDockedEvent> {
+            FX.eventbus.fire(InitialSelectedVerseChangedEvent(recordedVerses.size))
+        }
     }
 
     fun onDock() {
@@ -205,7 +213,8 @@ class NarrationBodyViewModel : ViewModel() {
         recordedAudio?.let {
             val action = RecordAgainAction(recordedVerses, it, verseIndex)
             narrationHistory.execute(action)
-            updateAvailableHistory()
+            updateHistoryAvailable()
+            updateJsonFile()
         }
 
         recorder?.start()
@@ -223,7 +232,8 @@ class NarrationBodyViewModel : ViewModel() {
                     recordedVerses.lastOrNull()?.end = it.totalFrames
                     val action = NextVerseAction(recordedVerses, it)
                     narrationHistory.execute(action)
-                    updateAvailableHistory()
+                    updateHistoryAvailable()
+                    updateJsonFile()
                 }
             }
             recordPause -> {
@@ -247,7 +257,8 @@ class NarrationBodyViewModel : ViewModel() {
     fun resetChapter() {
         val action = ResetAllAction(recordedVerses)
         narrationHistory.execute(action)
-        updateAvailableHistory()
+        updateHistoryAvailable()
+        updateJsonFile()
 
         recordStart = true
         recordResume = false
@@ -261,7 +272,8 @@ class NarrationBodyViewModel : ViewModel() {
         recordStart = recordedVerses.isEmpty()
         recordResume = recordedVerses.isNotEmpty()
 
-        updateAvailableHistory()
+        updateHistoryAvailable()
+        updateJsonFile()
     }
 
     fun redo() {
@@ -271,10 +283,11 @@ class NarrationBodyViewModel : ViewModel() {
         recordStart = recordedVerses.isEmpty()
         recordResume = recordedVerses.isNotEmpty()
 
-        updateAvailableHistory()
+        updateHistoryAvailable()
+        updateJsonFile()
     }
 
-    private fun updateAvailableHistory() {
+    private fun updateHistoryAvailable() {
         hasUndo = narrationHistory.hasUndo()
         hasRedo = narrationHistory.hasRedo()
     }
@@ -285,7 +298,8 @@ class NarrationBodyViewModel : ViewModel() {
         recordedAudio?.let {
             val action = NextVerseAction(recordedVerses, it)
             narrationHistory.execute(action)
-            updateAvailableHistory()
+            updateHistoryAvailable()
+            updateJsonFile()
         }
 
         recorder?.start()
@@ -306,6 +320,8 @@ class NarrationBodyViewModel : ViewModel() {
         recordedAudio?.let {
             recordedVerses.lastOrNull()?.end = it.totalFrames
         }
+
+        updateJsonFile()
     }
 
     private fun resumeRecording() {
@@ -337,12 +353,14 @@ class NarrationBodyViewModel : ViewModel() {
     private fun initializeRecorder() {
         recorder = audioConnectionFactory.getRecorder().also { rec ->
             val audioDir = workbookDataStore.workbook.projectFilesAccessor.audioDir
-            pcmFile = File.createTempFile("narration", ".${AudioFileFormat.PCM.extension}", audioDir)
 
-            println(pcmFile)
+            pcmFile = File(audioDir, "narration.${AudioFileFormat.PCM.extension}")
+            jsonFile = File(audioDir, "narration.json")
+
+            loadWorkInProgress()
 
             recordedAudio = AudioFile(pcmFile).also {
-                writer = WavFileWriter(it, rec.getAudioStream()) {  /* no op */  }
+                writer = WavFileWriter(it, rec.getAudioStream(), true) {  /* no op */  }
             }
         }
     }
@@ -353,6 +371,29 @@ class NarrationBodyViewModel : ViewModel() {
 
         writer?.writer?.dispose()
         writer = null
+    }
+
+    private fun updateJsonFile() {
+        val json = ObjectMapper().writeValueAsString(recordedVerses)
+        jsonFile.writeText(json)
+    }
+
+    private fun loadWorkInProgress() {
+        if (!jsonFile.exists()) {
+            jsonFile.createNewFile()
+            jsonFile.writeText("[]")
+        }
+        if (!pcmFile.exists()) {
+            pcmFile.createNewFile()
+        }
+
+        val json = jsonFile.readText()
+        val mapper = ObjectMapper().registerKotlinModule()
+
+        val reference = object: TypeReference<List<VerseNode>>(){}
+        val nodes: List<VerseNode> = mapper.readValue(json, reference)
+
+        recordedVerses.addAll(nodes)
     }
 }
 
