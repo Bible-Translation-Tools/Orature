@@ -19,14 +19,20 @@
 package org.wycliffeassociates.otter.common.domain.collections
 
 import io.reactivex.Completable
+import io.reactivex.schedulers.Schedulers
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import javax.inject.Inject
 
 class DeleteProject @Inject constructor(
     private val collectionRepository: ICollectionRepository,
-    private val directoryProvider: IDirectoryProvider
+    private val directoryProvider: IDirectoryProvider,
+    private val workbookRepository: IWorkbookRepository,
+    private val workbookDescriptorRepo: IWorkbookDescriptorRepository
 ) {
 
     fun delete(workbook: Workbook, deleteFiles: Boolean): Completable {
@@ -37,6 +43,28 @@ class DeleteProject @Inject constructor(
         return deleteFiles(workbook, deleteFiles)
             .andThen(collectionRepository.deleteResources(targetProject, deleteFiles))
             .andThen(collectionRepository.deleteProject(targetProject, deleteFiles))
+    }
+
+    fun delete(workbookDescriptor: WorkbookDescriptor): Completable {
+        val workbook = workbookRepository.get(workbookDescriptor.sourceCollection, workbookDescriptor.targetCollection)
+        deleteFiles(workbook, deleteFiles = true)
+
+        return workbookDescriptorRepo.getAll()
+            .map { list ->
+                list.filter {
+                    it.sourceCollection.id == workbookDescriptor.sourceCollection.id &&
+                        it.targetCollection.id == workbookDescriptor.targetCollection.id
+                }.let {
+                    it.size > 1
+                }
+            }
+            .flatMapCompletable { otherWorkbookModeExists ->
+                if (!otherWorkbookModeExists) {
+
+                }
+
+            }
+            .subscribeOn(Schedulers.io())
     }
 
     private fun deleteFiles(workbook: Workbook, deleteFiles: Boolean): Completable {

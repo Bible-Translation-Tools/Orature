@@ -51,6 +51,17 @@ class WorkbookDescriptorRepository @Inject constructor(
             }
     }
 
+    override fun delete(workbookDescriptor: WorkbookDescriptor): Completable {
+        return Completable
+            .fromAction {
+                workbookDescriptorDao.delete(mapToEntity(workbookDescriptor))
+            }
+            .subscribeOn(Schedulers.io())
+            .doOnError {
+                logger.error("Error deleting workbook descriptor.", it)
+            }
+    }
+
     override fun delete(list: List<WorkbookDescriptor>): Completable {
         return Completable
             .fromAction {

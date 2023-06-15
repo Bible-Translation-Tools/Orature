@@ -7,6 +7,7 @@ import org.wycliffeassociates.otter.jvm.controls.card.newTranslationCard
 import org.wycliffeassociates.otter.jvm.controls.card.translationCreationCard
 import org.wycliffeassociates.otter.jvm.controls.event.LanguageSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ProjectGroupDeleteEvent
+import org.wycliffeassociates.otter.jvm.controls.event.WorkbookDeleteEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookOpenEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.bindSingleChild
@@ -62,6 +63,10 @@ class HomePage2 : View() {
 
         subscribe<ProjectGroupDeleteEvent> {
             viewModel.deleteProjectGroup(it.books)
+        }
+
+        subscribe<WorkbookDeleteEvent> {
+            viewModel.deleteBook(it.data)
         }
     }
 

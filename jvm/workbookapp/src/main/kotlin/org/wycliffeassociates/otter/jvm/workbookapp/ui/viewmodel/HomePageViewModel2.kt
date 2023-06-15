@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
+import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
 import org.wycliffeassociates.otter.common.domain.collections.UpdateProject
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
@@ -31,6 +32,9 @@ class HomePageViewModel2 : ViewModel() {
     lateinit var createProjectUseCase: CreateProject
     @Inject
     lateinit var updateProjectUseCase: UpdateProject
+    @Inject
+    lateinit var deleteProjectUseCase: DeleteProject
+
 
     private val workbookDS: WorkbookDataStore by inject()
     private val navigator: NavigationMediator by inject()
@@ -70,6 +74,17 @@ class HomePageViewModel2 : ViewModel() {
 
     fun deleteProjectGroup(books: List<WorkbookDescriptor>) {
         workbookDescriptorRepo.delete(books)
+            .observeOnFx()
+            .subscribe {
+                loadProjects()
+            }
+    }
+
+    fun deleteBook(workbookDescriptor: WorkbookDescriptor) {
+        deleteProjectUseCase.delete(workbookDescriptor)
+            .doOnError {
+                logger.error("Error while deleting workbook.", it)
+            }
             .observeOnFx()
             .subscribe {
                 loadProjects()
