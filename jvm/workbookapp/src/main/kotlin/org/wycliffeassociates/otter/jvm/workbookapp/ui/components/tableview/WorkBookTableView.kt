@@ -56,7 +56,7 @@ class WorkBookTableView(
             minWidth = 120.0 // this may not be replaced with css
             isReorderable = false
         }
-        column("", String::class).apply {
+        column(messages["code"], String::class).apply {
             addClass("table-view__column-header-row")
             setCellValueFactory { it.value.slug.toProperty() }
             cellFormat {
