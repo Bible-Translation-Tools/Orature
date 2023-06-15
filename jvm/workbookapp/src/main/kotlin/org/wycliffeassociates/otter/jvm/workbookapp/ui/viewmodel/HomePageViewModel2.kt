@@ -80,10 +80,9 @@ class HomePageViewModel2 : ViewModel() {
     }
 
     fun deleteBook(workbookDescriptor: WorkbookDescriptor) {
+        logger.info("Deleting book: ${workbookDescriptor.slug}")
+
         deleteProjectUseCase.delete(workbookDescriptor)
-            .doOnError {
-                logger.error("Error while deleting workbook.", it)
-            }
             .observeOnFx()
             .subscribe {
                 loadProjects()

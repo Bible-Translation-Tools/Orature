@@ -19,7 +19,9 @@
 package org.wycliffeassociates.otter.common.domain.collections
 
 import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
@@ -32,8 +34,11 @@ class DeleteProject @Inject constructor(
     private val collectionRepository: ICollectionRepository,
     private val directoryProvider: IDirectoryProvider,
     private val workbookRepository: IWorkbookRepository,
-    private val workbookDescriptorRepo: IWorkbookDescriptorRepository
+    private val workbookDescriptorRepo: IWorkbookDescriptorRepository,
+    private val createProjectUseCase: CreateProject
 ) {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     fun delete(workbook: Workbook, deleteFiles: Boolean): Completable {
         // Order matters here, files won't remove anything from the database
@@ -46,25 +51,39 @@ class DeleteProject @Inject constructor(
     }
 
     fun delete(workbookDescriptor: WorkbookDescriptor): Completable {
-        val workbook = workbookRepository.get(workbookDescriptor.sourceCollection, workbookDescriptor.targetCollection)
-        deleteFiles(workbook, deleteFiles = true)
-
-        return workbookDescriptorRepo.getAll()
-            .map { list ->
-                list.filter {
-                    it.sourceCollection.id == workbookDescriptor.sourceCollection.id &&
-                        it.targetCollection.id == workbookDescriptor.targetCollection.id
-                }.let {
-                    it.size > 1
-                }
+        return Observable
+            .fromCallable {
+                workbookRepository.get(
+                    workbookDescriptor.sourceCollection,
+                    workbookDescriptor.targetCollection
+                )
             }
-            .flatMapCompletable { otherWorkbookModeExists ->
-                if (!otherWorkbookModeExists) {
-
-                }
-
+            .flatMapCompletable { workbook ->
+                delete(workbook, deleteFiles = true)
             }
+            .doOnError {
+                logger.error("Error while deleting workbook.", it)
+            }
+            .andThen(
+                recreateWorkbookDescriptor(workbookDescriptor)
+            )
             .subscribeOn(Schedulers.io())
+    }
+
+    private fun recreateWorkbookDescriptor(workbookDescriptor: WorkbookDescriptor): Completable {
+        val sourceMetadata = workbookDescriptor.sourceCollection.resourceContainer!!
+        return collectionRepository
+            .deriveProject(
+                listOf(sourceMetadata),
+                workbookDescriptor.sourceCollection,
+                workbookDescriptor.targetLanguage,
+                true,
+                workbookDescriptor.mode
+            )
+            .doOnError {
+                logger.error("Error while recreating workbook descriptor.", it)
+            }
+            .ignoreElement()
     }
 
     private fun deleteFiles(workbook: Workbook, deleteFiles: Boolean): Completable {
