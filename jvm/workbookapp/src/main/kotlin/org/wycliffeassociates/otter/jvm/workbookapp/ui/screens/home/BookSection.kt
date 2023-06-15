@@ -14,7 +14,7 @@ import tornadofx.FX.Companion.messages
 import java.text.MessageFormat
 
 class BookSection(books: ObservableList<WorkbookDescriptor>) : StackPane() {
-    private val projectsOptionMenu = ProjectGroupOptionMenu(books)
+    private val projectsOptionMenu = ProjectGroupOptionMenu()
     private val titleProperty = SimpleStringProperty().apply {
         bind(books.stringBinding {
             if (it.isNotEmpty()) {
@@ -40,6 +40,7 @@ class BookSection(books: ObservableList<WorkbookDescriptor>) : StackPane() {
                     addClass("btn", "btn--icon", "btn--borderless", "option-button")
                     graphic = FontIcon(MaterialDesign.MDI_DOTS_HORIZONTAL)
 
+                    projectsOptionMenu.books.setAll(books)
                     setOnAction {
                         val bound = this.boundsInLocal
                         val screenBound = this.localToScreen(bound)

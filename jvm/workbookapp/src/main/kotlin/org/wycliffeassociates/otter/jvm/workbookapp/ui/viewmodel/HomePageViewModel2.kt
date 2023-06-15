@@ -35,7 +35,6 @@ class HomePageViewModel2 : ViewModel() {
     @Inject
     lateinit var deleteProjectUseCase: DeleteProject
 
-
     private val workbookDS: WorkbookDataStore by inject()
     private val navigator: NavigationMediator by inject()
 

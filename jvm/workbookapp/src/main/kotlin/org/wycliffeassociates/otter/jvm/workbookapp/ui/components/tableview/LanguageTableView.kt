@@ -25,6 +25,7 @@ class LanguageTableView(
                     tooltip(text)
                 }
             }
+            isReorderable = false
         }
         column(messages["anglicized"], String::class) {
             setCellValueFactory { it.value.anglicizedName.toProperty() }
@@ -34,6 +35,7 @@ class LanguageTableView(
                     tooltip(text)
                 }
             }
+            isReorderable = false
         }
         column(messages["code"], String::class) {
             setCellValueFactory { it.value.slug.toProperty() }
@@ -42,6 +44,7 @@ class LanguageTableView(
                     addClass("normal-text")
                 }
             }
+            isReorderable = false
         }
         column(messages["gateway"], Boolean::class) {
             setCellValueFactory { it.value.isGateway.toProperty() }
@@ -51,6 +54,7 @@ class LanguageTableView(
                     addClass("normal-text")
                 }
             }
+            isReorderable = false
         }
 
         setRowFactory { LanguageTableRow() }

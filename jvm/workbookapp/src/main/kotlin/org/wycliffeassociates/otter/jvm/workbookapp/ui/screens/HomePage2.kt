@@ -2,6 +2,9 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Node
+import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.card.TranslationCard2
 import org.wycliffeassociates.otter.jvm.controls.card.newTranslationCard
 import org.wycliffeassociates.otter.jvm.controls.card.translationCreationCard
@@ -11,6 +14,8 @@ import org.wycliffeassociates.otter.jvm.controls.event.WorkbookDeleteEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookOpenEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.bindSingleChild
+import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.ProjectWizardSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.BookSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel2
@@ -21,9 +26,16 @@ class HomePage2 : View() {
 
     private val viewModel: HomePageViewModel2 by inject()
     private val projectWizardViewModel: ProjectWizardViewModel by inject()
+    private val navigator: NavigationMediator by inject()
 
     private val mainSectionProperty = SimpleObjectProperty<Node>(null)
-
+    private val breadCrumb = BreadCrumb().apply {
+        titleProperty.set(messages["home"])
+        iconProperty.set(FontIcon(MaterialDesign.MDI_HOME))
+        setOnAction {
+            fire(NavigationRequestEvent(this@HomePage2))
+        }
+    }
     private val bookFragment = BookSection(viewModel.bookList)
     private val wizardFragment: ProjectWizardSection by lazy {
         ProjectWizardSection(
@@ -128,6 +140,7 @@ class HomePage2 : View() {
 
     override fun onDock() {
         super.onDock()
+        navigator.dock(this, breadCrumb)
         mainSectionProperty.set(bookFragment)
         viewModel.loadProjects()
     }
