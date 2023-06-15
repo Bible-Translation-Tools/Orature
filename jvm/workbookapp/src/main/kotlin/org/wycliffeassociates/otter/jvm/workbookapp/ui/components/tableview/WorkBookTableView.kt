@@ -51,8 +51,11 @@ class WorkBookTableView(
             prefWidthProperty().bind(this@WorkBookTableView.widthProperty().multiply(0.25))
             minWidth = 120.0 // this may not be replaced with css
             isReorderable = false
+            isSortable = true
+
+            bindColumnSortComparator()
         }
-        column("", String::class).apply {
+        column(messages["code"], String::class).apply {
             addClass("table-view__column-header-row")
             setCellValueFactory { it.value.slug.toProperty() }
             cellFormat {
@@ -60,6 +63,9 @@ class WorkBookTableView(
             }
             minWidth = 70.0 // this may not be replaced with css
             isReorderable = false
+            isSortable = true
+
+            bindColumnSortComparator()
         }
         column(messages["anthology"], String::class).apply {
             addClass("table-view__column-header-row")
@@ -71,6 +77,9 @@ class WorkBookTableView(
                 }
             }
             isReorderable = false
+            isSortable = true
+
+            bindColumnSortComparator()
         }
         column(messages["progress"], Number::class) {
             setCellValueFactory { it.value.progress.toProperty() }
@@ -81,12 +90,18 @@ class WorkBookTableView(
                 }
             }
             isReorderable = false
+            isSortable = true
+
+            bindColumnSortComparator()
         }
         column("", Boolean::class) {
             addClass("table-column__status-icon-col")
             setCellValueFactory { SimpleBooleanProperty(it.value.hasSourceAudio) }
             setCellFactory { WorkbookSourceAudioTableCell() }
             isReorderable = false
+            isSortable = true
+
+            bindColumnSortComparator()
         }
         column("", WorkbookDescriptor::class) {
             setCellValueFactory { SimpleObjectProperty(it.value) }
@@ -100,6 +115,8 @@ class WorkBookTableView(
         setRowFactory {
             WorkbookTableRow()
         }
+
+        bindTableSortComparator()
     }
 }
 

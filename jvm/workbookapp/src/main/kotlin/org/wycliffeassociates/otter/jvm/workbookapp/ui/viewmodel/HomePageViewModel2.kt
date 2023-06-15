@@ -4,6 +4,7 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.transformation.FilteredList
+import javafx.collections.transformation.SortedList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
@@ -42,7 +43,8 @@ class HomePageViewModel2 : ViewModel() {
 
     val projectGroups = observableListOf<ProjectGroupCardModel>()
     val bookList = observableListOf<WorkbookDescriptor>()
-    val filteredBooks = FilteredList<WorkbookDescriptor>(bookList)
+    private val filteredBooks = FilteredList<WorkbookDescriptor>(bookList)
+    val sortedBooks = SortedList<WorkbookDescriptor>(filteredBooks)
 
     val selectedProjectGroup = SimpleObjectProperty<ProjectGroupKey>()
     val bookSearchQueryProperty = SimpleStringProperty("")
