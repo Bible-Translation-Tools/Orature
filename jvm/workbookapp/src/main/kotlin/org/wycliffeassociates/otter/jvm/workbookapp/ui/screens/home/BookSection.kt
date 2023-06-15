@@ -40,10 +40,10 @@ class BookSection(books: ObservableList<WorkbookDescriptor>) : StackPane() {
                     addClass("btn", "btn--icon", "btn--borderless", "option-button")
                     graphic = FontIcon(MaterialDesign.MDI_DOTS_HORIZONTAL)
 
-                    projectsOptionMenu.books.setAll(books)
                     setOnAction {
                         val bound = this.boundsInLocal
                         val screenBound = this.localToScreen(bound)
+                        projectsOptionMenu.books.setAll(books)
                         projectsOptionMenu.show(
                             FX.primaryStage
                         )

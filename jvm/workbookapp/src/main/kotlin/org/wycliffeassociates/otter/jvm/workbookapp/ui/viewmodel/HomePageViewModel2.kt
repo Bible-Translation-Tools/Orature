@@ -26,12 +26,16 @@ class HomePageViewModel2 : ViewModel() {
 
     @Inject
     lateinit var workbookRepo: IWorkbookRepository
+
     @Inject
     lateinit var workbookDescriptorRepo: IWorkbookDescriptorRepository
+
     @Inject
     lateinit var createProjectUseCase: CreateProject
+
     @Inject
     lateinit var updateProjectUseCase: UpdateProject
+
     @Inject
     lateinit var deleteProjectUseCase: DeleteProject
 
@@ -72,11 +76,14 @@ class HomePageViewModel2 : ViewModel() {
     }
 
     fun deleteProjectGroup(books: List<WorkbookDescriptor>) {
-        workbookDescriptorRepo.delete(books)
-            .observeOnFx()
-            .subscribe {
-                loadProjects()
-            }
+        if (books.all { it.progress == 0.0 }) {
+            logger.info("Deleting project group: ${selectedProjectGroup.value.sourceLanguage} -> ${selectedProjectGroup.value.targetLanguage}")
+            workbookDescriptorRepo.delete(books)
+                .observeOnFx()
+                .subscribe {
+                    loadProjects()
+                }
+        }
     }
 
     fun deleteBook(workbookDescriptor: WorkbookDescriptor) {
