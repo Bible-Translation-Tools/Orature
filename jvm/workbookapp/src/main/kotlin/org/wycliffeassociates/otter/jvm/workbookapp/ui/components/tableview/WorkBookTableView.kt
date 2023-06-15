@@ -21,11 +21,14 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
+import javafx.collections.transformation.SortedList
 import javafx.event.EventTarget
-import javafx.scene.control.Label
 import javafx.scene.control.TableView
 import javafx.scene.layout.Priority
+import javafx.scene.layout.Region
+import javafx.util.Callback
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
@@ -37,7 +40,7 @@ class WorkBookTableView(
         addClass("wa-table-view")
         vgrow = Priority.ALWAYS
         columnResizePolicy = CONSTRAINED_RESIZE_POLICY
-        placeholder = Label("")
+        placeholder = Region() // shows nothing when table is empty
 
         column(messages["book"], String::class) {
             addClass("table-view__column-header-row")
@@ -112,11 +115,22 @@ class WorkBookTableView(
             isSortable = false
         }
 
+        sortPolicy = CUSTOM_SORT_POLICY as (Callback<TableView<WorkbookDescriptor>, Boolean>)
         setRowFactory {
             WorkbookTableRow()
         }
 
-        bindTableSortComparator()
+        val list = this.items
+        if (list is SortedList<WorkbookDescriptor>) {
+            comparatorProperty().onChangeAndDoNow {
+                if (sortOrder.isEmpty()) {
+                    // "unsorted", reset to default book order
+                    list.comparator = Comparator { wb1, wb2 -> wb1.sort.compareTo(wb2.sort) }
+                } else {
+                    list.comparator = it
+                }
+            }
+        }
     }
 }
 

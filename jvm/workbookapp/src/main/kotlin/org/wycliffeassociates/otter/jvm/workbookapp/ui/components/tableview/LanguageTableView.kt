@@ -1,13 +1,12 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview
 
 import javafx.collections.ObservableList
-import javafx.collections.transformation.SortedList
 import javafx.event.EventTarget
 import javafx.scene.control.TableView
 import javafx.scene.layout.Priority
+import javafx.scene.layout.Region
 import javafx.util.Callback
 import org.wycliffeassociates.otter.common.data.primitives.Language
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
@@ -19,6 +18,7 @@ class LanguageTableView(
         addClass("wa-table-view")
         vgrow = Priority.ALWAYS
         columnResizePolicy = CONSTRAINED_RESIZE_POLICY
+        placeholder = Region() // shows nothing when table is empty
 
         column(messages["language"], String::class) {
             setCellValueFactory { it.value.name.toProperty() }

@@ -80,6 +80,10 @@ class HomePageViewModel2 : ViewModel() {
     }
 
     fun loadProjects() {
+        // reset sort to default book order
+        sortedBooks.comparator = Comparator { wb1, wb2 ->
+            wb1.sort.compareTo(wb2.sort)
+        }
         workbookDescriptorRepo.getAll()
             .observeOnFx()
             .subscribe { books ->
