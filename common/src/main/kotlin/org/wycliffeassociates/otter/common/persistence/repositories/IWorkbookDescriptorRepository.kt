@@ -9,6 +9,5 @@ import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 interface IWorkbookDescriptorRepository {
     fun getById(id: Int): Maybe<WorkbookDescriptor>
     fun getAll(): Single<List<WorkbookDescriptor>>
-    fun delete(workbookDescriptor: WorkbookDescriptor): Completable
     fun delete(list: List<WorkbookDescriptor>): Completable
 }
