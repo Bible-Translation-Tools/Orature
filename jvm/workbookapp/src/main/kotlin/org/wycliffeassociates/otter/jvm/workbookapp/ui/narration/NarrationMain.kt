@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.ReplayRelay
 import io.mockk.every
 import io.mockk.mockk
@@ -14,8 +15,8 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.DaggerAppDependencyGraph
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
+import java.io.File
 import javax.inject.Inject
-import kotlin.io.path.createTempDirectory
 
 class NarrationApp : App(NarrationView::class), IDependencyGraphProvider {
 
@@ -85,6 +86,7 @@ class NarrationApp : App(NarrationView::class), IDependencyGraphProvider {
             every { chapter.text } returns "Chapter Text $i"
             every { chapter.title } returns i.toString()
             every { chapter.getDraft() } returns mockChunks()
+            every { chapter.audio } returns mockAudio()
             chapters.add(chapter)
         }
         return Observable.fromIterable(chapters)
@@ -119,6 +121,37 @@ class NarrationApp : App(NarrationView::class), IDependencyGraphProvider {
         return ReplayRelay.create<Chunk>().apply { chunks.forEach { this.accept(it) } }
     }
 
+    private fun mockAudio(): AssociatedAudio {
+        val audio = mockk<AssociatedAudio>()
+        val take = mockTake()
+
+        val takes = ReplayRelay.create<Take>()
+        take?.let { takes.apply { this.accept(it) } }
+
+        val selected = take?.let {
+            BehaviorRelay.createDefault(TakeHolder(take))
+        } ?: BehaviorRelay.createDefault(TakeHolder.empty)
+
+        every { audio.takes } returns takes
+        every { audio.selected } returns selected
+
+        return audio
+    }
+
+    private fun mockTake(): Take? {
+        val userHomeDir = File(System.getProperty("user.home"))
+        val takeFile = File(userHomeDir, "narration.wav")
+
+        return if (takeFile.exists()) {
+            val take = mockk<Take>()
+            every { take.file } returns takeFile
+            every { take.name } returns takeFile.name
+            every { take.number } returns 1
+            every { take.format } returns MimeType.WAV
+            take
+        } else null
+    }
+
     private fun mockProjectFileAccessor(workbook: Workbook) {
         val projectFileAccessor = mockk<ProjectFilesAccessor>()
 
@@ -128,8 +161,8 @@ class NarrationApp : App(NarrationView::class), IDependencyGraphProvider {
     }
 
     private fun mockProjectAudioDir(accessor: ProjectFilesAccessor) {
-        val tempDir = createTempDirectory("narration")
-        every { accessor.audioDir } returns tempDir.toFile()
+        val userHomeDir = File(System.getProperty("user.home"))
+        every { accessor.audioDir } returns userHomeDir
     }
 }
 

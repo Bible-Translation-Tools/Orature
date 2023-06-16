@@ -1,15 +1,19 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.ObservableValue
 import javafx.event.EventTarget
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
+import org.wycliffeassociates.otter.common.data.workbook.Chapter
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.chapterSelector
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.narrationMenu
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
+import java.io.File
 import java.text.MessageFormat
 
 class NarrationHeader : View() {
@@ -28,6 +32,7 @@ class NarrationHeader : View() {
                 hasUndoProperty.bind(viewModel.hasUndoProperty)
                 hasRedoProperty.bind(viewModel.hasRedoProperty)
                 hasChapterFileProperty.bind(viewModel.hasChapterFileProperty)
+                hasVersesProperty.bind(viewModel.hasVersesProperty)
             }
             chapterSelector {
                 chapterTitleProperty.bind(viewModel.chapterTitleProperty)
@@ -50,31 +55,23 @@ class NarrationHeaderViewModel : ViewModel() {
     private val workbookDataStore by inject<WorkbookDataStore>()
     private val narrationViewViewModel: NarrationViewViewModel by inject()
 
-    // val titleProperty = SimpleStringProperty("Narration Title")
-    // val chapterTitleProperty = SimpleStringProperty("Chapter Title")
-
     val titleProperty = workbookDataStore.activeWorkbookProperty.stringBinding {
         it?.let {
             MessageFormat.format(
-                // messages["narrationTitle"],
+                messages["narrationTitle"],
                 it.target.title
             )
         } ?: ""
     }
 
-    val chapterTitleProperty = workbookDataStore.activeChapterProperty.stringBinding {
-        it?.let {
-            MessageFormat.format(
-                messages["chapterTitle"],
-                messages["chapter"],
-                it.title
-            )
-        } ?: ""
-    }
+    val chapterTitleProperty = SimpleStringProperty()
 
     val hasNextChapter = SimpleBooleanProperty()
     val hasPreviousChapter = SimpleBooleanProperty()
-    val hasChapterFileProperty = SimpleBooleanProperty()
+    val hasVersesProperty = SimpleBooleanProperty()
+
+    val chapterFileProperty = SimpleObjectProperty<File>()
+    val hasChapterFileProperty = chapterFileProperty.isNotNull
 
     val hasUndoProperty = SimpleBooleanProperty()
     val hasRedoProperty = SimpleBooleanProperty()
@@ -82,6 +79,13 @@ class NarrationHeaderViewModel : ViewModel() {
     init {
         hasUndoProperty.bind(narrationViewViewModel.hasUndoProperty)
         hasRedoProperty.bind(narrationViewViewModel.hasRedoProperty)
+        hasVersesProperty.bind(narrationViewViewModel.hasVersesProperty)
+
+        workbookDataStore.activeChapterProperty.onChangeAndDoNow {
+            it?.let { chapter ->
+                loadChapter(chapter)
+            }
+        }
     }
 
     fun selectPreviousChapter() {
@@ -90,6 +94,17 @@ class NarrationHeaderViewModel : ViewModel() {
 
     fun selectNextChapter() {
         TODO("Not yet implemented")
+    }
+
+    private fun loadChapter(chapter: Chapter) {
+        chapterFileProperty.set(chapter.audio.selected.value?.value?.file)
+        chapterTitleProperty.set(
+            MessageFormat.format(
+                messages["chapterTitle"],
+                messages["chapter"],
+                chapter.title
+            )
+        )
     }
 }
 

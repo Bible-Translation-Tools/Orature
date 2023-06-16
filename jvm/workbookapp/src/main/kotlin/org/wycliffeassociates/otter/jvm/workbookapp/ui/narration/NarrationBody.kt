@@ -165,6 +165,7 @@ class NarrationBodyViewModel : ViewModel() {
 
         narrationViewViewModel.hasUndoProperty.bind(hasUndoProperty)
         narrationViewViewModel.hasRedoProperty.bind(hasRedoProperty)
+        narrationViewViewModel.hasVersesProperty.bind(recordedVerses.booleanBinding { it.isNotEmpty() })
     }
 
     fun onDock() {

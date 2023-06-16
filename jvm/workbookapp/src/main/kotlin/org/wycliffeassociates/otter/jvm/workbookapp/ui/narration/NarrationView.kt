@@ -30,4 +30,5 @@ class NarrationViewViewModel : ViewModel() {
 
     val hasUndoProperty = SimpleBooleanProperty()
     val hasRedoProperty = SimpleBooleanProperty()
+    val hasVersesProperty = SimpleBooleanProperty()
 }
