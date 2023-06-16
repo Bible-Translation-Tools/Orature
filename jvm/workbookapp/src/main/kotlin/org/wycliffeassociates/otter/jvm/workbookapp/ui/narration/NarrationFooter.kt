@@ -4,7 +4,7 @@ import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
-import javafx.concurrent.Task
+import javafx.util.Duration
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.jvm.controls.narration.*
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NarrationTextCell
@@ -115,17 +115,11 @@ class NarrationFooter : View() {
 
         subscribe<InitialSelectedVerseChangedEvent> { event ->
             listView.apply {
-                val delay = object : Task<Unit>() {
-                    override fun call() {
-                        Thread.sleep(1000)
-                    }
-                }
-                delay.setOnSucceeded {
+                runLater(Duration.millis(1000.0)) {
                     val index = event.index.coerceIn(0, viewModel.chunks.size - 1)
                     selectionModel.select(index)
                     scrollTo(index)
                 }
-                Thread(delay).start()
             }
         }
 
