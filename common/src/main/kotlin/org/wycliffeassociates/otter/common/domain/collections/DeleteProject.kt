@@ -72,9 +72,6 @@ class DeleteProject @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
-    /**
-     * Initializes workbook descriptor after we delete the project data.
-     */
     private fun recreateWorkbookDescriptor(workbookDescriptor: WorkbookDescriptor): Completable {
         val sourceMetadata = workbookDescriptor.sourceCollection.resourceContainer!!
         return collectionRepository
