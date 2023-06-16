@@ -31,9 +31,6 @@ class HomePageViewModel2 : ViewModel() {
     lateinit var workbookDescriptorRepo: IWorkbookDescriptorRepository
 
     @Inject
-    lateinit var createProjectUseCase: CreateProject
-
-    @Inject
     lateinit var updateProjectUseCase: UpdateProject
 
     @Inject
@@ -97,6 +94,12 @@ class HomePageViewModel2 : ViewModel() {
     }
 
     private fun updateBookList(books: List<WorkbookDescriptor>) {
+        if (books.isEmpty()) {
+            bookList.clear()
+            projectGroups.clear()
+            return
+        }
+
         val projectGroups = books.groupBy {
             ProjectGroupKey(it.sourceLanguage.slug, it.targetLanguage.slug, it.mode)
         }

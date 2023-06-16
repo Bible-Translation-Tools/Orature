@@ -33,9 +33,7 @@ import javax.inject.Inject
 class DeleteProject @Inject constructor(
     private val collectionRepository: ICollectionRepository,
     private val directoryProvider: IDirectoryProvider,
-    private val workbookRepository: IWorkbookRepository,
-    private val workbookDescriptorRepo: IWorkbookDescriptorRepository,
-    private val createProjectUseCase: CreateProject
+    private val workbookRepository: IWorkbookRepository
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -50,6 +48,10 @@ class DeleteProject @Inject constructor(
             .andThen(collectionRepository.deleteProject(targetProject, deleteFiles))
     }
 
+    /**
+     * Delete the project's content (files & data). This resets the project
+     * to its initial state by deleting and re-inserting the project to its group.
+     */
     fun delete(workbookDescriptor: WorkbookDescriptor): Completable {
         return Observable
             .fromCallable {
@@ -70,6 +72,9 @@ class DeleteProject @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
+    /**
+     * Initializes workbook descriptor after we delete the project data.
+     */
     private fun recreateWorkbookDescriptor(workbookDescriptor: WorkbookDescriptor): Completable {
         val sourceMetadata = workbookDescriptor.sourceCollection.resourceContainer!!
         return collectionRepository
