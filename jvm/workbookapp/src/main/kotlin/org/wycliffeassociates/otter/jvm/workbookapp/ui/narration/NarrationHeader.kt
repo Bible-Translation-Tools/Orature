@@ -1,14 +1,19 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Observable
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.ObservableValue
+import javafx.collections.ObservableList
 import javafx.event.EventTarget
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.chapterSelector
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.narrationMenu
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -49,6 +54,16 @@ class NarrationHeader : View() {
             }
         }
     }
+
+    override fun onDock() {
+        super.onDock()
+        viewModel.onDock()
+    }
+
+    override fun onUndock() {
+        super.onDock()
+        viewModel.onUndock()
+    }
 }
 
 class NarrationHeaderViewModel : ViewModel() {
@@ -64,6 +79,11 @@ class NarrationHeaderViewModel : ViewModel() {
         } ?: ""
     }
 
+    private enum class StepDirection {
+        FORWARD,
+        BACKWARD
+    }
+
     val chapterTitleProperty = SimpleStringProperty()
 
     val hasNextChapter = SimpleBooleanProperty()
@@ -76,24 +96,42 @@ class NarrationHeaderViewModel : ViewModel() {
     val hasUndoProperty = SimpleBooleanProperty()
     val hasRedoProperty = SimpleBooleanProperty()
 
+    private val chapterList: ObservableList<Chapter> = observableListOf()
+
+    val listeners = mutableListOf<ListenerDisposer>()
+
     init {
         hasUndoProperty.bind(narrationViewViewModel.hasUndoProperty)
         hasRedoProperty.bind(narrationViewViewModel.hasRedoProperty)
         hasVersesProperty.bind(narrationViewViewModel.hasVersesProperty)
+    }
 
-        workbookDataStore.activeChapterProperty.onChangeAndDoNow {
+    fun onDock() {
+        workbookDataStore.activeChapterProperty.onChangeAndDoNowWithDisposer {
             it?.let { chapter ->
+                setHasNextAndPreviousChapter(chapter)
                 loadChapter(chapter)
             }
         }
+
+        workbookDataStore.activeWorkbookProperty.onChangeAndDoNowWithDisposer { workbook ->
+            workbook?.let {
+                getChapterList(workbook.target.chapters)
+            }
+        }.let(listeners::add)
+    }
+
+    fun onUndock() {
+        listeners.forEach(ListenerDisposer::dispose)
+        listeners.clear()
     }
 
     fun selectPreviousChapter() {
-        TODO("Not yet implemented")
+        stepToChapter(StepDirection.BACKWARD)
     }
 
     fun selectNextChapter() {
-        TODO("Not yet implemented")
+        stepToChapter(StepDirection.FORWARD)
     }
 
     private fun loadChapter(chapter: Chapter) {
@@ -105,6 +143,43 @@ class NarrationHeaderViewModel : ViewModel() {
                 chapter.title
             )
         )
+    }
+
+    private fun getChapterList(chapters: Observable<Chapter>) {
+        chapters
+            .toList()
+            .map { it.sortedBy { chapter -> chapter.sort } }
+            .observeOnFx()
+            .doOnError { e ->
+                //logger.error("Error in getting the chapter list", e)
+            }
+            .subscribe { list ->
+                chapterList.setAll(list)
+            }
+    }
+
+    private fun setHasNextAndPreviousChapter(chapter: Chapter) {
+        if (chapterList.isNotEmpty()) {
+            hasNextChapter.set(chapter.sort < chapterList.last().sort)
+            hasPreviousChapter.set(chapter.sort > chapterList.first().sort)
+        } else {
+            hasNextChapter.set(false)
+            hasPreviousChapter.set(false)
+            chapterList.sizeProperty.onChangeOnce {
+                setHasNextAndPreviousChapter(chapter)
+            }
+        }
+    }
+
+    private fun stepToChapter(direction: StepDirection) {
+        val step = when (direction) {
+            StepDirection.FORWARD -> 1
+            StepDirection.BACKWARD -> -1
+        }
+        val nextIndex = chapterList.indexOf(workbookDataStore.chapter) + step
+        chapterList.elementAtOrNull(nextIndex)?.let {
+            workbookDataStore.activeChapterProperty.set(it)
+        }
     }
 }
 

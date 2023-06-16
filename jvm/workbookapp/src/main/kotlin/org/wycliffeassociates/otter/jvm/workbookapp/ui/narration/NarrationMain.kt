@@ -83,6 +83,7 @@ class NarrationApp : App(NarrationView::class), IDependencyGraphProvider {
         val chapters = mutableListOf<Chapter>()
         for (i in 1..28) {
             val chapter = mockk<Chapter>()
+            every { chapter.sort } returns i
             every { chapter.text } returns "Chapter Text $i"
             every { chapter.title } returns i.toString()
             every { chapter.getDraft() } returns mockChunks()
