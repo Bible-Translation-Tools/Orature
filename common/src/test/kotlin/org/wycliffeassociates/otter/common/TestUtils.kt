@@ -38,6 +38,7 @@ import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository

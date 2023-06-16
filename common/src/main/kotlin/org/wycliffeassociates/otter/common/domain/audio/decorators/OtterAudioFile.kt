@@ -71,6 +71,12 @@ class OratureAudioFile : AudioFile {
         return getCuesFromMap(type)
     }
 
+    fun addCues(cues: List<AudioCue>) {
+        cues.forEach {
+            addCue(it.location, it.label)
+        }
+    }
+
     override fun addCue(location: Int, label: String) {
         super.addCue(location, label)
         cues as MutableList
@@ -88,6 +94,10 @@ class OratureAudioFile : AudioFile {
             val marker = VerseMarker(verseStart, verseEnd, location)
             cueMap[OratureCueType.VERSE]!!.add(marker)
         }
+    }
+
+    fun clearChunkMarkers() {
+        clearCuesFromMap(OratureCueType.CHUNK)
     }
 
     fun clearVerseMarkers() {

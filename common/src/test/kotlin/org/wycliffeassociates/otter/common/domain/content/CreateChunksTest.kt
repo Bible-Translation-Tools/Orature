@@ -19,6 +19,7 @@ import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants

@@ -17,7 +17,8 @@ import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.workbook.Book
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.common.domain.audio.SourceAudioFile
+import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureCueType
 import org.wycliffeassociates.otter.common.domain.versification.Versification
 import org.wycliffeassociates.otter.common.persistence.repositories.IVersificationRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
@@ -61,8 +62,8 @@ class CreateChunks @Inject constructor(
 
         logger.info("Creating ${chunks.size} user defined chunks for project: $projectSlug chapter: $chapterNumber")
         val chapAudio = workbook.sourceAudioAccessor.getChapter(chapter.sort, workbook.target)
-        val sa = SourceAudioFile(chapAudio!!.file)
-        val verseMarkers = sa.getVerses()
+        val sa = OratureAudioFile(chapAudio!!.file)
+        val verseMarkers = sa.getMarker(OratureCueType.VERSE).map { it.toCue() }
         val chunkRanges = mapCuesToRanges(chunks)
         val verseRanges = mapCuesToRanges(verseMarkers)
         val chunksToAdd = mutableListOf<Content>()

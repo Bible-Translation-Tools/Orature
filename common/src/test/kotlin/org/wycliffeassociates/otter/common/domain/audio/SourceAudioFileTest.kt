@@ -25,6 +25,7 @@ import org.junit.Test
 import java.io.File
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureCueType
 
 class SourceAudioFileTest {
 
@@ -94,9 +95,9 @@ class SourceAudioFileTest {
             }
             af.update()
 
-            val saf = SourceAudioFile(temp)
-            assertEquals(results[i].verses, saf.getVerses().size)
-            assertEquals(results[i].chunks, saf.getChunks().size)
+            val saf = OratureAudioFile(temp)
+            assertEquals(results[i].verses, saf.getMarker(OratureCueType.VERSE).size)
+            assertEquals(results[i].chunks, saf.getMarker(OratureCueType.CHUNK).size)
         }
     }
 }
