@@ -140,16 +140,19 @@ class WorkBookTableView(
             }
         }
 
-        /* default order when unsorted */
-        val list = this.items
-        if (list is SortedList<WorkbookDescriptor>) {
-            comparatorProperty().onChangeAndDoNow {
-                if (sortOrder.isEmpty()) {
-                    // "unsorted", reset to default book order
-                    list.comparator = Comparator { wb1, wb2 -> wb1.sort.compareTo(wb2.sort) }
-                } else {
-                    list.comparator = it
-                }
+        handleDefaultSortOrder()
+    }
+}
+
+private fun WorkBookTableView.handleDefaultSortOrder() {
+    val list = this.items
+    if (list is SortedList<WorkbookDescriptor>) {
+        comparatorProperty().onChangeAndDoNow {
+            if (sortOrder.isEmpty()) {
+                // when toggled to "unsorted", resets to default order (usually Biblical order)
+                list.comparator = Comparator { wb1, wb2 -> wb1.sort.compareTo(wb2.sort) }
+            } else {
+                list.comparator = it
             }
         }
     }
