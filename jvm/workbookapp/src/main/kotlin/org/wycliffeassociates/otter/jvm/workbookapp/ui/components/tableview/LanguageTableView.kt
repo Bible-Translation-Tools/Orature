@@ -85,6 +85,7 @@ class LanguageTableView(
                 focusModel.focus(0)
             }
         }
+
         /* accessibility */
         addEventFilter(KeyEvent.KEY_PRESSED) { keyEvent ->
             if (keyEvent.code == KeyCode.SPACE || keyEvent.code == KeyCode.ENTER) {

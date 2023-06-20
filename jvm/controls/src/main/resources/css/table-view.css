@@ -77,7 +77,7 @@
 .wa-table-view .virtual-flow .scroll-bar .increment-button,
 .wa-table-view .virtual-flow .scroll-bar .decrement-button {
     -fx-opacity: 0;
-    -fx-padding: 2;
+    -fx-padding: 0 2;
 }
 
 .wa-table-view .progress-bar {

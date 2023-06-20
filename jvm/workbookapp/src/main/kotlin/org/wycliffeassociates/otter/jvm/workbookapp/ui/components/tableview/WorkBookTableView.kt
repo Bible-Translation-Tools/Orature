@@ -95,6 +95,7 @@ class WorkBookTableView(
                 val percent = item.toDouble()
                 graphic = progressbar(percent) {
                     if (percent == 1.0) addClass("full")
+                    fitToParentWidth()
                 }
             }
             isReorderable = false
@@ -132,6 +133,7 @@ class WorkBookTableView(
                 focusModel.focus(0)
             }
         }
+
         /* accessibility */
         addEventFilter(KeyEvent.KEY_PRESSED) { keyEvent ->
             if (keyEvent.code == KeyCode.SPACE || keyEvent.code == KeyCode.ENTER) {

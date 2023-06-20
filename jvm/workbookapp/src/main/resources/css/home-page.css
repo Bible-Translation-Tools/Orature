@@ -29,7 +29,7 @@
 }
 
 .homepage__left-pane {
-    -fx-pref-width: 250px;
+    -fx-pref-width: 320px;
     -fx-spacing: 12;
     -fx-border-width: 0 0.5px 0 0;
     -fx-border-color: -wa-border-light;
@@ -81,4 +81,19 @@
 
 .line-break {
     -fx-padding: 6 0;
+}
+
+.homepage__left-pane .scroll-bar:vertical,
+.homepage__left-pane .scroll-bar:vertical .track,
+.homepage__left-pane .scroll-bar:vertical .track-background,
+.homepage__left-pane .scroll-bar:horizontal,
+.homepage__left-pane .scroll-bar:horizontal .track,
+.homepage__left-pane .scroll-bar:horizontal .track-background {
+    -fx-background-color: transparent;
+}
+
+.homepage__left-pane .scroll-bar .increment-button,
+.homepage__left-pane .scroll-bar .decrement-button {
+    -fx-opacity: 0;
+    -fx-padding: 0 2;
 }
