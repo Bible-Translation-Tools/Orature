@@ -34,6 +34,7 @@ class WorkbookTableRow : TableRow<WorkbookDescriptor>() {
         }
 
         isMouseTransparent = false
+        isFocusTraversable = false
 
         setOnMouseClicked {
             FX.eventbus.fire(WorkbookOpenEvent(item))
