@@ -35,14 +35,20 @@ class HomePage2 : View() {
             fire(NavigationRequestEvent(this@HomePage2))
         }
     }
-    private val bookFragment = BookSection(viewModel.bookList)
+    private val bookFragment = BookSection(viewModel.bookList, viewModel.sortedBooks).apply {
+        bookSearchQueryProperty.bindBidirectional(viewModel.bookSearchQueryProperty)
+    }
     private val wizardFragment: ProjectWizardSection by lazy {
         ProjectWizardSection(
-            projectWizardViewModel.sourceLanguages,
-            projectWizardViewModel.targetLanguages,
+            projectWizardViewModel.sortedSourceLanguages,
+            projectWizardViewModel.sortedTargetLanguages,
             projectWizardViewModel.selectedModeProperty,
-            projectWizardViewModel.selectedSourceLanguageProperty,
+            projectWizardViewModel.selectedSourceLanguageProperty
         ).apply {
+
+            sourceLanguageSearchQueryProperty.bindBidirectional(projectWizardViewModel.sourceLanguageSearchQueryProperty)
+            targetLanguageSearchQueryProperty.bindBidirectional(projectWizardViewModel.targetLanguageSearchQueryProperty)
+
             setOnCancelAction {
                 exitWizard()
             }
@@ -136,9 +142,14 @@ class HomePage2 : View() {
 
     override fun onDock() {
         super.onDock()
+        viewModel.dock()
         navigator.dock(this, breadCrumb)
         mainSectionProperty.set(bookFragment)
-        viewModel.loadProjects()
+    }
+
+    override fun onUndock() {
+        super.onUndock()
+        viewModel.undock()
     }
 
     private fun exitWizard() {

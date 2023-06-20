@@ -18,6 +18,7 @@ data class WorkbookDescriptor(
     val slug: String = targetCollection.slug
     val title: String = targetCollection.titleKey
     val label: String = targetCollection.labelKey
+    val sort: Int = sourceCollection.sort
     val lastModified: LocalDateTime? = targetCollection.modifiedTs
 
     val sourceLanguage: Language
