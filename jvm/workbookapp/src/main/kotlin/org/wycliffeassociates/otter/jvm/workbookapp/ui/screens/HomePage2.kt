@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Node
+import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
@@ -36,14 +37,20 @@ class HomePage2 : View() {
             fire(NavigationRequestEvent(this@HomePage2))
         }
     }
-    private val bookFragment = BookSection(viewModel.bookList)
+    private val bookFragment = BookSection(viewModel.bookList, viewModel.sortedBooks).apply {
+        bookSearchQueryProperty.bindBidirectional(viewModel.bookSearchQueryProperty)
+    }
     private val wizardFragment: ProjectWizardSection by lazy {
         ProjectWizardSection(
-            projectWizardViewModel.sourceLanguages,
-            projectWizardViewModel.targetLanguages,
+            projectWizardViewModel.sortedSourceLanguages,
+            projectWizardViewModel.sortedTargetLanguages,
             projectWizardViewModel.selectedModeProperty,
-            projectWizardViewModel.selectedSourceLanguageProperty,
+            projectWizardViewModel.selectedSourceLanguageProperty
         ).apply {
+
+            sourceLanguageSearchQueryProperty.bindBidirectional(projectWizardViewModel.sourceLanguageSearchQueryProperty)
+            targetLanguageSearchQueryProperty.bindBidirectional(projectWizardViewModel.targetLanguageSearchQueryProperty)
+
             setOnCancelAction {
                 exitWizard()
             }
@@ -83,9 +90,6 @@ class HomePage2 : View() {
     }
 
     override val root = borderpane {
-        center = stackpane {
-            bindSingleChild(mainSectionProperty)
-        }
         left = vbox {
             addClass("homepage__left-pane")
             label(messages["projects"]) {
@@ -115,34 +119,47 @@ class HomePage2 : View() {
                 }
             }
 
-            vbox { /* list of project groups */
-                addClass("homepage__left-pane__project-groups")
-                bindChildren(viewModel.projectGroups) { cardModel ->
-                    TranslationCard2(
-                        cardModel.sourceLanguage,
-                        cardModel.targetLanguage,
-                        cardModel.mode,
-                        viewModel.selectedProjectGroup
-                    ).apply {
+            scrollpane {
+                vgrow = Priority.ALWAYS
+                isFitToWidth = true
+                
+                vbox { /* list of project groups */
+                    addClass("homepage__left-pane__project-groups")
+                    bindChildren(viewModel.projectGroups) { cardModel ->
+                        TranslationCard2(
+                            cardModel.sourceLanguage,
+                            cardModel.targetLanguage,
+                            cardModel.mode,
+                            viewModel.selectedProjectGroup
+                        ).apply {
 
-                        setOnAction {
-                            viewModel.bookList.setAll(cardModel.books)
-                            viewModel.selectedProjectGroup.set(cardModel.getKey())
-                            if (mainSectionProperty.value !is BookSection) {
-                                exitWizard()
+                            setOnAction {
+                                viewModel.bookList.setAll(cardModel.books)
+                                viewModel.selectedProjectGroup.set(cardModel.getKey())
+                                if (mainSectionProperty.value !is BookSection) {
+                                    exitWizard()
+                                }
                             }
                         }
                     }
                 }
             }
         }
+        center = stackpane {
+            bindSingleChild(mainSectionProperty)
+        }
     }
 
     override fun onDock() {
         super.onDock()
+        viewModel.dock()
         navigator.dock(this, breadCrumb)
         mainSectionProperty.set(bookFragment)
-        viewModel.loadProjects()
+    }
+
+    override fun onUndock() {
+        super.onUndock()
+        viewModel.undock()
     }
 
     private fun exitWizard() {

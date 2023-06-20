@@ -19,12 +19,19 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview
 
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
+import javafx.collections.transformation.SortedList
 import javafx.event.EventTarget
 import javafx.scene.control.TableView
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
+import javafx.scene.layout.Region
+import javafx.util.Callback
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
@@ -32,10 +39,13 @@ class WorkBookTableView(
     books: ObservableList<WorkbookDescriptor>
 ) : TableView<WorkbookDescriptor>(books) {
 
+    private val selectedIndexProperty = SimpleIntegerProperty(-1)
+
     init {
         addClass("wa-table-view")
         vgrow = Priority.ALWAYS
         columnResizePolicy = CONSTRAINED_RESIZE_POLICY
+        placeholder = Region() // shows nothing when table is empty
 
         column(messages["book"], String::class) {
             addClass("table-view__column-header-row")
@@ -49,8 +59,11 @@ class WorkBookTableView(
             prefWidthProperty().bind(this@WorkBookTableView.widthProperty().multiply(0.25))
             minWidth = 120.0 // this may not be replaced with css
             isReorderable = false
+            isSortable = true
+
+            bindColumnSortComparator()
         }
-        column("", String::class).apply {
+        column(messages["code"], String::class).apply {
             addClass("table-view__column-header-row")
             setCellValueFactory { it.value.slug.toProperty() }
             cellFormat {
@@ -58,6 +71,9 @@ class WorkBookTableView(
             }
             minWidth = 70.0 // this may not be replaced with css
             isReorderable = false
+            isSortable = true
+
+            bindColumnSortComparator()
         }
         column(messages["anthology"], String::class).apply {
             addClass("table-view__column-header-row")
@@ -69,6 +85,9 @@ class WorkBookTableView(
                 }
             }
             isReorderable = false
+            isSortable = true
+
+            bindColumnSortComparator()
         }
         column(messages["progress"], Number::class) {
             setCellValueFactory { it.value.progress.toProperty() }
@@ -76,27 +95,67 @@ class WorkBookTableView(
                 val percent = item.toDouble()
                 graphic = progressbar(percent) {
                     if (percent == 1.0) addClass("full")
+                    fitToParentWidth()
                 }
             }
             isReorderable = false
+            isSortable = true
+
+            bindColumnSortComparator()
         }
         column("", Boolean::class) {
             addClass("table-column__status-icon-col")
             setCellValueFactory { SimpleBooleanProperty(it.value.hasSourceAudio) }
             setCellFactory { WorkbookSourceAudioTableCell() }
             isReorderable = false
+            isSortable = true
+
+            bindColumnSortComparator()
         }
         column("", WorkbookDescriptor::class) {
             setCellValueFactory { SimpleObjectProperty(it.value) }
             setCellFactory {
-                WorkbookOptionTableCell()
+                WorkbookOptionTableCell(selectedIndexProperty)
             }
             isReorderable = false
             isSortable = false
         }
 
+        sortPolicy = CUSTOM_SORT_POLICY as (Callback<TableView<WorkbookDescriptor>, Boolean>)
         setRowFactory {
             WorkbookTableRow()
+        }
+
+        /* accessibility */
+        focusedProperty().onChange {
+            if (it && selectionModel.selectedIndex < 0) {
+                selectionModel.select(0)
+                focusModel.focus(0)
+            }
+        }
+
+        /* accessibility */
+        addEventFilter(KeyEvent.KEY_PRESSED) { keyEvent ->
+            if (keyEvent.code == KeyCode.SPACE || keyEvent.code == KeyCode.ENTER) {
+                selectedIndexProperty.set(selectionModel.selectedIndex)
+                keyEvent.consume()
+            }
+        }
+
+        handleDefaultSortOrder()
+    }
+}
+
+private fun WorkBookTableView.handleDefaultSortOrder() {
+    val list = this.items
+    if (list is SortedList<WorkbookDescriptor>) {
+        comparatorProperty().onChangeAndDoNow {
+            if (sortOrder.isEmpty()) {
+                // when toggled to "unsorted", resets to default order (usually Biblical order)
+                list.comparator = Comparator { wb1, wb2 -> wb1.sort.compareTo(wb2.sort) }
+            } else {
+                list.comparator = it
+            }
         }
     }
 }

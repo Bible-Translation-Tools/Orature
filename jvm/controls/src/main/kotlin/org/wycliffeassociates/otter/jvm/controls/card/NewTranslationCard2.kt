@@ -26,8 +26,7 @@ class NewTranslationCard2(
     private var onCancelProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
-        addClass("translation-card")
-        addPseudoClass("active")
+        addClass("translation-card", "translation-card--active")
 
         hbox {
             addClass("translation-card__header")

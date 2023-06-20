@@ -7,16 +7,21 @@ import javafx.scene.layout.StackPane
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
+import org.wycliffeassociates.otter.jvm.controls.bar.searchBar
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.popup.ProjectGroupOptionMenu
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview.workbookTableView
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 import java.text.MessageFormat
 
-class BookSection(books: ObservableList<WorkbookDescriptor>) : StackPane() {
+class BookSection(
+    books: ObservableList<WorkbookDescriptor>,
+    filteredBooks: ObservableList<WorkbookDescriptor>
+) : StackPane() {
+    val bookSearchQueryProperty = SimpleStringProperty()
     private val projectsOptionMenu = ProjectGroupOptionMenu()
     private val titleProperty = SimpleStringProperty().apply {
-        bind(books.stringBinding {
+        bind(filteredBooks.stringBinding {
             if (it.isNotEmpty()) {
                 val book = it.first()
                 MessageFormat.format(
@@ -40,6 +45,7 @@ class BookSection(books: ObservableList<WorkbookDescriptor>) : StackPane() {
                     addClass("btn", "btn--icon", "btn--borderless", "option-button")
                     graphic = FontIcon(MaterialDesign.MDI_DOTS_HORIZONTAL)
 
+                    projectsOptionMenu.books.setAll(filteredBooks)
                     setOnAction {
                         val bound = this.boundsInLocal
                         val screenBound = this.localToScreen(bound)
@@ -52,9 +58,14 @@ class BookSection(books: ObservableList<WorkbookDescriptor>) : StackPane() {
                     }
                 }
                 label(titleProperty) { addClass("h4") }
+                region { hgrow = Priority.ALWAYS }
+                searchBar {
+                    textProperty().bindBidirectional(bookSearchQueryProperty)
+                    promptText = messages["search"]
+                }
             }
 
-            workbookTableView(books) {
+            workbookTableView(filteredBooks) {
                 hgrow = Priority.ALWAYS
             }
 
@@ -63,7 +74,7 @@ class BookSection(books: ObservableList<WorkbookDescriptor>) : StackPane() {
         }
 
         emptyProjectSection {
-            visibleWhen { books.booleanBinding { it.isEmpty() } }
+            visibleWhen(books.booleanBinding { it.isEmpty() })
             managedWhen(visibleProperty())
         }
     }

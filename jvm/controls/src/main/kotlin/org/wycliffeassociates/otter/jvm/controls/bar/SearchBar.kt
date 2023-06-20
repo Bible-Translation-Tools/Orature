@@ -15,7 +15,7 @@ class SearchBar : CustomTextField() {
 
     private val searchIcon = FontIcon(MaterialDesign.MDI_MAGNIFY)
     private val clearBtn = Button().apply {
-        addClass("btn", "btn--icon", "btn--borderless")
+        addClass("btn", "btn--borderless", "text-field-button")
         graphic = FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE)
     }
 

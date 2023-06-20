@@ -3,8 +3,13 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview
 import javafx.collections.ObservableList
 import javafx.event.EventTarget
 import javafx.scene.control.TableView
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
+import javafx.scene.layout.Region
+import javafx.util.Callback
 import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.jvm.controls.event.LanguageSelectedEvent
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
@@ -16,6 +21,7 @@ class LanguageTableView(
         addClass("wa-table-view")
         vgrow = Priority.ALWAYS
         columnResizePolicy = CONSTRAINED_RESIZE_POLICY
+        placeholder = Region() // shows nothing when table is empty
 
         column(messages["language"], String::class) {
             setCellValueFactory { it.value.name.toProperty() }
@@ -26,6 +32,9 @@ class LanguageTableView(
                 }
             }
             isReorderable = false
+            isSortable = true
+
+            bindColumnSortComparator()
         }
         column(messages["anglicized"], String::class) {
             setCellValueFactory { it.value.anglicizedName.toProperty() }
@@ -36,6 +45,9 @@ class LanguageTableView(
                 }
             }
             isReorderable = false
+            isSortable = true
+
+            bindColumnSortComparator()
         }
         column(messages["code"], String::class) {
             setCellValueFactory { it.value.slug.toProperty() }
@@ -45,6 +57,9 @@ class LanguageTableView(
                 }
             }
             isReorderable = false
+            isSortable = true
+
+            bindColumnSortComparator()
         }
         column(messages["gateway"], Boolean::class) {
             setCellValueFactory { it.value.isGateway.toProperty() }
@@ -55,9 +70,33 @@ class LanguageTableView(
                 }
             }
             isReorderable = false
+            isSortable = true
+
+            bindColumnSortComparator()
         }
 
+        sortPolicy = CUSTOM_SORT_POLICY as (Callback<TableView<Language>, Boolean>)
         setRowFactory { LanguageTableRow() }
+
+        /* accessibility */
+        focusedProperty().onChange {
+            if (it && selectionModel.selectedIndex < 0) {
+                selectionModel.select(0)
+                focusModel.focus(0)
+            }
+        }
+
+        /* accessibility */
+        addEventFilter(KeyEvent.KEY_PRESSED) { keyEvent ->
+            if (keyEvent.code == KeyCode.SPACE || keyEvent.code == KeyCode.ENTER) {
+                selectedItem?.let { language ->
+                    FX.eventbus.fire(LanguageSelectedEvent(language))
+                }
+                keyEvent.consume()
+            }
+        }
+
+        bindTableSortComparator()
     }
 }
 
