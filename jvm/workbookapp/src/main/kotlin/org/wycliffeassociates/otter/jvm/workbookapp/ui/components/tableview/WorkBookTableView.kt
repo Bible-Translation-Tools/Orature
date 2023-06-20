@@ -137,18 +137,18 @@ class WorkBookTableView(
             if (keyEvent.code == KeyCode.SPACE || keyEvent.code == KeyCode.ENTER) {
                 selectedIndexProperty.set(selectionModel.selectedIndex)
                 keyEvent.consume()
+            }
+        }
 
-                /* default order when unsorted */
-                val list = this.items
-                if (list is SortedList<WorkbookDescriptor>) {
-                    comparatorProperty().onChangeAndDoNow {
-                        if (sortOrder.isEmpty()) {
-                            // "unsorted", reset to default book order
-                            list.comparator = Comparator { wb1, wb2 -> wb1.sort.compareTo(wb2.sort) }
-                        } else {
-                            list.comparator = it
-                        }
-                    }
+        /* default order when unsorted */
+        val list = this.items
+        if (list is SortedList<WorkbookDescriptor>) {
+            comparatorProperty().onChangeAndDoNow {
+                if (sortOrder.isEmpty()) {
+                    // "unsorted", reset to default book order
+                    list.comparator = Comparator { wb1, wb2 -> wb1.sort.compareTo(wb2.sort) }
+                } else {
+                    list.comparator = it
                 }
             }
         }
