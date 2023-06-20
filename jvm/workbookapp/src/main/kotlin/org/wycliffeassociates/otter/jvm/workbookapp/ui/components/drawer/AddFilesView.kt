@@ -22,6 +22,7 @@ import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
 import javafx.application.Platform
 import javafx.event.EventHandler
+import javafx.geometry.NodeOrientation
 import javafx.scene.control.Button
 import javafx.scene.input.DragEvent
 import javafx.scene.input.KeyCode
@@ -31,9 +32,11 @@ import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.jvm.controls.dialog.OtterDialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ImportConflictDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AddFilesViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
@@ -46,6 +49,7 @@ class AddFilesView : View() {
     private val settingsViewModel: SettingsViewModel by inject()
 
     private lateinit var closeButton: Button
+    private lateinit var importConflictDialog: OtterDialog
 
     override val root = vbox {
         addClass("app-drawer__content")
@@ -180,7 +184,7 @@ class AddFilesView : View() {
             themeProperty.set(settingsViewModel.appColorMode.value)
         }
 
-        viewModel.showImportDialogProperty.onChange {
+        viewModel.showImportProgressDialogProperty.onChange {
             Platform.runLater { if (it) importDialog.open() else importDialog.close() }
         }
     }

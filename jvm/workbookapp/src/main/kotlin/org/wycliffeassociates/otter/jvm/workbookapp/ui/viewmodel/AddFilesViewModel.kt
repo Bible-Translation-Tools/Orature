@@ -20,11 +20,13 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Single
+import io.reactivex.SingleEmitter
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.geometry.NodeOrientation
 import javafx.stage.FileChooser
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
@@ -38,6 +40,8 @@ import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImport
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ImportEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ConflictResolution
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ImportConflictDialog
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
 import java.io.File
@@ -48,10 +52,15 @@ class AddFilesViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(AddFilesViewModel::class.java)
 
+    val settingsViewModel: SettingsViewModel by inject()
+
     @Inject lateinit var directoryProvider: IDirectoryProvider
     @Inject lateinit var importProjectProvider : Provider<ImportProjectUseCase>
 
-    val showImportDialogProperty = SimpleBooleanProperty(false)
+    val showImportConflictProperty = SimpleBooleanProperty(false)
+
+    val showImportConflictDialogProperty = SimpleBooleanProperty(false)
+    val showImportProgressDialogProperty = SimpleBooleanProperty(false)
     val showImportSuccessDialogProperty = SimpleBooleanProperty(false)
     val showImportErrorDialogProperty = SimpleBooleanProperty(false)
     val importErrorMessage = SimpleStringProperty(null)
@@ -59,6 +68,8 @@ class AddFilesViewModel : ViewModel() {
     val importedProjectCoverProperty = SimpleObjectProperty<File>()
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
+    val availableChapters = observableListOf<Int>()
+    private lateinit var importCallbackEmitter: SingleEmitter<ImportOptions>
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -91,7 +102,7 @@ class AddFilesViewModel : ViewModel() {
     }
 
     private fun importProject(file: File) {
-        showImportDialogProperty.set(true)
+        showImportProgressDialogProperty.set(true)
         val callback = setupImportCallback()
 
         importProjectProvider.get()
@@ -119,7 +130,7 @@ class AddFilesViewModel : ViewModel() {
                         showImportErrorDialogProperty.value = true
                     }
                 }
-                showImportDialogProperty.value = false
+                showImportProgressDialogProperty.value = false
             }
     }
 
@@ -130,7 +141,34 @@ class AddFilesViewModel : ViewModel() {
             }
 
             override fun onRequestUserInput(parameter: ImportCallbackParameter): Single<ImportOptions> {
-                return Single.just(ImportOptions(parameter.options))
+                availableChapters.setAll(parameter.options)
+                return Single.create { emitter ->
+
+                    find<ImportConflictDialog> {
+
+                        setOnSubmitAction { resolution ->
+                            val importOption = if (resolution == ConflictResolution.OVERRIDE) {
+                                // proceed with override
+                                ImportOptions(availableChapters)
+                            } else {
+                                // aborted
+                                ImportOptions(chapters = null)
+                            }
+                            emitter.onSuccess(importOption)
+                            close()
+                        }
+
+                        setOnCloseAction {
+                            emitter.onSuccess(ImportOptions(chapters = null))
+                            close()
+                        }
+
+                        orientationProperty.set(NodeOrientation.LEFT_TO_RIGHT)
+                        themeProperty.set(settingsViewModel.appColorMode.value)
+
+                        runLater { open() }
+                    }
+                }
             }
 
             override fun onError(messageKey: String) {

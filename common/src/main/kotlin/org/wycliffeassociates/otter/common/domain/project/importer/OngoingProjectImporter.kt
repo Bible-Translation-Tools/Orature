@@ -113,11 +113,17 @@ class OngoingProjectImporter @Inject constructor(
                 val projectSlug = rc.manifest.projects.first().identifier
 
                 val projects = workbookRepository.getProjects().blockingGet()
-                return projects.any { existingProject ->
+                return projects.firstOrNull { existingProject ->
                     sourceLanguageSlug == existingProject.source.language.slug &&
                             languageSlug == existingProject.target.language.slug &&
                             projectSlug == existingProject.target.slug
-                }
+                }?.let { workbook ->
+                    directoryProvider.getProjectDirectory(
+                        workbook.source.resourceMetadata,
+                        workbook.target.resourceMetadata,
+                        projectSlug
+                    ).exists()
+                } ?: false
             }
         }
     }
