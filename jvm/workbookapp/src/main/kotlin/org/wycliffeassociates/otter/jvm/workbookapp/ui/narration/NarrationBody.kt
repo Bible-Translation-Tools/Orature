@@ -3,27 +3,32 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.github.thomasnield.rxkotlinfx.observeOnFx
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.Slider
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
-import org.wycliffeassociates.otter.common.data.narration.NarrationHistory
-import org.wycliffeassociates.otter.common.data.narration.NextVerseAction
-import org.wycliffeassociates.otter.common.data.narration.RecordAgainAction
-import org.wycliffeassociates.otter.common.data.narration.ResetAllAction
+import org.wycliffeassociates.otter.common.data.narration.*
 import org.wycliffeassociates.otter.common.data.primitives.VerseNode
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
+import org.wycliffeassociates.otter.common.domain.content.PluginActions
+import org.wycliffeassociates.otter.common.domain.narration.AudioFileUtils
+import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.common.recorder.WavFileWriter
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NextVerseEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.RecordVerseEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationRedoEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationResetChapterEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationUndoEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.io.File
@@ -56,6 +61,16 @@ class NarrationBody : View() {
                                 action {
                                     //hide()
                                     fire(RecordAgainEvent(index))
+                                }
+                                disableWhen {
+                                    viewModel.isRecordingAgainProperty.or(viewModel.isRecordingProperty)
+                                }
+                            }
+                            item("") {
+                                text = "Open in..."
+                                action {
+                                    //hide()
+                                    fire(OpenInAudioPluginEvent(index))
                                 }
                                 disableWhen {
                                     viewModel.isRecordingAgainProperty.or(viewModel.isRecordingProperty)
@@ -96,6 +111,10 @@ class NarrationBody : View() {
         subscribe<RecordAgainEvent> {
             viewModel.recordAgain(it.index)
         }
+
+        subscribe<OpenInAudioPluginEvent> {
+            viewModel.openInAudioPlugin(it.index)
+        }
     }
 
     override fun onDock() {
@@ -110,9 +129,11 @@ class NarrationBody : View() {
 }
 
 class NarrationBodyViewModel : ViewModel() {
+    private val logger = LoggerFactory.getLogger(NarrationBodyViewModel::class.java)
 
     private val workbookDataStore: WorkbookDataStore by inject()
     private val narrationViewViewModel: NarrationViewViewModel by inject()
+    private val audioPluginViewModel: AudioPluginViewModel by inject()
 
     @Inject
     lateinit var player: IAudioPlayer
@@ -120,6 +141,9 @@ class NarrationBodyViewModel : ViewModel() {
 
     @Inject
     lateinit var audioConnectionFactory: AudioConnectionFactory
+
+    @Inject
+    lateinit var audioFileUtils: AudioFileUtils
 
     private var recorder: IAudioRecorder? = null
     private var writer: WavFileWriter? = null
@@ -155,6 +179,8 @@ class NarrationBodyViewModel : ViewModel() {
     private val narrationHistory = NarrationHistory()
     private lateinit var pcmFile: File
     private lateinit var jsonFile: File
+
+    val contextProperty = SimpleObjectProperty(PluginType.EDITOR)
 
     val recordedVerses = observableListOf<VerseNode>()
 
@@ -223,6 +249,14 @@ class NarrationBodyViewModel : ViewModel() {
         recordAgainVerseIndex = verseIndex
         isRecordingAgain = true
         recordPause = false
+    }
+
+    fun openInAudioPlugin(index: Int) {
+        recordedAudio?.let { audio ->
+            val verse = recordedVerses[index]
+            val file = audioFileUtils.getSectionAsFile(audio, verse.start, verse.end)
+            processWithPlugin(file, index)
+        }
     }
 
     fun onNext() {
@@ -373,6 +407,45 @@ class NarrationBodyViewModel : ViewModel() {
         writer = null
     }
 
+    private fun processWithPlugin(file: File, index: Int) {
+        val pluginType = PluginType.EDITOR
+        contextProperty.set(pluginType)
+
+        audioPluginViewModel.getPlugin(pluginType)
+            .doOnError { e ->
+                logger.error("Error in processing take with plugin type: $pluginType, ${e.message}")
+            }
+            .flatMapSingle { plugin ->
+                workbookDataStore.activeTakeNumberProperty.set(1)
+                fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
+                audioPluginViewModel.edit(file)
+            }
+            .observeOnFx()
+            .doOnError { e ->
+                logger.error("Error in processing take with plugin type: $pluginType - $e")
+            }
+            .onErrorReturn { PluginActions.Result.NO_PLUGIN }
+            .subscribe { result ->
+                when (result) {
+                    PluginActions.Result.NO_PLUGIN -> {
+                        FX.eventbus.fire(SnackBarEvent(messages["noEditor"]))
+                    }
+                    else -> {
+                        recordedAudio?.let { audio ->
+                            val start = audio.totalFrames
+                            audioFileUtils.appendFile(audio, file)
+                            val end = audio.totalFrames
+                            val action = EditVerseAction(recordedVerses, index, start, end)
+                            narrationHistory.execute(action)
+                            updateHistoryAvailable()
+                            updateJsonFile()
+                        }
+                    }
+                }
+                fire(PluginClosedEvent(pluginType))
+            }
+    }
+
     private fun updateJsonFile() {
         val json = ObjectMapper().writeValueAsString(recordedVerses)
         jsonFile.writeText(json)
@@ -399,3 +472,4 @@ class NarrationBodyViewModel : ViewModel() {
 
 class RecordAgainEvent(val index: Int) : FXEvent()
 class PlayVerseEvent(val verse: VerseNode) : FXEvent()
+class OpenInAudioPluginEvent(val index: Int) : FXEvent()

@@ -115,6 +115,37 @@ class VerseMarkerAction(
     }
 }
 
+class EditVerseAction(
+    private val list: MutableList<VerseNode>,
+    private val verseIndex: Int,
+    private val start: Int,
+    private val end: Int
+): NarrationAction {
+    var node: VerseNode? = null
+    var previous: VerseNode? = null
+
+    override fun execute() {
+        previous = list[verseIndex]
+
+        node = VerseNode (start, end).also {
+            list[verseIndex] = it
+        }
+    }
+
+    override fun undo() {
+        previous?.let {
+            list[verseIndex] = it
+        }
+    }
+
+    override fun redo() {
+        node?.let {
+            list[verseIndex] = it
+        }
+    }
+
+}
+
 class ResetAllAction(private val list: MutableList<VerseNode>): NarrationAction {
     private val nodes = ArrayList<VerseNode>(list.size)
 
