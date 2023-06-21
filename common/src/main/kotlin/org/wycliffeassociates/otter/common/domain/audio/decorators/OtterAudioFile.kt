@@ -3,7 +3,6 @@ package org.wycliffeassociates.otter.common.domain.audio.decorators
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.*
 import java.io.File
-import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 class OratureAudioFile : AudioFile {
@@ -14,9 +13,7 @@ class OratureAudioFile : AudioFile {
     private val extraCues: List<AudioCue> = mutableListOf()
     private val cueParser = OratureCueParser(this)
 
-    private val cueMap: MutableMap<OratureCueType, MutableList<AudioMarker>> = mutableMapOf(
-        OratureCueType.VERSE to mutableListOf()
-    )
+    private val markers = OratureMarkers()
 
     private fun initializeCues() {
         val allCues = metadata.getCues()
@@ -28,7 +25,7 @@ class OratureAudioFile : AudioFile {
         extraCues.forEach {
             metadata.addCue(it.location, it.label)
         }
-        cueMap.putAll(cueParser.parse())
+        markers.import(cueParser.parse())
         logger.info("Parsed ${getCuesFromMap(OratureCueType.VERSE)} verses")
     }
 
@@ -77,6 +74,14 @@ class OratureAudioFile : AudioFile {
         }
     }
 
+    fun addVerseMarker(marker: VerseMarker) {
+        markers.addMarker(OratureCueType.VERSE, marker)
+    }
+
+    fun addChunkMarker(marker: ChunkMarker) {
+        markers.addMarker(OratureCueType.CHUNK, marker)
+    }
+
     override fun addCue(location: Int, label: String) {
         super.addCue(location, label)
         cues as MutableList
@@ -92,7 +97,7 @@ class OratureAudioFile : AudioFile {
             val verseStart = match.group(1).toInt()
             val verseEnd = match.group(2)?.toInt() ?: verseStart
             val marker = VerseMarker(verseStart, verseEnd, location)
-            cueMap[OratureCueType.VERSE]!!.add(marker)
+            addVerseMarker(marker)
         }
     }
 
@@ -151,7 +156,7 @@ class OratureAudioFile : AudioFile {
             val match = regex.find(it.label)
             val groups = match!!.groupValues
             val label = if (groups.size > 1) {
-                match!!.groupValues.get(1)!!
+                match!!.groupValues[1]!!
             } else {
                 match!!.groupValues.first()!!
             }
@@ -161,11 +166,11 @@ class OratureAudioFile : AudioFile {
     }
 
     private fun getCuesFromMap(type: OratureCueType): List<AudioMarker> {
-        return cueMap[type] ?: listOf()
+        return markers.getMarkers(type)
     }
 
     private fun clearCuesFromMap(type: OratureCueType) {
-        cueMap[type]?.clear()
+        markers.clearMarkersOfType(type)
     }
 }
 
@@ -187,6 +192,11 @@ class VerseMarker(val start: Int, val end: Int, override val location: Int) : Au
     override fun formatMarkerText() = "orature-vm-${label}"
 }
 
+class ChunkMarker(val chunk: Int, override val location: Int) : AudioMarker {
+    override val label = "$chunk"
+    override fun formatMarkerText() = "orature-chunk-${label}"
+}
+
 enum class OratureCueType {
     CHUNK,
     VERSE,
@@ -195,30 +205,82 @@ enum class OratureCueType {
     LICENSE
 }
 
-class OratureCueParser(val audio: OratureAudioFile) {
+class OratureMarkers {
+    private val cueMap: MutableMap<OratureCueType, MutableList<AudioMarker>> = mutableMapOf(
+        OratureCueType.CHUNK to mutableListOf(),
+        OratureCueType.VERSE to mutableListOf(),
+        OratureCueType.CHAPTER_TITLE to mutableListOf(),
+        OratureCueType.BOOK_TITLE to mutableListOf(),
+        OratureCueType.LICENSE to mutableListOf(),
+    )
 
+    @Synchronized
+    fun getMarkers(type: OratureCueType): List<AudioMarker> {
+        if (!cueMap.containsKey(type)) cueMap[type] = mutableListOf()
+        return cueMap[type]!!
+    }
+
+    fun addMarker(type: OratureCueType, marker: AudioMarker) {
+        if (!cueMap.containsKey(type)) cueMap[type] = mutableListOf()
+        cueMap[type]!!.add(marker)
+    }
+
+    fun clearMarkersOfType(type: OratureCueType) {
+        if (!cueMap.containsKey(type)) {
+            cueMap[type] = mutableListOf()
+            return
+        } else {
+            cueMap[type]!!.clear()
+        }
+    }
+
+    private fun addEntry(entry: Map.Entry<OratureCueType, MutableList<AudioMarker>>) {
+        if (!cueMap.containsKey(entry.key)) cueMap[entry.key] = mutableListOf()
+        cueMap[entry.key]!!.addAll(entry.value)
+    }
+
+    /**
+     * Deep copies markers into a new instance of OratureMarkers
+     */
+    fun copy(): OratureMarkers {
+        val newCopy = OratureMarkers()
+        cueMap.forEach { newCopy.addEntry(it) }
+        return newCopy
+    }
+
+    /**
+     * Copies all markers from the provided markers to the internal map of markers
+     *
+     * @param markers the markers to copy from
+     */
+    fun import(markers: OratureMarkers) {
+        markers.cueMap.entries.forEach {
+            addEntry(it)
+        }
+    }
+}
+
+class OratureCueParser(val audio: OratureAudioFile) {
 
     private val verseMatcher = Pattern.compile("^orature-vm-(\\d+)(?:-(\\d+))?\$")
     private val chunkMatcher = Pattern.compile("^orature-chunk-(\\d+)")
 
-    fun parse(): MutableMap<OratureCueType, MutableList<AudioMarker>> {
-        val cueMap: MutableMap<OratureCueType, MutableList<AudioMarker>> = mutableMapOf(
-            OratureCueType.VERSE to mutableListOf()
-        )
+    fun parse(): OratureMarkers {
+        val markers = OratureMarkers()
 
         audio.getCues().forEach { cue ->
-            val matchedVerses = matchMarkers(cue, verseMatcher, OratureCueType.VERSE, cueMap)
-            if (!matchedVerses) matchMarkers(cue, chunkMatcher, OratureCueType.CHUNK, cueMap)
+            val matchedVerses = matchMarkers(cue, verseMatcher, OratureCueType.VERSE, markers)
+            if (!matchedVerses) matchMarkers(cue, chunkMatcher, OratureCueType.CHUNK, markers)
         }
 
-        return cueMap
+        return markers
     }
 
     private fun matchMarkers(
         cue: AudioCue,
         matchPattern: Pattern,
         type: OratureCueType,
-        cueMap: MutableMap<OratureCueType, MutableList<AudioMarker>>
+        markers: OratureMarkers
     ): Boolean {
         val start: Int
         val end: Int
@@ -235,7 +297,7 @@ class OratureCueParser(val audio: OratureAudioFile) {
                 OratureCueType.BOOK_TITLE -> TODO()
                 OratureCueType.LICENSE -> TODO()
             }
-            cueMap[type]!!.add(marker)
+            markers.addMarker(type, marker)
             return true
         }
         return false
