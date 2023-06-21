@@ -29,6 +29,7 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.NodeOrientation
 import javafx.stage.FileChooser
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.ConflictResolution
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
@@ -40,7 +41,6 @@ import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImport
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ImportEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ConflictResolution
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ImportConflictDialog
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
@@ -146,6 +146,9 @@ class AddFilesViewModel : ViewModel() {
 
                     find<ImportConflictDialog> {
 
+                        projectNameProperty.set(parameter.name)
+                        chaptersProperty.set(parameter.options.size)
+
                         setOnSubmitAction { resolution ->
                             val importOption = if (resolution == ConflictResolution.OVERRIDE) {
                                 // proceed with override
@@ -155,15 +158,15 @@ class AddFilesViewModel : ViewModel() {
                                 ImportOptions(chapters = null)
                             }
                             emitter.onSuccess(importOption)
-                            close()
+                            runLater { close() }
                         }
 
                         setOnCloseAction {
                             emitter.onSuccess(ImportOptions(chapters = null))
-                            close()
+                            runLater { close() }
                         }
 
-                        orientationProperty.set(NodeOrientation.LEFT_TO_RIGHT)
+                        orientationProperty.set(settingsViewModel.orientationProperty.value)
                         themeProperty.set(settingsViewModel.appColorMode.value)
 
                         runLater { open() }

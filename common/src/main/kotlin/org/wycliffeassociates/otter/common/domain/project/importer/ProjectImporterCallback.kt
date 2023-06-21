@@ -43,4 +43,4 @@ interface ProjectImporterCallback {
  * The import callback options presented to the user. This will associate with a callback
  * to request user's input.
  */
-data class ImportCallbackParameter(val options: List<Int>)
+data class ImportCallbackParameter(val options: List<Int>, val name: String = "")
