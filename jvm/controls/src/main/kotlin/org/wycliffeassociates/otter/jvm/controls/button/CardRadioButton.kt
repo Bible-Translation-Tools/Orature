@@ -6,17 +6,21 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.event.EventTarget
+import javafx.geometry.Pos
+import javafx.scene.control.Button
 import javafx.scene.control.Skin
 import javafx.scene.control.SkinBase
 import javafx.scene.control.ToggleButton
 import javafx.scene.control.ToggleGroup
 import javafx.scene.layout.HBox
+import javafx.scene.layout.Priority
+import javafx.scene.layout.Region
 import tornadofx.*
 
 class CardRadioButton(tg: ToggleGroup) : ToggleButton() {
 
-    val titleProperty = SimpleStringProperty()
-    val subTitleProperty = SimpleStringProperty()
+    val titleProperty = SimpleStringProperty("")
+    val subTitleProperty = SimpleStringProperty("")
     private val radioActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
@@ -50,12 +54,19 @@ class CardRadioButtonSkin(button: CardRadioButton) : SkinBase<CardRadioButton>(b
             label {
                 addClass("h4", "radio__label-text")
                 textProperty().bind(button.titleProperty)
+                minHeight = Region.USE_PREF_SIZE
             }
             label {
                 addClass("h5", "radio__label-text")
                 textProperty().bind(button.subTitleProperty)
+                /* extends the label text vertically to avoid ellipsis when overflow */
+                minHeight = Region.USE_PREF_SIZE
+
+                visibleWhen { button.subTitleProperty.isNotEmpty }
+                managedWhen(visibleProperty())
             }
         }
+        region { hgrow = Priority.ALWAYS }
         radiobutton {
             addClass("wa-radio")
             isFocusTraversable = false

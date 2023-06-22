@@ -1,13 +1,26 @@
-.import-conflict-dialog {
-    -fx-pref-width: 720px;
-    -fx-pref-height: 420px;
-    -fx-background-color: -wa-dialog-background;
-}
-
-.import-conflict-dialog__body {
-    -fx-spacing: 16;
-}
-
-.import-conflict-dialog .label {
+.import-conflict-dialog__body .label {
     -fx-wrap-text: true;
+}
+
+.export-project-dialog {
+    -fx-pref-height: 440px;
+}
+
+.export-project-dialog .export-project-dialog__body {
+    -fx-padding: 12 0;
+}
+
+.export-project-dialog__body .left-pane {
+    -fx-pref-width: 240;
+}
+
+.export-project-dialog__body .radio-button-card__labels {
+    -fx-spacing: 0;
+}
+
+.export-project-dialog__body .radio-button-card__control {
+    -fx-border-color: #ccc;
+    -fx-border-width: 0;
+    -fx-border-radius: 0;
+    -fx-background-radius: 0;
 }

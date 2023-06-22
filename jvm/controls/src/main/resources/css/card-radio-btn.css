@@ -26,10 +26,11 @@
 .radio-button-card {
     -fx-padding: 12 16;
     -fx-spacing: 8;
-    -fx-alignment: center;
+    -fx-alignment: center-left;
 }
 
 .radio-button-card__labels {
+    -fx-padding: 8 0;
     -fx-spacing: 12;
     -fx-alignment: center-left;
 }
