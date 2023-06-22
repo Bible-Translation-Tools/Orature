@@ -23,11 +23,7 @@
 }
 
 .confirm-dialog__header {
-    -fx-pref-height: 72px;
-    -fx-alignment: center-left;
-    -fx-padding: 12 16;
-    -fx-border-width: 0 0 0.5 0;
-    -fx-border-color: #ccc;
+    -fx-pref-height: 240px;
 }
 
 .confirm-dialog__title-bar {

@@ -31,7 +31,7 @@ class ImportConflictDialog : OtterDialog() {
         addClass("import-conflict-dialog")
 
         hbox {
-            addClass("confirm-dialog__header")
+            addClass("import-conflict-dialog__header")
             label {
                 textProperty().bind(projectNameProperty.stringBinding {
                     MessageFormat.format(messages["bookNameImportTitle"], it)
