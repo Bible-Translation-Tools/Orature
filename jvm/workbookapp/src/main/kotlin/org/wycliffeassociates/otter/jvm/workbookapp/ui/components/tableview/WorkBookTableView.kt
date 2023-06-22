@@ -19,11 +19,14 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview
 
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import javafx.collections.transformation.SortedList
 import javafx.event.EventTarget
 import javafx.scene.control.TableView
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.util.Callback
@@ -35,6 +38,8 @@ import tornadofx.FX.Companion.messages
 class WorkBookTableView(
     books: ObservableList<WorkbookDescriptor>
 ) : TableView<WorkbookDescriptor>(books) {
+
+    private val selectedIndexProperty = SimpleIntegerProperty(-1)
 
     init {
         addClass("wa-table-view")
@@ -90,6 +95,7 @@ class WorkBookTableView(
                 val percent = item.toDouble()
                 graphic = progressbar(percent) {
                     if (percent == 1.0) addClass("full")
+                    fitToParentWidth()
                 }
             }
             isReorderable = false
@@ -109,7 +115,7 @@ class WorkBookTableView(
         column("", WorkbookDescriptor::class) {
             setCellValueFactory { SimpleObjectProperty(it.value) }
             setCellFactory {
-                WorkbookOptionTableCell()
+                WorkbookOptionTableCell(selectedIndexProperty)
             }
             isReorderable = false
             isSortable = false
@@ -120,15 +126,35 @@ class WorkBookTableView(
             WorkbookTableRow()
         }
 
-        val list = this.items
-        if (list is SortedList<WorkbookDescriptor>) {
-            comparatorProperty().onChangeAndDoNow {
-                if (sortOrder.isEmpty()) {
-                    // "unsorted", reset to default book order
-                    list.comparator = Comparator { wb1, wb2 -> wb1.sort.compareTo(wb2.sort) }
-                } else {
-                    list.comparator = it
-                }
+        /* accessibility */
+        focusedProperty().onChange {
+            if (it && selectionModel.selectedIndex < 0) {
+                selectionModel.select(0)
+                focusModel.focus(0)
+            }
+        }
+
+        /* accessibility */
+        addEventFilter(KeyEvent.KEY_PRESSED) { keyEvent ->
+            if (keyEvent.code == KeyCode.SPACE || keyEvent.code == KeyCode.ENTER) {
+                selectedIndexProperty.set(selectionModel.selectedIndex)
+                keyEvent.consume()
+            }
+        }
+
+        handleDefaultSortOrder()
+    }
+}
+
+private fun WorkBookTableView.handleDefaultSortOrder() {
+    val list = this.items
+    if (list is SortedList<WorkbookDescriptor>) {
+        comparatorProperty().onChangeAndDoNow {
+            if (sortOrder.isEmpty()) {
+                // when toggled to "unsorted", resets to default order (usually Biblical order)
+                list.comparator = Comparator { wb1, wb2 -> wb1.sort.compareTo(wb2.sort) }
+            } else {
+                list.comparator = it
             }
         }
     }

@@ -46,7 +46,9 @@
     -fx-font-size: 10pt;
 }
 
-.scroll-pane {
+/* by default, scroll pane always has a gray background */
+.scroll-pane,
+.scroll-pane > .viewport{
     -fx-background-color: transparent;
 }
 

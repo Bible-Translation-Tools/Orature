@@ -5,7 +5,14 @@
     -fx-background-color: #e4f0fd;
 }
 
-.translation-card:active {
+.translation-card-button:focused {
+    -fx-border-width: 4px;
+    -fx-border-color: -wa-button-border;
+    -fx-border-insets: -2;
+    -fx-border-radius: 16px;
+}
+
+.translation-card--active {
     -fx-background-color: -wa-secondary-btn-background;
     -fx-border-width: 2px;
     -fx-border-color: -wa-primary;
