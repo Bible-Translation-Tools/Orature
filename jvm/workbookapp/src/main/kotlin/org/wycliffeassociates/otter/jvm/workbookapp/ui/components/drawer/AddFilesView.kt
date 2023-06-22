@@ -22,7 +22,6 @@ import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
 import javafx.application.Platform
 import javafx.event.EventHandler
-import javafx.geometry.NodeOrientation
 import javafx.scene.control.Button
 import javafx.scene.input.DragEvent
 import javafx.scene.input.KeyCode
@@ -36,7 +35,6 @@ import org.wycliffeassociates.otter.jvm.controls.dialog.OtterDialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ImportConflictDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AddFilesViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
@@ -145,6 +143,8 @@ class AddFilesView : View() {
     init {
         tryImportStylesheet(resources["/css/app-drawer.css"])
         tryImportStylesheet(resources["/css/confirm-dialog.css"])
+        tryImportStylesheet(resources["/css/import-conflict-dialog.css"])
+        tryImportStylesheet(resources["/css/card-radio-btn.css"])
 
         initImportDialog()
         initSuccessDialog()

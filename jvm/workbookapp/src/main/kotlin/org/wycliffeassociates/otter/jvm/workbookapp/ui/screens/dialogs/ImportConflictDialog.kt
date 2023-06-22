@@ -103,9 +103,6 @@ class ImportConflictDialog : OtterDialog() {
     }
 
     init {
-        tryImportStylesheet(resources["/css/import-conflict-dialog.css"])
-        tryImportStylesheet(resources["/css/card-radio-btn.css"])
-
         setContent(content)
     }
 
