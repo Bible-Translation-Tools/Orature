@@ -185,6 +185,11 @@ interface AudioMarker {
     }
 }
 
+class UnknownMarker(override val location: Int, override val label: String): AudioMarker {
+    constructor(cue: AudioCue): this(cue.location, cue.label)
+    override fun formatMarkerText() = label
+}
+
 class VerseMarker(val start: Int, val end: Int, override val location: Int) : AudioMarker {
     override val label: String
         get() = if (end != start) "$start-$end" else "$start"
@@ -198,6 +203,7 @@ class ChunkMarker(val chunk: Int, override val location: Int) : AudioMarker {
 }
 
 enum class OratureCueType {
+    UNKNOWN,
     CHUNK,
     VERSE,
     CHAPTER_TITLE,
@@ -218,6 +224,11 @@ class OratureMarkers {
     fun getMarkers(type: OratureCueType): List<AudioMarker> {
         if (!cueMap.containsKey(type)) cueMap[type] = mutableListOf()
         return cueMap[type]!!
+    }
+
+    fun addMarkers(type: OratureCueType, markers: List<AudioMarker>) {
+        if (!cueMap.containsKey(type)) cueMap[type] = mutableListOf()
+        cueMap[type]!!.addAll(markers)
     }
 
     fun addMarker(type: OratureCueType, marker: AudioMarker) {
@@ -262,44 +273,89 @@ class OratureMarkers {
 
 class OratureCueParser(val audio: OratureAudioFile) {
 
-    private val verseMatcher = Pattern.compile("^orature-vm-(\\d+)(?:-(\\d+))?\$")
-    private val chunkMatcher = Pattern.compile("^orature-chunk-(\\d+)")
+    private val parsers = listOf(
+        VerseMarkerParser(),
+        ChunkMarkerParser()
+    )
 
     fun parse(): OratureMarkers {
         val markers = OratureMarkers()
 
-        audio.getCues().forEach { cue ->
-            val matchedVerses = matchMarkers(cue, verseMatcher, OratureCueType.VERSE, markers)
-            if (!matchedVerses) matchMarkers(cue, chunkMatcher, OratureCueType.CHUNK, markers)
+        val cues = audio.getCues()
+        var result = parsers[0].parse(cues)
+        for (i in 1..parsers.size) {
+            markers.addMarkers(parsers[i - 1].cueType, result.accepted)
+            result = parsers[i].parse(result.rejected)
         }
+        markers.addMarkers(OratureCueType.UNKNOWN, result.rejected.map { UnknownMarker(it) })
 
         return markers
     }
+}
 
-    private fun matchMarkers(
-        cue: AudioCue,
-        matchPattern: Pattern,
-        type: OratureCueType,
-        markers: OratureMarkers
-    ): Boolean {
+class MarkerParseResult(val accepted: List<AudioMarker>, val rejected: List<AudioCue>)
+
+interface MarkerParser {
+    val cueType: OratureCueType
+    val pattern: Pattern
+
+    fun match(cue: AudioCue): AudioMarker?
+
+    fun parse(cues: List<AudioCue>): MarkerParseResult {
+        val accepted = mutableListOf<AudioMarker>()
+        val rejected = mutableListOf<AudioCue>()
+
+        cues.forEach { cue ->
+            val result = match(cue)
+            if (result != null) {
+                accepted.add(result)
+            } else {
+                rejected.add(cue)
+            }
+        }
+
+        return MarkerParseResult(accepted, rejected)
+    }
+}
+
+class VerseMarkerParser : MarkerParser {
+    override val cueType = OratureCueType.VERSE
+
+    override val pattern: Pattern = Pattern.compile("^orature-vm-(\\d+)(?:-(\\d+))?\$")
+
+    override fun match(cue: AudioCue): AudioMarker? {
         val start: Int
         val end: Int
-        val matcher = matchPattern.matcher(cue.label)
+        val matcher = pattern.matcher(cue.label)
         if (matcher.matches()) {
             start = matcher.group(1).toInt()
             end = if (matcher.groupCount() > 1 && !matcher.group(2).isNullOrBlank()) {
                 matcher.group(2).toInt()
             } else start
-            val marker = when (type) {
-                OratureCueType.VERSE -> VerseMarker(start, end, cue.location)
-                OratureCueType.CHUNK -> TODO()
-                OratureCueType.CHAPTER_TITLE -> TODO()
-                OratureCueType.BOOK_TITLE -> TODO()
-                OratureCueType.LICENSE -> TODO()
-            }
-            markers.addMarker(type, marker)
-            return true
+            return VerseMarker(start, end, cue.location)
         }
-        return false
+        return null
+    }
+
+    fun match
+}
+
+class ChunkMarkerParser : MarkerParser {
+    override val cueType = OratureCueType.CHUNK
+
+    override val pattern: Pattern = Pattern.compile("^orature-chunk-(\\d+)(?:-(\\d+))?\$")
+
+    override fun match(cue: AudioCue): AudioMarker? {
+        val start: Int
+        val end: Int
+        val matcher = pattern.matcher(cue.label)
+        if (matcher.matches()) {
+            start = matcher.group(1).toInt()
+            end = if (matcher.groupCount() > 1 && !matcher.group(2).isNullOrBlank()) {
+                matcher.group(2).toInt()
+            } else start
+            return VerseMarker(start, end, cue.location)
+        }
+        return null
     }
 }
