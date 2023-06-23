@@ -242,6 +242,7 @@ object OratureCueParser {
             markers.addMarkers(parsers[i - 1].cueType, result.accepted)
             result = parsers[i].parse(result.rejected)
         }
+        markers.addMarkers(parsers.last().cueType, result.accepted)
         markers.addMarkers(OratureCueType.UNKNOWN, result.rejected.map { UnknownMarker(it) })
 
         return markers
@@ -293,10 +294,12 @@ class VerseMarkerParser : MarkerParser {
     }
 
     override fun parse(cues: List<AudioCue>): MarkerParseResult {
+        if (cues.isEmpty()) return MarkerParseResult(listOf(), listOf())
+
         val accepted = mutableListOf<AudioMarker>()
         val rejected = mutableListOf<AudioCue>()
 
-        val oratureCues: Pattern = Pattern.compile("^orature-*\$")
+        val oratureCues: Pattern = Pattern.compile("^orature-.*\$")
         val hasOratureCues = cues.any { oratureCues.matcher(it.label).matches() }
 
         if (hasOratureCues) {
@@ -369,18 +372,14 @@ class VerseMarkerParser : MarkerParser {
 class ChunkMarkerParser : MarkerParser {
     override val cueType = OratureCueType.CHUNK
 
-    override val pattern: Pattern = Pattern.compile("^orature-chunk-(\\d+)(?:-(\\d+))?\$")
+    override val pattern: Pattern = Pattern.compile("^orature-chunk-(\\d+)\$")
 
     override fun match(cue: AudioCue): AudioMarker? {
         val start: Int
-        val end: Int
         val matcher = pattern.matcher(cue.label)
         if (matcher.matches()) {
             start = matcher.group(1).toInt()
-            end = if (matcher.groupCount() > 1 && !matcher.group(2).isNullOrBlank()) {
-                matcher.group(2).toInt()
-            } else start
-            return VerseMarker(start, end, cue.location)
+            return ChunkMarker(start, cue.location)
         }
         return null
     }
