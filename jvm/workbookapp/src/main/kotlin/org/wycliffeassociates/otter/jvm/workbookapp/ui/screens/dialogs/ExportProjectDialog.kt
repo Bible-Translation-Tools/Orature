@@ -20,7 +20,7 @@ import java.text.MessageFormat
 
 class ExportProjectDialog : OtterDialog() {
 
-    val chapters = observableListOf(ChapterSummary(1, 1.0))
+    val availableChapters = observableListOf<ChapterSummary>()
     val projectNameProperty = SimpleStringProperty()
 
     private val exportTypeProperty = SimpleObjectProperty<ExportType>(ExportType.BACKUP)
@@ -109,7 +109,7 @@ class ExportProjectDialog : OtterDialog() {
                     }
                 }
 
-                center = exportProjectTableView(chapters, selectedChapters)
+                center = exportProjectTableView(availableChapters, selectedChapters)
             }
         }
 
@@ -120,12 +120,18 @@ class ExportProjectDialog : OtterDialog() {
             button(messages["Export"]) {
                 addClass("btn", "btn--primary")
                 onActionProperty().bind(onExportActionProperty)
+                disableWhen { booleanBinding(selectedChapters) { selectedChapters.isEmpty() } }
             }
         }
     }
 
     init {
         setContent(content)
+    }
+
+    override fun onDock() {
+        super.onDock()
+        selectedChapters.addAll(availableChapters) // select all by default
     }
 
     fun setOnCloseAction(op: () -> Unit) {

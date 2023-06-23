@@ -4,6 +4,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import javafx.collections.ObservableSet
 import javafx.event.EventTarget
+import javafx.scene.control.TableRow
 import javafx.scene.control.TableView
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
@@ -11,7 +12,6 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.util.Callback
 import org.wycliffeassociates.otter.common.data.workbook.ChapterSummary
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
@@ -30,14 +30,8 @@ class ExportProjectTableView(
         column("", ChapterSummary::class) {
             addClass("table-view__column-header-row")
             setCellValueFactory { SimpleObjectProperty(it.value) }
-            cellFormat {
-                graphic = checkbox {
-                    addClass("wa-checkbox")
-                    isSelected = true
-                    selectedProperty().onChangeAndDoNow {
-                        if (it == true) selectedChapters.add(item) else selectedChapters.remove(item)
-                    }
-                }
+            setCellFactory {
+                ExportProjectTableCheckbox(selectedChapters)
             }
             isReorderable = false
             isSortable = true
@@ -67,6 +61,10 @@ class ExportProjectTableView(
             isSortable = true
         }
 
+        setRowFactory {
+            ExportProjectTableRow(selectedChapters)
+        }
+
         /* accessibility */
         focusedProperty().onChange {
             if (it && selectionModel.selectedIndex < 0) {
@@ -74,11 +72,37 @@ class ExportProjectTableView(
                 focusModel.focus(0)
             }
         }
+        /* handle selection with SPACE and ENTER */
+        addEventFilter(KeyEvent.KEY_PRESSED) { event ->
+            if (event.code == KeyCode.ENTER || event.code == KeyCode.SPACE) {
+                if (selectedItem in selectedChapters) {
+                    selectedChapters.remove(selectedItem)
+                } else {
+                    selectedChapters.add(selectedItem)
+                }
+            }
+        }
+    }
+}
 
-        /* accessibility */
-        addEventFilter(KeyEvent.KEY_PRESSED) { keyEvent ->
-            if (keyEvent.code == KeyCode.SPACE || keyEvent.code == KeyCode.ENTER) {
-                keyEvent.consume()
+class ExportProjectTableRow(
+    private val selectedChapters: ObservableSet<ChapterSummary>
+) : TableRow<ChapterSummary>() {
+
+    override fun updateItem(item: ChapterSummary?, empty: Boolean) {
+        super.updateItem(item, empty)
+        if (item == null || isEmpty) {
+            isMouseTransparent = true
+            return
+        }
+
+        isMouseTransparent = false
+
+        setOnMouseClicked {
+            if (item in selectedChapters) {
+                selectedChapters.remove(item)
+            } else {
+                selectedChapters.add(item)
             }
         }
     }
