@@ -26,10 +26,9 @@ import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.geometry.NodeOrientation
 import javafx.stage.FileChooser
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.ConflictResolution
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ConflictResolution
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
