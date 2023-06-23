@@ -90,9 +90,7 @@ class SourceAudioFileTest {
         for ((i, testCues) in testEnv.withIndex()) {
             val temp = File.createTempFile("test", ".wav").apply { deleteOnExit() }
             val af = OratureAudioFile(temp, 1, 41000, 16, WavMetadata(listOf(CueChunk())))
-            for (cue in testCues) {
-                af.addCue(cue.location, cue.label)
-            }
+            af.importCues(testCues)
             af.update()
 
             val saf = OratureAudioFile(temp)

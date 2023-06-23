@@ -37,6 +37,7 @@ import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.audio.decorators.VerseMarker
 import org.wycliffeassociates.otter.common.domain.project.importer.RCImporterFactory
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
@@ -236,7 +237,7 @@ class TestSourceProjectExporter {
         // select a take to be included when export
         workbook.target.chapters.blockingFirst().audio.selectTake(take)
         OratureAudioFile(testTake).apply {
-            addCue(1, "marker-1")
+            addVerseMarker(VerseMarker(1,1, 1))
             update()
         }
     }
@@ -259,7 +260,7 @@ class TestSourceProjectExporter {
             }
 
         OratureAudioFile(takeFile).apply {
-            addCue(1, "marker-1")
+            addVerseMarker(VerseMarker(1, 1, 1))
             update()
         }
     }

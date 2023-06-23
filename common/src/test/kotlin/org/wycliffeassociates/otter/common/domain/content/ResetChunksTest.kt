@@ -267,9 +267,7 @@ class ResetChunksTest {
             AudioCue(30, "4"),
             AudioCue(40, "5")
         )
-        for (cue in sourceCues) {
-            audio.addCue(cue.location, cue.label)
-        }
+        audio.importCues(sourceCues)
         audio.update()
 
         return createTestRc(projectDir.root, dublinCore, listOf(sourceFile, sourceCueFile))

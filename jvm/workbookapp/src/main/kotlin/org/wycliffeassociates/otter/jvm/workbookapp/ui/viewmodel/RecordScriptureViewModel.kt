@@ -41,6 +41,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.common.domain.audio.decorators.VerseMarker
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
@@ -568,7 +569,10 @@ class RecordScriptureViewModel : ViewModel() {
             audio.selected.value?.value?.let {
                 OratureAudioFile(it.file).apply {
                     if (getCues().isEmpty()) {
-                        addCue(0, workbookDataStore.chunk?.start.toString())
+                        val chunk = workbookDataStore.chunk
+                        if (chunk != null) {
+                            addVerseMarker(VerseMarker(chunk.start, chunk.end, 0))
+                        }
                         update()
                     }
                 }

@@ -3,29 +3,19 @@ package org.wycliffeassociates.otter.common.domain.audio.decorators
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.*
 import java.io.File
+import java.lang.UnsupportedOperationException
 import java.util.regex.Pattern
 
 class OratureAudioFile : AudioFile {
 
     val logger = LoggerFactory.getLogger(OratureAudioFile::class.java)
 
-    private val cues: List<AudioCue> = mutableListOf()
     private val extraCues: List<AudioCue> = mutableListOf()
-    private val cueParser = OratureCueParser(this)
 
     private val markers = OratureMarkers()
 
     private fun initializeCues() {
-        val allCues = metadata.getCues()
-        separateOratureCues(allCues)
-        metadata.clearMarkers()
-        cues.forEach {
-            metadata.addCue(it.location, it.label)
-        }
-        extraCues.forEach {
-            metadata.addCue(it.location, it.label)
-        }
-        markers.import(cueParser.parse())
+        markers.import(OratureCueParser.parse(this))
         logger.info("Parsed ${getCuesFromMap(OratureCueType.VERSE)} verses")
     }
 
@@ -61,7 +51,7 @@ class OratureAudioFile : AudioFile {
     }
 
     override fun getCues(): List<AudioCue> {
-        return cues
+        return markers.getCues()
     }
 
     fun getMarker(type: OratureCueType): List<AudioMarker> {
@@ -69,9 +59,7 @@ class OratureAudioFile : AudioFile {
     }
 
     fun addCues(cues: List<AudioCue>) {
-        cues.forEach {
-            addCue(it.location, it.label)
-        }
+
     }
 
     fun addVerseMarker(marker: VerseMarker) {
@@ -82,11 +70,16 @@ class OratureAudioFile : AudioFile {
         markers.addMarker(OratureCueType.CHUNK, marker)
     }
 
+    fun importMetadata(metadata: AudioMetadata) {
+        markers.import(OratureCueParser.parse(metadata))
+    }
+
+    fun importCues(cues: List<AudioCue>) {
+        markers.import(OratureCueParser.parse(cues))
+    }
+
     override fun addCue(location: Int, label: String) {
-        super.addCue(location, label)
-        cues as MutableList
-        cues.add(AudioCue(location, label))
-        metadata.addCue(location, label)
+        markers.import(OratureCueParser.parse(listOf(AudioCue(location, label))))
     }
 
     @Synchronized
@@ -106,63 +99,13 @@ class OratureAudioFile : AudioFile {
     }
 
     fun clearVerseMarkers() {
-        cues as MutableList
-        cues.clear()
         clearCuesFromMap(OratureCueType.VERSE)
     }
 
     override fun update() {
         metadata.clearMarkers()
-        extraCues.forEach {
-            metadata.addCue(it)
-        }
-        getCuesFromMap(OratureCueType.VERSE).forEach {
-            metadata.addCue(it.toCue())
-        }
+        markers.getCues().forEach { metadata.addCue(it) }
         super.update()
-    }
-
-    private fun separateOratureCues(allCues: List<AudioCue>) {
-        val oratureRegex = Regex("^orature-vm-((\\d+)(?:-(\\d+))?)\$")
-        val loneDigitRegex = Regex("^((\\d+)(?:-(\\d+))?)$")
-        val numberRegex = Regex("((\\d+)(?:-(\\d+))?)")
-
-        val oratureCues = allCues.filter { it.label.matches(oratureRegex) }
-        val leftoverCues = allCues.filter { !oratureCues.contains(it) }
-        val loneDigits = leftoverCues.filter { it.label.trim().matches(loneDigitRegex) }
-        val potentialCues = leftoverCues
-            .filter { !loneDigits.contains(it) }
-            .filter { numberRegex.containsMatchIn(it.label) }
-            .map {
-                val match = numberRegex.find(it.label)
-                val label = match!!.groupValues.first()!!
-                AudioCue(it.location, label)
-            }
-
-        if (oratureCues.isNotEmpty()) {
-            addMatchingCues(oratureCues, oratureRegex)
-        } else if (loneDigits.isNotEmpty()) {
-            addMatchingCues(loneDigits.map { AudioCue(it.location, it.label.trim()) }, loneDigitRegex)
-        } else if (potentialCues.isNotEmpty()) {
-            addMatchingCues(potentialCues, numberRegex)
-        }
-        extraCues as MutableList
-        extraCues.addAll(leftoverCues)
-    }
-
-    private fun addMatchingCues(baseCueList: List<AudioCue>, regex: Regex) {
-        cues as MutableList
-        val mapped = baseCueList.map {
-            val match = regex.find(it.label)
-            val groups = match!!.groupValues
-            val label = if (groups.size > 1) {
-                match!!.groupValues[1]!!
-            } else {
-                match!!.groupValues.first()!!
-            }
-            AudioCue(it.location, "orature-vm-${label}")
-        }
-        cues.addAll(mapped)
     }
 
     private fun getCuesFromMap(type: OratureCueType): List<AudioMarker> {
@@ -185,8 +128,9 @@ interface AudioMarker {
     }
 }
 
-class UnknownMarker(override val location: Int, override val label: String): AudioMarker {
-    constructor(cue: AudioCue): this(cue.location, cue.label)
+class UnknownMarker(override val location: Int, override val label: String) : AudioMarker {
+    constructor(cue: AudioCue) : this(cue.location, cue.label)
+
     override fun formatMarkerText() = label
 }
 
@@ -219,6 +163,10 @@ class OratureMarkers {
         OratureCueType.BOOK_TITLE to mutableListOf(),
         OratureCueType.LICENSE to mutableListOf(),
     )
+
+    fun getCues(): List<AudioCue> {
+        return cueMap.values.flatMap { it.map { it.toCue() } }
+    }
 
     @Synchronized
     fun getMarkers(type: OratureCueType): List<AudioMarker> {
@@ -271,19 +219,26 @@ class OratureMarkers {
     }
 }
 
-class OratureCueParser(val audio: OratureAudioFile) {
+object OratureCueParser {
 
     private val parsers = listOf(
         VerseMarkerParser(),
         ChunkMarkerParser()
     )
 
-    fun parse(): OratureMarkers {
+    fun parse(metadata: AudioMetadata): OratureMarkers {
+        return parse(metadata.getCues())
+    }
+
+    fun parse(audio: AudioFile): OratureMarkers {
+        return parse(audio.metadata)
+    }
+
+    fun parse(cues: List<AudioCue>): OratureMarkers {
         val markers = OratureMarkers()
 
-        val cues = audio.getCues()
         var result = parsers[0].parse(cues)
-        for (i in 1..parsers.size) {
+        for (i in 1 until parsers.size) {
             markers.addMarkers(parsers[i - 1].cueType, result.accepted)
             result = parsers[i].parse(result.rejected)
         }
@@ -337,7 +292,78 @@ class VerseMarkerParser : MarkerParser {
         return null
     }
 
-    fun match
+    override fun parse(cues: List<AudioCue>): MarkerParseResult {
+        val accepted = mutableListOf<AudioMarker>()
+        val rejected = mutableListOf<AudioCue>()
+
+        val oratureCues: Pattern = Pattern.compile("^orature-*\$")
+        val hasOratureCues = cues.any { oratureCues.matcher(it.label).matches() }
+
+        if (hasOratureCues) {
+            cues.forEach { cue ->
+                val result = match(cue)
+                if (result != null) {
+                    accepted.add(result)
+                } else {
+                    rejected.add(cue)
+                }
+            }
+            return MarkerParseResult(accepted, rejected)
+        } else {
+            matchAlternativeCues(cues, accepted, rejected)
+        }
+
+        return MarkerParseResult(accepted, rejected)
+    }
+
+    private fun matchAlternativeCues(
+        cues: List<AudioCue>,
+        accepted: MutableList<AudioMarker>,
+        rejected: MutableList<AudioCue>
+    ) {
+        val oratureRegex = Regex("^orature-vm-(\\d+)(?:-(\\d+))?\$")
+
+        val loneDigitRegex = Regex("^(\\d+)(?:-(\\d+))?$")
+        val numberRegex = Regex("(\\d+)(?:-(\\d+))?")
+
+        val oratureCues = cues.filter { it.label.matches(oratureRegex) }
+        val leftoverCues = cues.filter { !oratureCues.contains(it) }
+        val loneDigits = leftoverCues.filter { it.label.trim().matches(loneDigitRegex) }
+        val potentialCues = leftoverCues
+            .filter { !loneDigits.contains(it) }
+            .filter { numberRegex.containsMatchIn(it.label) }
+            .map {
+                val match = numberRegex.find(it.label)
+                val label = match!!.groupValues.first()!!
+                AudioCue(it.location, label)
+            }
+
+        if (oratureCues.isNotEmpty()) {
+            addMatchingCues(oratureCues, oratureRegex.toPattern(), accepted)
+        } else if (loneDigits.isNotEmpty()) {
+            addMatchingCues(
+                loneDigits.map { AudioCue(it.location, it.label.trim()) },
+                loneDigitRegex.toPattern(),
+                accepted
+            )
+        } else if (potentialCues.isNotEmpty()) {
+            addMatchingCues(potentialCues, numberRegex.toPattern(), accepted)
+        }
+        rejected.addAll(leftoverCues)
+    }
+
+    private fun addMatchingCues(cues: List<AudioCue>, pattern: Pattern, accepted: MutableList<AudioMarker>) {
+        cues.forEach { cue ->
+            val matcher = pattern.matcher(cue.label)
+            if (matcher.matches()) {
+                val start = matcher.group(1).toInt()
+                val end = if (matcher.groupCount() > 1 && !matcher.group(2).isNullOrBlank()) {
+                    matcher.group(2).toInt()
+                } else start
+                accepted.add(VerseMarker(start, end, cue.location))
+            }
+        }
+    }
 }
 
 class ChunkMarkerParser : MarkerParser {

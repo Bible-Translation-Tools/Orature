@@ -69,9 +69,7 @@ class AudioExporter @Inject constructor() {
                 metadata.license?.url?.let {
                     oratureAudioFile.metadata.setLegalInformationUrl(it)
                 }
-                metadata.markers.forEach {
-                    oratureAudioFile.addCue(it.location, it.label)
-                }
+                oratureAudioFile.importCues(metadata.markers)
                 oratureAudioFile.update()
             }
             .subscribeOn(Schedulers.io())
