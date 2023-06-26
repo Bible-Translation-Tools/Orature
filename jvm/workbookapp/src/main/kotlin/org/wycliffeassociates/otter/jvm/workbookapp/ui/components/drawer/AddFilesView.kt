@@ -152,7 +152,7 @@ class AddFilesView : View() {
     init {
         tryImportStylesheet(resources["/css/app-drawer.css"])
         tryImportStylesheet(resources["/css/confirm-dialog.css"])
-        tryImportStylesheet(resources["/css/import-conflict-dialog.css"])
+        tryImportStylesheet(resources["/css/import-export-dialogs.css"])
         tryImportStylesheet(resources["/css/card-radio-btn.css"])
 
         initImportDialog()
