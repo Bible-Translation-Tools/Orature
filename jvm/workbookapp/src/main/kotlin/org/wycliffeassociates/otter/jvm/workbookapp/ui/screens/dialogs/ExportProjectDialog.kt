@@ -133,7 +133,7 @@ class ExportProjectDialog : OtterDialog() {
                 disableWhen { booleanBinding(selectedChapters) { selectedChapters.isEmpty() } }
 
                 action {
-                    val directory = chooseDirectory(FX.messages["exportProject"])
+                    val directory = chooseDirectory(FX.messages["exportProject"], owner = currentWindow)
                     directory?.let { dir ->
                         FX.eventbus.fire(
                             WorkbookExportEvent(

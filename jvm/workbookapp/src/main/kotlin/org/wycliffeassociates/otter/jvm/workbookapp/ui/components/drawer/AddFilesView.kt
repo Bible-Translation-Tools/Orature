@@ -126,7 +126,7 @@ class AddFilesView : View() {
                         }
                         graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
                         action {
-                            viewModel.onChooseFile()
+                            viewModel.onChooseFile(currentWindow!!)
                         }
                     }
 

@@ -28,6 +28,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.NodeOrientation
 import javafx.stage.FileChooser
+import javafx.stage.Window
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ConflictResolution
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
@@ -84,7 +85,7 @@ class AddFilesViewModel : ViewModel() {
         }
     }
 
-    fun onChooseFile() {
+    fun onChooseFile(window: Window) {
         val file = chooseFile(
             FX.messages["importResourceFromZip"],
             arrayOf(
@@ -93,7 +94,8 @@ class AddFilesViewModel : ViewModel() {
                     *OratureFileFormat.extensionList.map { "*.$it" }.toTypedArray()
                 )
             ),
-            mode = FileChooserMode.Single
+            mode = FileChooserMode.Single,
+            owner = window
         ).firstOrNull()
         file?.let {
             setProjectInfo(file)
