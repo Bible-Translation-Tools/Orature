@@ -120,6 +120,7 @@ class NarrationApp : App(NarrationView::class), IDependencyGraphProvider {
             every { chapter.title } returns i.toString()
             every { chapter.label } returns "chapter"
             every { chapter.getDraft() } returns mockChunks()
+            every { chapter.audio } returns mockAudio()
             every { chapter.chunkCount } returns Single.just(10)
             chapters.add(chapter)
         }
@@ -151,6 +152,37 @@ class NarrationApp : App(NarrationView::class), IDependencyGraphProvider {
             chunks.add(chunk)
         }
         return ReplayRelay.create<Chunk>().apply { chunks.forEach { this.accept(it) } }
+    }
+
+    private fun mockAudio(): AssociatedAudio {
+        val audio = mockk<AssociatedAudio>()
+        val take = mockTake()
+
+        val takes = ReplayRelay.create<Take>()
+        take?.let { takes.apply { this.accept(it) } }
+
+        val selected = take?.let {
+            BehaviorRelay.createDefault(TakeHolder(take))
+        } ?: BehaviorRelay.createDefault(TakeHolder.empty)
+
+        every { audio.takes } returns takes
+        every { audio.selected } returns selected
+
+        return audio
+    }
+
+    private fun mockTake(): Take? {
+        val userHomeDir = File(System.getProperty("user.home"))
+        val takeFile = File(userHomeDir, "narration.wav")
+
+        return if (takeFile.exists()) {
+            val take = mockk<Take>()
+            every { take.file } returns takeFile
+            every { take.name } returns takeFile.name
+            every { take.number } returns 1
+            every { take.format } returns MimeType.WAV
+            take
+        } else null
     }
 
     private fun mockProjectFileAccessor(workbook: Workbook) {
