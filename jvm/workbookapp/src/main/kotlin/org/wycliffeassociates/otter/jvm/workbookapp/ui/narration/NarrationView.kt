@@ -31,6 +31,8 @@ class NarrationView : View() {
     override val root = stackpane {
         addClass(ColorTheme.LIGHT.styleClass)
 
+        createSnackBar()
+
         borderpane {
             top<NarrationHeader>()
             center<NarrationBody>()

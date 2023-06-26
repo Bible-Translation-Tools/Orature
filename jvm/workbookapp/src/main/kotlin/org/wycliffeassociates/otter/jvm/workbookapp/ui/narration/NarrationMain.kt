@@ -120,6 +120,7 @@ class NarrationApp : App(NarrationView::class), IDependencyGraphProvider {
             every { chapter.title } returns i.toString()
             every { chapter.label } returns "chapter"
             every { chapter.getDraft() } returns mockChunks()
+            every { chapter.chunkCount } returns Single.just(10)
             every { chapter.audio } returns mockAudio()
             every { chapter.chunkCount } returns Single.just(10)
             chapters.add(chapter)
@@ -167,6 +168,7 @@ class NarrationApp : App(NarrationView::class), IDependencyGraphProvider {
 
         every { audio.takes } returns takes
         every { audio.selected } returns selected
+        every { audio.selectTake(any()) } returns Unit
 
         return audio
     }
