@@ -76,18 +76,19 @@ class SourceProjectExporter @Inject constructor(
         return compileCompletedChapters(workbook, projectSourceMetadata, projectAccessor)
             .onErrorComplete()
             .andThen(
-                export(targetZip, workbook, contributors)
+                export(targetZip, workbook, contributors, options)
             )
     }
 
     private fun export(
         exportFile: File,
         workbook: Workbook,
-        contributors: List<Contributor>
+        contributors: List<Contributor>,
+        options: ExportOptions?
     ): Single<ExportResult> {
         val fileWriter = directoryProvider.newFileWriter(exportFile)
 
-        return exportSelectedTakes(workbook, fileWriter, contributors)
+        return exportSelectedTakes(workbook, fileWriter, contributors, options?.chapters)
             .doOnComplete {
                 fileWriter.close() // must close before changing file extension or NoSuchFileException
                 buildSourceProjectMetadata(
@@ -112,7 +113,8 @@ class SourceProjectExporter @Inject constructor(
     private fun exportSelectedTakes(
         workbook: Workbook,
         fileWriter: IFileWriter,
-        contributors: List<Contributor>
+        contributors: List<Contributor>,
+        chapterFilter: List<Int>? = null
     ): Completable {
         val tempExportDir = directoryProvider.tempDirectory
             .resolve("export${Date().time}")
@@ -121,6 +123,7 @@ class SourceProjectExporter @Inject constructor(
         return workbook
             .target
             .chapters
+            .filter { chapterFilter?.contains(it.sort) ?: true }
             .map { Pair(it.audio.selected.value?.value, it.sort) }
             .filter { (take, _) -> take != null }
             .map { (take, sort) ->

@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.ChapterSummary
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.project.exporter.AudioProjectExporter
+import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOptions
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportType
 import org.wycliffeassociates.otter.common.domain.project.exporter.IProjectExporter
@@ -87,7 +88,7 @@ class ExportProjectViewModel : ViewModel() {
                 directory,
                 resourceMetadata,
                 workbook,
-                null
+                ExportOptions(chapters)
             )
             .observeOnFx()
             .doOnError { e ->

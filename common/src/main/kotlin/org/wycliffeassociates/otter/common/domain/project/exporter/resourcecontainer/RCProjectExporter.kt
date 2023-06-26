@@ -131,14 +131,14 @@ abstract class RCProjectExporter(
         return chapters
             .filter { chapter ->
                 // filter chapter without selected take
-                chapter.audio.selected.value?.value == null
+                !chapter.hasSelectedAudio()
             }
             .filter { chapter ->
                 val chunks = chapter.chunks.getValues(emptyArray())
 
                 // filter chapter where all its content are ready to compile
                 chunks.isNotEmpty() && chunks.all { chunk ->
-                    chunk.audio.selected.value?.value != null
+                    chunk.hasSelectedAudio()
                 }
             }
     }
