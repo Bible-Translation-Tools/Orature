@@ -11,6 +11,7 @@ import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.workbook.ChapterSummary
+import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportType
 import org.wycliffeassociates.otter.jvm.controls.button.cardRadioButton
 import org.wycliffeassociates.otter.jvm.controls.dialog.OtterDialog
@@ -21,7 +22,7 @@ import java.text.MessageFormat
 class ExportProjectDialog : OtterDialog() {
 
     val availableChapters = observableListOf<ChapterSummary>()
-    val projectNameProperty = SimpleStringProperty()
+    val workbookDescriptorProperty = SimpleObjectProperty<WorkbookDescriptor>()
 
     private val exportTypeProperty = SimpleObjectProperty<ExportType>(ExportType.BACKUP)
     private val selectedChapters = observableSetOf<ChapterSummary>()
@@ -34,8 +35,8 @@ class ExportProjectDialog : OtterDialog() {
         hbox {
             addClass("confirm-dialog__header")
             label {
-                textProperty().bind(projectNameProperty.stringBinding {
-                    MessageFormat.format(messages["bookNameImportTitle"], it)
+                textProperty().bind(workbookDescriptorProperty.stringBinding {
+                    MessageFormat.format(messages["bookNameExportTitle"], it?.title)
                 })
                 addClass("h3")
             }
@@ -115,7 +116,18 @@ class ExportProjectDialog : OtterDialog() {
 
         hbox {
             addClass("confirm-dialog__footer")
-            label(messages["etaFileSize"])
+            label {
+                addClass("h5")
+                textProperty().bind(exportTypeProperty.stringBinding {
+                    val estimatedSize = when(it) {
+                        ExportType.BACKUP -> messages["large"]
+                        ExportType.LISTEN -> messages["small"]
+                        ExportType.SOURCE_AUDIO, ExportType.PUBLISH -> messages["normal"]
+                        else -> { "" }
+                    }
+                    MessageFormat.format(messages["estimatedFileSize"], estimatedSize)
+                })
+            }
             region { hgrow = Priority.ALWAYS }
             button(messages["Export"]) {
                 addClass("btn", "btn--primary")

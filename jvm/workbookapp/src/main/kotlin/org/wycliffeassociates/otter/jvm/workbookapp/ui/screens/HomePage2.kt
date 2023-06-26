@@ -62,6 +62,9 @@ class HomePage2 : View() {
         tryImportStylesheet("/css/popup-menu.css")
         tryImportStylesheet("/css/filtered-search-bar.css")
         tryImportStylesheet("/css/table-view.css")
+        tryImportStylesheet("/css/confirm-dialog.css")
+        tryImportStylesheet("/css/import-conflict-dialog.css")
+        tryImportStylesheet("/css/card-radio-btn.css")
 
         subscribeActionEvents()
     }

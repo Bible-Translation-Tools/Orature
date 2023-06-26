@@ -3,7 +3,7 @@
 }
 
 .export-project-dialog {
-    -fx-pref-height: 440px;
+    -fx-pref-height: 460px;
 }
 
 .export-project-dialog .export-project-dialog__body {
@@ -23,4 +23,15 @@
     -fx-border-width: 0;
     -fx-border-radius: 0;
     -fx-background-radius: 0;
+}
+
+.export-project-dialog__body .radio-button-card__control:focused {
+    -fx-border-width: 2px;
+    -fx-border-color: -wa-button-border;
+    -fx-border-insets: -1;
+}
+
+.radio-button-card__control:selected {
+    -fx-background-color: -wa-primary-light;
+    -fx-border-color: -wa-primary;
 }
