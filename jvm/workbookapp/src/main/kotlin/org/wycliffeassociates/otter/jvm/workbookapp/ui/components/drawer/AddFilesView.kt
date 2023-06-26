@@ -126,15 +126,7 @@ class AddFilesView : View() {
                         }
                         graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
                         action {
-//                            viewModel.onChooseFile()
-                            find<ExportProjectDialog> {
-                                orientationProperty.set(settingsViewModel.orientationProperty.value)
-                                themeProperty.set(settingsViewModel.appColorMode.value)
-
-                                setOnCloseAction {
-                                    this.close()
-                                }
-                            }.open()
+                            viewModel.onChooseFile()
                         }
                     }
 
