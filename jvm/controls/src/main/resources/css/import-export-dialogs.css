@@ -31,7 +31,7 @@
     -fx-border-insets: -1;
 }
 
-.radio-button-card__control:selected {
+.export-project-dialog__body .radio-button-card__control:focused:selected {
     -fx-background-color: -wa-primary-light;
     -fx-border-color: -wa-primary;
 }
