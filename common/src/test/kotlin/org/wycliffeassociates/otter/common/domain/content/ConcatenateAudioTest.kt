@@ -124,7 +124,7 @@ class ConcatenateAudioTest {
 
             cues.size == 3 && cues.all {
                 it.location == cues.indexOf(it)
-                it.label == "${cues.indexOf(it) + 1}"
+                it.label == "orature-vm-${cues.indexOf(it) + 1}"
             }
         }
     }

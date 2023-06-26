@@ -19,7 +19,10 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Completable
+import io.reactivex.CompletableSource
 import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
@@ -401,6 +404,7 @@ class RecordScriptureViewModel : ViewModel() {
                             loadTakes()
                             updateOnSuccess.subscribe()
                         }
+
                         PluginActions.Result.NO_AUDIO -> {
                             setMarker()
                             loadTakes()
@@ -441,11 +445,16 @@ class RecordScriptureViewModel : ViewModel() {
             }
     }
 
-    fun selectTake(take: Take) {
-        recordable?.audio?.selectTake(take) ?: throw IllegalStateException("Recordable is null")
-        val workbook = workbookDataStore.workbook
-        workbook.projectFilesAccessor.updateSelectedTakesFile(workbook).subscribe()
-        take.file.setLastModified(System.currentTimeMillis())
+    fun selectTake(take: Take): Completable {
+        return Single
+            .fromCallable {
+                recordable?.audio?.selectTake(take) ?: throw IllegalStateException("Recordable is null")
+                val workbook = workbookDataStore.workbook
+                workbook.projectFilesAccessor.updateSelectedTakesFile(workbook).blockingGet()
+                take.file.setLastModified(System.currentTimeMillis())
+            }
+            .ignoreElement()
+            .subscribeOn(Schedulers.io())
     }
 
     fun importTakes(files: List<File>) {
@@ -521,12 +530,15 @@ class RecordScriptureViewModel : ViewModel() {
                     PluginType.RECORDER -> {
                         audioPluginViewModel.selectedRecorderProperty.get()?.name
                     }
+
                     PluginType.EDITOR -> {
                         audioPluginViewModel.selectedEditorProperty.get()?.name
                     }
+
                     PluginType.MARKER -> {
                         audioPluginViewModel.selectedMarkerProperty.get()?.name
                     }
+
                     null -> throw IllegalStateException("Action is not supported!")
                 }
             },
