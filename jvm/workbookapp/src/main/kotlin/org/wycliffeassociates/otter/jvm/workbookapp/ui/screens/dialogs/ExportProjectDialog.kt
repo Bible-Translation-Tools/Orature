@@ -1,7 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs
 
 import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.scene.control.ScrollPane
@@ -15,6 +14,7 @@ import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportType
 import org.wycliffeassociates.otter.jvm.controls.button.cardRadioButton
 import org.wycliffeassociates.otter.jvm.controls.dialog.OtterDialog
+import org.wycliffeassociates.otter.jvm.controls.event.WorkbookExportEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview.exportProjectTableView
 import tornadofx.*
 import java.text.MessageFormat
@@ -27,7 +27,6 @@ class ExportProjectDialog : OtterDialog() {
     private val exportTypeProperty = SimpleObjectProperty<ExportType>(ExportType.BACKUP)
     private val selectedChapters = observableSetOf<ChapterSummary>()
     private val onCloseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
-    private val onExportActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     private val content = VBox().apply {
         addClass("confirm-dialog", "export-project-dialog")
@@ -131,8 +130,21 @@ class ExportProjectDialog : OtterDialog() {
             region { hgrow = Priority.ALWAYS }
             button(messages["Export"]) {
                 addClass("btn", "btn--primary")
-                onActionProperty().bind(onExportActionProperty)
                 disableWhen { booleanBinding(selectedChapters) { selectedChapters.isEmpty() } }
+
+                action {
+                    val directory = chooseDirectory(FX.messages["exportProject"])
+                    directory?.let { dir ->
+                        FX.eventbus.fire(
+                            WorkbookExportEvent(
+                                workbookDescriptorProperty.value,
+                                exportTypeProperty.value,
+                                dir,
+                                selectedChapters.map { it.number }
+                            )
+                        )
+                    }
+                }
             }
         }
     }
@@ -148,14 +160,5 @@ class ExportProjectDialog : OtterDialog() {
 
     fun setOnCloseAction(op: () -> Unit) {
         onCloseActionProperty.set(EventHandler { op() })
-    }
-
-    fun setOnExportAction(op: (List<ChapterSummary>, ExportType) -> Unit) {
-        if (selectedChapters.isEmpty()) {
-            return
-        }
-        onExportActionProperty.set(
-            EventHandler { op(selectedChapters.toList(), exportTypeProperty.value) }
-        )
     }
 }

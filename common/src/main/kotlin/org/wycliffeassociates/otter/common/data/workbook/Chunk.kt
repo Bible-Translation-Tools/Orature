@@ -41,7 +41,9 @@ class Chunk(
 ) : BookElement, ResourceRecordable {
     override val title
         get() = if (start != end) "${start}-${end}" else "$start"
-    
+
+    fun hasSelectedAudio() = audio.selected.value?.value != null
+
     override fun hashCode(): Int {
         return Objects.hash(
             sort,
