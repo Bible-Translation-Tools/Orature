@@ -58,9 +58,6 @@ class AddFilesViewModel : ViewModel() {
     @Inject lateinit var directoryProvider: IDirectoryProvider
     @Inject lateinit var importProjectProvider : Provider<ImportProjectUseCase>
 
-    val showImportConflictProperty = SimpleBooleanProperty(false)
-
-    val showImportConflictDialogProperty = SimpleBooleanProperty(false)
     val showImportProgressDialogProperty = SimpleBooleanProperty(false)
     val showImportSuccessDialogProperty = SimpleBooleanProperty(false)
     val showImportErrorDialogProperty = SimpleBooleanProperty(false)
@@ -70,7 +67,6 @@ class AddFilesViewModel : ViewModel() {
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
     val availableChapters = observableListOf<Int>()
-    private lateinit var importCallbackEmitter: SingleEmitter<ImportOptions>
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -145,9 +141,7 @@ class AddFilesViewModel : ViewModel() {
             override fun onRequestUserInput(parameter: ImportCallbackParameter): Single<ImportOptions> {
                 availableChapters.setAll(parameter.options)
                 return Single.create { emitter ->
-
                     find<ImportConflictDialog> {
-
                         projectNameProperty.set(parameter.name)
                         chaptersProperty.set(parameter.options.size)
 
