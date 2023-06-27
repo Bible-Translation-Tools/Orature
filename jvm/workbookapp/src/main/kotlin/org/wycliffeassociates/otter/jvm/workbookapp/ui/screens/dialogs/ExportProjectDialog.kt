@@ -143,6 +143,7 @@ class ExportProjectDialog : OtterDialog() {
                                 selectedChapters.map { it.number }
                             )
                         )
+                        close()
                     }
                 }
             }

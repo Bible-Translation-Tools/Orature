@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.transformation.FilteredList
@@ -12,6 +13,7 @@ import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.collections.UpdateProject
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
+import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupKey
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupCardModel
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
@@ -45,11 +47,12 @@ class HomePageViewModel2 : ViewModel() {
     val projectGroups = observableListOf<ProjectGroupCardModel>()
     val bookList = observableListOf<WorkbookDescriptor>()
     private val filteredBooks = FilteredList<WorkbookDescriptor>(bookList)
-    val sortedBooks = SortedList<WorkbookDescriptor>(filteredBooks)
+    private val disposableListeners = mutableListOf<ListenerDisposer>()
 
+    val sortedBooks = SortedList<WorkbookDescriptor>(filteredBooks)
     val selectedProjectGroup = SimpleObjectProperty<ProjectGroupKey>()
     val bookSearchQueryProperty = SimpleStringProperty("")
-    private val disposableListeners = mutableListOf<ListenerDisposer>()
+    val snackBarObservable: PublishSubject<NotificationViewData> = PublishSubject.create()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)

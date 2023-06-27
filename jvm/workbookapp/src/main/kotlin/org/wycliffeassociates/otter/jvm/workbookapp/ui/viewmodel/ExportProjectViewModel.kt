@@ -14,8 +14,11 @@ import org.wycliffeassociates.otter.common.domain.project.exporter.IProjectExpor
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.BackupProjectExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.SourceProjectExporter
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
+import org.wycliffeassociates.otter.jvm.controls.event.WorkbookExportEvent
+import org.wycliffeassociates.otter.jvm.controls.event.WorkbookExportFinishEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.errorMessage
+import tornadofx.FX
 import tornadofx.ViewModel
 import tornadofx.get
 import java.io.File
@@ -95,6 +98,7 @@ class ExportProjectViewModel : ViewModel() {
                 logger.error("Error in exporting project for project: ${workbook.target.slug}")
             }
             .subscribe { result: ExportResult ->
+                FX.eventbus.fire(WorkbookExportFinishEvent())
                 result.errorMessage?.let {
                     tornadofx.error(messages["exportError"], it)
                 }

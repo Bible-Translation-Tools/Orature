@@ -1,8 +1,12 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
+import com.jfoenix.controls.JFXSnackbar
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Node
+import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
+import javafx.scene.layout.Region
+import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
@@ -14,7 +18,11 @@ import org.wycliffeassociates.otter.jvm.controls.event.LanguageSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookExportDialogOpenEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookExportEvent
+import org.wycliffeassociates.otter.jvm.controls.event.WorkbookExportFinishEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookOpenEvent
+import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
+import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
+import org.wycliffeassociates.otter.jvm.controls.popup.NotificationSnackBar
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.bindSingleChild
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
@@ -76,6 +84,7 @@ class HomePage2 : View() {
         tryImportStylesheet("/css/confirm-dialog.css")
         tryImportStylesheet("/css/import-export-dialogs.css")
         tryImportStylesheet("/css/card-radio-btn.css")
+        tryImportStylesheet("/css/snack-bar-notification.css")
 
         subscribeActionEvents()
     }
@@ -118,14 +127,32 @@ class HomePage2 : View() {
                 event.chapters
             )
         }
-        
+
+        subscribe<WorkbookExportFinishEvent> {
+            val notification = NotificationViewData(
+                titleKey = "exportSuccessful",
+                subtitleKey = "exportSuccessfulPopupMessage",
+                statusType = NotificationStatusType.SUCCESSFUL
+            )
+            fireNotification(notification)
+        }
+
         subscribe<ImportEvent> {
             logger.info("Import project event received, refreshing the homepage.")
+            val notification = NotificationViewData(
+                titleKey = "importSuccessful",
+                subtitleKey = "importSuccessfulPopupMessage",
+                statusType = NotificationStatusType.SUCCESSFUL
+            ) {
+                println("opening book")
+            }
+            fireNotification(notification)
             viewModel.refresh()
         }
     }
 
     override val root = borderpane {
+        createSnackBar(this)
         left = vbox {
             addClass("homepage__left-pane")
             label(messages["projects"]) {
@@ -155,10 +182,25 @@ class HomePage2 : View() {
                 }
             }
 
+            button("show toast") {
+                action {
+                    val notification = NotificationViewData(
+                        titleKey = "importSuccessful",
+                        subtitleKey = "importSuccessfulPopupMessage",
+                        statusType = NotificationStatusType.SUCCESSFUL
+                    ) {
+                        println("opening book")
+                    }
+                    viewModel.snackBarObservable.onNext(
+                        notification
+                    )
+                }
+            }
+
             scrollpane {
                 vgrow = Priority.ALWAYS
                 isFitToWidth = true
-                
+
                 vbox { /* list of project groups */
                     addClass("homepage__left-pane__project-groups")
                     bindChildren(viewModel.projectGroups) { cardModel ->
@@ -202,5 +244,49 @@ class HomePage2 : View() {
         projectWizardViewModel.undock()
         viewModel.loadProjects()
         mainSectionProperty.set(bookFragment)
+    }
+
+    private fun createSnackBar(pane: Pane) {
+        val snackBar = JFXSnackbar(pane)
+        viewModel.snackBarObservable.subscribe { notificationData ->
+
+            val graphic = NotificationSnackBar().apply {
+
+                titleProperty.set(messages[notificationData.titleKey])
+                subtitleProperty.set(messages[notificationData.subtitleKey])
+                statusTypeProperty.set(notificationData.statusType)
+
+                if (notificationData.mainAction != null) {
+                    setMainActionGraphic(
+                        button(messages["open"]) {
+                            addClass("btn", "btn--secondary")
+                            graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
+                            action {
+                                notificationData.mainAction!!()
+                            }
+                        }
+                    )
+                } else {
+                    setMainActionGraphic(Region())
+                }
+
+
+                setOnDismiss { snackBar.close() }
+//                setOnMainAction { FX.eventbus.fire(WorkbookOpenEvent()) }
+
+            }
+            snackBar.enqueue(
+                JFXSnackbar.SnackbarEvent(
+                    graphic.build(),
+                    Duration.seconds(5.0)
+                )
+            )
+        }
+    }
+
+    private fun fireNotification(notification: NotificationViewData) {
+        viewModel.snackBarObservable.onNext(
+            notification
+        )
     }
 }

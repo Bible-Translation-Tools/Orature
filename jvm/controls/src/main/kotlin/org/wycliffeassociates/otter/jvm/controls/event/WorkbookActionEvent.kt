@@ -14,3 +14,4 @@ class WorkbookExportEvent(
     val outputDir: File,
     val chapters: List<Int>
 ) : FXEvent()
+class WorkbookExportFinishEvent: FXEvent()
