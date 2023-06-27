@@ -1,6 +1,5 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview
 
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import javafx.collections.ObservableSet
@@ -21,9 +20,7 @@ class ExportProjectTableView(
     selectedChapters: ObservableSet<ChapterSummary>
 ) : TableView<ChapterSummary>(chapters) {
 
-    private val isSelectAllProperty = SimpleBooleanProperty(true).apply {
-        bind(booleanBinding(selectedChapters) { selectedChapters.size == chapters.size })
-    }
+    private val isSelectedAllProperty = booleanBinding(selectedChapters) { selectedChapters.size == chapters.size }
 
     init {
         addClass("wa-table-view")
@@ -36,7 +33,7 @@ class ExportProjectTableView(
             addClass("table-view__column-header-row")
             graphic = checkbox {
                 addClass("wa-checkbox")
-                isSelectAllProperty.onChange { isSelected = it }
+                isSelectedAllProperty.onChange { isSelected = it }
                 action {
                     if (isSelected) {
                         selectedChapters.addAll(chapters)
