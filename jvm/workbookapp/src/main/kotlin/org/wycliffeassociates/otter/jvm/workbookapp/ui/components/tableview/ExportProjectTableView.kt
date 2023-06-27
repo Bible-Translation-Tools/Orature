@@ -11,14 +11,14 @@ import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.util.Callback
-import org.wycliffeassociates.otter.common.data.workbook.ChapterSummary
+import org.wycliffeassociates.otter.common.data.workbook.ChapterDescriptor
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class ExportProjectTableView(
-    chapters: ObservableList<ChapterSummary>,
-    selectedChapters: ObservableSet<ChapterSummary>
-) : TableView<ChapterSummary>(chapters) {
+    chapters: ObservableList<ChapterDescriptor>,
+    selectedChapters: ObservableSet<ChapterDescriptor>
+) : TableView<ChapterDescriptor>(chapters) {
 
     private val isSelectedAllProperty = booleanBinding(selectedChapters) { selectedChapters.size == chapters.size }
 
@@ -27,9 +27,9 @@ class ExportProjectTableView(
         vgrow = Priority.ALWAYS
         columnResizePolicy = CONSTRAINED_RESIZE_POLICY
         placeholder = Region()
-        sortPolicy = CUSTOM_SORT_POLICY as (Callback<TableView<ChapterSummary>, Boolean>)
+        sortPolicy = CUSTOM_SORT_POLICY as (Callback<TableView<ChapterDescriptor>, Boolean>)
 
-        column("", ChapterSummary::class) {
+        column("", ChapterDescriptor::class) {
             addClass("table-view__column-header-row")
             graphic = checkbox {
                 addClass("wa-checkbox")
@@ -100,10 +100,10 @@ class ExportProjectTableView(
 }
 
 class ExportProjectTableRow(
-    private val selectedChapters: ObservableSet<ChapterSummary>
-) : TableRow<ChapterSummary>() {
+    private val selectedChapters: ObservableSet<ChapterDescriptor>
+) : TableRow<ChapterDescriptor>() {
 
-    override fun updateItem(item: ChapterSummary?, empty: Boolean) {
+    override fun updateItem(item: ChapterDescriptor?, empty: Boolean) {
         super.updateItem(item, empty)
         if (item == null || isEmpty) {
             isMouseTransparent = true
@@ -123,7 +123,7 @@ class ExportProjectTableRow(
 }
 
 fun EventTarget.exportProjectTableView(
-    chapters: ObservableList<ChapterSummary>,
-    selectedChapters: ObservableSet<ChapterSummary>,
+    chapters: ObservableList<ChapterDescriptor>,
+    selectedChapters: ObservableSet<ChapterDescriptor>,
     op: ExportProjectTableView.() -> Unit = {}
 ) = ExportProjectTableView(chapters, selectedChapters).attachTo(this, op)

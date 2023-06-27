@@ -4,7 +4,7 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.workbook.ChapterSummary
+import org.wycliffeassociates.otter.common.data.workbook.ChapterDescriptor
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.project.exporter.AudioProjectExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOptions
@@ -42,7 +42,7 @@ class ExportProjectViewModel : ViewModel() {
 
     fun loadAvailableChapters(
         workbookDescriptor: WorkbookDescriptor
-    ): Single<List<ChapterSummary>> {
+    ): Single<List<ChapterDescriptor>> {
         return Single
             .fromCallable {
                 workbookRepo.get(workbookDescriptor.sourceCollection, workbookDescriptor.targetCollection)
@@ -61,7 +61,7 @@ class ExportProjectViewModel : ViewModel() {
                         } else {
                             0.0
                         }
-                        ChapterSummary(chapter.sort, progress)
+                        ChapterDescriptor(chapter.sort, progress)
                     }
             }
             .toList()

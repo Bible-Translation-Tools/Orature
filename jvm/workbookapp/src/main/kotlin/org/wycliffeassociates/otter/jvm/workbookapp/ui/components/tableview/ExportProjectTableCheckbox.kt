@@ -3,12 +3,12 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview
 import javafx.collections.ObservableSet
 import javafx.scene.control.CheckBox
 import javafx.scene.control.TableCell
-import org.wycliffeassociates.otter.common.data.workbook.ChapterSummary
+import org.wycliffeassociates.otter.common.data.workbook.ChapterDescriptor
 import tornadofx.*
 
 class ExportProjectTableCheckbox(
-    private val selectedChapters: ObservableSet<ChapterSummary>
-) : TableCell<ChapterSummary, ChapterSummary>() {
+    private val selectedChapters: ObservableSet<ChapterDescriptor>
+) : TableCell<ChapterDescriptor, ChapterDescriptor>() {
 
     private val graphicNode = CheckBox().apply {
         addClass("wa-checkbox")
@@ -22,7 +22,7 @@ class ExportProjectTableCheckbox(
         )
     }
 
-    override fun updateItem(item: ChapterSummary?, empty: Boolean) {
+    override fun updateItem(item: ChapterDescriptor?, empty: Boolean) {
         super.updateItem(item, empty)
 
         if (item == null || empty) {
