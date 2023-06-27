@@ -10,11 +10,9 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.common.data.ConflictResolution
-import org.wycliffeassociates.otter.jvm.controls.button.CardRadioButton
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ConflictResolution
 import org.wycliffeassociates.otter.jvm.controls.button.cardRadioButton
 import org.wycliffeassociates.otter.jvm.controls.dialog.OtterDialog
-import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.*
 import java.text.MessageFormat
 
