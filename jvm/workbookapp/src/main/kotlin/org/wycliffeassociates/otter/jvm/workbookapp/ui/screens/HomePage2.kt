@@ -117,11 +117,11 @@ class HomePage2 : View() {
                 event.exportType,
                 event.chapters
             )
-
-            subscribe<ImportEvent> {
-                logger.info("Import project event received, refreshing the homepage.")
-                viewModel.refresh()
-            }
+        }
+        
+        subscribe<ImportEvent> {
+            logger.info("Import project event received, refreshing the homepage.")
+            viewModel.refresh()
         }
     }
 
