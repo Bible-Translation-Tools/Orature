@@ -11,10 +11,12 @@ import org.wycliffeassociates.otter.jvm.controls.card.TranslationCard2
 import org.wycliffeassociates.otter.jvm.controls.card.newTranslationCard
 import org.wycliffeassociates.otter.jvm.controls.card.translationCreationCard
 import org.wycliffeassociates.otter.jvm.controls.event.LanguageSelectedEvent
-import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ProjectGroupDeleteEvent
+import org.wycliffeassociates.otter.jvm.controls.event.WorkbookDeleteEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookOpenEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.bindSingleChild
+import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ImportEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.ProjectWizardSection
@@ -77,9 +79,15 @@ class HomePage2 : View() {
                 mainSectionProperty.set(bookFragment)
             }
         }
-
         subscribe<WorkbookOpenEvent> {
             viewModel.selectBook(it.data)
+        }
+        subscribe<ProjectGroupDeleteEvent> {
+            viewModel.deleteProjectGroup(it.books)
+        }
+
+        subscribe<WorkbookDeleteEvent> {
+            viewModel.deleteBook(it.data)
         }
         subscribe<ImportEvent> {
             logger.info("Import project event received, refreshing the homepage.")
