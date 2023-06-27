@@ -95,7 +95,6 @@ class ExportProjectViewModel : ViewModel() {
                 logger.error("Error in exporting project for project: ${workbook.target.slug}")
             }
             .subscribe { result: ExportResult ->
-                println("Export completed: $result")
                 result.errorMessage?.let {
                     tornadofx.error(messages["exportError"], it)
                 }
