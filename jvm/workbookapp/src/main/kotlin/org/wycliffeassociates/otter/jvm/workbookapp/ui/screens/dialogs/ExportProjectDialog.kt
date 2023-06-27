@@ -9,7 +9,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.common.data.workbook.ChapterDescriptor
+import org.wycliffeassociates.otter.jvm.controls.model.ChapterDescriptor
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportType
 import org.wycliffeassociates.otter.jvm.controls.button.cardRadioButton

@@ -3,7 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview
 import javafx.collections.ObservableSet
 import javafx.scene.control.CheckBox
 import javafx.scene.control.TableCell
-import org.wycliffeassociates.otter.common.data.workbook.ChapterDescriptor
+import org.wycliffeassociates.otter.jvm.controls.model.ChapterDescriptor
 import tornadofx.*
 
 class ExportProjectTableCheckbox(

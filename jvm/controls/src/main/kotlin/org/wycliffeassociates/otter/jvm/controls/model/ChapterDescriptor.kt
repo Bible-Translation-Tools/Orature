@@ -1,3 +1,3 @@
-package org.wycliffeassociates.otter.common.data.workbook
+package org.wycliffeassociates.otter.jvm.controls.model
 
 data class ChapterDescriptor(val number: Int, val progress: Double)

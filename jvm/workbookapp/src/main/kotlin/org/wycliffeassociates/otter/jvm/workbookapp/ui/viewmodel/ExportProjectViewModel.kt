@@ -4,7 +4,7 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.workbook.ChapterDescriptor
+import org.wycliffeassociates.otter.jvm.controls.model.ChapterDescriptor
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.project.exporter.AudioProjectExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOptions

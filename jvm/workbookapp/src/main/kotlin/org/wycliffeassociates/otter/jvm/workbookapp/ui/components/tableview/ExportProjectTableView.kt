@@ -11,7 +11,7 @@ import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.util.Callback
-import org.wycliffeassociates.otter.common.data.workbook.ChapterDescriptor
+import org.wycliffeassociates.otter.jvm.controls.model.ChapterDescriptor
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
