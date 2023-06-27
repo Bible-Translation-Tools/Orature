@@ -119,14 +119,6 @@ class HomePage2 : View() {
             )
 
             subscribe<ImportEvent> {
-                if (isDocked) {
-                    logger.info("Import event received, refreshing the homepage.")
-                    viewModel.refresh()
-                } else {
-                    logger.info("Import event received, but not docked. Ignoring.")
-                }
-            }
-            subscribe<ImportEvent> {
                 logger.info("Import project event received, refreshing the homepage.")
                 viewModel.refresh()
             }
