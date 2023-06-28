@@ -1,0 +1,90 @@
+.translation-card {
+    -fx-padding: 12px 16px;
+    -fx-spacing: 8px;
+    -fx-background-radius: 16px;
+    -fx-background-color: #e4f0fd;
+}
+
+.translation-card-button:focused {
+    -fx-border-width: 4px;
+    -fx-border-color: -wa-button-border;
+    -fx-border-insets: -2;
+    -fx-border-radius: 16px;
+}
+
+.translation-card--active {
+    -fx-background-color: -wa-secondary-btn-background;
+    -fx-border-width: 2px;
+    -fx-border-color: -wa-primary;
+    -fx-border-radius: 16px;
+}
+
+.translation-card.translation-card--selectable {
+    -fx-cursor: hand;
+}
+
+.translation-card__header {
+    -fx-alignment: center-left;
+}
+
+.translation-card__header .translation-card__header__text {
+    -fx-text-fill: -wa-active-text;
+}
+
+.translation-card__header .ikonli-font-icon,
+.translation-card__body .ikonli-font-icon {
+    -fx-icon-color: -wa-active-text;
+    -fx-font-size: 22px;
+}
+
+.translation-card__body {
+    -fx-spacing: 3;
+    -fx-alignment: center-left;
+}
+
+.translation-card__language {
+    -fx-graphic-text-gap: 0.6em;
+    -fx-text-fill: -wa-active-text;
+    -fx-font-size: 1.4em;
+}
+
+.translation-card__language:unset {
+    -fx-text-fill: -wa-regular-text;
+}
+
+.translation-card__language:unset .ikonli-font-icon,
+.translation-card__divider:unset .ikonli-font-icon {
+    -fx-icon-color: -wa-regular-text;
+}
+
+.create-translation-card {
+    -fx-background-color: -wa-card-image-placeholder-background;
+    -fx-background-radius: 16;
+    -fx-alignment: center-right;
+    -fx-padding: 12;
+}
+
+/* translation wizard */
+.translation-type-card {
+    -fx-spacing: 25px;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-color: -wa-border-light;
+    -fx-padding: 16px;
+}
+
+.translation-type-card:last {
+    -fx-border-color: transparent;
+}
+
+.translation-type-card__text-cell {
+    -fx-alignment: center-left;
+    -fx-spacing: 8px;
+}
+
+.translation-type-card__text-cell > .translation-type-card__text-cell__title {
+    -fx-text-fill: -wa-active-text;
+}
+
+.translation-type-card__action-cell {
+    -fx-alignment: center-right;
+}

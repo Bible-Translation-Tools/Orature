@@ -46,12 +46,20 @@
 }
 
 .btn--icon {
-    -fx-border-width: 2px;
+    -fx-border-width: 1px;
     -fx-border-color: -wa-btn-icon-border-color;
+    -fx-border-radius: 12px;
     -fx-background-color: -wa-btn-icon-background;
-    -fx-pref-width: 48px;
+    -fx-background-radius: 12px;
+    -fx-pref-width: 56px;
+    -fx-min-width: 56px;
     -fx-pref-height: 48px;
+    -fx-min-height: 48px;
     -fx-padding: 0;
+}
+
+.btn--icon .ikonli-font-icon {
+    -fx-icon-color: -wa-regular-text-80;
 }
 
 .btn--icon:hover {
@@ -79,22 +87,24 @@
 /* -------------- Primary Button -------------- */
 .btn--primary {
     -fx-background-color: -wa-primary-gradient;
+    -fx-background-radius: 12px;
     -fx-effect: -wa-level2;
-    -fx-text-fill: -wa-primary-btn-text-fill;
-    -fx-border-width: 2px;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
     -fx-border-color: -wa-primary-dark;
-    -fx-underline: true;
+    -fx-text-fill: -wa-primary-btn-text-fill;
     -fx-font-size: 20px;
+    -fx-underline: true;
 }
 
 .btn--primary .ikonli-font-icon {
     -fx-fill: -wa-primary-btn-text-fill;
-    -fx-font-size: 20px;
+    -fx-font-size: 24px;
 }
 
 .btn--primary:hover {
     -fx-background-color: -wa-primary;
-    -fx-underline: false;
+    -fx-underline: true;
 }
 
 .btn--primary:pressed {
@@ -150,22 +160,22 @@
 /* -------------- Secondary Button -------------- */
 .btn--secondary {
     -fx-background-color: -wa-secondary-btn-background;
-    -fx-border-width: 2px;
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
     -fx-border-color: -wa-secondary-btn-border;
     -fx-text-fill: -wa-secondary-btn-text-fill;
     -fx-font-size: 1.4em;
-    -fx-underline: true;
     -jfx-disable-visual-focus: true;
 }
 .btn--secondary .ikonli-font-icon {
-    -fx-font-size: 1.6em;
-    -fx-fill: -wa-secondary-btn-text-fill;
+    -fx-font-size: 1.9em;
+    -fx-icon-color: -wa-secondary-btn-text-fill;
 }
 .btn--secondary:hover {
     -fx-background-color: -wa-secondary-btn-background-hover;
     -fx-border-color: -wa-secondary-btn-text-fill-hover;
     -fx-text-fill: -wa-secondary-btn-text-fill-hover;
-    -fx-underline: false;
+    -fx-underline: true;
 }
 .btn--secondary:hover .ikonli-font-icon {
     -fx-fill: -wa-secondary-btn-text-fill-hover;
@@ -339,8 +349,7 @@
 
 /* -------------- Text Input ---------------- */
 .txt-input {
-    -fx-pref-height: 48px;
-    -fx-border-width: 2px;
+    -fx-border-width: 1px;
     -fx-border-color: -wa-text-field-border;
     -fx-border-radius: 6px;
     -fx-background-color: -wa-text-field-background;

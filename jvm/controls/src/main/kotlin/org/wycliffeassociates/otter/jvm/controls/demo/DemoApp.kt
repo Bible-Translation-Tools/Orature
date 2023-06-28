@@ -27,7 +27,6 @@ import tornadofx.UIComponent
 class DemoApp : App(RootView::class) {
     override fun start(stage: Stage) {
         super.start(stage)
-        stage.isMaximized = true
     }
 
     override fun onBeforeShow(view: UIComponent) {

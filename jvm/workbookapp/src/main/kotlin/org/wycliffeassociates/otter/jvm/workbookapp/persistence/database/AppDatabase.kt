@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2023 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -106,6 +106,8 @@ class AppDatabase(
     val installedEntityDao = InstalledEntityDao(dsl)
     val translationDao = TranslationDao(dsl)
     val versificationDao = VersificationDao(dsl)
+    val workbookTypeDao = WorkbookTypeDao(dsl)
+    val workbookDescriptorDao = WorkbookDescriptorDao(dsl)
 
     // Transaction support
     fun transaction(block: (DSLContext) -> Unit) {

@@ -15,6 +15,10 @@
     -fx-font-size: 1.3em;
 }
 
+.wa-context-menu .menu-item:disabled {
+    -fx-cursor: disappear;
+}
+
 .wa-context-menu .menu-item > .label {
     -fx-text-fill: -wa-regular-text;
 }

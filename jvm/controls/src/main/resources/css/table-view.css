@@ -36,6 +36,11 @@
     -fx-padding: 8 0;
 }
 
+/* override javaFX - https://gist.github.com/tmazeika/c90c03c645d18722ddb0#file-caspian-css-L2153 */
+.wa-table-view:focused > .virtual-flow > .clipped-container > .sheet > .table-row-cell:filled:focused:selected {
+    -fx-background-color: -wa-primary-light;
+}
+
 /* cells */
 .wa-table-view .table-cell {
     -fx-border-color: transparent transparent -wa-table-row-border transparent;
@@ -59,16 +64,6 @@
     -fx-text-fill: -wa-regular-text-80;
 }
 
-.wa-table-view .table-view__title-cell {
-    -fx-text-fill: -wa-regular-text-80;
-    -fx-font-size: 1.4em;
-    -fx-font-weight: bold;
-}
-
-.wa-table-view .table-cell__normal-text.label {
-    -fx-text-fill: -wa-regular-text-80;
-}
-
 /* scroll-bar */
 .wa-table-view .virtual-flow .scroll-bar:vertical,
 .wa-table-view .virtual-flow .scroll-bar:vertical .track,
@@ -82,7 +77,7 @@
 .wa-table-view .virtual-flow .scroll-bar .increment-button,
 .wa-table-view .virtual-flow .scroll-bar .decrement-button {
     -fx-opacity: 0;
-    -fx-padding: 2;
+    -fx-padding: 0 2;
 }
 
 .wa-table-view .progress-bar {
@@ -108,10 +103,18 @@
 }
 
 .wa-table-view .ikonli-font-icon {
-    -fx-icon-color: -wa-regular-text;
     -fx-icon-size: 20px;
 }
 
 .wa-table-view .active-icon {
-    -fx-icon-color: -wa-secondary-btn-text-fill;
+    -fx-icon-color: -wa-primary;
+}
+
+.wa-table-view .button--active,
+.wa-table-view .button--active:hover {
+    -fx-background-color: #001533;
+}
+
+.wa-table-view .button--active .option-icon {
+    -fx-icon-color: -wa-white;
 }
