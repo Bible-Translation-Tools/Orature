@@ -66,6 +66,5 @@ interface TestPersistenceComponent : AppDependencyGraph {
     fun inject(test: TestSourceProjectExporter)
     fun inject(test: TestBackupProjectExporter)
     fun inject(test: TestAudioProjectExporter)
-    fun inject(test: TestCollectionRepository)
     fun inject(test: MergeMediaTest)
 }
