@@ -41,6 +41,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDatabaseAccessors
 import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.*
@@ -177,7 +178,7 @@ fun getGenesisCollection(): Collection {
 
 fun buildWorkbook(
     directoryProvider: IDirectoryProvider,
-    db: WorkbookRepository.IDatabaseAccessors,
+    db: IWorkbookDatabaseAccessors,
     source: Collection,
     target: Collection
 ) = WorkbookRepository(

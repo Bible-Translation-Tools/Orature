@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2023 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -49,6 +49,8 @@ import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AppInfoViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel2
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectWizardViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
 
 @Component(
@@ -68,6 +70,7 @@ interface AppDependencyGraph {
     fun inject(viewModel: RootViewModel)
     fun inject(viewModel: SplashScreenViewModel)
     fun inject(viewModel: HomePageViewModel)
+    fun inject(viewModel: HomePageViewModel2)
     fun inject(viewModel: AddPluginViewModel)
     fun inject(dataStore: AudioDataStore)
     fun inject(dataStore: AppPreferencesStore)
@@ -77,6 +80,7 @@ interface AppDependencyGraph {
     fun inject(viewModel: AddFilesViewModel)
     fun inject(viewModel: TranslationViewModel)
     fun inject(viewModel: BookWizardViewModel)
+    fun inject(viewModel: ProjectWizardViewModel)
     fun inject(viewModel: ChapterPageViewModel)
     fun inject(viewModel: AppInfoViewModel)
     fun inject(viewModel: ChunkingViewModel)

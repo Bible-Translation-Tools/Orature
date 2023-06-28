@@ -7,9 +7,9 @@ ext {
     buildscanPluginVer = '2.4.2'
     detektPluginVer = '1.17.0'
     ktlintPluginVer = '8.2.0'
-    shadowPluginVer = '5.2.0'
+    shadowPluginVer = '7.1.2'
     sonarcloudPluginVer = '3.0'
-    licensePluginVer = "0.15.0"
+    licensePluginVer = "0.16.1"
     jacocoToolVer = "0.8.7" // stable 0.8.7, not plugin version
 
     // Libraries
@@ -36,7 +36,7 @@ ext {
     mockitoKotlinVer = '2.1.0'
     commonmarkVer = '0.12.1'
     clapperJavaUtilVer = '3.2.0'
-    kotlinresourcecontainerVer = '0.10.0'
+    kotlinresourcecontainerVer = '0.11.0'
     slf4jApiVer = '2.0.0-alpha1'
     log4j2Ver = '2.15.0'
     ikonliVer = '12.2.0'

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2023 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -32,6 +32,7 @@ import jooq.tables.ContentEntity.CONTENT_ENTITY
 import org.jooq.DSLContext
 import org.jooq.Record
 import org.jooq.SelectConditionStep
+import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL.`val`
 import org.jooq.impl.DSL.and
 import org.jooq.impl.DSL.field
@@ -43,12 +44,13 @@ import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
+import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.ContentDao
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.WorkbookDescriptorEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.CollectionEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ResourceMetadataEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.CollectionMapper
@@ -80,6 +82,8 @@ class CollectionRepository @Inject constructor(
     private val metadataDao = database.resourceMetadataDao
     private val languageDao = database.languageDao
     private val resourceMetadataDao = database.resourceMetadataDao
+    private val workbookTypeDao = database.workbookTypeDao
+
 
     override fun delete(obj: Collection): Completable {
         return Completable
@@ -214,6 +218,23 @@ class CollectionRepository @Inject constructor(
             .doOnError { e ->
                 log.error("Error in getAll", e)
             }
+            .subscribeOn(Schedulers.io())
+    }
+
+    override fun getDerivedProject(sourceProject: Collection): Maybe<Collection> {
+        return Maybe
+            .fromCallable {
+                collectionDao
+                    .fetchByLabel("project")
+                    .find { it.sourceFk == sourceProject.id }
+                    ?.let(this::buildCollection)!!
+            }
+            .doOnError { e ->
+                if (e !is java.lang.NullPointerException) {
+                    log.error("Error in getDerivedProject", e)
+                }
+            }
+            .onErrorComplete()
             .subscribeOn(Schedulers.io())
     }
 
@@ -364,11 +385,35 @@ class CollectionRepository @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
+    override fun deriveProjects(
+        rootCollection: Collection,
+        language: Language,
+        verseByVerse: Boolean,
+        mode: ProjectMode
+    ): Single<List<Collection>> {
+        return getChildren(rootCollection)
+            .flattenAsObservable {
+                it
+            }
+            .map { sourceCollection ->
+                val sourceMetadata = sourceCollection.resourceContainer!!
+                deriveProject(
+                    listOf(sourceMetadata),
+                    sourceCollection,
+                    language,
+                    verseByVerse,
+                    mode
+                ).blockingGet()
+            }
+            .toList()
+    }
+
     override fun deriveProject(
         sourceMetadatas: List<ResourceMetadata>,
         sourceCollection: Collection,
         language: Language,
-        verseByVerse: Boolean
+        verseByVerse: Boolean,
+        mode: ProjectMode
     ): Single<Collection> {
         return Single
             .fromCallable {
@@ -431,6 +476,8 @@ class CollectionRepository @Inject constructor(
                             }
                         }
                     }
+
+                    insertWorkbookDescriptor(sourceCollection.id, projectEntity.id, mode)
 
                     return@transactionResult collectionMapper.mapFromEntity(
                         projectEntity,
@@ -844,6 +891,23 @@ class CollectionRepository @Inject constructor(
                         )
                 )
         ).execute()
+    }
+
+    private fun insertWorkbookDescriptor(
+        sourceCollectionId: Int,
+        targetCollectionId: Int,
+        mode: ProjectMode
+    ) {
+        try {
+            database.workbookDescriptorDao.insert(
+                WorkbookDescriptorEntity(
+                    0,
+                    sourceCollectionId,
+                    targetCollectionId,
+                    workbookTypeDao.fetchId(mode)
+                )
+            )
+        } catch (_: DataAccessException) { /* ignore duplicate */ }
     }
 
     private fun buildCollection(entity: CollectionEntity): Collection {
