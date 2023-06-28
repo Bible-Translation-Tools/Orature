@@ -68,14 +68,16 @@ abstract class RCProjectExporter(
         return "$lang-$resource-$project-$timestamp.zip"
     }
 
-    protected fun restoreFileExtension(file: File, extension: String) {
+    protected fun restoreFileExtension(file: File, extension: String): File {
         val fileName = file.nameWithoutExtension + ".$extension"
+        val target = file.parentFile.resolve(fileName)
         // using nio Files.move() instead of file.rename() for platform independent
         Files.move(
             file.toPath(),
-            file.parentFile.resolve(fileName).toPath(),
+            target.toPath(),
             StandardCopyOption.REPLACE_EXISTING
         )
+        return target
     }
 
     protected fun setContributorInfo(

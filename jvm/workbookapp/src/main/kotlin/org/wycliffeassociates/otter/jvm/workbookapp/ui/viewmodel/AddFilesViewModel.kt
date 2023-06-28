@@ -40,6 +40,9 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.AddFilesView
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.DrawerEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.DrawerEventAction
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ImportEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ImportConflictDialog
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
@@ -116,7 +119,6 @@ class AddFilesViewModel : ViewModel() {
             .subscribe { result: ImportResult ->
                 when (result) {
                     ImportResult.SUCCESS -> {
-                        showImportSuccessDialogProperty.value = true
                         fire(ImportEvent)
                     }
                     ImportResult.DEPENDENCY_CONSTRAINT -> {
@@ -128,6 +130,7 @@ class AddFilesViewModel : ViewModel() {
                     }
                 }
                 showImportProgressDialogProperty.value = false
+                fire(DrawerEvent(AddFilesView::class, DrawerEventAction.CLOSE))
             }
     }
 

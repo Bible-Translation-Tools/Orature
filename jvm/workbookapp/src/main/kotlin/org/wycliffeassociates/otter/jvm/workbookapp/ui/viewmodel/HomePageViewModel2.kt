@@ -1,7 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.transformation.FilteredList
@@ -13,7 +12,6 @@ import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.collections.UpdateProject
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
-import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupKey
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupCardModel
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
@@ -52,7 +50,6 @@ class HomePageViewModel2 : ViewModel() {
     val sortedBooks = SortedList<WorkbookDescriptor>(filteredBooks)
     val selectedProjectGroup = SimpleObjectProperty<ProjectGroupKey>()
     val bookSearchQueryProperty = SimpleStringProperty("")
-    val snackBarObservable: PublishSubject<NotificationViewData> = PublishSubject.create()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)

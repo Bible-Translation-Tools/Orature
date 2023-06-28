@@ -4,6 +4,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
+import javafx.scene.control.Tooltip
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.Ikon
@@ -11,11 +12,12 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
 import tornadofx.*
+import tornadofx.FX.Companion.messages
 
 class NotificationSnackBar {
 
     val titleProperty = SimpleStringProperty()
-    val subtitleProperty = SimpleStringProperty()
+    val messageProperty = SimpleStringProperty()
     val statusTypeProperty = SimpleObjectProperty<NotificationStatusType>()
     val actionIconProperty = SimpleObjectProperty<Ikon>()
     val actionTextProperty = SimpleStringProperty()
@@ -49,7 +51,7 @@ class NotificationSnackBar {
                 toggleClass("successful-text", statusTypeProperty.value == NotificationStatusType.SUCCESSFUL)
                 toggleClass("danger-text", statusTypeProperty.value == NotificationStatusType.FAILED)
             }
-            label(subtitleProperty) {
+            label(messageProperty) {
                 addClass("h5", "notification-subtitle")
             }
         }
@@ -57,6 +59,7 @@ class NotificationSnackBar {
         button {
             addClass("btn", "btn--secondary")
             textProperty().bind(actionTextProperty)
+            tooltipProperty().bind(actionTextProperty.objectBinding { Tooltip(it) })
             graphicProperty().bind(actionIconProperty.objectBinding {
                 FontIcon(it)
             })
@@ -67,6 +70,7 @@ class NotificationSnackBar {
 
         button {
             addClass("btn", "btn--icon", "btn--borderless")
+            tooltip(messages["dismiss"])
             graphic = FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE).apply {
                 addClass("dismiss-icon")
             }

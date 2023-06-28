@@ -3,12 +3,12 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 import com.jfoenix.controls.JFXSnackbar
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Node
-import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
 import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.card.TranslationCard2
 import org.wycliffeassociates.otter.jvm.controls.card.newTranslationCard
@@ -25,15 +25,19 @@ import org.wycliffeassociates.otter.jvm.controls.popup.NotificationSnackBar
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.bindSingleChild
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ExportProjectDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ImportEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.ProjectWizardSection
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ExportProjectDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.BookSection
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.ProjectWizardSection
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.openInFilesManager
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ExportProjectViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectWizardViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
+import java.lang.Exception
+import java.text.MessageFormat
+
 
 class HomePage2 : View() {
 
@@ -72,6 +76,7 @@ class HomePage2 : View() {
             }
         }
     }
+    private lateinit var snackBar: JFXSnackbar
 
     init {
         tryImportStylesheet("/css/control.css")
@@ -128,36 +133,28 @@ class HomePage2 : View() {
         }
 
         subscribe<WorkbookExportFinishEvent> {
-            val notification = NotificationViewData(
-                titleKey = "exportSuccessful",
-                subtitleKey = "exportSuccessfulPopupMessage",
-                statusType = NotificationStatusType.SUCCESSFUL,
-                actionIcon = MaterialDesign.MDI_OPEN_IN_NEW,
-                actionText = messages["showLocation"]
-            ) {
-                println("show location")
-            }
-            fireNotification(notification)
+            val notification = createExportNotification(it)
+            showNotification(notification)
         }
 
         subscribe<ImportEvent> {
             logger.info("Import project event received, refreshing the homepage.")
             val notification = NotificationViewData(
-                titleKey = "importSuccessful",
-                subtitleKey = "importSuccessfulPopupMessage",
+                title = "importSuccessful",
+                message = "importSuccessfulPopupMessage",
                 statusType = NotificationStatusType.SUCCESSFUL,
-                actionIcon = MaterialDesign.MDI_ARROW_RIGHT,
-                actionText = messages["openBook"]
+                actionText = messages["openBook"],
+                actionIcon = MaterialDesign.MDI_ARROW_RIGHT
             ) {
                 println("opening book")
             }
-            fireNotification(notification)
+            showNotification(notification)
             viewModel.refresh()
         }
     }
 
     override val root = borderpane {
-        createSnackBar(this)
+        snackBar = JFXSnackbar(this)
         left = vbox {
             addClass("homepage__left-pane")
             label(messages["projects"]) {
@@ -236,39 +233,61 @@ class HomePage2 : View() {
         mainSectionProperty.set(bookFragment)
     }
 
-    private fun createSnackBar(pane: Pane) {
-        val snackBar = JFXSnackbar(pane)
-        viewModel.snackBarObservable.subscribe { notificationData ->
-            snackBar.show()
-
-            val graphic = NotificationSnackBar().apply {
-
-                titleProperty.set(messages[notificationData.titleKey])
-                subtitleProperty.set(messages[notificationData.subtitleKey])
-                statusTypeProperty.set(notificationData.statusType)
-                actionIconProperty.set(notificationData.actionIcon)
-                actionTextProperty.set(notificationData.actionText)
-
-                setOnDismiss {
-                    snackBar.hide() /* avoid crashing if dismiss before timeout */
+    private fun createExportNotification(event: WorkbookExportFinishEvent): NotificationViewData {
+        val notification = if (event.result == ExportResult.SUCCESS) {
+            val messageBody = MessageFormat.format(
+                messages["exportSuccessfulPopupMessage"],
+                event.project.titleKey,
+                event.project.resourceContainer?.language?.name
+            )
+            NotificationViewData(
+                title = messages["exportSuccessful"],
+                message = messageBody,
+                statusType = NotificationStatusType.SUCCESSFUL,
+                actionText = messages["showLocation"],
+                actionIcon = MaterialDesign.MDI_OPEN_IN_NEW
+            ) {
+                val filePath = event.file
+                if (filePath?.exists() == true) {
+                    try {
+                        openInFilesManager(filePath.path)
+                    } catch (e: Exception) {
+                        logger.error("Error while opening $filePath in file manager.")
+                    }
                 }
-                setOnMainAction {
-                    notificationData.actionCallback()
-                }
-
             }
-            snackBar.enqueue(
-                JFXSnackbar.SnackbarEvent(
-                    graphic.build(),
-                    Duration.millis(5000.0)
-                )
+        } else {
+            NotificationViewData(
+                title = messages["exportFailed"],
+                message = messages["exportFailedDescription"],
+                statusType = NotificationStatusType.FAILED
             )
         }
+        return notification
     }
 
-    private fun fireNotification(notification: NotificationViewData) {
-        viewModel.snackBarObservable.onNext(
-            notification
+    private fun showNotification(notification: NotificationViewData) {
+        val graphic = NotificationSnackBar().apply {
+
+            titleProperty.set(notification.title)
+            messageProperty.set(notification.message)
+            statusTypeProperty.set(notification.statusType)
+            actionIconProperty.set(notification.actionIcon)
+            actionTextProperty.set(notification.actionText)
+
+            setOnDismiss {
+                snackBar.hide() /* avoid crashing if dismiss before timeout */
+            }
+            setOnMainAction {
+                notification.actionCallback()
+            }
+        }
+        snackBar.show()
+        snackBar.enqueue(
+            JFXSnackbar.SnackbarEvent(
+                graphic.build(),
+                Duration.seconds(5.0)
+            )
         )
     }
 }
