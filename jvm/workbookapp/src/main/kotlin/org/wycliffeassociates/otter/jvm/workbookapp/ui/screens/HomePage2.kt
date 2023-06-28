@@ -5,7 +5,6 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Node
 import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
-import javafx.scene.layout.Region
 import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
@@ -132,8 +131,12 @@ class HomePage2 : View() {
             val notification = NotificationViewData(
                 titleKey = "exportSuccessful",
                 subtitleKey = "exportSuccessfulPopupMessage",
-                statusType = NotificationStatusType.SUCCESSFUL
-            )
+                statusType = NotificationStatusType.SUCCESSFUL,
+                actionIcon = MaterialDesign.MDI_OPEN_IN_NEW,
+                actionText = messages["showLocation"]
+            ) {
+                println("show location")
+            }
             fireNotification(notification)
         }
 
@@ -142,7 +145,9 @@ class HomePage2 : View() {
             val notification = NotificationViewData(
                 titleKey = "importSuccessful",
                 subtitleKey = "importSuccessfulPopupMessage",
-                statusType = NotificationStatusType.SUCCESSFUL
+                statusType = NotificationStatusType.SUCCESSFUL,
+                actionIcon = MaterialDesign.MDI_ARROW_RIGHT,
+                actionText = messages["openBook"]
             ) {
                 println("opening book")
             }
@@ -179,21 +184,6 @@ class HomePage2 : View() {
                     setOnCancelAction {
                         exitWizard()
                     }
-                }
-            }
-
-            button("show toast") {
-                action {
-                    val notification = NotificationViewData(
-                        titleKey = "importSuccessful",
-                        subtitleKey = "importSuccessfulPopupMessage",
-                        statusType = NotificationStatusType.SUCCESSFUL
-                    ) {
-                        println("opening book")
-                    }
-                    viewModel.snackBarObservable.onNext(
-                        notification
-                    )
                 }
             }
 
@@ -249,36 +239,28 @@ class HomePage2 : View() {
     private fun createSnackBar(pane: Pane) {
         val snackBar = JFXSnackbar(pane)
         viewModel.snackBarObservable.subscribe { notificationData ->
+            snackBar.show()
 
             val graphic = NotificationSnackBar().apply {
 
                 titleProperty.set(messages[notificationData.titleKey])
                 subtitleProperty.set(messages[notificationData.subtitleKey])
                 statusTypeProperty.set(notificationData.statusType)
+                actionIconProperty.set(notificationData.actionIcon)
+                actionTextProperty.set(notificationData.actionText)
 
-                if (notificationData.mainAction != null) {
-                    setMainActionGraphic(
-                        button(messages["open"]) {
-                            addClass("btn", "btn--secondary")
-                            graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
-                            action {
-                                notificationData.mainAction!!()
-                            }
-                        }
-                    )
-                } else {
-                    setMainActionGraphic(Region())
+                setOnDismiss {
+                    snackBar.hide() /* avoid crashing if dismiss before timeout */
                 }
-
-
-                setOnDismiss { snackBar.close() }
-//                setOnMainAction { FX.eventbus.fire(WorkbookOpenEvent()) }
+                setOnMainAction {
+                    notificationData.actionCallback()
+                }
 
             }
             snackBar.enqueue(
                 JFXSnackbar.SnackbarEvent(
                     graphic.build(),
-                    Duration.seconds(5.0)
+                    Duration.millis(5000.0)
                 )
             )
         }
