@@ -33,7 +33,7 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import javax.inject.Inject
-import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.chunking.ChunkAudioUseCase
 import org.wycliffeassociates.otter.common.domain.content.CreateChunks

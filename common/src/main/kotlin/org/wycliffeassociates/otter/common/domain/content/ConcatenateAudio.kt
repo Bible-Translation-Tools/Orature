@@ -19,7 +19,9 @@
 package org.wycliffeassociates.otter.common.domain.content
 
 import io.reactivex.Single
-import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
+import org.wycliffeassociates.otter.common.data.audio.OratureCueType
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
 import javax.inject.Inject
@@ -63,8 +65,8 @@ class ConcatenateAudio @Inject constructor(private val directoryProvider: IDirec
 
         inputFiles.forEach { file ->
             val oratureAudioFile = OratureAudioFile(file)
-            val marker = oratureAudioFile.getCues().first().label
-            outputAudio.addCue(markerLocation, marker)
+            val marker = oratureAudioFile.getMarker(OratureCueType.VERSE).first() as VerseMarker
+            outputAudio.addVerseMarker(marker)
             markerLocation += oratureAudioFile.totalFrames
         }
         outputAudio.update()

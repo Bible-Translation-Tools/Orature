@@ -17,8 +17,8 @@ import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.workbook.Book
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
-import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureCueType
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
+import org.wycliffeassociates.otter.common.data.audio.OratureCueType
 import org.wycliffeassociates.otter.common.domain.versification.Versification
 import org.wycliffeassociates.otter.common.persistence.repositories.IVersificationRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer

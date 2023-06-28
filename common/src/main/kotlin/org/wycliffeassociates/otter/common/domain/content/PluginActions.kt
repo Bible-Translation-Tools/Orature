@@ -20,7 +20,7 @@ package org.wycliffeassociates.otter.common.domain.content
 
 import io.reactivex.Completable
 import io.reactivex.Single
-import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.wav.EMPTY_WAVE_FILE_SIZE
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator

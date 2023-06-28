@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.sound.sampled.LineUnavailableException
 import javax.sound.sampled.SourceDataLine
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer

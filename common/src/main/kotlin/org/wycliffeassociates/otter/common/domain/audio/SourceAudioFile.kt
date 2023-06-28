@@ -29,11 +29,11 @@ class SourceAudioFile : AudioFile {
     }
 
     override fun update() {
-        clearCues()
-        verses.forEach { addCue(it.location, "orature-vm-${it.label}") }
-        chunks.forEach { addCue(it.location, "orature-chunk-${it.label}") }
-        extraCues.forEach { addCue(it.location, it.label) }
-        super.update()
+//        clearCues()
+//        verses.forEach { addCue(it.location, "orature-vm-${it.label}") }
+//        chunks.forEach { addCue(it.location, "orature-chunk-${it.label}") }
+//        extraCues.forEach { addCue(it.location, it.label) }
+//        super.update()
     }
 
     fun addVerse(cue: AudioCue) {

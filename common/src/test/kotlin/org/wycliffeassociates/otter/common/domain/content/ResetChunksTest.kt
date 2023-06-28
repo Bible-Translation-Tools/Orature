@@ -14,7 +14,7 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.wycliffeassociates.otter.common.*
 import org.wycliffeassociates.otter.common.audio.AudioCue
-import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.data.primitives.*
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
@@ -267,9 +267,7 @@ class ResetChunksTest {
             AudioCue(30, "4"),
             AudioCue(40, "5")
         )
-        for (cue in sourceCues) {
-            audio.addCue(cue.location, cue.label)
-        }
+        audio.importCues(sourceCues)
         audio.update()
 
         return createTestRc(projectDir.root, dublinCore, listOf(sourceFile, sourceCueFile))

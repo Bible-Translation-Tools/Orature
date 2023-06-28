@@ -31,11 +31,12 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.domain.content.*
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
@@ -443,7 +444,7 @@ class ChapterPageViewModel : ViewModel() {
                 .filter { it.deletedTimestamp.value?.value == null }
                 .filter { it.file.exists() }
                 .map { take ->
-                    setMarker(chunk.start.toString(), take)
+                    setMarker(VerseMarker(chunk.start, chunk.end, 0), take)
                     take.mapToModel(take == selected)
                 }.subscribe {
                     chunkData.takes.addAll(it)
@@ -453,10 +454,10 @@ class ChapterPageViewModel : ViewModel() {
         }
     }
 
-    private fun setMarker(marker: String, take: Take) {
+    private fun setMarker(marker: VerseMarker, take: Take) {
         OratureAudioFile(take.file).apply {
             if (getCues().isEmpty()) {
-                addCue(0, marker)
+                addVerseMarker(marker)
                 update()
             }
         }

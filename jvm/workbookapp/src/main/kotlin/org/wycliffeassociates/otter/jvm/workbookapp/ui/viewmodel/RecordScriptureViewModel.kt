@@ -19,7 +19,9 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
@@ -35,12 +37,13 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.scene.control.ButtonType
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
@@ -400,6 +403,7 @@ class RecordScriptureViewModel : ViewModel() {
                             loadTakes()
                             updateOnSuccess.subscribe()
                         }
+
                         PluginActions.Result.NO_AUDIO -> {
                             setMarker()
                             loadTakes()
@@ -440,11 +444,16 @@ class RecordScriptureViewModel : ViewModel() {
             }
     }
 
-    fun selectTake(take: Take) {
-        recordable?.audio?.selectTake(take) ?: throw IllegalStateException("Recordable is null")
-        val workbook = workbookDataStore.workbook
-        workbook.projectFilesAccessor.updateSelectedTakesFile(workbook).subscribe()
-        take.file.setLastModified(System.currentTimeMillis())
+    fun selectTake(take: Take): Completable {
+        return Single
+            .fromCallable {
+                recordable?.audio?.selectTake(take) ?: throw IllegalStateException("Recordable is null")
+                val workbook = workbookDataStore.workbook
+                workbook.projectFilesAccessor.updateSelectedTakesFile(workbook).blockingGet()
+                take.file.setLastModified(System.currentTimeMillis())
+            }
+            .ignoreElement()
+            .subscribeOn(Schedulers.io())
     }
 
     fun importTakes(files: List<File>) {
@@ -520,12 +529,15 @@ class RecordScriptureViewModel : ViewModel() {
                     PluginType.RECORDER -> {
                         audioPluginViewModel.selectedRecorderProperty.get()?.name
                     }
+
                     PluginType.EDITOR -> {
                         audioPluginViewModel.selectedEditorProperty.get()?.name
                     }
+
                     PluginType.MARKER -> {
                         audioPluginViewModel.selectedMarkerProperty.get()?.name
                     }
+
                     null -> throw IllegalStateException("Action is not supported!")
                 }
             },
@@ -568,7 +580,10 @@ class RecordScriptureViewModel : ViewModel() {
             audio.selected.value?.value?.let {
                 OratureAudioFile(it.file).apply {
                     if (getCues().isEmpty()) {
-                        addCue(0, workbookDataStore.chunk?.start.toString())
+                        val chunk = workbookDataStore.chunk
+                        if (chunk != null) {
+                            addVerseMarker(VerseMarker(chunk.start, chunk.end, 0))
+                        }
                         update()
                     }
                 }

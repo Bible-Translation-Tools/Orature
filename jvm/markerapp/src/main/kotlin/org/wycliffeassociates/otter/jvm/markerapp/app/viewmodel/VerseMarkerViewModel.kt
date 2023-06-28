@@ -28,7 +28,7 @@ import javafx.scene.control.Slider
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
@@ -40,7 +40,6 @@ import java.io.File
 import java.lang.Integer.min
 import javafx.animation.AnimationTimer
 import javafx.beans.binding.Bindings
-import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureCueType
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseFinishedEvent
 import kotlin.math.max

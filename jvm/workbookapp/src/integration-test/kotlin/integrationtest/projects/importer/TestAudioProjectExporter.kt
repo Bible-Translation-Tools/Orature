@@ -8,7 +8,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.wycliffeassociates.otter.common.ResourceContainerBuilder
-import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.workbook.Workbook

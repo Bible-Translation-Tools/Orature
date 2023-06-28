@@ -24,10 +24,11 @@ import io.reactivex.observers.TestObserver
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
 import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
 
@@ -57,7 +58,7 @@ class ConcatenateAudioTest {
 
         inputFiles.forEachIndexed { index, file ->
             OratureAudioFile(file).apply {
-                addCue(index, "${index + 1}")
+                addVerseMarker(VerseMarker(index + 1, index + 1, index))
                 update()
             }
         }
@@ -123,7 +124,7 @@ class ConcatenateAudioTest {
 
             cues.size == 3 && cues.all {
                 it.location == cues.indexOf(it)
-                it.label == "${cues.indexOf(it) + 1}"
+                it.label == "orature-vm-${cues.indexOf(it) + 1}"
             }
         }
     }
