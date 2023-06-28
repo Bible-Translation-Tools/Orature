@@ -25,11 +25,9 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioCue
-import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
-import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureCueParser
-import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureCueType
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
+import org.wycliffeassociates.otter.common.data.audio.OratureCueType
 import tornadofx.*
-import java.util.regex.Pattern
 
 private const val SEEK_EPSILON = 15_000
 

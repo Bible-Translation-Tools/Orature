@@ -23,7 +23,7 @@ import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import org.slf4j.LoggerFactory
 import java.util.concurrent.atomic.AtomicBoolean
-import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 
 class WavFileWriter(
     private val oratureAudioFile: OratureAudioFile,

@@ -24,11 +24,11 @@ import io.reactivex.observers.TestObserver
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
 import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
-import org.wycliffeassociates.otter.common.domain.audio.decorators.VerseMarker
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
 

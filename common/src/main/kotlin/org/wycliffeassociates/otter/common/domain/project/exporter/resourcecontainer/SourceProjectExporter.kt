@@ -22,7 +22,7 @@ import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Contributor

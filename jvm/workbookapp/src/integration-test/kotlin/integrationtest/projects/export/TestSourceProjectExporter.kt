@@ -29,7 +29,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.Language
@@ -37,7 +37,7 @@ import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.common.domain.audio.decorators.VerseMarker
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.domain.project.importer.RCImporterFactory
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio

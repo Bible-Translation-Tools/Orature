@@ -21,7 +21,6 @@ package org.wycliffeassociates.otter.common.domain.audio
 import org.junit.Assert.assertTrue
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.License
 import java.io.File

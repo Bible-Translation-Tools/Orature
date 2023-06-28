@@ -20,7 +20,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
-import io.reactivex.CompletableSource
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
@@ -38,13 +37,13 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.scene.control.ButtonType
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.common.domain.audio.decorators.VerseMarker
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType

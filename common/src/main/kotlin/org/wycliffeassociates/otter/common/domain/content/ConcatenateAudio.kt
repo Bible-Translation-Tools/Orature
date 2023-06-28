@@ -19,9 +19,9 @@
 package org.wycliffeassociates.otter.common.domain.content
 
 import io.reactivex.Single
-import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
-import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureCueType
-import org.wycliffeassociates.otter.common.domain.audio.decorators.VerseMarker
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
+import org.wycliffeassociates.otter.common.data.audio.OratureCueType
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
 import javax.inject.Inject

@@ -25,8 +25,7 @@ import org.junit.Test
 import java.io.File
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.AudioFile
-import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
-import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureCueType
+import org.wycliffeassociates.otter.common.data.audio.OratureCueType
 
 class SourceAudioFileTest {
 

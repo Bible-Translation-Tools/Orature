@@ -19,15 +19,15 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer
 
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
-import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Media
 import java.io.File
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.workbook.Book
-import org.wycliffeassociates.otter.common.domain.audio.decorators.OratureCueType
-import org.wycliffeassociates.otter.common.domain.audio.decorators.VerseMarker
+import org.wycliffeassociates.otter.common.data.audio.OratureCueType
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 
