@@ -259,7 +259,7 @@ class HomePage2 : View() {
         } else {
             NotificationViewData(
                 title = messages["exportFailed"],
-                message = messages["exportFailedDescription"],
+                message = MessageFormat.format(messages["exportFailedDescription"], event.project.titleKey),
                 statusType = NotificationStatusType.FAILED
             )
         }

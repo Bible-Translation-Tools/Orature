@@ -31,6 +31,7 @@ class ExportProjectViewModel : ViewModel() {
 
     @Inject
     lateinit var workbookRepo: IWorkbookRepository
+
     @Inject
     lateinit var exportSourceUseCase: SourceProjectExporter
 
@@ -98,17 +99,26 @@ class ExportProjectViewModel : ViewModel() {
                 logger.error("Error in exporting project for project: ${workbook.target.slug}")
             }
             .subscribe { result: ExportResult ->
-                result.errorMessage?.let {
-                    tornadofx.error(messages["exportError"], it)
+                if (result == ExportResult.FAILURE) {
+                    callback.onNotifyError(workbook.target.toCollection())
                 }
             }
     }
 
     private fun setUpCallback(): ProjectExporterCallback {
-        return object: ProjectExporterCallback {
+        return object : ProjectExporterCallback {
             override fun onNotifySuccess(project: Collection, file: File) {
-                FX.eventbus.fire(WorkbookExportFinishEvent(
-                    ExportResult.SUCCESS, project, file)
+                FX.eventbus.fire(
+                    WorkbookExportFinishEvent(
+                        ExportResult.SUCCESS, project, file
+                    )
+                )
+            }
+            override fun onNotifyError(project: Collection) {
+                FX.eventbus.fire(
+                    WorkbookExportFinishEvent(
+                        ExportResult.FAILURE, project
+                    )
                 )
             }
         }

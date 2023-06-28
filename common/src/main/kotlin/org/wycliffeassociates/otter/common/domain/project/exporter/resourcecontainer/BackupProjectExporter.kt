@@ -95,7 +95,6 @@ class BackupProjectExporter @Inject constructor(
             }
             .doOnError {
                 logger.error("Failed to export in-progress project", it)
-                callback?.onNotifyError(workbook.target.toCollection())
             }
             .onErrorReturnItem(ExportResult.FAILURE)
             .subscribeOn(Schedulers.io())

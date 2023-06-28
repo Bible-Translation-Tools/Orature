@@ -60,8 +60,8 @@ class NotificationSnackBar {
             addClass("btn", "btn--secondary")
             textProperty().bind(actionTextProperty)
             tooltipProperty().bind(actionTextProperty.objectBinding { Tooltip(it) })
-            graphicProperty().bind(actionIconProperty.objectBinding {
-                FontIcon(it)
+            graphicProperty().bind(actionIconProperty.objectBinding { it ->
+                it?.let { FontIcon(it) }
             })
             onActionProperty().bind(mainActionProperty)
             visibleWhen { actionTextProperty.isNotNull }
