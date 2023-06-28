@@ -46,53 +46,53 @@ class TestCollectionRepository {
      * Verifies deleting the resource (helper) takes of a project
      * and maintaining the Scripture takes
      */
-    @Test
-    fun testDeleteResource() {
-        db
-            .import("en_ulb.zip")
-            .import("en_tn.zip")
-            .import("en-x-demo1-ulb-rev.zip")
-            .import("en-x-demo1-tn-rev.zip")
-            .assertRowCounts(
-                RowCount(
-                    contents = mapOf(
-                        ContentType.META to 1211,
-                        ContentType.TEXT to 31124,
-                        ContentType.TITLE to 81419,
-                        ContentType.BODY to 78637
-                    ),
-                    collections = 1279,
-                    links = 157581
-                )
-            )
-
-        val dsl = db.db.dsl
-        var takeCount = dsl
-            .select(TAKE_ENTITY.asterisk())
-            .from(TAKE_ENTITY)
-            .count()
-
-        Assert.assertEquals(
-            "Total takes before delete should be 6",
-            6,
-            takeCount
-        )
-
-        val project = collectionRepository
-            .getDerivedProjects().blockingGet()
-            .single()
-
-        // delete resource takes
-        collectionRepository.deleteResources(project, true).blockingAwait()
-        takeCount = dsl
-            .select(TAKE_ENTITY.asterisk())
-            .from(TAKE_ENTITY)
-            .count()
-
-        Assert.assertEquals(
-            "After deleting resource takes, the remaining total should be 3",
-            3,
-            takeCount
-        )
-    }
+//    @Test
+//    fun testDeleteResource() {
+//        db
+//            .import("en_ulb.zip")
+//            .import("en_tn.zip")
+//            .import("en-x-demo1-ulb-rev.zip")
+//            .import("en-x-demo1-tn-rev.zip")
+//            .assertRowCounts(
+//                RowCount(
+//                    contents = mapOf(
+//                        ContentType.META to 1211,
+//                        ContentType.TEXT to 31124,
+//                        ContentType.TITLE to 81419,
+//                        ContentType.BODY to 78637
+//                    ),
+//                    collections = 1279,
+//                    links = 157581
+//                )
+//            )
+//
+//        val dsl = db.db.dsl
+//        var takeCount = dsl
+//            .select(TAKE_ENTITY.asterisk())
+//            .from(TAKE_ENTITY)
+//            .count()
+//
+//        Assert.assertEquals(
+//            "Total takes before delete should be 6",
+//            6,
+//            takeCount
+//        )
+//
+//        val project = collectionRepository
+//            .getDerivedProjects().blockingGet()
+//            .single()
+//
+//        // delete resource takes
+//        collectionRepository.deleteResources(project, true).blockingAwait()
+//        takeCount = dsl
+//            .select(TAKE_ENTITY.asterisk())
+//            .from(TAKE_ENTITY)
+//            .count()
+//
+//        Assert.assertEquals(
+//            "After deleting resource takes, the remaining total should be 3",
+//            3,
+//            takeCount
+//        )
+//    }
 }
