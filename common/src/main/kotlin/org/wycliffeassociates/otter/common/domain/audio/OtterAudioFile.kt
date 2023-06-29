@@ -56,8 +56,9 @@ class OratureAudioFile : AudioFile {
         return getCuesFromMap(type)
     }
 
+    @Deprecated("Markers should be added to OtterAudioFile using typed addMarker methods")
     fun addCues(cues: List<AudioCue>) {
-
+        markers.import(OratureCueParser.parse(cues))
     }
 
     fun addVerseMarker(marker: VerseMarker) {
@@ -76,6 +77,7 @@ class OratureAudioFile : AudioFile {
         markers.import(OratureCueParser.parse(cues))
     }
 
+    @Deprecated("Markers should be added to OtterAudioFile using typed addMarker methods")
     override fun addCue(location: Int, label: String) {
         markers.import(OratureCueParser.parse(listOf(AudioCue(location, label))))
     }
