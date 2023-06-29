@@ -222,6 +222,10 @@ class OngoingProjectImporter @Inject constructor(
                     importResumableProject(fileReader, metadata, manifestProject, sourceCollection)
                 }
 
+                callback?.onNotifySuccess(
+                    manifestProject.title,
+                    manifest.dublinCore.language.title
+                )
                 ImportResult.SUCCESS
             } catch (e: ImportException) {
                 e.result

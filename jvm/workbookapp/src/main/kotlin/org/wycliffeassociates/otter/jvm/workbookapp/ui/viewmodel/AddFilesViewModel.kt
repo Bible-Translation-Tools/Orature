@@ -20,7 +20,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Single
-import io.reactivex.SingleEmitter
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
@@ -43,7 +42,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.AddFilesView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.DrawerEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.DrawerEventAction
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ImportEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ProjectImportEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ImportConflictDialog
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
@@ -117,17 +116,8 @@ class AddFilesViewModel : ViewModel() {
                 importedProjectCoverProperty.set(null)
             }
             .subscribe { result: ImportResult ->
-                when (result) {
-                    ImportResult.SUCCESS -> {
-                        fire(ImportEvent)
-                    }
-                    ImportResult.DEPENDENCY_CONSTRAINT -> {
-                        importErrorMessage.set(messages["importErrorDependencyExists"])
-                        showImportErrorDialogProperty.value = true
-                    }
-                    else -> {
-                        showImportErrorDialogProperty.value = true
-                    }
+                if (result == ImportResult.FAILED) {
+                    callback.onError(file.absolutePath)
                 }
                 showImportProgressDialogProperty.value = false
                 fire(DrawerEvent(AddFilesView::class, DrawerEventAction.CLOSE))
@@ -172,8 +162,16 @@ class AddFilesViewModel : ViewModel() {
                 }
             }
 
-            override fun onError(messageKey: String) {
-                TODO("Not yet implemented")
+            override fun onNotifySuccess(project: String, language: String) {
+                FX.eventbus.fire(
+                    ProjectImportEvent(ImportResult.SUCCESS, project, language)
+                )
+            }
+
+            override fun onError(filePath: String) {
+                FX.eventbus.fire(
+                    ProjectImportEvent(ImportResult.FAILED, filePath = filePath)
+                )
             }
 
             override fun onNotifyProgress(localizeKey: String?, message: String?) {

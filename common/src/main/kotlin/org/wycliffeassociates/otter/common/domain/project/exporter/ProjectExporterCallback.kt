@@ -17,5 +17,5 @@ interface ProjectExporterCallback {
      *
      * @param project the project that was exported
      */
-    fun onNotifyError(project: Collection)
+    fun onError(project: Collection)
 }

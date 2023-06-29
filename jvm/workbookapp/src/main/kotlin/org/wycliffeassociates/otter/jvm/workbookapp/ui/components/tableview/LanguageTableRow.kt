@@ -2,7 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview
 
 import javafx.scene.control.TableRow
 import org.wycliffeassociates.otter.common.data.primitives.Language
-import org.wycliffeassociates.otter.jvm.controls.event.LanguageSelectedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.LanguageSelectedEvent
 import tornadofx.FX
 
 class LanguageTableRow : TableRow<Language>() {

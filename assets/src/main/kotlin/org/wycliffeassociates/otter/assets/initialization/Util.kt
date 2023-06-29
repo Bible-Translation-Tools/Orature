@@ -24,8 +24,12 @@ internal fun setupImportCallback(
             throw NotImplementedError("no op")
         }
 
-        override fun onError(messageKey: String) {
-            throw NotImplementedError("no op")
+        override fun onNotifySuccess(project: String, language: String) {
+            /* no-op */
+        }
+
+        override fun onError(filePath: String) {
+            /* no-op */
         }
 
         override fun onNotifyProgress(localizeKey: String?, message: String?) {

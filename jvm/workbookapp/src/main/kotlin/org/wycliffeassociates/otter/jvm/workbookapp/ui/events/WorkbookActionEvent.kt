@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.controls.event
+package org.wycliffeassociates.otter.jvm.workbookapp.ui.events
 
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor

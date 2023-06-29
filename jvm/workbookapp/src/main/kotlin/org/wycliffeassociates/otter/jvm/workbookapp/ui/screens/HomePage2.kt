@@ -9,23 +9,24 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.card.TranslationCard2
 import org.wycliffeassociates.otter.jvm.controls.card.newTranslationCard
 import org.wycliffeassociates.otter.jvm.controls.card.translationCreationCard
-import org.wycliffeassociates.otter.jvm.controls.event.LanguageSelectedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.LanguageSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
-import org.wycliffeassociates.otter.jvm.controls.event.WorkbookExportDialogOpenEvent
-import org.wycliffeassociates.otter.jvm.controls.event.WorkbookExportEvent
-import org.wycliffeassociates.otter.jvm.controls.event.WorkbookExportFinishEvent
-import org.wycliffeassociates.otter.jvm.controls.event.WorkbookOpenEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportDialogOpenEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportFinishEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookOpenEvent
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
 import org.wycliffeassociates.otter.jvm.controls.popup.NotificationSnackBar
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.bindSingleChild
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ImportEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ProjectImportEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ExportProjectDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.BookSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.ProjectWizardSection
@@ -91,66 +92,6 @@ class HomePage2 : View() {
         tryImportStylesheet("/css/snack-bar-notification.css")
 
         subscribeActionEvents()
-    }
-
-    private fun subscribeActionEvents() {
-        subscribe<LanguageSelectedEvent> {
-            projectWizardViewModel.onLanguageSelected(it.item) {
-                viewModel.loadProjects()
-                mainSectionProperty.set(bookFragment)
-            }
-        }
-
-        subscribe<WorkbookOpenEvent> {
-            viewModel.selectBook(it.data)
-        }
-
-        subscribe<WorkbookExportDialogOpenEvent> {
-            find<ExportProjectDialog> {
-                val workbookDescriptor = it.data
-                orientationProperty.set(settingsViewModel.orientationProperty.value)
-                themeProperty.set(settingsViewModel.appColorMode.value)
-                workbookDescriptorProperty.set(workbookDescriptor)
-
-                exportProjectViewModel.loadAvailableChapters(workbookDescriptor)
-                    .subscribe { chapters ->
-                        availableChapters.setAll(chapters)
-                    }
-
-                setOnCloseAction {
-                    this.close()
-                }
-            }.open()
-        }
-
-        subscribe<WorkbookExportEvent> { event ->
-            exportProjectViewModel.exportWorkbook(
-                event.workbook,
-                event.outputDir,
-                event.exportType,
-                event.chapters
-            )
-        }
-
-        subscribe<WorkbookExportFinishEvent> {
-            val notification = createExportNotification(it)
-            showNotification(notification)
-        }
-
-        subscribe<ImportEvent> {
-            logger.info("Import project event received, refreshing the homepage.")
-            val notification = NotificationViewData(
-                title = "importSuccessful",
-                message = "importSuccessfulPopupMessage",
-                statusType = NotificationStatusType.SUCCESSFUL,
-                actionText = messages["openBook"],
-                actionIcon = MaterialDesign.MDI_ARROW_RIGHT
-            ) {
-                println("opening book")
-            }
-            showNotification(notification)
-            viewModel.refresh()
-        }
     }
 
     override val root = borderpane {
@@ -227,16 +168,94 @@ class HomePage2 : View() {
         viewModel.undock()
     }
 
+    private fun subscribeActionEvents() {
+        subscribe<LanguageSelectedEvent> {
+            projectWizardViewModel.onLanguageSelected(it.item) {
+                viewModel.loadProjects()
+                mainSectionProperty.set(bookFragment)
+            }
+        }
+
+        subscribe<WorkbookOpenEvent> {
+            viewModel.selectBook(it.data)
+        }
+
+        subscribe<WorkbookExportDialogOpenEvent> {
+            find<ExportProjectDialog> {
+                val workbookDescriptor = it.data
+                orientationProperty.set(settingsViewModel.orientationProperty.value)
+                themeProperty.set(settingsViewModel.appColorMode.value)
+                workbookDescriptorProperty.set(workbookDescriptor)
+
+                exportProjectViewModel.loadAvailableChapters(workbookDescriptor)
+                    .subscribe { chapters ->
+                        availableChapters.setAll(chapters)
+                    }
+
+                setOnCloseAction {
+                    this.close()
+                }
+            }.open()
+        }
+
+        subscribe<WorkbookExportEvent> { event ->
+            exportProjectViewModel.exportWorkbook(
+                event.workbook,
+                event.outputDir,
+                event.exportType,
+                event.chapters
+            )
+        }
+
+        subscribe<WorkbookExportFinishEvent> {
+            val notification = createExportNotification(it)
+            showNotification(notification)
+        }
+
+        subscribe<ProjectImportEvent> {
+            logger.info("Import project event received, refreshing the homepage.")
+            val notification = createImportNotification(it)
+            showNotification(notification)
+            viewModel.refresh()
+        }
+    }
+
     private fun exitWizard() {
         projectWizardViewModel.undock()
         viewModel.loadProjects()
         mainSectionProperty.set(bookFragment)
     }
 
+    private fun createImportNotification(event: ProjectImportEvent): NotificationViewData {
+        val notification = if (event.result == ImportResult.SUCCESS) {
+            val messageBody = MessageFormat.format(
+                messages["importSuccessfulPopupMessage"],
+                event.project,
+                event.language
+            )
+            NotificationViewData(
+                title = messages["importSuccessful"],
+                message = messageBody,
+                statusType = NotificationStatusType.SUCCESSFUL,
+                actionText = messages["openBook"],
+                actionIcon = MaterialDesign.MDI_ARROW_RIGHT
+            ) {
+                println("opening book")
+            }
+        } else {
+            NotificationViewData(
+                title = messages["importFailed"],
+                message = MessageFormat.format(messages["importFailedMessage"], event.filePath),
+                statusType = NotificationStatusType.FAILED
+            )
+        }
+        return notification
+    }
+
     private fun createExportNotification(event: WorkbookExportFinishEvent): NotificationViewData {
         val notification = if (event.result == ExportResult.SUCCESS) {
             val messageBody = MessageFormat.format(
-                messages["exportSuccessfulPopupMessage"],
+                messages["exportSuccessfulMessage"],
                 event.project.titleKey,
                 event.project.resourceContainer?.language?.name
             )
@@ -259,7 +278,7 @@ class HomePage2 : View() {
         } else {
             NotificationViewData(
                 title = messages["exportFailed"],
-                message = MessageFormat.format(messages["exportFailedDescription"], event.project.titleKey),
+                message = MessageFormat.format(messages["exportFailedMessage"], event.project.titleKey),
                 statusType = NotificationStatusType.FAILED
             )
         }

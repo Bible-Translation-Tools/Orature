@@ -16,12 +16,10 @@ import org.wycliffeassociates.otter.common.domain.project.exporter.ProjectExport
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.BackupProjectExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.SourceProjectExporter
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
-import org.wycliffeassociates.otter.jvm.controls.event.WorkbookExportFinishEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportFinishEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.errorMessage
 import tornadofx.FX
 import tornadofx.ViewModel
-import tornadofx.get
 import java.io.File
 import javax.inject.Inject
 
@@ -100,7 +98,7 @@ class ExportProjectViewModel : ViewModel() {
             }
             .subscribe { result: ExportResult ->
                 if (result == ExportResult.FAILURE) {
-                    callback.onNotifyError(workbook.target.toCollection())
+                    callback.onError(workbook.target.toCollection())
                 }
             }
     }
@@ -114,7 +112,7 @@ class ExportProjectViewModel : ViewModel() {
                     )
                 )
             }
-            override fun onNotifyError(project: Collection) {
+            override fun onError(project: Collection) {
                 FX.eventbus.fire(
                     WorkbookExportFinishEvent(
                         ExportResult.FAILURE, project

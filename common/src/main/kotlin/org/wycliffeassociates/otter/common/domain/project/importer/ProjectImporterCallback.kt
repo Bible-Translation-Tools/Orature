@@ -31,12 +31,14 @@ interface ProjectImporterCallback {
      */
     fun onNotifyProgress(localizeKey: String? = null, message: String? = null)
 
+    fun onNotifySuccess(project: String, language: String)
+
     /**
      * Called when the importer encounters an error that needs to alert the user.
      *
      * @param messageKey the string identifier mapped to the localized text of the message.
      */
-    fun onError(messageKey: String)
+    fun onError(filePath: String)
 }
 
 /**
