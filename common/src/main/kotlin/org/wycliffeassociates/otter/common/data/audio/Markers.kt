@@ -17,6 +17,10 @@ class UnknownMarker(override val location: Int, override val label: String) : Au
     constructor(cue: AudioCue) : this(cue.location, cue.label)
 
     override fun formatMarkerText() = label
+
+    override fun toString(): String {
+        return formatMarkerText()
+    }
 }
 
 class VerseMarker(val start: Int, val end: Int, override val location: Int) : AudioMarker {
@@ -24,9 +28,17 @@ class VerseMarker(val start: Int, val end: Int, override val location: Int) : Au
         get() = if (end != start) "$start-$end" else "$start"
 
     override fun formatMarkerText() = "orature-vm-${label}"
+
+    override fun toString(): String {
+        return formatMarkerText()
+    }
 }
 
 class ChunkMarker(val chunk: Int, override val location: Int) : AudioMarker {
     override val label = "$chunk"
     override fun formatMarkerText() = "orature-chunk-${label}"
+
+    override fun toString(): String {
+        return formatMarkerText()
+    }
 }
