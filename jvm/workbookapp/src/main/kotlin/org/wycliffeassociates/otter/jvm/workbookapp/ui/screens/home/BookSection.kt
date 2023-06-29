@@ -49,6 +49,7 @@ class BookSection(
                     setOnAction {
                         val bound = this.boundsInLocal
                         val screenBound = this.localToScreen(bound)
+                        projectsOptionMenu.books.setAll(books)
                         projectsOptionMenu.show(
                             FX.primaryStage
                         )

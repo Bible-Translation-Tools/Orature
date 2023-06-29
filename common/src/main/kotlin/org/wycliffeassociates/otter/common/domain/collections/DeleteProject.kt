@@ -19,15 +19,24 @@
 package org.wycliffeassociates.otter.common.domain.collections
 
 import io.reactivex.Completable
+import io.reactivex.Observable
+import io.reactivex.schedulers.Schedulers
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import javax.inject.Inject
 
 class DeleteProject @Inject constructor(
     private val collectionRepository: ICollectionRepository,
-    private val directoryProvider: IDirectoryProvider
+    private val directoryProvider: IDirectoryProvider,
+    private val workbookRepository: IWorkbookRepository
 ) {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     fun delete(workbook: Workbook, deleteFiles: Boolean): Completable {
         // Order matters here, files won't remove anything from the database
@@ -37,6 +46,46 @@ class DeleteProject @Inject constructor(
         return deleteFiles(workbook, deleteFiles)
             .andThen(collectionRepository.deleteResources(targetProject, deleteFiles))
             .andThen(collectionRepository.deleteProject(targetProject, deleteFiles))
+    }
+
+    /**
+     * Delete the project's content (files & data). This resets the project
+     * to its initial state by deleting and re-inserting the project to its group.
+     */
+    fun delete(workbookDescriptor: WorkbookDescriptor): Completable {
+        return Observable
+            .fromCallable {
+                workbookRepository.get(
+                    workbookDescriptor.sourceCollection,
+                    workbookDescriptor.targetCollection
+                )
+            }
+            .flatMapCompletable { workbook ->
+                delete(workbook, deleteFiles = true)
+            }
+            .doOnError {
+                logger.error("Error while deleting workbook.", it)
+            }
+            .andThen(
+                recreateWorkbookDescriptor(workbookDescriptor)
+            )
+            .subscribeOn(Schedulers.io())
+    }
+
+    private fun recreateWorkbookDescriptor(workbookDescriptor: WorkbookDescriptor): Completable {
+        val sourceMetadata = workbookDescriptor.sourceCollection.resourceContainer!!
+        return collectionRepository
+            .deriveProject(
+                listOf(sourceMetadata),
+                workbookDescriptor.sourceCollection,
+                workbookDescriptor.targetLanguage,
+                true,
+                workbookDescriptor.mode
+            )
+            .doOnError {
+                logger.error("Error while recreating workbook descriptor.", it)
+            }
+            .ignoreElement()
     }
 
     private fun deleteFiles(workbook: Workbook, deleteFiles: Boolean): Completable {

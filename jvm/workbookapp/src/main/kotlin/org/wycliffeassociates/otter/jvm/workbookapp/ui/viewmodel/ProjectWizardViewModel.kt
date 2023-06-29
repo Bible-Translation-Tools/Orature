@@ -107,12 +107,12 @@ class ProjectWizardViewModel : ViewModel() {
     }
 
     fun onLanguageSelected(language: Language, onNavigateBack: () -> Unit) {
-        if (selectedSourceLanguageProperty.value != null) {
-            // target language selected, creates project group
-            selectedTargetLanguageProperty.set(language)
+        val sourceLanguage = selectedSourceLanguageProperty.value
+        if (sourceLanguage != null) {
+            logger.info("Creating project group: ${sourceLanguage.slug} - ${language.slug}")
             creationUseCase
                 .createAllBooks(
-                    selectedSourceLanguageProperty.value,
+                    sourceLanguage,
                     language,
                     selectedModeProperty.value
                 )
