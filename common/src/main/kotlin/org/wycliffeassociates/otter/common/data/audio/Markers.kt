@@ -13,7 +13,7 @@ interface AudioMarker {
     }
 }
 
-class UnknownMarker(override val location: Int, override val label: String) : AudioMarker {
+data class UnknownMarker(override val location: Int, override val label: String) : AudioMarker {
     constructor(cue: AudioCue) : this(cue.location, cue.label)
 
     override fun formatMarkerText() = label
@@ -23,7 +23,7 @@ class UnknownMarker(override val location: Int, override val label: String) : Au
     }
 }
 
-class VerseMarker(val start: Int, val end: Int, override val location: Int) : AudioMarker {
+data class VerseMarker(val start: Int, val end: Int, override val location: Int) : AudioMarker {
     override val label: String
         get() = if (end != start) "$start-$end" else "$start"
 
@@ -34,7 +34,7 @@ class VerseMarker(val start: Int, val end: Int, override val location: Int) : Au
     }
 }
 
-class ChunkMarker(val chunk: Int, override val location: Int) : AudioMarker {
+data class ChunkMarker(val chunk: Int, override val location: Int) : AudioMarker {
     override val label = "$chunk"
     override fun formatMarkerText() = "orature-chunk-${label}"
 
