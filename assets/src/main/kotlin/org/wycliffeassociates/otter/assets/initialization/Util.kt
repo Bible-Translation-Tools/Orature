@@ -24,7 +24,7 @@ internal fun setupImportCallback(
             throw NotImplementedError("no op")
         }
 
-        override fun onNotifySuccess(project: String, language: String) {
+        override fun onNotifySuccess(languageName: String, projectSlug: String?) {
             /* no-op */
         }
 

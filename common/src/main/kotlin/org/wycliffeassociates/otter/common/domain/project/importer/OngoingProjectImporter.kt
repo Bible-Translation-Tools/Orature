@@ -223,8 +223,8 @@ class OngoingProjectImporter @Inject constructor(
                 }
 
                 callback?.onNotifySuccess(
-                    manifestProject.title,
-                    manifest.dublinCore.language.title
+                    manifest.dublinCore.language.title,
+                    manifestProject.title
                 )
                 ImportResult.SUCCESS
             } catch (e: ImportException) {

@@ -32,6 +32,8 @@ class ExistingSourceImporter @Inject constructor(
 ) : RCImporter(directoryProvider, resourceMetadataRepository) {
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
+    private var languageName = ""
+
     override fun import(
         file: File,
         callback: ProjectImporterCallback?,
@@ -47,6 +49,7 @@ class ExistingSourceImporter @Inject constructor(
             ResourceContainer.load(file).use { rc ->
                 sameVersion = (rc.manifest.dublinCore.version == existingSource.version)
                 ResourceContainer.load(existingSource.path).use { existingRC ->
+                    languageName = rc.manifest.dublinCore.language.title
                     val sourceVersification = rc.manifest.projects.firstOrNull()?.versification
                     val existingVersification = existingRC.manifest.projects.firstOrNull()?.versification
                     sameVersification = sourceVersification == existingVersification
@@ -57,7 +60,7 @@ class ExistingSourceImporter @Inject constructor(
             return Single.just(ImportResult.LOAD_RC_ERROR)
         }
 
-        return if (sameVersion) {
+        val singleStream = if (sameVersion) {
             callback?.onNotifyProgress(localizeKey = "mergingSource")
             logger.info("RC ${file.name} already imported, merging media...")
             mergeMedia(file, existingSource.path)
@@ -93,6 +96,23 @@ class ExistingSourceImporter @Inject constructor(
                     Single.just(ImportResult.DEPENDENCY_CONSTRAINT)
                 }
             }
+        }
+
+        return singleStream
+            .doOnSuccess { result ->
+                notifyCallback(result, callback, file)
+            }
+    }
+
+    private fun notifyCallback(
+        result: ImportResult,
+        callback: ProjectImporterCallback?,
+        file: File
+    ) {
+        if (result == ImportResult.SUCCESS) {
+            callback?.onNotifySuccess(languageName = languageName)
+        } else {
+            callback?.onError(file.name)
         }
     }
 

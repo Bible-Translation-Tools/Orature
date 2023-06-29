@@ -31,7 +31,7 @@ interface ProjectImporterCallback {
      */
     fun onNotifyProgress(localizeKey: String? = null, message: String? = null)
 
-    fun onNotifySuccess(project: String, language: String)
+    fun onNotifySuccess(languageName: String, projectSlug: String? = null)
 
     /**
      * Called when the importer encounters an error that needs to alert the user.

@@ -21,7 +21,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.events
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import tornadofx.FXEvent
-import java.io.File
 
 class LanguageSelectedEvent(val item: Language) : FXEvent()
 

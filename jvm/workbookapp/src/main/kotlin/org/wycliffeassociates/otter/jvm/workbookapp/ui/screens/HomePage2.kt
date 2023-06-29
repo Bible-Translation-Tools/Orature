@@ -227,9 +227,18 @@ class HomePage2 : View() {
     }
 
     private fun createImportNotification(event: ProjectImportEvent): NotificationViewData {
-        val notification = if (event.result == ImportResult.SUCCESS) {
+        if (event.result == ImportResult.FAILED) {
+            return NotificationViewData(
+                title = messages["importFailed"],
+                message = MessageFormat.format(messages["importFailedMessage"], event.filePath),
+                statusType = NotificationStatusType.FAILED
+            )
+        }
+
+        return if (event.project != null) {
+            // single project import
             val messageBody = MessageFormat.format(
-                messages["importSuccessfulPopupMessage"],
+                messages["importProjectSuccessfulMessage"],
                 event.project,
                 event.language
             )
@@ -243,13 +252,17 @@ class HomePage2 : View() {
                 println("opening book")
             }
         } else {
+            // source import
+            val messageBody = MessageFormat.format(
+                messages["importSourceSuccessfulMessage"],
+                event.language
+            )
             NotificationViewData(
-                title = messages["importFailed"],
-                message = MessageFormat.format(messages["importFailedMessage"], event.filePath),
-                statusType = NotificationStatusType.FAILED
+                title = messages["importSuccessful"],
+                message = messageBody,
+                statusType = NotificationStatusType.SUCCESSFUL,
             )
         }
-        return notification
     }
 
     private fun createExportNotification(event: WorkbookExportFinishEvent): NotificationViewData {

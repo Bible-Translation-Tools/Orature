@@ -162,9 +162,9 @@ class AddFilesViewModel : ViewModel() {
                 }
             }
 
-            override fun onNotifySuccess(project: String, language: String) {
+            override fun onNotifySuccess(languageName: String, projectSlug: String?) {
                 FX.eventbus.fire(
-                    ProjectImportEvent(ImportResult.SUCCESS, project, language)
+                    ProjectImportEvent(ImportResult.SUCCESS, language = languageName, project = projectSlug)
                 )
             }
 
