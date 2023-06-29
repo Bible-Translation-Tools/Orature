@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Completable
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.Slider
@@ -16,6 +17,7 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.narration.AudioFileUtils
+import org.wycliffeassociates.otter.common.domain.narration.SplitAudioOnCues
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.common.recorder.WavFileWriter
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
@@ -115,6 +117,10 @@ class NarrationBody : View() {
         subscribe<OpenInAudioPluginEvent> {
             viewModel.openInAudioPlugin(it.index)
         }
+
+        subscribe<ChapterOpenInPluginEvent> {
+            viewModel.onChapterOpenInPlugin(it.status)
+        }
     }
 
     override fun onDock() {
@@ -145,6 +151,9 @@ class NarrationBodyViewModel : ViewModel() {
     @Inject
     lateinit var audioFileUtils: AudioFileUtils
 
+    @Inject
+    lateinit var splitAudioOnCues: SplitAudioOnCues
+
     private var recorder: IAudioRecorder? = null
     private var writer: WavFileWriter? = null
     private var recordedAudio: AudioFile? = null
@@ -157,6 +166,9 @@ class NarrationBodyViewModel : ViewModel() {
 
     private val recordResumeProperty = SimpleBooleanProperty()
     private var recordResume by recordResumeProperty
+
+    private val potentiallyFinishedProperty = SimpleBooleanProperty()
+    private var potentiallyFinished by potentiallyFinishedProperty
 
     val isRecordingProperty = SimpleBooleanProperty()
     private var isRecording by isRecordingProperty
@@ -181,6 +193,7 @@ class NarrationBodyViewModel : ViewModel() {
     private lateinit var jsonFile: File
 
     val contextProperty = SimpleObjectProperty(PluginType.EDITOR)
+    val chapterOpenInPluginProperty = SimpleBooleanProperty()
 
     val recordedVerses = observableListOf<VerseNode>()
 
@@ -203,20 +216,11 @@ class NarrationBodyViewModel : ViewModel() {
     }
 
     fun onDock() {
-        loadVerses()
         initializeRecorder()
     }
 
     fun onUndock() {
         closeRecorder()
-    }
-
-    private fun loadVerses() {
-        // Load verses from database and map to recordedVerses list
-        // then based on the size of the list set start, resume and potentiallyFinished properties
-
-        recordStart = recordedVerses.isEmpty()
-        recordResume = recordedVerses.isNotEmpty()
     }
 
     fun play(verse: VerseNode) {
@@ -248,6 +252,8 @@ class NarrationBodyViewModel : ViewModel() {
         writer?.start()
 
         recordAgainVerseIndex = verseIndex
+        recordStart = false
+        recordResume = false
         isRecordingAgain = true
         recordPause = false
     }
@@ -257,6 +263,16 @@ class NarrationBodyViewModel : ViewModel() {
             val verse = recordedVerses[index]
             val file = audioFileUtils.getSectionAsFile(audio, verse.start, verse.end)
             processWithPlugin(file, index)
+        }
+    }
+
+    fun onChapterOpenInPlugin(status: ChapterOpenInPluginStatus) {
+        when (status) {
+            ChapterOpenInPluginStatus.STARTED -> {
+                chapterOpenInPluginProperty.value = true
+                initializeRecorder()
+            }
+            ChapterOpenInPluginStatus.FINISHED -> chapterOpenInPluginProperty.value = false
         }
     }
 
@@ -357,6 +373,8 @@ class NarrationBodyViewModel : ViewModel() {
         }
 
         updateJsonFile()
+
+        potentiallyFinished = checkPotentiallyFinished()
     }
 
     private fun resumeRecording() {
@@ -378,6 +396,8 @@ class NarrationBodyViewModel : ViewModel() {
                 recordedVerses[verseIndex].end = it.totalFrames
             }
         }
+        recordStart = recordedVerses.isEmpty()
+        recordResume = recordedVerses.isNotEmpty()
     }
 
     private fun stopPlayer() {
@@ -393,10 +413,19 @@ class NarrationBodyViewModel : ViewModel() {
             jsonFile = File(audioDir, "narration.json")
 
             loadWorkInProgress()
+                .doOnError {
+                    logger.error("An error occurred in loadWorkInProgress", it)
+                }
+                .subscribe {
+                    recordedAudio = AudioFile(pcmFile).also {
+                        writer = WavFileWriter(it, rec.getAudioStream(), true) {  /* no op */  }
+                    }
+                    recordStart = recordedVerses.isEmpty()
+                    recordResume = recordedVerses.isNotEmpty()
+                    potentiallyFinished = checkPotentiallyFinished()
 
-            recordedAudio = AudioFile(pcmFile).also {
-                writer = WavFileWriter(it, rec.getAudioStream(), true) {  /* no op */  }
-            }
+                    FX.eventbus.fire(ChapterOpenInPluginEvent(ChapterOpenInPluginStatus.FINISHED))
+                }
         }
     }
 
@@ -418,7 +447,7 @@ class NarrationBodyViewModel : ViewModel() {
             }
             .flatMapSingle { plugin ->
                 workbookDataStore.activeTakeNumberProperty.set(1)
-                fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
+                FX.eventbus.fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
                 audioPluginViewModel.edit(file)
             }
             .observeOnFx()
@@ -443,7 +472,7 @@ class NarrationBodyViewModel : ViewModel() {
                         }
                     }
                 }
-                fire(PluginClosedEvent(pluginType))
+                FX.eventbus.fire(PluginClosedEvent(pluginType))
             }
     }
 
@@ -452,25 +481,106 @@ class NarrationBodyViewModel : ViewModel() {
         jsonFile.writeText(json)
     }
 
-    private fun loadWorkInProgress() {
-        if (!jsonFile.exists()) {
-            jsonFile.createNewFile()
-            jsonFile.writeText("[]")
+    private fun loadWorkInProgress(): Completable {
+        return createInProgressFiles()
+            .andThen(loadVerses())
+    }
+
+    private fun loadVerses(): Completable {
+        return Completable.fromCallable {
+            val json = jsonFile.readText()
+            val mapper = ObjectMapper().registerKotlinModule()
+
+            val reference = object: TypeReference<List<VerseNode>>(){}
+            val nodes: List<VerseNode> = mapper.readValue(json, reference)
+
+            if (chapterOpenInPluginProperty.value) {
+                val action = ChapterEditedAction(recordedVerses, nodes)
+                narrationHistory.execute(action)
+                updateHistoryAvailable()
+            } else {
+                recordedVerses.addAll(nodes)
+            }
         }
-        if (!pcmFile.exists()) {
-            pcmFile.createNewFile()
+    }
+
+    private fun createEmptyInProgressFiles(): Completable {
+        return Completable.fromCallable {
+            if (!jsonFile.exists()) {
+                jsonFile.createNewFile()
+                jsonFile.writeText("[]")
+            }
+            if (!pcmFile.exists()) {
+                pcmFile.createNewFile()
+            }
         }
+    }
 
-        val json = jsonFile.readText()
-        val mapper = ObjectMapper().registerKotlinModule()
+    private fun createInProgressFilesFromChapterFile(file: File): Completable {
+        return splitAudioOnCues.execute(file)
+            .flatMapCompletable { cues ->
+                Completable.fromCallable {
+                    createEmptyInProgressFiles()
+                    writeCuesToJsonFile(cues)
+                    appendAudioToPcmFile(cues)
+                }
+            }
+    }
 
-        val reference = object: TypeReference<List<VerseNode>>(){}
-        val nodes: List<VerseNode> = mapper.readValue(json, reference)
+    private fun appendAudioToPcmFile(cues: Map<String, File>) {
+        val audio = AudioFile(pcmFile)
+        cues.forEach {
+            audioFileUtils.appendFile(audio, it.value)
+        }
+    }
 
-        recordedVerses.addAll(nodes)
+    private fun writeCuesToJsonFile(cues: Map<String, File>) {
+        val audio = AudioFile(pcmFile)
+        val nodes = mutableListOf<VerseNode>()
+        var start = audio.totalFrames
+        var end = audio.totalFrames
+
+        cues.forEach {
+            val verseAudio = AudioFile(it.value)
+            end += verseAudio.totalFrames
+            val node = VerseNode(start, end)
+            nodes.add(node)
+            start = end
+        }
+        val json = ObjectMapper().writeValueAsString(nodes)
+
+        jsonFile.writeText(json)
+    }
+
+    private fun createInProgressFiles(): Completable {
+        val chapterAudio = workbookDataStore.chapter.audio
+        val chapterFile = chapterAudio.selected.value?.value?.file
+        val chapterFileExists = chapterFile?.exists() ?: false
+
+        val chapterEdited = chapterFileExists && chapterOpenInPluginProperty.value
+        val isNarrationFromChapter = chapterFileExists && !chapterOpenInPluginProperty.value && !pcmFile.exists()
+
+        val createFromChapter = chapterEdited || isNarrationFromChapter
+
+        return when {
+            createFromChapter -> createInProgressFilesFromChapterFile(chapterFile!!)
+            !chapterFileExists -> createEmptyInProgressFiles()
+            else -> Completable.complete()
+        }
+    }
+
+    private fun checkPotentiallyFinished(): Boolean {
+        return workbookDataStore.chapter.chunkCount.blockingGet() == recordedVerses.size
     }
 }
 
 class RecordAgainEvent(val index: Int) : FXEvent()
 class PlayVerseEvent(val verse: VerseNode) : FXEvent()
 class OpenInAudioPluginEvent(val index: Int) : FXEvent()
+
+class ChapterOpenInPluginEvent(val status: ChapterOpenInPluginStatus): FXEvent()
+
+enum class ChapterOpenInPluginStatus {
+    STARTED,
+    FINISHED
+}
