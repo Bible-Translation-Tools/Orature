@@ -113,7 +113,7 @@ class NewSourceImporter @Inject constructor(
         file: File
     ) {
         if (result == ImportResult.SUCCESS) {
-            callback?.onNotifySuccess(languageName = sourceLanguageName, projectSlug = projectSlug)
+            callback?.onNotifySuccess(language = sourceLanguageName, project = projectSlug)
         } else {
             callback?.onError(file.name)
         }

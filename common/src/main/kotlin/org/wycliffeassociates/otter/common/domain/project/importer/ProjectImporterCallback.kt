@@ -1,6 +1,8 @@
 package org.wycliffeassociates.otter.common.domain.project.importer
 
 import io.reactivex.Single
+import org.wycliffeassociates.otter.common.data.primitives.Collection
+import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 
 /**
  *  Defines a set of callback methods that can be used to handle callbacks
@@ -31,7 +33,11 @@ interface ProjectImporterCallback {
      */
     fun onNotifyProgress(localizeKey: String? = null, message: String? = null)
 
-    fun onNotifySuccess(languageName: String, projectSlug: String? = null)
+    fun onNotifySuccess(
+        language: String? = null,
+        project: String? = null,
+        workbookDescriptor: WorkbookDescriptor? = null
+    )
 
     /**
      * Called when the importer encounters an error that needs to alert the user.

@@ -30,7 +30,9 @@ import javafx.stage.Window
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ConflictResolution
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
+import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
+import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportCallbackParameter
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
@@ -162,9 +164,14 @@ class AddFilesViewModel : ViewModel() {
                 }
             }
 
-            override fun onNotifySuccess(languageName: String, projectSlug: String?) {
+            override fun onNotifySuccess(language: String?, project: String?, workbookDescriptor: WorkbookDescriptor?) {
                 FX.eventbus.fire(
-                    ProjectImportEvent(ImportResult.SUCCESS, language = languageName, project = projectSlug)
+                    ProjectImportEvent(
+                        ImportResult.SUCCESS,
+                        language = language,
+                        project = project,
+                        workbook = workbookDescriptor
+                    )
                 )
             }
 

@@ -119,9 +119,9 @@ class HomePageViewModel2 : ViewModel() {
 
         val projects = workbookRepo.getProjects().blockingGet()
         val existingProject = projects.firstOrNull { existingProject ->
-            projectGroup.sourceLanguage == existingProject.source.language.slug &&
-                    projectGroup.targetLanguage == existingProject.target.language.slug &&
-                    workbookDescriptor.slug == existingProject.target.slug
+            existingProject.source.language.slug == projectGroup.sourceLanguage &&
+                    existingProject.target.language.slug == projectGroup.targetLanguage &&
+                    existingProject.target.slug == workbookDescriptor.slug
         }
 
         existingProject?.let { workbook ->

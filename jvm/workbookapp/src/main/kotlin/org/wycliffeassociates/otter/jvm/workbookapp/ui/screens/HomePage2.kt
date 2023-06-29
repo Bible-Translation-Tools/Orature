@@ -95,7 +95,6 @@ class HomePage2 : View() {
     }
 
     override val root = borderpane {
-        snackBar = JFXSnackbar(this)
         left = vbox {
             addClass("homepage__left-pane")
             label(messages["projects"]) {
@@ -249,7 +248,10 @@ class HomePage2 : View() {
                 actionText = messages["openBook"],
                 actionIcon = MaterialDesign.MDI_ARROW_RIGHT
             ) {
-                println("opening book")
+                /* open workbook callback */
+                event.workbook?.let { it ->
+                    viewModel.selectBook(it)
+                }
             }
         } else {
             // source import
@@ -299,6 +301,7 @@ class HomePage2 : View() {
     }
 
     private fun showNotification(notification: NotificationViewData) {
+        val snackBar = JFXSnackbar(root)
         val graphic = NotificationSnackBar().apply {
 
             titleProperty.set(notification.title)
@@ -314,7 +317,7 @@ class HomePage2 : View() {
                 notification.actionCallback()
             }
         }
-        snackBar.show()
+
         snackBar.enqueue(
             JFXSnackbar.SnackbarEvent(
                 graphic.build(),
