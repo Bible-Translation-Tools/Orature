@@ -83,10 +83,6 @@ class Mp3Metadata(val mp3File: File, val cueFile: File) : AudioMetadata {
         _cues.add(AudioCue(location, label))
     }
 
-    override fun addCue(audioCue: AudioCue) {
-        _cues.add(audioCue)
-    }
-
     override fun getCues(): List<AudioCue> {
         return _cues
     }
