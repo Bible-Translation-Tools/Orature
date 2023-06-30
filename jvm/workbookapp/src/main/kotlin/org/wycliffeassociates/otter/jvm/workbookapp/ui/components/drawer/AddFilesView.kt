@@ -31,7 +31,6 @@ import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.jvm.controls.dialog.OtterDialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
@@ -47,7 +46,6 @@ class AddFilesView : View() {
     private val settingsViewModel: SettingsViewModel by inject()
 
     private lateinit var closeButton: Button
-    private lateinit var importConflictDialog: OtterDialog
 
     override val root = vbox {
         addClass("app-drawer__content")
@@ -125,7 +123,7 @@ class AddFilesView : View() {
                         }
                         graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
                         action {
-                            viewModel.onChooseFile()
+                            viewModel.onChooseFile(currentWindow!!)
                         }
                     }
 
@@ -143,7 +141,7 @@ class AddFilesView : View() {
     init {
         tryImportStylesheet(resources["/css/app-drawer.css"])
         tryImportStylesheet(resources["/css/confirm-dialog.css"])
-        tryImportStylesheet(resources["/css/import-conflict-dialog.css"])
+        tryImportStylesheet(resources["/css/import-export-dialogs.css"])
         tryImportStylesheet(resources["/css/card-radio-btn.css"])
 
         initImportDialog()

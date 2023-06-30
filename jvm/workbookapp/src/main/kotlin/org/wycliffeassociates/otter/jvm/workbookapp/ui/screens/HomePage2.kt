@@ -11,18 +11,23 @@ import org.wycliffeassociates.otter.jvm.controls.card.TranslationCard2
 import org.wycliffeassociates.otter.jvm.controls.card.newTranslationCard
 import org.wycliffeassociates.otter.jvm.controls.card.translationCreationCard
 import org.wycliffeassociates.otter.jvm.controls.event.LanguageSelectedEvent
+import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
+import org.wycliffeassociates.otter.jvm.controls.event.WorkbookExportDialogOpenEvent
+import org.wycliffeassociates.otter.jvm.controls.event.WorkbookExportEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ProjectGroupDeleteEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookDeleteEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookOpenEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.bindSingleChild
-import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ExportProjectDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ImportEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.ProjectWizardSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.BookSection
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ExportProjectViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectWizardViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 
 class HomePage2 : View() {
@@ -31,6 +36,8 @@ class HomePage2 : View() {
 
     private val viewModel: HomePageViewModel2 by inject()
     private val projectWizardViewModel: ProjectWizardViewModel by inject()
+    private val settingsViewModel: SettingsViewModel by inject()
+    private val exportProjectViewModel: ExportProjectViewModel by inject()
     private val navigator: NavigationMediator by inject()
 
     private val mainSectionProperty = SimpleObjectProperty<Node>(null)
@@ -68,6 +75,9 @@ class HomePage2 : View() {
         tryImportStylesheet("/css/popup-menu.css")
         tryImportStylesheet("/css/filtered-search-bar.css")
         tryImportStylesheet("/css/table-view.css")
+        tryImportStylesheet("/css/confirm-dialog.css")
+        tryImportStylesheet("/css/import-export-dialogs.css")
+        tryImportStylesheet("/css/card-radio-btn.css")
 
         subscribeActionEvents()
     }
@@ -82,6 +92,34 @@ class HomePage2 : View() {
         subscribe<WorkbookOpenEvent> {
             viewModel.selectBook(it.data)
         }
+
+        subscribe<WorkbookExportDialogOpenEvent> {
+            find<ExportProjectDialog> {
+                val workbookDescriptor = it.data
+                orientationProperty.set(settingsViewModel.orientationProperty.value)
+                themeProperty.set(settingsViewModel.appColorMode.value)
+                workbookDescriptorProperty.set(workbookDescriptor)
+
+                exportProjectViewModel.loadAvailableChapters(workbookDescriptor)
+                    .subscribe { chapters ->
+                        availableChapters.setAll(chapters)
+                    }
+
+                setOnCloseAction {
+                    this.close()
+                }
+            }.open()
+        }
+
+        subscribe<WorkbookExportEvent> { event ->
+            exportProjectViewModel.exportWorkbook(
+                event.workbook,
+                event.outputDir,
+                event.exportType,
+                event.chapters
+            )
+        }
+
         subscribe<ProjectGroupDeleteEvent> {
             viewModel.deleteProjectGroup(it.books)
         }
@@ -89,6 +127,7 @@ class HomePage2 : View() {
         subscribe<WorkbookDeleteEvent> {
             viewModel.deleteBook(it.data)
         }
+
         subscribe<ImportEvent> {
             logger.info("Import project event received, refreshing the homepage.")
             viewModel.refresh()

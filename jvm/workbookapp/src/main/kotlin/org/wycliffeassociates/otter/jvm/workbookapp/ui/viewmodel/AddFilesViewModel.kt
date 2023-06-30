@@ -27,6 +27,7 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.stage.FileChooser
+import javafx.stage.Window
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ConflictResolution
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
@@ -56,9 +57,6 @@ class AddFilesViewModel : ViewModel() {
     @Inject lateinit var directoryProvider: IDirectoryProvider
     @Inject lateinit var importProjectProvider : Provider<ImportProjectUseCase>
 
-    val showImportConflictProperty = SimpleBooleanProperty(false)
-
-    val showImportConflictDialogProperty = SimpleBooleanProperty(false)
     val showImportProgressDialogProperty = SimpleBooleanProperty(false)
     val showImportSuccessDialogProperty = SimpleBooleanProperty(false)
     val showImportErrorDialogProperty = SimpleBooleanProperty(false)
@@ -68,7 +66,6 @@ class AddFilesViewModel : ViewModel() {
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
     val availableChapters = observableListOf<Int>()
-    private lateinit var importCallbackEmitter: SingleEmitter<ImportOptions>
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -83,7 +80,7 @@ class AddFilesViewModel : ViewModel() {
         }
     }
 
-    fun onChooseFile() {
+    fun onChooseFile(window: Window) {
         val file = chooseFile(
             FX.messages["importResourceFromZip"],
             arrayOf(
@@ -92,7 +89,8 @@ class AddFilesViewModel : ViewModel() {
                     *OratureFileFormat.extensionList.map { "*.$it" }.toTypedArray()
                 )
             ),
-            mode = FileChooserMode.Single
+            mode = FileChooserMode.Single,
+            owner = window
         ).firstOrNull()
         file?.let {
             setProjectInfo(file)
@@ -142,7 +140,6 @@ class AddFilesViewModel : ViewModel() {
             override fun onRequestUserInput(parameter: ImportCallbackParameter): Single<ImportOptions> {
                 availableChapters.setAll(parameter.options)
                 return Single.create { emitter ->
-
                     find<ImportConflictDialog> {
 
                         projectNameProperty.set(parameter.name)

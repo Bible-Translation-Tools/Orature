@@ -25,7 +25,7 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookDeleteEvent
-import org.wycliffeassociates.otter.jvm.controls.event.WorkbookExportEvent
+import org.wycliffeassociates.otter.jvm.controls.event.WorkbookExportDialogOpenEvent
 import org.wycliffeassociates.otter.jvm.controls.event.WorkbookOpenEvent
 import tornadofx.FX
 import tornadofx.action
@@ -49,7 +49,7 @@ class WorkbookOptionMenu : ContextMenu() {
             graphic = FontIcon(MaterialDesign.MDI_CONTENT_DUPLICATE)
             action {
                 workbookInfoProperty.value?.let {
-                    FX.eventbus.fire(WorkbookExportEvent(it))
+                    FX.eventbus.fire(WorkbookExportDialogOpenEvent(it))
                 }
             }
         }
@@ -57,7 +57,7 @@ class WorkbookOptionMenu : ContextMenu() {
             graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
             action {
                 workbookInfoProperty.value?.let {
-                    FX.eventbus.fire(WorkbookExportEvent(it))
+                    FX.eventbus.fire(WorkbookExportDialogOpenEvent(it))
                 }
             }
         }

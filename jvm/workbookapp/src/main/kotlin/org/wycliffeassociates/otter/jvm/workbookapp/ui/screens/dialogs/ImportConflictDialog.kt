@@ -26,7 +26,7 @@ class ImportConflictDialog : OtterDialog() {
     private val conflictResolutionProperty = SimpleObjectProperty<ConflictResolution>(ConflictResolution.OVERRIDE)
 
     private val content = VBox().apply {
-        addClass("import-conflict-dialog")
+        addClass("confirm-dialog")
 
         hbox {
             addClass("confirm-dialog__header")

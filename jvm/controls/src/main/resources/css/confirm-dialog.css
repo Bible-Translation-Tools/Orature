@@ -18,7 +18,8 @@
  */
 
 .confirm-dialog {
-    -fx-pref-width: 480px;
+    -fx-pref-width: 720px;
+    -fx-pref-height: 420px;
     -fx-background-color: -wa-dialog-background;
 }
 
@@ -41,6 +42,7 @@
 }
 
 .confirm-dialog__body {
+    -fx-spacing: 16;
     -fx-padding: 16 12;
     -fx-text-alignment: justify;
     -fx-min-height: 100px;
