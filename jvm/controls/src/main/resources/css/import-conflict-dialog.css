@@ -1,0 +1,13 @@
+.import-conflict-dialog {
+    -fx-pref-width: 720px;
+    -fx-pref-height: 420px;
+    -fx-background-color: -wa-dialog-background;
+}
+
+.import-conflict-dialog__body {
+    -fx-spacing: 16;
+}
+
+.import-conflict-dialog .label {
+    -fx-wrap-text: true;
+}

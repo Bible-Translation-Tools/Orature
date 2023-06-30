@@ -6,8 +6,6 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.event.EventTarget
-import javafx.geometry.Pos
-import javafx.scene.control.Button
 import javafx.scene.control.Skin
 import javafx.scene.control.SkinBase
 import javafx.scene.control.ToggleButton
