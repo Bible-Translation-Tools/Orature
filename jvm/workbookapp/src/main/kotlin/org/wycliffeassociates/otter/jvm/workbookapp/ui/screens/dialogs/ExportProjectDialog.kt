@@ -128,7 +128,7 @@ class ExportProjectDialog : OtterDialog() {
                 })
             }
             region { hgrow = Priority.ALWAYS }
-            button(messages["Export"]) {
+            button(messages["export"]) {
                 addClass("btn", "btn--primary")
                 disableWhen { booleanBinding(selectedChapters) { selectedChapters.isEmpty() } }
 

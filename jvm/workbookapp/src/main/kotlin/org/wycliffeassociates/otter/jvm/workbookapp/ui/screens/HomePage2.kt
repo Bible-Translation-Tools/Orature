@@ -90,7 +90,7 @@ class HomePage2 : View() {
         tryImportStylesheet("/css/table-view.css")
         tryImportStylesheet("/css/confirm-dialog.css")
         tryImportStylesheet("/css/import-export-dialogs.css")
-        tryImportStylesheet("/css/progress-dialogs.css")
+        tryImportStylesheet("/css/progress-dialog.css")
         tryImportStylesheet("/css/card-radio-btn.css")
         tryImportStylesheet("/css/snack-bar-notification.css")
 
