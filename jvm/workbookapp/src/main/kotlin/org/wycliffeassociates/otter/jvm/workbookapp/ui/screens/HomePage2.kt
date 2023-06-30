@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.jfoenix.controls.JFXSnackbar
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Node
@@ -28,6 +29,7 @@ import org.wycliffeassociates.otter.jvm.utils.bindSingleChild
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ProjectImportEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ExportProjectDialog
+import org.wycliffeassociates.otter.jvm.controls.dialog.ProgressDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.BookSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.ProjectWizardSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.openInFilesManager
@@ -88,6 +90,7 @@ class HomePage2 : View() {
         tryImportStylesheet("/css/table-view.css")
         tryImportStylesheet("/css/confirm-dialog.css")
         tryImportStylesheet("/css/import-export-dialogs.css")
+        tryImportStylesheet("/css/progress-dialogs.css")
         tryImportStylesheet("/css/card-radio-btn.css")
         tryImportStylesheet("/css/snack-bar-notification.css")
 
@@ -191,19 +194,42 @@ class HomePage2 : View() {
                         availableChapters.setAll(chapters)
                     }
 
-                setOnCloseAction {
-                    this.close()
-                }
+                setOnCloseAction { this.close() }
             }.open()
         }
 
         subscribe<WorkbookExportEvent> { event ->
+            val dialog = find<ProgressDialog> {
+                orientationProperty.set(settingsViewModel.orientationProperty.value)
+                themeProperty.set(settingsViewModel.appColorMode.value)
+                dialogTitleProperty.set(
+                    MessageFormat.format(
+                        messages["exportProjectTitle"],
+                        messages["exporting"],
+                        event.workbook.title
+                    )
+                )
+                dialogMessageProperty.set(messages["exportProjectMessage"])
+
+                setOnCloseAction { close() }
+            }.apply { open() }
+
             exportProjectViewModel.exportWorkbook(
                 event.workbook,
                 event.outputDir,
                 event.exportType,
                 event.chapters
             )
+                .observeOnFx()
+                .doOnComplete {
+                    dialog.percentageProperty.unbind()
+                    dialog.close()
+                }
+                .subscribe { progressStatus ->
+                    progressStatus.percent?.let { percent ->
+                        dialog.percentageProperty.set(percent)
+                    }
+                }
         }
 
         subscribe<WorkbookExportFinishEvent> {

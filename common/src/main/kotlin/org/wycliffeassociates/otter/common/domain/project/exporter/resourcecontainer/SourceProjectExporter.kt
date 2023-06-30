@@ -73,9 +73,11 @@ class SourceProjectExporter @Inject constructor(
 
         projectAccessor.initializeResourceContainerInFile(workbook, targetZip)
         setContributorInfo(contributors, targetZip)
+        callback?.onNotifyProgress(10.0)
 
         return compileCompletedChapters(workbook, projectSourceMetadata, projectAccessor)
             .onErrorComplete()
+            .doOnComplete { callback?.onNotifyProgress(60.0) }
             .andThen(
                 export(targetZip, workbook, contributors, callback, options)
             )
@@ -93,6 +95,7 @@ class SourceProjectExporter @Inject constructor(
         return exportSelectedTakes(workbook, fileWriter, contributors, options?.chapters)
             .andThen(
                 Single.fromCallable {
+                    callback?.onNotifyProgress(90.0)
                     fileWriter.close() // must close before changing file extension or NoSuchFileException
                     buildSourceProjectMetadata(
                         exportFile,

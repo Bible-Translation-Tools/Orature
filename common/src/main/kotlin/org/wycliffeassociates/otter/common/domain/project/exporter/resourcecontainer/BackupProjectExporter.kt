@@ -62,6 +62,7 @@ class BackupProjectExporter @Inject constructor(
 
                 projectAccessor.initializeResourceContainerInFile(workbook, zipFile)
                 setContributorInfo(contributors, zipFile)
+                callback?.onNotifyProgress(20.0)
 
                 directoryProvider.newFileWriter(zipFile).use { fileWriter ->
                     projectAccessor.copyTakeFiles(
@@ -72,6 +73,7 @@ class BackupProjectExporter @Inject constructor(
                     ) {
                         takesFilter(it, options)
                     }
+                    callback?.onNotifyProgress(75.0)
 
                     val linkedResource = workbook.source.linkedResources
                         .firstOrNull { it.identifier == resourceMetadata.identifier }
@@ -79,6 +81,8 @@ class BackupProjectExporter @Inject constructor(
                     projectAccessor.copySourceFilesWithRelatedMedia(
                         fileWriter, directoryProvider.tempDirectory, linkedResource
                     )
+                    callback?.onNotifyProgress(99.0)
+
                     projectAccessor.writeSelectedTakesFile(
                         fileWriter,
                         workbook,
@@ -90,6 +94,7 @@ class BackupProjectExporter @Inject constructor(
                 }
 
                 val exportedFile = restoreFileExtension(zipFile, OratureFileFormat.ORATURE.extension)
+                callback?.onNotifyProgress(100.0)
                 callback?.onNotifySuccess(workbook.target.toCollection(), exportedFile)
                 return@fromCallable ExportResult.SUCCESS
             }
