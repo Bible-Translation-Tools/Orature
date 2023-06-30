@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.system
 
 /**
- * Opens the given filePath in the current system's file manager/explorer.
+ * Opens the given filePath in the current OS file manager/explorer.
  */
 fun openInFilesManager(filePath: String) {
     val osName = System.getProperty("os.name").uppercase()

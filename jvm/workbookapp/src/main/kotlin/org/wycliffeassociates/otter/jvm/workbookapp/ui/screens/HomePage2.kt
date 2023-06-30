@@ -77,7 +77,6 @@ class HomePage2 : View() {
             }
         }
     }
-    private lateinit var snackBar: JFXSnackbar
 
     init {
         tryImportStylesheet("/css/control.css")
@@ -311,7 +310,7 @@ class HomePage2 : View() {
             actionTextProperty.set(notification.actionText)
 
             setOnDismiss {
-                snackBar.hide() /* avoid crashing if dismiss before timeout */
+                snackBar.hide() /* avoid crashing if close() invoked before timeout */
             }
             setOnMainAction {
                 notification.actionCallback()
