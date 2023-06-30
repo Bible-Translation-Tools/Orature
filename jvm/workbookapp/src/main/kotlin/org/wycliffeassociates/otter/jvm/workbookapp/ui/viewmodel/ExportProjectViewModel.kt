@@ -5,7 +5,7 @@ import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Collection
-import org.wycliffeassociates.otter.common.data.workbook.ChapterSummary
+import org.wycliffeassociates.otter.jvm.controls.model.ChapterDescriptor
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.project.exporter.AudioProjectExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOptions
@@ -18,8 +18,7 @@ import org.wycliffeassociates.otter.common.domain.project.exporter.resourceconta
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportFinishEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import tornadofx.FX
-import tornadofx.ViewModel
+import tornadofx.*
 import java.io.File
 import javax.inject.Inject
 
@@ -45,7 +44,7 @@ class ExportProjectViewModel : ViewModel() {
 
     fun loadAvailableChapters(
         workbookDescriptor: WorkbookDescriptor
-    ): Single<List<ChapterSummary>> {
+    ): Single<List<ChapterDescriptor>> {
         return Single
             .fromCallable {
                 workbookRepo.get(workbookDescriptor.sourceCollection, workbookDescriptor.targetCollection)
@@ -64,7 +63,8 @@ class ExportProjectViewModel : ViewModel() {
                         } else {
                             0.0
                         }
-                        ChapterSummary(chapter.sort, progress)
+
+                        ChapterDescriptor(chapter.sort, progress)
                     }
             }
             .toList()
