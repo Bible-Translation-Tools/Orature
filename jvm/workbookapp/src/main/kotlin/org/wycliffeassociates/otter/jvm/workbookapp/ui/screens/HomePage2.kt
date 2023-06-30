@@ -5,6 +5,7 @@ import javafx.scene.Node
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.card.TranslationCard2
 import org.wycliffeassociates.otter.jvm.controls.card.newTranslationCard
@@ -17,6 +18,7 @@ import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.bindSingleChild
 import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ImportEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.ProjectWizardSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.BookSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel2
@@ -24,6 +26,8 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectWizardVi
 import tornadofx.*
 
 class HomePage2 : View() {
+
+    private val logger = LoggerFactory.getLogger(HomePage::class.java)
 
     private val viewModel: HomePageViewModel2 by inject()
     private val projectWizardViewModel: ProjectWizardViewModel by inject()
@@ -75,17 +79,19 @@ class HomePage2 : View() {
                 mainSectionProperty.set(bookFragment)
             }
         }
-
         subscribe<WorkbookOpenEvent> {
             viewModel.selectBook(it.data)
         }
-
         subscribe<ProjectGroupDeleteEvent> {
             viewModel.deleteProjectGroup(it.books)
         }
 
         subscribe<WorkbookDeleteEvent> {
             viewModel.deleteBook(it.data)
+        }
+        subscribe<ImportEvent> {
+            logger.info("Import project event received, refreshing the homepage.")
+            viewModel.refresh()
         }
     }
 

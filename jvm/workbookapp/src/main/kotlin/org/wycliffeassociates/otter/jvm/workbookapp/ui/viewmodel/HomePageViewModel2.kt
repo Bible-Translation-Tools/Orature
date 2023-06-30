@@ -44,6 +44,7 @@ class HomePageViewModel2 : ViewModel() {
 
     private val workbookDS: WorkbookDataStore by inject()
     private val navigator: NavigationMediator by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
 
     val projectGroups = observableListOf<ProjectGroupCardModel>()
     val bookList = observableListOf<WorkbookDescriptor>()
@@ -64,9 +65,30 @@ class HomePageViewModel2 : ViewModel() {
     }
 
     fun undock() {
+        projectGroups.clear()
         bookList.clear()
         disposableListeners.forEach { it.dispose() }
         disposableListeners.clear()
+    }
+
+    fun refresh() {
+        clearProjects()
+        loadProjects()
+    }
+
+    /**
+     * Closes all open projects, closing their connections in the workbook repository.
+     *
+     * Also removes the workbooks from the workbook data store and resumeBookProperty.
+     */
+    private fun clearProjects() {
+        logger.info("Closing open workbooks")
+        workbookDataStore.activeWorkbookProperty.value?.let {
+            workbookRepo.closeWorkbook(it)
+        }
+        workbookDataStore.activeWorkbookProperty.set(null)
+        projectGroups.clear()
+        bookList.clear()
     }
 
     private fun setupBookSearchListener() {

@@ -64,6 +64,7 @@ class OngoingProjectImporter @Inject constructor(
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
     private val contentCache = mutableMapOf<ContentSignature, Content>()
+    private var projectName = ""
     private var takesInChapterFilter: Map<String, Int>? = null
     private var duplicatedTakes: MutableList<String> = mutableListOf()
 
@@ -110,14 +111,23 @@ class OngoingProjectImporter @Inject constructor(
                     ?: return false
 
                 val languageSlug = it.language.identifier
-                val projectSlug = rc.manifest.projects.first().identifier
+                val projectSlug = rc.manifest.projects.first().let { p ->
+                    projectName = p.title
+                    p.identifier
+                }
 
                 val projects = workbookRepository.getProjects().blockingGet()
-                return projects.any { existingProject ->
+                return projects.firstOrNull { existingProject ->
                     sourceLanguageSlug == existingProject.source.language.slug &&
                             languageSlug == existingProject.target.language.slug &&
                             projectSlug == existingProject.target.slug
-                }
+                }?.let { workbook ->
+                    directoryProvider.getProjectDirectory(
+                        workbook.source.resourceMetadata,
+                        workbook.target.resourceMetadata,
+                        projectSlug
+                    ).exists()
+                } ?: false
             }
         }
     }
@@ -128,7 +138,7 @@ class OngoingProjectImporter @Inject constructor(
     ): Boolean {
         val takesChapterMap = fetchTakesInRC(file)
         val chapterList = takesChapterMap.values.distinct().sorted()
-        val callbackParam = ImportCallbackParameter(chapterList)
+        val callbackParam = ImportCallbackParameter(chapterList, projectName)
         val chaptersToImport = callback.onRequestUserInput(callbackParam).blockingGet().chapters
             ?: return false
 

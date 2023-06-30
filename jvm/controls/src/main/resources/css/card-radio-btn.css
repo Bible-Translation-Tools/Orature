@@ -1,0 +1,39 @@
+.radio-button-card__control {
+    -fx-border-color: #ccc;
+    -fx-border-width: 0.5;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+}
+
+.radio-button-card__control:focused {
+    -fx-border-width: 2px;
+    -fx-border-color: -wa-button-border;
+    -fx-border-insets: -1;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+}
+
+.radio-button-card__control:selected {
+    -fx-background-color: -wa-primary-light;
+    -fx-border-color: -wa-primary;
+    -fx-border-radius: 12;
+}
+
+.radio-button-card__control:selected .label {
+    -fx-text-fill: -wa-primary;
+}
+
+.radio-button-card {
+    -fx-padding: 12 16;
+    -fx-spacing: 8;
+    -fx-alignment: center;
+}
+
+.radio-button-card__labels {
+    -fx-spacing: 12;
+    -fx-alignment: center-left;
+}
+
+.radio-button-card .radio__label-text {
+    -fx-wrap-text: true;
+}
