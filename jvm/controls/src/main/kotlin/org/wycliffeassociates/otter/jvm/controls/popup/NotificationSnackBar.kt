@@ -14,7 +14,7 @@ import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
-class NotificationSnackBar {
+class NotificationSnackBar: HBox() {
 
     val titleProperty = SimpleStringProperty()
     val messageProperty = SimpleStringProperty()
@@ -25,7 +25,7 @@ class NotificationSnackBar {
     private val mainActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>(null)
     private val dismissActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
-    fun build() = HBox().apply {
+    init {
         addClass("wa-snack-bar")
 
         button {

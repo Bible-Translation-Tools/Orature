@@ -320,7 +320,7 @@ class HomePage2 : View() {
 
         snackBar.enqueue(
             JFXSnackbar.SnackbarEvent(
-                graphic.build(),
+                graphic,
                 Duration.seconds(5.0)
             )
         )

@@ -33,6 +33,11 @@ interface ProjectImporterCallback {
      */
     fun onNotifyProgress(localizeKey: String? = null, message: String? = null)
 
+    /**
+     * Sends import success notification with related information about the project.
+     *
+     * @param workbookDescriptor project info to be used for further callback action(s).
+     */
     fun onNotifySuccess(
         language: String? = null,
         project: String? = null,
@@ -42,7 +47,7 @@ interface ProjectImporterCallback {
     /**
      * Called when the importer encounters an error that needs to alert the user.
      *
-     * @param messageKey the string identifier mapped to the localized text of the message.
+     * @param filePath path to import file
      */
     fun onError(filePath: String)
 }
