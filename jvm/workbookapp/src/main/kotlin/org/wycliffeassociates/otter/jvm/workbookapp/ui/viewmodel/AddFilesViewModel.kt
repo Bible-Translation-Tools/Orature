@@ -137,7 +137,7 @@ class AddFilesViewModel : ViewModel() {
                 availableChapters.setAll(parameter.options)
                 return Single.create { emitter ->
                     find<ImportConflictDialog> {
-                        
+
                         projectNameProperty.set(parameter.name)
                         chaptersProperty.set(parameter.options.size)
 
