@@ -198,12 +198,14 @@ class HomePage2 : View() {
                 workbookDescriptorProperty.set(workbookDescriptor)
 
                 exportProjectViewModel.loadAvailableChapters(workbookDescriptor)
+                    .observeOnFx()
                     .subscribe { chapters ->
                         availableChapters.setAll(chapters)
+                        open()
                     }
 
                 setOnCloseAction { this.close() }
-            }.open()
+            }
         }
 
         subscribe<WorkbookExportEvent> { event ->
@@ -241,8 +243,12 @@ class HomePage2 : View() {
                 )
             )
             dialogMessageProperty.set(messages["exportProjectMessage"])
+            cancelMessageProperty.set(messages["cancelExport"])
 
-            setOnCloseAction { close() }
+            setOnCloseAction {
+                cancelMessageProperty.set(null)
+                close()
+            }
         }.apply { open() }
 
         exportProjectViewModel.exportWorkbook(
@@ -254,6 +260,7 @@ class HomePage2 : View() {
             .observeOnFx()
             .doOnComplete {
                 dialog.percentageProperty.unbind()
+                dialog.cancelMessageProperty.set(null)
                 dialog.close()
             }
             .subscribe { progressStatus ->
