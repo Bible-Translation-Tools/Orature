@@ -11,6 +11,7 @@ import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
 import org.wycliffeassociates.otter.common.domain.collections.UpdateProject
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupKey
@@ -29,6 +30,9 @@ import javax.inject.Inject
 
 class HomePageViewModel2 : ViewModel() {
     private val logger = LoggerFactory.getLogger(javaClass)
+
+    @Inject
+    lateinit var directoryProvider: IDirectoryProvider
 
     @Inject
     lateinit var workbookRepo: IWorkbookRepository
@@ -154,6 +158,8 @@ class HomePageViewModel2 : ViewModel() {
                 loadProjects()
             }
     }
+
+    fun openInFilesManager(path: String) = directoryProvider.openInFileManager(path)
 
     private fun updateBookList(books: List<WorkbookDescriptor>) {
         if (books.isEmpty()) {

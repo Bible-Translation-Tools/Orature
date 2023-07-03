@@ -27,7 +27,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ProjectImportEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ExportProjectDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.BookSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.ProjectWizardSection
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.openInFilesManager
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportDialogOpenEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookOpenEvent
@@ -283,7 +282,7 @@ class HomePage2 : View() {
                 val filePath = event.file
                 if (filePath?.exists() == true) {
                     try {
-                        openInFilesManager(filePath.path)
+                        viewModel.openInFilesManager(filePath.path)
                     } catch (e: Exception) {
                         logger.error("Error while opening $filePath in file manager.")
                     }

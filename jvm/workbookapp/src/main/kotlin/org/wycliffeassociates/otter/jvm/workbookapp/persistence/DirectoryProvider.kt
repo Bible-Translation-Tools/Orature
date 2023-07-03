@@ -219,6 +219,28 @@ class DirectoryProvider(
         deleteRecursively(tempDirectory)
     }
 
+    override fun openInFileManager(path: String) {
+        if (!File(path).exists()) {
+            return
+        }
+
+        val osName = System.getProperty("os.name").uppercase()
+        when {
+            osName.contains("WIN") -> {
+                val command = "explorer.exe /select,\"$path\""
+                Runtime.getRuntime().exec(command)
+            }
+            osName.contains("MAC") -> {
+                val command = arrayOf("open", "-R", path)
+                Runtime.getRuntime().exec(command)
+            }
+            osName.contains("LINUX") -> {
+                val command = arrayOf("xdg-open", path)
+                Runtime.getRuntime().exec(command)
+            }
+        }
+    }
+
     override val databaseDirectory: File
         get() = getAppDataDirectory("database")
 
