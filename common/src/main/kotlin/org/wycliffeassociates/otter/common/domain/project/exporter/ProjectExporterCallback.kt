@@ -5,7 +5,7 @@ import java.io.File
 
 interface ProjectExporterCallback {
     /**
-     * Pushes a success notification to the GUI.
+     * Pushes a success notification to the listeners/handlers of this callback.
      *
      * @param project the project that was exported
      * @param file the file or directory of the exported content
@@ -13,9 +13,9 @@ interface ProjectExporterCallback {
     fun onNotifySuccess(project: Collection, file: File)
 
     /**
-     * Pushes an error notification to the GUI.
+     * Pushes an error notification to the listeners/handlers of this callback.
      *
-     * @param project the project that was exported
+     * @param project the project that was exported.
      */
     fun onError(project: Collection)
 }
