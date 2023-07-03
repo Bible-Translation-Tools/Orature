@@ -79,7 +79,7 @@ class DeleteProject @Inject constructor(
                 listOf(sourceMetadata),
                 workbookDescriptor.sourceCollection,
                 workbookDescriptor.targetLanguage,
-                true,
+                false,
                 workbookDescriptor.mode
             )
             .doOnError {

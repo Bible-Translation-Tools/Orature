@@ -16,6 +16,7 @@ import org.wycliffeassociates.otter.jvm.controls.card.newTranslationCard
 import org.wycliffeassociates.otter.jvm.controls.card.translationCreationCard
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.LanguageSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ProjectGroupDeleteEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportFinishEvent
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
@@ -24,6 +25,7 @@ import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.bindSingleChild
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ProjectImportEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookDeleteEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ExportProjectDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.BookSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.ProjectWizardSection
@@ -175,6 +177,14 @@ class HomePage2 : View() {
 
         subscribe<WorkbookOpenEvent> {
             viewModel.selectBook(it.data)
+        }
+
+        subscribe<ProjectGroupDeleteEvent> {
+            viewModel.deleteProjectGroup(it.books)
+        }
+
+        subscribe<WorkbookDeleteEvent> {
+            viewModel.deleteBook(it.data)
         }
 
         subscribe<WorkbookExportDialogOpenEvent> {
