@@ -9,7 +9,9 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
+import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
 import org.wycliffeassociates.otter.common.domain.collections.UpdateProject
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupKey
@@ -30,13 +32,19 @@ class HomePageViewModel2 : ViewModel() {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Inject
+    lateinit var directoryProvider: IDirectoryProvider
+
+    @Inject
     lateinit var workbookRepo: IWorkbookRepository
+
     @Inject
     lateinit var workbookDescriptorRepo: IWorkbookDescriptorRepository
-    @Inject
-    lateinit var createProjectUseCase: CreateProject
+
     @Inject
     lateinit var updateProjectUseCase: UpdateProject
+
+    @Inject
+    lateinit var deleteProjectUseCase: DeleteProject
 
     private val workbookDS: WorkbookDataStore by inject()
     private val navigator: NavigationMediator by inject()
@@ -130,7 +138,36 @@ class HomePageViewModel2 : ViewModel() {
         }
     }
 
+    fun deleteProjectGroup(books: List<WorkbookDescriptor>) {
+        if (books.all { it.progress == 0.0 }) {
+            logger.info("Deleting project group: ${selectedProjectGroup.value.sourceLanguage} -> ${selectedProjectGroup.value.targetLanguage}")
+            workbookDescriptorRepo.delete(books)
+                .observeOnFx()
+                .subscribe {
+                    loadProjects()
+                }
+        }
+    }
+
+    fun deleteBook(workbookDescriptor: WorkbookDescriptor) {
+        logger.info("Deleting book: ${workbookDescriptor.slug}")
+
+        deleteProjectUseCase.delete(workbookDescriptor)
+            .observeOnFx()
+            .subscribe {
+                loadProjects()
+            }
+    }
+
+    fun openInFilesManager(path: String) = directoryProvider.openInFileManager(path)
+
     private fun updateBookList(books: List<WorkbookDescriptor>) {
+        if (books.isEmpty()) {
+            bookList.clear()
+            projectGroups.clear()
+            return
+        }
+
         val projectGroups = books.groupBy {
             ProjectGroupKey(it.sourceLanguage.slug, it.targetLanguage.slug, it.mode)
         }

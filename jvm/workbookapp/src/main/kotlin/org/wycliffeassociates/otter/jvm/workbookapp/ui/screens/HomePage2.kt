@@ -17,10 +17,8 @@ import org.wycliffeassociates.otter.jvm.controls.card.newTranslationCard
 import org.wycliffeassociates.otter.jvm.controls.card.translationCreationCard
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.LanguageSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportDialogOpenEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ProjectGroupDeleteEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportFinishEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookOpenEvent
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
 import org.wycliffeassociates.otter.jvm.controls.popup.NotificationSnackBar
@@ -28,11 +26,14 @@ import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.bindSingleChild
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ProjectImportEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookDeleteEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ExportProjectDialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.ProgressDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.BookSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.ProjectWizardSection
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.openInFilesManager
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportDialogOpenEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookOpenEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ExportProjectViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectWizardViewModel
@@ -79,7 +80,6 @@ class HomePage2 : View() {
             }
         }
     }
-    private lateinit var snackBar: JFXSnackbar
 
     init {
         tryImportStylesheet("/css/control.css")
@@ -180,6 +180,14 @@ class HomePage2 : View() {
 
         subscribe<WorkbookOpenEvent> {
             viewModel.selectBook(it.data)
+        }
+
+        subscribe<ProjectGroupDeleteEvent> {
+            viewModel.deleteProjectGroup(it.books)
+        }
+
+        subscribe<WorkbookDeleteEvent> {
+            viewModel.deleteBook(it.data)
         }
 
         subscribe<WorkbookExportDialogOpenEvent> {
@@ -311,7 +319,7 @@ class HomePage2 : View() {
                 val filePath = event.file
                 if (filePath?.exists() == true) {
                     try {
-                        openInFilesManager(filePath.path)
+                        viewModel.openInFilesManager(filePath.path)
                     } catch (e: Exception) {
                         logger.error("Error while opening $filePath in file manager.")
                     }
@@ -338,7 +346,7 @@ class HomePage2 : View() {
             actionTextProperty.set(notification.actionText)
 
             setOnDismiss {
-                snackBar.hide() /* avoid crashing if dismiss before timeout */
+                snackBar.hide() /* avoid crashing if close() invoked before timeout */
             }
             setOnMainAction {
                 notification.actionCallback()
@@ -347,7 +355,7 @@ class HomePage2 : View() {
 
         snackBar.enqueue(
             JFXSnackbar.SnackbarEvent(
-                graphic.build(),
+                graphic,
                 Duration.seconds(5.0)
             )
         )

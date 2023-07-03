@@ -7,14 +7,17 @@ import javafx.event.EventHandler
 import javafx.scene.control.Tooltip
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
+import javafx.scene.layout.Region
 import org.kordamp.ikonli.Ikon
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
-class NotificationSnackBar {
+class NotificationSnackBar: HBox() {
 
     val titleProperty = SimpleStringProperty()
     val messageProperty = SimpleStringProperty()
@@ -25,22 +28,29 @@ class NotificationSnackBar {
     private val mainActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>(null)
     private val dismissActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
-    fun build() = HBox().apply {
+    init {
         addClass("wa-snack-bar")
 
         button {
             addClass("btn", "btn--icon", "btn--borderless", "success-btn-icon")
-            toggleClass("success-btn-icon", statusTypeProperty.value == NotificationStatusType.SUCCESSFUL)
-            toggleClass("danger-btn-icon", statusTypeProperty.value == NotificationStatusType.FAILED)
-            graphic = if (statusTypeProperty.value == NotificationStatusType.SUCCESSFUL) {
-                FontIcon(MaterialDesign.MDI_CHECK_CIRCLE).apply {
-                    addClass("active-icon")
+            graphicProperty().bind(statusTypeProperty.objectBinding {
+                this.toggleClass("success-btn-icon", it == NotificationStatusType.SUCCESSFUL)
+                this.toggleClass("danger-btn-icon", it == NotificationStatusType.FAILED)
+
+                return@objectBinding when (it) {
+                    NotificationStatusType.SUCCESSFUL -> {
+                        FontIcon(MaterialDesign.MDI_CHECK_CIRCLE).apply {
+                            addClass("active-icon")
+                        }
+                    }
+                    NotificationStatusType.FAILED -> {
+                        FontIcon(MaterialDesign.MDI_ALERT).apply {
+                            addClass("danger-icon")
+                        }
+                    }
+                    else -> Region()
                 }
-            } else {
-                FontIcon(MaterialDesign.MDI_ALERT).apply {
-                    addClass("danger-icon")
-                }
-            }
+            })
             isFocusTraversable = false
             isMouseTransparent = true
         }
@@ -48,8 +58,10 @@ class NotificationSnackBar {
             addClass("wa-snack-bar__labels")
             label(titleProperty) {
                 addClass("h4", "notification-title")
-                toggleClass("successful-text", statusTypeProperty.value == NotificationStatusType.SUCCESSFUL)
-                toggleClass("danger-text", statusTypeProperty.value == NotificationStatusType.FAILED)
+                statusTypeProperty.onChangeAndDoNow {
+                    toggleClass("successful-text", it == NotificationStatusType.SUCCESSFUL)
+                    toggleClass("danger-text", it == NotificationStatusType.FAILED)
+                }
             }
             label(messageProperty) {
                 addClass("h5", "notification-subtitle")

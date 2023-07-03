@@ -1,6 +1,5 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview
 
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import javafx.collections.ObservableSet
@@ -12,31 +11,29 @@ import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.util.Callback
-import org.wycliffeassociates.otter.common.data.workbook.ChapterSummary
+import org.wycliffeassociates.otter.jvm.controls.model.ChapterDescriptor
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class ExportProjectTableView(
-    chapters: ObservableList<ChapterSummary>,
-    selectedChapters: ObservableSet<ChapterSummary>
-) : TableView<ChapterSummary>(chapters) {
+    chapters: ObservableList<ChapterDescriptor>,
+    selectedChapters: ObservableSet<ChapterDescriptor>
+) : TableView<ChapterDescriptor>(chapters) {
 
-    private val isSelectAllProperty = SimpleBooleanProperty(true).apply {
-        bind(booleanBinding(selectedChapters) { selectedChapters.size == chapters.size })
-    }
+    private val isSelectedAllProperty = booleanBinding(selectedChapters) { selectedChapters.size == chapters.size }
 
     init {
         addClass("wa-table-view")
         vgrow = Priority.ALWAYS
         columnResizePolicy = CONSTRAINED_RESIZE_POLICY
         placeholder = Region()
-        sortPolicy = CUSTOM_SORT_POLICY as (Callback<TableView<ChapterSummary>, Boolean>)
+        sortPolicy = CUSTOM_SORT_POLICY as (Callback<TableView<ChapterDescriptor>, Boolean>)
 
-        column("", ChapterSummary::class) {
+        column("", ChapterDescriptor::class) {
             addClass("table-view__column-header-row")
             graphic = checkbox {
                 addClass("wa-checkbox")
-                isSelectAllProperty.onChange { isSelected = it }
+                isSelectedAllProperty.onChange { isSelected = it }
                 action {
                     if (isSelected) {
                         selectedChapters.addAll(chapters)
@@ -47,7 +44,7 @@ class ExportProjectTableView(
             }
             setCellValueFactory { SimpleObjectProperty(it.value) }
             setCellFactory {
-                ExportProjectTableCheckbox(selectedChapters)
+                ExportProjectTableActionCell(selectedChapters)
             }
             isReorderable = false
             isSortable = false
@@ -103,10 +100,10 @@ class ExportProjectTableView(
 }
 
 class ExportProjectTableRow(
-    private val selectedChapters: ObservableSet<ChapterSummary>
-) : TableRow<ChapterSummary>() {
+    private val selectedChapters: ObservableSet<ChapterDescriptor>
+) : TableRow<ChapterDescriptor>() {
 
-    override fun updateItem(item: ChapterSummary?, empty: Boolean) {
+    override fun updateItem(item: ChapterDescriptor?, empty: Boolean) {
         super.updateItem(item, empty)
         if (item == null || isEmpty) {
             isMouseTransparent = true
@@ -126,7 +123,7 @@ class ExportProjectTableRow(
 }
 
 fun EventTarget.exportProjectTableView(
-    chapters: ObservableList<ChapterSummary>,
-    selectedChapters: ObservableSet<ChapterSummary>,
+    chapters: ObservableList<ChapterDescriptor>,
+    selectedChapters: ObservableSet<ChapterDescriptor>,
     op: ExportProjectTableView.() -> Unit = {}
 ) = ExportProjectTableView(chapters, selectedChapters).attachTo(this, op)

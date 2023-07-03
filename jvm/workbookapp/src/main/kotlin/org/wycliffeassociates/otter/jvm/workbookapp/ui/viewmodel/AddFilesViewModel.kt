@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Single
+import io.reactivex.SingleEmitter
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
@@ -136,6 +137,7 @@ class AddFilesViewModel : ViewModel() {
                 availableChapters.setAll(parameter.options)
                 return Single.create { emitter ->
                     find<ImportConflictDialog> {
+
                         projectNameProperty.set(parameter.name)
                         chaptersProperty.set(parameter.options.size)
 
