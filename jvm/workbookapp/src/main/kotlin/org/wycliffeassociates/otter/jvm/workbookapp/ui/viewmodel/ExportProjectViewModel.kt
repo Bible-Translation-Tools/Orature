@@ -132,7 +132,7 @@ class ExportProjectViewModel : ViewModel() {
 
             override fun onNotifyProgress(percent: Double, message: String?) {
                 emitter.onNext(
-                    ProgressStatus(percent = percent)
+                    ProgressStatus(percent = percent, titleKey = message)
                 )
             }
         }

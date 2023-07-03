@@ -62,7 +62,7 @@ class AudioProjectExporter @Inject constructor(
         callback: ProjectExporterCallback?,
         options: ExportOptions?
     ): Single<ExportResult> {
-        callback?.onNotifyProgress(25.0)
+        callback?.onNotifyProgress(25.0, message = "exportingTakes")
         val outputProjectDir = directory.resolve(workbook.target.slug).apply { mkdirs() }
         val contributors = projectFilesAccessor.getContributorInfo()
         val license = License.get(workbook.target.resourceMetadata.license)

@@ -16,6 +16,7 @@ class ProgressDialog : OtterDialog() {
     val dialogTitleProperty = SimpleStringProperty()
     val dialogMessageProperty = SimpleStringProperty()
     val percentageProperty = SimpleDoubleProperty(0.0)
+    val progressMessageProperty = SimpleStringProperty()
 
     private val onCloseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     
@@ -48,6 +49,10 @@ class ProgressDialog : OtterDialog() {
                 fitToParentWidth()
             }
             hbox {
+                label {
+                    addClass("h5")
+                    textProperty().bind(progressMessageProperty.stringBinding { it?.let { messages[it] } ?: "" })
+                }
                 region { hgrow = Priority.ALWAYS }
                 label {
                     addClass("normal-text")

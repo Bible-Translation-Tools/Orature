@@ -229,6 +229,7 @@ class HomePage2 : View() {
                     progressStatus.percent?.let { percent ->
                         dialog.percentageProperty.set(percent)
                     }
+                    dialog.progressMessageProperty.set(progressStatus.titleKey)
                 }
         }
 
