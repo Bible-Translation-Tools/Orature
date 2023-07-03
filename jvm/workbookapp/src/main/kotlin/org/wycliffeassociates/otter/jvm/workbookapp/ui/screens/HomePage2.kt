@@ -207,38 +207,7 @@ class HomePage2 : View() {
         }
 
         subscribe<WorkbookExportEvent> { event ->
-            val dialog = find<ProgressDialog> {
-                orientationProperty.set(settingsViewModel.orientationProperty.value)
-                themeProperty.set(settingsViewModel.appColorMode.value)
-                dialogTitleProperty.set(
-                    MessageFormat.format(
-                        messages["exportProjectTitle"],
-                        messages["exporting"],
-                        event.workbook.title
-                    )
-                )
-                dialogMessageProperty.set(messages["exportProjectMessage"])
-
-                setOnCloseAction { close() }
-            }.apply { open() }
-
-            exportProjectViewModel.exportWorkbook(
-                event.workbook,
-                event.outputDir,
-                event.exportType,
-                event.chapters
-            )
-                .observeOnFx()
-                .doOnComplete {
-                    dialog.percentageProperty.unbind()
-                    dialog.close()
-                }
-                .subscribe { progressStatus ->
-                    progressStatus.percent?.let { percent ->
-                        dialog.percentageProperty.set(percent)
-                    }
-                    dialog.progressMessageProperty.set(progressStatus.titleKey)
-                }
+            handleExportEvent(event)
         }
 
         subscribe<WorkbookExportFinishEvent> {
@@ -258,6 +227,41 @@ class HomePage2 : View() {
         projectWizardViewModel.undock()
         viewModel.loadProjects()
         mainSectionProperty.set(bookFragment)
+    }
+
+    private fun handleExportEvent(event: WorkbookExportEvent) {
+        val dialog = find<ProgressDialog> {
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
+            dialogTitleProperty.set(
+                MessageFormat.format(
+                    messages["exportProjectTitle"],
+                    messages["exporting"],
+                    event.workbook.title
+                )
+            )
+            dialogMessageProperty.set(messages["exportProjectMessage"])
+
+            setOnCloseAction { close() }
+        }.apply { open() }
+
+        exportProjectViewModel.exportWorkbook(
+            event.workbook,
+            event.outputDir,
+            event.exportType,
+            event.chapters
+        )
+            .observeOnFx()
+            .doOnComplete {
+                dialog.percentageProperty.unbind()
+                dialog.close()
+            }
+            .subscribe { progressStatus ->
+                progressStatus.percent?.let { percent ->
+                    dialog.percentageProperty.set(percent)
+                }
+                dialog.progressMessageProperty.set(progressStatus.titleKey)
+            }
     }
 
     private fun createImportNotification(event: ProjectImportEvent): NotificationViewData {

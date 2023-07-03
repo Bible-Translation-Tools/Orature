@@ -73,11 +73,11 @@ class SourceProjectExporter @Inject constructor(
 
         projectAccessor.initializeResourceContainerInFile(workbook, targetZip)
         setContributorInfo(contributors, targetZip)
-        callback?.onNotifyProgress(10.0, message = "compilingChapters")
+        callback?.onNotifyProgress(10.0, messageKey = "compilingChapters")
 
         return compileCompletedChapters(workbook, projectSourceMetadata, projectAccessor)
             .onErrorComplete()
-            .doOnComplete { callback?.onNotifyProgress(50.0, message = "exportingTakes") }
+            .doOnComplete { callback?.onNotifyProgress(50.0, messageKey = "exportingTakes") }
             .andThen(
                 export(targetZip, workbook, contributors, callback, options)
             )

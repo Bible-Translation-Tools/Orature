@@ -62,7 +62,7 @@ class BackupProjectExporter @Inject constructor(
 
                 projectAccessor.initializeResourceContainerInFile(workbook, zipFile)
                 setContributorInfo(contributors, zipFile)
-                callback?.onNotifyProgress(20.0, message = "exportingTakes")
+                callback?.onNotifyProgress(20.0, messageKey = "exportingTakes")
 
                 directoryProvider.newFileWriter(zipFile).use { fileWriter ->
                     projectAccessor.copyTakeFiles(
@@ -73,7 +73,7 @@ class BackupProjectExporter @Inject constructor(
                     ) {
                         takesFilter(it, options)
                     }
-                    callback?.onNotifyProgress(75.0, message = "copyingSource")
+                    callback?.onNotifyProgress(75.0, messageKey = "copyingSource")
 
                     val linkedResource = workbook.source.linkedResources
                         .firstOrNull { it.identifier == resourceMetadata.identifier }

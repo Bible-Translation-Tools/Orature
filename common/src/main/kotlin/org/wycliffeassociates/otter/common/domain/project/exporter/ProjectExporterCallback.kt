@@ -19,5 +19,5 @@ interface ProjectExporterCallback {
      */
     fun onError(project: Collection)
 
-    fun onNotifyProgress(percent: Double, message: String? = null)
+    fun onNotifyProgress(percent: Double, messageKey: String? = null)
 }
