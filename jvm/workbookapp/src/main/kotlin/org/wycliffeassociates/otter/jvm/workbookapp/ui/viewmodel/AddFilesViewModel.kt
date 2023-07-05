@@ -20,7 +20,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Single
-import io.reactivex.SingleEmitter
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
@@ -172,7 +171,7 @@ class AddFilesViewModel : ViewModel() {
                         ImportResult.SUCCESS,
                         language = language,
                         project = project,
-                        workbook = workbookDescriptor
+                        workbookDescriptor = workbookDescriptor
                     )
                 )
             }
