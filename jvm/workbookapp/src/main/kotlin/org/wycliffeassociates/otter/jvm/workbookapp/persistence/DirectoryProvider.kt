@@ -224,7 +224,6 @@ class DirectoryProvider(
             return
         }
 
-        val osName = System.getProperty("os.name").uppercase()
         when {
             osName.contains("WIN") -> {
                 val command = "explorer.exe /select,\"$path\""
