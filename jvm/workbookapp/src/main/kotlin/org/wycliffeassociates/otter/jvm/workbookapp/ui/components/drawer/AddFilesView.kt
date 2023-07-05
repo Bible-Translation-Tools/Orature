@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
 import javafx.application.Platform
@@ -27,10 +28,12 @@ import javafx.scene.input.DragEvent
 import javafx.scene.input.KeyCode
 import javafx.scene.input.TransferMode
 import javafx.scene.layout.Priority
+import javafx.stage.FileChooser
 import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.jvm.controls.dialog.OtterDialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
@@ -38,6 +41,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AddFilesViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
+import java.io.File
 import java.text.MessageFormat
 
 class AddFilesView : View() {
@@ -125,7 +129,17 @@ class AddFilesView : View() {
                         }
                         graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
                         action {
-                            viewModel.onChooseFile(currentWindow!!)
+                            chooseFile(
+                                FX.messages["importResourceFromZip"],
+                                arrayOf(
+                                    FileChooser.ExtensionFilter(
+                                        messages["oratureFileTypes"],
+                                        *OratureFileFormat.extensionList.map { "*.$it" }.toTypedArray()
+                                    )
+                                ),
+                                mode = FileChooserMode.Single,
+                                owner = currentWindow
+                            ).firstOrNull()?.let { importFile(it) }
                         }
                     }
 
@@ -260,12 +274,28 @@ class AddFilesView : View() {
         return EventHandler {
             var success = false
             if (it.dragboard.hasFiles()) {
-                viewModel.onDropFile(it.dragboard.files)
+                onDropFile(it.dragboard.files)
                 success = true
             }
             it.isDropCompleted = success
             it.consume()
         }
+    }
+
+    private fun onDropFile(files: List<File>) {
+        if (viewModel.isValidImportFile(files)) {
+            logger.info("Drag-drop file to import: ${files.first()}")
+            val fileToImport = files.first()
+            viewModel.setProjectInfo(fileToImport)
+            importFile(fileToImport)
+        }
+    }
+
+    private fun importFile(file: File) {
+        viewModel.setProjectInfo(file)
+        viewModel.importProject(file)
+            .observeOnFx()
+            .
     }
 
     private fun createSnackBar() {

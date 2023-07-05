@@ -19,6 +19,8 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Observable
+import io.reactivex.ObservableEmitter
 import io.reactivex.Single
 import io.reactivex.SingleEmitter
 import io.reactivex.schedulers.Schedulers
@@ -31,6 +33,7 @@ import javafx.stage.Window
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ConflictResolution
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
+import org.wycliffeassociates.otter.common.data.ProgressStatus
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
@@ -76,58 +79,36 @@ class AddFilesViewModel : ViewModel() {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
     }
 
-    fun onDropFile(files: List<File>) {
-        if (isValidImportFile(files)) {
-            logger.info("Drag-drop file to import: ${files.first()}")
-            val fileToImport = files.first()
-            setProjectInfo(fileToImport)
-            importProject(fileToImport)
-        }
-    }
-
-    fun onChooseFile(window: Window) {
-        val file = chooseFile(
-            FX.messages["importResourceFromZip"],
-            arrayOf(
-                FileChooser.ExtensionFilter(
-                    messages["oratureFileTypes"],
-                    *OratureFileFormat.extensionList.map { "*.$it" }.toTypedArray()
-                )
-            ),
-            mode = FileChooserMode.Single,
-            owner = window
-        ).firstOrNull()
-        file?.let {
-            setProjectInfo(file)
-            importProject(file)
-        }
-    }
-
-    private fun importProject(file: File) {
+    fun importProject(file: File): Observable<ProgressStatus> {
         showImportProgressDialogProperty.set(true)
-        val callback = setupImportCallback()
 
-        importProjectProvider.get()
-            .import(file, callback)
-            .subscribeOn(Schedulers.io())
-            .observeOnFx()
-            .doOnError { e ->
-                logger.error("Error in importing resource container $file", e)
-            }
-            .doFinally {
-                importedProjectTitleProperty.set(null)
-                importedProjectCoverProperty.set(null)
-            }
-            .subscribe { result: ImportResult ->
-                if (result == ImportResult.FAILED) {
-                    callback.onError(file.absolutePath)
+        return Observable.create<ProgressStatus> { emitter ->
+            val callback = setupImportCallback(emitter)
+            importProjectProvider.get()
+                .import(file, callback)
+                .subscribeOn(Schedulers.io())
+                .observeOnFx()
+                .doOnError { e ->
+                    logger.error("Error in importing resource container $file", e)
                 }
-                showImportProgressDialogProperty.value = false
-                fire(DrawerEvent(AddFilesView::class, DrawerEventAction.CLOSE))
-            }
+                .doFinally {
+                    importedProjectTitleProperty.set(null)
+                    importedProjectCoverProperty.set(null)
+                    emitter.onComplete()
+                }
+                .subscribe { result: ImportResult ->
+                    if (result == ImportResult.FAILED) {
+                        callback.onError(file.absolutePath)
+                    }
+                    showImportProgressDialogProperty.value = false
+                    fire(DrawerEvent(AddFilesView::class, DrawerEventAction.CLOSE))
+                }
+        }
     }
 
-    private fun setupImportCallback(): ProjectImporterCallback {
+    private fun setupImportCallback(
+        emitter: ObservableEmitter<ProgressStatus>
+    ): ProjectImporterCallback {
         return object : ProjectImporterCallback {
             override fun onRequestUserInput(): Single<ImportOptions> {
                 return Single.just(ImportOptions(confirmed = true))
@@ -183,13 +164,15 @@ class AddFilesViewModel : ViewModel() {
                 )
             }
 
-            override fun onNotifyProgress(localizeKey: String?, message: String?) {
-
+            override fun onNotifyProgress(localizeKey: String?, message: String?, percent: Double?) {
+                emitter.onNext(
+                    ProgressStatus(titleKey = localizeKey, titleMessage = message, percent = percent)
+                )
             }
         }
     }
 
-    private fun isValidImportFile(files: List<File>): Boolean {
+    fun isValidImportFile(files: List<File>): Boolean {
         return when {
             files.size > 1 -> {
                 snackBarObservable.onNext(messages["importMultipleError"])
@@ -223,7 +206,7 @@ class AddFilesViewModel : ViewModel() {
      *
      * @param rc The resource container file being imported
      */
-    private fun setProjectInfo(rc: File) {
+    fun setProjectInfo(rc: File) {
         try {
             val project = ResourceContainer.load(rc, true).use {
                 if (it.manifest.projects.size != 1) {
