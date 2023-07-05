@@ -205,6 +205,7 @@ class OngoingProjectImporter @Inject constructor(
                 directoryProvider.newFileReader(resourceContainer).use { fileReader ->
                     val existingSource = fetchExistingSource(manifestProject, manifestSources)
                     try {
+                        callback?.onNotifyProgress(localizeKey = "importingSource", percent = 20.0)
                         // Import Sources even if existing source exists in order to potentially merge source audio
                         importSources(fileReader)
                     } catch (e: ImportException) {
