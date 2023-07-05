@@ -34,7 +34,7 @@ internal fun setupImportCallback(
             /* no-op */
         }
 
-        override fun onNotifyProgress(localizeKey: String?, message: String?) {
+        override fun onNotifyProgress(localizeKey: String?, message: String?, percent: Double?) {
             localizeKey?.let {
                 progressStatusEmitter.onNext(
                     ProgressStatus(subTitleKey = localizeKey, subTitleMessage = message)

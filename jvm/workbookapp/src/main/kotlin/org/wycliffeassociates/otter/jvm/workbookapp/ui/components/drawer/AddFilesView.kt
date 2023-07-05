@@ -35,6 +35,7 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.jvm.controls.dialog.OtterDialog
+import org.wycliffeassociates.otter.jvm.controls.dialog.ProgressDialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
@@ -51,7 +52,6 @@ class AddFilesView : View() {
     private val settingsViewModel: SettingsViewModel by inject()
 
     private lateinit var closeButton: Button
-    private lateinit var importConflictDialog: OtterDialog
 
     override val root = vbox {
         addClass("app-drawer__content")
@@ -160,7 +160,6 @@ class AddFilesView : View() {
         tryImportStylesheet(resources["/css/import-export-dialogs.css"])
         tryImportStylesheet(resources["/css/card-radio-btn.css"])
 
-        initImportDialog()
         initSuccessDialog()
         initErrorDialog()
         createSnackBar()
@@ -175,32 +174,6 @@ class AddFilesView : View() {
     override fun onDock() {
         super.onDock()
         focusCloseButton()
-    }
-
-    private fun initImportDialog() {
-        val importDialog = confirmdialog {
-            titleTextProperty.bind(
-                viewModel.importedProjectTitleProperty.stringBinding {
-                    it?.let {
-                        MessageFormat.format(
-                            messages["importProjectTitle"],
-                            messages["import"],
-                            it
-                        )
-                    } ?: messages["importResource"]
-                }
-            )
-            messageTextProperty.set(messages["importResourceMessage"])
-            backgroundImageFileProperty.bind(viewModel.importedProjectCoverProperty)
-            progressTitleProperty.set(messages["pleaseWait"])
-            showProgressBarProperty.set(true)
-            orientationProperty.set(settingsViewModel.orientationProperty.value)
-            themeProperty.set(settingsViewModel.appColorMode.value)
-        }
-
-        viewModel.showImportProgressDialogProperty.onChange {
-            Platform.runLater { if (it) importDialog.open() else importDialog.close() }
-        }
     }
 
     private fun initSuccessDialog() {
@@ -286,16 +259,50 @@ class AddFilesView : View() {
         if (viewModel.isValidImportFile(files)) {
             logger.info("Drag-drop file to import: ${files.first()}")
             val fileToImport = files.first()
-            viewModel.setProjectInfo(fileToImport)
             importFile(fileToImport)
         }
     }
 
     private fun importFile(file: File) {
         viewModel.setProjectInfo(file)
+
+        val dialog = find<ProgressDialog> {
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
+            cancelMessageProperty.set(null)
+            dialogTitleProperty.bind(viewModel.importedProjectTitleProperty.stringBinding {
+                it?.let {
+                    MessageFormat.format(
+                        messages["importProjectTitle"],
+                        messages["import"],
+                        it
+                    )
+                } ?: messages["importResource"]
+            })
+
+            setOnCloseAction { close() }
+
+            open()
+        }
+
         viewModel.importProject(file)
             .observeOnFx()
-            .
+            .doOnComplete {
+                dialog.dialogTitleProperty.unbind()
+                dialog.percentageProperty.set(0.0)
+                dialog.close()
+            }
+            .subscribe { progressStatus ->
+                progressStatus.percent?.let { percent ->
+                    dialog.percentageProperty.set(percent)
+                }
+                if (progressStatus.titleKey != null && progressStatus.titleMessage != null) {
+                    val message = MessageFormat.format(messages[progressStatus.titleKey!!], messages[progressStatus.titleMessage!!])
+                    dialog.progressMessageProperty.set(message)
+                } else if (progressStatus.titleKey != null) {
+                    dialog.progressMessageProperty.set(messages[progressStatus.titleKey!!])
+                }
+            }
     }
 
     private fun createSnackBar() {

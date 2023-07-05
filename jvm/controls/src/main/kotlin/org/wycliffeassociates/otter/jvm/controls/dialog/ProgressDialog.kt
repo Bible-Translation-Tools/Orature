@@ -53,7 +53,7 @@ class ProgressDialog : OtterDialog() {
             hbox {
                 label {
                     addClass("h5")
-                    textProperty().bind(progressMessageProperty.stringBinding { it?.let { messages[it] } ?: "" })
+                    textProperty().bind(progressMessageProperty)
                 }
                 region { hgrow = Priority.ALWAYS }
                 label {
@@ -70,9 +70,9 @@ class ProgressDialog : OtterDialog() {
             button(cancelMessageProperty) {
                 addClass("btn", "btn--secondary")
                 onActionProperty().bind(onCloseActionProperty)
+                visibleWhen { cancelMessageProperty.isNotNull }
+                managedWhen(visibleProperty())
             }
-            visibleWhen { cancelMessageProperty.isNotNull }
-            managedWhen(visibleProperty())
         }
     }
 

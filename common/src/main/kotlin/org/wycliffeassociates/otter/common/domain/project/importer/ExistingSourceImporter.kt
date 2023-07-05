@@ -61,18 +61,22 @@ class ExistingSourceImporter @Inject constructor(
         }
 
         val singleStream = if (sameVersion) {
-            callback?.onNotifyProgress(localizeKey = "mergingSource")
+            callback?.onNotifyProgress(localizeKey = "mergingSource", percent = 30.0)
             logger.info("RC ${file.name} already imported, merging media...")
-            mergeMedia(file, existingSource.path)
+            mergeMedia(file, existingSource.path, callback)
         } else if (sameVersification) {
-            callback?.onNotifyProgress(localizeKey = "updatingVersification")
+            callback?.onNotifyProgress(localizeKey = "updatingVersification", percent = 25.0)
+
             logger.info("RC ${file.name} already imported but uses the same versification, updating source...")
             updateSource(existingSource, file).blockingGet()
-            mergeMedia(file, existingSource.path)
+
+            callback?.onNotifyProgress(localizeKey = "mergingSource", percent = 50.0)
+
+            mergeMedia(file, existingSource.path, callback)
             mergeText(file, existingSource.path)
         } else {
             // existing resource has a different version, confirms overwrite/delete
-            callback?.onNotifyProgress(localizeKey = "overridingSource")
+            callback?.onNotifyProgress(localizeKey = "overridingSource", percent = 15.0)
             logger.info("RC ${file.name} already imported, but with a different version and different versification.")
             logger.info("Requesting user input to overwrite/delete existing source...")
             val confirmDelete = callback?.onRequestUserInput()
@@ -151,16 +155,19 @@ class ExistingSourceImporter @Inject constructor(
 
     fun mergeMedia(
         newRC: File,
-        existingRC: File
+        existingRC: File,
+        callback: ProjectImporterCallback?
     ): Single<ImportResult> {
         logger.info("RC already imported, merging media...")
         return Single
             .fromCallable {
                 MediaMerge.merge(
                     ResourceContainer.load(newRC),
-                    ResourceContainer.load(existingRC)
+                    ResourceContainer.load(existingRC),
+                    callback
                 )
                 logger.info("Merge media completed.")
+                callback?.onNotifyProgress(percent = 95.0)
                 ImportResult.SUCCESS
             }
             .onErrorReturn {

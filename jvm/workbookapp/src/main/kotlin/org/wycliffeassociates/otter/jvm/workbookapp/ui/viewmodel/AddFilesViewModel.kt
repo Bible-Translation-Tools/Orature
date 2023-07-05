@@ -27,13 +27,10 @@ import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.stage.FileChooser
-import javafx.stage.Window
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ConflictResolution
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.ProgressStatus
-import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
@@ -64,7 +61,6 @@ class AddFilesViewModel : ViewModel() {
     @Inject lateinit var directoryProvider: IDirectoryProvider
     @Inject lateinit var importProjectProvider : Provider<ImportProjectUseCase>
 
-    val showImportProgressDialogProperty = SimpleBooleanProperty(false)
     val showImportSuccessDialogProperty = SimpleBooleanProperty(false)
     val showImportErrorDialogProperty = SimpleBooleanProperty(false)
     val importErrorMessage = SimpleStringProperty(null)
@@ -79,8 +75,6 @@ class AddFilesViewModel : ViewModel() {
     }
 
     fun importProject(file: File): Observable<ProgressStatus> {
-        showImportProgressDialogProperty.set(true)
-
         return Observable.create<ProgressStatus> { emitter ->
             val callback = setupImportCallback(emitter)
             importProjectProvider.get()
@@ -99,7 +93,6 @@ class AddFilesViewModel : ViewModel() {
                     if (result == ImportResult.FAILED) {
                         callback.onError(file.absolutePath)
                     }
-                    showImportProgressDialogProperty.value = false
                     fire(DrawerEvent(AddFilesView::class, DrawerEventAction.CLOSE))
                 }
         }

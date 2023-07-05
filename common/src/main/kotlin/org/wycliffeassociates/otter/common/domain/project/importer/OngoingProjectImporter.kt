@@ -199,7 +199,8 @@ class OngoingProjectImporter @Inject constructor(
 
                 callback?.onNotifyProgress(
                     localizeKey = "loadingSomething",
-                    message = "${manifest.dublinCore.language.identifier}_${manifestProject.identifier}"
+                    message = "${manifest.dublinCore.language.identifier}_${manifestProject.identifier}",
+                    percent = 10.0
                 )
                 directoryProvider.newFileReader(resourceContainer).use { fileReader ->
                     val existingSource = fetchExistingSource(manifestProject, manifestSources)
@@ -223,7 +224,7 @@ class OngoingProjectImporter @Inject constructor(
                         }
                         .blockingGet()
 
-                    val derived = importResumableProject(fileReader, metadata, manifestProject, sourceCollection)
+                    val derived = importResumableProject(fileReader, metadata, manifestProject, sourceCollection, callback)
                     val workbookDescriptor = workbookDescriptorRepository.getAll().blockingGet().firstOrNull {
                         it.targetCollection == derived && it.sourceCollection == sourceCollection
                     }
@@ -248,7 +249,8 @@ class OngoingProjectImporter @Inject constructor(
         fileReader: IFileReader,
         metadata: ResourceMetadata,
         manifestProject: Project,
-        sourceCollection: Collection
+        sourceCollection: Collection,
+        callback: ProjectImporterCallback?
     ): Collection {
         val sourceMetadata = sourceCollection.resourceContainer!!
         val derivedProject = createDerivedProjects(metadata.language, sourceCollection, true)
@@ -263,6 +265,8 @@ class OngoingProjectImporter @Inject constructor(
         )
 
         projectFilesAccessor.initializeResourceContainerInDir()
+
+        callback?.onNotifyProgress(localizeKey = "copyingSource", percent = 40.0)
         projectFilesAccessor.copySourceFiles(fileReader)
 
         importContributorInfo(metadata, projectFilesAccessor)
@@ -272,6 +276,7 @@ class OngoingProjectImporter @Inject constructor(
             projectFilesAccessor,
             fileReader
         )
+        callback?.onNotifyProgress(localizeKey = "importingTakes", percent = 80.0)
 
         importTakes(
             fileReader,
@@ -285,6 +290,9 @@ class OngoingProjectImporter @Inject constructor(
         translation.modifiedTs = LocalDateTime.now()
         languageRepository.updateTranslation(translation).subscribe()
         resetChaptersWithoutTakes(fileReader, derivedProject)
+
+        callback?.onNotifyProgress(localizeKey = "finishingUp", percent = 100.0)
+
         return derivedProject
     }
 

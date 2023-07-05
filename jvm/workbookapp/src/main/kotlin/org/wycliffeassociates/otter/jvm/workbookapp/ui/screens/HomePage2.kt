@@ -259,7 +259,7 @@ class HomePage2 : View() {
         )
             .observeOnFx()
             .doOnComplete {
-                dialog.percentageProperty.unbind()
+                dialog.percentageProperty.set(0.0)
                 dialog.cancelMessageProperty.set(null)
                 dialog.close()
             }
@@ -267,7 +267,9 @@ class HomePage2 : View() {
                 progressStatus.percent?.let { percent ->
                     dialog.percentageProperty.set(percent)
                 }
-                dialog.progressMessageProperty.set(progressStatus.titleKey)
+                progressStatus.titleKey?.let {
+                    dialog.progressMessageProperty.set(messages[it])
+                }
             }
     }
 
