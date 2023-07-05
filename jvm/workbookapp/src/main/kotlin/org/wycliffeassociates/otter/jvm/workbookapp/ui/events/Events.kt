@@ -30,5 +30,5 @@ class ProjectImportEvent(
     val project: String? = null,
     val language: String? = null,
     val filePath: String? = null,
-    val workbook: WorkbookDescriptor? = null
+    val workbookDescriptor: WorkbookDescriptor? = null
 ): FXEvent()

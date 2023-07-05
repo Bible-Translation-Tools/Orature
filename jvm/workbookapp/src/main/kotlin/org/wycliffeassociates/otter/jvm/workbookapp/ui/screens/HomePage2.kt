@@ -291,11 +291,11 @@ class HomePage2 : View() {
                 title = messages["importSuccessful"],
                 message = messageBody,
                 statusType = NotificationStatusType.SUCCESSFUL,
-                actionText = messages["openBook"],
-                actionIcon = MaterialDesign.MDI_ARROW_RIGHT
+                actionText = event.workbookDescriptor?.let { messages["openBook"] },
+                actionIcon = event.workbookDescriptor?.let { MaterialDesign.MDI_ARROW_RIGHT }
             ) {
                 /* open workbook callback */
-                event.workbook?.let { it ->
+                event.workbookDescriptor?.let { it ->
                     viewModel.selectBook(it)
                 }
             }
@@ -348,14 +348,7 @@ class HomePage2 : View() {
 
     private fun showNotification(notification: NotificationViewData) {
         val snackBar = JFXSnackbar(root)
-        val graphic = NotificationSnackBar().apply {
-
-            titleProperty.set(notification.title)
-            messageProperty.set(notification.message)
-            statusTypeProperty.set(notification.statusType)
-            actionIconProperty.set(notification.actionIcon)
-            actionTextProperty.set(notification.actionText)
-
+        val graphic = NotificationSnackBar(notification).apply {
             setOnDismiss {
                 snackBar.hide() /* avoid crashing if close() invoked before timeout */
             }
