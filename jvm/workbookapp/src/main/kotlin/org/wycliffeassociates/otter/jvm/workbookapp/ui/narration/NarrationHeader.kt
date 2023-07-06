@@ -230,7 +230,7 @@ class NarrationHeaderViewModel : ViewModel() {
                             else -> {
                                 when (pluginType) {
                                     PluginType.EDITOR, PluginType.MARKER -> {
-                                        FX.eventbus.fire(ChapterOpenInPluginEvent(ChapterOpenInPluginStatus.STARTED))
+                                        FX.eventbus.fire(ChapterLoadEvent(ChapterLoadStatus.STARTED))
                                     }
                                     else -> {}
                                 }

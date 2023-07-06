@@ -118,8 +118,8 @@ class NarrationBody : View() {
             viewModel.openInAudioPlugin(it.index)
         }
 
-        subscribe<ChapterOpenInPluginEvent> {
-            viewModel.onChapterOpenInPlugin(it.status)
+        subscribe<ChapterLoadEvent> {
+            viewModel.onChapterLoad(it.status)
         }
     }
 
@@ -261,13 +261,13 @@ class NarrationBodyViewModel : ViewModel() {
         }
     }
 
-    fun onChapterOpenInPlugin(status: ChapterOpenInPluginStatus) {
+    fun onChapterLoad(status: ChapterLoadStatus) {
         when (status) {
-            ChapterOpenInPluginStatus.STARTED -> {
+            ChapterLoadStatus.STARTED -> {
                 chapterOpenInPluginProperty.value = true
                 initializeRecorder()
             }
-            ChapterOpenInPluginStatus.FINISHED -> chapterOpenInPluginProperty.value = false
+            ChapterLoadStatus.FINISHED -> chapterOpenInPluginProperty.value = false
         }
     }
 
@@ -419,7 +419,7 @@ class NarrationBodyViewModel : ViewModel() {
                     recordResume = recordedVerses.isNotEmpty()
                     potentiallyFinished = checkPotentiallyFinished()
 
-                    FX.eventbus.fire(ChapterOpenInPluginEvent(ChapterOpenInPluginStatus.FINISHED))
+                    FX.eventbus.fire(ChapterLoadEvent(ChapterLoadStatus.FINISHED))
                 }
         }
     }
@@ -556,9 +556,9 @@ class RecordAgainEvent(val index: Int) : FXEvent()
 class PlayVerseEvent(val verse: VerseNode) : FXEvent()
 class OpenInAudioPluginEvent(val index: Int) : FXEvent()
 
-class ChapterOpenInPluginEvent(val status: ChapterOpenInPluginStatus): FXEvent()
+class ChapterLoadEvent(val status: ChapterLoadStatus): FXEvent()
 
-enum class ChapterOpenInPluginStatus {
+enum class ChapterLoadStatus {
     STARTED,
     FINISHED
 }
