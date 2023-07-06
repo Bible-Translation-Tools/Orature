@@ -134,7 +134,7 @@ class NarrationHeaderViewModel : ViewModel() {
                 setHasNextAndPreviousChapter(chapter)
                 loadChapter(chapter)
             }
-        }
+        }.let(listeners::add)
 
         workbookDataStore.activeWorkbookProperty.onChangeAndDoNowWithDisposer { workbook ->
             workbook?.let {
