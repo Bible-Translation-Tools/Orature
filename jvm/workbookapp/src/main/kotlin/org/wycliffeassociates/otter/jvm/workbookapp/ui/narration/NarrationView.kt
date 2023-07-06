@@ -9,6 +9,7 @@ import javafx.util.Duration
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
+import javafx.beans.property.SimpleIntegerProperty
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
@@ -133,6 +134,8 @@ class NarrationViewViewModel : ViewModel() {
 
     val hasUndoProperty = SimpleBooleanProperty()
     val hasRedoProperty = SimpleBooleanProperty()
+
+    val lastRecordedVerseProperty = SimpleIntegerProperty()
     val hasVersesProperty = SimpleBooleanProperty()
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
