@@ -258,7 +258,7 @@ class HomePage2 : View() {
             event.chapters
         )
             .observeOnFx()
-            .doOnComplete {
+            .doFinally {
                 dialog.percentageProperty.set(0.0)
                 dialog.cancelMessageProperty.set(null)
                 dialog.close()

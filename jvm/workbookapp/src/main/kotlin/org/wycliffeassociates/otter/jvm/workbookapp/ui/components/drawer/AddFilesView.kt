@@ -287,7 +287,7 @@ class AddFilesView : View() {
 
         viewModel.importProject(file)
             .observeOnFx()
-            .doOnComplete {
+            .doFinally {
                 dialog.dialogTitleProperty.unbind()
                 dialog.percentageProperty.set(0.0)
                 dialog.close()
