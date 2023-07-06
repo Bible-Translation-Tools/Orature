@@ -12,7 +12,6 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.chapterSelector
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.narrationMenu
@@ -112,7 +111,7 @@ class NarrationHeaderViewModel : ViewModel() {
                 setHasNextAndPreviousChapter(chapter)
                 loadChapter(chapter)
             }
-        }
+        }.let(listeners::add)
 
         workbookDataStore.activeWorkbookProperty.onChangeAndDoNowWithDisposer { workbook ->
             workbook?.let {
