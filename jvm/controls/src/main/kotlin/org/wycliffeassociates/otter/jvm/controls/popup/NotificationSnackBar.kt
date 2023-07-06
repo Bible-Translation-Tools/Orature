@@ -12,18 +12,18 @@ import org.kordamp.ikonli.Ikon
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
+import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
-class NotificationSnackBar: HBox() {
+class NotificationSnackBar(notification: NotificationViewData): HBox() {
 
-    val titleProperty = SimpleStringProperty()
-    val messageProperty = SimpleStringProperty()
-    val statusTypeProperty = SimpleObjectProperty<NotificationStatusType>()
-    val actionIconProperty = SimpleObjectProperty<Ikon>()
-    val actionTextProperty = SimpleStringProperty()
+    val titleProperty = SimpleStringProperty(notification.title)
+    val messageProperty = SimpleStringProperty(notification.message)
+    val statusTypeProperty = SimpleObjectProperty<NotificationStatusType>(notification.statusType)
+    val actionTextProperty = SimpleStringProperty(notification.actionText)
+    val actionIconProperty = SimpleObjectProperty<Ikon>(notification.actionIcon)
 
     private val mainActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>(null)
     private val dismissActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()

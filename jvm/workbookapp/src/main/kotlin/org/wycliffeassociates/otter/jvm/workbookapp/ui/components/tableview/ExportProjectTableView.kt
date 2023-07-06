@@ -51,7 +51,7 @@ class ExportProjectTableView(
             maxWidth = 50.0
             minWidth = 50.0
         }
-        column(messages["Chapter"], Int::class) {
+        column(messages["chapter"], Int::class) {
             addClass("table-view__column-header-row")
             setCellValueFactory { SimpleObjectProperty(it.value.number) }
             cellFormat {

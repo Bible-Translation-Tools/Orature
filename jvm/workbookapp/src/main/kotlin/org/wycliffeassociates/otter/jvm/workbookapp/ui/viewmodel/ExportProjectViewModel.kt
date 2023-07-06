@@ -1,9 +1,12 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Observable
+import io.reactivex.ObservableEmitter
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.ProgressStatus
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterDescriptor
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
@@ -77,33 +80,38 @@ class ExportProjectViewModel : ViewModel() {
         directory: File,
         type: ExportType,
         chapters: List<Int>
-    ) {
+    ): Observable<ProgressStatus> {
         val workbook = workbookRepo.get(workbookDescriptor.sourceCollection, workbookDescriptor.targetCollection)
         val exporter: IProjectExporter = when (type) {
             ExportType.LISTEN -> exportAudioUseCase
             ExportType.SOURCE_AUDIO, ExportType.PUBLISH -> exportSourceUseCase
             ExportType.BACKUP -> exportBackupUseCase
         }
-        val callback = setUpCallback()
-        exporter
-            .export(
-                directory,
-                workbook,
-                callback,
-                ExportOptions(chapters)
-            )
-            .observeOnFx()
-            .doOnError { e ->
-                logger.error("Error in exporting project for project: ${workbook.target.slug}")
-            }
-            .subscribe { result: ExportResult ->
-                if (result == ExportResult.FAILURE) {
-                    callback.onError(workbook.target.toCollection())
+        return Observable.create<ProgressStatus> { emitter ->
+            val callback = setUpCallback(emitter)
+            exporter
+                .export(
+                    directory,
+                    workbook,
+                    callback,
+                    ExportOptions(chapters)
+                )
+                .observeOnFx()
+                .doOnError { e ->
+                    logger.error("Error in exporting project for project: ${workbook.target.slug}")
                 }
-            }
+                .doFinally {
+                    emitter.onComplete()
+                }
+                .subscribe { result: ExportResult ->
+                    if (result == ExportResult.FAILURE) {
+                        callback.onError(workbook.target.toCollection())
+                    }
+                }
+        }
     }
 
-    private fun setUpCallback(): ProjectExporterCallback {
+    private fun setUpCallback(emitter: ObservableEmitter<ProgressStatus>): ProjectExporterCallback {
         return object : ProjectExporterCallback {
             override fun onNotifySuccess(project: Collection, file: File) {
                 FX.eventbus.fire(
@@ -117,6 +125,12 @@ class ExportProjectViewModel : ViewModel() {
                     WorkbookExportFinishEvent(
                         ExportResult.FAILURE, project
                     )
+                )
+            }
+
+            override fun onNotifyProgress(percent: Double, message: String?) {
+                emitter.onNext(
+                    ProgressStatus(percent = percent, titleKey = message)
                 )
             }
         }

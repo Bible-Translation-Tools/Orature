@@ -18,4 +18,6 @@ interface ProjectExporterCallback {
      * @param project the project that was exported.
      */
     fun onError(project: Collection)
+
+    fun onNotifyProgress(percent: Double, messageKey: String? = null)
 }

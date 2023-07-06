@@ -45,8 +45,8 @@
     -fx-spacing: 16;
     -fx-padding: 16 12;
     -fx-text-alignment: justify;
-    -fx-min-height: 100px;
     -fx-background-color: -wa-dialog-background;
+    -fx-alignment: center;
 }
 
 .confirm-dialog__message {

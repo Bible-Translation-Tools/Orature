@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.jfoenix.controls.JFXSnackbar
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Node
@@ -27,6 +28,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ProjectImportEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookDeleteEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ExportProjectDialog
+import org.wycliffeassociates.otter.jvm.controls.dialog.ProgressDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.BookSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.ProjectWizardSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportDialogOpenEvent
@@ -88,6 +90,7 @@ class HomePage2 : View() {
         tryImportStylesheet("/css/table-view.css")
         tryImportStylesheet("/css/confirm-dialog.css")
         tryImportStylesheet("/css/import-export-dialogs.css")
+        tryImportStylesheet("/css/progress-dialog.css")
         tryImportStylesheet("/css/card-radio-btn.css")
         tryImportStylesheet("/css/snack-bar-notification.css")
 
@@ -195,23 +198,18 @@ class HomePage2 : View() {
                 workbookDescriptorProperty.set(workbookDescriptor)
 
                 exportProjectViewModel.loadAvailableChapters(workbookDescriptor)
+                    .observeOnFx()
                     .subscribe { chapters ->
                         availableChapters.setAll(chapters)
+                        open()
                     }
 
-                setOnCloseAction {
-                    this.close()
-                }
-            }.open()
+                setOnCloseAction { this.close() }
+            }
         }
 
         subscribe<WorkbookExportEvent> { event ->
-            exportProjectViewModel.exportWorkbook(
-                event.workbook,
-                event.outputDir,
-                event.exportType,
-                event.chapters
-            )
+            handleExportEvent(event)
         }
 
         subscribe<WorkbookExportFinishEvent> {
@@ -231,6 +229,48 @@ class HomePage2 : View() {
         projectWizardViewModel.undock()
         viewModel.loadProjects()
         mainSectionProperty.set(bookFragment)
+    }
+
+    private fun handleExportEvent(event: WorkbookExportEvent) {
+        val dialog = find<ProgressDialog> {
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
+            dialogTitleProperty.set(
+                MessageFormat.format(
+                    messages["exportProjectTitle"],
+                    messages["exporting"],
+                    event.workbook.title
+                )
+            )
+            dialogMessageProperty.set(messages["exportProjectMessage"])
+            cancelMessageProperty.set(messages["cancelExport"])
+
+            setOnCloseAction {
+                cancelMessageProperty.set(null)
+                close()
+            }
+        }.apply { open() }
+
+        exportProjectViewModel.exportWorkbook(
+            event.workbook,
+            event.outputDir,
+            event.exportType,
+            event.chapters
+        )
+            .observeOnFx()
+            .doFinally {
+                dialog.percentageProperty.set(0.0)
+                dialog.cancelMessageProperty.set(null)
+                dialog.close()
+            }
+            .subscribe { progressStatus ->
+                progressStatus.percent?.let { percent ->
+                    dialog.percentageProperty.set(percent)
+                }
+                progressStatus.titleKey?.let {
+                    dialog.progressMessageProperty.set(messages[it])
+                }
+            }
     }
 
     private fun createImportNotification(event: ProjectImportEvent): NotificationViewData {
@@ -253,11 +293,11 @@ class HomePage2 : View() {
                 title = messages["importSuccessful"],
                 message = messageBody,
                 statusType = NotificationStatusType.SUCCESSFUL,
-                actionText = messages["openBook"],
-                actionIcon = MaterialDesign.MDI_ARROW_RIGHT
+                actionText = event.workbookDescriptor?.let { messages["openBook"] },
+                actionIcon = event.workbookDescriptor?.let { MaterialDesign.MDI_ARROW_RIGHT }
             ) {
                 /* open workbook callback */
-                event.workbook?.let { it ->
+                event.workbookDescriptor?.let { it ->
                     viewModel.selectBook(it)
                 }
             }
@@ -310,14 +350,7 @@ class HomePage2 : View() {
 
     private fun showNotification(notification: NotificationViewData) {
         val snackBar = JFXSnackbar(root)
-        val graphic = NotificationSnackBar().apply {
-
-            titleProperty.set(notification.title)
-            messageProperty.set(notification.message)
-            statusTypeProperty.set(notification.statusType)
-            actionIconProperty.set(notification.actionIcon)
-            actionTextProperty.set(notification.actionText)
-
+        val graphic = NotificationSnackBar(notification).apply {
             setOnDismiss {
                 snackBar.hide() /* avoid crashing if close() invoked before timeout */
             }
