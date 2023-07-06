@@ -31,7 +31,9 @@ import javafx.stage.Window
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ConflictResolution
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
+import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
+import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportCallbackParameter
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
@@ -40,7 +42,10 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ImportEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.AddFilesView
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.DrawerEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.DrawerEventAction
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ProjectImportEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ImportConflictDialog
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
@@ -114,20 +119,11 @@ class AddFilesViewModel : ViewModel() {
                 importedProjectCoverProperty.set(null)
             }
             .subscribe { result: ImportResult ->
-                when (result) {
-                    ImportResult.SUCCESS -> {
-                        showImportSuccessDialogProperty.value = true
-                        fire(ImportEvent)
-                    }
-                    ImportResult.DEPENDENCY_CONSTRAINT -> {
-                        importErrorMessage.set(messages["importErrorDependencyExists"])
-                        showImportErrorDialogProperty.value = true
-                    }
-                    else -> {
-                        showImportErrorDialogProperty.value = true
-                    }
+                if (result == ImportResult.FAILED) {
+                    callback.onError(file.absolutePath)
                 }
                 showImportProgressDialogProperty.value = false
+                fire(DrawerEvent(AddFilesView::class, DrawerEventAction.CLOSE))
             }
     }
 
@@ -170,8 +166,21 @@ class AddFilesViewModel : ViewModel() {
                 }
             }
 
-            override fun onError(messageKey: String) {
-                TODO("Not yet implemented")
+            override fun onNotifySuccess(language: String?, project: String?, workbookDescriptor: WorkbookDescriptor?) {
+                FX.eventbus.fire(
+                    ProjectImportEvent(
+                        ImportResult.SUCCESS,
+                        language = language,
+                        project = project,
+                        workbook = workbookDescriptor
+                    )
+                )
+            }
+
+            override fun onError(filePath: String) {
+                FX.eventbus.fire(
+                    ProjectImportEvent(ImportResult.FAILED, filePath = filePath)
+                )
             }
 
             override fun onNotifyProgress(localizeKey: String?, message: String?) {

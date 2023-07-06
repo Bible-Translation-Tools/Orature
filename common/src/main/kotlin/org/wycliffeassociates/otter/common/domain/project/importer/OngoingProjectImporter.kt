@@ -40,6 +40,8 @@ import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRep
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Manifest
@@ -54,7 +56,8 @@ import javax.inject.Inject
 class OngoingProjectImporter @Inject constructor(
     private val directoryProvider: IDirectoryProvider,
     private val resourceMetadataRepository: IResourceMetadataRepository,
-    private val workbookRepository: WorkbookRepository,
+    private val workbookRepository: IWorkbookRepository,
+    private val workbookDescriptorRepository: IWorkbookDescriptorRepository,
     private val collectionRepository: ICollectionRepository,
     private val contentRepository: IContentRepository,
     private val takeRepository: ITakeRepository,
@@ -78,6 +81,7 @@ class OngoingProjectImporter @Inject constructor(
             return super.passToNextImporter(file, callback, options)
         }
         takesInChapterFilter = null
+        projectName = ""
 
         return Single
             .fromCallable { projectExists(file) }
@@ -219,7 +223,15 @@ class OngoingProjectImporter @Inject constructor(
                         }
                         .blockingGet()
 
-                    importResumableProject(fileReader, metadata, manifestProject, sourceCollection)
+                    val derived = importResumableProject(fileReader, metadata, manifestProject, sourceCollection)
+                    val workbookDescriptor = workbookDescriptorRepository.getAll().blockingGet().firstOrNull {
+                        it.targetCollection == derived && it.sourceCollection == sourceCollection
+                    }
+                    callback?.onNotifySuccess(
+                        manifest.dublinCore.language.title,
+                        manifestProject.title,
+                        workbookDescriptor
+                    )
                 }
 
                 ImportResult.SUCCESS
@@ -237,7 +249,7 @@ class OngoingProjectImporter @Inject constructor(
         metadata: ResourceMetadata,
         manifestProject: Project,
         sourceCollection: Collection
-    ) {
+    ): Collection {
         val sourceMetadata = sourceCollection.resourceContainer!!
         val derivedProject = createDerivedProjects(metadata.language, sourceCollection, true)
 
@@ -273,6 +285,7 @@ class OngoingProjectImporter @Inject constructor(
         translation.modifiedTs = LocalDateTime.now()
         languageRepository.updateTranslation(translation).subscribe()
         resetChaptersWithoutTakes(fileReader, derivedProject)
+        return derivedProject
     }
 
     private fun importChunks(project: Collection, accessor: ProjectFilesAccessor, fileReader: IFileReader) {

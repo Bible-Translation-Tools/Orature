@@ -6,7 +6,7 @@ import javafx.scene.control.TableCell
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterDescriptor
 import tornadofx.*
 
-class ExportProjectTableCheckbox(
+class ExportProjectTableActionCell(
     private val selectedChapters: ObservableSet<ChapterDescriptor>
 ) : TableCell<ChapterDescriptor, ChapterDescriptor>() {
 

@@ -82,9 +82,9 @@ class TestAudioProjectExporter {
         exportAudioUseCase.get()
             .export(
                 outputDir,
-                enUlbTestMetadata,
                 workbook,
-                null
+                callback = null,
+                options = null
             )
             .blockingGet()
 
@@ -100,8 +100,8 @@ class TestAudioProjectExporter {
         exportAudioUseCase.get()
             .export(
                 outputDir,
-                enUlbTestMetadata,
                 workbook,
+                callback = null,
                 ExportOptions(chapters = listOf(2))
             )
             .blockingGet()

@@ -11,6 +11,7 @@ import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
 import org.wycliffeassociates.otter.common.domain.collections.UpdateProject
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupKey
@@ -31,6 +32,9 @@ class HomePageViewModel2 : ViewModel() {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Inject
+    lateinit var directoryProvider: IDirectoryProvider
+
+    @Inject
     lateinit var workbookRepo: IWorkbookRepository
 
     @Inject
@@ -49,11 +53,11 @@ class HomePageViewModel2 : ViewModel() {
     val projectGroups = observableListOf<ProjectGroupCardModel>()
     val bookList = observableListOf<WorkbookDescriptor>()
     private val filteredBooks = FilteredList<WorkbookDescriptor>(bookList)
-    val sortedBooks = SortedList<WorkbookDescriptor>(filteredBooks)
+    private val disposableListeners = mutableListOf<ListenerDisposer>()
 
+    val sortedBooks = SortedList<WorkbookDescriptor>(filteredBooks)
     val selectedProjectGroup = SimpleObjectProperty<ProjectGroupKey>()
     val bookSearchQueryProperty = SimpleStringProperty("")
-    private val disposableListeners = mutableListOf<ListenerDisposer>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -123,9 +127,9 @@ class HomePageViewModel2 : ViewModel() {
 
         val projects = workbookRepo.getProjects().blockingGet()
         val existingProject = projects.firstOrNull { existingProject ->
-            projectGroup.sourceLanguage == existingProject.source.language.slug &&
-                    projectGroup.targetLanguage == existingProject.target.language.slug &&
-                    workbookDescriptor.slug == existingProject.target.slug
+            existingProject.source.language.slug == projectGroup.sourceLanguage &&
+                    existingProject.target.language.slug == projectGroup.targetLanguage &&
+                    existingProject.target.slug == workbookDescriptor.slug
         }
 
         existingProject?.let { workbook ->
@@ -154,6 +158,8 @@ class HomePageViewModel2 : ViewModel() {
                 loadProjects()
             }
     }
+
+    fun openInFilesManager(path: String) = directoryProvider.openInFileManager(path)
 
     private fun updateBookList(books: List<WorkbookDescriptor>) {
         if (books.isEmpty()) {

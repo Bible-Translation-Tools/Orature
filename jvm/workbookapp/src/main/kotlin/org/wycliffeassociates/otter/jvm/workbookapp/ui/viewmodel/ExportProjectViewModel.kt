@@ -4,6 +4,7 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterDescriptor
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.project.exporter.AudioProjectExporter
@@ -11,13 +12,13 @@ import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOptions
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportType
 import org.wycliffeassociates.otter.common.domain.project.exporter.IProjectExporter
+import org.wycliffeassociates.otter.common.domain.project.exporter.ProjectExporterCallback
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.BackupProjectExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.SourceProjectExporter
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportFinishEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.errorMessage
-import tornadofx.ViewModel
-import tornadofx.get
+import tornadofx.*
 import java.io.File
 import javax.inject.Inject
 
@@ -27,6 +28,7 @@ class ExportProjectViewModel : ViewModel() {
 
     @Inject
     lateinit var workbookRepo: IWorkbookRepository
+
     @Inject
     lateinit var exportSourceUseCase: SourceProjectExporter
 
@@ -61,6 +63,7 @@ class ExportProjectViewModel : ViewModel() {
                         } else {
                             0.0
                         }
+
                         ChapterDescriptor(chapter.sort, progress)
                     }
             }
@@ -76,18 +79,17 @@ class ExportProjectViewModel : ViewModel() {
         chapters: List<Int>
     ) {
         val workbook = workbookRepo.get(workbookDescriptor.sourceCollection, workbookDescriptor.targetCollection)
-        val resourceMetadata = workbook.target.resourceMetadata
         val exporter: IProjectExporter = when (type) {
             ExportType.LISTEN -> exportAudioUseCase
             ExportType.SOURCE_AUDIO, ExportType.PUBLISH -> exportSourceUseCase
             ExportType.BACKUP -> exportBackupUseCase
         }
-
+        val callback = setUpCallback()
         exporter
             .export(
                 directory,
-                resourceMetadata,
                 workbook,
+                callback,
                 ExportOptions(chapters)
             )
             .observeOnFx()
@@ -95,9 +97,28 @@ class ExportProjectViewModel : ViewModel() {
                 logger.error("Error in exporting project for project: ${workbook.target.slug}")
             }
             .subscribe { result: ExportResult ->
-                result.errorMessage?.let {
-                    tornadofx.error(messages["exportError"], it)
+                if (result == ExportResult.FAILURE) {
+                    callback.onError(workbook.target.toCollection())
                 }
             }
+    }
+
+    private fun setUpCallback(): ProjectExporterCallback {
+        return object : ProjectExporterCallback {
+            override fun onNotifySuccess(project: Collection, file: File) {
+                FX.eventbus.fire(
+                    WorkbookExportFinishEvent(
+                        ExportResult.SUCCESS, project, file
+                    )
+                )
+            }
+            override fun onError(project: Collection) {
+                FX.eventbus.fire(
+                    WorkbookExportFinishEvent(
+                        ExportResult.FAILURE, project
+                    )
+                )
+            }
+        }
     }
 }

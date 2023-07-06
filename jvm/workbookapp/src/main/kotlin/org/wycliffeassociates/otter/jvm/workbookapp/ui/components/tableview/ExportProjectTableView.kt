@@ -44,7 +44,7 @@ class ExportProjectTableView(
             }
             setCellValueFactory { SimpleObjectProperty(it.value) }
             setCellFactory {
-                ExportProjectTableCheckbox(selectedChapters)
+                ExportProjectTableActionCell(selectedChapters)
             }
             isReorderable = false
             isSortable = false
