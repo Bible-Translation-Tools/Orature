@@ -57,6 +57,9 @@ class NarrationBody : View() {
                                     //hide()
                                     fire(PlayVerseEvent(verse))
                                 }
+                                disableWhen {
+                                    viewModel.isRecordingProperty
+                                }
                             }
                             item("") {
                                 text = "Record Again"
@@ -65,7 +68,7 @@ class NarrationBody : View() {
                                     fire(RecordAgainEvent(index))
                                 }
                                 disableWhen {
-                                    viewModel.isRecordingAgainProperty.or(viewModel.isRecordingProperty)
+                                    viewModel.isRecordingProperty
                                 }
                             }
                             item("") {
@@ -75,7 +78,7 @@ class NarrationBody : View() {
                                     fire(OpenInAudioPluginEvent(index))
                                 }
                                 disableWhen {
-                                    viewModel.isRecordingAgainProperty.or(viewModel.isRecordingProperty)
+                                    viewModel.isRecordingProperty
                                 }
                             }
                         }
@@ -192,7 +195,7 @@ class NarrationBodyViewModel : ViewModel() {
     private lateinit var pcmFile: File
     private lateinit var jsonFile: File
 
-    val contextProperty = SimpleObjectProperty(PluginType.EDITOR)
+    val pluginContextProperty = SimpleObjectProperty(PluginType.EDITOR)
     val chapterOpenInPluginProperty = SimpleBooleanProperty()
 
     val recordedVerses = observableListOf<VerseNode>()
@@ -252,8 +255,7 @@ class NarrationBodyViewModel : ViewModel() {
         writer?.start()
 
         recordAgainVerseIndex = verseIndex
-        recordStart = false
-        recordResume = false
+        isRecording = true
         isRecordingAgain = true
         recordPause = false
     }
@@ -262,7 +264,7 @@ class NarrationBodyViewModel : ViewModel() {
         recordedAudio?.let { audio ->
             val verse = recordedVerses[index]
             val file = audioFileUtils.getSectionAsFile(audio, verse.start, verse.end)
-            processWithPlugin(file, index)
+            processWithEditor(file, index)
         }
     }
 
@@ -297,10 +299,10 @@ class NarrationBodyViewModel : ViewModel() {
 
     fun toggleRecording() {
         when {
-            recordStart || recordResume -> record()
-            isRecording -> pauseRecording()
+            isRecording && !isRecordingAgain -> pauseRecording()
+            isRecording && isRecordingAgain -> stopRecordAgain()
             recordPause -> resumeRecording()
-            isRecordingAgain -> stopRecordAgain()
+            recordStart || recordResume -> record()
             else -> {}
         }
     }
@@ -389,15 +391,18 @@ class NarrationBodyViewModel : ViewModel() {
 
     private fun stopRecordAgain() {
         recordAgainVerseIndex?.let { verseIndex ->
+            recorder?.pause()
+            writer?.pause()
+
             recordAgainVerseIndex = null
+            isRecording = false
             isRecordingAgain = false
             recordPause = true
             recordedAudio?.let {
                 recordedVerses[verseIndex].end = it.totalFrames
             }
+            updateJsonFile()
         }
-        recordStart = recordedVerses.isEmpty()
-        recordResume = recordedVerses.isNotEmpty()
     }
 
     private fun stopPlayer() {
@@ -437,9 +442,9 @@ class NarrationBodyViewModel : ViewModel() {
         writer = null
     }
 
-    private fun processWithPlugin(file: File, index: Int) {
+    private fun processWithEditor(file: File, index: Int) {
         val pluginType = PluginType.EDITOR
-        contextProperty.set(pluginType)
+        pluginContextProperty.set(pluginType)
 
         audioPluginViewModel.getPlugin(pluginType)
             .doOnError { e ->
@@ -462,13 +467,7 @@ class NarrationBodyViewModel : ViewModel() {
                     }
                     else -> {
                         recordedAudio?.let { audio ->
-                            val start = audio.totalFrames
-                            audioFileUtils.appendFile(audio, file)
-                            val end = audio.totalFrames
-                            val action = EditVerseAction(recordedVerses, index, start, end)
-                            narrationHistory.execute(action)
-                            updateHistoryAvailable()
-                            updateJsonFile()
+                            addEditedVerse(audio, file, index)
                         }
                     }
                 }
@@ -479,6 +478,16 @@ class NarrationBodyViewModel : ViewModel() {
     private fun updateJsonFile() {
         val json = ObjectMapper().writeValueAsString(recordedVerses)
         jsonFile.writeText(json)
+    }
+
+    private fun addEditedVerse(audio: AudioFile, file: File, index: Int) {
+        val start = audio.totalFrames
+        audioFileUtils.appendFile(audio, file)
+        val end = audio.totalFrames
+        val action = EditVerseAction(recordedVerses, index, start, end)
+        narrationHistory.execute(action)
+        updateHistoryAvailable()
+        updateJsonFile()
     }
 
     private fun loadWorkInProgress(): Completable {

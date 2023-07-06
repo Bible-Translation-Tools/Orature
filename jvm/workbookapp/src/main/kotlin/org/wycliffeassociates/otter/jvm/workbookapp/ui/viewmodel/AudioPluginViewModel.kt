@@ -149,6 +149,10 @@ class AudioPluginViewModel : ViewModel() {
         )
     }
 
+    /**
+     * This method opens the given file in the plugin and returns the result.
+     * It uses dummy AssociatedAudio, that doesn't insert/update the record in the database
+     */
     fun edit(file: File): Single<PluginActions.Result> {
         val takes = ReplayRelay.create<Take>()
         val audio = AssociatedAudio(takes)

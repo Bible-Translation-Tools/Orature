@@ -71,8 +71,8 @@ class NarrationFooterViewModel : ViewModel() {
         return Bindings.createStringBinding(
             {
                 when {
-                    isRecording -> messages["pauseRecording"]
-                    isRecordingAgain -> messages["stopRecording"]
+                    isRecording && !isRecordingAgain -> messages["pauseRecording"]
+                    isRecording && isRecordingAgain -> messages["stopRecording"]
                     recordResume || recordPause -> messages["resumeRecording"]
                     else -> messages["beginRecording"]
                 }
