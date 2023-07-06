@@ -1,8 +1,5 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
 import javafx.beans.property.SimpleBooleanProperty
@@ -484,30 +481,14 @@ class NarrationBodyViewModel : ViewModel() {
 
     private fun loadVerses(): Completable {
         return Completable.fromCallable {
-            val json = jsonFile.readText()
-            val mapper = ObjectMapper().registerKotlinModule()
-
-            val reference = object: TypeReference<List<VerseNode>>(){}
-            val nodes: List<VerseNode> = mapper.readValue(json, reference)
+            val nodes = narrationHistory.loadSavedHistoryFile()
 
             if (chapterOpenInPluginProperty.value) {
                 val action = ChapterEditedAction(recordedVerses, nodes)
                 narrationHistory.execute(action)
-                updateHistoryAvailable()
+                updateHistory()
             } else {
                 recordedVerses.addAll(nodes)
-            }
-        }
-    }
-
-    private fun createEmptyInProgressFiles(): Completable {
-        return Completable.fromCallable {
-            if (!jsonFile.exists()) {
-                jsonFile.createNewFile()
-                jsonFile.writeText("[]")
-            }
-            if (!pcmFile.exists()) {
-                pcmFile.createNewFile()
             }
         }
     }
@@ -516,22 +497,25 @@ class NarrationBodyViewModel : ViewModel() {
         return splitAudioOnCues.execute(file)
             .flatMapCompletable { cues ->
                 Completable.fromCallable {
-                    createEmptyInProgressFiles()
-                    writeCuesToJsonFile(cues)
+                    if (!chapterPcmFile.exists()) {
+                        chapterPcmFile.createNewFile()
+                    }
+
+                    writeCuesToSavedHistoryFile(cues)
                     appendAudioToPcmFile(cues)
                 }
             }
     }
 
     private fun appendAudioToPcmFile(cues: Map<String, File>) {
-        val audio = AudioFile(pcmFile)
+        val audio = AudioFile(chapterPcmFile)
         cues.forEach {
             audioFileUtils.appendFile(audio, it.value)
         }
     }
 
-    private fun writeCuesToJsonFile(cues: Map<String, File>) {
-        val audio = AudioFile(pcmFile)
+    private fun writeCuesToSavedHistoryFile(cues: Map<String, File>) {
+        val audio = AudioFile(chapterPcmFile)
         val nodes = mutableListOf<VerseNode>()
         var start = audio.totalFrames
         var end = audio.totalFrames
@@ -543,9 +527,8 @@ class NarrationBodyViewModel : ViewModel() {
             nodes.add(node)
             start = end
         }
-        val json = ObjectMapper().writeValueAsString(nodes)
 
-        jsonFile.writeText(json)
+        narrationHistory.updateSavedHistoryFile(nodes)
     }
 
     private fun createInProgressFiles(): Completable {
@@ -554,13 +537,12 @@ class NarrationBodyViewModel : ViewModel() {
         val chapterFileExists = chapterFile?.exists() ?: false
 
         val chapterEdited = chapterFileExists && chapterOpenInPluginProperty.value
-        val isNarrationFromChapter = chapterFileExists && !chapterOpenInPluginProperty.value && !pcmFile.exists()
+        val isNarrationFromChapter = chapterFileExists && !chapterOpenInPluginProperty.value && !chapterPcmFile.exists()
 
         val createFromChapter = chapterEdited || isNarrationFromChapter
 
         return when {
             createFromChapter -> createInProgressFilesFromChapterFile(chapterFile!!)
-            !chapterFileExists -> createEmptyInProgressFiles()
             else -> Completable.complete()
         }
     }
