@@ -46,6 +46,18 @@ interface ProjectImporterCallback {
     )
 
     /**
+     * Pushes a success message notification to the listeners/handlers of this callback.
+     *
+     * @param workbookDescriptor information about the imported project.
+     * This could be used for further actions following up the callback.
+     */
+    fun onNotifySuccess(
+        language: String? = null,
+        project: String? = null,
+        workbookDescriptor: WorkbookDescriptor? = null
+    )
+
+    /**
      * Called when the importer encounters an error that needs to alert the user.
      *
      * @param filePath path to the import file that caused an error while importing.
