@@ -20,7 +20,6 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.chapterSelector
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationEditVerseMarkersEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationOpenInPluginEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.narrationMenu
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
@@ -33,11 +32,7 @@ class NarrationHeader : View() {
 
     init {
         subscribe<NarrationOpenInPluginEvent> {
-            viewModel.processWithPlugin(PluginType.EDITOR)
-        }
-
-        subscribe<NarrationEditVerseMarkersEvent> {
-            viewModel.processWithPlugin(PluginType.MARKER)
+            viewModel.processWithPlugin(it.plugin)
         }
     }
 

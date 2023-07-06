@@ -7,6 +7,7 @@ import javafx.event.EventTarget
 import javafx.scene.control.MenuButton
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
@@ -44,14 +45,14 @@ class NarrationMenu : MenuButton() {
             item(openChapterInTextProperty.value) {
                 graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
                 action {
-                    FX.eventbus.fire(NarrationOpenInPluginEvent())
+                    FX.eventbus.fire(NarrationOpenInPluginEvent(PluginType.EDITOR))
                 }
                 enableWhen(hasChapterFileProperty)
             }
             item(editVerseMarkersTextProperty.value) {
                 graphic = FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE)
                 action {
-                    FX.eventbus.fire(NarrationEditVerseMarkersEvent())
+                    FX.eventbus.fire(NarrationOpenInPluginEvent(PluginType.MARKER))
                 }
                 enableWhen(hasChapterFileProperty)
             }
