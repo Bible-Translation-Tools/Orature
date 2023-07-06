@@ -162,7 +162,7 @@ class RecorderViewModel : ViewModel() {
     private fun initializeAudioData() {
         tempTake = createTempRecordingTake()
         wavAudio = AudioFile(tempTake, 1, 44100, 16)
-        writer = WavFileWriter(wavAudio, recorder.getAudioStream(), false) { /* no op */ }
+        writer = WavFileWriter(wavAudio, recorder.getAudioStream()) { /* no op */ }
     }
 
     private fun createTempRecordingTake(): File {

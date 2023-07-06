@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.util.Duration
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
@@ -35,12 +36,15 @@ class NarrationFooterViewModel : ViewModel() {
     val isRecordingAgainProperty = SimpleBooleanProperty()
     private var isRecordingAgain by isRecordingAgainProperty
 
+    val lastRecordedVerseProperty = SimpleIntegerProperty()
+
     init {
         recordStartProperty.bind(narrationViewViewModel.recordStartProperty)
         recordResumeProperty.bind(narrationViewViewModel.recordResumeProperty)
         isRecordingProperty.bind(narrationViewViewModel.isRecordingProperty)
         recordPauseProperty.bind(narrationViewViewModel.recordPauseProperty)
         isRecordingAgainProperty.bind(narrationViewViewModel.isRecordingAgainProperty)
+        lastRecordedVerseProperty.bind(narrationViewViewModel.lastRecordedVerseProperty)
     }
 
     fun onDock() {
@@ -113,16 +117,6 @@ class NarrationFooter : View() {
             }
         }
 
-        subscribe<InitialSelectedVerseChangedEvent> { event ->
-            listView.apply {
-                runLater(Duration.millis(1000.0)) {
-                    val index = event.index.coerceIn(0, viewModel.chunks.size - 1)
-                    selectionModel.select(index)
-                    scrollTo(index)
-                }
-            }
-        }
-
         subscribe<RecordAgainEvent> {
             listView.apply {
                 selectionModel.select(it.index)
@@ -136,7 +130,15 @@ class NarrationFooter : View() {
         viewModel.onDock()
         listView.addListeners()
 
-        FX.eventbus.fire(NarrationFooterDockedEvent())
+        viewModel.lastRecordedVerseProperty.value?.let { lastVerse ->
+            listView.apply {
+                runLater(Duration.millis(1000.0)) {
+                    val index = lastVerse.coerceIn(0, viewModel.chunks.size - 1)
+                    selectionModel.select(index)
+                    scrollTo(index)
+                }
+            }
+        }
     }
 
     override fun onUndock() {
@@ -172,6 +174,3 @@ class NarrationFooter : View() {
         }
     }
 }
-
-class InitialSelectedVerseChangedEvent(val index: Int) : FXEvent()
-class NarrationFooterDockedEvent : FXEvent()

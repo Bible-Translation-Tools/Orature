@@ -28,7 +28,7 @@ import org.wycliffeassociates.otter.common.audio.AudioFile
 class WavFileWriter(
     private val audioFile: AudioFile,
     private val audioStream: Observable<ByteArray>,
-    private val append: Boolean,
+    private val append: Boolean = false,
     private val onComplete: () -> Unit
 ) {
     private val logger = LoggerFactory.getLogger(WavFileWriter::class.java)
