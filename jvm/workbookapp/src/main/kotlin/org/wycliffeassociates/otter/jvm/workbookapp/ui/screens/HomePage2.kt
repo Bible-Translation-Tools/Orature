@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.jfoenix.controls.JFXSnackbar
 import javafx.beans.property.SimpleObjectProperty
+import javafx.event.ActionEvent
 import javafx.scene.Node
 import javafx.scene.layout.Priority
 import javafx.util.Duration
@@ -10,6 +11,7 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
+import org.wycliffeassociates.otter.common.domain.project.exporter.ExportType
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.card.TranslationCard2
@@ -34,6 +36,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.ProjectWizar
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportDialogOpenEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookOpenEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookQuickBackupEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ExportProjectViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectWizardViewModel
@@ -188,6 +191,20 @@ class HomePage2 : View() {
 
         subscribe<WorkbookDeleteEvent> {
             viewModel.deleteBook(it.data)
+        }
+
+        subscribe<WorkbookQuickBackupEvent> {
+            val directory = chooseDirectory(FX.messages["exportProject"], owner = currentWindow)
+            directory?.let { dir ->
+                FX.eventbus.fire(
+                    WorkbookExportEvent(
+                        it.data,
+                        ExportType.BACKUP,
+                        dir,
+                        chapters = null
+                    )
+                )
+            }
         }
 
         subscribe<WorkbookExportDialogOpenEvent> {

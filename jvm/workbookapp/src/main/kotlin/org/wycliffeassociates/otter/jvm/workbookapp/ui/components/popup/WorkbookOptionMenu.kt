@@ -27,6 +27,7 @@ import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookDeleteEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportDialogOpenEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookOpenEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookQuickBackupEvent
 import tornadofx.FX
 import tornadofx.action
 import tornadofx.addClass
@@ -49,7 +50,7 @@ class WorkbookOptionMenu : ContextMenu() {
             graphic = FontIcon(MaterialDesign.MDI_CONTENT_DUPLICATE)
             action {
                 workbookInfoProperty.value?.let {
-                    FX.eventbus.fire(WorkbookExportDialogOpenEvent(it))
+                    FX.eventbus.fire(WorkbookQuickBackupEvent(it))
                 }
             }
         }
