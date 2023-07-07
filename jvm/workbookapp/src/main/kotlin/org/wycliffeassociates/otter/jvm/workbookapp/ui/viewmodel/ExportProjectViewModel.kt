@@ -79,7 +79,7 @@ class ExportProjectViewModel : ViewModel() {
         workbookDescriptor: WorkbookDescriptor,
         directory: File,
         type: ExportType,
-        chapters: List<Int>
+        chapters: List<Int>?
     ): Observable<ProgressStatus> {
         val workbook = workbookRepo.get(workbookDescriptor.sourceCollection, workbookDescriptor.targetCollection)
         val exporter: IProjectExporter = when (type) {
@@ -94,7 +94,7 @@ class ExportProjectViewModel : ViewModel() {
                     directory,
                     workbook,
                     callback,
-                    ExportOptions(chapters)
+                    chapters?.let { ExportOptions(it) }
                 )
                 .observeOnFx()
                 .doOnError { e ->
