@@ -14,7 +14,7 @@ class OratureAudioFile : AudioFile {
 
     private fun initializeCues() {
         markers.import(OratureCueParser.parse(this))
-        logger.info("Parsed ${getCuesFromMap(OratureCueType.VERSE)} verses")
+        logger.info("Parsed ${getCuesFromMap(OratureCueType.VERSE).size} verses")
     }
 
     constructor() : super() {
