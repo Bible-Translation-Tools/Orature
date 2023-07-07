@@ -18,6 +18,7 @@
  */
 package integrationtest.projects.export
 
+import com.nhaarman.mockitokotlin2.calls
 import integrationtest.di.DaggerTestPersistenceComponent
 import integrationtest.enUlbTestMetadata
 import integrationtest.projects.DatabaseEnvironment
@@ -87,9 +88,9 @@ class TestBackupProjectExporter {
         val result = exportBackupUseCase.get()
             .export(
                 outputDir,
-                enUlbTestMetadata,
                 workbook,
-                null
+                callback = null,
+                options = null
             )
             .blockingGet()
 
@@ -111,9 +112,9 @@ class TestBackupProjectExporter {
         val result = exportBackupUseCase.get()
             .export(
                 outputDir,
-                enUlbTestMetadata,
                 workbook,
-                chapterFilter
+                options = chapterFilter,
+                callback = null
             )
             .blockingGet()
 

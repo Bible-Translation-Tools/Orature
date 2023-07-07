@@ -118,9 +118,9 @@ class TestSourceProjectExporter {
         val result = exportSourceProvider.get()
             .export(
                 outputDir,
-                targetMetadata,
                 workbook,
-                null
+                callback = null,
+                options = null
             )
             .blockingGet()
 
@@ -147,7 +147,7 @@ class TestSourceProjectExporter {
     @Test
     fun `export source project has no media when no take selected`() {
         val result = exportSourceProvider.get()
-            .export(outputDir, targetMetadata, workbook, null)
+            .export(outputDir, workbook, callback = null, options = null)
             .blockingGet()
 
         assertEquals(ExportResult.SUCCESS, result)
@@ -162,7 +162,7 @@ class TestSourceProjectExporter {
         // export as source
         prepareTakeForExport()
         val result = exportSourceProvider.get()
-            .export(outputDir, targetMetadata, workbook, null)
+            .export(outputDir, workbook, callback = null, options = null)
             .blockingGet()
 
         assertEquals(ExportResult.SUCCESS, result)
@@ -192,7 +192,7 @@ class TestSourceProjectExporter {
         prepareChapterContentReadyToCompile()
 
         val result = exportSourceProvider.get()
-            .export(outputDir, targetMetadata, workbook, null)
+            .export(outputDir, workbook, callback = null, options = null)
             .blockingGet()
 
         assertEquals(ExportResult.SUCCESS, result)

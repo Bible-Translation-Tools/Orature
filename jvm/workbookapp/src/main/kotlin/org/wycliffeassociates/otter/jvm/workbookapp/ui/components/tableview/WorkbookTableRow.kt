@@ -20,7 +20,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview
 
 import javafx.scene.control.TableRow
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
-import org.wycliffeassociates.otter.jvm.controls.event.WorkbookOpenEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookOpenEvent
 import tornadofx.FX
 
 class WorkbookTableRow : TableRow<WorkbookDescriptor>() {

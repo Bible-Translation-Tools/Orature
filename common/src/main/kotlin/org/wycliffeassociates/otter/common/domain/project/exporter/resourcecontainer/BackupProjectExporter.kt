@@ -22,11 +22,11 @@ import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
-import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.takeFilenamePattern
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOptions
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
+import org.wycliffeassociates.otter.common.domain.project.exporter.ProjectExporterCallback
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import java.io.File
@@ -42,12 +42,13 @@ class BackupProjectExporter @Inject constructor(
 
     override fun export(
         outputDirectory: File,
-        resourceMetadata: ResourceMetadata,
         workbook: Workbook,
+        callback: ProjectExporterCallback?,
         options: ExportOptions?
     ): Single<ExportResult> {
         return Single
             .fromCallable {
+                val resourceMetadata = workbook.target.resourceMetadata
                 val projectSourceMetadata = workbook.source.linkedResources
                     .firstOrNull { it.identifier == resourceMetadata.identifier }
                     ?: workbook.source.resourceMetadata
@@ -61,6 +62,7 @@ class BackupProjectExporter @Inject constructor(
 
                 projectAccessor.initializeResourceContainerInFile(workbook, zipFile)
                 setContributorInfo(contributors, zipFile)
+                callback?.onNotifyProgress(20.0, messageKey = "exportingTakes")
 
                 directoryProvider.newFileWriter(zipFile).use { fileWriter ->
                     projectAccessor.copyTakeFiles(
@@ -71,6 +73,7 @@ class BackupProjectExporter @Inject constructor(
                     ) {
                         takesFilter(it, options)
                     }
+                    callback?.onNotifyProgress(75.0, messageKey = "copyingSource")
 
                     val linkedResource = workbook.source.linkedResources
                         .firstOrNull { it.identifier == resourceMetadata.identifier }
@@ -78,6 +81,8 @@ class BackupProjectExporter @Inject constructor(
                     projectAccessor.copySourceFilesWithRelatedMedia(
                         fileWriter, directoryProvider.tempDirectory, linkedResource
                     )
+                    callback?.onNotifyProgress(99.0)
+
                     projectAccessor.writeSelectedTakesFile(
                         fileWriter,
                         workbook,
@@ -88,8 +93,9 @@ class BackupProjectExporter @Inject constructor(
                     projectAccessor.writeChunksFile(fileWriter)
                 }
 
-                restoreFileExtension(zipFile, OratureFileFormat.ORATURE.extension)
-
+                val exportedFile = restoreFileExtension(zipFile, OratureFileFormat.ORATURE.extension)
+                callback?.onNotifyProgress(100.0)
+                callback?.onNotifySuccess(workbook.target.toCollection(), exportedFile)
                 return@fromCallable ExportResult.SUCCESS
             }
             .doOnError {

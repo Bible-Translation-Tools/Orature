@@ -27,12 +27,12 @@ import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.License
-import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.audio.AudioExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOptions
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
+import org.wycliffeassociates.otter.common.domain.project.exporter.ProjectExporterCallback
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.otter.common.io.zip.IFileWriter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -55,10 +55,11 @@ class SourceProjectExporter @Inject constructor(
 
     override fun export(
         outputDirectory: File,
-        resourceMetadata: ResourceMetadata,
         workbook: Workbook,
+        callback: ProjectExporterCallback?,
         options: ExportOptions?
     ): Single<ExportResult> {
+        val resourceMetadata = workbook.target.resourceMetadata
         val projectSourceMetadata = workbook.source.linkedResources
             .firstOrNull { it.identifier == resourceMetadata.identifier }
             ?: workbook.source.resourceMetadata
@@ -72,38 +73,45 @@ class SourceProjectExporter @Inject constructor(
 
         projectAccessor.initializeResourceContainerInFile(workbook, targetZip)
         setContributorInfo(contributors, targetZip)
+        callback?.onNotifyProgress(10.0, messageKey = "compilingChapters")
 
         return compileCompletedChapters(workbook, projectSourceMetadata, projectAccessor)
             .onErrorComplete()
+            .doOnComplete { callback?.onNotifyProgress(50.0, messageKey = "exportingTakes") }
             .andThen(
-                export(targetZip, workbook, contributors)
+                export(targetZip, workbook, contributors, callback, options)
             )
     }
 
     private fun export(
         exportFile: File,
         workbook: Workbook,
-        contributors: List<Contributor>
+        contributors: List<Contributor>,
+        callback: ProjectExporterCallback?,
+        options: ExportOptions?
     ): Single<ExportResult> {
         val fileWriter = directoryProvider.newFileWriter(exportFile)
 
-        return exportSelectedTakes(workbook, fileWriter, contributors)
-            .doOnComplete {
-                fileWriter.close() // must close before changing file extension or NoSuchFileException
-                buildSourceProjectMetadata(
-                    exportFile,
-                    workbook.source.resourceMetadata.path,
-                    workbook
-                )
-                // change extension app-specific format
-                restoreFileExtension(exportFile, OratureFileFormat.ORATURE.extension)
-            }
+        return exportSelectedTakes(workbook, fileWriter, contributors, options?.chapters)
+            .andThen(
+                Single.fromCallable {
+                    callback?.onNotifyProgress(80.0, "finishingUp")
+
+                    fileWriter.close() // must close before changing file extension or NoSuchFileException
+                    buildSourceProjectMetadata(
+                        exportFile,
+                        workbook.source.resourceMetadata.path,
+                        workbook
+                    )
+                    // change extension app-specific format
+                    val exportedFile = restoreFileExtension(exportFile, OratureFileFormat.ORATURE.extension)
+                    callback?.onNotifySuccess(workbook.target.toCollection(), exportedFile)
+                    ExportResult.SUCCESS
+                }
+            )
             .doOnError {
                 logger.error("Error while exporting project as source.", it)
                 fileWriter.close()
-            }
-            .toSingle {
-                ExportResult.SUCCESS
             }
             .onErrorReturnItem(ExportResult.FAILURE)
             .subscribeOn(Schedulers.io())
@@ -112,7 +120,8 @@ class SourceProjectExporter @Inject constructor(
     private fun exportSelectedTakes(
         workbook: Workbook,
         fileWriter: IFileWriter,
-        contributors: List<Contributor>
+        contributors: List<Contributor>,
+        chapterFilter: List<Int>? = null
     ): Completable {
         val tempExportDir = directoryProvider.tempDirectory
             .resolve("export${Date().time}")
@@ -121,6 +130,7 @@ class SourceProjectExporter @Inject constructor(
         return workbook
             .target
             .chapters
+            .filter { chapterFilter?.contains(it.sort) ?: true }
             .map { Pair(it.audio.selected.value?.value, it.sort) }
             .filter { (take, _) -> take != null }
             .map { (take, sort) ->

@@ -11,6 +11,7 @@ import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
 import org.wycliffeassociates.otter.common.domain.collections.UpdateProject
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupKey
@@ -31,6 +32,9 @@ class HomePageViewModel2 : ViewModel() {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Inject
+    lateinit var directoryProvider: IDirectoryProvider
+
+    @Inject
     lateinit var workbookRepo: IWorkbookRepository
 
     @Inject
@@ -44,15 +48,16 @@ class HomePageViewModel2 : ViewModel() {
 
     private val workbookDS: WorkbookDataStore by inject()
     private val navigator: NavigationMediator by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
 
     val projectGroups = observableListOf<ProjectGroupCardModel>()
     val bookList = observableListOf<WorkbookDescriptor>()
     private val filteredBooks = FilteredList<WorkbookDescriptor>(bookList)
-    val sortedBooks = SortedList<WorkbookDescriptor>(filteredBooks)
+    private val disposableListeners = mutableListOf<ListenerDisposer>()
 
+    val sortedBooks = SortedList<WorkbookDescriptor>(filteredBooks)
     val selectedProjectGroup = SimpleObjectProperty<ProjectGroupKey>()
     val bookSearchQueryProperty = SimpleStringProperty("")
-    private val disposableListeners = mutableListOf<ListenerDisposer>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -64,9 +69,30 @@ class HomePageViewModel2 : ViewModel() {
     }
 
     fun undock() {
+        projectGroups.clear()
         bookList.clear()
         disposableListeners.forEach { it.dispose() }
         disposableListeners.clear()
+    }
+
+    fun refresh() {
+        clearProjects()
+        loadProjects()
+    }
+
+    /**
+     * Closes all open projects, closing their connections in the workbook repository.
+     *
+     * Also removes the workbooks from the workbook data store and resumeBookProperty.
+     */
+    private fun clearProjects() {
+        logger.info("Closing open workbooks")
+        workbookDataStore.activeWorkbookProperty.value?.let {
+            workbookRepo.closeWorkbook(it)
+        }
+        workbookDataStore.activeWorkbookProperty.set(null)
+        projectGroups.clear()
+        bookList.clear()
     }
 
     private fun setupBookSearchListener() {
@@ -101,9 +127,9 @@ class HomePageViewModel2 : ViewModel() {
 
         val projects = workbookRepo.getProjects().blockingGet()
         val existingProject = projects.firstOrNull { existingProject ->
-            projectGroup.sourceLanguage == existingProject.source.language.slug &&
-                    projectGroup.targetLanguage == existingProject.target.language.slug &&
-                    workbookDescriptor.slug == existingProject.target.slug
+            existingProject.source.language.slug == projectGroup.sourceLanguage &&
+                    existingProject.target.language.slug == projectGroup.targetLanguage &&
+                    existingProject.target.slug == workbookDescriptor.slug
         }
 
         existingProject?.let { workbook ->
@@ -132,6 +158,8 @@ class HomePageViewModel2 : ViewModel() {
                 loadProjects()
             }
     }
+
+    fun openInFilesManager(path: String) = directoryProvider.openInFileManager(path)
 
     private fun updateBookList(books: List<WorkbookDescriptor>) {
         if (books.isEmpty()) {

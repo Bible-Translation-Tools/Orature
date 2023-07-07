@@ -31,6 +31,8 @@ class NewSourceImporter @Inject constructor(
 ) : RCImporter(directoryProvider, resourceMetadataRepository) {
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
+    private var sourceLanguageName = ""
+    private var projectSlug: String? = null
 
     override fun import(
         file: File,
@@ -46,10 +48,18 @@ class NewSourceImporter @Inject constructor(
     ): Single<ImportResult> {
         return Single.create<ImportResult> { emitter ->
             logger.info("Importing RC...")
+            callback?.onNotifyProgress(
+                localizeKey = "loadingSomething", message = "${file.name}", percent = 10.0
+            )
             val fileToImport = prepareFileToImport(file)
 
             val container = try {
-                ResourceContainer.load(fileToImport, OtterResourceContainerConfig())
+                ResourceContainer
+                    .load(fileToImport, OtterResourceContainerConfig())
+                    .also {
+                        sourceLanguageName = it.manifest.dublinCore.language.title
+                        projectSlug = it.media?.projects?.singleOrNull()?.identifier
+                    }
             } catch (e: Exception) {
                 logger.error("Error loading rc in importFromInternalDir, file: $fileToImport", e)
                 cleanUp(fileToImport, ImportResult.LOAD_RC_ERROR).subscribe(emitter::onSuccess)
@@ -65,9 +75,6 @@ class NewSourceImporter @Inject constructor(
                 cleanUp(fileToImport, e.result).subscribe(emitter::onSuccess)
                 return@create
             }
-            callback?.onNotifyProgress(
-                localizeKey = "loadingSomething", message = "${file.name}"
-            )
 
             val preallocationTree = OtterTree<CollectionOrContent>(container.toCollection())
             val versificationTree = VersificationTreeBuilder(versificationRepository)
@@ -78,20 +85,42 @@ class NewSourceImporter @Inject constructor(
                     }
                 }
 
+            callback?.onNotifyProgress(
+                localizeKey = "importingSource", percent = 50.0
+            )
+
             if (versificationTree != null) {
                 importTree(container, preallocationTree, fileToImport)
                     .flatMap {
                         updateContentFromTextContent(container, tree)
                     }
-                    .subscribe(emitter::onSuccess)
+                    .subscribe { result ->
+                        notifyCallback(result, callback, file)
+                        emitter.onSuccess(result)
+                    }
             } else { // No versification found, just import the tree from the parsed text
                 importTree(container, tree, fileToImport)
-                    .subscribe(emitter::onSuccess)
+                    .subscribe { result ->
+                        notifyCallback(result, callback, file)
+                        emitter.onSuccess(result)
+                    }
             }
         }.onErrorReturn { e ->
             logger.error("Error in importContainer, file: $file", e)
             e.castOrFindImportException()?.result ?: throw e
         }.subscribeOn(Schedulers.io())
+    }
+
+    private fun notifyCallback(
+        result: ImportResult?,
+        callback: ProjectImporterCallback?,
+        file: File
+    ) {
+        if (result == ImportResult.SUCCESS) {
+            callback?.onNotifySuccess(language = sourceLanguageName, project = projectSlug)
+        } else {
+            callback?.onError(file.name)
+        }
     }
 
     private fun prepareFileToImport(file: File): File {

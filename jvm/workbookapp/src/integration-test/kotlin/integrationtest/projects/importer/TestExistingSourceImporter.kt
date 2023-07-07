@@ -19,6 +19,7 @@
 package integrationtest.projects.importer
 
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
@@ -114,7 +115,7 @@ class TestExistingSourceImporter {
                 Assert.assertEquals(ImportResult.SUCCESS, it)
             }
 
-        verify(spyImporter, never()).mergeMedia(any(), any())
+        verify(spyImporter, never()).mergeMedia(any(), any(), anyOrNull())
 
         spyImporter.import(getSourceFile("resource-containers/en_ulb_media_merge_test.zip"))
             .blockingGet()
@@ -122,7 +123,7 @@ class TestExistingSourceImporter {
                 Assert.assertEquals(ImportResult.SUCCESS, it)
             }
 
-        verify(spyImporter).mergeMedia(any(), any())
+        verify(spyImporter).mergeMedia(any(), any(), anyOrNull())
         verify(spyDeleteUseCase, never()).deleteSync(any())
     }
 

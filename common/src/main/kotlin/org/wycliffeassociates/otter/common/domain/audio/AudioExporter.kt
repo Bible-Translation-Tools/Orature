@@ -38,8 +38,6 @@ class AudioExporter @Inject constructor() {
      * including the relevant metadata.
      * @param wavAudio the input wav file
      * @param outputPath either a directory or a complete file path
-     * @param license license information to be included in the mp3 metadata
-     * @param contributors contributors information to be included in the mp3 metadata
      */
     fun exportMp3(
         wavAudio: File,

@@ -1,0 +1,37 @@
+.import-conflict-dialog__body .label {
+    -fx-wrap-text: true;
+}
+
+.export-project-dialog {
+    -fx-pref-height: 460px;
+}
+
+.export-project-dialog .export-project-dialog__body {
+    -fx-padding: 12 0;
+}
+
+.export-project-dialog__body .left-pane {
+    -fx-pref-width: 240;
+}
+
+.export-project-dialog__body .radio-button-card__labels {
+    -fx-spacing: 0;
+}
+
+.export-project-dialog__body .radio-button-card__control {
+    -fx-border-color: #ccc;
+    -fx-border-width: 0;
+    -fx-border-radius: 0;
+    -fx-background-radius: 0;
+}
+
+.export-project-dialog__body .radio-button-card__control:focused {
+    -fx-border-width: 2px;
+    -fx-border-color: -wa-button-border;
+    -fx-border-insets: -1;
+}
+
+.export-project-dialog__body .radio-button-card__control:focused:selected {
+    -fx-background-color: -wa-primary-light;
+    -fx-border-color: -wa-primary;
+}

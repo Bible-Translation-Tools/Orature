@@ -18,6 +18,17 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.events
 
+import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import tornadofx.FXEvent
 
-object ImportEvent: FXEvent()
+class LanguageSelectedEvent(val item: Language) : FXEvent()
+
+class ProjectImportEvent(
+    val result: ImportResult,
+    val project: String? = null,
+    val language: String? = null,
+    val filePath: String? = null,
+    val workbookDescriptor: WorkbookDescriptor? = null
+): FXEvent()

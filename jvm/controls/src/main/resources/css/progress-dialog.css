@@ -1,0 +1,21 @@
+.progress-dialog {
+    -fx-pref-height: 300px;
+}
+
+.progress-dialog .progress-bar {
+    -fx-pref-height: 7px;
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+}
+
+.progress-dialog .progress-bar .track {
+    -fx-background-color: -wa-progress-track-background;
+    -fx-background-insets: 0;
+    -fx-background-radius: 5px;
+}
+
+.progress-dialog .progress-bar .bar {
+    -fx-background-color: -wa-progress-foreground;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8px 0 0 8px;
+}
