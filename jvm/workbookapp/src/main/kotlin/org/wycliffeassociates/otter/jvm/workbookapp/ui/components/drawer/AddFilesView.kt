@@ -52,6 +52,7 @@ class AddFilesView : View() {
     private val settingsViewModel: SettingsViewModel by inject()
 
     private lateinit var closeButton: Button
+    private lateinit var importConflictDialog: OtterDialog
 
     override val root = vbox {
         addClass("app-drawer__content")
@@ -287,7 +288,7 @@ class AddFilesView : View() {
 
         viewModel.importProject(file)
             .observeOnFx()
-            .doOnComplete {
+            .doFinally {
                 dialog.dialogTitleProperty.unbind()
                 dialog.percentageProperty.set(0.0)
                 dialog.close()

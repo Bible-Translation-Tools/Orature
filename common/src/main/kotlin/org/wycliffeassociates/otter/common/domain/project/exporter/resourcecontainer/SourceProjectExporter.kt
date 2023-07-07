@@ -96,6 +96,7 @@ class SourceProjectExporter @Inject constructor(
             .andThen(
                 Single.fromCallable {
                     callback?.onNotifyProgress(80.0, "finishingUp")
+
                     fileWriter.close() // must close before changing file extension or NoSuchFileException
                     buildSourceProjectMetadata(
                         exportFile,

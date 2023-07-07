@@ -62,6 +62,7 @@ class ExistingSourceImporter @Inject constructor(
 
         val singleStream = if (sameVersion) {
             callback?.onNotifyProgress(localizeKey = "mergingSource", percent = 30.0)
+
             logger.info("RC ${file.name} already imported, merging media...")
             mergeMedia(file, existingSource.path, callback)
         } else if (sameVersification) {

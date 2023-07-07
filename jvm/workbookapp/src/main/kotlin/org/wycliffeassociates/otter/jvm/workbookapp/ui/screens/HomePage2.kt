@@ -3,7 +3,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.jfoenix.controls.JFXSnackbar
 import javafx.beans.property.SimpleObjectProperty
-import javafx.event.ActionEvent
 import javafx.scene.Node
 import javafx.scene.layout.Priority
 import javafx.util.Duration
@@ -275,7 +274,7 @@ class HomePage2 : View() {
             event.chapters
         )
             .observeOnFx()
-            .doOnComplete {
+            .doFinally {
                 dialog.percentageProperty.set(0.0)
                 dialog.cancelMessageProperty.set(null)
                 dialog.close()
