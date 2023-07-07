@@ -30,6 +30,8 @@ class ExportProjectTableActionCell(
             return
         }
 
-        graphic = graphicNode
+        graphic = graphicNode.apply {
+            isDisable = !item.available
+        }
     }
 }

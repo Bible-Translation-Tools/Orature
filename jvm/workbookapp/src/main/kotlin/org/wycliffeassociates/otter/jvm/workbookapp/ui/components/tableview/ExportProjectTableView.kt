@@ -12,6 +12,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.util.Callback
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterDescriptor
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
@@ -20,7 +21,9 @@ class ExportProjectTableView(
     selectedChapters: ObservableSet<ChapterDescriptor>
 ) : TableView<ChapterDescriptor>(chapters) {
 
-    private val isSelectedAllProperty = booleanBinding(selectedChapters) { selectedChapters.size == chapters.size }
+    private val isSelectedAllProperty = booleanBinding(selectedChapters) {
+        selectedChapters.size == chapters.filter { it.available }.size
+    }
 
     init {
         addClass("wa-table-view")
@@ -33,10 +36,10 @@ class ExportProjectTableView(
             addClass("table-view__column-header-row")
             graphic = checkbox {
                 addClass("wa-checkbox")
-                isSelectedAllProperty.onChange { isSelected = it }
+                isSelectedAllProperty.onChangeAndDoNow { isSelected = it == true }
                 action {
                     if (isSelected) {
-                        selectedChapters.addAll(chapters)
+                        selectedChapters.addAll(chapters.filter { it.available })
                     } else {
                         selectedChapters.clear()
                     }
@@ -51,12 +54,13 @@ class ExportProjectTableView(
             maxWidth = 50.0
             minWidth = 50.0
         }
-        column(messages["chapter"], Int::class) {
+        column(messages["chapter"], ChapterDescriptor::class) {
             addClass("table-view__column-header-row")
-            setCellValueFactory { SimpleObjectProperty(it.value.number) }
+            setCellValueFactory { SimpleObjectProperty(it.value) }
             cellFormat {
-                graphic = label(item.toString()) {
+                graphic = label(item.number.toString()) {
                     addClass("h4")
+                    isDisable = !item.available
                 }
             }
             isReorderable = false
@@ -67,7 +71,7 @@ class ExportProjectTableView(
             cellFormat {
                 val percent = item.toDouble()
                 graphic = progressbar(percent) {
-                    if (percent == 1.0) addClass("full")
+                    toggleClass("full", percent == 1.0)
                     fitToParentWidth()
                 }
             }
@@ -91,7 +95,7 @@ class ExportProjectTableView(
             if (event.code == KeyCode.ENTER || event.code == KeyCode.SPACE) {
                 if (selectedItem in selectedChapters) {
                     selectedChapters.remove(selectedItem)
-                } else {
+                } else if (selectedItem?.available == true) {
                     selectedChapters.add(selectedItem)
                 }
             }
@@ -105,12 +109,14 @@ class ExportProjectTableRow(
 
     override fun updateItem(item: ChapterDescriptor?, empty: Boolean) {
         super.updateItem(item, empty)
-        if (item == null || isEmpty) {
+        if (item == null || isEmpty || !item.available) {
             isMouseTransparent = true
+            isFocusTraversable = false
             return
         }
 
         isMouseTransparent = false
+        isFocusTraversable = true
 
         setOnMouseClicked {
             if (item in selectedChapters) {

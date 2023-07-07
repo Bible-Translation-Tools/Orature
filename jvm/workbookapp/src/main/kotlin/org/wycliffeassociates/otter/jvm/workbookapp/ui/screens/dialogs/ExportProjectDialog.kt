@@ -21,7 +21,7 @@ import java.text.MessageFormat
 
 class ExportProjectDialog : OtterDialog() {
 
-    val availableChapters = observableListOf<ChapterDescriptor>()
+    val chapters = observableListOf<ChapterDescriptor>()
     val workbookDescriptorProperty = SimpleObjectProperty<WorkbookDescriptor>()
 
     private val exportTypeProperty = SimpleObjectProperty<ExportType>(ExportType.BACKUP)
@@ -109,7 +109,7 @@ class ExportProjectDialog : OtterDialog() {
                     }
                 }
 
-                center = exportProjectTableView(availableChapters, selectedChapters)
+                center = exportProjectTableView(chapters, selectedChapters)
             }
         }
 
@@ -156,7 +156,7 @@ class ExportProjectDialog : OtterDialog() {
 
     override fun onDock() {
         super.onDock()
-        selectedChapters.addAll(availableChapters) // select all by default
+        selectedChapters.addAll(chapters.filter { it.available }) // select all by default
     }
 
     fun setOnCloseAction(op: () -> Unit) {

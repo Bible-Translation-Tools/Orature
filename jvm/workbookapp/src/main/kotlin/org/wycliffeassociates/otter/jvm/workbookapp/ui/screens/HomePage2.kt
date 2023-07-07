@@ -213,10 +213,10 @@ class HomePage2 : View() {
                 themeProperty.set(settingsViewModel.appColorMode.value)
                 workbookDescriptorProperty.set(workbookDescriptor)
 
-                exportProjectViewModel.loadAvailableChapters(workbookDescriptor)
+                exportProjectViewModel.loadChapters(workbookDescriptor)
                     .observeOnFx()
                     .subscribe { chapters ->
-                        availableChapters.setAll(chapters)
+                        this.chapters.setAll(chapters)
                         open()
                     }
 
