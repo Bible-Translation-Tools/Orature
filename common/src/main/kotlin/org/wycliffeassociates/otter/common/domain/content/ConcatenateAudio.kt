@@ -65,8 +65,8 @@ class ConcatenateAudio @Inject constructor(private val directoryProvider: IDirec
 
         inputFiles.forEach { file ->
             val oratureAudioFile = OratureAudioFile(file)
-            val marker = oratureAudioFile.getMarker(OratureCueType.VERSE).first() as VerseMarker
-            outputAudio.addVerseMarker(marker)
+            val oldMarker = oratureAudioFile.getMarker(OratureCueType.VERSE).first() as VerseMarker
+            outputAudio.addVerseMarker(VerseMarker(oldMarker.start, oldMarker.end, markerLocation))
             markerLocation += oratureAudioFile.totalFrames
         }
         outputAudio.update()
