@@ -7,6 +7,8 @@ import org.wycliffeassociates.otter.common.data.primitives.VerseNode
 import java.io.File
 import java.util.*
 
+private const val HISTORY_SAVED_FILE = "narration.json"
+
 class NarrationHistory {
     private val undoStack = ArrayDeque<NarrationAction>()
     private val redoStack = ArrayDeque<NarrationAction>()
@@ -50,8 +52,8 @@ class NarrationHistory {
         redoStack.clear()
     }
 
-    fun initSavedHistoryFile(parentDir: File) {
-        saveHistoryFile = File(parentDir, "narration.json").also { file ->
+    fun initSavedHistoryFile(chapterDir: File) {
+        saveHistoryFile = File(chapterDir, HISTORY_SAVED_FILE).also { file ->
             if (!file.exists()) {
                 file.createNewFile()
                 file.writeText("[]")
