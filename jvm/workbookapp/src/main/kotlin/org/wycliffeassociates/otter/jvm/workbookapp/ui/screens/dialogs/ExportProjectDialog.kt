@@ -67,6 +67,7 @@ class ExportProjectDialog : OtterDialog() {
                                 if (it) {
                                     subTitleProperty.set(messages["exportBackupDescription"])
                                     exportTypeProperty.set(ExportType.BACKUP)
+                                    onSelectExportType(ExportType.BACKUP)
                                 } else {
                                     subTitleProperty.set("")
                                 }
@@ -79,6 +80,7 @@ class ExportProjectDialog : OtterDialog() {
                                 if (it) {
                                     subTitleProperty.set(messages["exportSourceAudioDescription"])
                                     exportTypeProperty.set(ExportType.SOURCE_AUDIO)
+                                    onSelectExportType(ExportType.SOURCE_AUDIO)
                                 } else {
                                     subTitleProperty.set("")
                                 }
@@ -90,6 +92,7 @@ class ExportProjectDialog : OtterDialog() {
                                 if (it) {
                                     subTitleProperty.set(messages["exportListenDescription"])
                                     exportTypeProperty.set(ExportType.LISTEN)
+                                    onSelectExportType(ExportType.LISTEN)
                                 } else {
                                     subTitleProperty.set("")
                                 }
@@ -101,6 +104,7 @@ class ExportProjectDialog : OtterDialog() {
                                 if (it) {
                                     subTitleProperty.set(messages["exportPublishDescription"])
                                     exportTypeProperty.set(ExportType.PUBLISH)
+                                    onSelectExportType(ExportType.PUBLISH)
                                 } else {
                                     subTitleProperty.set("")
                                 }
@@ -118,11 +122,11 @@ class ExportProjectDialog : OtterDialog() {
             label {
                 addClass("h5")
                 textProperty().bind(exportTypeProperty.stringBinding {
-                    val estimatedSize = when(it) {
+                    val estimatedSize = when (it) {
                         ExportType.BACKUP -> messages["large"]
                         ExportType.LISTEN -> messages["small"]
                         ExportType.SOURCE_AUDIO, ExportType.PUBLISH -> messages["normal"]
-                        else -> { "" }
+                        else -> ""
                     }
                     MessageFormat.format(messages["estimatedFileSize"], estimatedSize)
                 })
@@ -156,10 +160,21 @@ class ExportProjectDialog : OtterDialog() {
 
     override fun onDock() {
         super.onDock()
-        selectedChapters.addAll(chapters.filter { it.available }) // select all by default
+        onSelectExportType(ExportType.BACKUP) // selects default option
     }
 
     fun setOnCloseAction(op: () -> Unit) {
         onCloseActionProperty.set(EventHandler { op() })
+    }
+
+    private fun onSelectExportType(type: ExportType) {
+        val newList = when (type) {
+            ExportType.BACKUP -> chapters.map { it.copy(selectable = it.progress > 0.0) }
+            else -> chapters.map { it.copy(selectable = it.progress == 1.0) }
+        }
+        chapters.setAll(newList)
+        selectedChapters.clear()
+        selectedChapters.addAll(newList.filter { it.selectable }) // select available chapters by default
+        newList.forEach { println(it) }
     }
 }

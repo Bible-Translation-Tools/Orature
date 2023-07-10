@@ -22,7 +22,7 @@ class ExportProjectTableView(
 ) : TableView<ChapterDescriptor>(chapters) {
 
     private val isSelectedAllProperty = booleanBinding(selectedChapters) {
-        selectedChapters.size == chapters.filter { it.available }.size
+        selectedChapters.size == chapters.filter { it.selectable }.size
     }
 
     init {
@@ -39,7 +39,7 @@ class ExportProjectTableView(
                 isSelectedAllProperty.onChangeAndDoNow { isSelected = it == true }
                 action {
                     if (isSelected) {
-                        selectedChapters.addAll(chapters.filter { it.available })
+                        selectedChapters.addAll(chapters.filter { it.selectable })
                     } else {
                         selectedChapters.clear()
                     }
@@ -60,7 +60,7 @@ class ExportProjectTableView(
             cellFormat {
                 graphic = label(item.number.toString()) {
                     addClass("h4")
-                    isDisable = !item.available
+                    isDisable = !item.selectable
                 }
             }
             isReorderable = false
@@ -95,7 +95,7 @@ class ExportProjectTableView(
             if (event.code == KeyCode.ENTER || event.code == KeyCode.SPACE) {
                 if (selectedItem in selectedChapters) {
                     selectedChapters.remove(selectedItem)
-                } else if (selectedItem?.available == true) {
+                } else if (selectedItem?.selectable == true) {
                     selectedChapters.add(selectedItem)
                 }
             }
@@ -109,7 +109,7 @@ class ExportProjectTableRow(
 
     override fun updateItem(item: ChapterDescriptor?, empty: Boolean) {
         super.updateItem(item, empty)
-        if (item == null || isEmpty || !item.available) {
+        if (item == null || isEmpty || !item.selectable) {
             isMouseTransparent = true
             isFocusTraversable = false
             return
