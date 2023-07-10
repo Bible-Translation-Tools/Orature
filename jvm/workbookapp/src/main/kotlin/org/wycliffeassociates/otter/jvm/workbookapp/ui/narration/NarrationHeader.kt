@@ -152,7 +152,7 @@ class NarrationHeaderViewModel : ViewModel() {
     }
 
     private fun loadChapter(chapter: Chapter) {
-        chapterTakeProperty.set(chapter.audio.selected.value?.value)
+        chapterTakeProperty.set(chapter.getSelectedTake())
         chapterTitleProperty.set(
             MessageFormat.format(
                 messages["chapterTitle"],
