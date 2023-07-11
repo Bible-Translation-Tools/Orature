@@ -111,7 +111,7 @@ class NarrationHeaderViewModel : ViewModel() {
     val hasUndoProperty = SimpleBooleanProperty()
     val hasRedoProperty = SimpleBooleanProperty()
 
-    val contextProperty = SimpleObjectProperty(PluginType.EDITOR)
+    val pluginContextProperty = SimpleObjectProperty(PluginType.EDITOR)
 
     private val chapterList: ObservableList<Chapter> = observableListOf()
 
@@ -202,7 +202,7 @@ class NarrationHeaderViewModel : ViewModel() {
     fun processWithPlugin(pluginType: PluginType) {
         chapterTakeProperty.value?.let { take ->
             workbookDataStore.activeChapterProperty.value?.audio?.let { audio ->
-                contextProperty.set(pluginType)
+                pluginContextProperty.set(pluginType)
                 workbookDataStore.activeTakeNumberProperty.set(take.number)
 
                 audioPluginViewModel
