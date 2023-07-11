@@ -129,7 +129,7 @@ class NarrationHeaderViewModel : ViewModel() {
                 setHasNextAndPreviousChapter(chapter)
                 loadChapter(chapter)
             }
-        }
+        }.let(listeners::add)
 
         workbookDataStore.activeWorkbookProperty.onChangeAndDoNowWithDisposer { workbook ->
             workbook?.let {
@@ -224,15 +224,13 @@ class NarrationHeaderViewModel : ViewModel() {
                     }
                     .onErrorReturn { PluginActions.Result.NO_PLUGIN }
                     .subscribe { result: PluginActions.Result ->
-                        fire(PluginClosedEvent(pluginType))
+                        FX.eventbus.fire(PluginClosedEvent(pluginType))
                         when (result) {
                             PluginActions.Result.NO_PLUGIN -> FX.eventbus.fire(SnackBarEvent(messages["noEditor"]))
                             else -> {
                                 when (pluginType) {
                                     PluginType.EDITOR, PluginType.MARKER -> {
-                                        /* no-op */
-                                        // TODO After the chapter file was changed,
-                                        // reset narration
+                                        FX.eventbus.fire(ChapterLoadEvent(ChapterLoadStatus.STARTED))
                                     }
                                     else -> {}
                                 }

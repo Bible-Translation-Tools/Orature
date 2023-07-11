@@ -53,7 +53,12 @@ class NarrationHistory {
     }
 
     fun initSavedHistoryFile(chapterDir: File) {
-        saveHistoryFile = File(chapterDir, HISTORY_SAVED_FILE)
+        saveHistoryFile = File(chapterDir, HISTORY_SAVED_FILE).also { file ->
+            if (!file.exists()) {
+                file.createNewFile()
+                file.writeText("[]")
+            }
+        }
     }
 
     fun updateSavedHistoryFile(verses: List<VerseNode>) {
@@ -63,10 +68,6 @@ class NarrationHistory {
 
     fun loadSavedHistoryFile(): List<VerseNode> {
         return saveHistoryFile?.let { file ->
-            if (!file.exists()) {
-                file.createNewFile()
-                file.writeText("[]")
-            }
             val json = file.readText()
             val mapper = ObjectMapper().registerKotlinModule()
 

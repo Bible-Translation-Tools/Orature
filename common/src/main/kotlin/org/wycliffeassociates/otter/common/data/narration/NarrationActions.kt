@@ -186,3 +186,27 @@ class ResetAllAction(private val list: MutableList<VerseNode>): NarrationAction 
     }
 
 }
+
+class ChapterEditedAction(
+    private val list: MutableList<VerseNode>,
+    private val newList: List<VerseNode>
+): NarrationAction {
+    private val nodes = ArrayList<VerseNode>(list.size)
+
+    override fun execute() {
+        nodes.addAll(list)
+        list.clear()
+        list.addAll(newList)
+    }
+
+    override fun undo() {
+        list.clear()
+        list.addAll(nodes)
+    }
+
+    override fun redo() {
+        list.clear()
+        list.addAll(newList)
+    }
+
+}

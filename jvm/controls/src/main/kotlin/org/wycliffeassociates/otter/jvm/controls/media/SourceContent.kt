@@ -431,9 +431,13 @@ class SourceContent : StackPane() {
                 val sp = this
                 addClass("source-content__text-popup__scroll")
                 vgrow = Priority.ALWAYS
-                maxHeightProperty().bind(
-                    FX.primaryStage.scene.heightProperty().multiply(2.0 / 3)
-                )
+                FX.primaryStage.sceneProperty().onChange {
+                    it?.let { scene ->
+                        maxHeightProperty().bind(
+                            scene.heightProperty().multiply(2.0 / 3)
+                        )
+                    }
+                }
 
                 vbox {
                     vgrow = Priority.ALWAYS

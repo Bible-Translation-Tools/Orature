@@ -26,7 +26,7 @@ import tornadofx.*
 import java.io.File
 import javax.inject.Inject
 
-class NarrationApp : App(NarrationView::class), IDependencyGraphProvider {
+class NarrationApp : App(NarrationRootView::class), IDependencyGraphProvider {
 
     override val dependencyGraph = DaggerAppDependencyGraph.builder().build()
     val workbookDataStore by inject<WorkbookDataStore>()
@@ -70,9 +70,11 @@ class NarrationApp : App(NarrationView::class), IDependencyGraphProvider {
 
     override fun start(stage: Stage) {
         super.start(stage)
-        stage.height = 600.0
-        stage.width = 800.0
+        stage.height = 760.0
+        stage.width = 1024.0
         stage.scene.root.addClass(ColorTheme.LIGHT.styleClass)
+
+        workspace.dock<NarrationView>()
     }
 
     private fun mockWorkbook() {
@@ -122,6 +124,7 @@ class NarrationApp : App(NarrationView::class), IDependencyGraphProvider {
             every { chapter.getDraft() } returns mockChunks()
             every { chapter.chunkCount } returns Single.just(10)
             every { chapter.audio } returns mockAudio()
+            every { chapter.chunkCount } returns Single.just(10)
             chapters.add(chapter)
         }
         return Observable.fromIterable(chapters)

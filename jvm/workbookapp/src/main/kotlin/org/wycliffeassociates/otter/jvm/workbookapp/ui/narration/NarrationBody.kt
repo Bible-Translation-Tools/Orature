@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Completable
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.Slider
@@ -12,6 +13,8 @@ import org.wycliffeassociates.otter.common.data.primitives.VerseNode
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
+import org.wycliffeassociates.otter.common.domain.narration.AudioFileUtils
+import org.wycliffeassociates.otter.common.domain.narration.SplitAudioOnCues
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.common.domain.narration.AudioFileUtils
 import org.wycliffeassociates.otter.common.recorder.WavFileWriter
@@ -115,6 +118,10 @@ class NarrationBody : View() {
         subscribe<OpenInAudioPluginEvent> {
             viewModel.openInAudioPlugin(it.index)
         }
+
+        subscribe<ChapterLoadEvent> {
+            viewModel.onChapterLoad(it.status)
+        }
     }
 
     override fun onDock() {
@@ -145,6 +152,9 @@ class NarrationBodyViewModel : ViewModel() {
     @Inject
     lateinit var audioFileUtils: AudioFileUtils
 
+    @Inject
+    lateinit var splitAudioOnCues: SplitAudioOnCues
+
     private var recorder: IAudioRecorder? = null
     private var writer: WavFileWriter? = null
     private var recordedAudio: AudioFile? = null
@@ -157,6 +167,9 @@ class NarrationBodyViewModel : ViewModel() {
 
     private val recordResumeProperty = SimpleBooleanProperty()
     private var recordResume by recordResumeProperty
+
+    private val potentiallyFinishedProperty = SimpleBooleanProperty()
+    private var potentiallyFinished by potentiallyFinishedProperty
 
     val isRecordingProperty = SimpleBooleanProperty()
     private var isRecording by isRecordingProperty
@@ -180,6 +193,7 @@ class NarrationBodyViewModel : ViewModel() {
     private lateinit var chapterPcmFile: File
 
     val pluginContextProperty = SimpleObjectProperty(PluginType.EDITOR)
+    val chapterOpenInPluginProperty = SimpleBooleanProperty()
 
     val recordedVerses = observableListOf<VerseNode>()
 
@@ -200,20 +214,11 @@ class NarrationBodyViewModel : ViewModel() {
     }
 
     fun onDock() {
-        loadVerses()
         initializeRecorder()
     }
 
     fun onUndock() {
         closeRecorder()
-    }
-
-    private fun loadVerses() {
-        // Load verses from database and map to recordedVerses list
-        // then based on the size of the list set start, resume and potentiallyFinished properties
-
-        recordStart = recordedVerses.isEmpty()
-        recordResume = recordedVerses.isNotEmpty()
     }
 
     fun play(verse: VerseNode) {
@@ -254,6 +259,16 @@ class NarrationBodyViewModel : ViewModel() {
             val verse = recordedVerses[index]
             val file = audioFileUtils.getSectionAsFile(audio, verse.start, verse.end)
             processWithEditor(file, index)
+        }
+    }
+
+    fun onChapterLoad(status: ChapterLoadStatus) {
+        when (status) {
+            ChapterLoadStatus.STARTED -> {
+                chapterOpenInPluginProperty.value = true
+                initializeRecorder()
+            }
+            ChapterLoadStatus.FINISHED -> chapterOpenInPluginProperty.value = false
         }
     }
 
@@ -351,6 +366,8 @@ class NarrationBodyViewModel : ViewModel() {
         }
 
         updateHistory()
+
+        potentiallyFinished = checkPotentiallyFinished()
     }
 
     private fun resumeRecording() {
@@ -392,10 +409,19 @@ class NarrationBodyViewModel : ViewModel() {
             narrationHistory.initSavedHistoryFile(audioDir)
 
             loadWorkInProgress()
+                .doOnError {
+                    logger.error("An error occurred in loadWorkInProgress", it)
+                }
+                .subscribe {
+                    recordedAudio = AudioFile(chapterPcmFile).also {
+                        writer = WavFileWriter(it, rec.getAudioStream(), true) {  /* no op */  }
+                    }
+                    recordStart = recordedVerses.isEmpty()
+                    recordResume = recordedVerses.isNotEmpty()
+                    potentiallyFinished = checkPotentiallyFinished()
 
-            recordedAudio = AudioFile(chapterPcmFile).also {
-                writer = WavFileWriter(it, rec.getAudioStream(), true) {  /* no op */  }
-            }
+                    FX.eventbus.fire(ChapterLoadEvent(ChapterLoadStatus.FINISHED))
+                }
         }
     }
 
@@ -417,7 +443,7 @@ class NarrationBodyViewModel : ViewModel() {
             }
             .flatMapSingle { plugin ->
                 workbookDataStore.activeTakeNumberProperty.set(1)
-                fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
+                FX.eventbus.fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
                 audioPluginViewModel.edit(file)
             }
             .observeOnFx()
@@ -436,7 +462,7 @@ class NarrationBodyViewModel : ViewModel() {
                         }
                     }
                 }
-                fire(PluginClosedEvent(pluginType))
+                FX.eventbus.fire(PluginClosedEvent(pluginType))
             }
     }
 
@@ -449,16 +475,91 @@ class NarrationBodyViewModel : ViewModel() {
         updateHistory()
     }
 
-    private fun loadWorkInProgress() {
-        if (!chapterPcmFile.exists()) {
-            chapterPcmFile.createNewFile()
+    private fun loadWorkInProgress(): Completable {
+        return createInProgressFiles()
+            .andThen(loadVerses())
+    }
+
+    private fun loadVerses(): Completable {
+        return Completable.fromCallable {
+            val nodes = narrationHistory.loadSavedHistoryFile()
+
+            if (chapterOpenInPluginProperty.value) {
+                val action = ChapterEditedAction(recordedVerses, nodes)
+                narrationHistory.execute(action)
+                updateHistory()
+            } else {
+                recordedVerses.addAll(nodes)
+            }
+        }
+    }
+
+    private fun createInProgressFilesFromChapterFile(file: File): Completable {
+        return splitAudioOnCues.execute(file)
+            .flatMapCompletable { cues ->
+                Completable.fromCallable {
+                    if (!chapterPcmFile.exists()) {
+                        chapterPcmFile.createNewFile()
+                    }
+
+                    writeCuesToSavedHistoryFile(cues)
+                    appendAudioToPcmFile(cues)
+                }
+            }
+    }
+
+    private fun appendAudioToPcmFile(cues: Map<String, File>) {
+        val audio = AudioFile(chapterPcmFile)
+        cues.forEach {
+            audioFileUtils.appendFile(audio, it.value)
+        }
+    }
+
+    private fun writeCuesToSavedHistoryFile(cues: Map<String, File>) {
+        val audio = AudioFile(chapterPcmFile)
+        val nodes = mutableListOf<VerseNode>()
+        var start = audio.totalFrames
+        var end = audio.totalFrames
+
+        cues.forEach {
+            val verseAudio = AudioFile(it.value)
+            end += verseAudio.totalFrames
+            val node = VerseNode(start, end)
+            nodes.add(node)
+            start = end
         }
 
-        val nodes = narrationHistory.loadSavedHistoryFile()
-        recordedVerses.addAll(nodes)
+        narrationHistory.updateSavedHistoryFile(nodes)
+    }
+
+    private fun createInProgressFiles(): Completable {
+        val chapterAudio = workbookDataStore.chapter.audio
+        val chapterFile = chapterAudio.selected.value?.value?.file
+        val chapterFileExists = chapterFile?.exists() ?: false
+
+        val chapterEdited = chapterFileExists && chapterOpenInPluginProperty.value
+        val isNarrationFromChapter = chapterFileExists && !chapterOpenInPluginProperty.value && !chapterPcmFile.exists()
+
+        val createFromChapter = chapterEdited || isNarrationFromChapter
+
+        return when {
+            createFromChapter -> createInProgressFilesFromChapterFile(chapterFile!!)
+            else -> Completable.complete()
+        }
+    }
+
+    private fun checkPotentiallyFinished(): Boolean {
+        return workbookDataStore.chapter.chunkCount.blockingGet() == recordedVerses.size
     }
 }
 
 class RecordAgainEvent(val index: Int) : FXEvent()
 class PlayVerseEvent(val verse: VerseNode) : FXEvent()
 class OpenInAudioPluginEvent(val index: Int) : FXEvent()
+
+class ChapterLoadEvent(val status: ChapterLoadStatus): FXEvent()
+
+enum class ChapterLoadStatus {
+    STARTED,
+    FINISHED
+}
