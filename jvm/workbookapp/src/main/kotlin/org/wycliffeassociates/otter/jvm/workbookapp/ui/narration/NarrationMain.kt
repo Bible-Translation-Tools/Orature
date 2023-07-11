@@ -167,6 +167,7 @@ class NarrationApp : App(NarrationView::class), IDependencyGraphProvider {
 
         every { audio.takes } returns takes
         every { audio.selected } returns selected
+        every { audio.selectTake(any()) } returns Unit
 
         return audio
     }

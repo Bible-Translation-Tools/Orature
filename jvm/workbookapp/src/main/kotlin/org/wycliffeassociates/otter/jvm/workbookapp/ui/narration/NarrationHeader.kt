@@ -13,8 +13,19 @@ import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
+import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.workbook.Chapter
+import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.domain.content.PluginActions
+import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.chapterSelector
+import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationOpenInPluginEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.narrationMenu
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.io.File
@@ -22,6 +33,12 @@ import java.text.MessageFormat
 
 class NarrationHeader : View() {
     private val viewModel by inject<NarrationHeaderViewModel>()
+
+    init {
+        subscribe<NarrationOpenInPluginEvent> {
+            viewModel.processWithPlugin(it.plugin)
+        }
+    }
 
     override val root = hbox {
         addClass("narration__header")
@@ -35,7 +52,7 @@ class NarrationHeader : View() {
             narrationMenu {
                 hasUndoProperty.bind(viewModel.hasUndoProperty)
                 hasRedoProperty.bind(viewModel.hasRedoProperty)
-                hasChapterFileProperty.bind(viewModel.hasChapterFileProperty)
+                hasChapterFileProperty.bind(viewModel.hasChapterTakeProperty)
                 hasVersesProperty.bind(viewModel.hasVersesProperty)
             }
             chapterSelector {
@@ -66,8 +83,11 @@ class NarrationHeader : View() {
 }
 
 class NarrationHeaderViewModel : ViewModel() {
+    private val logger = LoggerFactory.getLogger(NarrationHeaderViewModel::class.java)
+
     private val workbookDataStore by inject<WorkbookDataStore>()
     private val narrationViewViewModel: NarrationViewViewModel by inject()
+    private val audioPluginViewModel: AudioPluginViewModel by inject()
 
     val titleProperty = workbookDataStore.activeWorkbookProperty.stringBinding {
         it?.let {
@@ -89,11 +109,13 @@ class NarrationHeaderViewModel : ViewModel() {
     val hasPreviousChapter = SimpleBooleanProperty()
     val hasVersesProperty = SimpleBooleanProperty()
 
-    val chapterFileProperty = SimpleObjectProperty<File>()
-    val hasChapterFileProperty = chapterFileProperty.isNotNull
+    val chapterTakeProperty = SimpleObjectProperty<Take>()
+    val hasChapterTakeProperty = chapterTakeProperty.isNotNull
 
     val hasUndoProperty = SimpleBooleanProperty()
     val hasRedoProperty = SimpleBooleanProperty()
+
+    val contextProperty = SimpleObjectProperty(PluginType.EDITOR)
 
     private val chapterList: ObservableList<Chapter> = observableListOf()
 
@@ -111,7 +133,7 @@ class NarrationHeaderViewModel : ViewModel() {
                 setHasNextAndPreviousChapter(chapter)
                 loadChapter(chapter)
             }
-        }.let(listeners::add)
+        }
 
         workbookDataStore.activeWorkbookProperty.onChangeAndDoNowWithDisposer { workbook ->
             workbook?.let {
@@ -134,7 +156,7 @@ class NarrationHeaderViewModel : ViewModel() {
     }
 
     private fun loadChapter(chapter: Chapter) {
-        chapterFileProperty.set(chapter.audio.selected.value?.value?.file)
+        chapterTakeProperty.set(chapter.getSelectedTake())
         chapterTitleProperty.set(
             MessageFormat.format(
                 messages["chapterTitle"],
@@ -178,6 +200,50 @@ class NarrationHeaderViewModel : ViewModel() {
         val nextIndex = chapterList.indexOf(workbookDataStore.chapter) + step
         chapterList.elementAtOrNull(nextIndex)?.let {
             workbookDataStore.activeChapterProperty.set(it)
+        }
+    }
+
+    fun processWithPlugin(pluginType: PluginType) {
+        chapterTakeProperty.value?.let { take ->
+            workbookDataStore.activeChapterProperty.value?.audio?.let { audio ->
+                contextProperty.set(pluginType)
+                workbookDataStore.activeTakeNumberProperty.set(take.number)
+
+                audioPluginViewModel
+                    .getPlugin(pluginType)
+                    .doOnError { e ->
+                        logger.error("Error in processing take with plugin type: $pluginType, ${e.message}")
+                    }
+                    .flatMapSingle { plugin ->
+                        fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
+                        when (pluginType) {
+                            PluginType.EDITOR -> audioPluginViewModel.edit(audio, take)
+                            PluginType.MARKER -> audioPluginViewModel.mark(audio, take)
+                            else -> null
+                        }
+                    }
+                    .observeOnFx()
+                    .doOnError { e ->
+                        logger.error("Error in processing take with plugin type: $pluginType - $e")
+                    }
+                    .onErrorReturn { PluginActions.Result.NO_PLUGIN }
+                    .subscribe { result: PluginActions.Result ->
+                        fire(PluginClosedEvent(pluginType))
+                        when (result) {
+                            PluginActions.Result.NO_PLUGIN -> FX.eventbus.fire(SnackBarEvent(messages["noEditor"]))
+                            else -> {
+                                when (pluginType) {
+                                    PluginType.EDITOR, PluginType.MARKER -> {
+                                        /* no-op */
+                                        // TODO After the chapter file was changed,
+                                        // reset narration
+                                    }
+                                    else -> {}
+                                }
+                            }
+                        }
+                    }
+            }
         }
     }
 }

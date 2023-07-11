@@ -57,6 +57,8 @@ class Chapter(
 
     fun hasSelectedAudio() = audio.selected.value?.value != null
 
+    fun getSelectedTake() = audio.selected.value?.value
+
     fun getDraft(): Observable<Chunk> {
         return chunkCount
             .toObservable()
