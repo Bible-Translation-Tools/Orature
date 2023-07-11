@@ -15,11 +15,12 @@ class NarrationMenu : MenuButton() {
     val redoActionTextProperty = SimpleStringProperty(messages["redoAction"])
     val openChapterInTextProperty = SimpleStringProperty(messages["openChapterIn"])
     val editVerseMarkersTextProperty = SimpleStringProperty(messages["editVerseMarkers"])
-    val resetChapterTextProperty = SimpleStringProperty(messages["resetChapter"])
+    val resetChapterTextProperty = SimpleStringProperty(messages["restartChapter"])
 
     val hasUndoProperty = SimpleBooleanProperty()
     val hasRedoProperty = SimpleBooleanProperty()
     val hasChapterFileProperty = SimpleBooleanProperty()
+    val hasVersesProperty = SimpleBooleanProperty()
 
     init {
         addClass("btn", "btn--primary", "btn--borderless", "wa-menu-button")
@@ -59,6 +60,7 @@ class NarrationMenu : MenuButton() {
                 action {
                     FX.eventbus.fire(NarrationResetChapterEvent())
                 }
+                enableWhen(hasVersesProperty)
             }
         }
 }
