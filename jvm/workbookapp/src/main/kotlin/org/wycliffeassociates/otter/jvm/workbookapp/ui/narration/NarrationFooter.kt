@@ -3,7 +3,9 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.util.Duration
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.jvm.controls.narration.*
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NarrationTextCell
@@ -34,12 +36,15 @@ class NarrationFooterViewModel : ViewModel() {
     val isRecordingAgainProperty = SimpleBooleanProperty()
     private var isRecordingAgain by isRecordingAgainProperty
 
+    val lastRecordedVerseProperty = SimpleIntegerProperty()
+
     init {
         recordStartProperty.bind(narrationViewViewModel.recordStartProperty)
         recordResumeProperty.bind(narrationViewViewModel.recordResumeProperty)
         isRecordingProperty.bind(narrationViewViewModel.isRecordingProperty)
         recordPauseProperty.bind(narrationViewViewModel.recordPauseProperty)
         isRecordingAgainProperty.bind(narrationViewViewModel.isRecordingAgainProperty)
+        lastRecordedVerseProperty.bind(narrationViewViewModel.lastRecordedVerseProperty)
     }
 
     fun onDock() {
@@ -70,8 +75,8 @@ class NarrationFooterViewModel : ViewModel() {
         return Bindings.createStringBinding(
             {
                 when {
-                    isRecording -> messages["pauseRecording"]
-                    isRecordingAgain -> messages["stopRecording"]
+                    isRecording && !isRecordingAgain -> messages["pauseRecording"]
+                    isRecording && isRecordingAgain -> messages["stopRecording"]
                     recordResume || recordPause -> messages["resumeRecording"]
                     else -> messages["beginRecording"]
                 }
@@ -112,15 +117,6 @@ class NarrationFooter : View() {
             }
         }
 
-        subscribe<InitialSelectedVerseChangedEvent> {
-            listView.apply {
-                println(it.index)
-
-                selectionModel.select(it.index)
-                scrollTo(it.index - 1)
-            }
-        }
-
         subscribe<RecordAgainEvent> {
             listView.apply {
                 selectionModel.select(it.index)
@@ -133,6 +129,16 @@ class NarrationFooter : View() {
         super.onDock()
         viewModel.onDock()
         listView.addListeners()
+
+        viewModel.lastRecordedVerseProperty.value?.let { lastVerse ->
+            listView.apply {
+                runLater(Duration.millis(1000.0)) {
+                    val index = lastVerse.coerceIn(0, viewModel.chunks.size - 1)
+                    selectionModel.select(index)
+                    scrollTo(index)
+                }
+            }
+        }
     }
 
     override fun onUndock() {
@@ -168,5 +174,3 @@ class NarrationFooter : View() {
         }
     }
 }
-
-class InitialSelectedVerseChangedEvent(val index: Int) : FXEvent()

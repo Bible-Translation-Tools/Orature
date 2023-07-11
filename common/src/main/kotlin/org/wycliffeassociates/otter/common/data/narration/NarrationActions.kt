@@ -4,12 +4,20 @@ import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.primitives.VerseNode
 import kotlin.collections.ArrayList
 
+/**
+ * To perform a narration action,
+ * and provide undo/redo functionality
+ */
 interface NarrationAction {
     fun execute()
     fun undo()
     fun redo()
 }
 
+/**
+ * This action is to create a new verse node and add it to the list of verse nodes.
+ * It doesn't track the end position of the verse. It should be updated when recording is paused.
+ */
 class NextVerseAction(
     private val list: MutableList<VerseNode>,
     private val file: AudioFile
@@ -34,6 +42,10 @@ class NextVerseAction(
     }
 }
 
+/**
+ * This action is to replace corresponding verse node in the list of verse nodes with new recording.
+ * It doesn't track the end position of the verse. It should be updated when recording is stopped.
+ */
 class RecordAgainAction(
     private val list: MutableList<VerseNode>,
     private val file: AudioFile,
@@ -66,6 +78,10 @@ class RecordAgainAction(
     }
 }
 
+/**
+ * This action is to replace corresponding verse nodes in the list of verse nodes
+ * by verse nodes with updated positions.
+ */
 class VerseMarkerAction(
     private val list: MutableList<VerseNode>,
     private val firstVerseIndex: Int,
@@ -115,6 +131,44 @@ class VerseMarkerAction(
     }
 }
 
+/**
+ * This action is to replace corresponding verse node in the list of verse nodes
+ * with new recording from an external app.
+ */
+class EditVerseAction(
+    private val list: MutableList<VerseNode>,
+    private val verseIndex: Int,
+    private val start: Int,
+    private val end: Int
+): NarrationAction {
+    var node: VerseNode? = null
+    var previous: VerseNode? = null
+
+    override fun execute() {
+        previous = list[verseIndex]
+
+        node = VerseNode (start, end).also {
+            list[verseIndex] = it
+        }
+    }
+
+    override fun undo() {
+        previous?.let {
+            list[verseIndex] = it
+        }
+    }
+
+    override fun redo() {
+        node?.let {
+            list[verseIndex] = it
+        }
+    }
+
+}
+
+/**
+ * This action is to clear the list of verse nodes
+ */
 class ResetAllAction(private val list: MutableList<VerseNode>): NarrationAction {
     private val nodes = ArrayList<VerseNode>(list.size)
 
