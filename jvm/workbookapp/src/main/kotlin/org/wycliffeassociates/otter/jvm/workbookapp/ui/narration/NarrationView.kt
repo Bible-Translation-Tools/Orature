@@ -4,6 +4,7 @@ import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.util.Duration
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ColorTheme

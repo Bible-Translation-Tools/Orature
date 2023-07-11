@@ -14,12 +14,9 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
-import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.chapterSelector
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
@@ -28,7 +25,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.narrationM
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
-import java.io.File
 import java.text.MessageFormat
 
 class NarrationHeader : View() {
