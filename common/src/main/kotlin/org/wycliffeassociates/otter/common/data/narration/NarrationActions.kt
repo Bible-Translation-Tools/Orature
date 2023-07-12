@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.common.data.narration
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.primitives.VerseNode
 import kotlin.collections.ArrayList
@@ -8,6 +9,7 @@ import kotlin.collections.ArrayList
  * To perform a narration action,
  * and provide undo/redo functionality
  */
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 interface NarrationAction {
     fun execute()
     fun undo()

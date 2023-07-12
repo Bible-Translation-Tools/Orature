@@ -125,6 +125,7 @@ class NarrationApp : App(NarrationRootView::class), IDependencyGraphProvider {
             every { chapter.chunkCount } returns Single.just(10)
             every { chapter.audio } returns mockAudio()
             every { chapter.chunkCount } returns Single.just(10)
+            every { chapter.getSelectedTake() } returns chapter.audio.selected.value?.value
             chapters.add(chapter)
         }
         return Observable.fromIterable(chapters)
@@ -176,7 +177,9 @@ class NarrationApp : App(NarrationRootView::class), IDependencyGraphProvider {
     }
 
     private fun mockTake(): Take? {
-        val userHomeDir = File(System.getProperty("user.home"))
+        val userHomeDir = File(System.getProperty("user.home"), "narration").also {
+            if (!it.exists()) it.mkdirs()
+        }
         val takeFile = File(userHomeDir, "narration.wav")
 
         return if (takeFile.exists()) {
@@ -213,8 +216,11 @@ class NarrationApp : App(NarrationRootView::class), IDependencyGraphProvider {
     }
 
     private fun mockProjectAudioDir(accessor: ProjectFilesAccessor) {
-        val userHomeDir = File(System.getProperty("user.home"))
-        every { accessor.audioDir } returns userHomeDir
+        val narrationDir = File(System.getProperty("user.home"), "narration").also {
+            if (!it.exists()) it.mkdirs()
+        }
+        every { accessor.audioDir } returns narrationDir
+        every { accessor.getProjectChapterAudioDir(any(), any()) } returns accessor.audioDir
     }
 }
 

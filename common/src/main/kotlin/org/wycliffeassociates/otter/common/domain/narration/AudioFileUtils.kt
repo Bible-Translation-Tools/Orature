@@ -24,9 +24,9 @@ class AudioFileUtils @Inject constructor(private val directoryProvider: IDirecto
     }
 
     fun appendFile(audio: AudioFile, file: File) {
-        val chunkAudio = AudioFile(file)
+        val appendedAudio = AudioFile(file)
         audio.writer(true).use { writer ->
-            chunkAudio.reader().use { reader ->
+            appendedAudio.reader().use { reader ->
                 reader.open()
                 val buffer = ByteArray(10240)
                 while (reader.hasRemaining()) {

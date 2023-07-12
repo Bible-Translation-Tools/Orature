@@ -1,24 +1,26 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import io.reactivex.Completable
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.Slider
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
-import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.narration.*
 import org.wycliffeassociates.otter.common.data.primitives.VerseNode
+import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.narration.AudioFileUtils
 import org.wycliffeassociates.otter.common.domain.narration.SplitAudioOnCues
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.common.recorder.WavFileWriter
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
@@ -154,6 +156,9 @@ class NarrationBodyViewModel : ViewModel() {
     @Inject
     lateinit var splitAudioOnCues: SplitAudioOnCues
 
+    @Inject
+    lateinit var directoryProvider: IDirectoryProvider
+
     private var recorder: IAudioRecorder? = null
     private var writer: WavFileWriter? = null
     private var recordedAudio: AudioFile? = null
@@ -188,13 +193,14 @@ class NarrationBodyViewModel : ViewModel() {
     private val hasRedoProperty = SimpleBooleanProperty()
     private var hasRedo by hasRedoProperty
 
-    private val narrationHistory = NarrationHistory()
-    private lateinit var chapterPcmFile: File
+    private lateinit var narration: Narration
 
     val pluginContextProperty = SimpleObjectProperty(PluginType.EDITOR)
     val chapterOpenInPluginProperty = SimpleBooleanProperty()
 
     val recordedVerses = observableListOf<VerseNode>()
+
+    private val listeners = mutableListOf<ListenerDisposer>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -213,10 +219,16 @@ class NarrationBodyViewModel : ViewModel() {
     }
 
     fun onDock() {
-        initializeRecorder()
+        workbookDataStore.activeChapterProperty.onChangeAndDoNowWithDisposer {
+            it?.let { chapter ->
+                initializeNarration(chapter)
+            }
+        }.let(listeners::add)
     }
 
     fun onUndock() {
+        listeners.forEach(ListenerDisposer::dispose)
+
         closeRecorder()
     }
 
@@ -226,7 +238,7 @@ class NarrationBodyViewModel : ViewModel() {
         } else {
             audioController.pause()
 
-            player.loadSection(chapterPcmFile, verse.start, verse.end)
+            player.loadSection(narration.workingAudioFile, verse.start, verse.end)
             audioController.load(player)
             audioController.seek(0)
             audioController.play()
@@ -238,11 +250,7 @@ class NarrationBodyViewModel : ViewModel() {
     fun recordAgain(verseIndex: Int) {
         stopPlayer()
 
-        recordedAudio?.let {
-            val action = RecordAgainAction(recordedVerses, it, verseIndex)
-            narrationHistory.execute(action)
-            updateHistory()
-        }
+        narration.onRecordAgain(verseIndex)
 
         recorder?.start()
         writer?.start()
@@ -254,11 +262,9 @@ class NarrationBodyViewModel : ViewModel() {
     }
 
     fun openInAudioPlugin(index: Int) {
-        recordedAudio?.let { audio ->
-            val verse = recordedVerses[index]
-            val file = audioFileUtils.getSectionAsFile(audio, verse.start, verse.end)
-            processWithEditor(file, index)
-        }
+        val verse = recordedVerses[index]
+        val file = audioFileUtils.getSectionAsFile(narration.workingAudio, verse.start, verse.end)
+        processWithEditor(file, index)
     }
 
     fun onChapterLoad(status: ChapterLoadStatus) {
@@ -274,12 +280,7 @@ class NarrationBodyViewModel : ViewModel() {
     fun onNext() {
         when {
             isRecording -> {
-                recordedAudio?.let {
-                    recordedVerses.lastOrNull()?.end = it.totalFrames
-                    val action = NextVerseAction(recordedVerses, it)
-                    narrationHistory.execute(action)
-                    updateHistory()
-                }
+                narration.onNextVerse()
             }
             recordPause -> {
                 recordPause = false
@@ -300,9 +301,7 @@ class NarrationBodyViewModel : ViewModel() {
     }
 
     fun resetChapter() {
-        val action = ResetAllAction(recordedVerses)
-        narrationHistory.execute(action)
-        updateHistory()
+        narration.onResetAll()
 
         recordStart = true
         recordResume = false
@@ -310,40 +309,57 @@ class NarrationBodyViewModel : ViewModel() {
     }
 
     fun undo() {
-        narrationHistory.undo()
+        narration.undo()
 
         recordPause = false
         recordStart = recordedVerses.isEmpty()
         recordResume = recordedVerses.isNotEmpty()
-
-        updateHistory()
     }
 
     fun redo() {
-        narrationHistory.redo()
+        narration.redo()
 
         recordPause = false
         recordStart = recordedVerses.isEmpty()
         recordResume = recordedVerses.isNotEmpty()
+    }
 
-        updateHistory()
+    private fun initializeNarration(chapter: Chapter) {
+        val projectChapterDir = workbookDataStore.workbook.projectFilesAccessor.getProjectChapterAudioDir(
+            workbookDataStore.workbook,
+            chapter
+        )
+        narration = Narration(directoryProvider, projectChapterDir)
+
+        val chapterFile = chapter.getSelectedTake()?.file
+        val forceLoadFromChapter = chapterOpenInPluginProperty.value
+
+        narration.load(chapterFile, forceLoadFromChapter)
+            .doOnError {
+                logger.error("An error occurred in loadNarration", it)
+            }
+            .subscribe {
+                initializeRecorder()
+
+                recordedVerses.setAll(narration.activeVerses)
+
+                recordStart = recordedVerses.isEmpty()
+                recordResume = recordedVerses.isNotEmpty()
+                potentiallyFinished = checkPotentiallyFinished()
+
+                FX.eventbus.fire(ChapterLoadEvent(ChapterLoadStatus.FINISHED))
+            }
     }
 
     private fun updateHistory() {
-        hasUndo = narrationHistory.hasUndo()
-        hasRedo = narrationHistory.hasRedo()
-
-        narrationHistory.updateSavedHistoryFile(recordedVerses)
+        //hasUndo = narrationHistory.hasUndo()
+        //hasRedo = narrationHistory.hasRedo()
     }
 
     private fun record() {
         stopPlayer()
 
-        recordedAudio?.let {
-            val action = NextVerseAction(recordedVerses, it)
-            narrationHistory.execute(action)
-            updateHistory()
-        }
+        narration.onNextVerse()
 
         recorder?.start()
         writer?.start()
@@ -360,12 +376,7 @@ class NarrationBodyViewModel : ViewModel() {
         recorder?.pause()
         writer?.pause()
 
-        recordedAudio?.let {
-            recordedVerses.lastOrNull()?.end = it.totalFrames
-        }
-
-        updateHistory()
-
+        narration.finalizeVerse()
         potentiallyFinished = checkPotentiallyFinished()
     }
 
@@ -388,10 +399,8 @@ class NarrationBodyViewModel : ViewModel() {
             isRecording = false
             isRecordingAgain = false
             recordPause = true
-            recordedAudio?.let {
-                recordedVerses[verseIndex].end = it.totalFrames
-            }
-            updateHistory()
+
+            narration.finalizeVerse(verseIndex)
         }
     }
 
@@ -402,25 +411,7 @@ class NarrationBodyViewModel : ViewModel() {
 
     private fun initializeRecorder() {
         recorder = audioConnectionFactory.getRecorder().also { rec ->
-            val audioDir = workbookDataStore.workbook.projectFilesAccessor.audioDir
-
-            chapterPcmFile = File(audioDir, "narration.${AudioFileFormat.PCM.extension}")
-            narrationHistory.initSavedHistoryFile(audioDir)
-
-            loadWorkInProgress()
-                .doOnError {
-                    logger.error("An error occurred in loadWorkInProgress", it)
-                }
-                .subscribe {
-                    recordedAudio = AudioFile(chapterPcmFile).also {
-                        writer = WavFileWriter(it, rec.getAudioStream(), true) {  /* no op */  }
-                    }
-                    recordStart = recordedVerses.isEmpty()
-                    recordResume = recordedVerses.isNotEmpty()
-                    potentiallyFinished = checkPotentiallyFinished()
-
-                    FX.eventbus.fire(ChapterLoadEvent(ChapterLoadStatus.FINISHED))
-                }
+            writer = WavFileWriter(narration.workingAudio, rec.getAudioStream(), true) {  /* no op */  }
         }
     }
 
@@ -432,7 +423,7 @@ class NarrationBodyViewModel : ViewModel() {
         writer = null
     }
 
-    private fun processWithEditor(file: File, index: Int) {
+    private fun processWithEditor(file: File, verseIndex: Int) {
         val pluginType = PluginType.EDITOR
         pluginContextProperty.set(pluginType)
 
@@ -456,95 +447,19 @@ class NarrationBodyViewModel : ViewModel() {
                         FX.eventbus.fire(SnackBarEvent(messages["noEditor"]))
                     }
                     else -> {
-                        recordedAudio?.let { audio ->
-                            addEditedVerse(audio, file, index)
-                        }
+                        addEditedVerse(file, verseIndex)
                     }
                 }
                 FX.eventbus.fire(PluginClosedEvent(pluginType))
             }
     }
 
-    private fun addEditedVerse(audio: AudioFile, file: File, index: Int) {
-        val start = audio.totalFrames
-        audioFileUtils.appendFile(audio, file)
-        val end = audio.totalFrames
-        val action = EditVerseAction(recordedVerses, index, start, end)
-        narrationHistory.execute(action)
-        updateHistory()
-    }
+    private fun addEditedVerse(file: File, verseIndex: Int) {
+        val start = narration.workingAudio.totalFrames
+        audioFileUtils.appendFile(narration.workingAudio, file)
+        val end = narration.workingAudio.totalFrames
 
-    private fun loadWorkInProgress(): Completable {
-        return createInProgressFiles()
-            .andThen(loadVerses())
-    }
-
-    private fun loadVerses(): Completable {
-        return Completable.fromCallable {
-            val nodes = narrationHistory.loadSavedHistoryFile()
-
-            if (chapterOpenInPluginProperty.value) {
-                val action = ChapterEditedAction(recordedVerses, nodes)
-                narrationHistory.execute(action)
-                updateHistory()
-            } else {
-                recordedVerses.addAll(nodes)
-            }
-        }
-    }
-
-    private fun createInProgressFilesFromChapterFile(file: File): Completable {
-        return splitAudioOnCues.execute(file)
-            .flatMapCompletable { cues ->
-                Completable.fromCallable {
-                    if (!chapterPcmFile.exists()) {
-                        chapterPcmFile.createNewFile()
-                    }
-
-                    writeCuesToSavedHistoryFile(cues)
-                    appendAudioToPcmFile(cues)
-                }
-            }
-    }
-
-    private fun appendAudioToPcmFile(cues: Map<String, File>) {
-        val audio = AudioFile(chapterPcmFile)
-        cues.forEach {
-            audioFileUtils.appendFile(audio, it.value)
-        }
-    }
-
-    private fun writeCuesToSavedHistoryFile(cues: Map<String, File>) {
-        val audio = AudioFile(chapterPcmFile)
-        val nodes = mutableListOf<VerseNode>()
-        var start = audio.totalFrames
-        var end = audio.totalFrames
-
-        cues.forEach {
-            val verseAudio = AudioFile(it.value)
-            end += verseAudio.totalFrames
-            val node = VerseNode(start, end)
-            nodes.add(node)
-            start = end
-        }
-
-        narrationHistory.updateSavedHistoryFile(nodes)
-    }
-
-    private fun createInProgressFiles(): Completable {
-        val chapterAudio = workbookDataStore.chapter.audio
-        val chapterFile = chapterAudio.selected.value?.value?.file
-        val chapterFileExists = chapterFile?.exists() ?: false
-
-        val chapterEdited = chapterFileExists && chapterOpenInPluginProperty.value
-        val isNarrationFromChapter = chapterFileExists && !chapterOpenInPluginProperty.value && !chapterPcmFile.exists()
-
-        val createFromChapter = chapterEdited || isNarrationFromChapter
-
-        return when {
-            createFromChapter -> createInProgressFilesFromChapterFile(chapterFile!!)
-            else -> Completable.complete()
-        }
+        narration.onEditVerse(verseIndex, start, end)
     }
 
     private fun checkPotentiallyFinished(): Boolean {
