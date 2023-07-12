@@ -77,7 +77,12 @@ class SourceAudioAccessor(
         return null
     }
 
-    private fun getChapter(media: Media, chapter: Int, rc: ResourceContainer, targetMetadata: ResourceMetadata?): SourceAudio? {
+    private fun getChapter(
+        media: Media,
+        chapter: Int,
+        rc: ResourceContainer,
+        targetMetadata: ResourceMetadata?
+    ): SourceAudio? {
         return if (rc.media != null && media.chapterUrl.isNotEmpty()) {
             val path = media.chapterUrl.replace("{chapter}", chapter.toString())
             if (rc.accessor.fileExists(path)) {
@@ -125,10 +130,14 @@ class SourceAudioAccessor(
             val oratureAudioFile = OratureAudioFile(file)
             val cues = oratureAudioFile.getCues()
             cues.sortedBy { it.location }
-            val verses = oratureAudioFile.getMarker(OratureCueType.VERSE).map { it as VerseMarker }
+            val verses = oratureAudioFile
+                .getMarker(OratureCueType.VERSE)
+                .map { it as VerseMarker }
+                .sortedBy { it.location }
             val marker = verses.find { it.start == chunk }
             if (marker != null) {
-                val nextMarker = verses.find { it.start == marker.end + 1 }
+                val markerIndex = verses.indexOf(marker)
+                val nextMarker = if (verses.lastIndex > markerIndex) verses[markerIndex + 1] else null
                 val start = marker.location
                 val end = nextMarker?.location ?: oratureAudioFile.totalFrames
                 return SourceAudio(file, start, end)
