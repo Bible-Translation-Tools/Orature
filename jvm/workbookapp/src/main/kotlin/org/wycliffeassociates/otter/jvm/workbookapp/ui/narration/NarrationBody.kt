@@ -5,7 +5,6 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.Slider
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.narration.*
 import org.wycliffeassociates.otter.common.data.primitives.VerseNode
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
@@ -53,7 +52,6 @@ class NarrationBody : View() {
                             item("") {
                                 text = "Play"
                                 action {
-                                    //hide()
                                     fire(PlayVerseEvent(verse))
                                 }
                                 disableWhen {
@@ -63,7 +61,6 @@ class NarrationBody : View() {
                             item("") {
                                 text = "Record Again"
                                 action {
-                                    //hide()
                                     fire(RecordAgainEvent(index))
                                 }
                                 disableWhen {
@@ -73,7 +70,6 @@ class NarrationBody : View() {
                             item("") {
                                 text = "Open in..."
                                 action {
-                                    //hide()
                                     fire(OpenInAudioPluginEvent(index))
                                 }
                                 disableWhen {
@@ -121,7 +117,7 @@ class NarrationBody : View() {
         }
 
         subscribe<ChapterLoadEvent> {
-            viewModel.onChapterLoad(it.status)
+            viewModel.onChapterLoad(it.chapter, it.status)
         }
     }
 
@@ -161,7 +157,6 @@ class NarrationBodyViewModel : ViewModel() {
 
     private var recorder: IAudioRecorder? = null
     private var writer: WavFileWriter? = null
-    private var recordedAudio: AudioFile? = null
 
     private val recordStartProperty = SimpleBooleanProperty()
     private var recordStart by recordStartProperty
@@ -267,11 +262,11 @@ class NarrationBodyViewModel : ViewModel() {
         processWithEditor(file, index)
     }
 
-    fun onChapterLoad(status: ChapterLoadStatus) {
+    fun onChapterLoad(chapter: Chapter, status: ChapterLoadStatus) {
         when (status) {
             ChapterLoadStatus.STARTED -> {
                 chapterOpenInPluginProperty.value = true
-                initializeRecorder()
+                initializeNarration(chapter)
             }
             ChapterLoadStatus.FINISHED -> chapterOpenInPluginProperty.value = false
         }
@@ -280,7 +275,8 @@ class NarrationBodyViewModel : ViewModel() {
     fun onNext() {
         when {
             isRecording -> {
-                narration.onNextVerse()
+                narration.finalizeVerse()
+                narration.onNewVerse()
             }
             recordPause -> {
                 recordPause = false
@@ -331,6 +327,18 @@ class NarrationBodyViewModel : ViewModel() {
         )
         narration = Narration(directoryProvider, projectChapterDir)
 
+        narration.activeVerses.subscribe {
+            recordedVerses.setAll(it)
+        }
+
+        narration.hasUndo.subscribe {
+            hasUndo = it
+        }
+
+        narration.hasRedo.subscribe {
+            hasRedo = it
+        }
+
         val chapterFile = chapter.getSelectedTake()?.file
         val forceLoadFromChapter = chapterOpenInPluginProperty.value
 
@@ -341,25 +349,18 @@ class NarrationBodyViewModel : ViewModel() {
             .subscribe {
                 initializeRecorder()
 
-                recordedVerses.setAll(narration.activeVerses)
-
                 recordStart = recordedVerses.isEmpty()
                 recordResume = recordedVerses.isNotEmpty()
                 potentiallyFinished = checkPotentiallyFinished()
 
-                FX.eventbus.fire(ChapterLoadEvent(ChapterLoadStatus.FINISHED))
+                FX.eventbus.fire(ChapterLoadEvent(chapter, ChapterLoadStatus.FINISHED))
             }
-    }
-
-    private fun updateHistory() {
-        //hasUndo = narrationHistory.hasUndo()
-        //hasRedo = narrationHistory.hasRedo()
     }
 
     private fun record() {
         stopPlayer()
 
-        narration.onNextVerse()
+        narration.onNewVerse()
 
         recorder?.start()
         writer?.start()
@@ -398,7 +399,9 @@ class NarrationBodyViewModel : ViewModel() {
             recordAgainVerseIndex = null
             isRecording = false
             isRecordingAgain = false
-            recordPause = true
+
+            recordPause = false
+            recordResume = true
 
             narration.finalizeVerse(verseIndex)
         }
@@ -471,7 +474,7 @@ class RecordAgainEvent(val index: Int) : FXEvent()
 class PlayVerseEvent(val verse: VerseNode) : FXEvent()
 class OpenInAudioPluginEvent(val index: Int) : FXEvent()
 
-class ChapterLoadEvent(val status: ChapterLoadStatus): FXEvent()
+class ChapterLoadEvent(val chapter: Chapter, val status: ChapterLoadStatus): FXEvent()
 
 enum class ChapterLoadStatus {
     STARTED,

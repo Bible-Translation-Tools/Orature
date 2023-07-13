@@ -20,7 +20,7 @@ class NarrationMenu : MenuButton() {
 
     val hasUndoProperty = SimpleBooleanProperty()
     val hasRedoProperty = SimpleBooleanProperty()
-    val hasChapterFileProperty = SimpleBooleanProperty()
+    val hasChapterTakeProperty = SimpleBooleanProperty()
     val hasVersesProperty = SimpleBooleanProperty()
 
     init {
@@ -47,14 +47,14 @@ class NarrationMenu : MenuButton() {
                 action {
                     FX.eventbus.fire(NarrationOpenInPluginEvent(PluginType.EDITOR))
                 }
-                enableWhen(hasChapterFileProperty)
+                enableWhen(hasChapterTakeProperty)
             }
             item(editVerseMarkersTextProperty.value) {
                 graphic = FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE)
                 action {
                     FX.eventbus.fire(NarrationOpenInPluginEvent(PluginType.MARKER))
                 }
-                enableWhen(hasChapterFileProperty)
+                enableWhen(hasChapterTakeProperty)
             }
             item(resetChapterTextProperty.value) {
                 graphic = FontIcon(MaterialDesign.MDI_DELETE)

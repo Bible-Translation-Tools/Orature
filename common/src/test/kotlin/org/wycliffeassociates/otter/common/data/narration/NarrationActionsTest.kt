@@ -320,7 +320,7 @@ class NarrationActionsTest {
     }
 
     private fun addNextVerse(audioFile: AudioFile) {
-        val action = NextVerseAction(narrationList, audioFile)
+        val action = NewVerseAction(narrationList, audioFile)
         narrationHistory.execute(action)
     }
 

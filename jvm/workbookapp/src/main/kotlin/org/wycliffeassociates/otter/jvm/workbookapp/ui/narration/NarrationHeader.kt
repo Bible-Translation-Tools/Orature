@@ -48,7 +48,7 @@ class NarrationHeader : View() {
             narrationMenu {
                 hasUndoProperty.bind(viewModel.hasUndoProperty)
                 hasRedoProperty.bind(viewModel.hasRedoProperty)
-                hasChapterFileProperty.bind(viewModel.hasChapterTakeProperty)
+                hasChapterTakeProperty.bind(viewModel.hasChapterTakeProperty)
                 hasVersesProperty.bind(viewModel.hasVersesProperty)
             }
             chapterSelector {
@@ -230,7 +230,8 @@ class NarrationHeaderViewModel : ViewModel() {
                             else -> {
                                 when (pluginType) {
                                     PluginType.EDITOR, PluginType.MARKER -> {
-                                        FX.eventbus.fire(ChapterLoadEvent(ChapterLoadStatus.STARTED))
+                                        val chapter = workbookDataStore.chapter
+                                        FX.eventbus.fire(ChapterLoadEvent(chapter, ChapterLoadStatus.STARTED))
                                     }
                                     else -> {}
                                 }

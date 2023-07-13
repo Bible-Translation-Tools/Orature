@@ -11,36 +11,33 @@ import kotlin.collections.ArrayList
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 interface NarrationAction {
-    fun execute()
-    fun undo()
-    fun redo()
+    fun execute(activeVerses: MutableList<VerseNode>, workingAudio: AudioFile)
+    fun undo(activeVerses: MutableList<VerseNode>)
+    fun redo(activeVerses: MutableList<VerseNode>)
 }
 
 /**
  * This action is to create a new verse node and add it to the list of verse nodes.
  * It doesn't track the end position of the verse. It should be updated when recording is paused.
  */
-class NextVerseAction(
-    private val list: MutableList<VerseNode>,
-    private val file: AudioFile
-) : NarrationAction {
+class NewVerseAction : NarrationAction {
     private var node: VerseNode? = null
 
-    override fun execute() {
-        val start = file.totalFrames
-        val end = file.totalFrames
+    override fun execute(activeVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
+        val start = workingAudio.totalFrames
+        val end = workingAudio.totalFrames
 
         node = VerseNode (start, end).also {
-            list.add(it)
+            activeVerses.add(it)
         }
     }
 
-    override fun undo() {
-        list.removeLast()
+    override fun undo(activeVerses: MutableList<VerseNode>) {
+        activeVerses.removeLast()
     }
 
-    override fun redo() {
-        node?.let(list::add)
+    override fun redo(activeVerses: MutableList<VerseNode>) {
+        node?.let(activeVerses::add)
     }
 }
 
@@ -49,33 +46,31 @@ class NextVerseAction(
  * It doesn't track the end position of the verse. It should be updated when recording is stopped.
  */
 class RecordAgainAction(
-    private val list: MutableList<VerseNode>,
-    private val file: AudioFile,
     private val verseIndex: Int
 ) : NarrationAction {
     var node: VerseNode? = null
     var previous: VerseNode? = null
 
-    override fun execute() {
-        previous = list[verseIndex]
+    override fun execute(activeVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
+        previous = activeVerses[verseIndex]
 
-        val start = file.totalFrames
-        val end = file.totalFrames
+        val start = workingAudio.totalFrames
+        val end = workingAudio.totalFrames
 
         node = VerseNode (start, end).also {
-            list[verseIndex] = it
+            activeVerses[verseIndex] = it
         }
     }
 
-    override fun undo() {
+    override fun undo(activeVerses: MutableList<VerseNode>) {
         previous?.let {
-            list[verseIndex] = it
+            activeVerses[verseIndex] = it
         }
     }
 
-    override fun redo() {
+    override fun redo(activeVerses: MutableList<VerseNode>) {
         node?.let {
-            list[verseIndex] = it
+            activeVerses[verseIndex] = it
         }
     }
 }
@@ -85,7 +80,6 @@ class RecordAgainAction(
  * by verse nodes with updated positions.
  */
 class VerseMarkerAction(
-    private val list: MutableList<VerseNode>,
     private val firstVerseIndex: Int,
     private val secondVerseIndex: Int,
     private val marker: Int
@@ -97,38 +91,38 @@ class VerseMarkerAction(
     private var secondNode: VerseNode? = null
 
     // Called when marker is set and mouse button is released
-    override fun execute() {
-        previousFirstNode = list[firstVerseIndex]
-        previousSecondNode = list[secondVerseIndex]
+    override fun execute(activeVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
+        previousFirstNode = activeVerses[firstVerseIndex]
+        previousSecondNode = activeVerses[secondVerseIndex]
 
         previousFirstNode?.let { prev ->
             firstNode = VerseNode(prev.start, marker).also { current ->
-                list[firstVerseIndex] = current
+                activeVerses[firstVerseIndex] = current
             }
         }
 
         previousSecondNode?.let { prev ->
             secondNode = VerseNode(marker, prev.end).also { current ->
-                list[secondVerseIndex] = current
+                activeVerses[secondVerseIndex] = current
             }
         }
     }
 
-    override fun undo() {
+    override fun undo(activeVerses: MutableList<VerseNode>) {
         previousFirstNode?.let {
-            list[firstVerseIndex] = it
+            activeVerses[firstVerseIndex] = it
         }
         previousSecondNode?.let {
-            list[secondVerseIndex] = it
+            activeVerses[secondVerseIndex] = it
         }
     }
 
-    override fun redo() {
+    override fun redo(activeVerses: MutableList<VerseNode>) {
         firstNode?.let {
-            list[firstVerseIndex] = it
+            activeVerses[firstVerseIndex] = it
         }
         secondNode?.let {
-            list[secondVerseIndex] = it
+            activeVerses[secondVerseIndex] = it
         }
     }
 }
@@ -138,7 +132,6 @@ class VerseMarkerAction(
  * with new recording from an external app.
  */
 class EditVerseAction(
-    private val list: MutableList<VerseNode>,
     private val verseIndex: Int,
     private val start: Int,
     private val end: Int
@@ -146,69 +139,65 @@ class EditVerseAction(
     var node: VerseNode? = null
     var previous: VerseNode? = null
 
-    override fun execute() {
-        previous = list[verseIndex]
+    override fun execute(activeVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
+        previous = activeVerses[verseIndex]
 
         node = VerseNode (start, end).also {
-            list[verseIndex] = it
+            activeVerses[verseIndex] = it
         }
     }
 
-    override fun undo() {
+    override fun undo(activeVerses: MutableList<VerseNode>) {
         previous?.let {
-            list[verseIndex] = it
+            activeVerses[verseIndex] = it
         }
     }
 
-    override fun redo() {
+    override fun redo(activeVerses: MutableList<VerseNode>) {
         node?.let {
-            list[verseIndex] = it
+            activeVerses[verseIndex] = it
         }
     }
-
 }
 
 /**
  * This action is to clear the list of verse nodes
  */
-class ResetAllAction(private val list: MutableList<VerseNode>): NarrationAction {
-    private val nodes = ArrayList<VerseNode>(list.size)
+class ResetAllAction: NarrationAction {
+    private val nodes = ArrayList<VerseNode>()
 
-    override fun execute() {
-        nodes.addAll(list)
-        list.clear()
+    override fun execute(activeVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
+        nodes.addAll(activeVerses)
+        activeVerses.clear()
     }
 
-    override fun undo() {
-        list.addAll(nodes)
+    override fun undo(activeVerses: MutableList<VerseNode>) {
+        activeVerses.addAll(nodes)
     }
 
-    override fun redo() {
-        list.clear()
+    override fun redo(activeVerses: MutableList<VerseNode>) {
+        activeVerses.clear()
     }
-
 }
 
 class ChapterEditedAction(
-    private val list: MutableList<VerseNode>,
     private val newList: List<VerseNode>
 ): NarrationAction {
-    private val nodes = ArrayList<VerseNode>(list.size)
+    private val nodes = ArrayList<VerseNode>()
 
-    override fun execute() {
-        nodes.addAll(list)
-        list.clear()
-        list.addAll(newList)
+    override fun execute(activeVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
+        nodes.addAll(activeVerses)
+        activeVerses.clear()
+        activeVerses.addAll(newList)
     }
 
-    override fun undo() {
-        list.clear()
-        list.addAll(nodes)
+    override fun undo(activeVerses: MutableList<VerseNode>) {
+        activeVerses.clear()
+        activeVerses.addAll(nodes)
     }
 
-    override fun redo() {
-        list.clear()
-        list.addAll(newList)
+    override fun redo(activeVerses: MutableList<VerseNode>) {
+        activeVerses.clear()
+        activeVerses.addAll(newList)
     }
-
 }

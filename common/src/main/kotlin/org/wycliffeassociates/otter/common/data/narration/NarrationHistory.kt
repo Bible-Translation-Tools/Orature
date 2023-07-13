@@ -1,34 +1,38 @@
 package org.wycliffeassociates.otter.common.data.narration
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect
+import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.data.primitives.VerseNode
 import java.util.*
 
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 internal class NarrationHistory {
-    private val undoStack = ArrayDeque<NarrationAction>()
-    private val redoStack = ArrayDeque<NarrationAction>()
+    val undoStack = ArrayDeque<NarrationAction>()
+    val redoStack = ArrayDeque<NarrationAction>()
 
-    fun execute(action: NarrationAction) {
-        action.execute()
+    fun execute(
+        action: NarrationAction,
+        activeVerses: MutableList<VerseNode>,
+        workingAudio: AudioFile
+    ) {
+        action.execute(activeVerses, workingAudio)
         undoStack.addLast(action)
         redoStack.clear()
     }
 
-    fun undo() {
+    fun undo(activeVerses: MutableList<VerseNode>) {
         if (undoStack.isEmpty()) return
 
         val action = undoStack.removeLast()
 
-        action.undo()
+        action.undo(activeVerses)
         redoStack.addLast(action)
     }
 
-    fun redo() {
+    fun redo(activeVerses: MutableList<VerseNode>) {
         if (redoStack.isEmpty()) return
 
         val action = redoStack.removeLast()
 
-        action.redo()
+        action.redo(activeVerses)
         undoStack.addLast(action)
     }
 
