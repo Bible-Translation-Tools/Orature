@@ -25,9 +25,12 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioCue
+import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.data.audio.OratureCueType
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import tornadofx.*
+import kotlin.math.absoluteValue
 
 private const val SEEK_EPSILON = 15_000
 
@@ -41,7 +44,7 @@ class VerseMarkerModel(
     private val undoStack: Deque<MarkerOperation> = ArrayDeque()
     private val redoStack: Deque<MarkerOperation> = ArrayDeque()
 
-    private val cues = sanitizeCues(audio)
+    private val cues = sanitizeCues(audio, markerLabels)
     val markers: ObservableList<ChunkMarkerModel> = observableListOf()
 
     val markerCountProperty = SimpleIntegerProperty(1)
@@ -161,10 +164,53 @@ class VerseMarkerModel(
         }.ignoreElement()
     }
 
-    private fun sanitizeCues(audio: OratureAudioFile): List<AudioCue> {
+    private fun sanitizeCues(
+        audio: OratureAudioFile,
+        markerLabels: List<String>
+    ): List<AudioCue> {
         val verses = audio.getMarker(OratureCueType.VERSE)
-        return verses.map {
-            AudioCue(it.location, it.label)
+        val map = mutableMapOf<String, AudioMarker?>()
+        map.putAll(markerLabels.map { it to null })
+        val unmatched = mutableListOf<AudioMarker>()
+        for (verse in verses) {
+            if (verse.label in map.keys) {
+                map[verse.label] = verse
+            } else {
+                unmatched.add(verse)
+            }
+        }
+        handleUnmatched(map, unmatched)
+        val nonNullMap = map.filterValues { it != null }
+        val sanitized = nonNullMap.values.map { AudioCue(it!!.location, it!!.label) }
+        return sanitized
+    }
+
+
+    private fun handleUnmatched(labelsToMarkers: MutableMap<String, AudioMarker?>, unmatchedMarkers: List<AudioMarker>) {
+        if (unmatchedMarkers.isEmpty()) return
+
+        data class Bridge(val start: Int, val end: Int)
+        val labelMatcher = Regex("^(\\d+)(?:-(\\d+))?$")
+        val bridgeToLabel = mutableMapOf<Bridge, String>()
+        labelsToMarkers.forEach {
+            val match = labelMatcher.find(it.key)
+            match?.let { match ->
+                val start = match.groups[1]!!.value.toInt()
+                val end = match.groups[2]?.value?.toInt()?.absoluteValue ?: start
+                val bridge = Bridge(start, end)
+                bridgeToLabel[bridge] = it.key
+            }
+        }
+
+        for (verse in unmatchedMarkers) {
+            bridgeToLabel.forEach { (bridge, label) ->
+                (verse as? VerseMarker)?.let { marker ->
+                    if (marker.start == bridge.start) {
+                        val newVerse = VerseMarker(bridge.start, bridge.end, verse.location)
+                        labelsToMarkers[label] = newVerse
+                    }
+                }
+            }
         }
     }
 
