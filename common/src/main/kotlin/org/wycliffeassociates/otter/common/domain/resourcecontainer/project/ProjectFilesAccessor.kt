@@ -44,8 +44,6 @@ import org.wycliffeassociates.otter.common.data.primitives.*
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.common.domain.content.FileNamer
-import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.usfm.getText
 import org.wycliffeassociates.usfmtools.USFMParser
 import org.wycliffeassociates.usfmtools.models.markers.CMarker
@@ -53,7 +51,7 @@ import org.wycliffeassociates.usfmtools.models.markers.VMarker
 
 
 class ProjectFilesAccessor(
-    directoryProvider: IDirectoryProvider,
+    private val directoryProvider: IDirectoryProvider,
     private val sourceMetadata: ResourceMetadata,
     private val targetMetadata: ResourceMetadata,
     private val project: Collection
@@ -91,6 +89,10 @@ class ProjectFilesAccessor(
         targetMetadata,
         project
     )
+
+    fun getChapterAudioDir(workbook: Workbook, chapter: Chapter): File {
+        return directoryProvider.getProjectChapterAudioDirectory(workbook, chapter)
+    }
 
     fun copySourceFiles(
         linkedResource: ResourceMetadata? = null,
@@ -639,28 +641,6 @@ class ProjectFilesAccessor(
         if (!outFile.exists() && fileReader.exists(RcConstants.CHUNKS_FILE)) {
             fileReader.stream(RcConstants.CHUNKS_FILE).transferTo(outFile.outputStream())
         }
-    }
-
-    fun getProjectChapterAudioDir(workbook: Workbook, chapter: Chapter): File {
-        val namer = FileNamer(
-            bookSlug = project.slug,
-            languageSlug = targetMetadata.language.slug,
-            chapterCount = workbook.target.chapters.count().blockingGet(),
-            chapterTitle = chapter.title,
-            chapterSort = chapter.sort,
-            chunkCount = chapter.chunkCount.blockingGet().toLong(),
-            contentType = ContentType.TEXT,
-            rcSlug = if (sourceMetadata.language.slug == targetMetadata.language.slug) {
-                sourceMetadata.identifier
-            } else {
-                FileNamer.DEFAULT_RC_SLUG
-            }
-        )
-        val formattedChapterName = namer.formatChapterNumber()
-        val chapterDir = audioDir.resolve(formattedChapterName).also {
-            if (!it.exists()) it.mkdirs()
-        }
-        return chapterDir
     }
 
     companion object {

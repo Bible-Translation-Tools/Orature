@@ -15,7 +15,7 @@ import java.io.File
 private const val HISTORY_FILE_NAME = "narration"
 
 class Narration (
-    private val directoryProvider: IDirectoryProvider,
+    directoryProvider: IDirectoryProvider,
     private val projectChapterDir: File
 ) {
     private val history = NarrationHistory()
@@ -35,8 +35,6 @@ class Narration (
     private val mapper = ObjectMapper().registerKotlinModule()
 
     val activeVerses = PublishSubject.create<List<VerseNode>>()
-    val hasUndo = PublishSubject.create<Boolean>()
-    val hasRedo = PublishSubject.create<Boolean>()
 
     init {
         initializeWorkingAudioFile()
@@ -59,7 +57,6 @@ class Narration (
     fun undo() {
         history.undo(verses)
 
-        sendHistoryHasActions()
         sendActiveVerses()
         serializeVerses()
     }
@@ -67,7 +64,6 @@ class Narration (
     fun redo() {
         history.redo(verses)
 
-        sendHistoryHasActions()
         sendActiveVerses()
         serializeVerses()
     }
@@ -107,10 +103,17 @@ class Narration (
         execute(action)
     }
 
+    fun hasUndo(): Boolean {
+        return history.hasUndo()
+    }
+
+    fun hasRedo(): Boolean {
+        return history.hasRedo()
+    }
+
     private fun execute(action: NarrationAction) {
         history.execute(action, verses, workingAudio)
 
-        sendHistoryHasActions()
         sendActiveVerses()
         serializeVerses()
     }
@@ -179,11 +182,6 @@ class Narration (
         }
 
         onChapterEdited(nodes)
-    }
-
-    private fun sendHistoryHasActions() {
-        hasUndo.onNext(history.hasUndo())
-        hasRedo.onNext(history.hasRedo())
     }
 
     private fun sendActiveVerses() {

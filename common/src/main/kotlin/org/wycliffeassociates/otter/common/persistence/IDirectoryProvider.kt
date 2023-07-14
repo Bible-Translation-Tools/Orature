@@ -20,6 +20,8 @@ package org.wycliffeassociates.otter.common.persistence
 
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.workbook.Chapter
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.io.zip.IFileReader
 import org.wycliffeassociates.otter.common.io.zip.IFileWriter
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
@@ -59,6 +61,12 @@ interface IDirectoryProvider {
         source: ResourceMetadata,
         target: ResourceMetadata?,
         bookSlug: String
+    ): File
+
+    /** Directory for project chapter audio */
+    fun getProjectChapterAudioDirectory(
+        workbook: Workbook,
+        chapter: Chapter
     ): File
 
     /** Directory for source */

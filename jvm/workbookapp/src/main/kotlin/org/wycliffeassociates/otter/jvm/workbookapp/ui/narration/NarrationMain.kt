@@ -220,7 +220,7 @@ class NarrationApp : App(NarrationRootView::class), IDependencyGraphProvider {
             if (!it.exists()) it.mkdirs()
         }
         every { accessor.audioDir } returns narrationDir
-        every { accessor.getProjectChapterAudioDir(any(), any()) } returns accessor.audioDir
+        every { accessor.getChapterAudioDir(any(), any()) } returns accessor.audioDir
     }
 }
 

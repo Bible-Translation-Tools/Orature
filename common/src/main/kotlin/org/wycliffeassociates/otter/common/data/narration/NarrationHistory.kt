@@ -5,8 +5,8 @@ import org.wycliffeassociates.otter.common.data.primitives.VerseNode
 import java.util.*
 
 internal class NarrationHistory {
-    val undoStack = ArrayDeque<NarrationAction>()
-    val redoStack = ArrayDeque<NarrationAction>()
+    private val undoStack = ArrayDeque<NarrationAction>()
+    private val redoStack = ArrayDeque<NarrationAction>()
 
     fun execute(
         action: NarrationAction,

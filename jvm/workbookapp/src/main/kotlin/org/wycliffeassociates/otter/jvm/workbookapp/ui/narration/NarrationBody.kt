@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.disposables.CompositeDisposable
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.Slider
@@ -196,6 +197,7 @@ class NarrationBodyViewModel : ViewModel() {
     val recordedVerses = observableListOf<VerseNode>()
 
     private val listeners = mutableListOf<ListenerDisposer>()
+    private val disposables = CompositeDisposable()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -223,6 +225,7 @@ class NarrationBodyViewModel : ViewModel() {
 
     fun onUndock() {
         listeners.forEach(ListenerDisposer::dispose)
+        disposables.dispose()
 
         closeRecorder()
     }
@@ -308,36 +311,22 @@ class NarrationBodyViewModel : ViewModel() {
         narration.undo()
 
         recordPause = false
-        recordStart = recordedVerses.isEmpty()
-        recordResume = recordedVerses.isNotEmpty()
     }
 
     fun redo() {
         narration.redo()
 
         recordPause = false
-        recordStart = recordedVerses.isEmpty()
-        recordResume = recordedVerses.isNotEmpty()
     }
 
     private fun initializeNarration(chapter: Chapter) {
-        val projectChapterDir = workbookDataStore.workbook.projectFilesAccessor.getProjectChapterAudioDir(
+        val projectChapterDir = workbookDataStore.workbook.projectFilesAccessor.getChapterAudioDir(
             workbookDataStore.workbook,
             chapter
         )
         narration = Narration(directoryProvider, projectChapterDir)
 
-        narration.activeVerses.subscribe {
-            recordedVerses.setAll(it)
-        }
-
-        narration.hasUndo.subscribe {
-            hasUndo = it
-        }
-
-        narration.hasRedo.subscribe {
-            hasRedo = it
-        }
+        subscribeActiveVersesChanged()
 
         val chapterFile = chapter.getSelectedTake()?.file
         val forceLoadFromChapter = chapterOpenInPluginProperty.value
@@ -467,6 +456,18 @@ class NarrationBodyViewModel : ViewModel() {
 
     private fun checkPotentiallyFinished(): Boolean {
         return workbookDataStore.chapter.chunkCount.blockingGet() == recordedVerses.size
+    }
+
+    private fun subscribeActiveVersesChanged() {
+        narration.activeVerses.subscribe {
+            recordedVerses.setAll(it)
+
+            hasUndo = narration.hasUndo()
+            hasRedo = narration.hasRedo()
+
+            recordStart = recordedVerses.isEmpty()
+            recordResume = recordedVerses.isNotEmpty()
+        }.let(disposables::add)
     }
 }
 
