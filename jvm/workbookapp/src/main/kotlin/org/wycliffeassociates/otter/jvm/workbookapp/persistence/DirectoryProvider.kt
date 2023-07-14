@@ -21,11 +21,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
-import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
-import org.wycliffeassociates.otter.common.data.workbook.Chapter
-import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.io.zip.IFileReader
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.io.file.NioDirectoryFileReader
@@ -135,33 +131,6 @@ class DirectoryProvider(
             .resolve("takes")
         path.mkdirs()
         return path
-    }
-
-    override fun getProjectChapterAudioDirectory(workbook: Workbook, chapter: Chapter): File {
-        val namer = FileNamer(
-            bookSlug = workbook.target.slug,
-            languageSlug = workbook.target.language.slug,
-            chapterCount = workbook.target.chapters.count().blockingGet(),
-            chapterTitle = chapter.title,
-            chapterSort = chapter.sort,
-            chunkCount = chapter.chunkCount.blockingGet().toLong(),
-            contentType = ContentType.TEXT,
-            rcSlug = if (workbook.source.language.slug == workbook.target.language.slug) {
-                workbook.sourceMetadataSlug
-            } else {
-                FileNamer.DEFAULT_RC_SLUG
-            }
-        )
-        val audioDir = getProjectAudioDirectory(
-            workbook.source.resourceMetadata,
-            workbook.target.resourceMetadata,
-            workbook.target.slug
-        )
-        val formattedChapterName = namer.formatChapterNumber()
-        val chapterDir = audioDir.resolve(formattedChapterName).also {
-            if (!it.exists()) it.mkdirs()
-        }
-        return chapterDir
     }
 
     override fun getProjectSourceDirectory(

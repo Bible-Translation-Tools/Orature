@@ -44,6 +44,7 @@ import org.wycliffeassociates.otter.common.data.primitives.*
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.usfm.getText
 import org.wycliffeassociates.usfmtools.USFMParser
 import org.wycliffeassociates.usfmtools.models.markers.CMarker
@@ -51,7 +52,7 @@ import org.wycliffeassociates.usfmtools.models.markers.VMarker
 
 
 class ProjectFilesAccessor(
-    private val directoryProvider: IDirectoryProvider,
+    directoryProvider: IDirectoryProvider,
     private val sourceMetadata: ResourceMetadata,
     private val targetMetadata: ResourceMetadata,
     private val project: Collection
@@ -91,7 +92,25 @@ class ProjectFilesAccessor(
     )
 
     fun getChapterAudioDir(workbook: Workbook, chapter: Chapter): File {
-        return directoryProvider.getProjectChapterAudioDirectory(workbook, chapter)
+        val namer = FileNamer(
+            bookSlug = workbook.target.slug,
+            languageSlug = workbook.target.language.slug,
+            chapterCount = workbook.target.chapters.count().blockingGet(),
+            chapterTitle = chapter.title,
+            chapterSort = chapter.sort,
+            chunkCount = chapter.chunkCount.blockingGet().toLong(),
+            contentType = ContentType.TEXT,
+            rcSlug = if (workbook.source.language.slug == workbook.target.language.slug) {
+                workbook.sourceMetadataSlug
+            } else {
+                FileNamer.DEFAULT_RC_SLUG
+            }
+        )
+        val formattedChapterName = namer.formatChapterNumber()
+        val chapterDir = audioDir.resolve(formattedChapterName).also {
+            if (!it.exists()) it.mkdirs()
+        }
+        return chapterDir
     }
 
     fun copySourceFiles(

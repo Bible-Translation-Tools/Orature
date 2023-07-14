@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.data.narration
+package org.wycliffeassociates.otter.common.domain.narration
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import org.wycliffeassociates.otter.common.audio.AudioFile
@@ -10,7 +10,7 @@ import kotlin.collections.ArrayList
  * and provide undo/redo functionality
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-interface NarrationAction {
+internal interface NarrationAction {
     fun execute(activeVerses: MutableList<VerseNode>, workingAudio: AudioFile)
     fun undo(activeVerses: MutableList<VerseNode>)
     fun redo(activeVerses: MutableList<VerseNode>)
@@ -20,7 +20,7 @@ interface NarrationAction {
  * This action is to create a new verse node and add it to the list of verse nodes.
  * It doesn't track the end position of the verse. It should be updated when recording is paused.
  */
-class NewVerseAction : NarrationAction {
+internal class NewVerseAction : NarrationAction {
     private var node: VerseNode? = null
 
     override fun execute(activeVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
@@ -45,7 +45,7 @@ class NewVerseAction : NarrationAction {
  * This action is to replace corresponding verse node in the list of verse nodes with new recording.
  * It doesn't track the end position of the verse. It should be updated when recording is stopped.
  */
-class RecordAgainAction(
+internal class RecordAgainAction(
     private val verseIndex: Int
 ) : NarrationAction {
     var node: VerseNode? = null
@@ -79,7 +79,7 @@ class RecordAgainAction(
  * This action is to replace corresponding verse nodes in the list of verse nodes
  * by verse nodes with updated positions.
  */
-class VerseMarkerAction(
+internal class VerseMarkerAction(
     private val firstVerseIndex: Int,
     private val secondVerseIndex: Int,
     private val marker: Int
@@ -131,7 +131,7 @@ class VerseMarkerAction(
  * This action is to replace corresponding verse node in the list of verse nodes
  * with new recording from an external app.
  */
-class EditVerseAction(
+internal class EditVerseAction(
     private val verseIndex: Int,
     private val start: Int,
     private val end: Int
@@ -163,7 +163,7 @@ class EditVerseAction(
 /**
  * This action is to clear the list of verse nodes
  */
-class ResetAllAction: NarrationAction {
+internal class ResetAllAction: NarrationAction {
     private val nodes = ArrayList<VerseNode>()
 
     override fun execute(activeVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
@@ -180,7 +180,7 @@ class ResetAllAction: NarrationAction {
     }
 }
 
-class ChapterEditedAction(
+internal class ChapterEditedAction(
     private val newList: List<VerseNode>
 ): NarrationAction {
     private val nodes = ArrayList<VerseNode>()

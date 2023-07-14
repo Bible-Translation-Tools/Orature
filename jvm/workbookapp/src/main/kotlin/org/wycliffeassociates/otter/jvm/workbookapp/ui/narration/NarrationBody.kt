@@ -1,17 +1,18 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Completable
 import io.reactivex.disposables.CompositeDisposable
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.Slider
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.narration.*
 import org.wycliffeassociates.otter.common.data.primitives.VerseNode
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.narration.AudioFileUtils
+import org.wycliffeassociates.otter.common.domain.narration.Narration
 import org.wycliffeassociates.otter.common.domain.narration.SplitAudioOnCues
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
@@ -231,7 +232,7 @@ class NarrationBodyViewModel : ViewModel() {
         } else {
             audioController.pause()
 
-            player.loadSection(narration.workingAudioFile, verse.start, verse.end)
+            player.loadSection(narration.getWorkingAudio().file, verse.start, verse.end)
             audioController.load(player)
             audioController.seek(0)
             audioController.play()
@@ -253,7 +254,7 @@ class NarrationBodyViewModel : ViewModel() {
 
     fun openInAudioPlugin(index: Int) {
         val verse = recordedVerses[index]
-        val file = audioFileUtils.getSectionAsFile(narration.workingAudio, verse.start, verse.end)
+        val file = audioFileUtils.getSectionAsFile(narration.getWorkingAudio(), verse.start, verse.end)
         processWithEditor(file, index)
     }
 
@@ -312,23 +313,22 @@ class NarrationBodyViewModel : ViewModel() {
     }
 
     private fun initializeNarration(chapter: Chapter) {
-        val projectChapterDir = workbookDataStore.workbook.projectFilesAccessor.getChapterAudioDir(
-            workbookDataStore.workbook,
-            chapter
-        )
-        narration = Narration(directoryProvider, projectChapterDir)
-
-        subscribeActiveVersesChanged()
-
-        val chapterFile = chapter.getSelectedTake()?.file
-        val forceLoadFromChapter = chapterOpenInPluginProperty.value
-
-        narration.load(chapterFile, forceLoadFromChapter)
+        Completable.fromAction {
+            narration = Narration.load(
+                workbookDataStore.workbook,
+                chapter,
+                directoryProvider,
+                workbookDataStore.workbook.projectFilesAccessor,
+                audioConnectionFactory.getRecorder(),
+                chapterOpenInPluginProperty.value
+            )
+        }
             .doOnError {
                 logger.error("An error occurred in loadNarration", it)
             }
             .subscribe {
-                initializeRecorder()
+                subscribeActiveVersesChanged()
+                recordedVerses.setAll(narration.activeVerses)
 
                 recordStart = recordedVerses.isEmpty()
                 recordResume = recordedVerses.isNotEmpty()
@@ -384,10 +384,6 @@ class NarrationBodyViewModel : ViewModel() {
         playingVerse = null
     }
 
-    private fun initializeRecorder() {
-        narration.initializeRecorder(audioConnectionFactory.getRecorder())
-    }
-
     private fun closeRecorder() {
         narration.closeRecorder()
     }
@@ -416,19 +412,11 @@ class NarrationBodyViewModel : ViewModel() {
                         FX.eventbus.fire(SnackBarEvent(messages["noEditor"]))
                     }
                     else -> {
-                        addEditedVerse(file, verseIndex)
+                        narration.onEditVerse(verseIndex, file)
                     }
                 }
                 FX.eventbus.fire(PluginClosedEvent(pluginType))
             }
-    }
-
-    private fun addEditedVerse(file: File, verseIndex: Int) {
-        val start = narration.workingAudio.totalFrames
-        audioFileUtils.appendFile(narration.workingAudio, file)
-        val end = narration.workingAudio.totalFrames
-
-        narration.onEditVerse(verseIndex, start, end)
     }
 
     private fun checkPotentiallyFinished(): Boolean {
@@ -436,7 +424,7 @@ class NarrationBodyViewModel : ViewModel() {
     }
 
     private fun subscribeActiveVersesChanged() {
-        narration.activeVerses.subscribe {
+        narration.onActiveVersesUpdated.subscribe {
             recordedVerses.setAll(it)
 
             hasUndo = narration.hasUndo()

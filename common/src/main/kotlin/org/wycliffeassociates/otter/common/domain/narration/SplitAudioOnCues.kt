@@ -30,13 +30,17 @@ private const val BUFFER_SIZE = 10240
 
 class SplitAudioOnCues @Inject constructor(private val directoryProvider: IDirectoryProvider) {
 
-    fun execute(file: File): Single<Map<String, File>> {
+    fun execute(file: File): Map<String, File> {
+        val sourceAudio = AudioFile(file)
+        val cues = sourceAudio.metadata.getCues().ifEmpty {
+            listOf(AudioCue(location = 0, label = "1"))
+        }
+        return splitAudio(file, cues)
+    }
+
+    fun executeAsync(file: File): Single<Map<String, File>> {
         return Single.fromCallable {
-            val sourceAudio = AudioFile(file)
-            val cues = sourceAudio.metadata.getCues().ifEmpty {
-                listOf(AudioCue(location = 0, label = "1"))
-            }
-            splitAudio(file, cues)
+            execute(file)
         }
     }
 

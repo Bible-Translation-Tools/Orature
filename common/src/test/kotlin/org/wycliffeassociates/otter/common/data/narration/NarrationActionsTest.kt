@@ -7,6 +7,8 @@ import org.junit.Before
 import org.junit.Test
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.primitives.VerseNode
+import org.wycliffeassociates.otter.common.domain.narration.*
+import org.wycliffeassociates.otter.common.domain.narration.NarrationHistory
 import java.util.ArrayList
 
 class NarrationActionsTest {
