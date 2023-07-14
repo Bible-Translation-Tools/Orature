@@ -10,13 +10,11 @@ import org.wycliffeassociates.otter.common.data.narration.*
 import org.wycliffeassociates.otter.common.data.primitives.VerseNode
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.narration.AudioFileUtils
 import org.wycliffeassociates.otter.common.domain.narration.SplitAudioOnCues
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
-import org.wycliffeassociates.otter.common.recorder.WavFileWriter
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
@@ -156,9 +154,6 @@ class NarrationBodyViewModel : ViewModel() {
     @Inject
     lateinit var directoryProvider: IDirectoryProvider
 
-    private var recorder: IAudioRecorder? = null
-    private var writer: WavFileWriter? = null
-
     private val recordStartProperty = SimpleBooleanProperty()
     private var recordStart by recordStartProperty
 
@@ -249,9 +244,6 @@ class NarrationBodyViewModel : ViewModel() {
         stopPlayer()
 
         narration.onRecordAgain(verseIndex)
-
-        recorder?.start()
-        writer?.start()
 
         recordAgainVerseIndex = verseIndex
         isRecording = true
@@ -351,9 +343,6 @@ class NarrationBodyViewModel : ViewModel() {
 
         narration.onNewVerse()
 
-        recorder?.start()
-        writer?.start()
-
         isRecording = true
         recordStart = false
         recordResume = false
@@ -363,18 +352,15 @@ class NarrationBodyViewModel : ViewModel() {
         isRecording = false
         recordPause = true
 
-        recorder?.pause()
-        writer?.pause()
+        narration.pauseRecording()
 
-        narration.finalizeVerse()
         potentiallyFinished = checkPotentiallyFinished()
     }
 
     private fun resumeRecording() {
         stopPlayer()
 
-        recorder?.start()
-        writer?.start()
+        narration.resumeRecording()
 
         isRecording = true
         recordPause = false
@@ -382,8 +368,7 @@ class NarrationBodyViewModel : ViewModel() {
 
     private fun stopRecordAgain() {
         recordAgainVerseIndex?.let { verseIndex ->
-            recorder?.pause()
-            writer?.pause()
+            narration.pauseRecording(verseIndex)
 
             recordAgainVerseIndex = null
             isRecording = false
@@ -391,8 +376,6 @@ class NarrationBodyViewModel : ViewModel() {
 
             recordPause = false
             recordResume = true
-
-            narration.finalizeVerse(verseIndex)
         }
     }
 
@@ -402,17 +385,11 @@ class NarrationBodyViewModel : ViewModel() {
     }
 
     private fun initializeRecorder() {
-        recorder = audioConnectionFactory.getRecorder().also { rec ->
-            writer = WavFileWriter(narration.workingAudio, rec.getAudioStream(), true) {  /* no op */  }
-        }
+        narration.initializeRecorder(audioConnectionFactory.getRecorder())
     }
 
     private fun closeRecorder() {
-        recorder?.stop()
-        recorder = null
-
-        writer?.writer?.dispose()
-        writer = null
+        narration.closeRecorder()
     }
 
     private fun processWithEditor(file: File, verseIndex: Int) {

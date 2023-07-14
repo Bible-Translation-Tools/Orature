@@ -7,9 +7,11 @@ import io.reactivex.Completable
 import io.reactivex.subjects.PublishSubject
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.primitives.VerseNode
+import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.domain.narration.AudioFileUtils
 import org.wycliffeassociates.otter.common.domain.narration.SplitAudioOnCues
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.recorder.WavFileWriter
 import java.io.File
 
 private const val HISTORY_FILE_NAME = "narration"
@@ -36,6 +38,9 @@ class Narration (
 
     val activeVerses = PublishSubject.create<List<VerseNode>>()
 
+    private var recorder: IAudioRecorder? = null
+    private var writer: WavFileWriter? = null
+
     init {
         initializeWorkingAudioFile()
         initializeSerializedVersesFile()
@@ -52,6 +57,19 @@ class Narration (
             true -> createWorkingFilesFromChapterFile(chapterFile!!)
             else -> loadFromSerializedVerses()
         }
+    }
+
+    fun initializeRecorder(recorder: IAudioRecorder) {
+        this.recorder = recorder
+        writer = WavFileWriter(workingAudio, recorder.getAudioStream(), true) {  /* no op */  }
+    }
+
+    fun closeRecorder() {
+        recorder?.stop()
+        recorder = null
+
+        writer?.writer?.dispose()
+        writer = null
     }
 
     fun undo() {
@@ -76,11 +94,17 @@ class Narration (
     fun onNewVerse() {
         val action = NewVerseAction()
         execute(action)
+
+        recorder?.start()
+        writer?.start()
     }
 
     fun onRecordAgain(verseIndex: Int) {
         val action = RecordAgainAction(verseIndex)
         execute(action)
+
+        recorder?.start()
+        writer?.start()
     }
 
     fun onVerseMarker(firstVerseIndex: Int, secondVerseIndex: Int, markerPosition: Int) {
@@ -101,6 +125,18 @@ class Narration (
     fun onChapterEdited(newVerses: List<VerseNode>) {
         val action = ChapterEditedAction(newVerses)
         execute(action)
+    }
+
+    fun pauseRecording(verseIndex: Int = verses.lastIndex) {
+        recorder?.pause()
+        writer?.pause()
+
+        finalizeVerse(verseIndex)
+    }
+
+    fun resumeRecording() {
+        recorder?.start()
+        writer?.start()
     }
 
     fun hasUndo(): Boolean {
