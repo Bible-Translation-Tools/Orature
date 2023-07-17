@@ -20,8 +20,10 @@ class Narration private constructor(directoryProvider: IDirectoryProvider,) {
     private lateinit var chapterRepresentation: ChapterRepresentation
 
     val activeVerses: List<VerseNode>
-        get() = chapterRepresentation.verses
-    val onActiveVersesUpdated = PublishSubject.create<List<VerseNode>>()
+        get() = chapterRepresentation.activeVerses
+
+    val onActiveVersesUpdated: PublishSubject<List<VerseNode>>
+        get() = chapterRepresentation.onActiveVersesUpdated
 
     private var recorder: IAudioRecorder? = null
     private var writer: WavFileWriter? = null
@@ -56,7 +58,7 @@ class Narration private constructor(directoryProvider: IDirectoryProvider,) {
                 }
 
                 initializeRecorder(recorder)
-                sendActiveVerses()
+                chapterRepresentation.sendActiveVerses()
             }
         }
     }
@@ -81,23 +83,21 @@ class Narration private constructor(directoryProvider: IDirectoryProvider,) {
     }
 
     fun undo() {
-        history.undo(chapterRepresentation.verses)
+        history.undo(chapterRepresentation.activeVerses)
 
-        sendActiveVerses()
+        chapterRepresentation.sendActiveVerses()
         chapterRepresentation.serializeVerses()
     }
 
     fun redo() {
-        history.redo(chapterRepresentation.verses)
+        history.redo(chapterRepresentation.activeVerses)
 
-        sendActiveVerses()
+        chapterRepresentation.sendActiveVerses()
         chapterRepresentation.serializeVerses()
     }
 
-    fun finalizeVerse(verseIndex: Int = chapterRepresentation.verses.lastIndex) {
-        chapterRepresentation.verses.getOrNull(verseIndex)?.end =
-            chapterRepresentation.workingAudio.totalFrames
-        chapterRepresentation.serializeVerses()
+    fun finalizeVerse(verseIndex: Int = activeVerses.lastIndex) {
+        chapterRepresentation.finalizeVerse(verseIndex)
     }
 
     fun onNewVerse() {
@@ -140,11 +140,9 @@ class Narration private constructor(directoryProvider: IDirectoryProvider,) {
         execute(action)
     }
 
-    fun pauseRecording(verseIndex: Int = chapterRepresentation.verses.lastIndex) {
+    fun pauseRecording() {
         recorder?.pause()
         writer?.pause()
-
-        finalizeVerse(verseIndex)
     }
 
     fun resumeRecording() {
@@ -165,30 +163,30 @@ class Narration private constructor(directoryProvider: IDirectoryProvider,) {
     }
 
     private fun execute(action: NarrationAction) {
-        history.execute(action, chapterRepresentation.verses, chapterRepresentation.workingAudio)
+        history.execute(action, chapterRepresentation.activeVerses, chapterRepresentation.workingAudio)
 
-        sendActiveVerses()
+        chapterRepresentation.sendActiveVerses()
         chapterRepresentation.serializeVerses()
     }
 
     private fun createWorkingFilesFromChapterFile(file: File) {
-        val cues = splitAudioOnCues.execute(file)
-        createVersesFromCues(cues)
-        appendCuesToWorkingAudio(cues)
+        val segments = splitAudioOnCues.execute(file)
+        createVersesFromVerseSegments(segments)
+        appendVerseSegmentsToWorkingAudio(segments)
     }
 
-    private fun appendCuesToWorkingAudio(cues: Map<String, File>) {
-        cues.forEach {
+    private fun appendVerseSegmentsToWorkingAudio(segments: Map<String, File>) {
+        segments.forEach {
             audioFileUtils.appendFile(chapterRepresentation.workingAudio, it.value)
         }
     }
 
-    private fun createVersesFromCues(cues: Map<String, File>) {
+    private fun createVersesFromVerseSegments(segments: Map<String, File>) {
         val nodes = mutableListOf<VerseNode>()
         var start = chapterRepresentation.workingAudio.totalFrames
         var end = chapterRepresentation.workingAudio.totalFrames
 
-        cues.forEach {
+        segments.forEach {
             val verseAudio = AudioFile(it.value)
             end += verseAudio.totalFrames
             val node = VerseNode(start, end)
@@ -197,9 +195,5 @@ class Narration private constructor(directoryProvider: IDirectoryProvider,) {
         }
 
         onChapterEdited(nodes)
-    }
-
-    private fun sendActiveVerses() {
-        onActiveVersesUpdated.onNext(chapterRepresentation.verses)
     }
 }

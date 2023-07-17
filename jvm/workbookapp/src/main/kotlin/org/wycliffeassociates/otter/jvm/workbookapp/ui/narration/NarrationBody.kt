@@ -353,6 +353,7 @@ class NarrationBodyViewModel : ViewModel() {
         recordPause = true
 
         narration.pauseRecording()
+        narration.finalizeVerse()
 
         potentiallyFinished = checkPotentiallyFinished()
     }
@@ -368,7 +369,8 @@ class NarrationBodyViewModel : ViewModel() {
 
     private fun stopRecordAgain() {
         recordAgainVerseIndex?.let { verseIndex ->
-            narration.pauseRecording(verseIndex)
+            narration.pauseRecording()
+            narration.finalizeVerse(verseIndex)
 
             recordAgainVerseIndex = null
             isRecording = false
