@@ -12,11 +12,11 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
+import org.wycliffeassociates.otter.common.domain.narration.AudioFileUtils
 import org.wycliffeassociates.otter.common.domain.narration.Narration
-import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.domain.narration.SplitAudioOnCues
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
-import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -134,17 +134,16 @@ class NarrationBody : View() {
 class NarrationBodyViewModel : ViewModel() {
     private val logger = LoggerFactory.getLogger(NarrationBodyViewModel::class.java)
 
+    @Inject lateinit var splitAudioOnCues: SplitAudioOnCues
+    @Inject lateinit var audioFileUtils: AudioFileUtils
+    @Inject lateinit var recorder: IAudioRecorder
+    @Inject lateinit var player: IAudioPlayer
+
     private val workbookDataStore: WorkbookDataStore by inject()
     private val narrationViewViewModel: NarrationViewViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
     private val audioController = AudioPlayerController(Slider())
-
-    @Inject
-    lateinit var audioConnectionFactory: AudioConnectionFactory
-
-    @Inject
-    lateinit var directoryProvider: IDirectoryProvider
 
     private val recordStartProperty = SimpleBooleanProperty()
     private var recordStart by recordStartProperty
@@ -186,9 +185,6 @@ class NarrationBodyViewModel : ViewModel() {
     private val listeners = mutableListOf<ListenerDisposer>()
     private val disposables = CompositeDisposable()
 
-    private val player: IAudioPlayer
-    private val recorder: IAudioRecorder
-
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
 
@@ -203,9 +199,6 @@ class NarrationBodyViewModel : ViewModel() {
         narrationViewViewModel.hasVersesProperty.bind(recordedVerses.booleanBinding { it.isNotEmpty() })
 
         narrationViewViewModel.lastRecordedVerseProperty.bind(recordedVerses.integerBinding { it.size })
-
-        player = audioConnectionFactory.getPlayer()
-        recorder = audioConnectionFactory.getRecorder()
     }
 
     fun onDock() {
@@ -314,8 +307,8 @@ class NarrationBodyViewModel : ViewModel() {
             narration = Narration.load(
                 workbookDataStore.workbook,
                 chapter,
-                directoryProvider,
-                workbookDataStore.workbook.projectFilesAccessor,
+                splitAudioOnCues,
+                audioFileUtils,
                 recorder,
                 player,
                 chapterOpenInPluginProperty.value

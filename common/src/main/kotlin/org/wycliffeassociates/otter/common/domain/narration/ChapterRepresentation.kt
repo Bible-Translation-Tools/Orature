@@ -10,14 +10,12 @@ import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.primitives.VerseNode
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import java.io.File
 
-private const val HISTORY_FILE_NAME = "narration_history.json"
+private const val ACTIVE_VERSES_FILE_NAME = "active_verses.json"
 private const val CHAPTER_NARRATION_FILE_NAME = "chapter_narration.pcm"
 
 internal class ChapterRepresentation(
-    private val projectFilesAccessor: ProjectFilesAccessor,
     private val workbook: Workbook,
     private val chapter: Chapter
 ) {
@@ -39,8 +37,8 @@ internal class ChapterRepresentation(
     }
 
     private fun initializeSerializedVersesFile() {
-        val projectChapterDir = projectFilesAccessor.getChapterAudioDir(workbook, chapter)
-        serializedVersesFile = File(projectChapterDir, HISTORY_FILE_NAME).also {
+        val projectChapterDir = workbook.projectFilesAccessor.getChapterAudioDir(workbook, chapter)
+        serializedVersesFile = File(projectChapterDir, ACTIVE_VERSES_FILE_NAME).also {
             if (!it.exists()) {
                 it.createNewFile()
             }
@@ -48,7 +46,7 @@ internal class ChapterRepresentation(
     }
 
     private fun initializeWorkingAudioFile() {
-        val projectChapterDir = projectFilesAccessor.getChapterAudioDir(workbook, chapter)
+        val projectChapterDir = workbook.projectFilesAccessor.getChapterAudioDir(workbook, chapter)
         File(projectChapterDir, CHAPTER_NARRATION_FILE_NAME).also {
             if (!it.exists()) {
                 it.createNewFile()

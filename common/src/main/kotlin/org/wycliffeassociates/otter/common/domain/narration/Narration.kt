@@ -7,20 +7,16 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
-import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.recorder.WavFileWriter
 import java.io.File
 
 class Narration private constructor(
-    private val directoryProvider: IDirectoryProvider,
+    private val splitAudioOnCues: SplitAudioOnCues,
+    private val audioFileUtils: AudioFileUtils,
+    private val recorder: IAudioRecorder,
     private val player: IAudioPlayer
 ) {
     private val history = NarrationHistory()
-
-    private val splitAudioOnCues = SplitAudioOnCues(directoryProvider)
-    private val audioFileUtils = AudioFileUtils(directoryProvider)
-
     private lateinit var chapterRepresentation: ChapterRepresentation
 
     val activeVerses: List<VerseNode>
@@ -29,22 +25,20 @@ class Narration private constructor(
     val onActiveVersesUpdated: PublishSubject<List<VerseNode>>
         get() = chapterRepresentation.onActiveVersesUpdated
 
-    private var recorder: IAudioRecorder? = null
     private var writer: WavFileWriter? = null
 
     companion object {
         fun load(
             workbook: Workbook,
             chapter: Chapter,
-            directoryProvider: IDirectoryProvider,
-            projectFilesAccessor: ProjectFilesAccessor,
+            splitAudioOnCues: SplitAudioOnCues,
+            audioFileUtils: AudioFileUtils,
             recorder: IAudioRecorder,
             player: IAudioPlayer,
             forceLoadFromChapterFile: Boolean = false
         ): Narration {
-            return Narration(directoryProvider, player).apply {
+            return Narration(splitAudioOnCues, audioFileUtils, recorder, player).apply {
                 chapterRepresentation = ChapterRepresentation(
-                    projectFilesAccessor,
                     workbook,
                     chapter
                 )
@@ -62,26 +56,14 @@ class Narration private constructor(
                     chapterRepresentation.loadFromSerializedVerses()
                 }
 
-                initializeRecorder(recorder)
+                initializeWavWriter()
                 chapterRepresentation.sendActiveVerses()
             }
         }
     }
 
-    fun initializeRecorder(recorder: IAudioRecorder) {
-        this.recorder = recorder
-        writer = WavFileWriter(
-            chapterRepresentation.workingAudio,
-            recorder.getAudioStream(),
-            true
-        ) {
-            /* no op */
-        }
-    }
-
     fun closeRecorder() {
-        recorder?.stop()
-        recorder = null
+        recorder.stop()
 
         writer?.writer?.dispose()
         writer = null
@@ -109,7 +91,7 @@ class Narration private constructor(
         val action = NewVerseAction()
         execute(action)
 
-        recorder?.start()
+        recorder.start()
         writer?.start()
     }
 
@@ -117,7 +99,7 @@ class Narration private constructor(
         val action = RecordAgainAction(verseIndex)
         execute(action)
 
-        recorder?.start()
+        recorder.start()
         writer?.start()
     }
 
@@ -146,12 +128,12 @@ class Narration private constructor(
     }
 
     fun pauseRecording() {
-        recorder?.pause()
+        recorder.pause()
         writer?.pause()
     }
 
     fun resumeRecording() {
-        recorder?.start()
+        recorder.start()
         writer?.start()
     }
 
@@ -174,6 +156,16 @@ class Narration private constructor(
 
     fun loadSectionIntoPlayer(verse: VerseNode) {
         player.loadSection(chapterRepresentation.workingAudio.file, verse.start, verse.end)
+    }
+
+    private fun initializeWavWriter() {
+        writer = WavFileWriter(
+            chapterRepresentation.workingAudio,
+            recorder.getAudioStream(),
+            true
+        ) {
+            /* no op */
+        }
     }
 
     private fun execute(action: NarrationAction) {
