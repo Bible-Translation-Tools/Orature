@@ -13,7 +13,6 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.narration.AudioFileUtils
 import org.wycliffeassociates.otter.common.domain.narration.Narration
-import org.wycliffeassociates.otter.common.domain.narration.SplitAudioOnCues
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
@@ -148,9 +147,6 @@ class NarrationBodyViewModel : ViewModel() {
 
     @Inject
     lateinit var audioFileUtils: AudioFileUtils
-
-    @Inject
-    lateinit var splitAudioOnCues: SplitAudioOnCues
 
     @Inject
     lateinit var directoryProvider: IDirectoryProvider
