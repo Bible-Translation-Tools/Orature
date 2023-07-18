@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.VerseNode
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.narration.Narration
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -137,8 +138,6 @@ class NarrationBodyViewModel : ViewModel() {
     private val narrationViewViewModel: NarrationViewViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
-    @Inject
-    lateinit var player: IAudioPlayer
     private val audioController = AudioPlayerController(Slider())
 
     @Inject
@@ -187,6 +186,9 @@ class NarrationBodyViewModel : ViewModel() {
     private val listeners = mutableListOf<ListenerDisposer>()
     private val disposables = CompositeDisposable()
 
+    private val player: IAudioPlayer
+    private val recorder: IAudioRecorder
+
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
 
@@ -201,6 +203,9 @@ class NarrationBodyViewModel : ViewModel() {
         narrationViewViewModel.hasVersesProperty.bind(recordedVerses.booleanBinding { it.isNotEmpty() })
 
         narrationViewViewModel.lastRecordedVerseProperty.bind(recordedVerses.integerBinding { it.size })
+
+        player = audioConnectionFactory.getPlayer()
+        recorder = audioConnectionFactory.getRecorder()
     }
 
     fun onDock() {
@@ -311,7 +316,7 @@ class NarrationBodyViewModel : ViewModel() {
                 chapter,
                 directoryProvider,
                 workbookDataStore.workbook.projectFilesAccessor,
-                audioConnectionFactory.getRecorder(),
+                recorder,
                 player,
                 chapterOpenInPluginProperty.value
             )
