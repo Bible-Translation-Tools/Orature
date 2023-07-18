@@ -11,7 +11,6 @@ import org.wycliffeassociates.otter.common.data.primitives.VerseNode
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
-import org.wycliffeassociates.otter.common.domain.narration.AudioFileUtils
 import org.wycliffeassociates.otter.common.domain.narration.Narration
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
@@ -146,9 +145,6 @@ class NarrationBodyViewModel : ViewModel() {
     lateinit var audioConnectionFactory: AudioConnectionFactory
 
     @Inject
-    lateinit var audioFileUtils: AudioFileUtils
-
-    @Inject
     lateinit var directoryProvider: IDirectoryProvider
 
     private val recordStartProperty = SimpleBooleanProperty()
@@ -228,7 +224,8 @@ class NarrationBodyViewModel : ViewModel() {
         } else {
             audioController.pause()
 
-            player.loadSection(narration.getWorkingAudio().file, verse.start, verse.end)
+            narration.loadSectionIntoPlayer(verse)
+
             audioController.load(player)
             audioController.seek(0)
             audioController.play()
@@ -249,8 +246,7 @@ class NarrationBodyViewModel : ViewModel() {
     }
 
     fun openInAudioPlugin(index: Int) {
-        val verse = recordedVerses[index]
-        val file = audioFileUtils.getSectionAsFile(narration.getWorkingAudio(), verse.start, verse.end)
+        val file = narration.getSectionAsFile(index)
         processWithEditor(file, index)
     }
 
@@ -316,6 +312,7 @@ class NarrationBodyViewModel : ViewModel() {
                 directoryProvider,
                 workbookDataStore.workbook.projectFilesAccessor,
                 audioConnectionFactory.getRecorder(),
+                player,
                 chapterOpenInPluginProperty.value
             )
         }

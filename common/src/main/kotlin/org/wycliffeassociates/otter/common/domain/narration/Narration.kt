@@ -5,13 +5,17 @@ import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.primitives.VerseNode
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.recorder.WavFileWriter
 import java.io.File
 
-class Narration private constructor(directoryProvider: IDirectoryProvider,) {
+class Narration private constructor(
+    private val directoryProvider: IDirectoryProvider,
+    private val player: IAudioPlayer
+) {
     private val history = NarrationHistory()
 
     private val splitAudioOnCues = SplitAudioOnCues(directoryProvider)
@@ -35,9 +39,10 @@ class Narration private constructor(directoryProvider: IDirectoryProvider,) {
             directoryProvider: IDirectoryProvider,
             projectFilesAccessor: ProjectFilesAccessor,
             recorder: IAudioRecorder,
+            player: IAudioPlayer,
             forceLoadFromChapterFile: Boolean = false
         ): Narration {
-            return Narration(directoryProvider).apply {
+            return Narration(directoryProvider, player).apply {
                 chapterRepresentation = ChapterRepresentation(
                     projectFilesAccessor,
                     workbook,
@@ -158,8 +163,17 @@ class Narration private constructor(directoryProvider: IDirectoryProvider,) {
         return history.hasRedo()
     }
 
-    fun getWorkingAudio(): AudioFile {
-        return chapterRepresentation.workingAudio
+    fun getSectionAsFile(index: Int): File {
+        val verse = activeVerses[index]
+        return audioFileUtils.getSectionAsFile(
+            chapterRepresentation.workingAudio,
+            verse.start,
+            verse.end
+        )
+    }
+
+    fun loadSectionIntoPlayer(verse: VerseNode) {
+        player.loadSection(chapterRepresentation.workingAudio.file, verse.start, verse.end)
     }
 
     private fun execute(action: NarrationAction) {
