@@ -38,10 +38,9 @@ class Narration private constructor(
             forceLoadFromChapterFile: Boolean = false
         ): Narration {
             return Narration(splitAudioOnCues, audioFileUtils, recorder, player).apply {
-                chapterRepresentation = ChapterRepresentation(
-                    workbook,
-                    chapter
-                )
+                chapterRepresentation = ChapterRepresentation(workbook, chapter)
+
+                initializeWavWriter()
 
                 val chapterFile = chapter.getSelectedTake()?.file
                 val chapterFileExists = chapterFile?.exists() ?: false
@@ -55,9 +54,6 @@ class Narration private constructor(
                 } else {
                     chapterRepresentation.loadFromSerializedVerses()
                 }
-
-                initializeWavWriter()
-                chapterRepresentation.sendActiveVerses()
             }
         }
     }
@@ -71,16 +67,12 @@ class Narration private constructor(
 
     fun undo() {
         history.undo(chapterRepresentation.activeVerses)
-
-        chapterRepresentation.sendActiveVerses()
-        chapterRepresentation.serializeVerses()
+        chapterRepresentation.onVersesUpdated()
     }
 
     fun redo() {
         history.redo(chapterRepresentation.activeVerses)
-
-        chapterRepresentation.sendActiveVerses()
-        chapterRepresentation.serializeVerses()
+        chapterRepresentation.onVersesUpdated()
     }
 
     fun finalizeVerse(verseIndex: Int = activeVerses.lastIndex) {
@@ -170,9 +162,7 @@ class Narration private constructor(
 
     private fun execute(action: NarrationAction) {
         history.execute(action, chapterRepresentation.activeVerses, chapterRepresentation.workingAudio)
-
-        chapterRepresentation.sendActiveVerses()
-        chapterRepresentation.serializeVerses()
+        chapterRepresentation.onVersesUpdated()
     }
 
     private fun createWorkingFilesFromChapterFile(file: File) {

@@ -36,6 +36,37 @@ internal class ChapterRepresentation(
         initializeSerializedVersesFile()
     }
 
+    fun loadFromSerializedVerses() {
+        val json = serializedVersesFile.readText()
+        val reference = object : TypeReference<List<VerseNode>>() {}
+
+        try {
+            val nodes = activeVersesMapper.readValue(json, reference)
+            activeVerses.addAll(nodes)
+        } catch (e: JsonMappingException) {
+            logger.error("Error in loadFromSerializedVerses: ${e.message}")
+        }
+    }
+
+    fun finalizeVerse(verseIndex: Int = activeVerses.lastIndex) {
+        activeVerses.getOrNull(verseIndex)?.end = workingAudio.totalFrames
+        serializeVerses()
+    }
+
+    fun onVersesUpdated() {
+        serializeVerses()
+        sendActiveVerses()
+    }
+
+    private fun serializeVerses() {
+        val jsonStr = activeVersesMapper.writeValueAsString(activeVerses)
+        serializedVersesFile.writeText(jsonStr)
+    }
+
+    private fun sendActiveVerses() {
+        onActiveVersesUpdated.onNext(activeVerses)
+    }
+
     private fun initializeSerializedVersesFile() {
         val projectChapterDir = workbook.projectFilesAccessor.getChapterAudioDir(workbook, chapter)
         serializedVersesFile = File(projectChapterDir, ACTIVE_VERSES_FILE_NAME).also {
@@ -53,31 +84,5 @@ internal class ChapterRepresentation(
             }
             workingAudio = AudioFile(it)
         }
-    }
-
-    fun serializeVerses() {
-        val jsonStr = activeVersesMapper.writeValueAsString(activeVerses)
-        serializedVersesFile.writeText(jsonStr)
-    }
-
-    fun loadFromSerializedVerses() {
-        val json = serializedVersesFile.readText()
-        val reference = object : TypeReference<List<VerseNode>>() {}
-
-        try {
-            val nodes = activeVersesMapper.readValue(json, reference)
-            activeVerses.addAll(nodes)
-        } catch (e: JsonMappingException) {
-            logger.error("Error in loadFromSerializedVerses: ${e.message}")
-        }
-    }
-
-    fun sendActiveVerses() {
-        onActiveVersesUpdated.onNext(activeVerses)
-    }
-
-    fun finalizeVerse(verseIndex: Int = activeVerses.lastIndex) {
-        activeVerses.getOrNull(verseIndex)?.end = workingAudio.totalFrames
-        serializeVerses()
     }
 }
