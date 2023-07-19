@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.common.domain.narration
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.primitives.VerseNode
@@ -52,6 +53,10 @@ class Narration @AssistedInject constructor(
 
     fun getPlayer(): IAudioPlayer {
         return player
+    }
+
+    fun getRecorderAudioStream(): Observable<ByteArray> {
+        return recorder.getAudioStream()
     }
 
     fun closeRecorder() {
