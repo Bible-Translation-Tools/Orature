@@ -1,5 +1,8 @@
 package org.wycliffeassociates.otter.common.domain.narration
 
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import io.reactivex.subjects.PublishSubject
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.primitives.VerseNode
@@ -10,14 +13,17 @@ import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.recorder.WavFileWriter
 import java.io.File
 
-class Narration private constructor(
+class Narration @AssistedInject constructor(
     private val splitAudioOnCues: SplitAudioOnCues,
     private val audioFileUtils: AudioFileUtils,
     private val recorder: IAudioRecorder,
-    private val player: IAudioPlayer
+    private val player: IAudioPlayer,
+    @Assisted private val workbook: Workbook,
+    @Assisted private val chapter: Chapter,
+    @Assisted private val forceLoadFromChapterFile: Boolean
 ) {
     private val history = NarrationHistory()
-    private lateinit var chapterRepresentation: ChapterRepresentation
+    private var chapterRepresentation = ChapterRepresentation(workbook, chapter)
 
     val activeVerses: List<VerseNode>
         get() = chapterRepresentation.activeVerses
@@ -27,35 +33,25 @@ class Narration private constructor(
 
     private var writer: WavFileWriter? = null
 
-    companion object {
-        fun load(
-            workbook: Workbook,
-            chapter: Chapter,
-            splitAudioOnCues: SplitAudioOnCues,
-            audioFileUtils: AudioFileUtils,
-            recorder: IAudioRecorder,
-            player: IAudioPlayer,
-            forceLoadFromChapterFile: Boolean = false
-        ): Narration {
-            return Narration(splitAudioOnCues, audioFileUtils, recorder, player).apply {
-                chapterRepresentation = ChapterRepresentation(workbook, chapter)
+    init {
+        initializeWavWriter()
 
-                initializeWavWriter()
+        val chapterFile = chapter.getSelectedTake()?.file
+        val chapterFileExists = chapterFile?.exists() ?: false
 
-                val chapterFile = chapter.getSelectedTake()?.file
-                val chapterFileExists = chapterFile?.exists() ?: false
+        val forceLoad = chapterFileExists && forceLoadFromChapterFile
+        val narrationEmpty = chapterRepresentation.workingAudio.totalFrames == 0
+        val narrationFromChapter = chapterFileExists && narrationEmpty
 
-                val forceLoad = chapterFileExists && forceLoadFromChapterFile
-                val narrationEmpty = chapterRepresentation.workingAudio.totalFrames == 0
-                val narrationFromChapter = chapterFileExists && narrationEmpty
-
-                if(forceLoad || narrationFromChapter) {
-                    createWorkingFilesFromChapterFile(chapterFile!!)
-                } else {
-                    chapterRepresentation.loadFromSerializedVerses()
-                }
-            }
+        if(forceLoad || narrationFromChapter) {
+            createWorkingFilesFromChapterFile(chapterFile!!)
+        } else {
+            chapterRepresentation.loadFromSerializedVerses()
         }
+    }
+
+    fun getPlayer(): IAudioPlayer {
+        return player
     }
 
     fun closeRecorder() {
@@ -192,4 +188,13 @@ class Narration private constructor(
 
         onChapterEdited(nodes)
     }
+}
+
+@AssistedFactory
+interface NarrationFactory {
+    fun create(
+        workbook: Workbook,
+        chapter: Chapter,
+        forceLoadFromChapterFile: Boolean
+    ): Narration
 }

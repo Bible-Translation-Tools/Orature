@@ -9,12 +9,9 @@ import javafx.scene.control.Slider
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.VerseNode
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
-import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
-import org.wycliffeassociates.otter.common.domain.narration.AudioFileUtils
 import org.wycliffeassociates.otter.common.domain.narration.Narration
-import org.wycliffeassociates.otter.common.domain.narration.SplitAudioOnCues
+import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
@@ -134,10 +131,7 @@ class NarrationBody : View() {
 class NarrationBodyViewModel : ViewModel() {
     private val logger = LoggerFactory.getLogger(NarrationBodyViewModel::class.java)
 
-    @Inject lateinit var splitAudioOnCues: SplitAudioOnCues
-    @Inject lateinit var audioFileUtils: AudioFileUtils
-    @Inject lateinit var recorder: IAudioRecorder
-    @Inject lateinit var player: IAudioPlayer
+    @Inject lateinit var narrationFactory: NarrationFactory
 
     private val workbookDataStore: WorkbookDataStore by inject()
     private val narrationViewViewModel: NarrationViewViewModel by inject()
@@ -224,7 +218,7 @@ class NarrationBodyViewModel : ViewModel() {
 
             narration.loadSectionIntoPlayer(verse)
 
-            audioController.load(player)
+            audioController.load(narration.getPlayer())
             audioController.seek(0)
             audioController.play()
 
@@ -304,13 +298,9 @@ class NarrationBodyViewModel : ViewModel() {
 
     private fun initializeNarration(chapter: Chapter) {
         Completable.fromAction {
-            narration = Narration.load(
+            narration = narrationFactory.create(
                 workbookDataStore.workbook,
                 chapter,
-                splitAudioOnCues,
-                audioFileUtils,
-                recorder,
-                player,
                 chapterOpenInPluginProperty.value
             )
         }

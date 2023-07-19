@@ -30,7 +30,7 @@ ext {
     retrofitJacksonVer = '2.9.0'
     retrofitRxJava2Ver = '2.9.0'
     jacksonVer = '2.9.2'
-    daggerVer = '2.24'
+    daggerVer = '2.47'
     junitVer = '4.12'
     mockitoVer = '2.+'
     mockitoKotlinVer = '2.1.0'
