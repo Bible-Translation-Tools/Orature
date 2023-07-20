@@ -80,9 +80,8 @@ internal class RecordAgainAction(
  * by verse nodes with updated positions.
  */
 internal class VerseMarkerAction(
-    private val firstVerseIndex: Int,
-    private val secondVerseIndex: Int,
-    private val marker: Int
+    private val verseIndex: Int,
+    private val newMarkerPosition: Int
 ) : NarrationAction {
     private var previousFirstNode: VerseNode? = null
     private var previousSecondNode: VerseNode? = null
@@ -92,37 +91,37 @@ internal class VerseMarkerAction(
 
     // Called when marker is set and mouse button is released
     override fun execute(activeVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
-        previousFirstNode = activeVerses[firstVerseIndex]
-        previousSecondNode = activeVerses[secondVerseIndex]
+        previousFirstNode = activeVerses[verseIndex]
+        previousSecondNode = activeVerses.getOrNull(verseIndex - 1)
 
         previousFirstNode?.let { prev ->
-            firstNode = VerseNode(prev.start, marker).also { current ->
-                activeVerses[firstVerseIndex] = current
+            firstNode = VerseNode(newMarkerPosition, prev.end).also { current ->
+                activeVerses[verseIndex] = current
             }
         }
 
         previousSecondNode?.let { prev ->
-            secondNode = VerseNode(marker, prev.end).also { current ->
-                activeVerses[secondVerseIndex] = current
+            secondNode = VerseNode(prev.start, newMarkerPosition).also { current ->
+                activeVerses[verseIndex - 1] = current
             }
         }
     }
 
     override fun undo(activeVerses: MutableList<VerseNode>) {
         previousFirstNode?.let {
-            activeVerses[firstVerseIndex] = it
+            activeVerses[verseIndex] = it
         }
         previousSecondNode?.let {
-            activeVerses[secondVerseIndex] = it
+            activeVerses[verseIndex - 1] = it
         }
     }
 
     override fun redo(activeVerses: MutableList<VerseNode>) {
         firstNode?.let {
-            activeVerses[firstVerseIndex] = it
+            activeVerses[verseIndex] = it
         }
         secondNode?.let {
-            activeVerses[secondVerseIndex] = it
+            activeVerses[verseIndex - 1] = it
         }
     }
 }

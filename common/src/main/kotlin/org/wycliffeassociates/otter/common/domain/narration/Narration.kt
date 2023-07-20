@@ -89,8 +89,8 @@ class Narration @AssistedInject constructor(
         writer?.start()
     }
 
-    fun onVerseMarker(firstVerseIndex: Int, secondVerseIndex: Int, markerPosition: Int) {
-        val action = VerseMarkerAction(firstVerseIndex, secondVerseIndex, markerPosition)
+    fun onVerseMarker(verseIndex: Int, markerPosition: Int) {
+        val action = VerseMarkerAction(verseIndex, markerPosition)
         execute(action)
     }
 

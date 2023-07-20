@@ -198,7 +198,7 @@ class NarrationActionsTest {
 
         val newMarker = 120
 
-        val action = VerseMarkerAction(0, 1, newMarker)
+        val action = VerseMarkerAction(1, newMarker)
         narrationHistory.execute(action, narrationList, secondFileUpdated)
 
         assertEquals(narrationList.size, 2)
@@ -222,7 +222,7 @@ class NarrationActionsTest {
 
         val newMarker = 120
 
-        val action = VerseMarkerAction(0, 1, newMarker)
+        val action = VerseMarkerAction(1, newMarker)
         narrationHistory.execute(action, narrationList, secondFileUpdated)
 
         narrationHistory.undo(narrationList)
