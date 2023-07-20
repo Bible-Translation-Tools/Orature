@@ -36,8 +36,8 @@ object OratureCueParser {
     }
 }
 
-class MarkerParseResult(val accepted: List<AudioMarker>, val rejected: List<AudioCue>)
-interface MarkerParser {
+internal class MarkerParseResult(val accepted: List<AudioMarker>, val rejected: List<AudioCue>)
+internal interface MarkerParser {
     val cueType: OratureCueType
     val pattern: Pattern
 
@@ -60,7 +60,7 @@ interface MarkerParser {
     }
 }
 
-class VerseMarkerParser : MarkerParser {
+internal class VerseMarkerParser : MarkerParser {
     override val cueType = OratureCueType.VERSE
 
     override val pattern: Pattern = Pattern.compile("^orature-vm-(\\d+)(?:-(\\d+))?\$")
@@ -155,7 +155,7 @@ class VerseMarkerParser : MarkerParser {
     }
 }
 
-class ChunkMarkerParser : MarkerParser {
+internal class ChunkMarkerParser : MarkerParser {
     override val cueType = OratureCueType.CHUNK
 
     override val pattern: Pattern = Pattern.compile("^orature-chunk-(\\d+)\$")
