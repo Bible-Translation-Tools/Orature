@@ -113,7 +113,7 @@ class NarrationBody : View() {
         }
 
         subscribe<ChapterOpenInPluginEvent> {
-            viewModel.onChapterLoad()
+            viewModel.onChapterLoadFromPlugin()
         }
     }
 
@@ -241,7 +241,7 @@ class NarrationBodyViewModel : ViewModel() {
         processWithEditor(file, index)
     }
 
-    fun onChapterLoad() {
+    fun onChapterLoadFromPlugin() {
         reloadNarration()
     }
 
