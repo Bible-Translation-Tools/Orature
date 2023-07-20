@@ -1,8 +1,16 @@
 package org.wycliffeassociates.otter.common.domain.audio
 
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.audio.*
-import org.wycliffeassociates.otter.common.data.audio.*
+import org.wycliffeassociates.otter.common.audio.AudioCue
+import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.audio.AudioMetadata
+import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
+import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
+import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
+import org.wycliffeassociates.otter.common.data.audio.AudioMarker
+import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
+import org.wycliffeassociates.otter.common.data.audio.OratureCueType
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import java.io.File
 import java.util.regex.Pattern
 
