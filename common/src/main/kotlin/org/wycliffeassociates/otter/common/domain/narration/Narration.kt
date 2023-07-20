@@ -25,6 +25,9 @@ class Narration @AssistedInject constructor(
     private val history = NarrationHistory()
     private var chapterRepresentation = ChapterRepresentation(workbook, chapter)
 
+    val workingAudio: AudioFile
+        get() = chapterRepresentation.workingAudio
+
     val activeVerses: List<VerseNode>
         get() = chapterRepresentation.activeVerses
 
