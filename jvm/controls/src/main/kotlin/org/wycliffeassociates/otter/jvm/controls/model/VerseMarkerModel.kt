@@ -186,10 +186,14 @@ class VerseMarkerModel(
     }
 
 
-    private fun handleUnmatched(labelsToMarkers: MutableMap<String, AudioMarker?>, unmatchedMarkers: List<AudioMarker>) {
+    private fun handleUnmatched(
+        labelsToMarkers: MutableMap<String, AudioMarker?>,
+        unmatchedMarkers: List<AudioMarker>
+    ) {
         if (unmatchedMarkers.isEmpty()) return
 
         data class Bridge(val start: Int, val end: Int)
+
         val labelMatcher = Regex("^(\\d+)(?:-(\\d+))?$")
         val bridgeToLabel = mutableMapOf<Bridge, String>()
         labelsToMarkers.forEach {
@@ -258,7 +262,11 @@ class VerseMarkerModel(
         return false
     }
 
-    fun bridgeCue(cue: AudioCue, labels: MutableList<String>, mappedCues: MutableMap<String, AudioCue>) {
+    fun bridgeCue(
+        cue: AudioCue,
+        labels: MutableList<String>,
+        mappedCues: MutableMap<String, AudioCue>
+    ) {
         val label = labels.find { it.contains("-") }
         if (label != null) {
             val range = label.split("-")
