@@ -39,8 +39,22 @@ import java.nio.ByteBuffer
 class WavMetadata(parsableChunks: List<RiffChunk>? = null) : AudioMetadata {
 
     companion object {
-        var parsers: List<Class<out RiffChunk?>> = arrayListOf<Class<out RiffChunk?>>(CueChunk::class.java)
 
+        /**
+         * Holds the chunk parsers used to parse Wav metadata
+         */
+        private var parsers: List<Class<out RiffChunk?>> = arrayListOf<Class<out RiffChunk?>>(CueChunk::class.java)
+
+        /**
+         * Allows for configuration of the WavMetadata when using this audio library. As The ideal use of this library
+         * is to open a file using the AudioFile class, it can be difficult to configure and or extend custom Wav Chunk
+         * parsers beyond what is provided by this library.
+         *
+         * In your main function, or where application configuration is done prior to use of the AudioFile class,
+         * make a call to this function and provide which RiffChunk parsers should be used by the WavMetadata class
+         * when reading wav files. All AudioFiles will then use the provided parsers instead of the default configuration.
+         * (Currently the default chunks parsed are only CueChunks).
+         */
         fun configureParsers(vararg parsers: Class<out RiffChunk>) {
             this.parsers = arrayListOf(*parsers)
         }
