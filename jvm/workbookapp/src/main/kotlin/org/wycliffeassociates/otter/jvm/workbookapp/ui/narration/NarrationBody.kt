@@ -112,8 +112,8 @@ class NarrationBody : View() {
             viewModel.openInAudioPlugin(it.index)
         }
 
-        subscribe<ChapterLoadEvent> {
-            viewModel.onChapterLoad(it.chapter, it.status)
+        subscribe<ChapterOpenInPluginEvent> {
+            viewModel.onChapterLoad()
         }
     }
 
@@ -172,7 +172,6 @@ class NarrationBodyViewModel : ViewModel() {
     private lateinit var narration: Narration
 
     val pluginContextProperty = SimpleObjectProperty(PluginType.EDITOR)
-    val chapterOpenInPluginProperty = SimpleBooleanProperty()
 
     val recordedVerses = observableListOf<VerseNode>()
 
@@ -242,14 +241,8 @@ class NarrationBodyViewModel : ViewModel() {
         processWithEditor(file, index)
     }
 
-    fun onChapterLoad(chapter: Chapter, status: ChapterLoadStatus) {
-        when (status) {
-            ChapterLoadStatus.STARTED -> {
-                chapterOpenInPluginProperty.value = true
-                initializeNarration(chapter)
-            }
-            ChapterLoadStatus.FINISHED -> chapterOpenInPluginProperty.value = false
-        }
+    fun onChapterLoad() {
+        reloadNarration()
     }
 
     fun onNext() {
@@ -298,11 +291,7 @@ class NarrationBodyViewModel : ViewModel() {
 
     private fun initializeNarration(chapter: Chapter) {
         Completable.fromAction {
-            narration = narrationFactory.create(
-                workbookDataStore.workbook,
-                chapter,
-                chapterOpenInPluginProperty.value
-            )
+            narration = narrationFactory.create(workbookDataStore.workbook, chapter)
         }
             .doOnError {
                 logger.error("An error occurred in loadNarration", it)
@@ -314,8 +303,22 @@ class NarrationBodyViewModel : ViewModel() {
                 recordStart = recordedVerses.isEmpty()
                 recordResume = recordedVerses.isNotEmpty()
                 potentiallyFinished = checkPotentiallyFinished()
+            }
+    }
 
-                FX.eventbus.fire(ChapterLoadEvent(chapter, ChapterLoadStatus.FINISHED))
+    private fun reloadNarration() {
+        Completable.fromCallable {
+            narration.loadFromSelectedChapterFile()
+        }
+            .doOnError {
+                logger.error("An error occurred in loadNarration", it)
+            }
+            .subscribe {
+                recordedVerses.setAll(narration.activeVerses)
+
+                recordStart = recordedVerses.isEmpty()
+                recordResume = recordedVerses.isNotEmpty()
+                potentiallyFinished = checkPotentiallyFinished()
             }
     }
 
@@ -423,9 +426,4 @@ class RecordAgainEvent(val index: Int) : FXEvent()
 class PlayVerseEvent(val verse: VerseNode) : FXEvent()
 class OpenInAudioPluginEvent(val index: Int) : FXEvent()
 
-class ChapterLoadEvent(val chapter: Chapter, val status: ChapterLoadStatus): FXEvent()
-
-enum class ChapterLoadStatus {
-    STARTED,
-    FINISHED
-}
+class ChapterOpenInPluginEvent: FXEvent()

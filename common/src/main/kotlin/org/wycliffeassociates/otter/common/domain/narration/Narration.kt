@@ -20,8 +20,7 @@ class Narration @AssistedInject constructor(
     private val recorder: IAudioRecorder,
     private val player: IAudioPlayer,
     @Assisted private val workbook: Workbook,
-    @Assisted private val chapter: Chapter,
-    @Assisted private val forceLoadFromChapterFile: Boolean
+    @Assisted private val chapter: Chapter
 ) {
     private val history = NarrationHistory()
     private var chapterRepresentation = ChapterRepresentation(workbook, chapter)
@@ -40,15 +39,19 @@ class Narration @AssistedInject constructor(
         val chapterFile = chapter.getSelectedTake()?.file
         val chapterFileExists = chapterFile?.exists() ?: false
 
-        val forceLoad = chapterFileExists && forceLoadFromChapterFile
         val narrationEmpty = chapterRepresentation.workingAudio.totalFrames == 0
         val narrationFromChapter = chapterFileExists && narrationEmpty
 
-        if(forceLoad || narrationFromChapter) {
+        if(narrationFromChapter) {
             createWorkingFilesFromChapterFile(chapterFile!!)
         } else {
             chapterRepresentation.loadFromSerializedVerses()
         }
+    }
+
+    fun loadFromSelectedChapterFile() {
+        val chapterFile = chapter.getSelectedTake()?.file
+        createWorkingFilesFromChapterFile(chapterFile!!)
     }
 
     fun getPlayer(): IAudioPlayer {
@@ -199,7 +202,6 @@ class Narration @AssistedInject constructor(
 interface NarrationFactory {
     fun create(
         workbook: Workbook,
-        chapter: Chapter,
-        forceLoadFromChapterFile: Boolean
+        chapter: Chapter
     ): Narration
 }

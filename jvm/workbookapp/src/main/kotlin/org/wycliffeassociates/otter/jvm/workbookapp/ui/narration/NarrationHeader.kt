@@ -230,8 +230,7 @@ class NarrationHeaderViewModel : ViewModel() {
                             else -> {
                                 when (pluginType) {
                                     PluginType.EDITOR, PluginType.MARKER -> {
-                                        val chapter = workbookDataStore.chapter
-                                        FX.eventbus.fire(ChapterLoadEvent(chapter, ChapterLoadStatus.STARTED))
+                                        FX.eventbus.fire(ChapterOpenInPluginEvent())
                                     }
                                     else -> {}
                                 }
