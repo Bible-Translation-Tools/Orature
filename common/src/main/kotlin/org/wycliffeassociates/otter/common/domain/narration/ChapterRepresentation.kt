@@ -42,6 +42,7 @@ internal class ChapterRepresentation(
 
         try {
             val nodes = activeVersesMapper.readValue(json, reference)
+            activeVerses.clear()
             activeVerses.addAll(nodes)
         } catch (e: JsonMappingException) {
             logger.error("Error in loadFromSerializedVerses: ${e.message}")

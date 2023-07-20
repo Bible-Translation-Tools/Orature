@@ -36,22 +36,12 @@ class Narration @AssistedInject constructor(
     init {
         initializeWavWriter()
 
-        val chapterFile = chapter.getSelectedTake()?.file
-        val chapterFileExists = chapterFile?.exists() ?: false
-
-        val narrationEmpty = chapterRepresentation.workingAudio.totalFrames == 0
-        val narrationFromChapter = chapterFileExists && narrationEmpty
-
-        if(narrationFromChapter) {
-            createWorkingFilesFromChapterFile(chapterFile!!)
-        } else {
-            chapterRepresentation.loadFromSerializedVerses()
-        }
+        updateWorkingFilesFromChapterFile()
+        chapterRepresentation.loadFromSerializedVerses()
     }
 
     fun loadFromSelectedChapterFile() {
-        val chapterFile = chapter.getSelectedTake()?.file
-        createWorkingFilesFromChapterFile(chapterFile!!)
+        updateWorkingFilesFromChapterFile(true)
     }
 
     fun getPlayer(): IAudioPlayer {
@@ -169,10 +159,18 @@ class Narration @AssistedInject constructor(
         chapterRepresentation.onVersesUpdated()
     }
 
-    private fun createWorkingFilesFromChapterFile(file: File) {
-        val segments = splitAudioOnCues.execute(file)
-        createVersesFromVerseSegments(segments)
-        appendVerseSegmentsToWorkingAudio(segments)
+    private fun updateWorkingFilesFromChapterFile(forceUpdate: Boolean = false) {
+        val chapterFile = chapter.getSelectedTake()?.file
+        val chapterFileExists = chapterFile?.exists() ?: false
+
+        val narrationEmpty = chapterRepresentation.workingAudio.totalFrames == 0
+        val narrationFromChapter = chapterFileExists && narrationEmpty
+
+        if (narrationFromChapter || forceUpdate) {
+            val segments = splitAudioOnCues.execute(chapterFile!!)
+            createVersesFromVerseSegments(segments)
+            appendVerseSegmentsToWorkingAudio(segments)
+        }
     }
 
     private fun appendVerseSegmentsToWorkingAudio(segments: Map<String, File>) {
