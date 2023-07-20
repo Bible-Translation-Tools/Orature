@@ -112,8 +112,8 @@ class NarrationBody : View() {
             viewModel.openInAudioPlugin(it.index)
         }
 
-        subscribe<ChapterOpenInPluginEvent> {
-            viewModel.onChapterLoadFromPlugin()
+        subscribe<ChapterReturnFromPluginEvent> {
+            viewModel.onChapterReturnFromPlugin()
         }
     }
 
@@ -241,7 +241,7 @@ class NarrationBodyViewModel : ViewModel() {
         processWithEditor(file, index)
     }
 
-    fun onChapterLoadFromPlugin() {
+    fun onChapterReturnFromPlugin() {
         reloadNarration()
     }
 
@@ -426,4 +426,4 @@ class RecordAgainEvent(val index: Int) : FXEvent()
 class PlayVerseEvent(val verse: VerseNode) : FXEvent()
 class OpenInAudioPluginEvent(val index: Int) : FXEvent()
 
-class ChapterOpenInPluginEvent: FXEvent()
+class ChapterReturnFromPluginEvent: FXEvent()
