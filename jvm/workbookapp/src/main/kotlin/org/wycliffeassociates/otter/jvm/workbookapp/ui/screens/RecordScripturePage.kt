@@ -351,7 +351,7 @@ class RecordScripturePage : View() {
             recordScriptureViewModel.processTakeWithPlugin(it, PluginType.MARKER)
         }
         addEventHandler(TakeEvent.SELECT_TAKE) {
-            recordScriptureViewModel.selectTake(it.take)
+            recordScriptureViewModel.selectTake(it.take).subscribe()
         }
     }
 

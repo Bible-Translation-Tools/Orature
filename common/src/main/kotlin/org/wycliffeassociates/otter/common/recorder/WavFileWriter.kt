@@ -23,10 +23,10 @@ import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import org.slf4j.LoggerFactory
 import java.util.concurrent.atomic.AtomicBoolean
-import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 
 class WavFileWriter(
-    private val audioFile: AudioFile,
+    private val oratureAudioFile: OratureAudioFile,
     private val audioStream: Observable<ByteArray>,
     private val onComplete: () -> Unit
 ) {
@@ -49,7 +49,7 @@ class WavFileWriter(
     val writer = Observable
         .using(
             {
-                audioFile.writer(append = false, buffered = true)
+                oratureAudioFile.writer(append = false, buffered = true)
             },
             { writer ->
                 audioStream.map {

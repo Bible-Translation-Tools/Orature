@@ -28,7 +28,7 @@ import javafx.scene.control.Slider
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
@@ -46,7 +46,6 @@ import kotlin.math.max
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
-import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseRequestEvent
 
 private const val WAV_COLOR = "#0A337390"
 private const val BACKGROUND_COLOR = "#FFFFFF"
@@ -116,11 +115,11 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
         )
     }
 
-    private fun loadAudio(): AudioFile {
+    private fun loadAudio(): OratureAudioFile {
         val scope = scope as ParameterizedScope
         val player = (scope.workspace.params["audioConnectionFactory"] as AudioConnectionFactory).getPlayer()
         val audioFile = File(scope.parameters.named["wav"])
-        val audio = AudioFile(audioFile)
+        val audio = OratureAudioFile(audioFile)
         player.load(audioFile)
         player.getAudioReader()?.let {
             sampleRate = it.sampleRate
@@ -130,11 +129,12 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
         return audio
     }
 
-    private fun loadMarkers(audio: AudioFile) {
-        val initialMarkerCount = audio.metadata.getCues().size
+    private fun loadMarkers(audio: OratureAudioFile) {
         scope as ParameterizedScope
-        val totalMarkers: Int = scope.parameters.named["marker_total"]?.toInt() ?: initialMarkerCount
-        markerModel = VerseMarkerModel(audio, totalMarkers)
+        val markersList: List<String> = getVerseLabelList(scope.parameters.named["marker_labels"])
+        val totalMarkers: Int = markersList.size
+
+        markerModel = VerseMarkerModel(audio, totalMarkers, markersList)
 
         markerRatioProperty.bind(
             Bindings.createStringBinding(
@@ -145,6 +145,10 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
         markerModel?.let { markerModel ->
             markers.setAll(markerModel.markers)
         }
+    }
+
+    private fun getVerseLabelList(s: String?): List<String> {
+        return s?.removeSurrounding("[", "]")?.split(",")?.map { it.trim() } ?: emptyList()
     }
 
     private fun loadTitles() {
@@ -193,7 +197,7 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
         audioController?.pause()
     }
 
-    private fun createWaveformImages(audio: AudioFile) {
+    private fun createWaveformImages(audio: OratureAudioFile) {
         imageWidthProperty.set(computeImageWidth(SECONDS_ON_SCREEN))
 
         waveform = asyncBuilder.buildAsync(
