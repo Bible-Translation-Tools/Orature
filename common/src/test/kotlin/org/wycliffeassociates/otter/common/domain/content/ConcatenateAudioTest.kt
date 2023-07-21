@@ -58,7 +58,7 @@ class ConcatenateAudioTest {
 
         inputFiles.forEachIndexed { index, file ->
             OratureAudioFile(file).apply {
-                addVerseMarker(VerseMarker(index + 1, index + 1, index))
+                addMarker<VerseMarker>(VerseMarker(index + 1, index + 1, index))
                 update()
             }
         }

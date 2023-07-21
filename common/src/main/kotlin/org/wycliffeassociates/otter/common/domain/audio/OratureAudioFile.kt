@@ -10,9 +10,11 @@ import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.audio.OratureCueType
+import org.wycliffeassociates.otter.common.data.audio.UnknownMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import java.io.File
 import java.util.regex.Pattern
+import kotlin.reflect.KClass
 
 class OratureAudioFile : AudioFile {
 
@@ -64,17 +66,33 @@ class OratureAudioFile : AudioFile {
         return getCuesFromMap(type)
     }
 
+    fun getMarkerTypeFromClass(clazz: KClass<out AudioMarker>): OratureCueType {
+        return when (clazz) {
+            UnknownMarker::class -> OratureCueType.UNKNOWN
+            VerseMarker::class -> OratureCueType.VERSE
+            ChunkMarker::class -> OratureCueType.CHUNK
+            else -> OratureCueType.UNKNOWN
+        }
+    }
+
+    inline fun <reified T: AudioMarker> getMarker(): List<T> {
+        val type = T::class
+        val enum = getMarkerTypeFromClass(type)
+        return getMarker(enum).map { it as T }
+    }
+
     @Deprecated("Markers should be added to OtterAudioFile using typed addMarker methods")
     fun addCues(cues: List<AudioCue>) {
         markers.import(OratureCueParser.parse(cues))
     }
 
-    fun addVerseMarker(marker: VerseMarker) {
-        markers.addMarker(OratureCueType.VERSE, marker)
+    inline fun <reified T: AudioMarker> addMarker(marker: T) {
+        val enum = getMarkerTypeFromClass(T::class)
+        addMarker(enum, marker)
     }
 
-    fun addChunkMarker(marker: ChunkMarker) {
-        markers.addMarker(OratureCueType.CHUNK, marker)
+    fun addMarker(type: OratureCueType, marker: AudioMarker) {
+        markers.addMarker(type, marker)
     }
 
     fun importMetadata(metadata: AudioMetadata) {
@@ -98,8 +116,13 @@ class OratureAudioFile : AudioFile {
             val verseStart = match.group(1).toInt()
             val verseEnd = match.group(2)?.toInt() ?: verseStart
             val marker = VerseMarker(verseStart, verseEnd, location)
-            addVerseMarker(marker)
+            addMarker<VerseMarker>(marker)
         }
+    }
+
+    inline fun <reified T: AudioMarker> clearMarkersOfType() {
+        val enum = getMarkerTypeFromClass(T::class)
+        clearCuesFromMap(enum)
     }
 
     fun clearChunkMarkers() {
@@ -120,12 +143,12 @@ class OratureAudioFile : AudioFile {
         return markers.getMarkers(type)
     }
 
-    private fun clearCuesFromMap(type: OratureCueType) {
+    fun clearCuesFromMap(type: OratureCueType) {
         markers.clearMarkersOfType(type)
     }
 }
 
-class OratureMarkers {
+internal class OratureMarkers {
     private val cueMap: MutableMap<OratureCueType, MutableList<AudioMarker>> = mutableMapOf(
         OratureCueType.CHUNK to mutableListOf(),
         OratureCueType.VERSE to mutableListOf(),

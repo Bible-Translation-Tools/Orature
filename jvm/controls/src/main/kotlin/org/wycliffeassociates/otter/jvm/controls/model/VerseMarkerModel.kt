@@ -168,7 +168,7 @@ class VerseMarkerModel(
         audio: OratureAudioFile,
         markerLabels: List<String>
     ): List<AudioCue> {
-        val verses = audio.getMarker(OratureCueType.VERSE)
+        val verses = audio.getMarker<VerseMarker>()
         val map = mutableMapOf<String, AudioMarker?>()
         map.putAll(markerLabels.map { it to null })
         val unmatched = mutableListOf<AudioMarker>()

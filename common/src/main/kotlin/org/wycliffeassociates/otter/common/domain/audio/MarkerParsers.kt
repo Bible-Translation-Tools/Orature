@@ -6,7 +6,7 @@ import org.wycliffeassociates.otter.common.audio.AudioMetadata
 import org.wycliffeassociates.otter.common.data.audio.*
 import java.util.regex.Pattern
 
-object OratureCueParser {
+internal object OratureCueParser {
 
     private val parsers = listOf(
         VerseMarkerParser(),

@@ -582,7 +582,7 @@ class RecordScriptureViewModel : ViewModel() {
                     if (getCues().isEmpty()) {
                         val chunk = workbookDataStore.chunk
                         if (chunk != null) {
-                            addVerseMarker(VerseMarker(chunk.start, chunk.end, 0))
+                            addMarker<VerseMarker>(VerseMarker(chunk.start, chunk.end, 0))
                         }
                         update()
                     }

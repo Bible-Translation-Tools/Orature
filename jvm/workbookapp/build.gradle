@@ -49,6 +49,10 @@ sourceSets {
     }
 }
 
+compileIntegrationTestKotlin {
+    kotlinOptions.jvmTarget = "11"
+}
+
 configurations {
     integrationTestImplementation.extendsFrom main
     integrationTestRuntime.extendsFrom main

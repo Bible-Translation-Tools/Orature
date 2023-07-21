@@ -457,7 +457,7 @@ class ChapterPageViewModel : ViewModel() {
     private fun setMarker(marker: VerseMarker, take: Take) {
         OratureAudioFile(take.file).apply {
             if (getCues().isEmpty()) {
-                addVerseMarker(marker)
+                addMarker<VerseMarker>(marker)
                 update()
             }
         }

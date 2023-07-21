@@ -131,8 +131,7 @@ class SourceAudioAccessor(
             val cues = oratureAudioFile.getCues()
             cues.sortedBy { it.location }
             val verses = oratureAudioFile
-                .getMarker(OratureCueType.VERSE)
-                .map { it as VerseMarker }
+                .getMarker<VerseMarker>()
                 .sortedBy { it.location }
             val marker = verses.find { it.start == chunk }
             if (marker != null) {

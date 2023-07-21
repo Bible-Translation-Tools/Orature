@@ -237,7 +237,7 @@ class TestSourceProjectExporter {
         // select a take to be included when export
         workbook.target.chapters.blockingFirst().audio.selectTake(take)
         OratureAudioFile(testTake).apply {
-            addVerseMarker(VerseMarker(1,1, 1))
+            addMarker<VerseMarker>(VerseMarker(1,1, 1))
             update()
         }
     }
@@ -260,7 +260,7 @@ class TestSourceProjectExporter {
             }
 
         OratureAudioFile(takeFile).apply {
-            addVerseMarker(VerseMarker(1, 1, 1))
+            addMarker<VerseMarker>(VerseMarker(1, 1, 1))
             update()
         }
     }
