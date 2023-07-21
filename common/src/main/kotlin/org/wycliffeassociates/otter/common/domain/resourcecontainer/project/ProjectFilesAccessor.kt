@@ -219,8 +219,8 @@ class ProjectFilesAccessor(
             try {
                 ResourceContainer.load(projectDir).close()
                 return
-            } catch (e: Exception) {
-                log.error("Error in loading resource container $projectDir", e)
+            } catch (_: Exception) {
+                log.info("Unable to load resource container at $projectDir. Creating a new one...")
             }
         }
 

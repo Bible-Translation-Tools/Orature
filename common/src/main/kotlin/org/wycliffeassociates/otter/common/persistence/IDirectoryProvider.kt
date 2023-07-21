@@ -102,6 +102,11 @@ interface IDirectoryProvider {
     /** Clean temporary directory */
     fun cleanTempDirectory()
 
+    /**
+     * Opens the given filePath in the current OS file manager/explorer.
+     */
+    fun openInFileManager(path: String)
+
     val databaseDirectory: File
     val resourceContainerDirectory: File
     val internalSourceRCDirectory: File

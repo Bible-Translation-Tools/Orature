@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2023 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -188,8 +188,6 @@ class WorkbookPageViewModel : ViewModel() {
         showExportProgressDialogProperty.set(true)
 
         val workbook = workbookDataStore.workbook
-        val resourceMetadata = workbookDataStore.workbook.target.resourceMetadata
-
         activeProjectTitleProperty.set(workbook.target.title)
         activeProjectCoverProperty.set(
             workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
@@ -204,7 +202,6 @@ class WorkbookPageViewModel : ViewModel() {
         exporter
             .export(
                 directory,
-                resourceMetadata,
                 workbook,
                 null
             )

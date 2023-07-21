@@ -26,11 +26,12 @@
 }
 
 .filtered-search-bar__input {
+    -fx-pref-height: 40px;
     -fx-pref-width: 240px;
     -fx-background-radius: 20;
     -fx-border-radius: 16;
     -fx-padding: 3 0 3 14;
-    -fx-font-size: 1.5em;
+    -fx-font-size: 1.4em;
 }
 
 .filtered-search-bar__input:focused {
@@ -47,6 +48,11 @@
     -fx-border-width: 0 0 0 1px;
 }
 
+.filtered-search-bar__input .right-pane > .button {
+    -fx-pref-width: 24px;
+    -fx-pref-height: 24px;
+}
+
 .filtered-search-bar__input .ikonli-font-icon {
     -fx-fill: -wa-regular-text;
     -fx-font-size: 24px;
@@ -54,6 +60,11 @@
 
 .filtered-search-bar__input:focused .ikonli-font-icon {
     -fx-fill: -wa-text-input-fill;
+}
+
+.filtered-search-bar__input .text-field-button {
+    -fx-padding: 5 10;
+    -fx-background-color: transparent;
 }
 
 .wa-menu-button .checkbox-button,

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2023 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -24,6 +24,7 @@ import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.ThemeColorEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.HomePage
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.HomePage2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SplashScreenViewModel
 import tornadofx.*
@@ -77,7 +78,7 @@ class SplashScreen : View() {
                 close()
                 settingsViewModel.setAppOrientation()
                 primaryStage.show()
-                navigator.dock<HomePage>()
+                navigator.dock<HomePage2>()
             }
             .observeOnFx()
             .subscribe { theme ->

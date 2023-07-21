@@ -40,6 +40,8 @@ import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRep
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Manifest
@@ -54,7 +56,8 @@ import javax.inject.Inject
 class OngoingProjectImporter @Inject constructor(
     private val directoryProvider: IDirectoryProvider,
     private val resourceMetadataRepository: IResourceMetadataRepository,
-    private val workbookRepository: WorkbookRepository,
+    private val workbookRepository: IWorkbookRepository,
+    private val workbookDescriptorRepository: IWorkbookDescriptorRepository,
     private val collectionRepository: ICollectionRepository,
     private val contentRepository: IContentRepository,
     private val takeRepository: ITakeRepository,
@@ -64,6 +67,7 @@ class OngoingProjectImporter @Inject constructor(
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
     private val contentCache = mutableMapOf<ContentSignature, Content>()
+    private var projectName = ""
     private var takesInChapterFilter: Map<String, Int>? = null
     private var duplicatedTakes: MutableList<String> = mutableListOf()
 
@@ -77,6 +81,7 @@ class OngoingProjectImporter @Inject constructor(
             return super.passToNextImporter(file, callback, options)
         }
         takesInChapterFilter = null
+        projectName = ""
 
         return Single
             .fromCallable { projectExists(file) }
@@ -110,14 +115,23 @@ class OngoingProjectImporter @Inject constructor(
                     ?: return false
 
                 val languageSlug = it.language.identifier
-                val projectSlug = rc.manifest.projects.first().identifier
+                val projectSlug = rc.manifest.projects.first().let { p ->
+                    projectName = p.title
+                    p.identifier
+                }
 
                 val projects = workbookRepository.getProjects().blockingGet()
-                return projects.any { existingProject ->
+                return projects.firstOrNull { existingProject ->
                     sourceLanguageSlug == existingProject.source.language.slug &&
                             languageSlug == existingProject.target.language.slug &&
                             projectSlug == existingProject.target.slug
-                }
+                }?.let { workbook ->
+                    directoryProvider.getProjectDirectory(
+                        workbook.source.resourceMetadata,
+                        workbook.target.resourceMetadata,
+                        projectSlug
+                    ).exists()
+                } ?: false
             }
         }
     }
@@ -128,7 +142,7 @@ class OngoingProjectImporter @Inject constructor(
     ): Boolean {
         val takesChapterMap = fetchTakesInRC(file)
         val chapterList = takesChapterMap.values.distinct().sorted()
-        val callbackParam = ImportCallbackParameter(chapterList)
+        val callbackParam = ImportCallbackParameter(chapterList, projectName)
         val chaptersToImport = callback.onRequestUserInput(callbackParam).blockingGet().chapters
             ?: return false
 
@@ -185,11 +199,13 @@ class OngoingProjectImporter @Inject constructor(
 
                 callback?.onNotifyProgress(
                     localizeKey = "loadingSomething",
-                    message = "${manifest.dublinCore.language.identifier}_${manifestProject.identifier}"
+                    message = "${manifest.dublinCore.language.identifier}_${manifestProject.identifier}",
+                    percent = 10.0
                 )
                 directoryProvider.newFileReader(resourceContainer).use { fileReader ->
                     val existingSource = fetchExistingSource(manifestProject, manifestSources)
                     try {
+                        callback?.onNotifyProgress(localizeKey = "importingSource", percent = 20.0)
                         // Import Sources even if existing source exists in order to potentially merge source audio
                         importSources(fileReader)
                     } catch (e: ImportException) {
@@ -209,7 +225,15 @@ class OngoingProjectImporter @Inject constructor(
                         }
                         .blockingGet()
 
-                    importResumableProject(fileReader, metadata, manifestProject, sourceCollection)
+                    val derived = importResumableProject(fileReader, metadata, manifestProject, sourceCollection, callback)
+                    val workbookDescriptor = workbookDescriptorRepository.getAll().blockingGet().firstOrNull {
+                        it.targetCollection == derived && it.sourceCollection == sourceCollection
+                    }
+                    callback?.onNotifySuccess(
+                        manifest.dublinCore.language.title,
+                        manifestProject.title,
+                        workbookDescriptor
+                    )
                 }
 
                 ImportResult.SUCCESS
@@ -226,8 +250,9 @@ class OngoingProjectImporter @Inject constructor(
         fileReader: IFileReader,
         metadata: ResourceMetadata,
         manifestProject: Project,
-        sourceCollection: Collection
-    ) {
+        sourceCollection: Collection,
+        callback: ProjectImporterCallback?
+    ): Collection {
         val sourceMetadata = sourceCollection.resourceContainer!!
         val derivedProject = createDerivedProjects(metadata.language, sourceCollection, true)
 
@@ -241,6 +266,8 @@ class OngoingProjectImporter @Inject constructor(
         )
 
         projectFilesAccessor.initializeResourceContainerInDir()
+
+        callback?.onNotifyProgress(localizeKey = "copyingSource", percent = 40.0)
         projectFilesAccessor.copySourceFiles(fileReader)
 
         importContributorInfo(metadata, projectFilesAccessor)
@@ -250,6 +277,7 @@ class OngoingProjectImporter @Inject constructor(
             projectFilesAccessor,
             fileReader
         )
+        callback?.onNotifyProgress(localizeKey = "importingTakes", percent = 80.0)
 
         importTakes(
             fileReader,
@@ -263,6 +291,10 @@ class OngoingProjectImporter @Inject constructor(
         translation.modifiedTs = LocalDateTime.now()
         languageRepository.updateTranslation(translation).subscribe()
         resetChaptersWithoutTakes(fileReader, derivedProject)
+
+        callback?.onNotifyProgress(localizeKey = "finishingUp", percent = 100.0)
+
+        return derivedProject
     }
 
     private fun importChunks(project: Collection, accessor: ProjectFilesAccessor, fileReader: IFileReader) {

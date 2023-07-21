@@ -32,6 +32,8 @@ class ExistingSourceImporter @Inject constructor(
 ) : RCImporter(directoryProvider, resourceMetadataRepository) {
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
+    private var languageName = ""
+
     override fun import(
         file: File,
         callback: ProjectImporterCallback?,
@@ -47,6 +49,7 @@ class ExistingSourceImporter @Inject constructor(
             ResourceContainer.load(file).use { rc ->
                 sameVersion = (rc.manifest.dublinCore.version == existingSource.version)
                 ResourceContainer.load(existingSource.path).use { existingRC ->
+                    languageName = rc.manifest.dublinCore.language.title
                     val sourceVersification = rc.manifest.projects.firstOrNull()?.versification
                     val existingVersification = existingRC.manifest.projects.firstOrNull()?.versification
                     sameVersification = sourceVersification == existingVersification
@@ -57,19 +60,24 @@ class ExistingSourceImporter @Inject constructor(
             return Single.just(ImportResult.LOAD_RC_ERROR)
         }
 
-        return if (sameVersion) {
-            callback?.onNotifyProgress(localizeKey = "mergingSource")
+        val singleStream = if (sameVersion) {
+            callback?.onNotifyProgress(localizeKey = "mergingSource", percent = 30.0)
+
             logger.info("RC ${file.name} already imported, merging media...")
-            mergeMedia(file, existingSource.path)
+            mergeMedia(file, existingSource.path, callback)
         } else if (sameVersification) {
-            callback?.onNotifyProgress(localizeKey = "updatingVersification")
+            callback?.onNotifyProgress(localizeKey = "updatingVersification", percent = 25.0)
+
             logger.info("RC ${file.name} already imported but uses the same versification, updating source...")
             updateSource(existingSource, file).blockingGet()
-            mergeMedia(file, existingSource.path)
+
+            callback?.onNotifyProgress(localizeKey = "mergingSource", percent = 50.0)
+
+            mergeMedia(file, existingSource.path, callback)
             mergeText(file, existingSource.path)
         } else {
             // existing resource has a different version, confirms overwrite/delete
-            callback?.onNotifyProgress(localizeKey = "overridingSource")
+            callback?.onNotifyProgress(localizeKey = "overridingSource", percent = 15.0)
             logger.info("RC ${file.name} already imported, but with a different version and different versification.")
             logger.info("Requesting user input to overwrite/delete existing source...")
             val confirmDelete = callback?.onRequestUserInput()
@@ -93,6 +101,23 @@ class ExistingSourceImporter @Inject constructor(
                     Single.just(ImportResult.DEPENDENCY_CONSTRAINT)
                 }
             }
+        }
+
+        return singleStream
+            .doOnSuccess { result ->
+                notifyCallback(result, callback, file)
+            }
+    }
+
+    private fun notifyCallback(
+        result: ImportResult,
+        callback: ProjectImporterCallback?,
+        file: File
+    ) {
+        if (result == ImportResult.SUCCESS) {
+            callback?.onNotifySuccess(language = languageName)
+        } else {
+            callback?.onError(file.name)
         }
     }
 
@@ -131,16 +156,19 @@ class ExistingSourceImporter @Inject constructor(
 
     fun mergeMedia(
         newRC: File,
-        existingRC: File
+        existingRC: File,
+        callback: ProjectImporterCallback?
     ): Single<ImportResult> {
         logger.info("RC already imported, merging media...")
         return Single
             .fromCallable {
                 MediaMerge.merge(
                     ResourceContainer.load(newRC),
-                    ResourceContainer.load(existingRC)
+                    ResourceContainer.load(existingRC),
+                    callback
                 )
                 logger.info("Merge media completed.")
+                callback?.onNotifyProgress(percent = 95.0)
                 ImportResult.SUCCESS
             }
             .onErrorReturn {

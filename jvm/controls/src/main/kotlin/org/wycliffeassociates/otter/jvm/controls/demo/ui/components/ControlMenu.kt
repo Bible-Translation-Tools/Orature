@@ -26,6 +26,7 @@ import org.wycliffeassociates.otter.jvm.controls.combobox.IconComboBoxCell
 import org.wycliffeassociates.otter.jvm.controls.demo.ui.viewmodels.DemoViewModel
 import org.wycliffeassociates.otter.jvm.controls.demo.ui.fragments.ButtonFragment
 import org.wycliffeassociates.otter.jvm.controls.demo.ui.fragments.ComboBoxFragment
+import org.wycliffeassociates.otter.jvm.controls.demo.ui.fragments.TextFieldFragment
 import org.wycliffeassociates.otter.jvm.utils.overrideDefaultKeyEventHandler
 import tornadofx.*
 

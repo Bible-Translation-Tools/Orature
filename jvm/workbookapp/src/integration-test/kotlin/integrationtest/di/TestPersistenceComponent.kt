@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2023 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -23,7 +23,6 @@ import dagger.Component
 import integrationtest.initialization.TestInitializeProjects
 import integrationtest.initialization.TestInitializeSources
 import integrationtest.initialization.TestInitializeUlb
-import integrationtest.persistence.repository.TestCollectionRepository
 import integrationtest.projects.TestProjectCreate
 import integrationtest.projects.TestProjectImport
 import integrationtest.projects.TestRcImport
@@ -37,7 +36,6 @@ import integrationtest.projects.importer.TestRCImporterFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.di.AppDependencyGraph
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppDatabaseModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppPreferencesModule
-import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppRepositoriesModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.ZipEntryTreeBuilderModule
 import javax.inject.Singleton
 
@@ -66,6 +64,5 @@ interface TestPersistenceComponent : AppDependencyGraph {
     fun inject(test: TestSourceProjectExporter)
     fun inject(test: TestBackupProjectExporter)
     fun inject(test: TestAudioProjectExporter)
-    fun inject(test: TestCollectionRepository)
     fun inject(test: MergeMediaTest)
 }

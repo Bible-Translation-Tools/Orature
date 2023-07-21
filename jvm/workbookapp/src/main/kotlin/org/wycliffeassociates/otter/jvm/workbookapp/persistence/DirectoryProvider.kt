@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2023 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -217,6 +217,27 @@ class DirectoryProvider(
 
     override fun cleanTempDirectory() {
         deleteRecursively(tempDirectory)
+    }
+
+    override fun openInFileManager(path: String) {
+        if (!File(path).exists()) {
+            return
+        }
+
+        when {
+            osName.contains("WIN") -> {
+                val command = "explorer.exe /select,\"$path\""
+                Runtime.getRuntime().exec(command)
+            }
+            osName.contains("MAC") -> {
+                val command = arrayOf("open", "-R", path)
+                Runtime.getRuntime().exec(command)
+            }
+            osName.contains("LINUX") -> {
+                val command = arrayOf("xdg-open", path)
+                Runtime.getRuntime().exec(command)
+            }
+        }
     }
 
     override val databaseDirectory: File

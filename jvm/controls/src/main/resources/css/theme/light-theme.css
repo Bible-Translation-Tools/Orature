@@ -55,10 +55,11 @@
     -wa-warning-overlay: rgba(184, 86, 89, 0.1);
 
 /* -------------------- Components mappings --------------------*/
-    -wa-regular-text: -wa-black;
+    -wa-regular-text: #001533;
     -wa-regular-text-80: #33445C;
     -wa-note-text: -wa-black-70;
     -wa-highlight-text: -wa-primary;
+    -wa-active-text: -wa-primary;
     -wa-disabled-text: -wa-gray-light;
     -wa-disabled-background: -wa-black-15;
     -wa-status-active: -wa-green;
@@ -96,14 +97,14 @@
 
     /* buttons */
     -wa-primary-btn-text-fill: -wa-white;
-    -wa-secondary-btn-text-fill: -wa-primary;
+    -wa-secondary-btn-text-fill: -wa-regular-text-80;
     -wa-secondary-btn-text-fill-hover: -wa-primary-dark;
     -wa-secondary-btn-text-fill-pressed: -wa-primary-dark;
     -wa-secondary-btn-background: transparent;
     -wa-secondary-btn-background-hover: -wa-primary-05;
     -wa-secondary-btn-background-pressed: -wa-primary-10;
-    -wa-secondary-btn-border: -wa-primary;
-    -wa-btn-icon-background: -wa-transparent;
+    -wa-secondary-btn-border: -wa-border-light;
+    -wa-btn-icon-background: -wa-white;
     -wa-btn-icon-background-hover: -wa-black-05;
     -wa-btn-icon-background-pressed: -wa-black-10;
     -wa-btn-icon-background-selected: -wa-primary-10;

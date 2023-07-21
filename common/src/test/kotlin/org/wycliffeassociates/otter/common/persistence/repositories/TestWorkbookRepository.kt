@@ -46,7 +46,6 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.TakeHolder
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository.IDatabaseAccessors
 
 class TestWorkbookRepository {
     /** When a unique ID is needed, just use this. */
@@ -121,7 +120,7 @@ class TestWorkbookRepository {
     private val collTarget = collectionBase.copy(resourceContainer = rcTarget, id = autoincrement)
 
     private fun buildWorkbook(
-        db: IDatabaseAccessors,
+        db: IWorkbookDatabaseAccessors,
         source: Collection = collSource,
         target: Collection = collTarget
     ) = WorkbookRepository(
@@ -138,14 +137,14 @@ class TestWorkbookRepository {
     private fun resourceSlugArray(resourceGroups: Iterable<ResourceGroup>) =
         resourceSlugArray(resourceGroups.map { it.metadata })
 
-    private fun buildBasicTestDb(): IDatabaseAccessors = mock()
+    private fun buildBasicTestDb(): IWorkbookDatabaseAccessors = mock()
 
     private object BasicTestParams {
         const val chaptersPerBook = 3
         const val chunksPerChapter = 5
     }
 
-    private fun buildBasicTestWorkbook(mockedDb: IDatabaseAccessors = buildBasicTestDb()): Workbook {
+    private fun buildBasicTestWorkbook(mockedDb: IWorkbookDatabaseAccessors = buildBasicTestDb()): Workbook {
         whenever(
             mockedDb.getChildren(any())
         ).thenAnswer { invocation ->

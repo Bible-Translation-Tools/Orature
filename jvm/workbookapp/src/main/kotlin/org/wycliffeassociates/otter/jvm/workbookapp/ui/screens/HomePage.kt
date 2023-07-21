@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2023 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -32,7 +32,6 @@ import org.wycliffeassociates.otter.jvm.controls.card.TranslationCard
 import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ImportEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
@@ -61,16 +60,6 @@ class HomePage : View() {
         tryImportStylesheet(resources.get("/css/new-translation-card.css"))
         tryImportStylesheet(resources.get("/css/translation-card.css"))
         tryImportStylesheet(resources.get("/css/book-card.css"))
-
-        subscribe<ImportEvent> {
-            if (isDocked) {
-                logger.info("Import event received, refreshing the homepage.")
-                banner.cleanUp()
-                viewModel.refresh()
-            } else {
-                logger.info("Import event received, but not docked. Ignoring.")
-            }
-        }
     }
 
     override val root = stackpane {

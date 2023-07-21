@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2023 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
 import javafx.application.Platform
@@ -27,16 +28,21 @@ import javafx.scene.input.DragEvent
 import javafx.scene.input.KeyCode
 import javafx.scene.input.TransferMode
 import javafx.scene.layout.Priority
+import javafx.stage.FileChooser
 import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.OratureFileFormat
+import org.wycliffeassociates.otter.jvm.controls.dialog.OtterDialog
+import org.wycliffeassociates.otter.jvm.controls.dialog.ProgressDialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AddFilesViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
+import java.io.File
 import java.text.MessageFormat
 
 class AddFilesView : View() {
@@ -46,6 +52,7 @@ class AddFilesView : View() {
     private val settingsViewModel: SettingsViewModel by inject()
 
     private lateinit var closeButton: Button
+    private lateinit var importConflictDialog: OtterDialog
 
     override val root = vbox {
         addClass("app-drawer__content")
@@ -123,7 +130,17 @@ class AddFilesView : View() {
                         }
                         graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
                         action {
-                            viewModel.onChooseFile()
+                            chooseFile(
+                                FX.messages["importResourceFromZip"],
+                                arrayOf(
+                                    FileChooser.ExtensionFilter(
+                                        messages["oratureFileTypes"],
+                                        *OratureFileFormat.extensionList.map { "*.$it" }.toTypedArray()
+                                    )
+                                ),
+                                mode = FileChooserMode.Single,
+                                owner = currentWindow
+                            ).firstOrNull()?.let { importFile(it) }
                         }
                     }
 
@@ -141,8 +158,9 @@ class AddFilesView : View() {
     init {
         tryImportStylesheet(resources["/css/app-drawer.css"])
         tryImportStylesheet(resources["/css/confirm-dialog.css"])
+        tryImportStylesheet(resources["/css/import-export-dialogs.css"])
+        tryImportStylesheet(resources["/css/card-radio-btn.css"])
 
-        initImportDialog()
         initSuccessDialog()
         initErrorDialog()
         createSnackBar()
@@ -157,32 +175,6 @@ class AddFilesView : View() {
     override fun onDock() {
         super.onDock()
         focusCloseButton()
-    }
-
-    private fun initImportDialog() {
-        val importDialog = confirmdialog {
-            titleTextProperty.bind(
-                viewModel.importedProjectTitleProperty.stringBinding {
-                    it?.let {
-                        MessageFormat.format(
-                            messages["importProjectTitle"],
-                            messages["import"],
-                            it
-                        )
-                    } ?: messages["importResource"]
-                }
-            )
-            messageTextProperty.set(messages["importResourceMessage"])
-            backgroundImageFileProperty.bind(viewModel.importedProjectCoverProperty)
-            progressTitleProperty.set(messages["pleaseWait"])
-            showProgressBarProperty.set(true)
-            orientationProperty.set(settingsViewModel.orientationProperty.value)
-            themeProperty.set(settingsViewModel.appColorMode.value)
-        }
-
-        viewModel.showImportDialogProperty.onChange {
-            Platform.runLater { if (it) importDialog.open() else importDialog.close() }
-        }
     }
 
     private fun initSuccessDialog() {
@@ -256,12 +248,62 @@ class AddFilesView : View() {
         return EventHandler {
             var success = false
             if (it.dragboard.hasFiles()) {
-                viewModel.onDropFile(it.dragboard.files)
+                onDropFile(it.dragboard.files)
                 success = true
             }
             it.isDropCompleted = success
             it.consume()
         }
+    }
+
+    private fun onDropFile(files: List<File>) {
+        if (viewModel.isValidImportFile(files)) {
+            logger.info("Drag-drop file to import: ${files.first()}")
+            val fileToImport = files.first()
+            importFile(fileToImport)
+        }
+    }
+
+    private fun importFile(file: File) {
+        viewModel.setProjectInfo(file)
+
+        val dialog = find<ProgressDialog> {
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
+            cancelMessageProperty.set(null)
+            dialogTitleProperty.bind(viewModel.importedProjectTitleProperty.stringBinding {
+                it?.let {
+                    MessageFormat.format(
+                        messages["importProjectTitle"],
+                        messages["import"],
+                        it
+                    )
+                } ?: messages["importResource"]
+            })
+
+            setOnCloseAction { close() }
+
+            open()
+        }
+
+        viewModel.importProject(file)
+            .observeOnFx()
+            .doFinally {
+                dialog.dialogTitleProperty.unbind()
+                dialog.percentageProperty.set(0.0)
+                dialog.close()
+            }
+            .subscribe { progressStatus ->
+                progressStatus.percent?.let { percent ->
+                    dialog.percentageProperty.set(percent)
+                }
+                if (progressStatus.titleKey != null && progressStatus.titleMessage != null) {
+                    val message = MessageFormat.format(messages[progressStatus.titleKey!!], messages[progressStatus.titleMessage!!])
+                    dialog.progressMessageProperty.set(message)
+                } else if (progressStatus.titleKey != null) {
+                    dialog.progressMessageProperty.set(messages[progressStatus.titleKey!!])
+                }
+            }
     }
 
     private fun createSnackBar() {

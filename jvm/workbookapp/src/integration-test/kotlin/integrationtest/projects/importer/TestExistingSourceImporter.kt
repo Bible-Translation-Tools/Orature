@@ -1,6 +1,25 @@
+/**
+ * Copyright (C) 2020-2023 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package integrationtest.projects.importer
 
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
@@ -96,7 +115,7 @@ class TestExistingSourceImporter {
                 Assert.assertEquals(ImportResult.SUCCESS, it)
             }
 
-        verify(spyImporter, never()).mergeMedia(any(), any())
+        verify(spyImporter, never()).mergeMedia(any(), any(), anyOrNull())
 
         spyImporter.import(getSourceFile("resource-containers/en_ulb_media_merge_test.zip"))
             .blockingGet()
@@ -104,7 +123,7 @@ class TestExistingSourceImporter {
                 Assert.assertEquals(ImportResult.SUCCESS, it)
             }
 
-        verify(spyImporter).mergeMedia(any(), any())
+        verify(spyImporter).mergeMedia(any(), any(), anyOrNull())
         verify(spyDeleteUseCase, never()).deleteSync(any())
     }
 

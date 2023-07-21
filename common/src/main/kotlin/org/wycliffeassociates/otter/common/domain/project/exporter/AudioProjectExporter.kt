@@ -22,7 +22,6 @@ import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.License
-import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.audio.AudioExporter
@@ -42,8 +41,8 @@ class AudioProjectExporter @Inject constructor(
 
     override fun export(
         outputDirectory: File,
-        resourceMetadata: ResourceMetadata,
         workbook: Workbook,
+        callback: ProjectExporterCallback?,
         options: ExportOptions?
     ): Single<ExportResult> {
         val projectAccessor = ProjectFilesAccessor(
@@ -53,15 +52,17 @@ class AudioProjectExporter @Inject constructor(
             workbook.target.toCollection()
         )
         logger.info("Exporting project as mp3: ${workbook.target.slug}")
-        return exportBookMp3(outputDirectory, workbook, projectAccessor, options)
+        return exportBookMp3(outputDirectory, workbook, projectAccessor, callback, options)
     }
 
     private fun exportBookMp3(
         directory: File,
         workbook: Workbook,
         projectFilesAccessor: ProjectFilesAccessor,
+        callback: ProjectExporterCallback?,
         options: ExportOptions?
     ): Single<ExportResult> {
+        callback?.onNotifyProgress(25.0, messageKey = "exportingTakes")
         val outputProjectDir = directory.resolve(workbook.target.slug).apply { mkdirs() }
         val contributors = projectFilesAccessor.getContributorInfo()
         val license = License.get(workbook.target.resourceMetadata.license)
@@ -76,6 +77,8 @@ class AudioProjectExporter @Inject constructor(
                 }
             }
             .toSingle {
+                callback?.onNotifyProgress(100.0)
+                callback?.onNotifySuccess(workbook.target.toCollection(), outputProjectDir)
                 ExportResult.SUCCESS
             }
             .onErrorReturnItem(ExportResult.FAILURE)

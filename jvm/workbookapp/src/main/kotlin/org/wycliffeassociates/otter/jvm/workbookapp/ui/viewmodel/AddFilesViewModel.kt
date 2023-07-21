@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2023 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -19,16 +19,20 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Observable
+import io.reactivex.ObservableEmitter
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.stage.FileChooser
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ConflictResolution
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
+import org.wycliffeassociates.otter.common.data.ProgressStatus
 import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
+import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportCallbackParameter
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
@@ -37,7 +41,11 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ImportEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.AddFilesView
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.DrawerEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.DrawerEventAction
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ProjectImportEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ImportConflictDialog
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
 import java.io.File
@@ -48,10 +56,11 @@ class AddFilesViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(AddFilesViewModel::class.java)
 
+    val settingsViewModel: SettingsViewModel by inject()
+
     @Inject lateinit var directoryProvider: IDirectoryProvider
     @Inject lateinit var importProjectProvider : Provider<ImportProjectUseCase>
 
-    val showImportDialogProperty = SimpleBooleanProperty(false)
     val showImportSuccessDialogProperty = SimpleBooleanProperty(false)
     val showImportErrorDialogProperty = SimpleBooleanProperty(false)
     val importErrorMessage = SimpleStringProperty(null)
@@ -59,91 +68,103 @@ class AddFilesViewModel : ViewModel() {
     val importedProjectCoverProperty = SimpleObjectProperty<File>()
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
+    val availableChapters = observableListOf<Int>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
     }
 
-    fun onDropFile(files: List<File>) {
-        if (isValidImportFile(files)) {
-            logger.info("Drag-drop file to import: ${files.first()}")
-            val fileToImport = files.first()
-            setProjectInfo(fileToImport)
-            importProject(fileToImport)
-        }
-    }
-
-    fun onChooseFile() {
-        val file = chooseFile(
-            FX.messages["importResourceFromZip"],
-            arrayOf(
-                FileChooser.ExtensionFilter(
-                    messages["oratureFileTypes"],
-                    *OratureFileFormat.extensionList.map { "*.$it" }.toTypedArray()
-                )
-            ),
-            mode = FileChooserMode.Single
-        ).firstOrNull()
-        file?.let {
-            setProjectInfo(file)
-            importProject(file)
-        }
-    }
-
-    private fun importProject(file: File) {
-        showImportDialogProperty.set(true)
-        val callback = setupImportCallback()
-
-        importProjectProvider.get()
-            .import(file, callback)
-            .subscribeOn(Schedulers.io())
-            .observeOnFx()
-            .doOnError { e ->
-                logger.error("Error in importing resource container $file", e)
-            }
-            .doFinally {
-                importedProjectTitleProperty.set(null)
-                importedProjectCoverProperty.set(null)
-            }
-            .subscribe { result: ImportResult ->
-                when (result) {
-                    ImportResult.SUCCESS -> {
-                        showImportSuccessDialogProperty.value = true
-                        fire(ImportEvent)
-                    }
-                    ImportResult.DEPENDENCY_CONSTRAINT -> {
-                        importErrorMessage.set(messages["importErrorDependencyExists"])
-                        showImportErrorDialogProperty.value = true
-                    }
-                    else -> {
-                        showImportErrorDialogProperty.value = true
-                    }
+    fun importProject(file: File): Observable<ProgressStatus> {
+        return Observable.create<ProgressStatus> { emitter ->
+            val callback = setupImportCallback(emitter)
+            importProjectProvider.get()
+                .import(file, callback)
+                .subscribeOn(Schedulers.io())
+                .observeOnFx()
+                .doOnError { e ->
+                    logger.error("Error in importing resource container $file", e)
                 }
-                showImportDialogProperty.value = false
-            }
+                .doFinally {
+                    importedProjectTitleProperty.set(null)
+                    importedProjectCoverProperty.set(null)
+                    emitter.onComplete()
+                }
+                .subscribe { result: ImportResult ->
+                    if (result == ImportResult.FAILED) {
+                        callback.onError(file.absolutePath)
+                    }
+                    fire(DrawerEvent(AddFilesView::class, DrawerEventAction.CLOSE))
+                }
+        }
     }
 
-    private fun setupImportCallback(): ProjectImporterCallback {
+    private fun setupImportCallback(
+        emitter: ObservableEmitter<ProgressStatus>
+    ): ProjectImporterCallback {
         return object : ProjectImporterCallback {
             override fun onRequestUserInput(): Single<ImportOptions> {
                 return Single.just(ImportOptions(confirmed = true))
             }
 
             override fun onRequestUserInput(parameter: ImportCallbackParameter): Single<ImportOptions> {
-                return Single.just(ImportOptions(parameter.options))
+                availableChapters.setAll(parameter.options)
+                return Single.create { emitter ->
+                    find<ImportConflictDialog> {
+
+                        projectNameProperty.set(parameter.name)
+                        chaptersProperty.set(parameter.options.size)
+
+                        setOnSubmitAction { resolution ->
+                            val importOption = if (resolution == ConflictResolution.OVERRIDE) {
+                                // proceed with override
+                                ImportOptions(availableChapters)
+                            } else {
+                                // aborted
+                                ImportOptions(chapters = null)
+                            }
+                            emitter.onSuccess(importOption)
+                            runLater { close() }
+                        }
+
+                        setOnCloseAction {
+                            emitter.onSuccess(ImportOptions(chapters = null))
+                            runLater { close() }
+                        }
+
+                        orientationProperty.set(settingsViewModel.orientationProperty.value)
+                        themeProperty.set(settingsViewModel.appColorMode.value)
+
+                        runLater { open() }
+                    }
+                }
             }
 
-            override fun onError(messageKey: String) {
-                TODO("Not yet implemented")
+            override fun onNotifySuccess(language: String?, project: String?, workbookDescriptor: WorkbookDescriptor?) {
+                FX.eventbus.fire(
+                    ProjectImportEvent(
+                        ImportResult.SUCCESS,
+                        language = language,
+                        project = project,
+                        workbookDescriptor = workbookDescriptor
+                    )
+                )
             }
 
-            override fun onNotifyProgress(localizeKey: String?, message: String?) {
+            override fun onError(filePath: String) {
+                FX.eventbus.fire(
+                    ProjectImportEvent(ImportResult.FAILED, filePath = filePath)
+                )
+            }
 
+            override fun onNotifyProgress(localizeKey: String?, message: String?, percent: Double?) {
+                emitter.onNext(
+                    ProgressStatus(titleKey = localizeKey, titleMessage = message, percent = percent)
+                )
             }
         }
     }
 
-    private fun isValidImportFile(files: List<File>): Boolean {
+    fun isValidImportFile(files: List<File>): Boolean {
         return when {
             files.size > 1 -> {
                 snackBarObservable.onNext(messages["importMultipleError"])
@@ -177,7 +198,7 @@ class AddFilesViewModel : ViewModel() {
      *
      * @param rc The resource container file being imported
      */
-    private fun setProjectInfo(rc: File) {
+    fun setProjectInfo(rc: File) {
         try {
             val project = ResourceContainer.load(rc, true).use {
                 if (it.manifest.projects.size != 1) {

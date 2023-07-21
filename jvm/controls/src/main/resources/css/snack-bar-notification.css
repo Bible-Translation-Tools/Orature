@@ -1,0 +1,50 @@
+.wa-snack-bar {
+    -fx-pref-width: 720px;
+    -fx-pref-height: 80px;
+    -fx-alignment: center-left;
+    -fx-spacing: 16;
+    -fx-padding: 12 16;
+}
+
+.wa-snack-bar .wa-snack-bar__labels {
+    -fx-alignment: center-left;
+}
+
+.wa-snack-bar .notification-title.successful-text {
+    -fx-text-fill: -wa-primary;
+}
+
+.wa-snack-bar .notification-title.danger-text {
+    -fx-text-fill: #B85659;
+}
+
+.wa-snack-bar .notification-subtitle {
+    -fx-text-fill: -wa-regular-text-80;
+}
+
+.wa-snack-bar .active-icon,
+.wa-snack-bar .dismiss-icon {
+    -fx-font-size: 1.5em;
+}
+
+.wa-snack-bar .active-icon {
+    -fx-icon-color: -wa-primary;
+}
+
+.wa-snack-bar .success-btn-icon {
+    -fx-background-color: -wa-primary-05;
+}
+
+.wa-snack-bar .danger-icon {
+    -fx-icon-color: #B85659;
+}
+
+.wa-snack-bar .danger-btn-icon {
+    -fx-background-color: #B8565920;
+}
+
+.jfx-snackbar-content {
+    -fx-background-color: -wa-foreground;
+    -fx-effect: -wa-level3;
+    -fx-background-radius: 12;
+}
