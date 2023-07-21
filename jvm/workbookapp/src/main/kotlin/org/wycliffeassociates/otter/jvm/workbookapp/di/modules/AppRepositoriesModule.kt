@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2023 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -85,6 +85,12 @@ abstract class AppRepositoriesModule {
     abstract fun providesWorkbookRepository(
         repository: WorkbookRepository
     ): IWorkbookRepository
+
+    @Binds
+    @Singleton
+    abstract fun providesWorkbookDescriptorRepository(
+        repository: WorkbookDescriptorRepository
+    ): IWorkbookDescriptorRepository
 
     @Binds
     @Singleton

@@ -68,14 +68,16 @@ abstract class RCProjectExporter(
         return "$lang-$resource-$project-$timestamp.zip"
     }
 
-    protected fun restoreFileExtension(file: File, extension: String) {
+    protected fun restoreFileExtension(file: File, extension: String): File {
         val fileName = file.nameWithoutExtension + ".$extension"
+        val target = file.parentFile.resolve(fileName)
         // using nio Files.move() instead of file.rename() for platform independent
         Files.move(
             file.toPath(),
-            file.parentFile.resolve(fileName).toPath(),
+            target.toPath(),
             StandardCopyOption.REPLACE_EXISTING
         )
+        return target
     }
 
     protected fun setContributorInfo(
@@ -131,14 +133,14 @@ abstract class RCProjectExporter(
         return chapters
             .filter { chapter ->
                 // filter chapter without selected take
-                chapter.audio.selected.value?.value == null
+                !chapter.hasSelectedAudio()
             }
             .filter { chapter ->
                 val chunks = chapter.chunks.getValues(emptyArray())
 
                 // filter chapter where all its content are ready to compile
                 chunks.isNotEmpty() && chunks.all { chunk ->
-                    chunk.audio.selected.value?.value != null
+                    chunk.hasSelectedAudio()
                 }
             }
     }

@@ -25,6 +25,7 @@ import org.wycliffeassociates.otter.common.data.primitives.Take
 import org.wycliffeassociates.otter.common.data.workbook.Book
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 
 interface IWorkbookRepository {
     fun get(source: Collection, target: Collection): Workbook

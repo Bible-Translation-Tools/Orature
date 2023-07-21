@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2023 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 .home-page__container {
     -fx-padding: 40px;
     -fx-pref-width: 800px;
@@ -26,5 +25,75 @@
 
 .home-page__translations {
     -fx-max-width: 800px;
-    -fx-spacing: 20px;
+    -fx-spacing: 20;
+}
+
+.homepage__left-pane {
+    -fx-pref-width: 320px;
+    -fx-spacing: 12;
+    -fx-border-width: 0 0.5px 0 0;
+    -fx-border-color: -wa-border-light;
+    -fx-background-color: -wa-foreground;
+    -fx-padding: 16;
+}
+
+.homepage__left-header {
+    -fx-padding: 8 0;
+}
+
+.homepage__left-pane__project-groups {
+    -fx-spacing: 12;
+}
+
+.homepage__main-region {
+    -fx-padding: 16;
+    -fx-background-color: -wa-background;
+    -fx-spacing: 16
+}
+
+.homepage__main-region .container {
+    -fx-spacing: 16;
+}
+
+.homepage__main-region__header-section {
+    -fx-alignment: center-left;
+    -fx-spacing: 8;
+}
+
+.homepage__main-region__body {
+    -fx-padding: 16;
+    -fx-background-color: -wa-foreground;
+    -fx-background-radius: 12px;
+}
+
+.homepage__main-region__empty-section {
+    -fx-alignment: center;
+}
+
+.option-button {
+    -fx-background-color: transparent;
+}
+
+.icon-xl {
+    -fx-font-size: 6em;
+    -fx-icon-color: -wa-primary;
+}
+
+.line-break {
+    -fx-padding: 6 0;
+}
+
+.homepage__left-pane .scroll-bar:vertical,
+.homepage__left-pane .scroll-bar:vertical .track,
+.homepage__left-pane .scroll-bar:vertical .track-background,
+.homepage__left-pane .scroll-bar:horizontal,
+.homepage__left-pane .scroll-bar:horizontal .track,
+.homepage__left-pane .scroll-bar:horizontal .track-background {
+    -fx-background-color: transparent;
+}
+
+.homepage__left-pane .scroll-bar .increment-button,
+.homepage__left-pane .scroll-bar .decrement-button {
+    -fx-opacity: 0;
+    -fx-padding: 0 2;
 }

@@ -6,6 +6,8 @@ import org.wycliffeassociates.otter.common.domain.project.importer.ImportCallbac
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
 import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
 import org.wycliffeassociates.otter.common.data.ProgressStatus
+import org.wycliffeassociates.otter.common.data.primitives.Collection
+import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 
 /**
  * Sets up the callback for pushing progress status to the UI
@@ -24,11 +26,15 @@ internal fun setupImportCallback(
             throw NotImplementedError("no op")
         }
 
-        override fun onError(messageKey: String) {
-            throw NotImplementedError("no op")
+        override fun onNotifySuccess(language: String?, project: String?, workbookDescriptor: WorkbookDescriptor?) {
+            /* no-op */
         }
 
-        override fun onNotifyProgress(localizeKey: String?, message: String?) {
+        override fun onError(filePath: String) {
+            /* no-op */
+        }
+
+        override fun onNotifyProgress(localizeKey: String?, message: String?, percent: Double?) {
             localizeKey?.let {
                 progressStatusEmitter.onNext(
                     ProgressStatus(subTitleKey = localizeKey, subTitleMessage = message)

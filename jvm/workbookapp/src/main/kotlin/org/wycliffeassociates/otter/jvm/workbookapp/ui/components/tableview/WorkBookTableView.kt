@@ -1,35 +1,93 @@
+/**
+ * Copyright (C) 2020-2023 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview
 
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
+import javafx.collections.transformation.SortedList
 import javafx.event.EventTarget
 import javafx.scene.control.TableView
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
-import org.kordamp.ikonli.javafx.FontIcon
-import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.common.data.workbook.WorkbookInfo
+import javafx.scene.layout.Region
+import javafx.util.Callback
+import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class WorkBookTableView(
-    books: ObservableList<WorkbookInfo>
-) : TableView<WorkbookInfo>(books) {
+    books: ObservableList<WorkbookDescriptor>
+) : TableView<WorkbookDescriptor>(books) {
+
+    private val selectedIndexProperty = SimpleIntegerProperty(-1)
 
     init {
         addClass("wa-table-view")
         vgrow = Priority.ALWAYS
         columnResizePolicy = CONSTRAINED_RESIZE_POLICY
+        placeholder = Region() // shows nothing when table is empty
 
-        column(messages["book"], String::class).apply {
+        column(messages["book"], String::class) {
             addClass("table-view__column-header-row")
             setCellValueFactory { it.value.title.toProperty() }
             cellFormat {
                 graphic = label(item) {
-                    addClass("table-view__title-cell")
+                    addClass("h4", "h4--80")
+                    tooltip(item)
+                }
+            }
+            prefWidthProperty().bind(this@WorkBookTableView.widthProperty().multiply(0.25))
+            minWidth = 120.0 // this may not be replaced with css
+            isReorderable = false
+            isSortable = true
+
+            bindColumnSortComparator()
+        }
+        column(messages["code"], String::class).apply {
+            addClass("table-view__column-header-row")
+            setCellValueFactory { it.value.slug.toProperty() }
+            cellFormat {
+                graphic = label(item) { addClass("normal-text") }
+            }
+            minWidth = 70.0 // this may not be replaced with css
+            isReorderable = false
+            isSortable = true
+
+            bindColumnSortComparator()
+        }
+        column(messages["anthology"], String::class).apply {
+            addClass("table-view__column-header-row")
+            setCellValueFactory { it.value.anthology.titleKey.toProperty() }
+            cellFormat {
+                graphic = label {
+                    text = if (item.isEmpty()) "" else messages[item] // catch empty string for key
+                    addClass("h5")
                 }
             }
             isReorderable = false
+            isSortable = true
+
+            bindColumnSortComparator()
         }
         column(messages["progress"], Number::class) {
             setCellValueFactory { it.value.progress.toProperty() }
@@ -37,44 +95,67 @@ class WorkBookTableView(
                 val percent = item.toDouble()
                 graphic = progressbar(percent) {
                     if (percent == 1.0) addClass("full")
+                    fitToParentWidth()
                 }
             }
             isReorderable = false
+            isSortable = true
+
+            bindColumnSortComparator()
         }
         column("", Boolean::class) {
             addClass("table-column__status-icon-col")
             setCellValueFactory { SimpleBooleanProperty(it.value.hasSourceAudio) }
-            cellFormat {
-                graphic = if (it) {
-                    FontIcon(MaterialDesign.MDI_VOLUME_HIGH).apply {
-                        addClass("active-icon")
-                    }
-                } else {
-                    null
-                }
-            }
-
-            maxWidth = 50.0
-            minWidth = 50.0
+            setCellFactory { WorkbookSourceAudioTableCell() }
             isReorderable = false
-            isResizable = false
-            isSortable = false
+            isSortable = true
+
+            bindColumnSortComparator()
         }
-        column("", WorkbookInfo::class) {
+        column("", WorkbookDescriptor::class) {
             setCellValueFactory { SimpleObjectProperty(it.value) }
             setCellFactory {
-                WorkbookOptionTableCell()
+                WorkbookOptionTableCell(selectedIndexProperty)
             }
-
-            maxWidth = 100.0
-            minWidth = 80.0
             isReorderable = false
-            isResizable = false
             isSortable = false
         }
 
+        sortPolicy = CUSTOM_SORT_POLICY as (Callback<TableView<WorkbookDescriptor>, Boolean>)
         setRowFactory {
             WorkbookTableRow()
+        }
+
+        /* accessibility */
+        focusedProperty().onChange {
+            if (it && selectionModel.selectedIndex < 0) {
+                selectionModel.select(0)
+                focusModel.focus(0)
+            }
+        }
+
+        /* accessibility */
+        addEventFilter(KeyEvent.KEY_PRESSED) { keyEvent ->
+            if (keyEvent.code == KeyCode.SPACE || keyEvent.code == KeyCode.ENTER) {
+                selectedIndexProperty.set(selectionModel.selectedIndex)
+                keyEvent.consume()
+            }
+        }
+
+        handleDefaultSortOrder()
+    }
+}
+
+private fun WorkBookTableView.handleDefaultSortOrder() {
+    val list = this.items
+    if (list is SortedList<WorkbookDescriptor>) {
+        comparatorProperty().onChangeAndDoNow {
+            if (sortOrder.isEmpty()) {
+                // when toggled to "unsorted", resets to default order (usually Biblical order)
+                list.comparator = Comparator { wb1, wb2 -> wb1.sort.compareTo(wb2.sort) }
+            } else {
+                list.comparator = it
+            }
         }
     }
 }
@@ -83,6 +164,6 @@ class WorkBookTableView(
  * Constructs a workbook table and attach it to the parent.
  */
 fun EventTarget.workbookTableView(
-    values: ObservableList<WorkbookInfo>,
+    values: ObservableList<WorkbookDescriptor>,
     op: WorkBookTableView.() -> Unit = {}
 ) = WorkBookTableView(values).attachTo(this, op)
