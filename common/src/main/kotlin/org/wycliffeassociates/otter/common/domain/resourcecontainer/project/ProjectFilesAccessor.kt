@@ -24,10 +24,6 @@ import io.reactivex.rxkotlin.cast
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
-import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
-import org.wycliffeassociates.otter.common.data.workbook.BookElement
-import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.buildManifest
 import org.wycliffeassociates.otter.common.io.zip.IFileReader
@@ -46,7 +42,9 @@ import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.AudioMetadataFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.*
 import org.wycliffeassociates.otter.common.data.primitives.Collection
-import org.wycliffeassociates.otter.common.data.workbook.Book
+import org.wycliffeassociates.otter.common.data.workbook.*
+import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.usfm.getText
 import org.wycliffeassociates.usfmtools.USFMParser
 import org.wycliffeassociates.usfmtools.models.markers.CMarker
@@ -92,6 +90,28 @@ class ProjectFilesAccessor(
         targetMetadata,
         project
     )
+
+    fun getChapterAudioDir(workbook: Workbook, chapter: Chapter): File {
+        val namer = FileNamer(
+            bookSlug = workbook.target.slug,
+            languageSlug = workbook.target.language.slug,
+            chapterCount = workbook.target.chapters.count().blockingGet(),
+            chapterTitle = chapter.title,
+            chapterSort = chapter.sort,
+            chunkCount = chapter.chunkCount.blockingGet().toLong(),
+            contentType = ContentType.TEXT,
+            rcSlug = if (workbook.source.language.slug == workbook.target.language.slug) {
+                workbook.sourceMetadataSlug
+            } else {
+                FileNamer.DEFAULT_RC_SLUG
+            }
+        )
+        val formattedChapterName = namer.formatChapterNumber()
+        val chapterDir = audioDir.resolve(formattedChapterName).also {
+            if (!it.exists()) it.mkdirs()
+        }
+        return chapterDir
+    }
 
     fun copySourceFiles(
         linkedResource: ResourceMetadata? = null,
