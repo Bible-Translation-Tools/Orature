@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.data.primitives
+package org.wycliffeassociates.otter.common.domain.narration
 
 data class VerseNode(
     var start: Int,

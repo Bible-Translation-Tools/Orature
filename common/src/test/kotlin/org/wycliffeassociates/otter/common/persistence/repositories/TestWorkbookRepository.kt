@@ -601,8 +601,8 @@ class TestWorkbookRepository {
         val take = Take(
             name = "TakeName",
             file = File("."),
-            format = MimeType.WAV,
             number = autoincrement,
+            format = MimeType.WAV,
             createdTimestamp = LocalDate.now()
         )
         takes.accept(take)

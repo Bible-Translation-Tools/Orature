@@ -6,7 +6,6 @@ import dagger.assisted.AssistedInject
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 import org.wycliffeassociates.otter.common.audio.AudioFile
-import org.wycliffeassociates.otter.common.data.primitives.VerseNode
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
