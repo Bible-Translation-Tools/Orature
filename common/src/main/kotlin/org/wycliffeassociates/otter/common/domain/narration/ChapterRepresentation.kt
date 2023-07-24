@@ -6,9 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.reactivex.subjects.PublishSubject
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
-import org.wycliffeassociates.otter.common.data.primitives.VerseNode
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
