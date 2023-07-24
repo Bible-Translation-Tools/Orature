@@ -56,13 +56,16 @@ class ExportProjectViewModel : ViewModel() {
                 workbook.target.chapters
                     .map { chapter ->
                         val chunkCount = chapter.chunkCount.blockingGet()
-                        val chunkWithAudio = chapter.chunks
-                            .getValues(emptyArray())
-                            .count { it.hasSelectedAudio() }
 
                         val progress = when {
                             chapter.hasSelectedAudio() -> 1.0
-                            chunkCount != 0 -> chunkWithAudio.toDouble() / chunkCount
+                            chunkCount != 0 -> {
+                                // collect chunks from the relay as soon as it starts emitting (blocking)
+                                val chunkWithAudio = chapter.chunks.take(chunkCount.toLong()).blockingIterable()
+                                    .count { it.hasSelectedAudio() }
+
+                                chunkWithAudio.toDouble() / chunkCount
+                            }
                             else -> 0.0
                         }
 

@@ -175,6 +175,5 @@ class ExportProjectDialog : OtterDialog() {
         chapters.setAll(newList)
         selectedChapters.clear()
         selectedChapters.addAll(newList.filter { it.selectable }) // select available chapters by default
-        newList.forEach { println(it) }
     }
 }
