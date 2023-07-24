@@ -29,7 +29,9 @@ import org.wycliffeassociates.otter.jvm.workbookapp.io.zip.NioZipFileReader
 import org.wycliffeassociates.otter.jvm.workbookapp.io.zip.NioZipFileWriter
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
-import java.lang.IllegalArgumentException
+import java.io.FileNotFoundException
+import java.io.IOError
+import java.io.IOException
 import java.nio.file.FileSystems
 
 class DirectoryProvider(
@@ -67,6 +69,7 @@ class DirectoryProvider(
                 pathComponents.add("Library")
                 pathComponents.add("Application Support")
             }
+
             osName.contains("LINUX") -> {
                 pathComponents.add(userHome)
                 pathComponents.add(".config")
@@ -203,11 +206,44 @@ class DirectoryProvider(
     override fun newFileWriter(file: File) = NioZipFileWriter(file)
 
     override fun newFileReader(file: File): IFileReader {
+        if (!file.exists()) throw FileNotFoundException("File ${file.absolutePath} does not exist.")
+
         return when {
             file.isDirectory -> NioDirectoryFileReader(file)
             file.isFile && file.extension in OratureFileFormat.extensionList
-                            -> NioZipFileReader(file)
-            else -> throw IllegalArgumentException("File type not supported")
+            -> NioZipFileReader(file)
+            else -> {
+                if (magicNumberIsZip(file)) {
+                    NioZipFileReader(file)
+                } else {
+                    throw IllegalArgumentException("File type not supported, file name ${file.name}, extension ${file.extension}")
+                }
+            }
+        }
+    }
+
+    /**
+     * Examines the beginning of a file to see if its magic number matches the magic number
+     * for zip files. This will help attempt to use zip files that are stripped of file
+     * extensions.
+     */
+    private fun magicNumberIsZip(file: File): Boolean {
+        if (file.isFile) {
+            try {
+                val bytes = ByteArray(4)
+                file.inputStream().read(bytes)
+                val numberMatches = booleanArrayOf(
+                    bytes[0] == 'P'.code.toByte(),
+                    bytes[1] == 'K'.code.toByte(),
+                    bytes[2].toInt() == 0b0011,
+                    bytes[3].toInt() == 0b0100
+                ).all { it }
+                return numberMatches
+            } catch (e: IOException) {
+                return false
+            }
+        } else {
+            return false
         }
     }
 

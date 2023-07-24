@@ -14,7 +14,7 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.wycliffeassociates.otter.common.*
 import org.wycliffeassociates.otter.common.audio.AudioCue
-import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.data.primitives.*
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
@@ -258,8 +258,8 @@ class ResetChunksTest {
         val sourceFile = createWavFile(tempDir.root, "${fileName.replace("{chapter}", "1")}.wav", "123456".toByteArray())
         val sourceCueFile = File(tempDir.root, "${fileName.replace("{chapter}", "1")}.cue").apply { createNewFile() }
 
-        val audio = AudioFile(sourceFile)
-        audio.metadata.clearMarkers()
+        val audio = OratureAudioFile(sourceFile)
+        audio.clearCues()
         audio.update()
         val sourceCues = listOf(
             AudioCue(0, "1"),
@@ -268,9 +268,7 @@ class ResetChunksTest {
             AudioCue(30, "4"),
             AudioCue(40, "5")
         )
-        for (cue in sourceCues) {
-            audio.metadata.addCue(cue.location, cue.label)
-        }
+        audio.importCues(sourceCues)
         audio.update()
 
         return createTestRc(projectDir.root, dublinCore, listOf(sourceFile, sourceCueFile))

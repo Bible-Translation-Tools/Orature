@@ -19,13 +19,15 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer
 
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
-import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Media
 import java.io.File
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.workbook.Book
+import org.wycliffeassociates.otter.common.data.audio.OratureCueType
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.InputStream
@@ -53,8 +55,8 @@ class SourceAudioAccessor(
             }
             file?.let {
                 logger.info("Found the source audio file! ${it.path}")
-                val audioFile = AudioFile(it)
-                val size = audioFile.totalFrames
+                val oratureAudioFile = OratureAudioFile(it)
+                val size = oratureAudioFile.totalFrames
                 return SourceAudio(it, 0, size)
             }
         }
@@ -75,7 +77,12 @@ class SourceAudioAccessor(
         return null
     }
 
-    private fun getChapter(media: Media, chapter: Int, rc: ResourceContainer, targetMetadata: ResourceMetadata?): SourceAudio? {
+    private fun getChapter(
+        media: Media,
+        chapter: Int,
+        rc: ResourceContainer,
+        targetMetadata: ResourceMetadata?
+    ): SourceAudio? {
         return if (rc.media != null && media.chapterUrl.isNotEmpty()) {
             val path = media.chapterUrl.replace("{chapter}", chapter.toString())
             if (rc.accessor.fileExists(path)) {
@@ -106,8 +113,8 @@ class SourceAudioAccessor(
                     }
                 }
 
-                val audioFile = AudioFile(file)
-                val size = audioFile.totalFrames
+                val oratureAudioFile = OratureAudioFile(file)
+                val size = oratureAudioFile.totalFrames
                 SourceAudio(file, 0, size)
             } else {
                 null
@@ -120,14 +127,18 @@ class SourceAudioAccessor(
     fun getChunk(chapter: Int, chunk: Int, target: Book?): SourceAudio? {
         val file = getChapter(chapter, target)?.file
         if (file != null) {
-            logger.info("chunk file is ${file.absolutePath}")
-            val audioFile = AudioFile(file)
-            val cues = audioFile.metadata.getCues()
+            val oratureAudioFile = OratureAudioFile(file)
+            val cues = oratureAudioFile.getCues()
             cues.sortedBy { it.location }
-            val index = chunk - 1
-            if (cues.size > index) {
-                val start = cues[index].location
-                val end = if (cues.size > chunk) cues[chunk].location else audioFile.totalFrames
+            val verses = oratureAudioFile
+                .getMarker<VerseMarker>()
+                .sortedBy { it.location }
+            val marker = verses.find { it.start == chunk }
+            if (marker != null) {
+                val markerIndex = verses.indexOf(marker)
+                val nextMarker = if (verses.lastIndex > markerIndex) verses[markerIndex + 1] else null
+                val start = marker.location
+                val end = nextMarker?.location ?: oratureAudioFile.totalFrames
                 return SourceAudio(file, start, end)
             }
         }

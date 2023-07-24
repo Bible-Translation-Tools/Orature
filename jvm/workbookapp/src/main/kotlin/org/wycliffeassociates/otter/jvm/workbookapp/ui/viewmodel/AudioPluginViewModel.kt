@@ -97,7 +97,7 @@ class AudioPluginViewModel : ViewModel() {
         val chapterLabel = messages[workbookDataStore.activeChapterProperty.value.label]
         val chapterNumber = workbookDataStore.activeChapterProperty.value.sort
 
-        // TODO: This needs a better solution
+        val verseLabels = workbookDataStore.getSourceChapter().map { it.getDraft() }.blockingGet().map { it.title }.toList().blockingGet()
         val verseTotal =  workbookDataStore.getSourceChapter().map { it.chunkCount }.blockingGet().blockingGet()
         val chunkLabel = workbookDataStore.activeChunkProperty.value?.let {
             messages[workbookDataStore.activeChunkProperty.value.label]
@@ -118,6 +118,7 @@ class AudioPluginViewModel : ViewModel() {
             bookTitle = workbook.target.title,
             chapterLabel = chapterLabel,
             chapterNumber = chapterNumber,
+            verseLabels = verseLabels,
             verseTotal = verseTotal,
             chunkLabel = chunkLabel,
             chunkNumber = chunkNumber,

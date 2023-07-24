@@ -19,6 +19,9 @@
 package org.wycliffeassociates.otter.common.audio
 
 interface AudioMetadata {
+    fun addCue(audioCue: AudioCue) {
+        addCue(audioCue.location, audioCue.label)
+    }
     fun addCue(location: Int, label: String)
     fun getCues(): List<AudioCue>
     fun clearMarkers()
