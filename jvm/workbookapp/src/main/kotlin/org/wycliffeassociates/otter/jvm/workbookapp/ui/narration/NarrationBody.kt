@@ -26,6 +26,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationR
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationUndoEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.WaveformCanvas
 import tornadofx.*
 import java.io.File
 import javax.inject.Inject
@@ -34,7 +35,15 @@ class NarrationBody : View() {
     private val viewModel: NarrationBodyViewModel by inject()
 
     override val root = hbox {
+
+//        borderpane {
+//            center {
+//                add(WaveformCanvas())
+//            }
+//        }
+
         stackpane {
+            add<WaveformCanvas>()
             scrollpane {
                 hbox {
                     spacing = 10.0
@@ -78,7 +87,6 @@ class NarrationBody : View() {
             }
         }
     }
-
     init {
         subscribe<NarrationUndoEvent> {
             viewModel.undo()
@@ -427,3 +435,6 @@ class PlayVerseEvent(val verse: VerseNode) : FXEvent()
 class OpenInAudioPluginEvent(val index: Int) : FXEvent()
 
 class ChapterReturnFromPluginEvent: FXEvent()
+
+
+
