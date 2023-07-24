@@ -70,6 +70,10 @@ class Narration @AssistedInject constructor(
         writer = null
     }
 
+    fun closeChapterRepresentation() {
+        chapterRepresentation.close()
+    }
+
     fun undo() {
         history.undo(chapterRepresentation.activeVerses)
         chapterRepresentation.onVersesUpdated()

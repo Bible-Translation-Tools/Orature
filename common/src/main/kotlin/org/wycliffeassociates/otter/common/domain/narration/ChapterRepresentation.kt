@@ -13,6 +13,8 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import java.io.File
 import java.io.RandomAccessFile
+import java.lang.Exception
+import java.lang.IllegalStateException
 import java.nio.ByteBuffer
 
 private const val ACTIVE_VERSES_FILE_NAME = "active_verses.json"
@@ -43,7 +45,7 @@ internal class ChapterRepresentation(
         get() = position / frameSizeInBytes
 
     override val totalFrames: Int
-        get() = activeVerses.sumOf { it.start + it.end }
+        get() = activeVerses.sumOf { it.end - it.start }
 
     val activeVerses = mutableListOf<VerseNode>()
 
@@ -55,9 +57,13 @@ internal class ChapterRepresentation(
     lateinit var workingAudio: AudioFile
         private set
 
+    private var mappedFile: RandomAccessFile? = null
+
     init {
         initializeWorkingAudioFile()
         initializeSerializedVersesFile()
+
+        open()
     }
 
     fun loadFromSerializedVerses() {
@@ -115,20 +121,20 @@ internal class ChapterRepresentation(
     }
 
     override fun hasRemaining(): Boolean {
-        return (totalFrames - position) > 0
+        return ((totalFrames * frameSizeInBytes) - position) > 0
     }
 
     override fun getPcmBuffer(bytes: ByteArray): Int {
         var bytesWritten = 0
 
-        RandomAccessFile(workingAudio.file, "r").use { raf ->
-            val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
-            val byteBuffer = ByteBuffer.wrap(bytes)
+        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+        val byteBuffer = ByteBuffer.wrap(bytes)
 
-            for (verse in activeVerses) {
+        mappedFile?.let { raf ->
+            for (i in 0 until activeVerses.size) {
                 var verseRead = 0
-                val start = verse.start * frameSizeInBytes
-                val end = verse.end * frameSizeInBytes
+                val start = activeVerses[i].start * frameSizeInBytes
+                val end = activeVerses[i].end * frameSizeInBytes
 
                 val length = end - start
                 raf.seek(start.toLong())
@@ -139,9 +145,14 @@ internal class ChapterRepresentation(
                     bytesWritten += read
 
                     if (bytesWritten > bytes.size) {
+                        // If bytes read exceed target byte array size,
+                        // we need to write only the part that fits in the array
                         val diff = bytesWritten - bytes.size
-                        val smallerBuffer = buffer.copyOf(buffer.size - diff)
-                        byteBuffer.put(smallerBuffer)
+                        val partialSize = buffer.size - diff
+
+                        for (j in 0 until partialSize) {
+                            byteBuffer.put(buffer[j])
+                        }
                         break
                     } else {
                         byteBuffer.put(buffer)
@@ -150,7 +161,7 @@ internal class ChapterRepresentation(
 
                 if (bytesWritten == bytes.size) break
             }
-        }
+        } ?: throw IllegalStateException("getPcmBuffer called before opening file")
 
         position = bytesWritten
 
@@ -158,18 +169,38 @@ internal class ChapterRepresentation(
     }
 
     override fun seek(sample: Int) {
-        position = sample
+        val sampleIndex = sample * frameSizeInBytes
+        val limit = totalFrames * frameSizeInBytes
+        position = Integer.min(sampleIndex, limit)
     }
 
     override fun open() {
-        TODO("Not yet implemented")
+        mappedFile?.let { release() }
+        mappedFile = RandomAccessFile(workingAudio.file, "r")
     }
 
     override fun release() {
-        TODO("Not yet implemented")
+        if (mappedFile != null) {
+            try {
+                // https://stackoverflow.com/questions/25238110/how-to-properly-close-mappedbytebuffer/25239834#25239834
+                // TODO: Replace with https://docs.oracle.com/en/java/javase/14/docs/api/jdk.incubator.foreign/jdk/incubator/foreign/MemorySegment.html#ofByteBuffer(java.nio.ByteBuffer)
+                val unsafeClass = Class.forName("sun.misc.Unsafe")
+                val unsafeField = unsafeClass.getDeclaredField("theUnsafe")
+                unsafeField.isAccessible = true
+                val unsafe: Any = unsafeField.get(null)
+                val invokeCleaner = unsafeClass.getMethod("invokeCleaner", ByteBuffer::class.java)
+                invokeCleaner.invoke(unsafe, mappedFile)
+            } catch (e: Exception) {
+
+            }
+            mappedFile?.channel?.close()
+            mappedFile?.close()
+            mappedFile = null
+            System.gc()
+        }
     }
 
     override fun close() {
-        TODO("Not yet implemented")
+        release()
     }
 }
