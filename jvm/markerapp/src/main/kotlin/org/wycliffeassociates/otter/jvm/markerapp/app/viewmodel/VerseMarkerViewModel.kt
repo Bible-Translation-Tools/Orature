@@ -130,8 +130,8 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
     }
 
     private fun loadMarkers(audio: OratureAudioFile) {
-        scope as ParameterizedScope
-        val markersList: List<String> = getVerseLabelList(scope.parameters.named["marker_labels"])
+        val params = (scope as ParameterizedScope).parameters
+        val markersList: List<String> = getVerseLabelList(params.named["marker_labels"])
         val totalMarkers: Int = markersList.size
 
         markerModel = VerseMarkerModel(audio, totalMarkers, markersList)
