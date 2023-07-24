@@ -672,6 +672,13 @@ class ProjectFilesAccessor(
         }
     }
 
+    fun copyProjectModeFile(fileReader: IFileReader) {
+        val modeFile = projectDir.resolve(RcConstants.PROJECT_MODE_FILE)
+        if (fileReader.exists(RcConstants.PROJECT_MODE_FILE)) {
+            fileReader.stream(RcConstants.PROJECT_MODE_FILE).transferTo(modeFile.outputStream())
+        }
+    }
+
     companion object {
         val ignoredSourceMediaExtensions = listOf("wav", "mp3", "jpg", "jpeg", "png", "cue")
 

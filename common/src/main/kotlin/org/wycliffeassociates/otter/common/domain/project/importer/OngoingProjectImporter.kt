@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -22,7 +23,9 @@ import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.primitives.SerializableProjectMode
 import org.wycliffeassociates.otter.common.data.primitives.Take
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
@@ -42,7 +45,6 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRep
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Manifest
 import org.wycliffeassociates.resourcecontainer.entity.Project
@@ -254,7 +256,8 @@ class OngoingProjectImporter @Inject constructor(
         callback: ProjectImporterCallback?
     ): Collection {
         val sourceMetadata = sourceCollection.resourceContainer!!
-        val derivedProject = createDerivedProjects(metadata.language, sourceCollection, true)
+        val mode = getProjectMode(fileReader, metadata.language, sourceCollection.resourceContainer!!.language)
+        val derivedProject = createDerivedProjects(metadata.language, sourceCollection, mode, true)
 
         val translation = createTranslation(sourceMetadata.language, metadata.language)
 
@@ -295,6 +298,26 @@ class OngoingProjectImporter @Inject constructor(
         callback?.onNotifyProgress(localizeKey = "finishingUp", percent = 100.0)
 
         return derivedProject
+    }
+
+    private fun getProjectMode(
+        fileReader: IFileReader,
+        targetLanguage: Language,
+        sourceLanguage: Language
+    ): ProjectMode {
+        if (fileReader.exists(RcConstants.PROJECT_MODE_FILE)) {
+            val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
+            fileReader.bufferedReader(RcConstants.PROJECT_MODE_FILE).use {
+                val serialized: SerializableProjectMode = mapper.readValue(it)
+                return serialized.mode
+            }
+        }
+        // backward compatibility when there was no mode in the import file
+        return if (targetLanguage.slug == sourceLanguage.slug) {
+            ProjectMode.NARRATION
+        } else {
+            ProjectMode.TRANSLATION
+        }
     }
 
     private fun importChunks(project: Collection, accessor: ProjectFilesAccessor, fileReader: IFileReader) {
@@ -480,10 +503,11 @@ class OngoingProjectImporter @Inject constructor(
     private fun createDerivedProjects(
         language: Language,
         sourceCollection: Collection,
+        mode: ProjectMode,
         verseByVerse: Boolean
     ): Collection {
         return CreateProject(collectionRepository, resourceMetadataRepository)
-            .create(sourceCollection, language, deriveProjectFromVerses = verseByVerse)
+            .create(sourceCollection, language, mode, deriveProjectFromVerses = verseByVerse)
             .blockingGet()
     }
 
