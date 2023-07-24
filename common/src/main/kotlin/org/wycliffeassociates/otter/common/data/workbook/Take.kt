@@ -23,14 +23,13 @@ import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import java.io.File
 import java.time.LocalDate
 
-data class Take(
+class Take(
     val name: String,
     val file: File,
     val number: Int,
     val format: MimeType,
     val createdTimestamp: LocalDate,
-    val deletedTimestamp: BehaviorRelay<DateHolder> = BehaviorRelay.createDefault(DateHolder.empty),
-    val savedInDb: BehaviorRelay<Boolean> = BehaviorRelay.createDefault(false)
+    val deletedTimestamp: BehaviorRelay<DateHolder> = BehaviorRelay.createDefault(DateHolder.empty)
 ) {
     override fun equals(other: Any?): Boolean {
         return (other as? Take)?.let {
