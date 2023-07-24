@@ -6,6 +6,7 @@ import dagger.assisted.AssistedInject
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.data.primitives.VerseNode
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
@@ -28,6 +29,9 @@ class Narration @AssistedInject constructor(
     val workingAudio: AudioFile
         get() = chapterRepresentation.workingAudio
 
+    val audioReader: AudioFileReader
+        get() = chapterRepresentation
+
     val activeVerses: List<VerseNode>
         get() = chapterRepresentation.activeVerses
 
@@ -41,6 +45,10 @@ class Narration @AssistedInject constructor(
 
         updateWorkingFilesFromChapterFile()
         chapterRepresentation.loadFromSerializedVerses()
+    }
+
+    fun getPcmBuffer(bytes: ByteArray): Int {
+        return chapterRepresentation.getPcmBuffer(bytes)
     }
 
     fun loadFromSelectedChapterFile() {
