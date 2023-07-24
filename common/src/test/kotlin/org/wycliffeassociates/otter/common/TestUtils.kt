@@ -24,7 +24,6 @@ import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.nhaarman.mockitokotlin2.mock
 import java.io.File
 import java.util.*
 import org.junit.Assert
@@ -39,11 +38,11 @@ import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDatabaseAccessors
 import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
-import org.wycliffeassociates.resourcecontainer.DirectoryAccessor
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.*
 import java.time.LocalDate
@@ -189,15 +188,15 @@ fun buildWorkbook(
 
 fun createWavFile(dir: File, name: String, data: ByteArray): File {
     val file = File(dir, name)
-    val audioFile = AudioFile(file, DEFAULT_CHANNELS, DEFAULT_SAMPLE_RATE, DEFAULT_BITS_PER_SAMPLE)
-    audioFile.writer().use { os ->
+    val oratureAudioFile = OratureAudioFile(file, DEFAULT_CHANNELS, DEFAULT_SAMPLE_RATE, DEFAULT_BITS_PER_SAMPLE)
+    oratureAudioFile.writer().use { os ->
         os.write(data)
     }
     return file
 }
 
-fun readTextFromAudioFile(audioFile: AudioFile, bufferSize: Int): String {
-    val reader = audioFile.reader()
+fun readTextFromAudioFile(oratureAudioFile: OratureAudioFile, bufferSize: Int): String {
+    val reader = oratureAudioFile.reader()
     val buffer = ByteArray(bufferSize)
     reader.open()
     var outStr = ""

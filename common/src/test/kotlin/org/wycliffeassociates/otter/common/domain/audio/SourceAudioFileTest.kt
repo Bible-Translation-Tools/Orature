@@ -25,6 +25,9 @@ import org.junit.Test
 import java.io.File
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
+import org.wycliffeassociates.otter.common.data.audio.OratureCueType
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 
 class SourceAudioFileTest {
 
@@ -89,14 +92,14 @@ class SourceAudioFileTest {
         for ((i, testCues) in testEnv.withIndex()) {
             val temp = File.createTempFile("test", ".wav").apply { deleteOnExit() }
             val af = AudioFile(temp, 1, 41000, 16, WavMetadata(listOf(CueChunk())))
-            for (cue in testCues) {
-                af.metadata.addCue(cue.location, cue.label)
+            testCues.forEach {
+                af.addCue(it.location, it.label)
             }
             af.update()
 
-            val saf = SourceAudioFile(temp)
-            assertEquals(results[i].verses, saf.getVerses().size)
-            assertEquals(results[i].chunks, saf.getChunks().size)
+            val saf = OratureAudioFile(temp)
+            assertEquals(results[i].verses, saf.getMarker<VerseMarker>().size)
+            assertEquals(results[i].chunks, saf.getMarker<ChunkMarker>().size)
         }
     }
 }

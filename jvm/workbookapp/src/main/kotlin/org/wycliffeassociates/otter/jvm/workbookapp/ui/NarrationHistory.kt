@@ -12,7 +12,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataSto
 import tornadofx.observableListOf
 import java.io.File
 import java.time.LocalDate
-import java.util.Stack
 import javax.inject.Inject
 
 class NarrationHistory @Inject constructor(private val directoryProvider: IDirectoryProvider) {

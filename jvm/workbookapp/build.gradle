@@ -49,6 +49,10 @@ sourceSets {
     }
 }
 
+compileIntegrationTestKotlin {
+    kotlinOptions.jvmTarget = "11"
+}
+
 configurations {
     integrationTestImplementation.extendsFrom main
     integrationTestRuntime.extendsFrom main
@@ -142,9 +146,6 @@ dependencies {
     implementation "com.google.dagger:dagger:$daggerVer"
     kapt "com.google.dagger:dagger-compiler:$daggerVer"
     kaptIntegrationTest "com.google.dagger:dagger-compiler:$daggerVer"
-
-//    implementation "org.mockito:mockito-core:$mockitoVer"
-//    implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVer"
 
     // Testing
     implementation 'io.mockk:mockk:1.13.4'

@@ -11,6 +11,7 @@ import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.data.primitives.VerseNode
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import java.io.File
 import java.io.RandomAccessFile
 import java.lang.Exception
@@ -54,7 +55,7 @@ internal class ChapterRepresentation(
 
     val onActiveVersesUpdated = PublishSubject.create<List<VerseNode>>()
 
-    lateinit var workingAudio: AudioFile
+    lateinit var workingAudio: OratureAudioFile
         private set
 
     private var mappedFile: RandomAccessFile? = null
@@ -116,7 +117,7 @@ internal class ChapterRepresentation(
             if (!it.exists()) {
                 it.createNewFile()
             }
-            workingAudio = AudioFile(it)
+            workingAudio = OratureAudioFile(it)
         }
     }
 

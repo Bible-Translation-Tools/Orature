@@ -47,7 +47,14 @@ class PcmTakeTransformer @Inject constructor(
                 ".${AudioFileFormat.WAV.extension}"
             )
             audioConverter.pcmToWav(take.file, wav).blockingGet()
-            return take.copy(name = wav.name, file = wav)
+            return Take(
+                name = wav.name,
+                file = wav,
+                number = take.number,
+                format = take.format,
+                createdTimestamp = take.createdTimestamp,
+                deletedTimestamp = take.deletedTimestamp
+            )
         }
 
         return take

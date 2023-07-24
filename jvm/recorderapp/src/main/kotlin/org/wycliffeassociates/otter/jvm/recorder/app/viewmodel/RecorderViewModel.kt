@@ -34,6 +34,7 @@ import java.io.File
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
 import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseFinishedEvent
 import tornadofx.*
@@ -46,7 +47,7 @@ class RecorderViewModel : ViewModel() {
     private val targetLanguageName = parameters.named["language"]
 
     lateinit var tempTake: File
-    lateinit var wavAudio: AudioFile
+    lateinit var wavAudio: OratureAudioFile
     lateinit var writer: WavFileWriter
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
@@ -128,7 +129,6 @@ class RecorderViewModel : ViewModel() {
         pause()
         at.stop()
         recorder.stop()
-        renderer.removeListeners()
         writer.writer.dispose()
         wavAudio.file.copyTo(targetFile, true)
 
@@ -161,7 +161,7 @@ class RecorderViewModel : ViewModel() {
 
     private fun initializeAudioData() {
         tempTake = createTempRecordingTake()
-        wavAudio = AudioFile(tempTake, 1, 44100, 16)
+        wavAudio = OratureAudioFile(tempTake, 1, 44100, 16)
         writer = WavFileWriter(wavAudio, recorder.getAudioStream()) { /* no op */ }
     }
 
