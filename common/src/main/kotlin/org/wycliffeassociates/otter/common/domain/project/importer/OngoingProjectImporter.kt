@@ -64,7 +64,8 @@ class OngoingProjectImporter @Inject constructor(
     private val contentRepository: IContentRepository,
     private val takeRepository: ITakeRepository,
     private val languageRepository: ILanguageRepository,
-    private val resourceRepository: IResourceRepository
+    private val resourceRepository: IResourceRepository,
+    private val createProjectUseCase: CreateProject
 ) : RCImporter(directoryProvider, resourceMetadataRepository) {
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
@@ -257,7 +258,12 @@ class OngoingProjectImporter @Inject constructor(
     ): Collection {
         val sourceMetadata = sourceCollection.resourceContainer!!
         val mode = getProjectMode(fileReader, metadata.language, sourceCollection.resourceContainer!!.language)
-        val derivedProject = createDerivedProjects(metadata.language, sourceCollection, mode, true)
+        val derivedProject = createDerivedProjects(
+            metadata.language,
+            sourceCollection,
+            mode,
+            true
+        )
 
         val translation = createTranslation(sourceMetadata.language, metadata.language)
 
@@ -506,9 +512,21 @@ class OngoingProjectImporter @Inject constructor(
         mode: ProjectMode,
         verseByVerse: Boolean
     ): Collection {
-        return CreateProject(collectionRepository, resourceMetadataRepository)
-            .create(sourceCollection, language, mode, deriveProjectFromVerses = verseByVerse)
-            .blockingGet()
+        // populate all books when importing a project
+        return createProjectUseCase.createAllBooks(
+            sourceCollection.resourceContainer!!.language,
+            language,
+            mode
+        ).andThen(
+            createProjectUseCase.create(
+                sourceCollection,
+                language,
+                mode,
+                deriveProjectFromVerses = verseByVerse
+            )
+        ).doOnError {
+            logger.error("Error while deriving project(s) during import", it)
+        }.blockingGet()
     }
 
     private fun findSourceCollection(manifestSources: Set<Source>, manifestProject: Project): Collection {

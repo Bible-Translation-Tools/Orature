@@ -67,7 +67,6 @@ class CreateProject @Inject constructor(
             else -> sourceAndLinkedRcs.filter { resourceId == it.identifier }
         }
 
-        // TODO: use mode from method argument instead
         val projectMode = when {
             mode != null -> mode
             sourceProject.resourceContainer?.language == targetLanguage -> {
