@@ -275,6 +275,7 @@ class OngoingProjectImporter @Inject constructor(
         )
 
         projectFilesAccessor.initializeResourceContainerInDir()
+        projectFilesAccessor.setProjectMode(mode)
 
         callback?.onNotifyProgress(localizeKey = "copyingSource", percent = 40.0)
         projectFilesAccessor.copySourceFiles(fileReader)
