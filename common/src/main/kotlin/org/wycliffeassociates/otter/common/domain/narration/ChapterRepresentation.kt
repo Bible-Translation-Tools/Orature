@@ -132,14 +132,17 @@ internal class ChapterRepresentation(
         mappedFile?.let { raf ->
             for (i in 0 until activeVerses.size) {
                 var verseRead = 0
-                val start = activeVerses[i].start * frameSizeInBytes
-                val end = activeVerses[i].end * frameSizeInBytes
+                val verseStart = activeVerses[i].start * frameSizeInBytes
+                val verseEnd = activeVerses[i].end * frameSizeInBytes
 
-                val length = end - start
-                raf.seek(start.toLong())
+                val verseLength = verseEnd - verseStart
+                raf.seek(verseStart.toLong())
 
-                while (verseRead < length) {
-                    val read = raf.read(buffer)
+                while (verseRead < verseLength) {
+                    // Make buffer smaller if default buffer size exceeds verse length
+                    // though, this should almost never happen
+                    val normalBuffer = if (buffer.size > verseLength) ByteArray(verseLength) else buffer
+                    val read = raf.read(normalBuffer)
                     verseRead += read
                     bytesWritten += read
 
@@ -147,14 +150,15 @@ internal class ChapterRepresentation(
                         // If bytes read exceed target byte array size,
                         // we need to write only the part that fits in the array
                         val diff = bytesWritten - bytes.size
-                        val partialSize = buffer.size - diff
+                        val partialSize = normalBuffer.size - diff
 
                         for (j in 0 until partialSize) {
-                            byteBuffer.put(buffer[j])
+                            byteBuffer.put(normalBuffer[j])
                         }
+                        bytesWritten = bytes.size
                         break
                     } else {
-                        byteBuffer.put(buffer)
+                        byteBuffer.put(normalBuffer)
                     }
                 }
 
