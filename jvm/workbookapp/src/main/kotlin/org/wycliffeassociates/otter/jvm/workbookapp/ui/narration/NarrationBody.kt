@@ -5,7 +5,9 @@ import io.reactivex.Completable
 import io.reactivex.disposables.CompositeDisposable
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.geometry.Insets
 import javafx.scene.control.Slider
+import javafx.scene.layout.Priority
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.VerseNode
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
@@ -21,6 +23,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NextVerseEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.RecordVerseEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkersLayer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationRedoEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationResetChapterEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationUndoEvent
@@ -35,47 +38,13 @@ class NarrationBody : View() {
 
     override val root = hbox {
         stackpane {
-            scrollpane {
-                hbox {
-                    spacing = 10.0
-                    paddingHorizontal = 10.0
+            hgrow = Priority.ALWAYS
+            //padding = Insets(20.0)
 
-                    bindChildren(viewModel.recordedVerses) { verse ->
-                        val index = viewModel.recordedVerses.indexOf(verse)
-                        val label = (index + 1).toString()
-
-                        menubutton(label) {
-                            item("") {
-                                text = "Play"
-                                action {
-                                    fire(PlayVerseEvent(verse))
-                                }
-                                disableWhen {
-                                    viewModel.isRecordingProperty
-                                }
-                            }
-                            item("") {
-                                text = "Record Again"
-                                action {
-                                    fire(RecordAgainEvent(index))
-                                }
-                                disableWhen {
-                                    viewModel.isRecordingProperty
-                                }
-                            }
-                            item("") {
-                                text = "Open in..."
-                                action {
-                                    fire(OpenInAudioPluginEvent(index))
-                                }
-                                disableWhen {
-                                    viewModel.isRecordingProperty
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            add(VerseMarkersLayer().apply {
+                isRecordingProperty.bind(viewModel.isRecordingProperty)
+                markers.bind(viewModel.recordedVerses) { it }
+            })
         }
     }
 
@@ -424,6 +393,6 @@ class NarrationBodyViewModel : ViewModel() {
 
 class RecordAgainEvent(val index: Int) : FXEvent()
 class PlayVerseEvent(val verse: VerseNode) : FXEvent()
+class ImportVerseEvent(val verse: VerseNode) : FXEvent()
 class OpenInAudioPluginEvent(val index: Int) : FXEvent()
-
 class ChapterReturnFromPluginEvent: FXEvent()
