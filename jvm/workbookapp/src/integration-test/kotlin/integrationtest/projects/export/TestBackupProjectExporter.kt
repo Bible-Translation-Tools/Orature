@@ -18,9 +18,7 @@
  */
 package integrationtest.projects.export
 
-import com.nhaarman.mockitokotlin2.calls
 import integrationtest.di.DaggerTestPersistenceComponent
-import integrationtest.enUlbTestMetadata
 import integrationtest.projects.DatabaseEnvironment
 import org.junit.After
 import org.junit.Assert
@@ -74,7 +72,8 @@ class TestBackupProjectExporter {
     @Before
     fun setUp() {
         importer.get().import(seedProject).blockingGet()
-        workbook = workbookRepository.getProjects().blockingGet().single()
+        workbook = workbookRepository.getProjects().blockingGet()
+            .find { it.target.slug == ResourceContainerBuilder.defaultProjectSlug }!!
         outputDir = createTempDirectory("orature-export-test").toFile()
     }
 
