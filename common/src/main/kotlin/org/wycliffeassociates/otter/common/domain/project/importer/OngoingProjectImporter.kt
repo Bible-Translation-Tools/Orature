@@ -133,7 +133,7 @@ class OngoingProjectImporter @Inject constructor(
                         workbook.source.resourceMetadata,
                         workbook.target.resourceMetadata,
                         projectSlug
-                    ).exists()
+                    ).list().isNullOrEmpty().not() // since getProjectDirectory always uses mkdir()
                 } ?: false
             }
         }
