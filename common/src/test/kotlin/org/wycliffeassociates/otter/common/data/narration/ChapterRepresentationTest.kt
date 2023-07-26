@@ -89,11 +89,6 @@ class ChapterRepresentationTest {
         Assert.assertEquals(2, chapterRepresentation.framePosition)
     }
 
-    @Test
-    fun test2() {
-
-    }
-
     private fun mockWorkBook(): Workbook {
         return mockk<Workbook> {
             every { projectFilesAccessor } returns mockProjectFileAccessor()

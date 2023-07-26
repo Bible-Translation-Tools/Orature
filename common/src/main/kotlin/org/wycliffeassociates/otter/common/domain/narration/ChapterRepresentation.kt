@@ -12,9 +12,8 @@ import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import java.io.File
 import java.io.RandomAccessFile
-import java.lang.Exception
 import java.lang.IllegalStateException
-import java.nio.ByteBuffer
+import kotlin.math.min
 
 private const val ACTIVE_VERSES_FILE_NAME = "active_verses.json"
 private const val CHAPTER_NARRATION_FILE_NAME = "chapter_narration.pcm"
@@ -123,42 +122,29 @@ internal class ChapterRepresentation(
         return ((totalFrames * frameSizeInBytes) - position) > 0
     }
 
+    private val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
     override fun getPcmBuffer(bytes: ByteArray): Int {
         var bytesWritten = 0
 
-        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
-        val byteBuffer = ByteBuffer.wrap(bytes)
-
         mappedFile?.let { raf ->
-            for (i in 0 until activeVerses.size) {
+            for (verse in 0 until activeVerses.size) {
                 var verseRead = 0
-                val verseStart = activeVerses[i].start * frameSizeInBytes
-                val verseEnd = activeVerses[i].end * frameSizeInBytes
+                val verseStart = activeVerses[verse].start * frameSizeInBytes
+                val verseEnd = activeVerses[verse].end * frameSizeInBytes
 
                 val verseLength = verseEnd - verseStart
                 raf.seek(verseStart.toLong())
 
                 while (verseRead < verseLength) {
-                    // Make buffer smaller if default buffer size exceeds verse length
-                    // though, this should almost never happen
-                    val normalBuffer = if (buffer.size > verseLength) ByteArray(verseLength) else buffer
-                    val read = raf.read(normalBuffer)
+                    val bytesToRead = min(verseLength, buffer.size)
+                    val read = raf.read(buffer, 0, bytesToRead)
                     verseRead += read
-                    bytesWritten += read
 
-                    if (bytesWritten > bytes.size) {
-                        // If bytes read exceed target byte array size,
-                        // we need to write only the part that fits in the array
-                        val diff = bytesWritten - bytes.size
-                        val partialSize = normalBuffer.size - diff
+                    for (i in 0 until read) {
+                        if (bytesWritten >= bytes.size) break
 
-                        for (j in 0 until partialSize) {
-                            byteBuffer.put(normalBuffer[j])
-                        }
-                        bytesWritten = bytes.size
-                        break
-                    } else {
-                        byteBuffer.put(normalBuffer)
+                        bytes[bytesWritten] = buffer[i]
+                        bytesWritten++
                     }
                 }
 
@@ -184,22 +170,8 @@ internal class ChapterRepresentation(
 
     override fun release() {
         if (mappedFile != null) {
-            try {
-                // https://stackoverflow.com/questions/25238110/how-to-properly-close-mappedbytebuffer/25239834#25239834
-                // TODO: Replace with https://docs.oracle.com/en/java/javase/14/docs/api/jdk.incubator.foreign/jdk/incubator/foreign/MemorySegment.html#ofByteBuffer(java.nio.ByteBuffer)
-                val unsafeClass = Class.forName("sun.misc.Unsafe")
-                val unsafeField = unsafeClass.getDeclaredField("theUnsafe")
-                unsafeField.isAccessible = true
-                val unsafe: Any = unsafeField.get(null)
-                val invokeCleaner = unsafeClass.getMethod("invokeCleaner", ByteBuffer::class.java)
-                invokeCleaner.invoke(unsafe, mappedFile)
-            } catch (e: Exception) {
-
-            }
-            mappedFile?.channel?.close()
             mappedFile?.close()
             mappedFile = null
-            System.gc()
         }
     }
 
