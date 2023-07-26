@@ -5,7 +5,6 @@ dependencies {
     implementation "de.sciss:jump3r:$jump3rVer"
 
     // Testing
-    implementation "io.mockk:mockk:$mockkVer"
     testImplementation "junit:junit:$junitVer"
     testImplementation "io.mockk:mockk:$mockkVer"
     testImplementation "org.mockito:mockito-core:$mockitoVer"
