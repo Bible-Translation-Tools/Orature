@@ -152,6 +152,7 @@ dependencies {
     testImplementation "junit:junit:$junitVer"
     testImplementation "org.mockito:mockito-core:$mockitoVer"
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVer"
+    testImplementation "io.mockk:mockk:$mockkVer"
     testImplementation "org.testfx:testfx-core:$testFxVer"
     testImplementation "org.testfx:testfx-junit:$testFxVer"
     testImplementation "org.testfx:openjfx-monocle:$testFxMonocleVer"

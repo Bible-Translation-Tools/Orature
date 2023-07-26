@@ -13,7 +13,7 @@ ext {
     jacocoToolVer = "0.8.7" // stable 0.8.7, not plugin version
 
     // Libraries
-    kotlinVer = '1.5.10'
+    kotlinVer = '1.8.0'
     javafxVer = '19'
     javaGridviewVer = '1.0.0'
     tornadofxVer = '2.1.1-WA-fork'
@@ -32,6 +32,7 @@ ext {
     jacksonVer = '2.9.2'
     daggerVer = '2.47'
     junitVer = '4.12'
+    mockkVer = '1.13.5'
     mockitoVer = '2.+'
     mockitoKotlinVer = '2.1.0'
     commonmarkVer = '0.12.1'
