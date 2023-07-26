@@ -51,7 +51,7 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
     private val APP_THEME_KEY = "appTheme"
     private val SOURCE_TEXT_ZOOM_KEY = "sourceTextZoom"
     private val LANGUAGE_NAMES_URL_KEY = "languageNamesUrl"
-    private val DEFAULT_LANGUAGE_NAMES_URL = "https://td.unfoldingword.org/exports/langnames.json"
+    private val DEFAULT_LANGUAGE_NAMES_URL = "https://langnames.bibleineverylanguage.org/langnames.json"
 
     private fun putInt(key: String, value: Int): Completable {
         return Completable
