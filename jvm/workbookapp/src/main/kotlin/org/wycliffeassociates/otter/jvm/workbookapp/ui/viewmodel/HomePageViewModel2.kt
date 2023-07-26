@@ -141,7 +141,8 @@ class HomePageViewModel2 : ViewModel() {
     fun deleteProjectGroup(books: List<WorkbookDescriptor>) {
         if (books.all { it.progress == 0.0 }) {
             logger.info("Deleting project group: ${selectedProjectGroup.value.sourceLanguage} -> ${selectedProjectGroup.value.targetLanguage}")
-            workbookDescriptorRepo.delete(books)
+
+            deleteProjectUseCase.deleteProjects(books)
                 .observeOnFx()
                 .subscribe {
                     loadProjects()

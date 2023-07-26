@@ -33,7 +33,8 @@ import javax.inject.Inject
 class DeleteProject @Inject constructor(
     private val collectionRepository: ICollectionRepository,
     private val directoryProvider: IDirectoryProvider,
-    private val workbookRepository: IWorkbookRepository
+    private val workbookRepository: IWorkbookRepository,
+    private val workbookDescriptorRepo: IWorkbookDescriptorRepository
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -70,6 +71,15 @@ class DeleteProject @Inject constructor(
                 recreateWorkbookDescriptor(workbookDescriptor)
             )
             .subscribeOn(Schedulers.io())
+    }
+
+    fun deleteProjects(list: List<WorkbookDescriptor>): Completable {
+        return Completable
+            .fromAction {
+                list.map { workbookRepository.get(it.sourceCollection, it.targetCollection) }
+                    .forEach { delete(it, true).blockingAwait() } // avoid concurrent accesses to the same file
+            }
+            .andThen(workbookDescriptorRepo.delete(list))
     }
 
     private fun recreateWorkbookDescriptor(workbookDescriptor: WorkbookDescriptor): Completable {
