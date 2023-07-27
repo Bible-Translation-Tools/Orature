@@ -2,9 +2,9 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers
 
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.layout.HBox
-import javafx.scene.paint.Color
-import org.wycliffeassociates.otter.common.data.primitives.VerseNode
+import org.wycliffeassociates.otter.common.domain.narration.VerseNode
 import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.*
 
 class VerseMarkersLayer : HBox() {
@@ -17,9 +17,9 @@ class VerseMarkersLayer : HBox() {
     }
 
     init {
-        style {
-            borderColor += box(Color.RED)
-        }
+        tryImportStylesheet("/css/verse-markers-layer.css")
+
+        addClass("verse-markers-layer")
 
         //isMouseTransparent = true
 

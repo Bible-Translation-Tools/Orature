@@ -8,7 +8,7 @@ import javafx.event.EventTarget
 import javafx.scene.control.MenuButton
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.common.data.primitives.VerseNode
+import org.wycliffeassociates.otter.common.domain.narration.VerseNode
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.ImportVerseEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.OpenInAudioPluginEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.PlayVerseEvent
