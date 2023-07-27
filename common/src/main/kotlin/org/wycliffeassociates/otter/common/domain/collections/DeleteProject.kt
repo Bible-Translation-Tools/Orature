@@ -73,6 +73,9 @@ class DeleteProject @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
+    /**
+     * Deletes all the projects/workbooks including the derived collections & content.
+     */
     fun deleteProjects(list: List<WorkbookDescriptor>): Completable {
         return Completable
             .fromAction {
