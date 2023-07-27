@@ -2,9 +2,8 @@
     -fx-border-color: red;
 }
 
-.verse-marker {
+.verse-marker__drag-area {
     -fx-alignment: bottom-left;
-    -fx-spacing: 26;
 }
 
 .verse-marker__drag-area:hover {
@@ -16,33 +15,45 @@
     -fx-stroke : -wa-primary;
 }
 
-.verse-marker__label {
-    -fx-alignment: bottom-left;
-    -fx-spacing: 0;
-    -fx-translate-x: 6;
-    -fx-translate-y: -20;
-}
-
-.verse-marker__label-title {
+.verse-marker__title {
     -fx-font-size: 20px;
     -fx-font-weight: 400;
     -fx-text-fill: -wa-primary;
+    -fx-translate-y: -20;
 }
 
-.verse-marker__label-icon {
+.verse-marker__icon {
     -fx-background-color: #F2F3F5;
+    -fx-translate-x: -2;
+    -fx-translate-y: -20;
 }
 
-.verse-marker__drag-area:hover .verse-marker__label-icon {
+.verse-marker__drag-area:hover .verse-marker__icon {
     -fx-background-color: transparent;
 }
 
-.verse-marker__drag-area:hover .verse-marker__label-icon .ikonli-font-icon {
+.verse-marker__drag-area:hover .verse-marker__icon .ikonli-font-icon {
     -fx-icon-code: mdi-bookmark;
 }
 
-.verse-marker__label-icon .ikonli-font-icon {
+.verse-marker__icon .ikonli-font-icon {
     -fx-icon-color: -wa-primary;
     -fx-icon-size: 28px;
     -fx-icon-code: mdi-bookmark-outline;
+}
+
+.verse-marker__menu {
+    -fx-translate-x: 10;
+    -fx-translate-y: -10;
+}
+
+.verse-marker .wa-menu-button {
+    -fx-padding: 0;
+}
+
+.verse-marker__menu .arrow-button,
+.verse-marker__menu .arrow-button .arrow,
+.verse-marker__menu .arrow-button,
+.verse-marker__menu .arrow-button .arrow {
+    -fx-padding: 0;
 }

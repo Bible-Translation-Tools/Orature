@@ -29,45 +29,44 @@ class VerseMenu : MenuButton() {
     init {
         addClass("btn", "btn--primary", "btn--borderless", "wa-menu-button")
         graphic = FontIcon(MaterialDesign.MDI_DOTS_VERTICAL)
-            addClass("wa-context-menu")
 
-            item(playVerseTextProperty.value) {
-                graphic = FontIcon(MaterialDesign.MDI_PLAY)
-                action {
-                    FX.eventbus.fire(PlayVerseEvent(verseProperty.value))
-                }
-                disableWhen {
-                    isRecordingProperty
-                }
+        item(playVerseTextProperty.value) {
+            graphic = FontIcon(MaterialDesign.MDI_PLAY)
+            action {
+                FX.eventbus.fire(PlayVerseEvent(verseProperty.value))
             }
-            item(recordAgainTextProperty.value) {
-                graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
-                action {
-                    FX.eventbus.fire(RecordAgainEvent(verseIndexProperty.value))
-                }
-                disableWhen {
-                    isRecordingProperty
-                }
-            }
-            item(importVerseTextProperty.value) {
-                graphic = FontIcon(MaterialDesign.MDI_DOWNLOAD)
-                action {
-                    FX.eventbus.fire(ImportVerseEvent(verseProperty.value))
-                }
-                disableWhen {
-                    isRecordingProperty
-                }
-            }
-            item(editVerseTextProperty.value) {
-                graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
-                action {
-                    FX.eventbus.fire(OpenInAudioPluginEvent(verseIndexProperty.value))
-                }
-                disableWhen {
-                    isRecordingProperty
-                }
+            disableWhen {
+                isRecordingProperty
             }
         }
+        item(recordAgainTextProperty.value) {
+            graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
+            action {
+                FX.eventbus.fire(RecordAgainEvent(verseIndexProperty.value))
+            }
+            disableWhen {
+                isRecordingProperty
+            }
+        }
+        item(importVerseTextProperty.value) {
+            graphic = FontIcon(MaterialDesign.MDI_DOWNLOAD)
+            action {
+                FX.eventbus.fire(ImportVerseEvent(verseProperty.value))
+            }
+            disableWhen {
+                isRecordingProperty
+            }
+        }
+        item(editVerseTextProperty.value) {
+            graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
+            action {
+                FX.eventbus.fire(OpenInAudioPluginEvent(verseIndexProperty.value))
+            }
+            disableWhen {
+                isRecordingProperty
+            }
+        }
+    }
 }
 
 fun EventTarget.verseMenu(op: VerseMenu.() -> Unit = {}) = VerseMenu().attachTo(this, op)

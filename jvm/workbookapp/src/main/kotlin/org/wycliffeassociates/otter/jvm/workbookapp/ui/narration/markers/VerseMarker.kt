@@ -4,17 +4,18 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.scene.layout.HBox
+import javafx.geometry.Pos
+import javafx.scene.layout.BorderPane
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.domain.narration.VerseNode
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.VerseMenu
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.verseMenu
 import tornadofx.*
 
 private const val MARKER_AREA_WIDTH = 24.0
 private const val MARKER_WIDTH = 2.0
 
-class VerseMarker : HBox() {
+class VerseMarker : BorderPane() {
 
     val verseProperty = SimpleObjectProperty<VerseNode>()
     val verseIndexProperty = SimpleIntegerProperty()
@@ -28,7 +29,7 @@ class VerseMarker : HBox() {
 
         translateXProperty().bind(positionProperty.minus(MARKER_AREA_WIDTH / 2))
 
-        add(stackpane {
+        left = stackpane {
             addClass("verse-marker__drag-area")
             minWidth = MARKER_AREA_WIDTH
             maxWidth = MARKER_AREA_WIDTH
@@ -45,24 +46,24 @@ class VerseMarker : HBox() {
                 }
             }
 
-            hbox {
-                addClass("verse-marker__label")
-
-                label {
-                    addClass("verse-marker__label-icon")
-                    graphic = FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE)
-                }
-
-                label(labelProperty) {
-                    addClass("verse-marker__label-title")
-                }
+            label {
+                addClass("verse-marker__icon")
+                graphic = FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE)
             }
-        })
+        }
 
-        add(VerseMenu().apply {
+        center = label(labelProperty) {
+            addClass("verse-marker__title")
+            setAlignment(this, Pos.BOTTOM_LEFT)
+        }
+
+        right = verseMenu {
+            addClass("verse-marker__menu")
+            setAlignment(this, Pos.BOTTOM_LEFT)
+
             isRecordingProperty.bind(this@VerseMarker.isRecordingProperty)
             verseProperty.bind(this@VerseMarker.verseProperty)
             verseIndexProperty.bind(this@VerseMarker.verseIndexProperty)
-        })
+        }
     }
 }
