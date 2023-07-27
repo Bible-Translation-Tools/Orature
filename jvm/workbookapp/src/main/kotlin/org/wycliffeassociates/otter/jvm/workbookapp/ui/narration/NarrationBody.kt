@@ -9,7 +9,6 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.control.Slider
-import javafx.scene.image.PixelWriter
 import javafx.scene.image.WritableImage
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
@@ -37,9 +36,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataSto
 import tornadofx.*
 import java.io.File
 import java.lang.Math.sin
-import java.util.concurrent.Executors
-import java.util.concurrent.ScheduledExecutorService
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class NarrationBody : View() {
@@ -422,10 +418,10 @@ class ChapterReturnFromPluginEvent: FXEvent()
 class drawableWaveForm() : Drawable {
 
     // TODO: inject narration and use the pcmBuffer to display the current audio data
-
-    // TODO: add a variable here for line thickness
     var heightProperty = SimpleDoubleProperty(1.0)
     var widthProperty = SimpleDoubleProperty(1.0)
+    val waveformColor = Color.rgb(26, 26, 26)
+    var backgroundColor = c("#E5E8EB")
 
     var lineWidth = 1
     val sampleRate = 44100
@@ -492,7 +488,7 @@ class drawableWaveForm() : Drawable {
             val startY = previouslyDrawnLines[i]
             val endY = previouslyDrawnLines[i + 1]
             for (y in startY..endY) {
-                pixelWriter.setColor(startX, y, c("#E5E8EB"))
+                pixelWriter.setColor(startX, y, backgroundColor)
             }
         }
 
@@ -507,7 +503,7 @@ class drawableWaveForm() : Drawable {
             val endY = y2 - 1
 
             for (y in startY..endY) {
-                pixelWriter.setColor(x, y, Color.rgb(26, 26, 26))
+                pixelWriter.setColor(x, y, waveformColor)
             }
 
             previouslyDrawnLines[x2] = startY
@@ -523,34 +519,13 @@ class drawableWaveForm() : Drawable {
 
 
     override fun draw(context: GraphicsContext, canvas: Canvas) {
+        fillSamplesBuffer(samplesBuffer)
+        findAllLocalMinAndMaxSamples(samplesBuffer)
+        drawAllLocalMinAndMaxToImage()
+        isWaveformDirty = true
         context.drawImage(writableImage, 0.0, 0.0, canvas.width, canvas.height)
     }
 
-
-
-    fun startMethodExecutionThread() {
-        val executorService: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
-        executorService.scheduleAtFixedRate(::executeMethodCalls, 0, 15, TimeUnit.MILLISECONDS)
-    }
-
-
-    fun executeMethodCalls() {
-        fillSamplesBuffer(samplesBuffer)
-        findAllLocalMinAndMaxSamples(samplesBuffer)
-    }
-
-    fun startDrawingThread() {
-        val executorService: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
-        executorService.scheduleAtFixedRate( {
-            drawAllLocalMinAndMaxToImage()
-            isWaveformDirty = true
-        }, 0, 16, TimeUnit.MILLISECONDS)
-    }
-
-    init {
-        startMethodExecutionThread()
-        startDrawingThread()
-    }
 
 }
 
