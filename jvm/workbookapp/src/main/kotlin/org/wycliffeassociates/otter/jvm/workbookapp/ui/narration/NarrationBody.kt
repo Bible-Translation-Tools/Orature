@@ -429,18 +429,19 @@ class drawableWaveForm() : Drawable {
     var heightProperty = SimpleDoubleProperty(1.0)
     var widthProperty = SimpleDoubleProperty(1.0)
     var writableImage = WritableImage(1920, 400)
+    val sampleRate = 44100
 
     var sampleGeneratorSeed = 0.0
-    var samplesBuffer = DoubleArray(441000)
-    var allLocalMinAndMaxSamples = Array(numberOfLines) { Pair(0.0,0.0)}
+    var samplesBuffer = DoubleArray(sampleRate * 10)
+    var allLocalMinAndMaxSamples = Array(numberOfLines) { Pair(0.0,0.0) }
     var previouslyDrawnLines = IntArray(numberOfLines * 2) { 0 }
     private var isWaveformDirty = true
 
 
     fun generateSamples(samplesBuffer: DoubleArray) {
         var sampleValue = 0.0
-        for(i in 1 ..  441000) {
-            sampleValue = 32787 * sin(sampleGeneratorSeed)
+        for(i in 1 ..  (sampleRate*10)) {
+            sampleValue = Short.MAX_VALUE * sin(sampleGeneratorSeed)
             samplesBuffer[i - 1] = sampleValue
             sampleGeneratorSeed  += 0.0001
         }
@@ -448,8 +449,8 @@ class drawableWaveForm() : Drawable {
 
 
     fun findMinAndMaxSamplesInRange(samplesBuffer: DoubleArray, range : Int, startingIndex : Int): Pair<Double, Double> {
-        var min = 32789.0
-        var max = - 32769.0
+        var min = (Short.MAX_VALUE + 1).toDouble()
+        var max = (Short.MIN_VALUE - 1).toDouble()
         for (i in startingIndex until (startingIndex + range)) {
 
             if(i >= samplesBuffer.size) break
