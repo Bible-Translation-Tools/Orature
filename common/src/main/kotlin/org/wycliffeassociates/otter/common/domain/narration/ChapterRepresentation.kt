@@ -6,9 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.reactivex.subjects.PublishSubject
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import java.io.File
 
 private const val ACTIVE_VERSES_FILE_NAME = "active_verses.json"
@@ -27,7 +27,7 @@ internal class ChapterRepresentation(
 
     val onActiveVersesUpdated = PublishSubject.create<List<VerseNode>>()
 
-    lateinit var workingAudio: AudioFile
+    lateinit var workingAudio: OratureAudioFile
         private set
 
     init {
@@ -49,10 +49,7 @@ internal class ChapterRepresentation(
     }
 
     fun finalizeVerse(verseIndex: Int = activeVerses.lastIndex) {
-        activeVerses.getOrNull(verseIndex)?.let { verse ->
-            val newVerse = VerseNode(verse.start, workingAudio.totalFrames)
-            activeVerses[verseIndex] = newVerse
-        }
+        activeVerses.getOrNull(verseIndex)?.end = workingAudio.totalFrames
         onVersesUpdated()
     }
 
@@ -85,7 +82,7 @@ internal class ChapterRepresentation(
             if (!it.exists()) {
                 it.createNewFile()
             }
-            workingAudio = AudioFile(it)
+            workingAudio = OratureAudioFile(it)
         }
     }
 }

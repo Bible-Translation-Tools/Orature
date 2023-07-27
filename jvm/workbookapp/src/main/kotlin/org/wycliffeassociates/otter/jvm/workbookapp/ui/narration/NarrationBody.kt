@@ -306,7 +306,6 @@ class NarrationBodyViewModel : ViewModel() {
             }
             .subscribe {
                 subscribeActiveVersesChanged()
-                recordedVerses.setAll(narration.activeVerses)
 
                 recordStart = recordedVerses.isEmpty()
                 recordResume = recordedVerses.isNotEmpty()
@@ -418,6 +417,10 @@ class NarrationBodyViewModel : ViewModel() {
     }
 
     private fun subscribeActiveVersesChanged() {
+        recordedVerses.setAll(narration.activeVerses)
+        hasUndo = narration.hasUndo()
+        hasRedo = narration.hasRedo()
+
         narration.onActiveVersesUpdated.subscribe {
             recordedVerses.setAll(it)
 

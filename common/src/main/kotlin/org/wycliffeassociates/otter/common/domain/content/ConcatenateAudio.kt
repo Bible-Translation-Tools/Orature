@@ -45,7 +45,7 @@ class ConcatenateAudio @Inject constructor(private val directoryProvider: IDirec
                 files.forEach { file ->
                     val oratureAudioFile = OratureAudioFile(file)
                     val buffer = ByteArray(10240)
-                    audioFile.reader().use { reader ->
+                    oratureAudioFile.reader().use { reader ->
                         reader.open()
                         while (reader.hasRemaining()) {
                             val written = reader.getPcmBuffer(buffer)
