@@ -4,8 +4,14 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
 import io.reactivex.disposables.CompositeDisposable
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.scene.canvas.Canvas
+import javafx.scene.canvas.GraphicsContext
 import javafx.scene.control.Slider
+import javafx.scene.image.PixelWriter
+import javafx.scene.image.WritableImage
+import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.narration.VerseNode
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
@@ -14,6 +20,8 @@ import org.wycliffeassociates.otter.common.domain.narration.Narration
 import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
+import org.wycliffeassociates.otter.jvm.controls.narration.CanvasFragment
+import org.wycliffeassociates.otter.jvm.controls.waveform.Drawable
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -26,66 +34,33 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationR
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationUndoEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.WaveformCanvas
 import tornadofx.*
 import java.io.File
+import java.lang.Math.sin
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class NarrationBody : View() {
     private val viewModel: NarrationBodyViewModel by inject()
 
+    var canvasFragment = CanvasFragment()
+
     override val root = hbox {
+        var waveform = drawableWaveForm()
 
-//        borderpane {
-//            center {
-//                add(WaveformCanvas())
-//            }
-//        }
-
-        stackpane {
-            add<WaveformCanvas>()
-            scrollpane {
-                hbox {
-                    spacing = 10.0
-                    paddingHorizontal = 10.0
-
-                    bindChildren(viewModel.recordedVerses) { verse ->
-                        val index = viewModel.recordedVerses.indexOf(verse)
-                        val label = (index + 1).toString()
-
-                        menubutton(label) {
-                            item("") {
-                                text = "Play"
-                                action {
-                                    fire(PlayVerseEvent(verse))
-                                }
-                                disableWhen {
-                                    viewModel.isRecordingProperty
-                                }
-                            }
-                            item("") {
-                                text = "Record Again"
-                                action {
-                                    fire(RecordAgainEvent(index))
-                                }
-                                disableWhen {
-                                    viewModel.isRecordingProperty
-                                }
-                            }
-                            item("") {
-                                text = "Open in..."
-                                action {
-                                    fire(OpenInAudioPluginEvent(index))
-                                }
-                                disableWhen {
-                                    viewModel.isRecordingProperty
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        runAsync {
+            waveform.drawAllLocalMinAndMaxToImage()
         }
+
+        waveform.heightProperty.bind(this.heightProperty())
+        waveform.widthProperty.bind(this.widthProperty())
+        canvasFragment.prefWidthProperty().bind(this.widthProperty())
+        canvasFragment.drawableProperty.set(waveform)
+        canvasFragment.isDrawingProperty.set(true)
+
+        add(canvasFragment)
     }
     init {
         subscribe<NarrationUndoEvent> {
@@ -438,6 +413,138 @@ class PlayVerseEvent(val verse: VerseNode) : FXEvent()
 class OpenInAudioPluginEvent(val index: Int) : FXEvent()
 
 class ChapterReturnFromPluginEvent: FXEvent()
+
+
+
+
+
+
+class drawableWaveForm() : Drawable {
+
+    // TODO: inject narration and use the pcmBuffer to display the current audio data
+
+    val samplesPerLine = 230
+    // TODO: add a variable here for line thickness
+    val numberOfLines = 1920
+    var heightProperty = SimpleDoubleProperty(1.0)
+    var widthProperty = SimpleDoubleProperty(1.0)
+    var writableImage = WritableImage(1920, 400)
+
+    var sampleGeneratorSeed = 0.0
+    var samplesBuffer = DoubleArray(441000)
+    var allLocalMinAndMaxSamples = Array(numberOfLines) { Pair(0.0,0.0)}
+    var previouslyDrawnLines = IntArray(numberOfLines * 2) { 0 }
+    private var isWaveformDirty = true
+
+
+    fun generateSamples(samplesBuffer: DoubleArray) {
+        var sampleValue = 0.0
+        for(i in 1 ..  441000) {
+            sampleValue = 32787 * sin(sampleGeneratorSeed)
+            samplesBuffer[i - 1] = sampleValue
+            sampleGeneratorSeed  += 0.0001
+        }
+    }
+
+
+    fun findMinAndMaxSamplesInRange(samplesBuffer: DoubleArray, range : Int, startingIndex : Int): Pair<Double, Double> {
+        var min = 32789.0
+        var max = - 32769.0
+        for (i in startingIndex until (startingIndex + range)) {
+
+            if(i >= samplesBuffer.size) break
+
+            if(samplesBuffer[i] < min) min = samplesBuffer[i]
+
+            if(samplesBuffer[i] > max) max = samplesBuffer[i]
+        }
+
+        return Pair(min, max)
+    }
+
+
+    fun findAllLocalMinAndMaxSamples(samplesBuffer: DoubleArray) {
+        var i = 0
+        var position = 0
+        while(i < samplesBuffer.size) {
+            allLocalMinAndMaxSamples[position] = findMinAndMaxSamplesInRange(samplesBuffer, samplesPerLine, i)
+            i += samplesPerLine + 1
+            position++
+        }
+    }
+
+
+    private fun scaleAmplitude(sample: Double, height: Double): Double {
+        return height / (Short.MAX_VALUE * 2) * (sample + Short.MAX_VALUE)
+    }
+
+
+    fun drawAllLocalMinAndMaxToImage() {
+        if (!isWaveformDirty) return
+
+        val pixelWriter = writableImage.pixelWriter
+
+        // Clear only the lines that need to be redrawn
+        for (i in previouslyDrawnLines.indices step 2) {
+            val startX = i / 2
+            val startY = previouslyDrawnLines[i]
+            val endY = previouslyDrawnLines[i + 1]
+            for (y in startY..endY) {
+                pixelWriter.setColor(startX, y, c("#E5E8EB"))
+            }
+        }
+
+        // Draw the updated waveform
+        var x = 0
+        var x2 = 0
+        while (x < writableImage.width.toInt() && x < allLocalMinAndMaxSamples.size) {
+            val y1 = scaleAmplitude(allLocalMinAndMaxSamples[x].first, writableImage.height).toInt()
+            val y2 = scaleAmplitude(allLocalMinAndMaxSamples[x].second, writableImage.height).toInt()
+
+            val startY = y1 + 1
+            val endY = y2 - 1
+
+            for (y in startY..endY) {
+                pixelWriter.setColor(x, y, Color.rgb(26, 26, 26))
+            }
+
+            previouslyDrawnLines[x2] = startY
+            previouslyDrawnLines[x2 + 1] = endY
+
+            x++
+            x2 += 2
+        }
+
+        // Mark the waveform as not dirty, as we have now drawn the updated parts
+        isWaveformDirty = false
+    }
+
+
+    override fun draw(context: GraphicsContext, canvas: Canvas) {
+        context.drawImage(writableImage, 0.0, 0.0, canvas.width, canvas.height)
+    }
+
+
+
+    fun startMethodExecutionThread() {
+        val executorService: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
+        executorService.scheduleAtFixedRate(::executeMethodCalls, 0, 15, TimeUnit.MILLISECONDS)
+    }
+
+
+    fun executeMethodCalls() {
+        generateSamples(samplesBuffer)
+        findAllLocalMinAndMaxSamples(samplesBuffer)
+        drawAllLocalMinAndMaxToImage()
+        isWaveformDirty = true
+    }
+
+
+    init {
+        startMethodExecutionThread()
+    }
+
+}
 
 
 
