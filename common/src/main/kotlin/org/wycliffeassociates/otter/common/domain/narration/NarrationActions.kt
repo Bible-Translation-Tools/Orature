@@ -2,7 +2,6 @@ package org.wycliffeassociates.otter.common.domain.narration
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import org.wycliffeassociates.otter.common.audio.AudioFile
-import org.wycliffeassociates.otter.common.data.primitives.VerseNode
 import kotlin.collections.ArrayList
 
 /**

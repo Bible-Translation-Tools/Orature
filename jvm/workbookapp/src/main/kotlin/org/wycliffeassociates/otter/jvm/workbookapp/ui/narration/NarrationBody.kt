@@ -9,7 +9,7 @@ import javafx.geometry.Insets
 import javafx.scene.control.Slider
 import javafx.scene.layout.Priority
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.primitives.VerseNode
+import org.wycliffeassociates.otter.common.domain.narration.VerseNode
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.narration.Narration
@@ -267,7 +267,6 @@ class NarrationBodyViewModel : ViewModel() {
             }
             .subscribe {
                 subscribeActiveVersesChanged()
-                recordedVerses.setAll(narration.activeVerses)
 
                 recordStart = recordedVerses.isEmpty()
                 recordResume = recordedVerses.isNotEmpty()
@@ -379,6 +378,10 @@ class NarrationBodyViewModel : ViewModel() {
     }
 
     private fun subscribeActiveVersesChanged() {
+        recordedVerses.setAll(narration.activeVerses)
+        hasUndo = narration.hasUndo()
+        hasRedo = narration.hasRedo()
+
         narration.onActiveVersesUpdated.subscribe {
             recordedVerses.setAll(it)
 

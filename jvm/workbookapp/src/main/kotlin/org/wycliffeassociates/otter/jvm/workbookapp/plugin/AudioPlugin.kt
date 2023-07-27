@@ -131,6 +131,7 @@ class AudioPlugin(
                     "--book=${pluginParameters.bookTitle}",
                     "--chapter=${pluginParameters.chapterLabel}",
                     "--chapter_number=${pluginParameters.chapterNumber}",
+                    "--marker_labels=${pluginParameters.verseLabels}",
                     "--marker_total=${pluginParameters.verseTotal}",
                     (if (pluginParameters.chunkLabel != null) "--unit=${pluginParameters.chunkLabel}" else ""),
                     (if (pluginParameters.chunkNumber != null) "--unit_number=${pluginParameters.chunkNumber}" else ""),

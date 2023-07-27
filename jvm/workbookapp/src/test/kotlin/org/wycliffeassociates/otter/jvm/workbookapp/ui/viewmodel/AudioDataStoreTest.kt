@@ -24,7 +24,6 @@ import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import io.reactivex.Observable
 import io.reactivex.Single
-import javafx.beans.property.SimpleStringProperty
 import org.junit.After
 import org.junit.AfterClass
 import org.junit.Assert

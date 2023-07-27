@@ -1,7 +1,6 @@
 package org.wycliffeassociates.otter.common.domain.narration
 
 import org.wycliffeassociates.otter.common.audio.AudioFile
-import org.wycliffeassociates.otter.common.data.primitives.VerseNode
 import java.util.*
 
 internal class NarrationHistory {

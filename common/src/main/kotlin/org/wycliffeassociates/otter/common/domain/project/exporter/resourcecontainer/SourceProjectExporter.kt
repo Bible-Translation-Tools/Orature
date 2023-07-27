@@ -22,7 +22,7 @@ import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
@@ -165,7 +165,7 @@ class SourceProjectExporter @Inject constructor(
         contributors: List<Contributor>
     ): Completable {
         // update markers for newly copied takes
-        val cues = AudioFile(take.file).metadata.getCues()
+        val cues = OratureAudioFile(take.file).getCues()
         return if (cues.isEmpty()) {
             Completable.complete()
         } else {

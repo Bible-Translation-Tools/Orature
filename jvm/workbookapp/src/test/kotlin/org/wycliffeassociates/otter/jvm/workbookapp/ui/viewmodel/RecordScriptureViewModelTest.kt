@@ -58,6 +58,7 @@ import org.wycliffeassociates.otter.jvm.device.ConfigureAudioSystem
 import org.wycliffeassociates.otter.jvm.workbookapp.utils.writeWavFile
 import tornadofx.*
 import java.io.File
+import java.lang.Thread.sleep
 import java.time.LocalDate
 
 class RecordScriptureViewModelTest {
@@ -175,7 +176,8 @@ class RecordScriptureViewModelTest {
         }
 
         @BeforeClass
-        @JvmStatic fun setup() {
+        @JvmStatic
+        fun setup() {
             FxToolkit.registerPrimaryStage()
             FxToolkit.setupApplication { testApp }
 
@@ -200,7 +202,8 @@ class RecordScriptureViewModelTest {
         }
 
         @AfterClass
-        @JvmStatic fun tearDown() {
+        @JvmStatic
+        fun tearDown() {
             FxToolkit.hideStage()
             FxToolkit.cleanupStages()
             FxToolkit.cleanupApplication(testApp)
@@ -290,14 +293,17 @@ class RecordScriptureViewModelTest {
 
     @Test
     fun `make selected take a recordable`() {
-        val take = Take("take1", take1File, 1, MimeType.USFM, LocalDate.now())
+        val take = Take("take1", take1File, 1, MimeType.USFM, LocalDate.now().minusDays(10))
 
         val initialLastModified = take.file.lastModified()
 
-        recordScriptureViewModel.selectTake(take)
+        recordScriptureViewModel
+            .selectTake(take)
+            .subscribe {
+                Assert.assertNotEquals(take.file.lastModified(), initialLastModified)
+                Assert.assertEquals(recordScriptureViewModel.recordable?.audio?.selected?.value?.value, take)
+            }
 
-        Assert.assertNotEquals(take.file.lastModified(), initialLastModified)
-        Assert.assertEquals(recordScriptureViewModel.recordable?.audio?.selected?.value?.value, take)
     }
 
     @Test

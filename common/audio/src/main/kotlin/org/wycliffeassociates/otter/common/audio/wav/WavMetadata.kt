@@ -18,11 +18,11 @@
  */
 package org.wycliffeassociates.otter.common.audio.wav
 
+import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.AudioCue
+import org.wycliffeassociates.otter.common.audio.AudioMetadata
 import java.io.OutputStream
 import java.nio.ByteBuffer
-import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.audio.AudioMetadata
-import org.wycliffeassociates.otter.common.audio.AudioCue
 
 
 /**
@@ -38,6 +38,28 @@ import org.wycliffeassociates.otter.common.audio.AudioCue
  */
 class WavMetadata(parsableChunks: List<RiffChunk>? = null) : AudioMetadata {
 
+    companion object {
+
+        /**
+         * Holds the chunk parsers used to parse Wav metadata
+         */
+        private var parsers: List<Class<out RiffChunk?>> = arrayListOf<Class<out RiffChunk?>>(CueChunk::class.java)
+
+        /**
+         * Allows for configuration of the WavMetadata when using this audio library. As The ideal use of this library
+         * is to open a file using the AudioFile class, it can be difficult to configure and or extend custom Wav Chunk
+         * parsers beyond what is provided by this library.
+         *
+         * In your main function, or where application configuration is done prior to use of the AudioFile class,
+         * make a call to this function and provide which RiffChunk parsers should be used by the WavMetadata class
+         * when reading wav files. All AudioFiles will then use the provided parsers instead of the default configuration.
+         * (Currently the default chunks parsed are only CueChunks).
+         */
+        fun configureParsers(vararg parsers: Class<out RiffChunk>) {
+            this.parsers = arrayListOf(*parsers)
+        }
+    }
+
     private val logger = LoggerFactory.getLogger(WavMetadata::class.java)
 
     private val cueChunk: CueChunk
@@ -45,6 +67,13 @@ class WavMetadata(parsableChunks: List<RiffChunk>? = null) : AudioMetadata {
 
     init {
         chunks = mutableSetOf()
+        parsers.forEach {
+            val chunk = it.getConstructor().newInstance()
+            chunk?.let { chunk ->
+                chunks.add(chunk)
+            }
+        }
+
         if (parsableChunks != null) {
             chunks.addAll(parsableChunks)
         }
@@ -52,7 +81,7 @@ class WavMetadata(parsableChunks: List<RiffChunk>? = null) : AudioMetadata {
         if (cue != null) {
             cueChunk = cue as CueChunk
         } else {
-            cueChunk = VerseMarkerChunk()
+            cueChunk = CueChunk()
             chunks.add(cueChunk)
         }
     }
