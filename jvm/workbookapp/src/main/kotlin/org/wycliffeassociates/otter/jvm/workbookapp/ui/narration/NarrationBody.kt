@@ -423,22 +423,27 @@ class drawableWaveForm() : Drawable {
 
     // TODO: inject narration and use the pcmBuffer to display the current audio data
 
-    val samplesPerLine = 230
     // TODO: add a variable here for line thickness
-    val numberOfLines = 1920
     var heightProperty = SimpleDoubleProperty(1.0)
     var widthProperty = SimpleDoubleProperty(1.0)
-    var writableImage = WritableImage(1920, 400)
+
+    var lineWidth = 1
     val sampleRate = 44100
+    val samplesPerPixel =  (sampleRate * 10) / 1920
+    var samplesPerLine = samplesPerPixel * lineWidth
+    val numberOfLines = 1920
+
 
     var sampleGeneratorSeed = 0.0
     var samplesBuffer = DoubleArray(sampleRate * 10)
     var allLocalMinAndMaxSamples = Array(numberOfLines) { Pair(0.0,0.0) }
     var previouslyDrawnLines = IntArray(numberOfLines * 2) { 0 }
+    var writableImage = WritableImage(1920, 400)
+
     private var isWaveformDirty = true
 
 
-    fun generateSamples(samplesBuffer: DoubleArray) {
+    fun fillSamplesBuffer(samplesBuffer: DoubleArray) {
         var sampleValue = 0.0
         for(i in 1 ..  (sampleRate*10)) {
             sampleValue = Short.MAX_VALUE * sin(sampleGeneratorSeed)
@@ -534,15 +539,21 @@ class drawableWaveForm() : Drawable {
 
 
     fun executeMethodCalls() {
-        generateSamples(samplesBuffer)
+        fillSamplesBuffer(samplesBuffer)
         findAllLocalMinAndMaxSamples(samplesBuffer)
-        drawAllLocalMinAndMaxToImage()
-        isWaveformDirty = true
     }
 
+    fun startDrawingThread() {
+        val executorService: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
+        executorService.scheduleAtFixedRate( {
+            drawAllLocalMinAndMaxToImage()
+            isWaveformDirty = true
+        }, 0, 16, TimeUnit.MILLISECONDS)
+    }
 
     init {
         startMethodExecutionThread()
+        startDrawingThread()
     }
 
 }
