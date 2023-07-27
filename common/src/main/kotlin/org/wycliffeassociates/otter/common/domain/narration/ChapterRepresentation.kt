@@ -49,10 +49,7 @@ internal class ChapterRepresentation(
     }
 
     fun finalizeVerse(verseIndex: Int = activeVerses.lastIndex) {
-        activeVerses.getOrNull(verseIndex)?.let { verse ->
-            val newVerse = VerseNode(verse.start, workingAudio.totalFrames)
-            activeVerses[verseIndex] = newVerse
-        }
+        activeVerses.getOrNull(verseIndex)?.end = workingAudio.totalFrames
         onVersesUpdated()
     }
 
