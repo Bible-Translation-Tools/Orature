@@ -436,7 +436,7 @@ class drawableWaveForm() : Drawable {
 
     var sampleGeneratorSeed = 0.0
     var samplesBuffer = DoubleArray(sampleRate * 10)
-    var allLocalMinAndMaxSamples = Array(numberOfLines) { Pair(0.0,0.0) }
+    var allLocalMinAndMaxSamples = DoubleArray(numberOfLines * 2) {0.0 }
     var previouslyDrawnLines = IntArray(numberOfLines * 2) { 0 }
     var writableImage = WritableImage(1920, 400)
 
@@ -453,29 +453,25 @@ class drawableWaveForm() : Drawable {
     }
 
 
-    fun findMinAndMaxSamplesInRange(samplesBuffer: DoubleArray, range : Int, startingIndex : Int): Pair<Double, Double> {
-        var min = (Short.MAX_VALUE + 1).toDouble()
-        var max = (Short.MIN_VALUE - 1).toDouble()
-        for (i in startingIndex until (startingIndex + range)) {
-
-            if(i >= samplesBuffer.size) break
-
-            if(samplesBuffer[i] < min) min = samplesBuffer[i]
-
-            if(samplesBuffer[i] > max) max = samplesBuffer[i]
-        }
-
-        return Pair(min, max)
-    }
-
-
     fun findAllLocalMinAndMaxSamples(samplesBuffer: DoubleArray) {
         var i = 0
         var position = 0
         while(i < samplesBuffer.size) {
-            allLocalMinAndMaxSamples[position] = findMinAndMaxSamplesInRange(samplesBuffer, samplesPerLine, i)
+
+            var min = (Short.MAX_VALUE + 1).toDouble()
+            var max = (Short.MIN_VALUE - 1).toDouble()
+            for (j in i until (i + samplesPerLine)) {
+
+                if(j >= samplesBuffer.size) break
+
+                if(samplesBuffer[j] < min) min = samplesBuffer[j]
+
+                if(samplesBuffer[j] > max) max = samplesBuffer[j]
+            }
+            allLocalMinAndMaxSamples[position] = min
+            allLocalMinAndMaxSamples[position + 1] = max
             i += samplesPerLine + 1
-            position++
+            position += 2
         }
     }
 
@@ -503,9 +499,9 @@ class drawableWaveForm() : Drawable {
         // Draw the updated waveform
         var x = 0
         var x2 = 0
-        while (x < writableImage.width.toInt() && x < allLocalMinAndMaxSamples.size) {
-            val y1 = scaleAmplitude(allLocalMinAndMaxSamples[x].first, writableImage.height).toInt()
-            val y2 = scaleAmplitude(allLocalMinAndMaxSamples[x].second, writableImage.height).toInt()
+        while (x < writableImage.width.toInt() && x < allLocalMinAndMaxSamples.size - 1) {
+            val y1 = scaleAmplitude(allLocalMinAndMaxSamples[x], writableImage.height).toInt()
+            val y2 = scaleAmplitude(allLocalMinAndMaxSamples[x + 1], writableImage.height).toInt()
 
             val startY = y1 + 1
             val endY = y2 - 1
