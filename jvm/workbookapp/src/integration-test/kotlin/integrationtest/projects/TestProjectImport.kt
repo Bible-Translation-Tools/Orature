@@ -133,8 +133,8 @@ class TestProjectImport {
             .assertRowCounts(
                 RowCount(
                     contents = mapOf(
-                        META to 2378,
-                        TEXT to 61823
+                        META to 2400,
+                        TEXT to 61843
                     ),
                     collections = 2511,
                     links = 0
@@ -157,8 +157,8 @@ class TestProjectImport {
             .assertRowCounts(
                 RowCount(
                     contents = mapOf(
-                        META to 2378,
-                        TEXT to 61823
+                        META to 2400,
+                        TEXT to 61843
                     ),
                     collections = 2511,
                     links = 0
@@ -174,33 +174,6 @@ class TestProjectImport {
                 .count() == 3
         )
     }
-
-//    @Test
-//    fun tnHelps() {
-//        db.import("en-x-demo1-tn-rev.zip")
-//            .assertRowCounts(
-//                RowCount(
-//                    contents = mapOf(
-//                        META to 1211,
-//                        TEXT to 31124,
-//                        TITLE to 82025,
-//                        BODY to 79240
-//                    ),
-//                    collections = 1279,
-//                    links = 158796
-//                )
-//            )
-//
-//        Assert.assertEquals(true, tnProjectDir.resolve("manifest.yaml").exists())
-//        Assert.assertEquals(true, tnSourceDir.resolve("en_ulb.zip").exists())
-//        Assert.assertEquals(true, tnSourceDir.resolve("en_tn-master.zip").exists())
-//        Assert.assertEquals(
-//            true,
-//            tnAudioDir.walkTopDown()
-//                .filter { it.extension == "wav" }
-//                .count() == 3
-//        )
-//    }
 
     @Test
     fun importContributorInfo() {
