@@ -68,7 +68,8 @@ class TestAudioProjectExporter {
     @Before
     fun setUp() {
         importer.get().import(setUpProject()).blockingGet()
-        workbook = workbookRepository.getProjects().blockingGet().single()
+        workbook = workbookRepository.getProjects().blockingGet()
+            .find { it.target.slug == ResourceContainerBuilder.defaultProjectSlug }!!
         outputDir = createTempDirectory("orature-export-test").toFile()
     }
 

@@ -91,6 +91,7 @@ class BackupProjectExporter @Inject constructor(
                         takesFilter(takeName, options)
                     }
                     projectAccessor.writeChunksFile(fileWriter)
+                    projectAccessor.copyProjectModeFile(fileWriter)
                 }
 
                 val exportedFile = restoreFileExtension(zipFile, OratureFileFormat.ORATURE.extension)

@@ -209,6 +209,7 @@ class HomePageViewModel2 : ViewModel() {
         workbook.projectFilesAccessor.copySourceFiles(linkedResource)
         workbook.projectFilesAccessor.createSelectedTakesFile()
         workbook.projectFilesAccessor.createChunksFile()
+        workbook.projectFilesAccessor.setProjectMode(workbookDS.currentModeProperty.value)
     }
 
     private fun updateWorkbookModifiedDate(workbook: Workbook) {

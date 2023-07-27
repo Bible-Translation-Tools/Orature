@@ -431,7 +431,7 @@ class WorkbookPage : View() {
                 onExportAction { option ->
                     val directory = chooseDirectory(FX.messages["exportProject"])
                     directory?.let { dir ->
-                        viewModel.exportWorkbook(dir, option)
+//                        viewModel.exportWorkbook(dir, option)
                     }
                 }
             }

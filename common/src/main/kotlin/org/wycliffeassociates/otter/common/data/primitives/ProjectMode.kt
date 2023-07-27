@@ -11,3 +11,5 @@ enum class ProjectMode(val titleKey: String) {
         }
     }
 }
+
+internal data class SerializableProjectMode(val mode: ProjectMode)

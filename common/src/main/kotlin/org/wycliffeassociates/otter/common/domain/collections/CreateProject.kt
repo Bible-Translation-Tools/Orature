@@ -49,6 +49,7 @@ class CreateProject @Inject constructor(
     fun create(
         sourceProject: Collection,
         targetLanguage: Language,
+        mode: ProjectMode? = null,
         resourceId: String? = null,
         deriveProjectFromVerses: Boolean = false
     ): Single<Collection> {
@@ -66,18 +67,21 @@ class CreateProject @Inject constructor(
             else -> sourceAndLinkedRcs.filter { resourceId == it.identifier }
         }
 
-        // TODO: use mode from method argument instead
-        val mode = if (sourceProject.resourceContainer?.language == targetLanguage) {
-            ProjectMode.NARRATION
-        }  else {
-            ProjectMode.TRANSLATION
+        val projectMode = when {
+            mode != null -> mode
+            sourceProject.resourceContainer?.language == targetLanguage -> {
+                ProjectMode.NARRATION
+            }
+            else -> {
+                ProjectMode.TRANSLATION
+            }
         }
 
         // Create derived projects for each of the sources
         return matchingRcs
             .toList()
             .flatMap {
-                collectionRepo.deriveProject(it, sourceProject, targetLanguage, deriveProjectFromVerses, mode)
+                collectionRepo.deriveProject(it, sourceProject, targetLanguage, deriveProjectFromVerses, projectMode)
             }
     }
 
