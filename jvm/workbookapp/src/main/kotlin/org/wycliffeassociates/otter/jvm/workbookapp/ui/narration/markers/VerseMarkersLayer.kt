@@ -1,13 +1,13 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers
 
 import javafx.beans.property.SimpleBooleanProperty
-import javafx.scene.layout.HBox
+import javafx.scene.layout.AnchorPane
 import org.wycliffeassociates.otter.common.domain.narration.VerseNode
 import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.*
 
-class VerseMarkersLayer : HBox() {
+class VerseMarkersLayer : AnchorPane() {
 
     val isRecordingProperty = SimpleBooleanProperty()
 
@@ -35,6 +35,43 @@ class VerseMarkersLayer : HBox() {
                 labelProperty.set(verseLabel)
 
                 isRecordingProperty.bind(this@VerseMarkersLayer.isRecordingProperty)
+
+                var delta = 0.0
+                var pos = 0.0
+
+                setOnDragDetected { event ->
+                    if (!canBeMovedProperty.value) return@setOnDragDetected
+
+                    val point = localToParent(event.x, event.y)
+                    delta = 0.0
+                    pos = point.x
+
+                    println("onDragDetected: ${point.x}")
+                    println("Pos: ${pos}")
+
+                    event.consume()
+                }
+
+                setOnMouseDragged { event ->
+                    if (!canBeMovedProperty.value) return@setOnMouseDragged
+
+                    val point = localToParent(event.x, event.y)
+                    println("onMouseDragged: ${point.x}")
+                    println("pos: $pos")
+
+                    delta = point.x - pos
+
+                    println("delta: $delta")
+
+                    positionProperty.set(point.x.toInt())
+
+                    event.consume()
+                }
+
+                anchorpaneConstraints {
+                    topAnchor = 0.0
+                    bottomAnchor = 0.0
+                }
             }
         }
     }

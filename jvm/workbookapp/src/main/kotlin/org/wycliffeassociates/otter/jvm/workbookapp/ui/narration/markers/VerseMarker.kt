@@ -1,10 +1,12 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers
 
+import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
+import javafx.scene.Cursor
 import javafx.scene.layout.BorderPane
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
@@ -21,8 +23,12 @@ class VerseMarker : BorderPane() {
     val verseIndexProperty = SimpleIntegerProperty()
     val labelProperty = SimpleStringProperty()
     val positionProperty = SimpleIntegerProperty()
-
+    val canBeMovedProperty: BooleanBinding = verseIndexProperty.greaterThan(0)
     val isRecordingProperty = SimpleBooleanProperty()
+
+    private val normalMarker = FontIcon(MaterialDesign.MDI_BOOKMARK)
+    private val outlinedMarker = FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE)
+    private val markerIconProperty = SimpleObjectProperty(outlinedMarker)
 
     init {
         addClass("verse-marker")
@@ -48,7 +54,23 @@ class VerseMarker : BorderPane() {
 
             label {
                 addClass("verse-marker__icon")
-                graphic = FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE)
+                graphicProperty().bind(markerIconProperty)
+            }
+
+            setOnMouseEntered {
+                if (canBeMovedProperty.value) {
+                    cursor = Cursor.H_RESIZE
+                    markerIconProperty.set(normalMarker)
+
+                    addPseudoClass("movable")
+                }
+            }
+
+            setOnMouseExited {
+                cursor = Cursor.DEFAULT
+                markerIconProperty.set(outlinedMarker)
+
+                removePseudoClass("movable")
             }
         }
 

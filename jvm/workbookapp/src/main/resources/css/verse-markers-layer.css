@@ -6,9 +6,8 @@
     -fx-alignment: bottom-left;
 }
 
-.verse-marker__drag-area:hover {
+.verse-marker__drag-area:movable {
     -fx-background-color: -wa-primary-20;
-    -fx-cursor: h-resize;
 }
 
 .verse-marker__line {
@@ -28,18 +27,13 @@
     -fx-translate-y: -20;
 }
 
-.verse-marker__drag-area:hover .verse-marker__icon {
+.verse-marker__drag-area:movable .verse-marker__icon {
     -fx-background-color: transparent;
-}
-
-.verse-marker__drag-area:hover .verse-marker__icon .ikonli-font-icon {
-    -fx-icon-code: mdi-bookmark;
 }
 
 .verse-marker__icon .ikonli-font-icon {
     -fx-icon-color: -wa-primary;
     -fx-icon-size: 28px;
-    -fx-icon-code: mdi-bookmark-outline;
 }
 
 .verse-marker__menu {
