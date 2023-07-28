@@ -65,7 +65,7 @@ class CanvasFragment : StackPane() {
     }
 
     fun draw() {
-        //ctx.clearRect(0.0, 0.0, cvs.width, cvs.height)
+        ctx.clearRect(0.0, 0.0, cvs.width, cvs.height)
         drawableProperty.value?.draw(ctx, cvs)
     }
 }

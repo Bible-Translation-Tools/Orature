@@ -425,14 +425,14 @@ class drawableWaveForm() : Drawable {
 
     var lineWidth = 1
     val sampleRate = 44100
-    val samplesPerPixel =  (sampleRate * 10) / 1920
-    var samplesPerLine = samplesPerPixel * lineWidth
+    val samplesPerPixelWidth =  (sampleRate * 10) / 1920
+    var samplesPerLine = samplesPerPixelWidth * lineWidth
     val numberOfLines = 1920
 
 
     var sampleGeneratorSeed = 0.0
     var samplesBuffer = DoubleArray(sampleRate * 10)
-    var allLocalMinAndMaxSamples = DoubleArray(numberOfLines * 2) {0.0 }
+    var allLocalMinAndMaxSamples = DoubleArray(numberOfLines * 2) { 0.0 }
     var previouslyDrawnLines = IntArray(numberOfLines * 2) { 0 }
     var writableImage = WritableImage(1920, 400)
 
