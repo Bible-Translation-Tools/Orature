@@ -8,14 +8,12 @@ import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.*
 
+private const val MARKER_OFFSET = (MARKER_AREA_WIDTH / 2).toInt()
+
 class VerseMarkersLayer : AnchorPane() {
 
     val isRecordingProperty = SimpleBooleanProperty()
-
     val markers = observableListOf<VerseNode>()
-    val totalFrames = markers.integerBinding {
-        it.sumOf { verse -> verse.end - verse.start }
-    }
 
     init {
         tryImportStylesheet("/css/verse-markers-layer.css")
@@ -37,8 +35,6 @@ class VerseMarkersLayer : AnchorPane() {
 
                 verseProperty.set(verse)
                 verseIndexProperty.set(markers.indexOf(verse))
-                startPositionProperty.set(startPosInPixels)
-                endPositionProperty.set(endPosInPixels)
                 labelProperty.set(verseLabel)
 
                 isRecordingProperty.bind(this@VerseMarkersLayer.isRecordingProperty)
@@ -46,14 +42,13 @@ class VerseMarkersLayer : AnchorPane() {
                 val dragTarget = dragAreaProperty.value
 
                 var delta = 0
-                var pos = 0
+                var oldPos = 0
 
-                dragTarget.setOnDragDetected { event ->
-                    if (!canBeMovedProperty.value) return@setOnDragDetected
+                dragTarget.setOnMousePressed { event ->
+                    if (!canBeMovedProperty.value) return@setOnMousePressed
 
-                    val point = localToParent(event.x, event.y)
                     delta = 0
-                    pos = point.x.toInt()
+                    oldPos = getLeftAnchor(this).toInt()
 
                     event.consume()
                 }
@@ -63,10 +58,12 @@ class VerseMarkersLayer : AnchorPane() {
 
                     val point = localToParent(event.x, event.y)
                     val currentPos = point.x.toInt()
-                    delta = currentPos - pos
+                    delta = currentPos - oldPos
 
                     if (currentPos in prevStartPosInPixels..endPosInPixels) {
-                        startPositionProperty.set(currentPos)
+                        anchorpaneConstraints {
+                            leftAnchor = currentPos - MARKER_OFFSET
+                        }
                     }
 
                     event.consume()
@@ -74,6 +71,7 @@ class VerseMarkersLayer : AnchorPane() {
 
                 dragTarget.setOnMouseReleased { event ->
                     if (delta != 0) {
+                        delta -= MARKER_OFFSET
                         val frameDelta = pixelsToFrames(delta.toDouble())
                         FX.eventbus.fire(NarrationMarkerChangedEvent(markers.indexOf(verse), frameDelta))
                     }
@@ -83,6 +81,7 @@ class VerseMarkersLayer : AnchorPane() {
                 anchorpaneConstraints {
                     topAnchor = 0.0
                     bottomAnchor = 0.0
+                    leftAnchor = startPosInPixels - MARKER_OFFSET
                 }
             }
         }
