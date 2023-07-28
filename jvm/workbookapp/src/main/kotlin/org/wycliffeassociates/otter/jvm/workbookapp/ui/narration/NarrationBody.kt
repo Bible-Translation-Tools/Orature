@@ -12,6 +12,7 @@ import javafx.scene.control.Slider
 import javafx.scene.image.WritableImage
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.domain.narration.VerseNode
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
@@ -44,7 +45,7 @@ class NarrationBody : View() {
     var canvasFragment = CanvasFragment()
 
     override val root = hbox {
-        var waveform = drawableWaveForm()
+        var waveform = DrawableWaveForm()
 
         runAsync {
             waveform.drawAllLocalMinAndMaxToImage()
@@ -415,26 +416,27 @@ class ChapterReturnFromPluginEvent: FXEvent()
 
 
 
-class drawableWaveForm() : Drawable {
+class DrawableWaveForm() : Drawable {
 
     // TODO: inject narration and use the pcmBuffer to display the current audio data
+
     var heightProperty = SimpleDoubleProperty(1.0)
     var widthProperty = SimpleDoubleProperty(1.0)
     val waveformColor = Color.rgb(26, 26, 26)
     var backgroundColor = c("#E5E8EB")
 
+    val screenWidth = 1920
+    val screenHeight = 1080
     var lineWidth = 1
     val sampleRate = 44100
-    val samplesPerPixelWidth =  (sampleRate * 10) / 1920
+    val samplesPerPixelWidth =  (sampleRate * 10) / screenWidth // NOTE: this could result in compounding errors due to rounding
     var samplesPerLine = samplesPerPixelWidth * lineWidth
-    val numberOfLines = 1920
-
 
     var sampleGeneratorSeed = 0.0
     var samplesBuffer = DoubleArray(sampleRate * 10)
-    var allLocalMinAndMaxSamples = DoubleArray(numberOfLines * 2) { 0.0 }
-    var previouslyDrawnLines = IntArray(numberOfLines * 2) { 0 }
-    var writableImage = WritableImage(1920, 400)
+    var allLocalMinAndMaxSamples = DoubleArray(screenWidth * 2) { 0.0 }
+    var previouslyDrawnLines = IntArray(screenWidth * 2) { 0 }
+    var writableImage = WritableImage(screenWidth, screenHeight)
 
     private var isWaveformDirty = true
 
@@ -527,6 +529,52 @@ class drawableWaveForm() : Drawable {
     }
 
 
+}
+
+
+
+class WaveformGenerator : AudioFileReader {
+    override val sampleRate = 44100
+    override val channels = 1
+    override val sampleSize = 16
+    override val framePosition = 0
+    override val totalFrames = 0
+    var sampleGeneratorSeed = 0.0
+
+    override fun hasRemaining(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun getPcmBuffer(bytes: ByteArray): Int {
+        TODO("Not yet implemented")
+        fillSamplesBuffer(bytes)
+    }
+
+    override fun seek(sample: Int) {
+        TODO("Not yet implemented")
+    }
+
+    override fun open() {
+        TODO("Not yet implemented")
+    }
+
+    override fun release() {
+        TODO("Not yet implemented")
+    }
+
+    override fun close() {
+        TODO("Not yet implemented")
+    }
+
+
+    fun fillSamplesBuffer(samplesBuffer: ByteArray) {
+        var sampleValue = 0.0
+        for(i in 1 ..  (sampleRate*10)) {
+            sampleValue = Short.MAX_VALUE * sin(sampleGeneratorSeed)
+            samplesBuffer[i - 1] = sampleValue.toInt().toByte()
+            sampleGeneratorSeed  += 0.0001
+        }
+    }
 }
 
 
