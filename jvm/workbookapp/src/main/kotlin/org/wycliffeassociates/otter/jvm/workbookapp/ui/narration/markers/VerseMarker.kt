@@ -7,6 +7,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
 import javafx.scene.Cursor
+import javafx.scene.Node
 import javafx.scene.layout.BorderPane
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
@@ -22,9 +23,12 @@ class VerseMarker : BorderPane() {
     val verseProperty = SimpleObjectProperty<VerseNode>()
     val verseIndexProperty = SimpleIntegerProperty()
     val labelProperty = SimpleStringProperty()
-    val positionProperty = SimpleIntegerProperty()
+    val startPositionProperty = SimpleIntegerProperty()
+    val endPositionProperty = SimpleIntegerProperty()
     val canBeMovedProperty: BooleanBinding = verseIndexProperty.greaterThan(0)
     val isRecordingProperty = SimpleBooleanProperty()
+
+    val dragAreaProperty = SimpleObjectProperty<Node>()
 
     private val normalMarker = FontIcon(MaterialDesign.MDI_BOOKMARK)
     private val outlinedMarker = FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE)
@@ -33,12 +37,14 @@ class VerseMarker : BorderPane() {
     init {
         addClass("verse-marker")
 
-        translateXProperty().bind(positionProperty.minus(MARKER_AREA_WIDTH / 2))
+        translateXProperty().bind(startPositionProperty.minus(MARKER_AREA_WIDTH / 2))
 
         left = stackpane {
             addClass("verse-marker__drag-area")
             minWidth = MARKER_AREA_WIDTH
             maxWidth = MARKER_AREA_WIDTH
+
+            dragAreaProperty.set(this)
 
             region {
                 line {
@@ -64,6 +70,7 @@ class VerseMarker : BorderPane() {
 
                     addPseudoClass("movable")
                 }
+                it.consume()
             }
 
             setOnMouseExited {
@@ -71,6 +78,7 @@ class VerseMarker : BorderPane() {
                 markerIconProperty.set(outlinedMarker)
 
                 removePseudoClass("movable")
+                it.consume()
             }
         }
 

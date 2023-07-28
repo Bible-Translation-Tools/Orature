@@ -25,46 +25,56 @@ class VerseMarkersLayer : AnchorPane() {
 
         bindChildren(markers) { verse ->
             VerseMarker().apply {
-                val relativePos = absoluteFrameToRelative(verse)
-                val posInPixels = framesToPixels(relativePos)
+                val (relStart, relEnd) = absolutePositionToRelative(verse)
+                val startPosInPixels = framesToPixels(relStart)
+                val endPosInPixels = framesToPixels(relEnd)
+
                 val verseLabel = getVerseLabel(verse)
+                val prevVerse = getPrevVerse(verse)
+                val (prevRelStart, _) = absolutePositionToRelative(prevVerse)
+                val prevStartPosInPixels = framesToPixels(prevRelStart)
 
                 verseProperty.set(verse)
                 verseIndexProperty.set(markers.indexOf(verse))
-                positionProperty.set(posInPixels)
+                startPositionProperty.set(startPosInPixels)
+                endPositionProperty.set(endPosInPixels)
                 labelProperty.set(verseLabel)
 
                 isRecordingProperty.bind(this@VerseMarkersLayer.isRecordingProperty)
 
-                var delta = 0.0
-                var pos = 0.0
+                val dragTarget = dragAreaProperty.value
 
-                setOnDragDetected { event ->
+                var delta = 0
+                var pos = 0
+
+                dragTarget.setOnDragDetected { event ->
                     if (!canBeMovedProperty.value) return@setOnDragDetected
 
                     val point = localToParent(event.x, event.y)
-                    delta = 0.0
-                    pos = point.x
-
-                    println("onDragDetected: ${point.x}")
-                    println("Pos: ${pos}")
+                    delta = 0
+                    pos = point.x.toInt()
 
                     event.consume()
                 }
 
-                setOnMouseDragged { event ->
+                dragTarget.setOnMouseDragged { event ->
                     if (!canBeMovedProperty.value) return@setOnMouseDragged
 
                     val point = localToParent(event.x, event.y)
-                    println("onMouseDragged: ${point.x}")
-                    println("pos: $pos")
+                    val currentPos = point.x.toInt()
+                    delta = currentPos - pos
 
-                    delta = point.x - pos
+                    if (currentPos in prevStartPosInPixels..endPosInPixels) {
+                        startPositionProperty.set(currentPos)
+                    }
 
-                    println("delta: $delta")
+                    event.consume()
+                }
 
-                    positionProperty.set(point.x.toInt())
-
+                dragTarget.setOnMouseReleased { event ->
+                    if (delta > 0) {
+                        println(startPositionProperty.value)
+                    }
                     event.consume()
                 }
 
@@ -76,15 +86,22 @@ class VerseMarkersLayer : AnchorPane() {
         }
     }
 
-    private fun absoluteFrameToRelative(verse: VerseNode): Int {
+    private fun absolutePositionToRelative(verse: VerseNode): Pair<Int, Int> {
         val index = markers.indexOf(verse)
         val prevVerses = markers.slice(0 until index)
+        val relStart = prevVerses.sumOf { it.end - it.start }
+        val relEnd = relStart + (verse.end - verse.start)
 
-        return prevVerses.sumOf { it.end - it.start }
+        return Pair(relStart, relEnd)
     }
 
     private fun getVerseLabel(verse: VerseNode): String {
         val index = markers.indexOf(verse)
         return (index + 1).toString()
+    }
+
+    private fun getPrevVerse(verse: VerseNode): VerseNode {
+        val currentIndex = markers.indexOf(verse)
+        return markers.getOrNull(currentIndex - 1) ?: verse
     }
 }
