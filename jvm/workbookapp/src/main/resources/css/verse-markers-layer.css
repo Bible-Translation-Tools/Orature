@@ -1,7 +1,3 @@
-.verse-markers-layer {
-    -fx-border-color: red;
-}
-
 .verse-marker__drag-area {
     -fx-alignment: bottom-left;
 }

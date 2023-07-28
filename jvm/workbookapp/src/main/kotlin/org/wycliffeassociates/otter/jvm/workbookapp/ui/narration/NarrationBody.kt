@@ -36,14 +36,15 @@ import javax.inject.Inject
 class NarrationBody : View() {
     private val viewModel: NarrationBodyViewModel by inject()
 
-    override val root = hbox {
-        stackpane {
-            hgrow = Priority.ALWAYS
-            //padding = Insets(20.0)
+    override val root = stackpane {
+        //padding = Insets(20.0)
 
+        scrollpane {
             add(VerseMarkersLayer().apply {
                 isRecordingProperty.bind(viewModel.isRecordingProperty)
                 markers.bind(viewModel.recordedVerses) { it }
+
+                isFitToHeight = true
             })
         }
     }

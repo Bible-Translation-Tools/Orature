@@ -8,12 +8,19 @@ import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.*
 
+/**
+ * This is the offset of the marker line relative
+ * to the draggable area. In other words,
+ * it's a half the length of marker draggable area.
+ */
 private const val MARKER_OFFSET = (MARKER_AREA_WIDTH / 2).toInt()
 
 class VerseMarkersLayer : AnchorPane() {
 
     val isRecordingProperty = SimpleBooleanProperty()
     val markers = observableListOf<VerseNode>()
+
+    private val totalFramesProperty = markers.integerBinding { it.sumOf { verse -> verse.end - verse.start } }
 
     init {
         tryImportStylesheet("/css/verse-markers-layer.css")
@@ -22,17 +29,21 @@ class VerseMarkersLayer : AnchorPane() {
 
         //isMouseTransparent = true
 
+        prefWidthProperty().bind(
+            totalFramesProperty.doubleBinding { it?.let { framesToPixels(it.toInt()).toDouble() } ?: 1.0 }
+        )
+
         bindChildren(markers) { verse ->
+            val (relStart, relEnd) = absolutePositionToRelative(verse)
+            val startPosInPixels = framesToPixels(relStart)
+            val endPosInPixels = framesToPixels(relEnd)
+
+            val verseLabel = getVerseLabel(verse)
+            val prevVerse = getPrevVerse(verse)
+            val (prevRelStart, _) = absolutePositionToRelative(prevVerse)
+            val prevStartPosInPixels = framesToPixels(prevRelStart)
+
             VerseMarker().apply {
-                val (relStart, relEnd) = absolutePositionToRelative(verse)
-                val startPosInPixels = framesToPixels(relStart)
-                val endPosInPixels = framesToPixels(relEnd)
-
-                val verseLabel = getVerseLabel(verse)
-                val prevVerse = getPrevVerse(verse)
-                val (prevRelStart, _) = absolutePositionToRelative(prevVerse)
-                val prevStartPosInPixels = framesToPixels(prevRelStart)
-
                 verseProperty.set(verse)
                 verseIndexProperty.set(markers.indexOf(verse))
                 labelProperty.set(verseLabel)
@@ -41,14 +52,14 @@ class VerseMarkersLayer : AnchorPane() {
 
                 val dragTarget = dragAreaProperty.value
 
-                var delta = 0
-                var oldPos = 0
+                var delta = 0.0
+                var oldPos = 0.0
 
                 dragTarget.setOnMousePressed { event ->
                     if (!canBeMovedProperty.value) return@setOnMousePressed
 
-                    delta = 0
-                    oldPos = getLeftAnchor(this).toInt()
+                    delta = 0.0
+                    oldPos = getLeftAnchor(this)
 
                     event.consume()
                 }
@@ -57,22 +68,22 @@ class VerseMarkersLayer : AnchorPane() {
                     if (!canBeMovedProperty.value) return@setOnMouseDragged
 
                     val point = localToParent(event.x, event.y)
-                    val currentPos = point.x.toInt()
-                    delta = currentPos - oldPos
+                    val currentPos = point.x
+                    val prevStartThreshold = prevStartPosInPixels + width + MARKER_OFFSET
+                    val endPosThreshold = endPosInPixels - width - MARKER_OFFSET
 
-                    if (currentPos in prevStartPosInPixels..endPosInPixels) {
-                        anchorpaneConstraints {
-                            leftAnchor = currentPos - MARKER_OFFSET
-                        }
+                    if (currentPos in prevStartThreshold..endPosThreshold) {
+                        delta = currentPos - oldPos
+                        setLeftAnchor(this, currentPos - MARKER_OFFSET)
                     }
 
                     event.consume()
                 }
 
                 dragTarget.setOnMouseReleased { event ->
-                    if (delta != 0) {
+                    if (delta != 0.0) {
                         delta -= MARKER_OFFSET
-                        val frameDelta = pixelsToFrames(delta.toDouble())
+                        val frameDelta = pixelsToFrames(delta)
                         FX.eventbus.fire(NarrationMarkerChangedEvent(markers.indexOf(verse), frameDelta))
                     }
                     event.consume()
