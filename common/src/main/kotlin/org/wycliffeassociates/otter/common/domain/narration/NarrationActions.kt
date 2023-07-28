@@ -75,51 +75,53 @@ internal class RecordAgainAction(
 }
 
 /**
- * This action is to replace corresponding verse nodes in the list of verse nodes
- * by verse nodes with updated positions.
+ * This action is to update verse location based on delta.
+ * The previous verse's end position will also be updated.
  */
 internal class VerseMarkerAction(
     private val verseIndex: Int,
-    private val newMarkerPosition: Int
+    private val delta: Int
 ) : NarrationAction {
-    private var previousFirstNode: VerseNode? = null
-    private var previousSecondNode: VerseNode? = null
+    private var oldNode: VerseNode? = null
+    private var oldPrevNode: VerseNode? = null
 
-    private var firstNode: VerseNode? = null
-    private var secondNode: VerseNode? = null
+    private var node: VerseNode? = null
+    private var prevNode: VerseNode? = null
 
     // Called when marker is set and mouse button is released
     override fun execute(activeVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
-        previousFirstNode = activeVerses[verseIndex]
-        previousSecondNode = activeVerses.getOrNull(verseIndex - 1)
+        oldNode = activeVerses[verseIndex]
+        oldPrevNode = activeVerses.getOrNull(verseIndex - 1)
 
-        previousFirstNode?.let { prev ->
-            firstNode = VerseNode(newMarkerPosition, prev.end).also { current ->
+        oldNode?.let { prev ->
+            val newPos = prev.start + delta
+            node = VerseNode(newPos, prev.end).also { current ->
                 activeVerses[verseIndex] = current
             }
         }
 
-        previousSecondNode?.let { prev ->
-            secondNode = VerseNode(prev.start, newMarkerPosition).also { current ->
+        oldPrevNode?.let { prev ->
+            val newPos = prev.end + delta
+            prevNode = VerseNode(prev.start, newPos).also { current ->
                 activeVerses[verseIndex - 1] = current
             }
         }
     }
 
     override fun undo(activeVerses: MutableList<VerseNode>) {
-        previousFirstNode?.let {
+        oldNode?.let {
             activeVerses[verseIndex] = it
         }
-        previousSecondNode?.let {
+        oldPrevNode?.let {
             activeVerses[verseIndex - 1] = it
         }
     }
 
     override fun redo(activeVerses: MutableList<VerseNode>) {
-        firstNode?.let {
+        node?.let {
             activeVerses[verseIndex] = it
         }
-        secondNode?.let {
+        prevNode?.let {
             activeVerses[verseIndex - 1] = it
         }
     }

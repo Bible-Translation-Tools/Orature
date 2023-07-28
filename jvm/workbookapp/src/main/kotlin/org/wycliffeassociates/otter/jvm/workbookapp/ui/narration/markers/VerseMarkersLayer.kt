@@ -4,6 +4,7 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.layout.AnchorPane
 import org.wycliffeassociates.otter.common.domain.narration.VerseNode
 import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
+import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.*
 
@@ -72,8 +73,9 @@ class VerseMarkersLayer : AnchorPane() {
                 }
 
                 dragTarget.setOnMouseReleased { event ->
-                    if (delta > 0) {
-                        println(startPositionProperty.value)
+                    if (delta != 0) {
+                        val frameDelta = pixelsToFrames(delta.toDouble())
+                        FX.eventbus.fire(NarrationMarkerChangedEvent(markers.indexOf(verse), frameDelta))
                     }
                     event.consume()
                 }
@@ -105,3 +107,5 @@ class VerseMarkersLayer : AnchorPane() {
         return markers.getOrNull(currentIndex - 1) ?: verse
     }
 }
+
+class NarrationMarkerChangedEvent(val index: Int, val delta: Int) : FXEvent()

@@ -5,7 +5,6 @@ import io.reactivex.Completable
 import io.reactivex.disposables.CompositeDisposable
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
-import javafx.geometry.Insets
 import javafx.scene.control.Slider
 import javafx.scene.layout.Priority
 import org.slf4j.LoggerFactory
@@ -23,6 +22,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NextVerseEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.RecordVerseEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.NarrationMarkerChangedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkersLayer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationRedoEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationResetChapterEvent
@@ -83,6 +83,10 @@ class NarrationBody : View() {
 
         subscribe<ChapterReturnFromPluginEvent> {
             viewModel.onChapterReturnFromPlugin()
+        }
+
+        subscribe<NarrationMarkerChangedEvent> {
+            viewModel.onMarkerChanged(it.index, it.delta)
         }
     }
 
@@ -212,6 +216,10 @@ class NarrationBodyViewModel : ViewModel() {
 
     fun onChapterReturnFromPlugin() {
         reloadNarration()
+    }
+
+    fun onMarkerChanged(index: Int, delta: Int) {
+        narration.onVerseMarker(index, delta)
     }
 
     fun onNext() {

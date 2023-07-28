@@ -196,15 +196,18 @@ class NarrationActionsTest {
         val secondFileUpdated = makeNewFile(200)
         onPauseOrNew(narrationList.last(), secondFileUpdated)
 
-        val newMarker = 120
+        val oldMarker = narrationList.last().start
 
-        val action = VerseMarkerAction(1, newMarker)
+        // Verse 2 marker was moved 20 frames to the left
+        val markerDelta = -20
+
+        val action = VerseMarkerAction(1, markerDelta)
         narrationHistory.execute(action, narrationList, secondFileUpdated)
 
         assertEquals(narrationList.size, 2)
         assertEquals(narrationList.first().start, 0)
-        assertEquals(narrationList.first().end, newMarker)
-        assertEquals(narrationList.last().start, newMarker)
+        assertEquals(narrationList.first().end, oldMarker + markerDelta)
+        assertEquals(narrationList.last().start, oldMarker + markerDelta)
         assertEquals(narrationList.last().end, secondFileUpdated.totalFrames)
     }
 
@@ -220,9 +223,10 @@ class NarrationActionsTest {
         val secondFileUpdated = makeNewFile(200)
         onPauseOrNew(narrationList.last(), secondFileUpdated)
 
-        val newMarker = 120
+        val oldMarker = narrationList.last().start
+        val markerDelta = -20
 
-        val action = VerseMarkerAction(1, newMarker)
+        val action = VerseMarkerAction(1, markerDelta)
         narrationHistory.execute(action, narrationList, secondFileUpdated)
 
         narrationHistory.undo(narrationList)
@@ -236,8 +240,8 @@ class NarrationActionsTest {
         narrationHistory.redo(narrationList)
 
         assertEquals(narrationList.first().start, 0)
-        assertEquals(narrationList.first().end, newMarker)
-        assertEquals(narrationList.last().start, newMarker)
+        assertEquals(narrationList.first().end, oldMarker + markerDelta)
+        assertEquals(narrationList.last().start, oldMarker + markerDelta)
         assertEquals(narrationList.last().end, secondFileUpdated.totalFrames)
     }
 
