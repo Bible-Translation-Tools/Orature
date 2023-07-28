@@ -6,7 +6,6 @@ import io.reactivex.disposables.CompositeDisposable
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.Slider
-import javafx.scene.layout.Priority
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.narration.VerseNode
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
@@ -45,6 +44,10 @@ class NarrationBody : View() {
                 markers.bind(viewModel.recordedVerses) { it }
 
                 isFitToHeight = true
+
+                setOnScroll {
+                    hvalue += it / width
+                }
             })
         }
     }

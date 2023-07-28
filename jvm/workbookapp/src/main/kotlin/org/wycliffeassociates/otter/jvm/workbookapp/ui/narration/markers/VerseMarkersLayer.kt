@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers
 
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.layout.AnchorPane
 import org.wycliffeassociates.otter.common.domain.narration.VerseNode
 import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
@@ -21,13 +22,29 @@ class VerseMarkersLayer : AnchorPane() {
     val markers = observableListOf<VerseNode>()
 
     private val totalFramesProperty = markers.integerBinding { it.sumOf { verse -> verse.end - verse.start } }
+    private val onScrollProperty = SimpleObjectProperty<(Double) -> Unit>()
 
     init {
         tryImportStylesheet("/css/verse-markers-layer.css")
 
         addClass("verse-markers-layer")
 
-        //isMouseTransparent = true
+        var layerOldPos = 0.0
+        var layerDelta: Double
+
+        setOnMousePressed { event ->
+            val point = localToParent(event.x, event.y)
+
+            layerOldPos = point.x
+            layerDelta = 0.0
+        }
+
+        setOnMouseDragged { event ->
+            val point = localToParent(event.x, event.y)
+            layerDelta = layerOldPos - point.x
+
+            onScrollProperty.value?.invoke(layerDelta)
+        }
 
         prefWidthProperty().bind(
             totalFramesProperty.doubleBinding { it?.let { framesToPixels(it.toInt()).toDouble() } ?: 1.0 }
@@ -96,6 +113,10 @@ class VerseMarkersLayer : AnchorPane() {
                 }
             }
         }
+    }
+
+    fun setOnScroll(op: (Double) -> Unit) {
+        onScrollProperty.set(op)
     }
 
     private fun absolutePositionToRelative(verse: VerseNode): Pair<Int, Int> {
