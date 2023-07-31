@@ -109,7 +109,8 @@ class WorkBookTableView(
             setCellFactory { WorkbookSourceAudioTableCell() }
             isReorderable = false
             isSortable = true
-
+            minWidth = 80.0
+            maxWidth = 90.0
             bindColumnSortComparator()
         }
         column("", WorkbookDescriptor::class) {
@@ -117,6 +118,8 @@ class WorkBookTableView(
             setCellFactory {
                 WorkbookOptionTableCell(selectedIndexProperty)
             }
+            minWidth = 80.0
+            maxWidth = 90.0
             isReorderable = false
             isSortable = false
         }
