@@ -118,10 +118,6 @@ class CollectionRepository @Inject constructor(
                             // 4b. If the manifest has no projects left,
                             // delete the RC folder and the metadata from the database
                             metadata.path.deleteRecursively()
-                            val links = metadataDao.fetchLinks(metadata.id)
-                            links.forEach {
-                                metadataDao.delete(it)
-                            }
                             metadataDao.delete(metadataMapper.mapToEntity(metadata))
                         }
                     }
