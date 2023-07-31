@@ -38,18 +38,10 @@ class NarrationBody : View() {
     override val root = stackpane {
         //padding = Insets(20.0)
 
-        scrollpane {
-            add(VerseMarkersLayer().apply {
-                isRecordingProperty.bind(viewModel.isRecordingProperty)
-                markers.bind(viewModel.recordedVerses) { it }
-
-                isFitToHeight = true
-
-                setOnScroll {
-                    hvalue += it / width
-                }
-            })
-        }
+        add(VerseMarkersLayer().apply {
+            isRecordingProperty.bind(viewModel.isRecordingProperty)
+            markers.bind(viewModel.recordedVerses) { it }
+        })
     }
 
     init {
