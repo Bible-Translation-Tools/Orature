@@ -29,21 +29,21 @@ class VerseMarkersLayer : AnchorPane() {
 
         addClass("verse-markers-layer")
 
-        var layerOldPos = 0.0
-        var layerDelta: Double
+        var scrollOldPos = 0.0
+        var scrollDelta: Double
 
         setOnMousePressed { event ->
             val point = localToParent(event.x, event.y)
 
-            layerOldPos = point.x
-            layerDelta = 0.0
+            scrollOldPos = point.x
+            scrollDelta = 0.0
         }
 
         setOnMouseDragged { event ->
             val point = localToParent(event.x, event.y)
-            layerDelta = layerOldPos - point.x
+            scrollDelta = scrollOldPos - point.x
 
-            onScrollProperty.value?.invoke(layerDelta)
+            onScrollProperty.value?.invoke(scrollDelta)
         }
 
         prefWidthProperty().bind(
