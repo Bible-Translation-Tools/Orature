@@ -60,7 +60,7 @@ class NotificationSnackBar(notification: NotificationViewData): HBox() {
                 addClass("h4", "notification-title")
                 statusTypeProperty.onChangeAndDoNow {
                     toggleClass("successful-text", it == NotificationStatusType.SUCCESSFUL)
-                    toggleClass("danger-text", it != NotificationStatusType.FAILED)
+                    toggleClass("danger-text", it != NotificationStatusType.SUCCESSFUL)
                 }
             }
             label(messageProperty) {
@@ -71,7 +71,7 @@ class NotificationSnackBar(notification: NotificationViewData): HBox() {
         button {
             addClass("btn", "btn--secondary")
             textProperty().bind(actionTextProperty)
-            tooltipProperty().bind(actionTextProperty.objectBinding { Tooltip(it) })
+            tooltip { textProperty().bind(actionTextProperty) }
             graphicProperty().bind(actionIconProperty.objectBinding { it ->
                 it?.let { FontIcon(it) }
             })
