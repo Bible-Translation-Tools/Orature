@@ -3,14 +3,18 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
 import io.reactivex.disposables.CompositeDisposable
+import javafx.animation.AnimationTimer
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.geometry.Pos
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
+import javafx.scene.control.Label
 import javafx.scene.control.Slider
 import javafx.scene.image.WritableImage
 import javafx.scene.paint.Color
+import javafx.scene.paint.Paint
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.domain.narration.VerseNode
@@ -36,8 +40,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.io.File
-import java.lang.Math.cos
-import java.lang.Math.sin
 import java.nio.ByteBuffer
 import java.util.function.DoubleUnaryOperator
 import javax.inject.Inject
@@ -46,6 +48,7 @@ class NarrationBody : View() {
     private val viewModel: NarrationBodyViewModel by inject()
 
     var canvasFragment = CanvasFragment()
+    var fps = FramerateView()
 
     override val root = hbox {
         var waveform = DrawableWaveForm()
@@ -59,8 +62,9 @@ class NarrationBody : View() {
         canvasFragment.prefWidthProperty().bind(this.widthProperty())
         canvasFragment.drawableProperty.set(waveform)
         canvasFragment.isDrawingProperty.set(true)
-
+        canvasFragment.add(fps)
         add(canvasFragment)
+
     }
     init {
         subscribe<NarrationUndoEvent> {
@@ -434,22 +438,23 @@ class DrawableWaveForm() : Drawable {
     val samplesPerPixelWidth =  (sampleRate * 10) / screenWidth // NOTE: this could result in compounding errors due to rounding. ~= 229
     var samplesPerLine = samplesPerPixelWidth
 
-    var samplesBuffer = DoubleArray(sampleRate * 10)
+    var samplesBuffer = FloatArray(sampleRate * 10)
     var bytes = ByteArray(sampleRate * 10 * 2)
-    var allLocalMinAndMaxSamples = DoubleArray(screenWidth * 2) { 0.0 }
+    var allLocalMinAndMaxSamples = FloatArray(screenWidth * 2) { 0.0F }
     var previouslyDrawnLines = IntArray(screenWidth * 2) { 0 }
     var writableImage = WritableImage(screenWidth, screenHeight)
 
     private var isWaveformDirty = true
 
 
-    fun findAllLocalMinAndMaxSamples(samplesBuffer: DoubleArray) {
+    // TODO: replace with PCMCompressor
+    fun findAllLocalMinAndMaxSamples(samplesBuffer: FloatArray) {
         var i = 0
         var position = 0
         while(i < samplesBuffer.size) {
 
-            var min = (Short.MAX_VALUE + 1).toDouble()
-            var max = (Short.MIN_VALUE - 1).toDouble()
+            var min = (Short.MAX_VALUE + 1).toFloat()
+            var max = (Short.MIN_VALUE - 1).toFloat()
             for (j in i until (i + samplesPerLine)) {
 
                 if(j >= samplesBuffer.size) break
@@ -466,7 +471,7 @@ class DrawableWaveForm() : Drawable {
     }
 
 
-    private fun scaleAmplitude(sample: Double, height: Double): Double {
+    private fun scaleAmplitude(sample: Float, height: Double): Double {
         return height / (Short.MAX_VALUE * 2) * (sample + Short.MAX_VALUE)
     }
 
@@ -521,7 +526,7 @@ class DrawableWaveForm() : Drawable {
             val lowerByte = bytes[i].toInt() and 0xFF
             val upperByte = bytes[i + 1].toInt() and 0xFF
             val wholeNum = (upperByte shl 8 or lowerByte).toShort().toInt()
-            samplesBuffer[j] = wholeNum.toDouble()
+            samplesBuffer[j] = wholeNum.toFloat()
             i += 2
             j++
         }
@@ -622,5 +627,47 @@ class WaveformGenerator : AudioFileReader {
         fillTestSamplesBuffer(existingAudio, 3) { Math.sin(it) }
     }
 
+}
+
+
+
+
+
+
+class FramerateView : Label() {
+
+    private val frameTimes = LongArray(100)
+    private var frameTimeIndex = 0
+    private var arrayFilled = false
+
+    private val builder = StringBuilder("FPS: 000")
+
+    // code from:
+    // https://stackoverflow.com/questions/28287398/what-is-the-preferred-way-of-getting-the-frame-rate-of-a-javafx-application
+    val at = object : AnimationTimer() {
+
+        override fun handle(currentNanoTime: Long) {
+            val oldFrameTime = frameTimes[frameTimeIndex]
+            frameTimes[frameTimeIndex] = currentNanoTime
+            frameTimeIndex = (frameTimeIndex + 1) % frameTimes.size
+            if (frameTimeIndex == 0) {
+                arrayFilled = true
+            }
+            if (arrayFilled) {
+                val elapsedNanos = currentNanoTime - oldFrameTime
+                val elapsedNanosPerFrame = elapsedNanos / frameTimes.size
+                val frameRate = 1_000_000_000 / elapsedNanosPerFrame
+                builder.replace(5, 8, frameRate.toString())
+                text = builder.toString()
+            }
+        }
+    }.start()
+
+    init {
+        prefHeight = 50.0
+        prefWidth = 100.0
+        alignment = Pos.TOP_LEFT
+        textFill = Paint.valueOf("#00FF00")
+    }
 }
 
