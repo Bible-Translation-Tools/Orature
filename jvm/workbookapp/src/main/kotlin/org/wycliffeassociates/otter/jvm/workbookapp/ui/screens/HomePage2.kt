@@ -369,7 +369,11 @@ class HomePage2 : View() {
         } else {
             NotificationViewData(
                 title = messages["exportFailed"],
-                message = MessageFormat.format(messages["exportFailedMessage"], event.project.titleKey),
+                message = MessageFormat.format(
+                    messages["exportFailedMessage"],
+                    event.project.titleKey,
+                    event.project.resourceContainer?.language?.name ?: ""
+                ),
                 statusType = NotificationStatusType.FAILED
             )
         }
