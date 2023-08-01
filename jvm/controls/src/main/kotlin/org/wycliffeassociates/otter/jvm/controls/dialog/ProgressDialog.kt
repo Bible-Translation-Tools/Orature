@@ -43,7 +43,7 @@ class ProgressDialog : OtterDialog() {
             addClass("confirm-dialog__body")
             vgrow = Priority.ALWAYS
             label {
-                addClass("normal-text")
+                addClass("confirm-dialog__message")
                 textProperty().bind(dialogMessageProperty)
             }
             progressbar {
@@ -69,6 +69,7 @@ class ProgressDialog : OtterDialog() {
             region { hgrow = Priority.ALWAYS }
             button(cancelMessageProperty) {
                 addClass("btn", "btn--secondary")
+                tooltip { textProperty().bind(cancelMessageProperty) }
                 onActionProperty().bind(onCloseActionProperty)
                 visibleWhen { cancelMessageProperty.isNotNull }
                 managedWhen(visibleProperty())
