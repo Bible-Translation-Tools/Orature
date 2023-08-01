@@ -36,7 +36,10 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.io.File
+import java.lang.Math.cos
 import java.lang.Math.sin
+import java.nio.ByteBuffer
+import java.util.function.DoubleUnaryOperator
 import javax.inject.Inject
 
 class NarrationBody : View() {
@@ -427,28 +430,17 @@ class DrawableWaveForm() : Drawable {
 
     val screenWidth = 1920
     val screenHeight = 1080
-    var lineWidth = 1
     val sampleRate = 44100
-    val samplesPerPixelWidth =  (sampleRate * 10) / screenWidth // NOTE: this could result in compounding errors due to rounding
-    var samplesPerLine = samplesPerPixelWidth * lineWidth
+    val samplesPerPixelWidth =  (sampleRate * 10) / screenWidth // NOTE: this could result in compounding errors due to rounding. ~= 229
+    var samplesPerLine = samplesPerPixelWidth
 
-    var sampleGeneratorSeed = 0.0
     var samplesBuffer = DoubleArray(sampleRate * 10)
+    var bytes = ByteArray(sampleRate * 10 * 2)
     var allLocalMinAndMaxSamples = DoubleArray(screenWidth * 2) { 0.0 }
     var previouslyDrawnLines = IntArray(screenWidth * 2) { 0 }
     var writableImage = WritableImage(screenWidth, screenHeight)
 
     private var isWaveformDirty = true
-
-
-    fun fillSamplesBuffer(samplesBuffer: DoubleArray) {
-        var sampleValue = 0.0
-        for(i in 1 ..  (sampleRate*10)) {
-            sampleValue = Short.MAX_VALUE * sin(sampleGeneratorSeed)
-            samplesBuffer[i - 1] = sampleValue
-            sampleGeneratorSeed  += 0.0001
-        }
-    }
 
 
     fun findAllLocalMinAndMaxSamples(samplesBuffer: DoubleArray) {
@@ -520,16 +512,37 @@ class DrawableWaveForm() : Drawable {
     }
 
 
+    fun fillSampleBuffer() {
+
+        var i = 0
+        var j = 0
+        while(i < bytes.size) {
+
+            val lowerByte = bytes[i].toInt() and 0xFF
+            val upperByte = bytes[i + 1].toInt() and 0xFF
+            val wholeNum = (upperByte shl 8 or lowerByte).toShort().toInt()
+            samplesBuffer[j] = wholeNum.toDouble()
+            i += 2
+            j++
+        }
+    }
+
+    var waveformGenerator = WaveformGenerator()
+
     override fun draw(context: GraphicsContext, canvas: Canvas) {
-        fillSamplesBuffer(samplesBuffer)
+        waveformGenerator.getPcmBuffer(bytes)
+        fillSampleBuffer()
         findAllLocalMinAndMaxSamples(samplesBuffer)
         drawAllLocalMinAndMaxToImage()
         isWaveformDirty = true
-        context.drawImage(writableImage, 0.0, 0.0, canvas.width, canvas.height)
+        context.drawImage(writableImage, 0.0, 0.0, writableImage.width, canvas.height)
     }
 
 
 }
+
+
+
 
 
 
@@ -539,15 +552,12 @@ class WaveformGenerator : AudioFileReader {
     override val sampleSize = 16
     override val framePosition = 0
     override val totalFrames = 0
-    var sampleGeneratorSeed = 0.0
+
+    var existingAudio = ByteBuffer.allocate(sampleRate * 10 * 2)
+    var incomingAudio = ByteBuffer.allocate(sampleRate * 10 * 2)
 
     override fun hasRemaining(): Boolean {
         TODO("Not yet implemented")
-    }
-
-    override fun getPcmBuffer(bytes: ByteArray): Int {
-        TODO("Not yet implemented")
-        fillSamplesBuffer(bytes)
     }
 
     override fun seek(sample: Int) {
@@ -567,15 +577,50 @@ class WaveformGenerator : AudioFileReader {
     }
 
 
-    fun fillSamplesBuffer(samplesBuffer: ByteArray) {
-        var sampleValue = 0.0
-        for(i in 1 ..  (sampleRate*10)) {
-            sampleValue = Short.MAX_VALUE * sin(sampleGeneratorSeed)
-            samplesBuffer[i - 1] = sampleValue.toInt().toByte()
-            sampleGeneratorSeed  += 0.0001
+    override fun getPcmBuffer(bytes: ByteArray): Int {
+        var bytesFromExisting = 0
+        val bytesFromIncoming = minOf(bytes.size, incomingAudio.remaining())
+
+        incomingAudio.get(bytes, 0, bytesFromIncoming)
+
+        val remainingBytes = bytes.size - bytesFromIncoming
+
+        if (remainingBytes > 0) {
+            bytesFromExisting = minOf(remainingBytes, existingAudio.remaining())
+            existingAudio.get(bytes, bytesFromIncoming, bytesFromExisting)
         }
+
+        incomingAudio.position(0)
+        existingAudio.position(0)
+
+        return bytesFromIncoming + bytesFromExisting
     }
+
+
+    var sampleGeneratorSeed = 0.0
+    fun fillTestSamplesBuffer(
+        samplesBuffer: ByteBuffer,
+        secondsToDisplay: Int,
+        operation: DoubleUnaryOperator)
+    {
+        var sampleValue = 0.0
+        var j = 0
+        for(i in 1 ..  (sampleRate*secondsToDisplay)) {
+            sampleValue = Short.MAX_VALUE * operation.applyAsDouble(sampleGeneratorSeed)
+            samplesBuffer.put((sampleValue.toInt() and 0xFF).toByte())
+            samplesBuffer.put((sampleValue.toInt() ushr 8 and 0xFF).toByte())
+            sampleGeneratorSeed  += 0.0001
+            j += 2
+        }
+        samplesBuffer.position(0)
+        samplesBuffer.limit(j)
+    }
+
+
+    init {
+        fillTestSamplesBuffer(incomingAudio, 2) { Math.cos(it) }
+        fillTestSamplesBuffer(existingAudio, 3) { Math.sin(it) }
+    }
+
 }
-
-
 
