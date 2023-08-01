@@ -181,8 +181,8 @@ class TestSourceProjectExporter {
         db.assertRowCounts(
             RowCount(
                 contents = mapOf(
-                    ContentType.META to 3567,
-                    ContentType.TEXT to 92927
+                    ContentType.META to 3589,
+                    ContentType.TEXT to 92947
                 ),
                 collections = 3767,
                 links = 0
