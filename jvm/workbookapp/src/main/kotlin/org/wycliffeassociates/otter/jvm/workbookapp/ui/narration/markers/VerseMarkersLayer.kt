@@ -81,13 +81,13 @@ class VerseMarkersLayer : StackPane() {
                     prefWidthProperty().bind(markersTotalWidthProperty)
 
                     bindChildren(markers) { verse ->
-                        val (relStart, relEnd) = putNameOfYourPreference(verse)
+                        val (relStart, relEnd) = absolutePositionToRelative(verse)
                         val startPosInPixels = framesToPixels(relStart)
                         val endPosInPixels = framesToPixels(relEnd)
 
                         val verseLabel = getVerseLabel(verse)
                         val prevVerse = getPrevVerse(verse)
-                        val (prevRelStart, _) = putNameOfYourPreference(prevVerse)
+                        val (prevRelStart, _) = absolutePositionToRelative(prevVerse)
                         val prevStartPosInPixels = framesToPixels(prevRelStart)
 
                         VerseMarker().apply {
@@ -157,7 +157,7 @@ class VerseMarkersLayer : StackPane() {
         onScrollProperty.set(op)
     }
 
-    private fun putNameOfYourPreference(verse: VerseNode): Pair<Int, Int> {
+    private fun absolutePositionToRelative(verse: VerseNode): Pair<Int, Int> {
         val index = markers.indexOf(verse)
         val prevVerses = markers.slice(0 until index)
         val relStart = prevVerses.sumOf { it.end - it.start }
