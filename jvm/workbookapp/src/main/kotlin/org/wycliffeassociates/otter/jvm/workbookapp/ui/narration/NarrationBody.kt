@@ -57,7 +57,9 @@ class NarrationBody : View() {
     override val root = hbox {
 
         runAsync {
+            waveform.fillAmplitudes()
             waveform.drawAllLocalMinAndMaxToImage()
+            // TODO: possibly add a delay to insure that this matches the 60 fps requiremetns
         }
 
         waveform.heightProperty.bind(this.heightProperty())
@@ -464,12 +466,12 @@ class WaveformLayer() : Drawable {
                        chapterRepresentation.getPcmBuffer(bytes).
                        Should be of size SAMPLE_RATE * 10 * 2 (the size to hold 10 seconds of audio samples in bytes)
      */
-    fun fillAmplitudes(amplitudes : FloatArray) {
+    fun fillAmplitudes() {
 
-        val amplitudesFromIncoming = minOf(amplitudes.size, incomingAudioRingBuffer.size())
+        val amplitudesFromIncoming = minOf(allLocalMinAndMaxSamples.size, incomingAudioRingBuffer.size())
 
         // The amount of min/max amplitude values that we need to fill the amplitudes array
-        val remainingAmplitudes = amplitudes.size - amplitudesFromIncoming
+        val remainingAmplitudes = allLocalMinAndMaxSamples.size - amplitudesFromIncoming
 
         // TODO: seek existingAudioFileReader to existingAudioFileReader.totalFrames - samplesNeededFromExistingAudio
         // TODO: call existingAudioFileReader.getPCMBuffer(existingAudio)
@@ -490,8 +492,8 @@ class WaveformLayer() : Drawable {
                 min = minOf(currentSample, min)
                 max = maxOf(currentSample, max)
             }
-            amplitudes[pos] = scaleAmplitude(min, screenHeight.toDouble()).toFloat()
-            amplitudes[pos + 1] = scaleAmplitude(max, screenHeight.toDouble()).toFloat()
+            allLocalMinAndMaxSamples[pos] = scaleAmplitude(min, screenHeight.toDouble()).toFloat()
+            allLocalMinAndMaxSamples[pos + 1] = scaleAmplitude(max, screenHeight.toDouble()).toFloat()
             i++
             pos += 2
         }
@@ -499,7 +501,7 @@ class WaveformLayer() : Drawable {
         // fills the rest with (already compressed) amplitudes from incomingAudioRingBuffer
         i = 0
         while (i < amplitudesFromIncoming) {
-            amplitudes[pos] = incomingAudioRingBuffer.get(i)
+            allLocalMinAndMaxSamples[pos] = incomingAudioRingBuffer.get(i)
             i++
             pos++
         }
@@ -579,6 +581,7 @@ class WaveformLayer() : Drawable {
             val endY = y2 - 1
 
             for (y in startY..endY) {
+                if(y in 0 until writableImage.height.toInt())
                 writableImage.pixelWriter.setColor(x, y, waveformColor)
             }
 
@@ -594,8 +597,6 @@ class WaveformLayer() : Drawable {
     }
 
     override fun draw(context: GraphicsContext, canvas: Canvas) {
-        fillAmplitudes(allLocalMinAndMaxSamples)
-        drawAllLocalMinAndMaxToImage()
         isWaveformDirty = true
         context.drawImage(writableImage, 0.0, 0.0, writableImage.width, canvas.height)
     }
