@@ -53,24 +53,37 @@ class NarrationFooterViewModel : ViewModel() {
     }
 
     fun onDock() {
-        val chapter = getInitialChapter()
-        chapter.getDraft().subscribe { chunks.add(it) }
-
+        loadChapter()
     }
 
-    private fun getInitialChapter(): Chapter {
+    private fun loadChapter() {
+        getInitialChapter()
+            .toObservable()
+            .map {
+                it.getDraft()
+            }
+            .flatMap { it }
+            .observeOnFx()
+            .subscribe { chunks.add(it) }
+    }
+
+    private fun getInitialChapter(): Single<Chapter> {
         workbookDataStore.activeChapterProperty.value?.let {
-            return it
+            return Single.just(it)
         }
 
-        val chapter =  workbookDataStore
+        return workbookDataStore
             .workbook
             .source
             .chapters
-            .blockingFirst()
-
-        workbookDataStore.activeChapterProperty.set(chapter)
-        return chapter
+            .toList()
+            .map { it.first() }
+            .map { chapter ->
+                runLater {
+                    workbookDataStore.activeChapterProperty.set(chapter)
+                }
+                chapter
+            }
     }
 
     fun currentVerseTextBinding(): StringBinding {
