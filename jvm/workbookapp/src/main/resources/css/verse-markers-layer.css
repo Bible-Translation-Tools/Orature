@@ -53,4 +53,5 @@
     -fx-max-width: 2px;
     -fx-background-color: red;
     -fx-translate-x: 1px;
+    -fx-translate-y: 1px;
 }
