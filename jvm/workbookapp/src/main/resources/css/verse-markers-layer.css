@@ -47,3 +47,10 @@
 .verse-marker__menu .arrow-button .arrow {
     -fx-padding: 0;
 }
+
+.verse-marker__play-head {
+    -fx-pref-width: 2px;
+    -fx-max-width: 2px;
+    -fx-background-color: red;
+    -fx-translate-x: 1px;
+}

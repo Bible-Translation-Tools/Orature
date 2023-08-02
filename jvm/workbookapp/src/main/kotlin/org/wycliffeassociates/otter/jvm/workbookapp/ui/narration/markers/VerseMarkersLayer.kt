@@ -40,11 +40,7 @@ class VerseMarkersLayer : StackPane() {
         layerWidthProperty.bind(widthProperty())
 
         region {
-            prefWidth = 2.0
-            maxWidth = 2.0
-            style {
-                backgroundColor += Color.RED
-            }
+            addClass("verse-marker__play-head")
         }
 
         scrollpane {
