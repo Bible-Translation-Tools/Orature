@@ -1,17 +1,22 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Single
+import io.reactivex.functions.Consumer
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.util.Duration
+import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.jvm.controls.narration.*
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NarrationTextCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.text.MessageFormat
+import kotlin.math.max
 
 class NarrationFooterViewModel : ViewModel() {
     private val workbookDataStore by inject<WorkbookDataStore>()
@@ -48,10 +53,24 @@ class NarrationFooterViewModel : ViewModel() {
     }
 
     fun onDock() {
-        val chapter = workbookDataStore.activeChapterProperty.value
-        chapter.getDraft().subscribe {
-            chunks.add(it)
+        val chapter = getInitialChapter()
+        chapter.getDraft().subscribe { chunks.add(it) }
+
+    }
+
+    private fun getInitialChapter(): Chapter {
+        workbookDataStore.activeChapterProperty.value?.let {
+            return it
         }
+
+        val chapter =  workbookDataStore
+            .workbook
+            .source
+            .chapters
+            .blockingFirst()
+
+        workbookDataStore.activeChapterProperty.set(chapter)
+        return chapter
     }
 
     fun currentVerseTextBinding(): StringBinding {
@@ -133,7 +152,7 @@ class NarrationFooter : View() {
         viewModel.lastRecordedVerseProperty.value?.let { lastVerse ->
             listView.apply {
                 runLater(Duration.millis(1000.0)) {
-                    val index = lastVerse.coerceIn(0, viewModel.chunks.size - 1)
+                    val index = lastVerse.coerceIn(0, max(viewModel.chunks.size - 1, 0))
                     selectionModel.select(index)
                     scrollTo(index)
                 }
