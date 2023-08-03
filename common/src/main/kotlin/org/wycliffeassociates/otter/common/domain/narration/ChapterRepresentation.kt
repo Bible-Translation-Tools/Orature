@@ -55,7 +55,7 @@ internal class ChapterRepresentation(
     lateinit var workingAudio: OratureAudioFile
         private set
 
-    private var mappedFile: RandomAccessFile? = null
+    private var randomAccessFile: RandomAccessFile? = null
 
     init {
         initializeWorkingAudioFile()
@@ -126,7 +126,7 @@ internal class ChapterRepresentation(
     override fun getPcmBuffer(bytes: ByteArray): Int {
         var bytesWritten = 0
 
-        mappedFile?.let { raf ->
+        randomAccessFile?.let { raf ->
             for (verse in 0 until activeVerses.size) {
                 var verseRead = 0
                 val verseStart = activeVerses[verse].start * frameSizeInBytes
@@ -176,14 +176,14 @@ internal class ChapterRepresentation(
     }
 
     override fun open() {
-        mappedFile?.let { release() }
-        mappedFile = RandomAccessFile(workingAudio.file, "r")
+        randomAccessFile?.let { release() }
+        randomAccessFile = RandomAccessFile(workingAudio.file, "r")
     }
 
     override fun release() {
-        if (mappedFile != null) {
-            mappedFile?.close()
-            mappedFile = null
+        if (randomAccessFile != null) {
+            randomAccessFile?.close()
+            randomAccessFile = null
         }
     }
 
