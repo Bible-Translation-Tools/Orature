@@ -13,32 +13,45 @@ import tornadofx.objectBinding
 import tornadofx.onChange
 import tornadofx.togglePseudoClass
 
+class ChunkGrid(list: List<ChunkViewData>) : GridPane() {
 
-class ChunkGrid(list: List<ChunkViewData>) : GridPane(){
+    private val chunkCompletedIcon = FontIcon(MaterialDesign.MDI_CHECK_CIRCLE).apply {
+        addClass("chunk-item__icon")
+    }
+
+    private val chunkIcon =  FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE).apply {
+        addClass("chunk-item__icon")
+    }
 
     init {
         list.forEachIndexed { index, chunk ->
-            val btn = Button(chunk.number.toString()).apply {
-                addClass("btn", "btn--secondary", "btn--borderless", "chunk-item")
-                graphicProperty().bind(chunk.completed.objectBinding {
+            val btn = createChunkButton(chunk)
+            this.add(btn, index % 3, index / 3)
+        }
+    }
+
+    private fun createChunkButton(chunk: ChunkViewData): Button {
+        return Button(chunk.number.toString()).apply {
+            addClass("btn", "btn--secondary", "btn--borderless", "chunk-item")
+
+            graphicProperty().bind(
+                chunk.completedProperty.objectBinding {
                     this.togglePseudoClass("completed", it == true)
                     if (it == true) {
-                        FontIcon(MaterialDesign.MDI_CHECK_CIRCLE).apply { addClass("chunk-item__icon") }
+                        chunkCompletedIcon
                     } else {
-                        FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE).apply { addClass("chunk-item__icon") }
+                        chunkIcon
                     }
-                })
-
-                chunk.selectedChunk.onChange {
-                    this.togglePseudoClass("selected", it == chunk.number)
                 }
+            )
 
-                action {
-                    chunk.selectedChunk.set(chunk.number)
-                }
+            chunk.selectedChunk.onChange {
+                this.togglePseudoClass("selected", it == chunk.number)
             }
 
-            this.add(btn, index % 3, index / 3)
+            action {
+                chunk.selectedChunk.set(chunk.number)
+            }
         }
     }
 }
