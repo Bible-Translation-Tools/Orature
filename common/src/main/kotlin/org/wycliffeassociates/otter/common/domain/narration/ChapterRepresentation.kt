@@ -17,7 +17,6 @@ import kotlin.math.min
 
 private const val ACTIVE_VERSES_FILE_NAME = "active_verses.json"
 private const val CHAPTER_NARRATION_FILE_NAME = "chapter_narration.pcm"
-private const val DEFAULT_BUFFER_SIZE = 1024
 
 internal class ChapterRepresentation(
     private val workbook: Workbook,
