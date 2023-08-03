@@ -6,6 +6,7 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.collections.transformation.FilteredList
 import javafx.collections.transformation.SortedList
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
@@ -20,6 +21,7 @@ import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.NarrationView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.WorkbookPage
 import tornadofx.ViewModel
 import tornadofx.observableListOf
@@ -134,7 +136,11 @@ class HomePageViewModel2 : ViewModel() {
 
         existingProject?.let { workbook ->
             openWorkbook(workbook)
-            navigator.dock<WorkbookPage>()
+            if (workbookDescriptor.mode in listOf(ProjectMode.NARRATION, ProjectMode.DIALECT)) {
+                navigator.dock<NarrationView>()
+            } else {
+                navigator.dock<WorkbookPage>()
+            }
         }
     }
 
