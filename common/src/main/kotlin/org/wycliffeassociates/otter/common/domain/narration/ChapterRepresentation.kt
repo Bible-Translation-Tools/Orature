@@ -169,7 +169,7 @@ internal class ChapterRepresentation(
                 pos += verseRange
             } else {
                 // we've found the range the seek position falls within, so get the delta and add it to the start
-                this.position = min((sample - pos) + verse.start, this.totalFrames)
+                this.position = min((sample - pos) + verse.start, this.totalFrames) * frameSizeInBytes
                 return
             }
         }
