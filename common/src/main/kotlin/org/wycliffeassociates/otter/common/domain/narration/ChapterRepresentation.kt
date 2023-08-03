@@ -158,9 +158,21 @@ internal class ChapterRepresentation(
     }
 
     override fun seek(sample: Int) {
-        val sampleIndex = sample * frameSizeInBytes
-        val limit = totalFrames * frameSizeInBytes
-        position = Integer.min(sampleIndex, limit)
+        var pos = 0
+
+        for (i in 0 until activeVerses.size) {
+            val verse = activeVerses[i]
+            val verseRange = verse.end - verse.start
+
+            // jump by the verse range if it combined with our accumulated position is still less than the seek point
+            if (sample > pos + verseRange) {
+                pos += verseRange
+            } else {
+                // we've found the range the seek position falls within, so get the delta and add it to the start
+                this.position = min((sample - pos) + verse.start, this.totalFrames)
+                return
+            }
+        }
     }
 
     override fun open() {
