@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.reactivex.Observable
 import io.reactivex.Single
+import javafx.scene.layout.Priority
 import javafx.stage.Stage
 import org.wycliffeassociates.otter.common.OratureInfo
 import org.wycliffeassociates.otter.common.data.ColorTheme
@@ -25,6 +26,15 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataSto
 import tornadofx.*
 import java.io.File
 import javax.inject.Inject
+
+
+class NarrationRootView : View() {
+    override val root = borderpane { center<Workspace>() }
+    init {
+        workspace.header.removeFromParent()
+        workspace.root.vgrow = Priority.ALWAYS
+    }
+}
 
 class NarrationApp : App(NarrationRootView::class), IDependencyGraphProvider {
 
@@ -74,7 +84,7 @@ class NarrationApp : App(NarrationRootView::class), IDependencyGraphProvider {
         stage.width = 1024.0
         stage.scene.root.addClass(ColorTheme.LIGHT.styleClass)
 
-        workspace.dock<NarrationView>()
+        workspace.dock<NarrationPage>()
     }
 
     private fun mockWorkbook() {

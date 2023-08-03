@@ -21,10 +21,10 @@ import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseFinishe
 import tornadofx.*
 import java.util.*
 
-class NarrationView : View() {
-    private val logger = LoggerFactory.getLogger(NarrationView::class.java)
+class NarrationPage : View() {
+    private val logger = LoggerFactory.getLogger(NarrationPage::class.java)
 
-    private val viewModel: NarrationViewViewModel by inject()
+    private val viewModel: NarrationViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
     private val settingsViewModel: SettingsViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
@@ -64,8 +64,8 @@ class NarrationView : View() {
 
         borderpane {
             top<NarrationHeader>()
-            center<NarrationBody>()
-            bottom<NarrationFooter>()
+            center<AudioWorkspaceView>()
+            bottom<TeleprompterView>()
         }
     }
 
@@ -123,7 +123,7 @@ class NarrationView : View() {
     }
 }
 
-class NarrationViewViewModel : ViewModel() {
+class NarrationViewModel : ViewModel() {
     val recordStartProperty = SimpleBooleanProperty()
     val recordPauseProperty = SimpleBooleanProperty()
     val recordResumeProperty = SimpleBooleanProperty()

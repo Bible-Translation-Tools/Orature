@@ -82,7 +82,7 @@ class NarrationHeaderViewModel : ViewModel() {
     private val logger = LoggerFactory.getLogger(NarrationHeaderViewModel::class.java)
 
     private val workbookDataStore by inject<WorkbookDataStore>()
-    private val narrationViewViewModel: NarrationViewViewModel by inject()
+    private val narrationViewModel: NarrationViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
     val titleProperty = workbookDataStore.activeWorkbookProperty.stringBinding {
@@ -118,9 +118,9 @@ class NarrationHeaderViewModel : ViewModel() {
     val listeners = mutableListOf<ListenerDisposer>()
 
     init {
-        hasUndoProperty.bind(narrationViewViewModel.hasUndoProperty)
-        hasRedoProperty.bind(narrationViewViewModel.hasRedoProperty)
-        hasVersesProperty.bind(narrationViewViewModel.hasVersesProperty)
+        hasUndoProperty.bind(narrationViewModel.hasUndoProperty)
+        hasRedoProperty.bind(narrationViewModel.hasRedoProperty)
+        hasVersesProperty.bind(narrationViewModel.hasVersesProperty)
     }
 
     fun onDock() {

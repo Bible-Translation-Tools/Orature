@@ -30,7 +30,7 @@ import tornadofx.*
 import java.io.File
 import javax.inject.Inject
 
-class NarrationBody : View() {
+class AudioWorkspaceView : View() {
     private val viewModel: NarrationBodyViewModel by inject()
 
     override val root = hbox {
@@ -134,7 +134,7 @@ class NarrationBodyViewModel : ViewModel() {
     @Inject lateinit var narrationFactory: NarrationFactory
 
     private val workbookDataStore: WorkbookDataStore by inject()
-    private val narrationViewViewModel: NarrationViewViewModel by inject()
+    private val narrationViewModel: NarrationViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
     private val audioController = AudioPlayerController(Slider())
@@ -181,17 +181,17 @@ class NarrationBodyViewModel : ViewModel() {
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
 
-        narrationViewViewModel.recordStartProperty.bind(recordStartProperty)
-        narrationViewViewModel.recordResumeProperty.bind(recordResumeProperty)
-        narrationViewViewModel.isRecordingProperty.bind(isRecordingProperty)
-        narrationViewViewModel.recordPauseProperty.bind(recordPauseProperty)
-        narrationViewViewModel.isRecordingAgainProperty.bind(isRecordingAgainProperty)
+        narrationViewModel.recordStartProperty.bind(recordStartProperty)
+        narrationViewModel.recordResumeProperty.bind(recordResumeProperty)
+        narrationViewModel.isRecordingProperty.bind(isRecordingProperty)
+        narrationViewModel.recordPauseProperty.bind(recordPauseProperty)
+        narrationViewModel.isRecordingAgainProperty.bind(isRecordingAgainProperty)
 
-        narrationViewViewModel.hasUndoProperty.bind(hasUndoProperty)
-        narrationViewViewModel.hasRedoProperty.bind(hasRedoProperty)
-        narrationViewViewModel.hasVersesProperty.bind(recordedVerses.booleanBinding { it.isNotEmpty() })
+        narrationViewModel.hasUndoProperty.bind(hasUndoProperty)
+        narrationViewModel.hasRedoProperty.bind(hasRedoProperty)
+        narrationViewModel.hasVersesProperty.bind(recordedVerses.booleanBinding { it.isNotEmpty() })
 
-        narrationViewViewModel.lastRecordedVerseProperty.bind(recordedVerses.integerBinding { it.size })
+        narrationViewModel.lastRecordedVerseProperty.bind(recordedVerses.integerBinding { it.size })
     }
 
     fun onDock() {
