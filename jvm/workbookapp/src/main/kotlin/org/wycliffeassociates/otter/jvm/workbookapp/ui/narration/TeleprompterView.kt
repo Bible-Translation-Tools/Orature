@@ -2,7 +2,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Single
-import io.reactivex.functions.Consumer
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
@@ -18,9 +17,9 @@ import tornadofx.*
 import java.text.MessageFormat
 import kotlin.math.max
 
-class NarrationFooterViewModel : ViewModel() {
+class TeleprompterViewModel : ViewModel() {
     private val workbookDataStore by inject<WorkbookDataStore>()
-    private val narrationViewViewModel: NarrationViewViewModel by inject()
+    private val narrationViewModel: NarrationViewModel by inject()
 
     val chunks = observableListOf<Chunk>()
 
@@ -44,12 +43,12 @@ class NarrationFooterViewModel : ViewModel() {
     val lastRecordedVerseProperty = SimpleIntegerProperty()
 
     init {
-        recordStartProperty.bind(narrationViewViewModel.recordStartProperty)
-        recordResumeProperty.bind(narrationViewViewModel.recordResumeProperty)
-        isRecordingProperty.bind(narrationViewViewModel.isRecordingProperty)
-        recordPauseProperty.bind(narrationViewViewModel.recordPauseProperty)
-        isRecordingAgainProperty.bind(narrationViewViewModel.isRecordingAgainProperty)
-        lastRecordedVerseProperty.bind(narrationViewViewModel.lastRecordedVerseProperty)
+        recordStartProperty.bind(narrationViewModel.recordStartProperty)
+        recordResumeProperty.bind(narrationViewModel.recordResumeProperty)
+        isRecordingProperty.bind(narrationViewModel.isRecordingProperty)
+        recordPauseProperty.bind(narrationViewModel.recordPauseProperty)
+        isRecordingAgainProperty.bind(narrationViewModel.isRecordingAgainProperty)
+        lastRecordedVerseProperty.bind(narrationViewModel.lastRecordedVerseProperty)
     }
 
     fun onDock() {
@@ -122,9 +121,9 @@ class NarrationFooterViewModel : ViewModel() {
     }
 }
 
-class NarrationFooter : View() {
+class TeleprompterView : View() {
 
-    private val viewModel: NarrationFooterViewModel by inject()
+    private val viewModel: TeleprompterViewModel by inject()
     private var listView: NarrationTextListView<Chunk> by singleAssign()
 
     init {
