@@ -65,7 +65,7 @@
     -wa-status-active: -wa-green;
     -wa-status-inactive: -wa-gray;
     -wa-status-complete: -wa-blue;
-    -wa-inverse-text: -wa-gray-dark;
+    -wa-inverse-text: -wa-white;
 
     /* borders */
     -wa-border-neutral: -wa-gray;

@@ -36,7 +36,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.removeListViewCli
 import tornadofx.*
 
 private const val TAKE_CELL_HEIGHT = 80.0
-
+// TODO: DELETE THIS CLASS
 class ChunkItem : VBox() {
     val chunkTitleProperty = SimpleStringProperty()
     val showTakesProperty = SimpleBooleanProperty(false)
