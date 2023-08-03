@@ -31,7 +31,7 @@ import java.io.File
 import javax.inject.Inject
 
 class AudioWorkspaceView : View() {
-    private val viewModel: NarrationBodyViewModel by inject()
+    private val viewModel: AudioWorkspaceViewModel by inject()
 
     override val root = hbox {
         stackpane {
@@ -128,8 +128,8 @@ class AudioWorkspaceView : View() {
     }
 }
 
-class NarrationBodyViewModel : ViewModel() {
-    private val logger = LoggerFactory.getLogger(NarrationBodyViewModel::class.java)
+class AudioWorkspaceViewModel : ViewModel() {
+    private val logger = LoggerFactory.getLogger(AudioWorkspaceViewModel::class.java)
 
     @Inject lateinit var narrationFactory: NarrationFactory
 
