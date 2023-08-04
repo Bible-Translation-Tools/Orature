@@ -59,7 +59,7 @@ class NarrationBody : View() {
         runAsync {
             waveform.fillAmplitudes()
             waveform.drawAllLocalMinAndMaxToImage()
-            // TODO: possibly add a delay to insure that this matches the 60 fps requiremetns
+            // TODO: make this continually run
         }
 
         waveform.heightProperty.bind(this.heightProperty())
@@ -434,20 +434,25 @@ class WaveformLayer() : Drawable {
     val screenWidth = 1920
     val screenHeight = 1080
     val sampleRate = 44100
-    val samplesPerPixelWidth =  (sampleRate * 10) / screenWidth // NOTE: this could result in compounding errors due to rounding. ~= 229
     val secondsOfAudioToDraw = 10
+    val samplesPerPixelWidth =  (sampleRate * secondsOfAudioToDraw) / screenWidth // NOTE: this could result in compounding errors due to rounding. ~= 229
+
 
     var allLocalMinAndMaxSamples = FloatArray(screenWidth * 2) { 0.0F }
     var previouslyDrawnLines = IntArray(screenWidth * 2) { 0 }
     var writableImage = WritableImage(screenWidth, screenHeight)
     private var isWaveformDirty = true
 
-    // NOTE: this will be used to hold existing audio PCM data when necessary
+    // NOTE: this will be used to hold existing audio PCM data when the AudioFileReader is passed in constructor
+    // Can hold 10 seconds worth of PCM data
     private var existingAudio = ByteArray(sampleRate * secondsOfAudioToDraw * 2)
     var existingAudioPosition = 0
 
     // NOTE: eventually, this will be supplied as a constructor value
+    // Can hold 10 seconds worth of pixel data
     var incomingAudioRingBuffer = FloatRingBuffer(screenWidth * 2)
+
+    val dataGenerator = TestDataGenerator(sampleRate, secondsOfAudioToDraw, samplesPerPixelWidth, screenHeight)
 
 
     private fun getShort(bytes: ByteArray, position: Int): Short {
@@ -460,22 +465,37 @@ class WaveformLayer() : Drawable {
         val amplitudesFromIncoming = minOf(allLocalMinAndMaxSamples.size, incomingAudioRingBuffer.size())
 
         // The amount of min/max amplitude values that we need to fill the amplitudes array
-        val remainingAmplitudes = allLocalMinAndMaxSamples.size - amplitudesFromIncoming
-
-        // TODO: seek existingAudioFileReader to existingAudioFileReader.totalFrames - samplesNeededFromExistingAudio
-        // TODO: call existingAudioFileReader.getPCMBuffer(existingAudio)
-        // TODO: handle cases where existing audio + incoming audio is not enough to fill the screen
+        val remainingAmplitudesAfterIncoming = allLocalMinAndMaxSamples.size - amplitudesFromIncoming
 
         var pos = 0
+        var bytesFromExisting = dataGenerator.getPcmBuffer(existingAudio)
+        var offset = 1920 - (amplitudesFromIncoming / 2 + bytesFromExisting / 458)
         var i = 0
 
-        if(remainingAmplitudes >= 2) {
+        // offset = 1920 - (min/maxFromExisting + min/maxFromIncoming)
+        // min/max from incoming = amplitudesFromIncoming / 2
+        // min/max from existing = (bytesFromExisting / 2) / 229
+        println("min/max from incoming: ${amplitudesFromIncoming / 2}")
+        println("min/max frmo existing: ${(bytesFromExisting / 458)}")
+        println("Amplitudes need from existing: ${remainingAmplitudesAfterIncoming}")
+        println("offset: ${offset}")
+
+        while (pos <= offset) {
+            allLocalMinAndMaxSamples[pos] = 0.0F
+            pos++
+        }
+
+        println("offset by ${pos / 2}px")
+
+        if (remainingAmplitudesAfterIncoming >= 2) {
+            // Get min/max amplitudes from existing audio
             var min: Float
             var max: Float
             var currentSample: Float
 
-            // Gets min/max amplitudes from existing audio
-            while (i < remainingAmplitudes / 2) {
+            // Start filling the amplitudes array with min/max values from existing audio
+            // i < bytesFromExisting / 2 bytes per sample / 1 min-max per 229 samples / 2 bytes per min-max =
+            while (i < bytesFromExisting / 916 && i < remainingAmplitudesAfterIncoming / 4)  {
                 min = Short.MAX_VALUE.toFloat()
                 max = Short.MIN_VALUE.toFloat()
                 for (j in 0 until samplesPerPixelWidth) {
@@ -489,6 +509,8 @@ class WaveformLayer() : Drawable {
                 i++
                 pos += 2
             }
+            println("pixels from existing: ${i}")
+            println("position: ${pos}\n")
             existingAudioPosition = 0
             i = 0
         }
@@ -498,9 +520,11 @@ class WaveformLayer() : Drawable {
             allLocalMinAndMaxSamples[pos] = incomingAudioRingBuffer.get(i)
             i++
             pos++
+
+            println("value: ${allLocalMinAndMaxSamples[pos - 1]}")
+            println("px location: ${pos/2}")
         }
-
-
+        println("min/max written from incoming: ${i / 2}")
     }
 
     private fun scaleAmplitude(sample: Float, height: Double): Double {
@@ -509,8 +533,7 @@ class WaveformLayer() : Drawable {
 
 
     init {
-        val dataGenerator = TestDataGenerator(sampleRate, secondsOfAudioToDraw, samplesPerPixelWidth, screenHeight)
-        dataGenerator.generateData(existingAudio, incomingAudioRingBuffer)
+        dataGenerator.generateData(incomingAudioRingBuffer)
     }
 
 
@@ -542,6 +565,8 @@ class WaveformLayer() : Drawable {
                 writableImage.pixelWriter.setColor(x, y, waveformColor)
             }
 
+            println("y1: ${y1}\ny2: ${y2}\nx: ${x}\n")
+
             previouslyDrawnLines[x2] = startY
             previouslyDrawnLines[x2 + 1] = endY
 
@@ -564,10 +589,13 @@ class WaveformLayer() : Drawable {
 
 
 
-class TestDataGenerator(val sampleRate: Int, val secondsOfAudioToDraw: Int, val samplesPerPixelWidth: Int, val screenHeight : Int ) {
+class TestDataGenerator(override val sampleRate: Int, val secondsOfAudioToDraw: Int, val samplesPerPixelWidth: Int, val screenHeight : Int ) : AudioFileReader {
 
-    // NOTE: used to generate ring buffer for incoming data.
+    // Used to generate ring buffer for incoming data.
     var incomingAudio = ByteBuffer.allocate(sampleRate * secondsOfAudioToDraw * 2)
+
+    private var existingAudio = ByteArray(sampleRate * secondsOfAudioToDraw * 2)
+    var existingAudioPosition = 0
 
     var sampleGeneratorSeed = 0.0
     fun fillTestSamplesBuffer(
@@ -591,7 +619,10 @@ class TestDataGenerator(val sampleRate: Int, val secondsOfAudioToDraw: Int, val 
     private fun fillTestSamplesArray(samplesBuffer: ByteArray, secondsToDisplay: Int, operation: DoubleUnaryOperator) {
         var sampleValue = 0.0
         var j = 0
-        for (i in 1..(sampleRate * secondsToDisplay)) {
+
+        // TODO: figure not why dividing (sampleRate * secondsToDisplay) by two results in twice the needed amount of
+        // data being shown for existingAudio
+        for (i in 1..(sampleRate * secondsToDisplay))  {
             sampleValue = Short.MAX_VALUE * operation.applyAsDouble(sampleGeneratorSeed)
             samplesBuffer[j++] = (sampleValue.toInt() and 0xFF).toByte()
             samplesBuffer[j++] = (sampleValue.toInt() ushr 8 and 0xFF).toByte()
@@ -614,12 +645,56 @@ class TestDataGenerator(val sampleRate: Int, val secondsOfAudioToDraw: Int, val 
         incomingAudio.position(0)
     }
 
-    fun generateData(existingAudio: ByteArray, incomingAudioRingBuffer: FloatRingBuffer) {
+    fun generateData(incomingAudioRingBuffer: FloatRingBuffer) {
         fillTestSamplesBuffer(incomingAudio, 8) { Math.cos(it) }
-        fillTestSamplesArray(existingAudio, 2) { Math.sin(it) }
+
+        fillTestSamplesArray(existingAudio, 10) { Math.sin(it) } // contains ALL of the audio recorded
+
+        val secondsToFastForwardExistingAudio = 5
+        seek(sampleRate*2*secondsToFastForwardExistingAudio)
 
         incomingAudio.order(ByteOrder.LITTLE_ENDIAN)
         fillIncomingAudioRingBufferWithFakeData(incomingAudioRingBuffer)
+    }
+
+    override val channels: Int
+        get() = TODO("Not yet implemented")
+    override val sampleSize: Int
+        get() = TODO("Not yet implemented")
+    override val framePosition: Int
+        get() = TODO("Not yet implemented")
+    override val totalFrames: Int
+        get() = TODO("Not yet implemented")
+
+    override fun hasRemaining(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun getPcmBuffer(bytes: ByteArray): Int {
+        var written = 0
+
+        while(written < bytes.size && written + existingAudioPosition < existingAudio.size) {
+            bytes[written] = existingAudio[written + existingAudioPosition]
+            written++
+        }
+
+        return written
+    }
+
+    override fun seek(sample: Int) {
+        existingAudioPosition = sample
+    }
+
+    override fun open() {
+        TODO("Not yet implemented")
+    }
+
+    override fun release() {
+        TODO("Not yet implemented")
+    }
+
+    override fun close() {
+        TODO("Not yet implemented")
     }
 }
 
