@@ -57,9 +57,7 @@ class NarrationBody : View() {
     override val root = hbox {
 
         runAsync {
-            waveform.fillAmplitudes()
-            //waveform.drawAllLocalMinAndMaxToImage()
-            // TODO: make this continually run
+            // TODO: possibly push work of drawing to image here
         }
 
         waveform.heightProperty.bind(this.heightProperty())
@@ -439,7 +437,6 @@ class WaveformLayer() : Drawable {
 
     var previouslyDrawnLines = IntArray(screenWidth * 2) { 0 }
     var writableImage = WritableImage(screenWidth, screenHeight)
-    private var isWaveformDirty = true
 
     // NOTE: this will be used to hold existing audio PCM data when the AudioFileReader is passed in constructor
     // Can hold 10 seconds worth of PCM data
@@ -458,7 +455,7 @@ class WaveformLayer() : Drawable {
     }
 
 
-    fun fillAmplitudes() {
+    fun drawWaveformToImage() {
         val pxFromIncoming = incomingAudioRingBuffer.size() / 2
         val pxNeeded = screenWidth - pxFromIncoming
         val bytesAvailableFromExisting = dataGenerator.getPcmBuffer(existingAudio)
@@ -536,6 +533,7 @@ class WaveformLayer() : Drawable {
             previouslyDrawnLines[currentAmplitude - 2] = startY.toInt()
             previouslyDrawnLines[currentAmplitude - 1] = endY.toInt()
         }
+        existingAudioPosition = 0 // TODO: possibly remove this. Resets the existingAudioPosition to zero so I can render the same data each time
     }
 
     private fun scaleAmplitude(sample: Float, height: Double): Double {
@@ -549,7 +547,7 @@ class WaveformLayer() : Drawable {
 
 
     override fun draw(context: GraphicsContext, canvas: Canvas) {
-        isWaveformDirty = true
+        drawWaveformToImage()
         context.drawImage(writableImage, 0.0, 0.0, writableImage.width, canvas.height)
     }
 
