@@ -94,11 +94,6 @@ class NarrationHeaderViewModel : ViewModel() {
         } ?: ""
     }
 
-    private enum class StepDirection {
-        FORWARD,
-        BACKWARD
-    }
-
     val chapterTitleProperty = SimpleStringProperty()
 
     val hasNextChapter = SimpleBooleanProperty()
@@ -143,12 +138,27 @@ class NarrationHeaderViewModel : ViewModel() {
         listeners.clear()
     }
 
+    private enum class StepDirection {
+        FORWARD,
+        BACKWARD
+    }
     fun selectPreviousChapter() {
         stepToChapter(StepDirection.BACKWARD)
     }
 
     fun selectNextChapter() {
         stepToChapter(StepDirection.FORWARD)
+    }
+
+    private fun stepToChapter(direction: StepDirection) {
+        val step = when (direction) {
+            StepDirection.FORWARD -> 1
+            StepDirection.BACKWARD -> -1
+        }
+        val nextIndex = chapterList.indexOf(workbookDataStore.chapter) + step
+        chapterList.elementAtOrNull(nextIndex)?.let {
+            workbookDataStore.activeChapterProperty.set(it)
+        }
     }
 
     private fun loadChapter(chapter: Chapter) {
@@ -168,7 +178,7 @@ class NarrationHeaderViewModel : ViewModel() {
             .map { it.sortedBy { chapter -> chapter.sort } }
             .observeOnFx()
             .doOnError { e ->
-                //logger.error("Error in getting the chapter list", e)
+                logger.error("Error in getting the chapter list", e)
             }
             .subscribe { list ->
                 chapterList.setAll(list)
@@ -185,17 +195,6 @@ class NarrationHeaderViewModel : ViewModel() {
             chapterList.sizeProperty.onChangeOnce {
                 setHasNextAndPreviousChapter(chapter)
             }
-        }
-    }
-
-    private fun stepToChapter(direction: StepDirection) {
-        val step = when (direction) {
-            StepDirection.FORWARD -> 1
-            StepDirection.BACKWARD -> -1
-        }
-        val nextIndex = chapterList.indexOf(workbookDataStore.chapter) + step
-        chapterList.elementAtOrNull(nextIndex)?.let {
-            workbookDataStore.activeChapterProperty.set(it)
         }
     }
 

@@ -36,7 +36,7 @@ class NarrationRootView : View() {
     }
 }
 
-class NarrationApp : App(NarrationRootView::class), IDependencyGraphProvider {
+class NarrationDebugApp : App(NarrationRootView::class), IDependencyGraphProvider {
 
     override val dependencyGraph = DaggerAppDependencyGraph.builder().build()
     val workbookDataStore by inject<WorkbookDataStore>()
@@ -235,5 +235,5 @@ class NarrationApp : App(NarrationRootView::class), IDependencyGraphProvider {
 }
 
 fun main() {
-    launch<NarrationApp>()
+    launch<NarrationDebugApp>()
 }
