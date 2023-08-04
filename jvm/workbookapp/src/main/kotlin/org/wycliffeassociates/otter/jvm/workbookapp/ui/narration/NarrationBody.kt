@@ -459,10 +459,6 @@ class WaveformLayer() : Drawable {
 
 
     fun fillAmplitudes() {
-
-        // TODO: add logic for removing previously drawn lines here
-        // TODO: completely remove the drawAllLocalMinMaxToImage method
-
         val pxFromIncoming = incomingAudioRingBuffer.size() / 2
         val pxNeeded = screenWidth - pxFromIncoming
         val bytesAvailableFromExisting = dataGenerator.getPcmBuffer(existingAudio)
@@ -481,6 +477,10 @@ class WaveformLayer() : Drawable {
         // fill offset with 0
         for(i in 0 until pxOffset) {
             currentAmplitude += 2
+            // remove line that was previously at this position
+            for (y in previouslyDrawnLines[currentAmplitude - 2]..previouslyDrawnLines[currentAmplitude - 1]) {
+                writableImage.pixelWriter.setColor(currentAmplitude / 2 - 1, y, backgroundColor)
+            }
         }
 
         // get/draw px needed from existing audio
@@ -498,26 +498,43 @@ class WaveformLayer() : Drawable {
             }
             currentAmplitude += 2
 
+            // remove line that was previously at this position
+            for (y in previouslyDrawnLines[currentAmplitude - 2]..previouslyDrawnLines[currentAmplitude - 1]) {
+                writableImage.pixelWriter.setColor(currentAmplitude / 2 - 1, y, backgroundColor)
+            }
+
             val startY = scaleAmplitude(min, screenHeight.toDouble()).toFloat() + 1
             val endY = scaleAmplitude(max, screenHeight.toDouble()).toFloat()- 1
-
             for (y in startY.toInt()..endY.toInt()) {
                 if(y in 0 until writableImage.height.toInt())
                     writableImage.pixelWriter.setColor(currentAmplitude / 2 - 1, y, Color.GREEN)
             }
+
+            // Updated with the most recently drawn line
+            previouslyDrawnLines[currentAmplitude - 2] = startY.toInt()
+            previouslyDrawnLines[currentAmplitude - 1] = endY.toInt()
+
         }
 
         // get/draw px available in incoming
         for(i in 0 until pxFromIncoming) {
             currentAmplitude += 2
 
+            // Remove the line that was previously at this position
+            for (y in previouslyDrawnLines[currentAmplitude - 2]..previouslyDrawnLines[currentAmplitude - 1]) {
+                writableImage.pixelWriter.setColor(currentAmplitude / 2 - 1, y, backgroundColor)
+            }
+
             val startY = incomingAudioRingBuffer.get(i) + 1
             val endY = incomingAudioRingBuffer.get(i + 1) - 1
-
             for (y in startY.toInt()..endY.toInt()) {
                 if(y in 0 until writableImage.height.toInt())
                     writableImage.pixelWriter.setColor(currentAmplitude / 2 - 1, y, Color.RED)
             }
+
+            // Updated with the most recently drawn line
+            previouslyDrawnLines[currentAmplitude - 2] = startY.toInt()
+            previouslyDrawnLines[currentAmplitude - 1] = endY.toInt()
         }
     }
 
@@ -528,24 +545,6 @@ class WaveformLayer() : Drawable {
 
     init {
         dataGenerator.generateData(incomingAudioRingBuffer)
-    }
-
-
-    fun drawAllLocalMinAndMaxToImage() {
-        if (!isWaveformDirty) return
-
-        // Clear only the lines that need to be redrawn
-        for (i in previouslyDrawnLines.indices step 2) {
-            val startX = i / 2
-            val startY = previouslyDrawnLines[i]
-            val endY = previouslyDrawnLines[i + 1]
-            for (y in startY..endY) {
-                writableImage.pixelWriter.setColor(startX, y, backgroundColor)
-            }
-        }
-
-        // Mark the waveform as not dirty, as we have now drawn the updated parts
-        isWaveformDirty = false
     }
 
 
