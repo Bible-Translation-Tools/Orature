@@ -58,7 +58,7 @@ class NarrationBody : View() {
 
         runAsync {
             waveform.fillAmplitudes()
-            waveform.drawAllLocalMinAndMaxToImage()
+            //waveform.drawAllLocalMinAndMaxToImage()
             // TODO: make this continually run
         }
 
@@ -462,69 +462,70 @@ class WaveformLayer() : Drawable {
 
     fun fillAmplitudes() {
 
-        val amplitudesFromIncoming = minOf(allLocalMinAndMaxSamples.size, incomingAudioRingBuffer.size())
 
-        // The amount of min/max amplitude values that we need to fill the amplitudes array
-        val remainingAmplitudesAfterIncoming = allLocalMinAndMaxSamples.size - amplitudesFromIncoming
+        // TODO: remove allLocalMinAndMaxSamples array
+        // TODO: add logic for removing previously drawn lines here
+        // TODO: completely remove the drawAllLocalMinMaxToImage method
 
-        var pos = 0
-        var bytesFromExisting = dataGenerator.getPcmBuffer(existingAudio)
-        var offset = 1920 - (amplitudesFromIncoming / 2 + bytesFromExisting / 458)
-        var i = 0
+        val pxFromIncoming = incomingAudioRingBuffer.size() / 2
+        val pxNeeded = screenWidth - pxFromIncoming
+        val bytesAvailableFromExisting = dataGenerator.getPcmBuffer(existingAudio)
+        val samplesAvailableFromExisting = bytesAvailableFromExisting / 2
+        val pxAvailableFromExisting = samplesAvailableFromExisting / samplesPerPixelWidth
 
-        // offset = 1920 - (min/maxFromExisting + min/maxFromIncoming)
-        // min/max from incoming = amplitudesFromIncoming / 2
-        // min/max from existing = (bytesFromExisting / 2) / 229
-        println("min/max from incoming: ${amplitudesFromIncoming / 2}")
-        println("min/max frmo existing: ${(bytesFromExisting / 458)}")
-        println("Amplitudes need from existing: ${remainingAmplitudesAfterIncoming}")
-        println("offset: ${offset}")
+        var pxOffset = 0
 
-        while (pos <= offset) {
-            allLocalMinAndMaxSamples[pos] = 0.0F
-            pos++
+        if(pxAvailableFromExisting < pxNeeded) {
+            pxOffset = screenWidth - (pxFromIncoming + pxAvailableFromExisting)
         }
 
-        println("offset by ${pos / 2}px")
+        val pxFromExisting = minOf(pxNeeded, pxAvailableFromExisting)
+        var currentAmplitude = 0
 
-        if (remainingAmplitudesAfterIncoming >= 2) {
-            // Get min/max amplitudes from existing audio
-            var min: Float
-            var max: Float
-            var currentSample: Float
+        // fill offset with 0
+        for(i in 0 until pxOffset) {
+            allLocalMinAndMaxSamples[currentAmplitude++] = 0.0F
+            allLocalMinAndMaxSamples[currentAmplitude++] = 0.0F
+        }
 
-            // Start filling the amplitudes array with min/max values from existing audio
-            // i < bytesFromExisting / 2 bytes per sample / 1 min-max per 229 samples / 2 bytes per min-max =
-            while (i < bytesFromExisting / 916 && i < remainingAmplitudesAfterIncoming / 4)  {
-                min = Short.MAX_VALUE.toFloat()
-                max = Short.MIN_VALUE.toFloat()
-                for (j in 0 until samplesPerPixelWidth) {
-                    currentSample = getShort(existingAudio, existingAudioPosition).toFloat()
-                    existingAudioPosition += 2
-                    min = minOf(currentSample, min)
-                    max = maxOf(currentSample, max)
-                }
-                allLocalMinAndMaxSamples[pos] = scaleAmplitude(min, screenHeight.toDouble()).toFloat()
-                allLocalMinAndMaxSamples[pos + 1] = scaleAmplitude(max, screenHeight.toDouble()).toFloat()
-                i++
-                pos += 2
+        // get/draw px needed from existing audio
+        var min: Float
+        var max: Float
+        var currentSample: Float
+        for(i in 0 until pxFromExisting) {
+            min = Short.MAX_VALUE.toFloat()
+            max = Short.MIN_VALUE.toFloat()
+            for(j in 0 until samplesPerPixelWidth) {
+                currentSample = getShort(existingAudio, existingAudioPosition).toFloat()
+                existingAudioPosition += 2
+                min = minOf(currentSample, min)
+                max = maxOf(currentSample, max)
             }
-            println("pixels from existing: ${i}")
-            println("position: ${pos}\n")
-            existingAudioPosition = 0
-            i = 0
+            allLocalMinAndMaxSamples[currentAmplitude++] = scaleAmplitude(min, screenHeight.toDouble()).toFloat()
+            allLocalMinAndMaxSamples[currentAmplitude++] = scaleAmplitude(max, screenHeight.toDouble()).toFloat()
+
+            val startY = allLocalMinAndMaxSamples[currentAmplitude - 2] + 1
+            val endY = allLocalMinAndMaxSamples[currentAmplitude - 1] - 1
+
+            for (y in startY.toInt()..endY.toInt()) {
+                if(y in 0 until writableImage.height.toInt())
+                    writableImage.pixelWriter.setColor(currentAmplitude / 2 - 1, y, Color.GREEN)
+            }
         }
 
-        // fills the rest with (already compressed) amplitudes from incomingAudioRingBuffer
-        while (i < amplitudesFromIncoming) {
-            allLocalMinAndMaxSamples[pos] = incomingAudioRingBuffer.get(i)
-            i++
-            pos++
+        // get/draw px available in incoming
+        for(i in 0 until pxFromIncoming) {
+            allLocalMinAndMaxSamples[currentAmplitude++] = incomingAudioRingBuffer.get(i)
+            allLocalMinAndMaxSamples[currentAmplitude++] = incomingAudioRingBuffer.get(i + 1)
 
-            println("value: ${allLocalMinAndMaxSamples[pos - 1]}")
-            println("px location: ${pos/2}")
+            val startY = allLocalMinAndMaxSamples[currentAmplitude - 2] + 1
+            val endY = allLocalMinAndMaxSamples[currentAmplitude - 1] - 1
+
+            for (y in startY.toInt()..endY.toInt()) {
+                if(y in 0 until writableImage.height.toInt())
+                    writableImage.pixelWriter.setColor(currentAmplitude / 2 - 1, y, Color.RED)
+            }
         }
-        println("min/max written from incoming: ${i / 2}")
     }
 
     private fun scaleAmplitude(sample: Float, height: Double): Double {
@@ -564,8 +565,6 @@ class WaveformLayer() : Drawable {
                 if(y in 0 until writableImage.height.toInt())
                 writableImage.pixelWriter.setColor(x, y, waveformColor)
             }
-
-            println("y1: ${y1}\ny2: ${y2}\nx: ${x}\n")
 
             previouslyDrawnLines[x2] = startY
             previouslyDrawnLines[x2 + 1] = endY
@@ -646,11 +645,11 @@ class TestDataGenerator(override val sampleRate: Int, val secondsOfAudioToDraw: 
     }
 
     fun generateData(incomingAudioRingBuffer: FloatRingBuffer) {
-        fillTestSamplesBuffer(incomingAudio, 8) { Math.cos(it) }
+        fillTestSamplesBuffer(incomingAudio, 2) { Math.cos(it) }
 
         fillTestSamplesArray(existingAudio, 10) { Math.sin(it) } // contains ALL of the audio recorded
 
-        val secondsToFastForwardExistingAudio = 5
+        val secondsToFastForwardExistingAudio = 8
         seek(sampleRate*2*secondsToFastForwardExistingAudio)
 
         incomingAudio.order(ByteOrder.LITTLE_ENDIAN)
