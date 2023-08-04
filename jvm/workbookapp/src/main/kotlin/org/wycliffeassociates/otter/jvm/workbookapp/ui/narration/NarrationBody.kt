@@ -437,8 +437,6 @@ class WaveformLayer() : Drawable {
     val secondsOfAudioToDraw = 10
     val samplesPerPixelWidth =  (sampleRate * secondsOfAudioToDraw) / screenWidth // NOTE: this could result in compounding errors due to rounding. ~= 229
 
-
-    var allLocalMinAndMaxSamples = FloatArray(screenWidth * 2) { 0.0F }
     var previouslyDrawnLines = IntArray(screenWidth * 2) { 0 }
     var writableImage = WritableImage(screenWidth, screenHeight)
     private var isWaveformDirty = true
@@ -462,8 +460,6 @@ class WaveformLayer() : Drawable {
 
     fun fillAmplitudes() {
 
-
-        // TODO: remove allLocalMinAndMaxSamples array
         // TODO: add logic for removing previously drawn lines here
         // TODO: completely remove the drawAllLocalMinMaxToImage method
 
@@ -484,8 +480,7 @@ class WaveformLayer() : Drawable {
 
         // fill offset with 0
         for(i in 0 until pxOffset) {
-            allLocalMinAndMaxSamples[currentAmplitude++] = 0.0F
-            allLocalMinAndMaxSamples[currentAmplitude++] = 0.0F
+            currentAmplitude += 2
         }
 
         // get/draw px needed from existing audio
@@ -501,11 +496,10 @@ class WaveformLayer() : Drawable {
                 min = minOf(currentSample, min)
                 max = maxOf(currentSample, max)
             }
-            allLocalMinAndMaxSamples[currentAmplitude++] = scaleAmplitude(min, screenHeight.toDouble()).toFloat()
-            allLocalMinAndMaxSamples[currentAmplitude++] = scaleAmplitude(max, screenHeight.toDouble()).toFloat()
+            currentAmplitude += 2
 
-            val startY = allLocalMinAndMaxSamples[currentAmplitude - 2] + 1
-            val endY = allLocalMinAndMaxSamples[currentAmplitude - 1] - 1
+            val startY = scaleAmplitude(min, screenHeight.toDouble()).toFloat() + 1
+            val endY = scaleAmplitude(max, screenHeight.toDouble()).toFloat()- 1
 
             for (y in startY.toInt()..endY.toInt()) {
                 if(y in 0 until writableImage.height.toInt())
@@ -515,11 +509,10 @@ class WaveformLayer() : Drawable {
 
         // get/draw px available in incoming
         for(i in 0 until pxFromIncoming) {
-            allLocalMinAndMaxSamples[currentAmplitude++] = incomingAudioRingBuffer.get(i)
-            allLocalMinAndMaxSamples[currentAmplitude++] = incomingAudioRingBuffer.get(i + 1)
+            currentAmplitude += 2
 
-            val startY = allLocalMinAndMaxSamples[currentAmplitude - 2] + 1
-            val endY = allLocalMinAndMaxSamples[currentAmplitude - 1] - 1
+            val startY = incomingAudioRingBuffer.get(i) + 1
+            val endY = incomingAudioRingBuffer.get(i + 1) - 1
 
             for (y in startY.toInt()..endY.toInt()) {
                 if(y in 0 until writableImage.height.toInt())
@@ -549,28 +542,6 @@ class WaveformLayer() : Drawable {
             for (y in startY..endY) {
                 writableImage.pixelWriter.setColor(startX, y, backgroundColor)
             }
-        }
-
-        // Draw the updated waveform
-        var x = 0
-        var x2 = 0
-        while (x < writableImage.width.toInt() && x < allLocalMinAndMaxSamples.size - 1) {
-            val y1 = allLocalMinAndMaxSamples[x].toInt()
-            val y2 = allLocalMinAndMaxSamples[x + 1].toInt()
-
-            val startY = y1 + 1
-            val endY = y2 - 1
-
-            for (y in startY..endY) {
-                if(y in 0 until writableImage.height.toInt())
-                writableImage.pixelWriter.setColor(x, y, waveformColor)
-            }
-
-            previouslyDrawnLines[x2] = startY
-            previouslyDrawnLines[x2 + 1] = endY
-
-            x++
-            x2 += 2
         }
 
         // Mark the waveform as not dirty, as we have now drawn the updated parts
