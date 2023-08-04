@@ -6,22 +6,9 @@ import javafx.scene.layout.GridPane
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
-import tornadofx.action
-import tornadofx.addClass
-import tornadofx.attachTo
-import tornadofx.objectBinding
-import tornadofx.onChange
-import tornadofx.togglePseudoClass
+import tornadofx.*
 
 class ChunkGrid(list: List<ChunkViewData>) : GridPane() {
-
-    private val chunkCompletedIcon = FontIcon(MaterialDesign.MDI_CHECK_CIRCLE).apply {
-        addClass("chunk-item__icon")
-    }
-
-    private val chunkIcon =  FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE).apply {
-        addClass("chunk-item__icon")
-    }
 
     init {
         list.forEachIndexed { index, chunk ->
@@ -38,9 +25,13 @@ class ChunkGrid(list: List<ChunkViewData>) : GridPane() {
                 chunk.completedProperty.objectBinding {
                     this.togglePseudoClass("completed", it == true)
                     if (it == true) {
-                        chunkCompletedIcon
+                        FontIcon(MaterialDesign.MDI_CHECK_CIRCLE).apply {
+                            addClass("chunk-item__icon")
+                        }
                     } else {
-                        chunkIcon
+                        FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE).apply {
+                            addClass("chunk-item__icon")
+                        }
                     }
                 }
             )

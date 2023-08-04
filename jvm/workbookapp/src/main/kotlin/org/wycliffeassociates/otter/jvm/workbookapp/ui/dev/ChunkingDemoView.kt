@@ -14,9 +14,9 @@ import tornadofx.*
 
 class ChunkingDemoView : View() {
 
-    val selectedChunk: IntegerProperty = SimpleIntegerProperty(-1)
+    private val selectedChunk: IntegerProperty = SimpleIntegerProperty(-1)
 
-    val list = listOf(
+    private val list = listOf(
         ChunkViewData(1, SimpleBooleanProperty(true), selectedChunk),
         ChunkViewData(2, SimpleBooleanProperty(true), selectedChunk),
         ChunkViewData(3, SimpleBooleanProperty(true), selectedChunk),
@@ -26,22 +26,10 @@ class ChunkingDemoView : View() {
     )
 
     override val root = vbox {
-
-
-//        chunkGrid(list)
+        chunkGrid(list)
     }
 
     init {
         tryImportStylesheet("/css/chunk-item.css")
-    }
-}
-
-class ChunkStep() : VBox() {
-    init {
-        button("Blind Draft") {
-            graphic = FontIcon(MaterialDesign.MDI_HEADSET)
-        }
-
-        bindSingleChild()
     }
 }
