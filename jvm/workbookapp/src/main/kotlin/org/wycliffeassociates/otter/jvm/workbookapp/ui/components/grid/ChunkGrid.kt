@@ -11,6 +11,10 @@ import tornadofx.*
 class ChunkGrid(list: List<ChunkViewData>) : GridPane() {
 
     init {
+        gridpaneColumnConstraints {
+            percentWidth = 100.0 / 3.0 // Three columns, each taking up 1/3 of the available width
+        }
+
         list.forEachIndexed { index, chunk ->
             val btn = createChunkButton(chunk)
             this.add(btn, index % 3, index / 3)

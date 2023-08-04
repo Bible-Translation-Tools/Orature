@@ -1,0 +1,12 @@
+.chunking-step {
+    -fx-border-width: 1px;
+    -fx-border-color: transparent transparent -wa-border-light transparent;
+}
+
+.chunking-step__title-section {
+    -fx-padding: 16;
+}
+
+.chunking-step > .chunking-step__title {
+    -fx-graphic-text-gap: 0.6em;
+}
