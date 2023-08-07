@@ -41,20 +41,31 @@ class ChunkingDemoView : View() {
             isFocusTraversable = true
 
             hbox {
-                addClass("chunking-step__header-section")
+                addClass("chunking-step__header-section", "chunk-step__header-section__menu-btn")
                 label {
-                    addClass("chunking-step__title", "normal-text")
+                    addClass("chunking-step__title", "h5")
+                    graphicProperty().bind(showAllProperty.objectBinding {
+                        if (it == true) {
+                            FontIcon(MaterialDesign.MDI_EYE_OFF).apply {
+                                addClass("icon")
+                            }
+                        } else {
+                            FontIcon(MaterialDesign.MDI_CHECK_CIRCLE).apply {
+                                addClass("icon", "success-icon")
+                            }
+                        }
+                    })
                     textProperty().bind(showAllProperty.stringBinding {
-                        if (it == false) messages["show_completed"] else messages["hide_completed"]
+                        if (it == true) messages["hide_completed"] else messages["show_completed"]
                     })
                 }
                 region { hgrow = Priority.ALWAYS }
                 label {
                     graphicProperty().bind(showAllProperty.objectBinding {
                         if (it == true) {
-                            FontIcon(MaterialDesign.MDI_MENU_UP)
+                            FontIcon(MaterialDesign.MDI_MENU_UP).apply { addClass("icon") }
                         } else {
-                            FontIcon(MaterialDesign.MDI_MENU_DOWN)
+                            FontIcon(MaterialDesign.MDI_MENU_DOWN).apply { addClass("icon") }
                         }
                     })
                 }

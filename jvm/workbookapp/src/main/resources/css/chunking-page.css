@@ -13,9 +13,19 @@
 }
 
 .chunking-step__header-section {
+    -fx-alignment: center;
     -fx-padding: 16;
 }
 
-.chunking-step > .chunking-step__title {
+.chunking-step__header-section .chunking-step__title {
     -fx-graphic-text-gap: 0.6em;
+}
+
+.chunk-step__header-section__menu-btn .icon {
+    -fx-icon-color: -wa-regular-text-80;
+    -fx-font-size: 1.8em;
+}
+
+.chunk-step__header-section__menu-btn .success-icon {
+    -fx-icon-color: #82A93F;
 }
