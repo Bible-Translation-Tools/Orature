@@ -16,7 +16,8 @@ import tornadofx.*
 
 class ChunkingStepNode(
     step: ChunkingStep,
-    currentStepProperty: SimpleObjectProperty<ChunkingStep>,
+    selectedStepProperty: SimpleObjectProperty<ChunkingStep>,
+    reachableStepProperty: SimpleObjectProperty<ChunkingStep>,
     content: Node? = null
 ) : VBox() {
     private val mainSectionProperty = SimpleObjectProperty<Node>(null)
@@ -24,12 +25,19 @@ class ChunkingStepNode(
     init {
         addClass("chunking-step")
         isFocusTraversable = true
+        disableWhen {
+            reachableStepProperty.booleanBinding {
+                it?.let { reachable ->
+                    reachable.ordinal < step.ordinal
+                } ?: true
+            }
+        }
 
         hbox {
             addClass("chunking-step__header-section")
             label(step.name) {
                 addClass("chunking-step__title", "normal-text")
-                graphic = when(step) {
+                graphic = when (step) {
                     ChunkingStep.CONSUME -> FontIcon(Material.HEARING)
                     ChunkingStep.CHUNKING -> FontIcon(MaterialDesign.MDI_CONTENT_CUT)
                     ChunkingStep.BLIND_DRAFT -> FontIcon(MaterialDesign.MDI_HEADSET)
@@ -45,10 +53,10 @@ class ChunkingStepNode(
         pane {
             bindSingleChild(mainSectionProperty)
 
-            visibleWhen { currentStepProperty.isEqualTo(step) }
+            visibleWhen { selectedStepProperty.isEqualTo(step) }
             managedWhen(visibleProperty())
             mainSectionProperty.bind(
-                currentStepProperty.objectBinding {
+                selectedStepProperty.objectBinding {
                     this@ChunkingStepNode.togglePseudoClass("selected", it == step)
                     if (it == step) {
                         content
@@ -60,12 +68,12 @@ class ChunkingStepNode(
         }
 
         setOnMouseClicked {
-            currentStepProperty.set(step)
+            selectedStepProperty.set(step)
             requestFocus()
         }
         this.addEventFilter(KeyEvent.KEY_PRESSED) {
             if (it.code == KeyCode.ENTER || it.code == KeyCode.SPACE) {
-                currentStepProperty.set(step)
+                selectedStepProperty.set(step)
             }
         }
     }
@@ -73,7 +81,8 @@ class ChunkingStepNode(
 
 fun EventTarget.chunkingStep(
     step: ChunkingStep,
-    currentStep: SimpleObjectProperty<ChunkingStep>,
+    selectedStep: SimpleObjectProperty<ChunkingStep>,
+    reachableStep: SimpleObjectProperty<ChunkingStep>,
     content: Node? = null,
     op: ChunkingStepNode.() -> Unit = {}
-) = ChunkingStepNode(step, currentStep, content).attachTo(this, op)
+) = ChunkingStepNode(step, selectedStep, reachableStep, content).attachTo(this, op)
