@@ -22,9 +22,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
-import tornadofx.FX
-import tornadofx.ViewModel
-import tornadofx.observableListOf
+import tornadofx.*
 import java.io.File
 import javax.inject.Inject
 
@@ -173,10 +171,12 @@ class NarrationViewModel : ViewModel() {
                 narration.finalizeVerse()
                 narration.onNewVerse()
             }
+
             recordPause -> {
                 recordPause = false
                 recordResume = true
             }
+
             else -> {}
         }
     }
@@ -287,6 +287,7 @@ class NarrationViewModel : ViewModel() {
                     PluginActions.Result.NO_PLUGIN -> {
                         FX.eventbus.fire(SnackBarEvent(messages["noEditor"]))
                     }
+
                     else -> {
                         narration.onEditVerse(verseIndex, file)
                     }
