@@ -1,5 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
+import javafx.beans.property.BooleanProperty
+import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.EventTarget
 import javafx.scene.Node
@@ -13,11 +15,13 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.utils.bindSingleChild
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
 import tornadofx.*
+import tornadofx.FX.Companion.messages
 
 class ChunkingStepNode(
     step: ChunkingStep,
-    selectedStepProperty: SimpleObjectProperty<ChunkingStep>,
-    reachableStepProperty: SimpleObjectProperty<ChunkingStep>,
+    selectedStepProperty: ObjectProperty<ChunkingStep>,
+    reachableStepProperty: ObjectProperty<ChunkingStep>,
+    showAllProperty: BooleanProperty,
     content: Node? = null
 ) : VBox() {
     private val mainSectionProperty = SimpleObjectProperty<Node>(null)
@@ -25,6 +29,14 @@ class ChunkingStepNode(
     init {
         addClass("chunking-step")
         isFocusTraversable = true
+        visibleWhen {
+            showAllProperty.booleanBinding {
+                it == true || step.ordinal >= selectedStepProperty.value.ordinal
+            }
+                .or(disableProperty())
+
+        }
+        managedWhen(visibleProperty())
         disableWhen {
             reachableStepProperty.booleanBinding {
                 it?.let { reachable ->
@@ -35,10 +47,10 @@ class ChunkingStepNode(
 
         hbox {
             addClass("chunking-step__header-section")
-            label(step.name) {
+            label(messages[step.titleKey]) {
                 addClass("chunking-step__title", "normal-text")
                 graphic = when (step) {
-                    ChunkingStep.CONSUME -> FontIcon(Material.HEARING)
+                    ChunkingStep.CONSUME_AND_VERBALIZE -> FontIcon(Material.HEARING)
                     ChunkingStep.CHUNKING -> FontIcon(MaterialDesign.MDI_CONTENT_CUT)
                     ChunkingStep.BLIND_DRAFT -> FontIcon(MaterialDesign.MDI_HEADSET)
                     ChunkingStep.PEER_EDIT -> FontIcon(MaterialDesign.MDI_ACCOUNT_MULTIPLE)
@@ -71,6 +83,7 @@ class ChunkingStepNode(
             selectedStepProperty.set(step)
             requestFocus()
         }
+
         this.addEventFilter(KeyEvent.KEY_PRESSED) {
             if (it.code == KeyCode.ENTER || it.code == KeyCode.SPACE) {
                 selectedStepProperty.set(step)
@@ -81,8 +94,12 @@ class ChunkingStepNode(
 
 fun EventTarget.chunkingStep(
     step: ChunkingStep,
-    selectedStep: SimpleObjectProperty<ChunkingStep>,
-    reachableStep: SimpleObjectProperty<ChunkingStep>,
+    selectedStepProperty: ObjectProperty<ChunkingStep>,
+    reachableStepProperty: ObjectProperty<ChunkingStep>,
+    hideCompletedProperty: BooleanProperty,
     content: Node? = null,
     op: ChunkingStepNode.() -> Unit = {}
-) = ChunkingStepNode(step, selectedStep, reachableStep, content).attachTo(this, op)
+) = ChunkingStepNode(step, selectedStepProperty, reachableStepProperty, hideCompletedProperty, content).attachTo(
+    this,
+    op
+)
