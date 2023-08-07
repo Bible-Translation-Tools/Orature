@@ -3,6 +3,8 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.EventTarget
 import javafx.scene.Node
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
@@ -21,9 +23,10 @@ class ChunkingStepNode(
 
     init {
         addClass("chunking-step")
+        isFocusTraversable = true
 
         hbox {
-            addClass("chunking-step__title-section")
+            addClass("chunking-step__header-section")
             label(step.name) {
                 addClass("chunking-step__title", "normal-text")
                 graphic = when(step) {
@@ -45,12 +48,25 @@ class ChunkingStepNode(
             visibleWhen { currentStepProperty.isEqualTo(step) }
             managedWhen(visibleProperty())
             mainSectionProperty.bind(
-                currentStepProperty.objectBinding { if (it == step) content else null }
+                currentStepProperty.objectBinding {
+                    this@ChunkingStepNode.togglePseudoClass("selected", it == step)
+                    if (it == step) {
+                        content
+                    } else {
+                        null
+                    }
+                }
             )
         }
 
         setOnMouseClicked {
             currentStepProperty.set(step)
+            requestFocus()
+        }
+        this.addEventFilter(KeyEvent.KEY_PRESSED) {
+            if (it.code == KeyCode.ENTER || it.code == KeyCode.SPACE) {
+                currentStepProperty.set(step)
+            }
         }
     }
 }

@@ -41,7 +41,10 @@ class ChunkGrid(list: List<ChunkViewData>) : GridPane() {
             )
 
             chunk.selectedChunk.onChange {
-                this.togglePseudoClass("selected", it == chunk.number)
+                val selected = it == chunk.number
+                this.togglePseudoClass("selected", selected)
+                isFocusTraversable = !selected
+                isMouseTransparent = selected
             }
 
             action {

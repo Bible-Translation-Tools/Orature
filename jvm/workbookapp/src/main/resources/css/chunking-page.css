@@ -1,9 +1,18 @@
 .chunking-step {
-    -fx-border-width: 1px;
+    -fx-border-width: 1;
     -fx-border-color: transparent transparent -wa-border-light transparent;
 }
 
-.chunking-step__title-section {
+.chunking-step:focused .chunking-step__header-section {
+    -fx-border-width: 2;
+    -fx-border-color: -wa-button-border;
+}
+
+.chunking-step:selected .chunking-step__title {
+    -fx-text-fill: -wa-primary;
+}
+
+.chunking-step__header-section {
     -fx-padding: 16;
 }
 
