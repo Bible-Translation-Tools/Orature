@@ -76,6 +76,9 @@ class NarrationViewModel : ViewModel() {
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+
+        hasVersesProperty.bind(recordedVerses.booleanBinding { it.isNotEmpty() })
+        lastRecordedVerseProperty.bind(recordedVerses.integerBinding { it.size })
     }
 
     fun onDock() {
