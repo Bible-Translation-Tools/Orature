@@ -21,7 +21,7 @@ class ChunkingDemoView : View() {
     private val selectedChunk: IntegerProperty = SimpleIntegerProperty(-1)
     private val selectedStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.BLIND_DRAFT)
     private val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.PEER_EDIT)
-    private val showAllProperty = SimpleBooleanProperty(true)
+    private val showAllProperty = SimpleBooleanProperty(false)
 
     private val list = listOf(
         ChunkViewData(1, SimpleBooleanProperty(true), selectedChunk),
@@ -82,12 +82,19 @@ class ChunkingDemoView : View() {
                 }
             }
         }
-        chunkingStep(ChunkingStep.CONSUME_AND_VERBALIZE,selectedStepProperty,reachableStepProperty, showAllProperty,null)
-        chunkingStep(ChunkingStep.CHUNKING, selectedStepProperty, reachableStepProperty, showAllProperty, null)
-        chunkingStep(ChunkingStep.BLIND_DRAFT, selectedStepProperty, reachableStepProperty, showAllProperty, grid)
-        chunkingStep(ChunkingStep.PEER_EDIT, selectedStepProperty, reachableStepProperty, showAllProperty, grid)
-        chunkingStep(ChunkingStep.KEYWORD_CHECK, selectedStepProperty, reachableStepProperty, showAllProperty, grid)
-        chunkingStep(ChunkingStep.VERSE_CHECK, selectedStepProperty, reachableStepProperty, showAllProperty, grid)
+
+        scrollpane {
+            isFitToWidth = true
+
+            vbox {
+                chunkingStep(ChunkingStep.CONSUME_AND_VERBALIZE,selectedStepProperty,reachableStepProperty, showAllProperty,null)
+                chunkingStep(ChunkingStep.CHUNKING, selectedStepProperty, reachableStepProperty, showAllProperty, null)
+                chunkingStep(ChunkingStep.BLIND_DRAFT, selectedStepProperty, reachableStepProperty, showAllProperty, grid)
+                chunkingStep(ChunkingStep.PEER_EDIT, selectedStepProperty, reachableStepProperty, showAllProperty, grid)
+                chunkingStep(ChunkingStep.KEYWORD_CHECK, selectedStepProperty, reachableStepProperty, showAllProperty, grid)
+                chunkingStep(ChunkingStep.VERSE_CHECK, selectedStepProperty, reachableStepProperty, showAllProperty, grid)
+            }
+        }
     }
 
     init {
