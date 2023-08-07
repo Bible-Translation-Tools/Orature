@@ -97,22 +97,14 @@ class AudioWorkspaceViewModel : ViewModel() {
 
     val isRecordingProperty = SimpleBooleanProperty()
     var recordedVerses = observableListOf<VerseNode>()
-
-    private val listeners = mutableListOf<ListConversionListener<*, *>>()
-
+    
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
     }
 
     fun onDock() {
         isRecordingProperty.bind(narrationViewModel.isRecordingProperty)
-        recordedVerses.bind(narrationViewModel.recordedVerses) { it }.let { listeners.add(it) }
-
-        narrationViewModel.hasUndoProperty.bind(narrationViewModel.hasUndoProperty)
-        narrationViewModel.hasRedoProperty.bind(narrationViewModel.hasRedoProperty)
-
-        narrationViewModel.hasVersesProperty.bind(recordedVerses.booleanBinding { it.isNotEmpty() })
-        narrationViewModel.lastRecordedVerseProperty.bind(recordedVerses.integerBinding { it.size })
+        recordedVerses.bind(narrationViewModel.recordedVerses) { it }
     }
 
     fun onUndock() {

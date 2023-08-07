@@ -33,66 +33,13 @@ class NarrationPage : View() {
 
     private val pluginOpenedPage: PluginOpenedPage
 
+    private val eventSubscriptions = mutableListOf<EventRegistration>()
+
     init {
         tryImportStylesheet(resources["/css/narration.css"])
         tryImportStylesheet(resources["/css/chapter-selector.css"])
 
         pluginOpenedPage = createPluginOpenedPage()
-
-        workspace.subscribe<PluginOpenedEvent> { pluginInfo ->
-            if (!pluginInfo.isNative) {
-                workspace.dock(pluginOpenedPage)
-                //viewModel.openSourcePlayer()
-            }
-        }
-        workspace.subscribe<PluginClosedEvent> {
-            (workspace.dockedComponentProperty.value as? PluginOpenedPage)?.let {
-                workspace.navigateBack()
-            }
-        }
-        workspace.subscribe<PluginCloseFinishedEvent> {
-            workspace.navigateBack()
-        }
-
-        workspace.subscribe<SnackBarEvent> {
-            viewModel.snackBarMessage(it.message)
-        }
-
-        subscribe<NarrationResetChapterEvent> {
-            viewModel.resetChapter()
-        }
-
-        subscribe<NarrationUndoEvent> {
-            viewModel.undo()
-        }
-
-        subscribe<NarrationRedoEvent> {
-            viewModel.redo()
-        }
-
-        subscribe<RecordVerseEvent> {
-            viewModel.toggleRecording()
-        }
-
-        subscribe<NextVerseEvent> {
-            viewModel.onNext()
-        }
-
-        subscribe<PlayVerseEvent> {
-            viewModel.play(it.verse)
-        }
-
-        subscribe<RecordAgainEvent> {
-            viewModel.recordAgain(it.index)
-        }
-
-        subscribe<OpenInAudioPluginEvent> {
-            viewModel.openInAudioPlugin(it.index)
-        }
-
-        subscribe<ChapterReturnFromPluginEvent> {
-            viewModel.onChapterReturnFromPlugin()
-        }
     }
 
     override val root = stackpane {
@@ -105,6 +52,80 @@ class NarrationPage : View() {
             center<AudioWorkspaceView>()
             bottom<TeleprompterView>()
         }
+    }
+
+    override fun onDock() {
+        super.onDock()
+        subscribeToEvents()
+    }
+
+    override fun onUndock() {
+        super.onUndock()
+        unsubscribeFromEvents()
+    }
+
+    private fun subscribeToEvents() {
+        subscribe<PluginOpenedEvent> { pluginInfo ->
+            if (!pluginInfo.isNative) {
+                workspace.dock(pluginOpenedPage)
+                //viewModel.openSourcePlayer()
+            }
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<PluginClosedEvent> {
+            (workspace.dockedComponentProperty.value as? PluginOpenedPage)?.let {
+                workspace.navigateBack()
+            }
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<PluginCloseFinishedEvent> {
+            workspace.navigateBack()
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<SnackBarEvent> {
+            viewModel.snackBarMessage(it.message)
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<NarrationResetChapterEvent> {
+            viewModel.resetChapter()
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<NarrationUndoEvent> {
+            viewModel.undo()
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<NarrationRedoEvent> {
+            viewModel.redo()
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<RecordVerseEvent> {
+            viewModel.toggleRecording()
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<NextVerseEvent> {
+            viewModel.onNext()
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<PlayVerseEvent> {
+            viewModel.play(it.verse)
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<RecordAgainEvent> {
+            viewModel.recordAgain(it.index)
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<OpenInAudioPluginEvent> {
+            viewModel.openInAudioPlugin(it.index)
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<ChapterReturnFromPluginEvent> {
+            viewModel.onChapterReturnFromPlugin()
+        }.let { eventSubscriptions.add(it) }
+    }
+
+    private fun unsubscribeFromEvents() {
+        eventSubscriptions.forEach { it.unsubscribe() }
+        eventSubscriptions.clear()
     }
 
     private fun createSnackBar() {
