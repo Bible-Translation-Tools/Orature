@@ -196,7 +196,7 @@ class NarrationBodyViewModel : ViewModel() {
         listeners.forEach(ListenerDisposer::dispose)
         disposables.dispose()
 
-        closeRecorder()
+        closeNarrationAudio()
     }
 
     fun play(verse: VerseNode) {
@@ -359,8 +359,9 @@ class NarrationBodyViewModel : ViewModel() {
         playingVerse = null
     }
 
-    private fun closeRecorder() {
+    private fun closeNarrationAudio() {
         narration.closeRecorder()
+        narration.closeChapterRepresentation()
     }
 
     private fun processWithEditor(file: File, verseIndex: Int) {
