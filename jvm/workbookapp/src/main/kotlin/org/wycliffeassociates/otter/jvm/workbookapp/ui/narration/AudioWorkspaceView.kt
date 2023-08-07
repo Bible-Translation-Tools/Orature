@@ -79,44 +79,6 @@ class AudioWorkspaceView : View() {
         }
     }
 
-    init {
-        subscribe<NarrationUndoEvent> {
-            viewModel.undo()
-        }
-
-        subscribe<NarrationRedoEvent> {
-            viewModel.redo()
-        }
-
-        subscribe<NarrationResetChapterEvent> {
-            viewModel.resetChapter()
-        }
-
-        subscribe<RecordVerseEvent> {
-            viewModel.toggleRecording()
-        }
-
-        subscribe<NextVerseEvent> {
-            viewModel.onNext()
-        }
-
-        subscribe<PlayVerseEvent> {
-            viewModel.play(it.verse)
-        }
-
-        subscribe<RecordAgainEvent> {
-            viewModel.recordAgain(it.index)
-        }
-
-        subscribe<OpenInAudioPluginEvent> {
-            viewModel.openInAudioPlugin(it.index)
-        }
-
-        subscribe<ChapterReturnFromPluginEvent> {
-            viewModel.onChapterReturnFromPlugin()
-        }
-    }
-
     override fun onDock() {
         super.onDock()
         viewModel.onDock()
@@ -131,303 +93,29 @@ class AudioWorkspaceView : View() {
 class AudioWorkspaceViewModel : ViewModel() {
     private val logger = LoggerFactory.getLogger(AudioWorkspaceViewModel::class.java)
 
-    @Inject lateinit var narrationFactory: NarrationFactory
-
-    private val workbookDataStore: WorkbookDataStore by inject()
     private val narrationViewModel: NarrationViewModel by inject()
-    private val audioPluginViewModel: AudioPluginViewModel by inject()
-
-    private val audioController = AudioPlayerController(Slider())
-
-    private val recordStartProperty = SimpleBooleanProperty()
-    private var recordStart by recordStartProperty
-
-    private val recordPauseProperty = SimpleBooleanProperty()
-    private var recordPause by recordPauseProperty
-
-    private val recordResumeProperty = SimpleBooleanProperty()
-    private var recordResume by recordResumeProperty
-
-    private val potentiallyFinishedProperty = SimpleBooleanProperty()
-    private var potentiallyFinished by potentiallyFinishedProperty
 
     val isRecordingProperty = SimpleBooleanProperty()
-    private var isRecording by isRecordingProperty
+    var recordedVerses = observableListOf<VerseNode>()
 
-    val isRecordingAgainProperty = SimpleBooleanProperty()
-    private var isRecordingAgain by isRecordingAgainProperty
-
-    private val recordAgainVerseIndexProperty = SimpleObjectProperty<Int?>()
-    private var recordAgainVerseIndex by recordAgainVerseIndexProperty
-
-    private val playingVerseProperty = SimpleObjectProperty<VerseNode?>()
-    private var playingVerse by playingVerseProperty
-
-    private val hasUndoProperty = SimpleBooleanProperty()
-    private var hasUndo by hasUndoProperty
-
-    private val hasRedoProperty = SimpleBooleanProperty()
-    private var hasRedo by hasRedoProperty
-
-    private lateinit var narration: Narration
-
-    val pluginContextProperty = SimpleObjectProperty(PluginType.EDITOR)
-
-    val recordedVerses = observableListOf<VerseNode>()
-
-    private val listeners = mutableListOf<ListenerDisposer>()
-    private val disposables = CompositeDisposable()
+    private val listeners = mutableListOf<ListConversionListener<*, *>>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
-
-        narrationViewModel.recordStartProperty.bind(recordStartProperty)
-        narrationViewModel.recordResumeProperty.bind(recordResumeProperty)
-        narrationViewModel.isRecordingProperty.bind(isRecordingProperty)
-        narrationViewModel.recordPauseProperty.bind(recordPauseProperty)
-        narrationViewModel.isRecordingAgainProperty.bind(isRecordingAgainProperty)
-
-        narrationViewModel.hasUndoProperty.bind(hasUndoProperty)
-        narrationViewModel.hasRedoProperty.bind(hasRedoProperty)
-        narrationViewModel.hasVersesProperty.bind(recordedVerses.booleanBinding { it.isNotEmpty() })
-
-        narrationViewModel.lastRecordedVerseProperty.bind(recordedVerses.integerBinding { it.size })
     }
 
     fun onDock() {
-        workbookDataStore.activeChapterProperty.onChangeAndDoNowWithDisposer {
-            it?.let { chapter ->
-                initializeNarration(chapter)
-            }
-        }.let(listeners::add)
+        isRecordingProperty.bind(narrationViewModel.isRecordingProperty)
+        recordedVerses.bind(narrationViewModel.recordedVerses) { it }.let { listeners.add(it) }
+
+        narrationViewModel.hasUndoProperty.bind(narrationViewModel.hasUndoProperty)
+        narrationViewModel.hasRedoProperty.bind(narrationViewModel.hasRedoProperty)
+
+        narrationViewModel.hasVersesProperty.bind(recordedVerses.booleanBinding { it.isNotEmpty() })
+        narrationViewModel.lastRecordedVerseProperty.bind(recordedVerses.integerBinding { it.size })
     }
 
     fun onUndock() {
-        listeners.forEach(ListenerDisposer::dispose)
-        disposables.dispose()
-
-        closeNarrationAudio()
-    }
-
-    fun play(verse: VerseNode) {
-        if (playingVerse == verse) {
-            audioController.toggle()
-        } else {
-            audioController.pause()
-
-            narration.loadSectionIntoPlayer(verse)
-
-            audioController.load(narration.getPlayer())
-            audioController.seek(0)
-            audioController.play()
-
-            playingVerse = verse
-        }
-    }
-
-    fun recordAgain(verseIndex: Int) {
-        stopPlayer()
-
-        narration.onRecordAgain(verseIndex)
-
-        recordAgainVerseIndex = verseIndex
-        isRecording = true
-        isRecordingAgain = true
-        recordPause = false
-    }
-
-    fun openInAudioPlugin(index: Int) {
-        val file = narration.getSectionAsFile(index)
-        processWithEditor(file, index)
-    }
-
-    fun onChapterReturnFromPlugin() {
-        reloadNarration()
-    }
-
-    fun onNext() {
-        when {
-            isRecording -> {
-                narration.finalizeVerse()
-                narration.onNewVerse()
-            }
-            recordPause -> {
-                recordPause = false
-                recordResume = true
-            }
-            else -> {}
-        }
-    }
-
-    fun toggleRecording() {
-        when {
-            isRecording && !isRecordingAgain -> pauseRecording()
-            isRecording && isRecordingAgain -> stopRecordAgain()
-            recordPause -> resumeRecording()
-            recordStart || recordResume -> record()
-            else -> {}
-        }
-    }
-
-    fun resetChapter() {
-        narration.onResetAll()
-
-        recordStart = true
-        recordResume = false
-        recordPause = false
-    }
-
-    fun undo() {
-        narration.undo()
-
-        recordPause = false
-    }
-
-    fun redo() {
-        narration.redo()
-
-        recordPause = false
-    }
-
-    private fun initializeNarration(chapter: Chapter) {
-        Completable.fromAction {
-            narration = narrationFactory.create(workbookDataStore.workbook, chapter)
-        }
-            .doOnError {
-                logger.error("An error occurred in loadNarration", it)
-            }
-            .subscribe {
-                subscribeActiveVersesChanged()
-
-                recordStart = recordedVerses.isEmpty()
-                recordResume = recordedVerses.isNotEmpty()
-                potentiallyFinished = checkPotentiallyFinished()
-            }
-    }
-
-    private fun reloadNarration() {
-        Completable.fromCallable {
-            narration.loadFromSelectedChapterFile()
-        }
-            .doOnError {
-                logger.error("An error occurred in loadNarration", it)
-            }
-            .subscribe {
-                recordedVerses.setAll(narration.activeVerses)
-
-                recordStart = recordedVerses.isEmpty()
-                recordResume = recordedVerses.isNotEmpty()
-                potentiallyFinished = checkPotentiallyFinished()
-            }
-    }
-
-    private fun record() {
-        stopPlayer()
-
-        narration.onNewVerse()
-
-        isRecording = true
-        recordStart = false
-        recordResume = false
-    }
-
-    private fun pauseRecording() {
-        isRecording = false
-        recordPause = true
-
-        narration.pauseRecording()
-        narration.finalizeVerse()
-
-        potentiallyFinished = checkPotentiallyFinished()
-    }
-
-    private fun resumeRecording() {
-        stopPlayer()
-
-        narration.resumeRecording()
-
-        isRecording = true
-        recordPause = false
-    }
-
-    private fun stopRecordAgain() {
-        recordAgainVerseIndex?.let { verseIndex ->
-            narration.pauseRecording()
-            narration.finalizeVerse(verseIndex)
-
-            recordAgainVerseIndex = null
-            isRecording = false
-            isRecordingAgain = false
-
-            recordPause = false
-            recordResume = true
-        }
-    }
-
-    private fun stopPlayer() {
-        audioController.pause()
-        playingVerse = null
-    }
-
-    private fun closeNarrationAudio() {
-        narration.closeRecorder()
-        narration.closeChapterRepresentation()
-    }
-
-    private fun processWithEditor(file: File, verseIndex: Int) {
-        val pluginType = PluginType.EDITOR
-        pluginContextProperty.set(pluginType)
-
-        audioPluginViewModel.getPlugin(pluginType)
-            .doOnError { e ->
-                logger.error("Error in processing take with plugin type: $pluginType, ${e.message}")
-            }
-            .flatMapSingle { plugin ->
-                workbookDataStore.activeTakeNumberProperty.set(1)
-                FX.eventbus.fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
-                audioPluginViewModel.edit(file)
-            }
-            .observeOnFx()
-            .doOnError { e ->
-                logger.error("Error in processing take with plugin type: $pluginType - $e")
-            }
-            .onErrorReturn { PluginActions.Result.NO_PLUGIN }
-            .subscribe { result ->
-                when (result) {
-                    PluginActions.Result.NO_PLUGIN -> {
-                        FX.eventbus.fire(SnackBarEvent(messages["noEditor"]))
-                    }
-                    else -> {
-                        narration.onEditVerse(verseIndex, file)
-                    }
-                }
-                FX.eventbus.fire(PluginClosedEvent(pluginType))
-            }
-    }
-
-    private fun checkPotentiallyFinished(): Boolean {
-        return workbookDataStore.chapter.chunkCount.blockingGet() == recordedVerses.size
-    }
-
-    private fun subscribeActiveVersesChanged() {
-        recordedVerses.setAll(narration.activeVerses)
-        hasUndo = narration.hasUndo()
-        hasRedo = narration.hasRedo()
-
-        narration.onActiveVersesUpdated.subscribe {
-            recordedVerses.setAll(it)
-
-            hasUndo = narration.hasUndo()
-            hasRedo = narration.hasRedo()
-
-            recordStart = recordedVerses.isEmpty()
-            recordResume = recordedVerses.isNotEmpty()
-        }.let(disposables::add)
+        isRecordingProperty.unbind()
     }
 }
-
-class RecordAgainEvent(val index: Int) : FXEvent()
-class PlayVerseEvent(val verse: VerseNode) : FXEvent()
-class OpenInAudioPluginEvent(val index: Int) : FXEvent()
-
-class ChapterReturnFromPluginEvent: FXEvent()

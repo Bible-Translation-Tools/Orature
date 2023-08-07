@@ -3,9 +3,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 import com.github.thomasnield.rxkotlinfx.toLazyBinding
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
-import io.reactivex.subjects.PublishSubject
-import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleIntegerProperty
 import javafx.util.Duration
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ColorTheme
@@ -14,6 +11,11 @@ import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NextVerseEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.RecordVerseEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationRedoEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationResetChapterEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationUndoEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -54,6 +56,42 @@ class NarrationPage : View() {
 
         workspace.subscribe<SnackBarEvent> {
             viewModel.snackBarMessage(it.message)
+        }
+
+        subscribe<NarrationResetChapterEvent> {
+            viewModel.resetChapter()
+        }
+
+        subscribe<NarrationUndoEvent> {
+            viewModel.undo()
+        }
+
+        subscribe<NarrationRedoEvent> {
+            viewModel.redo()
+        }
+
+        subscribe<RecordVerseEvent> {
+            viewModel.toggleRecording()
+        }
+
+        subscribe<NextVerseEvent> {
+            viewModel.onNext()
+        }
+
+        subscribe<PlayVerseEvent> {
+            viewModel.play(it.verse)
+        }
+
+        subscribe<RecordAgainEvent> {
+            viewModel.recordAgain(it.index)
+        }
+
+        subscribe<OpenInAudioPluginEvent> {
+            viewModel.openInAudioPlugin(it.index)
+        }
+
+        subscribe<ChapterReturnFromPluginEvent> {
+            viewModel.onChapterReturnFromPlugin()
         }
     }
 
@@ -120,25 +158,6 @@ class NarrationPage : View() {
                 workbookDataStore.sourceTextZoomRateProperty
             )*/
         }
-    }
-}
-
-class NarrationViewModel : ViewModel() {
-    val recordStartProperty = SimpleBooleanProperty()
-    val recordPauseProperty = SimpleBooleanProperty()
-    val recordResumeProperty = SimpleBooleanProperty()
-    val isRecordingProperty = SimpleBooleanProperty()
-    val isRecordingAgainProperty = SimpleBooleanProperty()
-
-    val hasUndoProperty = SimpleBooleanProperty()
-    val hasRedoProperty = SimpleBooleanProperty()
-    val hasVersesProperty = SimpleBooleanProperty()
-
-    val lastRecordedVerseProperty = SimpleIntegerProperty()
-
-    val snackBarObservable: PublishSubject<String> = PublishSubject.create()
-    fun snackBarMessage(message: String) {
-        snackBarObservable.onNext(message)
     }
 }
 
