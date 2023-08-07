@@ -425,8 +425,7 @@ class ChapterReturnFromPluginEvent: FXEvent()
 class WaveformLayer() : Drawable {
 
     var heightProperty = SimpleDoubleProperty(1.0)
-    var widthProperty = SimpleDoubleProperty(1.0)
-    val waveformColor = Color.rgb(26, 26, 26)
+    var widthProperty = SimpleDoubleProperty()
     var backgroundColor = c("#E5E8EB")
 
     val screenWidth = 1920
@@ -471,7 +470,6 @@ class WaveformLayer() : Drawable {
         val pxFromExisting = minOf(pxNeeded, pxAvailableFromExisting)
         var currentAmplitude = 0
 
-        // fill offset with 0
         for(i in 0 until pxOffset) {
             currentAmplitude += 2
             // remove line that was previously at this position
@@ -548,7 +546,7 @@ class WaveformLayer() : Drawable {
 
     override fun draw(context: GraphicsContext, canvas: Canvas) {
         drawWaveformToImage()
-        context.drawImage(writableImage, 0.0, 0.0, writableImage.width, canvas.height)
+        context.drawImage(writableImage, (widthProperty.value - screenWidth), 0.0, writableImage.width, canvas.height)
     }
 
 }
