@@ -18,7 +18,7 @@ class ChunkGrid(list: List<ChunkViewData>) : GridPane() {
 
         list.forEachIndexed { index, chunk ->
             val btn = createChunkButton(chunk)
-            btn.prefWidthProperty().bind(this.widthProperty().divide(3.0))
+            btn.prefWidthProperty().bind(this.widthProperty().divide(GRID_COLUMNS.toDouble()))
             this.add(btn, index % GRID_COLUMNS, index / GRID_COLUMNS)
         }
     }
