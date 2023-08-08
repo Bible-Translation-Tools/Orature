@@ -8,6 +8,23 @@
     -fx-border-color: -wa-button-border;
 }
 
+.chunking-step.completed .chunking-step__title {
+    -fx-text-fill: #82A93F;
+}
+
+.chunking-step.completed .chunking-step__title .complete-icon {
+    -fx-icon-color: #82A93F;
+}
+
+.chunking-step .chunking-step__title .icon {
+    -fx-font-size: 1.8em;
+    -fx-icon-color: -wa-regular-text-80;
+}
+
+.chunking-step:selected .chunking-step__title .icon {
+    -fx-icon-color: -wa-primary;
+}
+
 .chunking-step:selected .chunking-step__title {
     -fx-text-fill: -wa-primary;
 }
@@ -21,11 +38,7 @@
     -fx-graphic-text-gap: 0.6em;
 }
 
-.chunk-step__header-section__menu-btn .icon {
-    -fx-icon-color: -wa-regular-text-80;
-    -fx-font-size: 1.8em;
-}
-
-.chunk-step__header-section__menu-btn .success-icon {
+.chunk-step__header-section__menu-btn .complete-icon {
     -fx-icon-color: #82A93F;
+    -fx-font-size: 1.8em;
 }

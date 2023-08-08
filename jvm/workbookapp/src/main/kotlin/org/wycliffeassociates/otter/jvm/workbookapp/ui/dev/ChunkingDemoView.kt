@@ -51,7 +51,7 @@ class ChunkingDemoView : View() {
                             }
                         } else {
                             FontIcon(MaterialDesign.MDI_CHECK_CIRCLE).apply {
-                                addClass("icon", "success-icon")
+                                addClass("complete-icon")
                             }
                         }
                     })
@@ -61,6 +61,7 @@ class ChunkingDemoView : View() {
                 }
                 region { hgrow = Priority.ALWAYS }
                 label {
+                    addClass("chunking-step__title")
                     graphicProperty().bind(showAllProperty.objectBinding {
                         if (it == true) {
                             FontIcon(MaterialDesign.MDI_MENU_UP).apply { addClass("icon") }
