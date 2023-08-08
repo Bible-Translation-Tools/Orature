@@ -26,21 +26,23 @@ class ChunkGrid(list: List<ChunkViewData>) : GridPane() {
             addClass("btn", "btn--secondary", "btn--borderless", "chunk-item")
 
             graphicProperty().bind(
-                chunk.completedProperty.objectBinding {
-                    this.togglePseudoClass("completed", it == true)
-                    if (it == true) {
-                        FontIcon(MaterialDesign.MDI_CHECK_CIRCLE).apply {
+                objectBinding(chunk.completedProperty, chunk.selectedChunkProperty) {
+                    this.togglePseudoClass("completed", chunk.completedProperty.value)
+                    when {
+                        chunk.completedProperty.value -> FontIcon(MaterialDesign.MDI_CHECK_CIRCLE).apply {
                             addClass("chunk-item__icon")
                         }
-                    } else {
-                        FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE).apply {
+                        chunk.selectedChunkProperty.value == chunk.number -> FontIcon(MaterialDesign.MDI_BOOKMARK).apply {
+                            addClass("chunk-item__icon")
+                        }
+                        else -> FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE).apply {
                             addClass("chunk-item__icon")
                         }
                     }
                 }
             )
 
-            chunk.selectedChunk.onChange {
+            chunk.selectedChunkProperty.onChange {
                 val selected = it == chunk.number
                 this.togglePseudoClass("selected", selected)
                 isFocusTraversable = !selected
@@ -48,7 +50,7 @@ class ChunkGrid(list: List<ChunkViewData>) : GridPane() {
             }
 
             action {
-                chunk.selectedChunk.set(chunk.number)
+                chunk.selectedChunkProperty.set(chunk.number)
             }
         }
     }
