@@ -22,6 +22,7 @@ class ChunkingDemoView : View() {
     private val selectedStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.BLIND_DRAFT)
     private val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.PEER_EDIT)
     private val showAllProperty = SimpleBooleanProperty(false)
+    private val isCollapsedProperty = SimpleBooleanProperty(false)
 
     private val list = listOf(
         ChunkViewData(1, SimpleBooleanProperty(true), selectedChunk),
@@ -39,9 +40,12 @@ class ChunkingDemoView : View() {
         vbox {
             addClass("chunking-step")
             isFocusTraversable = true
+            visibleWhen(isCollapsedProperty.not())
+            managedWhen(visibleProperty())
 
             hbox {
                 addClass("chunking-step__header-section", "chunk-step__header-section__menu-btn")
+
                 label {
                     addClass("chunking-step__title", "h5")
                     graphicProperty().bind(showAllProperty.objectBinding {
@@ -88,12 +92,22 @@ class ChunkingDemoView : View() {
             isFitToWidth = true
 
             vbox {
-                chunkingStep(ChunkingStep.CONSUME_AND_VERBALIZE,selectedStepProperty,reachableStepProperty, showAllProperty,null)
-                chunkingStep(ChunkingStep.CHUNKING, selectedStepProperty, reachableStepProperty, showAllProperty, null)
-                chunkingStep(ChunkingStep.BLIND_DRAFT, selectedStepProperty, reachableStepProperty, showAllProperty, grid)
-                chunkingStep(ChunkingStep.PEER_EDIT, selectedStepProperty, reachableStepProperty, showAllProperty, grid)
-                chunkingStep(ChunkingStep.KEYWORD_CHECK, selectedStepProperty, reachableStepProperty, showAllProperty, grid)
-                chunkingStep(ChunkingStep.VERSE_CHECK, selectedStepProperty, reachableStepProperty, showAllProperty, grid)
+                chunkingStep(ChunkingStep.CONSUME_AND_VERBALIZE,selectedStepProperty,reachableStepProperty, showAllProperty, isCollapsedProperty, null)
+                chunkingStep(ChunkingStep.CHUNKING, selectedStepProperty, reachableStepProperty, showAllProperty, isCollapsedProperty, null)
+                chunkingStep(ChunkingStep.BLIND_DRAFT, selectedStepProperty, reachableStepProperty, showAllProperty, isCollapsedProperty, grid)
+                chunkingStep(ChunkingStep.PEER_EDIT, selectedStepProperty, reachableStepProperty, showAllProperty, isCollapsedProperty, grid)
+                chunkingStep(ChunkingStep.KEYWORD_CHECK, selectedStepProperty, reachableStepProperty, showAllProperty, isCollapsedProperty, grid)
+                chunkingStep(ChunkingStep.VERSE_CHECK, selectedStepProperty, reachableStepProperty, showAllProperty, isCollapsedProperty, grid)
+            }
+        }
+        button("Collapse") {
+            action {
+                this@vbox.maxWidth = if (isCollapsedProperty.value) {
+                    320.0
+                } else {
+                    80.0
+                }
+                isCollapsedProperty.set(!isCollapsedProperty.value)
             }
         }
     }

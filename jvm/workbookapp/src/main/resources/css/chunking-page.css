@@ -13,6 +13,7 @@
 }
 
 .chunking-step.completed .chunking-step__title .complete-icon {
+    -fx-font-size: 1.8em;
     -fx-icon-color: #82A93F;
 }
 

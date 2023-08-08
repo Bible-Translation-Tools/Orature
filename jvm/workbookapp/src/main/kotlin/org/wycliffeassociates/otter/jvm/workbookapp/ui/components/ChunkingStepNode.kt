@@ -3,7 +3,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 import javafx.beans.binding.ObjectBinding
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.ObjectProperty
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.EventTarget
 import javafx.scene.Node
@@ -22,9 +21,10 @@ import tornadofx.FX.Companion.messages
 
 class ChunkingStepNode(
     step: ChunkingStep,
-    private val selectedStepProperty: ObjectProperty<ChunkingStep>,
+    selectedStepProperty: ObjectProperty<ChunkingStep>,
     reachableStepProperty: ObjectProperty<ChunkingStep>,
     showAllProperty: BooleanProperty,
+    isCollapsedProperty: BooleanProperty,
     content: Node? = null
 ) : VBox() {
     private val mainSectionProperty = SimpleObjectProperty<Node>(null)
@@ -32,6 +32,9 @@ class ChunkingStepNode(
         it?.let { reachable ->
             reachable.ordinal < step.ordinal
         } ?: true
+    }
+    private val isSelectedProperty = booleanBinding(selectedStepProperty) {
+        step == selectedStepProperty.value
     }
     private val completedProperty = booleanBinding(selectedStepProperty) {
         step.ordinal < selectedStepProperty.value.ordinal
@@ -43,36 +46,45 @@ class ChunkingStepNode(
         visibleWhen {
             showAllProperty.booleanBinding {
                 it == true || step.ordinal >= selectedStepProperty.value.ordinal
-            }
-                .or(disableProperty())
-
+            }.or(disableProperty())
         }
         managedWhen(visibleProperty())
         disableWhen(unavailableProperty)
         completedProperty.onChangeAndDoNow { toggleClass("completed", it == true) }
 
-        hbox {
-            addClass("chunking-step__header-section")
-            label(messages[step.titleKey]) {
-                addClass("chunking-step__title", "normal-text")
-                graphicProperty().bind(createGraphicBinding(step))
+        stackpane {
+            hbox {
+                addClass("chunking-step__header-section")
+                visibleWhen { isCollapsedProperty.not() }
+                managedWhen(visibleProperty())
+
+                label(messages[step.titleKey]) {
+                    addClass("chunking-step__title", "normal-text")
+                    graphicProperty().bind(createGraphicBinding(step))
+                }
+                region { hgrow = Priority.ALWAYS }
             }
-            region { hgrow = Priority.ALWAYS }
+            hbox {
+                addClass("chunking-step__header-section")
+                label {
+                    addClass("chunking-step__title")
+                    graphicProperty().bind(createGraphicBinding(step))
+                    visibleWhen { isCollapsedProperty }
+                    managedWhen(visibleProperty())
+                }
+            }
         }
 
         pane {
+            // expands content when step is selected (similar to accordion)
             bindSingleChild(mainSectionProperty)
 
-            visibleWhen { selectedStepProperty.isEqualTo(step) }
+            visibleWhen { isSelectedProperty.and(isCollapsedProperty.not()) }
             managedWhen(visibleProperty())
             mainSectionProperty.bind(
-                selectedStepProperty.objectBinding {
-                    this@ChunkingStepNode.togglePseudoClass("selected", it == step)
-                    if (it == step) {
-                        content
-                    } else {
-                        null
-                    }
+                isSelectedProperty.objectBinding {
+                    this@ChunkingStepNode.togglePseudoClass("selected", it == true)
+                    if (it == true) content else null
                 }
             )
         }
@@ -90,7 +102,7 @@ class ChunkingStepNode(
     }
 
     private fun createGraphicBinding(step: ChunkingStep) : ObjectBinding<Node?> {
-        return objectBinding(unavailableProperty, selectedStepProperty, completedProperty) {
+        return objectBinding(unavailableProperty, isSelectedProperty, completedProperty) {
             when {
                 unavailableProperty.value -> FontIcon(MaterialDesign.MDI_LOCK).apply { addClass("icon") }
                 completedProperty.value -> FontIcon(MaterialDesign.MDI_CHECK_CIRCLE).apply { addClass("complete-icon") }
@@ -115,9 +127,10 @@ fun EventTarget.chunkingStep(
     selectedStepProperty: ObjectProperty<ChunkingStep>,
     reachableStepProperty: ObjectProperty<ChunkingStep>,
     hideCompletedProperty: BooleanProperty,
+    isCollapsedProperty: BooleanProperty,
     content: Node? = null,
     op: ChunkingStepNode.() -> Unit = {}
-) = ChunkingStepNode(step, selectedStepProperty, reachableStepProperty, hideCompletedProperty, content).attachTo(
+) = ChunkingStepNode(step, selectedStepProperty, reachableStepProperty, hideCompletedProperty, isCollapsedProperty, content).attachTo(
     this,
     op
 )
