@@ -2,13 +2,19 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
+import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
+import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
+import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.narration.Narration
 import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
@@ -24,6 +30,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.io.File
+import java.text.MessageFormat
 import javax.inject.Inject
 
 class NarrationViewModel : ViewModel() {
@@ -62,6 +69,13 @@ class NarrationViewModel : ViewModel() {
     val potentiallyFinishedProperty = SimpleBooleanProperty()
     var potentiallyFinished by potentiallyFinishedProperty
 
+    val chapterList: ObservableList<Chapter> = observableListOf()
+    val chapterTitleProperty = SimpleStringProperty()
+    val chapterTakeProperty = SimpleObjectProperty<Take>()
+    val hasNextChapter = SimpleBooleanProperty()
+    val hasPreviousChapter = SimpleBooleanProperty()
+
+    val chunksList: ObservableList<Chunk> = observableListOf()
 
     val recordedVerses = observableListOf<VerseNode>()
     val hasVersesProperty = SimpleBooleanProperty()
@@ -82,8 +96,16 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun onDock() {
+        workbookDataStore.activeWorkbookProperty.onChangeAndDoNowWithDisposer { workbook ->
+            workbook?.let {
+                getChapterList(workbook.target.chapters)
+            }
+        }.let(listeners::add)
+
         workbookDataStore.activeChapterProperty.onChangeAndDoNowWithDisposer {
             it?.let { chapter ->
+                setHasNextAndPreviousChapter(chapter)
+                loadChapter(chapter)
                 initializeNarration(chapter)
             }
         }.let(listeners::add)
@@ -97,19 +119,13 @@ class NarrationViewModel : ViewModel() {
     }
 
     private fun initializeNarration(chapter: Chapter) {
-        Completable.fromAction {
-            narration = narrationFactory.create(workbookDataStore.workbook, chapter)
-        }
-            .doOnError {
-                logger.error("An error occurred in loadNarration", it)
-            }
-            .subscribe {
-                subscribeActiveVersesChanged()
+        narration = narrationFactory.create(workbookDataStore.workbook, chapter)
 
-                recordStart = recordedVerses.isEmpty()
-                recordResume = recordedVerses.isNotEmpty()
-                potentiallyFinished = checkPotentiallyFinished()
-            }
+        subscribeActiveVersesChanged()
+
+        recordStart = recordedVerses.isEmpty()
+        recordResume = recordedVerses.isNotEmpty()
+        potentiallyFinished = checkPotentiallyFinished()
     }
 
     private fun reloadNarration() {
@@ -125,6 +141,74 @@ class NarrationViewModel : ViewModel() {
                 recordStart = recordedVerses.isEmpty()
                 recordResume = recordedVerses.isNotEmpty()
                 potentiallyFinished = checkPotentiallyFinished()
+            }
+    }
+
+    private fun loadChapter(chapter: Chapter) {
+        loadChunks()
+        chapterTakeProperty.set(chapter.getSelectedTake())
+        chapterTitleProperty.set(
+            MessageFormat.format(
+                messages["chapterTitle"],
+                messages["chapter"],
+                chapter.title
+            )
+        )
+    }
+
+    private fun setHasNextAndPreviousChapter(chapter: Chapter) {
+        if (chapterList.isNotEmpty()) {
+            hasNextChapter.set(chapter.sort < chapterList.last().sort)
+            hasPreviousChapter.set(chapter.sort > chapterList.first().sort)
+        } else {
+            hasNextChapter.set(false)
+            hasPreviousChapter.set(false)
+            chapterList.sizeProperty.onChangeOnce {
+                setHasNextAndPreviousChapter(chapter)
+            }
+        }
+    }
+
+    private fun getChapterList(chapters: Observable<Chapter>) {
+        chapters
+            .toList()
+            .map { it.sortedBy { chapter -> chapter.sort } }
+            .observeOnFx()
+            .doOnError { e ->
+                logger.error("Error in getting the chapter list", e)
+            }
+            .subscribe { list ->
+                chapterList.setAll(list)
+            }
+    }
+
+    private fun loadChunks() {
+        getInitialChapter()
+            .toObservable()
+            .map {
+                it.getDraft()
+            }
+            .flatMap { it }
+            .observeOnFx()
+            .subscribe { chunksList.add(it) }
+    }
+
+    private fun getInitialChapter(): Single<Chapter> {
+        workbookDataStore.activeChapterProperty.value?.let {
+            return Single.just(it)
+        }
+
+        return workbookDataStore
+            .workbook
+            .source
+            .chapters
+            .toList()
+            .map { it.first() }
+            .map { chapter ->
+                runLater {
+                    workbookDataStore.activeChapterProperty.set(chapter)
+                }
+                chapter
             }
     }
 
@@ -185,12 +269,15 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun toggleRecording() {
+        println("toggle recording")
         when {
             isRecording && !isRecordingAgain -> pauseRecording()
             isRecording && isRecordingAgain -> stopRecordAgain()
             recordPause -> resumeRecording()
             recordStart || recordResume -> record()
-            else -> {}
+            else -> {
+                logger.error("Toggle recording is in the else state.")
+            }
         }
     }
 
@@ -215,6 +302,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     private fun record() {
+        println("record")
         stopPlayer()
 
         narration.onNewVerse()
@@ -225,6 +313,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     private fun pauseRecording() {
+        println("pausing recording")
         isRecording = false
         recordPause = true
 
@@ -235,6 +324,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     private fun resumeRecording() {
+        println("resuming recording")
         stopPlayer()
 
         narration.resumeRecording()
@@ -244,6 +334,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     private fun stopRecordAgain() {
+        println("stop record again")
         recordAgainVerseIndex?.let { verseIndex ->
             narration.pauseRecording()
             narration.finalizeVerse(verseIndex)
