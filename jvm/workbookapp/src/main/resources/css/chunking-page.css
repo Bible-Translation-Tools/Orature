@@ -43,3 +43,7 @@
     -fx-icon-color: #82A93F;
     -fx-font-size: 1.8em;
 }
+
+.chunking-step__content-section {
+    -fx-alignment: center;
+}

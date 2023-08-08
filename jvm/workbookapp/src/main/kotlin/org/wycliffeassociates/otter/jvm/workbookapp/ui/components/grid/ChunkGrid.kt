@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.grid
 import javafx.event.EventTarget
 import javafx.scene.control.Button
 import javafx.scene.layout.GridPane
+import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
@@ -11,12 +12,11 @@ import tornadofx.*
 class ChunkGrid(list: List<ChunkViewData>) : GridPane() {
 
     init {
-        gridpaneColumnConstraints {
-            percentWidth = 100.0 / 3.0 // Three columns, each taking up 1/3 of the available width
-        }
+        hgrow = Priority.ALWAYS
 
         list.forEachIndexed { index, chunk ->
             val btn = createChunkButton(chunk)
+            btn.prefWidthProperty().bind(this.widthProperty().divide(3.0))
             this.add(btn, index % 3, index / 3)
         }
     }

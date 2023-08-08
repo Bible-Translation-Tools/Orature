@@ -75,8 +75,9 @@ class ChunkingStepNode(
             }
         }
 
-        pane {
-            // expands content when step is selected (similar to accordion)
+        hbox {
+            /* expands when step is selected (similar to titled pane & accordion) */
+            addClass("chunking-step__content-section")
             bindSingleChild(mainSectionProperty)
 
             visibleWhen { isSelectedProperty.and(isCollapsedProperty.not()) }
