@@ -1,0 +1,13 @@
+.chapter-grid__btn {
+    -fx-padding: 14 16;
+}
+
+.chapter-grid .chapter-grid__icon-alignment-box {
+    -fx-alignment: top-right;
+    -fx-padding: 8;
+}
+
+.chapter-grid .complete-icon {
+    -fx-font-size: 1.8em;
+    -fx-icon-color: -wa-primary;
+}
