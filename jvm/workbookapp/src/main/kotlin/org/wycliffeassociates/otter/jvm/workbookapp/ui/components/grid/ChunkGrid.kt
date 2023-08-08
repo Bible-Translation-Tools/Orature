@@ -9,7 +9,7 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
 import tornadofx.*
 
-private const val COLUMN_COUNT = 3
+private const val GRID_COLUMNS = 3
 
 class ChunkGrid(list: List<ChunkViewData>) : GridPane() {
 
@@ -18,8 +18,8 @@ class ChunkGrid(list: List<ChunkViewData>) : GridPane() {
 
         list.forEachIndexed { index, chunk ->
             val btn = createChunkButton(chunk)
-            btn.prefWidthProperty().bind(this.widthProperty().divide(3.0))
-            this.add(btn, index % COLUMN_COUNT, index / COLUMN_COUNT)
+            btn.prefWidthProperty().bind(this.widthProperty().divide(GRID_COLUMNS.toDouble()))
+            this.add(btn, index % GRID_COLUMNS, index / GRID_COLUMNS)
         }
     }
 
