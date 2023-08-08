@@ -43,46 +43,14 @@ class TeleprompterViewModel : ViewModel() {
     val lastRecordedVerseProperty = SimpleIntegerProperty()
 
     init {
-        recordStartProperty.bind(narrationViewModel.recordStartProperty)
-        recordResumeProperty.bind(narrationViewModel.recordResumeProperty)
-        isRecordingProperty.bind(narrationViewModel.isRecordingProperty)
-        recordPauseProperty.bind(narrationViewModel.recordPauseProperty)
-        isRecordingAgainProperty.bind(narrationViewModel.isRecordingAgainProperty)
-        lastRecordedVerseProperty.bind(narrationViewModel.lastRecordedVerseProperty)
-    }
+        chunks.bind(narrationViewModel.chunksList) { it }
 
-    fun onDock() {
-        loadChapter()
-    }
-
-    private fun loadChapter() {
-        getInitialChapter()
-            .toObservable()
-            .map {
-                it.getDraft()
-            }
-            .flatMap { it }
-            .observeOnFx()
-            .subscribe { chunks.add(it) }
-    }
-
-    private fun getInitialChapter(): Single<Chapter> {
-        workbookDataStore.activeChapterProperty.value?.let {
-            return Single.just(it)
-        }
-
-        return workbookDataStore
-            .workbook
-            .source
-            .chapters
-            .toList()
-            .map { it.first() }
-            .map { chapter ->
-                runLater {
-                    workbookDataStore.activeChapterProperty.set(chapter)
-                }
-                chapter
-            }
+        recordStartProperty.bindBidirectional(narrationViewModel.recordStartProperty)
+        recordResumeProperty.bindBidirectional(narrationViewModel.recordResumeProperty)
+        isRecordingProperty.bindBidirectional(narrationViewModel.isRecordingProperty)
+        recordPauseProperty.bindBidirectional(narrationViewModel.recordPauseProperty)
+        isRecordingAgainProperty.bindBidirectional(narrationViewModel.isRecordingAgainProperty)
+        lastRecordedVerseProperty.bindBidirectional(narrationViewModel.lastRecordedVerseProperty)
     }
 
     fun currentVerseTextBinding(): StringBinding {
@@ -126,6 +94,8 @@ class TeleprompterView : View() {
     private val viewModel: TeleprompterViewModel by inject()
     private var listView: NarrationTextListView<Chunk> by singleAssign()
 
+    private val subscriptions = mutableListOf<EventRegistration>()
+
     init {
         /*subscribe<WaveformClickedEvent> {
             listView.apply {
@@ -140,25 +110,25 @@ class TeleprompterView : View() {
             } ?: run {
                 viewModel.stickyVerseProperty.set(null)
             }
-        }
+        }.let { subscriptions.add(it) }
 
         subscribe<ResumeVerseEvent> {
             viewModel.stickyVerseProperty.value?.let { verse ->
                 listView.scrollTo(verse)
             }
-        }
+        }.let { subscriptions.add(it) }
 
         subscribe<RecordAgainEvent> {
             listView.apply {
                 selectionModel.select(it.index)
                 scrollTo(it.index - 1)
             }
-        }
+        }.let { subscriptions.add(it) }
     }
 
     override fun onDock() {
         super.onDock()
-        viewModel.onDock()
+        println("Teleprompter docked")
         listView.addListeners()
 
         viewModel.lastRecordedVerseProperty.value?.let { lastVerse ->
@@ -175,6 +145,8 @@ class TeleprompterView : View() {
     override fun onUndock() {
         super.onUndock()
         listView.removeListeners()
+        subscriptions.forEach { it.unsubscribe() }
+        subscriptions.clear()
     }
 
     override val root = stackpane {
