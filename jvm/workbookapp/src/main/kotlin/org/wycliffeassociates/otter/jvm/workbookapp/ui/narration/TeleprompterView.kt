@@ -128,7 +128,6 @@ class TeleprompterView : View() {
 
     override fun onDock() {
         super.onDock()
-        println("Teleprompter docked")
         listView.addListeners()
 
         viewModel.lastRecordedVerseProperty.value?.let { lastVerse ->
