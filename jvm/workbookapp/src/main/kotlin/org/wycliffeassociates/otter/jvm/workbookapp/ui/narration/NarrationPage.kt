@@ -74,7 +74,7 @@ class NarrationPage : View() {
     override fun onUndock() {
         super.onUndock()
         unsubscribeFromEvents()
-        viewModel.onUndock( )
+        viewModel.onUndock()
         narrationHeader.onUndock()
         audioWorkspaceView.onUndock()
         teleprompterView.onUndock()
@@ -138,7 +138,7 @@ class NarrationPage : View() {
             viewModel.onChapterReturnFromPlugin()
         }.let { eventSubscriptions.add(it) }
 
-        subscribe<NarrationHeaderViewModel.OpenChapterEvent> {
+        subscribe<OpenChapterEvent> {
             viewModel.loadChapter(it.chapter)
         }.let { eventSubscriptions.add(it) }
     }

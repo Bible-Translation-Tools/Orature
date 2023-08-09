@@ -30,6 +30,7 @@ import javax.inject.Inject
 
 class NarrationRootView : View() {
     override val root = borderpane { center<Workspace>() }
+
     init {
         workspace.header.removeFromParent()
         workspace.root.vgrow = Priority.ALWAYS
@@ -155,7 +156,7 @@ class NarrationDebugApp : App(NarrationRootView::class), IDependencyGraphProvide
     private fun mockChunks(): ReplayRelay<Chunk> {
         val chunks = mutableListOf<Chunk>()
         for (i in 1..10) {
-            val item = TextItem(chunkText[i-1], MimeType.USFM)
+            val item = TextItem(chunkText[i - 1], MimeType.USFM)
             val chunk = mockk<Chunk>()
             every { chunk.sort } returns i
             every { chunk.label } returns "verse"

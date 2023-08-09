@@ -125,8 +125,6 @@ class NarrationHeaderViewModel : ViewModel() {
         stepToChapter(StepDirection.FORWARD)
     }
 
-    class OpenChapterEvent(val chapter: Chapter) : FXEvent()
-
     private fun stepToChapter(direction: StepDirection) {
         val step = when (direction) {
             StepDirection.FORWARD -> 1

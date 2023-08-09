@@ -97,7 +97,7 @@ class AudioWorkspaceViewModel : ViewModel() {
 
     val isRecordingProperty = SimpleBooleanProperty()
     var recordedVerses = observableListOf<VerseNode>()
-    
+
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
     }
