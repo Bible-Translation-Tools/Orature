@@ -21,7 +21,7 @@ class ChunkingDemoView : View() {
     private val selectedChunk: IntegerProperty = SimpleIntegerProperty(-1)
     private val selectedStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.BLIND_DRAFT)
     private val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.PEER_EDIT)
-    private val showAllProperty = SimpleBooleanProperty(false)
+    private val hideCompletedProperty = SimpleBooleanProperty(true)
     private val isCollapsedProperty = SimpleBooleanProperty(false)
 
     private val list = listOf(
@@ -48,41 +48,41 @@ class ChunkingDemoView : View() {
 
                 label {
                     addClass("chunking-step__title", "h5")
-                    graphicProperty().bind(showAllProperty.objectBinding {
+                    graphicProperty().bind(hideCompletedProperty.objectBinding {
                         if (it == true) {
-                            FontIcon(MaterialDesign.MDI_EYE_OFF).apply {
-                                addClass("icon")
-                            }
-                        } else {
                             FontIcon(MaterialDesign.MDI_CHECK_CIRCLE).apply {
                                 addClass("complete-icon")
                             }
+                        } else {
+                            FontIcon(MaterialDesign.MDI_EYE_OFF).apply {
+                                addClass("icon")
+                            }
                         }
                     })
-                    textProperty().bind(showAllProperty.stringBinding {
-                        if (it == true) messages["hide_completed"] else messages["show_completed"]
+                    textProperty().bind(hideCompletedProperty.stringBinding {
+                        if (it == true) messages["show_completed"] else messages["hide_completed"]
                     })
                 }
                 region { hgrow = Priority.ALWAYS }
                 label {
                     addClass("chunking-step__title")
-                    graphicProperty().bind(showAllProperty.objectBinding {
+                    graphicProperty().bind(hideCompletedProperty.objectBinding {
                         if (it == true) {
-                            FontIcon(MaterialDesign.MDI_MENU_UP).apply { addClass("icon") }
-                        } else {
                             FontIcon(MaterialDesign.MDI_MENU_DOWN).apply { addClass("icon") }
+                        } else {
+                            FontIcon(MaterialDesign.MDI_MENU_UP).apply { addClass("icon") }
                         }
                     })
                 }
             }
 
             setOnMouseClicked {
-                showAllProperty.set(!showAllProperty.value)
+                hideCompletedProperty.set(!hideCompletedProperty.value)
                 requestFocus()
             }
             this.addEventFilter(KeyEvent.KEY_PRESSED) {
                 if (it.code == KeyCode.ENTER || it.code == KeyCode.SPACE) {
-                    showAllProperty.set(!showAllProperty.value)
+                    hideCompletedProperty.set(!hideCompletedProperty.value)
                     requestFocus()
                 }
             }
@@ -92,12 +92,12 @@ class ChunkingDemoView : View() {
             isFitToWidth = true
 
             vbox {
-                chunkingStep(ChunkingStep.CONSUME_AND_VERBALIZE,selectedStepProperty,reachableStepProperty, showAllProperty, isCollapsedProperty, null)
-                chunkingStep(ChunkingStep.CHUNKING, selectedStepProperty, reachableStepProperty, showAllProperty, isCollapsedProperty, null)
-                chunkingStep(ChunkingStep.BLIND_DRAFT, selectedStepProperty, reachableStepProperty, showAllProperty, isCollapsedProperty, grid)
-                chunkingStep(ChunkingStep.PEER_EDIT, selectedStepProperty, reachableStepProperty, showAllProperty, isCollapsedProperty, grid)
-                chunkingStep(ChunkingStep.KEYWORD_CHECK, selectedStepProperty, reachableStepProperty, showAllProperty, isCollapsedProperty, grid)
-                chunkingStep(ChunkingStep.VERSE_CHECK, selectedStepProperty, reachableStepProperty, showAllProperty, isCollapsedProperty, grid)
+                chunkingStep(ChunkingStep.CONSUME_AND_VERBALIZE,selectedStepProperty,reachableStepProperty, hideCompletedProperty, isCollapsedProperty, null)
+                chunkingStep(ChunkingStep.CHUNKING, selectedStepProperty, reachableStepProperty, hideCompletedProperty, isCollapsedProperty, null)
+                chunkingStep(ChunkingStep.BLIND_DRAFT, selectedStepProperty, reachableStepProperty, hideCompletedProperty, isCollapsedProperty, grid)
+                chunkingStep(ChunkingStep.PEER_EDIT, selectedStepProperty, reachableStepProperty, hideCompletedProperty, isCollapsedProperty, grid)
+                chunkingStep(ChunkingStep.KEYWORD_CHECK, selectedStepProperty, reachableStepProperty, hideCompletedProperty, isCollapsedProperty, grid)
+                chunkingStep(ChunkingStep.VERSE_CHECK, selectedStepProperty, reachableStepProperty, hideCompletedProperty, isCollapsedProperty, grid)
             }
         }
         button("Collapse") {

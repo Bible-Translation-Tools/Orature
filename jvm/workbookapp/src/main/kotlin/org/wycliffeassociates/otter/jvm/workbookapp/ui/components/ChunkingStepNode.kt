@@ -23,7 +23,7 @@ class ChunkingStepNode(
     step: ChunkingStep,
     selectedStepProperty: ObjectProperty<ChunkingStep>,
     reachableStepProperty: ObjectProperty<ChunkingStep>,
-    showAllProperty: BooleanProperty,
+    hideCompletedProperty: BooleanProperty,
     isCollapsedProperty: BooleanProperty,
     content: Node? = null
 ) : VBox() {
@@ -44,9 +44,9 @@ class ChunkingStepNode(
         addClass("chunking-step")
         isFocusTraversable = true
         visibleWhen {
-            showAllProperty.booleanBinding {
-                it == true || step.ordinal >= selectedStepProperty.value.ordinal
-            }.or(disableProperty())
+            booleanBinding(hideCompletedProperty, selectedStepProperty) {
+                hideCompletedProperty.value == false || step.ordinal >= selectedStepProperty.value.ordinal
+            }
         }
         managedWhen(visibleProperty())
         disableWhen(unavailableProperty)
