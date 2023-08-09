@@ -28,12 +28,12 @@
 }
 
 .translation-card__header .translation-card__header__text {
-    -fx-text-fill: -wa-active-text;
+    -fx-text-fill: -wa-status-active;
 }
 
 .translation-card__header .ikonli-font-icon,
 .translation-card__body .ikonli-font-icon {
-    -fx-icon-color: -wa-active-text;
+    -fx-icon-color: -wa-status-active;
     -fx-font-size: 22px;
 }
 
@@ -44,7 +44,7 @@
 
 .translation-card__language {
     -fx-graphic-text-gap: 0.6em;
-    -fx-text-fill: -wa-active-text;
+    -fx-text-fill: -wa-status-active;
     -fx-font-size: 1.4em;
 }
 
@@ -82,7 +82,7 @@
 }
 
 .translation-type-card__text-cell > .translation-type-card__text-cell__title {
-    -fx-text-fill: -wa-active-text;
+    -fx-text-fill: -wa-status-active;
 }
 
 .translation-type-card__action-cell {
