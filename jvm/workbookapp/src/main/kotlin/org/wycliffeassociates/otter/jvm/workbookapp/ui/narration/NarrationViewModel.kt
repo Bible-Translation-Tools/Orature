@@ -255,7 +255,6 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun toggleRecording() {
-        println("toggle recording")
         when {
             isRecording && !isRecordingAgain -> pauseRecording()
             isRecording && isRecordingAgain -> stopRecordAgain()
@@ -288,7 +287,6 @@ class NarrationViewModel : ViewModel() {
     }
 
     private fun record() {
-        println("record")
         stopPlayer()
 
         narration.onNewVerse()
@@ -299,7 +297,6 @@ class NarrationViewModel : ViewModel() {
     }
 
     private fun pauseRecording() {
-        println("pausing recording")
         isRecording = false
         recordPause = true
 
@@ -308,7 +305,6 @@ class NarrationViewModel : ViewModel() {
     }
 
     private fun resumeRecording() {
-        println("resuming recording")
         stopPlayer()
 
         narration.resumeRecording()
@@ -318,7 +314,6 @@ class NarrationViewModel : ViewModel() {
     }
 
     private fun stopRecordAgain() {
-        println("stop record again")
         recordAgainVerseIndex?.let { verseIndex ->
             narration.pauseRecording()
             narration.finalizeVerse(verseIndex)
