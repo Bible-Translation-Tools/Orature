@@ -4,7 +4,7 @@
 
 .chapter-grid .chapter-grid__icon-alignment-box {
     -fx-alignment: top-right;
-    -fx-padding: 8;
+    -fx-padding: 4;
 }
 
 .chapter-grid .complete-icon {
