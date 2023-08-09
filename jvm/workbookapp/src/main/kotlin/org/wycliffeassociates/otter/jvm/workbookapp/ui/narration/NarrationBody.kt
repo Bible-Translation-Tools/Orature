@@ -52,7 +52,6 @@ class NarrationBody : View() {
 
     var canvasFragment = CanvasFragment()
     var fps = FramerateView()
-    var waveform = WaveformLayer()
 
     override val root = hbox {
 
@@ -60,10 +59,10 @@ class NarrationBody : View() {
             // TODO: possibly push work of drawing to image here
         }
 
-        waveform.heightProperty.bind(this.heightProperty())
-        waveform.widthProperty.bind(this.widthProperty())
+        viewModel.waveformLayer.heightProperty.bind(this.heightProperty())
+        viewModel.waveformLayer.widthProperty.bind(this.widthProperty())
         canvasFragment.prefWidthProperty().bind(this.widthProperty())
-        canvasFragment.drawableProperty.set(waveform)
+        canvasFragment.drawableProperty.set(viewModel.waveformLayer)
         canvasFragment.isDrawingProperty.set(true)
         canvasFragment.add(fps)
         add(canvasFragment)
@@ -168,6 +167,8 @@ class NarrationBodyViewModel : ViewModel() {
     private val listeners = mutableListOf<ListenerDisposer>()
     private val disposables = CompositeDisposable()
 
+    val waveformLayer = WaveformLayer()
+
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
 
@@ -184,12 +185,27 @@ class NarrationBodyViewModel : ViewModel() {
         narrationViewViewModel.lastRecordedVerseProperty.bind(recordedVerses.integerBinding { it.size })
     }
 
+
+    private fun scaleAmplitude(sample: Float, height: Double): Double {
+        return height / (Short.MAX_VALUE * 2) * (sample + Short.MAX_VALUE)
+    }
+
     fun onDock() {
         workbookDataStore.activeChapterProperty.onChangeAndDoNowWithDisposer {
             it?.let { chapter ->
                 initializeNarration(chapter)
             }
         }.let(listeners::add)
+
+
+        var stream = narration.getRecorderAudioStream()
+        // TODO: create FloatRingBuffer here
+//        stream.subscribe { stream ->
+//            run {
+//                // TODO: everytime the audioStream changes, add those changes to the ring buffer
+//            }
+//        }
+        waveformLayer.existingAudioReader = narration.audioReader
     }
 
     fun onUndock() {
@@ -424,7 +440,6 @@ class ChapterReturnFromPluginEvent: FXEvent()
 
 
 class WaveformLayer() : Drawable {
-
     var heightProperty = SimpleDoubleProperty(1.0)
     var widthProperty = SimpleDoubleProperty()
     var backgroundColor = c("#E5E8EB")
@@ -442,10 +457,12 @@ class WaveformLayer() : Drawable {
     // Can hold 10 seconds worth of PCM data
     private var existingAudio = ByteArray(sampleRate * secondsOfAudioToDraw * 2)
     var existingAudioPosition = 0
+    var existingAudioReader : AudioFileReader? = null
 
     // NOTE: eventually, this will be supplied as a constructor value
     // Can hold 10 seconds worth of pixel data
-    var incomingAudioRingBuffer = FloatRingBuffer(screenWidth * 2)
+    var testIncomingAudioRingBuffer = FloatRingBuffer(screenWidth * 2)
+    var incomingAudioRingBuffer : FloatRingBuffer? = null
 
     val dataGenerator = TestDataGenerator(sampleRate, secondsOfAudioToDraw, samplesPerPixelWidth, screenHeight)
 
@@ -456,9 +473,17 @@ class WaveformLayer() : Drawable {
 
 
     fun drawWaveformToImage() {
-        val pxFromIncoming = incomingAudioRingBuffer.size() / 2
+
+        var bytesAvailableFromExisting : Int = 0
+
+        if(existingAudioReader == null) {
+            bytesAvailableFromExisting = dataGenerator.getPcmBuffer(existingAudio)
+        } else {
+            bytesAvailableFromExisting = existingAudioReader!!.getPcmBuffer(existingAudio)
+        }
+
+        val pxFromIncoming = testIncomingAudioRingBuffer.size() / 2
         val pxNeeded = screenWidth - pxFromIncoming
-        val bytesAvailableFromExisting = dataGenerator.getPcmBuffer(existingAudio)
         val samplesAvailableFromExisting = bytesAvailableFromExisting / 2
         val pxAvailableFromExisting = samplesAvailableFromExisting / samplesPerPixelWidth
 
@@ -521,8 +546,8 @@ class WaveformLayer() : Drawable {
                 writableImage.pixelWriter.setColor(currentAmplitude / 2 - 1, y, backgroundColor)
             }
 
-            val startY = incomingAudioRingBuffer.get(i) + 1
-            val endY = incomingAudioRingBuffer.get(i + 1) - 1
+            val startY = testIncomingAudioRingBuffer.get(i) + 1
+            val endY = testIncomingAudioRingBuffer.get(i + 1) - 1
             for (y in startY.toInt()..endY.toInt()) {
                 if(y in 0 until writableImage.height.toInt())
                     writableImage.pixelWriter.setColor(currentAmplitude / 2 - 1, y, Color.RED)
@@ -541,7 +566,7 @@ class WaveformLayer() : Drawable {
 
 
     init {
-        dataGenerator.generateData(incomingAudioRingBuffer)
+        dataGenerator.generateData(testIncomingAudioRingBuffer)
     }
 
 
