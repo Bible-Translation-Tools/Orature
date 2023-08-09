@@ -116,6 +116,7 @@ class NarrationHeaderViewModel : ViewModel() {
         FORWARD,
         BACKWARD
     }
+
     fun selectPreviousChapter() {
         stepToChapter(StepDirection.BACKWARD)
     }
@@ -124,15 +125,20 @@ class NarrationHeaderViewModel : ViewModel() {
         stepToChapter(StepDirection.FORWARD)
     }
 
+    class OpenChapterEvent(val chapter: Chapter) : FXEvent()
+
     private fun stepToChapter(direction: StepDirection) {
         val step = when (direction) {
             StepDirection.FORWARD -> 1
             StepDirection.BACKWARD -> -1
         }
         val nextIndex = chapterList.indexOf(workbookDataStore.chapter) + step
-        chapterList.elementAtOrNull(nextIndex)?.let {
-            workbookDataStore.activeChapterProperty.set(it)
-        }
+
+        chapterList
+            .elementAtOrNull(nextIndex)
+            ?.let { chapter ->
+                fire(OpenChapterEvent(chapter))
+            }
     }
 
     fun processWithPlugin(pluginType: PluginType) {
@@ -168,6 +174,7 @@ class NarrationHeaderViewModel : ViewModel() {
                                     PluginType.EDITOR, PluginType.MARKER -> {
                                         FX.eventbus.fire(ChapterReturnFromPluginEvent())
                                     }
+
                                     else -> {
                                         logger.error("Plugin returned with result $result, plugintype: $pluginType did not match a known plugin.")
                                     }
