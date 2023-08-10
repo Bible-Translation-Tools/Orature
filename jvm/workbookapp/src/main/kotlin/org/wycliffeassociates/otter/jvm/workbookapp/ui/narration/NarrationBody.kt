@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import javafx.animation.AnimationTimer
 import javafx.beans.property.SimpleBooleanProperty
@@ -24,6 +25,7 @@ import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.narration.Narration
 import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
+import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
 import org.wycliffeassociates.otter.common.recorder.PCMCompressor
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.narration.CanvasFragment
@@ -199,13 +201,12 @@ class NarrationBodyViewModel : ViewModel() {
 
 
         var stream = narration.getRecorderAudioStream()
-        // TODO: create FloatRingBuffer here
-//        stream.subscribe { stream ->
-//            run {
-//                // TODO: everytime the audioStream changes, add those changes to the ring buffer
-//            }
-//        }
+
+        val alwaysRecordingStatus: Observable<Boolean> = Observable.just(true)
+        val renderer = ActiveRecordingRenderer(stream, alwaysRecordingStatus, 1920, 10)
         waveformLayer.existingAudioReader = narration.audioReader
+        waveformLayer.isRecordingProperty.bind(isRecordingProperty)
+        waveformLayer.incomingAudioRingBuffer = renderer.floatBuffer
     }
 
     fun onUndock() {
@@ -442,7 +443,9 @@ class ChapterReturnFromPluginEvent: FXEvent()
 class WaveformLayer() : Drawable {
     var heightProperty = SimpleDoubleProperty(1.0)
     var widthProperty = SimpleDoubleProperty()
+    var isRecordingProperty = SimpleBooleanProperty(false)
     var backgroundColor = c("#E5E8EB")
+    var waveformColor = c("#B3B9C2")
 
     val screenWidth = 1920
     val screenHeight = 1080
@@ -474,15 +477,21 @@ class WaveformLayer() : Drawable {
 
     fun drawWaveformToImage() {
 
+        // based on the isRecording property, get data from incoming source
+
         var bytesAvailableFromExisting : Int = 0
 
-        if(existingAudioReader == null) {
-            bytesAvailableFromExisting = dataGenerator.getPcmBuffer(existingAudio)
+        bytesAvailableFromExisting = if(existingAudioReader == null) {
+            dataGenerator.getPcmBuffer(existingAudio)
         } else {
-            bytesAvailableFromExisting = existingAudioReader!!.getPcmBuffer(existingAudio)
+            existingAudioReader!!.getPcmBuffer(existingAudio)
         }
 
-        val pxFromIncoming = testIncomingAudioRingBuffer.size() / 2
+        var pxFromIncoming : Int = 0
+        if(isRecordingProperty.value == true) {
+            pxFromIncoming = testIncomingAudioRingBuffer.size() / 2
+        }
+
         val pxNeeded = screenWidth - pxFromIncoming
         val samplesAvailableFromExisting = bytesAvailableFromExisting / 2
         val pxAvailableFromExisting = samplesAvailableFromExisting / samplesPerPixelWidth
@@ -528,7 +537,7 @@ class WaveformLayer() : Drawable {
             val endY = scaleAmplitude(max, screenHeight.toDouble()).toFloat()- 1
             for (y in startY.toInt()..endY.toInt()) {
                 if(y in 0 until writableImage.height.toInt())
-                    writableImage.pixelWriter.setColor(currentAmplitude / 2 - 1, y, Color.GREEN)
+                    writableImage.pixelWriter.setColor(currentAmplitude / 2 - 1, y, waveformColor)
             }
 
             // Updated with the most recently drawn line
