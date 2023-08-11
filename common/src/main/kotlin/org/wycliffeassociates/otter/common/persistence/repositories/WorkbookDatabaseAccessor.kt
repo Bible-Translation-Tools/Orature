@@ -21,7 +21,7 @@ interface IWorkbookDatabaseAccessors {
     fun getChildren(collection: Collection): Single<List<Collection>>
     fun getCollectionMetaContent(collection: Collection): Single<Content>
     fun getContentByCollection(collection: Collection): Single<List<Content>>
-    fun getContentByCollectionActiveConnection(collection: Collection): Observable<Content>
+    fun getContentByCollectionActiveConnection(collection: Collection): Observable<List<Content>>
     fun updateContent(content: Content): Completable
     fun getResources(content: Content, metadata: ResourceMetadata): Observable<Content>
     fun getResources(collection: Collection, metadata: ResourceMetadata): Observable<Content>
@@ -86,18 +86,11 @@ class WorkbookDatabaseAccessor(
     }
 
     override fun addContentForCollection(collection: Collection, chunks: List<Content>): Completable {
-        return Observable
-            .fromArray(*chunks.toTypedArray())
-            .map { content ->
-                contentRepo.insertForCollection(content, collection)
+        return Observable.just(chunks)
+            .map { contents ->
+                contentRepo.insertForCollection(contents, collection)
                     .blockingGet()
-                    .let { contentId ->
-                        content.copy(
-                            id = contentId
-                        )
-                    }
             }
-            .toList()
             .flatMapCompletable { contents ->
                 val sourceContents = collectionRepo.getSource(collection)
                     .blockingGet()
@@ -117,7 +110,7 @@ class WorkbookDatabaseAccessor(
 
     override fun getCollectionMetaContent(collection: Collection) = contentRepo.getCollectionMetaContent(collection)
     override fun getContentByCollection(collection: Collection) = contentRepo.getByCollection(collection)
-    override fun getContentByCollectionActiveConnection(collection: Collection): Observable<Content> {
+    override fun getContentByCollectionActiveConnection(collection: Collection): Observable<List<Content>> {
         return contentRepo.getByCollectionWithPersistentConnection(collection)
     }
 

@@ -193,13 +193,13 @@ class WorkbookDataStore : Component(), ScopedInstance {
 
     fun getSourceChunk(): Maybe<Chunk> {
         return getSourceChapter()
-            .flatMap { _chapter ->
+            .map { _chapter ->
                 _chapter
                     .chunks
-                    .filter { _chunk ->
+                    .value
+                    ?.find { _chunk ->
                         _chunk.sort == chunk?.sort
                     }
-                    .firstElement()
             }
     }
 }

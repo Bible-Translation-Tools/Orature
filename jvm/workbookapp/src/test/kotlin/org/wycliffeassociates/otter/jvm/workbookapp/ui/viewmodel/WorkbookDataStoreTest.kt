@@ -137,8 +137,8 @@ class WorkbookDataStoreTest {
         }
 
         private fun createChapter(chunk: Chunk): Chapter {
-            val chunks = ReplayRelay.create<Chunk>()
-            chunks.accept(chunk)
+            val chunks = ReplayRelay.create<List<Chunk>>()
+            chunks.accept(listOf(chunk))
             return Chapter(
                 1,
                 "1",

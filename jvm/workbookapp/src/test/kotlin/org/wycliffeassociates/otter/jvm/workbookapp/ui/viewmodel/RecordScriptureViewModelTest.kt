@@ -143,8 +143,8 @@ class RecordScriptureViewModelTest {
 
         private fun createChapter(): Chapter {
             chunk1 = createChunk()
-            val chunks = ReplayRelay.create<Chunk>()
-            chunks.accept(chunk1)
+            val chunks = ReplayRelay.create<List<Chunk>>()
+            chunks.accept(listOf(chunk1))
             return Chapter(
                 1,
                 "1",

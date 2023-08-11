@@ -354,11 +354,9 @@ class OngoingProjectImporter @Inject constructor(
         val chapters = collectionRepository.getChildren(project).blockingGet()
         chapters.forEach { chapter ->
             if (chunks.containsKey(chapter.sort)) {
-                val contents = chunks[chapter.sort]
+                val contents = chunks[chapter.sort] ?: listOf()
                 contentRepository.deleteForCollection(chapter).blockingAwait()
-                contents?.forEach { content ->
-                    contentRepository.insertForCollection(content, chapter).blockingGet()
-                }
+                contentRepository.insertForCollection(contents, chapter).blockingGet()
             }
         }
     }

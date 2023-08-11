@@ -257,8 +257,8 @@ class TestSourceProjectExporter {
         // select take for each chunk so that the chapter is ready to compile
         workbook.target
             .chapters.blockingFirst()
-            .chunks
-            .forEach {
+            .chunks.value
+            ?.forEach {
                 it.audio.selectTake(take)
             }
 

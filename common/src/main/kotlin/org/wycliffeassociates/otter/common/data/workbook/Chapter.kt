@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.common.data.workbook
 
 import com.jakewharton.rxrelay2.ReplayRelay
+import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.rxkotlin.cast
@@ -39,14 +40,14 @@ class Chapter(
     override val audio: AssociatedAudio,
     override val resources: List<ResourceGroup>,
     override val subtreeResources: List<ResourceMetadata>,
-    private val lazychunks: Lazy<ReplayRelay<Chunk>>,
+    private val lazychunks: Lazy<ReplayRelay<List<Chunk>>>,
     val chunkCount: Single<Int>,
     val addChunk: (List<Content>) -> Unit,
     val reset: () -> Unit
 ) : BookElement, BookElementContainer, Recordable {
 
     override val contentType: ContentType = ContentType.META
-    override val children: Observable<BookElement> = getDraft().cast()
+    override val children: Observable<BookElement> by lazy { getDraft().cast() }
 
     val chunks by lazychunks
 
@@ -58,29 +59,14 @@ class Chapter(
     fun hasSelectedAudio() = audio.selected.value?.value != null
 
     fun getDraft(): Observable<Chunk> {
-        return chunkCount
-            .toObservable()
-            .map {
-                (getLatestDraftFromRelay().blockingGet()).toObservable()
-            }
-            .flatMap { it }
+        return getLatestDraftFromRelay()
+            .flattenAsObservable { it }
+            .switchIfEmpty(Observable.empty<Chunk>())
             .subscribeOn(Schedulers.io())
     }
 
-    private fun getLatestDraftFromRelay(): Single<List<Chunk>> {
-        return Single.fromCallable {
-            val draft = mutableListOf<Chunk>()
-            val chunkTotal = chunkCount.blockingGet()
-            val disposable = chunks
-                .filter { it.draftNumber > 0 } // filter active drafts
-                .takeUntil { draft.size == chunkTotal }
-                .forEach { draft.add(it) }
-            while (draft.size != chunkTotal) {
-                sleep(50)
-            }
-            disposable.dispose()
-            draft.toList()
-        }.subscribeOn(Schedulers.io())
+    private fun getLatestDraftFromRelay(): Maybe<List<Chunk>> {
+        return if (chunks.hasValue()) Maybe.just(chunks.value) else Maybe.empty()
     }
 
     private fun textItem(): TextItem {

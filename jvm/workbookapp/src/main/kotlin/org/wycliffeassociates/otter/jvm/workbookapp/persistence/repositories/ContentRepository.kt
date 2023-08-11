@@ -42,7 +42,7 @@ class ContentRepository @Inject constructor(
 ) : IContentRepository {
     private val logger = LoggerFactory.getLogger(ContentRepository::class.java)
 
-    private val activeConnections = mutableMapOf<Collection, ReplayRelay<Content>>()
+    private val activeConnections = mutableMapOf<Collection, ReplayRelay<List<Content>>>()
 
     private val contentDao = database.contentDao
     private val takeDao = database.takeDao
@@ -67,14 +67,14 @@ class ContentRepository @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
-    override fun getByCollectionWithPersistentConnection(collection: Collection): Observable<Content> {
+    override fun getByCollectionWithPersistentConnection(collection: Collection): Observable<List<Content>> {
         activeConnections.getOrDefault(collection, null)?.let { return it }
-
-        val connection = ReplayRelay.create<Content>()
+        println("getting cached content from activeConnection ${collection.slug}")
+        val connection = ReplayRelay.create<List<Content>>()
         activeConnections[collection] = connection
         getByCollection(collection)
             .map {
-                it.forEach { connection.accept(it) }
+                connection.accept(it)
             }
             .subscribeOn(Schedulers.io())
             .subscribe()
@@ -137,8 +137,8 @@ class ContentRepository @Inject constructor(
             contentTypeDao.fetchId(typeFilter)
         }
 
-        activeConnections.getOrDefault(chapterCollection, null)
-            ?.let { it.getValues(emptyArray()).forEach { it.draftNumber = -1 } }
+//        activeConnections.getOrDefault(chapterCollection, null)
+//            ?.let { it.getValues(emptyArray()).forEach { it.draftNumber = -1 } }
 
         return Completable.fromCallable {
             contentDao.deleteForCollection(
@@ -178,20 +178,22 @@ class ContentRepository @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
-    override fun insertForCollection(content: Content, collection: Collection): Single<Int> {
+    override fun insertForCollection(contentList: List<Content>, collection: Collection): Single<List<Content>> {
         return Single
             .fromCallable {
-                val id = contentDao.insert(
-                    contentMapper
-                        .mapToEntity(content, collection.id)
-                        .apply { collectionFk = collection.id }
-                )
-                content.id = id
-                activeConnections.getOrDefault(collection, null)?.let { it.accept(content) }
-                id
+                contentList.forEach { content ->
+                    val id = contentDao.insert(
+                        contentMapper
+                            .mapToEntity(content, collection.id)
+                            .apply { collectionFk = collection.id }
+                    )
+                    content.id = id
+                }
+                activeConnections.getOrDefault(collection, null)?.accept(contentList)
+                contentList
             }
             .doOnError { e ->
-                logger.error("Error in insertForCollection for content: $content, collection: $collection", e)
+                logger.error("Error in insertForCollection for collection: $collection", e)
             }
             .subscribeOn(Schedulers.io())
     }
@@ -212,7 +214,7 @@ class ContentRepository @Inject constructor(
             .fromAction {
                 val existing = contentDao.fetchById(obj.id)
                 val entity = contentMapper.mapToEntity(obj)
-                // Make sure we don't over write the collection relationship
+                // Make sure we don't overwrite the collection relationship
                 entity.collectionFk = existing.collectionFk
                 contentDao.update(entity)
 
@@ -235,7 +237,11 @@ class ContentRepository @Inject constructor(
     ) {
         activeConnections.keys.find { it.id == collectionId }?.let { collection ->
             activeConnections[collection]?.let { connection ->
-                connection.getValues(emptyArray()).find {
+                if (!connection.hasValue()) {
+                    return
+                }
+
+                connection.blockingLast().find {
                     it.id == newContent.id
                 }?.let { contentInRelay ->
                     contentInRelay.apply {

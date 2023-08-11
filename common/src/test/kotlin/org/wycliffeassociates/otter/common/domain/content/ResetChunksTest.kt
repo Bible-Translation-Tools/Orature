@@ -231,21 +231,21 @@ class ResetChunksTest {
         ResetChunks().resetChapter(projectFilesAccessor, chapter)
         Assert.assertEquals(true, clearContentForCollectionTriggered)
 
-        chapter.chunks.getValues(emptyArray()).forEach {
+        chapter.chunks.value!!.forEach {
             Assert.assertEquals(-1, it.draftNumber)
         }
     }
 
     @Test
     fun takesMarkedForDeletion() {
-        val takes = chapter.chunks.getValues(emptyArray()).map { chunk ->
+        val takes = chapter.chunks.value!!.map { chunk ->
             chunk.audio.getAllTakes().filter { it.deletedTimestamp.value?.value == null }
         }
         Assert.assertEquals(1, takes.size)
 
         ResetChunks().resetChapter(projectFilesAccessor, chapter)
 
-        val deletedTakes = chapter.chunks.getValues(emptyArray()).map { chunk ->
+        val deletedTakes = chapter.chunks.value!!.map { chunk ->
             chunk.audio.getAllTakes().filter { it.deletedTimestamp.value?.value != null }
         }
         Assert.assertEquals(1, deletedTakes.size)
