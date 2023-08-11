@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -374,18 +375,18 @@ class ChapterPageViewModel : ViewModel() {
         // Remove existing content so the user knows they are outdated
         allContent.clear()
         loading = true
-        chapter.chunks.map { list ->
-            list
-                .map { CardData(it) }
-                .map {
-                    buildTakes(it)
-                    it.player = getPlayer()
-                    it.onChunkOpen = ::onChunkOpen
-                    it.onTakeSelected = ::onTakeSelected
-                    it
-                }
-
-        }
+        chapter.chunks
+            .flatMap {
+                Observable.fromIterable(it)
+            }
+            .map { CardData(it) }
+            .map {
+                buildTakes(it)
+                it.player = getPlayer()
+                it.onChunkOpen = ::onChunkOpen
+                it.onTakeSelected = ::onTakeSelected
+                it
+            }
             .doOnComplete {
                 loading = false
             }
@@ -393,25 +394,23 @@ class ChapterPageViewModel : ViewModel() {
             .doOnError { e ->
                 logger.error("Error in loading chapter contents for chapter: $chapter", e)
             }
-            .map { list ->
-                list.map {
-                    if (it.chunkSource != null) {
-                        if (it.chunkSource.draftNumber > 0) {
-                            if (filteredContent.find { cont -> it.sort == cont.sort } == null) {
-                                filteredContent.add(it)
-                            }
+            .map { cardData ->
+                if (cardData.chunkSource != null) {
+                    if (cardData.chunkSource.draftNumber > 0) {
+                        if (filteredContent.find { cont -> cardData.sort == cont.sort } == null) {
+                            filteredContent.add(cardData)
                         }
-                    } else {
-                        filteredContent.add(it)
                     }
-
-                    filteredContent.removeIf { card ->
-                        card.chunkSource != null && (card.chunkSource.draftNumber < 0 || card.chunkSource.bridged)
-                    }
-                    filteredContent.sortBy { it.sort }
-                    setWorkChunk()
-                    it
+                } else {
+                    filteredContent.add(cardData)
                 }
+
+                filteredContent.removeIf { card ->
+                    card.chunkSource != null && (card.chunkSource.draftNumber < 0 || card.chunkSource.bridged)
+                }
+                filteredContent.sortBy { it.sort }
+                setWorkChunk()
+                cardData
             }
             .observeOnFx()
             .subscribe()
