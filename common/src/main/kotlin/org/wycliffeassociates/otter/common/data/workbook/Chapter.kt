@@ -66,7 +66,7 @@ class Chapter(
     }
 
     private fun getLatestDraftFromRelay(): Maybe<List<Chunk>> {
-        return if (chunks.hasValue()) Maybe.just(chunks.value) else Maybe.empty()
+        return Maybe.fromCallable { chunks.value }
     }
 
     private fun textItem(): TextItem {

@@ -229,8 +229,8 @@ class WorkbookRepository(
     ): ReplayRelay<List<Chunk>> {
         val rr = ReplayRelay.create<List<Chunk>>()
         db.getContentByCollectionActiveConnection(chapterCollection)
-            .map { list ->
-                list.filter { it.type == ContentType.TEXT }.map { content ->
+            .map { contents ->
+                contents.filter { it.type == ContentType.TEXT }.map { content ->
                     chunk(content, disposables)
                 }
             }

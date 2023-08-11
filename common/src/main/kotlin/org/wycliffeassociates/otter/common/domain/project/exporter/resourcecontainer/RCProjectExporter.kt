@@ -100,7 +100,7 @@ abstract class RCProjectExporter(
         return filterChaptersReadyToCompile(workbook.target.chapters)
             .flatMapCompletable { chapter ->
                 // compile the chapter
-                chapter.chunks.blockingLast()
+                chapter.chunks.value!! // available chunks after filtering
                     .mapNotNull { chunk -> chunk.audio.selected.value?.value?.file }
                     .let { takes ->
                         logger.info("Compiling chunk/verse takes for completed chapter #${chapter.sort}")
@@ -136,7 +136,11 @@ abstract class RCProjectExporter(
                 !chapter.hasSelectedAudio()
             }
             .filter { chapter ->
-                val chunks = chapter.chunks.value ?: return@filter false
+                val chunks = if (chapter.chunks.hasValue()) {
+                    chapter.chunks.value!!
+                } else {
+                    return@filter false
+                }
 
                 // filter chapter where all its content are ready to compile
                 chunks.isNotEmpty() && chunks.all { chunk ->

@@ -91,21 +91,14 @@ class AudioPluginViewModel : ViewModel() {
         val sourceAudio = audioDataStore.getSourceAudio()
         val sourceText = workbookDataStore.sourceTextBinding().value
 
-        val chapter = workbookDataStore.chapter
-        val chunks = workbookDataStore.chapter
-            .chunks
-            .getValues(emptyArray())
-
         val chapterLabel = messages[workbookDataStore.activeChapterProperty.value.label]
         val chapterNumber = workbookDataStore.activeChapterProperty.value.sort
 
         val verseLabels = workbookDataStore.getSourceChapter()
-            .map { it.getDraft() }
+            .map { it.getDraft() }.blockingGet()
+            .map { it.title }.toList()
             .blockingGet()
-            .map { it.title }
-            .toList()
-            .blockingGet()
-        val verseTotal =  workbookDataStore.getSourceChapter().map { it.chunkCount }.blockingGet().blockingGet()
+        val verseTotal =  workbookDataStore.getSourceChapter().flatMapSingle { it.chunkCount }.blockingGet()
         val chunkLabel = workbookDataStore.activeChunkProperty.value?.let {
             messages[workbookDataStore.activeChunkProperty.value.label]
         }

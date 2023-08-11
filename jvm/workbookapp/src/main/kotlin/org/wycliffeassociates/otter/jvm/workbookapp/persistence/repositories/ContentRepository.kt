@@ -137,8 +137,8 @@ class ContentRepository @Inject constructor(
             contentTypeDao.fetchId(typeFilter)
         }
 
-//        activeConnections.getOrDefault(chapterCollection, null)
-//            ?.let { it.getValues(emptyArray()).forEach { it.draftNumber = -1 } }
+        activeConnections.getOrDefault(chapterCollection, null)
+            ?.let { it.value?.forEach { chunk -> chunk.draftNumber = -1 } }
 
         return Completable.fromCallable {
             contentDao.deleteForCollection(
@@ -237,11 +237,7 @@ class ContentRepository @Inject constructor(
     ) {
         activeConnections.keys.find { it.id == collectionId }?.let { collection ->
             activeConnections[collection]?.let { connection ->
-                if (!connection.hasValue()) {
-                    return
-                }
-
-                connection.blockingLast().find {
+                connection.value?.find {
                     it.id == newContent.id
                 }?.let { contentInRelay ->
                     contentInRelay.apply {
