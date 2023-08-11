@@ -69,7 +69,7 @@ class ContentRepository @Inject constructor(
 
     override fun getByCollectionWithPersistentConnection(collection: Collection): Observable<List<Content>> {
         activeConnections.getOrDefault(collection, null)?.let { return it }
-        println("getting cached content from activeConnection ${collection.slug}")
+
         val connection = ReplayRelay.create<List<Content>>()
         activeConnections[collection] = connection
         getByCollection(collection)

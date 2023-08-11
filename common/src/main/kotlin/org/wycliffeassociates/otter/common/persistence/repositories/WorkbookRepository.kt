@@ -227,7 +227,6 @@ class WorkbookRepository(
         chapterCollection: Collection,
         disposables: MutableList<Disposable>
     ): ReplayRelay<List<Chunk>> {
-        println("Constructing chunks...")
         val rr = ReplayRelay.create<List<Chunk>>()
         db.getContentByCollectionActiveConnection(chapterCollection)
             .map { list ->
@@ -236,7 +235,6 @@ class WorkbookRepository(
                 }
             }
             .subscribe {
-                println("${it.size} content in chapter ${chapterCollection.sort}")
                 rr.accept(it)
             }
             .let {
