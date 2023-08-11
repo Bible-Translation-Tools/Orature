@@ -57,10 +57,6 @@ class NarrationBody : View() {
 
     override val root = hbox {
 
-        runAsync {
-            // TODO: possibly push work of drawing to image here
-        }
-
         viewModel.waveformLayer.heightProperty.bind(this.heightProperty())
         viewModel.waveformLayer.widthProperty.bind(this.widthProperty())
         canvasFragment.prefWidthProperty().bind(this.widthProperty())
@@ -187,11 +183,6 @@ class NarrationBodyViewModel : ViewModel() {
         narrationViewViewModel.lastRecordedVerseProperty.bind(recordedVerses.integerBinding { it.size })
     }
 
-
-    private fun scaleAmplitude(sample: Float, height: Double): Double {
-        return height / (Short.MAX_VALUE * 2) * (sample + Short.MAX_VALUE)
-    }
-
     fun onDock() {
         workbookDataStore.activeChapterProperty.onChangeAndDoNowWithDisposer {
             it?.let { chapter ->
@@ -207,6 +198,12 @@ class NarrationBodyViewModel : ViewModel() {
         waveformLayer.existingAudioReader = narration.audioReader
         waveformLayer.isRecordingProperty.bind(isRecordingProperty)
         waveformLayer.incomingAudioRingBuffer = renderer.floatBuffer
+
+        isRecordingProperty.addListener {_, old, new ->
+            if(old == true && new == false) {
+                renderer.clearData()
+            }
+        }
     }
 
     fun onUndock() {
@@ -476,20 +473,18 @@ class WaveformLayer() : Drawable {
 
 
     fun drawWaveformToImage() {
+        var bytesAvailableFromExisting = 0
 
-        // based on the isRecording property, get data from incoming source
-
-        var bytesAvailableFromExisting : Int = 0
-
+        // TODO: remove this because I don't care about primarily/defaulting-to using test data any more
         bytesAvailableFromExisting = if(existingAudioReader == null) {
             dataGenerator.getPcmBuffer(existingAudio)
         } else {
             existingAudioReader!!.getPcmBuffer(existingAudio)
         }
 
-        var pxFromIncoming : Int = 0
-        if(isRecordingProperty.value == true) {
-            pxFromIncoming = testIncomingAudioRingBuffer.size() / 2
+        var pxFromIncoming = 0
+        if(isRecordingProperty.value == true && incomingAudioRingBuffer != null) {
+            pxFromIncoming = incomingAudioRingBuffer!!.size() / 2
         }
 
         val pxNeeded = screenWidth - pxFromIncoming
@@ -497,7 +492,6 @@ class WaveformLayer() : Drawable {
         val pxAvailableFromExisting = samplesAvailableFromExisting / samplesPerPixelWidth
 
         var pxOffset = 0
-
         if(pxAvailableFromExisting < pxNeeded) {
             pxOffset = screenWidth - (pxFromIncoming + pxAvailableFromExisting)
         }
@@ -505,19 +499,45 @@ class WaveformLayer() : Drawable {
         val pxFromExisting = minOf(pxNeeded, pxAvailableFromExisting)
         var currentAmplitude = 0
 
+        currentAmplitude = drawOffsetToImage(pxOffset)
+
+        currentAmplitude = drawExistingAudioToImage(pxFromExisting, currentAmplitude)
+
+        existingAudioPosition = 0 // TODO: possibly remove this. Resets the existingAudioPosition to zero so I can render the same data each time
+
+        drawIncomingAudioToImage(pxFromIncoming, currentAmplitude)
+    }
+
+
+    private fun drawVerticalLine(x: Int, startY: Int, endY: Int, color: Color) {
+        for (y in startY..endY) {
+            writableImage.pixelWriter.setColor(x, y, color)
+        }
+    }
+
+    private fun drawOffsetToImage(pxOffset: Int) : Int {
+        var currentAmplitude = 0
         for(i in 0 until pxOffset) {
             currentAmplitude += 2
             // remove line that was previously at this position
-            for (y in previouslyDrawnLines[currentAmplitude - 2]..previouslyDrawnLines[currentAmplitude - 1]) {
-                writableImage.pixelWriter.setColor(currentAmplitude / 2 - 1, y, backgroundColor)
-            }
+            drawVerticalLine(
+                currentAmplitude / 2 - 1,
+                previouslyDrawnLines[currentAmplitude - 2],
+                previouslyDrawnLines[currentAmplitude - 1],
+                backgroundColor
+            )
         }
+        return currentAmplitude
+    }
 
+    private fun drawExistingAudioToImage(pxFromExisting: Int, currentAmplitude: Int) : Int {
+        var currentAmplitudeIndex = currentAmplitude
         // get/draw px needed from existing audio
         var min: Float
         var max: Float
         var currentSample: Float
         for(i in 0 until pxFromExisting) {
+
             min = Short.MAX_VALUE.toFloat()
             max = Short.MIN_VALUE.toFloat()
             for(j in 0 until samplesPerPixelWidth) {
@@ -526,47 +546,47 @@ class WaveformLayer() : Drawable {
                 min = minOf(currentSample, min)
                 max = maxOf(currentSample, max)
             }
-            currentAmplitude += 2
+            currentAmplitudeIndex += 2
 
             // remove line that was previously at this position
-            for (y in previouslyDrawnLines[currentAmplitude - 2]..previouslyDrawnLines[currentAmplitude - 1]) {
-                writableImage.pixelWriter.setColor(currentAmplitude / 2 - 1, y, backgroundColor)
-            }
+            drawVerticalLine(currentAmplitudeIndex / 2 - 1, previouslyDrawnLines[currentAmplitudeIndex - 2], previouslyDrawnLines[currentAmplitudeIndex - 1], backgroundColor)
 
             val startY = scaleAmplitude(min, screenHeight.toDouble()).toFloat() + 1
             val endY = scaleAmplitude(max, screenHeight.toDouble()).toFloat()- 1
-            for (y in startY.toInt()..endY.toInt()) {
-                if(y in 0 until writableImage.height.toInt())
-                    writableImage.pixelWriter.setColor(currentAmplitude / 2 - 1, y, waveformColor)
-            }
+            drawVerticalLine(currentAmplitudeIndex / 2 - 1, startY.toInt(), endY.toInt(), waveformColor)
 
             // Updated with the most recently drawn line
-            previouslyDrawnLines[currentAmplitude - 2] = startY.toInt()
-            previouslyDrawnLines[currentAmplitude - 1] = endY.toInt()
-
+            previouslyDrawnLines[currentAmplitudeIndex - 2] = startY.toInt()
+            previouslyDrawnLines[currentAmplitudeIndex - 1] = endY.toInt()
         }
+        return currentAmplitudeIndex
+    }
 
+
+    private fun drawIncomingAudioToImage(pxFromIncoming: Int, currentAmplitude: Int) : Int{
+        var currentAmplitudeIndex = currentAmplitude
         // get/draw px available in incoming
         for(i in 0 until pxFromIncoming) {
-            currentAmplitude += 2
+            currentAmplitudeIndex += 2
 
             // Remove the line that was previously at this position
-            for (y in previouslyDrawnLines[currentAmplitude - 2]..previouslyDrawnLines[currentAmplitude - 1]) {
-                writableImage.pixelWriter.setColor(currentAmplitude / 2 - 1, y, backgroundColor)
-            }
+            drawVerticalLine(currentAmplitudeIndex / 2 - 1, previouslyDrawnLines[currentAmplitudeIndex - 2], previouslyDrawnLines[currentAmplitudeIndex - 1], backgroundColor)
 
-            val startY = testIncomingAudioRingBuffer.get(i) + 1
-            val endY = testIncomingAudioRingBuffer.get(i + 1) - 1
-            for (y in startY.toInt()..endY.toInt()) {
-                if(y in 0 until writableImage.height.toInt())
-                    writableImage.pixelWriter.setColor(currentAmplitude / 2 - 1, y, Color.RED)
+            var startY = incomingAudioRingBuffer?.get(i)?.plus(1)
+            var endY = incomingAudioRingBuffer?.get(i + 1)?.minus(1)
+            if(startY == null || endY == null) {
+                return 0
             }
+            startY = scaleAmplitude(startY, screenHeight.toDouble()).toFloat()
+            endY = scaleAmplitude(endY, screenHeight.toDouble()).toFloat()
+            drawVerticalLine(currentAmplitudeIndex / 2 - 1, startY.toInt(), endY.toInt(), Color.RED)
 
             // Updated with the most recently drawn line
-            previouslyDrawnLines[currentAmplitude - 2] = startY.toInt()
-            previouslyDrawnLines[currentAmplitude - 1] = endY.toInt()
+            previouslyDrawnLines[currentAmplitudeIndex - 2] = startY.toInt()
+            previouslyDrawnLines[currentAmplitudeIndex - 1] = endY.toInt()
         }
-        existingAudioPosition = 0 // TODO: possibly remove this. Resets the existingAudioPosition to zero so I can render the same data each time
+
+        return currentAmplitudeIndex
     }
 
     private fun scaleAmplitude(sample: Float, height: Double): Double {
