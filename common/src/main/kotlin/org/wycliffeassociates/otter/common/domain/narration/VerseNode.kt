@@ -1,5 +1,7 @@
 package org.wycliffeassociates.otter.common.domain.narration
 
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+
 data class VerseNode(
     /**
      * Start location in frames
@@ -8,5 +10,6 @@ data class VerseNode(
     /**
      * End location in frames
      */
-    var end: Int
+    var end: Int,
+    val marker: VerseMarker
 )

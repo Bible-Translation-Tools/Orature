@@ -19,39 +19,42 @@
 package org.wycliffeassociates.otter.common.domain.narration
 
 import io.reactivex.Single
-import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
 import javax.inject.Inject
 
-private const val BUFFER_SIZE = 10240
 
+typealias VerseSegments = Map<VerseMarker, File>
 class SplitAudioOnCues @Inject constructor(private val directoryProvider: IDirectoryProvider) {
 
-    fun execute(file: File): Map<String, File> {
-        val sourceAudio = AudioFile(file)
-        val cues = sourceAudio.metadata.getCues().ifEmpty {
-            listOf(AudioCue(location = 0, label = "1"))
-        }
+    fun execute(file: File, initialMarker: VerseMarker): VerseSegments {
+        val sourceAudio = OratureAudioFile(file)
+        val cues = sourceAudio
+            .getMarker<VerseMarker>()
+            .ifEmpty {
+                listOf(initialMarker)
+            }
         return splitAudio(file, cues)
     }
 
-    fun executeAsync(file: File): Single<Map<String, File>> {
+    fun executeAsync(file: File, initialMarker: VerseMarker): Single<VerseSegments> {
         return Single.fromCallable {
-            execute(file)
+            execute(file, initialMarker)
         }
     }
 
-    fun execute(file: File, cues: List<AudioCue>): Single<Map<String, File>> {
+    fun execute(file: File, cues: List<VerseMarker>): Single<VerseSegments> {
         return Single.fromCallable {
             splitAudio(file, cues)
         }
     }
 
-    private fun splitAudio(file: File, cues: List<AudioCue>): Map<String, File> {
-        val chunks = mutableMapOf<String, File>()
+    private fun splitAudio(file: File, cues: List<VerseMarker>): VerseSegments {
+        val chunks = mutableMapOf<VerseMarker, File>()
         val sourceAudio = AudioFile(file)
         val totalFrames = sourceAudio.totalFrames
         cues.forEachIndexed { index, cue ->
@@ -59,7 +62,7 @@ class SplitAudioOnCues @Inject constructor(private val directoryProvider: IDirec
             val pcmFile = directoryProvider.createTempFile("chunk$index", ".${AudioFileFormat.PCM.extension}")
             val pcmAudio = AudioFile(pcmFile)
             writeAudio(sourceAudio, pcmAudio, audioStartEnd)
-            chunks[cue.label] = pcmFile
+            chunks[cue] = pcmFile
         }
         return chunks
     }
@@ -71,7 +74,7 @@ class SplitAudioOnCues @Inject constructor(private val directoryProvider: IDirec
         sourceReader.use { reader ->
             reader.open()
             targetWriter.use { writer ->
-                val buffer = ByteArray(BUFFER_SIZE)
+                val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
                 while (reader.hasRemaining()) {
                     val written = reader.getPcmBuffer(buffer)
                     writer.write(buffer, 0, written)
@@ -80,7 +83,7 @@ class SplitAudioOnCues @Inject constructor(private val directoryProvider: IDirec
         }
     }
 
-    private fun getChunkAudioRange(index: Int, max: Int, cues: List<AudioCue>): Pair<Int, Int> {
+    private fun getChunkAudioRange(index: Int, max: Int, cues: List<VerseMarker>): Pair<Int, Int> {
         val current = cues[index].location
         val nextIndex = index + 1
         val next = if (nextIndex in 0..cues.lastIndex) {

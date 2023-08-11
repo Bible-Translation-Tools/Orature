@@ -7,6 +7,7 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.reactivex.subjects.PublishSubject
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
@@ -45,7 +46,7 @@ internal class ChapterRepresentation(
     override val totalFrames: Int
         get() = activeVerses.sumOf { it.end - it.start }
 
-    val activeVerses = mutableListOf<VerseNode>()
+    val activeVerses: MutableList<VerseNode>
 
     private lateinit var serializedVersesFile: File
     private val activeVersesMapper = ObjectMapper().registerKotlinModule()
@@ -58,10 +59,24 @@ internal class ChapterRepresentation(
     private var randomAccessFile: RandomAccessFile? = null
 
     init {
+        activeVerses = initalizeActiveVerses()
         initializeWorkingAudioFile()
         initializeSerializedVersesFile()
 
         open()
+    }
+
+    private fun initalizeActiveVerses(): MutableList<VerseNode> {
+        return chapter
+            .getDraft()
+            .map { chunk ->
+                VerseMarker(chunk.start, chunk.end, 0)
+            }
+            .map { marker ->
+                VerseNode(0,0, marker)
+            }
+            .toList()
+            .blockingGet()
     }
 
     fun loadFromSerializedVerses() {

@@ -26,7 +26,10 @@ internal class NewVerseAction : NarrationAction {
         val start = workingAudio.totalFrames
         val end = workingAudio.totalFrames
 
-        node = VerseNode (start, end).also {
+        node = VerseNode(
+            start,
+            end
+        ).also {
             activeVerses.add(it)
         }
     }
@@ -50,13 +53,20 @@ internal class RecordAgainAction(
     var node: VerseNode? = null
     var previous: VerseNode? = null
 
-    override fun execute(activeVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
+    override fun execute(
+        activeVerses: MutableList<VerseNode>,
+        workingAudio: AudioFile
+    ) {
         previous = activeVerses[verseIndex]
 
         val start = workingAudio.totalFrames
         val end = workingAudio.totalFrames
 
-        node = VerseNode (start, end).also {
+        node = VerseNode(
+            start,
+            end,
+            activeVerses[verseIndex].marker.copy()
+        ).also {
             activeVerses[verseIndex] = it
         }
     }
@@ -94,13 +104,21 @@ internal class VerseMarkerAction(
         previousSecondNode = activeVerses.getOrNull(verseIndex - 1)
 
         previousFirstNode?.let { prev ->
-            firstNode = VerseNode(newMarkerPosition, prev.end).also { current ->
+            firstNode = VerseNode(
+                newMarkerPosition,
+                prev.end,
+                activeVerses[verseIndex].marker.copy()
+            ).also { current ->
                 activeVerses[verseIndex] = current
             }
         }
 
         previousSecondNode?.let { prev ->
-            secondNode = VerseNode(prev.start, newMarkerPosition).also { current ->
+            secondNode = VerseNode(
+                prev.start,
+                newMarkerPosition,
+                activeVerses[verseIndex - 1].marker.copy()
+            ).also { current ->
                 activeVerses[verseIndex - 1] = current
             }
         }
@@ -133,14 +151,15 @@ internal class EditVerseAction(
     private val verseIndex: Int,
     private val start: Int,
     private val end: Int
-): NarrationAction {
+) : NarrationAction {
     var node: VerseNode? = null
     var previous: VerseNode? = null
 
     override fun execute(activeVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
         previous = activeVerses[verseIndex]
 
-        node = VerseNode (start, end).also {
+        val vm = activeVerses[verseIndex].marker.copy()
+        node = VerseNode(start, end, vm).also {
             activeVerses[verseIndex] = it
         }
     }
@@ -161,7 +180,7 @@ internal class EditVerseAction(
 /**
  * This action is to clear the list of verse nodes
  */
-internal class ResetAllAction: NarrationAction {
+internal class ResetAllAction : NarrationAction {
     private val nodes = ArrayList<VerseNode>()
 
     override fun execute(activeVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
@@ -180,7 +199,7 @@ internal class ResetAllAction: NarrationAction {
 
 internal class ChapterEditedAction(
     private val newList: List<VerseNode>
-): NarrationAction {
+) : NarrationAction {
     private val nodes = ArrayList<VerseNode>()
 
     override fun execute(activeVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
