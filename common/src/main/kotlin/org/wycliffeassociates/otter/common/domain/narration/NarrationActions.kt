@@ -3,7 +3,6 @@ package org.wycliffeassociates.otter.common.domain.narration
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import kotlin.collections.ArrayList
-import kotlin.time.measureTime
 
 /**
  * To perform a narration action,
