@@ -129,8 +129,7 @@ class NarrationViewModel : ViewModel() {
                 logger.error("Error in getting the chapter list", e)
             }
             .map { list ->
-                val chapterToResume = list
-                    ?.first { !it.hasSelectedAudio() }
+                val chapterToResume = list.first { !it.hasSelectedAudio() }
                 runLater {
                     workbookDataStore.activeChapterProperty.set(chapterToResume)
                 }
