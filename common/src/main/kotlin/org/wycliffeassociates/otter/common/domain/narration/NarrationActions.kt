@@ -36,7 +36,7 @@ internal class NewVerseAction : NarrationAction {
                 placed = true,
                 activeVerses[verseIndex].marker.copy()
             ).also {
-                activeVerses.add(it)
+                activeVerses[verseIndex] = it
             }
         }
     }
