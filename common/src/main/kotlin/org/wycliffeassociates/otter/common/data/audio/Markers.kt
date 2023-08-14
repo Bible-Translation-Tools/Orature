@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.common.data.audio
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import org.wycliffeassociates.otter.common.audio.AudioCue
 
 interface AudioMarker {
@@ -31,10 +32,13 @@ data class UnknownMarker(override val location: Int, override val label: String)
 }
 
 data class VerseMarker(val start: Int, val end: Int, override val location: Int) : AudioMarker {
+
     override val label: String
+        @JsonIgnore
         get() = if (end != start) "$start-$end" else "$start"
 
     override val formattedLabel
+        @JsonIgnore
         get() = "orature-vm-${label}"
 
     override fun toString(): String {
