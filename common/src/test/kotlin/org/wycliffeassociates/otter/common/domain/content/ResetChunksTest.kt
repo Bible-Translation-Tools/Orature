@@ -163,25 +163,22 @@ class ResetChunksTest {
                 val collection = invocation.getArgument<Collection>(0)!!
                 val format = if (collection.resourceContainer == rcTarget) "audio/wav" else "text/usfm"
 
-                val rr = ReplayRelay.create<Content>()
+                val rr = ReplayRelay.create<List<Content>>()
                 when (collection.slug.count { it == '_' }) {
                     1 -> {
-                        listOf(
-                            rr.accept(
-                                Content(
-                                    id = autoincrement,
-                                    start = 1,
-                                    end = 1,
-                                    sort = 1,
-                                    labelKey = ContentLabel.VERSE.value,
-                                    type = ContentType.TEXT,
-                                    format = format,
-                                    text = "/v 1 but test everything; hold fast what is good.",
-                                    selectedTake = null,
-                                    draftNumber = 1
-                                )
-                            )
+                        val content = Content(
+                            id = autoincrement,
+                            start = 1,
+                            end = 1,
+                            sort = 1,
+                            labelKey = ContentLabel.VERSE.value,
+                            type = ContentType.TEXT,
+                            format = format,
+                            text = "/v 1 but test everything; hold fast what is good.",
+                            selectedTake = null,
+                            draftNumber = 1
                         )
+                        rr.accept(listOf(content))
                     }
                     else -> {}
                 }
@@ -231,21 +228,21 @@ class ResetChunksTest {
         ResetChunks().resetChapter(projectFilesAccessor, chapter)
         Assert.assertEquals(true, clearContentForCollectionTriggered)
 
-        chapter.chunks.value!!.forEach {
+        chapter.chunks.take(1).blockingFirst().forEach {
             Assert.assertEquals(-1, it.draftNumber)
         }
     }
 
     @Test
     fun takesMarkedForDeletion() {
-        val takes = chapter.chunks.value!!.map { chunk ->
+        val takes = chapter.chunks.take(1).blockingFirst().map { chunk ->
             chunk.audio.getAllTakes().filter { it.deletedTimestamp.value?.value == null }
         }
         Assert.assertEquals(1, takes.size)
 
         ResetChunks().resetChapter(projectFilesAccessor, chapter)
 
-        val deletedTakes = chapter.chunks.value!!.map { chunk ->
+        val deletedTakes = chapter.chunks.take(1).blockingFirst().map { chunk ->
             chunk.audio.getAllTakes().filter { it.deletedTimestamp.value?.value != null }
         }
         Assert.assertEquals(1, deletedTakes.size)

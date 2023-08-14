@@ -51,6 +51,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRep
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.time.LocalDate
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.io.path.createTempDirectory
@@ -255,9 +256,12 @@ class TestSourceProjectExporter {
             LocalDate.now()
         )
         // select take for each chunk so that the chapter is ready to compile
-        workbook.target
+        val chapter = workbook.target
             .chapters.blockingFirst()
-            .chunks.value
+        chapter
+            .chunks.take(1)
+            .timeout(5, TimeUnit.SECONDS)
+            .blockingFirst()
             ?.forEach {
                 it.audio.selectTake(take)
             }

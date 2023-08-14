@@ -216,24 +216,24 @@ class TestWorkbookRepository {
             val collection = invocation.getArgument<Collection>(0)!!
             val format = if (collection.resourceContainer == rcTarget) "audio/wav" else "text/usfm"
 
-            val rr = ReplayRelay.create<Content>()
+            val rr = ReplayRelay.create<List<Content>>()
             when (collection.slug.count { it == '_' }) {
                 1 -> {
                     (1..BasicTestParams.chunksPerChapter).map { verse ->
-                        rr.accept(
-                            Content(
-                                id = autoincrement,
-                                start = verse,
-                                end = verse,
-                                sort = verse,
-                                labelKey = ContentLabel.VERSE.value,
-                                type = ContentType.TEXT,
-                                format = format,
-                                text = "/v $verse but test everything; hold fast what is good.",
-                                selectedTake = null,
-                                draftNumber = 1
-                            )
+                        Content(
+                            id = autoincrement,
+                            start = verse,
+                            end = verse,
+                            sort = verse,
+                            labelKey = ContentLabel.VERSE.value,
+                            type = ContentType.TEXT,
+                            format = format,
+                            text = "/v $verse but test everything; hold fast what is good.",
+                            selectedTake = null,
+                            draftNumber = 1
                         )
+                    }.let {
+                        rr.accept(it)
                     }
                 }
                 else -> {}
