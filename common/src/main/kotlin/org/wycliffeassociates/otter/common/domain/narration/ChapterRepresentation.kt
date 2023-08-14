@@ -40,13 +40,19 @@ internal class ChapterRepresentation(
     override val sampleSize: Int
         get() = workingAudio.bitsPerSample
 
+    @get:Synchronized
     override val framePosition: Int
         get() = position / frameSizeInBytes
 
+    @get:Synchronized
     override val totalFrames: Int
         get() = activeVerses.sumOf { it.end - it.start }
 
-    val activeVerses: MutableList<VerseNode>
+    @get:Synchronized
+    val activeVerses: List<VerseNode>
+        get() = totalVerses.filter { it.placed }
+
+    internal val totalVerses: MutableList<VerseNode>
 
     private lateinit var serializedVersesFile: File
     private val activeVersesMapper = ObjectMapper().registerKotlinModule()
@@ -59,7 +65,7 @@ internal class ChapterRepresentation(
     private var randomAccessFile: RandomAccessFile? = null
 
     init {
-        activeVerses = initalizeActiveVerses()
+        totalVerses = initalizeActiveVerses()
         initializeWorkingAudioFile()
         initializeSerializedVersesFile()
 
@@ -73,7 +79,7 @@ internal class ChapterRepresentation(
                 VerseMarker(chunk.start, chunk.end, 0)
             }
             .map { marker ->
-                VerseNode(0,0, marker)
+                VerseNode(0, 0, false, marker)
             }
             .toList()
             .blockingGet()
@@ -85,8 +91,10 @@ internal class ChapterRepresentation(
 
         try {
             val nodes = activeVersesMapper.readValue(json, reference)
-            activeVerses.clear()
-            activeVerses.addAll(nodes)
+            totalVerses.forEach { it.clear() }
+            totalVerses.forEachIndexed { idx, _ ->
+                nodes.getOrNull(idx)?.let { totalVerses[idx] = it }
+            }
         } catch (e: JsonMappingException) {
             logger.error("Error in loadFromSerializedVerses: ${e.message}")
         }
@@ -130,11 +138,13 @@ internal class ChapterRepresentation(
         }
     }
 
+    @Synchronized
     override fun hasRemaining(): Boolean {
         return ((totalFrames * frameSizeInBytes) - position) > 0
     }
 
     private val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+    @Synchronized
     override fun getPcmBuffer(bytes: ByteArray): Int {
         var bytesWritten = 0
 
@@ -169,6 +179,7 @@ internal class ChapterRepresentation(
         return bytesWritten
     }
 
+    @Synchronized
     override fun seek(sample: Int) {
         var pos = 0
 

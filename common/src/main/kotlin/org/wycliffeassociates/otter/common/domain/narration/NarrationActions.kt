@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.common.domain.narration
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import kotlin.collections.ArrayList
+import kotlin.time.measureTime
 
 /**
  * To perform a narration action,
@@ -26,20 +27,28 @@ internal class NewVerseAction : NarrationAction {
         val start = workingAudio.totalFrames
         val end = workingAudio.totalFrames
 
-        node = VerseNode(
-            start,
-            end
-        ).also {
-            activeVerses.add(it)
+        val verseIndex = activeVerses.indexOfFirst { !it.placed }
+
+        verseIndex?.let {
+            node = VerseNode(
+                start,
+                end,
+                placed = true,
+                activeVerses[verseIndex].marker.copy()
+            ).also {
+                activeVerses.add(it)
+            }
         }
     }
 
     override fun undo(activeVerses: MutableList<VerseNode>) {
-        activeVerses.removeLast()
+        val index = activeVerses.indexOfLast { it.placed }
+        index?.let { activeVerses[index].placed = false }
     }
 
     override fun redo(activeVerses: MutableList<VerseNode>) {
-        node?.let(activeVerses::add)
+        val index = activeVerses.indexOfFirst { !it.placed }
+        index?.let { activeVerses[index].placed = true }
     }
 }
 
@@ -65,6 +74,7 @@ internal class RecordAgainAction(
         node = VerseNode(
             start,
             end,
+            placed = true,
             activeVerses[verseIndex].marker.copy()
         ).also {
             activeVerses[verseIndex] = it
@@ -107,6 +117,7 @@ internal class VerseMarkerAction(
             firstNode = VerseNode(
                 newMarkerPosition,
                 prev.end,
+                placed = true,
                 activeVerses[verseIndex].marker.copy()
             ).also { current ->
                 activeVerses[verseIndex] = current
@@ -117,6 +128,7 @@ internal class VerseMarkerAction(
             secondNode = VerseNode(
                 prev.start,
                 newMarkerPosition,
+                placed = true,
                 activeVerses[verseIndex - 1].marker.copy()
             ).also { current ->
                 activeVerses[verseIndex - 1] = current
@@ -159,7 +171,12 @@ internal class EditVerseAction(
         previous = activeVerses[verseIndex]
 
         val vm = activeVerses[verseIndex].marker.copy()
-        node = VerseNode(start, end, vm).also {
+        node = VerseNode(
+            start,
+            end,
+            placed = true,
+            vm
+        ).also {
             activeVerses[verseIndex] = it
         }
     }
@@ -185,15 +202,16 @@ internal class ResetAllAction : NarrationAction {
 
     override fun execute(activeVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
         nodes.addAll(activeVerses)
-        activeVerses.clear()
+        activeVerses.forEach { it.clear() }
     }
 
     override fun undo(activeVerses: MutableList<VerseNode>) {
+        activeVerses.clear()
         activeVerses.addAll(nodes)
     }
 
     override fun redo(activeVerses: MutableList<VerseNode>) {
-        activeVerses.clear()
+        activeVerses.forEach { it.clear() }
     }
 }
 

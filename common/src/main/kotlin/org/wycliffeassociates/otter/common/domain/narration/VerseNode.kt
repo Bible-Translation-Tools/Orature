@@ -11,5 +11,12 @@ data class VerseNode(
      * End location in frames
      */
     var end: Int,
+    var placed: Boolean = false,
     val marker: VerseMarker
-)
+) {
+    fun clear() {
+        start = 0
+        end = 0
+        placed = false
+    }
+}

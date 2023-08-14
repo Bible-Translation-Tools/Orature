@@ -33,7 +33,11 @@ class Narration @AssistedInject constructor(
         get() = chapterRepresentation
 
     val activeVerses: List<VerseNode>
-        get() = chapterRepresentation.activeVerses
+        get() = run {
+            val verses = chapterRepresentation.activeVerses
+            println("active verses is ${verses.size}")
+            verses
+        }
 
     val onActiveVersesUpdated: PublishSubject<List<VerseNode>>
         get() = chapterRepresentation.onActiveVersesUpdated
@@ -83,12 +87,12 @@ class Narration @AssistedInject constructor(
     }
 
     fun undo() {
-        history.undo(chapterRepresentation.activeVerses)
+        history.undo(chapterRepresentation.totalVerses)
         chapterRepresentation.onVersesUpdated()
     }
 
     fun redo() {
-        history.redo(chapterRepresentation.activeVerses)
+        history.redo(chapterRepresentation.totalVerses)
         chapterRepresentation.onVersesUpdated()
     }
 
@@ -178,7 +182,7 @@ class Narration @AssistedInject constructor(
     }
 
     private fun execute(action: NarrationAction) {
-        history.execute(action, chapterRepresentation.activeVerses, chapterRepresentation.workingAudio)
+        history.execute(action, chapterRepresentation.totalVerses, chapterRepresentation.workingAudio)
         chapterRepresentation.onVersesUpdated()
     }
 
@@ -212,7 +216,7 @@ class Narration @AssistedInject constructor(
         segments.forEach {
             val verseAudio = AudioFile(it.value)
             end += verseAudio.totalFrames
-            val node = VerseNode(start, end, it.key)
+            val node = VerseNode(start, end, true, it.key)
             nodes.add(node)
             start = end
         }
