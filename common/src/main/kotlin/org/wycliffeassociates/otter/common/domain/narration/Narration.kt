@@ -35,7 +35,6 @@ class Narration @AssistedInject constructor(
     val activeVerses: List<VerseNode>
         get() = run {
             val verses = chapterRepresentation.activeVerses
-            println("active verses is ${verses.size}")
             verses
         }
 
