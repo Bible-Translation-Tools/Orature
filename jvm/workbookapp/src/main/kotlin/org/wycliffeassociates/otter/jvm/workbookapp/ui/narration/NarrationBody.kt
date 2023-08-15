@@ -4,6 +4,7 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import javafx.animation.AnimationTimer
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
@@ -18,6 +19,7 @@ import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
+import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.collections.FloatRingBuffer
 import org.wycliffeassociates.otter.common.domain.narration.VerseNode
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
@@ -46,7 +48,7 @@ import tornadofx.*
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import java.util.function.DoubleUnaryOperator
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
 class NarrationBody : View() {
@@ -57,10 +59,21 @@ class NarrationBody : View() {
 
     override val root = hbox {
 
-        viewModel.waveformLayer.heightProperty.bind(this.heightProperty())
-        viewModel.waveformLayer.widthProperty.bind(this.widthProperty())
         canvasFragment.prefWidthProperty().bind(this.widthProperty())
-        canvasFragment.drawableProperty.set(viewModel.waveformLayer)
+        viewModel.isWaveformLayerInitialized.addListener {_, old, new ->
+            if(new == true) {
+                viewModel.waveformLayer?.heightProperty?.bind(this.heightProperty())
+                viewModel.waveformLayer?.widthProperty?.bind(this.widthProperty())
+                canvasFragment.drawableProperty.set(viewModel.waveformLayer)
+            }
+        }
+        viewModel.isNarrationWaveformLayerInitialized.addListener {_, old, new ->
+            if(new == true) {
+                viewModel.narrationWaveformLayer?.heightProperty?.bind(this.heightProperty())
+                viewModel.narrationWaveformLayer?.widthProperty?.bind(this.widthProperty())
+                canvasFragment.drawableProperty.set(viewModel.narrationWaveformLayer)
+            }
+        }
         canvasFragment.isDrawingProperty.set(true)
         canvasFragment.add(fps)
         add(canvasFragment)
@@ -165,7 +178,8 @@ class NarrationBodyViewModel : ViewModel() {
     private val listeners = mutableListOf<ListenerDisposer>()
     private val disposables = CompositeDisposable()
 
-    val waveformLayer = WaveformLayer()
+    var waveformLayer : NewWaveformLayer? = null
+    var narrationWaveformLayer : NarrationWaveformLayer? = null
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -183,6 +197,8 @@ class NarrationBodyViewModel : ViewModel() {
         narrationViewViewModel.lastRecordedVerseProperty.bind(recordedVerses.integerBinding { it.size })
     }
 
+    var isWaveformLayerInitialized = SimpleBooleanProperty(false)
+    var isNarrationWaveformLayerInitialized = SimpleBooleanProperty(false)
     fun onDock() {
         workbookDataStore.activeChapterProperty.onChangeAndDoNowWithDisposer {
             it?.let { chapter ->
@@ -195,9 +211,15 @@ class NarrationBodyViewModel : ViewModel() {
 
         val alwaysRecordingStatus: Observable<Boolean> = Observable.just(true)
         val renderer = ActiveRecordingRenderer(stream, alwaysRecordingStatus, 1920, 10)
-        waveformLayer.existingAudioReader = narration.audioReader
-        waveformLayer.isRecordingProperty.bind(isRecordingProperty)
-        waveformLayer.incomingAudioRingBuffer = renderer.floatBuffer
+
+        waveformLayer = NewWaveformLayer(renderer)
+        waveformLayer?.existingAudioReader = narration.audioReader
+        waveformLayer?.isRecordingProperty?.bind(isRecordingProperty)
+//        isWaveformLayerInitialized.set(true)
+
+        val existingAndIncomingAudioRenderer = ExistingAndIncomingAudioRenderer(narration.audioReader, stream, alwaysRecordingStatus, 1920, 10)
+        narrationWaveformLayer = NarrationWaveformLayer(existingAndIncomingAudioRenderer)
+        isNarrationWaveformLayerInitialized.set(true)
 
         isRecordingProperty.addListener {_, old, new ->
             if(old == true && new == false) {
@@ -437,7 +459,7 @@ class OpenInAudioPluginEvent(val index: Int) : FXEvent()
 class ChapterReturnFromPluginEvent: FXEvent()
 
 
-class WaveformLayer() : Drawable {
+class NewWaveformLayer(var incomingAudioRenderer : ActiveRecordingRenderer) : Drawable {
     var heightProperty = SimpleDoubleProperty(1.0)
     var widthProperty = SimpleDoubleProperty()
     var isRecordingProperty = SimpleBooleanProperty(false)
@@ -459,32 +481,23 @@ class WaveformLayer() : Drawable {
     var existingAudioPosition = 0
     var existingAudioReader : AudioFileReader? = null
 
-    // NOTE: eventually, this will be supplied as a constructor value
-    // Can hold 10 seconds worth of pixel data
-    var testIncomingAudioRingBuffer = FloatRingBuffer(screenWidth * 2)
-    var incomingAudioRingBuffer : FloatRingBuffer? = null
-
-    val dataGenerator = TestDataGenerator(sampleRate, secondsOfAudioToDraw, samplesPerPixelWidth, screenHeight)
-
-
     private fun getShort(bytes: ByteArray, position: Int): Short {
         return ((bytes[position + 1].toInt() shl 8) or (bytes[position].toInt() and 0xFF)).toShort()
     }
 
 
-    fun drawWaveformToImage() {
+    fun drawWaveformToImage(context: GraphicsContext, canvas: Canvas) {
         var bytesAvailableFromExisting = 0
 
-        // TODO: remove this because I don't care about primarily/defaulting-to using test data any more
         bytesAvailableFromExisting = if(existingAudioReader == null) {
-            dataGenerator.getPcmBuffer(existingAudio)
+            0
         } else {
             existingAudioReader!!.getPcmBuffer(existingAudio)
         }
 
         var pxFromIncoming = 0
-        if(isRecordingProperty.value == true && incomingAudioRingBuffer != null) {
-            pxFromIncoming = incomingAudioRingBuffer!!.size() / 2
+        if(isRecordingProperty.value == true && incomingAudioRenderer?.floatBuffer != null) {
+            pxFromIncoming = incomingAudioRenderer?.floatBuffer?.size()?.div(2)!!
         }
 
         val pxNeeded = screenWidth - pxFromIncoming
@@ -497,25 +510,34 @@ class WaveformLayer() : Drawable {
         }
 
         val pxFromExisting = minOf(pxNeeded, pxAvailableFromExisting)
-        var currentAmplitude = 0
 
-        currentAmplitude = drawOffsetToImage(pxOffset)
+        drawOffsetToImage(pxOffset, context, canvas)
 
-        currentAmplitude = drawExistingAudioToImage(pxFromExisting, currentAmplitude)
+        drawExistingAudioToImage(pxFromExisting, pxOffset * 2, context, canvas)
 
         existingAudioPosition = 0 // TODO: possibly remove this. Resets the existingAudioPosition to zero so I can render the same data each time
 
-        drawIncomingAudioToImage(pxFromIncoming, currentAmplitude)
+        context.stroke = Paint.valueOf(Color.GREEN.toString())
+
+        var leftShift = maxOf(0.0, screenWidth - widthProperty.value)
+        joesWaveformLayer2?.startingX = (pxOffset + pxFromExisting - leftShift)
+        joesWaveformLayer2?.draw(context, canvas)
+        context.stroke = Paint.valueOf(Color.BLACK.toString())
     }
 
 
-    private fun drawVerticalLine(x: Int, startY: Int, endY: Int, color: Color) {
-        for (y in startY..endY) {
-            writableImage.pixelWriter.setColor(x, y, color)
-        }
+    private fun drawVerticalLine(x: Int, startY: Int, endY: Int, color: Color, canvas: Canvas, context: GraphicsContext) {
+        context.stroke = waveformColor
+        context.lineWidth = 1.0
+        context.strokeLine(
+            (x - (maxOf(0.0, screenWidth - widthProperty.value))),
+            scaleAmplitude(startY.toFloat(), heightProperty.value),
+            (x - (maxOf(0.0, screenWidth - widthProperty.value))),
+            scaleAmplitude(endY.toFloat(), heightProperty.value)
+        )
     }
 
-    private fun drawOffsetToImage(pxOffset: Int) : Int {
+    private fun drawOffsetToImage(pxOffset: Int, context: GraphicsContext, canvas: Canvas) : Int {
         var currentAmplitude = 0
         for(i in 0 until pxOffset) {
             currentAmplitude += 2
@@ -524,13 +546,15 @@ class WaveformLayer() : Drawable {
                 currentAmplitude / 2 - 1,
                 previouslyDrawnLines[currentAmplitude - 2],
                 previouslyDrawnLines[currentAmplitude - 1],
-                backgroundColor
+                backgroundColor,
+                canvas,
+                context
             )
         }
         return currentAmplitude
     }
 
-    private fun drawExistingAudioToImage(pxFromExisting: Int, currentAmplitude: Int) : Int {
+    private fun drawExistingAudioToImage(pxFromExisting: Int, currentAmplitude: Int, context: GraphicsContext, canvas: Canvas) : Int {
         var currentAmplitudeIndex = currentAmplitude
         // get/draw px needed from existing audio
         var min: Float
@@ -549,11 +573,11 @@ class WaveformLayer() : Drawable {
             currentAmplitudeIndex += 2
 
             // remove line that was previously at this position
-            drawVerticalLine(currentAmplitudeIndex / 2 - 1, previouslyDrawnLines[currentAmplitudeIndex - 2], previouslyDrawnLines[currentAmplitudeIndex - 1], backgroundColor)
+            drawVerticalLine(currentAmplitudeIndex / 2 - 1, previouslyDrawnLines[currentAmplitudeIndex - 2], previouslyDrawnLines[currentAmplitudeIndex - 1], backgroundColor, canvas, context)
 
-            val startY = scaleAmplitude(min, screenHeight.toDouble()).toFloat() + 1
-            val endY = scaleAmplitude(max, screenHeight.toDouble()).toFloat()- 1
-            drawVerticalLine(currentAmplitudeIndex / 2 - 1, startY.toInt(), endY.toInt(), waveformColor)
+            val startY = (min).toFloat() + 1
+            val endY = (max).toFloat()- 1
+            drawVerticalLine(currentAmplitudeIndex / 2 - 1, startY.toInt(), endY.toInt(), waveformColor, canvas, context)
 
             // Updated with the most recently drawn line
             previouslyDrawnLines[currentAmplitudeIndex - 2] = startY.toInt()
@@ -563,23 +587,22 @@ class WaveformLayer() : Drawable {
     }
 
 
-    private fun drawIncomingAudioToImage(pxFromIncoming: Int, currentAmplitude: Int) : Int{
+    private fun drawIncomingAudioToImage(pxFromIncoming: Int, currentAmplitude: Int, context: GraphicsContext, canvas: Canvas) : Int{
         var currentAmplitudeIndex = currentAmplitude
         // get/draw px available in incoming
         for(i in 0 until pxFromIncoming) {
             currentAmplitudeIndex += 2
-
             // Remove the line that was previously at this position
-            drawVerticalLine(currentAmplitudeIndex / 2 - 1, previouslyDrawnLines[currentAmplitudeIndex - 2], previouslyDrawnLines[currentAmplitudeIndex - 1], backgroundColor)
+            drawVerticalLine(currentAmplitudeIndex / 2 - 1, previouslyDrawnLines[currentAmplitudeIndex - 2], previouslyDrawnLines[currentAmplitudeIndex - 1], backgroundColor, canvas, context)
 
-            var startY = incomingAudioRingBuffer?.get(i)?.plus(1)
-            var endY = incomingAudioRingBuffer?.get(i + 1)?.minus(1)
+            var startY = incomingAudioRenderer?.floatBuffer?.get(i)?.plus(1)
+            var endY = incomingAudioRenderer?.floatBuffer?.get(i + 1)?.minus(1)
             if(startY == null || endY == null) {
                 return 0
             }
-            startY = scaleAmplitude(startY, screenHeight.toDouble()).toFloat()
-            endY = scaleAmplitude(endY, screenHeight.toDouble()).toFloat()
-            drawVerticalLine(currentAmplitudeIndex / 2 - 1, startY.toInt(), endY.toInt(), Color.RED)
+            startY = startY.toFloat()
+            endY = endY.toFloat()
+            drawVerticalLine(currentAmplitudeIndex / 2 - 1, startY.toInt(), endY.toInt(), Color.RED, canvas, context)
 
             // Updated with the most recently drawn line
             previouslyDrawnLines[currentAmplitudeIndex - 2] = startY.toInt()
@@ -593,132 +616,18 @@ class WaveformLayer() : Drawable {
         return height / (Short.MAX_VALUE * 2) * (sample + Short.MAX_VALUE)
     }
 
+    var joesWaveformLayer2 : WaveformLayer? = null
 
     init {
-        dataGenerator.generateData(testIncomingAudioRingBuffer)
+        joesWaveformLayer2 = WaveformLayer(incomingAudioRenderer)
     }
 
-
     override fun draw(context: GraphicsContext, canvas: Canvas) {
-        drawWaveformToImage()
+        drawWaveformToImage(context, canvas)
         context.drawImage(writableImage, (widthProperty.value - screenWidth), 0.0, writableImage.width, canvas.height)
     }
 
 }
-
-
-
-
-class TestDataGenerator(override val sampleRate: Int, val secondsOfAudioToDraw: Int, val samplesPerPixelWidth: Int, val screenHeight : Int ) : AudioFileReader {
-
-    // Used to generate ring buffer for incoming data.
-    var incomingAudio = ByteBuffer.allocate(sampleRate * secondsOfAudioToDraw * 2)
-
-    private var existingAudio = ByteArray(sampleRate * secondsOfAudioToDraw * 2)
-    var existingAudioPosition = 0
-
-    var sampleGeneratorSeed = 0.0
-    fun fillTestSamplesBuffer(
-        samplesBuffer: ByteBuffer,
-        secondsToDisplay: Int,
-        operation: DoubleUnaryOperator)
-    {
-        var sampleValue = 0.0
-        var j = 0
-        for(i in 1 ..  (sampleRate*secondsToDisplay)) {
-            sampleValue = Short.MAX_VALUE * operation.applyAsDouble(sampleGeneratorSeed)
-            samplesBuffer.put((sampleValue.toInt() and 0xFF).toByte())
-            samplesBuffer.put((sampleValue.toInt() ushr 8 and 0xFF).toByte())
-            sampleGeneratorSeed  += 0.0001
-            j += 2
-        }
-        samplesBuffer.position(0)
-        samplesBuffer.limit(j)
-    }
-
-    private fun fillTestSamplesArray(samplesBuffer: ByteArray, secondsToDisplay: Int, operation: DoubleUnaryOperator) {
-        var sampleValue = 0.0
-        var j = 0
-
-        // TODO: figure not why dividing (sampleRate * secondsToDisplay) by two results in twice the needed amount of
-        // data being shown for existingAudio
-        for (i in 1..(sampleRate * secondsToDisplay))  {
-            sampleValue = Short.MAX_VALUE * operation.applyAsDouble(sampleGeneratorSeed)
-            samplesBuffer[j++] = (sampleValue.toInt() and 0xFF).toByte()
-            samplesBuffer[j++] = (sampleValue.toInt() ushr 8 and 0xFF).toByte()
-            sampleGeneratorSeed += 0.0001
-        }
-    }
-
-    private fun scaleAmplitude(sample: Float, height: Double): Double {
-        return height / (Short.MAX_VALUE * 2) * (sample + Short.MAX_VALUE)
-    }
-
-
-    fun fillIncomingAudioRingBufferWithFakeData(incomingAudioRingBuffer: FloatRingBuffer) {
-        val audioCompressor = PCMCompressor(incomingAudioRingBuffer, samplesPerPixelWidth)
-
-        while (incomingAudio.remaining() >= 2) {
-            val sampleValue = incomingAudio.getShort().toFloat()
-            audioCompressor.add(scaleAmplitude(sampleValue, screenHeight.toDouble()).toFloat())
-        }
-        incomingAudio.position(0)
-    }
-
-    fun generateData(incomingAudioRingBuffer: FloatRingBuffer) {
-        fillTestSamplesBuffer(incomingAudio, 2) { Math.cos(it) }
-
-        fillTestSamplesArray(existingAudio, 10) { Math.sin(it) } // contains ALL of the audio recorded
-
-        val secondsToFastForwardExistingAudio = 8
-        seek(sampleRate*2*secondsToFastForwardExistingAudio)
-
-        incomingAudio.order(ByteOrder.LITTLE_ENDIAN)
-        fillIncomingAudioRingBufferWithFakeData(incomingAudioRingBuffer)
-    }
-
-    override val channels: Int
-        get() = TODO("Not yet implemented")
-    override val sampleSize: Int
-        get() = TODO("Not yet implemented")
-    override val framePosition: Int
-        get() = TODO("Not yet implemented")
-    override val totalFrames: Int
-        get() = TODO("Not yet implemented")
-
-    override fun hasRemaining(): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override fun getPcmBuffer(bytes: ByteArray): Int {
-        var written = 0
-
-        while(written < bytes.size && written + existingAudioPosition < existingAudio.size) {
-            bytes[written] = existingAudio[written + existingAudioPosition]
-            written++
-        }
-
-        return written
-    }
-
-    override fun seek(sample: Int) {
-        existingAudioPosition = sample
-    }
-
-    override fun open() {
-        TODO("Not yet implemented")
-    }
-
-    override fun release() {
-        TODO("Not yet implemented")
-    }
-
-    override fun close() {
-        TODO("Not yet implemented")
-    }
-}
-
-
 
 
 class FramerateView : Label() {
@@ -758,3 +667,204 @@ class FramerateView : Label() {
     }
 }
 
+
+
+
+
+
+
+class ExistingAndIncomingAudioRenderer(
+    val existingAudioReader : AudioFileReader,
+    incomingAudioStream : Observable<ByteArray>,
+    recordingStatus: Observable<Boolean>,
+    val width: Int,
+    secondsOnScreen: Int) {
+
+    private val DEFAULT_BUFFER_SIZE = 1024
+    private val logger = LoggerFactory.getLogger(ActiveRecordingRenderer::class.java)
+
+    private var isActive = AtomicBoolean(false)
+    private var recordingActive: Observable<Boolean> = recordingStatus
+
+    // double the width as for each pixel there will be a min and max value
+    val floatBuffer = FloatRingBuffer(width * 2)
+    private val pcmCompressor = PCMCompressor(floatBuffer, samplesToCompress(width, secondsOnScreen))
+    val bb = ByteBuffer.allocate(DEFAULT_BUFFER_SIZE)
+
+    val compositeDisposable = CompositeDisposable()
+
+    val existingAudioHolder = ByteArray(DEFAULT_SAMPLE_RATE * secondsOnScreen * 2)
+
+    init {
+        recordingActive
+            .doOnError { e ->
+                logger.error("Error in active recording listener", e)
+            }
+            .subscribe { isActive.set(it) }
+            .also {
+                compositeDisposable.add(it)
+            }
+        bb.order(ByteOrder.LITTLE_ENDIAN)
+    }
+
+    val isRecordingChecker = recordingStatus
+        .subscribeOn(Schedulers.io())
+        .doOnError {
+            logger.error("Error in isRecordingChecker")
+        }
+        .subscribe {
+            if(it == true) {
+                println("RECORDING HAS STARTED")
+                println("isActive: ${(isActive.get())}")
+                // TODO: clear buffer here
+            }
+        }
+
+
+    val activeRenderer = incomingAudioStream
+        .subscribeOn(Schedulers.io())
+        .doOnError { e ->
+            logger.error("Error in active renderer stream", e)
+        }
+        .subscribe {
+            println("getting data from stream")
+            bb.put(it)
+            bb.position(0)
+
+
+            if(floatBuffer.size() == 0) { // NOTE: for this to work, the floatBuffer MUST be cleared when switched to recording mode
+                println("getting offset + existing")
+                // fill with offset + existingAudio
+                val bytesFromExisting = fillExistingAudioHolder()
+                val offset = existingAudioHolder.size - bytesFromExisting
+
+                for(i in 0 until offset) {
+                    pcmCompressor.add(0.0F)
+                }
+
+                for(i in 0 until (bytesFromExisting - 1) step 2) {
+                    val short = ((existingAudioHolder[i + 1].toInt() shl 8) or (existingAudioHolder[i].toInt() and 0xFF)).toShort()
+                    pcmCompressor.add(short.toFloat())
+                }
+
+            }
+            while (bb.hasRemaining()) {
+                val short = bb.short
+                if (isActive.get()) {
+                    pcmCompressor.add(short.toFloat())
+                }
+            }
+            bb.clear()
+        }
+
+    private fun samplesToCompress(width: Int, secondsOnScreen: Int): Int {
+        // TODO: get samplerate from wav file, don't assume 44.1khz
+        return (DEFAULT_SAMPLE_RATE * secondsOnScreen) / width
+    }
+
+    /** Sets a new status listener and removes the old one */
+    fun setRecordingStatusObservable(value: Observable<Boolean>) {
+        compositeDisposable.clear()
+
+        recordingActive = value
+        recordingActive
+            .doOnError { e ->
+                logger.error("Error in active recording listener", e)
+            }
+            .subscribe { isActive.set(it) }
+            .also {
+                compositeDisposable.add(it)
+            }
+    }
+
+    /** Clears rendered data from buffer */
+    fun clearData() {
+        floatBuffer.clear()
+    }
+
+
+    fun fillExistingAudioHolder(): Int {
+        var bytesFromExisting = existingAudioReader.getPcmBuffer(this.existingAudioHolder)
+
+        return bytesFromExisting
+    }
+
+}
+
+
+
+class NarrationWaveformLayer(
+    val renderer : ExistingAndIncomingAudioRenderer,
+) : Drawable {
+
+    var heightProperty = SimpleDoubleProperty(1.0)
+    var widthProperty = SimpleDoubleProperty()
+
+    // TODO: possibly update this to implement the Strategy Pattern
+    override fun draw(context: GraphicsContext, canvas: Canvas) {
+        context.stroke = Paint.valueOf("#1A1A1A")
+        context.lineWidth = 1.0
+
+        val buffer = renderer.floatBuffer.array
+        var i = 0
+        var x = 0.0
+        // TODO: add some functionality here that allows me to choose a starting X position
+        // The idea is that when there is existing and incoming audio. I don't have 10 seconds of incoming audio
+        // so calculate how much existing audio I need, display it, then pass the the starting x position to this,
+        // so it can render
+        while (i < buffer.size) {
+            context.strokeLine(
+                (x - (maxOf(0.0, renderer.width - widthProperty.value))),
+                scaleAmplitude(buffer[i].toDouble(), canvas.height),
+                (x - (maxOf(0.0, renderer.width - widthProperty.value))),
+                scaleAmplitude(buffer[i + 1].toDouble(), canvas.height)
+            )
+            i += 2
+            x += 1
+        }
+    }
+
+    // 16 bit audio range is -32,768 to 32,767, or 65535 (size of unsigned short)
+    // This scales the sample to fit within the canvas height, and moves the
+    // sample down (-y translate) by half the height
+    private fun scaleAmplitude(sample: Double, height: Double): Double {
+        return height * (sample / UShort.MAX_VALUE.toDouble()) + height / 2
+    }
+}
+
+
+
+
+class WaveformLayer(private val renderer: ActiveRecordingRenderer) : Drawable {
+
+    var startingX = 0.0
+    override fun draw(context: GraphicsContext, canvas: Canvas) {
+        context.stroke = Paint.valueOf("#1A1A1A")
+        context.lineWidth = 1.0
+
+        val buffer = renderer.floatBuffer.array
+        var i = 0
+        var x = startingX
+        // TODO: add some functionality here that allows me to choose a starting X position
+        // The idea is that when there is existing and incoming audio. I don't have 10 seconds of incoming audio
+        // so calculate how much existing audio I need, display it, then pass the the starting x position to this,
+        // so it can render
+        while (i < buffer.size) {
+            context.strokeLine(
+                x,
+                scaleAmplitude(buffer[i].toDouble(), canvas.height),
+                x,
+                scaleAmplitude(buffer[i + 1].toDouble(), canvas.height)
+            )
+            i += 2
+            x += 1
+        }
+    }
+
+    // 16 bit audio range is -32,768 to 32,767, or 65535 (size of unsigned short)
+    // This scales the sample to fit within the canvas height, and moves the
+    // sample down (-y translate) by half the height
+    private fun scaleAmplitude(sample: Double, height: Double): Double {
+        return height * (sample / UShort.MAX_VALUE.toDouble()) + height / 2
+    }
+}
