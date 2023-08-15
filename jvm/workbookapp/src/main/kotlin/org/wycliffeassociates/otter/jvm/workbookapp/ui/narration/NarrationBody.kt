@@ -14,8 +14,6 @@ import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.control.Label
 import javafx.scene.control.Slider
-import javafx.scene.image.WritableImage
-import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
@@ -32,6 +30,7 @@ import org.wycliffeassociates.otter.common.recorder.PCMCompressor
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.narration.CanvasFragment
 import org.wycliffeassociates.otter.jvm.controls.waveform.Drawable
+import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -55,11 +54,19 @@ class NarrationBody : View() {
     private val viewModel: NarrationBodyViewModel by inject()
 
     var canvasFragment = CanvasFragment()
+    var volumeBarCanavsFragment = CanvasFragment()
     var fps = FramerateView()
 
     override val root = hbox {
+        this.maxWidth = 1895.0
+        canvasFragment.prefWidthProperty().bind(this.widthProperty().minus(25))
+        canvasFragment.maxWidth(1920.0)
+        canvasFragment.let {
+            style {
+                backgroundColor += c("#E5E8EB")
+            }
+        }
 
-        canvasFragment.prefWidthProperty().bind(this.widthProperty())
         viewModel.isNarrationWaveformLayerInitialized.addListener {_, old, new ->
             if(new == true) {
                 viewModel.narrationWaveformLayer?.heightProperty?.bind(this.heightProperty())
@@ -69,7 +76,25 @@ class NarrationBody : View() {
         }
         canvasFragment.isDrawingProperty.set(true)
         canvasFragment.add(fps)
+
         add(canvasFragment)
+
+        hbox {
+            prefWidth = 25.0
+            volumeBarCanavsFragment.let {
+                style {
+                    backgroundColor += c("#001533")
+                }
+            }
+            volumeBarCanavsFragment.prefWidthProperty().bind(this.widthProperty())
+            viewModel.isNarrationWaveformLayerInitialized.addListener {_, old, new ->
+                if(new == true) {
+                    volumeBarCanavsFragment.drawableProperty.set(viewModel.volumeBar)
+                    volumeBarCanavsFragment.isDrawingProperty.set(true)
+                }
+            }
+            add(volumeBarCanavsFragment)
+        }
 
     }
     init {
@@ -172,6 +197,7 @@ class NarrationBodyViewModel : ViewModel() {
     private val disposables = CompositeDisposable()
 
     var narrationWaveformLayer : NarrationWaveformLayer? = null
+    var volumeBar : VolumeBar? = null
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -198,10 +224,11 @@ class NarrationBodyViewModel : ViewModel() {
         }.let(listeners::add)
 
 
-        var stream = narration.getRecorderAudioStream()
+        val stream = narration.getRecorderAudioStream()
         val alwaysRecordingStatus: Observable<Boolean> = Observable.just(true)
         val existingAndIncomingAudioRenderer = ExistingAndIncomingAudioRenderer(narration.audioReader, stream, alwaysRecordingStatus, 1920, 10)
         narrationWaveformLayer = NarrationWaveformLayer(existingAndIncomingAudioRenderer)
+        volumeBar = VolumeBar(stream)
         isNarrationWaveformLayerInitialized.set(true)
 
         isRecordingProperty.addListener {_, old, new ->
@@ -487,7 +514,7 @@ class FramerateView : Label() {
 
 class ExistingAndIncomingAudioRenderer(
     val existingAudioReader : AudioFileReader,
-    incomingAudioStream : Observable<ByteArray>,
+    val incomingAudioStream : Observable<ByteArray>,
     recordingStatus: Observable<Boolean>,
     val width: Int,
     secondsOnScreen: Int) {
@@ -529,6 +556,8 @@ class ExistingAndIncomingAudioRenderer(
                 println("RECORDING HAS STARTED")
                 println("isActive: ${(isActive.get())}")
                 // TODO: clear buffer here
+            } else {
+                println("RECORDING HAS STOPPED")
             }
         }
 
@@ -545,6 +574,7 @@ class ExistingAndIncomingAudioRenderer(
 
             if(floatBuffer.size() == 0) { // NOTE: for this to work, the floatBuffer MUST be cleared when switched to recording mode
                 // fill with offset + existingAudio
+                println("getting offset + existing")
                 val bytesFromExisting = fillExistingAudioHolder()
                 val offset = existingAudioHolder.size - bytesFromExisting
 

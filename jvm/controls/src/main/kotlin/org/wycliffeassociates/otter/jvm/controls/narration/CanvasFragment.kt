@@ -50,9 +50,10 @@ class CanvasFragment : StackPane() {
         cvs.widthProperty().addListener { _ -> draw() }
         cvs.heightProperty().addListener { _ -> draw() }
 
-        style {
-            backgroundColor += c("#E5E8EB")
-        }
+        // TODO: high-key remove this so I am not breaking other things
+//        style {
+//            backgroundColor += c("#E5E8EB")
+//        }
         isDrawingProperty.addListener { _, _, isDrawing ->
             if (isDrawing) {
                 at.start()
