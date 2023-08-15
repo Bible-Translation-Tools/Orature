@@ -60,13 +60,6 @@ class NarrationBody : View() {
     override val root = hbox {
 
         canvasFragment.prefWidthProperty().bind(this.widthProperty())
-        viewModel.isWaveformLayerInitialized.addListener {_, old, new ->
-            if(new == true) {
-                viewModel.waveformLayer?.heightProperty?.bind(this.heightProperty())
-                viewModel.waveformLayer?.widthProperty?.bind(this.widthProperty())
-                canvasFragment.drawableProperty.set(viewModel.waveformLayer)
-            }
-        }
         viewModel.isNarrationWaveformLayerInitialized.addListener {_, old, new ->
             if(new == true) {
                 viewModel.narrationWaveformLayer?.heightProperty?.bind(this.heightProperty())
@@ -178,7 +171,6 @@ class NarrationBodyViewModel : ViewModel() {
     private val listeners = mutableListOf<ListenerDisposer>()
     private val disposables = CompositeDisposable()
 
-    var waveformLayer : NewWaveformLayer? = null
     var narrationWaveformLayer : NarrationWaveformLayer? = null
 
     init {
@@ -197,7 +189,6 @@ class NarrationBodyViewModel : ViewModel() {
         narrationViewViewModel.lastRecordedVerseProperty.bind(recordedVerses.integerBinding { it.size })
     }
 
-    var isWaveformLayerInitialized = SimpleBooleanProperty(false)
     var isNarrationWaveformLayerInitialized = SimpleBooleanProperty(false)
     fun onDock() {
         workbookDataStore.activeChapterProperty.onChangeAndDoNowWithDisposer {
@@ -208,22 +199,14 @@ class NarrationBodyViewModel : ViewModel() {
 
 
         var stream = narration.getRecorderAudioStream()
-
         val alwaysRecordingStatus: Observable<Boolean> = Observable.just(true)
-        val renderer = ActiveRecordingRenderer(stream, alwaysRecordingStatus, 1920, 10)
-
-        waveformLayer = NewWaveformLayer(renderer)
-        waveformLayer?.existingAudioReader = narration.audioReader
-        waveformLayer?.isRecordingProperty?.bind(isRecordingProperty)
-//        isWaveformLayerInitialized.set(true)
-
         val existingAndIncomingAudioRenderer = ExistingAndIncomingAudioRenderer(narration.audioReader, stream, alwaysRecordingStatus, 1920, 10)
         narrationWaveformLayer = NarrationWaveformLayer(existingAndIncomingAudioRenderer)
         isNarrationWaveformLayerInitialized.set(true)
 
         isRecordingProperty.addListener {_, old, new ->
             if(old == true && new == false) {
-                renderer.clearData()
+                existingAndIncomingAudioRenderer.clearData()
             }
         }
     }
@@ -459,177 +442,6 @@ class OpenInAudioPluginEvent(val index: Int) : FXEvent()
 class ChapterReturnFromPluginEvent: FXEvent()
 
 
-class NewWaveformLayer(var incomingAudioRenderer : ActiveRecordingRenderer) : Drawable {
-    var heightProperty = SimpleDoubleProperty(1.0)
-    var widthProperty = SimpleDoubleProperty()
-    var isRecordingProperty = SimpleBooleanProperty(false)
-    var backgroundColor = c("#E5E8EB")
-    var waveformColor = c("#B3B9C2")
-
-    val screenWidth = 1920
-    val screenHeight = 1080
-    val sampleRate = 44100
-    val secondsOfAudioToDraw = 10
-    val samplesPerPixelWidth =  (sampleRate * secondsOfAudioToDraw) / screenWidth // NOTE: this could result in compounding errors due to rounding. ~= 229
-
-    var previouslyDrawnLines = IntArray(screenWidth * 2) { 0 }
-    var writableImage = WritableImage(screenWidth, screenHeight)
-
-    // NOTE: this will be used to hold existing audio PCM data when the AudioFileReader is passed in constructor
-    // Can hold 10 seconds worth of PCM data
-    private var existingAudio = ByteArray(sampleRate * secondsOfAudioToDraw * 2)
-    var existingAudioPosition = 0
-    var existingAudioReader : AudioFileReader? = null
-
-    private fun getShort(bytes: ByteArray, position: Int): Short {
-        return ((bytes[position + 1].toInt() shl 8) or (bytes[position].toInt() and 0xFF)).toShort()
-    }
-
-
-    fun drawWaveformToImage(context: GraphicsContext, canvas: Canvas) {
-        var bytesAvailableFromExisting = 0
-
-        bytesAvailableFromExisting = if(existingAudioReader == null) {
-            0
-        } else {
-            existingAudioReader!!.getPcmBuffer(existingAudio)
-        }
-
-        var pxFromIncoming = 0
-        if(isRecordingProperty.value == true && incomingAudioRenderer?.floatBuffer != null) {
-            pxFromIncoming = incomingAudioRenderer?.floatBuffer?.size()?.div(2)!!
-        }
-
-        val pxNeeded = screenWidth - pxFromIncoming
-        val samplesAvailableFromExisting = bytesAvailableFromExisting / 2
-        val pxAvailableFromExisting = samplesAvailableFromExisting / samplesPerPixelWidth
-
-        var pxOffset = 0
-        if(pxAvailableFromExisting < pxNeeded) {
-            pxOffset = screenWidth - (pxFromIncoming + pxAvailableFromExisting)
-        }
-
-        val pxFromExisting = minOf(pxNeeded, pxAvailableFromExisting)
-
-        drawOffsetToImage(pxOffset, context, canvas)
-
-        drawExistingAudioToImage(pxFromExisting, pxOffset * 2, context, canvas)
-
-        existingAudioPosition = 0 // TODO: possibly remove this. Resets the existingAudioPosition to zero so I can render the same data each time
-
-        context.stroke = Paint.valueOf(Color.GREEN.toString())
-
-        var leftShift = maxOf(0.0, screenWidth - widthProperty.value)
-        joesWaveformLayer2?.startingX = (pxOffset + pxFromExisting - leftShift)
-        joesWaveformLayer2?.draw(context, canvas)
-        context.stroke = Paint.valueOf(Color.BLACK.toString())
-    }
-
-
-    private fun drawVerticalLine(x: Int, startY: Int, endY: Int, color: Color, canvas: Canvas, context: GraphicsContext) {
-        context.stroke = waveformColor
-        context.lineWidth = 1.0
-        context.strokeLine(
-            (x - (maxOf(0.0, screenWidth - widthProperty.value))),
-            scaleAmplitude(startY.toFloat(), heightProperty.value),
-            (x - (maxOf(0.0, screenWidth - widthProperty.value))),
-            scaleAmplitude(endY.toFloat(), heightProperty.value)
-        )
-    }
-
-    private fun drawOffsetToImage(pxOffset: Int, context: GraphicsContext, canvas: Canvas) : Int {
-        var currentAmplitude = 0
-        for(i in 0 until pxOffset) {
-            currentAmplitude += 2
-            // remove line that was previously at this position
-            drawVerticalLine(
-                currentAmplitude / 2 - 1,
-                previouslyDrawnLines[currentAmplitude - 2],
-                previouslyDrawnLines[currentAmplitude - 1],
-                backgroundColor,
-                canvas,
-                context
-            )
-        }
-        return currentAmplitude
-    }
-
-    private fun drawExistingAudioToImage(pxFromExisting: Int, currentAmplitude: Int, context: GraphicsContext, canvas: Canvas) : Int {
-        var currentAmplitudeIndex = currentAmplitude
-        // get/draw px needed from existing audio
-        var min: Float
-        var max: Float
-        var currentSample: Float
-        for(i in 0 until pxFromExisting) {
-
-            min = Short.MAX_VALUE.toFloat()
-            max = Short.MIN_VALUE.toFloat()
-            for(j in 0 until samplesPerPixelWidth) {
-                currentSample = getShort(existingAudio, existingAudioPosition).toFloat()
-                existingAudioPosition += 2
-                min = minOf(currentSample, min)
-                max = maxOf(currentSample, max)
-            }
-            currentAmplitudeIndex += 2
-
-            // remove line that was previously at this position
-            drawVerticalLine(currentAmplitudeIndex / 2 - 1, previouslyDrawnLines[currentAmplitudeIndex - 2], previouslyDrawnLines[currentAmplitudeIndex - 1], backgroundColor, canvas, context)
-
-            val startY = (min).toFloat() + 1
-            val endY = (max).toFloat()- 1
-            drawVerticalLine(currentAmplitudeIndex / 2 - 1, startY.toInt(), endY.toInt(), waveformColor, canvas, context)
-
-            // Updated with the most recently drawn line
-            previouslyDrawnLines[currentAmplitudeIndex - 2] = startY.toInt()
-            previouslyDrawnLines[currentAmplitudeIndex - 1] = endY.toInt()
-        }
-        return currentAmplitudeIndex
-    }
-
-
-    private fun drawIncomingAudioToImage(pxFromIncoming: Int, currentAmplitude: Int, context: GraphicsContext, canvas: Canvas) : Int{
-        var currentAmplitudeIndex = currentAmplitude
-        // get/draw px available in incoming
-        for(i in 0 until pxFromIncoming) {
-            currentAmplitudeIndex += 2
-            // Remove the line that was previously at this position
-            drawVerticalLine(currentAmplitudeIndex / 2 - 1, previouslyDrawnLines[currentAmplitudeIndex - 2], previouslyDrawnLines[currentAmplitudeIndex - 1], backgroundColor, canvas, context)
-
-            var startY = incomingAudioRenderer?.floatBuffer?.get(i)?.plus(1)
-            var endY = incomingAudioRenderer?.floatBuffer?.get(i + 1)?.minus(1)
-            if(startY == null || endY == null) {
-                return 0
-            }
-            startY = startY.toFloat()
-            endY = endY.toFloat()
-            drawVerticalLine(currentAmplitudeIndex / 2 - 1, startY.toInt(), endY.toInt(), Color.RED, canvas, context)
-
-            // Updated with the most recently drawn line
-            previouslyDrawnLines[currentAmplitudeIndex - 2] = startY.toInt()
-            previouslyDrawnLines[currentAmplitudeIndex - 1] = endY.toInt()
-        }
-
-        return currentAmplitudeIndex
-    }
-
-    private fun scaleAmplitude(sample: Float, height: Double): Double {
-        return height / (Short.MAX_VALUE * 2) * (sample + Short.MAX_VALUE)
-    }
-
-    var joesWaveformLayer2 : WaveformLayer? = null
-
-    init {
-        joesWaveformLayer2 = WaveformLayer(incomingAudioRenderer)
-    }
-
-    override fun draw(context: GraphicsContext, canvas: Canvas) {
-        drawWaveformToImage(context, canvas)
-        context.drawImage(writableImage, (widthProperty.value - screenWidth), 0.0, writableImage.width, canvas.height)
-    }
-
-}
-
-
 class FramerateView : Label() {
 
     private val frameTimes = LongArray(100)
@@ -727,13 +539,11 @@ class ExistingAndIncomingAudioRenderer(
             logger.error("Error in active renderer stream", e)
         }
         .subscribe {
-            println("getting data from stream")
             bb.put(it)
             bb.position(0)
 
 
             if(floatBuffer.size() == 0) { // NOTE: for this to work, the floatBuffer MUST be cleared when switched to recording mode
-                println("getting offset + existing")
                 // fill with offset + existingAudio
                 val bytesFromExisting = fillExistingAudioHolder()
                 val offset = existingAudioHolder.size - bytesFromExisting
@@ -817,43 +627,6 @@ class NarrationWaveformLayer(
                 (x - (maxOf(0.0, renderer.width - widthProperty.value))),
                 scaleAmplitude(buffer[i].toDouble(), canvas.height),
                 (x - (maxOf(0.0, renderer.width - widthProperty.value))),
-                scaleAmplitude(buffer[i + 1].toDouble(), canvas.height)
-            )
-            i += 2
-            x += 1
-        }
-    }
-
-    // 16 bit audio range is -32,768 to 32,767, or 65535 (size of unsigned short)
-    // This scales the sample to fit within the canvas height, and moves the
-    // sample down (-y translate) by half the height
-    private fun scaleAmplitude(sample: Double, height: Double): Double {
-        return height * (sample / UShort.MAX_VALUE.toDouble()) + height / 2
-    }
-}
-
-
-
-
-class WaveformLayer(private val renderer: ActiveRecordingRenderer) : Drawable {
-
-    var startingX = 0.0
-    override fun draw(context: GraphicsContext, canvas: Canvas) {
-        context.stroke = Paint.valueOf("#1A1A1A")
-        context.lineWidth = 1.0
-
-        val buffer = renderer.floatBuffer.array
-        var i = 0
-        var x = startingX
-        // TODO: add some functionality here that allows me to choose a starting X position
-        // The idea is that when there is existing and incoming audio. I don't have 10 seconds of incoming audio
-        // so calculate how much existing audio I need, display it, then pass the the starting x position to this,
-        // so it can render
-        while (i < buffer.size) {
-            context.strokeLine(
-                x,
-                scaleAmplitude(buffer[i].toDouble(), canvas.height),
-                x,
                 scaleAmplitude(buffer[i + 1].toDouble(), canvas.height)
             )
             i += 2
