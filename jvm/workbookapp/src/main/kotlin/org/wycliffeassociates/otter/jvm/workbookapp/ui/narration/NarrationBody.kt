@@ -228,13 +228,13 @@ class NarrationBodyViewModel : ViewModel() {
         val alwaysRecordingStatus: Observable<Boolean> = Observable.just(true)
         val existingAndIncomingAudioRenderer = ExistingAndIncomingAudioRenderer(narration.audioReader, stream, alwaysRecordingStatus, 1920, 10)
         narrationWaveformLayer = NarrationWaveformLayer(existingAndIncomingAudioRenderer)
+        narrationWaveformLayer!!.isRecordingProperty.bind(isRecordingProperty)
         volumeBar = VolumeBar(stream)
         isNarrationWaveformLayerInitialized.set(true)
 
         isRecordingProperty.addListener {_, old, new ->
-            if(old == true && new == false) {
-                existingAndIncomingAudioRenderer.clearData()
-            }
+            println("clearing buffer")
+            existingAndIncomingAudioRenderer.clearData()
         }
     }
 
@@ -307,7 +307,7 @@ class NarrationBodyViewModel : ViewModel() {
 
     fun resetChapter() {
         narration.onResetAll()
-
+        narrationWaveformLayer?.renderer?.clearData()
         recordStart = true
         recordResume = false
         recordPause = false
@@ -546,21 +546,8 @@ class ExistingAndIncomingAudioRenderer(
         bb.order(ByteOrder.LITTLE_ENDIAN)
     }
 
-    val isRecordingChecker = recordingStatus
-        .subscribeOn(Schedulers.io())
-        .doOnError {
-            logger.error("Error in isRecordingChecker")
-        }
-        .subscribe {
-            if(it == true) {
-                println("RECORDING HAS STARTED")
-                println("isActive: ${(isActive.get())}")
-                // TODO: clear buffer here
-            } else {
-                println("RECORDING HAS STOPPED")
-            }
-        }
-
+    // NOTE: I would like to subscribe to something (possibly the position of the play-head) that will call
+    // existingAudioReader.getPCMBuffer / fillExistingAudioHolder
 
     val activeRenderer = incomingAudioStream
         .subscribeOn(Schedulers.io())
@@ -568,33 +555,24 @@ class ExistingAndIncomingAudioRenderer(
             logger.error("Error in active renderer stream", e)
         }
         .subscribe {
-            bb.put(it)
-            bb.position(0)
+            if(isActive.get()) {
+                bb.put(it)
+                bb.position(0)
 
 
-            if(floatBuffer.size() == 0) { // NOTE: for this to work, the floatBuffer MUST be cleared when switched to recording mode
-                // fill with offset + existingAudio
-                println("getting offset + existing")
-                val bytesFromExisting = fillExistingAudioHolder()
-                val offset = existingAudioHolder.size - bytesFromExisting
-
-                for(i in 0 until offset) {
-                    pcmCompressor.add(0.0F)
+                if(floatBuffer.size() == 0) { // NOTE: for this to work, the floatBuffer MUST be cleared when switched to recording mode
+                    // fill with offset + existingAudio
+                    fillExistingAudioHolder()
                 }
-
-                for(i in 0 until (bytesFromExisting - 1) step 2) {
-                    val short = ((existingAudioHolder[i + 1].toInt() shl 8) or (existingAudioHolder[i].toInt() and 0xFF)).toShort()
-                    pcmCompressor.add(short.toFloat())
+                while (bb.hasRemaining()) {
+                    val short = bb.short
+                    if (isActive.get()) {
+                        pcmCompressor.add(short.toFloat())
+                    }
                 }
-
+                bb.clear()
             }
-            while (bb.hasRemaining()) {
-                val short = bb.short
-                if (isActive.get()) {
-                    pcmCompressor.add(short.toFloat())
-                }
-            }
-            bb.clear()
+
         }
 
     private fun samplesToCompress(width: Int, secondsOnScreen: Int): Int {
@@ -625,6 +603,18 @@ class ExistingAndIncomingAudioRenderer(
 
     fun fillExistingAudioHolder(): Int {
         var bytesFromExisting = existingAudioReader.getPcmBuffer(this.existingAudioHolder)
+        val offset = existingAudioHolder.size - bytesFromExisting
+
+        println("bytesFromExisting: ${bytesFromExisting}, secondsFromExisting: ${bytesFromExisting / 2 / 44100}, offsetBytes: ${offset}, offsetSeconds: ${offset / 2 / 44100}")
+
+        for(i in 0 until offset) {
+            pcmCompressor.add(0.0F)
+        }
+
+        for(i in 0 until (bytesFromExisting - 1) step 2) {
+            val short = ((existingAudioHolder[i + 1].toInt() shl 8) or (existingAudioHolder[i].toInt() and 0xFF)).toShort()
+            pcmCompressor.add(short.toFloat())
+        }
 
         return bytesFromExisting
     }
@@ -639,16 +629,20 @@ class NarrationWaveformLayer(
 
     var heightProperty = SimpleDoubleProperty(1.0)
     var widthProperty = SimpleDoubleProperty()
+    var isRecordingProperty = SimpleBooleanProperty(false)
 
     // TODO: possibly update this to implement the Strategy Pattern
     override fun draw(context: GraphicsContext, canvas: Canvas) {
+
+        if(isRecordingProperty.value == false) {
+            renderer.fillExistingAudioHolder()
+        }
         context.stroke = Paint.valueOf("#66768B")
         context.lineWidth = 1.0
 
         val buffer = renderer.floatBuffer.array
         var i = 0
         var x = 0.0
-        // TODO: add some functionality here that allows me to choose a starting X position
         // The idea is that when there is existing and incoming audio. I don't have 10 seconds of incoming audio
         // so calculate how much existing audio I need, display it, then pass the the starting x position to this,
         // so it can render
