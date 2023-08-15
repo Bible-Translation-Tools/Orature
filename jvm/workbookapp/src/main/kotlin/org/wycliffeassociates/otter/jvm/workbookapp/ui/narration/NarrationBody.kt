@@ -642,7 +642,7 @@ class NarrationWaveformLayer(
 
     // TODO: possibly update this to implement the Strategy Pattern
     override fun draw(context: GraphicsContext, canvas: Canvas) {
-        context.stroke = Paint.valueOf("#1A1A1A")
+        context.stroke = Paint.valueOf("#66768B")
         context.lineWidth = 1.0
 
         val buffer = renderer.floatBuffer.array
