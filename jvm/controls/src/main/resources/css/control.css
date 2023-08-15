@@ -843,20 +843,45 @@
 }
 
 /* Common scrollbar styles */
-.virtual-flow .scroll-bar:vertical,
-.virtual-flow .scroll-bar:vertical .track-background,
-.virtual-flow .scroll-bar:horizontal,
-.virtual-flow .scroll-bar:horizontal .track-background {
-     -fx-background-color: transparent;
+.scroll-bar {
+    -fx-font-size: 18;
+    -fx-background-insets: 0, 0 !important;
+}
+
+.scroll-bar:vertical {
+    -fx-pref-width: 24;
+}
+
+.scroll-bar:horizontal {
+    -fx-pref-height: 24;
+}
+
+.scroll-bar .thumb {
+    -fx-padding: 0;
+    -fx-alignment: center;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+
+.scroll-bar .thumb .thumb-icon {
+    -fx-icon-color: #33445C;
+}
+
+.scroll-bar .track {
+    -fx-background-color: #66768B;
+}
+
+.scroll-pane .corner {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-padding: 6;
+    -fx-alignment: center;
  }
 
-.virtual-flow .scroll-bar .increment-button,
-.virtual-flow .scroll-bar .decrement-button {
-     -fx-opacity: 0;
-     -fx-padding: 0 2;
- }
-
-.virtual-flow .scroll-bar:vertical .thumb,
-.virtual-flow .scroll-bar:horizontal .thumb {
-    -fx-background-radius: 8;
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-background-color: #33445C;
 }

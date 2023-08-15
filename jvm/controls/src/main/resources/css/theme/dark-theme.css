@@ -177,20 +177,6 @@
     -fx-background-color: -wa-background;
 }
 
-.dark-theme .scroll-bar {
-    -fx-background-color: #00000020;
-}
-
-.dark-theme .scroll-bar .thumb {
-    -fx-background-color: #768198;
-}
-
 .dark-theme .split-pane:horizontal > .split-pane-divider {
     -fx-background-color: -wa-primary-dark;
  }
-
-.dark-theme .virtual-flow .scroll-bar:vertical .track,
-.dark-theme .virtual-flow .scroll-bar:horizontal .track {
-    -fx-background-color: #2a2d34;
-    -fx-background-radius: 8;
-}
