@@ -9,12 +9,12 @@
 }
 
 .chunking-step.completed .chunking-step__title {
-    -fx-text-fill: #82A93F;
+    -fx-text-fill: -wa-status-complete;
 }
 
 .chunking-step.completed .chunking-step__title .complete-icon {
     -fx-font-size: 1.8em;
-    -fx-icon-color: #82A93F;
+    -fx-icon-color: -wa-status-complete;
 }
 
 .chunking-step .chunking-step__title .icon {
@@ -40,7 +40,7 @@
 }
 
 .chunk-step__header-section__menu-btn .complete-icon {
-    -fx-icon-color: #82A93F;
+    -fx-icon-color: -wa-status-complete;
     -fx-font-size: 1.8em;
 }
 
