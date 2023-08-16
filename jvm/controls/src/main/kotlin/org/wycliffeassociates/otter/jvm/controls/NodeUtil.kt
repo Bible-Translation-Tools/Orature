@@ -10,6 +10,9 @@ import tornadofx.*
 /**
  * Calls this method from a scrollable component such as a ScrollPane
  * to insert the custom graphic.
+ *
+ * This may need to execute within a Platform.runLater() block to avoid
+ * premature search for the component that not yet exists.
  */
 fun Parent.customizeScrollbarSkin() {
     val scrollBars = lookupAll(".scroll-bar")
