@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 import javafx.application.Platform
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.ColorTheme
+import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
@@ -51,6 +52,11 @@ class RootView : View() {
         workspace.subscribe<PluginClosedEvent> {
             (app as OtterApp).shouldBlockWindowCloseRequest = false
             viewModel.externalPluginOpenedProperty.set(false)
+        }
+        workspace.subscribe<PluginClosedEvent> {
+            (workspace.dockedComponentProperty.value as? PluginOpenedPage)?.let {
+                workspace.navigateBack()
+            }
         }
         workspace.header.removeFromParent()
         workspace.root.vgrow = Priority.ALWAYS

@@ -88,16 +88,6 @@ class NarrationPage : View() {
             }
         }.let { eventSubscriptions.add(it) }
 
-        subscribe<PluginClosedEvent> {
-            (workspace.dockedComponentProperty.value as? PluginOpenedPage)?.let {
-                workspace.navigateBack()
-            }
-        }.let { eventSubscriptions.add(it) }
-
-        subscribe<PluginCloseFinishedEvent> {
-            workspace.navigateBack()
-        }.let { eventSubscriptions.add(it) }
-
         subscribe<SnackBarEvent> {
             viewModel.snackBarMessage(it.message)
         }.let { eventSubscriptions.add(it) }
