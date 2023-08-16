@@ -36,7 +36,10 @@ class ChunkingDemoView : View() {
                     }
                 }
             }
-            customizeScrollbarSkin()
+            runLater {
+                // executes this after the view components are created to avoid null (node is not created yet)
+                customizeScrollbarSkin()
+            }
 
             hbarPolicy = ScrollPane.ScrollBarPolicy.ALWAYS
         }
