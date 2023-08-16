@@ -711,7 +711,7 @@ class ImageNarrationWaveformLayer(renderer: ExistingAndIncomingAudioRenderer) : 
         addLinesToImageData(buffer)
         drawImageDataToImage()
 
-        context.drawImage(writableImage, 0.0, 0.0, canvas.width, DEFAULT_SCREEN_HEIGHT.toDouble())
+        context.drawImage(writableImage, (0.0 + minOf(widthProperty.value - DEFAULT_SCREEN_WIDTH, 0.0)), 0.0, DEFAULT_SCREEN_WIDTH.toDouble(), DEFAULT_SCREEN_HEIGHT.toDouble())
     }
 
     private fun scaleAmplitude(sample: Double, height: Double): Double {
