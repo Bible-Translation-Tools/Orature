@@ -130,6 +130,9 @@ open class AudioFile protected constructor() {
     val bitsPerSample: Int
         get() = strategy.bitsPerSample
 
+    val frameSizeBytes: Int
+        get() = (strategy.bitsPerSample / Byte.SIZE_BITS) * channels
+
     val totalFrames: Int
         get() = strategy.totalFrames
 
