@@ -843,16 +843,13 @@
 }
 
 /* Common scrollbar styles */
-.scroll-bar {
-    -fx-font-size: 18;
-    -fx-background-insets: 0, 0 !important;
-}
-
 .scroll-bar:vertical {
+    -fx-background-insets: 0;
     -fx-pref-width: 24;
 }
 
 .scroll-bar:horizontal {
+    -fx-background-insets: 0;
     -fx-pref-height: 24;
 }
 
@@ -863,7 +860,16 @@
     -fx-border-radius: 0;
 }
 
+.scroll-bar:vertical .thumb {
+    -fx-background-insets: 2 0;
+}
+
+.scroll-bar:horizontal .thumb {
+    -fx-background-insets: 0 2;
+}
+
 .scroll-bar .thumb .thumb-icon {
+    -fx-font-size: 18;
     -fx-icon-color: #33445C;
 }
 
@@ -877,11 +883,29 @@
 
 .scroll-bar .increment-button,
 .scroll-bar .decrement-button {
-    -fx-padding: 6;
+    -fx-background-insets: 0;
+    -fx-font-size: 12;
+    -fx-padding: 10;
     -fx-alignment: center;
  }
 
 .scroll-bar .increment-arrow,
 .scroll-bar .decrement-arrow {
     -fx-background-color: #33445C;
+}
+
+.scroll-bar:vertical .decrement-arrow {
+    -fx-shape: "M5 0 L10 10 L0 10 Z";
+}
+
+.scroll-bar:vertical .increment-arrow {
+    -fx-shape: "M0 0 L10 0 L5 10 Z";
+}
+
+.scroll-bar:horizontal .decrement-arrow {
+    -fx-shape: "M0 5 L10 0 L10 10 Z";
+}
+
+.scroll-bar:horizontal .increment-arrow {
+    -fx-shape: "M0 0 L0 10 L10 5 Z";
 }
