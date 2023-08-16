@@ -14,6 +14,7 @@ import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.control.Label
 import javafx.scene.control.Slider
+import javafx.scene.image.PixelFormat
 import javafx.scene.image.WritableImage
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
@@ -21,11 +22,11 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.collections.FloatRingBuffer
-import org.wycliffeassociates.otter.common.domain.narration.VerseNode
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.narration.Narration
 import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
+import org.wycliffeassociates.otter.common.domain.narration.VerseNode
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
 import org.wycliffeassociates.otter.common.recorder.PCMCompressor
@@ -52,6 +53,7 @@ import java.nio.ByteOrder
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
+
 class NarrationBody : View() {
     private val viewModel: NarrationBodyViewModel by inject()
 
@@ -73,15 +75,11 @@ class NarrationBody : View() {
             if(new == true) {
                 viewModel.narrationWaveformLayer?.heightProperty?.bind(this.heightProperty())
                 viewModel.narrationWaveformLayer?.widthProperty?.bind(this.widthProperty())
-
-//                viewModel.imageNarrationWaveformLayer?.heightProperty?.bind(this.heightProperty())
-//                viewModel.imageNarrationWaveformLayer?.widthProperty?.bind(this.widthProperty())
-
                 canvasFragment.drawableProperty.set(viewModel.narrationWaveformLayer)
             }
         }
         canvasFragment.isDrawingProperty.set(true)
-//        canvasFragment.add(fps)
+        canvasFragment.add(fps)
 
         add(canvasFragment)
 
@@ -203,7 +201,6 @@ class NarrationBodyViewModel : ViewModel() {
     private val disposables = CompositeDisposable()
 
     var narrationWaveformLayer : NarrationWaveformLayer? = null
-//    var imageNarrationWaveformLayer : ImageNarrationWaveformLayer? = null
     var volumeBar : VolumeBar? = null
 
     init {
@@ -236,9 +233,6 @@ class NarrationBodyViewModel : ViewModel() {
         val existingAndIncomingAudioRenderer = ExistingAndIncomingAudioRenderer(narration.audioReader, stream, alwaysRecordingStatus, 1920, 10)
         narrationWaveformLayer = ImageNarrationWaveformLayer(existingAndIncomingAudioRenderer)
         narrationWaveformLayer!!.isRecordingProperty.bind(isRecordingProperty)
-
-//        imageNarrationWaveformLayer = ImageNarrationWaveformLayer(existingAndIncomingAudioRenderer)
-//        imageNarrationWaveformLayer!!.isRecordingProperty.bind(isRecordingProperty)
 
         volumeBar = VolumeBar(stream)
         isNarrationWaveformLayerInitialized.set(true)
@@ -320,7 +314,6 @@ class NarrationBodyViewModel : ViewModel() {
         narration.onResetAll()
         println("clearing data")
         narrationWaveformLayer?.renderer?.clearData()
-//        imageNarrationWaveformLayer?.renderer?.clearData()
         recordStart = true
         recordResume = false
         recordPause = false
@@ -694,46 +687,104 @@ open class NarrationWaveformLayer(
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class ImageNarrationWaveformLayer(renderer: ExistingAndIncomingAudioRenderer) : NarrationWaveformLayer(renderer) {
     val writableImage = WritableImage(1920, 1080)
     val previouslyDrawnLines = IntArray(1920*2) {0}
     val backgroundColor = c("#E5E8EB")
     val pixelWriter = writableImage.pixelWriter
-
+    var pixelFormat: PixelFormat<ByteBuffer> = PixelFormat.getByteRgbInstance()
+    private val imageData = ByteArray(1920 * 1080 * 3)
     override fun draw(context: GraphicsContext, canvas: Canvas) {
+
+//        if(isRecordingProperty.value == false) {
+//            renderer.fillExistingAudioHolder()
+//        }
+
         val imageHeight = canvas.height.toInt()
         val buffer = renderer.floatBuffer.array
         val imageWidth = buffer.size / 2
 
+//        for(i in 0 until 1920) {
+//            for(j in 0 until 1080) {
+//                pixelWriter.setColor(i, j, backgroundColor)
+//            }
+//        }
+
+        // TODO: try setPixels to change the image to have just the background
+
+//        pixelWriter.setPixels(0, 0, 1920,
+//            1080, pixelFormat, imageData,
+//            0, 1920 * 3);
+        var i = 0;
+        for (y in 0 until 1080) {
+            for ( x in 0 until 1920) {
+                imageData[i] = 229.toByte() // Red component
+                imageData[i + 1] = 232.toByte() // Green component
+                imageData[i + 2] = 235.toByte() // Blue component
+                i += 3
+            }
+        }
+
         for (x in 0 until imageWidth) {
-            val y1 = scaleAmplitude(buffer[x * 2].toDouble(), heightProperty.value) + 50
+            val y1 = scaleAmplitude(buffer[x * 2].toDouble(), heightProperty.value)
             val y2 = scaleAmplitude(buffer[x * 2 + 1].toDouble(), heightProperty.value)
 
-            for (y in minOf(previouslyDrawnLines[x*2], previouslyDrawnLines[x*2+1])..maxOf(previouslyDrawnLines[x*2], previouslyDrawnLines[x*2+1])) {
-                pixelWriter.setColor(x, y, backgroundColor)
-            }
+//            for (y in minOf(previouslyDrawnLines[x*2], previouslyDrawnLines[x*2+1])..maxOf(previouslyDrawnLines[x*2], previouslyDrawnLines[x*2+1])) {
+//                if(y < 0 || y > imageHeight - 1) continue
+//                pixelWriter.setColor(x, y, backgroundColor)
+//            }
 
             // Draw a line on the pixel writer of the image
+//            for (y in minOf(y1.toInt(), y2.toInt())..maxOf(y1.toInt(), y2.toInt())) {
+//                if(y < 0 || y > imageHeight - 1) continue
+//                pixelWriter.setColor(x, y, Color.BLACK)
+//            }
+
+            // TODO: add data to imageData here
             for (y in minOf(y1.toInt(), y2.toInt())..maxOf(y1.toInt(), y2.toInt())) {
-                pixelWriter.setColor(x, y, Color.BLACK)
+                imageData[(x + y * 1920) * 3] = 0.toByte() // Red component
+                imageData[(x + y * 1920) * 3 + 1] = 0.toByte() // Green component
+                imageData[(x + y * 1920) * 3 + 2] = 0.toByte() // Blue component
             }
 
             previouslyDrawnLines[x*2] = y1.toInt()
             previouslyDrawnLines[x*2+1] = y2.toInt()
         }
 
-//        context.drawImage(writableImage, 0.0, 0.0, canvas.width, canvas.height)
-        context.drawImage(writableImage, (widthProperty.value - 1920), 0.0, writableImage.width, canvas.height)
+        pixelWriter.setPixels(0, 0, 1920,
+            1080, pixelFormat, imageData,
+            0, 1920 * 3)
+        context.drawImage(writableImage, 0.0, 0.0, canvas.width, 1080.0)
+//        context.drawImage(writableImage, (widthProperty.value - 1920), 0.0, writableImage.width, canvas.height)
     }
 
     private fun scaleAmplitude(sample: Double, height: Double): Double {
-        return height * (sample / UShort.MAX_VALUE.toDouble()) + height / 2
+        return height / (Short.MAX_VALUE * 2) * (sample + Short.MAX_VALUE)
     }
 
     init {
-        heightProperty.addListener {_, old, new ->
-            println("new: ${new}, old: ${old}")
+        var i = 0;
+        for (y in 0 until 1080) {
+            for ( x in 0 until 1920) {
+                imageData[i] = 229.toByte() // Red component
+                imageData[i + 1] = 232.toByte() // Green component
+                imageData[i + 2] = 235.toByte() // Blue component
+                i += 3
+            }
         }
     }
-
 }
