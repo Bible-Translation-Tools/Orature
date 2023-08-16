@@ -238,7 +238,6 @@ class NarrationBodyViewModel : ViewModel() {
         isNarrationWaveformLayerInitialized.set(true)
 
         isRecordingProperty.addListener {_, old, new ->
-            println("clearing buffer")
             existingAndIncomingAudioRenderer.clearData()
         }
     }
@@ -312,7 +311,6 @@ class NarrationBodyViewModel : ViewModel() {
 
     fun resetChapter() {
         narration.onResetAll()
-        println("clearing data")
         narrationWaveformLayer?.renderer?.clearData()
         recordStart = true
         recordResume = false
@@ -568,7 +566,6 @@ class ExistingAndIncomingAudioRenderer(
 
                 if(floatBuffer.size() == 0) { // NOTE: for this to work, the floatBuffer MUST be cleared when switched to recording mode
                     // fill with offset + existingAudio
-                    println("filling with offset + existing")
                     fillExistingAudioHolder()
                 }
 
@@ -608,12 +605,9 @@ class ExistingAndIncomingAudioRenderer(
         floatBuffer.clear()
     }
 
-
     fun fillExistingAudioHolder(): Int {
         val bytesFromExisting = existingAudioReader.getPcmBuffer(this.existingAudioHolder)
         val offset = existingAudioHolder.size - bytesFromExisting
-
-//        println("bytesFromExisting: ${bytesFromExisting}, secondsFromExisting: ${bytesFromExisting / 2 / 44100}, offsetBytes: ${offset}, offsetSeconds: ${offset / 2 / 44100}")
 
         var i = 0
         while( i < offset) {
@@ -630,7 +624,6 @@ class ExistingAndIncomingAudioRenderer(
 
         return bytesFromExisting
     }
-
 }
 
 
@@ -639,20 +632,24 @@ open class NarrationWaveformLayer(
     val renderer : ExistingAndIncomingAudioRenderer
 ) : Drawable {
 
-    var heightProperty = SimpleDoubleProperty(1.0)
-    var widthProperty = SimpleDoubleProperty()
-    var isRecordingProperty = SimpleBooleanProperty(false)
-    // TODO: possibly update this to implement the Strategy Pattern
+    val heightProperty = SimpleDoubleProperty(1.0)
+    val widthProperty = SimpleDoubleProperty()
+    val isRecordingProperty = SimpleBooleanProperty(false)
+    val DEFAULT_SCREEN_WIDTH = 1920
+    val DEFAULT_SCREEN_HEIGHT = 1080
+    val backgroundColor = c("#E5E8EB")
+    val waveformColor = c("#66768B")
+
     override fun draw(context: GraphicsContext, canvas: Canvas) {
 
         // NOTE: This is what is causing the flicker
         // Possibly, a better solution would be to make the render responsible for updating itself depending on the
         // position of the play-head. This would also greatly reduce the work on the CPU, since it won't have to generate
         // the same data repeatedly even when the play-head has not moved
-        if(isRecordingProperty.value == false) {
-            renderer.fillExistingAudioHolder()
-        }
-        context.stroke = Paint.valueOf("#66768B")
+//        if(isRecordingProperty.value == false) {
+//            renderer.fillExistingAudioHolder()
+//        }
+        context.stroke = waveformColor
         context.lineWidth = 1.0
 
         var i = 0
@@ -702,89 +699,57 @@ open class NarrationWaveformLayer(
 
 
 class ImageNarrationWaveformLayer(renderer: ExistingAndIncomingAudioRenderer) : NarrationWaveformLayer(renderer) {
-    val writableImage = WritableImage(1920, 1080)
-    val previouslyDrawnLines = IntArray(1920*2) {0}
-    val backgroundColor = c("#E5E8EB")
+    val writableImage = WritableImage(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT)
     val pixelWriter = writableImage.pixelWriter
     var pixelFormat: PixelFormat<ByteBuffer> = PixelFormat.getByteRgbInstance()
-    private val imageData = ByteArray(1920 * 1080 * 3)
+    private val imageData = ByteArray(DEFAULT_SCREEN_WIDTH * DEFAULT_SCREEN_HEIGHT * 3)
+
     override fun draw(context: GraphicsContext, canvas: Canvas) {
-
-//        if(isRecordingProperty.value == false) {
-//            renderer.fillExistingAudioHolder()
-//        }
-
-        val imageHeight = canvas.height.toInt()
         val buffer = renderer.floatBuffer.array
-        val imageWidth = buffer.size / 2
 
-//        for(i in 0 until 1920) {
-//            for(j in 0 until 1080) {
-//                pixelWriter.setColor(i, j, backgroundColor)
-//            }
-//        }
+        fillImageDataWithDefaultColor()
+        addLinesToImageData(buffer)
+        drawImageDataToImage()
 
-        // TODO: try setPixels to change the image to have just the background
-
-//        pixelWriter.setPixels(0, 0, 1920,
-//            1080, pixelFormat, imageData,
-//            0, 1920 * 3);
-        var i = 0;
-        for (y in 0 until 1080) {
-            for ( x in 0 until 1920) {
-                imageData[i] = 229.toByte() // Red component
-                imageData[i + 1] = 232.toByte() // Green component
-                imageData[i + 2] = 235.toByte() // Blue component
-                i += 3
-            }
-        }
-
-        for (x in 0 until imageWidth) {
-            val y1 = scaleAmplitude(buffer[x * 2].toDouble(), heightProperty.value)
-            val y2 = scaleAmplitude(buffer[x * 2 + 1].toDouble(), heightProperty.value)
-
-//            for (y in minOf(previouslyDrawnLines[x*2], previouslyDrawnLines[x*2+1])..maxOf(previouslyDrawnLines[x*2], previouslyDrawnLines[x*2+1])) {
-//                if(y < 0 || y > imageHeight - 1) continue
-//                pixelWriter.setColor(x, y, backgroundColor)
-//            }
-
-            // Draw a line on the pixel writer of the image
-//            for (y in minOf(y1.toInt(), y2.toInt())..maxOf(y1.toInt(), y2.toInt())) {
-//                if(y < 0 || y > imageHeight - 1) continue
-//                pixelWriter.setColor(x, y, Color.BLACK)
-//            }
-
-            // TODO: add data to imageData here
-            for (y in minOf(y1.toInt(), y2.toInt())..maxOf(y1.toInt(), y2.toInt())) {
-                imageData[(x + y * 1920) * 3] = 0.toByte() // Red component
-                imageData[(x + y * 1920) * 3 + 1] = 0.toByte() // Green component
-                imageData[(x + y * 1920) * 3 + 2] = 0.toByte() // Blue component
-            }
-
-            previouslyDrawnLines[x*2] = y1.toInt()
-            previouslyDrawnLines[x*2+1] = y2.toInt()
-        }
-
-        pixelWriter.setPixels(0, 0, 1920,
-            1080, pixelFormat, imageData,
-            0, 1920 * 3)
-        context.drawImage(writableImage, 0.0, 0.0, canvas.width, 1080.0)
-//        context.drawImage(writableImage, (widthProperty.value - 1920), 0.0, writableImage.width, canvas.height)
+        context.drawImage(writableImage, 0.0, 0.0, canvas.width, DEFAULT_SCREEN_HEIGHT.toDouble())
     }
 
     private fun scaleAmplitude(sample: Double, height: Double): Double {
         return height / (Short.MAX_VALUE * 2) * (sample + Short.MAX_VALUE)
     }
 
-    init {
+    fun fillImageDataWithDefaultColor() {
         var i = 0;
-        for (y in 0 until 1080) {
-            for ( x in 0 until 1920) {
-                imageData[i] = 229.toByte() // Red component
-                imageData[i + 1] = 232.toByte() // Green component
-                imageData[i + 2] = 235.toByte() // Blue component
+        for (y in 0 until DEFAULT_SCREEN_HEIGHT) {
+            for ( x in 0 until DEFAULT_SCREEN_WIDTH) {
+                imageData[i] = (backgroundColor.red * 255).toInt().toByte()
+                imageData[i + 1] = (backgroundColor.green * 255).toInt().toByte()
+                imageData[i + 2] = (backgroundColor.blue * 255).toInt().toByte()
                 i += 3
             }
         }
+    }
+
+    fun addLinesToImageData(buffer: FloatArray) {
+        for (x in 0 until buffer.size / 2) {
+            val y1 = scaleAmplitude(buffer[x * 2].toDouble(), heightProperty.value)
+            val y2 = scaleAmplitude(buffer[x * 2 + 1].toDouble(), heightProperty.value)
+
+            for (y in minOf(y1.toInt(), y2.toInt())..maxOf(y1.toInt(), y2.toInt())) {
+                imageData[(x + y * DEFAULT_SCREEN_WIDTH) * 3] = (waveformColor.red * 255).toInt().toByte()
+                imageData[(x + y * DEFAULT_SCREEN_WIDTH) * 3 + 1] = (waveformColor.green * 255).toInt().toByte()
+                imageData[(x + y * DEFAULT_SCREEN_WIDTH) * 3 + 2] = (waveformColor.blue * 255).toInt().toByte()
+            }
+        }
+    }
+
+    fun drawImageDataToImage() {
+        pixelWriter.setPixels(0, 0, DEFAULT_SCREEN_WIDTH,
+            DEFAULT_SCREEN_HEIGHT, pixelFormat, imageData,
+            0, DEFAULT_SCREEN_WIDTH * 3)
+    }
+
+    init {
+        fillImageDataWithDefaultColor()
     }
 }
