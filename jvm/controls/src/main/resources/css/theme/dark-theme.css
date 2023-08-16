@@ -59,12 +59,11 @@
     -wa-regular-text-80: -wa-regular-text;
     -wa-note-text: #c0bfbf;
     -wa-highlight-text: -wa-accent-light;
-    -wa-active-text: -wa-regular-text;
     -wa-disabled-text: gray;
     -wa-disabled-background: #ffffff20;
-    -wa-status-active: #2ec144;
+    -wa-status-active: -wa-blue;
     -wa-status-inactive: -wa-black-05-noalpha;
-    -wa-status-complete: -wa-blue;
+    -wa-status-complete: #2ec144;
     -wa-inverse-text: -wa-gray-dark;
 
     /* borders */
