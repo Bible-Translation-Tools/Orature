@@ -173,24 +173,10 @@
     -wa-table-row-hover: -wa-foreground-hover;
 }
 
-.scroll-bar {
-    -fx-font-size: 10px;
-}
-
 .light-theme .workspace {
     -fx-background-color: -wa-background;
 }
 
-.light-theme .scroll-bar .thumb {
-    -fx-background-color: #b3b3b3;
-}
-
 .light-theme .split-pane:horizontal > .split-pane-divider {
     -fx-background-color: -wa-primary-dark;
-}
-
-.light-theme .virtual-flow .scroll-bar:vertical .track,
-.light-theme .virtual-flow .scroll-bar:horizontal .track {
-    -fx-background-color: #e6e6e6;
-    -fx-background-radius: 8;
 }

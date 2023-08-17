@@ -3,28 +3,18 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.dev
 import javafx.beans.property.IntegerProperty
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
-import javafx.beans.property.SimpleObjectProperty
-import javafx.scene.input.KeyCode
-import javafx.scene.input.KeyEvent
-import javafx.scene.layout.Priority
-import org.kordamp.ikonli.javafx.FontIcon
-import org.kordamp.ikonli.materialdesign.MaterialDesign
+import javafx.scene.control.Button
+import javafx.scene.control.ScrollPane
+import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.chunkingStep
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.grid.ChunkGrid
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
 import tornadofx.*
 
 class ChunkingDemoView : View() {
 
     private val selectedChunk: IntegerProperty = SimpleIntegerProperty(-1)
-    private val selectedStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.BLIND_DRAFT)
-    private val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.PEER_EDIT)
-    private val hideCompletedProperty = SimpleBooleanProperty(true)
-    private val isCollapsedProperty = SimpleBooleanProperty(false)
 
-    private val list = listOf(
+    private val list = observableListOf(
         ChunkViewData(1, SimpleBooleanProperty(true), selectedChunk),
         ChunkViewData(2, SimpleBooleanProperty(true), selectedChunk),
         ChunkViewData(3, SimpleBooleanProperty(true), selectedChunk),
@@ -34,81 +24,24 @@ class ChunkingDemoView : View() {
     )
 
     override val root = vbox {
-        maxWidth = 320.0
-
-        val grid = ChunkGrid(list)
-        vbox {
-            addClass("chunking-step")
-            isFocusTraversable = true
-            visibleWhen(isCollapsedProperty.not())
-            managedWhen(visibleProperty())
-
-            hbox {
-                addClass("chunking-step__header-section", "chunk-step__header-section__menu-btn")
-
-                label {
-                    addClass("chunking-step__title", "h5")
-                    graphicProperty().bind(hideCompletedProperty.objectBinding {
-                        if (it == true) {
-                            FontIcon(MaterialDesign.MDI_CHECK_CIRCLE).apply {
-                                addClass("complete-icon")
-                            }
-                        } else {
-                            FontIcon(MaterialDesign.MDI_EYE_OFF).apply {
-                                addClass("icon")
-                            }
-                        }
-                    })
-                    textProperty().bind(hideCompletedProperty.stringBinding {
-                        if (it == true) messages["show_completed"] else messages["hide_completed"]
-                    })
-                }
-                region { hgrow = Priority.ALWAYS }
-                label {
-                    addClass("chunking-step__title")
-                    graphicProperty().bind(hideCompletedProperty.objectBinding {
-                        if (it == true) {
-                            FontIcon(MaterialDesign.MDI_MENU_DOWN).apply { addClass("icon") }
-                        } else {
-                            FontIcon(MaterialDesign.MDI_MENU_UP).apply { addClass("icon") }
-                        }
-                    })
-                }
-            }
-
-            setOnMouseClicked {
-                hideCompletedProperty.set(!hideCompletedProperty.value)
-                requestFocus()
-            }
-            this.addEventFilter(KeyEvent.KEY_PRESSED) {
-                if (it.code == KeyCode.ENTER || it.code == KeyCode.SPACE) {
-                    hideCompletedProperty.set(!hideCompletedProperty.value)
-                    requestFocus()
-                }
-            }
-        }
+        maxWidth = 300.0
 
         scrollpane {
             isFitToWidth = true
-
+            prefHeight = 200.0
             vbox {
-                chunkingStep(ChunkingStep.CONSUME_AND_VERBALIZE,selectedStepProperty,reachableStepProperty, hideCompletedProperty, isCollapsedProperty, null)
-                chunkingStep(ChunkingStep.CHUNKING, selectedStepProperty, reachableStepProperty, hideCompletedProperty, isCollapsedProperty, null)
-                chunkingStep(ChunkingStep.BLIND_DRAFT, selectedStepProperty, reachableStepProperty, hideCompletedProperty, isCollapsedProperty, grid)
-                chunkingStep(ChunkingStep.PEER_EDIT, selectedStepProperty, reachableStepProperty, hideCompletedProperty, isCollapsedProperty, grid)
-                chunkingStep(ChunkingStep.KEYWORD_CHECK, selectedStepProperty, reachableStepProperty, hideCompletedProperty, isCollapsedProperty, grid)
-                chunkingStep(ChunkingStep.VERSE_CHECK, selectedStepProperty, reachableStepProperty, hideCompletedProperty, isCollapsedProperty, grid)
-            }
-        }
-        button("Collapse") {
-            action {
-                this@vbox.maxWidth = if (isCollapsedProperty.value) {
-                    320.0
-                } else {
-                    80.0
+                bindChildren(list) {
+                    Button(it.number.toString()).apply {
+                        addClass("btn", "btn--primary")
+                    }
                 }
-                isCollapsedProperty.set(!isCollapsedProperty.value)
             }
+            runLater {
+                // executes this after the view components are created to avoid null (node is not created yet)
+                customizeScrollbarSkin()
+            }
+
+            hbarPolicy = ScrollPane.ScrollBarPolicy.ALWAYS
         }
     }
 
@@ -117,3 +50,4 @@ class ChunkingDemoView : View() {
         tryImportStylesheet("/css/chunking-page.css")
     }
 }
+
