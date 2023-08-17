@@ -99,7 +99,7 @@ class TranslationCreationCard : HBox() {
             hbox {
                 addClass("translation-creation-card__box")
                 rectangle(width = 80.0, height = 16.0).addClass("card-graphic")
-                rectangle(width = 8.0, height = 8.0).addClass("card-graphic")
+                rectangle(width = 15.0, height = 15.0).addClass("card-graphic")
                 rectangle(width = 80.0, height = 16.0).addClass("card-graphic")
             }
         }
