@@ -231,7 +231,7 @@ class NarrationBodyViewModel : ViewModel() {
         val stream = narration.getRecorderAudioStream()
         val alwaysRecordingStatus: Observable<Boolean> = Observable.just(true)
         val existingAndIncomingAudioRenderer = ExistingAndIncomingAudioRenderer(narration.audioReader, stream, alwaysRecordingStatus, 1920, 10)
-        narrationWaveformLayer = ImageNarrationWaveformLayer(existingAndIncomingAudioRenderer)
+        narrationWaveformLayer = ImageNarrationWaveformLayerWith2DImageBuffer(existingAndIncomingAudioRenderer)
         narrationWaveformLayer!!.isRecordingProperty.bind(isRecordingProperty)
 
         volumeBar = VolumeBar(stream)
@@ -753,3 +753,131 @@ class ImageNarrationWaveformLayer(renderer: ExistingAndIncomingAudioRenderer) : 
         fillImageDataWithDefaultColor()
     }
 }
+
+
+
+
+
+class ImageNarrationWaveformLayerWith2DImageBuffer(renderer: ExistingAndIncomingAudioRenderer) : NarrationWaveformLayer(renderer) {
+    val writableImage = WritableImage(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT)
+    val pixelWriter = writableImage.pixelWriter
+    var pixelFormat: PixelFormat<ByteBuffer> = PixelFormat.getByteRgbInstance()
+    private val imageData = ByteArray(DEFAULT_SCREEN_WIDTH * DEFAULT_SCREEN_HEIGHT * 3)
+
+    private val imageData2D = Array<ByteArray>(DEFAULT_SCREEN_HEIGHT) { ByteArray(DEFAULT_SCREEN_WIDTH * 3) }
+
+    override fun draw(context: GraphicsContext, canvas: Canvas) {
+        val buffer = renderer.floatBuffer.array
+
+        fillImageDataWithDefaultColor()
+        addLinesToImageData(buffer)
+        drawImageDataToImage()
+
+        context.drawImage(writableImage, (0.0 + minOf(widthProperty.value - DEFAULT_SCREEN_WIDTH, 0.0)), 0.0, DEFAULT_SCREEN_WIDTH.toDouble(), DEFAULT_SCREEN_HEIGHT.toDouble())
+    }
+
+    private fun scaleAmplitude(sample: Double, height: Double): Double {
+        return height / (Short.MAX_VALUE * 2) * (sample + Short.MAX_VALUE)
+    }
+
+    fun fillImageDataWithDefaultColor() {
+        for (i in 0 until DEFAULT_SCREEN_HEIGHT) {
+            for (j in 0 until DEFAULT_SCREEN_WIDTH * 3 step 3) {
+                imageData2D[i][j] = (backgroundColor.red * 255).toInt().toByte()
+                imageData2D[i][j + 1] = (backgroundColor.green * 255).toInt().toByte()
+                imageData2D[i][j + 2] = (backgroundColor.blue * 255).toInt().toByte()
+            }
+        }
+    }
+
+    fun addLinesToImageData(buffer: FloatArray) {
+        for (x in 0 until buffer.size / 2) {
+            val y1 = scaleAmplitude(buffer[x * 2].toDouble(), heightProperty.value)
+            val y2 = scaleAmplitude(buffer[x * 2 + 1].toDouble(), heightProperty.value)
+
+            for (y in minOf(y1.toInt(), y2.toInt())..maxOf(y1.toInt(), y2.toInt())) {
+                imageData2D[y][x * 3] = (waveformColor.red * 255).toInt().toByte()
+                imageData2D[y][x * 3 + 1] = (waveformColor.green * 255).toInt().toByte()
+                imageData2D[y][x * 3 + 2] = (waveformColor.blue * 255).toInt().toByte()
+            }
+        }
+    }
+
+    fun drawImageDataToImage() {
+        for (y in 0 until DEFAULT_SCREEN_HEIGHT) {
+            imageData2D[y].copyInto(imageData, y * DEFAULT_SCREEN_WIDTH * 3)
+        }
+        pixelWriter.setPixels(0, 0, DEFAULT_SCREEN_WIDTH,
+            DEFAULT_SCREEN_HEIGHT, pixelFormat, imageData,
+            0, DEFAULT_SCREEN_WIDTH * 3)
+    }
+
+    init {
+        fillImageDataWithDefaultColor()
+    }
+}
+
+
+
+
+
+// TODO: finish
+//class ImageNarrationWaveformLayerWithRotated2DImageBuffer(renderer: ExistingAndIncomingAudioRenderer) : NarrationWaveformLayer(renderer) {
+//    val writableImage = WritableImage(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT)
+//    val pixelWriter = writableImage.pixelWriter
+//    var pixelFormat: PixelFormat<ByteBuffer> = PixelFormat.getByteRgbInstance()
+//    private val imageData = ByteArray(DEFAULT_SCREEN_WIDTH * DEFAULT_SCREEN_HEIGHT * 3)
+//
+//    private val imageData2D = Array<ByteArray>(DEFAULT_SCREEN_HEIGHT) { ByteArray(DEFAULT_SCREEN_WIDTH * 3) }
+//
+//    override fun draw(context: GraphicsContext, canvas: Canvas) {
+//        val buffer = renderer.floatBuffer.array
+//
+//        fillImageDataWithDefaultColor()
+//        addLinesToImageData(buffer)
+//        drawImageDataToImage()
+//
+//        context.drawImage(writableImage, (0.0 + minOf(widthProperty.value - DEFAULT_SCREEN_WIDTH, 0.0)), 0.0, DEFAULT_SCREEN_WIDTH.toDouble(), DEFAULT_SCREEN_HEIGHT.toDouble())
+//    }
+//
+//    private fun scaleAmplitude(sample: Double, height: Double): Double {
+//        return height / (Short.MAX_VALUE * 2) * (sample + Short.MAX_VALUE)
+//    }
+//
+//    fun fillImageDataWithDefaultColor() {
+//        for (i in 0 until DEFAULT_SCREEN_HEIGHT) {
+//            for (j in 0 until DEFAULT_SCREEN_WIDTH * 3 step 3) {
+//                imageData2D[i][j] = (backgroundColor.red * 255).toInt().toByte()
+//                imageData2D[i][j + 1] = (backgroundColor.green * 255).toInt().toByte()
+//                imageData2D[i][j + 2] = (backgroundColor.blue * 255).toInt().toByte()
+//            }
+//        }
+//    }
+//
+//    fun addLinesToImageData(buffer: FloatArray) {
+//        for (x in 0 until buffer.size / 2) {
+//            val y1 = scaleAmplitude(buffer[x * 2].toDouble(), heightProperty.value)
+//            val y2 = scaleAmplitude(buffer[x * 2 + 1].toDouble(), heightProperty.value)
+//
+//            for (y in minOf(y1.toInt(), y2.toInt())..maxOf(y1.toInt(), y2.toInt())) {
+//                imageData2D[y][x * 3] = (waveformColor.red * 255).toInt().toByte()
+//                imageData2D[y][x * 3 + 1] = (waveformColor.green * 255).toInt().toByte()
+//                imageData2D[y][x * 3 + 2] = (waveformColor.blue * 255).toInt().toByte()
+//            }
+//        }
+//    }
+//
+//    fun drawImageDataToImage() {
+//        for (y in 0 until DEFAULT_SCREEN_HEIGHT) {
+//            imageData2D[y].copyInto(imageData, y * DEFAULT_SCREEN_WIDTH * 3)
+//        }
+//        pixelWriter.setPixels(0, 0, DEFAULT_SCREEN_WIDTH,
+//            DEFAULT_SCREEN_HEIGHT, pixelFormat, imageData,
+//            0, DEFAULT_SCREEN_WIDTH * 3)
+//    }
+//
+//    init {
+//        fillImageDataWithDefaultColor()
+//    }
+//}
+
