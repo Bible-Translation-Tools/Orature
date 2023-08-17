@@ -103,6 +103,7 @@ class NarrationHeaderViewModel : ViewModel() {
     init {
         chapterList.bind(narrationViewModel.chapterList) { it }
 
+        chapterTakeProperty.bind(narrationViewModel.chapterTakeProperty)
         chapterTitleProperty.bind(narrationViewModel.chapterTitleProperty)
         hasNextChapter.bind(narrationViewModel.hasNextChapter)
         hasPreviousChapter.bind(narrationViewModel.hasPreviousChapter)
