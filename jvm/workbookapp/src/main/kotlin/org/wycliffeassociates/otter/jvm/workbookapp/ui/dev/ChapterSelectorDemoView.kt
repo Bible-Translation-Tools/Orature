@@ -9,7 +9,7 @@ import tornadofx.*
 
 class ChapterSelectorDemoView : View() {
 
-    private val list = listOf(
+    private val list = observableListOf(
         ChapterGridItemData(1, SimpleBooleanProperty(false)),
         ChapterGridItemData(2, SimpleBooleanProperty(true)),
         ChapterGridItemData(3, SimpleBooleanProperty(false)),
