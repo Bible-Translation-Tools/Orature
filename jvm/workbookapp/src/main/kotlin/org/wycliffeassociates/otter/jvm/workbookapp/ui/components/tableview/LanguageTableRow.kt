@@ -3,7 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview
 import javafx.scene.control.TableRow
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.LanguageSelectedEvent
-import tornadofx.FX
+import tornadofx.*
 
 class LanguageTableRow : TableRow<Language>() {
     override fun updateItem(item: Language?, empty: Boolean) {
@@ -16,7 +16,9 @@ class LanguageTableRow : TableRow<Language>() {
 
         isMouseTransparent = false
         setOnMouseClicked {
-            FX.eventbus.fire(LanguageSelectedEvent(item))
+            if (it.clickCount == 1) { // avoid double fire()
+                FX.eventbus.fire(LanguageSelectedEvent(item))
+            }
         }
     }
 }
