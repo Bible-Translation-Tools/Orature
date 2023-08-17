@@ -1,34 +1,9 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
-import com.github.thomasnield.rxkotlinfx.observeOnFx
-import io.reactivex.Completable
-import io.reactivex.disposables.CompositeDisposable
 import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleObjectProperty
-import javafx.scene.control.Slider
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.domain.narration.VerseNode
-import org.wycliffeassociates.otter.common.data.workbook.Chapter
-import org.wycliffeassociates.otter.common.domain.content.PluginActions
-import org.wycliffeassociates.otter.common.domain.narration.Narration
-import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
-import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
-import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
-import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
-import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NextVerseEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.RecordVerseEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationRedoEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationResetChapterEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationUndoEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import tornadofx.*
-import java.io.File
-import javax.inject.Inject
 
 class AudioWorkspaceView : View() {
     private val viewModel: AudioWorkspaceViewModel by inject()
@@ -42,7 +17,7 @@ class AudioWorkspaceView : View() {
 
                     bindChildren(viewModel.recordedVerses) { verse ->
                         val index = viewModel.recordedVerses.indexOf(verse)
-                        val label = (index + 1).toString()
+                        val label = verse.label
 
                         menubutton(label) {
                             item("") {
@@ -96,7 +71,7 @@ class AudioWorkspaceViewModel : ViewModel() {
     private val narrationViewModel: NarrationViewModel by inject()
 
     val isRecordingProperty = SimpleBooleanProperty()
-    var recordedVerses = observableListOf<VerseNode>()
+    var recordedVerses = observableListOf<VerseMarker>()
 
     fun onDock() {
         isRecordingProperty.bind(narrationViewModel.isRecordingProperty)

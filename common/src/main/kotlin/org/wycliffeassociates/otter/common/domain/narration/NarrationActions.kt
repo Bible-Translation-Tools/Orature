@@ -22,7 +22,10 @@ internal interface NarrationAction {
 internal class NewVerseAction : NarrationAction {
     private var node: VerseNode? = null
 
-    override fun execute(activeVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
+    override fun execute(
+        activeVerses: MutableList<VerseNode>,
+        workingAudio: AudioFile
+    ) {
         val start = workingAudio.totalFrames
         val end = workingAudio.totalFrames
 
@@ -32,6 +35,8 @@ internal class NewVerseAction : NarrationAction {
             node = VerseNode(
                 start,
                 end,
+                start * workingAudio.frameSizeBytes,
+                end * workingAudio.frameSizeBytes,
                 placed = true,
                 activeVerses[verseIndex].marker.copy()
             ).also {
@@ -73,6 +78,8 @@ internal class RecordAgainAction(
         node = VerseNode(
             start,
             end,
+            start * workingAudio.frameSizeBytes,
+            end * workingAudio.frameSizeBytes,
             placed = true,
             activeVerses[verseIndex].marker.copy()
         ).also {
@@ -108,14 +115,23 @@ internal class VerseMarkerAction(
     private var secondNode: VerseNode? = null
 
     // Called when marker is set and mouse button is released
-    override fun execute(activeVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
+    override fun execute(
+        activeVerses: MutableList<VerseNode>,
+        workingAudio: AudioFile
+    ) {
         previousFirstNode = activeVerses[verseIndex]
         previousSecondNode = activeVerses.getOrNull(verseIndex - 1)
 
         previousFirstNode?.let { prev ->
+
+            val start = newMarkerPosition
+            val end = prev.end
+
             firstNode = VerseNode(
-                newMarkerPosition,
-                prev.end,
+                start,
+                end,
+                start * workingAudio.frameSizeBytes,
+                end * workingAudio.frameSizeBytes,
                 placed = true,
                 activeVerses[verseIndex].marker.copy()
             ).also { current ->
@@ -124,9 +140,15 @@ internal class VerseMarkerAction(
         }
 
         previousSecondNode?.let { prev ->
+
+            val start = prev.start
+            val end = newMarkerPosition
+
             secondNode = VerseNode(
-                prev.start,
-                newMarkerPosition,
+                start,
+                end,
+                start  * workingAudio.frameSizeBytes,
+                end * workingAudio.frameSizeBytes,
                 placed = true,
                 activeVerses[verseIndex - 1].marker.copy()
             ).also { current ->
@@ -173,6 +195,8 @@ internal class EditVerseAction(
         node = VerseNode(
             start,
             end,
+            start * workingAudio.frameSizeBytes,
+            end * workingAudio.frameSizeBytes,
             placed = true,
             vm
         ).also {

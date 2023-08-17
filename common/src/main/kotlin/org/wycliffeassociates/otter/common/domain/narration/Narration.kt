@@ -32,13 +32,15 @@ class Narration @AssistedInject constructor(
     val audioReader: AudioFileReader
         get() = chapterRepresentation
 
-    val activeVerses: List<VerseNode>
+    val activeVerses: List<VerseMarker>
         get() = run {
-            val verses = chapterRepresentation.activeVerses
+            val verses = chapterRepresentation
+                .activeVerses
+                .map { it.marker }
             verses
         }
 
-    val onActiveVersesUpdated: PublishSubject<List<VerseNode>>
+    val onActiveVersesUpdated: PublishSubject<List<VerseMarker>>
         get() = chapterRepresentation.onActiveVersesUpdated
 
     private val firstVerse: VerseMarker
@@ -134,7 +136,8 @@ class Narration @AssistedInject constructor(
         execute(action)
     }
 
-    fun onChapterEdited(newVerses: List<VerseNode>) {
+    private fun onChapterEdited(newVerses: List<VerseNode>) {
+        // TODO adjust for not having an end location
         val action = ChapterEditedAction(newVerses)
         execute(action)
     }
@@ -166,8 +169,11 @@ class Narration @AssistedInject constructor(
         )
     }
 
-    fun loadSectionIntoPlayer(verse: VerseNode) {
-        player.loadSection(chapterRepresentation.workingAudio.file, verse.start, verse.end)
+    fun loadSectionIntoPlayer(verse: VerseMarker) {
+        val node = chapterRepresentation.activeVerses.find { it.marker.label == verse.label }
+        node?.let {
+            player.loadSection(chapterRepresentation.workingAudio.file, node.start, node.end)
+        }
     }
 
     private fun initializeWavWriter() {
@@ -215,7 +221,13 @@ class Narration @AssistedInject constructor(
         segments.forEach {
             val verseAudio = AudioFile(it.value)
             end += verseAudio.totalFrames
-            val node = VerseNode(start, end, true, it.key)
+            val node = VerseNode(
+                start,
+                end,
+                start * verseAudio.frameSizeBytes,
+                end * verseAudio.frameSizeBytes,
+                true,
+                it.key)
             nodes.add(node)
             start = end
         }

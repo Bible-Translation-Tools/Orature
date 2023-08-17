@@ -11,13 +11,13 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.narration.Narration
 import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
-import org.wycliffeassociates.otter.common.domain.narration.VerseNode
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
@@ -56,7 +56,7 @@ class NarrationViewModel : ViewModel() {
     val recordAgainVerseIndexProperty = SimpleObjectProperty<Int?>()
     var recordAgainVerseIndex by recordAgainVerseIndexProperty
 
-    val playingVerseProperty = SimpleObjectProperty<VerseNode?>()
+    val playingVerseProperty = SimpleObjectProperty<VerseMarker?>()
     var playingVerse by playingVerseProperty
 
     val hasUndoProperty = SimpleBooleanProperty()
@@ -73,7 +73,7 @@ class NarrationViewModel : ViewModel() {
     val chunkTotalProperty = SimpleIntegerProperty(0)
     val chunksList: ObservableList<Chunk> = observableListOf()
 
-    val recordedVerses = observableListOf<VerseNode>()
+    val recordedVerses = observableListOf<VerseMarker>()
     val hasVersesProperty = SimpleBooleanProperty()
     val lastRecordedVerseProperty = SimpleIntegerProperty()
 
@@ -199,7 +199,7 @@ class NarrationViewModel : ViewModel() {
         snackBarObservable.onNext(message)
     }
 
-    fun play(verse: VerseNode) {
+    fun play(verse: VerseMarker) {
         if (playingVerse == verse) {
             audioPlayer.toggle()
         } else {

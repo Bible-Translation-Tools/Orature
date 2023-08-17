@@ -57,7 +57,7 @@ internal class ChapterRepresentation(
     private lateinit var serializedVersesFile: File
     private val activeVersesMapper = ObjectMapper().registerKotlinModule()
 
-    val onActiveVersesUpdated = PublishSubject.create<List<VerseNode>>()
+    val onActiveVersesUpdated = PublishSubject.create<List<VerseMarker>>()
 
     lateinit var workingAudio: OratureAudioFile
         private set
@@ -79,7 +79,7 @@ internal class ChapterRepresentation(
                 VerseMarker(chunk.start, chunk.end, 0)
             }
             .map { marker ->
-                VerseNode(0, 0, false, marker)
+                VerseNode(0, 0, 0, 0, false, marker)
             }
             .toList()
             .blockingGet()
@@ -116,7 +116,7 @@ internal class ChapterRepresentation(
     }
 
     private fun sendActiveVerses() {
-        onActiveVersesUpdated.onNext(activeVerses)
+        onActiveVersesUpdated.onNext(activeVerses.map { it.marker })
     }
 
     private fun initializeSerializedVersesFile() {
@@ -136,6 +136,33 @@ internal class ChapterRepresentation(
             }
             workingAudio = OratureAudioFile(it)
         }
+    }
+
+    internal fun absoluteToRelative(absolute: Int): Int {
+        val verse = activeVerses.find { absolute in it.start..it.end }
+        verse?.let {
+            val index = activeVerses.indexOf(verse)
+            var rel = 0
+            for (idx in 0..index) {
+                rel += activeVerses[idx].end - activeVerses[idx].start
+            }
+            rel += absolute - it.start
+            return rel
+        }
+        return 0
+    }
+
+    internal fun relativeToAbsolute(relativeIdx: Int): Int {
+        var remaining = relativeIdx
+        activeVerses.forEach {
+            val range = it.end - it.start
+            if (range > remaining) {
+                remaining -= range
+            } else {
+                return it.start + min(remaining, 0)
+            }
+        }
+        return remaining
     }
 
     @Synchronized
