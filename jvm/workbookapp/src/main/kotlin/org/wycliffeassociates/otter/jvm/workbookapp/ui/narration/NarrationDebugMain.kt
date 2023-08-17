@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.reactivex.Observable
 import io.reactivex.Single
+import javafx.scene.layout.Priority
 import javafx.stage.Stage
 import org.wycliffeassociates.otter.common.OratureInfo
 import org.wycliffeassociates.otter.common.data.ColorTheme
@@ -26,7 +27,17 @@ import tornadofx.*
 import java.io.File
 import javax.inject.Inject
 
-class NarrationApp : App(NarrationRootView::class), IDependencyGraphProvider {
+
+class NarrationRootView : View() {
+    override val root = borderpane { center<Workspace>() }
+
+    init {
+        workspace.header.removeFromParent()
+        workspace.root.vgrow = Priority.ALWAYS
+    }
+}
+
+class NarrationDebugApp : App(NarrationRootView::class), IDependencyGraphProvider {
 
     override val dependencyGraph = DaggerAppDependencyGraph.builder().build()
     val workbookDataStore by inject<WorkbookDataStore>()
@@ -74,7 +85,7 @@ class NarrationApp : App(NarrationRootView::class), IDependencyGraphProvider {
         stage.width = 1024.0
         stage.scene.root.addClass(ColorTheme.LIGHT.styleClass)
 
-        workspace.dock<NarrationView>()
+        workspace.dock<NarrationPage>()
     }
 
     private fun mockWorkbook() {
@@ -145,7 +156,7 @@ class NarrationApp : App(NarrationRootView::class), IDependencyGraphProvider {
     private fun mockChunks(): ReplayRelay<Chunk> {
         val chunks = mutableListOf<Chunk>()
         for (i in 1..10) {
-            val item = TextItem(chunkText[i-1], MimeType.USFM)
+            val item = TextItem(chunkText[i - 1], MimeType.USFM)
             val chunk = mockk<Chunk>()
             every { chunk.sort } returns i
             every { chunk.label } returns "verse"
@@ -225,5 +236,5 @@ class NarrationApp : App(NarrationRootView::class), IDependencyGraphProvider {
 }
 
 fun main() {
-    launch<NarrationApp>()
+    launch<NarrationDebugApp>()
 }

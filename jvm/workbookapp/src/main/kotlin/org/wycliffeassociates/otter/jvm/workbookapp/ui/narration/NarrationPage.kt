@@ -3,9 +3,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 import com.github.thomasnield.rxkotlinfx.toLazyBinding
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
-import io.reactivex.subjects.PublishSubject
-import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleIntegerProperty
 import javafx.util.Duration
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ColorTheme
@@ -14,6 +11,11 @@ import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NextVerseEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.RecordVerseEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationRedoEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationResetChapterEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationUndoEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -21,40 +23,27 @@ import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseFinishe
 import tornadofx.*
 import java.util.*
 
-class NarrationView : View() {
-    private val logger = LoggerFactory.getLogger(NarrationView::class.java)
+class NarrationPage : View() {
+    private val logger = LoggerFactory.getLogger(NarrationPage::class.java)
 
-    private val viewModel: NarrationViewViewModel by inject()
+    private val viewModel: NarrationViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
     private val settingsViewModel: SettingsViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
 
     private val pluginOpenedPage: PluginOpenedPage
 
+    private val eventSubscriptions = mutableListOf<EventRegistration>()
+
+    private lateinit var narrationHeader: NarrationHeader
+    private lateinit var audioWorkspaceView: AudioWorkspaceView
+    private lateinit var teleprompterView: TeleprompterView
+
     init {
         tryImportStylesheet(resources["/css/narration.css"])
         tryImportStylesheet(resources["/css/chapter-selector.css"])
 
         pluginOpenedPage = createPluginOpenedPage()
-
-        workspace.subscribe<PluginOpenedEvent> { pluginInfo ->
-            if (!pluginInfo.isNative) {
-                workspace.dock(pluginOpenedPage)
-                //viewModel.openSourcePlayer()
-            }
-        }
-        workspace.subscribe<PluginClosedEvent> {
-            (workspace.dockedComponentProperty.value as? PluginOpenedPage)?.let {
-                workspace.navigateBack()
-            }
-        }
-        workspace.subscribe<PluginCloseFinishedEvent> {
-            workspace.navigateBack()
-        }
-
-        workspace.subscribe<SnackBarEvent> {
-            viewModel.snackBarMessage(it.message)
-        }
     }
 
     override val root = stackpane {
@@ -62,11 +51,91 @@ class NarrationView : View() {
 
         createSnackBar()
 
+        narrationHeader = find()
+        audioWorkspaceView = find()
+        teleprompterView = find()
+
         borderpane {
-            top<NarrationHeader>()
-            center<NarrationBody>()
-            bottom<NarrationFooter>()
+            top = narrationHeader.root
+            center = audioWorkspaceView.root
+            bottom = teleprompterView.root
         }
+    }
+
+    override fun onDock() {
+        super.onDock()
+        subscribeToEvents()
+        viewModel.onDock()
+        narrationHeader.onDock()
+        audioWorkspaceView.onDock()
+        teleprompterView.onDock()
+    }
+
+    override fun onUndock() {
+        super.onUndock()
+        unsubscribeFromEvents()
+        viewModel.onUndock()
+        narrationHeader.onUndock()
+        audioWorkspaceView.onUndock()
+        teleprompterView.onUndock()
+    }
+
+    private fun subscribeToEvents() {
+        subscribe<PluginOpenedEvent> { pluginInfo ->
+            if (!pluginInfo.isNative) {
+                workspace.dock(pluginOpenedPage)
+                //viewModel.openSourcePlayer()
+            }
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<SnackBarEvent> {
+            viewModel.snackBarMessage(it.message)
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<NarrationResetChapterEvent> {
+            viewModel.resetChapter()
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<NarrationUndoEvent> {
+            viewModel.undo()
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<NarrationRedoEvent> {
+            viewModel.redo()
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<RecordVerseEvent> {
+            viewModel.toggleRecording()
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<NextVerseEvent> {
+            viewModel.onNext()
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<PlayVerseEvent> {
+            viewModel.play(it.verse)
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<RecordAgainEvent> {
+            viewModel.recordAgain(it.index)
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<OpenInAudioPluginEvent> {
+            viewModel.openInAudioPlugin(it.index)
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<ChapterReturnFromPluginEvent> {
+            viewModel.onChapterReturnFromPlugin()
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<OpenChapterEvent> {
+            viewModel.loadChapter(it.chapter)
+        }.let { eventSubscriptions.add(it) }
+    }
+
+    private fun unsubscribeFromEvents() {
+        eventSubscriptions.forEach { it.unsubscribe() }
+        eventSubscriptions.clear()
     }
 
     private fun createSnackBar() {
@@ -120,25 +189,6 @@ class NarrationView : View() {
                 workbookDataStore.sourceTextZoomRateProperty
             )*/
         }
-    }
-}
-
-class NarrationViewViewModel : ViewModel() {
-    val recordStartProperty = SimpleBooleanProperty()
-    val recordPauseProperty = SimpleBooleanProperty()
-    val recordResumeProperty = SimpleBooleanProperty()
-    val isRecordingProperty = SimpleBooleanProperty()
-    val isRecordingAgainProperty = SimpleBooleanProperty()
-
-    val hasUndoProperty = SimpleBooleanProperty()
-    val hasRedoProperty = SimpleBooleanProperty()
-    val hasVersesProperty = SimpleBooleanProperty()
-
-    val lastRecordedVerseProperty = SimpleIntegerProperty()
-
-    val snackBarObservable: PublishSubject<String> = PublishSubject.create()
-    fun snackBarMessage(message: String) {
-        snackBarObservable.onNext(message)
     }
 }
 

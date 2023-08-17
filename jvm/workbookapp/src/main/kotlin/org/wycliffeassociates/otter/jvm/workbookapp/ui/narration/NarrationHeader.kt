@@ -66,23 +66,13 @@ class NarrationHeader : View() {
             }
         }
     }
-
-    override fun onDock() {
-        super.onDock()
-        viewModel.onDock()
-    }
-
-    override fun onUndock() {
-        super.onDock()
-        viewModel.onUndock()
-    }
 }
 
 class NarrationHeaderViewModel : ViewModel() {
     private val logger = LoggerFactory.getLogger(NarrationHeaderViewModel::class.java)
 
     private val workbookDataStore by inject<WorkbookDataStore>()
-    private val narrationViewViewModel: NarrationViewViewModel by inject()
+    private val narrationViewModel: NarrationViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
     val titleProperty = workbookDataStore.activeWorkbookProperty.stringBinding {
@@ -92,11 +82,6 @@ class NarrationHeaderViewModel : ViewModel() {
                 it.target.title
             )
         } ?: ""
-    }
-
-    private enum class StepDirection {
-        FORWARD,
-        BACKWARD
     }
 
     val chapterTitleProperty = SimpleStringProperty()
@@ -115,32 +100,22 @@ class NarrationHeaderViewModel : ViewModel() {
 
     private val chapterList: ObservableList<Chapter> = observableListOf()
 
-    val listeners = mutableListOf<ListenerDisposer>()
-
     init {
-        hasUndoProperty.bind(narrationViewViewModel.hasUndoProperty)
-        hasRedoProperty.bind(narrationViewViewModel.hasRedoProperty)
-        hasVersesProperty.bind(narrationViewViewModel.hasVersesProperty)
+        chapterList.bind(narrationViewModel.chapterList) { it }
+
+        chapterTakeProperty.bind(narrationViewModel.chapterTakeProperty)
+        chapterTitleProperty.bind(narrationViewModel.chapterTitleProperty)
+        hasNextChapter.bind(narrationViewModel.hasNextChapter)
+        hasPreviousChapter.bind(narrationViewModel.hasPreviousChapter)
+
+        hasUndoProperty.bind(narrationViewModel.hasUndoProperty)
+        hasRedoProperty.bind(narrationViewModel.hasRedoProperty)
+        hasVersesProperty.bind(narrationViewModel.hasVersesProperty)
     }
 
-    fun onDock() {
-        workbookDataStore.activeChapterProperty.onChangeAndDoNowWithDisposer {
-            it?.let { chapter ->
-                setHasNextAndPreviousChapter(chapter)
-                loadChapter(chapter)
-            }
-        }.let(listeners::add)
-
-        workbookDataStore.activeWorkbookProperty.onChangeAndDoNowWithDisposer { workbook ->
-            workbook?.let {
-                getChapterList(workbook.target.chapters)
-            }
-        }.let(listeners::add)
-    }
-
-    fun onUndock() {
-        listeners.forEach(ListenerDisposer::dispose)
-        listeners.clear()
+    private enum class StepDirection {
+        FORWARD,
+        BACKWARD
     }
 
     fun selectPreviousChapter() {
@@ -151,52 +126,18 @@ class NarrationHeaderViewModel : ViewModel() {
         stepToChapter(StepDirection.FORWARD)
     }
 
-    private fun loadChapter(chapter: Chapter) {
-        chapterTakeProperty.set(chapter.getSelectedTake())
-        chapterTitleProperty.set(
-            MessageFormat.format(
-                messages["chapterTitle"],
-                messages["chapter"],
-                chapter.title
-            )
-        )
-    }
-
-    private fun getChapterList(chapters: Observable<Chapter>) {
-        chapters
-            .toList()
-            .map { it.sortedBy { chapter -> chapter.sort } }
-            .observeOnFx()
-            .doOnError { e ->
-                //logger.error("Error in getting the chapter list", e)
-            }
-            .subscribe { list ->
-                chapterList.setAll(list)
-            }
-    }
-
-    private fun setHasNextAndPreviousChapter(chapter: Chapter) {
-        if (chapterList.isNotEmpty()) {
-            hasNextChapter.set(chapter.sort < chapterList.last().sort)
-            hasPreviousChapter.set(chapter.sort > chapterList.first().sort)
-        } else {
-            hasNextChapter.set(false)
-            hasPreviousChapter.set(false)
-            chapterList.sizeProperty.onChangeOnce {
-                setHasNextAndPreviousChapter(chapter)
-            }
-        }
-    }
-
     private fun stepToChapter(direction: StepDirection) {
         val step = when (direction) {
             StepDirection.FORWARD -> 1
             StepDirection.BACKWARD -> -1
         }
         val nextIndex = chapterList.indexOf(workbookDataStore.chapter) + step
-        chapterList.elementAtOrNull(nextIndex)?.let {
-            workbookDataStore.activeChapterProperty.set(it)
-        }
+
+        chapterList
+            .elementAtOrNull(nextIndex)
+            ?.let { chapter ->
+                fire(OpenChapterEvent(chapter))
+            }
     }
 
     fun processWithPlugin(pluginType: PluginType) {
@@ -232,7 +173,10 @@ class NarrationHeaderViewModel : ViewModel() {
                                     PluginType.EDITOR, PluginType.MARKER -> {
                                         FX.eventbus.fire(ChapterReturnFromPluginEvent())
                                     }
-                                    else -> {}
+
+                                    else -> {
+                                        logger.error("Plugin returned with result $result, plugintype: $pluginType did not match a known plugin.")
+                                    }
                                 }
                             }
                         }

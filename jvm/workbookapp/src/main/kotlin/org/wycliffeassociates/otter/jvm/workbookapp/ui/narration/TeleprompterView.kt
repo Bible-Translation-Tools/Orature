@@ -2,7 +2,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Single
-import io.reactivex.functions.Consumer
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
@@ -18,9 +17,9 @@ import tornadofx.*
 import java.text.MessageFormat
 import kotlin.math.max
 
-class NarrationFooterViewModel : ViewModel() {
+class TeleprompterViewModel : ViewModel() {
     private val workbookDataStore by inject<WorkbookDataStore>()
-    private val narrationViewViewModel: NarrationViewViewModel by inject()
+    private val narrationViewModel: NarrationViewModel by inject()
 
     val chunks = observableListOf<Chunk>()
 
@@ -44,46 +43,14 @@ class NarrationFooterViewModel : ViewModel() {
     val lastRecordedVerseProperty = SimpleIntegerProperty()
 
     init {
-        recordStartProperty.bind(narrationViewViewModel.recordStartProperty)
-        recordResumeProperty.bind(narrationViewViewModel.recordResumeProperty)
-        isRecordingProperty.bind(narrationViewViewModel.isRecordingProperty)
-        recordPauseProperty.bind(narrationViewViewModel.recordPauseProperty)
-        isRecordingAgainProperty.bind(narrationViewViewModel.isRecordingAgainProperty)
-        lastRecordedVerseProperty.bind(narrationViewViewModel.lastRecordedVerseProperty)
-    }
+        chunks.bind(narrationViewModel.chunksList) { it }
 
-    fun onDock() {
-        loadChapter()
-    }
-
-    private fun loadChapter() {
-        getInitialChapter()
-            .toObservable()
-            .map {
-                it.getDraft()
-            }
-            .flatMap { it }
-            .observeOnFx()
-            .subscribe { chunks.add(it) }
-    }
-
-    private fun getInitialChapter(): Single<Chapter> {
-        workbookDataStore.activeChapterProperty.value?.let {
-            return Single.just(it)
-        }
-
-        return workbookDataStore
-            .workbook
-            .source
-            .chapters
-            .toList()
-            .map { it.first() }
-            .map { chapter ->
-                runLater {
-                    workbookDataStore.activeChapterProperty.set(chapter)
-                }
-                chapter
-            }
+        recordStartProperty.bindBidirectional(narrationViewModel.recordStartProperty)
+        recordResumeProperty.bindBidirectional(narrationViewModel.recordResumeProperty)
+        isRecordingProperty.bindBidirectional(narrationViewModel.isRecordingProperty)
+        recordPauseProperty.bindBidirectional(narrationViewModel.recordPauseProperty)
+        isRecordingAgainProperty.bindBidirectional(narrationViewModel.isRecordingAgainProperty)
+        lastRecordedVerseProperty.bindBidirectional(narrationViewModel.lastRecordedVerseProperty)
     }
 
     fun currentVerseTextBinding(): StringBinding {
@@ -122,10 +89,12 @@ class NarrationFooterViewModel : ViewModel() {
     }
 }
 
-class NarrationFooter : View() {
+class TeleprompterView : View() {
 
-    private val viewModel: NarrationFooterViewModel by inject()
+    private val viewModel: TeleprompterViewModel by inject()
     private var listView: NarrationTextListView<Chunk> by singleAssign()
+
+    private val subscriptions = mutableListOf<EventRegistration>()
 
     init {
         /*subscribe<WaveformClickedEvent> {
@@ -141,25 +110,24 @@ class NarrationFooter : View() {
             } ?: run {
                 viewModel.stickyVerseProperty.set(null)
             }
-        }
+        }.let { subscriptions.add(it) }
 
         subscribe<ResumeVerseEvent> {
             viewModel.stickyVerseProperty.value?.let { verse ->
                 listView.scrollTo(verse)
             }
-        }
+        }.let { subscriptions.add(it) }
 
         subscribe<RecordAgainEvent> {
             listView.apply {
                 selectionModel.select(it.index)
                 scrollTo(it.index - 1)
             }
-        }
+        }.let { subscriptions.add(it) }
     }
 
     override fun onDock() {
         super.onDock()
-        viewModel.onDock()
         listView.addListeners()
 
         viewModel.lastRecordedVerseProperty.value?.let { lastVerse ->
@@ -176,6 +144,8 @@ class NarrationFooter : View() {
     override fun onUndock() {
         super.onUndock()
         listView.removeListeners()
+        subscriptions.forEach { it.unsubscribe() }
+        subscriptions.clear()
     }
 
     override val root = stackpane {
