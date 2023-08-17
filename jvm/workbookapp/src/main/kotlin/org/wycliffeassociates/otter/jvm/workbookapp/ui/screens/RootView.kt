@@ -52,8 +52,6 @@ class RootView : View() {
         workspace.subscribe<PluginClosedEvent> {
             (app as OtterApp).shouldBlockWindowCloseRequest = false
             viewModel.externalPluginOpenedProperty.set(false)
-        }
-        workspace.subscribe<PluginClosedEvent> {
             (workspace.dockedComponentProperty.value as? PluginOpenedPage)?.let {
                 workspace.navigateBack()
             }
