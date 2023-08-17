@@ -7,6 +7,7 @@ import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -32,18 +33,29 @@ class Narration @AssistedInject constructor(
         get() = chapterRepresentation
 
     val activeVerses: List<VerseNode>
-        get() = chapterRepresentation.activeVerses
+        get() = run {
+            val verses = chapterRepresentation.activeVerses
+            verses
+        }
 
     val onActiveVersesUpdated: PublishSubject<List<VerseNode>>
         get() = chapterRepresentation.onActiveVersesUpdated
+
+    private val firstVerse: VerseMarker
 
     private var writer: WavFileWriter? = null
 
     init {
         initializeWavWriter()
 
+        firstVerse = getFirstVerseMarker()
         updateWorkingFilesFromChapterFile()
         chapterRepresentation.loadFromSerializedVerses()
+    }
+
+    private fun getFirstVerseMarker(): VerseMarker {
+        val firstVerse = chapter.getDraft().blockingFirst()
+        return VerseMarker(firstVerse.start, firstVerse.end, 0)
     }
 
     fun getPcmBuffer(bytes: ByteArray): Int {
@@ -74,12 +86,12 @@ class Narration @AssistedInject constructor(
     }
 
     fun undo() {
-        history.undo(chapterRepresentation.activeVerses)
+        history.undo(chapterRepresentation.totalVerses)
         chapterRepresentation.onVersesUpdated()
     }
 
     fun redo() {
-        history.redo(chapterRepresentation.activeVerses)
+        history.redo(chapterRepresentation.totalVerses)
         chapterRepresentation.onVersesUpdated()
     }
 
@@ -169,11 +181,13 @@ class Narration @AssistedInject constructor(
     }
 
     private fun execute(action: NarrationAction) {
-        history.execute(action, chapterRepresentation.activeVerses, chapterRepresentation.workingAudio)
+        history.execute(action, chapterRepresentation.totalVerses, chapterRepresentation.workingAudio)
         chapterRepresentation.onVersesUpdated()
     }
 
-    private fun updateWorkingFilesFromChapterFile(forceUpdate: Boolean = false) {
+    private fun updateWorkingFilesFromChapterFile(
+        forceUpdate: Boolean = false
+    ) {
         val chapterFile = chapter.getSelectedTake()?.file
         val chapterFileExists = chapterFile?.exists() ?: false
 
@@ -181,19 +195,19 @@ class Narration @AssistedInject constructor(
         val narrationFromChapter = chapterFileExists && narrationEmpty
 
         if (narrationFromChapter || forceUpdate) {
-            val segments = splitAudioOnCues.execute(chapterFile!!)
+            val segments = splitAudioOnCues.execute(chapterFile!!, firstVerse)
             createVersesFromVerseSegments(segments)
             appendVerseSegmentsToWorkingAudio(segments)
         }
     }
 
-    private fun appendVerseSegmentsToWorkingAudio(segments: Map<String, File>) {
+    private fun appendVerseSegmentsToWorkingAudio(segments: VerseSegments) {
         segments.forEach {
             audioFileUtils.appendFile(chapterRepresentation.workingAudio, it.value)
         }
     }
 
-    private fun createVersesFromVerseSegments(segments: Map<String, File>) {
+    private fun createVersesFromVerseSegments(segments: VerseSegments) {
         val nodes = mutableListOf<VerseNode>()
         var start = chapterRepresentation.workingAudio.totalFrames
         var end = chapterRepresentation.workingAudio.totalFrames
@@ -201,7 +215,7 @@ class Narration @AssistedInject constructor(
         segments.forEach {
             val verseAudio = AudioFile(it.value)
             end += verseAudio.totalFrames
-            val node = VerseNode(start, end)
+            val node = VerseNode(start, end, true, it.key)
             nodes.add(node)
             start = end
         }

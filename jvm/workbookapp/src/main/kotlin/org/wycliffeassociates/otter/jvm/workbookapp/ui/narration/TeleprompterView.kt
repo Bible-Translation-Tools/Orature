@@ -18,7 +18,6 @@ import java.text.MessageFormat
 import kotlin.math.max
 
 class TeleprompterViewModel : ViewModel() {
-    private val workbookDataStore by inject<WorkbookDataStore>()
     private val narrationViewModel: NarrationViewModel by inject()
 
     val chunks = observableListOf<Chunk>()
