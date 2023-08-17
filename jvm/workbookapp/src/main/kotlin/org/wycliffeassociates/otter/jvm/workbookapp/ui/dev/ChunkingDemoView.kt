@@ -37,17 +37,15 @@ class ChunkingDemoView : View() {
         maxWidth = 300.0
 
         val node = RollingSourceText().apply {
+            sourceTitleProperty.set("English ULB")
             sourceTextProperty.set(text)
-            highlightedChunk.set(2)
+            highlightedChunk.set(0)
         }
         add(node)
     }
 
     init {
         tryImportStylesheet("/css/source-content.css")
-
-        val chunks = text.trim().split(Regex("\\d{1,3}\\."))
-        println(chunks)
     }
 }
 
