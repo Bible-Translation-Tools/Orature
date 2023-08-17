@@ -36,6 +36,7 @@ class ProjectWizardSection(
             addClass("homepage__main-region__header-section")
             button {
                 addClass("btn", "btn--icon")
+                tooltip(messages["goBack"])
                 graphic = FontIcon(MaterialDesign.MDI_ARROW_LEFT)
 
                 onActionProperty().bind(onCancelActionProperty)
@@ -76,6 +77,7 @@ class ProjectWizardSection(
             addClass("homepage__main-region__header-section")
             button {
                 addClass("btn", "btn--icon")
+                tooltip(messages["goBack"])
                 graphic = FontIcon(MaterialDesign.MDI_ARROW_LEFT)
 
                 setOnAction { selectedModeProperty.set(null) }
@@ -105,6 +107,7 @@ class ProjectWizardSection(
 
             button {
                 addClass("btn", "btn--icon")
+                tooltip(messages["goBack"])
                 graphic = FontIcon(MaterialDesign.MDI_ARROW_LEFT)
 
                 setOnAction { selectedSourceLanguageProperty.set(null) }

@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Completable
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.transformation.FilteredList
@@ -14,6 +15,8 @@ import org.wycliffeassociates.otter.common.domain.collections.UpdateProject
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
+import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
+import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupKey
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupCardModel
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
@@ -22,8 +25,10 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.WorkbookPage
 import tornadofx.ViewModel
+import tornadofx.get
 import tornadofx.observableListOf
 import tornadofx.toObservable
+import java.text.MessageFormat
 import java.time.LocalDateTime
 import java.util.function.Predicate
 import javax.inject.Inject
@@ -150,14 +155,11 @@ class HomePageViewModel2 : ViewModel() {
         }
     }
 
-    fun deleteBook(workbookDescriptor: WorkbookDescriptor) {
+    fun deleteBook(workbookDescriptor: WorkbookDescriptor): Completable {
         logger.info("Deleting book: ${workbookDescriptor.slug}")
 
-        deleteProjectUseCase.delete(workbookDescriptor)
+        return deleteProjectUseCase.delete(workbookDescriptor)
             .observeOnFx()
-            .subscribe {
-                loadProjects()
-            }
     }
 
     fun openInFilesManager(path: String) = directoryProvider.openInFileManager(path)

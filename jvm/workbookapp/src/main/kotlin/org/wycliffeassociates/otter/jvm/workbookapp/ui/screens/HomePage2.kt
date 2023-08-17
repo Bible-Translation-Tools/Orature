@@ -9,6 +9,7 @@ import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportType
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
@@ -196,6 +197,11 @@ class HomePage2 : View() {
 
         subscribe<WorkbookDeleteEvent> {
             viewModel.deleteBook(it.data)
+                .subscribe {
+                    val notification = createBookDeleteNotification(it.data)
+                    showNotification(notification)
+                    viewModel.loadProjects()
+                }
         }
 
         subscribe<WorkbookQuickBackupEvent> {
@@ -363,11 +369,27 @@ class HomePage2 : View() {
         } else {
             NotificationViewData(
                 title = messages["exportFailed"],
-                message = MessageFormat.format(messages["exportFailedMessage"], event.project.titleKey),
+                message = MessageFormat.format(
+                    messages["exportFailedMessage"],
+                    event.project.titleKey,
+                    event.project.resourceContainer?.language?.name ?: ""
+                ),
                 statusType = NotificationStatusType.FAILED
             )
         }
         return notification
+    }
+
+    private fun createBookDeleteNotification(workbookDescriptor: WorkbookDescriptor): NotificationViewData {
+        return NotificationViewData(
+            title = messages["projectDeleted"],
+            message = MessageFormat.format(
+                messages["projectDeletedMessage"],
+                workbookDescriptor.targetCollection.titleKey,
+                workbookDescriptor.targetLanguage.name
+            ),
+            statusType = NotificationStatusType.WARNING,
+        )
     }
 
     private fun showNotification(notification: NotificationViewData) {

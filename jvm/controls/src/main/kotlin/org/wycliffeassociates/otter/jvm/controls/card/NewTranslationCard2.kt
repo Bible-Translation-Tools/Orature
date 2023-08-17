@@ -73,6 +73,7 @@ class NewTranslationCard2(
         }
         button(messages["cancel"]) {
             addClass("btn", "btn--secondary")
+            tooltip(text)
             graphic = FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE)
 
             onActionProperty().bind(onCancelProperty)
@@ -90,6 +91,7 @@ class TranslationCreationCard : VBox() {
         addClass("create-translation-card")
         button {
             addClass("btn", "btn--primary")
+            tooltip(messages["newProject"])
             graphic = FontIcon(MaterialDesign.MDI_PLUS)
 
             onActionProperty().bind(onCreateProperty)
