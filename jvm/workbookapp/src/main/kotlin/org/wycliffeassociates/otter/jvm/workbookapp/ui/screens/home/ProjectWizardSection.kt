@@ -1,8 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home
 
-import javafx.animation.KeyFrame
-import javafx.animation.KeyValue
-import javafx.animation.Timeline
+import javafx.animation.TranslateTransition
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -188,33 +186,30 @@ class ProjectWizardSection(
      */
     private fun renderStepTransition(step: Int, direction: StepDirection) {
         val nodeToAnimate = steps[step]
+        val duration = Duration.seconds(TRANSITION_DURATION_SEC)
         /* horizontal translation is automatically aligned with node orientation */
         if (direction == StepDirection.FORWARD) {
             steps[step].isVisible = true
 
-            val keyValue = KeyValue(nodeToAnimate.translateXProperty(), 0)
-            val keyFrame = KeyFrame(Duration.seconds(TRANSITION_DURATION_SEC), keyValue)
-            val timeline = Timeline(keyFrame)
-
-            timeline.setOnFinished {
-                steps.forEachIndexed { index, node ->
-                    node.isVisible = index == step // only enable visibility for the target step
+            TranslateTransition(duration, nodeToAnimate).apply {
+                toX = 0.0
+                setOnFinished {
+                    steps.forEachIndexed { index, node ->
+                        node.isVisible = index == step // only enable visibility for the target step
+                    }
                 }
-            }
-            timeline.play()
+            }.play()
         } else {
             steps[step - 1].isVisible = true
 
-            val keyValue = KeyValue(nodeToAnimate.translateXProperty(), scene.width)
-            val keyFrame = KeyFrame(Duration.seconds(TRANSITION_DURATION_SEC), keyValue)
-            val timeline = Timeline(keyFrame)
-
-            timeline.setOnFinished {
-                steps.forEachIndexed { index, node ->
-                    node.isVisible = index == step - 1 // only enable visibility for the target step
+            TranslateTransition(duration, nodeToAnimate).apply {
+                toX = scene.width
+                setOnFinished {
+                    steps.forEachIndexed { index, node ->
+                        node.isVisible = index == step - 1 // only enable visibility for the target step
+                    }
                 }
-            }
-            timeline.play()
+            }.play()
         }
     }
 }
