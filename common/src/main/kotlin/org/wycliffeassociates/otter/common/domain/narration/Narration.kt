@@ -36,7 +36,9 @@ class Narration @AssistedInject constructor(
         get() = run {
             val verses = chapterRepresentation
                 .activeVerses
-                .map { it.marker }
+                .map {
+                    it.marker
+                }
             verses
         }
 
@@ -170,9 +172,9 @@ class Narration @AssistedInject constructor(
     }
 
     fun loadSectionIntoPlayer(verse: VerseMarker) {
-        val node = chapterRepresentation.activeVerses.find { it.marker.label == verse.label }
-        node?.let {
-            player.loadSection(chapterRepresentation.workingAudio.file, node.start, node.end)
+        val range: IntRange? = chapterRepresentation.getRangeOfMarker(verse)
+        range?.let {
+            player.loadSection(chapterRepresentation.workingAudio.file, range.start, range.last)
         }
     }
 
@@ -224,10 +226,9 @@ class Narration @AssistedInject constructor(
             val node = VerseNode(
                 start,
                 end,
-                start * verseAudio.frameSizeBytes,
-                end * verseAudio.frameSizeBytes,
                 true,
-                it.key)
+                it.key
+            )
             nodes.add(node)
             start = end
         }

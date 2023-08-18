@@ -35,8 +35,6 @@ internal class NewVerseAction : NarrationAction {
             node = VerseNode(
                 start,
                 end,
-                start * workingAudio.frameSizeBytes,
-                end * workingAudio.frameSizeBytes,
                 placed = true,
                 activeVerses[verseIndex].marker.copy()
             ).also {
@@ -78,8 +76,6 @@ internal class RecordAgainAction(
         node = VerseNode(
             start,
             end,
-            start * workingAudio.frameSizeBytes,
-            end * workingAudio.frameSizeBytes,
             placed = true,
             activeVerses[verseIndex].marker.copy()
         ).also {
@@ -130,8 +126,6 @@ internal class VerseMarkerAction(
             firstNode = VerseNode(
                 start,
                 end,
-                start * workingAudio.frameSizeBytes,
-                end * workingAudio.frameSizeBytes,
                 placed = true,
                 activeVerses[verseIndex].marker.copy()
             ).also { current ->
@@ -147,8 +141,6 @@ internal class VerseMarkerAction(
             secondNode = VerseNode(
                 start,
                 end,
-                start  * workingAudio.frameSizeBytes,
-                end * workingAudio.frameSizeBytes,
                 placed = true,
                 activeVerses[verseIndex - 1].marker.copy()
             ).also { current ->
@@ -195,8 +187,6 @@ internal class EditVerseAction(
         node = VerseNode(
             start,
             end,
-            start * workingAudio.frameSizeBytes,
-            end * workingAudio.frameSizeBytes,
             placed = true,
             vm
         ).also {

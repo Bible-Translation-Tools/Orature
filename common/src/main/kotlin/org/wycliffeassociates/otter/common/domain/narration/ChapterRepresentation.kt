@@ -9,12 +9,12 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
-import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import java.io.File
 import java.io.RandomAccessFile
 import java.lang.IllegalStateException
+import kotlin.math.max
 import kotlin.math.min
 
 private const val ACTIVE_VERSES_FILE_NAME = "active_verses.json"
@@ -49,8 +49,10 @@ internal class ChapterRepresentation(
         get() = activeVerses.sumOf { it.end - it.start }
 
     @get:Synchronized
-    val activeVerses: List<VerseNode>
-        get() = totalVerses.filter { it.placed }
+    internal val activeVerses: List<VerseNode>
+        get() = totalVerses.filter {
+            it.placed
+        }
 
     internal val totalVerses: MutableList<VerseNode>
 
@@ -79,7 +81,7 @@ internal class ChapterRepresentation(
                 VerseMarker(chunk.start, chunk.end, 0)
             }
             .map { marker ->
-                VerseNode(0, 0, 0, 0, false, marker)
+                VerseNode(0, 0, false, marker)
             }
             .toList()
             .blockingGet()
@@ -116,7 +118,12 @@ internal class ChapterRepresentation(
     }
 
     private fun sendActiveVerses() {
-        onActiveVersesUpdated.onNext(activeVerses.map { it.marker })
+        onActiveVersesUpdated.onNext(
+            activeVerses.map {
+                val newLoc = absoluteToRelative(it.start)
+                it.marker.copy(location = newLoc)
+            }
+        )
     }
 
     private fun initializeSerializedVersesFile() {
@@ -138,7 +145,7 @@ internal class ChapterRepresentation(
         }
     }
 
-    internal fun absoluteToRelative(absolute: Int): Int {
+    private fun absoluteToRelative(absolute: Int): Int {
         val verse = activeVerses.find { absolute in it.start..it.end }
         verse?.let {
             val index = activeVerses.indexOf(verse)
@@ -239,5 +246,26 @@ internal class ChapterRepresentation(
 
     override fun close() {
         release()
+    }
+
+    fun getRangeOfMarker(verse: VerseMarker): IntRange? {
+        val verses = activeVerses
+        if (verses.isEmpty()) return null
+
+        verses
+            .find { it.marker.label == verse.label }
+            ?.let {
+                val start = absoluteToRelative(it.start)
+                var end = 0
+                val index = verses.indexOf(it)
+                if (verses.lastIndex != index) {
+                    val next = verses[index + 1]
+                    end = max(absoluteToRelative(next.start) - 1, 0)
+                } else {
+                    absoluteToRelative(verses.last().end)
+                }
+                return start..end
+            }
+        return null
     }
 }
