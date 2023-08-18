@@ -5,6 +5,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
@@ -23,6 +24,8 @@ class Narration @AssistedInject constructor(
     @Assisted private val workbook: Workbook,
     @Assisted private val chapter: Chapter
 ) {
+    private val logger = LoggerFactory.getLogger(Narration::class.java)
+
     private val history = NarrationHistory()
     private var chapterRepresentation = ChapterRepresentation(workbook, chapter)
 
@@ -99,12 +102,18 @@ class Narration @AssistedInject constructor(
         chapterRepresentation.onVersesUpdated()
     }
 
-    fun finalizeVerse(verseIndex: Int = activeVerses.lastIndex) {
+    fun finalizeVerse(verseIndex: Int) {
         chapterRepresentation.finalizeVerse(verseIndex)
     }
 
-    fun onNewVerse() {
-        val action = NewVerseAction()
+    fun onNewVerse(verseIndex: Int) {
+//        val verseIndex = chapterRepresentation.totalVerses.indexOfFirst { it.marker.label == verse.label }
+//        if (verseIndex == -1) {
+//            logger.error("could not find verse: $verse")
+//            return
+//        }
+
+        val action = NewVerseAction(verseIndex)
         execute(action)
 
         recorder.start()
@@ -172,9 +181,11 @@ class Narration @AssistedInject constructor(
     }
 
     fun loadSectionIntoPlayer(verse: VerseMarker) {
+        logger.info("Loading verse ${verse.label} into player")
         val range: IntRange? = chapterRepresentation.getRangeOfMarker(verse)
+        logger.info("Playback range is ${range?.start}-${range?.last}")
         range?.let {
-            player.loadSection(chapterRepresentation.workingAudio.file, range.start, range.last)
+            player.loadSection(chapterRepresentation.workingAudio.file, range.first, range.last)
         }
     }
 

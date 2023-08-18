@@ -62,7 +62,7 @@ class NarrationTextCell(
             nextChunkTextProperty.set(nextChunkText)
 
             onRecordActionProperty.set(EventHandler {
-                FX.eventbus.fire(RecordVerseEvent(item))
+                FX.eventbus.fire(RecordVerseEvent(index, item))
             })
 
             onNextVerseActionProperty.set(EventHandler  {
@@ -75,12 +75,12 @@ class NarrationTextCell(
                     // than the text needed to actively be narrated being off the screen.
                     scrollTo(selectionModel.selectedIndex - 1)
 
-                    FX.eventbus.fire(NextVerseEvent(selectionModel.selectedItem))
+                    FX.eventbus.fire(NextVerseEvent(selectionModel.selectedIndex, selectionModel.selectedItem))
                 }
             })
         }
     }
 }
 
-class NextVerseEvent(val data: Chunk) : FXEvent()
-class RecordVerseEvent(val data: Chunk) : FXEvent()
+class NextVerseEvent(val index: Int, val chunk: Chunk) : FXEvent()
+class RecordVerseEvent(val index: Int, val chunk: Chunk) : FXEvent()

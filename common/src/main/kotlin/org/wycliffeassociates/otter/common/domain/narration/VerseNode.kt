@@ -19,4 +19,7 @@ internal data class VerseNode(
         end = 0
         placed = false
     }
+
+    val length: Int
+        get() = start - end
 }

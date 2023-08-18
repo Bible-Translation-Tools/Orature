@@ -9,29 +9,29 @@ internal class NarrationHistory {
 
     fun execute(
         action: NarrationAction,
-        activeVerses: MutableList<VerseNode>,
+        totalVerses: MutableList<VerseNode>,
         workingAudio: AudioFile
     ) {
-        action.execute(activeVerses, workingAudio)
+        action.execute(totalVerses, workingAudio)
         undoStack.addLast(action)
         redoStack.clear()
     }
 
-    fun undo(activeVerses: MutableList<VerseNode>) {
+    fun undo(totalVerses: MutableList<VerseNode>) {
         if (undoStack.isEmpty()) return
 
         val action = undoStack.removeLast()
 
-        action.undo(activeVerses)
+        action.undo(totalVerses)
         redoStack.addLast(action)
     }
 
-    fun redo(activeVerses: MutableList<VerseNode>) {
+    fun redo(totalVerses: MutableList<VerseNode>) {
         if (redoStack.isEmpty()) return
 
         val action = redoStack.removeLast()
 
-        action.redo(activeVerses)
+        action.redo(totalVerses)
         undoStack.addLast(action)
     }
 

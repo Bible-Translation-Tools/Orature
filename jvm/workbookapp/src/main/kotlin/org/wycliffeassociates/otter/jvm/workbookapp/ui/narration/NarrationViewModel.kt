@@ -30,6 +30,7 @@ import tornadofx.*
 import java.io.File
 import java.text.MessageFormat
 import javax.inject.Inject
+import kotlin.math.max
 
 class NarrationViewModel : ViewModel() {
     private val logger = LoggerFactory.getLogger(NarrationViewModel::class.java)
@@ -200,7 +201,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun play(verse: VerseMarker) {
-        if (playingVerse == verse) {
+        if (playingVerse?.label == verse.label) {
             audioPlayer.toggle()
         } else {
             audioPlayer.pause()
@@ -237,11 +238,11 @@ class NarrationViewModel : ViewModel() {
         updateRecordingState()
     }
 
-    fun onNext() {
+    fun onNext(index: Int) {
         when {
             isRecording -> {
-                narration.finalizeVerse()
-                narration.onNewVerse()
+                narration.finalizeVerse(max(index - 1, 0))
+                narration.onNewVerse(index)
             }
 
             recordPause -> {
@@ -253,12 +254,12 @@ class NarrationViewModel : ViewModel() {
         }
     }
 
-    fun toggleRecording() {
+    fun toggleRecording(index: Int) {
         when {
-            isRecording && !isRecordingAgain -> pauseRecording()
+            isRecording && !isRecordingAgain -> pauseRecording(index)
             isRecording && isRecordingAgain -> stopRecordAgain()
             recordPause -> resumeRecording()
-            recordStart || recordResume -> record()
+            recordStart || recordResume -> record(index)
             else -> {
                 logger.error("Toggle recording is in the else state.")
             }
@@ -285,22 +286,22 @@ class NarrationViewModel : ViewModel() {
         recordPause = false
     }
 
-    private fun record() {
+    private fun record(index: Int) {
         stopPlayer()
 
-        narration.onNewVerse()
+        narration.onNewVerse(index)
 
         isRecording = true
         recordStart = false
         recordResume = false
     }
 
-    private fun pauseRecording() {
+    private fun pauseRecording(index: Int) {
         isRecording = false
         recordPause = true
 
         narration.pauseRecording()
-        narration.finalizeVerse()
+        narration.finalizeVerse(index)
     }
 
     private fun resumeRecording() {

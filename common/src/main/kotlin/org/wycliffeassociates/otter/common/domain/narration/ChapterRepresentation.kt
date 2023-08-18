@@ -102,7 +102,8 @@ internal class ChapterRepresentation(
         }
     }
 
-    fun finalizeVerse(verseIndex: Int = activeVerses.lastIndex) {
+    fun finalizeVerse(verseIndex: Int) {
+        logger.info("Finalizing verse: ${verseIndex}")
         activeVerses.getOrNull(verseIndex)?.end = workingAudio.totalFrames
         onVersesUpdated()
     }
@@ -146,12 +147,17 @@ internal class ChapterRepresentation(
     }
 
     private fun absoluteToRelative(absolute: Int): Int {
-        val verse = activeVerses.find { absolute in it.start..it.end }
+        val verses = activeVerses
+        var verse = verses.find {
+            val absoluteIsInRange = absolute in it.start until it.end
+            val absoluteIsAbsoluteEnd = absolute == it.end && absolute == activeVerses.last().end
+            absoluteIsInRange || absoluteIsAbsoluteEnd
+        }
         verse?.let {
-            val index = activeVerses.indexOf(verse)
+            val index = verses.indexOf(verse)
             var rel = 0
-            for (idx in 0..index) {
-                rel += activeVerses[idx].end - activeVerses[idx].start
+            for (idx in 0 until index) {
+                rel += verses[idx].end - verses[idx].start
             }
             rel += absolute - it.start
             return rel
@@ -249,20 +255,24 @@ internal class ChapterRepresentation(
     }
 
     fun getRangeOfMarker(verse: VerseMarker): IntRange? {
-        val verses = activeVerses
+        val verses = activeVerses.map {
+            val newLoc = absoluteToRelative(it.start)
+            val newMarker = it.marker.copy(location = newLoc)
+            VerseNode(it.start, it.end, it.placed, newMarker)
+        }
         if (verses.isEmpty()) return null
 
         verses
             .find { it.marker.label == verse.label }
             ?.let {
-                val start = absoluteToRelative(it.start)
+                val start = verse.location
                 var end = 0
                 val index = verses.indexOf(it)
                 if (verses.lastIndex != index) {
                     val next = verses[index + 1]
-                    end = max(absoluteToRelative(next.start) - 1, 0)
+                    end = max(next.marker.location - 1, 0)
                 } else {
-                    absoluteToRelative(verses.last().end)
+                    end = absoluteToRelative(verses.last().end)
                 }
                 return start..end
             }
