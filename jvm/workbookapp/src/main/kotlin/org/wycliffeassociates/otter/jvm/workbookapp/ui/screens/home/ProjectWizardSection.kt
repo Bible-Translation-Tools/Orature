@@ -36,7 +36,7 @@ class ProjectWizardSection(
     val sourceLanguageSearchQueryProperty =  SimpleStringProperty()
     val targetLanguageSearchQueryProperty = SimpleStringProperty()
 
-    private val steps = mutableListOf<Node>()
+    private val steps: List<Node>
     private val currentStepProperty = SimpleIntegerProperty(0)
     private val onCancelActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
@@ -146,9 +146,7 @@ class ProjectWizardSection(
         add(step2)
         add(step3)
 
-        steps.add(step1)
-        steps.add(step2)
-        steps.add(step3)
+        steps = listOf(step1, step2, step3)
     }
 
     fun setOnCancelAction(op: () -> Unit) {
@@ -158,9 +156,8 @@ class ProjectWizardSection(
     fun onSectionDocked() {
         currentStepProperty.set(0)
         steps.forEachIndexed { index, node ->
-            node.isVisible = index == 0 // enable the first step
+            node.isVisible = index == 0 // allow only the first step to be accessible
         }
-
         runLater {
             step2.translateX = scene.width
             step3.translateX = scene.width
@@ -180,10 +177,10 @@ class ProjectWizardSection(
     }
 
     /**
-     * Renders the animation when switching between wizard steps.
+     * Renders the transition animation when switching between wizard steps.
      *
      * After the animation completes, all step nodes that are not the target
-     * will be "removed" from the view to avoid firing keyboard event on
+     * will be inaccessible by the view to avoid firing keyboard event on
      * detached element(s).
      *
      * @param step the ordinal of the step that needs to animate
@@ -191,13 +188,14 @@ class ProjectWizardSection(
      */
     private fun renderStepTransition(step: Int, direction: StepDirection) {
         val nodeToAnimate = steps[step]
-
+        /* horizontal translation is automatically aligned with node orientation */
         if (direction == StepDirection.FORWARD) {
             steps[step].isVisible = true
 
             val keyValue = KeyValue(nodeToAnimate.translateXProperty(), 0)
             val keyFrame = KeyFrame(Duration.seconds(TRANSITION_DURATION_SEC), keyValue)
             val timeline = Timeline(keyFrame)
+
             timeline.setOnFinished {
                 steps.forEachIndexed { index, node ->
                     node.isVisible = index == step // only enable visibility for the target step
@@ -210,6 +208,7 @@ class ProjectWizardSection(
             val keyValue = KeyValue(nodeToAnimate.translateXProperty(), scene.width)
             val keyFrame = KeyFrame(Duration.seconds(TRANSITION_DURATION_SEC), keyValue)
             val timeline = Timeline(keyFrame)
+
             timeline.setOnFinished {
                 steps.forEachIndexed { index, node ->
                     node.isVisible = index == step - 1 // only enable visibility for the target step
