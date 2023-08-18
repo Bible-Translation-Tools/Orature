@@ -1,6 +1,8 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.popup
 
+import javafx.scene.control.Button
 import javafx.scene.control.ContextMenu
+import javafx.scene.control.Label
 import javafx.scene.control.MenuItem
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
@@ -12,19 +14,26 @@ import tornadofx.*
 class ProjectGroupOptionMenu : ContextMenu() {
     val books = observableListOf<WorkbookDescriptor>()
     init {
-        val editContributorOption = MenuItem(messages["modifyContributors"]).apply {
-            graphic = FontIcon(MaterialDesign.MDI_ACCOUNT_MULTIPLE)
+        val editContributorOption = MenuItem().apply {
+            graphic = Label(messages["modifyContributors"]).apply {
+                this.graphic = FontIcon(MaterialDesign.MDI_ACCOUNT_MULTIPLE)
+                tooltip(this.text)
+            }
             action {
                 // TODO
             }
         }
-        val deleteOption = MenuItem(messages["deleteProject"]).apply {
+        val deleteOption = MenuItem().apply {
             addClass("danger")
-            graphic = FontIcon(MaterialDesign.MDI_DELETE)
-            disableWhen { books.booleanBinding { list -> list.any { it.progress > 0 } } }
-
+            graphic = Label(messages["deleteProject"]).apply {
+                this.graphic = FontIcon(MaterialDesign.MDI_DELETE)
+                tooltip(this.text)
+            }
             action {
                 FX.eventbus.fire(ProjectGroupDeleteEvent(books))
+            }
+            disableWhen {
+                books.booleanBinding { list -> list.any { it.progress > 0 } }
             }
         }
         addClass("wa-context-menu")

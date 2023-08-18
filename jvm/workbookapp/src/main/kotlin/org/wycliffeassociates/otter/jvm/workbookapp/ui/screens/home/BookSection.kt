@@ -44,7 +44,7 @@ class BookSection(
                 button {
                     addClass("btn", "btn--icon", "btn--borderless", "option-button")
                     tooltip(messages["options"])
-                    graphic = FontIcon(MaterialDesign.MDI_DOTS_HORIZONTAL)
+                    graphic = FontIcon(MaterialDesign.MDI_DOTS_VERTICAL)
 
                     projectsOptionMenu.books.setAll(filteredBooks)
                     setOnAction {
