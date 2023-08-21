@@ -7,6 +7,7 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.collections.transformation.FilteredList
 import javafx.collections.transformation.SortedList
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
@@ -57,6 +58,7 @@ class HomePageViewModel2 : ViewModel() {
 
     val projectGroups = observableListOf<ProjectGroupCardModel>()
     val bookList = observableListOf<WorkbookDescriptor>()
+    val contributorList = observableListOf<Contributor>()
     private val filteredBooks = FilteredList<WorkbookDescriptor>(bookList)
     private val disposableListeners = mutableListOf<ListenerDisposer>()
 
@@ -164,6 +166,33 @@ class HomePageViewModel2 : ViewModel() {
 
     fun openInFilesManager(path: String) = directoryProvider.openInFileManager(path)
 
+    fun loadContributors(books: List<WorkbookDescriptor>): List<Contributor> {
+        val contributors = mutableSetOf<Contributor>()
+        books.forEach {
+            val workbook = workbookRepo.get(it.sourceCollection, it.targetCollection)
+            if (workbook.projectFilesAccessor.isInitialized()) {
+                contributors.addAll(workbook.projectFilesAccessor.getContributorInfo())
+            }
+        }
+        return if (contributors.isEmpty()) {
+            contributorList
+        }
+        else {
+            contributorList.setAll(contributors)
+            contributors.toList()
+        }
+    }
+
+    fun saveContributors(contributors: List<Contributor>, books: List<WorkbookDescriptor>) {
+        contributorList.setAll(contributors)
+        books.forEach {
+            val workbook = workbookRepo.get(it.sourceCollection, it.targetCollection)
+            if (workbook.projectFilesAccessor.isInitialized()) {
+                workbook.projectFilesAccessor.setContributorInfo(contributors)
+            }
+        }
+    }
+
     private fun updateBookList(books: List<WorkbookDescriptor>) {
         if (books.isEmpty()) {
             bookList.clear()
@@ -216,6 +245,7 @@ class HomePageViewModel2 : ViewModel() {
         workbook.projectFilesAccessor.copySourceFiles(linkedResource)
         workbook.projectFilesAccessor.createSelectedTakesFile()
         workbook.projectFilesAccessor.createChunksFile()
+        workbook.projectFilesAccessor.setContributorInfo(contributorList)
         workbook.projectFilesAccessor.setProjectMode(workbookDS.currentModeProperty.value)
     }
 

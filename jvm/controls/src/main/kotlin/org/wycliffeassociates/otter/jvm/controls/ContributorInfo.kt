@@ -53,9 +53,6 @@ class ContributorInfo(
         addClass("contributor__container")
 
         vbox {
-            label(messages["contributorHeading"]) {
-                addClass("contributor__section-title")
-            }
             label(messages["contributorDescription"]) {
                 addClass("contributor__section-text")
                 minHeight = Region.USE_PREF_SIZE // prevent overflow ellipsis
@@ -77,21 +74,15 @@ class ContributorInfo(
                         contributorField.requestFocus()
                     }
                 }
-            }.hide()
+            }
 
-            button(messages["addContributor"]) {
-                addClass("btn", "btn--secondary", "contributor__add-btn")
-                hgrow = Priority.SOMETIMES
+            button {
+                addClass("btn", "btn--primary", "contributor__add-btn")
                 graphic = FontIcon(MaterialDesign.MDI_PLUS)
-                tooltip(this.text)
+                tooltip(messages["add"])
 
                 setOnAction {
-                    if (!contributorField.isVisible) {
-                        contributorField.show()
-                    } else {
-                        addContributor()
-                    }
-                    contributorField.requestFocus()
+                    addContributor()
                 }
             }
         }

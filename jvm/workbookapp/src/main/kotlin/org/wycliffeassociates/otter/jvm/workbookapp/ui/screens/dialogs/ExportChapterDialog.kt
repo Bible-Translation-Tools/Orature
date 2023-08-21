@@ -34,6 +34,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewMod
 import tornadofx.*
 
 class ExportChapterDialog : OtterDialog() {
+    val contributors = observableListOf<Contributor>()
     private val viewModel: ExportChapterViewModel by inject()
 
     private val settingsViewModel: SettingsViewModel by inject()
@@ -45,7 +46,7 @@ class ExportChapterDialog : OtterDialog() {
             hbox {
                 addClass("contributor-dialog__header")
                 label (messages["exportChapter"]) {
-                    addClass("contributor-dialog__title")
+                    addClass("h3")
                 }
                 region { hgrow = Priority.ALWAYS }
                 button {
@@ -55,7 +56,7 @@ class ExportChapterDialog : OtterDialog() {
                     action { close() }
                 }
             }
-            add(createContributorSection())
+            add(createContributorSection(contributors))
         }
         hbox {
             hgrow = Priority.ALWAYS
@@ -103,9 +104,8 @@ class ExportChapterDialog : OtterDialog() {
         setContent(content)
     }
 
-    private fun createContributorSection(): ContributorInfo {
-        viewModel.loadContributors()
-        return ContributorInfo(viewModel.contributors)
+    private fun createContributorSection(contributors: ObservableList<Contributor>): ContributorInfo {
+        return ContributorInfo(contributors)
             .apply {
                 addContributorCallbackProperty.set(
                     EventHandler {
