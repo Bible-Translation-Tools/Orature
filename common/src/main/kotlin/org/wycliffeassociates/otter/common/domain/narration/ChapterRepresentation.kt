@@ -50,9 +50,7 @@ internal class ChapterRepresentation(
 
     @get:Synchronized
     internal val activeVerses: List<VerseNode>
-        get() = totalVerses.filter {
-            it.placed
-        }
+        get() = totalVerses.filter { it.placed }
 
     internal val totalVerses: MutableList<VerseNode>
 

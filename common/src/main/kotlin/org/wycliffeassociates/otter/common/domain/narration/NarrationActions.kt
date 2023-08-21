@@ -122,7 +122,6 @@ internal class VerseMarkerAction(
         previousSecondNode = totalVerses.getOrNull(verseIndex - 1)
 
         previousFirstNode?.let { prev ->
-
             val start = newMarkerPosition
             val end = prev.endScratchFrame
 
@@ -134,7 +133,6 @@ internal class VerseMarkerAction(
         }
 
         previousSecondNode?.let { prev ->
-
             val start = prev.startScratchFrame
             val end = newMarkerPosition
 
