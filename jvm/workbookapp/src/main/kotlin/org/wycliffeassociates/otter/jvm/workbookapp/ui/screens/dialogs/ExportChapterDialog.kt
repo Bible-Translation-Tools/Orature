@@ -18,22 +18,22 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs
 
+import javafx.collections.ObservableList
 import javafx.event.EventHandler
-import javafx.scene.control.TextField
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.jvm.controls.dialog.OtterDialog
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ContributorInfo
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ContributorCellData
+import org.wycliffeassociates.otter.jvm.controls.ContributorInfo
+import org.wycliffeassociates.otter.jvm.controls.model.ContributorCellData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ExportChapterViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 
 class ExportChapterDialog : OtterDialog() {
-    var contributorField: TextField by singleAssign()
     private val viewModel: ExportChapterViewModel by inject()
 
     private val settingsViewModel: SettingsViewModel by inject()
