@@ -108,12 +108,6 @@ class Narration @AssistedInject constructor(
     }
 
     fun onNewVerse(verseIndex: Int) {
-//        val verseIndex = chapterRepresentation.totalVerses.indexOfFirst { it.marker.label == verse.label }
-//        if (verseIndex == -1) {
-//            logger.error("could not find verse: $verse")
-//            return
-//        }
-
         val action = NewVerseAction(verseIndex)
         execute(action)
 

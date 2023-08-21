@@ -257,12 +257,7 @@ internal class ChapterRepresentation(
     }
 
     fun getRangeOfMarker(verse: VerseMarker): IntRange? {
-        val verses = activeVerses.map {
-//            val newLoc = relativeToAbsolute(it.start)
-//            val newMarker = it.marker.copy(location = newLoc)
-//            VerseNode(it.start, it.end, it.placed, newMarker)
-            it
-        }
+        val verses = activeVerses.map { it }
         if (verses.isEmpty()) return null
 
         verses
