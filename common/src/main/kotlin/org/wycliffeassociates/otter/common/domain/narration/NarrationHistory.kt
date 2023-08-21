@@ -48,12 +48,11 @@ internal class NarrationHistory {
         redoStack.clear()
     }
 
-    fun finalizeVerse(end: Int) {
-        (undoStack.last as? NewVerseAction)?.let {
-            it.node?.endScratchFrame = end
-        }
-        (undoStack.last as? RecordAgainAction)?.let {
-            it.node?.endScratchFrame = end
+    fun finalizeVerse(end: Int, totalVerses: MutableList<VerseNode>) {
+        when (val lastAction = undoStack.last) {
+            is NewVerseAction -> lastAction.finalize(end, totalVerses)
+            is RecordAgainAction -> lastAction.finalize(end, totalVerses)
+            else -> {}
         }
     }
 }

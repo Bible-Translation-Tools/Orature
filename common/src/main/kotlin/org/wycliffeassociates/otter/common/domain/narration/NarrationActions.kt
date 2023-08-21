@@ -53,6 +53,13 @@ internal class NewVerseAction(
             totalVerses[verseIndex] = it.copy()
         }
     }
+
+    fun finalize(end: Int, totalVerses: MutableList<VerseNode>) {
+        node?.let { node ->
+            node.endScratchFrame = end
+            totalVerses[verseIndex] = node.copy()
+        }
+    }
 }
 
 /**
@@ -71,7 +78,7 @@ internal class RecordAgainAction(
         totalVerses: MutableList<VerseNode>, workingAudio: AudioFile
     ) {
         logger.info("Recording again verse for index: ${verseIndex}")
-        previous = totalVerses[verseIndex]
+        previous = totalVerses[verseIndex].copy()
 
         val start = workingAudio.totalFrames
         val end = workingAudio.totalFrames
@@ -94,6 +101,13 @@ internal class RecordAgainAction(
         logger.info("Redoing record again for index: ${verseIndex}")
         node?.let {
             totalVerses[verseIndex] = it.copy()
+        }
+    }
+
+    fun finalize(end: Int, totalVerses: MutableList<VerseNode>) {
+        node?.let { node ->
+            node.endScratchFrame = end
+            totalVerses[verseIndex] = node.copy()
         }
     }
 }

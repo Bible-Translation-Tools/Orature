@@ -102,10 +102,12 @@ internal class ChapterRepresentation(
         }
     }
 
-    fun finalizeVerse(verseIndex: Int): Int {
+    fun finalizeVerse(verseIndex: Int, history: NarrationHistory? = null): Int {
         logger.info("Finalizing verse: ${verseIndex}")
         val end = scratchAudio.totalFrames
-        activeVerses.getOrNull(verseIndex)?.endScratchFrame = end
+
+        history?.finalizeVerse(end, totalVerses)
+
         onVersesUpdated()
         return end
     }
@@ -273,14 +275,7 @@ internal class ChapterRepresentation(
             .find { it.marker.label == verse.label }
             ?.let { verse ->
                 val start = verse.startScratchFrame
-                var end = 0
-                val index = verses.indexOf(verse)
-                if (verses.lastIndex != index) {
-                    val next = verses[index + 1]
-                    end = max(next.startScratchFrame - 1, 0)
-                } else {
-                    end = verses.last().endScratchFrame
-                }
+                val end = verse.endScratchFrame
                 return start..end
             }
         return null
