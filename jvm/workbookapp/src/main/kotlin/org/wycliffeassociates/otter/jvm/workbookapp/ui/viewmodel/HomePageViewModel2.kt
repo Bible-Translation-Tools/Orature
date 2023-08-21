@@ -10,14 +10,11 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
-import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
 import org.wycliffeassociates.otter.common.domain.collections.UpdateProject
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
-import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
-import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupKey
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupCardModel
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
@@ -26,10 +23,8 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.WorkbookPage
 import tornadofx.ViewModel
-import tornadofx.get
 import tornadofx.observableListOf
 import tornadofx.toObservable
-import java.text.MessageFormat
 import java.time.LocalDateTime
 import java.util.function.Predicate
 import javax.inject.Inject
@@ -190,6 +185,16 @@ class HomePageViewModel2 : ViewModel() {
             if (workbook.projectFilesAccessor.isInitialized()) {
                 workbook.projectFilesAccessor.setContributorInfo(contributors)
             }
+        }
+    }
+
+    fun mergeContributorFromImport(workbookDescriptor: WorkbookDescriptor) {
+        val workbook = workbookRepo.get(workbookDescriptor.sourceCollection, workbookDescriptor.targetCollection)
+        if (workbook.projectFilesAccessor.isInitialized()) {
+            val set = contributorList.toMutableSet()
+            val contributors = workbook.projectFilesAccessor.getContributorInfo()
+            set.addAll(contributors)
+            saveContributors(set.toList(), bookList)
         }
     }
 

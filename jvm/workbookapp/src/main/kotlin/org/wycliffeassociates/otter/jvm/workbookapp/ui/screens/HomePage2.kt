@@ -267,10 +267,13 @@ class HomePage2 : View() {
             showNotification(notification)
         }
 
-        subscribe<ProjectImportEvent> {
+        subscribe<ProjectImportEvent> { event ->
             logger.info("Import project event received, refreshing the homepage.")
-            val notification = createImportNotification(it)
+            val notification = createImportNotification(event)
             showNotification(notification)
+            event.workbookDescriptor?.let {
+                viewModel.mergeContributorFromImport(it)
+            }
             viewModel.refresh()
         }
     }
