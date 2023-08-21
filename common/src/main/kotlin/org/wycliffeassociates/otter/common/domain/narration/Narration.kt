@@ -30,7 +30,7 @@ class Narration @AssistedInject constructor(
     private var chapterRepresentation = ChapterRepresentation(workbook, chapter)
 
     val workingAudio: AudioFile
-        get() = chapterRepresentation.workingAudio
+        get() = chapterRepresentation.scratchAudio
 
     val audioReader: AudioFileReader
         get() = chapterRepresentation
@@ -129,9 +129,9 @@ class Narration @AssistedInject constructor(
     }
 
     fun onEditVerse(verseIndex: Int, editedFile: File) {
-        val start = chapterRepresentation.workingAudio.totalFrames
-        audioFileUtils.appendFile(chapterRepresentation.workingAudio, editedFile)
-        val end = chapterRepresentation.workingAudio.totalFrames
+        val start = chapterRepresentation.scratchAudio.totalFrames
+        audioFileUtils.appendFile(chapterRepresentation.scratchAudio, editedFile)
+        val end = chapterRepresentation.scratchAudio.totalFrames
 
         val action = EditVerseAction(verseIndex, start, end)
         execute(action)
@@ -169,7 +169,7 @@ class Narration @AssistedInject constructor(
     fun getSectionAsFile(index: Int): File {
         val verse = activeVerses[index]
         return audioFileUtils.getSectionAsFile(
-            chapterRepresentation.workingAudio,
+            chapterRepresentation.scratchAudio,
             verse.start,
             verse.end
         )
@@ -180,13 +180,13 @@ class Narration @AssistedInject constructor(
         val range: IntRange? = chapterRepresentation.getRangeOfMarker(verse)
         logger.info("Playback range is ${range?.start}-${range?.last}")
         range?.let {
-            player.loadSection(chapterRepresentation.workingAudio.file, range.first, range.last)
+            player.loadSection(chapterRepresentation.scratchAudio.file, range.first, range.last)
         }
     }
 
     private fun initializeWavWriter() {
         writer = WavFileWriter(
-            chapterRepresentation.workingAudio,
+            chapterRepresentation.scratchAudio,
             recorder.getAudioStream(),
             true
         ) {
@@ -195,7 +195,7 @@ class Narration @AssistedInject constructor(
     }
 
     private fun execute(action: NarrationAction) {
-        history.execute(action, chapterRepresentation.totalVerses, chapterRepresentation.workingAudio)
+        history.execute(action, chapterRepresentation.totalVerses, chapterRepresentation.scratchAudio)
         chapterRepresentation.onVersesUpdated()
     }
 
@@ -205,7 +205,7 @@ class Narration @AssistedInject constructor(
         val chapterFile = chapter.getSelectedTake()?.file
         val chapterFileExists = chapterFile?.exists() ?: false
 
-        val narrationEmpty = chapterRepresentation.workingAudio.totalFrames == 0
+        val narrationEmpty = chapterRepresentation.scratchAudio.totalFrames == 0
         val narrationFromChapter = chapterFileExists && narrationEmpty
 
         if (narrationFromChapter || forceUpdate) {
@@ -217,14 +217,14 @@ class Narration @AssistedInject constructor(
 
     private fun appendVerseSegmentsToWorkingAudio(segments: VerseSegments) {
         segments.forEach {
-            audioFileUtils.appendFile(chapterRepresentation.workingAudio, it.value)
+            audioFileUtils.appendFile(chapterRepresentation.scratchAudio, it.value)
         }
     }
 
     private fun createVersesFromVerseSegments(segments: VerseSegments) {
         val nodes = mutableListOf<VerseNode>()
-        var start = chapterRepresentation.workingAudio.totalFrames
-        var end = chapterRepresentation.workingAudio.totalFrames
+        var start = chapterRepresentation.scratchAudio.totalFrames
+        var end = chapterRepresentation.scratchAudio.totalFrames
 
         segments.forEach {
             val verseAudio = AudioFile(it.value)

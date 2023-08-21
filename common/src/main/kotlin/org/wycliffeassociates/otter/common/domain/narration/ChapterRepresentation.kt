@@ -29,16 +29,16 @@ internal class ChapterRepresentation(
     private var position: Int = 0
 
     private val frameSizeInBytes: Int
-        get() = channels * (workingAudio.bitsPerSample / 8)
+        get() = channels * (scratchAudio.bitsPerSample / 8)
 
     override val sampleRate: Int
-        get() = workingAudio.sampleRate
+        get() = scratchAudio.sampleRate
 
     override val channels: Int
-        get() = workingAudio.channels
+        get() = scratchAudio.channels
 
     override val sampleSize: Int
-        get() = workingAudio.bitsPerSample
+        get() = scratchAudio.bitsPerSample
 
     @get:Synchronized
     override val framePosition: Int
@@ -46,7 +46,7 @@ internal class ChapterRepresentation(
 
     @get:Synchronized
     override val totalFrames: Int
-        get() = activeVerses.sumOf { it.end - it.start }
+        get() = activeVerses.sumOf { it.endScratchFrame - it.startScratchFrame }
 
     @get:Synchronized
     internal val activeVerses: List<VerseNode>
@@ -61,7 +61,9 @@ internal class ChapterRepresentation(
 
     val onActiveVersesUpdated = PublishSubject.create<List<VerseMarker>>()
 
-    lateinit var workingAudio: OratureAudioFile
+    // Represents an ever growing tape of audio. This tape may have "dirty" sectors corresponding to outdated
+    // content, which needs to be removed before finalizing the audio.
+    lateinit var scratchAudio: OratureAudioFile
         private set
 
     private var randomAccessFile: RandomAccessFile? = null
@@ -104,8 +106,8 @@ internal class ChapterRepresentation(
 
     fun finalizeVerse(verseIndex: Int): Int {
         logger.info("Finalizing verse: ${verseIndex}")
-        val end = workingAudio.totalFrames
-        activeVerses.getOrNull(verseIndex)?.end = end
+        val end = scratchAudio.totalFrames
+        activeVerses.getOrNull(verseIndex)?.endScratchFrame = end
         onVersesUpdated()
         return end
     }
@@ -123,7 +125,7 @@ internal class ChapterRepresentation(
     private fun sendActiveVerses() {
         onActiveVersesUpdated.onNext(
             activeVerses.map {
-                val newLoc = absoluteToRelative(it.start)
+                val newLoc = absoluteToRelative(it.startScratchFrame)
                 it.marker.copy(location = newLoc)
             }
         )
@@ -144,37 +146,46 @@ internal class ChapterRepresentation(
             if (!it.exists()) {
                 it.createNewFile()
             }
-            workingAudio = OratureAudioFile(it)
+            scratchAudio = OratureAudioFile(it)
         }
     }
 
-    private fun absoluteToRelative(absolute: Int): Int {
+    /**
+     * Converts the absolute audio frame position within the scratch audio file to a "relative" position as if the
+     * audio only contained the segments referrenced by the active verse nodes.
+     */
+    private fun absoluteToRelative(absoluteFrame: Int): Int {
         val verses = activeVerses
         var verse = verses.find {
-            val absoluteIsInRange = absolute in it.start until it.end
-            val absoluteIsAbsoluteEnd = absolute == it.end && absolute == activeVerses.last().end
+            val absoluteIsInRange = absoluteFrame in it.startScratchFrame until it.endScratchFrame
+            val absoluteIsAbsoluteEnd = absoluteFrame == it.endScratchFrame && absoluteFrame == activeVerses.last().endScratchFrame
             absoluteIsInRange || absoluteIsAbsoluteEnd
         }
         verse?.let {
             val index = verses.indexOf(verse)
             var rel = 0
             for (idx in 0 until index) {
-                rel += verses[idx].end - verses[idx].start
+                rel += verses[idx].endScratchFrame - verses[idx].startScratchFrame
             }
-            rel += absolute - it.start
+            rel += absoluteFrame - it.startScratchFrame
             return rel
         }
         return 0
     }
 
+    /**
+     * Converts a relative index (audio only taking into account the currently active verses)
+     * to an absolute position into the scratch audio file. This conversion is performed by counting frames through
+     * the range of each active verse.
+     */
     internal fun relativeToAbsolute(relativeIdx: Int): Int {
         var remaining = relativeIdx
         activeVerses.forEach {
-            val range = it.end - it.start
+            val range = it.endScratchFrame - it.startScratchFrame
             if (range > remaining) {
                 remaining -= range
             } else {
-                return it.start + min(remaining, 0)
+                return it.startScratchFrame + min(remaining, 0)
             }
         }
         return remaining
@@ -193,8 +204,8 @@ internal class ChapterRepresentation(
         randomAccessFile?.let { raf ->
             for (verse in 0 until activeVerses.size) {
                 var verseRead = 0
-                val verseStart = activeVerses[verse].start * frameSizeInBytes
-                val verseEnd = activeVerses[verse].end * frameSizeInBytes
+                val verseStart = activeVerses[verse].startScratchFrame * frameSizeInBytes
+                val verseEnd = activeVerses[verse].endScratchFrame * frameSizeInBytes
 
                 val verseLength = verseEnd - verseStart
                 raf.seek(verseStart.toLong())
@@ -227,14 +238,14 @@ internal class ChapterRepresentation(
 
         for (i in 0 until activeVerses.size) {
             val verse = activeVerses[i]
-            val verseRange = verse.end - verse.start
+            val verseRange = verse.endScratchFrame - verse.startScratchFrame
 
             // jump by the verse range if it combined with our accumulated position is still less than the seek point
             if (sample > pos + verseRange) {
                 pos += verseRange
             } else {
                 // we've found the range the seek position falls within, so get the delta and add it to the start
-                this.position = min((sample - pos) + verse.start, this.totalFrames) * frameSizeInBytes
+                this.position = min((sample - pos) + verse.startScratchFrame, this.totalFrames) * frameSizeInBytes
                 return
             }
         }
@@ -242,7 +253,7 @@ internal class ChapterRepresentation(
 
     override fun open() {
         randomAccessFile?.let { release() }
-        randomAccessFile = RandomAccessFile(workingAudio.file, "r")
+        randomAccessFile = RandomAccessFile(scratchAudio.file, "r")
     }
 
     override fun release() {
@@ -263,14 +274,14 @@ internal class ChapterRepresentation(
         verses
             .find { it.marker.label == verse.label }
             ?.let { verse ->
-                val start = verse.start
+                val start = verse.startScratchFrame
                 var end = 0
                 val index = verses.indexOf(verse)
                 if (verses.lastIndex != index) {
                     val next = verses[index + 1]
-                    end = max(next.start - 1, 0)
+                    end = max(next.startScratchFrame - 1, 0)
                 } else {
-                    end = verses.last().end
+                    end = verses.last().endScratchFrame
                 }
                 return start..end
             }

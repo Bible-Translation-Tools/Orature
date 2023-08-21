@@ -50,10 +50,10 @@ internal class NarrationHistory {
 
     fun finalizeVerse(end: Int) {
         (undoStack.last as? NewVerseAction)?.let {
-            it.node?.end = end
+            it.node?.endScratchFrame = end
         }
         (undoStack.last as? RecordAgainAction)?.let {
-            it.node?.end = end
+            it.node?.endScratchFrame = end
         }
     }
 }

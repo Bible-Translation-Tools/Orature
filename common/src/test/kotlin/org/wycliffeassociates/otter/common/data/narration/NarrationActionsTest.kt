@@ -30,8 +30,8 @@ class NarrationActionsTest {
         onPauseOrNew(narrationList.first(), fileUpdated)
 
         assertEquals(narrationList.size, 1)
-        assertEquals(narrationList.last().start, 0)
-        assertEquals(narrationList.last().end, fileUpdated.totalFrames)
+        assertEquals(narrationList.last().startScratchFrame, 0)
+        assertEquals(narrationList.last().endScratchFrame, fileUpdated.totalFrames)
     }
 
     @Test
@@ -47,10 +47,10 @@ class NarrationActionsTest {
         onPauseOrNew(narrationList.last(), secondFileUpdated)
 
         assertEquals(narrationList.size, 2)
-        assertEquals(narrationList.first().start, 0)
-        assertEquals(narrationList.first().end, firstFileUpdated.totalFrames)
-        assertEquals(narrationList.last().start, firstFileUpdated.totalFrames)
-        assertEquals(narrationList.last().end, secondFileUpdated.totalFrames)
+        assertEquals(narrationList.first().startScratchFrame, 0)
+        assertEquals(narrationList.first().endScratchFrame, firstFileUpdated.totalFrames)
+        assertEquals(narrationList.last().startScratchFrame, firstFileUpdated.totalFrames)
+        assertEquals(narrationList.last().endScratchFrame, secondFileUpdated.totalFrames)
     }
 
     @Test
@@ -102,8 +102,8 @@ class NarrationActionsTest {
         narrationHistory.redo(narrationList)
 
         assertEquals(narrationList.size, 1)
-        assertEquals(narrationList.first().start, 0)
-        assertEquals(narrationList.first().end, fileUpdated.totalFrames)
+        assertEquals(narrationList.first().startScratchFrame, 0)
+        assertEquals(narrationList.first().endScratchFrame, fileUpdated.totalFrames)
     }
 
     @Test
@@ -121,8 +121,8 @@ class NarrationActionsTest {
         onPauseOrNew(narrationList.first(), reRecordedFile)
 
         assertEquals(narrationList.size, 1)
-        assertEquals(narrationList.first().start, fileUpdated.totalFrames)
-        assertEquals(narrationList.first().end, reRecordedFile.totalFrames)
+        assertEquals(narrationList.first().startScratchFrame, fileUpdated.totalFrames)
+        assertEquals(narrationList.first().endScratchFrame, reRecordedFile.totalFrames)
     }
 
     @Test
@@ -151,8 +151,8 @@ class NarrationActionsTest {
         onPauseOrNew(narrationList[1], reRecordedFile)
 
         assertEquals(narrationList.size, 3)
-        assertEquals(narrationList[1].start, thirdFileUpdated.totalFrames)
-        assertEquals(narrationList[1].end, reRecordedFile.totalFrames)
+        assertEquals(narrationList[1].startScratchFrame, thirdFileUpdated.totalFrames)
+        assertEquals(narrationList[1].endScratchFrame, reRecordedFile.totalFrames)
     }
 
     @Test
@@ -168,20 +168,20 @@ class NarrationActionsTest {
         onPauseOrNew(narrationList.first(), reRecordedFile)
 
         assertEquals(narrationList.size, 1)
-        assertEquals(narrationList.first().start, fileUpdated.totalFrames)
-        assertEquals(narrationList.first().end, reRecordedFile.totalFrames)
+        assertEquals(narrationList.first().startScratchFrame, fileUpdated.totalFrames)
+        assertEquals(narrationList.first().endScratchFrame, reRecordedFile.totalFrames)
 
         narrationHistory.undo(narrationList)
 
         assertEquals(narrationList.size, 1)
-        assertEquals(narrationList.first().start, 0)
-        assertEquals(narrationList.first().end, fileUpdated.totalFrames)
+        assertEquals(narrationList.first().startScratchFrame, 0)
+        assertEquals(narrationList.first().endScratchFrame, fileUpdated.totalFrames)
 
         narrationHistory.redo(narrationList)
 
         assertEquals(narrationList.size, 1)
-        assertEquals(narrationList.first().start, fileUpdated.totalFrames)
-        assertEquals(narrationList.first().end, reRecordedFile.totalFrames)
+        assertEquals(narrationList.first().startScratchFrame, fileUpdated.totalFrames)
+        assertEquals(narrationList.first().endScratchFrame, reRecordedFile.totalFrames)
     }
 
     @Test
@@ -202,10 +202,10 @@ class NarrationActionsTest {
         narrationHistory.execute(action, narrationList, secondFileUpdated)
 
         assertEquals(narrationList.size, 2)
-        assertEquals(narrationList.first().start, 0)
-        assertEquals(narrationList.first().end, newMarker)
-        assertEquals(narrationList.last().start, newMarker)
-        assertEquals(narrationList.last().end, secondFileUpdated.totalFrames)
+        assertEquals(narrationList.first().startScratchFrame, 0)
+        assertEquals(narrationList.first().endScratchFrame, newMarker)
+        assertEquals(narrationList.last().startScratchFrame, newMarker)
+        assertEquals(narrationList.last().endScratchFrame, secondFileUpdated.totalFrames)
     }
 
     @Test
@@ -228,17 +228,17 @@ class NarrationActionsTest {
         narrationHistory.undo(narrationList)
 
         assertEquals(narrationList.size, 2)
-        assertEquals(narrationList.first().start, 0)
-        assertEquals(narrationList.first().end, firstFileUpdated.totalFrames)
-        assertEquals(narrationList.last().start, secondFile.totalFrames)
-        assertEquals(narrationList.last().end, secondFileUpdated.totalFrames)
+        assertEquals(narrationList.first().startScratchFrame, 0)
+        assertEquals(narrationList.first().endScratchFrame, firstFileUpdated.totalFrames)
+        assertEquals(narrationList.last().startScratchFrame, secondFile.totalFrames)
+        assertEquals(narrationList.last().endScratchFrame, secondFileUpdated.totalFrames)
 
         narrationHistory.redo(narrationList)
 
-        assertEquals(narrationList.first().start, 0)
-        assertEquals(narrationList.first().end, newMarker)
-        assertEquals(narrationList.last().start, newMarker)
-        assertEquals(narrationList.last().end, secondFileUpdated.totalFrames)
+        assertEquals(narrationList.first().startScratchFrame, 0)
+        assertEquals(narrationList.first().endScratchFrame, newMarker)
+        assertEquals(narrationList.last().startScratchFrame, newMarker)
+        assertEquals(narrationList.last().endScratchFrame, secondFileUpdated.totalFrames)
     }
 
     @Test
@@ -260,10 +260,10 @@ class NarrationActionsTest {
         onPauseOrNew(narrationList.last(), secondFileUpdated)
 
         assertEquals(narrationList.size, 2)
-        assertEquals(narrationList.first().start, firstFileUpdated.totalFrames)
-        assertEquals(narrationList.first().end, reRecordedFile.totalFrames)
-        assertEquals(narrationList.last().start, secondFile.totalFrames)
-        assertEquals(narrationList.last().end, secondFileUpdated.totalFrames)
+        assertEquals(narrationList.first().startScratchFrame, firstFileUpdated.totalFrames)
+        assertEquals(narrationList.first().endScratchFrame, reRecordedFile.totalFrames)
+        assertEquals(narrationList.last().startScratchFrame, secondFile.totalFrames)
+        assertEquals(narrationList.last().endScratchFrame, secondFileUpdated.totalFrames)
     }
 
     @Test
@@ -286,11 +286,11 @@ class NarrationActionsTest {
 
         narrationHistory.redo(narrationList)
 
-        assertEquals(narrationList.first().start, 0)
-        assertEquals(narrationList.first().end, firstFileUpdated.totalFrames)
+        assertEquals(narrationList.first().startScratchFrame, 0)
+        assertEquals(narrationList.first().endScratchFrame, firstFileUpdated.totalFrames)
 
-        assertEquals(narrationList.last().start, reRecordedFile.totalFrames)
-        assertEquals(narrationList.last().end, secondFileUpdated.totalFrames)
+        assertEquals(narrationList.last().startScratchFrame, reRecordedFile.totalFrames)
+        assertEquals(narrationList.last().endScratchFrame, secondFileUpdated.totalFrames)
     }
 
     @Test
@@ -306,10 +306,10 @@ class NarrationActionsTest {
         onPauseOrNew(narrationList.last(), secondFileUpdated)
 
         assertEquals(narrationList.size, 2)
-        assertEquals(narrationList.first().start, 0)
-        assertEquals(narrationList.first().end, firstFileUpdated.totalFrames)
-        assertEquals(narrationList.last().start, firstFileUpdated.totalFrames)
-        assertEquals(narrationList.last().end, secondFileUpdated.totalFrames)
+        assertEquals(narrationList.first().startScratchFrame, 0)
+        assertEquals(narrationList.first().endScratchFrame, firstFileUpdated.totalFrames)
+        assertEquals(narrationList.last().startScratchFrame, firstFileUpdated.totalFrames)
+        assertEquals(narrationList.last().endScratchFrame, secondFileUpdated.totalFrames)
 
         val resetAction = ResetAllAction()
         narrationHistory.execute(resetAction, narrationList, secondFileUpdated)
@@ -333,6 +333,6 @@ class NarrationActionsTest {
     }
 
     private fun onPauseOrNew(verse: VerseNode, audioFile: AudioFile) {
-        verse.end = audioFile.totalFrames
+        verse.endScratchFrame = audioFile.totalFrames
     }
 }
