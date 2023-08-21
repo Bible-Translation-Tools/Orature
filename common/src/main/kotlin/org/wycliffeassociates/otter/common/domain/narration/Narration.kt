@@ -103,7 +103,8 @@ class Narration @AssistedInject constructor(
     }
 
     fun finalizeVerse(verseIndex: Int) {
-        chapterRepresentation.finalizeVerse(verseIndex)
+        val end = chapterRepresentation.finalizeVerse(verseIndex)
+        history.finalizeVerse(end)
     }
 
     fun onNewVerse(verseIndex: Int) {

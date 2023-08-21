@@ -47,4 +47,13 @@ internal class NarrationHistory {
         undoStack.clear()
         redoStack.clear()
     }
+
+    fun finalizeVerse(end: Int) {
+        (undoStack.last as? NewVerseAction)?.let {
+            it.node?.end = end
+        }
+        (undoStack.last as? RecordAgainAction)?.let {
+            it.node?.end = end
+        }
+    }
 }

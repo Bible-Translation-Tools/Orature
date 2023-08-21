@@ -102,10 +102,12 @@ internal class ChapterRepresentation(
         }
     }
 
-    fun finalizeVerse(verseIndex: Int) {
+    fun finalizeVerse(verseIndex: Int): Int {
         logger.info("Finalizing verse: ${verseIndex}")
-        activeVerses.getOrNull(verseIndex)?.end = workingAudio.totalFrames
+        val end = workingAudio.totalFrames
+        activeVerses.getOrNull(verseIndex)?.end = end
         onVersesUpdated()
+        return end
     }
 
     fun onVersesUpdated() {
@@ -256,23 +258,24 @@ internal class ChapterRepresentation(
 
     fun getRangeOfMarker(verse: VerseMarker): IntRange? {
         val verses = activeVerses.map {
-            val newLoc = absoluteToRelative(it.start)
-            val newMarker = it.marker.copy(location = newLoc)
-            VerseNode(it.start, it.end, it.placed, newMarker)
+//            val newLoc = relativeToAbsolute(it.start)
+//            val newMarker = it.marker.copy(location = newLoc)
+//            VerseNode(it.start, it.end, it.placed, newMarker)
+            it
         }
         if (verses.isEmpty()) return null
 
         verses
             .find { it.marker.label == verse.label }
-            ?.let {
-                val start = verse.location
+            ?.let { verse ->
+                val start = verse.start
                 var end = 0
-                val index = verses.indexOf(it)
+                val index = verses.indexOf(verse)
                 if (verses.lastIndex != index) {
                     val next = verses[index + 1]
-                    end = max(next.marker.location - 1, 0)
+                    end = max(next.start - 1, 0)
                 } else {
-                    end = absoluteToRelative(verses.last().end)
+                    end = verses.last().end
                 }
                 return start..end
             }
