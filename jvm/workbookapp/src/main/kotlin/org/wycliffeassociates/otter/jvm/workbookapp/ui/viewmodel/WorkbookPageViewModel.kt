@@ -34,19 +34,15 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.BackupProjectExporter
-import org.wycliffeassociates.otter.common.domain.project.exporter.ExportType
-import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import org.wycliffeassociates.otter.common.domain.project.exporter.AudioProjectExporter
-import org.wycliffeassociates.otter.common.domain.project.exporter.IProjectExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.SourceProjectExporter
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterCardModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ContributorCellData
+import org.wycliffeassociates.otter.jvm.controls.model.ContributorCellData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChapterPage
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.errorMessage
 import tornadofx.*
 import java.io.File
 import java.text.MessageFormat
@@ -182,45 +178,6 @@ class WorkbookPageViewModel : ViewModel() {
         val resourceMetadata = workbookDataStore.workbook.target.resourceMetadata
         updateLastResource(resourceMetadata.identifier)
         navigator.dock<ChapterPage>()
-    }
-
-    fun exportWorkbook(directory: File, type: ExportType) {
-        showExportProgressDialogProperty.set(true)
-
-        val workbook = workbookDataStore.workbook
-        activeProjectTitleProperty.set(workbook.target.title)
-        activeProjectCoverProperty.set(
-            workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
-        )
-
-        val exporter: IProjectExporter = when (type) {
-            ExportType.LISTEN -> exportAudioProvider.get()
-            ExportType.SOURCE_AUDIO, ExportType.PUBLISH -> exportSourceProvider.get()
-            ExportType.BACKUP -> exportBackupProvider.get()
-        }
-
-        exporter
-            .export(
-                directory,
-                workbook,
-                null
-            )
-            .observeOnFx()
-            .doOnError { e ->
-                logger.error("Error in exporting project for project: ${workbook.target.slug}")
-                logger.error("Project language: ${workbook.target.language.slug}, file: $directory", e)
-            }
-            .doFinally {
-                activeProjectTitleProperty.set(null)
-                activeProjectCoverProperty.set(null)
-            }
-            .subscribe { result: ExportResult ->
-                showExportProgressDialogProperty.set(false)
-
-                result.errorMessage?.let {
-                    error(messages["exportError"], it)
-                }
-            }
     }
 
     fun deleteWorkbook() {

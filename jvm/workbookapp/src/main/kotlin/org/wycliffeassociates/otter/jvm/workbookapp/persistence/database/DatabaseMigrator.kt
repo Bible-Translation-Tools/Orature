@@ -383,9 +383,9 @@ class DatabaseMigrator {
                     WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.TYPE_FK
                 ),
                 DSL.foreignKey(WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.SOURCE_FK)
-                    .references(CollectionEntity.COLLECTION_ENTITY),
+                    .references(CollectionEntity.COLLECTION_ENTITY).onDeleteCascade(),
                 DSL.foreignKey(WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.TARGET_FK)
-                    .references(CollectionEntity.COLLECTION_ENTITY),
+                    .references(CollectionEntity.COLLECTION_ENTITY).onDeleteCascade(),
                 DSL.foreignKey(WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.TYPE_FK)
                     .references(WorkbookType.WORKBOOK_TYPE)
             )

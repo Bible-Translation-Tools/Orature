@@ -18,6 +18,10 @@
  */
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.project
 
+import com.fasterxml.jackson.core.JsonFactory
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.cast
@@ -111,6 +115,15 @@ class ProjectFilesAccessor(
             if (!it.exists()) it.mkdirs()
         }
         return chapterDir
+    }
+
+    fun isInitialized(): Boolean {
+        return try {
+            ResourceContainer.load(projectDir).close()
+            true
+        } catch (_: Exception) {
+            false
+        }
     }
 
     fun copySourceFiles(
@@ -659,6 +672,39 @@ class ProjectFilesAccessor(
         val outFile = projectDir.resolve(RcConstants.CHUNKS_FILE)
         if (!outFile.exists() && fileReader.exists(RcConstants.CHUNKS_FILE)) {
             fileReader.stream(RcConstants.CHUNKS_FILE).transferTo(outFile.outputStream())
+        }
+    }
+
+    fun getProjectMode(): ProjectMode? {
+        val file = projectDir.resolve(RcConstants.PROJECT_MODE_FILE)
+        return if (file.exists() && file.length() > 0) {
+            val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
+            val serialized: SerializableProjectMode = mapper.readValue(file)
+            serialized.mode
+        } else {
+            null
+        }
+    }
+
+    fun setProjectMode(mode: ProjectMode) {
+        val file = projectDir.resolve(RcConstants.PROJECT_MODE_FILE)
+        val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
+        mapper.writeValue(file, SerializableProjectMode(mode))
+    }
+
+    fun copyProjectModeFile(fileWriter: IFileWriter) {
+        val file = projectDir.resolve(RcConstants.PROJECT_MODE_FILE)
+        fileWriter.bufferedWriter(RcConstants.PROJECT_MODE_FILE).use { writer ->
+            file.bufferedReader().use { reader ->
+                reader.transferTo(writer)
+            }
+        }
+    }
+
+    fun copyProjectModeFile(fileReader: IFileReader) {
+        val modeFile = projectDir.resolve(RcConstants.PROJECT_MODE_FILE)
+        if (fileReader.exists(RcConstants.PROJECT_MODE_FILE)) {
+            fileReader.stream(RcConstants.PROJECT_MODE_FILE).transferTo(modeFile.outputStream())
         }
     }
 

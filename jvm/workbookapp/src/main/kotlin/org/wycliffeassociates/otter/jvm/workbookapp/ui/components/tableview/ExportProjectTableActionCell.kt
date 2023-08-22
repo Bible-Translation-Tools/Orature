@@ -14,12 +14,6 @@ class ExportProjectTableActionCell(
         addClass("wa-checkbox")
         isMouseTransparent = true
         isFocusTraversable = false
-
-        selectedProperty().bind(
-            booleanBinding(selectedChapters) {
-                selectedChapters.contains(item)
-            }
-        )
     }
 
     override fun updateItem(item: ChapterDescriptor?, empty: Boolean) {
@@ -27,9 +21,19 @@ class ExportProjectTableActionCell(
 
         if (item == null || empty) {
             graphic = null
+            graphicNode.selectedProperty().unbind()
             return
         }
 
-        graphic = graphicNode
+        graphic = graphicNode.apply {
+            isDisable = !item.selectable
+            isVisible = item.selectable
+
+            selectedProperty().bind(
+                booleanBinding(selectedChapters) {
+                    selectedChapters.contains(item)
+                }
+            )
+        }
     }
 }

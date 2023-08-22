@@ -29,6 +29,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.wycliffeassociates.otter.common.ResourceContainerBuilder
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
@@ -96,7 +97,9 @@ class TestSourceProjectExporter {
     @Before
     fun setUp() {
         db.import("en-x-demo1-ulb-rev.zip")
-        workbook = workbookRepository.getProjects().blockingGet().single()
+        workbook = workbookRepository.getProjects().blockingGet()
+            .find { it.target.slug == "rev" }!!
+
         projectFilesAccessor = ProjectFilesAccessor(
             directoryProvider,
             sourceMetadata,
@@ -178,10 +181,10 @@ class TestSourceProjectExporter {
         db.assertRowCounts(
             RowCount(
                 contents = mapOf(
-                    ContentType.META to 2400,
-                    ContentType.TEXT to 62228
+                    ContentType.META to 3589,
+                    ContentType.TEXT to 92947
                 ),
-                collections = 2535,
+                collections = 3767,
                 links = 0
             )
         )

@@ -1,12 +1,14 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Completable
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.transformation.FilteredList
 import javafx.collections.transformation.SortedList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
+import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
@@ -53,6 +55,7 @@ class HomePageViewModel2 : ViewModel() {
 
     val projectGroups = observableListOf<ProjectGroupCardModel>()
     val bookList = observableListOf<WorkbookDescriptor>()
+    val contributorList = observableListOf<Contributor>()
     private val filteredBooks = FilteredList<WorkbookDescriptor>(bookList)
     private val disposableListeners = mutableListOf<ListenerDisposer>()
 
@@ -146,7 +149,8 @@ class HomePageViewModel2 : ViewModel() {
     fun deleteProjectGroup(books: List<WorkbookDescriptor>) {
         if (books.all { it.progress == 0.0 }) {
             logger.info("Deleting project group: ${selectedProjectGroup.value.sourceLanguage} -> ${selectedProjectGroup.value.targetLanguage}")
-            workbookDescriptorRepo.delete(books)
+
+            deleteProjectUseCase.deleteProjects(books)
                 .observeOnFx()
                 .subscribe {
                     loadProjects()
@@ -154,17 +158,51 @@ class HomePageViewModel2 : ViewModel() {
         }
     }
 
-    fun deleteBook(workbookDescriptor: WorkbookDescriptor) {
+    fun deleteBook(workbookDescriptor: WorkbookDescriptor): Completable {
         logger.info("Deleting book: ${workbookDescriptor.slug}")
 
-        deleteProjectUseCase.delete(workbookDescriptor)
+        return deleteProjectUseCase.delete(workbookDescriptor)
             .observeOnFx()
-            .subscribe {
-                loadProjects()
-            }
     }
 
     fun openInFilesManager(path: String) = directoryProvider.openInFileManager(path)
+
+    fun loadContributors(books: List<WorkbookDescriptor>): List<Contributor> {
+        val contributors = mutableSetOf<Contributor>()
+        books.forEach {
+            val workbook = workbookRepo.get(it.sourceCollection, it.targetCollection)
+            if (workbook.projectFilesAccessor.isInitialized()) {
+                contributors.addAll(workbook.projectFilesAccessor.getContributorInfo())
+            }
+        }
+        return if (contributors.isEmpty()) {
+            contributorList
+        }
+        else {
+            contributorList.setAll(contributors)
+            contributors.toList()
+        }
+    }
+
+    fun saveContributors(contributors: List<Contributor>, books: List<WorkbookDescriptor>) {
+        contributorList.setAll(contributors)
+        books.forEach {
+            val workbook = workbookRepo.get(it.sourceCollection, it.targetCollection)
+            if (workbook.projectFilesAccessor.isInitialized()) {
+                workbook.projectFilesAccessor.setContributorInfo(contributors)
+            }
+        }
+    }
+
+    fun mergeContributorFromImport(workbookDescriptor: WorkbookDescriptor) {
+        val workbook = workbookRepo.get(workbookDescriptor.sourceCollection, workbookDescriptor.targetCollection)
+        if (workbook.projectFilesAccessor.isInitialized()) {
+            val set = contributorList.toMutableSet()
+            val contributors = workbook.projectFilesAccessor.getContributorInfo()
+            set.addAll(contributors)
+            saveContributors(set.toList(), bookList)
+        }
+    }
 
     private fun updateBookList(books: List<WorkbookDescriptor>) {
         if (books.isEmpty()) {
@@ -177,15 +215,19 @@ class HomePageViewModel2 : ViewModel() {
             ProjectGroupKey(it.sourceLanguage.slug, it.targetLanguage.slug, it.mode)
         }
         projectGroups
-            .map {
-                val book = it.value.first()
-                val mostRecentBook = it.value.maxByOrNull { it.lastModified?.nano ?: -1 }
+            .map { entry ->
+                val bookList = entry.value
+                val book = bookList.first()
+                val mostRecentBook = bookList
+                    .filter { it.lastModified != null }
+                    .maxByOrNull { it.lastModified!! }
+
                 ProjectGroupCardModel(
                     book.sourceLanguage,
                     book.targetLanguage,
                     book.mode,
                     mostRecentBook?.lastModified,
-                    it.value.toObservable()
+                    bookList.toObservable()
                 )
             }
             .sortedByDescending { it.modifiedTs }
@@ -214,6 +256,8 @@ class HomePageViewModel2 : ViewModel() {
         workbook.projectFilesAccessor.copySourceFiles(linkedResource)
         workbook.projectFilesAccessor.createSelectedTakesFile()
         workbook.projectFilesAccessor.createChunksFile()
+        workbook.projectFilesAccessor.setContributorInfo(contributorList)
+        workbook.projectFilesAccessor.setProjectMode(workbookDS.currentModeProperty.value)
     }
 
     private fun updateWorkbookModifiedDate(workbook: Workbook) {

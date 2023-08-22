@@ -64,22 +64,6 @@
     -fx-text-fill: -wa-regular-text-80;
 }
 
-/* scroll-bar */
-.wa-table-view .virtual-flow .scroll-bar:vertical,
-.wa-table-view .virtual-flow .scroll-bar:vertical .track,
-.wa-table-view .virtual-flow .scroll-bar:vertical .track-background,
-.wa-table-view .virtual-flow .scroll-bar:horizontal,
-.wa-table-view .virtual-flow .scroll-bar:horizontal .track,
-.wa-table-view .virtual-flow .scroll-bar:horizontal .track-background {
-    -fx-background-color: transparent;
-}
-
-.wa-table-view .virtual-flow .scroll-bar .increment-button,
-.wa-table-view .virtual-flow .scroll-bar .decrement-button {
-    -fx-opacity: 0;
-    -fx-padding: 0 2;
-}
-
 .wa-table-view .progress-bar {
     -fx-pref-height: 7px;
     -fx-background-color: transparent;

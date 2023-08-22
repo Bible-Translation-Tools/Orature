@@ -118,10 +118,6 @@ class CollectionRepository @Inject constructor(
                             // 4b. If the manifest has no projects left,
                             // delete the RC folder and the metadata from the database
                             metadata.path.deleteRecursively()
-                            val links = metadataDao.fetchLinks(metadata.id)
-                            links.forEach {
-                                metadataDao.delete(it)
-                            }
                             metadataDao.delete(metadataMapper.mapToEntity(metadata))
                         }
                     }
@@ -437,16 +433,6 @@ class CollectionRepository @Inject constructor(
                         // Copy the chapters
                         copyChapters(dsl, sourceCollectionEntity.id, projectEntity.id, mainDerivedMetadata.id)
 
-                        if (verseByVerse) {
-                            // Copy the content
-                            copyContent(dsl, sourceCollectionEntity.id, mainDerivedMetadata.id)
-                            // Link the derivative content
-                            linkDerivativeContent(dsl, sourceCollectionEntity.id, projectEntity.id)
-                        } else {
-                            // Copy only meta content
-                            copyMetaContent(dsl, sourceCollectionEntity.id, mainDerivedMetadata.id)
-                        }
-
                         val metadataSourceToDerivedMap = sourceMetadatas.zip(derivedMetadata).associate { it }
                         copyResourceLinks(dsl, projectEntity, metadataSourceToDerivedMap)
 
@@ -475,6 +461,14 @@ class CollectionRepository @Inject constructor(
                                 container.write()
                             }
                         }
+                    }
+
+                    // copy the content under chapter-level
+                    if (verseByVerse) {
+                        copyContent(dsl, sourceCollectionEntity.id, mainDerivedMetadata.id)
+                        linkDerivativeContent(dsl, sourceCollectionEntity.id, projectEntity.id)
+                    } else {
+                        copyMetaContent(dsl, sourceCollectionEntity.id, mainDerivedMetadata.id)
                     }
 
                     insertWorkbookDescriptor(sourceCollection.id, projectEntity.id, mode)

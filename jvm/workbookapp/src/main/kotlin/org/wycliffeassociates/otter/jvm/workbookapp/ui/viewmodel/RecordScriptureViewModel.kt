@@ -52,6 +52,7 @@ import org.wycliffeassociates.otter.jvm.controls.ListAnimationMediator
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
+import org.wycliffeassociates.otter.jvm.controls.model.StepDirection
 import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
@@ -69,11 +70,6 @@ private const val NO_HIGHLIGHT_INDEX = -1
 class RecordScriptureViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(RecordScriptureViewModel::class.java)
-
-    private enum class StepDirection {
-        FORWARD,
-        BACKWARD
-    }
 
     private val workbookDataStore: WorkbookDataStore by inject()
     private val audioDataStore: AudioDataStore by inject()

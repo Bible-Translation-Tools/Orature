@@ -40,9 +40,9 @@ import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.*
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChapterCell
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ContributorInfo
+import org.wycliffeassociates.otter.jvm.controls.ContributorInfo
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterCardModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ContributorCellData
+import org.wycliffeassociates.otter.jvm.controls.model.ContributorCellData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookPageViewModel
@@ -431,7 +431,7 @@ class WorkbookPage : View() {
                 onExportAction { option ->
                     val directory = chooseDirectory(FX.messages["exportProject"])
                     directory?.let { dir ->
-                        viewModel.exportWorkbook(dir, option)
+//                        viewModel.exportWorkbook(dir, option)
                     }
                 }
             }
