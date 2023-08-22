@@ -18,24 +18,20 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
-import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.doNothing
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.spy
-import com.nhaarman.mockitokotlin2.whenever
 import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.BeforeClass
 import org.junit.Test
 import org.testfx.api.FxToolkit
-import org.testfx.util.WaitForAsyncUtils
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ContributorCellData
+import org.wycliffeassociates.otter.jvm.controls.model.ContributorCellData
 import tornadofx.FX
 import tornadofx.find
 import tornadofx.observableListOf
-import tornadofx.onChange
 
 class ExportChapterViewModelTest {
 

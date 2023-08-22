@@ -35,6 +35,10 @@
     -fx-wrap-text: true;
 }
 
+.contributor__license-text {
+    -fx-text-fill: -wa-note-text;
+}
+
 .contributor__license-link {
     -fx-font-size: 1.1em;
     -fx-wrap-text: true;
@@ -46,19 +50,16 @@
     -fx-spacing: 10px;
 }
 
-.contributor__add-btn {
-    -fx-max-width: infinity;
-}
-
 .contributor__add-btn:focused {
     -fx-border-color: -wa-card-border;
     -fx-border-insets: -2;
 }
 
 .contributor__text-input {
-    -fx-font-size: 1.15em;
-    -fx-pref-height: 38px;
     -fx-padding: 8px 12px;
+    -fx-pref-height: 48;
+    -fx-background-radius: 20;
+    -fx-border-radius: 16;
     -fx-border-width: 1px;
 }
 
@@ -96,19 +97,19 @@
     -fx-border-insets: -3;
 }
 
-.contributor__list .contributor__text-input {
-    -fx-underline: true;
+.contributor__list-cell__delete-btn {
+    -fx-background-color: transparent;
 }
 
-.contributor__list-cell__delete-btn .ikonli-font-icon {
-    -fx-icon-color: -wa-regular-text;
+.contributor__list-cell .delete-icon {
+    -fx-icon-color: -wa-regular-text-80;
 }
 
 /* --- dialog --- */
 .contributor-dialog {
     -fx-background-color: -wa-dialog-background;
     -fx-padding: 15px;
-    -fx-pref-width: 600px;
+    -fx-pref-width: 720px;
 }
 
 .contributor-dialog .contributor__container {
@@ -120,18 +121,13 @@
     -fx-padding: 5px 0;
 }
 
-.contributor-dialog__title {
-    -fx-font-size: 1.8em;
-    -fx-text-fill: -wa-highlight-text;
-    -fx-font-weight: bold;
-}
-
 .contributor-dialog__action {
     -fx-padding: 10px 0;
     -fx-spacing: 10px;
+    -fx-alignment: center-right;
 }
 
-.contributor-dialog__export-btn {
+.contributor-dialog__action__confirm-btn {
     -fx-max-width: infinity;
 }
 

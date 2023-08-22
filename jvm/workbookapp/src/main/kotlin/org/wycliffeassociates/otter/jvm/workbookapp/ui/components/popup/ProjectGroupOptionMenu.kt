@@ -6,6 +6,7 @@ import javafx.scene.control.MenuItem
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
+import org.wycliffeassociates.otter.jvm.controls.event.ProjectContributorsEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ProjectGroupDeleteEvent
 import tornadofx.FX.Companion.messages
 import tornadofx.*
@@ -19,7 +20,7 @@ class ProjectGroupOptionMenu : ContextMenu() {
                 tooltip(this.text)
             }
             action {
-                // TODO
+                FX.eventbus.fire(ProjectContributorsEvent(books))
             }
         }
         val deleteOption = MenuItem().apply {

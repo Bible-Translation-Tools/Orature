@@ -7,16 +7,14 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.collections.transformation.FilteredList
 import javafx.collections.transformation.SortedList
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
-import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
 import org.wycliffeassociates.otter.common.domain.collections.UpdateProject
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
-import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
-import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupKey
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupCardModel
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
@@ -25,10 +23,8 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.WorkbookPage
 import tornadofx.ViewModel
-import tornadofx.get
 import tornadofx.observableListOf
 import tornadofx.toObservable
-import java.text.MessageFormat
 import java.time.LocalDateTime
 import java.util.function.Predicate
 import javax.inject.Inject
@@ -57,6 +53,7 @@ class HomePageViewModel2 : ViewModel() {
 
     val projectGroups = observableListOf<ProjectGroupCardModel>()
     val bookList = observableListOf<WorkbookDescriptor>()
+    val contributorList = observableListOf<Contributor>()
     private val filteredBooks = FilteredList<WorkbookDescriptor>(bookList)
     private val disposableListeners = mutableListOf<ListenerDisposer>()
 
@@ -164,6 +161,43 @@ class HomePageViewModel2 : ViewModel() {
 
     fun openInFilesManager(path: String) = directoryProvider.openInFileManager(path)
 
+    fun loadContributors(books: List<WorkbookDescriptor>): List<Contributor> {
+        val contributors = mutableSetOf<Contributor>()
+        books.forEach {
+            val workbook = workbookRepo.get(it.sourceCollection, it.targetCollection)
+            if (workbook.projectFilesAccessor.isInitialized()) {
+                contributors.addAll(workbook.projectFilesAccessor.getContributorInfo())
+            }
+        }
+        return if (contributors.isEmpty()) {
+            contributorList
+        }
+        else {
+            contributorList.setAll(contributors)
+            contributors.toList()
+        }
+    }
+
+    fun saveContributors(contributors: List<Contributor>, books: List<WorkbookDescriptor>) {
+        contributorList.setAll(contributors)
+        books.forEach {
+            val workbook = workbookRepo.get(it.sourceCollection, it.targetCollection)
+            if (workbook.projectFilesAccessor.isInitialized()) {
+                workbook.projectFilesAccessor.setContributorInfo(contributors)
+            }
+        }
+    }
+
+    fun mergeContributorFromImport(workbookDescriptor: WorkbookDescriptor) {
+        val workbook = workbookRepo.get(workbookDescriptor.sourceCollection, workbookDescriptor.targetCollection)
+        if (workbook.projectFilesAccessor.isInitialized()) {
+            val set = contributorList.toMutableSet()
+            val contributors = workbook.projectFilesAccessor.getContributorInfo()
+            set.addAll(contributors)
+            saveContributors(set.toList(), bookList)
+        }
+    }
+
     private fun updateBookList(books: List<WorkbookDescriptor>) {
         if (books.isEmpty()) {
             bookList.clear()
@@ -216,6 +250,7 @@ class HomePageViewModel2 : ViewModel() {
         workbook.projectFilesAccessor.copySourceFiles(linkedResource)
         workbook.projectFilesAccessor.createSelectedTakesFile()
         workbook.projectFilesAccessor.createChunksFile()
+        workbook.projectFilesAccessor.setContributorInfo(contributorList)
         workbook.projectFilesAccessor.setProjectMode(workbookDS.currentModeProperty.value)
     }
 
