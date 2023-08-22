@@ -9,7 +9,6 @@ import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
-import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NextVerseEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.RecordVerseEvent
@@ -19,7 +18,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationU
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
-import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseFinishedEvent
 import tornadofx.*
 import java.util.*
 
@@ -105,11 +103,11 @@ class NarrationPage : View() {
         }.let { eventSubscriptions.add(it) }
 
         subscribe<RecordVerseEvent> {
-            viewModel.toggleRecording()
+            viewModel.toggleRecording(it.index)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<NextVerseEvent> {
-            viewModel.onNext()
+            viewModel.onNext(it.index)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<PlayVerseEvent> {

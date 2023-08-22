@@ -44,7 +44,7 @@ class ChapterRepresentationTest {
         chapter = mockChapter()
 
         chapterRepresentation = ChapterRepresentation(workbook, chapter)
-        chapterRepresentation.workingAudio.file.outputStream().use {
+        chapterRepresentation.scratchAudio.file.outputStream().use {
             it.write(audioData)
         }
         chapterRepresentation.activeVerses.addAll(verses)

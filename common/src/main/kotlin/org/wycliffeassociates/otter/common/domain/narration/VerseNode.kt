@@ -2,21 +2,26 @@ package org.wycliffeassociates.otter.common.domain.narration
 
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 
-data class VerseNode(
+internal data class VerseNode(
     /**
-     * Start location in frames
+     * Start location in audio frames within the scratch audio recording. This is an absolute frame position into
+     * the file.
      */
-    var start: Int,
+    var startScratchFrame: Int,
     /**
-     * End location in frames
+     * End location in audio frames within the scratch audio recording. This is an absolute frame position into
+     * the file.
      */
-    var end: Int,
+    var endScratchFrame: Int,
     var placed: Boolean = false,
     val marker: VerseMarker
 ) {
     fun clear() {
-        start = 0
-        end = 0
+        startScratchFrame = 0
+        endScratchFrame = 0
         placed = false
     }
+
+    val length: Int
+        get() = startScratchFrame - endScratchFrame
 }

@@ -11,13 +11,13 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.narration.Narration
 import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
-import org.wycliffeassociates.otter.common.domain.narration.VerseNode
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
@@ -30,6 +30,7 @@ import tornadofx.*
 import java.io.File
 import java.text.MessageFormat
 import javax.inject.Inject
+import kotlin.math.max
 
 class NarrationViewModel : ViewModel() {
     private val logger = LoggerFactory.getLogger(NarrationViewModel::class.java)
@@ -56,7 +57,7 @@ class NarrationViewModel : ViewModel() {
     val recordAgainVerseIndexProperty = SimpleObjectProperty<Int?>()
     var recordAgainVerseIndex by recordAgainVerseIndexProperty
 
-    val playingVerseProperty = SimpleObjectProperty<VerseNode?>()
+    val playingVerseProperty = SimpleObjectProperty<VerseMarker?>()
     var playingVerse by playingVerseProperty
 
     val hasUndoProperty = SimpleBooleanProperty()
@@ -73,7 +74,7 @@ class NarrationViewModel : ViewModel() {
     val chunkTotalProperty = SimpleIntegerProperty(0)
     val chunksList: ObservableList<Chunk> = observableListOf()
 
-    val recordedVerses = observableListOf<VerseNode>()
+    val recordedVerses = observableListOf<VerseMarker>()
     val hasVersesProperty = SimpleBooleanProperty()
     val lastRecordedVerseProperty = SimpleIntegerProperty()
 
@@ -199,8 +200,8 @@ class NarrationViewModel : ViewModel() {
         snackBarObservable.onNext(message)
     }
 
-    fun play(verse: VerseNode) {
-        if (playingVerse == verse) {
+    fun play(verse: VerseMarker) {
+        if (playingVerse?.label == verse.label) {
             audioPlayer.toggle()
         } else {
             audioPlayer.pause()
@@ -237,11 +238,11 @@ class NarrationViewModel : ViewModel() {
         updateRecordingState()
     }
 
-    fun onNext() {
+    fun onNext(index: Int) {
         when {
             isRecording -> {
-                narration.finalizeVerse()
-                narration.onNewVerse()
+                narration.finalizeVerse(max(index - 1, 0))
+                narration.onNewVerse(index)
             }
 
             recordPause -> {
@@ -253,12 +254,12 @@ class NarrationViewModel : ViewModel() {
         }
     }
 
-    fun toggleRecording() {
+    fun toggleRecording(index: Int) {
         when {
-            isRecording && !isRecordingAgain -> pauseRecording()
+            isRecording && !isRecordingAgain -> pauseRecording(index)
             isRecording && isRecordingAgain -> stopRecordAgain()
             recordPause -> resumeRecording()
-            recordStart || recordResume -> record()
+            recordStart || recordResume -> record(index)
             else -> {
                 logger.error("Toggle recording is in the else state.")
             }
@@ -285,22 +286,22 @@ class NarrationViewModel : ViewModel() {
         recordPause = false
     }
 
-    private fun record() {
+    private fun record(index: Int) {
         stopPlayer()
 
-        narration.onNewVerse()
+        narration.onNewVerse(index)
 
         isRecording = true
         recordStart = false
         recordResume = false
     }
 
-    private fun pauseRecording() {
+    private fun pauseRecording(index: Int) {
         isRecording = false
         recordPause = true
 
         narration.pauseRecording()
-        narration.finalizeVerse()
+        narration.finalizeVerse(index)
     }
 
     private fun resumeRecording() {

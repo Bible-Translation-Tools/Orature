@@ -5,6 +5,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
@@ -23,22 +24,28 @@ class Narration @AssistedInject constructor(
     @Assisted private val workbook: Workbook,
     @Assisted private val chapter: Chapter
 ) {
+    private val logger = LoggerFactory.getLogger(Narration::class.java)
+
     private val history = NarrationHistory()
     private var chapterRepresentation = ChapterRepresentation(workbook, chapter)
 
     val workingAudio: AudioFile
-        get() = chapterRepresentation.workingAudio
+        get() = chapterRepresentation.scratchAudio
 
     val audioReader: AudioFileReader
         get() = chapterRepresentation
 
-    val activeVerses: List<VerseNode>
+    val activeVerses: List<VerseMarker>
         get() = run {
-            val verses = chapterRepresentation.activeVerses
+            val verses = chapterRepresentation
+                .activeVerses
+                .map {
+                    it.marker
+                }
             verses
         }
 
-    val onActiveVersesUpdated: PublishSubject<List<VerseNode>>
+    val onActiveVersesUpdated: PublishSubject<List<VerseMarker>>
         get() = chapterRepresentation.onActiveVersesUpdated
 
     private val firstVerse: VerseMarker
@@ -95,12 +102,12 @@ class Narration @AssistedInject constructor(
         chapterRepresentation.onVersesUpdated()
     }
 
-    fun finalizeVerse(verseIndex: Int = activeVerses.lastIndex) {
-        chapterRepresentation.finalizeVerse(verseIndex)
+    fun finalizeVerse(verseIndex: Int) {
+        chapterRepresentation.finalizeVerse(verseIndex, history)
     }
 
-    fun onNewVerse() {
-        val action = NewVerseAction()
+    fun onNewVerse(verseIndex: Int) {
+        val action = NewVerseAction(verseIndex)
         execute(action)
 
         recorder.start()
@@ -121,9 +128,9 @@ class Narration @AssistedInject constructor(
     }
 
     fun onEditVerse(verseIndex: Int, editedFile: File) {
-        val start = chapterRepresentation.workingAudio.totalFrames
-        audioFileUtils.appendFile(chapterRepresentation.workingAudio, editedFile)
-        val end = chapterRepresentation.workingAudio.totalFrames
+        val start = chapterRepresentation.scratchAudio.totalFrames
+        audioFileUtils.appendFile(chapterRepresentation.scratchAudio, editedFile)
+        val end = chapterRepresentation.scratchAudio.totalFrames
 
         val action = EditVerseAction(verseIndex, start, end)
         execute(action)
@@ -134,7 +141,8 @@ class Narration @AssistedInject constructor(
         execute(action)
     }
 
-    fun onChapterEdited(newVerses: List<VerseNode>) {
+    private fun onChapterEdited(newVerses: List<VerseNode>) {
+        // TODO adjust for not having an end location
         val action = ChapterEditedAction(newVerses)
         execute(action)
     }
@@ -160,19 +168,24 @@ class Narration @AssistedInject constructor(
     fun getSectionAsFile(index: Int): File {
         val verse = activeVerses[index]
         return audioFileUtils.getSectionAsFile(
-            chapterRepresentation.workingAudio,
+            chapterRepresentation.scratchAudio,
             verse.start,
             verse.end
         )
     }
 
-    fun loadSectionIntoPlayer(verse: VerseNode) {
-        player.loadSection(chapterRepresentation.workingAudio.file, verse.start, verse.end)
+    fun loadSectionIntoPlayer(verse: VerseMarker) {
+        logger.info("Loading verse ${verse.label} into player")
+        val range: IntRange? = chapterRepresentation.getRangeOfMarker(verse)
+        logger.info("Playback range is ${range?.start}-${range?.last}")
+        range?.let {
+            player.loadSection(chapterRepresentation.scratchAudio.file, range.first, range.last)
+        }
     }
 
     private fun initializeWavWriter() {
         writer = WavFileWriter(
-            chapterRepresentation.workingAudio,
+            chapterRepresentation.scratchAudio,
             recorder.getAudioStream(),
             true
         ) {
@@ -181,7 +194,7 @@ class Narration @AssistedInject constructor(
     }
 
     private fun execute(action: NarrationAction) {
-        history.execute(action, chapterRepresentation.totalVerses, chapterRepresentation.workingAudio)
+        history.execute(action, chapterRepresentation.totalVerses, chapterRepresentation.scratchAudio)
         chapterRepresentation.onVersesUpdated()
     }
 
@@ -191,7 +204,7 @@ class Narration @AssistedInject constructor(
         val chapterFile = chapter.getSelectedTake()?.file
         val chapterFileExists = chapterFile?.exists() ?: false
 
-        val narrationEmpty = chapterRepresentation.workingAudio.totalFrames == 0
+        val narrationEmpty = chapterRepresentation.scratchAudio.totalFrames == 0
         val narrationFromChapter = chapterFileExists && narrationEmpty
 
         if (narrationFromChapter || forceUpdate) {
@@ -203,19 +216,24 @@ class Narration @AssistedInject constructor(
 
     private fun appendVerseSegmentsToWorkingAudio(segments: VerseSegments) {
         segments.forEach {
-            audioFileUtils.appendFile(chapterRepresentation.workingAudio, it.value)
+            audioFileUtils.appendFile(chapterRepresentation.scratchAudio, it.value)
         }
     }
 
     private fun createVersesFromVerseSegments(segments: VerseSegments) {
         val nodes = mutableListOf<VerseNode>()
-        var start = chapterRepresentation.workingAudio.totalFrames
-        var end = chapterRepresentation.workingAudio.totalFrames
+        var start = chapterRepresentation.scratchAudio.totalFrames
+        var end = chapterRepresentation.scratchAudio.totalFrames
 
         segments.forEach {
             val verseAudio = AudioFile(it.value)
             end += verseAudio.totalFrames
-            val node = VerseNode(start, end, true, it.key)
+            val node = VerseNode(
+                start,
+                end,
+                true,
+                it.key
+            )
             nodes.add(node)
             start = end
         }

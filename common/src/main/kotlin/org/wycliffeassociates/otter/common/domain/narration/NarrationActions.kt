@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.common.domain.narration
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import kotlin.collections.ArrayList
 
@@ -10,44 +11,54 @@ import kotlin.collections.ArrayList
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 internal interface NarrationAction {
-    fun execute(activeVerses: MutableList<VerseNode>, workingAudio: AudioFile)
-    fun undo(activeVerses: MutableList<VerseNode>)
-    fun redo(activeVerses: MutableList<VerseNode>)
+    fun execute(totalVerses: MutableList<VerseNode>, workingAudio: AudioFile)
+    fun undo(totalVerses: MutableList<VerseNode>)
+    fun redo(totalVerses: MutableList<VerseNode>)
 }
 
 /**
  * This action is to create a new verse node and add it to the list of verse nodes.
  * It doesn't track the end position of the verse. It should be updated when recording is paused.
  */
-internal class NewVerseAction : NarrationAction {
-    private var node: VerseNode? = null
+internal class NewVerseAction(
+    private val verseIndex: Int
+) : NarrationAction {
+    private val logger = LoggerFactory.getLogger(NarrationAction::class.java)
 
-    override fun execute(activeVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
+    internal var node: VerseNode? = null
+
+    override fun execute(
+        totalVerses: MutableList<VerseNode>, workingAudio: AudioFile
+    ) {
+        logger.info("New verse for index: ${verseIndex}")
+
         val start = workingAudio.totalFrames
         val end = workingAudio.totalFrames
 
-        val verseIndex = activeVerses.indexOfFirst { !it.placed }
-
-        verseIndex?.let {
-            node = VerseNode(
-                start,
-                end,
-                placed = true,
-                activeVerses[verseIndex].marker.copy()
-            ).also {
-                activeVerses[verseIndex] = it
-            }
+        node = VerseNode(
+            start, end, placed = true, totalVerses[verseIndex].marker.copy()
+        ).also {
+            totalVerses[verseIndex] = it.copy()
         }
     }
 
-    override fun undo(activeVerses: MutableList<VerseNode>) {
-        val index = activeVerses.indexOfLast { it.placed }
-        index?.let { activeVerses[index].placed = false }
+    override fun undo(totalVerses: MutableList<VerseNode>) {
+        logger.info("Undoing verse for index: ${verseIndex}")
+        totalVerses[verseIndex].placed = false
     }
 
-    override fun redo(activeVerses: MutableList<VerseNode>) {
-        val index = activeVerses.indexOfFirst { !it.placed }
-        index?.let { activeVerses[index].placed = true }
+    override fun redo(totalVerses: MutableList<VerseNode>) {
+        logger.info("Redoing verse for index: ${verseIndex}")
+        node?.let {
+            totalVerses[verseIndex] = it.copy()
+        }
+    }
+
+    fun finalize(end: Int, totalVerses: MutableList<VerseNode>) {
+        node?.let { node ->
+            node.endScratchFrame = end
+            totalVerses[verseIndex] = node.copy()
+        }
     }
 }
 
@@ -58,37 +69,45 @@ internal class NewVerseAction : NarrationAction {
 internal class RecordAgainAction(
     private val verseIndex: Int
 ) : NarrationAction {
-    var node: VerseNode? = null
-    var previous: VerseNode? = null
+    private val logger = LoggerFactory.getLogger(RecordAgainAction::class.java)
+
+    internal var node: VerseNode? = null
+    internal var previous: VerseNode? = null
 
     override fun execute(
-        activeVerses: MutableList<VerseNode>,
-        workingAudio: AudioFile
+        totalVerses: MutableList<VerseNode>, workingAudio: AudioFile
     ) {
-        previous = activeVerses[verseIndex]
+        logger.info("Recording again verse for index: ${verseIndex}")
+        previous = totalVerses[verseIndex].copy()
 
         val start = workingAudio.totalFrames
         val end = workingAudio.totalFrames
 
         node = VerseNode(
-            start,
-            end,
-            placed = true,
-            activeVerses[verseIndex].marker.copy()
+            start, end, placed = true, totalVerses[verseIndex].marker.copy()
         ).also {
-            activeVerses[verseIndex] = it
+            totalVerses[verseIndex] = it.copy()
         }
     }
 
-    override fun undo(activeVerses: MutableList<VerseNode>) {
+    override fun undo(totalVerses: MutableList<VerseNode>) {
+        logger.info("Undoing record again for index: ${verseIndex}")
         previous?.let {
-            activeVerses[verseIndex] = it
+            totalVerses[verseIndex] = it.copy()
         }
     }
 
-    override fun redo(activeVerses: MutableList<VerseNode>) {
+    override fun redo(totalVerses: MutableList<VerseNode>) {
+        logger.info("Redoing record again for index: ${verseIndex}")
         node?.let {
-            activeVerses[verseIndex] = it
+            totalVerses[verseIndex] = it.copy()
+        }
+    }
+
+    fun finalize(end: Int, totalVerses: MutableList<VerseNode>) {
+        node?.let { node ->
+            node.endScratchFrame = end
+            totalVerses[verseIndex] = node.copy()
         }
     }
 }
@@ -98,9 +117,10 @@ internal class RecordAgainAction(
  * by verse nodes with updated positions.
  */
 internal class VerseMarkerAction(
-    private val verseIndex: Int,
-    private val newMarkerPosition: Int
+    private val verseIndex: Int, private val newMarkerPosition: Int
 ) : NarrationAction {
+    private val logger = LoggerFactory.getLogger(VerseMarkerAction::class.java)
+
     private var previousFirstNode: VerseNode? = null
     private var previousSecondNode: VerseNode? = null
 
@@ -108,48 +128,53 @@ internal class VerseMarkerAction(
     private var secondNode: VerseNode? = null
 
     // Called when marker is set and mouse button is released
-    override fun execute(activeVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
-        previousFirstNode = activeVerses[verseIndex]
-        previousSecondNode = activeVerses.getOrNull(verseIndex - 1)
+    override fun execute(
+        totalVerses: MutableList<VerseNode>, workingAudio: AudioFile
+    ) {
+        logger.info("Moving marker of verse index: ${verseIndex}")
+        previousFirstNode = totalVerses[verseIndex]
+        previousSecondNode = totalVerses.getOrNull(verseIndex - 1)
 
         previousFirstNode?.let { prev ->
+            val start = newMarkerPosition
+            val end = prev.endScratchFrame
+
             firstNode = VerseNode(
-                newMarkerPosition,
-                prev.end,
-                placed = true,
-                activeVerses[verseIndex].marker.copy()
+                start, end, placed = true, totalVerses[verseIndex].marker.copy()
             ).also { current ->
-                activeVerses[verseIndex] = current
+                totalVerses[verseIndex] = current.copy()
             }
         }
 
         previousSecondNode?.let { prev ->
+            val start = prev.startScratchFrame
+            val end = newMarkerPosition
+
             secondNode = VerseNode(
-                prev.start,
-                newMarkerPosition,
-                placed = true,
-                activeVerses[verseIndex - 1].marker.copy()
+                start, end, placed = true, totalVerses[verseIndex - 1].marker.copy()
             ).also { current ->
-                activeVerses[verseIndex - 1] = current
+                totalVerses[verseIndex - 1] = current.copy()
             }
         }
     }
 
-    override fun undo(activeVerses: MutableList<VerseNode>) {
+    override fun undo(totalVerses: MutableList<VerseNode>) {
+        logger.info("Undoing moving marker of verse index: ${verseIndex}")
         previousFirstNode?.let {
-            activeVerses[verseIndex] = it
+            totalVerses[verseIndex] = it.copy()
         }
         previousSecondNode?.let {
-            activeVerses[verseIndex - 1] = it
+            totalVerses[verseIndex - 1] = it.copy()
         }
     }
 
-    override fun redo(activeVerses: MutableList<VerseNode>) {
+    override fun redo(totalVerses: MutableList<VerseNode>) {
+        logger.info("Undoing moving marker of verse index: ${verseIndex}")
         firstNode?.let {
-            activeVerses[verseIndex] = it
+            totalVerses[verseIndex] = it.copy()
         }
         secondNode?.let {
-            activeVerses[verseIndex - 1] = it
+            totalVerses[verseIndex - 1] = it.copy()
         }
     }
 }
@@ -159,36 +184,36 @@ internal class VerseMarkerAction(
  * with new recording from an external app.
  */
 internal class EditVerseAction(
-    private val verseIndex: Int,
-    private val start: Int,
-    private val end: Int
+    private val verseIndex: Int, private val start: Int, private val end: Int
 ) : NarrationAction {
+    private val logger = LoggerFactory.getLogger(EditVerseAction::class.java)
+
     var node: VerseNode? = null
     var previous: VerseNode? = null
 
-    override fun execute(activeVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
-        previous = activeVerses[verseIndex]
+    override fun execute(totalVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
+        logger.info("Editing verse index: ${verseIndex}")
+        previous = totalVerses[verseIndex]
 
-        val vm = activeVerses[verseIndex].marker.copy()
+        val vm = totalVerses[verseIndex].marker.copy()
         node = VerseNode(
-            start,
-            end,
-            placed = true,
-            vm
+            start, end, placed = true, vm
         ).also {
-            activeVerses[verseIndex] = it
+            totalVerses[verseIndex] = it.copy()
         }
     }
 
-    override fun undo(activeVerses: MutableList<VerseNode>) {
+    override fun undo(totalVerses: MutableList<VerseNode>) {
+        logger.info("Undoing edit verse index: ${verseIndex}")
         previous?.let {
-            activeVerses[verseIndex] = it
+            totalVerses[verseIndex] = it.copy()
         }
     }
 
-    override fun redo(activeVerses: MutableList<VerseNode>) {
+    override fun redo(totalVerses: MutableList<VerseNode>) {
+        logger.info("Redoing edit verse index: ${verseIndex}")
         node?.let {
-            activeVerses[verseIndex] = it
+            totalVerses[verseIndex] = it.copy()
         }
     }
 }
@@ -199,18 +224,21 @@ internal class EditVerseAction(
 internal class ResetAllAction : NarrationAction {
     private val nodes = ArrayList<VerseNode>()
 
-    override fun execute(activeVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
-        nodes.addAll(activeVerses)
-        activeVerses.forEach { it.clear() }
+    override fun execute(totalVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
+        // use copy to get nodes that won't share the same pointer otherwise clearing totalVerses will result in
+        // erasing the state from nodes as well.
+        nodes.addAll(totalVerses.map { it.copy() })
+        totalVerses.forEach { it.clear() }
     }
 
-    override fun undo(activeVerses: MutableList<VerseNode>) {
-        activeVerses.clear()
-        activeVerses.addAll(nodes)
+    override fun undo(totalVerses: MutableList<VerseNode>) {
+        totalVerses.clear()
+        // same as with execute; copy the nodes otherwise undo/redo will start erasing the data saved in nodes.
+        totalVerses.addAll(nodes.map { it.copy() })
     }
 
-    override fun redo(activeVerses: MutableList<VerseNode>) {
-        activeVerses.forEach { it.clear() }
+    override fun redo(totalVerses: MutableList<VerseNode>) {
+        totalVerses.forEach { it.clear() }
     }
 }
 
@@ -219,19 +247,19 @@ internal class ChapterEditedAction(
 ) : NarrationAction {
     private val nodes = ArrayList<VerseNode>()
 
-    override fun execute(activeVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
-        nodes.addAll(activeVerses)
-        activeVerses.clear()
-        activeVerses.addAll(newList)
+    override fun execute(totalVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
+        nodes.addAll(totalVerses)
+        totalVerses.clear()
+        totalVerses.addAll(newList)
     }
 
-    override fun undo(activeVerses: MutableList<VerseNode>) {
-        activeVerses.clear()
-        activeVerses.addAll(nodes)
+    override fun undo(totalVerses: MutableList<VerseNode>) {
+        totalVerses.clear()
+        totalVerses.addAll(nodes)
     }
 
-    override fun redo(activeVerses: MutableList<VerseNode>) {
-        activeVerses.clear()
-        activeVerses.addAll(newList)
+    override fun redo(totalVerses: MutableList<VerseNode>) {
+        totalVerses.clear()
+        totalVerses.addAll(newList)
     }
 }
