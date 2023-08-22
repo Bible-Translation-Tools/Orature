@@ -114,6 +114,7 @@ class HomePage2 : View() {
                         viewModel.selectedProjectGroup.set(null)
                         mainSectionProperty.set(wizardFragment)
                         projectWizardViewModel.dock()
+                        wizardFragment.onSectionDocked()
                     }
                 }
                 newTranslationCard(
@@ -181,6 +182,9 @@ class HomePage2 : View() {
 
     private fun subscribeActionEvents() {
         subscribe<LanguageSelectedEvent> {
+            if (projectWizardViewModel.selectedSourceLanguageProperty.value == null) {
+                wizardFragment.nextStep()
+            }
             projectWizardViewModel.onLanguageSelected(it.item) {
                 viewModel.loadProjects()
                 mainSectionProperty.set(bookFragment)

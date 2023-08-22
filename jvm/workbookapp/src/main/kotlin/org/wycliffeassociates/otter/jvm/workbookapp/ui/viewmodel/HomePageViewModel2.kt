@@ -175,15 +175,19 @@ class HomePageViewModel2 : ViewModel() {
             ProjectGroupKey(it.sourceLanguage.slug, it.targetLanguage.slug, it.mode)
         }
         projectGroups
-            .map {
-                val book = it.value.first()
-                val mostRecentBook = it.value.maxByOrNull { it.lastModified?.nano ?: -1 }
+            .map { entry ->
+                val bookList = entry.value
+                val book = bookList.first()
+                val mostRecentBook = bookList
+                    .filter { it.lastModified != null }
+                    .maxByOrNull { it.lastModified!! }
+
                 ProjectGroupCardModel(
                     book.sourceLanguage,
                     book.targetLanguage,
                     book.mode,
                     mostRecentBook?.lastModified,
-                    it.value.toObservable()
+                    bookList.toObservable()
                 )
             }
             .sortedByDescending { it.modifiedTs }
