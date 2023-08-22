@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.popup
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.ContextMenu
+import javafx.scene.control.Label
 import javafx.scene.control.MenuItem
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
@@ -32,39 +33,52 @@ import tornadofx.FX
 import tornadofx.action
 import tornadofx.addClass
 import tornadofx.get
+import tornadofx.tooltip
 
 class WorkbookOptionMenu : ContextMenu() {
 
     val workbookInfoProperty = SimpleObjectProperty<WorkbookDescriptor>(null)
 
     init {
-        val openOption = MenuItem(FX.messages["openBook"]).apply {
-            graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
+        val openOption = MenuItem().apply {
+            graphic = Label(FX.messages["openBook"]).apply {
+                this.graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
+                tooltip(text)
+            }
             action {
                 workbookInfoProperty.value?.let {
                     FX.eventbus.fire(WorkbookOpenEvent(it))
                 }
             }
         }
-        val backupOption = MenuItem(FX.messages["backup"]).apply {
-            graphic = FontIcon(MaterialDesign.MDI_CONTENT_DUPLICATE)
+        val backupOption = MenuItem().apply {
+            graphic = Label(FX.messages["backup"]).apply {
+                this.graphic = FontIcon(MaterialDesign.MDI_CONTENT_DUPLICATE)
+                tooltip(text)
+            }
             action {
                 workbookInfoProperty.value?.let {
                     FX.eventbus.fire(WorkbookQuickBackupEvent(it))
                 }
             }
         }
-        val exportOption = MenuItem(FX.messages["exportOptions"]).apply {
-            graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
+        val exportOption = MenuItem().apply {
+            graphic = Label(FX.messages["exportOptions"]).apply {
+                this.graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
+                tooltip(text)
+            }
             action {
                 workbookInfoProperty.value?.let {
                     FX.eventbus.fire(WorkbookExportDialogOpenEvent(it))
                 }
             }
         }
-        val deleteOption = MenuItem(FX.messages["deleteBook"]).apply {
+        val deleteOption = MenuItem().apply {
             addClass("danger")
-            graphic = FontIcon(MaterialDesign.MDI_DELETE)
+            graphic = Label(FX.messages["deleteBook"]).apply {
+                this.graphic = FontIcon(MaterialDesign.MDI_DELETE)
+                tooltip(text)
+            }
             action {
                 workbookInfoProperty.value?.let {
                     FX.eventbus.fire(WorkbookDeleteEvent(it))

@@ -19,7 +19,7 @@
     -fx-cursor: disappear;
 }
 
-.wa-context-menu .menu-item > .label {
+.wa-context-menu .menu-item .label {
     -fx-text-fill: -wa-regular-text;
 }
 
@@ -28,7 +28,7 @@
     -fx-icon-size: 18px;
 }
 
-.wa-context-menu .menu-item.danger > .label {
+.wa-context-menu .menu-item.danger .label {
     -fx-text-fill: #B85659;
 }
 

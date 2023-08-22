@@ -57,11 +57,23 @@
     -fx-icon-color: -wa-regular-text;
 }
 
-.create-translation-card {
+.translation-creation-card {
+    -fx-pref-height: 80;
     -fx-background-color: -wa-card-image-placeholder-background;
     -fx-background-radius: 16;
-    -fx-alignment: center-right;
+    -fx-alignment: center;
     -fx-padding: 12;
+}
+
+.translation-creation-card .translation-creation-card__box {
+    -fx-alignment: center-left;
+    -fx-spacing: 8;
+}
+
+.translation-creation-card .card-graphic {
+    -fx-fill: #E5E8EB;
+    -fx-arc-width: 20;
+    -fx-arc-height: 20;
 }
 
 /* translation wizard */
