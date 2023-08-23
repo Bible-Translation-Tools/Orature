@@ -12,6 +12,7 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Take
@@ -88,11 +89,17 @@ class NarrationViewModel : ViewModel() {
     private val listeners = mutableListOf<ListenerDisposer>()
     private val disposables = CompositeDisposable()
 
+
+    var mockRecordedVerseMarkers = observableListOf<VerseMarker>()
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
 
         hasVersesProperty.bind(recordedVerses.booleanBinding { it.isNotEmpty() })
         lastRecordedVerseProperty.bind(recordedVerses.integerBinding { it.size })
+
+        for(i in 0 until 5) {
+            mockRecordedVerseMarkers.add(VerseMarker(0 + 44100 * (i) + 1, 44100 * (i + 1), 44100 * (i + 1)))
+        }
     }
 
     fun onDock() {
@@ -139,6 +146,16 @@ class NarrationViewModel : ViewModel() {
             }
     }
 
+    fun getRecorderAudioStream(): Observable<ByteArray> {
+        return narration.getRecorderAudioStream()
+    }
+
+    fun getExistingAudioFileReader(): AudioFileReader {
+        return narration.audioReader
+    }
+
+    var narrationIsInitialized = SimpleBooleanProperty(false)
+
     fun loadChapter(chapter: Chapter) {
         chapter
             .chunkCount
@@ -150,6 +167,7 @@ class NarrationViewModel : ViewModel() {
 
         workbookDataStore.activeChapterProperty.set(chapter)
         initializeNarration(chapter)
+        narrationIsInitialized.set(true)
 
         chunksList.clear()
         loadChunks(chapter)
