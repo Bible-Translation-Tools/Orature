@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
+import io.reactivex.disposables.Disposable
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.transformation.FilteredList
@@ -26,8 +27,11 @@ import tornadofx.ViewModel
 import tornadofx.observableListOf
 import tornadofx.toObservable
 import java.time.LocalDateTime
+import java.util.concurrent.TimeUnit
 import java.util.function.Predicate
 import javax.inject.Inject
+
+const val NOTIFICATION_DURATION_SEC = 5.0
 
 class HomePageViewModel2 : ViewModel() {
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -58,7 +62,7 @@ class HomePageViewModel2 : ViewModel() {
     private val disposableListeners = mutableListOf<ListenerDisposer>()
 
     val sortedBooks = SortedList<WorkbookDescriptor>(filteredBooks)
-    val selectedProjectGroup = SimpleObjectProperty<ProjectGroupKey>()
+    val selectedProjectGroupProperty = SimpleObjectProperty<ProjectGroupKey>()
     val bookSearchQueryProperty = SimpleStringProperty("")
 
     init {
@@ -124,8 +128,8 @@ class HomePageViewModel2 : ViewModel() {
     }
 
     fun selectBook(workbookDescriptor: WorkbookDescriptor) {
-        val projectGroup = selectedProjectGroup.value
-        workbookDS.currentModeProperty.set(selectedProjectGroup.value.mode)
+        val projectGroup = selectedProjectGroupProperty.value
+        workbookDS.currentModeProperty.set(selectedProjectGroupProperty.value.mode)
 
         val projects = workbookRepo.getProjects().blockingGet()
         val existingProject = projects.firstOrNull { existingProject ->
@@ -140,16 +144,26 @@ class HomePageViewModel2 : ViewModel() {
         }
     }
 
-    fun deleteProjectGroup(books: List<WorkbookDescriptor>) {
-        if (books.all { it.progress == 0.0 }) {
-            logger.info("Deleting project group: ${selectedProjectGroup.value.sourceLanguage} -> ${selectedProjectGroup.value.targetLanguage}")
+    fun deleteProjectGroupWithTimer(cardModel: ProjectGroupCardModel): Disposable {
+        val timeoutMillis = NOTIFICATION_DURATION_SEC * 1000
 
-            deleteProjectUseCase.deleteProjects(books)
-                .observeOnFx()
-                .subscribe {
-                    loadProjects()
+        val completable: Completable = Completable.create { emitter ->
+            val timerDisposable = Completable
+                .timer(timeoutMillis.toLong(), TimeUnit.MILLISECONDS)
+                .andThen(deleteProjectGroup(cardModel.books))
+                .doOnComplete {
+                    logger.info("Deleted project group: ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
+                    emitter.onComplete()
                 }
+                .subscribe()
+            emitter.setDisposable(timerDisposable)
         }
+
+        return completable.subscribe()
+    }
+
+    fun deleteProjectGroup(books: List<WorkbookDescriptor>): Completable {
+        return deleteProjectUseCase.deleteProjects(books)
     }
 
     fun deleteBook(workbookDescriptor: WorkbookDescriptor): Completable {
@@ -228,7 +242,7 @@ class HomePageViewModel2 : ViewModel() {
             .let { modelList ->
                 this.projectGroups.setAll(modelList)
                 modelList.firstOrNull()?.let { cardModel ->
-                    selectedProjectGroup.set(cardModel.getKey())
+                    selectedProjectGroupProperty.set(cardModel.getKey())
                     bookList.setAll(cardModel.books)
                 }
             }

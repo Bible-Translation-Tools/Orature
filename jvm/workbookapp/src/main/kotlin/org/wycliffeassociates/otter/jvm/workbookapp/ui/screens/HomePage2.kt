@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.jfoenix.controls.JFXSnackbar
+import io.reactivex.disposables.Disposable
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.EventHandler
 import javafx.scene.Node
@@ -34,6 +35,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookDeleteEven
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ExportProjectDialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.ProgressDialog
 import org.wycliffeassociates.otter.jvm.controls.event.ProjectContributorsEvent
+import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.BookSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.ProjectWizardSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportDialogOpenEvent
@@ -42,6 +44,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookOpenEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookQuickBackupEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ExportProjectViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel2
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.NOTIFICATION_DURATION_SEC
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectWizardViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
@@ -114,7 +117,7 @@ class HomePage2 : View() {
                     visibleWhen { mainSectionProperty.isNotEqualTo(wizardFragment) }
                     managedWhen(visibleProperty())
                     setOnAction {
-                        viewModel.selectedProjectGroup.set(null)
+                        viewModel.selectedProjectGroupProperty.set(null)
                         mainSectionProperty.set(wizardFragment)
                         projectWizardViewModel.dock()
                         wizardFragment.onSectionDocked()
@@ -145,12 +148,12 @@ class HomePage2 : View() {
                             cardModel.sourceLanguage,
                             cardModel.targetLanguage,
                             cardModel.mode,
-                            viewModel.selectedProjectGroup
+                            viewModel.selectedProjectGroupProperty
                         ).apply {
 
                             setOnAction {
                                 viewModel.bookList.setAll(cardModel.books)
-                                viewModel.selectedProjectGroup.set(cardModel.getKey())
+                                viewModel.selectedProjectGroupProperty.set(cardModel.getKey())
                                 if (mainSectionProperty.value !is BookSection) {
                                     exitWizard()
                                 }
@@ -210,7 +213,18 @@ class HomePage2 : View() {
         }
 
         subscribe<ProjectGroupDeleteEvent> {
-            viewModel.deleteProjectGroup(it.books)
+            val cardModel = viewModel.projectGroups
+                .find { gr -> gr.getKey() == viewModel.selectedProjectGroupProperty.value }
+                ?: return@subscribe
+
+            // temporarily remove the project group from the view
+            viewModel.projectGroups.remove(cardModel)
+            viewModel.selectedProjectGroupProperty.set(viewModel.projectGroups.firstOrNull()?.getKey())
+            viewModel.bookList.setAll(viewModel.projectGroups.firstOrNull()?.books ?: listOf())
+
+            val cancellable = viewModel.deleteProjectGroupWithTimer(cardModel)
+            val notification = createProjectGroupDeleteNotification(cardModel, cancellable)
+            showNotification(notification)
         }
 
         subscribe<WorkbookOpenEvent> {
@@ -407,14 +421,36 @@ class HomePage2 : View() {
 
     private fun createBookDeleteNotification(workbookDescriptor: WorkbookDescriptor): NotificationViewData {
         return NotificationViewData(
-            title = messages["projectDeleted"],
+            title = messages["bookDeleted"],
             message = MessageFormat.format(
-                messages["projectDeletedMessage"],
+                messages["bookDeletedMessage"],
                 workbookDescriptor.targetCollection.titleKey,
                 workbookDescriptor.targetLanguage.name
             ),
             statusType = NotificationStatusType.WARNING,
         )
+    }
+
+    private fun createProjectGroupDeleteNotification(
+        cardModel: ProjectGroupCardModel,
+        cancellable: Disposable
+    ): NotificationViewData {
+        return NotificationViewData(
+            title = messages["projectDeleted"],
+            message = MessageFormat.format(
+                messages["projectDeletedMessage"],
+                cardModel.sourceLanguage.name,
+                cardModel.targetLanguage.name,
+                messages[cardModel.mode.titleKey]
+            ),
+            statusType = NotificationStatusType.WARNING,
+            actionText = messages["undo"],
+            actionIcon = MaterialDesign.MDI_UNDO
+        ) {
+            // cancel deletion
+            cancellable.dispose()
+            viewModel.loadProjects()
+        }
     }
 
     private fun showNotification(notification: NotificationViewData) {
@@ -425,13 +461,14 @@ class HomePage2 : View() {
             }
             setOnMainAction {
                 notification.actionCallback()
+                snackBar.hide()
             }
         }
 
         snackBar.enqueue(
             JFXSnackbar.SnackbarEvent(
                 graphic,
-                Duration.seconds(5.0)
+                Duration.seconds(NOTIFICATION_DURATION_SEC)
             )
         )
     }
