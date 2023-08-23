@@ -56,7 +56,7 @@ internal class NewVerseAction(
 
     fun finalize(end: Int, totalVerses: MutableList<VerseNode>) {
         node?.let { node ->
-            node.endScratchFrame = end
+            node.finalize(end)
             totalVerses[verseIndex] = node.copy()
         }
     }
@@ -106,7 +106,7 @@ internal class RecordAgainAction(
 
     fun finalize(end: Int, totalVerses: MutableList<VerseNode>) {
         node?.let { node ->
-            node.endScratchFrame = end
+            node.finalize(end)
             totalVerses[verseIndex] = node.copy()
         }
     }
