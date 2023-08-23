@@ -225,10 +225,7 @@ class HomePage2 : View() {
                 .find { gr -> gr.getKey() == viewModel.selectedProjectGroupProperty.value }
                 ?: return@subscribe
 
-            // temporarily remove the project group from the view
-            viewModel.projectGroups.remove(cardModel)
-            viewModel.selectedProjectGroupProperty.set(viewModel.projectGroups.firstOrNull()?.getKey())
-            viewModel.bookList.setAll(viewModel.projectGroups.firstOrNull()?.books ?: listOf())
+            viewModel.removeProjectFromList(cardModel)
 
             val cancellable = viewModel.deleteProjectGroupWithTimer(cardModel)
             val notification = createProjectGroupDeleteNotification(cardModel, cancellable)
@@ -324,7 +321,7 @@ class HomePage2 : View() {
 
     private fun exitWizard() {
         projectWizardViewModel.undock()
-        viewModel.selectedProjectGroup.set(viewModel.projectGroups.firstOrNull()?.getKey())
+        viewModel.selectedProjectGroupProperty.set(viewModel.projectGroups.firstOrNull()?.getKey())
         mainSectionProperty.set(bookFragment)
     }
 
@@ -477,9 +474,14 @@ class HomePage2 : View() {
             actionText = messages["undo"],
             actionIcon = MaterialDesign.MDI_UNDO
         ) {
-            // cancel deletion
+            // undo deletion by cancelling the task
             cancellable.dispose()
-            viewModel.loadProjects()
+            // reinsert the project group
+            viewModel.projectGroups.add(cardModel)
+            if (viewModel.projectGroups.size == 1) {
+                viewModel.bookList.setAll(cardModel.books)
+                viewModel.selectedProjectGroupProperty.set(cardModel.getKey())
+            }
         }
     }
 

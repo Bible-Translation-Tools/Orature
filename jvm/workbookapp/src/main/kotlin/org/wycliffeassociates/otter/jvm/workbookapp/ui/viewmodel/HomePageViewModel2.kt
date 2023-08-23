@@ -143,26 +143,42 @@ class HomePageViewModel2 : ViewModel() {
         }
     }
 
+    /**
+     * Temporarily removes the project group from the view as if the project was "deleted".
+     * This is used in conjunction with time-out enabled deletion which allows the user to
+     * cancel/undo the action.
+     */
+    fun removeProjectFromList(cardModel: ProjectGroupCardModel) {
+        projectGroups.remove(cardModel)
+        selectedProjectGroupProperty.set(projectGroups.firstOrNull()?.getKey())
+        bookList.setAll(projectGroups.firstOrNull()?.books ?: listOf())
+    }
+
+    /**
+     * Deletes the project group after a specified timeout. During this time,
+     * the user can choose to cancel (undo) the action by calling dispose()
+     * from the disposable.
+     *
+     * @return the disposable (cancellable) subscription to the deletion task.
+     */
     fun deleteProjectGroupWithTimer(cardModel: ProjectGroupCardModel): Disposable {
         val timeoutMillis = NOTIFICATION_DURATION_SEC * 1000
 
         val completable: Completable = Completable.create { emitter ->
             val timerDisposable = Completable
                 .timer(timeoutMillis.toLong(), TimeUnit.MILLISECONDS)
-                .andThen(deleteProjectGroup(cardModel.books))
+                .andThen(deleteProjectUseCase.deleteProjects(cardModel.books))
+                .observeOnFx()
                 .doOnComplete {
                     logger.info("Deleted project group: ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
                     emitter.onComplete()
                 }
                 .subscribe()
+
             emitter.setDisposable(timerDisposable)
         }
 
         return completable.subscribe()
-    }
-
-    fun deleteProjectGroup(books: List<WorkbookDescriptor>): Completable {
-        return deleteProjectUseCase.deleteProjects(books)
     }
 
     fun deleteBook(workbookDescriptor: WorkbookDescriptor): Completable {
