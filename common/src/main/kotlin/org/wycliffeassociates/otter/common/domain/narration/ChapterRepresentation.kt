@@ -234,12 +234,13 @@ internal class ChapterRepresentation(
 
     @Synchronized
     override fun seek(sample: Int) {
+        val scratchFileLength = scratchAudio.totalFrames * frameSizeInBytes
         when {
             sample <= 0 -> this.position = 0
-            sample > totalFrames -> this.position = totalFrames * frameSizeInBytes
+            sample >= totalFrames -> this.position = scratchFileLength
             else -> {
                 val absoluteFrame = relativeToAbsolute(sample)
-                this.position = max(min(absoluteFrame, this.totalFrames) * frameSizeInBytes, 0)
+                this.position = max(min(absoluteFrame * frameSizeInBytes, scratchFileLength), 0)
             }
         }
     }
