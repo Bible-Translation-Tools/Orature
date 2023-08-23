@@ -3,12 +3,14 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.jfoenix.controls.JFXSnackbar
 import javafx.beans.property.SimpleObjectProperty
+import javafx.event.EventHandler
 import javafx.scene.Node
 import javafx.scene.layout.Priority
 import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportType
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
@@ -16,6 +18,7 @@ import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.card.TranslationCard2
 import org.wycliffeassociates.otter.jvm.controls.card.newTranslationCard
 import org.wycliffeassociates.otter.jvm.controls.card.translationCreationCard
+import org.wycliffeassociates.otter.jvm.controls.dialog.ContributorDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.LanguageSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ProjectGroupDeleteEvent
@@ -30,6 +33,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ProjectImportEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookDeleteEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ExportProjectDialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.ProgressDialog
+import org.wycliffeassociates.otter.jvm.controls.event.ProjectContributorsEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.BookSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.ProjectWizardSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportDialogOpenEvent
@@ -43,7 +47,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewMod
 import tornadofx.*
 import java.lang.Exception
 import java.text.MessageFormat
-
 
 class HomePage2 : View() {
 
@@ -86,6 +89,7 @@ class HomePage2 : View() {
     init {
         tryImportStylesheet("/css/control.css")
         tryImportStylesheet("/css/home-page.css")
+        tryImportStylesheet("/css/contributor-info.css")
         tryImportStylesheet("/css/translation-card-2.css")
         tryImportStylesheet("/css/popup-menu.css")
         tryImportStylesheet("/css/filtered-search-bar.css")
@@ -113,6 +117,7 @@ class HomePage2 : View() {
                         viewModel.selectedProjectGroup.set(null)
                         mainSectionProperty.set(wizardFragment)
                         projectWizardViewModel.dock()
+                        wizardFragment.onSectionDocked()
                     }
                 }
                 newTranslationCard(
@@ -180,22 +185,45 @@ class HomePage2 : View() {
 
     private fun subscribeActionEvents() {
         subscribe<LanguageSelectedEvent> {
+            if (projectWizardViewModel.selectedSourceLanguageProperty.value == null) {
+                wizardFragment.nextStep()
+            }
             projectWizardViewModel.onLanguageSelected(it.item) {
                 viewModel.loadProjects()
                 mainSectionProperty.set(bookFragment)
             }
         }
 
-        subscribe<WorkbookOpenEvent> {
-            viewModel.selectBook(it.data)
+        subscribe<ProjectContributorsEvent> {
+            val books = it.books
+            val dialog = find<ContributorDialog>().apply {
+                themeProperty.set(settingsViewModel.appColorMode.value)
+                orientationProperty.set(settingsViewModel.orientationProperty.value)
+                contributors.setAll(viewModel.loadContributors(books))
+                saveContributorCallback.set(
+                    EventHandler {
+                        viewModel.saveContributors(contributors, books)
+                    }
+                )
+            }
+            dialog.open()
         }
 
         subscribe<ProjectGroupDeleteEvent> {
             viewModel.deleteProjectGroup(it.books)
         }
 
+        subscribe<WorkbookOpenEvent> {
+            viewModel.selectBook(it.data)
+        }
+
         subscribe<WorkbookDeleteEvent> {
             viewModel.deleteBook(it.data)
+                .subscribe {
+                    val notification = createBookDeleteNotification(it.data)
+                    showNotification(notification)
+                    viewModel.loadProjects()
+                }
         }
 
         subscribe<WorkbookQuickBackupEvent> {
@@ -239,10 +267,13 @@ class HomePage2 : View() {
             showNotification(notification)
         }
 
-        subscribe<ProjectImportEvent> {
+        subscribe<ProjectImportEvent> { event ->
             logger.info("Import project event received, refreshing the homepage.")
-            val notification = createImportNotification(it)
+            val notification = createImportNotification(event)
             showNotification(notification)
+            event.workbookDescriptor?.let {
+                viewModel.mergeContributorFromImport(it)
+            }
             viewModel.refresh()
         }
     }
@@ -363,11 +394,27 @@ class HomePage2 : View() {
         } else {
             NotificationViewData(
                 title = messages["exportFailed"],
-                message = MessageFormat.format(messages["exportFailedMessage"], event.project.titleKey),
+                message = MessageFormat.format(
+                    messages["exportFailedMessage"],
+                    event.project.titleKey,
+                    event.project.resourceContainer?.language?.name ?: ""
+                ),
                 statusType = NotificationStatusType.FAILED
             )
         }
         return notification
+    }
+
+    private fun createBookDeleteNotification(workbookDescriptor: WorkbookDescriptor): NotificationViewData {
+        return NotificationViewData(
+            title = messages["projectDeleted"],
+            message = MessageFormat.format(
+                messages["projectDeletedMessage"],
+                workbookDescriptor.targetCollection.titleKey,
+                workbookDescriptor.targetLanguage.name
+            ),
+            statusType = NotificationStatusType.WARNING,
+        )
     }
 
     private fun showNotification(notification: NotificationViewData) {

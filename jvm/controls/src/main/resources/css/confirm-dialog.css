@@ -51,7 +51,7 @@
 
 .confirm-dialog__message {
     -fx-text-fill: -wa-regular-text;
-    -fx-font-size: 18px;
+    -fx-font-size: 1.4em;
     -fx-wrap-text: true;
 }
 
