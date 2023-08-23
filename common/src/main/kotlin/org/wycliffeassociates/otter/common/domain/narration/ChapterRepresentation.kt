@@ -46,7 +46,7 @@ internal class ChapterRepresentation(
 
     @get:Synchronized
     override val totalFrames: Int
-        get() = activeVerses.sumOf { it.endScratchFrame - it.startScratchFrame }
+        get() = activeVerses.sumOf { it.length }
 
     @get:Synchronized
     internal val activeVerses: List<VerseNode>
