@@ -18,6 +18,7 @@ import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.jvm.controls.bar.searchBar
 import org.wycliffeassociates.otter.jvm.controls.card.translationTypeCard
+import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.model.StepDirection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview.languageTableView
 import tornadofx.*
@@ -104,7 +105,11 @@ class ProjectWizardSection(
             }
         }
 
-        languageTableView(sourceLanguages)
+        languageTableView(sourceLanguages) {
+            this@apply.visibleProperty().onChange {
+                if (it) customizeScrollbarSkin()
+            }
+        }
         managedWhen(visibleProperty())
     }
 
@@ -132,7 +137,11 @@ class ProjectWizardSection(
             }
         }
 
-        languageTableView(targetLanguages)
+        languageTableView(targetLanguages) {
+            this@apply.visibleProperty().onChange {
+                if (it) customizeScrollbarSkin()
+            }
+        }
         managedWhen(visibleProperty())
     }
 

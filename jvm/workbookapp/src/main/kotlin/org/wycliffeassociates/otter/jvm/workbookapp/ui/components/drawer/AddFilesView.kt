@@ -34,6 +34,7 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
+import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.dialog.OtterDialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.ProgressDialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
@@ -153,6 +154,8 @@ class AddFilesView : View() {
         setOnKeyReleased {
             if (it.code == KeyCode.ESCAPE) collapse()
         }
+
+        runLater { customizeScrollbarSkin() }
     }
 
     init {
