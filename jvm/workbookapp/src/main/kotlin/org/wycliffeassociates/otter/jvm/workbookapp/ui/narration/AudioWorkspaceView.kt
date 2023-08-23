@@ -5,6 +5,7 @@ import javafx.beans.property.SimpleBooleanProperty
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkersLayer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.ExistingAndIncomingAudioRenderer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.Waveform
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.WaveformLayer
@@ -27,10 +28,17 @@ class AudioWorkspaceView : View() {
             }
 
             narrationWaveformLayer.widthProperty().addListener { _, old, new ->
-                println("Width: ${new}px, Range to show: ${viewModel.getCurrentFrameRangeShown(0, new.toInt())}")
+                var rangeToShow = viewModel.getCurrentFrameRangeShown(0, new.toInt())
+                println("Width: ${new}px, Range to show: ${rangeToShow}")
+                viewModel.getVerMarkersInRange(rangeToShow)
             }
 
             add(narrationWaveformLayer)
+
+//            add(VerseMarkersLayer().apply {
+//                isRecordingProperty.bind(viewModel.isRecordingProperty)
+//                markers.bind(viewModel.recordedVerses) { it }
+//            })
 
             scrollpane {
                 hbox {
@@ -105,12 +113,11 @@ class AudioWorkspaceViewModel : ViewModel() {
         return relativePosition .. (relativePosition + (screenWidth*framesPerPixel))
     }
 
-    // TODO: call this on widthProperty change
-    fun getVerMarkersInRange(verseMarker: VerseMarker, rangeToShow: IntRange): List<VerseMarker> {
+    fun getVerMarkersInRange(rangeToShow: IntRange): List<VerseMarker> {
         val verseMarkersToShow = mutableListOf<VerseMarker>()
-        for (i in 0 until narrationViewModel.recordedVerses.size) {
-            val currentVerse = narrationViewModel.recordedVerses[i]
-            if (currentVerse.end in rangeToShow) {
+        for (i in 0 until narrationViewModel.mockRecordedVerseMarkers.size) {
+            val currentVerse = narrationViewModel.mockRecordedVerseMarkers[i]
+            if (currentVerse.location in rangeToShow) {
                 println("verseMarker: ${currentVerse.label}, marker.end: ${currentVerse.end}")
                 verseMarkersToShow.add(currentVerse)
             }
