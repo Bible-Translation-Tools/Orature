@@ -14,6 +14,7 @@ import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import java.io.File
 import java.io.RandomAccessFile
 import java.lang.IllegalStateException
+import kotlin.math.max
 import kotlin.math.min
 
 private const val ACTIVE_VERSES_FILE_NAME = "active_verses.json"
@@ -233,19 +234,12 @@ internal class ChapterRepresentation(
 
     @Synchronized
     override fun seek(sample: Int) {
-        var pos = 0
-
-        for (i in 0 until activeVerses.size) {
-            val verse = activeVerses[i]
-            val verseRange = verse.endScratchFrame - verse.startScratchFrame
-
-            // jump by the verse range if it combined with our accumulated position is still less than the seek point
-            if (sample > pos + verseRange) {
-                pos += verseRange
-            } else {
-                // we've found the range the seek position falls within, so get the delta and add it to the start
-                this.position = min((sample - pos) + verse.startScratchFrame, this.totalFrames) * frameSizeInBytes
-                return
+        when {
+            sample <= 0 -> this.position = 0
+            sample > totalFrames -> this.position = totalFrames * frameSizeInBytes
+            else -> {
+                val absoluteFrame = relativeToAbsolute(sample)
+                this.position = max(min(absoluteFrame, this.totalFrames) * frameSizeInBytes, 0)
             }
         }
     }
