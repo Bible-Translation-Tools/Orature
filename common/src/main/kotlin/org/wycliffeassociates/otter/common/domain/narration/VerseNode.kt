@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.common.domain.narration
 
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import kotlin.math.min
 
 private const val UNPLACED_END = -1
 
@@ -202,7 +203,7 @@ internal data class VerseNode(
         return frameOffset
     }
 
-    fun indexFromOffset(framesFromStart: Int): Int {
+    fun absoluteFrameFromOffset(framesFromStart: Int): Int {
         if (framesFromStart > length) {
             throw IndexOutOfBoundsException("Frame offset: $framesFromStart exceeds the boundaries within ranges $sectors")
         }
@@ -218,8 +219,31 @@ internal data class VerseNode(
 
         throw IndexOutOfBoundsException("Requested offset $framesFromStart exceeded boundaries within ranges $sectors")
     }
+
+    fun getSectorsFromOffset(framePosition: Int, framesToRead: Int): List<IntRange> {
+        var framesToRead = framesToRead
+        val stuff = mutableListOf<IntRange>()
+
+        val startIndex = sectors.indexOfFirst { framePosition in it }
+        val start = (sectors[startIndex].first - framePosition)
+        val end = (start + min(sectors[startIndex].last - start, framesToRead))
+        val firstRange = start..end
+        stuff.add(firstRange)
+        framesToRead -= firstRange.length()
+
+        for (idx in startIndex until sectors.size) {
+            if (framesToRead <= 0) break
+            val sector = sectors[idx]
+            val end = (start + min(sectors[startIndex].last - start, framesToRead))
+            val range = (sector.first..end)
+            framesToRead -= range.length()
+            stuff.add(range)
+        }
+
+        return stuff
+    }
 }
 
-private fun IntRange.length(): Int {
+internal fun IntRange.length(): Int {
     return last - first
 }

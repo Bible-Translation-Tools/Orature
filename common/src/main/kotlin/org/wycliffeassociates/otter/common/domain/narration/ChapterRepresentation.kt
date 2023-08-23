@@ -156,11 +156,7 @@ internal class ChapterRepresentation(
      */
     private fun absoluteToRelative(absoluteFrame: Int): Int {
         val verses = activeVerses
-        var verse = verses.find { node ->
-            val absoluteIsInRange = absoluteFrame in node
-            val absoluteIsEndOfFile = absoluteFrame == node.lastFrame() && absoluteFrame == activeVerses.last().lastFrame()
-            absoluteIsInRange || absoluteIsEndOfFile
-        }
+        var verse = findVerse(absoluteFrame)
         verse?.let {
             val index = verses.indexOf(verse)
             var rel = 0
@@ -171,6 +167,14 @@ internal class ChapterRepresentation(
             return rel
         }
         return 0
+    }
+
+    private fun findVerse(absoluteFrame: Int): VerseNode? {
+        return activeVerses.find { node ->
+            val absoluteIsInRange = absoluteFrame in node
+            val absoluteIsEndOfFile = absoluteFrame == node.lastFrame() && absoluteFrame == activeVerses.last().lastFrame()
+            absoluteIsInRange || absoluteIsEndOfFile
+        }
     }
 
     /**
@@ -185,7 +189,7 @@ internal class ChapterRepresentation(
             if (range > remaining) {
                 remaining -= range
             } else {
-                return node.indexFromOffset(remaining)
+                return node.absoluteFrameFromOffset(remaining)
             }
         }
         return remaining
@@ -202,32 +206,26 @@ internal class ChapterRepresentation(
         var bytesWritten = 0
 
         randomAccessFile?.let { raf ->
-            for (verse in 0 until activeVerses.size) {
-                var verseRead = 0
-                val verseStart = activeVerses[verse].startScratchFrame * frameSizeInBytes
-                val verseEnd = activeVerses[verse].endScratchFrame * frameSizeInBytes
-
-                val verseLength = verseEnd - verseStart
-                raf.seek(verseStart.toLong())
-
-                while (verseRead < verseLength) {
-                    val bytesToRead = min(verseLength, buffer.size)
-                    val read = raf.read(buffer, 0, bytesToRead)
-                    verseRead += read
-
-                    for (i in 0 until read) {
-                        if (bytesWritten >= bytes.size) break
-
-                        bytes[bytesWritten] = buffer[i]
-                        bytesWritten++
+            var framesToRead = bytes.size / frameSizeInBytes
+            val verses = activeVerses
+            val startingVerse = findVerse(framePosition)
+            startingVerse?.let { startingVerse ->
+                val startIndex = verses.indexOf(startingVerse)
+                for (verseIdx in startIndex until verses.size) {
+                    val verse = verses[verseIdx]
+                    val sectors = verse.getSectorsFromOffset(framePosition, framesToRead)
+                    val framesTaken = sectors.sumOf { it.length() }
+                    for (sector in sectors) {
+                        raf.seek((sector.first * frameSizeInBytes).toLong())
+                        val temp = ByteArray(framesTaken * frameSizeInBytes)
+                        val toCopy = raf.read(temp)
+                        System.arraycopy(temp, 0, bytes, bytesWritten, toCopy)
+                        bytesWritten += toCopy
+                        position += toCopy
                     }
                 }
-
-                if (bytesWritten == bytes.size) break
             }
         } ?: throw IllegalStateException("getPcmBuffer called before opening file")
-
-        position = bytesWritten
 
         return bytesWritten
     }
