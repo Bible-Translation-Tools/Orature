@@ -21,6 +21,9 @@ internal data class VerseNode(
 ) {
     private val sectors = mutableListOf<IntRange>()
 
+    val length: Int
+        get() = sectors.sumOf { it.length() }
+
     fun lastFrame(): Int {
         if (sectors.isEmpty()) return 0
         return sectors.last().last
@@ -158,9 +161,6 @@ internal data class VerseNode(
         endScratchFrame = 0
         placed = false
     }
-
-    val length: Int
-        get() = startScratchFrame - endScratchFrame
 
     /**
      * Deep copies this VerseNode
