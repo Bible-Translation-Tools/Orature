@@ -14,7 +14,6 @@ import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import java.io.File
 import java.io.RandomAccessFile
 import java.lang.IllegalStateException
-import kotlin.math.max
 import kotlin.math.min
 
 private const val ACTIVE_VERSES_FILE_NAME = "active_verses.json"
@@ -156,18 +155,18 @@ internal class ChapterRepresentation(
      */
     private fun absoluteToRelative(absoluteFrame: Int): Int {
         val verses = activeVerses
-        var verse = verses.find {
-            val absoluteIsInRange = absoluteFrame in it.startScratchFrame until it.endScratchFrame
-            val absoluteIsAbsoluteEnd = absoluteFrame == it.endScratchFrame && absoluteFrame == activeVerses.last().endScratchFrame
-            absoluteIsInRange || absoluteIsAbsoluteEnd
+        var verse = verses.find { node ->
+            val absoluteIsInRange = absoluteFrame in node
+            val absoluteIsEndOfFile = absoluteFrame == node.lastFrame() && absoluteFrame == activeVerses.last().lastFrame()
+            absoluteIsInRange || absoluteIsEndOfFile
         }
         verse?.let {
             val index = verses.indexOf(verse)
             var rel = 0
             for (idx in 0 until index) {
-                rel += verses[idx].endScratchFrame - verses[idx].startScratchFrame
+                rel += verses[idx].length
             }
-            rel += absoluteFrame - it.startScratchFrame
+            rel += it.framesToPosition(absoluteFrame)
             return rel
         }
         return 0
@@ -180,12 +179,12 @@ internal class ChapterRepresentation(
      */
     internal fun relativeToAbsolute(relativeIdx: Int): Int {
         var remaining = relativeIdx
-        activeVerses.forEach {
-            val range = it.endScratchFrame - it.startScratchFrame
+        activeVerses.forEach { node ->
+            val range = node.length
             if (range > remaining) {
                 remaining -= range
             } else {
-                return it.startScratchFrame + min(remaining, 0)
+                return node.indexFromOffset(remaining)
             }
         }
         return remaining

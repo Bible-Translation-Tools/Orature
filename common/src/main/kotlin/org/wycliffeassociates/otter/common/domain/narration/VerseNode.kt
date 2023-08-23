@@ -21,6 +21,11 @@ internal data class VerseNode(
 ) {
     private val sectors = mutableListOf<IntRange>()
 
+    fun lastFrame(): Int {
+        if (sectors.isEmpty()) return 0
+        return sectors.last().last
+    }
+
     /**
      * Begins a new audio frame sector corresponding to this VerseNode
      */
@@ -70,10 +75,10 @@ internal data class VerseNode(
                 }
                 // Consume whole node
                 remaining > sectors.first().last - sectors.first().first -> {
-                    val node = sectors.first()
-                    remaining -= node.last - node.start
+                    val sector = sectors.first()
+                    remaining -= sector.length()
                     sectors.removeFirst()
-                    toGive.add(node)
+                    toGive.add(sector)
                 }
                 // Split node
                 else -> {
@@ -138,8 +143,8 @@ internal data class VerseNode(
     private fun flattenSectors() {
         val newSectors = mutableListOf<IntRange>()
         for (i in 0 until sectors.size - 1) {
-            if (sectors[i].last == sectors[i+1].first) {
-                newSectors.add(sectors[i].first..sectors[i+1].last)
+            if (sectors[i].last == sectors[i + 1].first) {
+                newSectors.add(sectors[i].first..sectors[i + 1].last)
             } else {
                 newSectors.add(sectors[i])
             }
@@ -170,4 +175,51 @@ internal data class VerseNode(
         vn.sectors.addAll(sectors.map { it })
         return vn
     }
+
+    operator fun contains(frame: Int): Boolean {
+        sectors.forEach {
+            if (frame in it) return true
+        }
+        return false
+    }
+
+    /**
+     * Returns the number of frames from the beginning of this verse node to the given absolute frame
+     */
+    fun framesToPosition(absoluteFrame: Int): Int {
+        if (absoluteFrame !in this) {
+            throw IndexOutOfBoundsException("Frame $absoluteFrame is not in ranges of $sectors")
+        }
+
+        var frameOffset = 0
+        sectors.forEach { sector ->
+            if (absoluteFrame in sector) {
+                frameOffset += (sector.last - sector.first)
+            } else {
+                frameOffset += absoluteFrame - sector.first
+            }
+        }
+        return frameOffset
+    }
+
+    fun indexFromOffset(framesFromStart: Int): Int {
+        if (framesFromStart > length) {
+            throw IndexOutOfBoundsException("Frame offset: $framesFromStart exceeds the boundaries within ranges $sectors")
+        }
+
+        var remaining = framesFromStart
+        sectors.forEach { sector ->
+            if (remaining > sector.length()) {
+                remaining -= sector.length()
+            } else {
+                return sector.first + remaining
+            }
+        }
+
+        throw IndexOutOfBoundsException("Requested offset $framesFromStart exceeded boundaries within ranges $sectors")
+    }
+}
+
+private fun IntRange.length(): Int {
+    return last - first
 }
