@@ -25,7 +25,7 @@ import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.License
 import org.wycliffeassociates.otter.common.domain.audio.AudioExporter
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ContributorCellData
+import org.wycliffeassociates.otter.jvm.controls.model.ContributorCellData
 import tornadofx.*
 import java.io.File
 import javax.inject.Inject

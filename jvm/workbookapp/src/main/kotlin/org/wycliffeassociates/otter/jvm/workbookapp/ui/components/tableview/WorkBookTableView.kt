@@ -69,7 +69,7 @@ class WorkBookTableView(
             cellFormat {
                 graphic = label(item) { addClass("normal-text") }
             }
-            minWidth = 70.0 // this may not be replaced with css
+            minWidth = 80.0 // this may not be replaced with css
             isReorderable = false
             isSortable = true
 
@@ -109,7 +109,8 @@ class WorkBookTableView(
             setCellFactory { WorkbookSourceAudioTableCell() }
             isReorderable = false
             isSortable = true
-
+            minWidth = 80.0
+            maxWidth = 100.0
             bindColumnSortComparator()
         }
         column("", WorkbookDescriptor::class) {
@@ -117,6 +118,8 @@ class WorkBookTableView(
             setCellFactory {
                 WorkbookOptionTableCell(selectedIndexProperty)
             }
+            minWidth = 80.0
+            maxWidth = 100.0
             isReorderable = false
             isSortable = false
         }

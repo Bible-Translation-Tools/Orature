@@ -16,6 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.model
+package org.wycliffeassociates.otter.jvm.controls.model
 
 data class ContributorCellData(val index: Int, val name: String)

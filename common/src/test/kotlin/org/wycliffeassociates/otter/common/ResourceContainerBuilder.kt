@@ -182,6 +182,8 @@ class ResourceContainerBuilder(baseRC: File? = null) {
     }
 
     companion object {
+        val defaultProjectSlug = "jhn"
+
         fun setUpEmptyProjectBuilder(): ResourceContainerBuilder {
             return ResourceContainerBuilder()
                 .setManifestSource(
@@ -191,7 +193,7 @@ class ResourceContainerBuilder(baseRC: File? = null) {
                 )
                 .setProjectManifest(
                     title = "John",
-                    identifier = "jhn",
+                    identifier = defaultProjectSlug,
                     sort = 1,
                     path = "./content"
                 )

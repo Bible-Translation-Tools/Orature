@@ -45,7 +45,7 @@ class ExportProjectViewModel : ViewModel() {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
     }
 
-    fun loadAvailableChapters(
+    fun loadChapters(
         workbookDescriptor: WorkbookDescriptor
     ): Single<List<ChapterDescriptor>> {
         return Single
@@ -54,17 +54,19 @@ class ExportProjectViewModel : ViewModel() {
             }
             .flatMapObservable { workbook ->
                 workbook.target.chapters
-                    .filter { it.hasSelectedAudio() }
                     .map { chapter ->
                         val chunkCount = chapter.chunkCount.blockingGet()
-                        val chunkWithAudio = chapter.chunks
-                            .getValues(emptyArray())
-                            .count { it.hasSelectedAudio() }
 
-                        val progress = if (chunkCount != 0) {
-                            chunkWithAudio.toDouble() / chunkCount
-                        } else {
-                            0.0
+                        val progress = when {
+                            chapter.hasSelectedAudio() -> 1.0
+                            chunkCount != 0 -> {
+                                // collect chunks from the relay as soon as it starts emitting (blocking)
+                                val chunkWithAudio = chapter.chunks.take(chunkCount.toLong()).blockingIterable()
+                                    .count { it.hasSelectedAudio() }
+
+                                chunkWithAudio.toDouble() / chunkCount
+                            }
+                            else -> 0.0
                         }
 
                         ChapterDescriptor(chapter.sort, progress)

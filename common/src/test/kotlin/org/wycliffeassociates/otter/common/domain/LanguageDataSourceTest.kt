@@ -38,7 +38,7 @@ class LanguageDataSourceTest {
             .thenReturn(Observable.just(listOf(english)))
 
         val result = languageDataSource
-            .fetchLanguageNames("https://td.unfoldingword.org/exports/langnames.json")
+            .fetchLanguageNames("https://langnames.bibleineverylanguage.org/langnames.json")
             .test()
 
         result.assertComplete()

@@ -34,6 +34,7 @@ import org.wycliffeassociates.otter.common.domain.project.importer.OngoingProjec
 import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
 import org.wycliffeassociates.otter.common.domain.project.importer.RCImporter
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
+import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Provider
@@ -47,6 +48,9 @@ class TestOngoingProjectImporter {
 
     @Inject
     lateinit var dbEnvProvider: Provider<DatabaseEnvironment>
+
+    @Inject
+    lateinit var workbookRepository: IWorkbookRepository
 
     init {
         DaggerTestPersistenceComponent.create().inject(this)
@@ -99,6 +103,19 @@ class TestOngoingProjectImporter {
         )
         Assert.assertEquals(takesAdded, addedTakes.size)
         Assert.assertEquals(chaptersSelected, chaptersImported)
+    }
+
+    @Test
+    fun testPopulateProjectsWhenImport() {
+        val bookCountBefore = db.db.workbookDescriptorDao.fetchAll().size
+        Assert.assertEquals(0, bookCountBefore)
+        Assert.assertEquals(0, workbookRepository.getProjects().blockingGet().size)
+
+        importOngoingProject(null)
+
+        val bookCountAfter = db.db.workbookDescriptorDao.fetchAll().size
+        Assert.assertEquals(66, bookCountAfter)
+        Assert.assertEquals(66, workbookRepository.getProjects().blockingGet().size)
     }
 
     private fun importOngoingProject(callback: ProjectImporterCallback?) {

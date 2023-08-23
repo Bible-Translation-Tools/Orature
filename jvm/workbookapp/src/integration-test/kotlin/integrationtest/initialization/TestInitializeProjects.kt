@@ -113,10 +113,10 @@ class TestInitializeProjects {
         env.assertRowCounts(
             RowCount(
                 contents = mapOf(
-                    ContentType.META to 1211,
-                    ContentType.TEXT to 31124
+                    ContentType.META to 2400,
+                    ContentType.TEXT to 61843
                 ),
-                collections = 1279,
+                collections = 2511,
                 links = 0
             )
         )
