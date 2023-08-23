@@ -222,6 +222,7 @@ internal class ChapterRepresentation(
                         System.arraycopy(temp, 0, bytes, bytesWritten, toCopy)
                         bytesWritten += toCopy
                         position += toCopy
+                        framesToRead -= toCopy / frameSizeInBytes
                     }
                 }
             }
