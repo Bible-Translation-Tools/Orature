@@ -1,14 +1,17 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home
 
+import javafx.animation.FadeTransition
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
 import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
+import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.jvm.controls.bar.searchBar
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.popup.ProjectGroupOptionMenu
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview.WorkBookTableView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview.workbookTableView
 import tornadofx.*
 import tornadofx.FX.Companion.messages
@@ -19,6 +22,7 @@ class BookSection(
     filteredBooks: ObservableList<WorkbookDescriptor>
 ) : StackPane() {
     val bookSearchQueryProperty = SimpleStringProperty()
+    private lateinit var bookTable: WorkBookTableView
     private val projectsOptionMenu = ProjectGroupOptionMenu()
     private val titleProperty = SimpleStringProperty().apply {
         bind(filteredBooks.stringBinding {
@@ -67,6 +71,7 @@ class BookSection(
             }
 
             workbookTableView(filteredBooks) {
+                bookTable = this
                 hgrow = Priority.ALWAYS
             }
 
@@ -78,5 +83,17 @@ class BookSection(
             visibleWhen(books.booleanBinding { it.isEmpty() })
             managedWhen(visibleProperty())
         }
+
+        books.onChange {
+            if (it.list.size > 0) renderTransition()
+        }
+    }
+
+    private fun renderTransition() {
+        val fadeDuration = Duration.seconds(0.5)
+        FadeTransition(fadeDuration, bookTable).apply {
+            fromValue = 0.1
+            toValue = 1.0
+        }.play()
     }
 }
