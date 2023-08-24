@@ -1,7 +1,9 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import io.reactivex.Observable
+import io.reactivex.subjects.BehaviorSubject
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleIntegerProperty
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
@@ -35,52 +37,52 @@ class AudioWorkspaceView : View() {
 
             add(narrationWaveformLayer)
 
-//            add(VerseMarkersLayer().apply {
-//                isRecordingProperty.bind(viewModel.isRecordingProperty)
-//                markers.bind(viewModel.recordedVerses) { it }
-//            })
+            add(VerseMarkersLayer().apply {
+                isRecordingProperty.bind(viewModel.isRecordingProperty)
+                markers.bind(viewModel.mockRecordedVerseMarkers) { it }
+            })
 
-            scrollpane {
-                hbox {
-                    spacing = 10.0
-                    paddingHorizontal = 10.0
-
-                    bindChildren(viewModel.recordedVerses) { verse ->
-                        val index = viewModel.recordedVerses.indexOf(verse)
-                        val label = verse.label
-
-                        menubutton(label) {
-                            item("") {
-                                text = "Play"
-                                action {
-                                    fire(PlayVerseEvent(verse))
-                                }
-                                disableWhen {
-                                    viewModel.isRecordingProperty
-                                }
-                            }
-                            item("") {
-                                text = "Record Again"
-                                action {
-                                    fire(RecordAgainEvent(index))
-                                }
-                                disableWhen {
-                                    viewModel.isRecordingProperty
-                                }
-                            }
-                            item("") {
-                                text = "Open in..."
-                                action {
-                                    fire(OpenInAudioPluginEvent(index))
-                                }
-                                disableWhen {
-                                    viewModel.isRecordingProperty
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+//            scrollpane {
+//                hbox {
+//                    spacing = 10.0
+//                    paddingHorizontal = 10.0
+//
+//                    bindChildren(viewModel.recordedVerses) { verse ->
+//                        val index = viewModel.recordedVerses.indexOf(verse)
+//                        val label = verse.label
+//
+//                        menubutton(label) {
+//                            item("") {
+//                                text = "Play"
+//                                action {
+//                                    fire(PlayVerseEvent(verse))
+//                                }
+//                                disableWhen {
+//                                    viewModel.isRecordingProperty
+//                                }
+//                            }
+//                            item("") {
+//                                text = "Record Again"
+//                                action {
+//                                    fire(RecordAgainEvent(index))
+//                                }
+//                                disableWhen {
+//                                    viewModel.isRecordingProperty
+//                                }
+//                            }
+//                            item("") {
+//                                text = "Open in..."
+//                                action {
+//                                    fire(OpenInAudioPluginEvent(index))
+//                                }
+//                                disableWhen {
+//                                    viewModel.isRecordingProperty
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
         }
 
 
@@ -107,6 +109,8 @@ class AudioWorkspaceViewModel : ViewModel() {
     var waveform : Waveform? = null
     var volumeBar : VolumeBar? = null
     var existingAndIncomingAudioRenderer : ExistingAndIncomingAudioRenderer? = null
+    var totalRecordedFrames = SimpleIntegerProperty(0)
+    var mockRecordedVerseMarkers = observableListOf<VerseMarker>()
 
     fun getCurrentFrameRangeShown(relativePosition: Int, screenWidth: Int) : IntRange {
         var framesPerPixel = 229 // TODO: don't use constants here
@@ -115,8 +119,8 @@ class AudioWorkspaceViewModel : ViewModel() {
 
     fun getVerMarkersInRange(rangeToShow: IntRange): List<VerseMarker> {
         val verseMarkersToShow = mutableListOf<VerseMarker>()
-        for (i in 0 until narrationViewModel.mockRecordedVerseMarkers.size) {
-            val currentVerse = narrationViewModel.mockRecordedVerseMarkers[i]
+        for (i in 0 until mockRecordedVerseMarkers.size) {
+            val currentVerse = mockRecordedVerseMarkers[i]
             if (currentVerse.location in rangeToShow) {
                 println("verseMarker: ${currentVerse.label}, marker.end: ${currentVerse.end}")
                 verseMarkersToShow.add(currentVerse)
@@ -130,20 +134,25 @@ class AudioWorkspaceViewModel : ViewModel() {
 
         isRecordingProperty.bind(narrationViewModel.isRecordingProperty)
         recordedVerses.bind(narrationViewModel.recordedVerses) { it }
-
+        mockRecordedVerseMarkers.bind(narrationViewModel.mockRecordedVerseMarkers) { it }
+        val recordingStatus: BehaviorSubject<Boolean> = BehaviorSubject.createDefault(false)
 
         // TODO: Don't do this initialization here, or in this file. It is awkward.
         narrationViewModel.narrationIsInitialized.addListener {_, old, new ->
             if(new == true && isNarrationWaveformLayerInitialized.value == false) {
-                val alwaysRecordingStatus: Observable<Boolean> = Observable.just(true)
 
-                existingAndIncomingAudioRenderer = ExistingAndIncomingAudioRenderer(
-                    narrationViewModel.getExistingAudioFileReader(),
-                    narrationViewModel.getRecorderAudioStream(),
-                    alwaysRecordingStatus,
-                    1920,
-                    10) // TODO: don't hardcode values!
-                waveform = Waveform(existingAndIncomingAudioRenderer!!)
+//                isRecordingProperty.addListener{_, old, new ->
+//                    recordingStatus.onNext(new)
+//                }
+//
+//                existingAndIncomingAudioRenderer = ExistingAndIncomingAudioRenderer(
+//                    narrationViewModel.getExistingAudioFileReader(),
+//                    narrationViewModel.getRecorderAudioStream(),
+//                    recordingStatus,
+//                    1920,
+//                    10) // TODO: don't hardcode values!
+//                waveform = Waveform(existingAndIncomingAudioRenderer!!)
+                waveform = Waveform(narrationViewModel.existingAndIncomingAudioRenderer!!)
 
                 volumeBar = VolumeBar(narrationViewModel.getRecorderAudioStream())
                 waveform!!.isRecordingProperty.bind(isRecordingProperty)
@@ -152,10 +161,22 @@ class AudioWorkspaceViewModel : ViewModel() {
         }
 
         narrationViewModel.recordStartProperty.addListener {_, old, new ->
-            if(new == true && existingAndIncomingAudioRenderer != null) {
+            if(new == true && waveform?.renderer != null) {
+                println("clearing render 2")
                 waveform?.renderer?.clearData()
             }
         }
+
+//        narrationViewModel.recordPauseProperty.addListener {_, old, new ->
+//
+//            println("=================================================pauseProperty: ${new}")
+//            if(new == true) {
+//                println("clearing render 1")
+//                waveform?.renderer?.clearData()
+//                println("filling with existing 2")
+//                waveform?.renderer?.fillExistingAudioHolder()
+//            }
+//        }
 
     }
 
@@ -164,9 +185,20 @@ class AudioWorkspaceViewModel : ViewModel() {
     }
 
     init {
-        narrationViewModel.recordedVerses.onChange {
-            println("detected changes in the recordedVerses list")
-            println("totalFrames: ${narrationViewModel.getExistingAudioFileReader().totalFrames}, seconds recorded: ${narrationViewModel.getExistingAudioFileReader().totalFrames / 44100}")
-        }
+//        narrationViewModel.isWritingToAudioFileProperty.addListener {_, old, new ->
+//            if(old == true && new == false) {
+//                println("ISWRITINGTOAUDIOFILEPROPERTY: ${new}==========================")
+//                println("clearing render 1")
+//                waveform?.renderer?.clearData()
+//                println("filling with existing 2")
+//                waveform?.renderer?.fillExistingAudioHolder()
+//            }
+//        }
+
+
+//        narrationViewModel.recordedVerses.onChange {
+//            println("detected changes in the recordedVerses list")
+//            println("totalFrames: ${narrationViewModel.getExistingAudioFileReader().totalFrames}, seconds recorded: ${narrationViewModel.getExistingAudioFileReader().totalFrames / 44100}")
+//        }
     }
 }

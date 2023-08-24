@@ -4,6 +4,7 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
@@ -25,6 +26,7 @@ import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.ExistingAndIncomingAudioRenderer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
@@ -91,6 +93,8 @@ class NarrationViewModel : ViewModel() {
 
 
     var mockRecordedVerseMarkers = observableListOf<VerseMarker>()
+    var isWritingToAudioFileProperty = SimpleBooleanProperty(false)
+
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
 
@@ -98,7 +102,7 @@ class NarrationViewModel : ViewModel() {
         lastRecordedVerseProperty.bind(recordedVerses.integerBinding { it.size })
 
         for(i in 0 until 5) {
-            mockRecordedVerseMarkers.add(VerseMarker(0 + 44100 * (i) + 1, 44100 * (i + 1), 44100 * (i + 1)))
+            mockRecordedVerseMarkers.add(VerseMarker(0 + 44100 * 2 * (i) + 1, 44100 * 2 * (i + 1), 44100 * 2 * (i + 1)))
         }
     }
 
@@ -155,6 +159,8 @@ class NarrationViewModel : ViewModel() {
     }
 
     var narrationIsInitialized = SimpleBooleanProperty(false)
+    var existingAndIncomingAudioRenderer : ExistingAndIncomingAudioRenderer? = null
+    val recordingStatus: BehaviorSubject<Boolean> = BehaviorSubject.createDefault(false)
 
     fun loadChapter(chapter: Chapter) {
         chapter
@@ -167,6 +173,28 @@ class NarrationViewModel : ViewModel() {
 
         workbookDataStore.activeChapterProperty.set(chapter)
         initializeNarration(chapter)
+
+        // ============= TODO: figure out where to actually initialize this stuff =============
+        // Initializes properties / variables used in AudioWorkspace
+        narration.isWritingToAudioFile
+            .doOnError { e ->
+                logger.error("Error in active writing listener", e)
+            }
+            .subscribe { isWritingToAudioFileProperty.set(it) }
+
+        isRecordingProperty.addListener{_, old, new ->
+            recordingStatus.onNext(new)
+        }
+
+        existingAndIncomingAudioRenderer = ExistingAndIncomingAudioRenderer(
+            getExistingAudioFileReader(),
+            getRecorderAudioStream(),
+            recordingStatus,
+            1920,
+            10
+        )
+        // ====================================================================================
+
         narrationIsInitialized.set(true)
 
         chunksList.clear()
@@ -400,6 +428,12 @@ class NarrationViewModel : ViewModel() {
 
             recordStart = recordedVerses.isEmpty()
             recordResume = recordedVerses.isNotEmpty()
+
+            // Whenever the active audio changes, we need to update the waveform data
+            // TODO: probably place this in a function or to a listener to RecordedVersesChanged
+            existingAndIncomingAudioRenderer?.clearData()
+            existingAndIncomingAudioRenderer?.fillExistingAudioHolder()
+
         }.let(disposables::add)
     }
 }

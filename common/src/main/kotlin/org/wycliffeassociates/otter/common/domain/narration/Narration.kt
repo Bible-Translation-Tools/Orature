@@ -4,6 +4,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import io.reactivex.Observable
+import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
@@ -183,6 +184,8 @@ class Narration @AssistedInject constructor(
         }
     }
 
+    var isWritingToAudioFile: Observable<Boolean> = BehaviorSubject.createDefault(false)
+
     private fun initializeWavWriter() {
         writer = WavFileWriter(
             chapterRepresentation.scratchAudio,
@@ -190,6 +193,11 @@ class Narration @AssistedInject constructor(
             true
         ) {
             /* no op */
+        }
+
+        writer?.isWriting?.subscribe { isWriting ->
+            // Update the BehaviorSubject whenever the writer?.isWriting changes
+            (isWritingToAudioFile as BehaviorSubject<Boolean>).onNext(isWriting)
         }
     }
 

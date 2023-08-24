@@ -57,23 +57,27 @@ class ExistingAndIncomingAudioRenderer(
             logger.error("Error in active renderer stream", e)
         }
         .subscribe {
+            if(isActive.get()) {
                 bb.put(it)
                 bb.position(0)
 
                 if(floatBuffer.size() == 0) { // NOTE: for this to work, the floatBuffer MUST be cleared when switched to recording mode
                     // fill with offset + existingAudio
-                    // TODO: uncomment this once ChapterRepresentation is an AudioFileReader
+                    // TODO: figure out why this is never being called?
+                    println("filling with existing 1")
                     fillExistingAudioHolder()
                 }
 
                 while (bb.hasRemaining()) {
                     val short = bb.short
                     if (isActive.get()) {
+                        //println("accumulating accumulate totelIncomingAudioBytes variable/property")
                         pcmCompressor.add(short.toFloat())
+                        // accumulate totelIncomingAudioBytes variable/property
                     }
                 }
                 bb.clear()
-
+            }
 
         }
 
@@ -105,6 +109,8 @@ class ExistingAndIncomingAudioRenderer(
     fun fillExistingAudioHolder(): Int {
         val bytesFromExisting = existingAudioReader.getPcmBuffer(this.existingAudioHolder)
         val offset = existingAudioHolder.size - bytesFromExisting
+
+        println("bytesFromExisting: ${bytesFromExisting}, offset: ${offset}")
 
         var i = 0
         while( i < offset) {
