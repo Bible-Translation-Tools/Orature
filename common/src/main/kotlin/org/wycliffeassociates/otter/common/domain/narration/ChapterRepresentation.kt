@@ -10,6 +10,7 @@ import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.device.AudioFileReaderProvider
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import java.io.File
 import java.io.RandomAccessFile
@@ -23,29 +24,25 @@ private const val CHAPTER_NARRATION_FILE_NAME = "chapter_narration.pcm"
 internal class ChapterRepresentation(
     private val workbook: Workbook,
     private val chapter: Chapter
-) : AudioFileReader {
-    private val logger = LoggerFactory.getLogger(ChapterRepresentation::class.java)
+) : AudioFileReaderProvider {
+    private val openReaderConnections = mutableListOf<ChapterRepresentationConnection>()
 
-    private var position: Int = 0
+    private val logger = LoggerFactory.getLogger(ChapterRepresentation::class.java)
 
     private val frameSizeInBytes: Int
         get() = channels * (scratchAudio.bitsPerSample / 8)
 
-    override val sampleRate: Int
+    private val sampleRate: Int
         get() = scratchAudio.sampleRate
 
-    override val channels: Int
+    private val channels: Int
         get() = scratchAudio.channels
 
-    override val sampleSize: Int
+    private val sampleSize: Int
         get() = scratchAudio.bitsPerSample
 
     @get:Synchronized
-    override val framePosition: Int
-        get() = position / frameSizeInBytes
-
-    @get:Synchronized
-    override val totalFrames: Int
+    val totalFrames: Int
         get() = activeVerses.sumOf { it.length }
 
     @get:Synchronized
@@ -64,14 +61,10 @@ internal class ChapterRepresentation(
     lateinit var scratchAudio: OratureAudioFile
         private set
 
-    private var randomAccessFile: RandomAccessFile? = null
-
     init {
         totalVerses = initalizeActiveVerses()
         initializeWorkingAudioFile()
         initializeSerializedVersesFile()
-
-        open()
     }
 
     private fun initalizeActiveVerses(): MutableList<VerseNode> {
@@ -172,7 +165,8 @@ internal class ChapterRepresentation(
     private fun findVerse(absoluteFrame: Int): VerseNode? {
         return activeVerses.find { node ->
             val absoluteIsInRange = absoluteFrame in node
-            val absoluteIsEndOfFile = absoluteFrame == node.lastFrame() && absoluteFrame == activeVerses.last().lastFrame()
+            val absoluteIsEndOfFile =
+                absoluteFrame == node.lastFrame() && absoluteFrame == activeVerses.last().lastFrame()
             absoluteIsInRange || absoluteIsEndOfFile
         }
     }
@@ -195,71 +189,6 @@ internal class ChapterRepresentation(
         return remaining
     }
 
-    @Synchronized
-    override fun hasRemaining(): Boolean {
-        return ((totalFrames * frameSizeInBytes) - position) > 0
-    }
-
-    private val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
-    @Synchronized
-    override fun getPcmBuffer(bytes: ByteArray): Int {
-        var bytesWritten = 0
-
-        randomAccessFile?.let { raf ->
-            var framesToRead = bytes.size / frameSizeInBytes
-            val verses = activeVerses
-            val startingVerse = findVerse(framePosition)
-            startingVerse?.let { startingVerse ->
-                val startIndex = verses.indexOf(startingVerse)
-                for (verseIdx in startIndex until verses.size) {
-                    val verse = verses[verseIdx]
-                    val sectors = verse.getSectorsFromOffset(framePosition, framesToRead)
-                    val framesTaken = sectors.sumOf { it.length() }
-                    for (sector in sectors) {
-                        raf.seek((sector.first * frameSizeInBytes).toLong())
-                        val temp = ByteArray(framesTaken * frameSizeInBytes)
-                        val toCopy = raf.read(temp)
-                        System.arraycopy(temp, 0, bytes, bytesWritten, toCopy)
-                        bytesWritten += toCopy
-                        position += toCopy
-                        framesToRead -= toCopy / frameSizeInBytes
-                    }
-                }
-            }
-        } ?: throw IllegalStateException("getPcmBuffer called before opening file")
-
-        return bytesWritten
-    }
-
-    @Synchronized
-    override fun seek(sample: Int) {
-        val scratchFileLength = scratchAudio.totalFrames * frameSizeInBytes
-        when {
-            sample <= 0 -> this.position = 0
-            sample >= totalFrames -> this.position = scratchFileLength
-            else -> {
-                val absoluteFrame = relativeToAbsolute(sample)
-                this.position = max(min(absoluteFrame * frameSizeInBytes, scratchFileLength), 0)
-            }
-        }
-    }
-
-    override fun open() {
-        randomAccessFile?.let { release() }
-        randomAccessFile = RandomAccessFile(scratchAudio.file, "r")
-    }
-
-    override fun release() {
-        if (randomAccessFile != null) {
-            randomAccessFile?.close()
-            randomAccessFile = null
-        }
-    }
-
-    override fun close() {
-        release()
-    }
-
     fun getRangeOfMarker(verse: VerseMarker): IntRange? {
         val verses = activeVerses.map { it }
         if (verses.isEmpty()) return null
@@ -272,5 +201,111 @@ internal class ChapterRepresentation(
                 return start..end
             }
         return null
+    }
+
+    override fun getAudioFileReader(start: Int?, end: Int?): AudioFileReader {
+        val readerConnection = ChapterRepresentationConnection(start, end)
+        synchronized(openReaderConnections) {
+            openReaderConnections.add(readerConnection)
+        }
+        return readerConnection
+    }
+
+    fun closeConnections() {
+        val temp = synchronized(openReaderConnections) {
+            openReaderConnections.map { it }
+        }
+        temp.forEach {
+            it.close()
+            it.release()
+        }
+    }
+
+    inner class ChapterRepresentationConnection(
+        val start: Int? = null,
+        val end: Int?
+    ) : AudioFileReader {
+        override val sampleRate: Int = this@ChapterRepresentation.sampleRate
+        override val channels: Int = this@ChapterRepresentation.channels
+        override val sampleSize: Int = this@ChapterRepresentation.sampleSize
+
+        private var randomAccessFile: RandomAccessFile? = null
+        private var position: Int = 0
+
+        @get:Synchronized
+        override val framePosition: Int
+            get() = position / frameSizeInBytes
+
+        override val totalFrames
+            get() = this@ChapterRepresentation.totalFrames
+
+        @Synchronized
+        override fun hasRemaining(): Boolean {
+            return ((totalFrames * frameSizeInBytes) - position) > 0
+        }
+
+        private val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+
+        @Synchronized
+        override fun getPcmBuffer(bytes: ByteArray): Int {
+            var bytesWritten = 0
+
+            randomAccessFile?.let { raf ->
+                var framesToRead = bytes.size / frameSizeInBytes
+                val verses = activeVerses
+                val startingVerse = findVerse(framePosition)
+                startingVerse?.let { startingVerse ->
+                    val startIndex = verses.indexOf(startingVerse)
+                    for (verseIdx in startIndex until verses.size) {
+                        val verse = verses[verseIdx]
+                        val sectors = verse.getSectorsFromOffset(framePosition, framesToRead)
+                        val framesTaken = sectors.sumOf { it.length() }
+                        for (sector in sectors) {
+                            raf.seek((sector.first * frameSizeInBytes).toLong())
+                            val temp = ByteArray(framesTaken * frameSizeInBytes)
+                            val toCopy = raf.read(temp)
+                            System.arraycopy(temp, 0, bytes, bytesWritten, toCopy)
+                            bytesWritten += toCopy
+                            position += toCopy
+                            framesToRead -= toCopy / frameSizeInBytes
+                        }
+                    }
+                }
+            } ?: throw IllegalStateException("getPcmBuffer called before opening file")
+
+            return bytesWritten
+        }
+
+        @Synchronized
+        override fun seek(sample: Int) {
+            val scratchFileLength = scratchAudio.totalFrames * frameSizeInBytes
+            when {
+                sample <= 0 -> this.position = 0
+                sample >= totalFrames -> this.position = scratchFileLength
+                else -> {
+                    val absoluteFrame = relativeToAbsolute(sample)
+                    this.position = max(min(absoluteFrame * frameSizeInBytes, scratchFileLength), 0)
+                }
+            }
+        }
+
+        override fun open() {
+            randomAccessFile?.let { release() }
+            randomAccessFile = RandomAccessFile(scratchAudio.file, "r")
+        }
+
+        override fun release() {
+            if (randomAccessFile != null) {
+                randomAccessFile?.close()
+                randomAccessFile = null
+            }
+            synchronized(openReaderConnections) {
+                openReaderConnections.remove(this)
+            }
+        }
+
+        override fun close() {
+            release()
+        }
     }
 }

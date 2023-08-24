@@ -33,7 +33,7 @@ class Narration @AssistedInject constructor(
         get() = chapterRepresentation.scratchAudio
 
     val audioReader: AudioFileReader
-        get() = chapterRepresentation
+        get() = chapterRepresentation.getAudioFileReader()
 
     val activeVerses: List<VerseMarker>
         get() = run {
@@ -65,10 +65,6 @@ class Narration @AssistedInject constructor(
         return VerseMarker(firstVerse.start, firstVerse.end, 0)
     }
 
-    fun getPcmBuffer(bytes: ByteArray): Int {
-        return chapterRepresentation.getPcmBuffer(bytes)
-    }
-
     fun loadFromSelectedChapterFile() {
         updateWorkingFilesFromChapterFile(true)
     }
@@ -89,7 +85,7 @@ class Narration @AssistedInject constructor(
     }
 
     fun closeChapterRepresentation() {
-        chapterRepresentation.close()
+        chapterRepresentation.closeConnections()
     }
 
     fun undo() {
@@ -179,7 +175,7 @@ class Narration @AssistedInject constructor(
         val range: IntRange? = chapterRepresentation.getRangeOfMarker(verse)
         logger.info("Playback range is ${range?.start}-${range?.last}")
         range?.let {
-            player.loadSection(chapterRepresentation.scratchAudio.file, range.first, range.last)
+            player.loadSection(chapterRepresentation, range.first, range.last)
         }
     }
 
