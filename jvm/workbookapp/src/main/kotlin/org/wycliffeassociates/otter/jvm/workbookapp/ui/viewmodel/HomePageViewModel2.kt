@@ -2,6 +2,8 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
+import io.reactivex.Single
+import io.reactivex.schedulers.Schedulers
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -161,11 +163,17 @@ class HomePageViewModel2 : ViewModel() {
 
     fun openInFilesManager(path: String) = directoryProvider.openInFileManager(path)
 
-    fun loadContributors(workbookDescriptor: WorkbookDescriptor): List<Contributor> {
-        return loadContributorsFromDerivedMetadata(
-            sourceMetadata =  workbookDescriptor.sourceCollection.resourceContainer!!,
-            targetMetadata =  workbookDescriptor.targetCollection.resourceContainer!!
-        )
+    fun loadContributors(workbookDescriptor: WorkbookDescriptor): Single<List<Contributor>> {
+        return Single
+            .fromCallable {
+                loadContributorsFromDerivedMetadata(
+                    sourceMetadata = workbookDescriptor.sourceCollection.resourceContainer!!,
+                    targetMetadata = workbookDescriptor.targetCollection.resourceContainer!!
+                )
+            }
+            .doOnError { logger.error("Error while loading contributor info.", it) }
+            .subscribeOn(Schedulers.io())
+            .observeOnFx()
     }
 
     private fun loadContributorsFromDerivedMetadata(
@@ -179,26 +187,36 @@ class HomePageViewModel2 : ViewModel() {
     }
 
     fun saveContributors(contributors: List<Contributor>, workbookDescriptor: WorkbookDescriptor) {
-        val der = directoryProvider.getDerivedContainerDirectory(
-            workbookDescriptor.targetCollection.resourceContainer!!,
-            workbookDescriptor.sourceCollection.resourceContainer!!
-        )
-        ResourceContainer.load(der).use { rc ->
-            rc.manifest.dublinCore.contributor = contributors.map { it.name }.toMutableList()
-            rc.writeManifest()
-        }
-        bookList.forEach {
-            val workbook = workbookRepo.get(it.sourceCollection, it.targetCollection)
-            if (workbook.projectFilesAccessor.isInitialized()) {
-                workbook.projectFilesAccessor.setContributorInfo(contributors)
+        Completable
+            .fromAction {
+                val der = directoryProvider.getDerivedContainerDirectory(
+                    workbookDescriptor.targetCollection.resourceContainer!!,
+                    workbookDescriptor.sourceCollection.resourceContainer!!
+                )
+                ResourceContainer.load(der).use { rc ->
+                    rc.manifest.dublinCore.contributor = contributors.map { it.name }.toMutableList()
+                    rc.writeManifest()
+                }
+                bookList.forEach {
+                    val workbook = workbookRepo.get(it.sourceCollection, it.targetCollection)
+                    if (workbook.projectFilesAccessor.isInitialized()) {
+                        workbook.projectFilesAccessor.setContributorInfo(contributors)
+                    }
+                }
             }
-        }
+            .doOnError { logger.error("Error while saving contributor info.", it) }
+            .subscribeOn(Schedulers.io())
+            .observeOnFx()
+            .subscribe()
     }
 
     fun mergeContributorFromImport(workbookDescriptor: WorkbookDescriptor) {
         val workbook = workbookRepo.get(workbookDescriptor.sourceCollection, workbookDescriptor.targetCollection)
         if (workbook.projectFilesAccessor.isInitialized()) {
-            val set = loadContributors(workbookDescriptor).toMutableSet()
+            val set = loadContributorsFromDerivedMetadata(
+                sourceMetadata = workbook.source.resourceMetadata,
+                targetMetadata = workbook.target.resourceMetadata
+            ).toMutableSet()
             val contributors = workbook.projectFilesAccessor.getContributorInfo()
             set.addAll(contributors)
             saveContributors(set.toList(), workbookDescriptor)
