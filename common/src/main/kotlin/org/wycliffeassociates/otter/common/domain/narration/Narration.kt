@@ -184,8 +184,6 @@ class Narration @AssistedInject constructor(
         }
     }
 
-    var isWritingToAudioFile: Observable<Boolean> = BehaviorSubject.createDefault(false)
-
     private fun initializeWavWriter() {
         writer = WavFileWriter(
             chapterRepresentation.scratchAudio,
@@ -193,11 +191,6 @@ class Narration @AssistedInject constructor(
             true
         ) {
             /* no op */
-        }
-
-        writer?.isWriting?.subscribe { isWriting ->
-            // Update the BehaviorSubject whenever the writer?.isWriting changes
-            (isWritingToAudioFile as BehaviorSubject<Boolean>).onNext(isWriting)
         }
     }
 

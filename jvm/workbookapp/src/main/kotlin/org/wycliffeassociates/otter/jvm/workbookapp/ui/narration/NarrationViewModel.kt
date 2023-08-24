@@ -93,7 +93,6 @@ class NarrationViewModel : ViewModel() {
 
 
     var mockRecordedVerseMarkers = observableListOf<VerseMarker>()
-    var isWritingToAudioFileProperty = SimpleBooleanProperty(false)
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -176,12 +175,6 @@ class NarrationViewModel : ViewModel() {
 
         // ============= TODO: figure out where to actually initialize this stuff =============
         // Initializes properties / variables used in AudioWorkspace
-        narration.isWritingToAudioFile
-            .doOnError { e ->
-                logger.error("Error in active writing listener", e)
-            }
-            .subscribe { isWritingToAudioFileProperty.set(it) }
-
         isRecordingProperty.addListener{_, old, new ->
             recordingStatus.onNext(new)
         }
