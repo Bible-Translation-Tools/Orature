@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.transformation.FilteredList
@@ -22,9 +23,7 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.WorkbookPage
-import tornadofx.ViewModel
-import tornadofx.observableListOf
-import tornadofx.toObservable
+import tornadofx.*
 import java.time.LocalDateTime
 import java.util.function.Predicate
 import javax.inject.Inject
@@ -60,12 +59,14 @@ class HomePageViewModel2 : ViewModel() {
     val sortedBooks = SortedList<WorkbookDescriptor>(filteredBooks)
     val selectedProjectGroup = SimpleObjectProperty<ProjectGroupKey>()
     val bookSearchQueryProperty = SimpleStringProperty("")
+    val isLoadingProperty = SimpleBooleanProperty(false)
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
     }
 
     fun dock() {
+        clearProjects()
         setupBookSearchListener()
         loadProjects()
     }
@@ -77,15 +78,8 @@ class HomePageViewModel2 : ViewModel() {
         disposableListeners.clear()
     }
 
-    fun refresh() {
-        clearProjects()
-        loadProjects()
-    }
-
     /**
      * Closes all open projects, closing their connections in the workbook repository.
-     *
-     * Also removes the workbooks from the workbook data store and resumeBookProperty.
      */
     private fun clearProjects() {
         logger.info("Closing open workbooks")
@@ -111,7 +105,8 @@ class HomePageViewModel2 : ViewModel() {
         }.apply { disposableListeners.add(this) }
     }
 
-    fun loadProjects() {
+    fun loadProjects(onFinishCallback: () -> Unit = {}) {
+        isLoadingProperty.set(true)
         // reset sort to default book order
         sortedBooks.comparator = Comparator { wb1, wb2 ->
             wb1.sort.compareTo(wb2.sort)
@@ -120,6 +115,10 @@ class HomePageViewModel2 : ViewModel() {
             .observeOnFx()
             .subscribe { books ->
                 updateBookList(books)
+                runLater {
+                    onFinishCallback()
+                    isLoadingProperty.set(false)
+                }
             }
     }
 

@@ -18,6 +18,7 @@ import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.card.TranslationCard2
 import org.wycliffeassociates.otter.jvm.controls.card.newTranslationCard
 import org.wycliffeassociates.otter.jvm.controls.card.translationCreationCard
+import org.wycliffeassociates.otter.jvm.controls.dialog.LoadingModal
 import org.wycliffeassociates.otter.jvm.controls.dialog.ContributorDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.LanguageSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
@@ -33,6 +34,8 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ProjectImportEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookDeleteEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ExportProjectDialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.ProgressDialog
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.controls.event.ProjectContributorsEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.BookSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.ProjectWizardSection
@@ -51,6 +54,7 @@ import java.text.MessageFormat
 class HomePage2 : View() {
 
     private val logger = LoggerFactory.getLogger(HomePage::class.java)
+    private val listeners = mutableListOf<ListenerDisposer>()
 
     private val viewModel: HomePageViewModel2 by inject()
     private val projectWizardViewModel: ProjectWizardViewModel by inject()
@@ -58,6 +62,7 @@ class HomePage2 : View() {
     private val exportProjectViewModel: ExportProjectViewModel by inject()
     private val navigator: NavigationMediator by inject()
 
+    private lateinit var loadingModal: LoadingModal
     private val mainSectionProperty = SimpleObjectProperty<Node>(null)
     private val breadCrumb = BreadCrumb().apply {
         titleProperty.set(messages["home"])
@@ -173,6 +178,7 @@ class HomePage2 : View() {
 
     override fun onDock() {
         super.onDock()
+        setUpLoadingModal()
         viewModel.dock()
         navigator.dock(this, breadCrumb)
         mainSectionProperty.set(bookFragment)
@@ -181,6 +187,8 @@ class HomePage2 : View() {
     override fun onUndock() {
         super.onUndock()
         viewModel.undock()
+        listeners.forEach(ListenerDisposer::dispose)
+        listeners.clear()
     }
 
     private fun subscribeActionEvents() {
@@ -220,9 +228,10 @@ class HomePage2 : View() {
         subscribe<WorkbookDeleteEvent> {
             viewModel.deleteBook(it.data)
                 .subscribe {
-                    val notification = createBookDeleteNotification(it.data)
-                    showNotification(notification)
-                    viewModel.loadProjects()
+                    viewModel.loadProjects {
+                        val notification = createBookDeleteNotification(it.data)
+                        showNotification(notification)
+                    }
                 }
         }
 
@@ -268,19 +277,40 @@ class HomePage2 : View() {
         }
 
         subscribe<ProjectImportEvent> { event ->
-            logger.info("Import project event received, refreshing the homepage.")
-            val notification = createImportNotification(event)
-            showNotification(notification)
+            logger.info("Import project event received, reloading projects...")
+            if (event.result == ImportResult.SUCCESS) {
+                viewModel.loadProjects {
+                    val notification = createImportNotification(event)
+                    showNotification(notification)
+                }
+            } else {
+                val notification = createImportNotification(event)
+                showNotification(notification)
+            }
+
             event.workbookDescriptor?.let {
                 viewModel.mergeContributorFromImport(it)
             }
-            viewModel.refresh()
         }
+    }
+
+    private fun setUpLoadingModal() {
+        loadingModal = LoadingModal().apply {
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
+        }
+        viewModel.isLoadingProperty.onChangeWithDisposer {
+            if (it == true) {
+                loadingModal.open()
+            } else {
+                loadingModal.close()
+            }
+        }.also { listeners.add(it) }
     }
 
     private fun exitWizard() {
         projectWizardViewModel.undock()
-        viewModel.loadProjects()
+        viewModel.selectedProjectGroup.set(viewModel.projectGroups.firstOrNull()?.getKey())
         mainSectionProperty.set(bookFragment)
     }
 
