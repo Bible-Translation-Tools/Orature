@@ -202,15 +202,12 @@ internal class ChapterRepresentation(
         var bytesWritten = 0
 
         randomAccessFile?.let { raf ->
-
-            println("number of active verses when fetching audio: ${activeVerses.size}")
             for (verse in 0 until activeVerses.size) {
                 var verseRead = 0
                 val verseStart = activeVerses[verse].startScratchFrame * frameSizeInBytes
                 val verseEnd = activeVerses[verse].endScratchFrame * frameSizeInBytes
 
                 val verseLength = verseEnd - verseStart
-                println("verseLength: ${verseLength}")
                 raf.seek(verseStart.toLong())
 
                 while (verseRead < verseLength) {

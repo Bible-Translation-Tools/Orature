@@ -110,8 +110,6 @@ class ExistingAndIncomingAudioRenderer(
         val bytesFromExisting = existingAudioReader.getPcmBuffer(this.existingAudioHolder)
         val offset = existingAudioHolder.size - bytesFromExisting
 
-        println("bytesFromExisting: ${bytesFromExisting}, offset: ${offset}")
-
         var i = 0
         while( i < offset) {
             pcmCompressor.add(0.0F)
