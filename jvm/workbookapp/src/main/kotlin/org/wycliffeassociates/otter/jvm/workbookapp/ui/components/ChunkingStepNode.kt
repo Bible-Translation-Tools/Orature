@@ -23,7 +23,6 @@ class ChunkingStepNode(
     step: ChunkingStep,
     selectedStepProperty: ObjectProperty<ChunkingStep>,
     reachableStepProperty: ObjectProperty<ChunkingStep>,
-    hideCompletedProperty: BooleanProperty,
     isCollapsedProperty: BooleanProperty,
     content: Node? = null
 ) : VBox() {
@@ -43,12 +42,6 @@ class ChunkingStepNode(
     init {
         addClass("chunking-step")
         isFocusTraversable = true
-        visibleWhen {
-            booleanBinding(hideCompletedProperty, selectedStepProperty) {
-                hideCompletedProperty.value == false || step.ordinal >= selectedStepProperty.value.ordinal
-            }
-        }
-        managedWhen(visibleProperty())
         disableWhen(unavailableProperty)
         completedProperty.onChangeAndDoNow { toggleClass("completed", it == true) }
 
@@ -127,11 +120,10 @@ fun EventTarget.chunkingStep(
     step: ChunkingStep,
     selectedStepProperty: ObjectProperty<ChunkingStep>,
     reachableStepProperty: ObjectProperty<ChunkingStep>,
-    hideCompletedProperty: BooleanProperty,
     isCollapsedProperty: BooleanProperty,
     content: Node? = null,
     op: ChunkingStepNode.() -> Unit = {}
-) = ChunkingStepNode(step, selectedStepProperty, reachableStepProperty, hideCompletedProperty, isCollapsedProperty, content).attachTo(
+) = ChunkingStepNode(step, selectedStepProperty, reachableStepProperty, isCollapsedProperty, content).attachTo(
     this,
     op
 )
