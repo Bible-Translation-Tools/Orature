@@ -48,28 +48,61 @@ class VerseMarkersLayer : StackPane() {
 //        totalFramesProperty, rightOffset
 //    )
 
+
+    // Stores the relative start/end positions in the audio file that are being shown.
+    val scrollBarPositionProperty = SimpleDoubleProperty(0.0) // TODO: mulitply this by the width of the content window
+    val rangeOfAudioToShowStart = Bindings.createIntegerBinding(
+        {
+            return@createIntegerBinding pixelsToFrames((scrollBarPositionProperty.value + rightOffset.value))
+        }, // TODO: finish
+        rightOffset, scrollBarPositionProperty
+    )
+    val rangeOfAudioToShowEnd = Bindings.createIntegerBinding(
+        {
+            (rangeOfAudioToShowStart.value + pixelsToFrames(layerWidthProperty.value))
+        },
+        layerWidthProperty, rangeOfAudioToShowStart
+    )
     val verseMarkersControlsInView: ObservableList<VerseMarkerControl> = observableListOf()
 
-    init {
-
-        // Manually shifts all verse markers to the left
-        rightOffset.addListener{_, old, new ->
-            println("iterating over verses: ${verseMarkersControlsInView.size}")
-            verseMarkersControlsInView.forEach { verseMarkerControl ->
-                if(new == 0) {
-                    AnchorPane.setLeftAnchor(verseMarkerControl,
-                        framesToPixels(verseMarkerControl.verseProperty.value.location).toDouble() - MARKER_OFFSET
-                    )
-                } else {
-                    val currentLeftAnchor = AnchorPane.getLeftAnchor(verseMarkerControl) ?: 0.0
-                    val newLeftAnchor = currentLeftAnchor - (maxOf(0, new.toInt() - old.toInt()))
-                    AnchorPane.setLeftAnchor(verseMarkerControl, newLeftAnchor)
-                }
-
+    fun getVerseMarkersInFrameRange(start: Int, end: Int) {
+        println("start: ${start}, end: ${end}")
+        for(i in 0 until markers.size) {
+            if(markers[i].location in start .. end) {
+                println("showing ${markers[i].label} at frame position: ${markers[i].location}")
             }
         }
+    }
 
-        //maxWidth = 1920.0 // TODO: fix to account for arrows of scrollbar
+    init {
+        // Manually shifts all verse markers to the left
+//        rightOffset.addListener{_, old, new ->
+//            println("iterating over verses: ${verseMarkersControlsInView.size}")
+//            verseMarkersControlsInView.forEach { verseMarkerControl ->
+//                if(new == 0) {
+//                    AnchorPane.setLeftAnchor(verseMarkerControl,
+//                        framesToPixels(verseMarkerControl.verseProperty.value.location).toDouble() - MARKER_OFFSET
+//                    )
+//                } else {
+//                    val currentLeftAnchor = AnchorPane.getLeftAnchor(verseMarkerControl) ?: 0.0
+//                    val newLeftAnchor = currentLeftAnchor - (maxOf(0, new.toInt() - old.toInt()))
+//                    AnchorPane.setLeftAnchor(verseMarkerControl, newLeftAnchor)
+//                }
+//
+//            }
+//        }
+
+        rangeOfAudioToShowEnd.onChange {
+//            println("range end: ${rangeOfAudioToShowEnd.value}")
+            getVerseMarkersInFrameRange(rangeOfAudioToShowStart.value, rangeOfAudioToShowEnd.value)
+        }
+
+        rangeOfAudioToShowStart.onChange {
+//            println("range start: ${rangeOfAudioToShowStart.value}")
+            getVerseMarkersInFrameRange(rangeOfAudioToShowStart.value, rangeOfAudioToShowEnd.value)
+        }
+
+        maxWidth = 1920.0 // TODO: fix to account for arrows of scrollbar
 
         tryImportStylesheet("/css/verse-markers-layer.css")
 
@@ -84,6 +117,14 @@ class VerseMarkersLayer : StackPane() {
         scrollpane {
             setOnLayerScroll {
                 hvalue += it / markersTotalWidthProperty.value
+            }
+
+            hvalueProperty().addListener { _, _, newValue ->
+                val contentWidth = markersTotalWidthProperty.value // Get the width of the content
+                val scrollbarPositionRatio : Double = hvalueProperty().value * contentWidth
+
+                println("Scrollbar position ratio: $scrollbarPositionRatio (out of $contentWidth)")
+                scrollBarPositionProperty.set(scrollbarPositionRatio)
             }
 
             hbox {
@@ -107,12 +148,6 @@ class VerseMarkersLayer : StackPane() {
 
 
                 anchorpane {
-//                    markersTotalWidthProperty.addListener { _ ->
-//                        println("markersTotalWidthProperty has changed: ${markersTotalWidthProperty.value}")
-//                        maxWidthProperty().set(markersTotalWidthProperty.value)
-//
-//                        prefWidthProperty().set(markersTotalWidthProperty.value)
-//                    }
 
                     bindChildren(markers) { verse ->
 
@@ -181,10 +216,10 @@ class VerseMarkersLayer : StackPane() {
                                 leftAnchor = endPosInPixels - MARKER_OFFSET//endPosInPixels - MARKER_OFFSET
                             }
 
-                            if(!verseMarkersControlsInView.contains(this)) {
-                                println("adding verse to list ${this.labelProperty.value}")
-                                verseMarkersControlsInView.add(this)
-                            }
+//                            if(!verseMarkersControlsInView.contains(this)) {
+//                                println("adding verse to list ${this.labelProperty.value}")
+//                                verseMarkersControlsInView.add(this)
+//                            }
                         }
                     }
                 }
