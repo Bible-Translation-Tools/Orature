@@ -1,9 +1,13 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers
 
 import com.sun.glass.ui.Screen
+import javafx.animation.KeyFrame
+import javafx.animation.Timeline
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.collections.ObservableList
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.StackPane
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
@@ -12,7 +16,9 @@ import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.*
-
+import javafx.util.Duration
+import javafx.beans.binding.Bindings
+import javafx.beans.binding.DoubleBinding
 /**
  * This is the offset of the marker line relative
  * to the draggable area. In other words,
@@ -24,6 +30,7 @@ class VerseMarkersLayer : StackPane() {
 
     val isRecordingProperty = SimpleBooleanProperty()
     val markers = observableListOf<VerseMarker>()
+    val rightOffset = SimpleIntegerProperty(0) // corresponds to pixels from incoming audio
 
     // gets the last verseMarker's location and sets that to the total frames
     private val totalFramesProperty = markers.integerBinding { it[it.size - 1].location }
@@ -36,9 +43,33 @@ class VerseMarkersLayer : StackPane() {
         framesToPixels(it.toInt()).toDouble() } ?: 1.0
     }
 
+//    val markersTotalWidthProperty: DoubleBinding = Bindings.createDoubleBinding(
+//        { framesToPixels(totalFramesProperty.value).toDouble() + rightOffset.value },
+//        totalFramesProperty, rightOffset
+//    )
+
+    val verseMarkersControlsInView: ObservableList<VerseMarkerControl> = observableListOf()
 
     init {
-        maxWidth = 1920.0 // TODO: fix to account for arrows of scrollbar
+
+        // Manually shifts all verse markers to the left
+        rightOffset.addListener{_, old, new ->
+            println("iterating over verses: ${verseMarkersControlsInView.size}")
+            verseMarkersControlsInView.forEach { verseMarkerControl ->
+                if(new == 0) {
+                    AnchorPane.setLeftAnchor(verseMarkerControl,
+                        framesToPixels(verseMarkerControl.verseProperty.value.location).toDouble() - MARKER_OFFSET
+                    )
+                } else {
+                    val currentLeftAnchor = AnchorPane.getLeftAnchor(verseMarkerControl) ?: 0.0
+                    val newLeftAnchor = currentLeftAnchor - (maxOf(0, new.toInt() - old.toInt()))
+                    AnchorPane.setLeftAnchor(verseMarkerControl, newLeftAnchor)
+                }
+
+            }
+        }
+
+        //maxWidth = 1920.0 // TODO: fix to account for arrows of scrollbar
 
         tryImportStylesheet("/css/verse-markers-layer.css")
 
@@ -57,7 +88,6 @@ class VerseMarkersLayer : StackPane() {
 
             hbox {
                 isFitToHeight = true
-
                 var scrollOldPos = 0.0
                 var scrollDelta: Double
 
@@ -75,8 +105,14 @@ class VerseMarkersLayer : StackPane() {
                 }
 
 
+
                 anchorpane {
-                     prefWidthProperty().bind(markersTotalWidthProperty)
+//                    markersTotalWidthProperty.addListener { _ ->
+//                        println("markersTotalWidthProperty has changed: ${markersTotalWidthProperty.value}")
+//                        maxWidthProperty().set(markersTotalWidthProperty.value)
+//
+//                        prefWidthProperty().set(markersTotalWidthProperty.value)
+//                    }
 
                     bindChildren(markers) { verse ->
 
@@ -91,7 +127,9 @@ class VerseMarkersLayer : StackPane() {
                         val currentMarkerPosition = verse.location
                         val endPosInPixels = framesToPixels(currentMarkerPosition)
 
-                        VerseMarker().apply {
+                        VerseMarkerControl().apply {
+
+                            // add node to list
                             verseProperty.set(verse)
                             verseIndexProperty.set(markers.indexOf(verse))
                             labelProperty.set(verseLabel)
@@ -117,8 +155,6 @@ class VerseMarkersLayer : StackPane() {
                                 val point = localToParent(event.x, event.y)
                                 val currentPos = point.x
 
-                                println("verse marker being dragged. currentPos: ${currentPos}, containerWidth: ${layerWidthProperty.value}, previousMarkerPos: ${previousMarkerPosition}, nextMarkerPos: ${nextMarkerPosition}")
-
                                 if (currentPos.toInt() in (previousMarkerPosition + 1) .. nextMarkerPosition) {
                                     delta = currentPos - oldPos
                                     AnchorPane.setLeftAnchor(this, currentPos - MARKER_OFFSET)
@@ -142,7 +178,12 @@ class VerseMarkersLayer : StackPane() {
                             anchorpaneConstraints {
                                 topAnchor = 0.0
                                 bottomAnchor = 0.0
-                                leftAnchor = endPosInPixels - MARKER_OFFSET
+                                leftAnchor = endPosInPixels - MARKER_OFFSET//endPosInPixels - MARKER_OFFSET
+                            }
+
+                            if(!verseMarkersControlsInView.contains(this)) {
+                                println("adding verse to list ${this.labelProperty.value}")
+                                verseMarkersControlsInView.add(this)
                             }
                         }
                     }

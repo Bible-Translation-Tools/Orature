@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleIntegerProperty
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
@@ -35,6 +36,7 @@ class AudioWorkspaceView : View() {
             add(VerseMarkersLayer().apply {
                 isRecordingProperty.bind(viewModel.isRecordingProperty)
                 markers.bind(viewModel.mockRecordedVerseMarkers) { it }
+                rightOffset.bind(viewModel.pxFromIncomingAudio)
             })
 
         }
@@ -63,6 +65,7 @@ class AudioWorkspaceViewModel : ViewModel() {
     var waveform : Waveform? = null
     var volumeBar : VolumeBar? = null
     var mockRecordedVerseMarkers = observableListOf<VerseMarker>()
+    var pxFromIncomingAudio = SimpleIntegerProperty(0)
 
     fun getCurrentFrameRangeShown(relativePosition: Int, screenWidth: Int) : IntRange {
         var framesPerPixel = 229 // TODO: don't use constants here
@@ -92,9 +95,11 @@ class AudioWorkspaceViewModel : ViewModel() {
         narrationViewModel.narrationIsInitialized.addListener {_, old, new ->
             if(new == true && isNarrationWaveformLayerInitialized.value == false) {
                 waveform = Waveform(narrationViewModel.existingAndIncomingAudioRenderer!!)
-
                 volumeBar = VolumeBar(narrationViewModel.getRecorderAudioStream())
                 waveform!!.isRecordingProperty.bind(isRecordingProperty)
+
+                pxFromIncomingAudio.bind(narrationViewModel.existingAndIncomingAudioRenderer!!.bytesFromIncoming.div(2).div(229))
+
                 isNarrationWaveformLayerInitialized.set(true)
             }
         }

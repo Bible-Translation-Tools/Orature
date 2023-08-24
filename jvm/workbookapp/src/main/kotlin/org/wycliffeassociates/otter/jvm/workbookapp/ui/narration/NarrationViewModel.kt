@@ -426,6 +426,7 @@ class NarrationViewModel : ViewModel() {
             // TODO: probably place this in a function or to a listener to RecordedVersesChanged
             existingAndIncomingAudioRenderer?.clearData()
             existingAndIncomingAudioRenderer?.fillExistingAudioHolder()
+            existingAndIncomingAudioRenderer?.bytesFromIncoming?.set(0)
 
         }.let(disposables::add)
     }

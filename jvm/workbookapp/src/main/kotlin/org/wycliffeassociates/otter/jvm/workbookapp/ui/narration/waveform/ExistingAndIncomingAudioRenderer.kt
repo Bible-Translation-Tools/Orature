@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import javafx.beans.property.SimpleIntegerProperty
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
@@ -35,6 +36,8 @@ class ExistingAndIncomingAudioRenderer(
     val compositeDisposable = CompositeDisposable()
 
     val existingAudioHolder = ByteArray(DEFAULT_SAMPLE_RATE * secondsOnScreen * 2)
+
+    var bytesFromIncoming = SimpleIntegerProperty(0)
 
     init {
         recordingActive
@@ -71,8 +74,9 @@ class ExistingAndIncomingAudioRenderer(
                 while (bb.hasRemaining()) {
                     val short = bb.short
                     if (isActive.get()) {
-                        //println("accumulating accumulate totelIncomingAudioBytes variable/property")
+//                        println("accumulating accumulate totelIncomingAudioBytes variable/property")
                         pcmCompressor.add(short.toFloat())
+                        bytesFromIncoming.set(bytesFromIncoming.value + 2)
                         // accumulate totelIncomingAudioBytes variable/property
                     }
                 }

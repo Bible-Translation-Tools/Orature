@@ -19,7 +19,7 @@ import tornadofx.*
 internal const val MARKER_AREA_WIDTH = 24.0
 internal const val MARKER_WIDTH = 2.0
 
-class VerseMarker : BorderPane() {
+class VerseMarkerControl : BorderPane() {
 
     val verseProperty = SimpleObjectProperty<VerseMarker>()
     val verseIndexProperty = SimpleIntegerProperty()
@@ -89,9 +89,9 @@ class VerseMarker : BorderPane() {
             addClass("verse-marker__menu")
             setAlignment(this, Pos.BOTTOM_LEFT)
 
-            isRecordingProperty.bind(this@VerseMarker.isRecordingProperty)
-            verseProperty.bind(this@VerseMarker.verseProperty)
-            verseIndexProperty.bind(this@VerseMarker.verseIndexProperty)
+            isRecordingProperty.bind(this@VerseMarkerControl.isRecordingProperty)
+            verseProperty.bind(this@VerseMarkerControl.verseProperty)
+            verseIndexProperty.bind(this@VerseMarkerControl.verseIndexProperty)
         }
     }
 }
