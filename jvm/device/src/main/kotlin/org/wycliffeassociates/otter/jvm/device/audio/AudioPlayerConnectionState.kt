@@ -18,12 +18,14 @@
  */
 package org.wycliffeassociates.otter.jvm.device.audio
 
+import org.wycliffeassociates.otter.common.device.AudioFileReaderProvider
 import java.io.File
 import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFileReaderProvider
 
 internal class AudioPlayerConnectionState(
     val id: Int,
-    var file: File = File(""),
+    var readerProvider: AudioFileReaderProvider = OratureAudioFileReaderProvider(File("")),
     var begin: Int? = null,
     var end: Int? = null,
     var rate: Double = 1.0,

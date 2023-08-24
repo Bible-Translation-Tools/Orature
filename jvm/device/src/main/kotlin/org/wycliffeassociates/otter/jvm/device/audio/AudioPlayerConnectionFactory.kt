@@ -80,9 +80,9 @@ internal class AudioPlayerConnectionFactory(
         }
         player.processor.updatePlaybackRate(request.rate)
         if (request.begin != null && request.end != null) {
-            player.loadSection(request.file, request.begin!!, request.end!!)
+            player.loadSection(request.readerProvider, request.begin!!, request.end!!)
         } else {
-            player.load(request.file)
+            player.load(request.readerProvider)
         }
     }
 

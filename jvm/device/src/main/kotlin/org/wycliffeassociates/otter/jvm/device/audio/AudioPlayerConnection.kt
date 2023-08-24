@@ -20,9 +20,11 @@ package org.wycliffeassociates.otter.jvm.device.audio
 
 import java.io.File
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
+import org.wycliffeassociates.otter.common.device.AudioFileReaderProvider
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFileReaderProvider
 
 internal class AudioPlayerConnection(
     val id: Int,
@@ -62,14 +64,26 @@ internal class AudioPlayerConnection(
         addListeners()
     }
 
+    override fun load(readerProvider: AudioFileReaderProvider) {
+        state.readerProvider = readerProvider
+        state.position = 0
+        connectionFactory.load(state)
+    }
+
     override fun load(file: File) {
-        state.file = file
+        load(OratureAudioFileReaderProvider(file))
+    }
+
+    override fun loadSection(readerProvider: AudioFileReaderProvider, frameStart: Int, frameEnd: Int) {
+        state.readerProvider = readerProvider
+        state.begin = frameStart
+        state.end = frameEnd
         state.position = 0
         connectionFactory.load(state)
     }
 
     override fun loadSection(file: File, frameStart: Int, frameEnd: Int) {
-        state.file = file
+        state.readerProvider = OratureAudioFileReaderProvider(file)
         state.begin = frameStart
         state.end = frameEnd
         state.position = 0

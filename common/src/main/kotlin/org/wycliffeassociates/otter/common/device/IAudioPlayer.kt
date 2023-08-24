@@ -32,8 +32,9 @@ interface IAudioPlayer {
             }
         }))
     }
-
+    fun load(readerProvider: AudioFileReaderProvider)
     fun load(file: File)
+    fun loadSection(readerProvider: AudioFileReaderProvider, frameStart: Int, frameEnd: Int)
     fun loadSection(file: File, frameStart: Int, frameEnd: Int)
     fun getAudioReader(): AudioFileReader?
     fun changeRate(rate: Double)

@@ -26,9 +26,11 @@ import javax.sound.sampled.SourceDataLine
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
+import org.wycliffeassociates.otter.common.device.AudioFileReaderProvider
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFileReaderProvider
 
 class AudioBufferPlayer(
     private val player: SourceDataLine?,
@@ -72,6 +74,21 @@ class AudioBufferPlayer(
         )
     }
 
+    override fun load(readerProvider: AudioFileReaderProvider) {
+        reader?.let { close() }
+        reader = readerProvider.getAudioFileReader().let { _reader ->
+            begin = 0
+            end = _reader.totalFrames
+            bytes = ByteArray(processor.inputBufferSize * 2)
+            listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
+            _reader.open()
+            _reader
+        }
+        if (player == null) {
+            errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, LineUnavailableException()))
+        }
+    }
+
     override fun load(file: File) {
         reader?.let { close() }
         reader = OratureAudioFile(file).reader().let { _reader ->
@@ -87,7 +104,25 @@ class AudioBufferPlayer(
         }
     }
 
+    override fun loadSection(readerProvider: AudioFileReaderProvider, frameStart: Int, frameEnd: Int) {
+        reader?.let { close() }
+        begin = frameStart
+        end = frameEnd
+        reader = readerProvider.getAudioFileReader(frameStart, frameEnd).let { _reader ->
+            bytes = ByteArray(processor.inputBufferSize * 2)
+            listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
+            _reader.open()
+            _reader
+        }
+        if (player == null) {
+            errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, LineUnavailableException()))
+        }
+    }
+
     override fun loadSection(file: File, frameStart: Int, frameEnd: Int) {
+        val readerProvider = OratureAudioFileReaderProvider(file)
+        loadSection(readerProvider = readerProvider, frameStart, frameEnd)
+
         reader?.let { close() }
         begin = frameStart
         end = frameEnd
