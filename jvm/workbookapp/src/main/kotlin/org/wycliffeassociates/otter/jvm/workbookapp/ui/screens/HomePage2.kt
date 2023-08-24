@@ -21,6 +21,7 @@ import org.wycliffeassociates.otter.jvm.controls.card.newTranslationCard
 import org.wycliffeassociates.otter.jvm.controls.card.translationCreationCard
 import org.wycliffeassociates.otter.jvm.controls.dialog.LoadingModal
 import org.wycliffeassociates.otter.jvm.controls.dialog.ContributorDialog
+import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.LanguageSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ProjectGroupDeleteEvent
@@ -166,6 +167,8 @@ class HomePage2 : View() {
                         }
                     }
                 }
+
+                runLater { customizeScrollbarSkin() }
             }
 
             visibleWhen {
