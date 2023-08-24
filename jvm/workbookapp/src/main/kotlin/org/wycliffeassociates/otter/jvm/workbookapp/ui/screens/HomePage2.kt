@@ -210,10 +210,10 @@ class HomePage2 : View() {
             val dialog = find<ContributorDialog>().apply {
                 themeProperty.set(settingsViewModel.appColorMode.value)
                 orientationProperty.set(settingsViewModel.orientationProperty.value)
-                contributors.setAll(viewModel.loadContributors(books))
+                contributors.setAll(viewModel.loadContributors(books.first()))
                 saveContributorCallback.set(
                     EventHandler {
-                        viewModel.saveContributors(contributors, books)
+                        viewModel.saveContributors(contributors, books.first())
                     }
                 )
             }
