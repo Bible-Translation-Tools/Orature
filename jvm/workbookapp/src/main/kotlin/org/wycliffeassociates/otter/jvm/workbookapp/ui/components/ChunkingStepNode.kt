@@ -4,6 +4,8 @@ import javafx.beans.binding.ObjectBinding
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.event.ActionEvent
+import javafx.event.EventHandler
 import javafx.event.EventTarget
 import javafx.scene.Node
 import javafx.scene.input.KeyCode
@@ -15,6 +17,8 @@ import org.kordamp.ikonli.material.Material
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.utils.bindSingleChild
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.grid.ChunkGrid
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
 import tornadofx.*
 import tornadofx.FX.Companion.messages
@@ -23,21 +27,29 @@ class ChunkingStepNode(
     step: ChunkingStep,
     selectedStepProperty: ObjectProperty<ChunkingStep>,
     reachableStepProperty: ObjectProperty<ChunkingStep>,
-    isCollapsedProperty: BooleanProperty,
-    content: Node? = null
+    isCollapsedProperty: BooleanProperty
 ) : VBox() {
-    private val mainSectionProperty = SimpleObjectProperty<Node>(null)
+    val chunkListProperty = SimpleObjectProperty<List<ChunkViewData>>(null)
+    val isSelectedProperty = booleanBinding(selectedStepProperty) {
+        step == selectedStepProperty.value
+    }
+    private val contentSectionProperty = SimpleObjectProperty<Node>().apply {
+        bind(chunkListProperty.objectBinding {
+            it?.let { list ->
+                ChunkGrid(list)
+            }
+        })
+    }
     private val unavailableProperty = reachableStepProperty.booleanBinding {
         it?.let { reachable ->
             reachable.ordinal < step.ordinal
         } ?: true
     }
-    private val isSelectedProperty = booleanBinding(selectedStepProperty) {
-        step == selectedStepProperty.value
-    }
     private val completedProperty = booleanBinding(selectedStepProperty) {
         step.ordinal < selectedStepProperty.value.ordinal
     }
+
+    private val onSelectActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
         addClass("chunking-step")
@@ -71,28 +83,26 @@ class ChunkingStepNode(
         hbox {
             /* expands when step is selected (similar to titled pane & accordion) */
             addClass("chunking-step__content-section")
-            bindSingleChild(mainSectionProperty)
+            bindSingleChild(contentSectionProperty)
 
             visibleWhen { isSelectedProperty.and(isCollapsedProperty.not()) }
             managedWhen(visibleProperty())
-            mainSectionProperty.bind(
-                isSelectedProperty.objectBinding {
-                    this@ChunkingStepNode.togglePseudoClass("selected", it == true)
-                    if (it == true) content else null
-                }
-            )
         }
 
         setOnMouseClicked {
-            selectedStepProperty.set(step)
+            onSelectActionProperty.value.handle(ActionEvent())
             requestFocus()
         }
 
         this.addEventFilter(KeyEvent.KEY_PRESSED) {
             if (it.code == KeyCode.ENTER || it.code == KeyCode.SPACE) {
-                selectedStepProperty.set(step)
+                onSelectActionProperty.value.handle(ActionEvent())
             }
         }
+    }
+
+    fun setOnSelect(op: () -> Unit) {
+        onSelectActionProperty.set(EventHandler { op() })
     }
 
     private fun createGraphicBinding(step: ChunkingStep) : ObjectBinding<Node?> {
@@ -121,9 +131,5 @@ fun EventTarget.chunkingStep(
     selectedStepProperty: ObjectProperty<ChunkingStep>,
     reachableStepProperty: ObjectProperty<ChunkingStep>,
     isCollapsedProperty: BooleanProperty,
-    content: Node? = null,
     op: ChunkingStepNode.() -> Unit = {}
-) = ChunkingStepNode(step, selectedStepProperty, reachableStepProperty, isCollapsedProperty, content).attachTo(
-    this,
-    op
-)
+) = ChunkingStepNode(step, selectedStepProperty, reachableStepProperty, isCollapsedProperty).attachTo(this, op)

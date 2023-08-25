@@ -4,6 +4,7 @@ import javafx.beans.property.IntegerProperty
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.event.EventTarget
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
@@ -15,11 +16,12 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
 import tornadofx.FX.Companion.messages
 import tornadofx.*
 
-class ChunkingStepsPane(items: List<ChunkViewData>) : VBox() {
+class ChunkingStepsPane : VBox() {
+    val chunkItems = observableListOf<ChunkViewData>()
+    val selectedChunk: IntegerProperty = SimpleIntegerProperty(2)
+    val selectedStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.BLIND_DRAFT)
+    val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.PEER_EDIT)
     private val isCollapsedProperty = SimpleBooleanProperty(false)
-    private val selectedChunk: IntegerProperty = SimpleIntegerProperty(2)
-    private val selectedStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.BLIND_DRAFT)
-    private val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.PEER_EDIT)
 
     init {
         hbox {
@@ -55,18 +57,47 @@ class ChunkingStepsPane(items: List<ChunkViewData>) : VBox() {
             }
 
         }
-        val grid = ChunkGrid(items)
         scrollpane {
             isFitToWidth = true
             vbox {
-                chunkingStep(ChunkingStep.CONSUME_AND_VERBALIZE,selectedStepProperty,reachableStepProperty, isCollapsedProperty, null)
-                chunkingStep(ChunkingStep.CHUNKING, selectedStepProperty, reachableStepProperty, isCollapsedProperty, null)
-                chunkingStep(ChunkingStep.BLIND_DRAFT, selectedStepProperty, reachableStepProperty, isCollapsedProperty, grid)
-                chunkingStep(ChunkingStep.PEER_EDIT, selectedStepProperty, reachableStepProperty, isCollapsedProperty, grid)
-                chunkingStep(ChunkingStep.KEYWORD_CHECK, selectedStepProperty, reachableStepProperty, isCollapsedProperty, grid)
-                chunkingStep(ChunkingStep.VERSE_CHECK, selectedStepProperty, reachableStepProperty, isCollapsedProperty, grid)
+                chunkingStep(ChunkingStep.CONSUME_AND_VERBALIZE,selectedStepProperty,reachableStepProperty, isCollapsedProperty) {
+                    setOnSelect {
+                        selectedStepProperty.set(ChunkingStep.CONSUME_AND_VERBALIZE)
+                    }
+                }
+                chunkingStep(ChunkingStep.CHUNKING, selectedStepProperty, reachableStepProperty, isCollapsedProperty) {
+                    setOnSelect {
+                        selectedStepProperty.set(ChunkingStep.CHUNKING)
+                    }
+                }
+                chunkingStep(ChunkingStep.BLIND_DRAFT, selectedStepProperty, reachableStepProperty, isCollapsedProperty) {
+                    chunkItems.onChange { chunkListProperty.set(it.list) }
+                    setOnSelect {
+                        selectedStepProperty.set(ChunkingStep.BLIND_DRAFT)
+                    }
+                }
+                chunkingStep(ChunkingStep.PEER_EDIT, selectedStepProperty, reachableStepProperty, isCollapsedProperty) {
+                    chunkItems.onChange { chunkListProperty.set(it.list) }
+                    setOnSelect {
+                        selectedStepProperty.set(ChunkingStep.PEER_EDIT)
+                    }
+                }
+                chunkingStep(ChunkingStep.KEYWORD_CHECK, selectedStepProperty, reachableStepProperty, isCollapsedProperty) {
+                    chunkItems.onChange { chunkListProperty.set(it.list) }
+                    setOnSelect {
+                        selectedStepProperty.set(ChunkingStep.KEYWORD_CHECK)
+                    }
+                }
+                chunkingStep(ChunkingStep.VERSE_CHECK, selectedStepProperty, reachableStepProperty, isCollapsedProperty) {
+                    chunkItems.onChange { chunkListProperty.set(it.list) }
+                    setOnSelect {
+                        selectedStepProperty.set(ChunkingStep.VERSE_CHECK)
+                    }
+                }
             }
         }
 
     }
 }
+
+fun EventTarget.chunkingStepsPane(op: ChunkingStepsPane.() -> Unit = {}) = ChunkingStepsPane().attachTo(this, op)

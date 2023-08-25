@@ -15,6 +15,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.grid.ChunkGrid
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.ChunkingStepsPane
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.chunkingStepsPane
 import tornadofx.*
 
 class ChunkingDemoView : View() {
@@ -37,12 +38,12 @@ class ChunkingDemoView : View() {
     )
 
     override val root = vbox {
-        maxWidth = 300.0
-        maxWidth = 320.0
-
-        add(ChunkingStepsPane(list))
-
         borderpane {
+            left = ChunkingStepsPane().apply {
+                chunkItems.setAll(list)
+                this.reachableStepProperty.bind(this@ChunkingDemoView.reachableStepProperty)
+                this@ChunkingDemoView.selectedStepProperty.bind(this.selectedStepProperty)
+            }
             centerProperty().bind(selectedStepProperty.objectBinding {
                 it?.let {
                     fragments[it]?.root
