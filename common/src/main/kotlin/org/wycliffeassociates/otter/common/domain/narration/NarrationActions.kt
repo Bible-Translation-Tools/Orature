@@ -85,7 +85,11 @@ internal class RecordAgainAction(
         val end = workingAudio.totalFrames
 
         node = VerseNode(
-            start, end, placed = true, totalVerses[verseIndex].marker.copy()
+            start,
+            end,
+            placed = true,
+            totalVerses[verseIndex].marker.copy(),
+            mutableListOf(start..end)
         ).also {
             totalVerses[verseIndex] = it.copy()
         }
