@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers
 import com.sun.glass.ui.Screen
 import javafx.animation.KeyFrame
 import javafx.animation.Timeline
+import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
@@ -19,6 +20,8 @@ import tornadofx.*
 import javafx.util.Duration
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.DoubleBinding
+import javafx.collections.ListChangeListener
+
 /**
  * This is the offset of the marker line relative
  * to the draggable area. In other words,
@@ -30,6 +33,7 @@ class VerseMarkersLayer : StackPane() {
 
     val isRecordingProperty = SimpleBooleanProperty()
     val markers = observableListOf<VerseMarker>()
+    val markersSubset = observableListOf<VerseMarker>()
     val rightOffset = SimpleIntegerProperty(0) // corresponds to pixels from incoming audio
 
     // gets the last verseMarker's location and sets that to the total frames
@@ -42,11 +46,6 @@ class VerseMarkersLayer : StackPane() {
     private val markersTotalWidthProperty = totalFramesProperty.doubleBinding { it?.let {
         framesToPixels(it.toInt()).toDouble() } ?: 1.0
     }
-
-//    val markersTotalWidthProperty: DoubleBinding = Bindings.createDoubleBinding(
-//        { framesToPixels(totalFramesProperty.value).toDouble() + rightOffset.value },
-//        totalFramesProperty, rightOffset
-//    )
 
 
     // Stores the relative start/end positions in the audio file that are being shown.
@@ -66,32 +65,26 @@ class VerseMarkersLayer : StackPane() {
     val verseMarkersControlsInView: ObservableList<VerseMarkerControl> = observableListOf()
 
     fun getVerseMarkersInFrameRange(start: Int, end: Int) {
-//        println("start: ${start}, end: ${end}")
-        for(i in 0 until markers.size) {
-            if(markers[i].location in start .. end) {
-//                println("showing ${markers[i].label} at frame position: ${markers[i].location}")
+        println("start: ${start}, end: ${end}")
+        Platform.runLater {
+            for (i in 0 until markers.size) {
+                if (markers[i].location in start..end) {
+                    println("showing ${markers[i].label} at frame position: ${markers[i].location}")
+
+                    if (!markersSubset.contains(markers[i])) {
+                        markersSubset.add(markers[i])
+                    }
+                } else {
+                    if (markersSubset.contains(markers[i])) {
+                        markersSubset.remove(markers[i])
+                    }
+                }
             }
         }
     }
 
-    init {
-        // Manually shifts all verse markers to the left
-//        rightOffset.addListener{_, old, new ->
-//            println("iterating over verses: ${verseMarkersControlsInView.size}")
-//            verseMarkersControlsInView.forEach { verseMarkerControl ->
-//                if(new == 0) {
-//                    AnchorPane.setLeftAnchor(verseMarkerControl,
-//                        framesToPixels(verseMarkerControl.verseProperty.value.location).toDouble() - MARKER_OFFSET
-//                    )
-//                } else {
-//                    val currentLeftAnchor = AnchorPane.getLeftAnchor(verseMarkerControl) ?: 0.0
-//                    val newLeftAnchor = currentLeftAnchor - (maxOf(0, new.toInt() - old.toInt()))
-//                    AnchorPane.setLeftAnchor(verseMarkerControl, newLeftAnchor)
-//                }
-//
-//            }
-//        }
 
+    init {
         rangeOfAudioToShowEnd.onChange {
             getVerseMarkersInFrameRange(rangeOfAudioToShowStart.value, rangeOfAudioToShowEnd.value)
         }
@@ -99,6 +92,14 @@ class VerseMarkersLayer : StackPane() {
         rangeOfAudioToShowStart.onChange {
             getVerseMarkersInFrameRange(rangeOfAudioToShowStart.value, rangeOfAudioToShowEnd.value)
         }
+
+
+        markersSubset.addListener(ListChangeListener<VerseMarker> { change ->
+            println("===== Showing markers in view =====")
+            for(i in 0 until markersSubset.size) {
+                println("${markersSubset[i].location}")
+            }
+        })
 
         maxWidth = 1920.0 // TODO: fix to account for arrows of scrollbar
 
@@ -145,10 +146,11 @@ class VerseMarkersLayer : StackPane() {
                 }
 
                 anchorpane {
-
-                    bindChildren(markers) { verse ->
-
-                        // TODO: skip over verses that are not in range here
+                    totalFramesProperty.addListener { _, old, new ->
+                        this.minWidth = framesToPixels(totalFramesProperty.value).toDouble()
+                        this.maxWidth = framesToPixels(totalFramesProperty.value).toDouble()
+                    }
+                    bindChildren(markersSubset) { verse ->
 
                         val verseLabel = getVerseLabel(verse)
                         val prevVerse = getPrevVerse(verse)
@@ -213,6 +215,21 @@ class VerseMarkersLayer : StackPane() {
                                 leftAnchor = endPosInPixels - MARKER_OFFSET//endPosInPixels - MARKER_OFFSET
                             }
 
+                            // Manually shifts all verse markers (that are in view) to the left
+                            // NOTE: this seems sketchy because I am not freeing up listeners.
+                            // I am not sure how these are freed up, but if they are not freed up properly,
+                            // then I am creating a memory leak everytime I change markersSubset.
+                            rightOffset.addListener{_, old, new ->
+                                    if(new == 0) {
+                                        AnchorPane.setLeftAnchor(this,
+                                            framesToPixels(this.verseProperty.value.location).toDouble() - MARKER_OFFSET
+                                        )
+                                    } else {
+                                        val currentLeftAnchor = AnchorPane.getLeftAnchor(this) ?: 0.0
+                                        val newLeftAnchor = currentLeftAnchor - (maxOf(0, new.toInt() - old.toInt()))
+                                        AnchorPane.setLeftAnchor(this, newLeftAnchor)
+                                    }
+                            }
                         }
                     }
                 }
