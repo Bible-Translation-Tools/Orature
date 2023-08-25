@@ -17,6 +17,7 @@ import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.narration.Narration
 import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
@@ -154,7 +155,13 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun getExistingAudioFileReader(): AudioFileReader {
-        return narration.audioReader
+        val testAudioFile = File("C:\\Users\\hilld\\beeMovieWav.wav")
+        val testOratureAudioFile = OratureAudioFile(testAudioFile)
+        val reader = testOratureAudioFile.reader()
+        reader.open()
+        return reader
+
+//        return narration.audioReader
     }
 
     var existingAndIncomingAudioRendererIsInitialized = SimpleBooleanProperty(false)
