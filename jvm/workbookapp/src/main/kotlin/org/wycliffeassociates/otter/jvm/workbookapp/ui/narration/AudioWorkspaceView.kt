@@ -7,6 +7,7 @@ import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkersLayer
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.ExistingAndIncomingAudioRenderer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.Waveform
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.WaveformLayer
 import tornadofx.*
@@ -17,19 +18,28 @@ class AudioWorkspaceView : View() {
 
     override val root =
         stackpane {
-            // Initializes the waveform and volumeBar used in the waveform layer
-            // TODO: Don't do this initialization here, or in this file. It is awkward.
-            viewModel.isNarrationWaveformLayerInitialized.addListener {_, old, new ->
-                if(new == true) {
-                    narrationWaveformLayer.waveform = viewModel.waveform
-                    narrationWaveformLayer.volumeBar = viewModel.volumeBar
-                    narrationWaveformLayer.isNarrationWaveformLayerInitialized.set(true) // should probably be a binding
-                    narrationWaveformLayer.audioFilePositionProperty.bind(viewModel.audioFilePositionProperty)
+
+            add(narrationWaveformLayer.apply {
+                // Initializes the waveform and volumeBar used in the waveform layer
+                // TODO: Don't do this initialization here, or in this file. It is awkward.
+                viewModel.isWaveformRendererInitialized.addListener {_, old, new ->
+                    if(new == true) {
+
+                        waveform = Waveform(viewModel.waveformRenderer!!)
+                        waveform!!.isRecordingProperty.bind(viewModel.isRecordingProperty)
+                        volumeBar = VolumeBar(viewModel.waveformRenderer!!.incomingAudioStream)
+                        audioFilePositionProperty.bind(viewModel.audioFilePositionProperty)
+
+                        waveform?.heightProperty?.bind(this.heightProperty())
+                        waveform?.widthProperty?.bind(this.widthProperty())
+                        canvasFragment.drawableProperty.set(waveform)
+
+                        volumeBarCanavsFragment.drawableProperty.set(volumeBar)
+                        volumeBarCanavsFragment.isDrawingProperty.set(true)
+                        isNarrationWaveformLayerInitialized.set(true) // should probably be a binding
+                    }
                 }
-            }
-
-
-            add(narrationWaveformLayer)
+            })
 
             add(VerseMarkersLayer().apply {
                 isRecordingProperty.bind(viewModel.isRecordingProperty)
@@ -66,41 +76,35 @@ class AudioWorkspaceViewModel : ViewModel() {
     val isRecordingProperty = SimpleBooleanProperty()
     var recordedVerses = observableListOf<VerseMarker>()
 
-    var isNarrationWaveformLayerInitialized = SimpleBooleanProperty(false)
-    var waveform : Waveform? = null
-    var volumeBar : VolumeBar? = null
     var mockRecordedVerseMarkers = observableListOf<VerseMarker>()
     var pxFromIncomingAudio = SimpleIntegerProperty(0)
     var audioFilePositionProperty = SimpleIntegerProperty(0)
-
+    var waveformRenderer : ExistingAndIncomingAudioRenderer? = null
+    var isWaveformRendererInitialized = SimpleBooleanProperty(false)
 
     fun onDock() {
 
 
         isRecordingProperty.bind(narrationViewModel.isRecordingProperty)
         recordedVerses.bind(narrationViewModel.recordedVerses) { it }
+
         mockRecordedVerseMarkers.bind(narrationViewModel.mockRecordedVerseMarkers) { it }
 
-        // TODO: Don't do this initialization here, or in this file. It is awkward.
-        narrationViewModel.narrationIsInitialized.addListener {_, old, new ->
-            if(new == true && isNarrationWaveformLayerInitialized.value == false) {
-                waveform = Waveform(narrationViewModel.existingAndIncomingAudioRenderer!!)
-                volumeBar = VolumeBar(narrationViewModel.getRecorderAudioStream())
-                waveform!!.isRecordingProperty.bind(isRecordingProperty)
-
-                pxFromIncomingAudio.bind(narrationViewModel.existingAndIncomingAudioRenderer!!.bytesFromIncoming.div(2).div(229))
-
-                isNarrationWaveformLayerInitialized.set(true)
+        narrationViewModel.existingAndIncomingAudioRendererIsInitialized.addListener {_, old, new ->
+            if(new == true && isWaveformRendererInitialized.value == false) {
+                waveformRenderer = narrationViewModel.existingAndIncomingAudioRenderer
+                pxFromIncomingAudio.bind(waveformRenderer!!.bytesFromIncoming.div(2).div(229))
+                isWaveformRendererInitialized.set(true)
             }
+
         }
 
         // clears waveform on chapter reset
         narrationViewModel.recordStartProperty.addListener {_, old, new ->
-            if(new == true && waveform?.renderer != null) {
-                waveform?.renderer?.clearData()
+            if(new == true && waveformRenderer != null) {
+                waveformRenderer?.clearData()
             }
         }
-
 
     }
 

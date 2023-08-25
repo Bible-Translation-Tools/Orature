@@ -157,22 +157,11 @@ class NarrationViewModel : ViewModel() {
         return narration.audioReader
     }
 
-    var narrationIsInitialized = SimpleBooleanProperty(false)
+    var existingAndIncomingAudioRendererIsInitialized = SimpleBooleanProperty(false)
     var existingAndIncomingAudioRenderer : ExistingAndIncomingAudioRenderer? = null
     val recordingStatus: BehaviorSubject<Boolean> = BehaviorSubject.createDefault(false)
 
-    fun loadChapter(chapter: Chapter) {
-        chapter
-            .chunkCount
-            .toObservable()
-            .observeOnFx()
-            .subscribe {
-                chunkTotalProperty.set(it)
-            }
-
-        workbookDataStore.activeChapterProperty.set(chapter)
-        initializeNarration(chapter)
-
+    fun initializeExistingAndIncomingAudioRenderer() {
         // ============= TODO: figure out where to actually initialize this stuff =============
         // Initializes properties / variables used in AudioWorkspace
         isRecordingProperty.addListener{_, old, new ->
@@ -186,9 +175,25 @@ class NarrationViewModel : ViewModel() {
             1920,
             10
         )
-        // ====================================================================================
 
-        narrationIsInitialized.set(true)
+        existingAndIncomingAudioRendererIsInitialized.set(true)
+
+        // ====================================================================================
+    }
+
+    fun loadChapter(chapter: Chapter) {
+        chapter
+            .chunkCount
+            .toObservable()
+            .observeOnFx()
+            .subscribe {
+                chunkTotalProperty.set(it)
+            }
+
+        workbookDataStore.activeChapterProperty.set(chapter)
+        initializeNarration(chapter)
+
+        initializeExistingAndIncomingAudioRenderer()
 
         chunksList.clear()
         loadChunks(chapter)
