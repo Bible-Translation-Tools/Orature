@@ -19,8 +19,8 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.project
 
 import com.fasterxml.jackson.core.JsonFactory
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -49,6 +49,7 @@ import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
+import org.wycliffeassociates.otter.common.domain.narration.VerseNode
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.usfm.getText
 import org.wycliffeassociates.usfmtools.USFMParser
 import org.wycliffeassociates.usfmtools.models.markers.CMarker
@@ -679,7 +680,7 @@ class ProjectFilesAccessor(
         val file = projectDir.resolve(RcConstants.PROJECT_MODE_FILE)
         return if (file.exists() && file.length() > 0) {
             val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
-            val serialized: SerializableProjectMode = mapper.readValue(file)
+            val serialized: SerializableProjectMode = mapper.readValue(file, object : TypeReference<SerializableProjectMode>() {})
             serialized.mode
         } else {
             null

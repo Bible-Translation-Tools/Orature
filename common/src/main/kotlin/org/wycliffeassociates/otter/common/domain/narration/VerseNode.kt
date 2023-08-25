@@ -20,7 +20,7 @@ internal data class VerseNode(
 
     var placed: Boolean = false,
     val marker: VerseMarker,
-    internal val sectors: MutableList<IntRange> = mutableListOf()
+    var sectors: MutableList<IntRange> = mutableListOf()
 ) {
     @get:JsonIgnore
     val length: Int

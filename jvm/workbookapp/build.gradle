@@ -194,6 +194,8 @@ dependencies {
 
     implementation "com.mpatric:mp3agic:$mp3TagVer"
     implementation "be.tarsos:tarsosdsp:$tarsosDspVer"
+
+    implementation 'org.json:json:20230618'
 }
 
 // tell gradle what to put in the jar

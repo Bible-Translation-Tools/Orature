@@ -31,7 +31,7 @@ import javax.inject.Inject
 class TestVersificationRepository @Inject constructor(): IVersificationRepository {
     override fun getVersification(slug: String): Maybe<Versification> {
         val vrsFile = ClassLoader.getSystemResourceAsStream("versification/ulb_versification.json")
-        val mapper = ObjectMapper().registerModule(KotlinModule())
+        val mapper = ObjectMapper().registerKotlinModule()
         val versification = mapper.readValue(vrsFile, ParatextVersification::class.java)
         return Maybe.just(versification)
     }
