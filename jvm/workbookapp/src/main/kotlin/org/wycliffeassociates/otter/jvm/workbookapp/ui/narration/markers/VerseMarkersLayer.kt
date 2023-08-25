@@ -85,13 +85,13 @@ class VerseMarkersLayer : StackPane() {
 
 
     init {
-        rangeOfAudioToShowEnd.onChange {
-            getVerseMarkersInFrameRange(rangeOfAudioToShowStart.value, rangeOfAudioToShowEnd.value)
-        }
-
-        rangeOfAudioToShowStart.onChange {
-            getVerseMarkersInFrameRange(rangeOfAudioToShowStart.value, rangeOfAudioToShowEnd.value)
-        }
+//        rangeOfAudioToShowEnd.onChange {
+//            getVerseMarkersInFrameRange(rangeOfAudioToShowStart.value, rangeOfAudioToShowEnd.value)
+//        }
+//
+//        rangeOfAudioToShowStart.onChange {
+//            getVerseMarkersInFrameRange(rangeOfAudioToShowStart.value, rangeOfAudioToShowEnd.value)
+//        }
 
 
         markersSubset.addListener(ListChangeListener<VerseMarker> { change ->
@@ -117,6 +117,15 @@ class VerseMarkersLayer : StackPane() {
             setOnLayerScroll {
                 hvalue += it / markersTotalWidthProperty.value
             }
+
+//            hvalueProperty().addListener { _, old, newValue ->
+//                val contentWidth = content.prefWidth(-1.0) // Get the width of the content
+//                val viewportWidth = viewportBounds.width // Get the width of the visible area
+//
+//                val totalWidth = contentWidth - viewportWidth // Calculate the total width
+//                println("Total width including content: $totalWidth")
+//                println("Scrolled pixels: ${newValue.toDouble() * markersTotalWidthProperty.value}")
+//            }
 
 
             hbox {
@@ -150,7 +159,7 @@ class VerseMarkersLayer : StackPane() {
                         this.minWidth = framesToPixels(totalFramesProperty.value).toDouble()
                         this.maxWidth = framesToPixels(totalFramesProperty.value).toDouble()
                     }
-                    bindChildren(markersSubset) { verse ->
+                    bindChildren(markers) { verse ->
 
                         val verseLabel = getVerseLabel(verse)
                         val prevVerse = getPrevVerse(verse)
@@ -203,7 +212,7 @@ class VerseMarkersLayer : StackPane() {
                                     val frameDelta = pixelsToFrames(delta)
                                     // TODO: I need to update the relative and actual location of the marker.
                                     // Pretty sure that this is done by firing a VerseMarkerAction, but not sure
-                                    println("frameDelta: ${frameDelta}, delta: ${delta}")
+//                                    println("frameDelta: ${frameDelta}, delta: ${delta}")
                                     FX.eventbus.fire(NarrationMarkerChangedEvent(markers.indexOf(verse), frameDelta))
                                 }
                                 event.consume()
@@ -219,17 +228,17 @@ class VerseMarkersLayer : StackPane() {
                             // NOTE: this seems sketchy because I am not freeing up listeners.
                             // I am not sure how these are freed up, but if they are not freed up properly,
                             // then I am creating a memory leak everytime I change markersSubset.
-                            rightOffset.addListener{_, old, new ->
-                                    if(new == 0) {
-                                        AnchorPane.setLeftAnchor(this,
-                                            framesToPixels(this.verseProperty.value.location).toDouble() - MARKER_OFFSET
-                                        )
-                                    } else {
-                                        val currentLeftAnchor = AnchorPane.getLeftAnchor(this) ?: 0.0
-                                        val newLeftAnchor = currentLeftAnchor - (maxOf(0, new.toInt() - old.toInt()))
-                                        AnchorPane.setLeftAnchor(this, newLeftAnchor)
-                                    }
-                            }
+//                            rightOffset.addListener{_, old, new ->
+//                                    if(new == 0) {
+//                                        AnchorPane.setLeftAnchor(this,
+//                                            framesToPixels(this.verseProperty.value.location).toDouble() - MARKER_OFFSET
+//                                        )
+//                                    } else {
+//                                        val currentLeftAnchor = AnchorPane.getLeftAnchor(this) ?: 0.0
+//                                        val newLeftAnchor = currentLeftAnchor - (maxOf(0, new.toInt() - old.toInt()))
+//                                        AnchorPane.setLeftAnchor(this, newLeftAnchor)
+//                                    }
+//                            }
                         }
                     }
                 }
