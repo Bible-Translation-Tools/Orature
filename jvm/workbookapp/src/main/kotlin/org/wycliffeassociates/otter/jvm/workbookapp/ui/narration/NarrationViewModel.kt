@@ -92,7 +92,8 @@ class NarrationViewModel : ViewModel() {
     private val listeners = mutableListOf<ListenerDisposer>()
     private val disposables = CompositeDisposable()
 
-
+    val testAudioFile = File("C:\\Users\\hilld\\beeMovieWav.wav")
+    val testOratureAudioFile = OratureAudioFile(testAudioFile)
     var mockRecordedVerseMarkers = observableListOf<VerseMarker>()
 
     init {
@@ -101,8 +102,8 @@ class NarrationViewModel : ViewModel() {
         hasVersesProperty.bind(recordedVerses.booleanBinding { it.isNotEmpty() })
         lastRecordedVerseProperty.bind(recordedVerses.integerBinding { it.size })
 
-        for(i in 0 until 5) {
-            mockRecordedVerseMarkers.add(VerseMarker(0 + 44100 * 2 * (i) + 1, 44100 * 2 * (i + 1), 44100 * 2 * (i + 1)))
+        for(i in 0 until testOratureAudioFile.totalFrames step 44100*2) {
+            mockRecordedVerseMarkers.add(VerseMarker(i + 1, i+(44100*2), i+(44100*2)))
         }
     }
 
@@ -155,8 +156,6 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun getExistingAudioFileReader(): AudioFileReader {
-        val testAudioFile = File("C:\\Users\\hilld\\beeMovieWav.wav")
-        val testOratureAudioFile = OratureAudioFile(testAudioFile)
         val reader = testOratureAudioFile.reader()
         reader.open()
         return reader
