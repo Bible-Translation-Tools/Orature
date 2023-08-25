@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform
 
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.scene.layout.HBox
 import org.wycliffeassociates.otter.jvm.controls.narration.CanvasFragment
 import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
@@ -15,11 +16,16 @@ class WaveformLayer : HBox() {
     var isNarrationWaveformLayerInitialized = SimpleBooleanProperty(false)
     var waveform : Waveform? = null
     var volumeBar : VolumeBar? = null
+    var audioFilePositionProperty = SimpleIntegerProperty(0)
 
     init {
 
         // TODO: Create renderer
         // TODO: Create Waveform
+
+        audioFilePositionProperty.addListener {_, old, new ->
+            println("audioFilePosition changed: ${audioFilePositionProperty.value}")
+        }
 
         this.maxWidth = 1895.0 // TODO: stop hardcoding
         canvasFragment.prefWidthProperty().bind(this.widthProperty().minus(25)) // TODO: stop hardcoding
@@ -31,6 +37,7 @@ class WaveformLayer : HBox() {
             }
         }
 
+        // TODO: move this to an apply method in the audioWorkspaceView.kt because this is super weird
         isNarrationWaveformLayerInitialized.addListener {_, old, new ->
             if(new == true) {
                 waveform?.heightProperty?.bind(this.heightProperty())

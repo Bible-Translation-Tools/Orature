@@ -1,9 +1,11 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
+import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkersLayer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.Waveform
@@ -22,14 +24,15 @@ class AudioWorkspaceView : View() {
                 if(new == true) {
                     narrationWaveformLayer.waveform = viewModel.waveform
                     narrationWaveformLayer.volumeBar = viewModel.volumeBar
-                    narrationWaveformLayer.isNarrationWaveformLayerInitialized.set(true)
+                    narrationWaveformLayer.isNarrationWaveformLayerInitialized.set(true) // should probably be a binding
+                    narrationWaveformLayer.audioFilePositionProperty.bind(viewModel.audioFilePositionProperty)
                 }
             }
 
-            narrationWaveformLayer.widthProperty().addListener { _, old, new ->
-                var rangeToShow = viewModel.getCurrentFrameRangeShown(0, new.toInt())
-                viewModel.getVerMarkersInRange(rangeToShow)
-            }
+//            narrationWaveformLayer.widthProperty().addListener { _, old, new ->
+//                var rangeToShow = viewModel.getCurrentFrameRangeShown(0, new.toInt())
+//                viewModel.getVerMarkersInRange(rangeToShow)
+//            }
 
             add(narrationWaveformLayer)
 
@@ -37,7 +40,15 @@ class AudioWorkspaceView : View() {
                 isRecordingProperty.bind(viewModel.isRecordingProperty)
                 markers.bind(viewModel.mockRecordedVerseMarkers) { it }
                 rightOffset.bind(viewModel.pxFromIncomingAudio)
+
+                // Updates the audioFilePosition property when the scrollbar position changes
+                scrollBarPositionProperty.addListener { _, old, new ->
+                    viewModel.audioFilePositionProperty.set(pixelsToFrames(scrollBarPositionProperty.value))
+                }
+
             })
+
+
 
         }
 
@@ -66,6 +77,7 @@ class AudioWorkspaceViewModel : ViewModel() {
     var volumeBar : VolumeBar? = null
     var mockRecordedVerseMarkers = observableListOf<VerseMarker>()
     var pxFromIncomingAudio = SimpleIntegerProperty(0)
+    var audioFilePositionProperty = SimpleIntegerProperty(0)
 
     fun getCurrentFrameRangeShown(relativePosition: Int, screenWidth: Int) : IntRange {
         var framesPerPixel = 229 // TODO: don't use constants here

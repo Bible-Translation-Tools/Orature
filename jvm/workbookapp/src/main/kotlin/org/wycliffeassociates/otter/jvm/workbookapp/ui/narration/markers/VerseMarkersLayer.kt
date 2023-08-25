@@ -66,10 +66,10 @@ class VerseMarkersLayer : StackPane() {
     val verseMarkersControlsInView: ObservableList<VerseMarkerControl> = observableListOf()
 
     fun getVerseMarkersInFrameRange(start: Int, end: Int) {
-        println("start: ${start}, end: ${end}")
+//        println("start: ${start}, end: ${end}")
         for(i in 0 until markers.size) {
             if(markers[i].location in start .. end) {
-                println("showing ${markers[i].label} at frame position: ${markers[i].location}")
+//                println("showing ${markers[i].label} at frame position: ${markers[i].location}")
             }
         }
     }
@@ -119,13 +119,6 @@ class VerseMarkersLayer : StackPane() {
                 hvalue += it / markersTotalWidthProperty.value
             }
 
-            hvalueProperty().addListener { _, _, newValue ->
-                val contentWidth = markersTotalWidthProperty.value // Get the width of the content
-                val scrollbarPositionRatio : Double = hvalueProperty().value * contentWidth
-
-                println("Scrollbar position ratio: $scrollbarPositionRatio (out of $contentWidth)")
-                scrollBarPositionProperty.set(scrollbarPositionRatio)
-            }
 
             hbox {
                 isFitToHeight = true
@@ -141,11 +134,17 @@ class VerseMarkersLayer : StackPane() {
                 setOnMouseDragged { event ->
                     val point = localToParent(event.x, event.y)
                     scrollDelta = scrollOldPos - point.x
-                    println("point: ${point}, scrollDelta: ${scrollDelta}")
+//                    println("point: ${point}, scrollDelta: ${scrollDelta}")
                     onScrollProperty.value?.invoke(scrollDelta)
                 }
 
+                hvalueProperty().addListener { _, _, newValue ->
+                    val contentWidth = markersTotalWidthProperty.value // Get the width of the content
+                    val scrollbarPositionRatio : Double = hvalueProperty().value * contentWidth
 
+//                    println("Scrollbar position ratio: $scrollbarPositionRatio (out of $contentWidth)")
+                    scrollBarPositionProperty.set(scrollbarPositionRatio)
+                }
 
                 anchorpane {
 
