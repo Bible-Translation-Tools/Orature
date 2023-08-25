@@ -179,6 +179,10 @@ class Narration @AssistedInject constructor(
         }
     }
 
+    fun loadChapterIntoPlayer() {
+        player.load(chapterRepresentation)
+    }
+
     private fun initializeWavWriter() {
         writer = WavFileWriter(
             chapterRepresentation.scratchAudio,

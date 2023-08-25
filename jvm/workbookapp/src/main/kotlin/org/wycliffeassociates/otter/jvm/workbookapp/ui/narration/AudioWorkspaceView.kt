@@ -11,41 +11,55 @@ class AudioWorkspaceView : View() {
     override val root = hbox {
         stackpane {
             scrollpane {
-                hbox {
-                    spacing = 10.0
-                    paddingHorizontal = 10.0
+                vbox {
+                    hbox {
+                        spacing = 10.0
+                        paddingHorizontal = 10.0
 
-                    bindChildren(viewModel.recordedVerses) { verse ->
-                        val index = viewModel.recordedVerses.indexOf(verse)
-                        val label = verse.label
+                        bindChildren(viewModel.recordedVerses) { verse ->
+                            val index = viewModel.recordedVerses.indexOf(verse)
+                            val label = verse.label
 
-                        menubutton(label) {
-                            item("") {
-                                text = "Play"
-                                action {
-                                    fire(PlayVerseEvent(verse))
+                            menubutton(label) {
+                                item("") {
+                                    text = "Play"
+                                    action {
+                                        fire(PlayVerseEvent(verse))
+                                    }
+                                    disableWhen {
+                                        viewModel.isRecordingProperty
+                                    }
                                 }
-                                disableWhen {
-                                    viewModel.isRecordingProperty
+                                item("") {
+                                    text = "Record Again"
+                                    action {
+                                        fire(RecordAgainEvent(index))
+                                    }
+                                    disableWhen {
+                                        viewModel.isRecordingProperty
+                                    }
+                                }
+                                item("") {
+                                    text = "Open in..."
+                                    action {
+                                        fire(OpenInAudioPluginEvent(index))
+                                    }
+                                    disableWhen {
+                                        viewModel.isRecordingProperty
+                                    }
                                 }
                             }
-                            item("") {
-                                text = "Record Again"
-                                action {
-                                    fire(RecordAgainEvent(index))
-                                }
-                                disableWhen {
-                                    viewModel.isRecordingProperty
-                                }
+                        }
+                    }
+                    hbox {
+                        button("Play All") {
+                            action {
+                                fire(PlayChapterEvent())
                             }
-                            item("") {
-                                text = "Open in..."
-                                action {
-                                    fire(OpenInAudioPluginEvent(index))
-                                }
-                                disableWhen {
-                                    viewModel.isRecordingProperty
-                                }
+                        }
+                        button("Pause") {
+                            action {
+                                fire(PauseEvent())
                             }
                         }
                     }

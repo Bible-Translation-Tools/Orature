@@ -114,6 +114,14 @@ class NarrationPage : View() {
             viewModel.play(it.verse)
         }.let { eventSubscriptions.add(it) }
 
+        subscribe<PlayChapterEvent> {
+            viewModel.playAll()
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<PauseEvent> {
+            viewModel.pause()
+        }.let { eventSubscriptions.add(it) }
+
         subscribe<RecordAgainEvent> {
             viewModel.recordAgain(it.index)
         }.let { eventSubscriptions.add(it) }

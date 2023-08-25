@@ -173,6 +173,28 @@ internal class ChapterRepresentation(
     }
 
     /**
+     * if the frame is the end frame of a verse, and there are more verses, return the frame of the next verse
+     */
+    private fun jumpGap(absoluteFrame: Int): Int {
+        val verses = activeVerses
+        val index = verses.indexOfFirst { node ->
+            absoluteFrame == node.lastFrame()
+        }
+        when {
+            index == -1 -> return 0
+            index == verses.lastIndex -> return 0
+            else -> {
+                for (i in index + 1 until verses.size) {
+                    if (verses[i].sectors.isNotEmpty()) {
+                        return verses[i].firstFrame()
+                    }
+                }
+                return 0
+            }
+        }
+    }
+
+    /**
      * Converts a relative index (audio only taking into account the currently active verses)
      * to an absolute position into the scratch audio file. This conversion is performed by counting frames through
      * the range of each active verse.
@@ -233,7 +255,6 @@ internal class ChapterRepresentation(
         private var _position = start?.times(frameSizeInBytes) ?: 0
         private var position: Int
             get() = _position
-
             set(value) = run {
                 if (value < startBounds * frameSizeInBytes || value > endBounds * frameSizeInBytes) {
                     logger.error("tried to set a position outside bounds")
@@ -283,62 +304,77 @@ internal class ChapterRepresentation(
             }
 
             val raf = randomAccessFile!!
-                val bounds = startBounds until endBounds
+            val bounds = startBounds until endBounds
 
-                if (framePosition !in bounds) {
-                    when {
-                        framePosition < bounds.first -> position = bounds.first * frameSizeInBytes
-                        else -> position = bounds.last * frameSizeInBytes
-                    }
+            if (framePosition !in bounds) {
+                when {
+                    framePosition < bounds.first -> position = bounds.first * frameSizeInBytes
+                    else -> position = bounds.last * frameSizeInBytes
+                }
+            }
+
+            var framesToRead = min(bytes.size / frameSizeInBytes, endBounds - startBounds)
+            val verses = activeVerses
+            var startingVerse = findVerse(framePosition)
+
+            while (startingVerse == null) {
+                val moveTo = jumpGap(framePosition)
+                if (moveTo == 0) break
+                seek(moveTo)
+                startingVerse = findVerse(framePosition)
+            }
+
+            logger.info("Starting verse is ${startingVerse}")
+            startingVerse?.let { startingVerse ->
+                var startIndex = verses.indexOf(startingVerse)
+                if (startIndex == -1) {
+                    logger.error("Aborting getPCMBuffer, could not find verse for frame Position: $framePosition")
+                    return bytesWritten
                 }
 
-                var framesToRead = min(bytes.size / frameSizeInBytes, endBounds - startBounds)
-                val verses = activeVerses
-                val startingVerse = findVerse(framePosition)
-                logger.info("Starting verse is ${startingVerse}")
-                startingVerse?.let { startingVerse ->
-                    val startIndex = verses.indexOf(startingVerse)
-                    if (startIndex == -1) {
-                        logger.error("Aborting getPCMBuffer, could not find verse for frame Position: $framePosition")
-                        return bytesWritten
+                // Jump verse if stuck at the end of a range
+                if (framePosition == startingVerse.lastFrame() && startIndex < verses.lastIndex) {
+                    seek(verses[startIndex + 1].firstFrame())
+                    startIndex++
+                }
+
+                for (verseIdx in startIndex until verses.size) {
+                    if (framesToRead <= 0 || framePosition !in bounds) break
+
+                    val verse = verses[verseIdx]
+                    val sectors = verse.getSectorsFromOffset(framePosition, framesToRead)
+
+                    if (sectors.isEmpty()) {
+                        logger.info("sectors is empty for verse index ${verseIdx}")
+                        continue
                     }
-                    for (verseIdx in startIndex until verses.size) {
+
+                    val framesTaken = sectors.sumOf { it.length() }
+
+                    logger.info("reading from sectors: $sectors")
+
+                    for (sector in sectors) {
                         if (framesToRead <= 0 || framePosition !in bounds) break
 
-                        val verse = verses[verseIdx]
-                        val sectors = verse.getSectorsFromOffset(framePosition, framesToRead)
-
-                        if (sectors.isEmpty()){
-                            logger.info("sectors is empty for verse index ${verseIdx}")
-                            continue
+                        val seekLoc = (sector.first * frameSizeInBytes).toLong()
+                        if (seekLoc <= 0) {
+                            logger.error("Sector seek produced a negative seek location: $seekLoc, from ${sector}")
                         }
-
-                        val framesTaken = sectors.sumOf { it.length() }
-
-                        logger.info("reading from sectors: $sectors")
-
-                        for (sector in sectors) {
-                            if (framesToRead <= 0 || framePosition !in bounds) break
-
-                            val seekLoc = (sector.first * frameSizeInBytes).toLong()
-                            if (seekLoc <= 0) {
-                                logger.error("Sector seek produced a negative seek location: $seekLoc, from ${sector}")
-                            }
-                            logger.info("in sector ${sector} seeking to position $seekLoc")
-                            raf.seek(seekLoc)
-                            val temp = ByteArray(framesTaken * frameSizeInBytes)
-                            val toCopy = raf.read(temp)
-                            try {
-                                System.arraycopy(temp, 0, bytes, bytesWritten, toCopy)
-                            } catch (_: ArrayIndexOutOfBoundsException) {
-                                println("here")
-                            }
-                            bytesWritten += toCopy
-                            position += toCopy
-                            framesToRead -= toCopy / frameSizeInBytes
+                        logger.info("in sector ${sector} seeking to position $seekLoc")
+                        raf.seek(seekLoc)
+                        val temp = ByteArray(framesTaken * frameSizeInBytes)
+                        val toCopy = raf.read(temp)
+                        try {
+                            System.arraycopy(temp, 0, bytes, bytesWritten, toCopy)
+                        } catch (_: ArrayIndexOutOfBoundsException) {
+                            println("here")
                         }
+                        bytesWritten += toCopy
+                        position += toCopy
+                        framesToRead -= toCopy / frameSizeInBytes
                     }
                 }
+            }
 
 
             return bytesWritten
@@ -351,7 +387,7 @@ internal class ChapterRepresentation(
                 sample >= endBounds -> endBounds - 1 * frameSizeInBytes
                 else -> {
                     logger.error("seek to $sample")
-                    position = startBounds * frameSizeInBytes
+                    position = sample * frameSizeInBytes
 //                    val absoluteFrame = relativeToAbsolute(sample)
 //                    this.position = max(
 //                        min(
@@ -377,7 +413,7 @@ internal class ChapterRepresentation(
                 randomAccessFile = null
             }
             //synchronized(openReaderConnections) {
-                openReaderConnections.remove(this)
+            openReaderConnections.remove(this)
             //}
         }
 

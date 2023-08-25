@@ -203,18 +203,25 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun play(verse: VerseMarker) {
-        if (playingVerse?.label == verse.label) {
-            audioPlayer.toggle()
-        } else {
-            audioPlayer.pause()
+        audioPlayer.pause()
 
-            narration.loadSectionIntoPlayer(verse)
+        narration.loadSectionIntoPlayer(verse)
 
-            audioPlayer.seek(0)
-            audioPlayer.play()
+        audioPlayer.seek(0)
+        audioPlayer.play()
 
-            playingVerse = verse
-        }
+        playingVerse = verse
+    }
+
+    fun playAll() {
+        audioPlayer.pause()
+        narration.loadChapterIntoPlayer()
+        audioPlayer.seek(0)
+        audioPlayer.play()
+    }
+
+    fun pause() {
+        audioPlayer.pause()
     }
 
     fun recordAgain(verseIndex: Int) {
