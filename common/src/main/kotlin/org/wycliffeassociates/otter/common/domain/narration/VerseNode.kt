@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.common.domain.narration
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import kotlin.math.min
 
@@ -18,12 +19,17 @@ internal data class VerseNode(
     var endScratchFrame: Int,
 
     var placed: Boolean = false,
-    val marker: VerseMarker
+    val marker: VerseMarker,
+    internal val sectors: MutableList<IntRange> = mutableListOf()
 ) {
-    private val sectors = mutableListOf<IntRange>()
-
+    @get:JsonIgnore
     val length: Int
         get() = sectors.sumOf { it.length() }
+
+    fun firstFrame(): Int {
+        if (sectors.isEmpty()) return 0
+        return sectors.first().first
+    }
 
     fun lastFrame(): Int {
         if (sectors.isEmpty()) return 0
@@ -34,7 +40,7 @@ internal data class VerseNode(
      * Begins a new audio frame sector corresponding to this VerseNode
      */
     fun addStart(start: Int) {
-        sectors.add(start..UNPLACED_END)
+        sectors.add(start..start)
     }
 
     /**
@@ -46,7 +52,7 @@ internal data class VerseNode(
     fun finalize(end: Int) {
         if (sectors.isNotEmpty()) {
             val last = sectors.last()
-            if (last.last == UNPLACED_END) {
+            if (last.last == UNPLACED_END || last.first == last.last) {
                 sectors.removeLast()
                 sectors.add(last.first..end)
             } else {
@@ -158,8 +164,7 @@ internal data class VerseNode(
     }
 
     fun clear() {
-        startScratchFrame = 0
-        endScratchFrame = 0
+        sectors.clear()
         placed = false
     }
 
@@ -220,18 +225,21 @@ internal data class VerseNode(
         throw IndexOutOfBoundsException("Requested offset $framesFromStart exceeded boundaries within ranges $sectors")
     }
 
-    fun getSectorsFromOffset(framePosition: Int, framesToRead: Int): List<IntRange> {
-        var framesToRead = framesToRead
+    fun getSectorsFromOffset(framePosition: Int, ftr: Int): List<IntRange> {
+        if (ftr <= 0 || framePosition !in this) return listOf()
+
+        var framesToRead = ftr
         val stuff = mutableListOf<IntRange>()
 
         val startIndex = sectors.indexOfFirst { framePosition in it }
-        val start = (sectors[startIndex].first - framePosition)
+
+        val start = framePosition
         val end = (start + min(sectors[startIndex].last - start, framesToRead))
         val firstRange = start..end
         stuff.add(firstRange)
         framesToRead -= firstRange.length()
 
-        for (idx in startIndex until sectors.size) {
+        for (idx in startIndex + 1 until sectors.size) {
             if (framesToRead <= 0) break
             val sector = sectors[idx]
             val end = (start + min(sectors[startIndex].last - start, framesToRead))

@@ -154,12 +154,17 @@ class AudioBufferPlayer(
                             player.start()
                             while (_reader.hasRemaining() && !pause.get() && !playbackThread.isInterrupted) {
                                 synchronized(monitor) {
-                                    if (_reader.framePosition > bytes.size / 2) {
-                                        _reader.seek(_reader.framePosition - processor.overlap)
+                                    if (_reader.supportsTimeShifting()) {
+                                        if (_reader.framePosition > bytes.size / 2) {
+                                            _reader.seek(_reader.framePosition - processor.overlap)
+                                        }
+                                        _reader.getPcmBuffer(bytes)
+                                        val output = processor.process(bytes)
+                                        player.write(output, 0, output.size)
+                                    } else {
+                                        _reader.getPcmBuffer(bytes)
+                                        player.write(bytes, 0, bytes.size)
                                     }
-                                    _reader.getPcmBuffer(bytes)
-                                    val output = processor.process(bytes)
-                                    player.write(output, 0, output.size)
                                 }
                             }
                             player.drain()

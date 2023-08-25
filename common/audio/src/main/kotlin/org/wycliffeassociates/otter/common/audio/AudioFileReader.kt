@@ -42,4 +42,7 @@ interface AudioFileReader: Closeable, AutoCloseable {
     fun seek(sample: Int)
     fun open()
     fun release()
+    fun supportsTimeShifting(): Boolean {
+        return true
+    }
 }

@@ -38,6 +38,7 @@ internal class NewVerseAction(
         node = VerseNode(
             start, end, placed = true, totalVerses[verseIndex].marker.copy()
         ).also {
+            it.addStart(start)
             totalVerses[verseIndex] = it.copy()
         }
     }

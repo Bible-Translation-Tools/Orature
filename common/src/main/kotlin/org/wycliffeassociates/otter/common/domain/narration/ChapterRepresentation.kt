@@ -82,6 +82,7 @@ internal class ChapterRepresentation(
 
     fun loadFromSerializedVerses() {
         val json = serializedVersesFile.readText()
+        logger.info(json)
         val reference = object : TypeReference<List<VerseNode>>() {}
 
         try {
@@ -118,7 +119,7 @@ internal class ChapterRepresentation(
     private fun sendActiveVerses() {
         onActiveVersesUpdated.onNext(
             activeVerses.map {
-                val newLoc = absoluteToRelative(it.startScratchFrame)
+                val newLoc = absoluteToRelative(it.firstFrame())
                 it.marker.copy(location = newLoc)
             }
         )
@@ -164,7 +165,7 @@ internal class ChapterRepresentation(
 
     private fun findVerse(absoluteFrame: Int): VerseNode? {
         return activeVerses.find { node ->
-            val absoluteIsInRange = absoluteFrame in node
+            val absoluteIsInRange = absoluteFrame in node && absoluteFrame != node.lastFrame()
             val absoluteIsEndOfFile =
                 absoluteFrame == node.lastFrame() && absoluteFrame == activeVerses.last().lastFrame()
             absoluteIsInRange || absoluteIsEndOfFile
@@ -196,9 +197,7 @@ internal class ChapterRepresentation(
         verses
             .find { it.marker.label == verse.label }
             ?.let { verse ->
-                val start = verse.startScratchFrame
-                val end = verse.endScratchFrame
-                return start..end
+                return verse.firstFrame()..verse.lastFrame()
             }
         return null
     }
@@ -230,18 +229,47 @@ internal class ChapterRepresentation(
         override val sampleSize: Int = this@ChapterRepresentation.sampleSize
 
         private var randomAccessFile: RandomAccessFile? = null
-        private var position: Int = 0
+
+        private var _position = start?.times(frameSizeInBytes) ?: 0
+        private var position: Int
+            get() = _position
+
+            set(value) = run {
+                if (value < startBounds * frameSizeInBytes || value > endBounds * frameSizeInBytes) {
+                    logger.error("tried to set a position outside bounds")
+                    _position = value.coerceIn(startBounds * frameSizeInBytes, endBounds * frameSizeInBytes)
+                } else {
+                    _position = value
+                }
+            }
+
+        private val startBounds
+            get() = start ?: 0
+        private val endBounds
+            get() = end ?: scratchAudio.totalFrames
 
         @get:Synchronized
         override val framePosition: Int
             get() = position / frameSizeInBytes
 
-        override val totalFrames
-            get() = this@ChapterRepresentation.totalFrames
+        override val totalFrames: Int
+            get() = run {
+                if (start == null && end == null) {
+                    this@ChapterRepresentation.totalFrames
+                } else {
+                    end!! - start!!
+                }
+            }
 
         @Synchronized
         override fun hasRemaining(): Boolean {
-            return ((totalFrames * frameSizeInBytes) - position) > 0
+            val remaining = endBounds - framePosition > 0
+            logger.info("hasRemaining is ${remaining} for ${end ?: totalFrames}, frame position is ${framePosition}")
+            return remaining
+        }
+
+        override fun supportsTimeShifting(): Boolean {
+            return false
         }
 
         private val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
@@ -249,42 +277,89 @@ internal class ChapterRepresentation(
         @Synchronized
         override fun getPcmBuffer(bytes: ByteArray): Int {
             var bytesWritten = 0
+            if (randomAccessFile == null) {
+                logger.error("Should have opened the file, this is weird")
+                open()
+            }
 
-            randomAccessFile?.let { raf ->
-                var framesToRead = bytes.size / frameSizeInBytes
+            val raf = randomAccessFile!!
+                val bounds = startBounds until endBounds
+
+                if (framePosition !in bounds) {
+                    when {
+                        framePosition < bounds.first -> position = bounds.first * frameSizeInBytes
+                        else -> position = bounds.last * frameSizeInBytes
+                    }
+                }
+
+                var framesToRead = min(bytes.size / frameSizeInBytes, endBounds - startBounds)
                 val verses = activeVerses
                 val startingVerse = findVerse(framePosition)
+                logger.info("Starting verse is ${startingVerse}")
                 startingVerse?.let { startingVerse ->
                     val startIndex = verses.indexOf(startingVerse)
+                    if (startIndex == -1) {
+                        logger.error("Aborting getPCMBuffer, could not find verse for frame Position: $framePosition")
+                        return bytesWritten
+                    }
                     for (verseIdx in startIndex until verses.size) {
+                        if (framesToRead <= 0 || framePosition !in bounds) break
+
                         val verse = verses[verseIdx]
                         val sectors = verse.getSectorsFromOffset(framePosition, framesToRead)
+
+                        if (sectors.isEmpty()){
+                            logger.info("sectors is empty for verse index ${verseIdx}")
+                            continue
+                        }
+
                         val framesTaken = sectors.sumOf { it.length() }
+
+                        logger.info("reading from sectors: $sectors")
+
                         for (sector in sectors) {
-                            raf.seek((sector.first * frameSizeInBytes).toLong())
+                            if (framesToRead <= 0 || framePosition !in bounds) break
+
+                            val seekLoc = (sector.first * frameSizeInBytes).toLong()
+                            if (seekLoc <= 0) {
+                                logger.error("Sector seek produced a negative seek location: $seekLoc, from ${sector}")
+                            }
+                            logger.info("in sector ${sector} seeking to position $seekLoc")
+                            raf.seek(seekLoc)
                             val temp = ByteArray(framesTaken * frameSizeInBytes)
                             val toCopy = raf.read(temp)
-                            System.arraycopy(temp, 0, bytes, bytesWritten, toCopy)
+                            try {
+                                System.arraycopy(temp, 0, bytes, bytesWritten, toCopy)
+                            } catch (_: ArrayIndexOutOfBoundsException) {
+                                println("here")
+                            }
                             bytesWritten += toCopy
                             position += toCopy
                             framesToRead -= toCopy / frameSizeInBytes
                         }
                     }
                 }
-            } ?: throw IllegalStateException("getPcmBuffer called before opening file")
+
 
             return bytesWritten
         }
 
         @Synchronized
         override fun seek(sample: Int) {
-            val scratchFileLength = scratchAudio.totalFrames * frameSizeInBytes
             when {
-                sample <= 0 -> this.position = 0
-                sample >= totalFrames -> this.position = scratchFileLength
+                sample <= startBounds -> startBounds * frameSizeInBytes
+                sample >= endBounds -> endBounds - 1 * frameSizeInBytes
                 else -> {
-                    val absoluteFrame = relativeToAbsolute(sample)
-                    this.position = max(min(absoluteFrame * frameSizeInBytes, scratchFileLength), 0)
+                    logger.error("seek to $sample")
+                    position = startBounds * frameSizeInBytes
+//                    val absoluteFrame = relativeToAbsolute(sample)
+//                    this.position = max(
+//                        min(
+//                            absoluteFrame * frameSizeInBytes,
+//                            endBounds * frameSizeInBytes
+//                        ),
+//                        startBounds * frameSizeInBytes
+//                    )
                 }
             }
         }
@@ -292,16 +367,18 @@ internal class ChapterRepresentation(
         override fun open() {
             randomAccessFile?.let { release() }
             randomAccessFile = RandomAccessFile(scratchAudio.file, "r")
+            logger.info("open called")
         }
 
         override fun release() {
+            logger.info("release called")
             if (randomAccessFile != null) {
                 randomAccessFile?.close()
                 randomAccessFile = null
             }
-            synchronized(openReaderConnections) {
+            //synchronized(openReaderConnections) {
                 openReaderConnections.remove(this)
-            }
+            //}
         }
 
         override fun close() {
