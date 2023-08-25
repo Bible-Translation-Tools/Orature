@@ -15,6 +15,7 @@ import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.narration.Narration
 import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
@@ -38,7 +39,7 @@ class NarrationViewModel : ViewModel() {
     private val workbookDataStore: WorkbookDataStore by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
-    var audioPlayer = AudioPlayerController()
+    lateinit var audioPlayer: IAudioPlayer
 
     @Inject
     lateinit var narrationFactory: NarrationFactory
@@ -113,6 +114,7 @@ class NarrationViewModel : ViewModel() {
 
     private fun initializeNarration(chapter: Chapter) {
         narration = narrationFactory.create(workbookDataStore.workbook, chapter)
+        audioPlayer = narration.getPlayer()
         subscribeActiveVersesChanged()
         updateRecordingState()
     }
@@ -208,7 +210,6 @@ class NarrationViewModel : ViewModel() {
 
             narration.loadSectionIntoPlayer(verse)
 
-            audioPlayer.load(narration.getPlayer())
             audioPlayer.seek(0)
             audioPlayer.play()
 
