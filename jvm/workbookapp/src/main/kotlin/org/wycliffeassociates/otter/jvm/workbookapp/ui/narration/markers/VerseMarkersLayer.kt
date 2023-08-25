@@ -93,12 +93,10 @@ class VerseMarkersLayer : StackPane() {
 //        }
 
         rangeOfAudioToShowEnd.onChange {
-//            println("range end: ${rangeOfAudioToShowEnd.value}")
             getVerseMarkersInFrameRange(rangeOfAudioToShowStart.value, rangeOfAudioToShowEnd.value)
         }
 
         rangeOfAudioToShowStart.onChange {
-//            println("range start: ${rangeOfAudioToShowStart.value}")
             getVerseMarkersInFrameRange(rangeOfAudioToShowStart.value, rangeOfAudioToShowEnd.value)
         }
 
@@ -215,10 +213,6 @@ class VerseMarkersLayer : StackPane() {
                                 leftAnchor = endPosInPixels - MARKER_OFFSET//endPosInPixels - MARKER_OFFSET
                             }
 
-//                            if(!verseMarkersControlsInView.contains(this)) {
-//                                println("adding verse to list ${this.labelProperty.value}")
-//                                verseMarkersControlsInView.add(this)
-//                            }
                         }
                     }
                 }

@@ -1,6 +1,5 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
-import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import org.slf4j.LoggerFactory
@@ -29,10 +28,6 @@ class AudioWorkspaceView : View() {
                 }
             }
 
-//            narrationWaveformLayer.widthProperty().addListener { _, old, new ->
-//                var rangeToShow = viewModel.getCurrentFrameRangeShown(0, new.toInt())
-//                viewModel.getVerMarkersInRange(rangeToShow)
-//            }
 
             add(narrationWaveformLayer)
 
@@ -48,8 +43,6 @@ class AudioWorkspaceView : View() {
 
             })
 
-
-
         }
 
 
@@ -63,6 +56,7 @@ class AudioWorkspaceView : View() {
         viewModel.onUndock()
     }
 }
+
 
 class AudioWorkspaceViewModel : ViewModel() {
     private val logger = LoggerFactory.getLogger(AudioWorkspaceViewModel::class.java)
@@ -79,22 +73,6 @@ class AudioWorkspaceViewModel : ViewModel() {
     var pxFromIncomingAudio = SimpleIntegerProperty(0)
     var audioFilePositionProperty = SimpleIntegerProperty(0)
 
-    fun getCurrentFrameRangeShown(relativePosition: Int, screenWidth: Int) : IntRange {
-        var framesPerPixel = 229 // TODO: don't use constants here
-        return relativePosition .. (relativePosition + (screenWidth*framesPerPixel))
-    }
-
-    fun getVerMarkersInRange(rangeToShow: IntRange): List<VerseMarker> {
-        val verseMarkersToShow = mutableListOf<VerseMarker>()
-        for (i in 0 until mockRecordedVerseMarkers.size) {
-            val currentVerse = mockRecordedVerseMarkers[i]
-            if (currentVerse.location in rangeToShow) {
-                println("verseMarker: ${currentVerse.label}, marker.end: ${currentVerse.end}")
-                verseMarkersToShow.add(currentVerse)
-            }
-        }
-        return verseMarkersToShow
-    }
 
     fun onDock() {
 
@@ -119,7 +97,6 @@ class AudioWorkspaceViewModel : ViewModel() {
         // clears waveform on chapter reset
         narrationViewModel.recordStartProperty.addListener {_, old, new ->
             if(new == true && waveform?.renderer != null) {
-                println("clearing render 2")
                 waveform?.renderer?.clearData()
             }
         }

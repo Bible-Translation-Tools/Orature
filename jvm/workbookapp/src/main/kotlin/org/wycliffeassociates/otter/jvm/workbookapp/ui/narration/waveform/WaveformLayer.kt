@@ -19,9 +19,7 @@ class WaveformLayer : HBox() {
     var audioFilePositionProperty = SimpleIntegerProperty(0)
 
     init {
-
-        // TODO: Create renderer
-        // TODO: Create Waveform
+        
 
         audioFilePositionProperty.addListener {_, old, new ->
             println("audioFilePosition changed: ${audioFilePositionProperty.value}")
