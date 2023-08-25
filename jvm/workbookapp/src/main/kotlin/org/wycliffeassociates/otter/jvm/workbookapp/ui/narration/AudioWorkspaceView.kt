@@ -93,7 +93,7 @@ class AudioWorkspaceViewModel : ViewModel() {
         narrationViewModel.existingAndIncomingAudioRendererIsInitialized.addListener {_, old, new ->
             if(new == true && isWaveformRendererInitialized.value == false) {
                 waveformRenderer = narrationViewModel.existingAndIncomingAudioRenderer
-                pxFromIncomingAudio.bind(waveformRenderer!!.bytesFromIncoming.div(2).div(229))
+                pxFromIncomingAudio.bind(waveformRenderer!!.bytesFromIncomingProperty.div(2).div(229))
                 isWaveformRendererInitialized.set(true)
             }
 

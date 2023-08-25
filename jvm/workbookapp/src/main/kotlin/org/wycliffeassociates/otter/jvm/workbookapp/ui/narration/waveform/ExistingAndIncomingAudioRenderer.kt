@@ -37,7 +37,7 @@ class ExistingAndIncomingAudioRenderer(
 
     val existingAudioHolder = ByteArray(DEFAULT_SAMPLE_RATE * secondsOnScreen * 2)
 
-    var bytesFromIncoming = SimpleIntegerProperty(0)
+    var bytesFromIncomingProperty = SimpleIntegerProperty(0)
 
     init {
         recordingActive
@@ -76,7 +76,7 @@ class ExistingAndIncomingAudioRenderer(
                     if (isActive.get()) {
 //                        println("accumulating accumulate totelIncomingAudioBytes variable/property")
                         pcmCompressor.add(short.toFloat())
-                        bytesFromIncoming.set(bytesFromIncoming.value + 2)
+                        bytesFromIncomingProperty.set(bytesFromIncomingProperty.value + 2)
                         // accumulate totelIncomingAudioBytes variable/property
                     }
                 }
