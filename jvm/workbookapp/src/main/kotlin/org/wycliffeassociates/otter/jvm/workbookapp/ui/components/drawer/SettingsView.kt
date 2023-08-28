@@ -35,6 +35,7 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.utils.overrideDefaultKeyEventHandler
 import org.wycliffeassociates.otter.jvm.controls.combobox.ComboboxItem
 import org.wycliffeassociates.otter.jvm.controls.combobox.IconComboBoxCell
+import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.AddPluginDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
@@ -54,6 +55,7 @@ class SettingsView : View() {
 
     override val root = vbox {
         addClass("app-drawer__content")
+        runLater { customizeScrollbarSkin() }
 
         DrawerTraversalEngine(this)
 

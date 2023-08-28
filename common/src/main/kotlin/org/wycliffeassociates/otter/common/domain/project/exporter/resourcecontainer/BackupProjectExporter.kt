@@ -54,6 +54,9 @@ class BackupProjectExporter @Inject constructor(
                     ?: workbook.source.resourceMetadata
 
                 val projectAccessor = workbook.projectFilesAccessor
+                if (!projectAccessor.isInitialized()) {
+                    return@fromCallable ExportResult.FAILURE
+                }
                 val contributors = projectAccessor.getContributorInfo()
                 val zipFilename = makeExportFilename(workbook, projectSourceMetadata)
                 val zipFile = outputDirectory.resolve(zipFilename)

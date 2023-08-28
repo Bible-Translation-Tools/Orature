@@ -844,13 +844,15 @@
 
 /* Common scrollbar styles */
 .scroll-bar:vertical {
+    -fx-padding: 0;
     -fx-background-insets: 0;
-    -fx-pref-width: 24;
+    -fx-pref-width: 20;
 }
 
 .scroll-bar:horizontal {
+    -fx-padding: 0;
     -fx-background-insets: 0;
-    -fx-pref-height: 24;
+    -fx-pref-height: 20;
 }
 
 .scroll-bar .thumb {
@@ -885,7 +887,7 @@
 .scroll-bar .decrement-button {
     -fx-background-insets: 0;
     -fx-font-size: 12;
-    -fx-padding: 10;
+    -fx-padding: 6;
     -fx-alignment: center;
  }
 

@@ -97,6 +97,15 @@ class ProjectFilesAccessor(
         project
     )
 
+    fun isInitialized(): Boolean {
+        return try {
+            ResourceContainer.load(projectDir).close()
+            true
+        } catch (_: Exception) {
+            false
+        }
+    }
+
     fun copySourceFiles(
         linkedResource: ResourceMetadata? = null,
         excludeMedia: Boolean = true

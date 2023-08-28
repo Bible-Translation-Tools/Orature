@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
+package org.wycliffeassociates.otter.jvm.controls
 
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -27,8 +27,10 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ContributorCellData
+import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.model.ContributorCellData
 import tornadofx.*
+import tornadofx.FX.Companion.messages
 
 class ContributorCell : HBox() {
     val indexProperty = SimpleIntegerProperty(-1)
@@ -44,7 +46,7 @@ class ContributorCell : HBox() {
         add(
             textfield(nameProperty) {
                 hgrow = Priority.ALWAYS
-                addClass("txt-input", "contributor__text-input")
+                addClass("txt-input", "contributor__text-input", "normal-text")
 
                 focusedProperty().onChange { focused ->
                     if (!focused) {
@@ -61,8 +63,9 @@ class ContributorCell : HBox() {
         )
 
         button {
-            addClass("btn", "btn--icon")
-            graphic = FontIcon(Material.DELETE)
+            addClass("btn", "btn--icon", "btn--borderless", "contributor__list-cell__delete-btn")
+            graphic = FontIcon(Material.DELETE).addClass("delete-icon")
+            tooltip(messages["remove"])
             setOnAction {
                 val index = if (indexProperty.value < 0) {
                     // when an item is deleted, its index will no longer be valid (-1)

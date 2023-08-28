@@ -37,6 +37,7 @@ class TranslationTypeCard(titleKey: String, descriptionKey: String) : HBox() {
             addClass("translation-type-card__action-cell")
             button(messages["select"]) {
                 addClass("btn", "btn--primary")
+                tooltip(text)
                 graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
                 minWidth = Button.USE_PREF_SIZE
 

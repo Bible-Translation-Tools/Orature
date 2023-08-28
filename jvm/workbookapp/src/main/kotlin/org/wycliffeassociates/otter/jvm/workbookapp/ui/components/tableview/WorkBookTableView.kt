@@ -31,6 +31,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.util.Callback
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
+import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import tornadofx.FX.Companion.messages
@@ -146,6 +147,7 @@ class WorkBookTableView(
         }
 
         handleDefaultSortOrder()
+        runLater { customizeScrollbarSkin() }
     }
 }
 
