@@ -64,6 +64,12 @@ internal class AudioPlayerConnection(
         addListeners()
     }
 
+    override fun load(reader: AudioFileReader) {
+        state.reader = reader
+        state.position = 0
+        connectionFactory.load(state)
+    }
+
     override fun load(readerProvider: AudioFileReaderProvider) {
         state.readerProvider = readerProvider
         state.position = 0
@@ -74,20 +80,20 @@ internal class AudioPlayerConnection(
         load(OratureAudioFileReaderProvider(file))
     }
 
-    override fun loadSection(readerProvider: AudioFileReaderProvider, frameStart: Int, frameEnd: Int) {
-        state.readerProvider = readerProvider
+    override fun loadSection(reader: AudioFileReader, frameStart: Int, frameEnd: Int) {
+        state.reader = reader
         state.begin = frameStart
         state.end = frameEnd
         state.position = 0
         connectionFactory.load(state)
     }
 
+    override fun loadSection(readerProvider: AudioFileReaderProvider, frameStart: Int, frameEnd: Int) {
+        loadSection(readerProvider.getAudioFileReader(frameStart, frameEnd), frameStart, frameEnd)
+    }
+
     override fun loadSection(file: File, frameStart: Int, frameEnd: Int) {
-        state.readerProvider = OratureAudioFileReaderProvider(file)
-        state.begin = frameStart
-        state.end = frameEnd
-        state.position = 0
-        connectionFactory.load(state)
+        loadSection(OratureAudioFileReaderProvider(file), frameStart, frameEnd)
     }
 
     override fun getAudioReader(): AudioFileReader? {

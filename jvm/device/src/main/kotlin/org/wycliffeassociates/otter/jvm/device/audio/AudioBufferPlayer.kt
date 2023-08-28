@@ -74,6 +74,21 @@ class AudioBufferPlayer(
         )
     }
 
+    override fun load(reader: AudioFileReader) {
+        this.reader?.let { close() }
+        this.reader = reader.let{ _reader ->
+            begin = 0
+            end = _reader.totalFrames
+            bytes = ByteArray(processor.inputBufferSize * 2)
+            listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
+            _reader.open()
+            _reader
+        }
+        if (player == null) {
+            errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, LineUnavailableException()))
+        }
+    }
+
     override fun load(readerProvider: AudioFileReaderProvider) {
         reader?.let { close() }
         reader = readerProvider.getAudioFileReader().let { _reader ->
@@ -94,6 +109,21 @@ class AudioBufferPlayer(
         reader = OratureAudioFile(file).reader().let { _reader ->
             begin = 0
             end = _reader.totalFrames
+            bytes = ByteArray(processor.inputBufferSize * 2)
+            listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
+            _reader.open()
+            _reader
+        }
+        if (player == null) {
+            errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, LineUnavailableException()))
+        }
+    }
+
+    override fun loadSection(reader: AudioFileReader, frameStart: Int, frameEnd: Int) {
+        this.reader?.let { close() }
+        begin = frameStart
+        end = frameEnd
+        this.reader = reader.let { _reader ->
             bytes = ByteArray(processor.inputBufferSize * 2)
             listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
             _reader.open()

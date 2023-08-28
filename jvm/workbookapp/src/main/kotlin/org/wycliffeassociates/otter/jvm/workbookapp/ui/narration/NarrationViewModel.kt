@@ -207,7 +207,7 @@ class NarrationViewModel : ViewModel() {
 
         narration.loadSectionIntoPlayer(verse)
 
-        audioPlayer.seek(0)
+        // audioPlayer.seek(0)
         audioPlayer.play()
 
         playingVerse = verse
@@ -216,7 +216,7 @@ class NarrationViewModel : ViewModel() {
     fun playAll() {
         audioPlayer.pause()
         narration.loadChapterIntoPlayer()
-        audioPlayer.seek(0)
+        // audioPlayer.seek(0)
         audioPlayer.play()
     }
 

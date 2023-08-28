@@ -252,8 +252,8 @@ internal class ChapterRepresentation(
     }
 
     inner class ChapterRepresentationConnection(
-        val start: Int? = null,
-        val end: Int?
+        var start: Int? = null,
+        var end: Int?
     ) : AudioFileReader {
         override val sampleRate: Int = this@ChapterRepresentation.sampleRate
         override val channels: Int = this@ChapterRepresentation.channels
@@ -276,7 +276,7 @@ internal class ChapterRepresentation(
         private val startBounds: Int
             inline get() {
                 return when {
-                    start != null -> start
+                    start != null -> start!!
                     activeVerses.isEmpty() -> 0
                     else -> activeVerses.minBy { it.firstFrame() }.firstFrame()
                 }
@@ -285,7 +285,7 @@ internal class ChapterRepresentation(
         private val endBounds: Int
             inline get() {
                 return when {
-                    end != null -> end
+                    end != null -> end!!
                     activeVerses.isEmpty() -> scratchAudio.totalFrames
                     else -> activeVerses.maxBy { it.lastFrame() }.lastFrame()
                 }
@@ -404,20 +404,12 @@ internal class ChapterRepresentation(
 
         @Synchronized
         override fun seek(sample: Int) {
-            when {
+            position = when {
                 sample <= startBounds -> startBounds * frameSizeInBytes
                 sample >= endBounds -> endBounds - 1 * frameSizeInBytes
                 else -> {
                     logger.error("seek to $sample")
-                    position = sample * frameSizeInBytes
-//                    val absoluteFrame = relativeToAbsolute(sample)
-//                    this.position = max(
-//                        min(
-//                            absoluteFrame * frameSizeInBytes,
-//                            endBounds * frameSizeInBytes
-//                        ),
-//                        startBounds * frameSizeInBytes
-//                    )
+                    sample * frameSizeInBytes
                 }
             }
         }
