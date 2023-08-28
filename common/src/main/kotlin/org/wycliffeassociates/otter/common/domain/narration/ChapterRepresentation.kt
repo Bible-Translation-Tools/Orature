@@ -181,7 +181,16 @@ internal class ChapterRepresentation(
             absoluteFrame == node.lastFrame()
         }
         when {
-            index == -1 -> return 0
+            verses.isEmpty() -> return 0
+            index == -1 -> {
+                return if (absoluteFrame == 0) {
+                    // if 0, assume playback should go to the first verse (might not be the smallest frame)
+                    verses.first().firstFrame()
+                } else {
+                    logger.warn("In jump gap, moving to closest starting frame for frame: $absoluteFrame, but this is unexpected")
+                    verses.minBy { it.firstFrame() - absoluteFrame }.firstFrame()
+                }
+            }
             index == verses.lastIndex -> return 0
             else -> {
                 for (i in index + 1 until verses.size) {
@@ -255,27 +264,40 @@ internal class ChapterRepresentation(
         private var _position = start?.times(frameSizeInBytes) ?: 0
         private var position: Int
             get() = _position
-            set(value) = run {
-                if (value < startBounds * frameSizeInBytes || value > endBounds * frameSizeInBytes) {
+            set(value) {
+                _position = if (value < startBounds * frameSizeInBytes || value > endBounds * frameSizeInBytes) {
                     logger.error("tried to set a position outside bounds")
-                    _position = value.coerceIn(startBounds * frameSizeInBytes, endBounds * frameSizeInBytes)
+                    value.coerceIn(startBounds * frameSizeInBytes, endBounds * frameSizeInBytes)
                 } else {
-                    _position = value
+                    value
                 }
             }
 
-        private val startBounds
-            get() = start ?: 0
-        private val endBounds
-            get() = end ?: scratchAudio.totalFrames
+        private val startBounds: Int
+            inline get() {
+                return when {
+                    start != null -> start
+                    activeVerses.isEmpty() -> 0
+                    else -> activeVerses.minBy { it.firstFrame() }.firstFrame()
+                }
+            }
+
+        private val endBounds: Int
+            inline get() {
+                return when {
+                    end != null -> end
+                    activeVerses.isEmpty() -> scratchAudio.totalFrames
+                    else -> activeVerses.maxBy { it.lastFrame() }.lastFrame()
+                }
+            }
 
         @get:Synchronized
         override val framePosition: Int
             get() = position / frameSizeInBytes
 
         override val totalFrames: Int
-            get() = run {
-                if (start == null && end == null) {
+            get() {
+                return if (start == null && end == null) {
                     this@ChapterRepresentation.totalFrames
                 } else {
                     end!! - start!!
