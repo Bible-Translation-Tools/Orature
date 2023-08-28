@@ -17,7 +17,8 @@ class ControlsDemoView : View() {
         val node = RollingSourceText().apply {
             sourceTitleProperty.set("English ULB")
             sourceTextProperty.set(text)
-            highlightedChunk.set(0)
+            highlightedChunk.set(1)
+            licenseTextProperty.set("Example of license text")
         }
         add(node)
     }
