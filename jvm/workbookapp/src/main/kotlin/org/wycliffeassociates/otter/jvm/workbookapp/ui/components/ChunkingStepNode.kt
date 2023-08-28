@@ -31,6 +31,7 @@ class ChunkingStepNode(
 ) : VBox() {
     val chunkListProperty = SimpleObjectProperty<List<ChunkViewData>>(null)
     val isSelectedProperty = booleanBinding(selectedStepProperty) {
+        togglePseudoClass("selected",  step == selectedStepProperty.value)
         step == selectedStepProperty.value
     }
     private val contentSectionProperty = SimpleObjectProperty<Node>().apply {

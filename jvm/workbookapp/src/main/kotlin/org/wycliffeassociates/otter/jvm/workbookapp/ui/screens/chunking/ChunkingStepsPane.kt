@@ -18,7 +18,6 @@ import tornadofx.*
 
 class ChunkingStepsPane : VBox() {
     val chunkItems = observableListOf<ChunkViewData>()
-    val selectedChunk: IntegerProperty = SimpleIntegerProperty(2)
     val selectedStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.BLIND_DRAFT)
     val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.PEER_EDIT)
     private val isCollapsedProperty = SimpleBooleanProperty(false)

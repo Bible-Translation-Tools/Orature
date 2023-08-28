@@ -22,6 +22,7 @@ import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChunkingTranslationPage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.WorkbookPage
 import tornadofx.*
 import java.time.LocalDateTime
@@ -135,7 +136,7 @@ class HomePageViewModel2 : ViewModel() {
 
         existingProject?.let { workbook ->
             openWorkbook(workbook)
-            navigator.dock<WorkbookPage>()
+            navigator.dock<ChunkingTranslationPage>()
         }
     }
 

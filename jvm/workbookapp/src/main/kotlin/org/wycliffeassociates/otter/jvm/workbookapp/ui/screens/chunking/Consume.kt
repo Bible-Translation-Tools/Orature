@@ -50,6 +50,10 @@ class Consume : Fragment() {
         tryImportStylesheet(resources.get("/css/scrolling-waveform.css"))
         tryImportStylesheet(resources.get("/css/consume-page.css"))
 
+        vm.audioDataStore.sourceAudioProperty.set(
+            vm.workbookDataStore.workbook.let { it.sourceAudioAccessor.getChapter(1, it.target) }
+        )
+
         vm.subscribeOnWaveformImages = ::subscribeOnWaveformImages
         vm.onDockConsume()
     }
