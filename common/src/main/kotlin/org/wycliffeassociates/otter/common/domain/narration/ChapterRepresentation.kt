@@ -142,7 +142,7 @@ internal class ChapterRepresentation(
 
     private fun initializeWorkingAudioFile() {
         val projectChapterDir = workbook.projectFilesAccessor.getChapterAudioDir(workbook, chapter)
-        File(projectChapterDir, CHAPTER_NARRATION_FILE_NAME).also {
+        File("C:\\Users\\hilld\\beeMovieWav.wav").also {
             if (!it.exists()) {
                 it.createNewFile()
             }
@@ -267,17 +267,24 @@ internal class ChapterRepresentation(
         release()
     }
 
-    fun getRangeOfMarker(verse: VerseMarker): IntRange? {
-        val verses = activeVerses.map { it }
-        if (verses.isEmpty()) return null
 
-        verses
-            .find { it.marker.label == verse.label }
-            ?.let { verse ->
-                val start = verse.startScratchFrame
-                val end = verse.endScratchFrame
-                return start..end
-            }
-        return null
+    var curStart = 0
+    fun getRangeOfMarker(verse: VerseMarker): IntRange? {
+
+        // TODO: update this with actual logic to get list of ranges
+        val range = curStart .. verse.location
+        curStart = verse.location
+        return range
+//        val verses = activeVerses.map { it }
+//        if (verses.isEmpty()) return null
+//
+//        verses
+//            .find { it.marker.label == verse.label }
+//            ?.let { verse ->
+//                val start = verse.startScratchFrame
+//                val end = verse.endScratchFrame
+//                return start..end
+//            }
+//        return null
     }
 }

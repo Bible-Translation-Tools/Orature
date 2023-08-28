@@ -177,7 +177,7 @@ class Narration @AssistedInject constructor(
 
     fun loadSectionIntoPlayer(verse: VerseMarker) {
         logger.info("Loading verse ${verse.label} into player")
-        val range: IntRange? = chapterRepresentation.getRangeOfMarker(verse)
+        val range: IntRange? = chapterRepresentation.getRangeOfMarker(verse) // TODO: actually update this with a correct mapping
         logger.info("Playback range is ${range?.start}-${range?.last}")
         range?.let {
             player.loadSection(chapterRepresentation.scratchAudio.file, range.first, range.last)

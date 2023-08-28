@@ -52,19 +52,19 @@ class AudioWorkspaceView : View(), Drawable {
 
             add(VerseMarkersLayer().apply {
                 isRecordingProperty.bind(viewModel.isRecordingProperty)
-                markers.bind(viewModel.mockRecordedVerseMarkers) { it }
+                markers.bind(viewModel.recordedVerses) { it }
                 rightOffset.bind(viewModel.pxFromIncomingAudio)
                 verseMarkersControls.bind(viewModel.verseMarkersControls) { it }
 
                 layerWidthProperty.bind(this.widthProperty())
 
                 // Updates the VerseMarkerControl list when the mockRecorderverseMarkers changes
-                viewModel.mockRecordedVerseMarkers.onChange {
+                viewModel.recordedVerses.onChange {
                     viewModel.verseMarkersControls.clear()
 
-                    for(i in 0 until viewModel.mockRecordedVerseMarkers.size) {
+                    for(i in 0 until viewModel.recordedVerses.size) {
                         val newVerseMarkerControl = VerseMarkerControl()
-                        newVerseMarkerControl.verseProperty.set(viewModel.mockRecordedVerseMarkers[i])
+                        newVerseMarkerControl.verseProperty.set(viewModel.recordedVerses[i])
                         newVerseMarkerControl.verseIndexProperty.set(i)
                         newVerseMarkerControl.labelProperty.set((i+1).toString())
 
@@ -99,29 +99,31 @@ class AudioWorkspaceView : View(), Drawable {
 
     fun updateVerseMarkersInFrameRange(start: Int, end: Int) {
         Platform.runLater {
-            println("===== start frame: ${start}, end frame: ${end} =====")
+//            println("===== start frame: ${start}, end frame: ${end} =====")
             for (i in 0 until viewModel.verseMarkersControls.size) {
                 val currentVerseMarkerControl = viewModel.verseMarkersControls[i]
                 if (currentVerseMarkerControl.verseProperty.value.location in start..end) {
 
-                    println("showing ${currentVerseMarkerControl.verseProperty.value.label} at frame position: ${currentVerseMarkerControl.verseProperty.value.location }")
-                    currentVerseMarkerControl.visibleProperty().set(true)
+//                    println("showing ${currentVerseMarkerControl.verseProperty.value.label} at frame position: ${currentVerseMarkerControl.verseProperty.value.location }")
 
                     // TODO: update all markers position on the
 
+                    // TODO: update marker's visibility
+                    //currentVerseMarkerControl.visibleProperty().set(true)
+
                 } else {
-                    currentVerseMarkerControl.visibleProperty().set(false)
+//                    currentVerseMarkerControl.visibleProperty().set(false)
                 }
             }
         }
     }
 
     override fun draw(context: GraphicsContext, canvas: Canvas){
-        println("drawing waveform")
+//        println("drawing waveform")
         narrationWaveformLayer.waveform?.draw(context, canvas)
 
         // Updating verse markers X position here
-        println("Updating verse markers positions")
+//        println("Updating verse markers positions")
         updateVerseMarkersInFrameRange(rangeOfAudioToShowStart.value, rangeOfAudioToShowEnd.value)
 
     }
@@ -147,7 +149,7 @@ class AudioWorkspaceViewModel : ViewModel() {
     val isRecordingProperty = SimpleBooleanProperty()
     var recordedVerses = observableListOf<VerseMarker>()
 
-    var mockRecordedVerseMarkers = observableListOf<VerseMarker>()
+//    var mockRecordedVerseMarkers = observableListOf<VerseMarker>()
     var pxFromIncomingAudio = SimpleIntegerProperty(0)
     var audioFilePositionProperty = SimpleIntegerProperty(0)
     var waveformRenderer : ExistingAndIncomingAudioRenderer? = null
@@ -158,14 +160,15 @@ class AudioWorkspaceViewModel : ViewModel() {
 
 
         isRecordingProperty.bind(narrationViewModel.isRecordingProperty)
-        recordedVerses.bind(narrationViewModel.recordedVerses) { it }
+        recordedVerses.bind(narrationViewModel.mockRecordedVerseMarkers) { it }
 
-        mockRecordedVerseMarkers.bind(narrationViewModel.mockRecordedVerseMarkers) { it }
+//        mockRecordedVerseMarkers.bind(narrationViewModel.mockRecordedVerseMarkers) { it }
 
         narrationViewModel.existingAndIncomingAudioRendererIsInitialized.addListener {_, old, new ->
             if(new == true && isWaveformRendererInitialized.value == false) {
                 waveformRenderer = narrationViewModel.existingAndIncomingAudioRenderer
                 pxFromIncomingAudio.bind(waveformRenderer!!.bytesFromIncomingProperty.div(2).div(229))
+                waveformRenderer?.fillExistingAudioHolder()
                 isWaveformRendererInitialized.set(true)
             }
 
