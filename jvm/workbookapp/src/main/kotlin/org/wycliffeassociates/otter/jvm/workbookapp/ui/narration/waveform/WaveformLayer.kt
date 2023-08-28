@@ -23,7 +23,6 @@ class WaveformLayer : HBox() {
     init {
         audioFilePositionProperty.addListener {_, old, new ->
             waveform?.renderer?.existingAudioReader?.seek(maxOf(audioFilePositionProperty.value, 0))
-            println("seeking to ${audioFilePositionProperty.value}")
             waveform?.renderer?.fillExistingAudioHolder()
         }
 
