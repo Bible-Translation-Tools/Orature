@@ -80,7 +80,11 @@ class DeleteProject @Inject constructor(
         return Completable
             .fromAction {
                 list.map { workbookRepository.get(it.sourceCollection, it.targetCollection) }
-                    .forEach { delete(it, true).blockingAwait() } // avoid concurrent accesses to the same file
+                    .forEach {
+                        if (it.projectFilesAccessor.isInitialized()) {
+                            delete(it, true).blockingAwait() // avoid concurrent accesses to the same file
+                        }
+                    }
             }
             .andThen(workbookDescriptorRepo.delete(list))
     }
