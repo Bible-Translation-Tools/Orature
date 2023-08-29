@@ -26,26 +26,17 @@ class AudioWorkspaceView : View() {
                                     action {
                                         fire(PlayVerseEvent(verse))
                                     }
-                                    disableWhen {
-                                        viewModel.isRecordingProperty
-                                    }
                                 }
                                 item("") {
                                     text = "Record Again"
                                     action {
                                         fire(RecordAgainEvent(index))
                                     }
-                                    disableWhen {
-                                        viewModel.isRecordingProperty
-                                    }
                                 }
                                 item("") {
                                     text = "Open in..."
                                     action {
                                         fire(OpenInAudioPluginEvent(index))
-                                    }
-                                    disableWhen {
-                                        viewModel.isRecordingProperty
                                     }
                                 }
                             }

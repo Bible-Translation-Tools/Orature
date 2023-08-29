@@ -6,15 +6,15 @@ import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.image.PixelFormat
 import javafx.scene.image.WritableImage
+import org.wycliffeassociates.otter.common.domain.narration.NarrationAudioRenderer
 import org.wycliffeassociates.otter.jvm.controls.waveform.Drawable
 import tornadofx.c
-import java.lang.Math.abs
 import java.nio.ByteBuffer
 
 
 // Set up the canvas for the Waveform and Volume bar
 class Waveform(
-    val renderer : ExistingAndIncomingAudioRenderer
+    val renderer : NarrationAudioRenderer
 ) : Drawable {
 
     val heightProperty = SimpleDoubleProperty(1.0)
@@ -30,7 +30,7 @@ class Waveform(
     private val imageData = ByteArray(DEFAULT_SCREEN_WIDTH * DEFAULT_SCREEN_HEIGHT * 3)
 
     override fun draw(context: GraphicsContext, canvas: Canvas) {
-        val buffer = renderer.floatBuffer.array
+        val buffer = renderer.getFrameData()
 
         fillImageDataWithDefaultColor()
         addLinesToImageData(buffer)
