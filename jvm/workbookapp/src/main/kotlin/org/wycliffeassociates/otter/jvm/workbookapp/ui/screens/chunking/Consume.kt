@@ -24,6 +24,8 @@ import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
 import java.text.MessageFormat
 import javafx.beans.binding.Bindings
+import javafx.scene.layout.Priority
+import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
@@ -31,7 +33,6 @@ import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.ScrollingWaveform
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingWizardPage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 
@@ -43,6 +44,8 @@ class Consume : Fragment() {
 
     val vm: ChunkingViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
+
+    private lateinit var waveformSection: ScrollingWaveform
 
     override fun onDock() {
         super.onDock()
@@ -67,50 +70,60 @@ class Consume : Fragment() {
         vm.waveform
             .observeOnFx()
             .subscribe {
-                (root.center as ScrollingWaveform).addWaveformImage(it)
+                waveformSection.addWaveformImage(it)
             }
             .addTo(vm.compositeDisposable)
     }
 
-    override val root = borderpane {
-        center = ScrollingWaveform().apply {
-            addClass("consume__scrolling-waveform")
+    override val root = vbox {
+        borderpane {
+            vgrow = Priority.ALWAYS
 
-            themeProperty.bind(settingsViewModel.appColorMode)
-            positionProperty.bind(vm.positionProperty)
+            center = ScrollingWaveform().apply {
+                waveformSection = this
+                addClass("consume__scrolling-waveform")
 
-            setOnWaveformClicked { vm.pause() }
-            setOnWaveformDragReleased { deltaPos ->
-                val deltaFrames = pixelsToFrames(deltaPos)
-                val curFrames = vm.getLocationInFrames()
-                val duration = vm.getDurationInFrames()
-                val final = Utils.clamp(0, curFrames - deltaFrames, duration)
-                vm.seek(final)
+                clip = Rectangle().apply {
+                    widthProperty().bind(this@vbox.widthProperty())
+                    heightProperty().bind(this@vbox.heightProperty())
+                }
+
+                themeProperty.bind(settingsViewModel.appColorMode)
+                positionProperty.bind(vm.positionProperty)
+
+                setOnWaveformClicked { vm.pause() }
+                setOnWaveformDragReleased { deltaPos ->
+                    val deltaFrames = pixelsToFrames(deltaPos)
+                    val curFrames = vm.getLocationInFrames()
+                    val duration = vm.getDurationInFrames()
+                    val final = Utils.clamp(0, curFrames - deltaFrames, duration)
+                    vm.seek(final)
+                }
+
+                setOnToggleMedia(vm::mediaToggle)
+                setOnRewind(vm::rewind)
+                setOnFastForward(vm::fastForward)
+
+                vm.consumeImageCleanup = ::freeImages
             }
-
-            setOnToggleMedia(vm::mediaToggle)
-            setOnRewind(vm::rewind)
-            setOnFastForward(vm::fastForward)
-
-            vm.consumeImageCleanup = ::freeImages
-        }
-        bottom = hbox {
-            styleClass.addAll("consume__bottom")
-            button {
-                graphicProperty().bind(
-                    Bindings.createObjectBinding(
-                        {
-                            when (vm.isPlayingProperty.value) {
-                                true -> pauseIcon
-                                false -> playIcon
-                            }
-                        },
-                        vm.isPlayingProperty
+            bottom = hbox {
+                styleClass.addAll("consume__bottom")
+                button {
+                    graphicProperty().bind(
+                        Bindings.createObjectBinding(
+                            {
+                                when (vm.isPlayingProperty.value) {
+                                    true -> pauseIcon
+                                    false -> playIcon
+                                }
+                            },
+                            vm.isPlayingProperty
+                        )
                     )
-                )
-                styleClass.addAll("btn", "btn--cta", "consume__btn")
-                action {
-                    vm.mediaToggle()
+                    styleClass.addAll("btn", "btn--cta", "consume__btn")
+                    action {
+                        vm.mediaToggle()
+                    }
                 }
             }
         }

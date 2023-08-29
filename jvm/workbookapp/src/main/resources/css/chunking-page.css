@@ -29,11 +29,12 @@
     -fx-text-fill: -wa-primary;
 }
 
-.chunking-step__header-section {
+.chunking-step__header-section,
+.source-text-drawer__header-section {
     -fx-alignment: center;
     -fx-padding: 16;
     -fx-border-width: 1;
-        -fx-border-color: transparent transparent -wa-border-light transparent;
+    -fx-border-color: transparent transparent -wa-border-light transparent;
 }
 
 .chunking-step__header-section .chunking-step__title {
@@ -47,4 +48,13 @@
 
 .chunking-step__content-section {
     -fx-alignment: center;
+}
+
+.source-text-drawer {
+    -fx-pref-width: 360;
+}
+
+.drawer-graphic-container {
+    -fx-alignment: center;
+    -fx-spacing: 5;
 }

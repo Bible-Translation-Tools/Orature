@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.controls
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.event.EventTarget
 import javafx.geometry.NodeOrientation
 import javafx.scene.Node
 import javafx.scene.control.Label
@@ -21,10 +22,10 @@ import tornadofx.*
 class RollingSourceText : VBox() {
 
     val sourceTitleProperty = SimpleStringProperty()
+    val sourceTextProperty = SimpleStringProperty()
     val licenseTextProperty = SimpleStringProperty()
     val orientationProperty = SimpleObjectProperty<NodeOrientation>()
     val highlightedChunk = SimpleIntegerProperty(-1)
-    val sourceTextProperty = SimpleStringProperty()
     val zoomRateProperty = SimpleIntegerProperty(100)
 
     private lateinit var sourceTextChunksContainer: ListView<Node>
@@ -148,3 +149,5 @@ class RollingSourceText : VBox() {
         }
     }
 }
+
+fun EventTarget.rollingSourceText(op: RollingSourceText.() -> Unit = {}) = RollingSourceText().attachTo(this, op)

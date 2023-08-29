@@ -4,21 +4,13 @@ import javafx.beans.property.IntegerProperty
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
-import javafx.scene.Parent
-import javafx.scene.layout.Priority
-import javafx.scene.layout.VBox
-import org.kordamp.ikonli.javafx.FontIcon
-import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.chunkingStep
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.grid.ChunkGrid
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.BlindDraftFragment
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChunkingFragment
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.ChunkingStepsPane
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.ChunkingStepsDrawer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.ConsumeFragment
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.chunkingStepsPane
 import tornadofx.*
 
 class ChunkingDemoView : View() {
@@ -42,7 +34,7 @@ class ChunkingDemoView : View() {
 
     override val root = vbox {
         borderpane {
-            left = ChunkingStepsPane().apply {
+            left = ChunkingStepsDrawer().apply {
                 chunkItems.setAll(list)
                 this.reachableStepProperty.bind(this@ChunkingDemoView.reachableStepProperty)
                 this@ChunkingDemoView.selectedStepProperty.bind(this.selectedStepProperty)
