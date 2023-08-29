@@ -2,6 +2,8 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
+import io.reactivex.Single
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.disposables.Disposable
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -10,6 +12,7 @@ import javafx.collections.transformation.FilteredList
 import javafx.collections.transformation.SortedList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
+import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
@@ -24,6 +27,7 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.WorkbookPage
+import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
 import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit
@@ -56,7 +60,6 @@ class HomePageViewModel2 : ViewModel() {
 
     val projectGroups = observableListOf<ProjectGroupCardModel>()
     val bookList = observableListOf<WorkbookDescriptor>()
-    val contributorList = observableListOf<Contributor>()
     private val filteredBooks = FilteredList<WorkbookDescriptor>(bookList)
     private val disposableListeners = mutableListOf<ListenerDisposer>()
 
@@ -190,40 +193,63 @@ class HomePageViewModel2 : ViewModel() {
 
     fun openInFilesManager(path: String) = directoryProvider.openInFileManager(path)
 
-    fun loadContributors(books: List<WorkbookDescriptor>): List<Contributor> {
-        val contributors = mutableSetOf<Contributor>()
-        books.forEach {
-            val workbook = workbookRepo.get(it.sourceCollection, it.targetCollection)
-            if (workbook.projectFilesAccessor.isInitialized()) {
-                contributors.addAll(workbook.projectFilesAccessor.getContributorInfo())
+    fun loadContributors(workbookDescriptor: WorkbookDescriptor): Single<List<Contributor>> {
+        return Single
+            .fromCallable {
+                loadContributorsFromDerivedMetadata(
+                    sourceMetadata = workbookDescriptor.sourceCollection.resourceContainer!!,
+                    targetMetadata = workbookDescriptor.targetCollection.resourceContainer!!
+                )
             }
-        }
-        return if (contributors.isEmpty()) {
-            contributorList
-        }
-        else {
-            contributorList.setAll(contributors)
-            contributors.toList()
+            .doOnError { logger.error("Error while loading contributor info.", it) }
+            .subscribeOn(Schedulers.io())
+            .observeOnFx()
+    }
+
+    private fun loadContributorsFromDerivedMetadata(
+        sourceMetadata: ResourceMetadata,
+        targetMetadata: ResourceMetadata
+    ): List<Contributor> {
+        val der = directoryProvider.getDerivedContainerDirectory(targetMetadata, sourceMetadata)
+        return ResourceContainer.load(der).use { rc ->
+            rc.manifest.dublinCore.contributor.map { Contributor(it) }
         }
     }
 
-    fun saveContributors(contributors: List<Contributor>, books: List<WorkbookDescriptor>) {
-        contributorList.setAll(contributors)
-        books.forEach {
-            val workbook = workbookRepo.get(it.sourceCollection, it.targetCollection)
-            if (workbook.projectFilesAccessor.isInitialized()) {
-                workbook.projectFilesAccessor.setContributorInfo(contributors)
+    fun saveContributors(contributors: List<Contributor>, workbookDescriptor: WorkbookDescriptor) {
+        Completable
+            .fromAction {
+                val der = directoryProvider.getDerivedContainerDirectory(
+                    workbookDescriptor.targetCollection.resourceContainer!!,
+                    workbookDescriptor.sourceCollection.resourceContainer!!
+                )
+                ResourceContainer.load(der).use { rc ->
+                    rc.manifest.dublinCore.contributor = contributors.map { it.name }.toMutableList()
+                    rc.writeManifest()
+                }
+                bookList.forEach {
+                    val workbook = workbookRepo.get(it.sourceCollection, it.targetCollection)
+                    if (workbook.projectFilesAccessor.isInitialized()) {
+                        workbook.projectFilesAccessor.setContributorInfo(contributors)
+                    }
+                }
             }
-        }
+            .doOnError { logger.error("Error while saving contributor info.", it) }
+            .subscribeOn(Schedulers.io())
+            .observeOnFx()
+            .subscribe()
     }
 
     fun mergeContributorFromImport(workbookDescriptor: WorkbookDescriptor) {
         val workbook = workbookRepo.get(workbookDescriptor.sourceCollection, workbookDescriptor.targetCollection)
         if (workbook.projectFilesAccessor.isInitialized()) {
-            val set = contributorList.toMutableSet()
+            val set = loadContributorsFromDerivedMetadata(
+                sourceMetadata = workbook.source.resourceMetadata,
+                targetMetadata = workbook.target.resourceMetadata
+            ).toMutableSet()
             val contributors = workbook.projectFilesAccessor.getContributorInfo()
             set.addAll(contributors)
-            saveContributors(set.toList(), bookList)
+            saveContributors(set.toList(), workbookDescriptor)
         }
     }
 
@@ -275,11 +301,16 @@ class HomePageViewModel2 : ViewModel() {
             .linkedResources
             .firstOrNull { it.identifier == workbook.source.resourceMetadata.identifier }
 
+        val contributors = loadContributorsFromDerivedMetadata(
+            sourceMetadata = workbook.source.resourceMetadata,
+            targetMetadata = workbook.target.resourceMetadata
+        )
+
         workbook.projectFilesAccessor.initializeResourceContainerInDir(false)
         workbook.projectFilesAccessor.copySourceFiles(linkedResource)
         workbook.projectFilesAccessor.createSelectedTakesFile()
         workbook.projectFilesAccessor.createChunksFile()
-        workbook.projectFilesAccessor.setContributorInfo(contributorList)
+        workbook.projectFilesAccessor.setContributorInfo(contributors)
         workbook.projectFilesAccessor.setProjectMode(workbookDS.currentModeProperty.value)
     }
 

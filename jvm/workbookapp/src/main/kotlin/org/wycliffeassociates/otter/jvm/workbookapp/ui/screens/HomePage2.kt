@@ -213,10 +213,14 @@ class HomePage2 : View() {
             val dialog = find<ContributorDialog>().apply {
                 themeProperty.set(settingsViewModel.appColorMode.value)
                 orientationProperty.set(settingsViewModel.orientationProperty.value)
-                contributors.setAll(viewModel.loadContributors(books))
+                viewModel.loadContributors(books.first())
+                    .subscribe { list ->
+                        contributors.setAll(list)
+                    }
+
                 saveContributorCallback.set(
                     EventHandler {
-                        viewModel.saveContributors(contributors, books)
+                        viewModel.saveContributors(contributors, books.first())
                     }
                 )
             }
