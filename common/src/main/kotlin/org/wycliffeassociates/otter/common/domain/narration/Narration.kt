@@ -28,12 +28,15 @@ class Narration @AssistedInject constructor(
 
     private val history = NarrationHistory()
     private var chapterRepresentation = ChapterRepresentation(workbook, chapter)
+    private val chapterReaderConnection = chapterRepresentation.getAudioFileReader() as ChapterRepresentation.ChapterRepresentationConnection
+
+    private var audioLoaded = false
 
     val workingAudio: AudioFile
         get() = chapterRepresentation.scratchAudio
 
     val audioReader: AudioFileReader
-        get() = chapterRepresentation
+        get() = chapterRepresentation.getAudioFileReader()
 
     val activeVerses: List<VerseMarker>
         get() = run {
@@ -65,10 +68,6 @@ class Narration @AssistedInject constructor(
         return VerseMarker(firstVerse.start, firstVerse.end, 0)
     }
 
-    fun getPcmBuffer(bytes: ByteArray): Int {
-        return chapterRepresentation.getPcmBuffer(bytes)
-    }
-
     fun loadFromSelectedChapterFile() {
         updateWorkingFilesFromChapterFile(true)
     }
@@ -89,7 +88,7 @@ class Narration @AssistedInject constructor(
     }
 
     fun closeChapterRepresentation() {
-        chapterRepresentation.close()
+        chapterRepresentation.closeConnections()
     }
 
     fun undo() {
@@ -122,8 +121,8 @@ class Narration @AssistedInject constructor(
         writer?.start()
     }
 
-    fun onVerseMarker(verseIndex: Int, markerPosition: Int) {
-        val action = VerseMarkerAction(verseIndex, markerPosition)
+    fun onVerseMarker(verseIndex: Int, delta: Int) {
+        val action = VerseMarkerAction(verseIndex, delta)
         execute(action)
     }
 
@@ -175,12 +174,38 @@ class Narration @AssistedInject constructor(
     }
 
     fun loadSectionIntoPlayer(verse: VerseMarker) {
+        if (!audioLoaded) {
+            player.load(chapterReaderConnection)
+            audioLoaded = true
+        }
+
         logger.info("Loading verse ${verse.label} into player")
         val range: IntRange? = chapterRepresentation.getRangeOfMarker(verse)
         logger.info("Playback range is ${range?.start}-${range?.last}")
         range?.let {
-            player.loadSection(chapterRepresentation.scratchAudio.file, range.first, range.last)
+            val wasPlaying = player.isPlaying()
+            player.pause()
+            chapterReaderConnection.start = range.first
+            chapterReaderConnection.end = range.last
+            player.seek(range.first)
+            chapterReaderConnection.seek(range.first)
+            if (wasPlaying) player.play()
         }
+    }
+
+    fun loadChapterIntoPlayer() {
+        if (!audioLoaded) {
+            player.load(chapterReaderConnection)
+            audioLoaded = true
+        }
+
+        val wasPlaying = player.isPlaying()
+        player.pause()
+        chapterReaderConnection.start = null
+        chapterReaderConnection.end = null
+        player.seek(0)
+        chapterReaderConnection.seek(0)
+        if (wasPlaying) player.play()
     }
 
     private fun initializeWavWriter() {

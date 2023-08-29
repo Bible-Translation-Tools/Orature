@@ -239,7 +239,7 @@ fun readChunksFile(projectDir: File): Map<Int, List<Content>> {
     val factory = JsonFactory()
     factory.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET)
     val mapper = ObjectMapper(factory)
-    mapper.registerModule(KotlinModule())
+    mapper.registerKotlinModule()
     mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
     val chunks = mutableMapOf<Int, List<Content>>()

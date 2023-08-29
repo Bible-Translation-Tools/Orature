@@ -26,9 +26,11 @@ import javax.sound.sampled.SourceDataLine
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
+import org.wycliffeassociates.otter.common.device.AudioFileReaderProvider
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFileReaderProvider
 
 class AudioBufferPlayer(
     private val player: SourceDataLine?,
@@ -72,6 +74,36 @@ class AudioBufferPlayer(
         )
     }
 
+    override fun load(reader: AudioFileReader) {
+        this.reader?.let { close() }
+        this.reader = reader.let{ _reader ->
+            begin = 0
+            end = _reader.totalFrames
+            bytes = ByteArray(processor.inputBufferSize * 2)
+            listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
+            _reader.open()
+            _reader
+        }
+        if (player == null) {
+            errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, LineUnavailableException()))
+        }
+    }
+
+    override fun load(readerProvider: AudioFileReaderProvider) {
+        reader?.let { close() }
+        reader = readerProvider.getAudioFileReader().let { _reader ->
+            begin = 0
+            end = _reader.totalFrames
+            bytes = ByteArray(processor.inputBufferSize * 2)
+            listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
+            _reader.open()
+            _reader
+        }
+        if (player == null) {
+            errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, LineUnavailableException()))
+        }
+    }
+
     override fun load(file: File) {
         reader?.let { close() }
         reader = OratureAudioFile(file).reader().let { _reader ->
@@ -87,7 +119,40 @@ class AudioBufferPlayer(
         }
     }
 
+    override fun loadSection(reader: AudioFileReader, frameStart: Int, frameEnd: Int) {
+        this.reader?.let { close() }
+        begin = frameStart
+        end = frameEnd
+        this.reader = reader.let { _reader ->
+            bytes = ByteArray(processor.inputBufferSize * 2)
+            listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
+            _reader.open()
+            _reader
+        }
+        if (player == null) {
+            errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, LineUnavailableException()))
+        }
+    }
+
+    override fun loadSection(readerProvider: AudioFileReaderProvider, frameStart: Int, frameEnd: Int) {
+        reader?.let { close() }
+        begin = frameStart
+        end = frameEnd
+        reader = readerProvider.getAudioFileReader(frameStart, frameEnd).let { _reader ->
+            bytes = ByteArray(processor.inputBufferSize * 2)
+            listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
+            _reader.open()
+            _reader
+        }
+        if (player == null) {
+            errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, LineUnavailableException()))
+        }
+    }
+
     override fun loadSection(file: File, frameStart: Int, frameEnd: Int) {
+        val readerProvider = OratureAudioFileReaderProvider(file)
+        loadSection(readerProvider = readerProvider, frameStart, frameEnd)
+
         reader?.let { close() }
         begin = frameStart
         end = frameEnd
@@ -119,12 +184,17 @@ class AudioBufferPlayer(
                             player.start()
                             while (_reader.hasRemaining() && !pause.get() && !playbackThread.isInterrupted) {
                                 synchronized(monitor) {
-                                    if (_reader.framePosition > bytes.size / 2) {
-                                        _reader.seek(_reader.framePosition - processor.overlap)
+                                    if (_reader.supportsTimeShifting()) {
+                                        if (_reader.framePosition > bytes.size / 2) {
+                                            _reader.seek(_reader.framePosition - processor.overlap)
+                                        }
+                                        _reader.getPcmBuffer(bytes)
+                                        val output = processor.process(bytes)
+                                        player.write(output, 0, output.size)
+                                    } else {
+                                        _reader.getPcmBuffer(bytes)
+                                        player.write(bytes, 0, bytes.size)
                                     }
-                                    _reader.getPcmBuffer(bytes)
-                                    val output = processor.process(bytes)
-                                    player.write(output, 0, output.size)
                                 }
                             }
                             player.drain()

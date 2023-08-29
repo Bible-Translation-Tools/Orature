@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
@@ -51,7 +52,7 @@ class VersificationRepository @Inject constructor(
                 val vrsFileName = versificationDao.fetchVersificationFile(slug)
                 val vrsFile = File(directoryProvider.versificationDirectory, vrsFileName)
                 val mapper = ObjectMapper(JsonFactory())
-                mapper.registerModule(KotlinModule())
+                mapper.registerKotlinModule()
                 mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
                 val versification = mapper.readValue(vrsFile, ParatextVersification::class.java)
                 if (versification is Versification) Maybe.just(versification as Versification) else Maybe.empty()

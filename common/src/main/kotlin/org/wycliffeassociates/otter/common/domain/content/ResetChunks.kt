@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.wycliffeassociates.otter.common.data.Chunkification
 import java.io.File
 import javax.inject.Inject
@@ -47,7 +48,7 @@ class ResetChunks @Inject constructor() {
             return
         }
 
-        val mapper = ObjectMapper(JsonFactory()).registerModule(KotlinModule())
+        val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
         val chunks: Chunkification = mapper.readValue(chunkFile)
         chunks.remove(chapterNumber)
 

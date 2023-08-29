@@ -23,6 +23,9 @@ dependencies {
     // dependencies coexist w/o warnings. This can be removed once the krc lib is updated
     // to Jackson 2.9.8+.
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVer"
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVer"
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVer"
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-csv:$jacksonVer"
     implementation project(':common:audio')
 
     // Retrofit

@@ -6,6 +6,8 @@ import tornadofx.FXEvent
 
 class RecordAgainEvent(val index: Int) : FXEvent()
 class PlayVerseEvent(val verse: VerseMarker) : FXEvent()
+class PlayChapterEvent() : FXEvent()
+class PauseEvent(): FXEvent()
 class OpenInAudioPluginEvent(val index: Int) : FXEvent()
 class ChapterReturnFromPluginEvent : FXEvent()
 class OpenChapterEvent(val chapter: Chapter) : FXEvent()

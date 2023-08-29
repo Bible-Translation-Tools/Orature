@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
-import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.wycliffeassociates.resourcecontainer.Config
 import java.io.OutputStream
 import java.io.Reader
@@ -33,7 +33,7 @@ class OtterResourceContainerConfig : Config {
 
     override fun read(reader: Reader): Config {
         val mapper = ObjectMapper(YAMLFactory())
-        mapper.registerModule(KotlinModule())
+        mapper.registerKotlinModule()
         config = reader.use {
             mapper.readValue(it, OtterConfig::class.java)
         }
@@ -45,7 +45,7 @@ class OtterResourceContainerConfig : Config {
 
     override fun write(writer: OutputStream) {
         val mapper = ObjectMapper(YAMLFactory())
-        mapper.registerModule(KotlinModule())
+        mapper.registerKotlinModule()
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
         mapper.writeValue(writer, config)
     }
