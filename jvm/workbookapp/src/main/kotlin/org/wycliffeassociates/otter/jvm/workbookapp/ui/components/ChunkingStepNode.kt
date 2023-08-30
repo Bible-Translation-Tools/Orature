@@ -65,7 +65,7 @@ class ChunkingStepNode(
                 managedWhen(visibleProperty())
 
                 label(messages[step.titleKey]) {
-                    addClass("chunking-step__title", "normal-text")
+                    addClass("chunking-step__title", "h4", "h4--80")
                     graphicProperty().bind(createGraphicBinding(step))
                 }
                 region { hgrow = Priority.ALWAYS }

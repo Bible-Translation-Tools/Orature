@@ -102,9 +102,9 @@ class RollingSourceText : VBox() {
 
     private fun buildSourceTitle(): HBox {
         return HBox().apply {
-                label {
-                    addClass("h4")
-                    textProperty().bind(sourceTitleProperty)
+            label {
+                addClass("h4", "h4--80")
+                textProperty().bind(sourceTitleProperty)
             }
         }
     }

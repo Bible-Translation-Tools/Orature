@@ -1,5 +1,9 @@
-.chunking-step {
+.chunking-step-drawer {
+    -fx-pref-width: 360;
+}
 
+.chunking-step-drawer:collapsed {
+    -fx-max-width: 80;
 }
 
 .chunking-step:focused .chunking-step__header-section {

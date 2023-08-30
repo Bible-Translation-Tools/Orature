@@ -73,6 +73,10 @@ class ChunkingTranslationPage : View() {
         super.onDock()
         sourceTextProperty.set("1. Source text here.\n2. More source text here...")
     }
+
+    override fun onUndock() {
+        super.onUndock()
+    }
 }
 
 class ChunkingFragment : Fragment() {

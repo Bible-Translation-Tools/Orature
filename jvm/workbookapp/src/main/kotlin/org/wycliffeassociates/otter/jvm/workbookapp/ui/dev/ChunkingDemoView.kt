@@ -4,21 +4,15 @@ import javafx.beans.property.IntegerProperty
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.scene.control.Label
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.SourceTextDrawer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.BlindDraftFragment
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChunkingFragment
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.ChunkingStepsDrawer
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.ConsumeFragment
 import tornadofx.*
 
 class ChunkingDemoView : View() {
-    private val fragments = mapOf(
-        ChunkingStep.CONSUME_AND_VERBALIZE to ConsumeFragment(),
-        ChunkingStep.CHUNKING to ChunkingFragment(),
-        ChunkingStep.BLIND_DRAFT to BlindDraftFragment()
-    )
 
     private val selectedChunk: IntegerProperty = SimpleIntegerProperty(2)
     private val selectedStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.BLIND_DRAFT)
@@ -39,11 +33,11 @@ class ChunkingDemoView : View() {
                 this.reachableStepProperty.bind(this@ChunkingDemoView.reachableStepProperty)
                 this@ChunkingDemoView.selectedStepProperty.bind(this.selectedStepProperty)
             }
-            centerProperty().bind(selectedStepProperty.objectBinding {
-                it?.let {
-                    fragments[it]?.root
-                }
-            })
+            center= Label("Fragment here").addClass("h4")
+
+            right = SourceTextDrawer().apply {
+                textProperty.set("1. Source text verse 1 here\n2. Verse two text here")
+            }
         }
 
     }
@@ -51,5 +45,6 @@ class ChunkingDemoView : View() {
     init {
         tryImportStylesheet("/css/chunk-item.css")
         tryImportStylesheet("/css/chunking-page.css")
+        tryImportStylesheet("/css/source-content.css")
     }
 }

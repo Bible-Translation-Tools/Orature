@@ -27,7 +27,7 @@ class SourceTextDrawer : VBox() {
         hbox {
             addClass("source-text-drawer__header-section")
             label(messages["sourceText"]) {
-                addClass("h3")
+                addClass("h3", "h3--80")
                 visibleWhen { isCollapsedProperty.not() }
                 managedWhen(visibleProperty())
             }

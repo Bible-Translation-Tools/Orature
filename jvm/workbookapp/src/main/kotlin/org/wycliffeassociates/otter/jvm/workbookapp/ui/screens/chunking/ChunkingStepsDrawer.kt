@@ -20,10 +20,11 @@ class ChunkingStepsDrawer : VBox() {
     private val isCollapsedProperty = SimpleBooleanProperty(false)
 
     init {
+        addClass("chunking-step-drawer")
         hbox {
             addClass("chunking-step__header-section")
             label(messages["steps"]) {
-                addClass("h3")
+                addClass("h3", "h3--80")
                 visibleWhen { isCollapsedProperty.not() }
                 managedWhen(visibleProperty())
             }
@@ -43,11 +44,8 @@ class ChunkingStepsDrawer : VBox() {
                     })
                 }
                 action {
-                    this@ChunkingStepsDrawer.maxWidth = if (isCollapsedProperty.value) {
-                        320.0
-                    } else {
-                        80.0
-                    }
+                    val collapsed = isCollapsedProperty.value
+                    this@ChunkingStepsDrawer.togglePseudoClass("collapsed", !collapsed)
                     isCollapsedProperty.set(!isCollapsedProperty.value)
                 }
             }
