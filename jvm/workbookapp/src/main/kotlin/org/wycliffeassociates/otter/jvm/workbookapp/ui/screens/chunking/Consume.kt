@@ -39,9 +39,6 @@ import tornadofx.*
 class Consume : Fragment() {
     private val logger = LoggerFactory.getLogger(Consume::class.java)
 
-    val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
-    val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
-
     val vm: ChunkingViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
 
@@ -107,20 +104,22 @@ class Consume : Fragment() {
                 vm.consumeImageCleanup = ::freeImages
             }
             bottom = hbox {
-                styleClass.addAll("consume__bottom")
+                addClass("consume__bottom")
                 button {
-                    graphicProperty().bind(
-                        Bindings.createObjectBinding(
-                            {
-                                when (vm.isPlayingProperty.value) {
-                                    true -> pauseIcon
-                                    false -> playIcon
-                                }
-                            },
-                            vm.isPlayingProperty
-                        )
-                    )
-                    styleClass.addAll("btn", "btn--cta", "consume__btn")
+                    addClass("btn", "btn--primary", "consume__btn")
+                    val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
+                    val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
+                    textProperty().bind(vm.isPlayingProperty.stringBinding {
+                        togglePseudoClass("active", it == true)
+                        if (it == true) {
+                            graphic = pauseIcon
+                            messages["pause"]
+                        } else {
+                            graphic = playIcon
+                            messages["playSource"]
+                        }
+                    })
+
                     action {
                         vm.mediaToggle()
                     }

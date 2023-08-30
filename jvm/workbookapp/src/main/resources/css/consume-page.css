@@ -16,21 +16,20 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
- .consume__bottom {
-    -fx-pref-height: 88px;
-    -fx-alignment: center;
-    -fx-background-color: -wa-recorder-controls-background;
- }
-
-.consume__btn {
-    -fx-pref-height: 60px;
-    -fx-pref-width: 60px;
-    -fx-border-radius: 90px;
-    -fx-background-radius: 90px;
+.consume__bottom {
+    -fx-pref-height: 80px;
+    -fx-alignment: center-left;
+    -fx-padding: 16;
+    -fx-background-color: -wa-foreground;
 }
 
-.consume__btn .ikonli-font-icon {
-    -fx-icon-size: 28px;
+.consume__btn {
+    -fx-pref-width: 240;
+    -fx-graphic-text-gap: 8;
+}
+
+.consume__btn:active {
+    -fx-background-color: #001533;
 }
 
 .vm-waveform-frame {
