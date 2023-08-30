@@ -1,6 +1,8 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.github.thomasnield.rxkotlinfx.toObservable
+import com.sun.glass.ui.Screen
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
@@ -10,7 +12,10 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
+import javafx.scene.canvas.Canvas
+import javafx.scene.canvas.GraphicsContext
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
@@ -18,6 +23,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.narration.Narration
+import org.wycliffeassociates.otter.common.domain.narration.NarrationAudioScene
 import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
@@ -25,6 +31,7 @@ import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.NarrationWaveformRenderer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
@@ -44,6 +51,8 @@ class NarrationViewModel : ViewModel() {
     @Inject
     lateinit var narrationFactory: NarrationFactory
     private lateinit var narration: Narration
+
+    private lateinit var renderer: NarrationWaveformRenderer
 
     val recordStartProperty = SimpleBooleanProperty()
     var recordStart by recordStartProperty
@@ -117,6 +126,16 @@ class NarrationViewModel : ViewModel() {
         audioPlayer = narration.getPlayer()
         subscribeActiveVersesChanged()
         updateRecordingState()
+        renderer = NarrationWaveformRenderer(
+            NarrationAudioScene(
+                narration.audioReader,
+                narration.getRecorderAudioStream(),
+                isRecordingProperty.toObservable(),
+                Screen.getMainScreen().width,
+                10,
+                DEFAULT_SAMPLE_RATE
+            )
+        )
     }
 
     private fun updateRecordingState() {
@@ -391,5 +410,11 @@ class NarrationViewModel : ViewModel() {
             recordStart = recordedVerses.isEmpty()
             recordResume = recordedVerses.isNotEmpty()
         }.let(disposables::add)
+    }
+
+    fun drawWaveform(context: GraphicsContext, canvas: Canvas) {
+        if (::renderer.isInitialized) {
+            renderer.draw(context, canvas)
+        }
     }
 }

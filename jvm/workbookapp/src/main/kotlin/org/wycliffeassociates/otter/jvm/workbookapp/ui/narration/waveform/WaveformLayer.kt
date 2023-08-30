@@ -1,53 +1,67 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform
 
-import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleIntegerProperty
+import com.sun.glass.ui.Screen
+import javafx.event.EventTarget
+import javafx.scene.canvas.Canvas
+import javafx.scene.canvas.GraphicsContext
+import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
 import org.wycliffeassociates.otter.jvm.controls.narration.CanvasFragment
-import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
 import tornadofx.*
 
 
 // Thing that is the container for the Waveform and VolumeBar
-class WaveformLayer : HBox() {
+class WaveformLayer : BorderPane() {
 
-    var canvasFragment = CanvasFragment()
-    var volumeBarCanavsFragment = CanvasFragment()
-    var isNarrationWaveformLayerInitialized = SimpleBooleanProperty(false)
-    var waveform : Waveform? = null
-    var volumeBar : VolumeBar? = null
-    var audioFilePositionProperty = SimpleIntegerProperty(0)
-    val volumeBarWidth = 25
-    val maxScreenWidth = 1920.0
+    private var waveformCanvas = CanvasFragment()
+    private var volumeBarCanvas = CanvasFragment()
+    private val volumeBarWidth = 25
+    private val maxScreenWidth = Screen.getMainScreen().width.toDouble()
 
     init {
-        audioFilePositionProperty.addListener {_, old, new ->
-            waveform?.renderer?.existingAudioReader?.seek(maxOf(audioFilePositionProperty.value, 0))
-            waveform?.renderer?.fillExistingAudioHolder()
-        }
-
-        this.maxWidth = maxScreenWidth - volumeBarWidth
-        canvasFragment.prefWidthProperty().bind(this.widthProperty().minus(volumeBarWidth))
-        canvasFragment.maxWidth(maxScreenWidth)
-
-        canvasFragment.let {
+        waveformCanvas.let {
+            prefWidthProperty().bind(this.widthProperty().minus(volumeBarWidth))
+            maxWidth(maxScreenWidth - volumeBarWidth)
             style {
-                backgroundColor += c("#E5E8EB")
+                backgroundColor += c("#FF0000")
             }
         }
 
-        canvasFragment.isDrawingProperty.set(true)
-        add(canvasFragment)
+        center = waveformCanvas
 
         hbox {
             prefWidth = 25.0
-            volumeBarCanavsFragment.let {
+            volumeBarCanvas.let {
                 style {
                     backgroundColor += c("#001533")
                 }
             }
-            volumeBarCanavsFragment.prefWidthProperty().bind(this.widthProperty())
-            add(volumeBarCanavsFragment)
+            volumeBarCanvas.prefWidthProperty().bind(this.widthProperty())
+            add(volumeBarCanvas)
         }
     }
+
+    fun getWaveformCanvas(): Canvas {
+        return waveformCanvas.getCanvas()
+    }
+
+    fun getWaveformContext(): GraphicsContext {
+        return waveformCanvas.getContext()
+    }
+
+    fun getVolumeCanvas(): Canvas {
+        return volumeBarCanvas.getCanvas()
+    }
+
+    fun getVolumeBarContext(): GraphicsContext {
+        return volumeBarCanvas.getContext()
+    }
+}
+
+fun EventTarget.narration_waveform(
+    op: WaveformLayer.() -> Unit = {}
+): WaveformLayer {
+    val waveformLayer = WaveformLayer()
+    opcr(this, waveformLayer, op)
+    return waveformLayer
 }

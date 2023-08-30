@@ -1,33 +1,39 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform
 
+import com.sun.glass.ui.Screen
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.image.PixelFormat
 import javafx.scene.image.WritableImage
-import org.wycliffeassociates.otter.common.domain.narration.NarrationAudioRenderer
+import javafx.scene.paint.Paint
+import org.wycliffeassociates.otter.common.domain.narration.NarrationAudioScene
 import org.wycliffeassociates.otter.jvm.controls.waveform.Drawable
 import tornadofx.c
 import java.nio.ByteBuffer
 
 
 // Set up the canvas for the Waveform and Volume bar
-class Waveform(
-    val renderer : NarrationAudioRenderer
+class NarrationWaveformRenderer(
+    val renderer : NarrationAudioScene
 ) : Drawable {
 
     val heightProperty = SimpleDoubleProperty(1.0)
     val widthProperty = SimpleDoubleProperty()
     val isRecordingProperty = SimpleBooleanProperty(false)
-    val DEFAULT_SCREEN_WIDTH = 1920
-    val DEFAULT_SCREEN_HEIGHT = 1080
-    val backgroundColor = c("#E5E8EB")
+    val DEFAULT_SCREEN_WIDTH = Screen.getMainScreen().width
+    val DEFAULT_SCREEN_HEIGHT = Screen.getMainScreen().height
+    val backgroundColor = c("#0000FF")
     val waveformColor = c("#66768B")
     val writableImage = WritableImage(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT)
     val pixelWriter = writableImage.pixelWriter
     var pixelFormat: PixelFormat<ByteBuffer> = PixelFormat.getByteRgbInstance()
     private val imageData = ByteArray(DEFAULT_SCREEN_WIDTH * DEFAULT_SCREEN_HEIGHT * 3)
+
+    init {
+        fillImageDataWithDefaultColor()
+    }
 
     override fun draw(context: GraphicsContext, canvas: Canvas) {
         val buffer = renderer.getFrameData()
@@ -36,7 +42,13 @@ class Waveform(
         addLinesToImageData(buffer)
         drawImageDataToImage()
 
-        context.drawImage(writableImage, (0.0 + minOf(widthProperty.value - DEFAULT_SCREEN_WIDTH, 0.0)), 0.0, DEFAULT_SCREEN_WIDTH.toDouble(), DEFAULT_SCREEN_HEIGHT.toDouble())
+        context.drawImage(
+            writableImage,
+            0.0,
+            0.0,
+            DEFAULT_SCREEN_WIDTH.toDouble(),
+            DEFAULT_SCREEN_HEIGHT.toDouble()
+        )
     }
 
     private fun scaleAmplitude(sample: Double, height: Double): Double {
@@ -69,9 +81,16 @@ class Waveform(
     }
 
     fun drawImageDataToImage() {
-        pixelWriter.setPixels(0, 0, DEFAULT_SCREEN_WIDTH,
-            DEFAULT_SCREEN_HEIGHT, pixelFormat, imageData,
-            0, DEFAULT_SCREEN_WIDTH * 3)
+        pixelWriter.setPixels(
+            0,
+            0,
+            DEFAULT_SCREEN_WIDTH,
+            DEFAULT_SCREEN_HEIGHT,
+            pixelFormat,
+            imageData,
+            0,
+            DEFAULT_SCREEN_WIDTH * 3
+        )
     }
 
     fun drawImageToCanvas(context: GraphicsContext, canvas: Canvas) {
@@ -84,9 +103,4 @@ class Waveform(
             DEFAULT_SCREEN_HEIGHT.toDouble()
         )
     }
-
-    init {
-        fillImageDataWithDefaultColor()
-    }
-
 }
