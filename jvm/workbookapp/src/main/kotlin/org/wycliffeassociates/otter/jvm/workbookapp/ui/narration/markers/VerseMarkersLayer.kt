@@ -1,20 +1,16 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers
 
-import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
-import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.StackPane
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
-import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.*
-import javafx.beans.binding.Bindings
-import javafx.collections.ListChangeListener
+import javafx.scene.control.ScrollPane
 
 /**
  * This is the offset of the marker line relative
@@ -34,51 +30,41 @@ class VerseMarkersLayer : StackPane() {
     private val onScrollProperty = SimpleObjectProperty<(Double) -> Unit>()
 
     private val layerWidthProperty = SimpleDoubleProperty()
+    private val layerHeightProperty = SimpleDoubleProperty(0.0)
+    private lateinit var scrollLayer: ScrollPane
 
     private val markersTotalWidthProperty = totalFramesProperty.doubleBinding { it?.let {
         framesToPixels(it.toInt()).toDouble() } ?: 1.0
     }
 
-    // Stores the relative start/end positions in the audio file that are being shown.
     val scrollBarPositionProperty = SimpleDoubleProperty(0.0)
     var verseMarkersControls: ObservableList<VerseMarkerControl> = observableListOf()
-
+    val MAX_SCREEN_WIDTH = 1920.0
+    val SCROLLBAR_HEIGHT = 50
 
     init {
-
-        maxWidth = 1920.0 // TODO: fix to account for arrows of scrollbar
+        maxWidth = MAX_SCREEN_WIDTH
 
         tryImportStylesheet("/css/verse-markers-layer.css")
 
         addClass("verse-markers-layer")
 
         layerWidthProperty.bind(widthProperty())
+        layerHeightProperty.bind(heightProperty())
 
         region {
             addClass("verse-marker__play-head")
         }
 
         scrollpane {
+            scrollLayer = this
+
             setOnLayerScroll {
                 hvalue += it / markersTotalWidthProperty.value
             }
 
             hbox {
                 isFitToHeight = true
-                var scrollOldPos = 0.0
-                var scrollDelta: Double
-
-                setOnMousePressed { event ->
-                    val point = localToParent(event.x, event.y)
-                    scrollOldPos = point.x
-                    scrollDelta = 0.0
-                }
-
-                setOnMouseDragged { event ->
-                    val point = localToParent(event.x, event.y)
-                    scrollDelta = scrollOldPos - point.x
-                    onScrollProperty.value?.invoke(scrollDelta)
-                }
 
                 hvalueProperty().addListener { _, _, newValue ->
                     val contentWidth = markersTotalWidthProperty.value // Get the width of the content
@@ -86,77 +72,41 @@ class VerseMarkersLayer : StackPane() {
 
                     scrollBarPositionProperty.set(scrollbarPositionRatio)
                 }
-                totalFramesProperty.addListener { _, old, new ->
-                    this.minWidth = framesToPixels(totalFramesProperty.value).toDouble()
-                    this.maxWidth = framesToPixels(totalFramesProperty.value).toDouble()
-                }
+
                 anchorpane {
                     totalFramesProperty.addListener { _, old, new ->
                         this.minWidth = framesToPixels(totalFramesProperty.value).toDouble()
                         this.maxWidth = framesToPixels(totalFramesProperty.value).toDouble()
                     }
-
-
-                    bindChildren(verseMarkersControls) { verseMarkerControl ->
-
-                        val prevVerse = getPrevVerse(verseMarkerControl.verseProperty.value)
-                        val nextVerse = getNextVerse(verseMarkerControl.verseProperty.value)
-                        val previousMarkerPosition = framesToPixels(prevVerse.location)
-                        val nextMarkerPosition = framesToPixels(nextVerse.location)
-
-                        val currentMarkerPosition = verseMarkerControl.verseProperty.value.location
-                        val endPosInPixels = framesToPixels(currentMarkerPosition)
-
-                        verseMarkerControl.apply {
-
-                            val dragTarget = dragAreaProperty.value
-
-                            var delta = 0.0
-                            var oldPos = 0.0
-
-                            dragTarget.setOnMousePressed { event ->
-                                if (!canBeMovedProperty.value) return@setOnMousePressed
-                                delta = 0.0
-                                oldPos = AnchorPane.getLeftAnchor(this)
-
-                                event.consume()
-                            }
-
-                            dragTarget.setOnMouseDragged { event ->
-                                if (!canBeMovedProperty.value) return@setOnMouseDragged
-
-                                val point = localToParent(event.x, event.y)
-                                val currentPos = point.x
-
-                                if (currentPos.toInt() in (previousMarkerPosition + 1) .. nextMarkerPosition) {
-                                    delta = currentPos - oldPos
-                                    AnchorPane.setLeftAnchor(this, currentPos - MARKER_OFFSET)
-                                }
-
-                                event.consume()
-                            }
-
-                            dragTarget.setOnMouseReleased { event ->
-                                if (delta != 0.0) {
-                                    delta -= MARKER_OFFSET
-                                    val frameDelta = pixelsToFrames(delta)
-                                    // TODO: I need to update the relative and actual location of the marker.
-                                    // Pretty sure that this is done by firing a VerseMarkerAction, but not sure
-                                    println("frameDelta: ${frameDelta}, delta: ${delta}")
-                                    FX.eventbus.fire(NarrationMarkerChangedEvent(markers.indexOf(verseMarkerControl.verseProperty.value), frameDelta))
-                                }
-                                event.consume()
-                            }
-
-                            anchorpaneConstraints {
-                                topAnchor = 0.0
-                                bottomAnchor = 0.0
-                                leftAnchor = endPosInPixels - MARKER_OFFSET
-                            }
-
-                        }
-                    }
                 }
+            }
+        }
+
+
+        // For the actual verseMarkers
+        hbox {
+            maxWidth = 1920.0
+            maxHeight = 100.0
+            var dragStartX: Double? = null
+
+            // Makes room for the scrollbar, so that this layer in the stackPane does not block it
+            this.maxHeightProperty().bind(layerHeightProperty.minus(SCROLLBAR_HEIGHT))
+
+            setOnMousePressed { event ->
+                dragStartX = event.x
+            }
+
+            setOnMouseDragged { event ->
+                dragStartX?.let { startX ->
+                    val deltaX = startX - event.x
+                    dragStartX = event.x
+                    // Update the scrollPane's hvalue based on the dragging distance
+                    scrollLayer.hvalue += deltaX / markersTotalWidthProperty.value
+                }
+            }
+
+            bindChildren(verseMarkersControls) { verseMarkerControl ->
+                verseMarkerControl
             }
         }
     }

@@ -8,7 +8,6 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.collections.ObservableList
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
-import javafx.scene.control.Button
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
@@ -24,7 +23,7 @@ import tornadofx.*
 
 class AudioWorkspaceView : View(), Drawable {
     private val viewModel: AudioWorkspaceViewModel by inject()
-    private var narrationWaveformLayer = WaveformLayer()
+    private val narrationWaveformLayer = WaveformLayer()
     val layerWidthProperty = SimpleDoubleProperty(0.0)
 
     override val root =
@@ -33,8 +32,8 @@ class AudioWorkspaceView : View(), Drawable {
             add(narrationWaveformLayer.apply {
                 // Initializes the waveform and volumeBar used in the waveform layer
                 // TODO: Don't do this initialization here, or in this file. It is awkward.
-                viewModel.isWaveformRendererInitialized.addListener {_, old, new ->
-                    if(new == true) {
+                viewModel.isWaveformRendererInitialized.addListener { _, old, new ->
+                    if (new == true) {
                         waveform = Waveform(viewModel.waveformRenderer!!)
                         waveform!!.isRecordingProperty.bind(viewModel.isRecordingProperty)
                         volumeBar = VolumeBar(viewModel.waveformRenderer!!.incomingAudioStream)
@@ -58,23 +57,6 @@ class AudioWorkspaceView : View(), Drawable {
 
                 layerWidthProperty.bind(this.widthProperty())
 
-                // Updates the VerseMarkerControl list when the mockRecorderverseMarkers changes
-                viewModel.recordedVerses.onChange {
-                    viewModel.verseMarkersControls.clear()
-
-                    for(i in 0 until viewModel.recordedVerses.size) {
-                        val newVerseMarkerControl = VerseMarkerControl()
-                        newVerseMarkerControl.verseProperty.set(viewModel.recordedVerses[i])
-                        newVerseMarkerControl.verseIndexProperty.set(i)
-                        newVerseMarkerControl.labelProperty.set((i+1).toString())
-
-                        newVerseMarkerControl.isRecordingProperty.bind(isRecordingProperty)
-
-                        viewModel.verseMarkersControls.add(newVerseMarkerControl)
-                    }
-                }
-
-
                 // Updates the audioFilePosition property when the scrollbar position changes
                 scrollBarPositionProperty.addListener { _, old, new ->
                     viewModel.audioFilePositionProperty.set(pixelsToFrames(scrollBarPositionProperty.value))
@@ -87,7 +69,7 @@ class AudioWorkspaceView : View(), Drawable {
     val rangeOfAudioToShowStart = Bindings.createIntegerBinding(
         {
             return@createIntegerBinding viewModel.audioFilePositionProperty.value + pixelsToFrames((viewModel.pxFromIncomingAudio.value.toDouble()))
-        }, // TODO: finish
+        },
         viewModel.audioFilePositionProperty, viewModel.pxFromIncomingAudio
     )
     val rangeOfAudioToShowEnd = Bindings.createIntegerBinding(
@@ -97,35 +79,11 @@ class AudioWorkspaceView : View(), Drawable {
         layerWidthProperty, rangeOfAudioToShowStart
     )
 
-    fun updateVerseMarkersInFrameRange(start: Int, end: Int) {
-        Platform.runLater {
-//            println("===== start frame: ${start}, end frame: ${end} =====")
-            for (i in 0 until viewModel.verseMarkersControls.size) {
-                val currentVerseMarkerControl = viewModel.verseMarkersControls[i]
-                if (currentVerseMarkerControl.verseProperty.value.location in start..end) {
-
-//                    println("showing ${currentVerseMarkerControl.verseProperty.value.label} at frame position: ${currentVerseMarkerControl.verseProperty.value.location }")
-
-                    // TODO: update all markers position on the
-
-                    // TODO: update marker's visibility
-                    //currentVerseMarkerControl.visibleProperty().set(true)
-
-                } else {
-//                    currentVerseMarkerControl.visibleProperty().set(false)
-                }
-            }
-        }
-    }
 
     override fun draw(context: GraphicsContext, canvas: Canvas){
-//        println("drawing waveform")
         narrationWaveformLayer.waveform?.draw(context, canvas)
 
-        // Updating verse markers X position here
-//        println("Updating verse markers positions")
-        updateVerseMarkersInFrameRange(rangeOfAudioToShowStart.value, rangeOfAudioToShowEnd.value)
-
+        viewModel.updateVerseMarkersInFrameRange(rangeOfAudioToShowStart.value, rangeOfAudioToShowEnd.value)
     }
 
     override fun onDock() {
@@ -149,11 +107,10 @@ class AudioWorkspaceViewModel : ViewModel() {
     val isRecordingProperty = SimpleBooleanProperty()
     var recordedVerses = observableListOf<VerseMarker>()
 
-//    var mockRecordedVerseMarkers = observableListOf<VerseMarker>()
-    var pxFromIncomingAudio = SimpleIntegerProperty(0)
-    var audioFilePositionProperty = SimpleIntegerProperty(0)
+    val pxFromIncomingAudio = SimpleIntegerProperty(0)
+    val audioFilePositionProperty = SimpleIntegerProperty(0)
     var waveformRenderer : ExistingAndIncomingAudioRenderer? = null
-    var isWaveformRendererInitialized = SimpleBooleanProperty(false)
+    val isWaveformRendererInitialized = SimpleBooleanProperty(false)
     val verseMarkersControls: ObservableList<VerseMarkerControl> = observableListOf()
 
     fun onDock() {
@@ -161,8 +118,6 @@ class AudioWorkspaceViewModel : ViewModel() {
 
         isRecordingProperty.bind(narrationViewModel.isRecordingProperty)
         recordedVerses.bind(narrationViewModel.mockRecordedVerseMarkers) { it }
-
-//        mockRecordedVerseMarkers.bind(narrationViewModel.mockRecordedVerseMarkers) { it }
 
         narrationViewModel.existingAndIncomingAudioRendererIsInitialized.addListener {_, old, new ->
             if(new == true && isWaveformRendererInitialized.value == false) {
@@ -181,10 +136,51 @@ class AudioWorkspaceViewModel : ViewModel() {
             }
         }
 
+        // Updates verseMarkersControls when recordedVerses changes
+        recordedVerses.onChange {
+            verseMarkersControls.clear()
+
+            for (i in 0 until recordedVerses.size) {
+                val newVerseMarkerControl = VerseMarkerControl()
+                newVerseMarkerControl.verseProperty.set(recordedVerses[i])
+                newVerseMarkerControl.verseIndexProperty.set(i)
+                newVerseMarkerControl.labelProperty.set((i + 1).toString())
+
+                newVerseMarkerControl.isRecordingProperty.bind(isRecordingProperty)
+
+                verseMarkersControls.add(newVerseMarkerControl)
+            }
+        }
     }
 
     fun onUndock() {
         isRecordingProperty.unbind()
+    }
+
+    fun updateVerseMarkersInFrameRange(start: Int, end: Int) {
+        Platform.runLater {
+
+            for (i in 0 until verseMarkersControls.size) {
+                val currentVerseMarkerControl = verseMarkersControls[i]
+                val verseMarker = currentVerseMarkerControl.verseProperty.value
+                if (verseMarker.location in start..end) {
+
+                    // TODO: Figure out why this calcuation is off and why it causes a "jump"
+                    //  when a verseMarkerControl's managedProperty is changed.
+                    // Updates all markers position on the
+                    val currentFramePositionInPixels = framesToPixels(verseMarker.location - audioFilePositionProperty.value)
+                    var xPosition = currentFramePositionInPixels - pxFromIncomingAudio.value
+                    currentVerseMarkerControl.translateX = xPosition.toDouble()
+
+                    currentVerseMarkerControl.visibleProperty().set(true)
+                    currentVerseMarkerControl.managedProperty().set(true)
+                } else {
+                    currentVerseMarkerControl.translateX = 0.0
+                    currentVerseMarkerControl.visibleProperty().set(false)
+                    currentVerseMarkerControl.managedProperty().set(false)
+                }
+            }
+        }
     }
 
 }
