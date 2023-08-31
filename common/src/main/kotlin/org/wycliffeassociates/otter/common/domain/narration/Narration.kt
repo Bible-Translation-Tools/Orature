@@ -266,6 +266,11 @@ class Narration @AssistedInject constructor(
 
         onChapterEdited(nodes)
     }
+
+    fun scrollAudio(delta: Int) {
+        chapterReaderConnection.seek(delta)
+        player
+    }
 }
 
 @AssistedFactory

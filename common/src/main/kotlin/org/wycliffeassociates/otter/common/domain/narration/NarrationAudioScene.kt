@@ -61,8 +61,8 @@ class NarrationAudioScene(
             val adjustedStart = min(readerDataSize, activeStartPos)
             val adjustedEnd = min(frameBuffer.size, activeSize)
 
-            logger.error("adjusted start is $adjustedStart")
-            logger.error("adjustedEnd is ${adjustedEnd}")
+//            logger.error("adjusted start is $adjustedStart")
+//            logger.error("adjustedEnd is ${adjustedEnd}")
 
             for (i in 0 until adjustedStart) {
                 frameBuffer[i] = compressedReaderData[i]
@@ -71,7 +71,7 @@ class NarrationAudioScene(
             for (i in adjustedStart until adjustedEnd) {
                 frameBuffer[i] = activeData[i]
             }
-            
+
             compressedReaderData.clear()
 
             return frameBuffer

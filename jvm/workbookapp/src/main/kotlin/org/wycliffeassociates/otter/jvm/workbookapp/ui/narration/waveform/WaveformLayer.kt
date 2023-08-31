@@ -16,7 +16,6 @@ class WaveformLayer : BorderPane() {
 
     private var waveformCanvas = CanvasFragment()
     private var volumeBarCanvas = CanvasFragment()
-    private var scrollBar = ScrollBar()
     private val volumeBarWidth = 25
     private val maxScreenWidth = Screen.getMainScreen().width.toDouble()
 
@@ -41,8 +40,6 @@ class WaveformLayer : BorderPane() {
             volumeBarCanvas.prefWidthProperty().bind(this.widthProperty())
             add(volumeBarCanvas)
         }
-
-        bottom = scrollBar
     }
 
     fun getWaveformCanvas(): Canvas {
