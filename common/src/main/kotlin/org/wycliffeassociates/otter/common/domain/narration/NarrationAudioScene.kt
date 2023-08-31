@@ -3,18 +3,20 @@ package org.wycliffeassociates.otter.common.domain.narration
 import io.reactivex.Observable
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
+import org.wycliffeassociates.otter.common.collections.FloatRingBuffer
 import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
+import org.wycliffeassociates.otter.common.recorder.PCMCompressor
 import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.util.*
 import kotlin.math.max
-import kotlin.math.min
 
 class NarrationAudioScene(
-    val existingAudioReader: AudioFileReader,
-    val incomingAudioStream: Observable<ByteArray>,
-    recordingActive: Observable<Boolean>,
-    val width: Int,
-    secondsOnScreen: Int,
+    private val existingAudioReader: AudioFileReader,
+    private val incomingAudioStream: Observable<ByteArray>,
+    private val recordingActive: Observable<Boolean>,
+    private val width: Int,
+    private val secondsOnScreen: Int,
     private val recordingSampleRate: Int,
 ) {
 
@@ -27,29 +29,56 @@ class NarrationAudioScene(
         secondsOnScreen
     )
 
-    private val frameBuffer = FloatArray(recordingSampleRate * secondsOnScreen * 2)
+    private val audioToRender = FloatArray(recordingSampleRate * secondsOnScreen)
 
-    fun getFrameData(): FloatArray {
-        val activeData = activeRenderer.floatBuffer
-        val activeSize = activeData.size()
+    val floatBuffer = FloatRingBuffer(width * 2)
+    private val pcmCompressor = PCMCompressor(floatBuffer, samplesToCompress(width, secondsOnScreen))
 
-        Arrays.fill(frameBuffer, 0f)
-        val activeStartPos = activeSize
+    val frameBuffer = FloatArray(width * 2)
 
-        val sizeFromReader = max((frameBuffer.size - activeStartPos / 2) - 1, 0)
+    fun getFrameData(readPosition: Int = 0): FloatArray {
+        try {
+            val activeData = activeRenderer.floatBuffer
+            val activeSize = activeData.size()
 
-        logger.info("Active start position is $activeStartPos, should only read $sizeFromReader from reader out of ${frameBuffer.size / 2}")
+            Arrays.fill(audioToRender, 0f)
+            val activeStartPos = frameBuffer.size - activeSize
 
-        if (activeStartPos != frameBuffer.size) {
-            positionReader(existingAudioReader, sizeFromReader)
+            val sizeFromReader = recordingSampleRate * secondsOnScreen * 2
+
+            logger.info("Active start position is $activeStartPos, should only read $sizeFromReader from reader out of ${audioToRender.size}")
+
+            // If there is active recording data, and we should still be showing data from the reader
+            // if (activeStartPos > 0 && activeStartPos != audioToRender.size) {
+            // positionReader(existingAudioReader, sizeFromReader)
+            // } else {
+            existingAudioReader.seek(readPosition)
+            // }
+
+            getDataFromReader(existingAudioReader, audioToRender, sizeFromReader)
+            compressReadData(pcmCompressor, audioToRender)
+
+            for (i in 0 until activeStartPos) {
+                frameBuffer[i] = floatBuffer[i]
+            }
+            for (i in activeStartPos until frameBuffer.size) {
+                frameBuffer[i] = activeData[i]
+            }
+
+            return frameBuffer
+        } catch (e: Exception) {
+            logger.error(e.message)
         }
+        throw IllegalStateException()
+    }
 
-        getDataFromReader(existingAudioReader, frameBuffer, sizeFromReader)
-        if (activeStartPos < frameBuffer.size) {
-            getDataFromActive(activeData.array, frameBuffer, activeStartPos)
+    private fun compressReadData(
+        pcmCompressor: PCMCompressor,
+        frameBuffer: FloatArray,
+    ) {
+        for (element in frameBuffer) {
+            pcmCompressor.add(element)
         }
-
-        return frameBuffer
     }
 
     private fun positionReader(reader: AudioFileReader, framesFromEnd: Int) {
@@ -57,15 +86,20 @@ class NarrationAudioScene(
     }
 
     private fun getDataFromReader(reader: AudioFileReader, outBuff: FloatArray, sizeToRead: Int) {
-        val framesRead = ByteArray(sizeToRead * reader.sampleSize)
-        val read = reader.getPcmBuffer(framesRead)
-        val bb = ByteBuffer.wrap(framesRead)
-        val fb = bb.asFloatBuffer()
-        for (i in 0 until read) {
-            outBuff[i] = fb.get()
-        }
-        for (i in read until outBuff.size) {
-            outBuff[i] = 0f
+        try {
+            val framesRead = ByteArray(sizeToRead * 2)
+
+            val read = reader.getPcmBuffer(framesRead)
+            val bb = ByteBuffer.wrap(framesRead)
+            bb.order(ByteOrder.LITTLE_ENDIAN)
+            for (i in 0 until outBuff.size) {
+                outBuff[i] = bb.getShort().toFloat()
+            }
+            for (i in read until outBuff.size) {
+                outBuff[i] = 0f
+            }
+        } catch (e: Exception) {
+            logger.error(e.message)
         }
         // logger.info(outBuff.joinToString { "$it," })
         // System.arraycopy(bb.asFloatBuffer().asReadOnlyBuffer().array(), 0, outBuff, 0, sizeToRead)
@@ -78,5 +112,9 @@ class NarrationAudioScene(
     /** Clears rendered data from buffer */
     fun resetRecordingRenderer() {
         activeRenderer.clearData()
+    }
+
+    private fun samplesToCompress(width: Int, secondsOnScreen: Int): Int {
+        return (existingAudioReader.sampleRate * secondsOnScreen) / width
     }
 }

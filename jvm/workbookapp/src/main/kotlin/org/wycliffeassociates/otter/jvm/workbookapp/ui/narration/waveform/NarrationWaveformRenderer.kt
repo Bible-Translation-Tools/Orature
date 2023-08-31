@@ -36,6 +36,8 @@ class NarrationWaveformRenderer(
     }
 
     override fun draw(context: GraphicsContext, canvas: Canvas) {
+        heightProperty.set(canvas.height)
+
         val buffer = renderer.getFrameData()
 
         fillImageDataWithDefaultColor()
@@ -68,15 +70,19 @@ class NarrationWaveformRenderer(
     }
 
     fun addLinesToImageData(buffer: FloatArray) {
-        for (x in 0 until buffer.size / 2) {
-            val y1 = scaleAmplitude(buffer[x * 2].toDouble(), heightProperty.value)
-            val y2 = scaleAmplitude(buffer[x * 2 + 1].toDouble(), heightProperty.value)
+        try {
+            for (x in 0 until buffer.size / 2) {
+                val y1 = scaleAmplitude(buffer[x * 2].toDouble(), heightProperty.value)
+                val y2 = scaleAmplitude(buffer[x * 2 + 1].toDouble(), heightProperty.value)
 
-            for (y in minOf(y1.toInt(), y2.toInt())..maxOf(y1.toInt(), y2.toInt())) {
-                imageData[(x + y * DEFAULT_SCREEN_WIDTH) * 3] = (waveformColor.red * 255).toInt().toByte()
-                imageData[(x + y * DEFAULT_SCREEN_WIDTH) * 3 + 1] = (waveformColor.green * 255).toInt().toByte()
-                imageData[(x + y * DEFAULT_SCREEN_WIDTH) * 3 + 2] = (waveformColor.blue * 255).toInt().toByte()
+                for (y in minOf(y1.toInt(), y2.toInt())..maxOf(y1.toInt(), y2.toInt())) {
+                    imageData[(x + y * DEFAULT_SCREEN_WIDTH) * 3] = (waveformColor.red * 255).toInt().toByte()
+                    imageData[(x + y * DEFAULT_SCREEN_WIDTH) * 3 + 1] = (waveformColor.green * 255).toInt().toByte()
+                    imageData[(x + y * DEFAULT_SCREEN_WIDTH) * 3 + 2] = (waveformColor.blue * 255).toInt().toByte()
+                }
             }
+        } catch (e: Exception) {
+            println("here")
         }
     }
 
