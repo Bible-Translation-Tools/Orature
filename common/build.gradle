@@ -26,6 +26,10 @@ dependencies {
     implementation "com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVer"
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVer"
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-csv:$jacksonVer"
+    testImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVer"
+    testImplementation "com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVer"
+    testImplementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVer"
+    testImplementation "com.fasterxml.jackson.dataformat:jackson-dataformat-csv:$jacksonVer"
     implementation project(':common:audio')
 
     // Retrofit
