@@ -131,6 +131,7 @@ class AudioWorkspaceViewModel : ViewModel() {
     }
 
     fun drawVolumeBar(context: GraphicsContext, canvas: Canvas) {
+        narrationViewModel.drawVolumebar(context, canvas)
     }
 
     fun onDock() {

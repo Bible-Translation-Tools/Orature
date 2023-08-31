@@ -4,6 +4,7 @@ import com.sun.glass.ui.Screen
 import javafx.event.EventTarget
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
+import javafx.scene.control.ScrollBar
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
 import org.wycliffeassociates.otter.jvm.controls.narration.CanvasFragment
@@ -15,6 +16,7 @@ class WaveformLayer : BorderPane() {
 
     private var waveformCanvas = CanvasFragment()
     private var volumeBarCanvas = CanvasFragment()
+    private var scrollBar = ScrollBar()
     private val volumeBarWidth = 25
     private val maxScreenWidth = Screen.getMainScreen().width.toDouble()
 
@@ -29,7 +31,7 @@ class WaveformLayer : BorderPane() {
 
         center = waveformCanvas
 
-        hbox {
+        right = hbox {
             prefWidth = 25.0
             volumeBarCanvas.let {
                 style {
@@ -39,6 +41,8 @@ class WaveformLayer : BorderPane() {
             volumeBarCanvas.prefWidthProperty().bind(this.widthProperty())
             add(volumeBarCanvas)
         }
+
+        bottom = scrollBar
     }
 
     fun getWaveformCanvas(): Canvas {

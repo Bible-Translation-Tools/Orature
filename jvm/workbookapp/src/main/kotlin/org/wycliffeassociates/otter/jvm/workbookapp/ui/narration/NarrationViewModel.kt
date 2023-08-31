@@ -29,6 +29,7 @@ import org.wycliffeassociates.otter.common.domain.narration.NarrationAudioScene
 import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
+import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
@@ -56,6 +57,7 @@ class NarrationViewModel : ViewModel() {
     private lateinit var narration: Narration
 
     private lateinit var renderer: NarrationWaveformRenderer
+    private lateinit var volumeBar: VolumeBar
 
     val recordStartProperty = SimpleBooleanProperty()
     var recordStart by recordStartProperty
@@ -127,6 +129,7 @@ class NarrationViewModel : ViewModel() {
     private fun initializeNarration(chapter: Chapter) {
         narration = narrationFactory.create(workbookDataStore.workbook, chapter)
         audioPlayer = narration.getPlayer()
+        volumeBar = VolumeBar(narration.getRecorderAudioStream())
         subscribeActiveVersesChanged()
         updateRecordingState()
         rendererAudioReader = narration.audioReader
@@ -425,6 +428,12 @@ class NarrationViewModel : ViewModel() {
         if (::renderer.isInitialized) {
             rendererAudioReader.seek(audioPlayer.getLocationInFrames())
             renderer.draw(context, canvas)
+        }
+    }
+
+    fun drawVolumebar(context: GraphicsContext, canvas: Canvas) {
+        if (::renderer.isInitialized) {
+            volumeBar.draw(context, canvas)
         }
     }
 }

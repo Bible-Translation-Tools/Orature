@@ -61,6 +61,7 @@ class Narration @AssistedInject constructor(
         firstVerse = getFirstVerseMarker()
         updateWorkingFilesFromChapterFile()
         chapterRepresentation.loadFromSerializedVerses()
+        recorder.start()
     }
 
     private fun getFirstVerseMarker(): VerseMarker {
@@ -109,7 +110,7 @@ class Narration @AssistedInject constructor(
         val action = NewVerseAction(verseIndex)
         execute(action)
 
-        recorder.start()
+        // recorder.start()
         writer?.start()
     }
 
@@ -117,7 +118,7 @@ class Narration @AssistedInject constructor(
         val action = RecordAgainAction(verseIndex)
         execute(action)
 
-        recorder.start()
+        // recorder.start()
         writer?.start()
     }
 
@@ -147,12 +148,12 @@ class Narration @AssistedInject constructor(
     }
 
     fun pauseRecording() {
-        recorder.pause()
+        // recorder.pause()
         writer?.pause()
     }
 
     fun resumeRecording() {
-        recorder.start()
+        // recorder.start()
         writer?.start()
     }
 

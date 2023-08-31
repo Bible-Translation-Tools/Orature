@@ -71,6 +71,8 @@ class NarrationAudioScene(
             for (i in adjustedStart until adjustedEnd) {
                 frameBuffer[i] = activeData[i]
             }
+            
+            compressedReaderData.clear()
 
             return frameBuffer
         } catch (e: Exception) {

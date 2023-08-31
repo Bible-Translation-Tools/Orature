@@ -75,6 +75,7 @@ class VolumeBar(stream: Observable<ByteArray>) : Drawable {
     }
 
     override fun draw(context: GraphicsContext, canvas: Canvas) {
+        context.clearRect(0.0, 0.0, canvas.width, canvas.height)
         calculateDbPixelLocations(canvas.height)
         drawBar(canvas, context)
     }

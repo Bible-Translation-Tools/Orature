@@ -16,7 +16,7 @@ import java.nio.ByteBuffer
 
 // Set up the canvas for the Waveform and Volume bar
 class NarrationWaveformRenderer(
-    val renderer : NarrationAudioScene
+    val renderer: NarrationAudioScene
 ) {
 
     val heightProperty = SimpleDoubleProperty(1.0)
@@ -60,7 +60,7 @@ class NarrationWaveformRenderer(
     fun fillImageDataWithDefaultColor() {
         var i = 0
         for (y in 0 until DEFAULT_SCREEN_HEIGHT) {
-            for ( x in 0 until DEFAULT_SCREEN_WIDTH) {
+            for (x in 0 until DEFAULT_SCREEN_WIDTH) {
                 imageData[i] = (backgroundColor.red * 255).toInt().toByte()
                 imageData[i + 1] = (backgroundColor.green * 255).toInt().toByte()
                 imageData[i + 2] = (backgroundColor.blue * 255).toInt().toByte()
@@ -70,19 +70,15 @@ class NarrationWaveformRenderer(
     }
 
     fun addLinesToImageData(buffer: FloatArray) {
-        try {
-            for (x in 0 until buffer.size / 2) {
-                val y1 = scaleAmplitude(buffer[x * 2].toDouble(), heightProperty.value)
-                val y2 = scaleAmplitude(buffer[x * 2 + 1].toDouble(), heightProperty.value)
+        for (x in 0 until buffer.size / 2) {
+            val y1 = scaleAmplitude(buffer[x * 2].toDouble(), heightProperty.value)
+            val y2 = scaleAmplitude(buffer[x * 2 + 1].toDouble(), heightProperty.value)
 
-                for (y in minOf(y1.toInt(), y2.toInt())..maxOf(y1.toInt(), y2.toInt())) {
-                    imageData[(x + y * DEFAULT_SCREEN_WIDTH) * 3] = (waveformColor.red * 255).toInt().toByte()
-                    imageData[(x + y * DEFAULT_SCREEN_WIDTH) * 3 + 1] = (waveformColor.green * 255).toInt().toByte()
-                    imageData[(x + y * DEFAULT_SCREEN_WIDTH) * 3 + 2] = (waveformColor.blue * 255).toInt().toByte()
-                }
+            for (y in minOf(y1.toInt(), y2.toInt())..maxOf(y1.toInt(), y2.toInt())) {
+                imageData[(x + y * DEFAULT_SCREEN_WIDTH) * 3] = (waveformColor.red * 255).toInt().toByte()
+                imageData[(x + y * DEFAULT_SCREEN_WIDTH) * 3 + 1] = (waveformColor.green * 255).toInt().toByte()
+                imageData[(x + y * DEFAULT_SCREEN_WIDTH) * 3 + 2] = (waveformColor.blue * 255).toInt().toByte()
             }
-        } catch (e: Exception) {
-            println("here")
         }
     }
 
