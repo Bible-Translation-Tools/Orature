@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.controls.waveform
 
 import com.sun.javafx.util.Utils
 import javafx.beans.binding.Bindings
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Point2D
 import javafx.scene.layout.Region
 import javafx.scene.shape.Rectangle
@@ -40,6 +41,7 @@ private const val MARKER_COUNT = 500
 class MarkerTrackControl : Region() {
 
     val markers = observableListOf<ChunkMarkerModel>()
+    val canMoveMarkerProperty = SimpleBooleanProperty(true)
     val onPositionChangedProperty = SimpleObjectProperty<(Int, Double) -> Unit>()
     val onSeekPreviousProperty = SimpleObjectProperty<() -> Unit>()
     val onSeekNextProperty = SimpleObjectProperty<() -> Unit>()
@@ -52,7 +54,6 @@ class MarkerTrackControl : Region() {
     fun setOnLocationRequest(op: () -> Int) {
         onLocationRequestProperty.set(op)
     }
-
 
     init {
         // Makes the the region mouse transparent but not children
@@ -114,7 +115,9 @@ class MarkerTrackControl : Region() {
             isPlacedProperty.set(mk.placed)
             markerIdProperty.set(i)
             markerNumberProperty.set(mk.label)
-            canBeMovedProperty.set(i != 0)
+            canBeMovedProperty.bind(canMoveMarkerProperty.booleanBinding {
+                it == true && i != 0
+            })
             markerPositionProperty.set(pixel)
 
             setOnMouseClicked { me ->
@@ -247,7 +250,9 @@ class MarkerTrackControl : Region() {
         setOnKeyPressed { e ->
             when (e.code) {
                 KeyCode.LEFT, KeyCode.RIGHT -> {
-                    moveMarker(e.code)
+                    if (canMoveMarkerProperty.value) {
+                        moveMarker(e.code)
+                    }
                     e.consume()
                 }
                 KeyCode.TAB -> {

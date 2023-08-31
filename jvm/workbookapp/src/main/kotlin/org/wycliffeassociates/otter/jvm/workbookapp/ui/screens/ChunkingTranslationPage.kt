@@ -67,6 +67,7 @@ class ChunkingTranslationPage : View() {
         tryImportStylesheet("/css/chunk-item.css")
         tryImportStylesheet("/css/chunking-page.css")
         tryImportStylesheet("/css/source-content.css")
+        tryImportStylesheet("/css/chunk-marker.css")
     }
 
     override fun onDock() {

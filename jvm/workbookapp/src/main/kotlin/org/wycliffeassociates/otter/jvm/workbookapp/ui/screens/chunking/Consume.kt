@@ -22,8 +22,6 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.glass.ui.Screen
 import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
-import java.text.MessageFormat
-import javafx.beans.binding.Bindings
 import javafx.scene.layout.Priority
 import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
@@ -31,7 +29,7 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
-import org.wycliffeassociates.otter.jvm.controls.waveform.ScrollingWaveform
+import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
@@ -39,10 +37,10 @@ import tornadofx.*
 class Consume : Fragment() {
     private val logger = LoggerFactory.getLogger(Consume::class.java)
 
-    val vm: ChunkingViewModel by inject()
+    val viewModel: ChunkingViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
 
-    private lateinit var waveformSection: ScrollingWaveform
+    private lateinit var waveform: MarkerPlacementWaveform
 
     override fun onDock() {
         super.onDock()
@@ -50,58 +48,66 @@ class Consume : Fragment() {
         tryImportStylesheet(resources.get("/css/scrolling-waveform.css"))
         tryImportStylesheet(resources.get("/css/consume-page.css"))
 
-        vm.audioDataStore.sourceAudioProperty.set(
-            vm.workbookDataStore.workbook.let { it.sourceAudioAccessor.getChapter(1, it.target) }
-        )
+        val wb = viewModel.workbookDataStore.workbook
+        val chapter = wb.target.chapters.blockingFirst()
+        val sourceAudio = wb.sourceAudioAccessor.getChapter(chapter.sort, wb.target)
+        viewModel.audioDataStore.sourceAudioProperty.set(sourceAudio)
+        viewModel.workbookDataStore.activeChapterProperty.set(chapter)
 
-        vm.subscribeOnWaveformImages = ::subscribeOnWaveformImages
-        vm.onDockConsume()
+        viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
+        viewModel.onDockConsume()
+        waveform.markers.bind(viewModel.markers) { it }
     }
 
     override fun onUndock() {
         super.onUndock()
-        vm.onUndockConsume()
+        viewModel.onUndockConsume()
     }
 
     private fun subscribeOnWaveformImages() {
-        vm.waveform
+        viewModel.waveform
             .observeOnFx()
             .subscribe {
-                waveformSection.addWaveformImage(it)
+                waveform.addWaveformImage(it)
             }
-            .addTo(vm.compositeDisposable)
+            .addTo(viewModel.compositeDisposable)
     }
 
     override val root = vbox {
         borderpane {
             vgrow = Priority.ALWAYS
 
-            center = ScrollingWaveform().apply {
-                waveformSection = this
+            center = MarkerPlacementWaveform().apply {
+                waveform = this
                 addClass("consume__scrolling-waveform")
-
                 clip = Rectangle().apply {
                     widthProperty().bind(this@vbox.widthProperty())
                     heightProperty().bind(this@vbox.heightProperty())
                 }
-
                 themeProperty.bind(settingsViewModel.appColorMode)
-                positionProperty.bind(vm.positionProperty)
+                positionProperty.bind(viewModel.positionProperty)
+                canMoveMarkerProperty.set(false)
 
-                setOnWaveformClicked { vm.pause() }
+                setOnSeekNext { viewModel.seekNext() }
+                setOnSeekPrevious { viewModel.seekPrevious() }
+                setOnPlaceMarker { viewModel.placeMarker() }
+                setOnWaveformClicked { viewModel.pause() }
                 setOnWaveformDragReleased { deltaPos ->
-                    val deltaFrames = pixelsToFrames(deltaPos)
-                    val curFrames = vm.getLocationInFrames()
-                    val duration = vm.getDurationInFrames()
+                    val deltaFrames = org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames(deltaPos)
+                    val curFrames = viewModel.getLocationInFrames()
+                    val duration = viewModel.getDurationInFrames()
                     val final = Utils.clamp(0, curFrames - deltaFrames, duration)
-                    vm.seek(final)
+                    viewModel.seek(final)
                 }
+                setOnRewind(viewModel::rewind)
+                setOnFastForward(viewModel::fastForward)
+                setOnToggleMedia(viewModel::mediaToggle)
+                setOnResumeMedia(viewModel::resumeMedia)
 
-                setOnToggleMedia(vm::mediaToggle)
-                setOnRewind(vm::rewind)
-                setOnFastForward(vm::fastForward)
+                // Marker stuff
+                imageWidthProperty.bind(viewModel.imageWidthProperty)
 
-                vm.consumeImageCleanup = ::freeImages
+                this.markers.bind(viewModel.markers) { it }
             }
             bottom = hbox {
                 addClass("consume__bottom")
@@ -109,7 +115,7 @@ class Consume : Fragment() {
                     addClass("btn", "btn--primary", "consume__btn")
                     val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
                     val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
-                    textProperty().bind(vm.isPlayingProperty.stringBinding {
+                    textProperty().bind(viewModel.isPlayingProperty.stringBinding {
                         togglePseudoClass("active", it == true)
                         if (it == true) {
                             graphic = pauseIcon
@@ -121,7 +127,7 @@ class Consume : Fragment() {
                     })
 
                     action {
-                        vm.mediaToggle()
+                        viewModel.mediaToggle()
                     }
                 }
             }

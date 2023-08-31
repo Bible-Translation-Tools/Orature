@@ -157,6 +157,7 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
             createWaveformImages(audio)
             initializeAudioController()
             subscribeOnWaveformImages()
+            loadMarkers(audio)
         }
         startAnimationTimer()
     }
@@ -208,7 +209,8 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
     fun loadMarkers(audio: OratureAudioFile) {
         val totalMarkers: Int = 500
         audio.clearCues()
-        markerModel = VerseMarkerModel(audio, totalMarkers, listOf())
+        val marketLabels = workbookDataStore.getSourceChapter().map { it.getDraft() }.blockingGet().map { it.title }.toList().blockingGet()
+        markerModel = VerseMarkerModel(audio, marketLabels.size, marketLabels)
         markerModel?.let { markerModel ->
             markers.setAll(markerModel.markers)
         }
