@@ -132,7 +132,6 @@ class NarrationViewModel : ViewModel() {
         rendererAudioReader = narration.audioReader
         renderer = NarrationWaveformRenderer(
             NarrationAudioScene(
-                // AudioFile(File("/Users/joe/renderingTest.wav")).reader().apply { open() },
                 rendererAudioReader,
                 narration.getRecorderAudioStream(),
                 isRecordingProperty.toObservable(),
