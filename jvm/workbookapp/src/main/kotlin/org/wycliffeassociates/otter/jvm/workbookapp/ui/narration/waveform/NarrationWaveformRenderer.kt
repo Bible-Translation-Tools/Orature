@@ -17,7 +17,7 @@ import java.nio.ByteBuffer
 // Set up the canvas for the Waveform and Volume bar
 class NarrationWaveformRenderer(
     val renderer : NarrationAudioScene
-) : Drawable {
+) {
 
     val heightProperty = SimpleDoubleProperty(1.0)
     val widthProperty = SimpleDoubleProperty()
@@ -35,7 +35,7 @@ class NarrationWaveformRenderer(
         fillImageDataWithDefaultColor()
     }
 
-    override fun draw(context: GraphicsContext, canvas: Canvas) {
+    fun draw(context: GraphicsContext, canvas: Canvas) {
         heightProperty.set(canvas.height)
 
         val buffer = renderer.getFrameData()
@@ -108,5 +108,9 @@ class NarrationWaveformRenderer(
             DEFAULT_SCREEN_WIDTH.toDouble(),
             DEFAULT_SCREEN_HEIGHT.toDouble()
         )
+    }
+
+    fun clearActiveRecordingData() {
+        renderer.resetRecordingRenderer()
     }
 }

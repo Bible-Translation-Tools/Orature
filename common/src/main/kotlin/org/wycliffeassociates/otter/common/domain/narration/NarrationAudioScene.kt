@@ -36,7 +36,7 @@ class NarrationAudioScene(
 
     val frameBuffer = FloatArray(width * 2)
 
-    fun getFrameData(readPosition: Int = 0): FloatArray {
+    fun getFrameData(): FloatArray {
         try {
             val activeData = activeRenderer.floatBuffer
             val activeSize = activeData.size()
@@ -52,7 +52,7 @@ class NarrationAudioScene(
             // if (activeStartPos > 0 && activeStartPos != audioToRender.size) {
             // positionReader(existingAudioReader, sizeFromReader)
             // } else {
-            existingAudioReader.seek(readPosition)
+            // existingAudioReader.seek(readPosition)
             // }
 
             getDataFromReader(existingAudioReader, audioToRender, sizeFromReader)

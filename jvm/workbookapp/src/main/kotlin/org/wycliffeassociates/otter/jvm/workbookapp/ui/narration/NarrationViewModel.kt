@@ -16,6 +16,7 @@ import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
@@ -42,6 +43,7 @@ import javax.inject.Inject
 import kotlin.math.max
 
 class NarrationViewModel : ViewModel() {
+    private lateinit var rendererAudioReader: AudioFileReader
     private val logger = LoggerFactory.getLogger(NarrationViewModel::class.java)
 
     private val workbookDataStore: WorkbookDataStore by inject()
@@ -127,9 +129,11 @@ class NarrationViewModel : ViewModel() {
         audioPlayer = narration.getPlayer()
         subscribeActiveVersesChanged()
         updateRecordingState()
+        rendererAudioReader = narration.audioReader
         renderer = NarrationWaveformRenderer(
             NarrationAudioScene(
-                narration.audioReader,
+                // AudioFile(File("/Users/joe/renderingTest.wav")).reader().apply { open() },
+                rendererAudioReader,
                 narration.getRecorderAudioStream(),
                 isRecordingProperty.toObservable(),
                 Screen.getMainScreen().width,
@@ -223,6 +227,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun play(verse: VerseMarker) {
+        renderer.clearActiveRecordingData()
         audioPlayer.pause()
 
         narration.loadSectionIntoPlayer(verse)
@@ -234,6 +239,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun playAll() {
+        renderer.clearActiveRecordingData()
         audioPlayer.pause()
         narration.loadChapterIntoPlayer()
         // audioPlayer.seek(0)
@@ -245,6 +251,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun recordAgain(verseIndex: Int) {
+        rendererAudioReader.seek(audioPlayer.getDurationInFrames())
         stopPlayer()
 
         narration.onRecordAgain(verseIndex)
@@ -316,6 +323,7 @@ class NarrationViewModel : ViewModel() {
 
     private fun record(index: Int) {
         stopPlayer()
+        rendererAudioReader.seek(audioPlayer.getDurationInFrames())
 
         narration.onNewVerse(index)
 
@@ -344,6 +352,7 @@ class NarrationViewModel : ViewModel() {
     private fun stopRecordAgain() {
         recordAgainVerseIndex?.let { verseIndex ->
             narration.pauseRecording()
+            renderer.clearActiveRecordingData()
             narration.finalizeVerse(verseIndex)
 
             recordAgainVerseIndex = null
@@ -415,6 +424,7 @@ class NarrationViewModel : ViewModel() {
 
     fun drawWaveform(context: GraphicsContext, canvas: Canvas) {
         if (::renderer.isInitialized) {
+            rendererAudioReader.seek(audioPlayer.getLocationInFrames())
             renderer.draw(context, canvas)
         }
     }
