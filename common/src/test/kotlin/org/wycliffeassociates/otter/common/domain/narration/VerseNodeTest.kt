@@ -221,12 +221,13 @@ class VerseNodeTest {
         val verseMarker = VerseMarker(1, 1, 0)
         val sectors = mutableListOf<IntRange>()
         sectors.add(1000.. 1999)
+
         val sectorsCopy = sectors.map { it }
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
         val sectorsTaken = verseNode.takeFramesFromStart(2000)
 
-        Assert.assertEquals(true, sectorsTaken.equals(sectorsCopy))
+        Assert.assertTrue(sectorsTaken.equals(sectorsCopy))
     }
 
 
@@ -238,7 +239,7 @@ class VerseNodeTest {
         sectors.add(3000 .. 3999)
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
-        val sectorsTaken = verseNode.takeFramesFromStart(2999)
+        val sectorsTaken = verseNode.takeFramesFromStart(3000)
 
         // need to test that sectorstaken is as expected
         val expectedSectorsTaken = mutableListOf<IntRange>()
@@ -246,7 +247,7 @@ class VerseNodeTest {
         expectedSectorsTaken.add(2000 .. 2999)
         expectedSectorsTaken.add(3000 .. 3999)
 
-        Assert.assertEquals(true, sectorsTaken.equals(expectedSectorsTaken))
+        Assert.assertTrue(sectorsTaken.equals(expectedSectorsTaken))
 
         Assert.assertEquals(0, verseNode.sectors.size)
 
@@ -263,7 +264,7 @@ class VerseNodeTest {
         sectors.add(3000 .. 3999)
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
-        val sectorsTaken = verseNode.takeFramesFromStart(1999)
+        val sectorsTaken = verseNode.takeFramesFromStart(2000)
 
         // need to test that sectorstaken is as expected
         val expectedSectorsTaken = mutableListOf<IntRange>()
@@ -274,12 +275,12 @@ class VerseNodeTest {
         // It seems to get stuck on 1, and stays stuck until it iterates through the
         // sectors list.
         // NOTE: seems to be splitting node unnecessarily
-        Assert.assertEquals(true, sectorsTaken.equals(expectedSectorsTaken))
+        Assert.assertTrue(sectorsTaken.equals(expectedSectorsTaken))
 
         val expectedVerseNodeSectors = mutableListOf<IntRange>()
         expectedVerseNodeSectors.add(3000 .. 3999)
 
-        Assert.assertEquals(true, verseNode.sectors.equals(expectedVerseNodeSectors))
+        Assert.assertTrue(verseNode.sectors.equals(expectedVerseNodeSectors))
 
     }
 
@@ -305,7 +306,7 @@ class VerseNodeTest {
 
         val sectorsTaken = verseNode.takeFramesFromEnd(2000)
 
-        Assert.assertEquals(true, sectorsTaken.equals(sectorsCopy))
+        Assert.assertTrue(sectorsTaken.equals(sectorsCopy))
     }
 
     @Test fun `take frames from end with same number of frames needed`() {
@@ -316,14 +317,14 @@ class VerseNodeTest {
         sectors.add(3000 .. 3999)
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
-        val sectorsTaken = verseNode.takeFramesFromEnd(2999)
+        val sectorsTaken = verseNode.takeFramesFromEnd(3000)
 
         val expectedSectorsTaken = mutableListOf<IntRange>()
         expectedSectorsTaken.add(1000.. 1999)
         expectedSectorsTaken.add(2000 .. 2999)
         expectedSectorsTaken.add(3000 .. 3999)
 
-        Assert.assertEquals(true, sectorsTaken.equals(expectedSectorsTaken))
+        Assert.assertTrue(sectorsTaken.equals(expectedSectorsTaken))
 
         Assert.assertEquals(0, verseNode.sectors.size)
 
@@ -339,7 +340,7 @@ class VerseNodeTest {
         sectors.add(3000 .. 3999)
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
-        val sectorsTaken = verseNode.takeFramesFromEnd(1999)
+        val sectorsTaken = verseNode.takeFramesFromEnd(2000)
 
         // need to test that sectorstaken is as expected
         val expectedSectorsTaken = mutableListOf<IntRange>()
@@ -353,12 +354,12 @@ class VerseNodeTest {
         // It seems to get stuck on 1, and stays stuck until it iterates through the
         // sectors list.
         // NOTE: seems to be splitting node unnecessarily
-        Assert.assertEquals(true, sectorsTaken.equals(expectedSectorsTaken))
+        Assert.assertTrue(sectorsTaken.equals(expectedSectorsTaken))
 
         val expectedVerseNodeSectors = mutableListOf<IntRange>()
         expectedVerseNodeSectors.add(1000.. 1999)
 
-        Assert.assertEquals(true, verseNode.sectors.equals(expectedVerseNodeSectors))
+        Assert.assertTrue(verseNode.sectors.equals(expectedVerseNodeSectors))
 
     }
 
@@ -409,7 +410,7 @@ class VerseNodeTest {
         verseNode.addRange(ranges)
 
         // QUESTION: same as "add range with one item in ranges list"
-        Assert.assertEquals(true, verseNode.sectors.equals(ranges))
+        Assert.assertTrue(verseNode.sectors.equals(ranges))
     }
 
     @Test
@@ -425,7 +426,7 @@ class VerseNodeTest {
 
         verseNode.addRange(ranges)
         // QUESTION: same as "add range with one item in ranges list"
-        Assert.assertEquals(true, verseNode.sectors.equals(ranges.sortedBy { it.first }))
+        Assert.assertTrue(verseNode.sectors.equals(ranges.sortedBy { it.first }))
     }
 
     @Test
@@ -441,7 +442,7 @@ class VerseNodeTest {
 
         verseNode.addRange(ranges)
         // QUESTION: same as "add range with one item in ranges list"
-        Assert.assertEquals(true, verseNode.sectors.equals(ranges))
+        Assert.assertTrue(verseNode.sectors.equals(ranges))
     }
 
     @Test
@@ -457,7 +458,7 @@ class VerseNodeTest {
 
         verseNode.addRange(ranges)
         // QUESTION: same as "add range with one item in ranges list"
-        Assert.assertEquals(true, verseNode.sectors.equals(ranges))
+        Assert.assertTrue(verseNode.sectors.equals(ranges))
     }
 
     @Test
@@ -467,12 +468,12 @@ class VerseNodeTest {
         val verseNode = VerseNode(0,0, false, verseMarker, sectors)
 
         Assert.assertEquals(0, verseNode.sectors.size)
-        Assert.assertEquals(false, verseNode.placed)
+        Assert.assertFalse(verseNode.placed)
 
         verseNode.clear()
 
         Assert.assertEquals(0, verseNode.sectors.size)
-        Assert.assertEquals(false, verseNode.placed)
+        Assert.assertFalse(verseNode.placed)
     }
 
     @Test
@@ -484,12 +485,12 @@ class VerseNodeTest {
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
         Assert.assertEquals(2, verseNode.sectors.size)
-        Assert.assertEquals(true, verseNode.placed)
+        Assert.assertTrue(verseNode.placed)
 
         verseNode.clear()
 
         Assert.assertEquals(0, verseNode.sectors.size)
-        Assert.assertEquals(false, verseNode.placed)
+        Assert.assertFalse(verseNode.placed)
     }
 
 
@@ -499,7 +500,7 @@ class VerseNodeTest {
         val sectors = mutableListOf<IntRange>()
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
-        Assert.assertEquals(false, verseNode.contains(500))
+        Assert.assertFalse(verseNode.contains(500))
     }
 
     @Test
@@ -509,7 +510,7 @@ class VerseNodeTest {
         sectors.add(6000.. 6999)
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
-        Assert.assertEquals(false, verseNode.contains(500))
+        Assert.assertFalse(verseNode.contains(500))
     }
 
     @Test
@@ -519,7 +520,7 @@ class VerseNodeTest {
         sectors.add(6000.. 6999)
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
-        Assert.assertEquals(true, verseNode.contains(6250))
+        Assert.assertTrue(verseNode.contains(6250))
     }
 
     @Test
@@ -531,7 +532,7 @@ class VerseNodeTest {
         sectors.add(6000.. 6999)
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
-        Assert.assertEquals(false, verseNode.contains(500))
+        Assert.assertFalse(verseNode.contains(500))
     }
 
     @Test
@@ -543,7 +544,7 @@ class VerseNodeTest {
         sectors.add(6000.. 6999)
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
-        Assert.assertEquals(true, verseNode.contains(6250))
+        Assert.assertTrue(verseNode.contains(6250))
     }
 
 
