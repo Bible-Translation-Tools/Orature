@@ -110,27 +110,21 @@ class RollingSourceText : VBox() {
     }
 
     private fun buildChunkText(textContent: String, index: Int): HBox {
-        val isChunkHighlightedProperty = highlightedChunk.booleanBinding { highlightedIndex ->
-            if (highlightedIndex == index) {
-                sourceTextChunksContainer.scrollTo(index)
-            }
-            highlightedIndex == index
-        }
         return HBox().apply {
+            addClass("source-content__chunk")
+            highlightedChunk.onChangeAndDoNowWithDisposer { highlightedIndex ->
+                if (highlightedIndex == index) {
+                    sourceTextChunksContainer.scrollTo(index)
+                }
+                togglePseudoClass("highlighted", highlightedIndex == index)
+            }
+
             label((index + 1).toString()) {
                 addClass("source-content__verse-number")
-
-                isChunkHighlightedProperty.onChangeAndDoNow {
-                    togglePseudoClass("highlighted", it == true)
-                }
             }
             label(textContent) {
                 addClass("source-content__text")
                 minHeight = Region.USE_PREF_SIZE // avoid ellipsis
-
-                isChunkHighlightedProperty.onChangeAndDoNow {
-                    togglePseudoClass("highlighted", it == true)
-                }
             }
         }
     }

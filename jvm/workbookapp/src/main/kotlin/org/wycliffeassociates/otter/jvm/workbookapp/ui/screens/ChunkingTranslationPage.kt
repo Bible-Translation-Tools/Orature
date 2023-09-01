@@ -59,6 +59,7 @@ class ChunkingTranslationPage : View() {
 
             right = SourceTextDrawer().apply {
                 textProperty.bind(sourceTextProperty)
+                highlightedChunk.bind(viewModel.currentMarkerNumberProperty)
             }
         }
     }

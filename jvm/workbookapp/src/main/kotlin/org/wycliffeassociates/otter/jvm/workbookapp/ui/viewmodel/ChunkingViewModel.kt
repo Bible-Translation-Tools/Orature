@@ -99,7 +99,7 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
     override val markers = observableListOf<ChunkMarkerModel>()
 
     override val markerCountProperty = markers.sizeProperty
-    override val currentMarkerNumberProperty = SimpleIntegerProperty(1)
+    override val currentMarkerNumberProperty = SimpleIntegerProperty(-1)
     override var resumeAfterScroll: Boolean = false
 
     private val width = Screen.getMainScreen().platformWidth
