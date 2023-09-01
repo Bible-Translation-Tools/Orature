@@ -7,6 +7,7 @@ import javafx.scene.canvas.GraphicsContext
 import javafx.scene.control.ScrollBar
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
+import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
 import org.wycliffeassociates.otter.jvm.controls.narration.CanvasFragment
 import tornadofx.*
 
@@ -24,7 +25,7 @@ class WaveformLayer : BorderPane() {
             prefWidthProperty().bind(this.widthProperty().minus(volumeBarWidth))
             maxWidth(maxScreenWidth - volumeBarWidth)
             style {
-                backgroundColor += c("#FF0000")
+                backgroundColor += c("#E5E8EB")
             }
         }
 

@@ -27,6 +27,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.concurrent.atomic.AtomicBoolean
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
+import java.util.*
 
 private const val DEFAULT_BUFFER_SIZE = 1024
 
@@ -100,5 +101,6 @@ class ActiveRecordingRenderer(
     /** Clears rendered data from buffer */
     fun clearData() {
         floatBuffer.clear()
+        Arrays.fill(pcmCompressor.accumulator, 0f)
     }
 }

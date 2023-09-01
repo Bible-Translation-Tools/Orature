@@ -4,6 +4,10 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import io.reactivex.Observable
+import io.reactivex.Scheduler
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
@@ -15,6 +19,8 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.recorder.WavFileWriter
 import java.io.File
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 
 class Narration @AssistedInject constructor(
     private val splitAudioOnCues: SplitAudioOnCues,
@@ -31,6 +37,11 @@ class Narration @AssistedInject constructor(
     private val chapterReaderConnection = chapterRepresentation.getAudioFileReader() as ChapterRepresentation.ChapterRepresentationConnection
 
     private var audioLoaded = false
+
+    private val isRecording = AtomicBoolean(false)
+    private val uncommittedRecordedFrames = AtomicInteger(0)
+
+    private val disposables = CompositeDisposable()
 
     val workingAudio: AudioFile
         get() = chapterRepresentation.scratchAudio
@@ -62,6 +73,26 @@ class Narration @AssistedInject constructor(
         updateWorkingFilesFromChapterFile()
         chapterRepresentation.loadFromSerializedVerses()
         recorder.start()
+        disposables.addAll(
+            activeRecordingFrameCounter(),
+            resetOnUpdatedVerses(),
+        )
+    }
+
+    private fun activeRecordingFrameCounter(): Disposable {
+        return getRecorderAudioStream()
+            .subscribeOn(Schedulers.io())
+            .subscribe {
+                if (isRecording.get()) {
+                    uncommittedRecordedFrames.addAndGet(it.size)
+                }
+            }
+    }
+
+    private fun resetOnUpdatedVerses(): Disposable {
+        return onActiveVersesUpdated.subscribe {
+            uncommittedRecordedFrames.set(0)
+        }
     }
 
     private fun getFirstVerseMarker(): VerseMarker {
@@ -82,6 +113,7 @@ class Narration @AssistedInject constructor(
     }
 
     fun closeRecorder() {
+        isRecording.set(false)
         recorder.stop()
 
         writer?.writer?.dispose()
@@ -111,7 +143,9 @@ class Narration @AssistedInject constructor(
         execute(action)
 
         // recorder.start()
+
         writer?.start()
+        isRecording.set(true)
     }
 
     fun onRecordAgain(verseIndex: Int) {
@@ -120,6 +154,7 @@ class Narration @AssistedInject constructor(
 
         // recorder.start()
         writer?.start()
+        isRecording.set(true)
     }
 
     fun onVerseMarker(verseIndex: Int, delta: Int) {
@@ -150,11 +185,13 @@ class Narration @AssistedInject constructor(
     fun pauseRecording() {
         // recorder.pause()
         writer?.pause()
+        isRecording.set(false)
     }
 
     fun resumeRecording() {
         // recorder.start()
         writer?.start()
+        isRecording.set(true)
     }
 
     fun hasUndo(): Boolean {

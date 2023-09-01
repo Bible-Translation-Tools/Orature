@@ -29,12 +29,7 @@ class PCMCompressor(private val ringBuffer: FloatRingBuffer, samplesToCompress: 
 
     fun add(data: FloatArray) {
         for (sample in data) {
-            if (index >= accumulator.size) {
-                sendDataToRingBuffer()
-                index = 0
-            }
-            accumulator[index] = sample
-            index++
+            add(sample)
         }
     }
 

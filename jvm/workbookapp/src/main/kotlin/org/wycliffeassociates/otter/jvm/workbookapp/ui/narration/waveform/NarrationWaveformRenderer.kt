@@ -8,15 +8,17 @@ import javafx.scene.canvas.GraphicsContext
 import javafx.scene.image.PixelFormat
 import javafx.scene.image.WritableImage
 import javafx.scene.paint.Paint
+import org.wycliffeassociates.otter.common.domain.narration.AudioScene
 import org.wycliffeassociates.otter.common.domain.narration.NarrationAudioScene
-import org.wycliffeassociates.otter.jvm.controls.waveform.Drawable
 import tornadofx.c
+import tornadofx.runLater
 import java.nio.ByteBuffer
 
 
 // Set up the canvas for the Waveform and Volume bar
 class NarrationWaveformRenderer(
-    val renderer: NarrationAudioScene
+    // val renderer: NarrationAudioScene
+    val renderer: AudioScene
 ) {
 
     val heightProperty = SimpleDoubleProperty(1.0)
@@ -24,7 +26,7 @@ class NarrationWaveformRenderer(
     val isRecordingProperty = SimpleBooleanProperty(false)
     val DEFAULT_SCREEN_WIDTH = Screen.getMainScreen().width
     val DEFAULT_SCREEN_HEIGHT = Screen.getMainScreen().height
-    val backgroundColor = c("#0000FF")
+    val backgroundColor = c("#E5E8EB")
     val waveformColor = c("#66768B")
     val writableImage = WritableImage(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT)
     val pixelWriter = writableImage.pixelWriter
@@ -35,22 +37,25 @@ class NarrationWaveformRenderer(
         fillImageDataWithDefaultColor()
     }
 
-    fun draw(context: GraphicsContext, canvas: Canvas) {
+    fun draw(context: GraphicsContext, canvas: Canvas, location: Int) {
         heightProperty.set(canvas.height)
 
-        val buffer = renderer.getFrameData()
+        //val buffer = renderer.getFrameData()
+        val buffer = renderer.getNarrationDrawable(location)
 
         fillImageDataWithDefaultColor()
         addLinesToImageData(buffer)
         drawImageDataToImage()
 
-        context.drawImage(
-            writableImage,
-            0.0,
-            0.0,
-            DEFAULT_SCREEN_WIDTH.toDouble(),
-            DEFAULT_SCREEN_HEIGHT.toDouble()
-        )
+        runLater {
+            context.drawImage(
+                writableImage,
+                0.0,
+                0.0,
+                DEFAULT_SCREEN_WIDTH.toDouble(),
+                DEFAULT_SCREEN_HEIGHT.toDouble()
+            )
+        }
     }
 
     private fun scaleAmplitude(sample: Double, height: Double): Double {
@@ -107,6 +112,6 @@ class NarrationWaveformRenderer(
     }
 
     fun clearActiveRecordingData() {
-        renderer.resetRecordingRenderer()
+        renderer.activeDrawable.clearBuffer()
     }
 }

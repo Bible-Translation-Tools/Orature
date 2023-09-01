@@ -7,6 +7,7 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.control.ScrollBar
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
@@ -22,8 +23,13 @@ import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.system.measureTimeMillis
+import kotlin.time.measureTime
 
 class AudioWorkspaceView : View() {
+    private val logger = LoggerFactory.getLogger(AudioWorkspaceView::class.java)
+
     private val viewModel: AudioWorkspaceViewModel by inject()
 
     private lateinit var narrationWaveformLayer: WaveformLayer
@@ -35,16 +41,21 @@ class AudioWorkspaceView : View() {
 
     val executor = ThreadPoolExecutor(1, 1, 10000, TimeUnit.SECONDS, LinkedBlockingQueue())
 
+    val finishedFrame = AtomicBoolean(true)
+
     val runnable = Runnable {
-        if (canvasInflatedProperty.value) {
-            viewModel.drawWaveform(
-                narrationWaveformLayer.getWaveformContext(),
-                narrationWaveformLayer.getWaveformCanvas()
-            )
-            viewModel.drawVolumeBar(
-                narrationWaveformLayer.getVolumeBarContext(),
-                narrationWaveformLayer.getVolumeCanvas()
-            )
+        if (finishedFrame.compareAndExchange(true, false)) {
+            if (canvasInflatedProperty.value) {
+                viewModel.drawWaveform(
+                    narrationWaveformLayer.getWaveformContext(),
+                    narrationWaveformLayer.getWaveformCanvas()
+                )
+                viewModel.drawVolumeBar(
+                    narrationWaveformLayer.getVolumeBarContext(),
+                    narrationWaveformLayer.getVolumeCanvas()
+                )
+            }
+            finishedFrame.set(true)
         }
     }
 

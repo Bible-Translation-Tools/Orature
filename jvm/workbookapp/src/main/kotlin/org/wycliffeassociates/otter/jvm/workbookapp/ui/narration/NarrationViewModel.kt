@@ -25,6 +25,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
+import org.wycliffeassociates.otter.common.domain.narration.AudioScene
 import org.wycliffeassociates.otter.common.domain.narration.Narration
 import org.wycliffeassociates.otter.common.domain.narration.NarrationAudioScene
 import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
@@ -146,7 +147,8 @@ class NarrationViewModel : ViewModel() {
         updateRecordingState()
         rendererAudioReader = narration.audioReader
         renderer = NarrationWaveformRenderer(
-            NarrationAudioScene(
+            // NarrationAudioScene(
+            AudioScene(
                 rendererAudioReader,
                 narration.getRecorderAudioStream(),
                 isRecordingProperty.toObservable(),
@@ -351,6 +353,7 @@ class NarrationViewModel : ViewModel() {
 
         narration.pauseRecording()
         narration.finalizeVerse(index)
+        renderer.clearActiveRecordingData()
     }
 
     private fun resumeRecording() {
@@ -443,9 +446,9 @@ class NarrationViewModel : ViewModel() {
             runLater {
                 audioPositionProperty.set(position)
             }
-            logger.error("rendering position is ${position}")
+            // logger.error("rendering position is ${position}")
             rendererAudioReader.seek(position)
-            renderer.draw(context, canvas)
+            renderer.draw(context, canvas, position)
         }
     }
 
