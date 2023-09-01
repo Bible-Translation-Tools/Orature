@@ -13,9 +13,8 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
-import org.controlsfx.control.GridView
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.enableScrollByKey
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import tornadofx.*
 
@@ -29,6 +28,7 @@ class RollingSourceText : VBox() {
     val zoomRateProperty = SimpleIntegerProperty(100)
 
     private lateinit var sourceTextChunksContainer: ListView<Node>
+    private val listeners = mutableListOf<ListenerDisposer>()
 
     init {
         addClass("source-content__top")
@@ -73,6 +73,11 @@ class RollingSourceText : VBox() {
         setUpListeners()
     }
 
+    fun disposeOfListeners() {
+        listeners.forEach { it.dispose() }
+        listeners.clear()
+    }
+
     private fun setUpListeners() {
         sourceTextProperty.onChangeAndDoNowWithDisposer { txt ->
             val chunks = txt?.trim()?.split(Regex("\\d{1,3}\\.")) ?: listOf()
@@ -82,22 +87,22 @@ class RollingSourceText : VBox() {
             val textNodes = chunks
                 .filter { it.isNotBlank() }
                 .mapIndexed { index, chunkText ->
-                buildChunkText(chunkText, index)
-            }.toMutableList()
+                    buildChunkText(chunkText, index)
+                }.toMutableList()
 
             nodes.add(sourceTitle)
             nodes.addAll(textNodes)
             nodes.add(licenseText)
 
             sourceTextChunksContainer.items.setAll(nodes)
-        }
+        }.also { listeners.add(it) }
 
         zoomRateProperty.onChangeAndDoNowWithDisposer { rate ->
             sourceTextChunksContainer.apply {
                 styleClass.removeAll { it.startsWith("text-zoom") }
                 addClass("text-zoom-$rate")
             }
-        }
+        }.also { listeners.add(it) }
     }
 
     private fun buildSourceTitle(): HBox {
@@ -117,7 +122,7 @@ class RollingSourceText : VBox() {
                     sourceTextChunksContainer.scrollTo(index)
                 }
                 togglePseudoClass("highlighted", highlightedIndex == index)
-            }
+            }.also { listeners.add(it) }
 
             label((index + 1).toString()) {
                 addClass("source-content__verse-number")

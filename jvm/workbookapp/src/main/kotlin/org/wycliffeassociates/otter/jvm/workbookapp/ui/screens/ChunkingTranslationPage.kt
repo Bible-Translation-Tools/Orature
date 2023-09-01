@@ -38,6 +38,8 @@ class ChunkingTranslationPage : View() {
         ChunkViewData(6, SimpleBooleanProperty(false), selectedChunk)
     )
 
+    private lateinit var sourceTextDrawer: SourceTextDrawer
+
     override val root = vbox {
         vgrow = Priority.ALWAYS
 
@@ -58,6 +60,7 @@ class ChunkingTranslationPage : View() {
             })
 
             right = SourceTextDrawer().apply {
+                sourceTextDrawer = this
                 textProperty.bind(sourceTextProperty)
                 highlightedChunk.bind(viewModel.currentMarkerNumberProperty)
             }
@@ -80,6 +83,7 @@ class ChunkingTranslationPage : View() {
 
     override fun onUndock() {
         super.onUndock()
+        sourceTextDrawer.disposeOfListeners()
     }
 }
 

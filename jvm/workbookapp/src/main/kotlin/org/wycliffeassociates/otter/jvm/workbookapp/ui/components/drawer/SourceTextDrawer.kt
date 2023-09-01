@@ -10,6 +10,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.RollingSourceText
 import org.wycliffeassociates.otter.jvm.controls.rollingSourceText
 import tornadofx.*
 import tornadofx.FX.Companion.messages
@@ -22,6 +23,8 @@ class SourceTextDrawer : VBox() {
     val highlightedChunk = SimpleIntegerProperty(-1)
 
     private val isCollapsedProperty = SimpleBooleanProperty(false)
+    private lateinit var sourceTextContent: RollingSourceText
+
     init {
         addClass("source-text-drawer")
         hbox {
@@ -63,6 +66,7 @@ class SourceTextDrawer : VBox() {
             }
         }
         rollingSourceText {
+            sourceTextContent = this
             sourceTitleProperty.bind(sourceInfoProperty)
             sourceTextProperty.bind(textProperty)
             licenseTextProperty.bind(licenseProperty)
@@ -73,4 +77,6 @@ class SourceTextDrawer : VBox() {
             managedWhen(visibleProperty())
         }
     }
+
+    fun disposeOfListeners() = sourceTextContent.disposeOfListeners()
 }
