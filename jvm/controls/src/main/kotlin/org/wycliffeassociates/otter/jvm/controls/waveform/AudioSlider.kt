@@ -30,7 +30,8 @@ import javafx.scene.paint.Paint
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.jvm.controls.skins.waveform.WaveformSliderSkin
+import org.wycliffeassociates.otter.jvm.controls.skins.slider.AudioSliderSkin
+import org.wycliffeassociates.otter.jvm.controls.skins.slider.WaveformSliderSkin
 import tornadofx.*
 
 class AudioSlider(
@@ -67,7 +68,8 @@ class AudioSlider(
     }
 
     override fun createDefaultSkin(): Skin<*> {
-        return WaveformSliderSkin(this)
+//        return WaveformSliderSkin(this)
+        return AudioSliderSkin(this)
     }
 
     fun updateMarker(id: Int, position: Double) {

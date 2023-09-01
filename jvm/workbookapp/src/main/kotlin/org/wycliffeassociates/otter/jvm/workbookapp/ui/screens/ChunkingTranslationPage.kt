@@ -64,10 +64,12 @@ class ChunkingTranslationPage : View() {
     }
 
     init {
-        tryImportStylesheet("/css/chunk-item.css")
+        tryImportStylesheet("/css/consume-page.css")
         tryImportStylesheet("/css/chunking-page.css")
         tryImportStylesheet("/css/source-content.css")
+        tryImportStylesheet("/css/chunk-item.css")
         tryImportStylesheet("/css/chunk-marker.css")
+        tryImportStylesheet("/css/scrolling-waveform.css")
     }
 
     override fun onDock() {

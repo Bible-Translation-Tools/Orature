@@ -30,6 +30,7 @@ import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.scene.control.Slider
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import javax.inject.Inject
@@ -52,6 +53,7 @@ import tornadofx.getValue
 import tornadofx.observableListOf
 import tornadofx.onChange
 import tornadofx.sizeProperty
+import kotlin.math.max
 
 const val ACTIVE = "chunking-wizard__step--active"
 const val COMPLETE = "chunking-wizard__step--complete"
@@ -155,7 +157,6 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
             (app as IDependencyGraphProvider).dependencyGraph.inject(this)
             audio = loadAudio(it)
             createWaveformImages(audio)
-            initializeAudioController()
             subscribeOnWaveformImages()
             loadMarkers(audio)
         }
@@ -246,8 +247,8 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
         disposeables.forEach { it.dispose() }
     }
 
-    private fun initializeAudioController() {
-        audioController = AudioPlayerController()
+    fun initializeAudioController(slider: Slider? = null) {
+        audioController = AudioPlayerController(slider)
         audioController?.load(audioPlayer.get())
         isPlayingProperty.bind(audioController!!.isPlayingProperty)
     }

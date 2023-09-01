@@ -62,3 +62,9 @@
     -fx-alignment: center;
     -fx-spacing: 5;
 }
+
+.audio-scroll-bar__track {
+    -fx-min-height: 16;
+    -fx-alignment: center;
+    -fx-padding: 2;
+}

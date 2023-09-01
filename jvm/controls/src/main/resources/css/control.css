@@ -644,6 +644,8 @@
 .wa-audio-slider .wa-audio-slider-thumb {
     -fx-stroke-width: 1;
     -fx-fill: -wa-minimap-slider-background;
+    -fx-arc-width: 10;
+    -fx-arc-height: 10;
 }
 
 .wa-audio-slider:focused .wa-audio-slider-thumb {
