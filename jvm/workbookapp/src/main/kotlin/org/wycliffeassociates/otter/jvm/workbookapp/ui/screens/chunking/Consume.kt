@@ -19,7 +19,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import com.sun.glass.ui.Screen
 import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
 import javafx.scene.control.Slider
@@ -30,60 +29,44 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
-import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
+import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
-import kotlin.math.max
 
 class Consume : Fragment() {
     private val logger = LoggerFactory.getLogger(Consume::class.java)
 
-    val viewModel: ChunkingViewModel by inject()
+    val vm: ChunkingViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
 
     private lateinit var waveform: MarkerPlacementWaveform
     private lateinit var slider: Slider
 
-    /** put these in VM */
-    private var sampleRate: Int = 0 // beware of divided by 0
-    private var totalFrames: Int = 0 // beware of divided by 0
-
     override fun onDock() {
         super.onDock()
         logger.info("Consume docked")
 
-        val wb = viewModel.workbookDataStore.workbook
-        val chapter = wb.target.chapters.blockingFirst()
-        val sourceAudio = wb.sourceAudioAccessor.getChapter(chapter.sort, wb.target)
-        viewModel.audioDataStore.sourceAudioProperty.set(sourceAudio)
-        viewModel.workbookDataStore.activeChapterProperty.set(chapter)
-
-        viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
-        viewModel.onDockConsume()
-        viewModel.initializeAudioController(slider)
-        viewModel.audioPlayer.value.getAudioReader()?.let {
-            sampleRate = it.sampleRate
-            totalFrames = it.totalFrames
-        }
-        waveform.markers.bind(viewModel.markers) { it }
+        vm.subscribeOnWaveformImages = ::subscribeOnWaveformImages
+        vm.onDockConsume()
+        vm.initializeAudioController(slider)
+        waveform.markers.bind(vm.markers) { it }
     }
 
     override fun onUndock() {
         super.onUndock()
-        viewModel.onUndockConsume()
+        vm.onUndockConsume()
     }
 
     private fun subscribeOnWaveformImages() {
-        viewModel.waveform
+        vm.waveform
             .observeOnFx()
             .subscribe {
                 waveform.addWaveformImage(it)
             }
-            .addTo(viewModel.compositeDisposable)
+            .addTo(vm.compositeDisposable)
     }
 
     override val root = vbox {
@@ -100,37 +83,16 @@ class Consume : Fragment() {
                         heightProperty().bind(this@vbox.heightProperty())
                     }
                     themeProperty.bind(settingsViewModel.appColorMode)
-                    positionProperty.bind(viewModel.positionProperty)
+                    positionProperty.bind(vm.positionProperty)
                     canMoveMarkerProperty.set(false)
+                    imageWidthProperty.bind(vm.imageWidthProperty)
 
-                    setOnSeekNext { viewModel.seekNext() }
-                    setOnSeekPrevious { viewModel.seekPrevious() }
-                    setOnPlaceMarker { viewModel.placeMarker() }
-                    setOnWaveformClicked { viewModel.pause() }
-                    setOnWaveformDragReleased { deltaPos ->
-                        val deltaFrames = org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames(deltaPos)
-                        val curFrames = viewModel.getLocationInFrames()
-                        val duration = viewModel.getDurationInFrames()
-                        val final = Utils.clamp(0, curFrames - deltaFrames, duration)
-                        viewModel.seek(final)
-                    }
-                    setOnRewind(viewModel::rewind)
-                    setOnFastForward(viewModel::fastForward)
-                    setOnToggleMedia(viewModel::mediaToggle)
-                    setOnResumeMedia(viewModel::resumeMedia)
+                    setUpWaveformActionHandlers()
 
                     // Marker stuff
-                    imageWidthProperty.bind(viewModel.imageWidthProperty)
-
-                    this.markers.bind(viewModel.markers) { it }
+                    this.markers.bind(vm.markers) { it }
                 }
-                slider = AudioSlider().apply {
-                    hgrow = Priority.ALWAYS
-                    colorThemeProperty.bind(settingsViewModel.selectedThemeProperty)
-                    setPixelsInHighlightFunction { pixelsInHighlight(it) }
-                    player.bind(viewModel.audioPlayer)
-                    secondsToHighlightProperty.set(SECONDS_ON_SCREEN)
-                }
+                slider = createAudioScrollbarSlider()
                 add(waveform)
                 add(slider)
             }
@@ -140,7 +102,7 @@ class Consume : Fragment() {
                     addClass("btn", "btn--primary", "consume__btn")
                     val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
                     val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
-                    textProperty().bind(viewModel.isPlayingProperty.stringBinding {
+                    textProperty().bind(vm.isPlayingProperty.stringBinding {
                         togglePseudoClass("active", it == true)
                         if (it == true) {
                             graphic = pauseIcon
@@ -152,27 +114,40 @@ class Consume : Fragment() {
                     })
 
                     action {
-                        viewModel.mediaToggle()
+                        vm.mediaToggle()
                     }
                 }
             }
         }
     }
 
-    /** go to VM */
-    fun pixelsInHighlight(controlWidth: Double): Double {
-        if (sampleRate == 0 || totalFrames == 0) {
-            return 1.0
+    private fun setUpWaveformActionHandlers() {
+        waveform.apply {
+            setOnSeekNext { vm.seekNext() }
+            setOnSeekPrevious { vm.seekPrevious() }
+            setOnPlaceMarker { vm.placeMarker() }
+            setOnWaveformClicked { vm.pause() }
+            setOnWaveformDragReleased { deltaPos ->
+                val deltaFrames = pixelsToFrames(deltaPos)
+                val curFrames = vm.getLocationInFrames()
+                val duration = vm.getDurationInFrames()
+                val final = Utils.clamp(0, curFrames - deltaFrames, duration)
+                vm.seek(final)
+            }
+            setOnRewind(vm::rewind)
+            setOnFastForward(vm::fastForward)
+            setOnToggleMedia(vm::mediaToggle)
+            setOnResumeMedia(vm::resumeMedia)
         }
-
-        val framesInHighlight = sampleRate * SECONDS_ON_SCREEN
-        val framesPerPixel = totalFrames / max(controlWidth, 1.0)
-        return max(framesInHighlight / framesPerPixel, 1.0)
     }
-}
 
-fun pixelsToFrames(pixels: Double): Int {
-    val framesOnScreen = SECONDS_ON_SCREEN * 44100
-    val framesInPixel = framesOnScreen / Screen.getMainScreen().platformWidth
-    return (pixels * framesInPixel).toInt()
+    private fun createAudioScrollbarSlider(): Slider {
+        return AudioSlider().apply {
+            hgrow = Priority.ALWAYS
+            colorThemeProperty.bind(settingsViewModel.selectedThemeProperty)
+            setPixelsInHighlightFunction { vm.pixelsInHighlight(it) }
+            player.bind(vm.audioPlayer)
+            secondsToHighlightProperty.set(SECONDS_ON_SCREEN)
+        }
+    }
 }

@@ -23,7 +23,6 @@ import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import java.io.File
-import java.text.MessageFormat
 import javafx.animation.AnimationTimer
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
@@ -126,6 +125,9 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
 
     var subscribeOnWaveformImages: () -> Unit = {}
 
+    private var sampleRate: Int = 0 // beware of divided by 0
+    private var sourceTotalFrames: Int = 0 // beware of divided by 0
+
     init {
         pageProperty.onChange {
             when (it) {
@@ -149,9 +151,12 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
     }
 
     fun onDockConsume() {
-        pageProperty.set(ChunkingWizardPage.CONSUME)
-        titleProperty.set(messages["consumeTitle"])
-        stepProperty.set(MessageFormat.format(messages["consumeDescription"], chapterTitle))
+        /** Update states should be done beforehand, not here */
+        val wb = workbookDataStore.workbook
+        val chapter = wb.target.chapters.blockingFirst()
+        val sourceAudio = wb.sourceAudioAccessor.getChapter(chapter.sort, wb.target)
+        audioDataStore.sourceAudioProperty.set(sourceAudio)
+        workbookDataStore.activeChapterProperty.set(chapter)
 
         sourceAudio?.file?.let {
             (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -203,6 +208,10 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
         val player = audioConnectionFactory.getPlayer()
         val audio = OratureAudioFile(audioFile)
         player.load(audioFile)
+        player.getAudioReader()?.let {
+            sampleRate = it.sampleRate
+            sourceTotalFrames = it.totalFrames
+        }
         audioPlayer.set(player)
         return audio
     }
@@ -274,5 +283,16 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
         val samplesPerPixel = samplesPerScreenWidth / width
         val pixelsInDuration = audioPlayer.get().getDurationInFrames() / samplesPerPixel
         return pixelsInDuration.toDouble()
+    }
+
+
+    fun pixelsInHighlight(controlWidth: Double): Double {
+        if (sampleRate == 0 || sourceTotalFrames == 0) {
+            return 1.0
+        }
+
+        val framesInHighlight = sampleRate * SECONDS_ON_SCREEN
+        val framesPerPixel = sourceTotalFrames / max(controlWidth, 1.0)
+        return max(framesInHighlight / framesPerPixel, 1.0)
     }
 }
