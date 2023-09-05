@@ -18,14 +18,12 @@
  */
 package org.wycliffeassociates.otter.common.data.workbook
 
-import com.jakewharton.rxrelay2.ReplayRelay
+import com.jakewharton.rxrelay2.BehaviorRelay
 import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.rxkotlin.cast
-import io.reactivex.rxkotlin.toObservable
 import io.reactivex.schedulers.Schedulers
-import java.lang.Thread.sleep
 import java.util.*
 import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
@@ -40,7 +38,7 @@ class Chapter(
     override val audio: AssociatedAudio,
     override val resources: List<ResourceGroup>,
     override val subtreeResources: List<ResourceMetadata>,
-    private val lazychunks: Lazy<ReplayRelay<List<Chunk>>>,
+    private val lazychunks: Lazy<BehaviorRelay<List<Chunk>>>,
     val chunkCount: Single<Int>,
     val addChunk: (List<Content>) -> Unit,
     val reset: () -> Unit

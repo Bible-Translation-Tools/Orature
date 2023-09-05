@@ -18,7 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories
 
-import com.jakewharton.rxrelay2.ReplayRelay
+import com.jakewharton.rxrelay2.BehaviorRelay
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -42,7 +42,7 @@ class ContentRepository @Inject constructor(
 ) : IContentRepository {
     private val logger = LoggerFactory.getLogger(ContentRepository::class.java)
 
-    private val activeConnections = mutableMapOf<Collection, ReplayRelay<List<Content>>>()
+    private val activeConnections = mutableMapOf<Collection, BehaviorRelay<List<Content>>>()
 
     private val contentDao = database.contentDao
     private val takeDao = database.takeDao
@@ -70,7 +70,7 @@ class ContentRepository @Inject constructor(
     override fun getByCollectionWithPersistentConnection(collection: Collection): Observable<List<Content>> {
         activeConnections.getOrDefault(collection, null)?.let { return it }
 
-        val connection = ReplayRelay.create<List<Content>>()
+        val connection = BehaviorRelay.create<List<Content>>()
         activeConnections[collection] = connection
         getByCollection(collection)
             .map {

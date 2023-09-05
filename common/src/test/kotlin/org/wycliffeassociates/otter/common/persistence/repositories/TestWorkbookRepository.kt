@@ -18,7 +18,7 @@
  */
 package org.wycliffeassociates.otter.common.persistence.repositories
 
-import com.jakewharton.rxrelay2.ReplayRelay
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.times
@@ -216,7 +216,7 @@ class TestWorkbookRepository {
             val collection = invocation.getArgument<Collection>(0)!!
             val format = if (collection.resourceContainer == rcTarget) "audio/wav" else "text/usfm"
 
-            val rr = ReplayRelay.create<List<Content>>()
+            val rr = BehaviorRelay.create<List<Content>>()
             when (collection.slug.count { it == '_' }) {
                 1 -> {
                     (1..BasicTestParams.chunksPerChapter).map { verse ->

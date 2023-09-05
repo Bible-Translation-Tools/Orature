@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.common.domain.content
 
-import com.jakewharton.rxrelay2.ReplayRelay
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.mock
@@ -163,7 +163,7 @@ class ResetChunksTest {
                 val collection = invocation.getArgument<Collection>(0)!!
                 val format = if (collection.resourceContainer == rcTarget) "audio/wav" else "text/usfm"
 
-                val rr = ReplayRelay.create<List<Content>>()
+                val rr = BehaviorRelay.create<List<Content>>()
                 when (collection.slug.count { it == '_' }) {
                     1 -> {
                         val content = Content(

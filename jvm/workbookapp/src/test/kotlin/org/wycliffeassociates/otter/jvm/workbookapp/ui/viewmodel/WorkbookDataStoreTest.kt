@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.ReplayRelay
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
@@ -50,7 +51,6 @@ import org.wycliffeassociates.otter.jvm.device.ConfigureAudioSystem
 import org.wycliffeassociates.otter.jvm.workbookapp.utils.writeWavFile
 import tornadofx.*
 import java.io.File
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 class WorkbookDataStoreTest {
@@ -137,7 +137,7 @@ class WorkbookDataStoreTest {
         }
 
         private fun createChapter(chunk: Chunk): Chapter {
-            val chunks = ReplayRelay.create<List<Chunk>>()
+            val chunks = BehaviorRelay.create<List<Chunk>>()
             chunks.accept(listOf(chunk))
             return Chapter(
                 1,
