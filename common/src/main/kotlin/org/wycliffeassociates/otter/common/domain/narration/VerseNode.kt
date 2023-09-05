@@ -6,7 +6,7 @@ import kotlin.math.min
 
 private const val UNPLACED_END = -1
 
-internal data class VerseNode(
+data class VerseNode(
     /**
      * Start location in audio frames within the scratch audio recording. This is an absolute frame position into
      * the file.
@@ -143,8 +143,9 @@ internal data class VerseNode(
      */
     fun addRange(ranges: List<IntRange>) {
         sectors.addAll(ranges)
-        sectors.sortBy { it.first }
-        flattenSectors()
+        // TODO: this is probably incorrect, as it might rearrange the content within a verse.
+//        sectors.sortBy { it.first }
+//        flattenSectors()
     }
 
     /**
@@ -198,11 +199,12 @@ internal data class VerseNode(
         }
 
         var frameOffset = 0
-        sectors.forEach { sector ->
-            if (absoluteFrame in sector) {
+        for(sector in sectors) {
+            if (absoluteFrame !in sector) {
                 frameOffset += (sector.last - sector.first)
             } else {
                 frameOffset += absoluteFrame - sector.first
+                break
             }
         }
         return frameOffset
@@ -235,7 +237,7 @@ internal data class VerseNode(
 
         val start = framePosition
         val end = (start + min(sectors[startIndex].last - start, framesToRead))
-        val firstRange = start..end
+        val firstRange = start until end
         stuff.add(firstRange)
         framesToRead -= firstRange.length()
 
@@ -243,7 +245,7 @@ internal data class VerseNode(
             if (framesToRead <= 0) break
             val sector = sectors[idx]
             val end = (start + min(sectors[startIndex].last - start, framesToRead))
-            val range = (sector.first..end)
+            val range = (sector.first until end)
             framesToRead -= range.length()
             stuff.add(range)
         }
