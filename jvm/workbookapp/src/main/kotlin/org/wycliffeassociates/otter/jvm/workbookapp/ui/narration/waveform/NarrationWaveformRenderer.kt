@@ -52,7 +52,8 @@ class NarrationWaveformRenderer(
                 writableImage,
                 0.0,
                 0.0,
-                DEFAULT_SCREEN_WIDTH.toDouble(),
+                //DEFAULT_SCREEN_WIDTH.toDouble(),
+                canvas.width + ((25+88) * (canvas.width / DEFAULT_SCREEN_WIDTH.toDouble())),
                 DEFAULT_SCREEN_HEIGHT.toDouble()
             )
 
