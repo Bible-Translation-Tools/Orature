@@ -657,8 +657,19 @@ class VerseNodeTest {
         }
     }
 
-    // TODO: figure out how to hit the second IndexOutOfBoundsException
+    // TODO: figure out how to hit the second IndexOutOfBoundsException for absoluteFrameFromOffset
 
+
+    @Test
+    fun `get sectors from offset with no sectors`() {
+        val verseMarker = VerseMarker(1, 1, 0)
+        val sectors = mutableListOf<IntRange>()
+
+        val verseNode = VerseNode(0,0, true, verseMarker, sectors)
+
+        val sectorsFromOffset = verseNode.getSectorsFromOffset(500, 1000)
+        Assert.assertEquals(0, sectorsFromOffset.size)
+    }
 
     @Test
     fun `get sectors from offset with negative ftr and does not contains frame position`() {
@@ -675,7 +686,7 @@ class VerseNodeTest {
     }
 
     @Test
-    fun `get sectors from offset positive ftr and contains frame position`() {
+    fun `get sectors from offset positive ftr and does not contain frame position`() {
         val verseMarker = VerseMarker(1, 1, 0)
         val sectors = mutableListOf<IntRange>()
         sectors.add(1000.. 1999)
@@ -688,7 +699,79 @@ class VerseNodeTest {
         Assert.assertEquals(0, sectorsFromOffset.size)
     }
 
-    // TODO: add more test for get sectors from offset once I understand its purpose more
+    // Starts at a particular offset, then gets the number of sectors up to the framesToRead
+    // Starting from some offset, how many sectors do I encounter while trying to read "framesToRead" number of frames
+    @Test
+    fun `get sectors from offset with framePosition equal to first sector's start and ftr less than first sector's end`() {
+        val verseMarker = VerseMarker(1, 1, 0)
+        val sectors = mutableListOf<IntRange>()
+        sectors.add(1000.. 1999)
+        sectors.add(5000.. 5999)
+        sectors.add(8000.. 8999)
+
+        val verseNode = VerseNode(0,0, true, verseMarker, sectors)
+
+        val sectorsFromOffset = verseNode.getSectorsFromOffset(1000, 300)
+        println(sectorsFromOffset)
+        Assert.assertEquals(1, sectorsFromOffset.size)
+        Assert.assertEquals(1000 .. 1299, sectorsFromOffset.first())
+
+    }
+
+    @Test
+    fun `get sectors from offset with framePosition equal to first sector's start and ftr greater than first sector's end`() {
+        val verseMarker = VerseMarker(1, 1, 0)
+        val sectors = mutableListOf<IntRange>()
+        sectors.add(1000.. 1999)
+        sectors.add(5000.. 5999)
+        sectors.add(8000.. 8999)
+
+        val verseNode = VerseNode(0,0, true, verseMarker, sectors)
+
+        val sectorsFromOffset = verseNode.getSectorsFromOffset(1000, 1300)
+        Assert.assertEquals(2, sectorsFromOffset.size)
+        // NOTE: making the returned list exclusive could possibly result in some unexpected return values
+        Assert.assertEquals(1000 .. 1998, sectorsFromOffset[0])
+        Assert.assertEquals(5000 .. 5301, sectorsFromOffset[1])
+    }
+
+    @Test
+    fun `get sectors from offset with framePosition equal to first sector's start and ftr greater than sector's length`() {
+        val verseMarker = VerseMarker(1, 1, 0)
+        val sectors = mutableListOf<IntRange>()
+        sectors.add(1000.. 1999)
+        sectors.add(5000.. 5999)
+        sectors.add(8000.. 8999)
+
+        val verseNode = VerseNode(0,0, true, verseMarker, sectors)
+
+        val sectorsFromOffset = verseNode.getSectorsFromOffset(1000, 4000)
+        println(sectorsFromOffset)
+        Assert.assertEquals(3, sectorsFromOffset.size)
+        // NOTE: making the returned list exclusive could possibly result in some unexpected return values
+        Assert.assertEquals(1000 .. 1998, sectorsFromOffset[0])
+        Assert.assertEquals(5000 .. 5998, sectorsFromOffset[1])
+        Assert.assertEquals(8000 .. 8998, sectorsFromOffset[2])
+    }
+
+
+    @Test
+    fun `get sectors from offset with framePosition not equal to first sector's start and ftr less than sector's length`() {
+        val verseMarker = VerseMarker(1, 1, 0)
+        val sectors = mutableListOf<IntRange>()
+        sectors.add(1000.. 1999)
+        sectors.add(5000.. 5999)
+        sectors.add(8000.. 8999)
+
+        val verseNode = VerseNode(0,0, true, verseMarker, sectors)
+
+        val sectorsFromOffset = verseNode.getSectorsFromOffset(1500, 1000)
+        println(sectorsFromOffset)
+        Assert.assertEquals(2, sectorsFromOffset.size)
+        // NOTE: making the returned list exclusive could possibly result in some unexpected return values
+        Assert.assertEquals(1500 .. 1998, sectorsFromOffset[0])
+        Assert.assertEquals(5000 .. 5501, sectorsFromOffset[1])
+    }
 }
 
 
