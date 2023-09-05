@@ -3,18 +3,13 @@ package org.wycliffeassociates.otter.common.domain.narration
 import io.reactivex.Observable
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
-import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.collections.FloatRingBuffer
 import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
 import org.wycliffeassociates.otter.common.recorder.PCMCompressor
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.*
-import kotlin.math.absoluteValue
-import kotlin.math.floor
-import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.roundToInt
 
 class NarrationAudioScene(
     private val existingAudioReader: AudioFileReader,
@@ -130,181 +125,6 @@ class NarrationAudioScene(
 
     private fun samplesToCompress(width: Int, secondsOnScreen: Int): Int {
         return (existingAudioReader.sampleRate * secondsOnScreen) / width
-    }
-}
-
-class AudioReaderDrawable(
-    private val audioReader: AudioFileReader,
-    private val width: Int,
-    private val secondsOnScreen: Int,
-    private val recordingSampleRate: Int,
-    // private val padEnds: Float = 0f
-) {
-    private val logger = LoggerFactory.getLogger(AudioReaderDrawable::class.java)
-
-    private val waveformDrawable = FloatArray(width * 2)
-    private val drawableData = FloatRingBuffer(width * 2)
-    private val pcmCompressor = PCMCompressor(drawableData, samplesToCompress(width, secondsOnScreen))
-
-    private val tempBuff = ByteArray(DEFAULT_BUFFER_SIZE)
-    private val bb = ByteBuffer.wrap(tempBuff).apply { order(ByteOrder.LITTLE_ENDIAN) }
-
-    private fun samplesToCompress(width: Int, secondsOnScreen: Int): Int {
-        return (recordingSampleRate * secondsOnScreen) / width
-    }
-
-    fun getWaveformDrawable(location: Int): FloatArray {
-        Arrays.fill(waveformDrawable, 0f)
-        drawableData.clear()
-
-        val clampedLoc = location.coerceIn(0..audioReader.totalFrames)
-        audioReader.seek(clampedLoc)
-
-        val totalSamplesToRead = secondsOnScreen * recordingSampleRate
-
-//        var paddedFrames = 0
-//        if (location < 0 && padEnds > 0) {
-//            paddedFrames = padStart(
-//                pcmCompressor,
-//                audioReader.sampleSize / 8,
-//                floor(padEnds * totalSamplesToRead).toInt(),
-//                location
-//            )
-//        }
-
-        val frameSizeBytes = audioReader.sampleSize / 8
-
-
-        var framesToRead = max(min(totalSamplesToRead, audioReader.totalFrames - clampedLoc), 0) * frameSizeBytes
-
-
-        while (framesToRead > 0) {
-            val read = audioReader.getPcmBuffer(tempBuff)
-            val toTransfer = if (framesToRead > read) read else framesToRead
-            transferBytesToCompressor(pcmCompressor, bb, toTransfer, frameSizeBytes)
-            framesToRead -= read
-        }
-
-        for (i in waveformDrawable.indices) {
-            waveformDrawable[i] = drawableData[i]
-        }
-
-        return waveformDrawable
-    }
-
-    private fun transferBytesToCompressor(
-        pcmCompressor: PCMCompressor,
-        byteBuffer: ByteBuffer,
-        framesToRead: Int,
-        frameSizeBytes: Int
-    ) {
-        byteBuffer.position(0)
-        for (i in 0 until framesToRead / frameSizeBytes) {
-            pcmCompressor.add(bb.getShort().toFloat())
-        }
-    }
-
-    private fun padStart(pcmCompressor: PCMCompressor, frameSize: Int, framesToPad: Int, location: Int): Int {
-        val count = max(framesToPad - (location.absoluteValue * frameSize), 0)
-        for (i in 0 until count) {
-            pcmCompressor.add(0f)
-        }
-        return count
-    }
-}
-
-class ActiveRecordingDrawable(
-    private val incomingAudioStream: Observable<ByteArray>,
-    private val recordingActive: Observable<Boolean>,
-    private val width: Int,
-    private val secondsOnScreen: Int,
-    private val recordingSampleRate: Int,
-) {
-
-    private val activeRenderer = ActiveRecordingRenderer(
-        incomingAudioStream,
-        recordingActive,
-        width,
-        secondsOnScreen
-    )
-
-    private val waveformDrawable = FloatArray(width * 2)
-
-    fun getWaveformDrawable(): FloatArray {
-        Arrays.fill(waveformDrawable, 0f)
-
-        val activeData = activeRenderer.floatBuffer
-        val activeSize = activeData.size()
-
-        val totalSamplesToRead = secondsOnScreen * recordingSampleRate
-
-        val samplesFromActive = min(totalSamplesToRead, activeSize)
-        for (i in 0 until samplesFromActive) {
-            waveformDrawable[i] = activeData[i]
-        }
-
-        return waveformDrawable
-    }
-
-    private fun samplesToCompress(width: Int, secondsOnScreen: Int): Int {
-        return (recordingSampleRate * secondsOnScreen) / width
-    }
-
-    fun clearBuffer() {
-        activeRenderer.clearData()
-    }
-}
-
-class AudioScene(
-    private val existingAudioReader: AudioFileReader,
-    private val incomingAudioStream: Observable<ByteArray>,
-    private val recordingActive: Observable<Boolean>,
-    private val width: Int,
-    private val secondsOnScreen: Int,
-    private val recordingSampleRate: Int,
-) {
-
-    private val logger = LoggerFactory.getLogger(AudioScene::class.java)
-
-    val readerDrawable = AudioReaderDrawable(existingAudioReader, width, secondsOnScreen, recordingSampleRate)
-    val activeDrawable =
-        ActiveRecordingDrawable(incomingAudioStream, recordingActive, width, secondsOnScreen, recordingSampleRate)
-
-    val frameBuffer = FloatArray(width * 2)
-
-    var lastPositionRendered = -1
-
-    fun getNarrationDrawable(location: Int): FloatArray {
-        // if (lastPositionRendered != location) {
-            lastPositionRendered = location
-            Arrays.fill(frameBuffer, 0f)
-            val read = fillFromReader(location)
-            fillFromActive(location, frameBuffer.size - read)
-        //}
-        return frameBuffer
-    }
-
-    private fun fillFromReader(location: Int): Int {
-        existingAudioReader.seek(location)
-        val readerPosition = existingAudioReader.framePosition
-
-        val readerData = readerDrawable.getWaveformDrawable(location)
-        val framesToFill = secondsOnScreen * recordingSampleRate
-
-        val totalReaderFrames = existingAudioReader.totalFrames
-
-        val framesFromReader = min(framesToFill, (totalReaderFrames - readerPosition))
-        val pixelsFromReader = min(framesToPixels(framesFromReader, width, framesToFill) * 2, frameBuffer.size)
-
-        System.arraycopy(readerData, 0, frameBuffer, 0, pixelsFromReader)
-        return pixelsFromReader
-    }
-
-    private fun fillFromActive(location: Int, pixelsToFill: Int) {
-        if (pixelsToFill > 0) {
-            val activeData = activeDrawable.getWaveformDrawable()
-            System.arraycopy(activeData, 0, frameBuffer, frameBuffer.size - pixelsToFill, pixelsToFill)
-        }
     }
 }
 

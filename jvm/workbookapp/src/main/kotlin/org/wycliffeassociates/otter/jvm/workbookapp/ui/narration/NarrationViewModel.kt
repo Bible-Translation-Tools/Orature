@@ -133,7 +133,7 @@ class NarrationViewModel : ViewModel() {
         narration = narrationFactory.create(workbookDataStore.workbook, chapter)
         audioPlayer = narration.getPlayer()
         audioPlayer.addEventListener { event: AudioPlayerEvent ->
-            when(event) {
+            when (event) {
                 AudioPlayerEvent.PLAY -> isPlayingProperty.set(true)
                 AudioPlayerEvent.COMPLETE, AudioPlayerEvent.PAUSE, AudioPlayerEvent.STOP -> isPlayingProperty.set(false)
                 else -> {}
@@ -149,7 +149,7 @@ class NarrationViewModel : ViewModel() {
                 rendererAudioReader,
                 narration.getRecorderAudioStream(),
                 isRecordingProperty.toObservable(),
-                Screen.getMainScreen().width,
+                Screen.getMainScreen().width - 25 - 88,
                 10,
                 DEFAULT_SAMPLE_RATE
             )
@@ -424,13 +424,16 @@ class NarrationViewModel : ViewModel() {
         hasUndo = narration.hasUndo()
         hasRedo = narration.hasRedo()
 
-        narration.onActiveVersesUpdated.subscribe {
+        narration.onActiveVersesUpdated.subscribe { verses ->
             totalAudioSizeProperty.set(rendererAudioReader.totalFrames)
 
-            recordedVerses.setAll(it)
+            recordedVerses.setAll(verses)
 
             hasUndo = narration.hasUndo()
             hasRedo = narration.hasRedo()
+
+            val lastVerse = verses.getOrElse(lastRecordedVerseProperty.value, { verses.last() }).location
+            narration.seek(lastVerse)
 
             recordStart = recordedVerses.isEmpty()
             recordResume = recordedVerses.isNotEmpty()

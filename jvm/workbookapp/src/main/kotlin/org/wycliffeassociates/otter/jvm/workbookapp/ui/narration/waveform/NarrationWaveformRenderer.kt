@@ -9,9 +9,9 @@ import javafx.scene.image.PixelFormat
 import javafx.scene.image.WritableImage
 import javafx.scene.paint.Paint
 import org.wycliffeassociates.otter.common.domain.narration.AudioScene
-import org.wycliffeassociates.otter.common.domain.narration.NarrationAudioScene
 import tornadofx.c
 import tornadofx.runLater
+import java.awt.Color
 import java.nio.ByteBuffer
 
 
@@ -55,6 +55,10 @@ class NarrationWaveformRenderer(
                 DEFAULT_SCREEN_WIDTH.toDouble(),
                 DEFAULT_SCREEN_HEIGHT.toDouble()
             )
+
+            context.stroke = javafx.scene.paint.Color.RED
+            context.lineWidth = 2.0
+            context.strokeLine(canvas.width / 2.0, 0.0, canvas.width / 2.0, canvas.height)
         }
     }
 

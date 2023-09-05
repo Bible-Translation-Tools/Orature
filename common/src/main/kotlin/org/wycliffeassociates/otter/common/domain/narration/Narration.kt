@@ -318,7 +318,10 @@ class Narration @AssistedInject constructor(
 
     fun scrollAudio(delta: Int) {
         chapterReaderConnection.seek(delta)
-        player
+    }
+
+    fun seek(location: Int) {
+        chapterReaderConnection.seek(location)
     }
 
     fun getLocationInFrames(): Int {
