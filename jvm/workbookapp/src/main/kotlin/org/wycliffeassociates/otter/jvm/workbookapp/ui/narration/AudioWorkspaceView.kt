@@ -84,7 +84,7 @@ class AudioWorkspaceView : View() {
                 maxProperty().bind(viewModel.totalAudioSizeProperty)
 
                 valueProperty().onChange {
-                    if (viewModel.isPlayingProperty.value == false) {
+                    if (viewModel.isPlayingProperty.value == false && viewModel.isRecordingProperty.value == false) {
                         viewModel.scrollAudio(pixelsToFrames(it))
                     }
                 }
