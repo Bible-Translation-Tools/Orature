@@ -712,7 +712,6 @@ class VerseNodeTest {
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
         val sectorsFromOffset = verseNode.getSectorsFromOffset(1000, 300)
-        println(sectorsFromOffset)
         Assert.assertEquals(1, sectorsFromOffset.size)
         Assert.assertEquals(1000 .. 1299, sectorsFromOffset.first())
 
@@ -746,7 +745,6 @@ class VerseNodeTest {
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
         val sectorsFromOffset = verseNode.getSectorsFromOffset(1000, 4000)
-        println(sectorsFromOffset)
         Assert.assertEquals(3, sectorsFromOffset.size)
         // NOTE: making the returned list exclusive could possibly result in some unexpected return values
         Assert.assertEquals(1000 .. 1998, sectorsFromOffset[0])
@@ -766,7 +764,6 @@ class VerseNodeTest {
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
         val sectorsFromOffset = verseNode.getSectorsFromOffset(1500, 1000)
-        println(sectorsFromOffset)
         Assert.assertEquals(2, sectorsFromOffset.size)
         // NOTE: making the returned list exclusive could possibly result in some unexpected return values
         Assert.assertEquals(1500 .. 1998, sectorsFromOffset[0])
