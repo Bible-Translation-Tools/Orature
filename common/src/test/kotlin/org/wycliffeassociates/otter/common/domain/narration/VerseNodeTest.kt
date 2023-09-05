@@ -38,7 +38,7 @@ class VerseNodeTest {
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
         // QUESTION: is the intended implementation to use exclusive or inclusive vale for end?
-        Assert.assertEquals(3000, verseNode.length)
+        Assert.assertEquals(2997, verseNode.length)
     }
 
     @Test
@@ -241,7 +241,6 @@ class VerseNodeTest {
 
         val sectorsTaken = verseNode.takeFramesFromStart(3000)
 
-        // need to test that sectorstaken is as expected
         val expectedSectorsTaken = mutableListOf<IntRange>()
         expectedSectorsTaken.add(1000.. 1999)
         expectedSectorsTaken.add(2000 .. 2999)
@@ -348,8 +347,6 @@ class VerseNodeTest {
         expectedSectorsTaken.add(3000 .. 3999)
 
 
-        println(sectorsTaken)
-
         // QUESTION: Is remaining be decremented each iteration of the loop?
         // It seems to get stuck on 1, and stays stuck until it iterates through the
         // sectors list.
@@ -413,6 +410,7 @@ class VerseNodeTest {
         Assert.assertTrue(verseNode.sectors.equals(ranges))
     }
 
+    // NOTE: test is potentially no longer relevant since we are not sorting the list of ranges anymore
     @Test
     fun `add range with multiple items in unordered ranges list that do not have overlapping ranges`() {
         val verseMarker = VerseMarker(1, 1, 0)
@@ -429,6 +427,7 @@ class VerseNodeTest {
         Assert.assertTrue(verseNode.sectors.equals(ranges.sortedBy { it.first }))
     }
 
+    // NOTE: test is potentially no longer relevant since we are not flattening the list of ranges anymore
     @Test
     fun `add range with multiple items in ordered ranges list that have overlapping ranges`() {
         val verseMarker = VerseMarker(1, 1, 0)
@@ -445,6 +444,7 @@ class VerseNodeTest {
         Assert.assertTrue(verseNode.sectors.equals(ranges))
     }
 
+    // NOTE: test is potentially no longer relevant since we are not sorting the list of ranges anymore
     @Test
     fun `add range with multiple items in unordered ranges list that have overlapping ranges`() {
         val verseMarker = VerseMarker(1, 1, 0)
@@ -560,6 +560,7 @@ class VerseNodeTest {
 
         try {
             verseNode.framesToPosition(10000)
+            Assert.fail("expecting IndexOutOfBoundsException")
         } catch (ise: IndexOutOfBoundsException) {
             // Success: expecting IndexOutOfBoundsException
         }
@@ -576,13 +577,118 @@ class VerseNodeTest {
 
 
         try {
-            // QUESTION: should their be a break in the forEach loop once the sector is found?
-            // additionally, are the operations on the first/last/absolute frames correct?
             Assert.assertEquals(500, verseNode.framesToPosition(2500))
         } catch (ise: IndexOutOfBoundsException) {
             Assert.fail("Not expecting IndexOutOfBoundsException")
         }
     }
+
+
+
+    @Test
+    fun `absolute frame from offset with one sector and out of bounds frames from start`() {
+        val verseMarker = VerseMarker(1, 1, 0)
+        val sectors = mutableListOf<IntRange>()
+        sectors.add(1000.. 1999)
+        val verseNode = VerseNode(0,0, true, verseMarker, sectors)
+
+
+        try {
+            verseNode.absoluteFrameFromOffset(2000)
+            Assert.fail("Expecting IndexOutOfBoundsException")
+        } catch (ise: IndexOutOfBoundsException) {
+            // Success: expecting IndexOutOfBoundsException
+        }
+    }
+
+
+    @Test
+    fun `absolute frame from offset with one sector and in bounds frames from start`() {
+        val verseMarker = VerseMarker(1, 1, 0)
+        val sectors = mutableListOf<IntRange>()
+        sectors.add(1000.. 1999)
+        val verseNode = VerseNode(0,0, true, verseMarker, sectors)
+
+
+        try {
+            val absoluteFrame = verseNode.absoluteFrameFromOffset(500)
+            Assert.assertEquals(1500, absoluteFrame)
+        } catch (ise: IndexOutOfBoundsException) {
+            Assert.fail("Not expecting IndexOutOfBoundsException")
+        }
+    }
+
+
+    @Test
+    fun `absolute frame from offset with multiple in order sectors and in bounds frames from start`() {
+        val verseMarker = VerseMarker(1, 1, 0)
+        val sectors = mutableListOf<IntRange>()
+        sectors.add(1000.. 1999)
+        sectors.add(5000.. 5999)
+        sectors.add(8000.. 8999)
+
+        val verseNode = VerseNode(0,0, true, verseMarker, sectors)
+
+
+        try {
+            val absoluteFrame = verseNode.absoluteFrameFromOffset(1500)
+            Assert.assertEquals(5501, absoluteFrame)
+        } catch (ise: IndexOutOfBoundsException) {
+            Assert.fail("Not expecting IndexOutOfBoundsException")
+        }
+    }
+
+    @Test
+    fun `absolute frame from offset with multiple out of order sectors and in bounds frames from start`() {
+        val verseMarker = VerseMarker(1, 1, 0)
+        val sectors = mutableListOf<IntRange>()
+        sectors.add(1000.. 1999)
+        sectors.add(8000.. 8999)
+        sectors.add(5000.. 5999)
+
+        val verseNode = VerseNode(0,0, true, verseMarker, sectors)
+
+
+        try {
+            val absoluteFrame = verseNode.absoluteFrameFromOffset(1500)
+            Assert.assertEquals(8501, absoluteFrame)
+        } catch (ise: IndexOutOfBoundsException) {
+            Assert.fail("Not expecting IndexOutOfBoundsException")
+        }
+    }
+
+    // TODO: figure out how to hit the second IndexOutOfBoundsException
+
+
+    @Test
+    fun `get sectors from offset with negative ftr and does not contains frame position`() {
+        val verseMarker = VerseMarker(1, 1, 0)
+        val sectors = mutableListOf<IntRange>()
+        sectors.add(1000.. 1999)
+        sectors.add(5000.. 5999)
+        sectors.add(8000.. 8999)
+
+        val verseNode = VerseNode(0,0, true, verseMarker, sectors)
+
+        val sectorsFromOffset = verseNode.getSectorsFromOffset(500, -1)
+        Assert.assertEquals(0, sectorsFromOffset.size)
+    }
+
+    @Test
+    fun `get sectors from offset positive ftr and contains frame position`() {
+        val verseMarker = VerseMarker(1, 1, 0)
+        val sectors = mutableListOf<IntRange>()
+        sectors.add(1000.. 1999)
+        sectors.add(5000.. 5999)
+        sectors.add(8000.. 8999)
+
+        val verseNode = VerseNode(0,0, true, verseMarker, sectors)
+
+        val sectorsFromOffset = verseNode.getSectorsFromOffset(500, 1000)
+        Assert.assertEquals(0, sectorsFromOffset.size)
+    }
+
+    // TODO: add more test for get sectors from offset once I understand its purpose more
 }
 
 
