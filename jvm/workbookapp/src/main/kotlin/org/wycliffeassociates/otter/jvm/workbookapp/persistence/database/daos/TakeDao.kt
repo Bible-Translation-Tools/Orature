@@ -59,7 +59,9 @@ class TakeDao(
                 TAKE_ENTITY.NUMBER,
                 TAKE_ENTITY.CREATED_TS,
                 TAKE_ENTITY.DELETED_TS,
-                TAKE_ENTITY.PLAYED
+                TAKE_ENTITY.PLAYED,
+                TAKE_ENTITY.CHECKING_FK,
+                TAKE_ENTITY.CHECKSUM,
             )
             .values(
                 entity.contentFk,
@@ -68,7 +70,9 @@ class TakeDao(
                 entity.number,
                 entity.createdTs,
                 entity.deletedTs,
-                entity.played
+                entity.played,
+                entity.checkingFk,
+                entity.checksum
             )
             .execute()
 
@@ -110,6 +114,8 @@ class TakeDao(
             .set(TAKE_ENTITY.CREATED_TS, entity.createdTs)
             .set(TAKE_ENTITY.DELETED_TS, entity.deletedTs)
             .set(TAKE_ENTITY.PLAYED, entity.played)
+            .set(TAKE_ENTITY.CHECKING_FK, entity.checkingFk)
+            .set(TAKE_ENTITY.CHECKSUM, entity.checksum)
             .where(TAKE_ENTITY.ID.eq(entity.id))
             .execute()
     }
