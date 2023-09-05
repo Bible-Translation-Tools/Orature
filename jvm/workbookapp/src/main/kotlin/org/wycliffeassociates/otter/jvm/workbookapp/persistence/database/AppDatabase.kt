@@ -108,6 +108,7 @@ class AppDatabase(
     val versificationDao = VersificationDao(dsl)
     val workbookTypeDao = WorkbookTypeDao(dsl)
     val workbookDescriptorDao = WorkbookDescriptorDao(dsl)
+    val checkingLevelDao = CheckingLevelDao(dsl)
 
     // Transaction support
     fun transaction(block: (DSLContext) -> Unit) {

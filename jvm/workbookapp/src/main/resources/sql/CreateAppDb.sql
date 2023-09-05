@@ -171,3 +171,9 @@ CREATE TABLE IF NOT EXISTS workbook_descriptor_entity (
     type_fk           INTEGER NOT NULL REFERENCES workbook_type(id) ON DELETE RESTRICT,
     UNIQUE (source_FK, target_FK, type_fk)
 );
+
+CREATE TABLE IF NOT EXISTS checking_level (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    name        TEXT NOT NULL,
+    UNIQUE (name COLLATE NOCASE) ON CONFLICT IGNORE
+);

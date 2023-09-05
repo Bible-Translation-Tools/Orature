@@ -24,7 +24,7 @@ import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
 import org.slf4j.LoggerFactory
 
-const val SCHEMA_VERSION = 12
+const val SCHEMA_VERSION = 13
 const val DATABASE_INSTALLABLE_NAME = "DATABASE"
 
 class DatabaseMigrator {
@@ -45,6 +45,7 @@ class DatabaseMigrator {
             currentVersion = migrate9to10(dsl, currentVersion)
             currentVersion = migrate10to11(dsl, currentVersion)
             currentVersion = migrate11to12(dsl, currentVersion)
+            currentVersion = migrate12to13(dsl, currentVersion)
             updateDatabaseVersion(dsl, currentVersion)
         }
     }
@@ -347,6 +348,24 @@ class DatabaseMigrator {
             createWorkbookDescriptorTable(dsl)
             logger.info("Updated database from version 11 to 12")
             12
+        } else {
+            current
+        }
+    }
+
+    private fun migrate12to13(dsl: DSLContext, current: Int): Int {
+        return if (current < 13) {
+            dsl
+                .createTableIfNotExists(CheckingLevel.CHECKING_LEVEL)
+                .column(CheckingLevel.CHECKING_LEVEL.ID)
+                .column(CheckingLevel.CHECKING_LEVEL.NAME)
+                .constraints(
+                    DSL.primaryKey(CheckingLevel.CHECKING_LEVEL.ID),
+                    DSL.unique(CheckingLevel.CHECKING_LEVEL.NAME)
+                )
+                .execute()
+            logger.info("Updated database from version 12 to 13")
+            13
         } else {
             current
         }
