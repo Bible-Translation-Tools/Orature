@@ -275,10 +275,31 @@ class VerseNodeTest {
         expectedVerseNodeSectors.add(3000 .. 3999)
 
         Assert.assertTrue(verseNode.sectors.equals(expectedVerseNodeSectors))
-
     }
 
-    // TODO: add test for takeFramesFromStart with node split
+    @Test fun `take frames from start with more frames than needed and with splitting a node`() {
+
+        val verseMarker = VerseMarker(1, 1, 0)
+        val sectors = mutableListOf<IntRange>()
+        sectors.add(1000.. 1999)
+        sectors.add(2000 .. 2999)
+        sectors.add(3000 .. 3999)
+        val verseNode = VerseNode(0,0, true, verseMarker, sectors)
+
+        val sectorsTaken = verseNode.takeFramesFromStart(2498)
+
+        val expectedSectorsTaken = mutableListOf<IntRange>()
+        expectedSectorsTaken.add(1000.. 1999)
+        expectedSectorsTaken.add(2000 .. 2999)
+        expectedSectorsTaken.add(3000 .. 3500)
+        println(sectorsTaken)
+        Assert.assertTrue(sectorsTaken.equals(expectedSectorsTaken))
+
+        val expectedVerseNodeSectors = mutableListOf<IntRange>()
+        expectedVerseNodeSectors.add(3500 .. 3999)
+
+        Assert.assertTrue(verseNode.sectors.equals(expectedVerseNodeSectors))
+    }
 
 
     @Test fun `take frames from end with no sectors`() {
