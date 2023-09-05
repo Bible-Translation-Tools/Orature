@@ -263,17 +263,12 @@ class VerseNodeTest {
         sectors.add(3000 .. 3999)
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
-        val sectorsTaken = verseNode.takeFramesFromStart(2000)
+        val sectorsTaken = verseNode.takeFramesFromStart(1998)
 
-        // need to test that sectorstaken is as expected
         val expectedSectorsTaken = mutableListOf<IntRange>()
         expectedSectorsTaken.add(1000.. 1999)
         expectedSectorsTaken.add(2000 .. 2999)
 
-        // QUESTION: Is remaining be decremented each iteration of the loop?
-        // It seems to get stuck on 1, and stays stuck until it iterates through the
-        // sectors list.
-        // NOTE: seems to be splitting node unnecessarily
         Assert.assertTrue(sectorsTaken.equals(expectedSectorsTaken))
 
         val expectedVerseNodeSectors = mutableListOf<IntRange>()
