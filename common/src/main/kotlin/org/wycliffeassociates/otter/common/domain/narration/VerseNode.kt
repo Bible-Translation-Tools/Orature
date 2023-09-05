@@ -242,9 +242,10 @@ data class VerseNode(
         framesToRead -= firstRange.length()
 
         for (idx in startIndex + 1 until sectors.size) {
-            if (framesToRead <= 0) break
+            if (framesToRead <= 1) break
             val sector = sectors[idx]
-            val end = (start + min(sectors[startIndex].last - start, framesToRead))
+            val start = sector.start
+            val end = (start + min(sectors[idx].last - start, framesToRead))
             val range = (sector.first until end)
             framesToRead -= range.length()
             stuff.add(range)
