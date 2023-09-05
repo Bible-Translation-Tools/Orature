@@ -603,7 +603,7 @@ class VerseNodeTest {
     }
 
     @Test
-    fun `frames to position with absolute frame in bounds`() {
+    fun `frames to position with absolute frame in first sector`() {
         val verseMarker = VerseMarker(1, 1, 0)
         val sectors = mutableListOf<IntRange>()
         sectors.add(2000.. 2999)
@@ -619,7 +619,22 @@ class VerseNodeTest {
         }
     }
 
+    @Test
+    fun `frames to position with absolute frame in last sector`() {
+        val verseMarker = VerseMarker(1, 1, 0)
+        val sectors = mutableListOf<IntRange>()
+        sectors.add(2000.. 2999)
+        sectors.add(3000.. 3999)
+        sectors.add(6000.. 6999)
+        val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
+
+        try {
+            Assert.assertEquals(2498, verseNode.framesToPosition(6500))
+        } catch (ise: IndexOutOfBoundsException) {
+            Assert.fail("Not expecting IndexOutOfBoundsException")
+        }
+    }
 
     @Test
     fun `absolute frame from offset with one sector and out of bounds frames from start`() {
