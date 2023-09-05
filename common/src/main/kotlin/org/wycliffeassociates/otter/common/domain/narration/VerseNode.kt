@@ -75,7 +75,7 @@ data class VerseNode(
     fun takeFramesFromStart(framesToTake: Int): List<IntRange> {
         var remaining = framesToTake
         val toGive = mutableListOf<IntRange>()
-        while (remaining >= 0) {
+        while (remaining > 0) {
             when {
                 // Consume the rest
                 remaining >= length -> {
@@ -84,7 +84,7 @@ data class VerseNode(
                     return toGive.apply { this.addAll(total) }
                 }
                 // Consume whole node
-                remaining > sectors.first().last - sectors.first().first -> {
+                remaining >= sectors.first().last - sectors.first().first -> {
                     val sector = sectors.first()
                     remaining -= sector.length()
                     sectors.removeFirst()
@@ -95,6 +95,7 @@ data class VerseNode(
                     val node = sectors.first()
                     toGive.add(node.first..(node.first + remaining))
                     sectors[0] = (node.first + remaining)..node.last
+                    break
                 }
             }
         }
@@ -112,7 +113,7 @@ data class VerseNode(
     fun takeFramesFromEnd(framesToTake: Int): List<IntRange> {
         var remaining = framesToTake
         val toGive = mutableListOf<IntRange>()
-        while (remaining >= 0) {
+        while (remaining > 0) {
             when {
                 // Consume the rest
                 remaining >= length -> {
@@ -121,7 +122,7 @@ data class VerseNode(
                     return toGive.apply { this.addAll(total) }
                 }
                 // Consume whole node
-                remaining > sectors.last().last - sectors.last().first -> {
+                remaining >= sectors.last().last - sectors.last().first -> {
                     val node = sectors.last()
                     remaining -= node.last - node.start
                     sectors.removeLast()
@@ -130,8 +131,9 @@ data class VerseNode(
                 // Split node
                 else -> {
                     val node = sectors.last()
-                    toGive.add(node.last..(node.last - remaining))
+                    toGive.add((node.last - remaining) .. node.last)
                     sectors[sectors.lastIndex] = node.first..(node.last - remaining)
+                    break
                 }
             }
         }
