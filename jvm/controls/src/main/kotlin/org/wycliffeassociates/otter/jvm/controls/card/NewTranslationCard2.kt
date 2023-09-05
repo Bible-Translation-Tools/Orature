@@ -5,6 +5,9 @@ import javafx.beans.value.ObservableValue
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.event.EventTarget
+import javafx.geometry.Pos
+import javafx.scene.layout.HBox
+import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
@@ -73,6 +76,7 @@ class NewTranslationCard2(
         }
         button(messages["cancel"]) {
             addClass("btn", "btn--secondary")
+            tooltip(text)
             graphic = FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE)
 
             onActionProperty().bind(onCancelProperty)
@@ -82,14 +86,27 @@ class NewTranslationCard2(
     fun setOnCancelAction(op: () -> Unit) = onCancelProperty.set { op() }
 }
 
-class TranslationCreationCard : VBox() {
+class TranslationCreationCard : HBox() {
 
     private var onCreateProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
-        addClass("create-translation-card")
+        addClass("translation-creation-card")
+        vbox {
+            addClass("translation-creation-card__box")
+            prefWidth = 180.0
+            rectangle(width = 140.0, height = 16.0).addClass("card-graphic")
+            hbox {
+                addClass("translation-creation-card__box")
+                rectangle(width = 80.0, height = 16.0).addClass("card-graphic")
+                rectangle(width = 15.0, height = 15.0).addClass("card-graphic")
+                rectangle(width = 80.0, height = 16.0).addClass("card-graphic")
+            }
+        }
+        region { hgrow = Priority.ALWAYS }
         button {
             addClass("btn", "btn--primary")
+            tooltip(messages["newProject"])
             graphic = FontIcon(MaterialDesign.MDI_PLUS)
 
             onActionProperty().bind(onCreateProperty)

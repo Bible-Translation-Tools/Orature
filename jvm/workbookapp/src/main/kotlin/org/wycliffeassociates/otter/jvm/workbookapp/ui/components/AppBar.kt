@@ -43,7 +43,7 @@ class AppBar : Fragment() {
 
     private val addButton = AppBarButton().apply {
         textProperty().set(messages["import"])
-        graphicProperty().set(FontIcon(MaterialDesign.MDI_PLUS))
+        graphicProperty().set(FontIcon(MaterialDesign.MDI_DOWNLOAD))
         toggleGroup = buttonsToggleGroup
         selectedProperty().onChange {
             toggleOpen<AddFilesView>(it)

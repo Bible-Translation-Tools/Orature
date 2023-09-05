@@ -2,13 +2,16 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.jfoenix.controls.JFXSnackbar
+import io.reactivex.disposables.Disposable
 import javafx.beans.property.SimpleObjectProperty
+import javafx.event.EventHandler
 import javafx.scene.Node
 import javafx.scene.layout.Priority
 import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportType
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
@@ -16,6 +19,9 @@ import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.card.TranslationCard2
 import org.wycliffeassociates.otter.jvm.controls.card.newTranslationCard
 import org.wycliffeassociates.otter.jvm.controls.card.translationCreationCard
+import org.wycliffeassociates.otter.jvm.controls.dialog.LoadingModal
+import org.wycliffeassociates.otter.jvm.controls.dialog.ContributorDialog
+import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.LanguageSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ProjectGroupDeleteEvent
@@ -30,6 +36,10 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ProjectImportEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookDeleteEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ExportProjectDialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.ProgressDialog
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
+import org.wycliffeassociates.otter.jvm.controls.event.ProjectContributorsEvent
+import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.BookSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.ProjectWizardSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportDialogOpenEvent
@@ -38,16 +48,17 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookOpenEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookQuickBackupEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ExportProjectViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel2
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.NOTIFICATION_DURATION_SEC
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectWizardViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 import java.lang.Exception
 import java.text.MessageFormat
 
-
 class HomePage2 : View() {
 
     private val logger = LoggerFactory.getLogger(HomePage::class.java)
+    private val listeners = mutableListOf<ListenerDisposer>()
 
     private val viewModel: HomePageViewModel2 by inject()
     private val projectWizardViewModel: ProjectWizardViewModel by inject()
@@ -55,6 +66,7 @@ class HomePage2 : View() {
     private val exportProjectViewModel: ExportProjectViewModel by inject()
     private val navigator: NavigationMediator by inject()
 
+    private lateinit var loadingModal: LoadingModal
     private val mainSectionProperty = SimpleObjectProperty<Node>(null)
     private val breadCrumb = BreadCrumb().apply {
         titleProperty.set(messages["home"])
@@ -86,6 +98,7 @@ class HomePage2 : View() {
     init {
         tryImportStylesheet("/css/control.css")
         tryImportStylesheet("/css/home-page.css")
+        tryImportStylesheet("/css/contributor-info.css")
         tryImportStylesheet("/css/translation-card-2.css")
         tryImportStylesheet("/css/popup-menu.css")
         tryImportStylesheet("/css/filtered-search-bar.css")
@@ -110,9 +123,10 @@ class HomePage2 : View() {
                     visibleWhen { mainSectionProperty.isNotEqualTo(wizardFragment) }
                     managedWhen(visibleProperty())
                     setOnAction {
-                        viewModel.selectedProjectGroup.set(null)
+                        viewModel.selectedProjectGroupProperty.set(null)
                         mainSectionProperty.set(wizardFragment)
                         projectWizardViewModel.dock()
+                        wizardFragment.onSectionDocked()
                     }
                 }
                 newTranslationCard(
@@ -140,12 +154,12 @@ class HomePage2 : View() {
                             cardModel.sourceLanguage,
                             cardModel.targetLanguage,
                             cardModel.mode,
-                            viewModel.selectedProjectGroup
+                            viewModel.selectedProjectGroupProperty
                         ).apply {
 
                             setOnAction {
                                 viewModel.bookList.setAll(cardModel.books)
-                                viewModel.selectedProjectGroup.set(cardModel.getKey())
+                                viewModel.selectedProjectGroupProperty.set(cardModel.getKey())
                                 if (mainSectionProperty.value !is BookSection) {
                                     exitWizard()
                                 }
@@ -153,6 +167,8 @@ class HomePage2 : View() {
                         }
                     }
                 }
+
+                runLater { customizeScrollbarSkin() }
             }
 
             visibleWhen {
@@ -168,6 +184,7 @@ class HomePage2 : View() {
 
     override fun onDock() {
         super.onDock()
+        setUpLoadingModal()
         viewModel.dock()
         navigator.dock(this, breadCrumb)
         mainSectionProperty.set(bookFragment)
@@ -176,26 +193,64 @@ class HomePage2 : View() {
     override fun onUndock() {
         super.onUndock()
         viewModel.undock()
+        listeners.forEach(ListenerDisposer::dispose)
+        listeners.clear()
     }
 
     private fun subscribeActionEvents() {
         subscribe<LanguageSelectedEvent> {
+            if (projectWizardViewModel.selectedSourceLanguageProperty.value == null) {
+                wizardFragment.nextStep()
+            }
             projectWizardViewModel.onLanguageSelected(it.item) {
                 viewModel.loadProjects()
                 mainSectionProperty.set(bookFragment)
             }
         }
 
+        subscribe<ProjectContributorsEvent> {
+            val books = it.books
+            val dialog = find<ContributorDialog>().apply {
+                themeProperty.set(settingsViewModel.appColorMode.value)
+                orientationProperty.set(settingsViewModel.orientationProperty.value)
+                viewModel.loadContributors(books.first())
+                    .subscribe { list ->
+                        contributors.setAll(list)
+                    }
+
+                saveContributorCallback.set(
+                    EventHandler {
+                        viewModel.saveContributors(contributors, books.first())
+                    }
+                )
+            }
+            dialog.open()
+        }
+
+        subscribe<ProjectGroupDeleteEvent> {
+            val cardModel = viewModel.projectGroups
+                .find { gr -> gr.getKey() == viewModel.selectedProjectGroupProperty.value }
+                ?: return@subscribe
+
+            viewModel.removeProjectFromList(cardModel)
+
+            val cancellable = viewModel.deleteProjectGroupWithTimer(cardModel)
+            val notification = createProjectGroupDeleteNotification(cardModel, cancellable)
+            showNotification(notification)
+        }
+
         subscribe<WorkbookOpenEvent> {
             viewModel.selectBook(it.data)
         }
 
-        subscribe<ProjectGroupDeleteEvent> {
-            viewModel.deleteProjectGroup(it.books)
-        }
-
         subscribe<WorkbookDeleteEvent> {
             viewModel.deleteBook(it.data)
+                .subscribe {
+                    viewModel.loadProjects {
+                        val notification = createBookDeleteNotification(it.data)
+                        showNotification(notification)
+                    }
+                }
         }
 
         subscribe<WorkbookQuickBackupEvent> {
@@ -239,17 +294,41 @@ class HomePage2 : View() {
             showNotification(notification)
         }
 
-        subscribe<ProjectImportEvent> {
-            logger.info("Import project event received, refreshing the homepage.")
-            val notification = createImportNotification(it)
-            showNotification(notification)
-            viewModel.refresh()
+        subscribe<ProjectImportEvent> { event ->
+            logger.info("Import project event received, reloading projects...")
+            if (event.result == ImportResult.SUCCESS) {
+                viewModel.loadProjects {
+                    val notification = createImportNotification(event)
+                    showNotification(notification)
+                }
+            } else {
+                val notification = createImportNotification(event)
+                showNotification(notification)
+            }
+
+            event.workbookDescriptor?.let {
+                viewModel.mergeContributorFromImport(it)
+            }
         }
+    }
+
+    private fun setUpLoadingModal() {
+        loadingModal = LoadingModal().apply {
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
+        }
+        viewModel.isLoadingProperty.onChangeWithDisposer {
+            if (it == true) {
+                loadingModal.open()
+            } else {
+                loadingModal.close()
+            }
+        }.also { listeners.add(it) }
     }
 
     private fun exitWizard() {
         projectWizardViewModel.undock()
-        viewModel.loadProjects()
+        viewModel.selectedProjectGroupProperty.set(viewModel.projectGroups.firstOrNull()?.getKey())
         mainSectionProperty.set(bookFragment)
     }
 
@@ -363,11 +442,54 @@ class HomePage2 : View() {
         } else {
             NotificationViewData(
                 title = messages["exportFailed"],
-                message = MessageFormat.format(messages["exportFailedMessage"], event.project.titleKey),
+                message = MessageFormat.format(
+                    messages["exportFailedMessage"],
+                    event.project.titleKey,
+                    event.project.resourceContainer?.language?.name ?: ""
+                ),
                 statusType = NotificationStatusType.FAILED
             )
         }
         return notification
+    }
+
+    private fun createBookDeleteNotification(workbookDescriptor: WorkbookDescriptor): NotificationViewData {
+        return NotificationViewData(
+            title = messages["bookDeleted"],
+            message = MessageFormat.format(
+                messages["bookDeletedMessage"],
+                workbookDescriptor.targetCollection.titleKey,
+                workbookDescriptor.targetLanguage.name
+            ),
+            statusType = NotificationStatusType.WARNING,
+        )
+    }
+
+    private fun createProjectGroupDeleteNotification(
+        cardModel: ProjectGroupCardModel,
+        cancellable: Disposable
+    ): NotificationViewData {
+        return NotificationViewData(
+            title = messages["projectDeleted"],
+            message = MessageFormat.format(
+                messages["projectDeletedMessage"],
+                cardModel.sourceLanguage.name,
+                cardModel.targetLanguage.name,
+                messages[cardModel.mode.titleKey]
+            ),
+            statusType = NotificationStatusType.WARNING,
+            actionText = messages["undo"],
+            actionIcon = MaterialDesign.MDI_UNDO
+        ) {
+            // undo deletion by cancelling the task
+            cancellable.dispose()
+            // reinsert the project group
+            viewModel.projectGroups.add(cardModel)
+            if (viewModel.projectGroups.size == 1) {
+                viewModel.bookList.setAll(cardModel.books)
+                viewModel.selectedProjectGroupProperty.set(cardModel.getKey())
+            }
+        }
     }
 
     private fun showNotification(notification: NotificationViewData) {
@@ -378,13 +500,14 @@ class HomePage2 : View() {
             }
             setOnMainAction {
                 notification.actionCallback()
+                snackBar.hide()
             }
         }
 
         snackBar.enqueue(
             JFXSnackbar.SnackbarEvent(
                 graphic,
-                Duration.seconds(5.0)
+                Duration.seconds(NOTIFICATION_DURATION_SEC)
             )
         )
     }

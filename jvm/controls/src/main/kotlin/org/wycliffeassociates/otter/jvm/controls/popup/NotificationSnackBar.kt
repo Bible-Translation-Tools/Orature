@@ -35,7 +35,7 @@ class NotificationSnackBar(notification: NotificationViewData): HBox() {
             addClass("btn", "btn--icon", "btn--borderless", "success-btn-icon")
             graphicProperty().bind(statusTypeProperty.objectBinding {
                 this.toggleClass("success-btn-icon", it == NotificationStatusType.SUCCESSFUL)
-                this.toggleClass("danger-btn-icon", it == NotificationStatusType.FAILED)
+                this.toggleClass("danger-btn-icon", it != NotificationStatusType.SUCCESSFUL)
 
                 return@objectBinding when (it) {
                     NotificationStatusType.SUCCESSFUL -> {
@@ -43,7 +43,7 @@ class NotificationSnackBar(notification: NotificationViewData): HBox() {
                             addClass("active-icon")
                         }
                     }
-                    NotificationStatusType.FAILED -> {
+                    NotificationStatusType.FAILED, NotificationStatusType.WARNING -> {
                         FontIcon(MaterialDesign.MDI_ALERT).apply {
                             addClass("danger-icon")
                         }
@@ -60,7 +60,7 @@ class NotificationSnackBar(notification: NotificationViewData): HBox() {
                 addClass("h4", "notification-title")
                 statusTypeProperty.onChangeAndDoNow {
                     toggleClass("successful-text", it == NotificationStatusType.SUCCESSFUL)
-                    toggleClass("danger-text", it == NotificationStatusType.FAILED)
+                    toggleClass("danger-text", it != NotificationStatusType.SUCCESSFUL)
                 }
             }
             label(messageProperty) {
@@ -71,7 +71,7 @@ class NotificationSnackBar(notification: NotificationViewData): HBox() {
         button {
             addClass("btn", "btn--secondary")
             textProperty().bind(actionTextProperty)
-            tooltipProperty().bind(actionTextProperty.objectBinding { Tooltip(it) })
+            tooltip { textProperty().bind(actionTextProperty) }
             graphicProperty().bind(actionIconProperty.objectBinding { it ->
                 it?.let { FontIcon(it) }
             })

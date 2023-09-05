@@ -1,14 +1,20 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Completable
+import io.reactivex.Single
+import io.reactivex.schedulers.Schedulers
+import io.reactivex.disposables.Disposable
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.transformation.FilteredList
 import javafx.collections.transformation.SortedList
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.primitives.Contributor
+import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
-import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
 import org.wycliffeassociates.otter.common.domain.collections.UpdateProject
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -21,12 +27,14 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.WorkbookPage
-import tornadofx.ViewModel
-import tornadofx.observableListOf
-import tornadofx.toObservable
+import org.wycliffeassociates.resourcecontainer.ResourceContainer
+import tornadofx.*
 import java.time.LocalDateTime
+import java.util.concurrent.TimeUnit
 import java.util.function.Predicate
 import javax.inject.Inject
+
+const val NOTIFICATION_DURATION_SEC = 5.0
 
 class HomePageViewModel2 : ViewModel() {
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -56,14 +64,16 @@ class HomePageViewModel2 : ViewModel() {
     private val disposableListeners = mutableListOf<ListenerDisposer>()
 
     val sortedBooks = SortedList<WorkbookDescriptor>(filteredBooks)
-    val selectedProjectGroup = SimpleObjectProperty<ProjectGroupKey>()
+    val selectedProjectGroupProperty = SimpleObjectProperty<ProjectGroupKey>()
     val bookSearchQueryProperty = SimpleStringProperty("")
+    val isLoadingProperty = SimpleBooleanProperty(false)
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
     }
 
     fun dock() {
+        clearProjects()
         setupBookSearchListener()
         loadProjects()
     }
@@ -75,15 +85,8 @@ class HomePageViewModel2 : ViewModel() {
         disposableListeners.clear()
     }
 
-    fun refresh() {
-        clearProjects()
-        loadProjects()
-    }
-
     /**
      * Closes all open projects, closing their connections in the workbook repository.
-     *
-     * Also removes the workbooks from the workbook data store and resumeBookProperty.
      */
     private fun clearProjects() {
         logger.info("Closing open workbooks")
@@ -109,7 +112,8 @@ class HomePageViewModel2 : ViewModel() {
         }.apply { disposableListeners.add(this) }
     }
 
-    fun loadProjects() {
+    fun loadProjects(onFinishCallback: () -> Unit = {}) {
+        isLoadingProperty.set(true)
         // reset sort to default book order
         sortedBooks.comparator = Comparator { wb1, wb2 ->
             wb1.sort.compareTo(wb2.sort)
@@ -118,12 +122,16 @@ class HomePageViewModel2 : ViewModel() {
             .observeOnFx()
             .subscribe { books ->
                 updateBookList(books)
+                runLater {
+                    onFinishCallback()
+                    isLoadingProperty.set(false)
+                }
             }
     }
 
     fun selectBook(workbookDescriptor: WorkbookDescriptor) {
-        val projectGroup = selectedProjectGroup.value
-        workbookDS.currentModeProperty.set(selectedProjectGroup.value.mode)
+        val projectGroup = selectedProjectGroupProperty.value
+        workbookDS.currentModeProperty.set(selectedProjectGroupProperty.value.mode)
 
         val projects = workbookRepo.getProjects().blockingGet()
         val existingProject = projects.firstOrNull { existingProject ->
@@ -138,29 +146,112 @@ class HomePageViewModel2 : ViewModel() {
         }
     }
 
-    fun deleteProjectGroup(books: List<WorkbookDescriptor>) {
-        if (books.all { it.progress == 0.0 }) {
-            logger.info("Deleting project group: ${selectedProjectGroup.value.sourceLanguage} -> ${selectedProjectGroup.value.targetLanguage}")
-
-            deleteProjectUseCase.deleteProjects(books)
-                .observeOnFx()
-                .subscribe {
-                    loadProjects()
-                }
-        }
+    /**
+     * Temporarily removes the project group from the view as if the project was "deleted".
+     * This is used in conjunction with time-out enabled deletion which allows the user to
+     * cancel/undo the action.
+     */
+    fun removeProjectFromList(cardModel: ProjectGroupCardModel) {
+        projectGroups.remove(cardModel)
+        selectedProjectGroupProperty.set(projectGroups.firstOrNull()?.getKey())
+        bookList.setAll(projectGroups.firstOrNull()?.books ?: listOf())
     }
 
-    fun deleteBook(workbookDescriptor: WorkbookDescriptor) {
+    /**
+     * Deletes the project group after a specified timeout. During this time,
+     * the user can choose to cancel (undo) the action by calling dispose()
+     * from the disposable.
+     *
+     * @return the disposable (cancellable) subscription to the deletion task.
+     */
+    fun deleteProjectGroupWithTimer(cardModel: ProjectGroupCardModel): Disposable {
+        val timeoutMillis = NOTIFICATION_DURATION_SEC * 1000
+
+        val completable: Completable = Completable.create { emitter ->
+            val timerDisposable = Completable
+                .timer(timeoutMillis.toLong(), TimeUnit.MILLISECONDS)
+                .andThen(deleteProjectUseCase.deleteProjects(cardModel.books))
+                .observeOnFx()
+                .doOnComplete {
+                    logger.info("Deleted project group: ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
+                    emitter.onComplete()
+                }
+                .subscribe()
+
+            emitter.setDisposable(timerDisposable)
+        }
+
+        return completable.subscribe()
+    }
+
+    fun deleteBook(workbookDescriptor: WorkbookDescriptor): Completable {
         logger.info("Deleting book: ${workbookDescriptor.slug}")
 
-        deleteProjectUseCase.delete(workbookDescriptor)
+        return deleteProjectUseCase.delete(workbookDescriptor)
             .observeOnFx()
-            .subscribe {
-                loadProjects()
-            }
     }
 
     fun openInFilesManager(path: String) = directoryProvider.openInFileManager(path)
+
+    fun loadContributors(workbookDescriptor: WorkbookDescriptor): Single<List<Contributor>> {
+        return Single
+            .fromCallable {
+                loadContributorsFromDerivedMetadata(
+                    sourceMetadata = workbookDescriptor.sourceCollection.resourceContainer!!,
+                    targetMetadata = workbookDescriptor.targetCollection.resourceContainer!!
+                )
+            }
+            .doOnError { logger.error("Error while loading contributor info.", it) }
+            .subscribeOn(Schedulers.io())
+            .observeOnFx()
+    }
+
+    private fun loadContributorsFromDerivedMetadata(
+        sourceMetadata: ResourceMetadata,
+        targetMetadata: ResourceMetadata
+    ): List<Contributor> {
+        val der = directoryProvider.getDerivedContainerDirectory(targetMetadata, sourceMetadata)
+        return ResourceContainer.load(der).use { rc ->
+            rc.manifest.dublinCore.contributor.map { Contributor(it) }
+        }
+    }
+
+    fun saveContributors(contributors: List<Contributor>, workbookDescriptor: WorkbookDescriptor) {
+        Completable
+            .fromAction {
+                val der = directoryProvider.getDerivedContainerDirectory(
+                    workbookDescriptor.targetCollection.resourceContainer!!,
+                    workbookDescriptor.sourceCollection.resourceContainer!!
+                )
+                ResourceContainer.load(der).use { rc ->
+                    rc.manifest.dublinCore.contributor = contributors.map { it.name }.toMutableList()
+                    rc.writeManifest()
+                }
+                bookList.forEach {
+                    val workbook = workbookRepo.get(it.sourceCollection, it.targetCollection)
+                    if (workbook.projectFilesAccessor.isInitialized()) {
+                        workbook.projectFilesAccessor.setContributorInfo(contributors)
+                    }
+                }
+            }
+            .doOnError { logger.error("Error while saving contributor info.", it) }
+            .subscribeOn(Schedulers.io())
+            .observeOnFx()
+            .subscribe()
+    }
+
+    fun mergeContributorFromImport(workbookDescriptor: WorkbookDescriptor) {
+        val workbook = workbookRepo.get(workbookDescriptor.sourceCollection, workbookDescriptor.targetCollection)
+        if (workbook.projectFilesAccessor.isInitialized()) {
+            val set = loadContributorsFromDerivedMetadata(
+                sourceMetadata = workbook.source.resourceMetadata,
+                targetMetadata = workbook.target.resourceMetadata
+            ).toMutableSet()
+            val contributors = workbook.projectFilesAccessor.getContributorInfo()
+            set.addAll(contributors)
+            saveContributors(set.toList(), workbookDescriptor)
+        }
+    }
 
     private fun updateBookList(books: List<WorkbookDescriptor>) {
         if (books.isEmpty()) {
@@ -173,22 +264,26 @@ class HomePageViewModel2 : ViewModel() {
             ProjectGroupKey(it.sourceLanguage.slug, it.targetLanguage.slug, it.mode)
         }
         projectGroups
-            .map {
-                val book = it.value.first()
-                val mostRecentBook = it.value.maxByOrNull { it.lastModified?.nano ?: -1 }
+            .map { entry ->
+                val bookList = entry.value
+                val book = bookList.first()
+                val mostRecentBook = bookList
+                    .filter { it.lastModified != null }
+                    .maxByOrNull { it.lastModified!! }
+
                 ProjectGroupCardModel(
                     book.sourceLanguage,
                     book.targetLanguage,
                     book.mode,
                     mostRecentBook?.lastModified,
-                    it.value.toObservable()
+                    bookList.toObservable()
                 )
             }
             .sortedByDescending { it.modifiedTs }
             .let { modelList ->
                 this.projectGroups.setAll(modelList)
                 modelList.firstOrNull()?.let { cardModel ->
-                    selectedProjectGroup.set(cardModel.getKey())
+                    selectedProjectGroupProperty.set(cardModel.getKey())
                     bookList.setAll(cardModel.books)
                 }
             }
@@ -206,10 +301,16 @@ class HomePageViewModel2 : ViewModel() {
             .linkedResources
             .firstOrNull { it.identifier == workbook.source.resourceMetadata.identifier }
 
+        val contributors = loadContributorsFromDerivedMetadata(
+            sourceMetadata = workbook.source.resourceMetadata,
+            targetMetadata = workbook.target.resourceMetadata
+        )
+
         workbook.projectFilesAccessor.initializeResourceContainerInDir(false)
         workbook.projectFilesAccessor.copySourceFiles(linkedResource)
         workbook.projectFilesAccessor.createSelectedTakesFile()
         workbook.projectFilesAccessor.createChunksFile()
+        workbook.projectFilesAccessor.setContributorInfo(contributors)
         workbook.projectFilesAccessor.setProjectMode(workbookDS.currentModeProperty.value)
     }
 
