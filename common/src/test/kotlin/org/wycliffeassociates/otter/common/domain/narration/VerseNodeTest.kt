@@ -359,8 +359,6 @@ class VerseNodeTest {
         val expectedSectorsTaken = mutableListOf<IntRange>()
         expectedSectorsTaken.add(3000 .. 3999)
         expectedSectorsTaken.add(2000 .. 2999)
-        println(sectorsTaken)
-
 
         Assert.assertTrue(sectorsTaken.equals(expectedSectorsTaken))
 
@@ -386,8 +384,6 @@ class VerseNodeTest {
         expectedSectorsTaken.add(3000 .. 3999)
         expectedSectorsTaken.add(2000 .. 2999)
         expectedSectorsTaken.add(1500 .. 1999)
-        println(sectorsTaken)
-
 
         Assert.assertTrue(sectorsTaken.equals(expectedSectorsTaken))
 
