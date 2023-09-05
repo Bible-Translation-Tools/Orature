@@ -292,7 +292,6 @@ class VerseNodeTest {
         expectedSectorsTaken.add(1000.. 1999)
         expectedSectorsTaken.add(2000 .. 2999)
         expectedSectorsTaken.add(3000 .. 3500)
-        println(sectorsTaken)
         Assert.assertTrue(sectorsTaken.equals(expectedSectorsTaken))
 
         val expectedVerseNodeSectors = mutableListOf<IntRange>()
@@ -355,18 +354,14 @@ class VerseNodeTest {
         sectors.add(3000 .. 3999)
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
-        val sectorsTaken = verseNode.takeFramesFromEnd(2000)
+        val sectorsTaken = verseNode.takeFramesFromEnd(1998)
 
-        // need to test that sectorstaken is as expected
         val expectedSectorsTaken = mutableListOf<IntRange>()
-        expectedSectorsTaken.add(2000 .. 2999)
         expectedSectorsTaken.add(3000 .. 3999)
+        expectedSectorsTaken.add(2000 .. 2999)
+        println(sectorsTaken)
 
 
-        // QUESTION: Is remaining be decremented each iteration of the loop?
-        // It seems to get stuck on 1, and stays stuck until it iterates through the
-        // sectors list.
-        // NOTE: seems to be splitting node unnecessarily
         Assert.assertTrue(sectorsTaken.equals(expectedSectorsTaken))
 
         val expectedVerseNodeSectors = mutableListOf<IntRange>()
@@ -376,7 +371,32 @@ class VerseNodeTest {
 
     }
 
-    // TODO: add test for takeFramesFromEnd with node split
+    @Test fun `take frames from end with more frames than needed and with splitting a node`() {
+
+        val verseMarker = VerseMarker(1, 1, 0)
+        val sectors = mutableListOf<IntRange>()
+        sectors.add(1000.. 1999)
+        sectors.add(2000 .. 2999)
+        sectors.add(3000 .. 3999)
+        val verseNode = VerseNode(0,0, true, verseMarker, sectors)
+
+        val sectorsTaken = verseNode.takeFramesFromEnd(2497)
+
+        val expectedSectorsTaken = mutableListOf<IntRange>()
+        expectedSectorsTaken.add(3000 .. 3999)
+        expectedSectorsTaken.add(2000 .. 2999)
+        expectedSectorsTaken.add(1500 .. 1999)
+        println(sectorsTaken)
+
+
+        Assert.assertTrue(sectorsTaken.equals(expectedSectorsTaken))
+
+        val expectedVerseNodeSectors = mutableListOf<IntRange>()
+        expectedVerseNodeSectors.add(1000.. 1500)
+
+        Assert.assertTrue(verseNode.sectors.equals(expectedVerseNodeSectors))
+
+    }
 
 
     @Test
