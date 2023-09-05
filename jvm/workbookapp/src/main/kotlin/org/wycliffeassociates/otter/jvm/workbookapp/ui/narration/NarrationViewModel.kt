@@ -27,17 +27,14 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.narration.AudioScene
 import org.wycliffeassociates.otter.common.domain.narration.Narration
-import org.wycliffeassociates.otter.common.domain.narration.NarrationAudioScene
 import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
-import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.NarrationWaveformRenderer
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
@@ -442,12 +439,10 @@ class NarrationViewModel : ViewModel() {
 
     fun drawWaveform(context: GraphicsContext, canvas: Canvas) {
         if (::renderer.isInitialized) {
-            val position = audioPlayer.getLocationInFrames()
+            val position = narration.getLocationInFrames()
             runLater {
                 audioPositionProperty.set(position)
             }
-            // logger.error("rendering position is ${position}")
-            rendererAudioReader.seek(position)
             renderer.draw(context, canvas, position)
         }
     }
@@ -459,7 +454,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun scrollAudio(delta: Int) {
-        logger.error("should be seeking to $delta")
+        // logger.error("should be seeking to $delta")
         val wasPlaying = audioPlayer.isPlaying()
         audioPlayer.pause()
         narration.loadChapterIntoPlayer()

@@ -264,6 +264,8 @@ class AudioScene(
     private val recordingSampleRate: Int,
 ) {
 
+    private val logger = LoggerFactory.getLogger(AudioScene::class.java)
+
     val readerDrawable = AudioReaderDrawable(existingAudioReader, width, secondsOnScreen, recordingSampleRate)
     val activeDrawable =
         ActiveRecordingDrawable(incomingAudioStream, recordingActive, width, secondsOnScreen, recordingSampleRate)

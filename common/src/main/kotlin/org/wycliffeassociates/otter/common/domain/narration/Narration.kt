@@ -7,6 +7,7 @@ import io.reactivex.Observable
 import io.reactivex.Scheduler
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import org.slf4j.LoggerFactory
@@ -30,6 +31,7 @@ class Narration @AssistedInject constructor(
     @Assisted private val workbook: Workbook,
     @Assisted private val chapter: Chapter
 ) {
+    private val DEFAULT_FRAME_SIZE_BYTES = 2
     private val logger = LoggerFactory.getLogger(Narration::class.java)
 
     private val history = NarrationHistory()
@@ -67,31 +69,40 @@ class Narration @AssistedInject constructor(
     private var writer: WavFileWriter? = null
 
     init {
-        initializeWavWriter()
+        val writer = initializeWavWriter()
 
         firstVerse = getFirstVerseMarker()
         updateWorkingFilesFromChapterFile()
         chapterRepresentation.loadFromSerializedVerses()
         recorder.start()
         disposables.addAll(
-            activeRecordingFrameCounter(),
+            activeRecordingFrameCounter(writer),
             resetOnUpdatedVerses(),
         )
     }
 
-    private fun activeRecordingFrameCounter(): Disposable {
-        return getRecorderAudioStream()
-            .subscribeOn(Schedulers.io())
-            .subscribe {
-                if (isRecording.get()) {
-                    uncommittedRecordedFrames.addAndGet(it.size)
+    private fun activeRecordingFrameCounter(writer: WavFileWriter): Disposable {
+        return Observable
+            .combineLatest(writer.isWriting, getRecorderAudioStream())
+            { isWriting, bytes -> Pair(isWriting, bytes) }
+            .map {
+                (isWriting, bytes) ->
+                if (isWriting) {
+                    uncommittedRecordedFrames.addAndGet(bytes.size / DEFAULT_FRAME_SIZE_BYTES)
                 }
+            }.subscribeOn(Schedulers.io())
+            .doOnNext {
+                logger.info("Audio duration is: ${getTotalFrames()}")
+                logger.info("uncommitted audio frames is now ${uncommittedRecordedFrames.get()}")
             }
+            .subscribe()
     }
 
     private fun resetOnUpdatedVerses(): Disposable {
         return onActiveVersesUpdated.subscribe {
+            logger.info("Clearing uncommitted audio frames")
             uncommittedRecordedFrames.set(0)
+            logger.info("player duration should be updated now: ${audioReader.totalFrames}")
         }
     }
 
@@ -246,7 +257,7 @@ class Narration @AssistedInject constructor(
         if (wasPlaying) player.play()
     }
 
-    private fun initializeWavWriter() {
+    private fun initializeWavWriter(): WavFileWriter {
         writer = WavFileWriter(
             chapterRepresentation.scratchAudio,
             recorder.getAudioStream(),
@@ -254,6 +265,7 @@ class Narration @AssistedInject constructor(
         ) {
             /* no op */
         }
+        return writer!!
     }
 
     private fun execute(action: NarrationAction) {
@@ -307,6 +319,14 @@ class Narration @AssistedInject constructor(
     fun scrollAudio(delta: Int) {
         chapterReaderConnection.seek(delta)
         player
+    }
+
+    fun getLocationInFrames(): Int {
+        return player.getLocationInFrames() + uncommittedRecordedFrames.get()
+    }
+
+    fun getTotalFrames(): Int {
+        return chapterReaderConnection.totalFrames + uncommittedRecordedFrames.get()
     }
 }
 
