@@ -79,9 +79,13 @@
 }
 
 .scrolling-waveform__highlight--primary {
-    -fx-fill: -wa-marker-overlay-primary;
+    -fx-fill: transparent;
+    -fx-stroke: -wa-border-light;
+    -fx-stroke-width: 1;
 }
 
 .scrolling-waveform__highlight--secondary {
-    -fx-fill: -wa-marker-overlay-secondary;
+    -fx-fill: transparent;
+    -fx-stroke: -wa-border-light;
+    -fx-stroke-width: 1;
 }

@@ -58,8 +58,8 @@ const val ACTIVE = "chunking-wizard__step--active"
 const val COMPLETE = "chunking-wizard__step--complete"
 const val INACTIVE = "chunking-wizard__step--inactive"
 
-private const val WAV_COLOR = "#0A337390"
-private const val BACKGROUND_COLOR = "#F7FAFF"
+private const val WAV_COLOR = "#66768B"
+private const val BACKGROUND_COLOR = "#fff"
 
 enum class ChunkingWizardPage {
     CONSUME,

@@ -1,9 +1,20 @@
 .chunking-step-drawer {
     -fx-pref-width: 360;
+    -fx-background-color: -wa-foreground;
+    -fx-border-width: 0 1 0 0;
+    -fx-border-color: -wa-border-light;
 }
 
 .chunking-step-drawer:collapsed {
     -fx-max-width: 80;
+}
+
+.chunking-step {
+    -fx-cursor: hand;
+}
+
+.chunking-step:disabled {
+    -fx-background-color: #E5E8EB;
 }
 
 .chunking-step:focused .chunking-step__header-section {
@@ -56,6 +67,9 @@
 
 .source-text-drawer {
     -fx-pref-width: 360;
+    -fx-background-color: -wa-foreground;
+    -fx-border-width: 0 0 0 1;
+    -fx-border-color: -wa-border-light;
 }
 
 .drawer-graphic-container {
