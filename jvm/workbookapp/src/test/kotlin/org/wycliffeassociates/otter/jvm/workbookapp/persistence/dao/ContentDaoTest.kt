@@ -47,7 +47,7 @@ class ContentDaoTest {
         database = AppDatabase(testDatabaseFile)
         database.dsl.execute("PRAGMA foreign_keys = OFF;")
 
-        defaultEntity = ContentMapper(database.contentTypeDao)
+        defaultEntity = ContentMapper(database.contentTypeDao, database.checkingLevelDao)
             .mapToEntity(TestDataStore.content.first())
             .copy(
                 id = 0,
@@ -219,7 +219,7 @@ class ContentDaoTest {
     }
 
     private fun insertAllSamples() {
-        val mapper = ContentMapper(database.contentTypeDao)
+        val mapper = ContentMapper(database.contentTypeDao, database.checkingLevelDao)
 
         TestDataStore.content.forEach {
             val contentEntity = mapper.mapToEntity(it)
