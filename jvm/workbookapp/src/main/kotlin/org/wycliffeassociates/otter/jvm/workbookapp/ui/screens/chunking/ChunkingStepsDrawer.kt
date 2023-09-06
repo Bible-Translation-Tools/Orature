@@ -13,10 +13,12 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
 import tornadofx.FX.Companion.messages
 import tornadofx.*
 
-class ChunkingStepsDrawer : VBox() {
+class ChunkingStepsDrawer(
+    selectedStepProperty: SimpleObjectProperty<ChunkingStep>
+) : VBox() {
     val chunkItems = observableListOf<ChunkViewData>()
-    val selectedStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.CHUNKING)
     val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.BLIND_DRAFT)
+
     private val isCollapsedProperty = SimpleBooleanProperty(false)
 
     init {
@@ -75,5 +77,3 @@ class ChunkingStepsDrawer : VBox() {
 
     }
 }
-
-fun EventTarget.chunkingStepsPane(op: ChunkingStepsDrawer.() -> Unit = {}) = ChunkingStepsDrawer().attachTo(this, op)

@@ -28,10 +28,9 @@ class ChunkingDemoView : View() {
 
     override val root = vbox {
         borderpane {
-            left = ChunkingStepsDrawer().apply {
+            left = ChunkingStepsDrawer(selectedStepProperty).apply {
                 chunkItems.setAll(list)
                 this.reachableStepProperty.bind(this@ChunkingDemoView.reachableStepProperty)
-                this@ChunkingDemoView.selectedStepProperty.bind(this.selectedStepProperty)
             }
             center= Label("Fragment here").addClass("h4")
 

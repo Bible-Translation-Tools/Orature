@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
 import javafx.beans.property.IntegerProperty
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
@@ -14,11 +15,13 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.ChunkingStepsDrawer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.Consume
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 
 class ChunkingTranslationPage : View() {
 
     val viewModel: ChunkingViewModel by inject()
+    val workbookDataStore: WorkbookDataStore by inject()
 
     private val fragments = mapOf(
         ChunkingStep.CONSUME_AND_VERBALIZE to find<Consume>(),
@@ -28,7 +31,7 @@ class ChunkingTranslationPage : View() {
     private val selectedChunk: IntegerProperty = SimpleIntegerProperty(2)
     private val selectedStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.BLIND_DRAFT)
     private val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.PEER_EDIT)
-    private val sourceTextProperty = SimpleStringProperty(null)
+    private val sourceTextProperty = SimpleStringProperty()
     private val list = observableListOf(
         ChunkViewData(1, SimpleBooleanProperty(true), selectedChunk),
         ChunkViewData(2, SimpleBooleanProperty(true), selectedChunk),
@@ -51,10 +54,9 @@ class ChunkingTranslationPage : View() {
         borderpane {
             vgrow = Priority.ALWAYS
 
-            left = ChunkingStepsDrawer().apply {
+            left = ChunkingStepsDrawer(selectedStepProperty).apply {
                 chunkItems.setAll(list)
                 this.reachableStepProperty.bind(this@ChunkingTranslationPage.reachableStepProperty)
-                this@ChunkingTranslationPage.selectedStepProperty.bind(this.selectedStepProperty)
             }
 
             centerProperty().bind(mainFragmentProperty.objectBinding { it?.root })
@@ -78,12 +80,25 @@ class ChunkingTranslationPage : View() {
 
     override fun onDock() {
         super.onDock()
-        sourceTextProperty.set("1. Source text here.\n2. More source text here...")
+        val recentChapter = workbookDataStore.workbookRecentChapterMap.getOrDefault(
+            workbookDataStore.workbook.hashCode(),
+            1
+        )
+        val chapter = workbookDataStore.workbook.target.chapters
+            .filter { it.sort == recentChapter }
+            .blockingFirst()
+
+        workbookDataStore.activeChapterProperty.set(chapter)
+        workbookDataStore.getSourceText()
+            .observeOnFx()
+            .subscribe {
+                sourceTextProperty.set(it)
+            }
     }
 
     override fun onUndock() {
         super.onUndock()
-        sourceTextDrawer.disposeOfListeners()
+        selectedStepProperty.set(null)
     }
 }
 

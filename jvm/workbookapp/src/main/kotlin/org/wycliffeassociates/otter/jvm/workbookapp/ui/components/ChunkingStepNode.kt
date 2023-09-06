@@ -30,7 +30,10 @@ class ChunkingStepNode(
     isCollapsedProperty: BooleanProperty
 ) : VBox() {
     val chunkListProperty = SimpleObjectProperty<List<ChunkViewData>>(null)
-    val isSelectedProperty = booleanBinding(selectedStepProperty) {
+    val isSelectedProperty = selectedStepProperty.booleanBinding {
+        if (it == null) {
+            return@booleanBinding false
+        }
         togglePseudoClass("selected",  step == selectedStepProperty.value)
         step == selectedStepProperty.value
     }
@@ -46,7 +49,10 @@ class ChunkingStepNode(
             reachable.ordinal < step.ordinal
         } ?: true
     }
-    private val completedProperty = booleanBinding(selectedStepProperty) {
+    private val completedProperty = selectedStepProperty.booleanBinding {
+        if (it == null) {
+            return@booleanBinding false
+        }
         step.ordinal < selectedStepProperty.value.ordinal
     }
 

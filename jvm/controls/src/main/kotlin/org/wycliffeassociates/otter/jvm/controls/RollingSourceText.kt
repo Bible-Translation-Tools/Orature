@@ -126,10 +126,11 @@ class RollingSourceText : VBox() {
 
             label((index + 1).toString()) {
                 addClass("source-content__verse-number")
+                minWidth = USE_PREF_SIZE
             }
             label(textContent) {
                 addClass("source-content__text")
-                minHeight = Region.USE_PREF_SIZE // avoid ellipsis
+                minHeight = USE_PREF_SIZE // avoid ellipsis
             }
         }
     }
