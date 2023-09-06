@@ -79,6 +79,7 @@ class Narration @AssistedInject constructor(
             activeRecordingFrameCounter(writer),
             resetOnUpdatedVerses(),
         )
+        loadChapterIntoPlayer()
     }
 
     private fun activeRecordingFrameCounter(writer: WavFileWriter): Disposable {
@@ -154,6 +155,7 @@ class Narration @AssistedInject constructor(
         execute(action)
 
         // recorder.start()
+        player.seek(player.getDurationInFrames())
 
         writer?.start()
         isRecording.set(true)
@@ -164,6 +166,8 @@ class Narration @AssistedInject constructor(
         execute(action)
 
         // recorder.start()
+        player.seek(activeVerses[verseIndex].location)
+
         writer?.start()
         isRecording.set(true)
     }
@@ -201,6 +205,7 @@ class Narration @AssistedInject constructor(
 
     fun resumeRecording() {
         // recorder.start()
+        player.seek(player.getDurationInFrames())
         writer?.start()
         isRecording.set(true)
     }
@@ -330,6 +335,14 @@ class Narration @AssistedInject constructor(
 
     fun getTotalFrames(): Int {
         return chapterReaderConnection.totalFrames + uncommittedRecordedFrames.get()
+    }
+
+    fun close() {
+        disposables.dispose()
+        player.stop()
+        player.close()
+        recorder.stop()
+        chapterRepresentation.closeConnections()
     }
 }
 

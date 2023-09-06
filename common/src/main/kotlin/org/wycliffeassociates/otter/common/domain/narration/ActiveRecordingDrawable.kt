@@ -35,6 +35,12 @@ class ActiveRecordingDrawable(
             waveformDrawable[i] = activeData[i]
         }
 
+//        var j = 0
+//        for (i in waveformDrawable.size - activeSize until waveformDrawable.size) {
+//            waveformDrawable[i] = activeData[j]
+//            j++
+//        }
+
         return waveformDrawable
     }
 
@@ -48,5 +54,9 @@ class ActiveRecordingDrawable(
 
     fun hasData(): Boolean {
         return !activeRenderer.floatBuffer.isEmpty
+    }
+
+    fun close() {
+        activeRenderer.close()
     }
 }

@@ -29,6 +29,7 @@ import org.wycliffeassociates.otter.common.domain.narration.AudioScene
 import org.wycliffeassociates.otter.common.domain.narration.Narration
 import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
+import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -111,6 +112,12 @@ class NarrationViewModel : ViewModel() {
 
         hasVersesProperty.bind(recordedVerses.booleanBinding { it.isNotEmpty() })
         lastRecordedVerseProperty.bind(recordedVerses.integerBinding { it.size })
+
+        subscribe<AppCloseRequestEvent> {
+            logger.info("Received close event request")
+            narration.close()
+            renderer.close()
+        }
     }
 
     fun onDock() {
@@ -127,6 +134,8 @@ class NarrationViewModel : ViewModel() {
         disposables.dispose()
 
         closeNarrationAudio()
+        narration.close()
+        renderer.close()
     }
 
     private fun initializeNarration(chapter: Chapter) {

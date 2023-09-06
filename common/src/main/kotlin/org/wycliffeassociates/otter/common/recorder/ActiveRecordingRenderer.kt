@@ -54,7 +54,9 @@ class ActiveRecordingRenderer(
             .doOnError { e ->
                 logger.error("Error in active recording listener", e)
             }
-            .subscribe { isActive.set(it) }
+            .subscribe {
+                isActive.set(it)
+            }
             .also {
                 compositeDisposable.add(it)
             }
@@ -102,5 +104,9 @@ class ActiveRecordingRenderer(
     fun clearData() {
         floatBuffer.clear()
         Arrays.fill(pcmCompressor.accumulator, 0f)
+    }
+
+    fun close() {
+        activeRenderer.dispose()
     }
 }

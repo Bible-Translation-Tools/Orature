@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
+import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
 import org.wycliffeassociates.otter.jvm.controls.waveform.Drawable
@@ -24,6 +25,7 @@ import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
 import kotlin.system.measureTimeMillis
 import kotlin.time.measureTime
 
@@ -36,7 +38,6 @@ class AudioWorkspaceView : View() {
 
     val canvasInflatedProperty = SimpleBooleanProperty(false)
 
-
     private val drawables = mutableListOf<Drawable>()
 
     val executor = ThreadPoolExecutor(1, 1, 10000, TimeUnit.SECONDS, LinkedBlockingQueue())
@@ -45,17 +46,23 @@ class AudioWorkspaceView : View() {
 
     val runnable = Runnable {
         if (finishedFrame.compareAndExchange(true, false)) {
-            if (canvasInflatedProperty.value) {
-                viewModel.drawWaveform(
-                    narrationWaveformLayer.getWaveformContext(),
-                    narrationWaveformLayer.getWaveformCanvas()
-                )
-                viewModel.drawVolumeBar(
-                    narrationWaveformLayer.getVolumeBarContext(),
-                    narrationWaveformLayer.getVolumeCanvas()
-                )
+            try {
+                if (canvasInflatedProperty.value) {
+                    viewModel.drawWaveform(
+                        narrationWaveformLayer.getWaveformContext(),
+                        narrationWaveformLayer.getWaveformCanvas()
+                    )
+                    viewModel.drawVolumeBar(
+                        narrationWaveformLayer.getVolumeBarContext(),
+                        narrationWaveformLayer.getVolumeCanvas()
+                    )
+                }
+            } catch (e: Exception) {
+                logger.error("Exception in render loop", e)
             }
-            finishedFrame.set(true)
+            finally {
+                finishedFrame.set(true)
+            }
         }
     }
 
@@ -66,6 +73,10 @@ class AudioWorkspaceView : View() {
     }
 
     override val root = stackpane {
+        subscribe<AppCloseRequestEvent> {
+            at.stop()
+        }
+
         borderpane {
             center = narration_waveform {
                 narrationWaveformLayer = this
@@ -83,9 +94,14 @@ class AudioWorkspaceView : View() {
 
                 maxProperty().bind(viewModel.totalAudioSizeProperty)
 
+                var lastModified = 0L
+
                 valueProperty().onChange {
                     if (viewModel.isPlayingProperty.value == false && viewModel.isRecordingProperty.value == false) {
-                        viewModel.scrollAudio(pixelsToFrames(it))
+                        if (System.currentTimeMillis() - lastModified > 75L) {
+                            lastModified = System.currentTimeMillis()
+                            viewModel.scrollAudio(pixelsToFrames(it))
+                        }
                     }
                 }
             }
@@ -136,7 +152,6 @@ class AudioWorkspaceView : View() {
                 }
             }
         }
-
     }
 
 

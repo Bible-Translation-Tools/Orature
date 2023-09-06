@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui
 
+import com.sun.javafx.stage.WindowCloseRequestHandler
 import javafx.scene.control.ButtonBase
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
