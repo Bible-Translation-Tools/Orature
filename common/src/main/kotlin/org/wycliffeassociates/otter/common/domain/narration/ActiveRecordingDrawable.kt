@@ -45,4 +45,8 @@ class ActiveRecordingDrawable(
     fun clearBuffer() {
         activeRenderer.clearData()
     }
+
+    fun hasData(): Boolean {
+        return !activeRenderer.floatBuffer.isEmpty
+    }
 }

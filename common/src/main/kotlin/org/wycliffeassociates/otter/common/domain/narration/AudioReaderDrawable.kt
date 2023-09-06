@@ -35,12 +35,10 @@ class AudioReaderDrawable(
         drawableData.clear()
         var totalSamplesToRead = secondsOnScreen * recordingSampleRate
 
-        val paddedLoc = location - 221000
-
-        val paddedFrames = padStart(pcmCompressor, audioReader.sampleSize / 8, paddedLoc, totalSamplesToRead)
+        val paddedFrames = padStart(pcmCompressor, audioReader.sampleSize / 8, location, totalSamplesToRead)
         totalSamplesToRead -= paddedFrames
 
-        val clampedLoc = paddedLoc.coerceIn(0..audioReader.totalFrames)
+        val clampedLoc = location.coerceIn(0..audioReader.totalFrames)
         audioReader.seek(clampedLoc)
 
         val frameSizeBytes = audioReader.sampleSize / 8

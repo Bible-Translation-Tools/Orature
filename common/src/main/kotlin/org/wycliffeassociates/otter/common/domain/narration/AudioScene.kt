@@ -30,10 +30,29 @@ class AudioScene(
             // lastPositionRendered = location
             Arrays.fill(frameBuffer, 0f)
 
-            val read = fillFromReader(location)
+            val viewPortRange = getViewPortRange(location)
+            val hasActiveData = activeDrawable.hasData()
+
+            if (!hasActiveData) {
+                val readerData = readerDrawable.getWaveformDrawable(viewPortRange.first)
+                System.arraycopy(readerData, 0, frameBuffer, 0, readerData.size)
+            } else {
+//                copyReaderData(viewPortRange, readerDrawable)
+//                copyActiveData(viewPortRange, activeDrawable)
+            }
+
             // fillFromActive(location, frameBuffer.size - read)
         //}
         return frameBuffer
+    }
+
+    fun copyReaderData(viewPortRange: IntRange, readerDrawable: AudioReaderDrawable) {
+
+    }
+
+    fun getViewPortRange(location: Int): IntRange {
+        val offset = (secondsOnScreen * recordingSampleRate) / 2
+        return location - offset until location + offset
     }
 
     fun padStart(location: Int) {
