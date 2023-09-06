@@ -3,7 +3,6 @@ package org.wycliffeassociates.otter.common.domain.narration
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
-import kotlin.collections.ArrayList
 import kotlin.math.absoluteValue
 
 /**
@@ -141,8 +140,8 @@ internal class VerseMarkerAction(
         totalVerses: MutableList<VerseNode>, workingAudio: AudioFile
     ) {
         logger.info("Moving marker of verse index: ${verseIndex}")
-        oldPrecedingVerse = totalVerses[verseIndex].copy()
-        oldVerse = totalVerses.getOrNull(verseIndex - 1)?.copy()
+        oldPrecedingVerse = totalVerses.getOrNull(verseIndex - 1)?.copy()
+        oldVerse = totalVerses[verseIndex].copy()
 
         val bothNull = oldPrecedingVerse == null && oldVerse == null
         val markerMovedBetweenVerses = oldPrecedingVerse != null && oldVerse != null
@@ -170,9 +169,11 @@ internal class VerseMarkerAction(
                 verse = oldVerse!!.copy()
 
                 if (delta < 0) {
-                    precedingVerse!!.addRange(verse!!.takeFramesFromStart(delta.absoluteValue))
+                    val framesToAdd = precedingVerse!!.takeFramesFromEnd(delta.absoluteValue)
+                    verse!!.addRange(framesToAdd)
                 } else {
-                    verse!!.addRange(precedingVerse!!.takeFramesFromEnd(delta.absoluteValue))
+                    val framesToAdd = verse!!.takeFramesFromStart(delta.absoluteValue)
+                    precedingVerse!!.addRange(framesToAdd)
                 }
 
                 totalVerses[verseIndex] = verse!!.copy()
