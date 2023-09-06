@@ -49,7 +49,7 @@ class ContentRepository @Inject constructor(
     private val markerDao = database.markerDao
     private val contentTypeDao = database.contentTypeDao
     private val checkingLevelDao = database.checkingLevelDao
-    private val contentMapper: ContentMapper = ContentMapper(contentTypeDao)
+    private val contentMapper: ContentMapper = ContentMapper(contentTypeDao, checkingLevelDao)
     private val collectionMapper = CollectionMapper()
     private val takeMapper: TakeMapper = TakeMapper()
     private val markerMapper: MarkerMapper = MarkerMapper()

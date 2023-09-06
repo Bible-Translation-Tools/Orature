@@ -364,6 +364,29 @@ class DatabaseMigrator {
                     DSL.unique(CheckingLevel.CHECKING_LEVEL.NAME)
                 )
                 .execute()
+
+            try {
+                dsl
+                    .alterTable(CheckingLevel.CHECKING_LEVEL)
+                    .addColumn(ContentEntity.CONTENT_ENTITY.CHECKING_FK)
+                    .execute()
+
+                dsl
+                    .alterTable(CheckingLevel.CHECKING_LEVEL)
+                    .add(
+                        DSL.constraint("fk_checking_level")
+                            .foreignKey(ContentEntity.CONTENT_ENTITY.CHECKING_FK)
+                            .references(CheckingLevel.CHECKING_LEVEL)
+                    )
+                    .execute()
+
+                clearProjectTables(dsl)
+            } catch (e: DataAccessException) {
+                // Exception is thrown because the column might already exist but an existence check cannot
+                // be performed in sqlite.
+                logger.error("Error in while migrating database from version 12 to 13", e)
+                return 12
+            }
             logger.info("Updated database from version 12 to 13")
             13
         } else {

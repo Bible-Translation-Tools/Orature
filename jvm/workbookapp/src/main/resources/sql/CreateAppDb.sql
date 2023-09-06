@@ -61,7 +61,8 @@ CREATE TABLE IF NOT EXISTS content_entity (
     text             TEXT,
     format           TEXT,
     draft_number     INTEGER DEFAULT 1 NOT NULL,
-    bridged          INTEGER DEFAULT 0 NOT NULL
+    bridged          INTEGER DEFAULT 0 NOT NULL,
+    checking_fk      INTEGER NOT NULL REFERENCES checking_level(id) ON DELETE RESTRICT
 );
 CREATE INDEX IF NOT EXISTS idx_content_entity_collection_start ON content_entity (collection_fk, start, type_fk);
 

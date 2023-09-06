@@ -8,7 +8,7 @@ enum class CheckingLevel {
 
     companion object {
         fun get(name: String): CheckingLevel? {
-            return CheckingLevel.values().firstOrNull() { it.name.lowercase() == name.lowercase() }
+            return CheckingLevel.values().firstOrNull { it.name.lowercase() == name.lowercase() }
         }
     }
 }
