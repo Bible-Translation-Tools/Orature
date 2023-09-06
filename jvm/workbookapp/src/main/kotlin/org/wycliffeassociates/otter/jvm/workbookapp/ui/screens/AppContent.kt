@@ -39,10 +39,10 @@ class AppContent : View() {
         addClass("app-bar__app-content")
         content = stackpane {
             borderpane {
-                top = navigator.breadCrumbsBar.apply {
-                    orientationScaleProperty.bind(settingsViewModel.orientationScaleProperty)
-                    disableWhen { rootViewModel.externalPluginOpenedProperty }
-                }
+//                top = navigator.breadCrumbsBar.apply {
+//                    orientationScaleProperty.bind(settingsViewModel.orientationScaleProperty)
+//                    disableWhen { rootViewModel.externalPluginOpenedProperty }
+//                }
                 center<Workspace>()
             }
             pane {
