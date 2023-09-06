@@ -184,20 +184,20 @@ internal class VerseMarkerAction(
 
     override fun undo(totalVerses: MutableList<VerseNode>) {
         logger.info("Undoing moving marker of verse index: ${verseIndex}")
-        oldPrecedingVerse?.let {
+        oldVerse?.let {
             totalVerses[verseIndex] = it.copy()
         }
-        oldVerse?.let {
+        oldPrecedingVerse?.let {
             totalVerses[verseIndex - 1] = it.copy()
         }
     }
 
     override fun redo(totalVerses: MutableList<VerseNode>) {
         logger.info("Undoing moving marker of verse index: ${verseIndex}")
-        precedingVerse?.let {
+        verse?.let {
             totalVerses[verseIndex] = it.copy()
         }
-        verse?.let {
+        precedingVerse?.let {
             totalVerses[verseIndex - 1] = it.copy()
         }
     }
