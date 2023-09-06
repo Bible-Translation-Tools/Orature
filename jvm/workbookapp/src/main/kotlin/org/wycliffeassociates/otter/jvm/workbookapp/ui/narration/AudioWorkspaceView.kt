@@ -40,7 +40,8 @@ class AudioWorkspaceView : View() {
 
     private val drawables = mutableListOf<Drawable>()
 
-    val executor = ThreadPoolExecutor(1, 1, 10000, TimeUnit.SECONDS, LinkedBlockingQueue())
+    val jobQueue = LinkedBlockingQueue<Runnable>()
+    val executor = ThreadPoolExecutor(1, 1, 5, TimeUnit.SECONDS, jobQueue)
 
     val finishedFrame = AtomicBoolean(true)
 
@@ -75,6 +76,8 @@ class AudioWorkspaceView : View() {
     override val root = stackpane {
         subscribe<AppCloseRequestEvent> {
             at.stop()
+            jobQueue.clear()
+            executor.shutdownNow()
         }
 
         borderpane {

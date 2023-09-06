@@ -115,8 +115,7 @@ class NarrationViewModel : ViewModel() {
 
         subscribe<AppCloseRequestEvent> {
             logger.info("Received close event request")
-            narration.close()
-            renderer.close()
+            onUndock()
         }
     }
 
@@ -132,7 +131,6 @@ class NarrationViewModel : ViewModel() {
     fun onUndock() {
         listeners.forEach(ListenerDisposer::dispose)
         disposables.dispose()
-
         closeNarrationAudio()
         narration.close()
         renderer.close()
