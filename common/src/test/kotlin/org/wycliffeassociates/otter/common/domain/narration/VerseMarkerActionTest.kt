@@ -87,7 +87,6 @@ class VerseMarkerActionTest {
 
     @Test
     fun `execute with markerMovedBetweenVerses true and negative delta`() {
-        // TODO
         val verseIndex = 1
         val delta = -500
         val verseMarkerAction = VerseMarkerAction(verseIndex, delta)
@@ -135,7 +134,6 @@ class VerseMarkerActionTest {
     fun `execute with firstMarkerMoved true`() {
         // TODO
         // NOTE: not sure how to test this or when this happens
-
     }
 
     @Test
@@ -279,10 +277,6 @@ class VerseMarkerActionTest {
         verseMarkerAction.undo(totalVerses)
 
         verseMarkerAction.redo(totalVerses)
-
-        println("after redo")
-        println(totalVerses[verseIndex - 1])
-        println(totalVerses[verseIndex])
 
         // NOTE: this is failing because the order in which the sectors are added is not correct.
         // Since we are moving the verseNode back, we should be taking frames from the end of the previous
