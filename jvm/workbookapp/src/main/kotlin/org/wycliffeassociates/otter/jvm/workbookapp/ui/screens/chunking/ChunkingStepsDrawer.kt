@@ -15,8 +15,8 @@ import tornadofx.*
 
 class ChunkingStepsDrawer : VBox() {
     val chunkItems = observableListOf<ChunkViewData>()
-    val selectedStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.BLIND_DRAFT)
-    val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.PEER_EDIT)
+    val selectedStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.CHUNKING)
+    val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.BLIND_DRAFT)
     private val isCollapsedProperty = SimpleBooleanProperty(false)
 
     init {
@@ -68,24 +68,6 @@ class ChunkingStepsDrawer : VBox() {
                     chunkItems.onChange { chunkListProperty.set(it.list) }
                     setOnSelect {
                         selectedStepProperty.set(ChunkingStep.BLIND_DRAFT)
-                    }
-                }
-                chunkingStep(ChunkingStep.PEER_EDIT, selectedStepProperty, reachableStepProperty, isCollapsedProperty) {
-                    chunkItems.onChange { chunkListProperty.set(it.list) }
-                    setOnSelect {
-                        selectedStepProperty.set(ChunkingStep.PEER_EDIT)
-                    }
-                }
-                chunkingStep(ChunkingStep.KEYWORD_CHECK, selectedStepProperty, reachableStepProperty, isCollapsedProperty) {
-                    chunkItems.onChange { chunkListProperty.set(it.list) }
-                    setOnSelect {
-                        selectedStepProperty.set(ChunkingStep.KEYWORD_CHECK)
-                    }
-                }
-                chunkingStep(ChunkingStep.VERSE_CHECK, selectedStepProperty, reachableStepProperty, isCollapsedProperty) {
-                    chunkItems.onChange { chunkListProperty.set(it.list) }
-                    setOnSelect {
-                        selectedStepProperty.set(ChunkingStep.VERSE_CHECK)
                     }
                 }
             }
