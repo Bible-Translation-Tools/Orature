@@ -7,13 +7,13 @@ import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.image.PixelFormat
 import javafx.scene.image.WritableImage
-import javafx.scene.paint.Paint
 import org.wycliffeassociates.otter.common.domain.narration.AudioScene
 import tornadofx.c
 import tornadofx.runLater
-import java.awt.Color
 import java.nio.ByteBuffer
 
+private const val VOLUME_BAR_WIDTH = 25
+private const val APP_BAR_WIDTH = 88
 
 // Set up the canvas for the Waveform and Volume bar
 class NarrationWaveformRenderer(
@@ -53,7 +53,7 @@ class NarrationWaveformRenderer(
                 0.0,
                 0.0,
                 //DEFAULT_SCREEN_WIDTH.toDouble(),
-                canvas.width + ((25+88) * (canvas.width / DEFAULT_SCREEN_WIDTH.toDouble())),
+                canvas.width + ((APP_BAR_WIDTH + VOLUME_BAR_WIDTH) * (canvas.width / DEFAULT_SCREEN_WIDTH.toDouble())),
                 DEFAULT_SCREEN_HEIGHT.toDouble()
             )
 
