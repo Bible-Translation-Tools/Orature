@@ -21,7 +21,7 @@ class ChunkingTranslationPage : View() {
     val viewModel: ChunkingViewModel by inject()
 
     private val fragments = mapOf(
-        ChunkingStep.CONSUME_AND_VERBALIZE to Consume(),
+        ChunkingStep.CONSUME_AND_VERBALIZE to find<Consume>(),
         ChunkingStep.CHUNKING to ChunkingFragment(),
         ChunkingStep.BLIND_DRAFT to BlindDraftFragment()
     )
@@ -37,6 +37,11 @@ class ChunkingTranslationPage : View() {
         ChunkViewData(5, SimpleBooleanProperty(false), selectedChunk),
         ChunkViewData(6, SimpleBooleanProperty(false), selectedChunk)
     )
+    private val mainFragmentProperty = selectedStepProperty.objectBinding {
+        it?.let {
+            fragments[it]
+        }
+    }
 
     private lateinit var sourceTextDrawer: SourceTextDrawer
 
@@ -52,12 +57,7 @@ class ChunkingTranslationPage : View() {
                 this@ChunkingTranslationPage.selectedStepProperty.bind(this.selectedStepProperty)
             }
 
-            centerProperty().bind(selectedStepProperty.objectBinding {
-                it?.let {
-                    fragments[it]?.onDock()
-                    fragments[it]?.root
-                }
-            })
+            centerProperty().bind(mainFragmentProperty.objectBinding { it?.root })
 
             right = SourceTextDrawer().apply {
                 sourceTextDrawer = this

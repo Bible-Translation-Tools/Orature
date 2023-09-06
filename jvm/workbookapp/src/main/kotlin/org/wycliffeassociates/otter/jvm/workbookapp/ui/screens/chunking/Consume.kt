@@ -45,6 +45,8 @@ class Consume : Fragment() {
     private lateinit var waveform: MarkerPlacementWaveform
     private lateinit var slider: Slider
 
+    var cleanUpWaveform: () -> Unit = {}
+
     override fun onDock() {
         super.onDock()
         logger.info("Consume docked")
@@ -57,7 +59,9 @@ class Consume : Fragment() {
 
     override fun onUndock() {
         super.onUndock()
+        logger.info("Consume undocked")
         vm.onUndockConsume()
+        cleanUpWaveform()
     }
 
     private fun subscribeOnWaveformImages() {
@@ -88,6 +92,7 @@ class Consume : Fragment() {
                     imageWidthProperty.bind(vm.imageWidthProperty)
 
                     setUpWaveformActionHandlers()
+                    cleanUpWaveform = ::freeImages
 
                     // Marker stuff
                     this.markers.bind(vm.markers) { it }
