@@ -15,10 +15,10 @@ class AudioReaderDrawable(
     private val width: Int,
     private val secondsOnScreen: Int,
     private val recordingSampleRate: Int,
-    // private val padEnds: Float = 0f
 ) {
     private val logger = LoggerFactory.getLogger(AudioReaderDrawable::class.java)
 
+    // Buffer sizes for drawables doubled, since each pixel needs a minimum and maximum value to draw a line
     private val waveformDrawable = FloatArray(width * 2)
     private val drawableData = FloatRingBuffer(width * 2)
     private val pcmCompressor = PCMCompressor(drawableData, samplesToCompress(width, secondsOnScreen))
@@ -30,20 +30,26 @@ class AudioReaderDrawable(
         return (recordingSampleRate * secondsOnScreen) / width
     }
 
+    /**
+     * Given a particular location, compute a buffer of min max values to draw a waveform from.
+     *
+     * If the location is negative, it will be zero padded.
+     *
+     * @param location the location in frames to begin reading from
+     * @return an array of min/max values to draw
+     */
     fun getWaveformDrawable(location: Int): FloatArray {
         Arrays.fill(waveformDrawable, 0f)
         drawableData.clear()
         var totalSamplesToRead = secondsOnScreen * recordingSampleRate
 
-        val paddedFrames = padStart(pcmCompressor, audioReader.sampleSize / 8, location, totalSamplesToRead)
+        val paddedFrames = padStart(pcmCompressor, audioReader.frameSizeBytes, location, totalSamplesToRead)
         totalSamplesToRead -= paddedFrames
 
         val clampedLoc = location.coerceIn(0..audioReader.totalFrames)
         audioReader.seek(clampedLoc)
 
-        val frameSizeBytes = audioReader.sampleSize / 8
-
-
+        val frameSizeBytes = audioReader.frameSizeBytes
         var framesToRead = max(min(totalSamplesToRead, audioReader.totalFrames - clampedLoc), 0) * frameSizeBytes
 
 
