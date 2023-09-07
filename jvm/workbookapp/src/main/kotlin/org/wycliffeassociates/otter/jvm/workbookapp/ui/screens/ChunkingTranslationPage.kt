@@ -29,8 +29,8 @@ class ChunkingTranslationPage : View() {
         ChunkingStep.BLIND_DRAFT to BlindDraftFragment()
     )
     private val selectedChunk: IntegerProperty = SimpleIntegerProperty(2)
-    private val selectedStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.BLIND_DRAFT)
-    private val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.PEER_EDIT)
+    private val selectedStepProperty = SimpleObjectProperty<ChunkingStep>(null)
+    private val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.BLIND_DRAFT)
     private val sourceTextProperty = SimpleStringProperty()
     private val list = observableListOf(
         ChunkViewData(1, SimpleBooleanProperty(true), selectedChunk),
@@ -41,8 +41,11 @@ class ChunkingTranslationPage : View() {
         ChunkViewData(6, SimpleBooleanProperty(false), selectedChunk)
     )
     private val mainFragmentProperty = selectedStepProperty.objectBinding {
-        it?.let {
-            fragments[it]
+        it?.let { step ->
+            when(step) {
+                ChunkingStep.CONSUME_AND_VERBALIZE -> Consume()
+                else -> null
+            }
         }
     }
 
@@ -76,6 +79,11 @@ class ChunkingTranslationPage : View() {
         tryImportStylesheet("/css/chunk-item.css")
         tryImportStylesheet("/css/chunk-marker.css")
         tryImportStylesheet("/css/scrolling-waveform.css")
+
+        mainFragmentProperty.addListener { observable, oldValue, newValue ->
+            oldValue?.onUndock()
+            newValue?.onDock()
+        }
     }
 
     override fun onDock() {
@@ -94,6 +102,8 @@ class ChunkingTranslationPage : View() {
             .subscribe {
                 sourceTextProperty.set(it)
             }
+
+        selectedStepProperty.set(ChunkingStep.CONSUME_AND_VERBALIZE)
     }
 
     override fun onUndock() {

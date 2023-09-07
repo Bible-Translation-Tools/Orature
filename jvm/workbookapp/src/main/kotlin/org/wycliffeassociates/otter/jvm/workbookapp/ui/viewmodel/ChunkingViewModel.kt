@@ -151,12 +151,10 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
     }
 
     fun onDockConsume() {
-        /** Update states should be done beforehand, not here */
         val wb = workbookDataStore.workbook
         val chapter = workbookDataStore.chapter
         val sourceAudio = wb.sourceAudioAccessor.getChapter(chapter.sort, wb.target)
         audioDataStore.sourceAudioProperty.set(sourceAudio)
-//        workbookDataStore.activeChapterProperty.set(chapter)
 
         sourceAudio?.file?.let {
             (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -169,9 +167,8 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
     }
 
     fun onUndockConsume() {
-        stopAnimationTimer()
         pause()
-        compositeDisposable.clear()
+        cleanup()
     }
 
     fun onDockChunk() {
