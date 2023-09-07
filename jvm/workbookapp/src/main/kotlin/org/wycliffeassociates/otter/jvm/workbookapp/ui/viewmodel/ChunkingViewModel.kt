@@ -135,28 +135,6 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
     private var sampleRate: Int = 0 // beware of divided by 0
     private var sourceTotalFrames: Int = 0 // beware of divided by 0
 
-    init {
-        pageProperty.onChange {
-            when (it) {
-                ChunkingWizardPage.CONSUME -> {
-                    consumeStepColor.set(ACTIVE)
-                    verbalizeStepColor.set(INACTIVE)
-                    chunkStepColor.set(INACTIVE)
-                }
-                ChunkingWizardPage.VERBALIZE -> {
-                    consumeStepColor.set(COMPLETE)
-                    verbalizeStepColor.set(ACTIVE)
-                    chunkStepColor.set(INACTIVE)
-                }
-                ChunkingWizardPage.CHUNK -> {
-                    consumeStepColor.set(COMPLETE)
-                    verbalizeStepColor.set(COMPLETE)
-                    chunkStepColor.set(ACTIVE)
-                }
-            }
-        }
-    }
-
     fun dockPage() {
         val recentChapter = workbookDataStore.workbookRecentChapterMap.getOrDefault(
             workbookDataStore.workbook.hashCode(),

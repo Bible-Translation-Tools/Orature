@@ -83,7 +83,6 @@ class ChunkingWizard : Wizard() {
         tryImportStylesheet(resources["/css/chunking-wizard.css"])
         pages.clear()
         add<Consume>()
-        add<Verbalize>()
         add<ChunkingPage>()
         val top = vbox {
             removeClass(WizardStyles.content)

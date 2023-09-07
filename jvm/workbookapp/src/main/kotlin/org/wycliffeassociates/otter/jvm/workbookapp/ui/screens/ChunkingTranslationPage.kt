@@ -2,7 +2,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.layout.Priority
-import javafx.scene.layout.VBox
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.SourceTextDrawer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
@@ -17,12 +16,6 @@ class ChunkingTranslationPage : View() {
 
     val viewModel: ChunkingViewModel by inject()
     val workbookDataStore: WorkbookDataStore by inject()
-
-    private val fragments = mapOf(
-        ChunkingStep.CONSUME_AND_VERBALIZE to find<Consume>(),
-        ChunkingStep.CHUNKING to ChunkingFragment(),
-        ChunkingStep.BLIND_DRAFT to BlindDraftFragment()
-    )
 
     private val list = observableListOf(
         ChunkViewData(1, SimpleBooleanProperty(true), viewModel.selectedChunk),
@@ -87,17 +80,5 @@ class ChunkingTranslationPage : View() {
     override fun onUndock() {
         super.onUndock()
         viewModel.selectedStepProperty.set(null)
-    }
-}
-
-class ChunkingFragment : Fragment() {
-    override val root = VBox().apply {
-        label("this is chunking").addClass("h3")
-    }
-}
-
-class BlindDraftFragment : Fragment() {
-    override val root = VBox().apply {
-        label("this is blind draft").addClass("h3")
     }
 }
