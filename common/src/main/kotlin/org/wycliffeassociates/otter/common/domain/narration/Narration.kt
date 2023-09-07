@@ -34,7 +34,8 @@ class Narration @AssistedInject constructor(
 
     private val history = NarrationHistory()
     private var chapterRepresentation = ChapterRepresentation(workbook, chapter)
-    private val chapterReaderConnection = chapterRepresentation.getAudioFileReader() as ChapterRepresentation.ChapterRepresentationConnection
+    private val chapterReaderConnection =
+        chapterRepresentation.getAudioFileReader() as ChapterRepresentation.ChapterRepresentationConnection
 
     private var audioLoaded = false
 
@@ -77,23 +78,25 @@ class Narration @AssistedInject constructor(
         loadChapterIntoPlayer()
     }
 
+    /**
+     * Counts the number of audio frames that have been recorded since activating a recording
+     */
     private fun activeRecordingFrameCounter(writer: WavFileWriter): Disposable {
         return Observable
             .combineLatest(writer.isWriting, getRecorderAudioStream())
             { isWriting, bytes -> Pair(isWriting, bytes) }
-            .map {
-                (isWriting, bytes) ->
+            .map { (isWriting, bytes) ->
                 if (isWriting) {
                     uncommittedRecordedFrames.addAndGet(bytes.size / DEFAULT_FRAME_SIZE_BYTES)
                 }
-            }.subscribeOn(Schedulers.io())
-            .doOnNext {
-                logger.info("Audio duration is: ${getTotalFrames()}")
-                logger.info("uncommitted audio frames is now ${uncommittedRecordedFrames.get()}")
             }
+            .subscribeOn(Schedulers.io())
             .subscribe()
     }
 
+    /**
+     * Resets the count of recorded frames when the writer pauses and thus the active verse list gets updated
+     */
     private fun resetUncommittedFramesOnUpdatedVerses(): Disposable {
         return onActiveVersesUpdated.subscribe {
             uncommittedRecordedFrames.set(0)

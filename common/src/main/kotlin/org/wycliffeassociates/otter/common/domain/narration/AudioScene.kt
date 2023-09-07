@@ -38,22 +38,28 @@ class AudioScene(
         val framesOnScreen = secondsOnScreen * recordingSampleRate
 
         val viewPortRange = getViewPortRange(location)
-        val hasActiveData = activeDrawable.hasData()
 
+        val hasActiveData = activeDrawable.hasData()
         val readerData = readerDrawable.getWaveformDrawable(viewPortRange.first)
+
+        // Copy reader data
         System.arraycopy(readerData, 0, frameBuffer, 0, readerData.size)
+
+        // If there is active data, we can apply it by overwriting the read data
         if (hasActiveData) {
             val readerEnd = existingAudioReader.totalFrames
             val activeData = activeDrawable.getWaveformDrawable()
 
-            val paddedStart = if (readerEnd in viewPortRange) {
-                framesToPixels(readerEnd - viewPortRange.first, width, framesOnScreen)
-            } else 0
-
             if (readerEnd in viewPortRange) {
+                // multiply by two because each pixel is a min and a max
                 val minMaxBufferStart = framesToPixels(readerEnd - viewPortRange.first, width, framesOnScreen) * 2
-                logger.error("Starting active buffer read at $minMaxBufferStart")
-                System.arraycopy(activeData, 0, frameBuffer, minMaxBufferStart, (frameBuffer.size / 2) - minMaxBufferStart)
+                System.arraycopy(
+                    activeData,
+                    // due to how the ring buffer works, the oldest recorded data will begin at 0
+                    0,
+                    frameBuffer,
+                    minMaxBufferStart,
+                    (frameBuffer.size / 2) - minMaxBufferStart)
             }
             else {
                 System.arraycopy(activeData, 0, frameBuffer, 0, activeData.size)
@@ -62,6 +68,10 @@ class AudioScene(
         return frameBuffer
     }
 
+    /**
+     * Given an audio frame, compute the range of audio frames that will be displayed by this scene
+     * Currently this is hardcoded to be from half the seconds on screen prior to the location, and half after.
+     */
     fun getViewPortRange(location: Int): IntRange {
         val offset = (secondsOnScreen * recordingSampleRate) / 2
         return location - offset until location + offset

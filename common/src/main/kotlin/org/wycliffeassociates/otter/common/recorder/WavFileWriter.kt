@@ -37,7 +37,7 @@ class WavFileWriter(
     private var record = AtomicBoolean(false)
     private val writingSubject = PublishSubject.create<Boolean>()
     val isWriting = writingSubject.map { it }
-    
+
     fun start() {
         record.set(true)
         writingSubject.onNext(true)
