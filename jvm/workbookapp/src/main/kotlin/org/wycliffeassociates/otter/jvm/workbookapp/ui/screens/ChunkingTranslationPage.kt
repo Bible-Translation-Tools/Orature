@@ -1,11 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
-import com.github.thomasnield.rxkotlinfx.observeOnFx
-import javafx.beans.property.IntegerProperty
 import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleIntegerProperty
-import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
@@ -28,19 +23,16 @@ class ChunkingTranslationPage : View() {
         ChunkingStep.CHUNKING to ChunkingFragment(),
         ChunkingStep.BLIND_DRAFT to BlindDraftFragment()
     )
-    private val selectedChunk: IntegerProperty = SimpleIntegerProperty(2)
-    private val selectedStepProperty = SimpleObjectProperty<ChunkingStep>(null)
-    private val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.BLIND_DRAFT)
-    private val sourceTextProperty = SimpleStringProperty()
+
     private val list = observableListOf(
-        ChunkViewData(1, SimpleBooleanProperty(true), selectedChunk),
-        ChunkViewData(2, SimpleBooleanProperty(true), selectedChunk),
-        ChunkViewData(3, SimpleBooleanProperty(true), selectedChunk),
-        ChunkViewData(4, SimpleBooleanProperty(false), selectedChunk),
-        ChunkViewData(5, SimpleBooleanProperty(false), selectedChunk),
-        ChunkViewData(6, SimpleBooleanProperty(false), selectedChunk)
+        ChunkViewData(1, SimpleBooleanProperty(true), viewModel.selectedChunk),
+        ChunkViewData(2, SimpleBooleanProperty(true), viewModel.selectedChunk),
+        ChunkViewData(3, SimpleBooleanProperty(true), viewModel.selectedChunk),
+        ChunkViewData(4, SimpleBooleanProperty(false), viewModel.selectedChunk),
+        ChunkViewData(5, SimpleBooleanProperty(false), viewModel.selectedChunk),
+        ChunkViewData(6, SimpleBooleanProperty(false), viewModel.selectedChunk)
     )
-    private val mainFragmentProperty = selectedStepProperty.objectBinding {
+    private val mainFragmentProperty = viewModel.selectedStepProperty.objectBinding {
         it?.let { step ->
             when(step) {
                 ChunkingStep.CONSUME_AND_VERBALIZE -> Consume()
@@ -57,16 +49,16 @@ class ChunkingTranslationPage : View() {
         borderpane {
             vgrow = Priority.ALWAYS
 
-            left = ChunkingStepsDrawer(selectedStepProperty).apply {
+            left = ChunkingStepsDrawer(viewModel.selectedStepProperty).apply {
                 chunkItems.setAll(list)
-                this.reachableStepProperty.bind(this@ChunkingTranslationPage.reachableStepProperty)
+                this.reachableStepProperty.bind(viewModel.reachableStepProperty)
             }
 
             centerProperty().bind(mainFragmentProperty.objectBinding { it?.root })
 
             right = SourceTextDrawer().apply {
                 sourceTextDrawer = this
-                textProperty.bind(sourceTextProperty)
+                textProperty.bind(viewModel.sourceTextProperty)
                 highlightedChunk.bind(viewModel.currentMarkerNumberProperty)
             }
         }
@@ -88,27 +80,13 @@ class ChunkingTranslationPage : View() {
 
     override fun onDock() {
         super.onDock()
-        val recentChapter = workbookDataStore.workbookRecentChapterMap.getOrDefault(
-            workbookDataStore.workbook.hashCode(),
-            1
-        )
-        val chapter = workbookDataStore.workbook.target.chapters
-            .filter { it.sort == recentChapter }
-            .blockingFirst()
-
-        workbookDataStore.activeChapterProperty.set(chapter)
-        workbookDataStore.getSourceText()
-            .observeOnFx()
-            .subscribe {
-                sourceTextProperty.set(it)
-            }
-
-        selectedStepProperty.set(ChunkingStep.CONSUME_AND_VERBALIZE)
+        viewModel.dockPage()
+        viewModel.selectedStepProperty.set(ChunkingStep.CONSUME_AND_VERBALIZE)
     }
 
     override fun onUndock() {
         super.onUndock()
-        selectedStepProperty.set(null)
+        viewModel.selectedStepProperty.set(null)
     }
 }
 

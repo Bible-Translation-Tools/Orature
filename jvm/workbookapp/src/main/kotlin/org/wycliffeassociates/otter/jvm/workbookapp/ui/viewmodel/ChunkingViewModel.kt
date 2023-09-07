@@ -18,12 +18,14 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.glass.ui.Screen
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import java.io.File
 import javafx.animation.AnimationTimer
+import javafx.beans.property.IntegerProperty
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
@@ -46,6 +48,7 @@ import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
 import tornadofx.ViewModel
 import tornadofx.get
 import tornadofx.getValue
@@ -83,8 +86,12 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
     val pageProperty = SimpleObjectProperty(ChunkingWizardPage.CONSUME)
     val titleProperty = SimpleStringProperty("")
     val stepProperty = SimpleStringProperty("")
+    val selectedChunk: IntegerProperty = SimpleIntegerProperty(2)
+    val selectedStepProperty = SimpleObjectProperty<ChunkingStep>(null)
+    val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.BLIND_DRAFT)
 
     val sourceAudio by audioDataStore.sourceAudioProperty
+    val sourceTextProperty = SimpleStringProperty()
 
     @Inject
     lateinit var directoryProvider: IDirectoryProvider
@@ -148,6 +155,23 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
                 }
             }
         }
+    }
+
+    fun dockPage() {
+        val recentChapter = workbookDataStore.workbookRecentChapterMap.getOrDefault(
+            workbookDataStore.workbook.hashCode(),
+            1
+        )
+        val chapter = workbookDataStore.workbook.target.chapters
+            .filter { it.sort == recentChapter }
+            .blockingFirst()
+
+        workbookDataStore.activeChapterProperty.set(chapter)
+        workbookDataStore.getSourceText()
+            .observeOnFx()
+            .subscribe {
+                sourceTextProperty.set(it)
+            }
     }
 
     fun onDockConsume() {

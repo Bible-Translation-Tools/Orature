@@ -60,8 +60,8 @@ class Consume : Fragment() {
     override fun onUndock() {
         super.onUndock()
         logger.info("Consume undocked")
-        vm.onUndockConsume()
         cleanUpWaveform()
+        vm.onUndockConsume()
     }
 
     private fun subscribeOnWaveformImages() {
