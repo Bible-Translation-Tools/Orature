@@ -67,6 +67,10 @@ class AudioScene(
         return location - offset until location + offset
     }
 
+    fun clear() {
+        activeDrawable.clearBuffer()
+    }
+
     fun close() {
         activeDrawable.close()
     }

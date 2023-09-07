@@ -117,7 +117,7 @@ class NarrationWaveformRenderer(
     }
 
     fun clearActiveRecordingData() {
-        renderer.activeDrawable.clearBuffer()
+        renderer.clear()
     }
 
     fun close() {
