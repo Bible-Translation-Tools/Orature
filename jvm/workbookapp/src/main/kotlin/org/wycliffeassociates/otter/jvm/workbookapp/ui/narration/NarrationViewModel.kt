@@ -27,6 +27,7 @@ import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.narration.AudioScene
 import org.wycliffeassociates.otter.common.domain.narration.Narration
 import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
+import org.wycliffeassociates.otter.common.domain.narration.framesToPixels
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
@@ -34,6 +35,7 @@ import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkerControl
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.NarrationWaveformRenderer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -442,19 +444,40 @@ class NarrationViewModel : ViewModel() {
         }.let(disposables::add)
     }
 
-    fun drawWaveform(context: GraphicsContext, canvas: Canvas) {
+    fun drawWaveform(
+        context: GraphicsContext,
+        canvas: Canvas,
+        markerNodes: ObservableList<VerseMarkerControl>
+    ) {
         if (::renderer.isInitialized) {
             val position = narration.getLocationInFrames()
             runLater {
                 audioPositionProperty.set(position)
             }
-            renderer.draw(context, canvas, position)
+            val viewport = renderer.draw(context, canvas, position)
+            adjustMarkers(markerNodes, viewport, canvas.width.toInt())
         }
     }
 
     fun drawVolumebar(context: GraphicsContext, canvas: Canvas) {
         if (::renderer.isInitialized) {
             volumeBar.draw(context, canvas)
+        }
+    }
+
+    private fun adjustMarkers(markerNodes: ObservableList<VerseMarkerControl>, viewport: IntRange, width: Int) {
+        for (marker in markerNodes) {
+            val verse = marker.verseProperty.value
+            if (verse.location in viewport) {
+                marker.visibleProperty().set(true)
+                marker.layoutX = framesToPixels(
+                    verse.location - viewport.first,
+                    width,
+                    viewport.last - viewport.first
+                ).toDouble()
+            } else {
+                marker.visibleProperty().set(false)
+            }
         }
     }
 

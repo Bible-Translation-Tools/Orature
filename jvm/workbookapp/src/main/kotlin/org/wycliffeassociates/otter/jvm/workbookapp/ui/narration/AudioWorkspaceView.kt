@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 import javafx.animation.AnimationTimer
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
+import javafx.collections.ObservableList
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.control.ScrollBar
@@ -11,6 +12,9 @@ import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
 import org.wycliffeassociates.otter.jvm.controls.waveform.Drawable
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkerControl
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkersLayer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.WaveformLayer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.narration_waveform
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.pixelsToFrames
@@ -36,13 +40,16 @@ class AudioWorkspaceView : View() {
 
     val finishedFrame = AtomicBoolean(true)
 
+    val markerNodes = observableListOf<VerseMarkerControl>()
+
     val runnable = Runnable {
         if (finishedFrame.compareAndExchange(true, false)) {
             try {
                 if (canvasInflatedProperty.value) {
                     viewModel.drawWaveform(
                         narrationWaveformLayer.getWaveformContext(),
-                        narrationWaveformLayer.getWaveformCanvas()
+                        narrationWaveformLayer.getWaveformCanvas(),
+                        markerNodes
                     )
                     viewModel.drawVolumeBar(
                         narrationWaveformLayer.getVolumeBarContext(),
@@ -51,8 +58,7 @@ class AudioWorkspaceView : View() {
                 }
             } catch (e: Exception) {
                 logger.error("Exception in render loop", e)
-            }
-            finally {
+            } finally {
                 finishedFrame.set(true)
             }
         }
@@ -99,6 +105,10 @@ class AudioWorkspaceView : View() {
                     }
                 }
             }
+        }
+
+        borderpane {
+            bindChildren(markerNodes) { it }
         }
 
         hbox {
@@ -152,6 +162,20 @@ class AudioWorkspaceView : View() {
     override fun onDock() {
         super.onDock()
         viewModel.onDock()
+        viewModel.recordedVerses.onChangeAndDoNowWithDisposer { markers ->
+            markerNodes.clear()
+            markers.mapIndexed { index, marker ->
+                VerseMarkerControl().apply {
+                    verseProperty.set(marker)
+                    verseIndexProperty.set(index)
+                    labelProperty.set(marker.label)
+                    isRecordingProperty.bind(viewModel.isRecordingProperty)
+                    prefHeightProperty().bind(root.heightProperty())
+                }
+            }.let {
+                markerNodes.addAll(it)
+            }
+        }
         at.start()
     }
 
@@ -178,8 +202,8 @@ class AudioWorkspaceViewModel : ViewModel() {
         narrationViewModel.seekAudio(delta)
     }
 
-    fun drawWaveform(context: GraphicsContext, canvas: Canvas) {
-        narrationViewModel.drawWaveform(context, canvas)
+    fun drawWaveform(context: GraphicsContext, canvas: Canvas, markerNodes: ObservableList<VerseMarkerControl>) {
+        narrationViewModel.drawWaveform(context, canvas, markerNodes)
     }
 
     fun drawVolumeBar(context: GraphicsContext, canvas: Canvas) {

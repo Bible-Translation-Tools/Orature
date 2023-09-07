@@ -369,9 +369,7 @@ internal class ChapterRepresentation(
                     }
 
                     val framesTaken = sectors.sumOf { it.length() }
-
-                    logger.info("reading from sectors: $sectors")
-
+                    
                     for (sector in sectors) {
                         if (framesToRead <= 0 || framePosition !in bounds) break
 
@@ -379,7 +377,6 @@ internal class ChapterRepresentation(
                         if (seekLoc <= 0) {
                             logger.error("Sector seek produced a negative seek location: $seekLoc, from ${sector}")
                         }
-                        logger.info("in sector ${sector} seeking to position $seekLoc")
                         raf.seek(seekLoc)
                         val temp = ByteArray(framesTaken * frameSizeInBytes)
                         val toCopy = raf.read(temp)
