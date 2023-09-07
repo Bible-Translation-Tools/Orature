@@ -462,9 +462,7 @@ class NarrationViewModel : ViewModel() {
         val wasPlaying = audioPlayer.isPlaying()
         audioPlayer.pause()
         narration.loadChapterIntoPlayer()
-        audioPlayer.seek(frame)
         narration.seek(frame)
-        rendererAudioReader.seek(frame)
         if (wasPlaying) audioPlayer.play()
     }
 }

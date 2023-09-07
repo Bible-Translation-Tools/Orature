@@ -315,6 +315,7 @@ class Narration @AssistedInject constructor(
     }
 
     fun seek(location: Int) {
+        player.seek(location)
         chapterReaderConnection.seek(location)
     }
 
