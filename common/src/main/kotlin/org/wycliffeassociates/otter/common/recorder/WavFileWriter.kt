@@ -37,9 +37,7 @@ class WavFileWriter(
     private var record = AtomicBoolean(false)
     private val writingSubject = PublishSubject.create<Boolean>()
     val isWriting = writingSubject.map { it }
-
-    val written = AtomicInteger(0)
-
+    
     fun start() {
         record.set(true)
         writingSubject.onNext(true)
@@ -60,8 +58,6 @@ class WavFileWriter(
                     if (record.get()) {
                         writer.write(it)
                         writer.flush()
-                        written.getAndAdd(it.size / 2)
-                        logger.info("wrote ${written.get()}")
                     }
                 }
             },
