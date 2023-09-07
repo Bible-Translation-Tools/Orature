@@ -22,6 +22,11 @@ class ActiveRecordingDrawable(
 
     private val waveformDrawable = FloatArray(width * 2)
 
+    /**
+     * Computes a buffer of min/max values for drawing a waveform from an active recording
+     *
+     * @return an array of min/max values to draw
+     */
     fun getWaveformDrawable(): FloatArray {
         Arrays.fill(waveformDrawable, 0f)
 
@@ -35,19 +40,12 @@ class ActiveRecordingDrawable(
             waveformDrawable[i] = activeData[i]
         }
 
-//        var j = 0
-//        for (i in waveformDrawable.size - activeSize until waveformDrawable.size) {
-//            waveformDrawable[i] = activeData[j]
-//            j++
-//        }
-
         return waveformDrawable
     }
 
-    private fun samplesToCompress(width: Int, secondsOnScreen: Int): Int {
-        return (recordingSampleRate * secondsOnScreen) / width
-    }
-
+    /**
+     * Clears data in the active renderer (Call when audio recording has completed).
+     */
     fun clearBuffer() {
         activeRenderer.clearData()
     }
@@ -56,6 +54,9 @@ class ActiveRecordingDrawable(
         return !activeRenderer.floatBuffer.isEmpty
     }
 
+    /**
+     * Closes the recording stream.
+     */
     fun close() {
         activeRenderer.close()
     }
