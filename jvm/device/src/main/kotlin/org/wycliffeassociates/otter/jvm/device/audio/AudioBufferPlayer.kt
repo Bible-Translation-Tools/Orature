@@ -177,6 +177,7 @@ class AudioBufferPlayer(
                 if (!player.isActive) {
                     listeners.forEach { it.onEvent(AudioPlayerEvent.PLAY) }
                     pause.set(false)
+                    if (!_reader.hasRemaining()) _reader.seek(0)
                     startPosition = _reader.framePosition
                     playbackThread = Thread {
                         try {
@@ -199,10 +200,10 @@ class AudioBufferPlayer(
                             }
                             player.drain()
                             if (!pause.get()) {
-                                startPosition = 0
+                                startPosition = _reader.totalFrames
                                 listeners.forEach { it.onEvent(AudioPlayerEvent.COMPLETE) }
                                 player.close()
-                                seek(0)
+                                seek(startPosition)
                             }
                         } catch (e: LineUnavailableException) {
                             errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, e))

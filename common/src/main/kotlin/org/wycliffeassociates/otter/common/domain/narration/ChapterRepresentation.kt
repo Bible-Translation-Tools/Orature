@@ -82,7 +82,6 @@ internal class ChapterRepresentation(
 
     fun loadFromSerializedVerses() {
         val json = serializedVersesFile.readText()
-        logger.info(json)
         val reference = object : TypeReference<List<VerseNode>>() {}
 
         try {
@@ -97,7 +96,6 @@ internal class ChapterRepresentation(
     }
 
     fun finalizeVerse(verseIndex: Int, history: NarrationHistory? = null): Int {
-        logger.info("Finalizing verse: ${verseIndex}")
         val end = scratchAudio.totalFrames
 
         history?.finalizeVerse(end, totalVerses)
@@ -346,7 +344,6 @@ internal class ChapterRepresentation(
                 startingVerse = findVerse(framePosition)
             }
 
-            logger.info("Starting verse is ${startingVerse}")
             startingVerse?.let { startingVerse ->
                 var startIndex = verses.indexOf(startingVerse)
                 if (startIndex == -1) {
@@ -421,14 +418,11 @@ internal class ChapterRepresentation(
         }
 
         override fun release() {
-            logger.info("release called")
             if (randomAccessFile != null) {
                 randomAccessFile?.close()
                 randomAccessFile = null
             }
-            //synchronized(openReaderConnections) {
             openReaderConnections.remove(this)
-            //}
         }
 
         override fun close() {

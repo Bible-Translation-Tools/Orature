@@ -24,12 +24,14 @@ import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.button.AppBarButton
+import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.AddFilesView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.DrawerEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.DrawerEventAction
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.InfoView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.SettingsView
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.HomePage2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
 import tornadofx.*
 
@@ -40,6 +42,16 @@ class AppBar : Fragment() {
     override val root = VBox()
 
     private val buttonsToggleGroup = ToggleGroup()
+
+    private val homeButton = AppBarButton().apply {
+        textProperty().set(messages["home"])
+        graphicProperty().set(FontIcon(MaterialDesign.MDI_HOME))
+        toggleGroup = buttonsToggleGroup
+        setOnMouseClicked {
+            val homePage = find<HomePage2>()
+            fire(NavigationRequestEvent(homePage))
+        }
+    }
 
     private val addButton = AppBarButton().apply {
         textProperty().set(messages["import"])
@@ -91,10 +103,7 @@ class AppBar : Fragment() {
 
             disableWhen { rootViewModel.externalPluginOpenedProperty }
 
-            label {
-                addClass("app-bar__logo")
-                graphic = FontIcon(MaterialDesign.MDI_HEADSET)
-            }
+            add(homeButton)
 
             region { vgrow = Priority.ALWAYS }
 

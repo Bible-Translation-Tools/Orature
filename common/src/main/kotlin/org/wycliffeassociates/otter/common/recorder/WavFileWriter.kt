@@ -24,6 +24,7 @@ import io.reactivex.subjects.PublishSubject
 import org.slf4j.LoggerFactory
 import java.util.concurrent.atomic.AtomicBoolean
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
+import java.util.concurrent.atomic.AtomicInteger
 
 class WavFileWriter(
     private val oratureAudioFile: OratureAudioFile,
@@ -56,6 +57,7 @@ class WavFileWriter(
                 audioStream.map {
                     if (record.get()) {
                         writer.write(it)
+                        writer.flush()
                     }
                 }
             },

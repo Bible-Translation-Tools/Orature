@@ -1,6 +1,8 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.github.thomasnield.rxkotlinfx.toObservable
+import com.sun.glass.ui.Screen
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
@@ -10,21 +12,29 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
+import javafx.scene.canvas.Canvas
+import javafx.scene.canvas.GraphicsContext
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.AudioFileReader
+import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
+import org.wycliffeassociates.otter.common.domain.narration.AudioScene
 import org.wycliffeassociates.otter.common.domain.narration.Narration
 import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
-import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
+import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
+import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.NarrationWaveformRenderer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
@@ -34,18 +44,22 @@ import javax.inject.Inject
 import kotlin.math.max
 
 class NarrationViewModel : ViewModel() {
+    private lateinit var rendererAudioReader: AudioFileReader
     private val logger = LoggerFactory.getLogger(NarrationViewModel::class.java)
-
     private val workbookDataStore: WorkbookDataStore by inject()
-    private val audioPluginViewModel: AudioPluginViewModel by inject()
 
+    private val audioPluginViewModel: AudioPluginViewModel by inject()
     lateinit var audioPlayer: IAudioPlayer
 
     @Inject
     lateinit var narrationFactory: NarrationFactory
-    private lateinit var narration: Narration
 
+    private lateinit var narration: Narration
+    private lateinit var renderer: NarrationWaveformRenderer
+
+    private lateinit var volumeBar: VolumeBar
     val recordStartProperty = SimpleBooleanProperty()
+
     var recordStart by recordStartProperty
     val recordPauseProperty = SimpleBooleanProperty()
     var recordPause by recordPauseProperty
@@ -57,6 +71,7 @@ class NarrationViewModel : ViewModel() {
     var isRecordingAgain by isRecordingAgainProperty
     val recordAgainVerseIndexProperty = SimpleObjectProperty<Int?>()
     var recordAgainVerseIndex by recordAgainVerseIndexProperty
+    val isPlayingProperty = SimpleBooleanProperty(false)
 
     val playingVerseProperty = SimpleObjectProperty<VerseMarker?>()
     var playingVerse by playingVerseProperty
@@ -78,6 +93,8 @@ class NarrationViewModel : ViewModel() {
     val recordedVerses = observableListOf<VerseMarker>()
     val hasVersesProperty = SimpleBooleanProperty()
     val lastRecordedVerseProperty = SimpleIntegerProperty()
+    val audioPositionProperty = SimpleIntegerProperty()
+    val totalAudioSizeProperty = SimpleIntegerProperty()
 
     val potentiallyFinishedProperty = chunkTotalProperty.eq(recordedVerses.sizeProperty)
     val potentiallyFinished by potentiallyFinishedProperty
@@ -94,6 +111,11 @@ class NarrationViewModel : ViewModel() {
 
         hasVersesProperty.bind(recordedVerses.booleanBinding { it.isNotEmpty() })
         lastRecordedVerseProperty.bind(recordedVerses.integerBinding { it.size })
+
+        subscribe<AppCloseRequestEvent> {
+            logger.info("Received close event request")
+            onUndock()
+        }
     }
 
     fun onDock() {
@@ -108,15 +130,37 @@ class NarrationViewModel : ViewModel() {
     fun onUndock() {
         listeners.forEach(ListenerDisposer::dispose)
         disposables.dispose()
-
         closeNarrationAudio()
+        narration.close()
+        renderer.close()
     }
 
     private fun initializeNarration(chapter: Chapter) {
         narration = narrationFactory.create(workbookDataStore.workbook, chapter)
         audioPlayer = narration.getPlayer()
+        audioPlayer.addEventListener { event: AudioPlayerEvent ->
+            when (event) {
+                AudioPlayerEvent.PLAY -> isPlayingProperty.set(true)
+                AudioPlayerEvent.COMPLETE, AudioPlayerEvent.PAUSE, AudioPlayerEvent.STOP -> isPlayingProperty.set(false)
+                else -> {}
+            }
+        }
+        volumeBar = VolumeBar(narration.getRecorderAudioStream())
         subscribeActiveVersesChanged()
         updateRecordingState()
+        rendererAudioReader = narration.audioReader
+        renderer = NarrationWaveformRenderer(
+            // NarrationAudioScene(
+            AudioScene(
+                rendererAudioReader,
+                narration.getRecorderAudioStream(),
+                isRecordingProperty.toObservable(),
+                Screen.getMainScreen().width - 25 - 88,
+                10,
+                DEFAULT_SAMPLE_RATE
+            )
+        )
+        totalAudioSizeProperty.set(rendererAudioReader.totalFrames)
     }
 
     private fun updateRecordingState() {
@@ -203,17 +247,17 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun play(verse: VerseMarker) {
+        renderer.clearActiveRecordingData()
         audioPlayer.pause()
 
         narration.loadSectionIntoPlayer(verse)
 
         // audioPlayer.seek(0)
         audioPlayer.play()
-
-        playingVerse = verse
     }
 
     fun playAll() {
+        renderer.clearActiveRecordingData()
         audioPlayer.pause()
         narration.loadChapterIntoPlayer()
         // audioPlayer.seek(0)
@@ -295,8 +339,6 @@ class NarrationViewModel : ViewModel() {
     }
 
     private fun record(index: Int) {
-        stopPlayer()
-
         narration.onNewVerse(index)
 
         isRecording = true
@@ -310,6 +352,7 @@ class NarrationViewModel : ViewModel() {
 
         narration.pauseRecording()
         narration.finalizeVerse(index)
+        renderer.clearActiveRecordingData()
     }
 
     private fun resumeRecording() {
@@ -324,6 +367,7 @@ class NarrationViewModel : ViewModel() {
     private fun stopRecordAgain() {
         recordAgainVerseIndex?.let { verseIndex ->
             narration.pauseRecording()
+            renderer.clearActiveRecordingData()
             narration.finalizeVerse(verseIndex)
 
             recordAgainVerseIndex = null
@@ -382,14 +426,43 @@ class NarrationViewModel : ViewModel() {
         hasUndo = narration.hasUndo()
         hasRedo = narration.hasRedo()
 
-        narration.onActiveVersesUpdated.subscribe {
-            recordedVerses.setAll(it)
+        narration.onActiveVersesUpdated.subscribe { verses ->
+            totalAudioSizeProperty.set(rendererAudioReader.totalFrames)
+
+            recordedVerses.setAll(verses)
 
             hasUndo = narration.hasUndo()
             hasRedo = narration.hasRedo()
 
+            val lastVerse = verses.getOrElse(lastRecordedVerseProperty.value, { verses.last() }).location
+            narration.seek(lastVerse)
+
             recordStart = recordedVerses.isEmpty()
             recordResume = recordedVerses.isNotEmpty()
         }.let(disposables::add)
+    }
+
+    fun drawWaveform(context: GraphicsContext, canvas: Canvas) {
+        if (::renderer.isInitialized) {
+            val position = narration.getLocationInFrames()
+            runLater {
+                audioPositionProperty.set(position)
+            }
+            renderer.draw(context, canvas, position)
+        }
+    }
+
+    fun drawVolumebar(context: GraphicsContext, canvas: Canvas) {
+        if (::renderer.isInitialized) {
+            volumeBar.draw(context, canvas)
+        }
+    }
+
+    fun seekAudio(frame: Int) {
+        val wasPlaying = audioPlayer.isPlaying()
+        audioPlayer.pause()
+        narration.loadChapterIntoPlayer()
+        narration.seek(frame)
+        if (wasPlaying) audioPlayer.play()
     }
 }

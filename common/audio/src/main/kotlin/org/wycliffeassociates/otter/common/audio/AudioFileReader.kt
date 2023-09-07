@@ -21,11 +21,18 @@ package org.wycliffeassociates.otter.common.audio
 import java.io.Closeable
 
 interface AudioFileReader: Closeable, AutoCloseable {
+    /**
+     * Gives the sample rate of the audio in bits (bitrate)
+     */
     val sampleRate: Int
     val channels: Int
     val sampleSize: Int
     val framePosition: Int
     val totalFrames: Int
+
+    val frameSizeBytes: Int
+        get() = (sampleRate / 8) * channels
+
     fun hasRemaining(): Boolean
 
     /**

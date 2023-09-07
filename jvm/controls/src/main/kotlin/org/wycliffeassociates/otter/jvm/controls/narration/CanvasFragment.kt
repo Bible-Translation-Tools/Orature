@@ -22,23 +22,23 @@ import javafx.animation.AnimationTimer
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Pos
+import javafx.scene.canvas.Canvas
+import javafx.scene.canvas.GraphicsContext
 import javafx.scene.layout.StackPane
 import org.wycliffeassociates.otter.jvm.controls.canvas.ResizableCanvas
 import org.wycliffeassociates.otter.jvm.controls.waveform.Drawable
 import tornadofx.*
 
 class CanvasFragment : StackPane() {
-
-    val isDrawingProperty = SimpleBooleanProperty()
-    val drawableProperty = SimpleObjectProperty<Drawable>()
-
     private val cvs = ResizableCanvas()
     private val ctx = cvs.graphicsContext2D
 
-    private val at = object : AnimationTimer() {
-        override fun handle(now: Long) {
-            draw()
-        }
+    fun getCanvas(): Canvas {
+        return cvs
+    }
+
+    fun getContext(): GraphicsContext {
+        return ctx
     }
 
     init {
@@ -46,23 +46,5 @@ class CanvasFragment : StackPane() {
         alignment = Pos.TOP_RIGHT
 
         add(cvs)
-
-        cvs.widthProperty().addListener { _ -> draw() }
-        cvs.heightProperty().addListener { _ -> draw() }
-
-        isDrawingProperty.addListener { _, _, isDrawing ->
-            if (isDrawing) {
-                at.start()
-            } else {
-                at.stop()
-            }
-        }
-
-        draw()
-    }
-
-    fun draw() {
-        ctx.clearRect(0.0, 0.0, cvs.width, cvs.height)
-        drawableProperty.value?.draw(ctx, cvs)
     }
 }
