@@ -255,7 +255,7 @@ internal class ChapterRepresentation(
     ) : AudioFileReader {
         override val sampleRate: Int = this@ChapterRepresentation.sampleRate
         override val channels: Int = this@ChapterRepresentation.channels
-        override val sampleSize: Int = this@ChapterRepresentation.sampleSize
+        override val sampleSizeBits: Int = this@ChapterRepresentation.sampleSize
 
         private var randomAccessFile: RandomAccessFile? = null
 

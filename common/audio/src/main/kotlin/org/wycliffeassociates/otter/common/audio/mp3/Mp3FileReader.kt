@@ -48,7 +48,7 @@ class MP3FileReader(
 
     override val sampleRate: Int = DEFAULT_SAMPLE_RATE
     override val channels: Int = DEFAULT_CHANNELS
-    override val sampleSize: Int = DEFAULT_BITS_PER_SAMPLE
+    override val sampleSizeBits: Int = DEFAULT_BITS_PER_SAMPLE
     override val framePosition: Int
         get() = pos - start
 

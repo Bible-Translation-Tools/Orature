@@ -37,7 +37,7 @@ internal class WavFileReader(val wav: WavFile, start: Int? = null, end: Int? = n
         get() = end - start
     override val sampleRate: Int = wav.sampleRate
     override val channels: Int = wav.channels
-    override val sampleSize: Int = wav.bitsPerSample
+    override val sampleSizeBits: Int = wav.bitsPerSample
     override val framePosition: Int
         get() = (mappedFile?.position() ?: 0) / wav.frameSizeInBytes
 

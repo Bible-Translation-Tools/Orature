@@ -33,7 +33,7 @@ internal class PcmFileReader(
 ) : AudioFileReader {
     override val sampleRate: Int = pcm.sampleRate
     override val channels: Int = pcm.channels
-    override val sampleSize: Int = pcm.bitsPerSample
+    override val sampleSizeBits: Int = pcm.bitsPerSample
     override val framePosition: Int
         get() = (mappedFile?.position() ?: 0) / pcm.frameSizeInBytes
     override val totalFrames: Int

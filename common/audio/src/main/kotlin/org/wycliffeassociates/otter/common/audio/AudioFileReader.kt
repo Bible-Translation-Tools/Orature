@@ -24,14 +24,14 @@ interface AudioFileReader: Closeable, AutoCloseable {
     /**
      * Gives the sample rate of the audio in bits (bitrate)
      */
+    val sampleSizeBits: Int
     val sampleRate: Int
     val channels: Int
-    val sampleSize: Int
     val framePosition: Int
     val totalFrames: Int
 
     val frameSizeBytes: Int
-        get() = (sampleRate / 8) * channels
+        get() = (sampleSizeBits / 8) * channels
 
     fun hasRemaining(): Boolean
 
