@@ -205,6 +205,52 @@ class ChapterRepresentationTest {
     }
 
 
+    @Test
+    fun `ChapterRepresentationConnection's framePosition with null start and end`() {
+        val chapterRepresentation = ChapterRepresentation(workbook, chapter)
+
+        val framePosition = chapterRepresentation.ChapterRepresentationConnection(end = null).framePosition
+        Assert.assertEquals(0, framePosition)
+    }
+
+    @Test
+    fun `ChapterRepresentationConnection's framePosition with non-null start and end`() {
+        val chapterRepresentation = ChapterRepresentation(workbook, chapter)
+
+        val framePosition = chapterRepresentation.ChapterRepresentationConnection(1000, 2000).framePosition
+        Assert.assertEquals(1000, framePosition)
+    }
+
+    // TODO: add more test for framePosition once I know more about intended use
+
+    @Test
+    fun `ChapterRepresentationConnection's hasRemaining with null start and end, no scratchAudio recorded, and empty activeVerses`() {
+        val chapterRepresentation = ChapterRepresentation(workbook, chapter)
+
+        val hasRemaining = chapterRepresentation.ChapterRepresentationConnection(end = null).hasRemaining()
+        Assert.assertEquals(false, hasRemaining)
+    }
+
+    @Test
+    fun `ChapterRepresentationConnection's hasRemaining with null start and end, no scratchAudio recorded, and non-empty activeVerses`() {
+        val chapterRepresentation = ChapterRepresentation(workbook, chapter)
+        initializeVerseNodeList(chapterRepresentation.totalVerses)
+
+        val hasRemaining = chapterRepresentation.ChapterRepresentationConnection(end = null).hasRemaining()
+        Assert.assertEquals(true, hasRemaining)
+    }
+
+    @Test
+    fun `ChapterRepresentationConnection's hasRemaining with non-null start and end, no scratchAudio recorded, and empty activeVerses`() {
+        val chapterRepresentation = ChapterRepresentation(workbook, chapter)
+
+        val hasRemaining = chapterRepresentation.ChapterRepresentationConnection(1000, 2000).hasRemaining()
+        Assert.assertEquals(true, hasRemaining)
+    }
+
+    // TODO: test hasRemaining where the endBound is determiend by the amount of scratchAudio
+
+    // TODO: add test for getPcmBuffer
 }
 
 
