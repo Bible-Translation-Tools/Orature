@@ -1,33 +1,24 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
-import com.sun.glass.ui.Screen
 import javafx.animation.AnimationTimer
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.control.ScrollBar
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
-import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
-import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
 import org.wycliffeassociates.otter.jvm.controls.waveform.Drawable
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.WaveformLayer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.narration_waveform
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.pixelsToFrames
 import tornadofx.*
-import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicLong
-import kotlin.system.measureTimeMillis
-import kotlin.time.measureTime
 
 class AudioWorkspaceView : View() {
     private val logger = LoggerFactory.getLogger(AudioWorkspaceView::class.java)
@@ -184,7 +175,7 @@ class AudioWorkspaceViewModel : ViewModel() {
     val totalAudioSizeProperty = SimpleIntegerProperty()
 
     fun scrollAudio(delta: Int) {
-        narrationViewModel.scrollAudio(delta)
+        narrationViewModel.seekAudio(delta)
     }
 
     fun drawWaveform(context: GraphicsContext, canvas: Canvas) {

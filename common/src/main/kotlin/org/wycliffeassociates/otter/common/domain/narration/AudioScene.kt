@@ -15,21 +15,25 @@ class AudioScene(
     private val width: Int,
     private val secondsOnScreen: Int,
     private val recordingSampleRate: Int,
+    private val readerDrawable: AudioReaderDrawable = AudioReaderDrawable(
+        existingAudioReader,
+        width,
+        secondsOnScreen,
+        recordingSampleRate
+    ),
+    private val activeDrawable: ActiveRecordingDrawable = ActiveRecordingDrawable(
+        incomingAudioStream,
+        recordingActive,
+        width / 2,
+        secondsOnScreen / 2,
+        recordingSampleRate
+    )
 ) {
-
     private val logger = LoggerFactory.getLogger(AudioScene::class.java)
-
-    val readerDrawable = AudioReaderDrawable(existingAudioReader, width, secondsOnScreen, recordingSampleRate)
-    val activeDrawable =
-        ActiveRecordingDrawable(incomingAudioStream, recordingActive, width / 2, secondsOnScreen / 2, recordingSampleRate)
 
     val frameBuffer = FloatArray(width * 2)
 
-    var lastPositionRendered = -1
-
     fun getNarrationDrawable(location: Int): FloatArray {
-        // if (lastPositionRendered != location) {
-        // lastPositionRendered = location
         Arrays.fill(frameBuffer, 0f)
         val framesOnScreen = secondsOnScreen * recordingSampleRate
 
@@ -53,20 +57,9 @@ class AudioScene(
             }
             else {
                 System.arraycopy(activeData, 0, frameBuffer, 0, activeData.size)
-//                val samplesBeyondReader = viewPortRange.last - readerEnd
-//                if (samplesBeyondReader > 0) {
-//                    val readerEndPosition = getReaderEndPosition(viewPortRange)
-//                    System.arraycopy(activeData, 0, frameBuffer, min(readerEndPosition * 2, activeData.size), max((activeData.size - (readerEndPosition * 2)), 0))
-//                }
             }
         }
         return frameBuffer
-    }
-
-    fun getReaderEndPosition(viewPortRange: IntRange): Int {
-        val readerEndFrame = existingAudioReader.totalFrames
-        val framesFromViewStart = viewPortRange.last - readerEndFrame
-        return framesToPixels(framesFromViewStart, width,secondsOnScreen * recordingSampleRate)
     }
 
     fun getViewPortRange(location: Int): IntRange {
@@ -74,34 +67,12 @@ class AudioScene(
         return location - offset until location + offset
     }
 
-    fun padStart(location: Int) {
-
-    }
-
-    private fun fillFromReader(location: Int): Int {
-        existingAudioReader.seek(location)
-        val readerPosition = existingAudioReader.framePosition
-
-        val readerData = readerDrawable.getWaveformDrawable(location)
-        val framesToFill = secondsOnScreen * recordingSampleRate
-
-        val totalReaderFrames = existingAudioReader.totalFrames
-
-        val framesFromReader = min(framesToFill, (totalReaderFrames - readerPosition))
-        val pixelsFromReader = min(framesToPixels(framesFromReader, width, framesToFill) * 2, frameBuffer.size)
-
-        System.arraycopy(readerData, 0, frameBuffer, 0, readerData.size)
-        return pixelsFromReader
-    }
-
-    private fun fillFromActive(location: Int, pixelsToFill: Int) {
-        if (pixelsToFill > 0) {
-            val activeData = activeDrawable.getWaveformDrawable()
-            System.arraycopy(activeData, 0, frameBuffer, frameBuffer.size - pixelsToFill, pixelsToFill)
-        }
-    }
-
     fun close() {
         activeDrawable.close()
     }
+}
+
+fun framesToPixels(frames: Int, width: Int, framesOnScreen: Int): Int {
+    val framesInPixel = framesOnScreen / width.toFloat()
+    return (frames / framesInPixel).toInt()
 }

@@ -4,10 +4,8 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import io.reactivex.Observable
-import io.reactivex.Scheduler
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
-import io.reactivex.functions.BiFunction
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import org.slf4j.LoggerFactory
@@ -45,9 +43,6 @@ class Narration @AssistedInject constructor(
 
     private val disposables = CompositeDisposable()
 
-    val workingAudio: AudioFile
-        get() = chapterRepresentation.scratchAudio
-
     val audioReader: AudioFileReader
         get() = chapterRepresentation.getAudioFileReader()
 
@@ -72,12 +67,12 @@ class Narration @AssistedInject constructor(
         val writer = initializeWavWriter()
 
         firstVerse = getFirstVerseMarker()
-        updateWorkingFilesFromChapterFile()
+        restoreFromExistingChapterAudio()
         chapterRepresentation.loadFromSerializedVerses()
         recorder.start()
         disposables.addAll(
             activeRecordingFrameCounter(writer),
-            resetOnUpdatedVerses(),
+            resetUncommittedFramesOnUpdatedVerses(),
         )
         loadChapterIntoPlayer()
     }
@@ -99,11 +94,9 @@ class Narration @AssistedInject constructor(
             .subscribe()
     }
 
-    private fun resetOnUpdatedVerses(): Disposable {
+    private fun resetUncommittedFramesOnUpdatedVerses(): Disposable {
         return onActiveVersesUpdated.subscribe {
-            logger.info("Clearing uncommitted audio frames")
             uncommittedRecordedFrames.set(0)
-            logger.info("player duration should be updated now: ${audioReader.totalFrames}")
         }
     }
 
@@ -113,7 +106,7 @@ class Narration @AssistedInject constructor(
     }
 
     fun loadFromSelectedChapterFile() {
-        updateWorkingFilesFromChapterFile(true)
+        restoreFromExistingChapterAudio(true)
     }
 
     fun getPlayer(): IAudioPlayer {
@@ -151,23 +144,21 @@ class Narration @AssistedInject constructor(
     }
 
     fun onNewVerse(verseIndex: Int) {
+        loadChapterIntoPlayer()
         val action = NewVerseAction(verseIndex)
         execute(action)
 
-        // recorder.start()
         player.seek(player.getDurationInFrames())
-
         writer?.start()
         isRecording.set(true)
     }
 
     fun onRecordAgain(verseIndex: Int) {
+        loadChapterIntoPlayer()
         val action = RecordAgainAction(verseIndex)
         execute(action)
 
-        // recorder.start()
         player.seek(activeVerses[verseIndex].location)
-
         writer?.start()
         isRecording.set(true)
     }
@@ -198,13 +189,11 @@ class Narration @AssistedInject constructor(
     }
 
     fun pauseRecording() {
-        // recorder.pause()
         writer?.pause()
         isRecording.set(false)
     }
 
     fun resumeRecording() {
-        // recorder.start()
         player.seek(player.getDurationInFrames())
         writer?.start()
         isRecording.set(true)
@@ -278,7 +267,7 @@ class Narration @AssistedInject constructor(
         chapterRepresentation.onVersesUpdated()
     }
 
-    private fun updateWorkingFilesFromChapterFile(
+    private fun restoreFromExistingChapterAudio(
         forceUpdate: Boolean = false
     ) {
         val chapterFile = chapter.getSelectedTake()?.file
@@ -290,11 +279,11 @@ class Narration @AssistedInject constructor(
         if (narrationFromChapter || forceUpdate) {
             val segments = splitAudioOnCues.execute(chapterFile!!, firstVerse)
             createVersesFromVerseSegments(segments)
-            appendVerseSegmentsToWorkingAudio(segments)
+            appendVerseSegmentsToScratchAudio(segments)
         }
     }
 
-    private fun appendVerseSegmentsToWorkingAudio(segments: VerseSegments) {
+    private fun appendVerseSegmentsToScratchAudio(segments: VerseSegments) {
         segments.forEach {
             audioFileUtils.appendFile(chapterRepresentation.scratchAudio, it.value)
         }

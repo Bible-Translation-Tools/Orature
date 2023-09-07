@@ -15,7 +15,6 @@ import javafx.collections.ObservableList
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
@@ -270,7 +269,6 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun recordAgain(verseIndex: Int) {
-        rendererAudioReader.seek(audioPlayer.getDurationInFrames())
         stopPlayer()
 
         narration.onRecordAgain(verseIndex)
@@ -341,9 +339,6 @@ class NarrationViewModel : ViewModel() {
     }
 
     private fun record(index: Int) {
-        stopPlayer()
-        rendererAudioReader.seek(audioPlayer.getDurationInFrames())
-
         narration.onNewVerse(index)
 
         isRecording = true
@@ -463,14 +458,13 @@ class NarrationViewModel : ViewModel() {
         }
     }
 
-    fun scrollAudio(delta: Int) {
-        // logger.error("should be seeking to $delta")
+    fun seekAudio(frame: Int) {
         val wasPlaying = audioPlayer.isPlaying()
         audioPlayer.pause()
         narration.loadChapterIntoPlayer()
-        audioPlayer.seek(delta)
-        narration.scrollAudio(delta)
-        rendererAudioReader.seek(delta)
+        audioPlayer.seek(frame)
+        narration.seek(frame)
+        rendererAudioReader.seek(frame)
         if (wasPlaying) audioPlayer.play()
     }
 }
