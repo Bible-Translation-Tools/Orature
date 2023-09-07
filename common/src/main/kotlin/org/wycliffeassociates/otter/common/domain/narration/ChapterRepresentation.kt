@@ -208,7 +208,7 @@ internal class ChapterRepresentation(
         var remaining = relativeIdx
         activeVerses.forEach { node ->
             val range = node.length
-            if (range > remaining) {
+            if (remaining > range) {
                 remaining -= range
             } else {
                 return node.absoluteFrameFromOffset(remaining)
