@@ -52,7 +52,9 @@ class Narration @AssistedInject constructor(
             val verses = chapterRepresentation
                 .activeVerses
                 .map {
-                    it.marker
+                    it.marker.copy(
+                        location = chapterRepresentation.absoluteToRelative(it.firstFrame())
+                    )
                 }
             verses
         }

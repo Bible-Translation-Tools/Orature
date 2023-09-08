@@ -118,6 +118,7 @@ internal class ChapterRepresentation(
         onActiveVersesUpdated.onNext(
             activeVerses.map {
                 val newLoc = absoluteToRelative(it.firstFrame())
+                logger.info("Verse ${it.marker.label} absolute loc is ${it.firstFrame()} relative is ${newLoc}")
                 it.marker.copy(location = newLoc)
             }
         )
@@ -146,7 +147,7 @@ internal class ChapterRepresentation(
      * Converts the absolute audio frame position within the scratch audio file to a "relative" position as if the
      * audio only contained the segments referrenced by the active verse nodes.
      */
-    private fun absoluteToRelative(absoluteFrame: Int): Int {
+    fun absoluteToRelative(absoluteFrame: Int): Int {
         val verses = activeVerses
         var verse = findVerse(absoluteFrame)
         verse?.let {
@@ -399,7 +400,6 @@ internal class ChapterRepresentation(
                 sample <= startBounds -> startBounds * frameSizeInBytes
                 sample >= endBounds -> endBounds - 1 * frameSizeInBytes
                 else -> {
-                    logger.error("seek to $sample")
                     sample * frameSizeInBytes
                 }
             }

@@ -200,9 +200,9 @@ internal data class VerseNode(
         var frameOffset = 0
         sectors.forEach { sector ->
             if (absoluteFrame in sector) {
-                frameOffset += (sector.last - sector.first)
-            } else {
                 frameOffset += absoluteFrame - sector.first
+            } else {
+                frameOffset += sector.length()
             }
         }
         return frameOffset
