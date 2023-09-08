@@ -1,0 +1,58 @@
+.verse-marker__drag-area {
+    -fx-alignment: bottom-left;
+}
+
+.verse-marker__drag-area:movable {
+    -fx-background-color: -wa-primary-20;
+}
+
+.verse-marker__line {
+    -fx-stroke : -wa-primary;
+}
+
+.verse-marker__title {
+    -fx-font-size: 20px;
+    -fx-font-weight: 400;
+    -fx-text-fill: -wa-primary;
+    -fx-translate-y: -20;
+}
+
+.verse-marker__icon {
+    -fx-background-color: #E5E8EB;
+    -fx-translate-x: -14;
+    -fx-translate-y: -20;
+}
+
+.verse-marker__drag-area:movable .verse-marker__icon {
+    -fx-background-color: transparent;
+}
+
+.verse-marker__icon .ikonli-font-icon {
+    -fx-icon-color: -wa-primary;
+    -fx-icon-size: 28px;
+    -fx-background-color: transparent;
+}
+
+.verse-marker__menu {
+    -fx-translate-x: 10;
+    -fx-translate-y: -10;
+}
+
+.verse-marker .wa-menu-button {
+    -fx-padding: 0;
+}
+
+.verse-marker__menu .arrow-button,
+.verse-marker__menu .arrow-button .arrow,
+.verse-marker__menu .arrow-button,
+.verse-marker__menu .arrow-button .arrow {
+    -fx-padding: 0;
+}
+
+.verse-marker__play-head {
+    -fx-pref-width: 2px;
+    -fx-max-width: 2px;
+    -fx-background-color: red;
+    -fx-translate-x: 1px;
+    -fx-translate-y: 1px;
+}

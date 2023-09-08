@@ -47,9 +47,9 @@ class VerseMarkerControl : BorderPane() {
                 line {
                     addClass("verse-marker__line")
 
-                    startXProperty().bind(this@region.layoutXProperty().plus(MARKER_AREA_WIDTH / 2))
+                    startXProperty().bind(this@region.layoutXProperty())
                     startYProperty().bind(this@region.layoutYProperty())
-                    endXProperty().bind(this@region.widthProperty().minus(MARKER_AREA_WIDTH / 2))
+                    endXProperty().bind(this@region.layoutXProperty())
                     endYProperty().bind(this@region.heightProperty())
                     strokeWidth = MARKER_WIDTH
                 }

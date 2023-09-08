@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.Drawable
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkerControl
@@ -70,6 +71,10 @@ class AudioWorkspaceView : View() {
         }
     }
 
+    init {
+        tryImportStylesheet("/css/verse-markers-layer.css")
+    }
+
     override val root = stackpane {
         subscribe<AppCloseRequestEvent> {
             at.stop()
@@ -77,15 +82,26 @@ class AudioWorkspaceView : View() {
             executor.shutdownNow()
         }
 
-        borderpane {
-            center = narration_waveform {
-                narrationWaveformLayer = this
 
-                canvasInflatedProperty.bind(
-                    widthProperty()
-                        .greaterThan(0)
-                        .and(heightProperty().greaterThan(0))
-                )
+        borderpane {
+            center = stackpane {
+                narration_waveform {
+                    narrationWaveformLayer = this
+
+                    canvasInflatedProperty.bind(
+                        widthProperty()
+                            .greaterThan(0)
+                            .and(heightProperty().greaterThan(0))
+                    )
+                }
+                borderpane {
+                    bindChildren(markerNodes) {
+                        it.apply {
+                            minHeightProperty().bind(narrationWaveformLayer.heightProperty())
+                            prefHeightProperty().bind(narrationWaveformLayer.heightProperty())
+                        }
+                    }
+                }
             }
             bottom = ScrollBar().apply {
                 viewModel.audioPositionProperty.onChange {
@@ -107,12 +123,20 @@ class AudioWorkspaceView : View() {
             }
         }
 
-        borderpane {
-            bindChildren(markerNodes) { it }
-        }
+//            borderpane {
+//                bindChildren(markerNodes) {
+//                    it.apply {
+//                        minHeightProperty().bind(narrationWaveformLayer.heightProperty())
+//                        prefHeightProperty().bind(narrationWaveformLayer.heightProperty())
+//                    }
+//                }
+//            }
+
+//        add(VerseMarkersLayer().apply {
+//            verseMarkersControls.bind(markerNodes) { it }
+//        })
 
         hbox {
-
             maxHeight = 50.0
             hbox {
                 spacing = 10.0
@@ -162,20 +186,23 @@ class AudioWorkspaceView : View() {
     override fun onDock() {
         super.onDock()
         viewModel.onDock()
-        viewModel.recordedVerses.onChangeAndDoNowWithDisposer { markers ->
-            markerNodes.clear()
-            markers.mapIndexed { index, marker ->
-                VerseMarkerControl().apply {
-                    verseProperty.set(marker)
-                    verseIndexProperty.set(index)
-                    labelProperty.set(marker.label)
-                    isRecordingProperty.bind(viewModel.isRecordingProperty)
-                    prefHeightProperty().bind(root.heightProperty())
-                }
-            }.let {
-                markerNodes.addAll(it)
+//        viewModel.recordedVerses.onChangeAndDoNowWithDisposer { markers ->
+//            markerNodes.clear()
+//            markers.mapIndexed { index, marker ->
+//
+//            }.let {
+//                markerNodes.addAll(it)
+//            }
+//        }
+        markerNodes.bind(viewModel.recordedVerses) { marker ->
+            VerseMarkerControl().apply {
+                verseProperty.set(marker)
+                // verseIndexProperty.set(index)
+                labelProperty.set(marker.label)
+                isRecordingProperty.bind(viewModel.isRecordingProperty)
             }
         }
+
         at.start()
     }
 

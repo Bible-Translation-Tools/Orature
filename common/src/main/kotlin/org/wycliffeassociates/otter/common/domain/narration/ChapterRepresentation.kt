@@ -374,16 +374,13 @@ internal class ChapterRepresentation(
                         if (framesToRead <= 0 || framePosition !in bounds) break
 
                         val seekLoc = (sector.first * frameSizeInBytes).toLong()
-                        if (seekLoc <= 0) {
-                            logger.error("Sector seek produced a negative seek location: $seekLoc, from ${sector}")
-                        }
                         raf.seek(seekLoc)
                         val temp = ByteArray(framesTaken * frameSizeInBytes)
                         val toCopy = raf.read(temp)
                         try {
                             System.arraycopy(temp, 0, bytes, bytesWritten, toCopy)
-                        } catch (_: ArrayIndexOutOfBoundsException) {
-                            println("here")
+                        } catch (e: ArrayIndexOutOfBoundsException) {
+                            logger.error("arraycopy out of bounds, $bytesWritten bytes written, $toCopy toCopy", e)
                         }
                         bytesWritten += toCopy
                         position += toCopy
