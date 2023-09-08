@@ -65,6 +65,11 @@
     -fx-alignment: center;
 }
 
+
+.chunking-bottom__media-btn-group {
+    -fx-spacing: 6;
+}
+
 .source-text-drawer {
     -fx-pref-width: 360;
     -fx-background-color: -wa-foreground;

@@ -6,6 +6,7 @@ import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.SourceTextDrawer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.Chunking
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.ChunkingStepsDrawer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.Consume
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
@@ -29,7 +30,7 @@ class ChunkingTranslationPage : View() {
         it?.let { step ->
             when(step) {
                 ChunkingStep.CONSUME_AND_VERBALIZE -> Consume()
-                else -> null
+                else -> Chunking()
             }
         }
     }

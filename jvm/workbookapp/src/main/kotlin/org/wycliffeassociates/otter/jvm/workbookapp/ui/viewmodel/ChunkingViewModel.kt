@@ -174,7 +174,6 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
     }
 
     fun onDockChunk() {
-        pageProperty.set(ChunkingWizardPage.CHUNK)
         titleProperty.set(messages["chunkingTitle"])
         stepProperty.set(messages["chunkingDescription"])
 
@@ -182,6 +181,14 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
         subscribeOnWaveformImages()
         startAnimationTimer()
         seek(0)
+    }
+
+    fun onDockChunking() {
+        onDockConsume()
+    }
+
+    fun onUndockChunking() {
+        onUndockConsume()
     }
 
     fun onUndockChunk() {
