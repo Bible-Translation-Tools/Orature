@@ -16,6 +16,7 @@ import org.wycliffeassociates.otter.jvm.controls.waveform.Drawable
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkerControl
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkersLayer
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.verse_markers_layer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.WaveformLayer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.narration_waveform
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.pixelsToFrames
@@ -94,13 +95,16 @@ class AudioWorkspaceView : View() {
                             .and(heightProperty().greaterThan(0))
                     )
                 }
-                borderpane {
-                    bindChildren(markerNodes) {
-                        it.apply {
-                            minHeightProperty().bind(narrationWaveformLayer.heightProperty())
-                            prefHeightProperty().bind(narrationWaveformLayer.heightProperty())
-                        }
-                    }
+//                borderpane {
+//                    bindChildren(markerNodes) {
+//                        it.apply {
+//                            minHeightProperty().bind(narrationWaveformLayer.heightProperty())
+//                            prefHeightProperty().bind(narrationWaveformLayer.heightProperty())
+//                        }
+//                    }
+//                }
+                verse_markers_layer {
+                    verseMarkersControls.bind(markerNodes) { it }
                 }
             }
             bottom = ScrollBar().apply {
@@ -197,7 +201,7 @@ class AudioWorkspaceView : View() {
         markerNodes.bind(viewModel.recordedVerses) { marker ->
             VerseMarkerControl().apply {
                 verseProperty.set(marker)
-                // verseIndexProperty.set(index)
+                verseIndexProperty.set(viewModel.recordedVerses.indexOf(marker))
                 labelProperty.set(marker.label)
                 isRecordingProperty.bind(viewModel.isRecordingProperty)
             }

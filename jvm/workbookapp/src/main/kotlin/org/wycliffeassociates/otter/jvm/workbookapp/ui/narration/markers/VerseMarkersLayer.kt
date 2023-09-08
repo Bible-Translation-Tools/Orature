@@ -15,6 +15,9 @@ import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.*
 import javafx.beans.binding.Bindings
 import javafx.collections.ListChangeListener
+import javafx.event.EventTarget
+import javafx.scene.layout.BorderPane
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.WaveformLayer
 
 /**
  * This is the offset of the marker line relative
@@ -23,26 +26,18 @@ import javafx.collections.ListChangeListener
  */
 private const val MARKER_OFFSET = (MARKER_AREA_WIDTH / 2).toInt()
 
-class VerseMarkersLayer : StackPane() {
+class VerseMarkersLayer : BorderPane() {
 
     val isRecordingProperty = SimpleBooleanProperty()
     val markers = observableListOf<VerseMarker>()
 
-    var verseMarkersControls: ObservableList<VerseMarkerControl> = observableListOf()
+    val verseMarkersControls: ObservableList<VerseMarkerControl> = observableListOf()
 
 
     init {
-
-        maxWidth = 1920.0 // TODO: fix to account for arrows of scrollbar
-
         tryImportStylesheet("/css/verse-markers-layer.css")
 
         addClass("verse-markers-layer")
-
-
-        region {
-            addClass("verse-marker__play-head")
-        }
 
 //            setOnMousePressed { event ->
 //                val point = localToParent(event.x, event.y)
@@ -74,44 +69,47 @@ class VerseMarkersLayer : StackPane() {
                 var delta = 0.0
                 var oldPos = 0.0
 
-//                        dragTarget.setOnMousePressed { event ->
-//                            if (!canBeMovedProperty.value) return@setOnMousePressed
-//                            delta = 0.0
-//                            oldPos = AnchorPane.getLeftAnchor(this)
-//
-//                            event.consume()
-//                        }
-//
-//                        dragTarget.setOnMouseDragged { event ->
-//                            if (!canBeMovedProperty.value) return@setOnMouseDragged
-//
-//                            val point = localToParent(event.x, event.y)
-//                            val currentPos = point.x
-//
-//                            if (currentPos.toInt() in (previousMarkerPosition + 1)..nextMarkerPosition) {
-//                                delta = currentPos - oldPos
-//                                AnchorPane.setLeftAnchor(this, currentPos - MARKER_OFFSET)
-//                            }
-//
-//                            event.consume()
-//                        }
-//
-//                        dragTarget.setOnMouseReleased { event ->
-//                            if (delta != 0.0) {
-//                                delta -= MARKER_OFFSET
-//                                val frameDelta = pixelsToFrames(delta)
-//                                // TODO: I need to update the relative and actual location of the marker.
-//                                // Pretty sure that this is done by firing a VerseMarkerAction, but not sure
-//                                println("frameDelta: ${frameDelta}, delta: ${delta}")
+                minHeightProperty().bind(this@VerseMarkersLayer.heightProperty())
+                prefHeightProperty().bind(this@VerseMarkersLayer.heightProperty())
+
+                        dragTarget.setOnMousePressed { event ->
+                            userIsDraggingProperty.set(true)
+                            if (!canBeMovedProperty.value) return@setOnMousePressed
+                            delta = 0.0
+                            oldPos = layoutX
+
+                            event.consume()
+                        }
+
+                        dragTarget.setOnMouseDragged { event ->
+                            userIsDraggingProperty.set(true)
+                            if (!canBeMovedProperty.value) return@setOnMouseDragged
+
+                            val point = localToParent(event.x, event.y)
+                            val currentPos = point.x
+
+                            layoutX = currentPos
+
+                            event.consume()
+                        }
+
+                        dragTarget.setOnMouseReleased { event ->
+                            userIsDraggingProperty.set(false)
+                            if (delta != 0.0) {
+                                delta -= MARKER_OFFSET
+                                //val frameDelta = pixelsToFrames(delta)
+                                // TODO: I need to update the relative and actual location of the marker.
+                                // Pretty sure that this is done by firing a VerseMarkerAction, but not sure
+                               // println("frameDelta: ${frameDelta}, delta: ${delta}")
 //                                FX.eventbus.fire(
 //                                    NarrationMarkerChangedEvent(
 //                                        markers.indexOf(verseMarkerControl.verseProperty.value),
 //                                        frameDelta
 //                                    )
 //                                )
-//                            }
-//                            event.consume()
-//                        }
+                            }
+                            event.consume()
+                        }
 
 
             }
@@ -128,6 +126,14 @@ class VerseMarkersLayer : StackPane() {
         val currentIndex = markers.indexOf(verse)
         return markers.getOrNull(currentIndex + 1) ?: verse
     }
+}
+
+fun EventTarget.verse_markers_layer(
+    op: VerseMarkersLayer.() -> Unit = {}
+): VerseMarkersLayer {
+    val markerLayer = VerseMarkersLayer()
+    opcr(this, markerLayer, op)
+    return markerLayer
 }
 
 class NarrationMarkerChangedEvent(val index: Int, val delta: Int) : FXEvent()

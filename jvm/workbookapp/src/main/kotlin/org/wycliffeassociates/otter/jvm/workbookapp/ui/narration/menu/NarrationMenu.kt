@@ -26,44 +26,44 @@ class NarrationMenu : MenuButton() {
     init {
         addClass("btn", "btn--primary", "btn--borderless", "wa-menu-button")
         graphic = FontIcon(MaterialDesign.MDI_DOTS_HORIZONTAL)
-            addClass("wa-context-menu")
+        addClass("wa-context-menu")
 
-            item(undoActionTextProperty.value) {
-                graphic = FontIcon(MaterialDesign.MDI_UNDO)
-                action {
-                    FX.eventbus.fire(NarrationUndoEvent())
-                }
-                enableWhen(hasUndoProperty)
+        item(undoActionTextProperty.value) {
+            graphic = FontIcon(MaterialDesign.MDI_UNDO)
+            action {
+                FX.eventbus.fire(NarrationUndoEvent())
             }
-            item(redoActionTextProperty.value) {
-                graphic = FontIcon(MaterialDesign.MDI_REDO)
-                action {
-                    FX.eventbus.fire(NarrationRedoEvent())
-                }
-                enableWhen(hasRedoProperty)
-            }
-            item(openChapterInTextProperty.value) {
-                graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
-                action {
-                    FX.eventbus.fire(NarrationOpenInPluginEvent(PluginType.EDITOR))
-                }
-                enableWhen(hasChapterTakeProperty)
-            }
-            item(editVerseMarkersTextProperty.value) {
-                graphic = FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE)
-                action {
-                    FX.eventbus.fire(NarrationOpenInPluginEvent(PluginType.MARKER))
-                }
-                enableWhen(hasChapterTakeProperty)
-            }
-            item(resetChapterTextProperty.value) {
-                graphic = FontIcon(MaterialDesign.MDI_DELETE)
-                action {
-                    FX.eventbus.fire(NarrationResetChapterEvent())
-                }
-                enableWhen(hasVersesProperty)
-            }
+            enableWhen(hasUndoProperty)
         }
+        item(redoActionTextProperty.value) {
+            graphic = FontIcon(MaterialDesign.MDI_REDO)
+            action {
+                FX.eventbus.fire(NarrationRedoEvent())
+            }
+            enableWhen(hasRedoProperty)
+        }
+        item(openChapterInTextProperty.value) {
+            graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
+            action {
+                FX.eventbus.fire(NarrationOpenInPluginEvent(PluginType.EDITOR))
+            }
+            enableWhen(hasChapterTakeProperty)
+        }
+        item(editVerseMarkersTextProperty.value) {
+            graphic = FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE)
+            action {
+                FX.eventbus.fire(NarrationOpenInPluginEvent(PluginType.MARKER))
+            }
+            enableWhen(hasChapterTakeProperty)
+        }
+        item(resetChapterTextProperty.value) {
+            graphic = FontIcon(MaterialDesign.MDI_DELETE)
+            action {
+                FX.eventbus.fire(NarrationResetChapterEvent())
+            }
+            enableWhen(hasVersesProperty)
+        }
+    }
 }
 
 fun EventTarget.narrationMenu(op: NarrationMenu.() -> Unit = {}) = NarrationMenu().attachTo(this, op)

@@ -35,6 +35,7 @@ import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.MARKER_AREA_WIDTH
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkerControl
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.NarrationWaveformRenderer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
@@ -467,16 +468,25 @@ class NarrationViewModel : ViewModel() {
 
     private fun adjustMarkers(markerNodes: ObservableList<VerseMarkerControl>, viewport: IntRange, width: Int) {
         for (marker in markerNodes) {
+            if (marker.userIsDraggingProperty.value == true) continue
+
             val verse = marker.verseProperty.value
             if (verse.location in viewport) {
-                marker.visibleProperty().set(true)
-                marker.layoutX = framesToPixels(
+                val newPos = framesToPixels(
                     verse.location - viewport.first,
                     width,
                     viewport.last - viewport.first
-                ).toDouble()
+                ).toDouble() - (MARKER_AREA_WIDTH / 2)
+                runLater {
+                    marker.visibleProperty().set(true)
+                    if (marker.layoutX != newPos) {
+                        marker.layoutX = newPos
+                    }
+                }
             } else {
-                marker.visibleProperty().set(false)
+                runLater {
+                    marker.visibleProperty().set(false)
+                }
             }
         }
     }
