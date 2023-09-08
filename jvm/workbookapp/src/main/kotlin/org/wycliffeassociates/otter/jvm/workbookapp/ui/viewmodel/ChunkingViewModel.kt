@@ -184,7 +184,19 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
     }
 
     fun onDockChunking() {
-        onDockConsume()
+        val wb = workbookDataStore.workbook
+        val chapter = workbookDataStore.chapter
+        val sourceAudio = wb.sourceAudioAccessor.getChapter(chapter.sort, wb.target)
+        audioDataStore.sourceAudioProperty.set(sourceAudio)
+
+        sourceAudio?.file?.let {
+            (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+            audio = loadAudio(it)
+            createWaveformImages(audio)
+            subscribeOnWaveformImages()
+            loadChunkMarkers(audio)
+        }
+        startAnimationTimer()
     }
 
     fun onUndockChunking() {
@@ -223,10 +235,18 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
     }
 
     fun loadMarkers(audio: OratureAudioFile) {
-        val totalMarkers: Int = 500
         audio.clearCues()
         val marketLabels = workbookDataStore.getSourceChapter().map { it.getDraft() }.blockingGet().map { it.title }.toList().blockingGet()
         markerModel = VerseMarkerModel(audio, marketLabels.size, marketLabels)
+        markerModel?.let { markerModel ->
+            markers.setAll(markerModel.markers)
+        }
+    }
+
+    fun loadChunkMarkers(audio: OratureAudioFile) {
+        val totalMarkers: Int = 500
+        audio.clearCues()
+        markerModel = VerseMarkerModel(audio, totalMarkers, listOf())
         markerModel?.let { markerModel ->
             markers.setAll(markerModel.markers)
         }

@@ -3,7 +3,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
-import javafx.scene.Parent
 import javafx.scene.control.Slider
 import javafx.scene.control.Tooltip
 import javafx.scene.layout.Priority
@@ -23,7 +22,7 @@ import tornadofx.*
 class Chunking : Fragment() {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    val vm: ChunkingViewModel by inject()
+    val viewModel: ChunkingViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
 
     private lateinit var waveform: MarkerPlacementWaveform
@@ -35,26 +34,26 @@ class Chunking : Fragment() {
         super.onDock()
         logger.info("Chunking docked")
 
-        vm.subscribeOnWaveformImages = ::subscribeOnWaveformImages
-        vm.onDockChunking()
-        vm.initializeAudioController(slider)
-        waveform.markers.bind(vm.markers) { it }
+        viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
+        viewModel.onDockChunking()
+        viewModel.initializeAudioController(slider)
+        waveform.markers.bind(viewModel.markers) { it }
     }
 
     override fun onUndock() {
         super.onUndock()
         logger.info("Chunking undocked")
         cleanUpWaveform()
-        vm.onUndockChunking()
+        viewModel.onUndockChunking()
     }
 
     private fun subscribeOnWaveformImages() {
-        vm.waveform
+        viewModel.waveform
             .observeOnFx()
             .subscribe {
                 waveform.addWaveformImage(it)
             }
-            .addTo(vm.compositeDisposable)
+            .addTo(viewModel.compositeDisposable)
     }
 
     override val root = vbox {
@@ -71,15 +70,15 @@ class Chunking : Fragment() {
                         heightProperty().bind(this@vbox.heightProperty())
                     }
                     themeProperty.bind(settingsViewModel.appColorMode)
-                    positionProperty.bind(vm.positionProperty)
+                    positionProperty.bind(viewModel.positionProperty)
                     canMoveMarkerProperty.set(true)
-                    imageWidthProperty.bind(vm.imageWidthProperty)
+                    imageWidthProperty.bind(viewModel.imageWidthProperty)
 
                     setUpWaveformActionHandlers()
                     cleanUpWaveform = ::freeImages
 
                     // Marker stuff
-                    this.markers.bind(vm.markers) { it }
+                    this.markers.bind(viewModel.markers) { it }
                 }
                 slider = createAudioScrollbarSlider()
                 add(waveform)
@@ -93,7 +92,7 @@ class Chunking : Fragment() {
                     graphic = FontIcon(MaterialDesign.MDI_PLUS)
 
                     action {
-
+                        viewModel.placeMarker()
                     }
                 }
                 region { hgrow = Priority.ALWAYS }
@@ -102,13 +101,15 @@ class Chunking : Fragment() {
                     button {
                         addClass("btn", "btn--icon")
                         graphic = FontIcon(MaterialDesign.MDI_SKIP_PREVIOUS)
+
+                        action { viewModel.seekPrevious() }
                     }
                     button {
                         addClass("btn", "btn--icon")
                         val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
                         val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
                         tooltipProperty().bind(
-                            vm.isPlayingProperty.objectBinding {
+                            viewModel.isPlayingProperty.objectBinding {
                                 togglePseudoClass("active", it == true)
                                 if (it == true) {
                                     graphic = pauseIcon
@@ -120,11 +121,13 @@ class Chunking : Fragment() {
                             }
                         )
 
-                        action { vm.mediaToggle() }
+                        action { viewModel.mediaToggle() }
                     }
                     button {
                         addClass("btn", "btn--icon")
                         graphic = FontIcon(MaterialDesign.MDI_SKIP_NEXT)
+
+                        action { viewModel.seekNext() }
                     }
                 }
             }
@@ -133,21 +136,21 @@ class Chunking : Fragment() {
 
     private fun setUpWaveformActionHandlers() {
         waveform.apply {
-            setOnSeekNext { vm.seekNext() }
-            setOnSeekPrevious { vm.seekPrevious() }
-            setOnPlaceMarker { vm.placeMarker() }
-            setOnWaveformClicked { vm.pause() }
+            setOnSeekNext { viewModel.seekNext() }
+            setOnSeekPrevious { viewModel.seekPrevious() }
+            setOnPlaceMarker { viewModel.placeMarker() }
+            setOnWaveformClicked { viewModel.pause() }
             setOnWaveformDragReleased { deltaPos ->
                 val deltaFrames = pixelsToFrames(deltaPos)
-                val curFrames = vm.getLocationInFrames()
-                val duration = vm.getDurationInFrames()
+                val curFrames = viewModel.getLocationInFrames()
+                val duration = viewModel.getDurationInFrames()
                 val final = Utils.clamp(0, curFrames - deltaFrames, duration)
-                vm.seek(final)
+                viewModel.seek(final)
             }
-            setOnRewind(vm::rewind)
-            setOnFastForward(vm::fastForward)
-            setOnToggleMedia(vm::mediaToggle)
-            setOnResumeMedia(vm::resumeMedia)
+            setOnRewind(viewModel::rewind)
+            setOnFastForward(viewModel::fastForward)
+            setOnToggleMedia(viewModel::mediaToggle)
+            setOnResumeMedia(viewModel::resumeMedia)
         }
     }
 
@@ -155,8 +158,8 @@ class Chunking : Fragment() {
         return AudioSlider().apply {
             hgrow = Priority.ALWAYS
             colorThemeProperty.bind(settingsViewModel.selectedThemeProperty)
-            setPixelsInHighlightFunction { vm.pixelsInHighlight(it) }
-            player.bind(vm.audioPlayer)
+            setPixelsInHighlightFunction { viewModel.pixelsInHighlight(it) }
+            player.bind(viewModel.audioPlayer)
             secondsToHighlightProperty.set(SECONDS_ON_SCREEN)
         }
     }
