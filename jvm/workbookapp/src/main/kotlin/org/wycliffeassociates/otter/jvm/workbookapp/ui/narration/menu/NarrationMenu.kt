@@ -24,8 +24,8 @@ class NarrationMenu : MenuButton() {
     val hasVersesProperty = SimpleBooleanProperty()
 
     init {
-        addClass("btn", "btn--primary", "btn--borderless", "wa-menu-button")
-        graphic = FontIcon(MaterialDesign.MDI_DOTS_HORIZONTAL)
+        addClass("btn", "btn--secondary", "wa-menu-button")
+        graphic = FontIcon(MaterialDesign.MDI_DOTS_VERTICAL)
         addClass("wa-context-menu")
 
         item(undoActionTextProperty.value) {

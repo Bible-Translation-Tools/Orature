@@ -35,6 +35,7 @@ class NarrationPage : View() {
 
     private lateinit var narrationHeader: NarrationHeader
     private lateinit var audioWorkspaceView: AudioWorkspaceView
+    private lateinit var narrationToolbar: NarrationToolBar
     private lateinit var teleprompterView: TeleprompterView
 
     init {
@@ -51,11 +52,15 @@ class NarrationPage : View() {
 
         narrationHeader = find()
         audioWorkspaceView = find()
+        narrationToolbar = find()
         teleprompterView = find()
 
         borderpane {
             top = narrationHeader.root
-            center = audioWorkspaceView.root
+            center = borderpane {
+                center = audioWorkspaceView.root
+                bottom = narrationToolbar.root
+            }
             bottom = teleprompterView.root
         }
     }

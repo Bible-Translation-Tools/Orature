@@ -126,78 +126,12 @@ class AudioWorkspaceView : View() {
                 }
             }
         }
-
-//            borderpane {
-//                bindChildren(markerNodes) {
-//                    it.apply {
-//                        minHeightProperty().bind(narrationWaveformLayer.heightProperty())
-//                        prefHeightProperty().bind(narrationWaveformLayer.heightProperty())
-//                    }
-//                }
-//            }
-
-//        add(VerseMarkersLayer().apply {
-//            verseMarkersControls.bind(markerNodes) { it }
-//        })
-
-        hbox {
-            maxHeight = 50.0
-            hbox {
-                spacing = 10.0
-                paddingHorizontal = 10.0
-
-                bindChildren(viewModel.recordedVerses) { verse ->
-                    val index = viewModel.recordedVerses.indexOf(verse)
-                    val label = verse.label
-
-                    menubutton(label) {
-                        item("") {
-                            text = "Play"
-                            action {
-                                fire(PlayVerseEvent(verse))
-                            }
-                        }
-                        item("") {
-                            text = "Record Again"
-                            action {
-                                fire(RecordAgainEvent(index))
-                            }
-                        }
-                        item("") {
-                            text = "Open in..."
-                            action {
-                                fire(OpenInAudioPluginEvent(index))
-                            }
-                        }
-                    }
-                }
-            }
-
-            button("Play All") {
-                action {
-                    fire(PlayChapterEvent())
-                }
-            }
-            button("Pause") {
-                action {
-                    fire(PauseEvent())
-                }
-            }
-        }
     }
 
 
     override fun onDock() {
         super.onDock()
         viewModel.onDock()
-//        viewModel.recordedVerses.onChangeAndDoNowWithDisposer { markers ->
-//            markerNodes.clear()
-//            markers.mapIndexed { index, marker ->
-//
-//            }.let {
-//                markerNodes.addAll(it)
-//            }
-//        }
         markerNodes.bind(viewModel.recordedVerses) { marker ->
             VerseMarkerControl().apply {
                 verseProperty.set(marker)
