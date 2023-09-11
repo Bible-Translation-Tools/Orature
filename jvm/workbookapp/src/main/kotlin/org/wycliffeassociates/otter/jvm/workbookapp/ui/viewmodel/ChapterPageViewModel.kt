@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -125,7 +126,7 @@ class ChapterPageViewModel : ViewModel() {
         chapterCardProperty.set(CardData(workbookDataStore.chapter))
         workbookDataStore.activeChapterProperty.value?.let { chapter ->
             updateLastSelectedChapter(chapter.sort)
-            loadChapterContents(chapter).subscribe()
+            loadChapterContents(chapter)
             val chap = CardData(chapter)
             chapterCardProperty.set(chap)
             subscribeSelectedTakePropertyToRelay(chapter.audio)
@@ -171,7 +172,9 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     fun setWorkChunk() {
-        if (filteredContent.isEmpty()) { return }
+        if (filteredContent.isEmpty()) {
+            return
+        }
 
         val hasTakes = filteredContent.any { chunk ->
             chunk.chunkSource?.audio?.getAllTakes()
@@ -223,6 +226,7 @@ class ChapterPageViewModel : ViewModel() {
                         PluginActions.Result.SUCCESS -> {
                             updateOnSuccess.subscribe()
                         }
+
                         PluginActions.Result.NO_AUDIO -> {
                             /* no-op */
                         }
@@ -343,12 +347,15 @@ class ChapterPageViewModel : ViewModel() {
                     PluginType.RECORDER -> {
                         audioPluginViewModel.selectedRecorderProperty.value?.name
                     }
+
                     PluginType.EDITOR -> {
                         audioPluginViewModel.selectedEditorProperty.value?.name
                     }
+
                     PluginType.MARKER -> {
                         audioPluginViewModel.selectedMarkerProperty.value?.name
                     }
+
                     null -> throw IllegalStateException("Action is not supported!")
                 }
             },
@@ -364,14 +371,15 @@ class ChapterPageViewModel : ViewModel() {
         workbookDataStore.workbookRecentChapterMap[workbookHash] = chapterNumber - 1
     }
 
-    private fun loadChapterContents(chapter: Chapter): Observable<CardData> {
+    private fun loadChapterContents(chapter: Chapter) {
         // Remove existing content so the user knows they are outdated
         allContent.clear()
         loading = true
-        return chapter.chunks
-            .map {
-                CardData(it)
+        chapter.chunks
+            .flatMap {
+                Observable.fromIterable(it)
             }
+            .map { CardData(it) }
             .map {
                 buildTakes(it)
                 it.player = getPlayer()
@@ -386,15 +394,15 @@ class ChapterPageViewModel : ViewModel() {
             .doOnError { e ->
                 logger.error("Error in loading chapter contents for chapter: $chapter", e)
             }
-            .map {
-                if (it.chunkSource != null) {
-                    if (it.chunkSource.draftNumber > 0) {
-                        if (filteredContent.find { cont -> it.sort == cont.sort } == null) {
-                            filteredContent.add(it)
+            .map { cardData ->
+                if (cardData.chunkSource != null) {
+                    if (cardData.chunkSource.draftNumber > 0) {
+                        if (filteredContent.find { cont -> cardData.sort == cont.sort } == null) {
+                            filteredContent.add(cardData)
                         }
                     }
                 } else {
-                    filteredContent.add(it)
+                    filteredContent.add(cardData)
                 }
 
                 filteredContent.removeIf { card ->
@@ -402,8 +410,10 @@ class ChapterPageViewModel : ViewModel() {
                 }
                 filteredContent.sortBy { it.sort }
                 setWorkChunk()
-                it
-            }.observeOnFx()
+                cardData
+            }
+            .observeOnFx()
+            .subscribe()
     }
 
     private fun subscribeSelectedTakePropertyToRelay(audio: AssociatedAudio) {

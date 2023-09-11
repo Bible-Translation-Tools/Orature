@@ -32,14 +32,15 @@ class ResetChunks @Inject constructor() {
     }
 
     private fun markTakesForDeletion(chapter: Chapter) {
-        chapter.chunks.getValues(emptyArray()).forEach { chunk ->
-            chunk.draftNumber = -1
-            chunk.audio.getAllTakes()
-                .filter { it.deletedTimestamp.value?.value == null }
-                .forEach { take ->
-                    take.deletedTimestamp.accept(DateHolder.now())
-                }
-        }
+        chapter.chunks.value
+            ?.forEach { chunk ->
+                chunk.draftNumber = -1
+                chunk.audio.getAllTakes()
+                    .filter { it.deletedTimestamp.value?.value == null }
+                    .forEach { take ->
+                        take.deletedTimestamp.accept(DateHolder.now())
+                    }
+            }
     }
 
     private fun removeChapterFromChunkFile(chunkFile: File, chapterNumber: Int) {

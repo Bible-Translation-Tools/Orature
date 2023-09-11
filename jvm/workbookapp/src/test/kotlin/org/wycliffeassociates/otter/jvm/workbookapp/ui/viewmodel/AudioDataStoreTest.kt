@@ -18,13 +18,13 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.ReplayRelay
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import io.reactivex.Observable
 import io.reactivex.Single
-import javafx.beans.property.SimpleStringProperty
 import org.junit.After
 import org.junit.AfterClass
 import org.junit.Assert
@@ -138,8 +138,8 @@ class AudioDataStoreTest {
         }
 
         private fun createChapter(chunk: Chunk): Chapter {
-            val chunks = ReplayRelay.create<Chunk>()
-            chunks.accept(chunk)
+            val chunks = BehaviorRelay.create<List<Chunk>>()
+            chunks.accept(listOf(chunk))
             return Chapter(
                 1,
                 "1",
