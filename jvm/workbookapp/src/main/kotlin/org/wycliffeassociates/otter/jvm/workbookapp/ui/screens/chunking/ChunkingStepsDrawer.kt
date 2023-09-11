@@ -56,21 +56,10 @@ class ChunkingStepsDrawer(
         scrollpane {
             isFitToWidth = true
             vbox {
-                chunkingStep(ChunkingStep.CONSUME_AND_VERBALIZE,selectedStepProperty,reachableStepProperty, isCollapsedProperty) {
-                    setOnSelect {
-                        selectedStepProperty.set(ChunkingStep.CONSUME_AND_VERBALIZE)
-                    }
-                }
-                chunkingStep(ChunkingStep.CHUNKING, selectedStepProperty, reachableStepProperty, isCollapsedProperty) {
-                    setOnSelect {
-                        selectedStepProperty.set(ChunkingStep.CHUNKING)
-                    }
-                }
+                chunkingStep(ChunkingStep.CONSUME_AND_VERBALIZE,selectedStepProperty,reachableStepProperty, isCollapsedProperty)
+                chunkingStep(ChunkingStep.CHUNKING, selectedStepProperty, reachableStepProperty, isCollapsedProperty)
                 chunkingStep(ChunkingStep.BLIND_DRAFT, selectedStepProperty, reachableStepProperty, isCollapsedProperty) {
                     chunkItems.onChange { chunkListProperty.set(it.list) }
-                    setOnSelect {
-                        selectedStepProperty.set(ChunkingStep.BLIND_DRAFT)
-                    }
                 }
             }
         }
