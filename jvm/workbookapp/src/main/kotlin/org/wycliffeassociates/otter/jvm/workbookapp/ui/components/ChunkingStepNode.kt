@@ -4,8 +4,6 @@ import javafx.beans.binding.ObjectBinding
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleObjectProperty
-import javafx.event.ActionEvent
-import javafx.event.EventHandler
 import javafx.event.EventTarget
 import javafx.scene.Node
 import javafx.scene.input.KeyCode
@@ -18,6 +16,7 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.utils.bindSingleChild
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.grid.ChunkGrid
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ChunkingStepSelectedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
 import tornadofx.*
@@ -55,8 +54,6 @@ class ChunkingStepNode(
         }
         step.ordinal < selectedStepProperty.value.ordinal
     }
-
-    private val onSelectActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
         addClass("chunking-step")
@@ -97,19 +94,15 @@ class ChunkingStepNode(
         }
 
         setOnMouseClicked {
-            onSelectActionProperty.value.handle(ActionEvent())
+            FX.eventbus.fire(ChunkingStepSelectedEvent(step))
             requestFocus()
         }
 
         this.addEventFilter(KeyEvent.KEY_PRESSED) {
             if (it.code == KeyCode.ENTER || it.code == KeyCode.SPACE) {
-                onSelectActionProperty.value.handle(ActionEvent())
+                FX.eventbus.fire(ChunkingStepSelectedEvent(step))
             }
         }
-    }
-
-    fun setOnSelect(op: () -> Unit) {
-        onSelectActionProperty.set(EventHandler { op() })
     }
 
     private fun createGraphicBinding(step: ChunkingStep) : ObjectBinding<Node?> {
