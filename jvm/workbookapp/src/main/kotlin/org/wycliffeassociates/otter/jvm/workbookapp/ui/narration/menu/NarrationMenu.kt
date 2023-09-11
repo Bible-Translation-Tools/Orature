@@ -12,8 +12,6 @@ import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class NarrationMenu : MenuButton() {
-    val undoActionTextProperty: ObservableValue<String> = SimpleStringProperty(messages["undoAction"])
-    val redoActionTextProperty = SimpleStringProperty(messages["redoAction"])
     val openChapterInTextProperty = SimpleStringProperty(messages["openChapterIn"])
     val editVerseMarkersTextProperty = SimpleStringProperty(messages["editVerseMarkers"])
     val resetChapterTextProperty = SimpleStringProperty(messages["restartChapter"])
@@ -27,21 +25,6 @@ class NarrationMenu : MenuButton() {
         addClass("btn", "btn--secondary", "wa-menu-button")
         graphic = FontIcon(MaterialDesign.MDI_DOTS_VERTICAL)
         addClass("wa-context-menu")
-
-        item(undoActionTextProperty.value) {
-            graphic = FontIcon(MaterialDesign.MDI_UNDO)
-            action {
-                FX.eventbus.fire(NarrationUndoEvent())
-            }
-            enableWhen(hasUndoProperty)
-        }
-        item(redoActionTextProperty.value) {
-            graphic = FontIcon(MaterialDesign.MDI_REDO)
-            action {
-                FX.eventbus.fire(NarrationRedoEvent())
-            }
-            enableWhen(hasRedoProperty)
-        }
         item(openChapterInTextProperty.value) {
             graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
             action {
