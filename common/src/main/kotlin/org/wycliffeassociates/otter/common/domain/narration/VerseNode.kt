@@ -201,7 +201,8 @@ data class VerseNode(
         }
 
         var frameOffset = 0
-        for(sector in sectors) {
+        for(i in 0 until sectors.size) {
+            val sector = sectors[i]
             if (absoluteFrame !in sector) {
                 frameOffset += (sector.last - sector.first)
             } else {
@@ -239,16 +240,15 @@ data class VerseNode(
 
         val start = framePosition
         val end = (start + min(sectors[startIndex].last - start, framesToRead))
-        val firstRange = start until end
+        val firstRange = start .. end
         stuff.add(firstRange)
         framesToRead -= firstRange.length()
 
         for (idx in startIndex + 1 until sectors.size) {
-            if (framesToRead <= 1) break
+            if (framesToRead <= 0) break
             val sector = sectors[idx]
-            val start = sector.start
-            val end = (start + min(sectors[idx].last - start, framesToRead))
-            val range = (sector.first until end)
+            val end = (start + min(sectors[startIndex].last - start, framesToRead))
+            val range = (sector.first .. end)
             framesToRead -= range.length()
             stuff.add(range)
         }
