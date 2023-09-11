@@ -746,8 +746,7 @@ class VerseNodeTest {
         Assert.assertEquals(0, sectorsFromOffset.size)
     }
 
-    // Starts at a particular offset, then gets the number of sectors up to the framesToRead
-    // Starting from some offset, how many sectors do I encounter while trying to read "framesToRead" number of frames
+
     @Test
     fun `get sectors from offset with framePosition equal to first sector's start and ftr less than first sector's end`() {
         val verseMarker = VerseMarker(1, 1, 0)
@@ -760,7 +759,7 @@ class VerseNodeTest {
 
         val sectorsFromOffset = verseNode.getSectorsFromOffset(1000, 300)
         Assert.assertEquals(1, sectorsFromOffset.size)
-        Assert.assertEquals(1000 .. 1299, sectorsFromOffset.first())
+        Assert.assertEquals(1000 .. 1300, sectorsFromOffset.first())
 
     }
 
@@ -775,10 +774,10 @@ class VerseNodeTest {
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
         val sectorsFromOffset = verseNode.getSectorsFromOffset(1000, 1300)
+        // TODO: This error seems to be partially caused by not updating the "start" value for each iteration in the for loop.
         Assert.assertEquals(2, sectorsFromOffset.size)
-        // NOTE: making the returned list exclusive could possibly result in some unexpected return values
-        Assert.assertEquals(1000 .. 1998, sectorsFromOffset[0])
-        Assert.assertEquals(5000 .. 5301, sectorsFromOffset[1])
+        Assert.assertEquals(1000 .. 1999, sectorsFromOffset[0])
+        Assert.assertEquals(5000 .. 5300, sectorsFromOffset[1])
     }
 
     @Test
@@ -793,10 +792,10 @@ class VerseNodeTest {
 
         val sectorsFromOffset = verseNode.getSectorsFromOffset(1000, 4000)
         Assert.assertEquals(3, sectorsFromOffset.size)
-        // NOTE: making the returned list exclusive could possibly result in some unexpected return values
-        Assert.assertEquals(1000 .. 1998, sectorsFromOffset[0])
-        Assert.assertEquals(5000 .. 5998, sectorsFromOffset[1])
-        Assert.assertEquals(8000 .. 8998, sectorsFromOffset[2])
+        Assert.assertEquals(1000 .. 1999, sectorsFromOffset[0])
+        // TODO: This error seems to be partially caused by not updating the "start" value for each iteration in the for loop.
+        Assert.assertEquals(5000 .. 5999, sectorsFromOffset[1])
+        Assert.assertEquals(8000 .. 8999, sectorsFromOffset[2])
     }
 
 
@@ -811,10 +810,10 @@ class VerseNodeTest {
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
         val sectorsFromOffset = verseNode.getSectorsFromOffset(1500, 1000)
+        // TODO: This error seems to be partially caused by not updating the "start" value for each iteration in the for loop.
         Assert.assertEquals(2, sectorsFromOffset.size)
-        // NOTE: making the returned list exclusive could possibly result in some unexpected return values
-        Assert.assertEquals(1500 .. 1998, sectorsFromOffset[0])
-        Assert.assertEquals(5000 .. 5501, sectorsFromOffset[1])
+        Assert.assertEquals(1500 .. 1999, sectorsFromOffset[0])
+        Assert.assertEquals(5000 .. 5500, sectorsFromOffset[1])
     }
 }
 
