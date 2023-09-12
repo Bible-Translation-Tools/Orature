@@ -15,14 +15,18 @@ import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ChunkingStepSelectedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 import tornadofx.*
 
 class Chunking : Fragment() {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     val viewModel: ChunkingViewModel by inject()
+    val translationViewModel: TranslationViewModel2 by inject()
     val settingsViewModel: SettingsViewModel by inject()
 
     private lateinit var waveform: MarkerPlacementWaveform
@@ -151,6 +155,11 @@ class Chunking : Fragment() {
             setOnFastForward(viewModel::fastForward)
             setOnToggleMedia(viewModel::mediaToggle)
             setOnResumeMedia(viewModel::resumeMedia)
+
+            setOnPositionChanged { _, _ ->
+                // markers moved = dirty
+                viewModel.changeUnsaved.set(true)
+            }
         }
     }
 

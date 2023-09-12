@@ -10,28 +10,22 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.Chunking
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.ChunkingStepsDrawer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.Consume
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 
 class ChunkingTranslationPage : View() {
 
-    val viewModel: ChunkingViewModel by inject()
+    val viewModel: TranslationViewModel2 by inject()
     val workbookDataStore: WorkbookDataStore by inject()
 
-    private val list = observableListOf(
-        ChunkViewData(1, SimpleBooleanProperty(true), viewModel.selectedChunk),
-        ChunkViewData(2, SimpleBooleanProperty(true), viewModel.selectedChunk),
-        ChunkViewData(3, SimpleBooleanProperty(true), viewModel.selectedChunk),
-        ChunkViewData(4, SimpleBooleanProperty(false), viewModel.selectedChunk),
-        ChunkViewData(5, SimpleBooleanProperty(false), viewModel.selectedChunk),
-        ChunkViewData(6, SimpleBooleanProperty(false), viewModel.selectedChunk)
-    )
+    private val list = observableListOf<ChunkViewData>()
     private val mainFragmentProperty = viewModel.selectedStepProperty.objectBinding {
         it?.let { step ->
             when(step) {
                 ChunkingStep.CONSUME_AND_VERBALIZE -> Consume()
-                else -> Chunking()
+                ChunkingStep.CHUNKING -> Chunking()
+                else -> null
             }
         }
     }
@@ -54,7 +48,7 @@ class ChunkingTranslationPage : View() {
             right = SourceTextDrawer().apply {
                 sourceTextDrawer = this
                 textProperty.bind(viewModel.sourceTextProperty)
-                highlightedChunk.bind(viewModel.currentMarkerNumberProperty)
+                highlightedChunk.bind(viewModel.currentMarkerProperty)
             }
         }
     }
@@ -73,7 +67,7 @@ class ChunkingTranslationPage : View() {
         }
 
         subscribe<ChunkingStepSelectedEvent> {
-            viewModel.selectedStepProperty.set(it.step)
+            viewModel.navigateStep(it.step)
         }
     }
 

@@ -40,7 +40,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ExportChapterVi
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SplashScreenViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioDataStore
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AppPreferencesStore
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookPageViewModel
@@ -49,10 +48,13 @@ import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AppInfoViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ConsumeViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ExportProjectViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectWizardViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 
 @Component(
     modules = [
@@ -80,10 +82,12 @@ interface AppDependencyGraph {
     fun inject(viewModel: SettingsViewModel)
     fun inject(viewModel: AddFilesViewModel)
     fun inject(viewModel: TranslationViewModel)
+    fun inject(viewModel: TranslationViewModel2)
     fun inject(viewModel: BookWizardViewModel)
     fun inject(viewModel: ProjectWizardViewModel)
     fun inject(viewModel: ChapterPageViewModel)
     fun inject(viewModel: AppInfoViewModel)
+    fun inject(viewModel: ConsumeViewModel)
     fun inject(viewModel: ChunkingViewModel)
     fun inject(viewModel: ExportChapterViewModel)
     fun inject(viewModel: ExportProjectViewModel)

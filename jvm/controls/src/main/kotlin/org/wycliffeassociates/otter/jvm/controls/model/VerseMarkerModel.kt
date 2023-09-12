@@ -52,7 +52,6 @@ class VerseMarkerModel(
 
     private var labelIndex = 0
     var changesSaved = true
-        private set
 
     init {
         cues as MutableList

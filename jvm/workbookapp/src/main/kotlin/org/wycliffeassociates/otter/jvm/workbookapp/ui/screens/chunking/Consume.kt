@@ -32,14 +32,14 @@ import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ConsumeViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 
 class Consume : Fragment() {
     private val logger = LoggerFactory.getLogger(Consume::class.java)
 
-    val viewModel: ChunkingViewModel by inject()
+    val viewModel: ConsumeViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
 
     private lateinit var waveform: MarkerPlacementWaveform

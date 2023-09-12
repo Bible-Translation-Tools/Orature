@@ -47,19 +47,19 @@ class SourceAudioAccessor(
 
     fun getChapter(chapter: Int, target: Book? = null): SourceAudio? {
         logger.info("Looking for target audio for chapter: $chapter with target book: $target")
-        target?.let { target ->
-            val accessor = ProjectFilesAccessor(directoryProvider, metadata, target.resourceMetadata, target)
-            val dir = accessor.sourceAudioDir
-            val file = dir.listFiles()?.find {
-                chapterMatches(it, chapter) && validAudioExtension(it)
-            }
-            file?.let {
-                logger.info("Found the source audio file! ${it.path}")
-                val oratureAudioFile = OratureAudioFile(it)
-                val size = oratureAudioFile.totalFrames
-                return SourceAudio(it, 0, size)
-            }
-        }
+//        target?.let { target ->
+//            val accessor = ProjectFilesAccessor(directoryProvider, metadata, target.resourceMetadata, target)
+//            val dir = accessor.sourceAudioDir
+//            val file = dir.listFiles()?.find {
+//                chapterMatches(it, chapter) && validAudioExtension(it)
+//            }
+//            file?.let {
+//                logger.info("Found the source audio file! ${it.path}")
+//                val oratureAudioFile = OratureAudioFile(it)
+//                val size = oratureAudioFile.totalFrames
+//                return SourceAudio(it, 0, size)
+//            }
+//        }
         ResourceContainer.load(metadata.path).use { rc ->
             if (rc.media != null) {
                 val mediaProject = rc.media!!.projects.find { it.identifier == project }
@@ -75,6 +75,23 @@ class SourceAudioAccessor(
         }
         logger.info("No source audio found")
         return null
+    }
+
+    fun getUserMarkedChapter(chapter: Int, target: Book? = null): SourceAudio? {
+        logger.info("Looking for source audio (chunks) for chapter: $chapter with target book: $target")
+        target?.let { target ->
+            val accessor = ProjectFilesAccessor(directoryProvider, metadata, target.resourceMetadata, target)
+            val dir = accessor.sourceAudioDir
+            val file = dir.listFiles()?.find {
+                chapterMatches(it, chapter) && validAudioExtension(it)
+            }
+            file?.let {
+                logger.info("Found the source audio file! ${it.path}")
+                val oratureAudioFile = OratureAudioFile(it)
+                val size = oratureAudioFile.totalFrames
+                return SourceAudio(it, 0, size)
+            }
+        } ?: return null
     }
 
     private fun getChapter(

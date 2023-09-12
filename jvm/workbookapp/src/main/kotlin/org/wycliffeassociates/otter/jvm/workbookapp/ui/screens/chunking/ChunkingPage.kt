@@ -86,7 +86,7 @@ class ChunkingPage : View() {
 
         vm.subscribeOnWaveformImages = ::subscribeOnWaveformImages
 
-        vm.onDockChunk()
+//        vm.onDockChunk()
 
         waveform.markers.bind(vm.markers, { it })
         waveform.refreshMarkers()
@@ -178,7 +178,7 @@ class ChunkingPage : View() {
                         jfxbutton(messages["save"]) {
                             addClass("btn", "btn--primary", "btn--borderless")
                             setOnAction {
-                                vm.saveAndQuit()
+                                vm.saveChanges()
                                 workspace.navigateBack()
                             }
                         }

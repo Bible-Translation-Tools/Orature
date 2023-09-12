@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.common.domain.chunking
 
 import java.io.File
 import org.wycliffeassociates.otter.common.audio.AudioCue
+import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -16,7 +17,9 @@ class ChunkAudioUseCase(val directoryProvider: IDirectoryProvider, val projectFi
             source.copyTo(temp, true)
             val audio = OratureAudioFile(temp)
             audio.clearChunkMarkers()
-            audio.addCues(cues)
+            cues.sortedBy { it.location }.forEachIndexed { index, cue ->
+                audio.addMarker(ChunkMarker(index + 1, cue.location))
+            }
             audio.update()
             val path = projectFilesAccessor.projectDir
             ResourceContainer.load(path).use {

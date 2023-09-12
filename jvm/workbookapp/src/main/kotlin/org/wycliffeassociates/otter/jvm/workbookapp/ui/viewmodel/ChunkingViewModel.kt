@@ -23,9 +23,9 @@ import com.sun.glass.ui.Screen
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.addTo
 import java.io.File
 import javafx.animation.AnimationTimer
-import javafx.beans.property.IntegerProperty
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
@@ -34,6 +34,8 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.Slider
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
+import org.wycliffeassociates.otter.common.audio.AudioCue
+import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import javax.inject.Inject
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -50,10 +52,8 @@ import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
 import tornadofx.ViewModel
-import tornadofx.get
 import tornadofx.getValue
 import tornadofx.observableListOf
-import tornadofx.onChange
 import tornadofx.sizeProperty
 import kotlin.math.max
 
@@ -61,15 +61,8 @@ const val ACTIVE = "chunking-wizard__step--active"
 const val COMPLETE = "chunking-wizard__step--complete"
 const val INACTIVE = "chunking-wizard__step--inactive"
 
-private const val WAV_COLOR = "#66768B"
-private const val BACKGROUND_COLOR = "#fff"
-
-enum class ChunkingWizardPage {
-    CONSUME,
-    VERBALIZE,
-    CHUNK
-}
-
+const val WAV_COLOR = "#66768B"
+const val BACKGROUND_COLOR = "#fff"
 
 class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
 
@@ -77,21 +70,17 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
 
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
+    val translationViewModel: TranslationViewModel2 by inject()
 
     val consumeStepColor = SimpleStringProperty(ACTIVE)
     val verbalizeStepColor = SimpleStringProperty(INACTIVE)
     val chunkStepColor = SimpleStringProperty(INACTIVE)
 
     val chapterTitle get() = workbookDataStore.activeChapterProperty.value?.title ?: ""
-    val pageProperty = SimpleObjectProperty(ChunkingWizardPage.CONSUME)
     val titleProperty = SimpleStringProperty("")
     val stepProperty = SimpleStringProperty("")
-    val selectedChunk: IntegerProperty = SimpleIntegerProperty(2)
-    val selectedStepProperty = SimpleObjectProperty<ChunkingStep>(null)
-    val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.BLIND_DRAFT)
 
     val sourceAudio by audioDataStore.sourceAudioProperty
-    val sourceTextProperty = SimpleStringProperty()
 
     @Inject
     lateinit var directoryProvider: IDirectoryProvider
@@ -125,7 +114,7 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
     val compositeDisposable = CompositeDisposable()
     override val positionProperty = SimpleDoubleProperty(0.0)
     override var imageWidthProperty = SimpleDoubleProperty(0.0)
-
+    val changeUnsaved = SimpleBooleanProperty(false)
     private val disposeables = mutableListOf<Disposable>()
 
     lateinit var audio: OratureAudioFile
@@ -135,58 +124,16 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
     private var sampleRate: Int = 0 // beware of divided by 0
     private var sourceTotalFrames: Int = 0 // beware of divided by 0
 
-    fun dockPage() {
-        val recentChapter = workbookDataStore.workbookRecentChapterMap.getOrDefault(
-            workbookDataStore.workbook.hashCode(),
-            1
-        )
-        val chapter = workbookDataStore.workbook.target.chapters
-            .filter { it.sort == recentChapter }
-            .blockingFirst()
-
-        workbookDataStore.activeChapterProperty.set(chapter)
-        workbookDataStore.getSourceText()
-            .observeOnFx()
-            .subscribe {
-                sourceTextProperty.set(it)
-            }
-    }
-
-    fun onDockConsume() {
-        val wb = workbookDataStore.workbook
-        val chapter = workbookDataStore.chapter
-        val sourceAudio = wb.sourceAudioAccessor.getChapter(chapter.sort, wb.target)
-        audioDataStore.sourceAudioProperty.set(sourceAudio)
-
-        sourceAudio?.file?.let {
-            (app as IDependencyGraphProvider).dependencyGraph.inject(this)
-            audio = loadAudio(it)
-            createWaveformImages(audio)
-            subscribeOnWaveformImages()
-            loadMarkers(audio)
-        }
-        startAnimationTimer()
-    }
-
-    fun onUndockConsume() {
-        pause()
-        cleanup()
-    }
-
-    fun onDockChunk() {
-        titleProperty.set(messages["chunkingTitle"])
-        stepProperty.set(messages["chunkingDescription"])
-
-        loadMarkers(audio)
-        subscribeOnWaveformImages()
-        startAnimationTimer()
-        seek(0)
-    }
-
     fun onDockChunking() {
         val wb = workbookDataStore.workbook
         val chapter = workbookDataStore.chapter
-        val sourceAudio = wb.sourceAudioAccessor.getChapter(chapter.sort, wb.target)
+        val sourceAudio = wb.sourceAudioAccessor.getUserMarkedChapter(chapter.sort, wb.target)
+            ?: let {
+                ChunkAudioUseCase(directoryProvider, workbookDataStore.workbook.projectFilesAccessor)
+                    .createChunkedSourceAudio(sourceAudio.file, listOf())
+
+                wb.sourceAudioAccessor.getUserMarkedChapter(chapter.sort, wb.target)
+            }
         audioDataStore.sourceAudioProperty.set(sourceAudio)
 
         sourceAudio?.file?.let {
@@ -197,10 +144,19 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
             loadChunkMarkers(audio)
         }
         startAnimationTimer()
+
+        translationViewModel.currentMarkerProperty.bind(currentMarkerNumberProperty)
     }
 
     fun onUndockChunking() {
-        onUndockConsume()
+        pause()
+        cleanup()
+        translationViewModel.selectedStepProperty.value?.let {
+            onNavigateStep(it)
+        }
+        translationViewModel.currentMarkerProperty.unbind()
+        translationViewModel.currentMarkerProperty.set(-1)
+        markerModel = null
     }
 
     fun onUndockChunk() {
@@ -234,22 +190,30 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
         return audio
     }
 
-    fun loadMarkers(audio: OratureAudioFile) {
-        audio.clearCues()
-        val marketLabels = workbookDataStore.getSourceChapter().map { it.getDraft() }.blockingGet().map { it.title }.toList().blockingGet()
-        markerModel = VerseMarkerModel(audio, marketLabels.size, marketLabels)
-        markerModel?.let { markerModel ->
-            markers.setAll(markerModel.markers)
-        }
-    }
-
     fun loadChunkMarkers(audio: OratureAudioFile) {
-        val totalMarkers: Int = 500
-        audio.clearCues()
-        markerModel = VerseMarkerModel(audio, totalMarkers, listOf())
-        markerModel?.let { markerModel ->
-            markers.setAll(markerModel.markers)
-        }
+        markers.clear()
+
+        workbookDataStore.chapter
+            .chunks
+            .observeOnFx()
+            .subscribe { chunks ->
+                val totalMarkers: Int = 500
+                audio.clearCues()
+                if (chunks.isEmpty()) {
+                    markerModel = VerseMarkerModel(audio, totalMarkers, listOf())
+                    markerModel?.let { markerModel ->
+                        markers.setAll(markerModel.markers)
+                    }
+                } else {
+                    val chunkMarkers = audio.getMarker<ChunkMarker>().map {
+                        ChunkMarkerModel(AudioCue(it.location, it.label))
+                    }
+                    markers.setAll(chunkMarkers)
+                    markerModel = VerseMarkerModel(audio, totalMarkers, (1..totalMarkers).map { it.toString() })
+                    chunkMarkers.forEach { markerModel!!.addMarker(it.frame) }
+                    markerModel!!.changesSaved = true
+                }
+            }.addTo(compositeDisposable)
     }
 
     fun cleanup() {
@@ -261,25 +225,25 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
         disposeables.forEach { it.dispose() }
     }
 
-    fun saveAndQuit() {
+    fun saveChanges() {
         compositeDisposable.clear()
         audioConnectionFactory.clearPlayerConnections()
         audioPlayer.value.close()
         audioController = null
+
 
         val accessor = workbookDataStore.workbook.projectFilesAccessor
         val wkbk = workbookDataStore.activeWorkbookProperty.value
         val chapter = workbookDataStore.activeChapterProperty.value
         val cues = markers.filter { it.placed }.map { it.toAudioCue() }
 
-        createChunks.createUserDefinedChunks(wkbk, chapter, cues, 1)
-
-        pageProperty.set(ChunkingWizardPage.CONSUME)
+        createChunks.createUserDefinedChunks(wkbk, chapter, cues, 2)
 
         ChunkAudioUseCase(directoryProvider, accessor)
             .createChunkedSourceAudio(sourceAudio.file, cues)
 
-        disposeables.forEach { it.dispose() }
+        markerModel?.changesSaved = true
+        changeUnsaved.value = false
     }
 
     fun initializeAudioController(slider: Slider? = null) {
@@ -290,6 +254,14 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
 
     fun pause() {
         audioController?.pause()
+    }
+
+    private fun onNavigateStep(step: ChunkingStep) {
+        // handle when moving to the next step
+        val hasUnsavedChanges = changeUnsaved.value || markerModel?.changesSaved == false
+        if (hasUnsavedChanges && step.ordinal > ChunkingStep.CHUNKING.ordinal) {
+            saveChanges()
+        }
     }
 
     private fun createWaveformImages(audio: OratureAudioFile) {
