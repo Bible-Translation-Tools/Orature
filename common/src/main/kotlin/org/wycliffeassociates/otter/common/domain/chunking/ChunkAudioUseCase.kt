@@ -4,6 +4,8 @@ import java.io.File
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants.SOURCE_AUDIO_DIR
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
@@ -23,7 +25,6 @@ class ChunkAudioUseCase(val directoryProvider: IDirectoryProvider, val projectFi
             audio.update()
             val path = projectFilesAccessor.projectDir
             ResourceContainer.load(path).use {
-
                 it.addFileToContainer(temp, ".apps/orature/source/audio/${temp.name}")
                 if (tempCue.exists()) {
                     it.addFileToContainer(tempCue, ".apps/orature/source/audio/${tempCue.name}")
@@ -35,6 +36,14 @@ class ChunkAudioUseCase(val directoryProvider: IDirectoryProvider, val projectFi
             if (tempCue.exists()) {
                 tempCue.delete()
             }
+        }
+    }
+
+    fun copySourceAudioToProject(source: File) {
+        val path = projectFilesAccessor.projectDir
+        ResourceContainer.load(path).use {
+            RcConstants
+            it.addFileToContainer(source, "${SOURCE_AUDIO_DIR}/${source.name}")
         }
     }
 }

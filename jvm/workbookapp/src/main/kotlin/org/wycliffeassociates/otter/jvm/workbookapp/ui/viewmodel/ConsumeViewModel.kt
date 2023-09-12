@@ -71,6 +71,10 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
     private val width = Screen.getMainScreen().platformWidth
     private val height = Integer.min(Screen.getMainScreen().platformHeight, 500)
 
+    init {
+        (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+    }
+
     fun onDockConsume() {
         val wb = workbookDataStore.workbook
         val chapter = workbookDataStore.chapter

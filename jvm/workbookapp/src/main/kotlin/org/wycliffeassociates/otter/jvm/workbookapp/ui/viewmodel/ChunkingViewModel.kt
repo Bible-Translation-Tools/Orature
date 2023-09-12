@@ -41,6 +41,7 @@ import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.chunking.ChunkAudioUseCase
 import org.wycliffeassociates.otter.common.domain.content.CreateChunks
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
@@ -124,16 +125,16 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
     private var sampleRate: Int = 0 // beware of divided by 0
     private var sourceTotalFrames: Int = 0 // beware of divided by 0
 
+    init {
+        (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+    }
+
     fun onDockChunking() {
         val wb = workbookDataStore.workbook
         val chapter = workbookDataStore.chapter
         val sourceAudio = wb.sourceAudioAccessor.getUserMarkedChapter(chapter.sort, wb.target)
-            ?: let {
-                ChunkAudioUseCase(directoryProvider, workbookDataStore.workbook.projectFilesAccessor)
-                    .createChunkedSourceAudio(sourceAudio.file, listOf())
+            ?: initializeSourceAudio(chapter.sort)
 
-                wb.sourceAudioAccessor.getUserMarkedChapter(chapter.sort, wb.target)
-            }
         audioDataStore.sourceAudioProperty.set(sourceAudio)
 
         sourceAudio?.file?.let {
@@ -146,6 +147,14 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
         startAnimationTimer()
 
         translationViewModel.currentMarkerProperty.bind(currentMarkerNumberProperty)
+    }
+
+    private fun initializeSourceAudio(chapter: Int): SourceAudio? {
+        val workbook = workbookDataStore.workbook
+        ChunkAudioUseCase(directoryProvider, workbook.projectFilesAccessor)
+            .copySourceAudioToProject(sourceAudio.file)
+
+        return workbook.sourceAudioAccessor.getUserMarkedChapter(chapter, workbook.target)
     }
 
     fun onUndockChunking() {
@@ -247,8 +256,11 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
     }
 
     fun initializeAudioController(slider: Slider? = null) {
-        audioController = AudioPlayerController(slider)
-        audioController?.load(audioPlayer.get())
+        audioController = AudioPlayerController(slider).also { controller ->
+            audioPlayer.value?.let {
+                controller.load(it)
+            }
+        }
         isPlayingProperty.bind(audioController!!.isPlayingProperty)
     }
 

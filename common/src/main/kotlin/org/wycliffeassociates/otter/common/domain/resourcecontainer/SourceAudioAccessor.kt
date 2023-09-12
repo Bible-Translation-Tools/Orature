@@ -79,7 +79,7 @@ class SourceAudioAccessor(
 
     fun getUserMarkedChapter(chapter: Int, target: Book? = null): SourceAudio? {
         logger.info("Looking for source audio (chunks) for chapter: $chapter with target book: $target")
-        target?.let { target ->
+        return target?.let { target ->
             val accessor = ProjectFilesAccessor(directoryProvider, metadata, target.resourceMetadata, target)
             val dir = accessor.sourceAudioDir
             val file = dir.listFiles()?.find {
@@ -89,9 +89,9 @@ class SourceAudioAccessor(
                 logger.info("Found the source audio file! ${it.path}")
                 val oratureAudioFile = OratureAudioFile(it)
                 val size = oratureAudioFile.totalFrames
-                return SourceAudio(it, 0, size)
+                SourceAudio(it, 0, size)
             }
-        } ?: return null
+        }
     }
 
     private fun getChapter(

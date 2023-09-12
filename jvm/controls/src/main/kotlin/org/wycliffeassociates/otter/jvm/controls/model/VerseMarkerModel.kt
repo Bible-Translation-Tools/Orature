@@ -55,10 +55,10 @@ class VerseMarkerModel(
 
     init {
         cues as MutableList
-        if (cues.isEmpty()) {
-            cues.add(AudioCue(0, markerLabels.firstOrNull() ?: "1"))
-            labelIndex++
-        }
+//        if (cues.isEmpty()) {
+//            cues.add(AudioCue(0, markerLabels.firstOrNull() ?: "1"))
+//            labelIndex++
+//        }
         cues.sortBy { it.location }
         markerCountProperty.value = cues.size
 
