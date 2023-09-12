@@ -11,15 +11,13 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
+import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.Drawable
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkerControl
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkersLayer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.verse_markers_layer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.WaveformLayer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.narration_waveform
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.pixelsToFrames
 import tornadofx.*
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
@@ -95,24 +93,18 @@ class AudioWorkspaceView : View() {
                             .and(heightProperty().greaterThan(0))
                     )
                 }
-//                borderpane {
-//                    bindChildren(markerNodes) {
-//                        it.apply {
-//                            minHeightProperty().bind(narrationWaveformLayer.heightProperty())
-//                            prefHeightProperty().bind(narrationWaveformLayer.heightProperty())
-//                        }
-//                    }
-//                }
                 verse_markers_layer {
                     verseMarkersControls.bind(markerNodes) { it }
                 }
             }
             bottom = ScrollBar().apply {
                 viewModel.audioPositionProperty.onChange {
-                    value = framesToPixels(it).toDouble()
+                    value = framesToPixels(it, width = narrationWaveformLayer.width.toInt()).toDouble()
                 }
 
-                maxProperty().bind(viewModel.totalAudioSizeProperty)
+                maxProperty().bind(viewModel.totalAudioSizeProperty.integerBinding {
+                    framesToPixels(it?.let { it.toInt() } ?: 0, narrationWaveformLayer.width.toInt())
+                })
 
                 var lastModified = 0L
 
@@ -120,7 +112,7 @@ class AudioWorkspaceView : View() {
                     if (viewModel.isPlayingProperty.value == false && viewModel.isRecordingProperty.value == false) {
                         if (System.currentTimeMillis() - lastModified > 75L) {
                             lastModified = System.currentTimeMillis()
-                            viewModel.scrollAudio(pixelsToFrames(it))
+                            viewModel.scrollAudio(pixelsToFrames(it, width = narrationWaveformLayer.width.toInt()))
                         }
                     }
                 }
@@ -178,13 +170,7 @@ class AudioWorkspaceViewModel : ViewModel() {
     fun onDock() {
         isRecordingProperty.bind(narrationViewModel.isRecordingProperty)
         isPlayingProperty.bind(narrationViewModel.isPlayingProperty)
-        totalAudioSizeProperty.bind(
-            narrationViewModel.totalAudioSizeProperty.integerBinding {
-                it?.let {
-                    framesToPixels(it.toInt())
-                } ?: 0
-            }
-        )
+        totalAudioSizeProperty.bind(narrationViewModel.totalAudioSizeProperty)
         audioPositionProperty.bind(narrationViewModel.audioPositionProperty)
         recordedVerses.bind(narrationViewModel.recordedVerses) { it }
 

@@ -309,6 +309,11 @@ class NarrationViewModel : ViewModel() {
         }
     }
 
+    fun moveMarker(index: Int, delta: Int) {
+        logger.info("Moving marker ${index} by $delta frames")
+        narration.onVerseMarkerMoved(index, delta)
+    }
+
     fun toggleRecording(index: Int) {
         when {
             isRecording && !isRecordingAgain -> pauseRecording(index)

@@ -1,23 +1,13 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers
 
-import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleDoubleProperty
-import javafx.beans.property.SimpleIntegerProperty
-import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
-import javafx.scene.layout.AnchorPane
-import javafx.scene.layout.StackPane
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
-import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.*
-import javafx.beans.binding.Bindings
-import javafx.collections.ListChangeListener
 import javafx.event.EventTarget
 import javafx.scene.layout.BorderPane
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.WaveformLayer
 
 /**
  * This is the offset of the marker line relative
@@ -56,11 +46,6 @@ class VerseMarkersLayer : BorderPane() {
 
             val prevVerse = getPrevVerse(verseMarkerControl.verseProperty.value)
             val nextVerse = getNextVerse(verseMarkerControl.verseProperty.value)
-            val previousMarkerPosition = framesToPixels(prevVerse.location)
-            val nextMarkerPosition = framesToPixels(nextVerse.location)
-
-//                    val currentMarkerPosition = verseMarkerControl.verseProperty.value.location
-//                    val endPosInPixels = framesToPixels(currentMarkerPosition)
 
             verseMarkerControl.apply {
 
@@ -88,26 +73,24 @@ class VerseMarkersLayer : BorderPane() {
                             val point = localToParent(event.x, event.y)
                             val currentPos = point.x
 
+                            delta = currentPos - oldPos
                             layoutX = currentPos
 
                             event.consume()
                         }
 
                         dragTarget.setOnMouseReleased { event ->
-                            userIsDraggingProperty.set(false)
                             if (delta != 0.0) {
-                                delta -= MARKER_OFFSET
-                                //val frameDelta = pixelsToFrames(delta)
-                                // TODO: I need to update the relative and actual location of the marker.
-                                // Pretty sure that this is done by firing a VerseMarkerAction, but not sure
-                               // println("frameDelta: ${frameDelta}, delta: ${delta}")
-//                                FX.eventbus.fire(
-//                                    NarrationMarkerChangedEvent(
-//                                        markers.indexOf(verseMarkerControl.verseProperty.value),
-//                                        frameDelta
-//                                    )
-//                                )
+                                // delta -= MARKER_OFFSET
+                                val frameDelta = pixelsToFrames(delta, width = this@VerseMarkersLayer.width.toInt())
+                                FX.eventbus.fire(
+                                    NarrationMarkerChangedEvent(
+                                        verseMarkerControl.verseIndexProperty.value,
+                                        frameDelta
+                                    )
+                                )
                             }
+                            userIsDraggingProperty.set(false)
                             event.consume()
                         }
 
