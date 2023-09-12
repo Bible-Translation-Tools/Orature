@@ -14,8 +14,8 @@ import org.wycliffeassociates.otter.common.device.AudioFileReaderProvider
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import java.io.File
 import java.io.RandomAccessFile
-import java.lang.IllegalStateException
-import kotlin.math.max
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.math.log
 import kotlin.math.min
 
 private const val ACTIVE_VERSES_FILE_NAME = "active_verses.json"
@@ -106,7 +106,7 @@ internal class ChapterRepresentation(
 
     fun onVersesUpdated() {
         serializeVerses()
-        sendActiveVerses()
+        publishActiveVerses()
     }
 
     private fun serializeVerses() {
@@ -114,7 +114,7 @@ internal class ChapterRepresentation(
         serializedVersesFile.writeText(jsonStr)
     }
 
-    private fun sendActiveVerses() {
+    private fun publishActiveVerses() {
         onActiveVersesUpdated.onNext(
             activeVerses.map {
                 val newLoc = absoluteToRelative(it.firstFrame())
@@ -164,10 +164,7 @@ internal class ChapterRepresentation(
 
     private fun findVerse(absoluteFrame: Int): VerseNode? {
         return activeVerses.find { node ->
-            val absoluteIsInRange = absoluteFrame in node && absoluteFrame != node.lastFrame()
-            val absoluteIsEndOfFile =
-                absoluteFrame == node.lastFrame() && absoluteFrame == activeVerses.last().lastFrame()
-            absoluteIsInRange || absoluteIsEndOfFile
+            absoluteFrame in node
         }
     }
 
@@ -190,6 +187,7 @@ internal class ChapterRepresentation(
                     verses.minBy { it.firstFrame() - absoluteFrame }.firstFrame()
                 }
             }
+
             index == verses.lastIndex -> return 0
             else -> {
                 for (i in index + 1 until verses.size) {
@@ -264,50 +262,61 @@ internal class ChapterRepresentation(
         private var position: Int
             get() = _position
             set(value) {
-                _position = if (value < startBounds * frameSizeInBytes || value > endBounds * frameSizeInBytes) {
-                    logger.error("tried to set a position outside bounds")
-                    value.coerceIn(startBounds * frameSizeInBytes, endBounds * frameSizeInBytes)
-                } else {
-                    value
-                }
+                _position = value.coerceIn(0, totalFrames * frameSizeInBytes)
             }
 
-        private val startBounds: Int
-            inline get() {
-                return when {
-                    start != null -> start!!
-                    activeVerses.isEmpty() -> 0
-                    else -> activeVerses.minBy { it.firstFrame() }.firstFrame()
-                }
-            }
+        private val CHAPTER_UNLOCKED: Int = -1
+        private val lockToVerse = AtomicInteger(CHAPTER_UNLOCKED)
 
-        private val endBounds: Int
-            inline get() {
-                return when {
-                    end != null -> end!!
-                    activeVerses.isEmpty() -> scratchAudio.totalFrames
-                    else -> activeVerses.maxBy { it.lastFrame() }.lastFrame()
-                }
+        @Synchronized
+        fun lockToVerse(index: Int?) {
+            if (index != null) {
+                if (index > activeVerses.lastIndex || index < 0) return
+
+                val node = activeVerses.get(index)
+                lockToVerse.set(index)
+                position.coerceIn(node.firstFrame() * frameSizeInBytes, node.lastFrame() * frameSizeInBytes)
+            } else {
+                lockToVerse.set(CHAPTER_UNLOCKED)
             }
+        }
+
+        @Synchronized
+        fun reset() {
+            val verses = activeVerses
+            if (verses.isEmpty()) position = 0
+
+            var index = lockToVerse.get()
+            index = if (index == CHAPTER_UNLOCKED) 0 else index
+            position = verses.get(index).firstFrame() * frameSizeInBytes
+        }
 
         @get:Synchronized
         override val framePosition: Int
             get() = position / frameSizeInBytes
 
+        @get:Synchronized
         override val totalFrames: Int
             get() {
-                return if (start == null && end == null) {
+                val lockedVerse = lockToVerse.get()
+                return if (lockedVerse == CHAPTER_UNLOCKED) {
                     this@ChapterRepresentation.totalFrames
                 } else {
-                    end!! - start!!
+                    activeVerses.get(lockedVerse).length
                 }
             }
 
         @Synchronized
         override fun hasRemaining(): Boolean {
-            val remaining = endBounds - framePosition > 0
-            logger.info("hasRemaining is ${remaining} for ${end ?: totalFrames}, frame position is ${framePosition}")
-            return remaining
+            if (totalFrames == 0) return false
+
+            val verses = activeVerses
+            val verseIndex = lockToVerse.get()
+            return if (verseIndex != CHAPTER_UNLOCKED) {
+                framePosition in verses[verseIndex] && framePosition != verses[verseIndex].lastFrame()
+            } else {
+                framePosition in verses.last() && framePosition != verses.last().lastFrame()
+            }
         }
 
         override fun supportsTimeShifting(): Boolean {
@@ -318,87 +327,150 @@ internal class ChapterRepresentation(
 
         @Synchronized
         override fun getPcmBuffer(bytes: ByteArray): Int {
+            if (totalFrames == 0) return 0
+
+
+
+            return when (lockToVerse.get()) {
+                CHAPTER_UNLOCKED -> getPcmBufferChapter(bytes)
+                else -> getPcmBufferVerse(bytes, activeVerses[lockToVerse.get()])
+            }
+        }
+
+        @Synchronized
+        private fun getPcmBufferChapter(bytes: ByteArray): Int {
+            val verses = activeVerses
+            if (verses.isEmpty()) {
+                logger.info("Playing a chapter but the verses are empty?")
+                return 0
+            }
+
+            val verseToReadFrom = getVerseToReadFrom(verses)
+            return if (verseToReadFrom != null) {
+                getPcmBufferVerse(bytes, verseToReadFrom)
+            } else 0
+        }
+
+        private fun getVerseToReadFrom(verses: List<VerseNode>): VerseNode? {
+            var currentVerseIndex = verses.indexOfFirst { framePosition in it }
+            if (currentVerseIndex == -1) currentVerseIndex = 0
+
+            val verse = findVerse(currentVerseIndex)
+            if (verse != null) {
+                return when {
+                    framePosition !in verse -> {
+                        if (currentVerseIndex != verses.lastIndex) {
+                            currentVerseIndex++
+                            verses[currentVerseIndex + 1]
+                        } else {
+                            throw IndexOutOfBoundsException("Frame position $framePosition is not in ${verse.sectors}")
+                        }
+                    }
+
+                    framePosition == verse.lastFrame() -> {
+                        if (currentVerseIndex != verses.lastIndex) {
+                            currentVerseIndex++
+                            verse
+                        } else {
+                            verse
+                        }
+                    }
+
+                    else -> verse
+                }
+            } else {
+                return null
+            }
+        }
+        
+        @Synchronized
+        private fun getPcmBufferVerse(bytes: ByteArray, verse: VerseNode): Int {
             var bytesWritten = 0
             if (randomAccessFile == null) {
                 logger.error("Should have opened the file, this is weird")
                 open()
             }
-
             val raf = randomAccessFile!!
-            val bounds = startBounds until endBounds
 
-            if (framePosition !in bounds) {
+            if (framePosition !in verse) {
+                logger.error("Playing locked verse but the frame position is out of bounds. Position: $framePosition, sectors: ${verse.sectors}")
                 when {
-                    framePosition < bounds.first -> position = bounds.first * frameSizeInBytes
-                    else -> position = bounds.last * frameSizeInBytes
+                    framePosition < verse.firstFrame() -> position = verse.firstFrame() * frameSizeInBytes
+                    else -> position = verse.lastFrame() * frameSizeInBytes
                 }
             }
 
-            var framesToRead = min(bytes.size / frameSizeInBytes, endBounds - startBounds)
-            val verses = activeVerses
-            var startingVerse = findVerse(framePosition)
+            var framesToRead = min(bytes.size / frameSizeInBytes, verse.length)
 
-            while (startingVerse == null) {
-                val moveTo = jumpGap(framePosition)
-                if (moveTo == 0) break
-                seek(moveTo)
-                startingVerse = findVerse(framePosition)
+            // if there is a negative frames to read or
+            if (framesToRead <= 0 || framePosition !in verse) {
+                logger.error("Frames to read is negative: $framePosition, $framesToRead, ${verse.marker.formattedLabel}")
+                position = verse.lastFrame() * frameSizeInBytes
+                return 0
             }
 
-            startingVerse?.let { startingVerse ->
-                var startIndex = verses.indexOf(startingVerse)
-                if (startIndex == -1) {
-                    logger.error("Aborting getPCMBuffer, could not find verse for frame Position: $framePosition")
-                    return bytesWritten
-                }
+            val sectors = verse.getSectorsFromOffset(framePosition, framesToRead)
 
-                // Jump verse if stuck at the end of a range
-                if (framePosition == startingVerse.lastFrame() && startIndex < verses.lastIndex) {
-                    seek(verses[startIndex + 1].firstFrame())
-                    startIndex++
-                }
-
-                for (verseIdx in startIndex until verses.size) {
-                    if (framesToRead <= 0 || framePosition !in bounds) break
-
-                    val verse = verses[verseIdx]
-                    val sectors = verse.getSectorsFromOffset(framePosition, framesToRead)
-
-                    if (sectors.isEmpty()) {
-                        logger.info("sectors is empty for verse index ${verseIdx}")
-                        continue
-                    }
-
-                    val framesTaken = sectors.sumOf { it.length() }
-                    
-                    for (sector in sectors) {
-                        if (framesToRead <= 0 || framePosition !in bounds) break
-
-                        val seekLoc = (sector.first * frameSizeInBytes).toLong()
-                        raf.seek(seekLoc)
-                        val temp = ByteArray(framesTaken * frameSizeInBytes)
-                        val toCopy = raf.read(temp)
-                        try {
-                            System.arraycopy(temp, 0, bytes, bytesWritten, toCopy)
-                        } catch (e: ArrayIndexOutOfBoundsException) {
-                            logger.error("arraycopy out of bounds, $bytesWritten bytes written, $toCopy toCopy", e)
-                        }
-                        bytesWritten += toCopy
-                        position += toCopy
-                        framesToRead -= toCopy / frameSizeInBytes
-                    }
-                }
+            if (sectors.isEmpty()) {
+                logger.error("sectors is empty for verse ${verse.marker.label}")
+                position = verse.lastFrame() * frameSizeInBytes
+                return 0
             }
 
+            for (sector in sectors) {
+                if (framesToRead <= 0 || framePosition !in verse) break
+
+                val framesToCopyFromSector = min(framesToRead, sector.length())
+
+                val seekLoc = (sector.first * frameSizeInBytes).toLong()
+                raf.seek(seekLoc)
+                val temp = ByteArray(framesToCopyFromSector * frameSizeInBytes)
+                val toCopy = raf.read(temp)
+                try {
+                    System.arraycopy(temp, 0, bytes, bytesWritten, toCopy)
+                } catch (e: ArrayIndexOutOfBoundsException) {
+                    logger.error("arraycopy out of bounds, $bytesWritten bytes written, $toCopy toCopy", e)
+                }
+                bytesWritten += toCopy
+                position += toCopy
+                framesToRead -= toCopy / frameSizeInBytes
+
+                if (framePosition > sector.last) {
+                    logger.warn("Frame position popped out of sector; it got corrected, but there must be a math issue. framePosition:$framePosition, last:${sector.last}")
+                    position = sector.last * frameSizeInBytes
+                }
+                adjustPositionToNextSector(verse, sector, sectors)
+            }
 
             return bytesWritten
+        }
+
+        private fun adjustPositionToNextSector(verse: VerseNode, sector: IntRange, sectors: List<IntRange>) {
+            if (position != sector.last) return
+
+            val sectorIndex = sectors.indexOf(sector)
+            if (sectorIndex == sectors.lastIndex) {
+                adjustPositionToNextVerse(verse)
+            } else {
+                position = sectors[sectorIndex + 1].first * frameSizeInBytes
+            }
+        }
+
+        private fun adjustPositionToNextVerse(verse: VerseNode) {
+            if (lockToVerse.get() != CHAPTER_UNLOCKED) return
+
+            val verses = activeVerses
+            val index = verses.indexOf(verse)
+            if (index == verses.lastIndex) return
+
+            position = verses[index + 1].firstFrame() * frameSizeInBytes
         }
 
         @Synchronized
         override fun seek(sample: Int) {
             position = when {
-                sample <= startBounds -> startBounds * frameSizeInBytes
-                sample >= endBounds -> endBounds - 1 * frameSizeInBytes
+//                sample <= startBounds -> startBounds * frameSizeInBytes
+//                sample >= endBounds -> endBounds - 1 * frameSizeInBytes
                 else -> {
                     sample * frameSizeInBytes
                 }
