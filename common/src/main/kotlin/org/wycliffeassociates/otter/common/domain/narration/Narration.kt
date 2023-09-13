@@ -145,7 +145,8 @@ class Narration @AssistedInject constructor(
     }
 
     fun finalizeVerse(verseIndex: Int) {
-        chapterRepresentation.finalizeVerse(verseIndex, history)
+        val loc = chapterRepresentation.finalizeVerse(verseIndex, history)
+        seek(loc)
     }
 
     fun onNewVerse(verseIndex: Int) {
@@ -338,6 +339,24 @@ class Narration @AssistedInject constructor(
         player.close()
         recorder.stop()
         chapterRepresentation.closeConnections()
+    }
+
+    fun seekToPrevious() {
+        player.pause()
+        val loc = player.getLocationInFrames()
+        val seekLoc = activeVerses.lastOrNull() { it.location < loc }
+        seekLoc?.let {
+            seek(it.location)
+        } ?: seek(0)
+    }
+
+    fun seekToNext() {
+        player.pause()
+        val loc = player.getLocationInFrames()
+        val seekLoc = activeVerses.firstOrNull { it.location > loc }
+        seekLoc?.let {
+            seek(it.location)
+        } ?: seek(player.getDurationInFrames())
     }
 }
 

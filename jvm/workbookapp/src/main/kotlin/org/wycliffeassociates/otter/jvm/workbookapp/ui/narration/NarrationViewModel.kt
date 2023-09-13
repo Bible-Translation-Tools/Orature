@@ -513,4 +513,12 @@ class NarrationViewModel : ViewModel() {
     fun seekPercent(percent: Double) {
         narration.seek(floor(audioPlayer.getDurationInFrames() * percent).toInt())
     }
+
+    fun seekToNext() {
+        narration.seekToNext()
+    }
+
+    fun seekToPrevious() {
+        narration.seekToPrevious()
+    }
 }

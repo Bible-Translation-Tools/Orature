@@ -51,10 +51,22 @@ class NarrationToolBar : View() {
             button {
                 addClass("btn", "btn--secondary")
                 graphic = FontIcon(MaterialDesign.MDI_SKIP_PREVIOUS)
+                setOnAction {
+                    viewModel.seekToPrevious()
+                }
+                disableWhen {
+                    viewModel.isPlayingProperty.or(viewModel.isRecordingProperty)
+                }
             }
             button {
                 addClass("btn", "btn--secondary")
                 graphic = FontIcon(MaterialDesign.MDI_SKIP_NEXT)
+                setOnAction {
+                    viewModel.seekToNext()
+                }
+                disableWhen {
+                    viewModel.isPlayingProperty.or(viewModel.isRecordingProperty)
+                }
             }
         }
         bottom = separator {
