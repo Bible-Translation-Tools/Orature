@@ -439,13 +439,18 @@ class NarrationViewModel : ViewModel() {
         narration.onActiveVersesUpdated.subscribe { verses ->
             totalAudioSizeProperty.set(rendererAudioReader.totalFrames)
 
+            val verseWasAdded = recordedVerses.size != verses.size
+
             recordedVerses.setAll(verses)
 
             hasUndo = narration.hasUndo()
             hasRedo = narration.hasRedo()
 
             val lastVerse = verses.getOrElse(lastRecordedVerseProperty.value, { verses.last() }).location
-            narration.seek(lastVerse)
+
+            if (verseWasAdded) {
+                narration.seek(lastVerse)
+            }
 
             recordStart = recordedVerses.isEmpty()
             recordResume = recordedVerses.isNotEmpty()

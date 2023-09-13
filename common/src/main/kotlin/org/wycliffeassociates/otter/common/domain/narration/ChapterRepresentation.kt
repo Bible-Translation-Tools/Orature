@@ -231,9 +231,6 @@ internal class ChapterRepresentation(
         private var position: Int
             get() = _position
             set(value) {
-                if (_position !in 0..(totalFrames * frameSizeInBytes)) {
-                    logger.warn("setting position outside of total frames?")
-                }
                 _position = value
             }
 
@@ -436,7 +433,6 @@ internal class ChapterRepresentation(
         override fun open() {
             randomAccessFile?.let { release() }
             randomAccessFile = RandomAccessFile(scratchAudio.file, "r")
-            logger.info("open called")
         }
 
         override fun release() {
