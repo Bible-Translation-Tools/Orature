@@ -228,7 +228,6 @@ class SourceContent : StackPane() {
                     addClass("source-content__bottom")
 
                     hbox {
-                        addClass("source-content__audio_container", "source-content__audio_container--target")
 
                         button {
                             playTargetBtn = this
@@ -278,7 +277,6 @@ class SourceContent : StackPane() {
                         }
 
                         hbox {
-                            addClass("source-content__audio_container")
                             hgrow = Priority.ALWAYS
 
                             button {
