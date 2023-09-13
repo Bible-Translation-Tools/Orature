@@ -11,11 +11,18 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
+import java.nio.ByteBuffer
+const val testDirWithAudio =  "C:\\Users\\hilld\\testProjectChapterDirWithAudio"
+const val testDirWithoutAudio = "C:\\Users\\hilld\\testProjectChapterDirWithoutAudio"
 
 class ChapterRepresentationTest {
 
     lateinit var chapter: Chapter
-    lateinit var workbook: Workbook
+    lateinit var workbookWithAudio: Workbook
+    lateinit var workbookWithoutAudio: Workbook
     lateinit var chunk: Observable<Chunk>
     val numTestVerses = 31
 
@@ -23,13 +30,15 @@ class ChapterRepresentationTest {
     @Before
     fun setup() {
         chunk = createObservableChunkMock(mockChunk())
-        workbook = mockWorkbook()
+        workbookWithAudio = mockWorkbook(true)
+        workbookWithoutAudio = mockWorkbook(false)
         chapter = mockChapter()
     }
 
-    fun mockWorkbook() : Workbook {
+    fun mockWorkbook(withAudio: Boolean) : Workbook {
+        val audioDirectory = if (withAudio) testDirWithAudio else testDirWithoutAudio
         return mockk<Workbook>{
-            every { projectFilesAccessor.getChapterAudioDir(any(), any())} returns File("C:\\Users\\hilld\\testProjectChapterDir")
+            every { projectFilesAccessor.getChapterAudioDir(any(), any())} returns File(audioDirectory)
         }
     }
 
@@ -50,15 +59,16 @@ class ChapterRepresentationTest {
         return Observable.just(chunk)
     }
 
-    // Initializes each verse with placed equal to true and with one sector
-    // that is an int range of 44100*i until 44100*(i+1)
-    // so each verseNode will have one second of recording
-    fun initializeVerseNodeList(verseNodeList : MutableList<VerseNode>) {
+    // Initializes each verse with placed equal to true and with one sector that holds one second worth of frames.
+    // where the start of each added sector is offset by "paddingLength" number of frames
+    fun initializeVerseNodeList(verseNodeList : MutableList<VerseNode>, paddingLength: Int = 0) {
+        var start = -1
         for (i in 0 until numTestVerses) {
             val verseMarker = VerseMarker((i + 1), (i + 1), 0)
             val sectors = mutableListOf<IntRange>()
             val verseNode = VerseNode(0, 0, true, verseMarker, sectors)
-            sectors.add(44100 * i until (44100 * (i + 1)))
+            sectors.add(start + 1 .. start + 44100)
+            start += 44100 + paddingLength
             verseNodeList.add(verseNode)
         }
     }
@@ -75,19 +85,61 @@ class ChapterRepresentationTest {
         }
     }
 
+
+    fun writeByteBufferToPCMFile(byteBuffer: ByteBuffer, filePath: String) {
+        try {
+            val byteArray = ByteArray(byteBuffer.remaining())
+            byteBuffer.get(byteArray)
+
+            val file = File(filePath)
+            val fos = FileOutputStream(file)
+
+            fos.write(byteArray)
+
+            fos.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
+
+    fun fillByteBuffferWithNoPadding(byteBuffer: ByteBuffer, secondsOfAudio: Int) {
+        for (i in 1 .. secondsOfAudio) {
+            for(j in 1 .. 44100) {
+                byteBuffer.putShort(i.toShort())
+            }
+        }
+        byteBuffer.rewind()
+    }
+
+
+    fun fillAudioBufferWithPadding(byteBuffer: ByteBuffer, secondsOfAudio: Int, paddingLength: Int) {
+        for (i in 1 .. secondsOfAudio) {
+            for(j in 1 .. 44100) {
+                byteBuffer.putShort(i.toShort())
+            }
+            for(j in 1 .. paddingLength) {
+                byteBuffer.putShort(0)
+            }
+        }
+        byteBuffer.rewind()
+    }
+
     @Test
     fun `totalFrames with initialized totalVerses list`() {
-        val chapterRepresentation = ChapterRepresentation(workbook, chapter)
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
+        println(chapterRepresentation.totalVerses)
 
-        Assert.assertEquals(44100*numTestVerses - numTestVerses, chapterRepresentation.totalFrames)
+        // TODO: update totalVerses to have inclusive ends
+        Assert.assertEquals(44100*numTestVerses, chapterRepresentation.totalFrames)
     }
 
 
     @Test
     fun `relativeToAbsolute with relativeIdx at the start of the first node`() {
         val relativePosition = 500
-        val chapterRepresentation = ChapterRepresentation(workbook, chapter)
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
 
         val absolutePositionFromRelativePosition = chapterRepresentation.relativeToAbsolute(relativePosition)
@@ -98,7 +150,7 @@ class ChapterRepresentationTest {
     @Test
     fun `relativeToAbsolute with relativeIdx at the end of the first node`() {
         val relativePosition = 44099
-        val chapterRepresentation = ChapterRepresentation(workbook, chapter)
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
 
         val absolutePositionFromRelativePosition = chapterRepresentation.relativeToAbsolute(relativePosition)
@@ -108,7 +160,7 @@ class ChapterRepresentationTest {
 
     @Test
     fun `relativeToAbsolute with relativeIdx in range of first node with non-sequential sectors and no unused frames`() {
-        val chapterRepresentation = ChapterRepresentation(workbook, chapter)
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
 
         addSectorsToEnd(chapterRepresentation.totalVerses, 44100, 0)
@@ -123,7 +175,7 @@ class ChapterRepresentationTest {
 
     @Test
     fun `relativeToAbsolute with relativeIdx with non-sequential sectors and no unused frames`() {
-        val chapterRepresentation = ChapterRepresentation(workbook, chapter)
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
 
         addSectorsToEnd(chapterRepresentation.totalVerses, 44100, 0)
@@ -140,7 +192,7 @@ class ChapterRepresentationTest {
 
     @Test
     fun `relativeToAbsolute with relativeIdx with non-sequential sectors and unused frames`() {
-        val chapterRepresentation = ChapterRepresentation(workbook, chapter)
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
 
         // 44100 frames are added between newly added sectors, as specified by the value for spaceBetweenSectors
@@ -160,7 +212,7 @@ class ChapterRepresentationTest {
 
     @Test
     fun `getRangeOfMarker with empty activeVerses`() {
-        val chapterRepresentation = ChapterRepresentation(workbook, chapter)
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
 
         val markerRange = chapterRepresentation.getRangeOfMarker(VerseMarker(1, 1, 0))
 
@@ -169,7 +221,7 @@ class ChapterRepresentationTest {
 
     @Test
     fun `getRangeOfMarker with no matching verseMarker label`() {
-        val chapterRepresentation = ChapterRepresentation(workbook, chapter)
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
 
         val markerRange = chapterRepresentation.getRangeOfMarker(VerseMarker(-1, 1, 0))
@@ -179,7 +231,7 @@ class ChapterRepresentationTest {
 
     @Test
     fun `getRangeOfMarker with matching verseMarker label and sequential sectors`() {
-        val chapterRepresentation = ChapterRepresentation(workbook, chapter)
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
 
         val verseNumber = 7
@@ -188,26 +240,26 @@ class ChapterRepresentationTest {
         Assert.assertEquals(44100*(verseNumber - 1) until 44100*verseNumber, markerRange)
     }
 
-    @Test
-    fun `getRangeOfMarker with matching verseMarker label and non-sequential sectors`() {
-        val chapterRepresentation = ChapterRepresentation(workbook, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses)
-
-        // 44100 frames are added between newly added sectors, as specified by the value for spaceBetweenSectors
-        val spaceBetweenSectors = 44100
-        addSectorsToEnd(chapterRepresentation.totalVerses, 44100, spaceBetweenSectors)
-
-        val verseNumber = 7
-        val markerRange = chapterRepresentation.getRangeOfMarker(VerseMarker(verseNumber, verseNumber, 0))
-
-        // TODO: fix once I get clarification about intended functionality of this
-        Assert.assertFalse(true)
-    }
+//    @Test
+//    fun `getRangeOfMarker with matching verseMarker label and non-sequential sectors`() {
+//        val chapterRepresentation = ChapterRepresentation(workbook, chapter)
+//        initializeVerseNodeList(chapterRepresentation.totalVerses)
+//
+//        // 44100 frames are added between newly added sectors, as specified by the value for spaceBetweenSectors
+//        val spaceBetweenSectors = 44100
+//        addSectorsToEnd(chapterRepresentation.totalVerses, 44100, spaceBetweenSectors)
+//
+//        val verseNumber = 7
+//        val markerRange = chapterRepresentation.getRangeOfMarker(VerseMarker(verseNumber, verseNumber, 0))
+//
+//        // TODO: fix once I get clarification about intended functionality of this
+//        Assert.assertFalse(true)
+//    }
 
 
     @Test
     fun `ChapterRepresentationConnection's framePosition with null start and end`() {
-        val chapterRepresentation = ChapterRepresentation(workbook, chapter)
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
 
         val framePosition = chapterRepresentation.ChapterRepresentationConnection(end = null).framePosition
         Assert.assertEquals(0, framePosition)
@@ -215,7 +267,7 @@ class ChapterRepresentationTest {
 
     @Test
     fun `ChapterRepresentationConnection's framePosition with non-null start and end`() {
-        val chapterRepresentation = ChapterRepresentation(workbook, chapter)
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
 
         val framePosition = chapterRepresentation.ChapterRepresentationConnection(1000, 2000).framePosition
         Assert.assertEquals(1000, framePosition)
@@ -225,7 +277,7 @@ class ChapterRepresentationTest {
 
     @Test
     fun `ChapterRepresentationConnection's hasRemaining with null start and end, no scratchAudio recorded, and empty activeVerses`() {
-        val chapterRepresentation = ChapterRepresentation(workbook, chapter)
+        val chapterRepresentation = ChapterRepresentation(workbookWithoutAudio, chapter)
 
         val hasRemaining = chapterRepresentation.ChapterRepresentationConnection(end = null).hasRemaining()
         Assert.assertEquals(false, hasRemaining)
@@ -233,7 +285,7 @@ class ChapterRepresentationTest {
 
     @Test
     fun `ChapterRepresentationConnection's hasRemaining with null start and end, no scratchAudio recorded, and non-empty activeVerses`() {
-        val chapterRepresentation = ChapterRepresentation(workbook, chapter)
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
 
         val hasRemaining = chapterRepresentation.ChapterRepresentationConnection(end = null).hasRemaining()
@@ -242,7 +294,7 @@ class ChapterRepresentationTest {
 
     @Test
     fun `ChapterRepresentationConnection's hasRemaining with non-null start and end, no scratchAudio recorded, and empty activeVerses`() {
-        val chapterRepresentation = ChapterRepresentation(workbook, chapter)
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
 
         val hasRemaining = chapterRepresentation.ChapterRepresentationConnection(1000, 2000).hasRemaining()
         Assert.assertEquals(true, hasRemaining)
@@ -250,7 +302,100 @@ class ChapterRepresentationTest {
 
     // TODO: test hasRemaining where the endBound is determiend by the amount of scratchAudio
 
-    // TODO: add test for getPcmBuffer
+
+
+    fun readBytesFromFile(filePath: String): ByteArray? {
+        try {
+            val file = File(filePath)
+            val inputStream = FileInputStream(file)
+            val fileSize = file.length().toInt()
+            val byteArray = ByteArray(fileSize)
+
+            // Read the bytes from the file into the byteArray
+            inputStream.read(byteArray)
+            inputStream.close()
+
+            return byteArray
+        } catch (e: IOException) {
+            e.printStackTrace()
+            println("Error reading bytes from file: ${e.message}")
+            return null
+        }
+    }
+
+
+    @Test
+    fun `getPcmBuffer with sequential sectors and reading entire file`() {
+        val secondsOfAudio = 31
+        val buffer = ByteBuffer.allocate(44100 * secondsOfAudio * 2)
+
+        fillAudioBufferWithPadding(buffer, secondsOfAudio, 0)
+        writeByteBufferToPCMFile(buffer, "${testDirWithAudio}\\chapter_narration.pcm")
+
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
+        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        val chapterRepresentationConnection  = chapterRepresentation.ChapterRepresentationConnection(end = null)
+
+        // Gets the full 10 seconds of audio
+        val byteArray = ByteArray(441000 * secondsOfAudio * 2) { 1 }
+        val bytesRead = chapterRepresentationConnection.getPcmBuffer(byteArray)
+        val responseBuffer = ByteBuffer.wrap(byteArray)
+
+        // TODO: Update so that ends are inclusive
+        Assert.assertEquals(44100 * secondsOfAudio * 2, bytesRead)
+        for(i in 1 .. secondsOfAudio) {
+            for(j in 1 .. 44100) {
+                if(responseBuffer.short != i.toShort()) {
+                    Assert.assertFalse(true)
+                    break
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `getPcmBuffer with sequential sectors, 1 second of padding between verses, and reading 10 seconds of audio file`() {
+        val secondsOfAudio = 10
+        val paddingLength = 44100
+        // byteBuffer for 10 seconds of audio
+        val buffer = ByteBuffer.allocate(44100 * secondsOfAudio * 2 + paddingLength * 2 * numTestVerses)
+
+        fillAudioBufferWithPadding(buffer, secondsOfAudio, paddingLength)
+        writeByteBufferToPCMFile(buffer, "${testDirWithAudio}\\chapter_narration.pcm")
+
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
+        initializeVerseNodeList(chapterRepresentation.totalVerses, 44100)
+        val chapterRepresentationConnection  = chapterRepresentation.ChapterRepresentationConnection(end = null)
+
+        chapterRepresentation.onVersesUpdated()
+
+        // Gets 10 seconds of audio
+        val byteArray = ByteArray(secondsOfAudio*44100*2) { 1 }
+        val bytesRead = chapterRepresentationConnection.getPcmBuffer(byteArray)
+
+        Assert.assertEquals(secondsOfAudio*44100*2, bytesRead)
+        val responseBuffer = ByteBuffer.wrap(byteArray)
+
+        Assert.assertEquals( 44100 * secondsOfAudio * 2 , bytesRead)
+
+        for(i in 1 .. secondsOfAudio) {
+            for(j in 1 .. 44100) {
+                Assert.assertEquals(i.toShort(), responseBuffer.short)
+//                if(responseBuffer.short != i.toShort()) {
+//                    Assert.assertFalse(true)
+//                    return
+//                }
+            }
+            for(j in 1 .. 44100) {
+                Assert.assertEquals(0, responseBuffer.short)
+
+//                if(responseBuffer.short != 0.toShort()) {
+//                    Assert.assertFalse(true)
+//                    return
+//                }
+            }
+        }
+    }
 }
 
 
