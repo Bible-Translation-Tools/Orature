@@ -10,11 +10,12 @@ import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 class VerseMarkerActionTest {
     val totalVerses: MutableList<VerseNode> = mutableListOf()
     lateinit var workingAudioFile: AudioFile
+    val numTestVerses = 31
 
     @Before
     fun setup() {
         workingAudioFile = mockWorkingAudio()
-        initializeTotalVerses()
+        initializeVerseNodeList(totalVerses)
     }
 
     fun mockWorkingAudio(): AudioFile {
@@ -22,17 +23,17 @@ class VerseMarkerActionTest {
     }
 
 
-    // Initializes each verse with placed equal to true and with one sector
-    // that is an int range of 44100*i until 44100*(i+1)
-    // so each verseNode will have one second of recording
-    fun initializeTotalVerses() {
-        val numVerses = 31
-        for (i in 0 until numVerses) {
+    // Initializes each verse with placed equal to true and with one sector that holds one second worth of frames.
+    // where the start of each added sector is offset by "paddingLength" number of frames
+    fun initializeVerseNodeList(verseNodeList : MutableList<VerseNode>, paddingLength: Int = 0) {
+        var start = -1
+        for (i in 0 until numTestVerses) {
             val verseMarker = VerseMarker((i + 1), (i + 1), 0)
             val sectors = mutableListOf<IntRange>()
             val verseNode = VerseNode(0, 0, true, verseMarker, sectors)
-            sectors.add(44100 * i until (44100 * (i + 1)))
-            totalVerses.add(verseNode)
+            sectors.add(start + 1 .. start + 44100)
+            start += 44100 + paddingLength
+            verseNodeList.add(verseNode)
         }
     }
 
