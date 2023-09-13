@@ -247,7 +247,10 @@ internal class ChapterRepresentation(
 
                 val node = activeVerses.get(index)
                 lockToVerse.set(index)
-                position.coerceIn(node.firstFrame() * frameSizeInBytes, node.lastFrame() * frameSizeInBytes)
+                if (position !in node) {
+                    // Is this a good default? This is if the position was out of the verse
+                    position = node.firstFrame() * frameSizeInBytes
+                }
             } else {
                 lockToVerse.set(CHAPTER_UNLOCKED)
             }
