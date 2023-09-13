@@ -252,8 +252,12 @@ class Narration @AssistedInject constructor(
         player.pause()
         chapterReaderConnection.start = null
         chapterReaderConnection.end = null
-        player.seek(0)
-        chapterReaderConnection.seek(0)
+
+        if (player.getLocationInFrames() == player.getDurationInFrames()) {
+            player.seek(0)
+            chapterReaderConnection.seek(0)
+        }
+
         if (wasPlaying) player.play()
     }
 

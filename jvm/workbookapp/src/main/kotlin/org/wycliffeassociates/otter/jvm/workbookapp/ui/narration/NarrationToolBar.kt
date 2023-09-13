@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.chapterSelector
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
@@ -42,10 +43,27 @@ class NarrationToolBar : View() {
             addClass("narration-toolbar__play-controls")
             button {
                 addClass("btn", "btn--secondary")
-                graphic = FontIcon(MaterialDesign.MDI_PLAY)
-                text = messages["playAll"]
+
+                viewModel.isPlayingProperty.onChangeAndDoNow {
+                    it?.let { playing ->
+                        runLater {
+                            if (!playing) {
+                                graphic = FontIcon(MaterialDesign.MDI_PLAY)
+                                text = messages["playAll"]
+                            } else {
+                                graphic = FontIcon(MaterialDesign.MDI_PAUSE)
+                                text = messages["pause"]
+                            }
+                        }
+                    }
+                }
+
                 setOnAction {
-                    viewModel.playAll()
+                    if (viewModel.isPlayingProperty.value) {
+                        viewModel.pause()
+                    } else {
+                        viewModel.playAll()
+                    }
                 }
             }
             button {
