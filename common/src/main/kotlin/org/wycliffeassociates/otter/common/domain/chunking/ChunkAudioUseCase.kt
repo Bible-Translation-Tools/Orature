@@ -25,9 +25,9 @@ class ChunkAudioUseCase(val directoryProvider: IDirectoryProvider, val projectFi
             audio.update()
             val path = projectFilesAccessor.projectDir
             ResourceContainer.load(path).use {
-                it.addFileToContainer(temp, ".apps/orature/source/audio/${temp.name}")
+                it.addFileToContainer(temp, "${SOURCE_AUDIO_DIR}/${temp.name}")
                 if (tempCue.exists()) {
-                    it.addFileToContainer(tempCue, ".apps/orature/source/audio/${tempCue.name}")
+                    it.addFileToContainer(tempCue, "${SOURCE_AUDIO_DIR}/${tempCue.name}")
                 }
                 it.write()
             }

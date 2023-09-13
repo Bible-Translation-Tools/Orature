@@ -41,6 +41,7 @@ import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.chunking.ChunkAudioUseCase
 import org.wycliffeassociates.otter.common.domain.content.CreateChunks
+import org.wycliffeassociates.otter.common.domain.content.ResetChunks
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
@@ -65,7 +66,7 @@ const val INACTIVE = "chunking-wizard__step--inactive"
 const val WAV_COLOR = "#66768B"
 const val BACKGROUND_COLOR = "#fff"
 
-class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
+class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
     var timer: AnimationTimer? = null
 
@@ -91,6 +92,9 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
 
     @Inject
     lateinit var createChunks: CreateChunks
+
+    @Inject
+    lateinit var resetChunks: ResetChunks
 
     override var markerModel: VerseMarkerModel? = null
     override val markers = observableListOf<ChunkMarkerModel>()
@@ -149,14 +153,6 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
         translationViewModel.currentMarkerProperty.bind(currentMarkerNumberProperty)
     }
 
-    private fun initializeSourceAudio(chapter: Int): SourceAudio? {
-        val workbook = workbookDataStore.workbook
-        ChunkAudioUseCase(directoryProvider, workbook.projectFilesAccessor)
-            .copySourceAudioToProject(sourceAudio.file)
-
-        return workbook.sourceAudioAccessor.getUserMarkedChapter(chapter, workbook.target)
-    }
-
     fun onUndockChunking() {
         pause()
         cleanup()
@@ -172,6 +168,14 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
         pause()
         compositeDisposable.clear()
         stopAnimationTimer()
+    }
+
+    private fun initializeSourceAudio(chapter: Int): SourceAudio? {
+        val workbook = workbookDataStore.workbook
+        ChunkAudioUseCase(directoryProvider, workbook.projectFilesAccessor)
+            .copySourceAudioToProject(sourceAudio.file)
+
+        return workbook.sourceAudioAccessor.getUserMarkedChapter(chapter, workbook.target)
     }
 
     private fun startAnimationTimer() {
@@ -246,6 +250,7 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
         val chapter = workbookDataStore.activeChapterProperty.value
         val cues = markers.filter { it.placed }.map { it.toAudioCue() }
 
+        resetChunks.resetChapter(accessor, chapter)
         createChunks.createUserDefinedChunks(wkbk, chapter, cues, 2)
 
         ChunkAudioUseCase(directoryProvider, accessor)

@@ -14,8 +14,6 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.Proj
 class ResetChunks @Inject constructor() {
     fun resetChapter(accessor: ProjectFilesAccessor, chapter: Chapter) {
         markTakesForDeletion(chapter)
-        deleteChunkedSourceAudio(accessor, chapter)
-        removeChapterFromChunkFile(accessor.getChunkFile(), chapter.sort)
         chapter.reset()
     }
 
