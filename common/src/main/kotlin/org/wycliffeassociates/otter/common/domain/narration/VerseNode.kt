@@ -52,13 +52,8 @@ internal data class VerseNode(
     fun finalize(end: Int) {
         if (sectors.isNotEmpty()) {
             val last = sectors.last()
-            if (last.last == UNPLACED_END || last.first == last.last) {
-                sectors.removeLast()
-                sectors.add(last.first..end)
-            } else {
-                throw IllegalStateException("Tried to finalize a finalized VerseNode ${marker.label}!")
-            }
-
+            sectors.removeLast()
+            sectors.add(last.first..end)
         } else {
             throw IllegalStateException("Tried to finalize VerseNode ${marker.label} that was not started!")
         }
@@ -128,7 +123,7 @@ internal data class VerseNode(
                     val firstSector = total.first()
                     total.removeFirst()
                     if (firstSector.first != firstSector.last) {
-                        total.add(0, firstSector.first + 1 .. firstSector.last)
+                        total.add(0, firstSector.first + 1..firstSector.last)
                     }
                     sectors.clear()
                     // the verse needs to at least hold onto its first frame
@@ -145,7 +140,7 @@ internal data class VerseNode(
                 // Split node
                 else -> {
                     val node = sectors.last()
-                    toGive.add(0, (node.last - remaining) .. node.last)
+                    toGive.add(0, (node.last - remaining)..node.last)
                     sectors[sectors.lastIndex] = node.first..(node.last - remaining - 1)
                     break
                 }
@@ -157,7 +152,7 @@ internal data class VerseNode(
     /**
      * Adds a list of Audio Frame ranges to this VerseNode's sectors
      */
-    fun addRange(ranges: List<IntRange>, ) {
+    fun addRange(ranges: List<IntRange>) {
         sectors.addAll(ranges)
     }
 
@@ -248,7 +243,7 @@ internal data class VerseNode(
 
         val startIndex = sectors.indexOfFirst { framePosition in it }
 
-        val start = framePosition
+        var start = framePosition
         val end = (start + min(sectors[startIndex].last - start, framesToRead))
         val firstRange = start..end
         stuff.add(firstRange)
@@ -257,7 +252,8 @@ internal data class VerseNode(
         for (idx in startIndex + 1 until sectors.size) {
             if (framesToRead <= 0) break
             val sector = sectors[idx]
-            val end = (start + min(sectors[startIndex].last - start, framesToRead))
+            val start = sector.first
+            val end = (start + min(sectors[idx].last - start, framesToRead))
             val range = (sector.first..end)
             framesToRead -= range.length()
             stuff.add(range)

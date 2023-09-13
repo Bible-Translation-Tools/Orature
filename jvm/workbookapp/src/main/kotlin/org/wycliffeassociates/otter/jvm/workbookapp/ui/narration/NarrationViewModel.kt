@@ -44,7 +44,9 @@ import tornadofx.*
 import java.io.File
 import java.text.MessageFormat
 import javax.inject.Inject
+import kotlin.math.floor
 import kotlin.math.max
+import kotlin.math.roundToInt
 
 class NarrationViewModel : ViewModel() {
     private lateinit var rendererAudioReader: AudioFileReader
@@ -456,12 +458,16 @@ class NarrationViewModel : ViewModel() {
         markerNodes: ObservableList<VerseMarkerControl>
     ) {
         if (::renderer.isInitialized) {
-            val position = narration.getLocationInFrames()
-            runLater {
-                audioPositionProperty.set(position)
+            try {
+                val position = narration.getLocationInFrames()
+                runLater {
+                    audioPositionProperty.set(position)
+                }
+                val viewport = renderer.draw(context, canvas, position)
+                adjustMarkers(markerNodes, viewport, canvas.width.toInt())
+            } catch (e: Exception) {
+                logger.error("", e)
             }
-            val viewport = renderer.draw(context, canvas, position)
-            adjustMarkers(markerNodes, viewport, canvas.width.toInt())
         }
     }
 
@@ -502,5 +508,9 @@ class NarrationViewModel : ViewModel() {
         narration.loadChapterIntoPlayer()
         narration.seek(frame)
         if (wasPlaying) audioPlayer.play()
+    }
+
+    fun seekPercent(percent: Double) {
+        narration.seek(floor(audioPlayer.getDurationInFrames() * percent).toInt())
     }
 }

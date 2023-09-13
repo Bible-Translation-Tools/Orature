@@ -47,7 +47,13 @@ class AudioBufferPlayer(
         get() = end
 
     private var pause = AtomicBoolean(false)
-    private var startPosition: Int = 0
+
+    private var _startPos = 0
+    private var startPosition: Int
+        set(pos) {
+            _startPos = pos
+        }
+        get() = _startPos
 
     private var reader: AudioFileReader? = null
 

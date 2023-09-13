@@ -98,24 +98,21 @@ class AudioWorkspaceView : View() {
                 }
             }
             bottom = ScrollBar().apply {
-                viewModel.audioPositionProperty.onChange {
-                    value = framesToPixels(it, width = narrationWaveformLayer.width.toInt()).toDouble()
-                }
-
-                maxProperty().bind(viewModel.totalAudioSizeProperty.integerBinding {
-                    framesToPixels(it?.let { it.toInt() } ?: 0, narrationWaveformLayer.width.toInt())
-                })
-
-                var lastModified = 0L
-
-                valueProperty().onChange {
-                    if (viewModel.isPlayingProperty.value == false && viewModel.isRecordingProperty.value == false) {
-                        if (System.currentTimeMillis() - lastModified > 75L) {
-                            lastModified = System.currentTimeMillis()
-                            viewModel.scrollAudio(pixelsToFrames(it, width = narrationWaveformLayer.width.toInt()))
-                        }
-                    }
-                }
+//                viewModel.audioPositionProperty.onChange {
+//                    value = framesToPixels(it, width = narrationWaveformLayer.width.toInt()).toDouble()
+//                }
+//
+//                maxProperty().bind(viewModel.totalAudioSizeProperty.integerBinding {
+//                    framesToPixels(it?.let { it.toInt() } ?: 0, narrationWaveformLayer.width.toInt())
+//                })
+//
+//                var lastModified = 0L
+//
+//                valueProperty().onChange {
+//                    if (viewModel.isPlayingProperty.value == false && viewModel.isRecordingProperty.value == false) {
+//                        viewModel.seekPercent(it / narrationWaveformLayer.width)
+//                    }
+//                }
             }
         }
     }
@@ -178,5 +175,9 @@ class AudioWorkspaceViewModel : ViewModel() {
 
     fun onUndock() {
         isRecordingProperty.unbind()
+    }
+
+    fun seekPercent(percent: Double) {
+        narrationViewModel.seekPercent(percent)
     }
 }

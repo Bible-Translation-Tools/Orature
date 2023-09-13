@@ -16,6 +16,7 @@ import java.io.File
 import java.io.RandomAccessFile
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.log
+import kotlin.math.max
 import kotlin.math.min
 
 private const val ACTIVE_VERSES_FILE_NAME = "active_verses.json"
@@ -169,38 +170,6 @@ internal class ChapterRepresentation(
     }
 
     /**
-     * if the frame is the end frame of a verse, and there are more verses, return the frame of the next verse
-     */
-    private fun jumpGap(absoluteFrame: Int): Int {
-        val verses = activeVerses
-        val index = verses.indexOfFirst { node ->
-            absoluteFrame == node.lastFrame()
-        }
-        when {
-            verses.isEmpty() -> return 0
-            index == -1 -> {
-                return if (absoluteFrame == 0) {
-                    // if 0, assume playback should go to the first verse (might not be the smallest frame)
-                    verses.first().firstFrame()
-                } else {
-                    logger.warn("In jump gap, moving to closest starting frame for frame: $absoluteFrame, but this is unexpected")
-                    verses.minBy { it.firstFrame() - absoluteFrame }.firstFrame()
-                }
-            }
-
-            index == verses.lastIndex -> return 0
-            else -> {
-                for (i in index + 1 until verses.size) {
-                    if (verses[i].sectors.isNotEmpty()) {
-                        return verses[i].firstFrame()
-                    }
-                }
-                return 0
-            }
-        }
-    }
-
-    /**
      * Converts a relative index (audio only taking into account the currently active verses)
      * to an absolute position into the scratch audio file. This conversion is performed by counting frames through
      * the range of each active verse.
@@ -262,7 +231,10 @@ internal class ChapterRepresentation(
         private var position: Int
             get() = _position
             set(value) {
-                _position = value.coerceIn(0, totalFrames * frameSizeInBytes)
+                if (_position !in 0..(totalFrames * frameSizeInBytes)) {
+                    logger.warn("setting position outside of total frames?")
+                }
+                _position = value
             }
 
         private val CHAPTER_UNLOCKED: Int = -1
@@ -312,11 +284,15 @@ internal class ChapterRepresentation(
 
             val verses = activeVerses
             val verseIndex = lockToVerse.get()
-            return if (verseIndex != CHAPTER_UNLOCKED) {
+            val hasRemaining =  if (verseIndex != CHAPTER_UNLOCKED) {
                 framePosition in verses[verseIndex] && framePosition != verses[verseIndex].lastFrame()
             } else {
-                framePosition in verses.last() && framePosition != verses.last().lastFrame()
+                verses.any { framePosition in it } && framePosition != verses.last().lastFrame()
             }
+            if (!hasRemaining) {
+                logger.info("No audio remaining")
+            }
+            return hasRemaining
         }
 
         override fun supportsTimeShifting(): Boolean {
@@ -353,36 +329,14 @@ internal class ChapterRepresentation(
 
         private fun getVerseToReadFrom(verses: List<VerseNode>): VerseNode? {
             var currentVerseIndex = verses.indexOfFirst { framePosition in it }
-            if (currentVerseIndex == -1) currentVerseIndex = 0
-
-            val verse = findVerse(currentVerseIndex)
-            if (verse != null) {
-                return when {
-                    framePosition !in verse -> {
-                        if (currentVerseIndex != verses.lastIndex) {
-                            currentVerseIndex++
-                            verses[currentVerseIndex + 1]
-                        } else {
-                            throw IndexOutOfBoundsException("Frame position $framePosition is not in ${verse.sectors}")
-                        }
-                    }
-
-                    framePosition == verse.lastFrame() -> {
-                        if (currentVerseIndex != verses.lastIndex) {
-                            currentVerseIndex++
-                            verse
-                        } else {
-                            verse
-                        }
-                    }
-
-                    else -> verse
-                }
-            } else {
-                return null
+            if (currentVerseIndex == -1) {
+                currentVerseIndex = 0
             }
+
+            val verse = verses.getOrNull(currentVerseIndex)
+            return verse
         }
-        
+
         @Synchronized
         private fun getPcmBufferVerse(bytes: ByteArray, verse: VerseNode): Int {
             var bytesWritten = 0
@@ -393,11 +347,7 @@ internal class ChapterRepresentation(
             val raf = randomAccessFile!!
 
             if (framePosition !in verse) {
-                logger.error("Playing locked verse but the frame position is out of bounds. Position: $framePosition, sectors: ${verse.sectors}")
-                when {
-                    framePosition < verse.firstFrame() -> position = verse.firstFrame() * frameSizeInBytes
-                    else -> position = verse.lastFrame() * frameSizeInBytes
-                }
+                return 0
             }
 
             var framesToRead = min(bytes.size / frameSizeInBytes, verse.length)
@@ -420,7 +370,7 @@ internal class ChapterRepresentation(
             for (sector in sectors) {
                 if (framesToRead <= 0 || framePosition !in verse) break
 
-                val framesToCopyFromSector = min(framesToRead, sector.length())
+                val framesToCopyFromSector = max(min(framesToRead, sector.length()), 0)
 
                 val seekLoc = (sector.first * frameSizeInBytes).toLong()
                 raf.seek(seekLoc)
@@ -435,18 +385,21 @@ internal class ChapterRepresentation(
                 position += toCopy
                 framesToRead -= toCopy / frameSizeInBytes
 
-                if (framePosition > sector.last) {
+                if (framePosition !in sector) {
                     logger.warn("Frame position popped out of sector; it got corrected, but there must be a math issue. framePosition:$framePosition, last:${sector.last}")
                     position = sector.last * frameSizeInBytes
                 }
-                adjustPositionToNextSector(verse, sector, sectors)
+            }
+
+            if (framePosition == verse.lastFrame()) {
+                adjustPositionToNextVerse(verse)
             }
 
             return bytesWritten
         }
 
         private fun adjustPositionToNextSector(verse: VerseNode, sector: IntRange, sectors: List<IntRange>) {
-            if (position != sector.last) return
+            if (framePosition != sector.last) return
 
             val sectorIndex = sectors.indexOf(sector)
             if (sectorIndex == sectors.lastIndex) {
