@@ -9,6 +9,7 @@ import javafx.scene.canvas.GraphicsContext
 import javafx.scene.control.ScrollBar
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
@@ -98,6 +99,9 @@ class AudioWorkspaceView : View() {
                 }
             }
             bottom = ScrollBar().apply {
+                runLater {
+                    customizeScrollbarSkin()
+                }
 //                viewModel.audioPositionProperty.onChange {
 //                    value = framesToPixels(it, width = narrationWaveformLayer.width.toInt()).toDouble()
 //                }
