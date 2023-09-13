@@ -10,7 +10,7 @@ class VerseNodeTest {
     fun `length of single sector`() {
         val verseMarker = VerseMarker(1, 1, 0)
         val sectors = mutableListOf<IntRange>()
-        sectors.add(IntRange(0,1000))
+        sectors.add(IntRange(0,999))
 
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
@@ -38,7 +38,7 @@ class VerseNodeTest {
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
         // QUESTION: is the intended implementation to use exclusive or inclusive vale for end?
-        Assert.assertEquals(2997, verseNode.length)
+        Assert.assertEquals(3000, verseNode.length)
     }
 
     @Test
@@ -263,12 +263,13 @@ class VerseNodeTest {
         sectors.add(3000 .. 3999)
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
-        val sectorsTaken = verseNode.takeFramesFromStart(1998)
+        val sectorsTaken = verseNode.takeFramesFromStart(2000)
 
         val expectedSectorsTaken = mutableListOf<IntRange>()
         expectedSectorsTaken.add(1000.. 1999)
         expectedSectorsTaken.add(2000 .. 2999)
 
+        // TODO: update takeFramesFromStart to account for inclusive ends
         Assert.assertTrue(sectorsTaken.equals(expectedSectorsTaken))
 
         val expectedVerseNodeSectors = mutableListOf<IntRange>()
@@ -286,12 +287,14 @@ class VerseNodeTest {
         sectors.add(3000 .. 3999)
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
-        val sectorsTaken = verseNode.takeFramesFromStart(2498)
+        val sectorsTaken = verseNode.takeFramesFromStart(2500)
 
         val expectedSectorsTaken = mutableListOf<IntRange>()
         expectedSectorsTaken.add(1000.. 1999)
         expectedSectorsTaken.add(2000 .. 2999)
-        expectedSectorsTaken.add(3000 .. 3500)
+        expectedSectorsTaken.add(3000 .. 3499)
+
+        // TODO: update takeFramesFromStart to account for inclusive ends
         Assert.assertTrue(sectorsTaken.equals(expectedSectorsTaken))
 
         val expectedVerseNodeSectors = mutableListOf<IntRange>()
@@ -354,12 +357,13 @@ class VerseNodeTest {
         sectors.add(3000 .. 3999)
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
-        val sectorsTaken = verseNode.takeFramesFromEnd(1998)
+        val sectorsTaken = verseNode.takeFramesFromEnd(1999)
 
         val expectedSectorsTaken = mutableListOf<IntRange>()
         expectedSectorsTaken.add(3000 .. 3999)
         expectedSectorsTaken.add(2000 .. 2999)
 
+        // TODO: update takeFramesFromEnd to account for inclusive ends
         Assert.assertTrue(sectorsTaken.equals(expectedSectorsTaken))
 
         val expectedVerseNodeSectors = mutableListOf<IntRange>()
@@ -378,13 +382,14 @@ class VerseNodeTest {
         sectors.add(3000 .. 3999)
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
-        val sectorsTaken = verseNode.takeFramesFromEnd(2497)
+        val sectorsTaken = verseNode.takeFramesFromEnd(2500)
 
         val expectedSectorsTaken = mutableListOf<IntRange>()
         expectedSectorsTaken.add(3000 .. 3999)
         expectedSectorsTaken.add(2000 .. 2999)
         expectedSectorsTaken.add(1500 .. 1999)
 
+        // TODO: update takeFramesFromEnd to account for inclusive ends
         Assert.assertTrue(sectorsTaken.equals(expectedSectorsTaken))
 
         val expectedVerseNodeSectors = mutableListOf<IntRange>()
@@ -609,7 +614,8 @@ class VerseNodeTest {
 
 
         try {
-            Assert.assertEquals(500, verseNode.framesToPosition(2500))
+            // TODO: update framesToPosition to acctount for inclusive ends
+            Assert.assertEquals(500, verseNode.framesToPosition(2499))
         } catch (ise: IndexOutOfBoundsException) {
             Assert.fail("Not expecting IndexOutOfBoundsException")
         }
@@ -626,7 +632,8 @@ class VerseNodeTest {
 
 
         try {
-            Assert.assertEquals(2498, verseNode.framesToPosition(6500))
+            // TODO: update framesToPosition to account for inclusive end
+            Assert.assertEquals(2500, verseNode.framesToPosition(6499))
         } catch (ise: IndexOutOfBoundsException) {
             Assert.fail("Not expecting IndexOutOfBoundsException")
         }
@@ -659,7 +666,8 @@ class VerseNodeTest {
 
         try {
             val absoluteFrame = verseNode.absoluteFrameFromOffset(500)
-            Assert.assertEquals(1500, absoluteFrame)
+            // TODO: ask joe if I should be starting at 0?
+            Assert.assertEquals(1499, absoluteFrame)
         } catch (ise: IndexOutOfBoundsException) {
             Assert.fail("Not expecting IndexOutOfBoundsException")
         }
@@ -679,7 +687,8 @@ class VerseNodeTest {
 
         try {
             val absoluteFrame = verseNode.absoluteFrameFromOffset(1500)
-            Assert.assertEquals(5501, absoluteFrame)
+            // TODO: update absolgeFrameFromOffset to account for inclusive end
+            Assert.assertEquals(5499, absoluteFrame)
         } catch (ise: IndexOutOfBoundsException) {
             Assert.fail("Not expecting IndexOutOfBoundsException")
         }
@@ -759,7 +768,8 @@ class VerseNodeTest {
 
         val sectorsFromOffset = verseNode.getSectorsFromOffset(1000, 300)
         Assert.assertEquals(1, sectorsFromOffset.size)
-        Assert.assertEquals(1000 .. 1300, sectorsFromOffset.first())
+        // TODO: update getSectorsFromOffset to account for inclusive ends
+        Assert.assertEquals(1000 .. 1299, sectorsFromOffset.first())
 
     }
 
