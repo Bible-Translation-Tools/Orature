@@ -18,12 +18,9 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
-import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.glass.ui.Screen
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
-import io.reactivex.rxkotlin.addTo
 import java.io.File
 import javafx.animation.AnimationTimer
 import javafx.beans.property.SimpleBooleanProperty
