@@ -227,13 +227,13 @@ class Narration @AssistedInject constructor(
             player.load(chapterReaderConnection)
             audioLoaded = true
         }
-
         logger.info("Loading verse ${verse.label} into player")
         val range: IntRange? = chapterRepresentation.getRangeOfMarker(verse)
         logger.info("Playback range is ${range?.start}-${range?.last}")
         range?.let {
             val wasPlaying = player.isPlaying()
             player.pause()
+            chapterReaderConnection.lockToVerse(activeVerses.indexOf(verse))
             chapterReaderConnection.start = range.first
             chapterReaderConnection.end = range.last
             player.seek(range.first)
@@ -250,6 +250,8 @@ class Narration @AssistedInject constructor(
 
         val wasPlaying = player.isPlaying()
         player.pause()
+
+        chapterReaderConnection.lockToVerse(null)
         chapterReaderConnection.start = null
         chapterReaderConnection.end = null
 
@@ -273,6 +275,7 @@ class Narration @AssistedInject constructor(
     }
 
     private fun execute(action: NarrationAction) {
+        chapterReaderConnection.lockToVerse(null)
         history.execute(action, chapterRepresentation.totalVerses, chapterRepresentation.scratchAudio)
         chapterRepresentation.onVersesUpdated()
     }

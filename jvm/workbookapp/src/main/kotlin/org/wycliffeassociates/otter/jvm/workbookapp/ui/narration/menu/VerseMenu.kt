@@ -16,7 +16,7 @@ import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class VerseMenu : MenuButton() {
-    val playVerseTextProperty = SimpleStringProperty(messages["playVerse"])
+    val playVerseTextProperty = SimpleStringProperty(messages["play"])
     val recordAgainTextProperty = SimpleStringProperty(messages["recordAgain"])
     val importVerseTextProperty = SimpleStringProperty(messages["importVerse"])
     val editVerseTextProperty = SimpleStringProperty(messages["openIn"])
