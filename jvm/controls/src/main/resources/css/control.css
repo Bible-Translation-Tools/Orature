@@ -178,7 +178,7 @@
     -fx-underline: true;
 }
 .btn--secondary:hover .ikonli-font-icon {
-    -fx-fill: -wa-secondary-btn-text-fill-hover;
+    -fx-icon-color: -wa-secondary-btn-text-fill-hover;
 }
 .btn--secondary:pressed {
     -fx-background-color: -wa-secondary-btn-background-pressed;
@@ -197,7 +197,19 @@
     -fx-underline: false;
 }
 .btn--secondary:disabled .ikonli-font-icon {
-    -fx-fill: -wa-disabled-text;
+    -fx-icon-color: -wa-disabled-text;
+}
+
+.btn--secondary:active {
+    -fx-background-color: -wa-black;
+    -fx-effect: -wa-level3;
+}
+.btn--secondary:active .text {
+    -fx-fill: -wa-white;
+    -fx-text-fill: -wa-white;
+}
+.btn--secondary:active .ikonli-font-icon {
+    -fx-icon-color: -wa-white;
 }
 
 .btn--secondary-light {
@@ -216,7 +228,7 @@
 }
 
 .btn--secondary-light:hover .ikonli-font-icon {
-    -fx-fill: -wa-white;
+    -fx-icon-color: -wa-white;
 }
 
 .btn--secondary-light:pressed {
@@ -226,7 +238,7 @@
 }
 
 .btn--secondary-light:pressed .ikonli-font-icon {
-    -fx-fill: -wa-white;
+    -fx-icon-color: -wa-white;
 }
 
 .btn--secondary-light:disabled {

@@ -43,6 +43,7 @@ class NarrationToolBar : View() {
             addClass("narration-toolbar__play-controls")
             button {
                 addClass("btn", "btn--secondary")
+                addPseudoClass("active")
 
                 viewModel.isPlayingProperty.onChangeAndDoNow {
                     it?.let { playing ->
@@ -50,9 +51,11 @@ class NarrationToolBar : View() {
                             if (!playing) {
                                 graphic = FontIcon(MaterialDesign.MDI_PLAY)
                                 text = messages["playAll"]
+                                togglePseudoClass("active", false)
                             } else {
                                 graphic = FontIcon(MaterialDesign.MDI_PAUSE)
                                 text = messages["pause"]
+                                togglePseudoClass("active", true)
                             }
                         }
                     }
