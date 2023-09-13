@@ -20,6 +20,7 @@
     -fx-alignment: center;
     -fx-pref-height: 80px;
     -fx-padding: 0 16px;
+    -fx-background-color: -wa-foreground;
 }
 
 .narration__header .btn {
@@ -40,13 +41,29 @@
 
 .narration__header-title {
     -fx-text-fill: -wa-regular-text;
+    -fx-font-weight: bold;
     -fx-font-size: 24px;
-    -fx-font-weight: 500;
 }
 
 .narration__header-controls {
     -fx-alignment: center;
     -fx-spacing: 10px;
+}
+
+.narration-toolbar {
+    -fx-background-color: -wa-foreground;
+    -fx-border: 0px 0px 1px 0px;
+}
+
+.narration-toolbar__play-controls {
+    -fx-padding: 12px 16px 12px 16px;
+    -fx-spacing: 8px;
+}
+
+.narration-toolbar__separator .line {
+    -fx-background-color: -wa-foreground-hover;
+    -fx-pref-height: 1px;
+    -fx-border-color: null ;
 }
 
 .narration__recording {
@@ -76,6 +93,7 @@
 
 .narration__list {
     -fx-padding: 10px 0 0 0;
+    -fx-background-color: -wa-foreground;
 }
 
 .narration-list__verse-item {

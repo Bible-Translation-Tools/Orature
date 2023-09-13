@@ -16,7 +16,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.VerseMenu
 import tornadofx.*
 
 
-internal const val MARKER_AREA_WIDTH = 24.0
+const val MARKER_AREA_WIDTH = 24.0
 internal const val MARKER_WIDTH = 2.0
 
 class VerseMarkerControl : BorderPane() {
@@ -25,6 +25,7 @@ class VerseMarkerControl : BorderPane() {
     val verseIndexProperty = SimpleIntegerProperty()
     val labelProperty = SimpleStringProperty()
     val canBeMovedProperty: BooleanBinding = verseIndexProperty.greaterThan(0)
+    val userIsDraggingProperty = SimpleBooleanProperty(false)
     val isRecordingProperty = SimpleBooleanProperty()
 
     val dragAreaProperty = SimpleObjectProperty<Node>()
@@ -47,9 +48,11 @@ class VerseMarkerControl : BorderPane() {
                 line {
                     addClass("verse-marker__line")
 
+                    //startXProperty().bind(this@region.layoutXProperty())
                     startXProperty().bind(this@region.layoutXProperty().plus(MARKER_AREA_WIDTH / 2))
                     startYProperty().bind(this@region.layoutYProperty())
                     endXProperty().bind(this@region.widthProperty().minus(MARKER_AREA_WIDTH / 2))
+                    //endXProperty().bind(this@region.layoutXProperty())
                     endYProperty().bind(this@region.heightProperty())
                     strokeWidth = MARKER_WIDTH
                 }

@@ -12,6 +12,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NextVerseEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.RecordVerseEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.NarrationMarkerChangedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationRedoEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationResetChapterEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationUndoEvent
@@ -35,6 +36,7 @@ class NarrationPage : View() {
 
     private lateinit var narrationHeader: NarrationHeader
     private lateinit var audioWorkspaceView: AudioWorkspaceView
+    private lateinit var narrationToolbar: NarrationToolBar
     private lateinit var teleprompterView: TeleprompterView
 
     init {
@@ -51,11 +53,15 @@ class NarrationPage : View() {
 
         narrationHeader = find()
         audioWorkspaceView = find()
+        narrationToolbar = find()
         teleprompterView = find()
 
         borderpane {
             top = narrationHeader.root
-            center = audioWorkspaceView.root
+            center = borderpane {
+                center = audioWorkspaceView.root
+                bottom = narrationToolbar.root
+            }
             bottom = teleprompterView.root
         }
     }
@@ -104,6 +110,11 @@ class NarrationPage : View() {
 
         subscribe<RecordVerseEvent> {
             viewModel.toggleRecording(it.index)
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<NarrationMarkerChangedEvent> {
+            logger.info("Received Narration Moved event")
+            viewModel.moveMarker(it.index, it.delta)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<NextVerseEvent> {

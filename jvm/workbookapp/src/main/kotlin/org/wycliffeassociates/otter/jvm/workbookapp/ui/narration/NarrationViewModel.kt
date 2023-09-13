@@ -27,6 +27,7 @@ import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.narration.AudioScene
 import org.wycliffeassociates.otter.common.domain.narration.Narration
 import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
+import org.wycliffeassociates.otter.common.domain.narration.framesToPixels
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
@@ -34,6 +35,8 @@ import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.MARKER_AREA_WIDTH
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkerControl
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.NarrationWaveformRenderer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -41,7 +44,9 @@ import tornadofx.*
 import java.io.File
 import java.text.MessageFormat
 import javax.inject.Inject
+import kotlin.math.floor
 import kotlin.math.max
+import kotlin.math.roundToInt
 
 class NarrationViewModel : ViewModel() {
     private lateinit var rendererAudioReader: AudioFileReader
@@ -306,6 +311,11 @@ class NarrationViewModel : ViewModel() {
         }
     }
 
+    fun moveMarker(index: Int, delta: Int) {
+        logger.info("Moving marker ${index} by $delta frames")
+        narration.onVerseMarkerMoved(index, delta)
+    }
+
     fun toggleRecording(index: Int) {
         when {
             isRecording && !isRecordingAgain -> pauseRecording(index)
@@ -442,13 +452,22 @@ class NarrationViewModel : ViewModel() {
         }.let(disposables::add)
     }
 
-    fun drawWaveform(context: GraphicsContext, canvas: Canvas) {
+    fun drawWaveform(
+        context: GraphicsContext,
+        canvas: Canvas,
+        markerNodes: ObservableList<VerseMarkerControl>
+    ) {
         if (::renderer.isInitialized) {
-            val position = narration.getLocationInFrames()
-            runLater {
-                audioPositionProperty.set(position)
+            try {
+                val position = narration.getLocationInFrames()
+                runLater {
+                    audioPositionProperty.set(position)
+                }
+                val viewport = renderer.draw(context, canvas, position)
+                adjustMarkers(markerNodes, viewport, canvas.width.toInt())
+            } catch (e: Exception) {
+                logger.error("", e)
             }
-            renderer.draw(context, canvas, position)
         }
     }
 
@@ -458,11 +477,48 @@ class NarrationViewModel : ViewModel() {
         }
     }
 
+    private fun adjustMarkers(markerNodes: ObservableList<VerseMarkerControl>, viewport: IntRange, width: Int) {
+        for (marker in markerNodes) {
+            if (marker.userIsDraggingProperty.value == true) continue
+
+            val verse = marker.verseProperty.value
+            if (verse.location in viewport) {
+                val newPos = framesToPixels(
+                    verse.location - viewport.first,
+                    width,
+                    viewport.last - viewport.first
+                ).toDouble() - (MARKER_AREA_WIDTH / 2)
+                runLater {
+                    marker.visibleProperty().set(true)
+                    if (marker.layoutX != newPos) {
+                        marker.layoutX = newPos
+                    }
+                }
+            } else {
+                runLater {
+                    marker.visibleProperty().set(false)
+                }
+            }
+        }
+    }
+
     fun seekAudio(frame: Int) {
         val wasPlaying = audioPlayer.isPlaying()
         audioPlayer.pause()
         narration.loadChapterIntoPlayer()
         narration.seek(frame)
         if (wasPlaying) audioPlayer.play()
+    }
+
+    fun seekPercent(percent: Double) {
+        narration.seek(floor(audioPlayer.getDurationInFrames() * percent).toInt())
+    }
+
+    fun seekToNext() {
+        narration.seekToNext()
+    }
+
+    fun seekToPrevious() {
+        narration.seekToPrevious()
     }
 }

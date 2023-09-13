@@ -8,8 +8,11 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.ObservableValue
 import javafx.collections.ObservableList
 import javafx.event.EventTarget
+import javafx.scene.control.Tooltip
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
+import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
@@ -21,6 +24,8 @@ import org.wycliffeassociates.otter.jvm.workbookapp.controls.chapterSelector
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationOpenInPluginEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationRedoEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationUndoEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.narrationMenu
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -45,6 +50,24 @@ class NarrationHeader : View() {
         }
         hbox {
             addClass("narration__header-controls")
+            button {
+                tooltip = tooltip(messages["undoAction"])
+                addClass("btn", "btn--secondary")
+                graphic = FontIcon(MaterialDesign.MDI_UNDO)
+                setOnAction {
+                    FX.eventbus.fire(NarrationUndoEvent())
+                }
+                enableWhen(viewModel.hasUndoProperty)
+            }
+            button {
+                tooltip = tooltip(messages["redoAction"])
+                addClass("btn", "btn--secondary")
+                graphic = FontIcon(MaterialDesign.MDI_REDO)
+                setOnAction {
+                    FX.eventbus.fire(NarrationRedoEvent())
+                }
+                enableWhen(viewModel.hasRedoProperty)
+            }
             narrationMenu {
                 hasUndoProperty.bind(viewModel.hasUndoProperty)
                 hasRedoProperty.bind(viewModel.hasRedoProperty)

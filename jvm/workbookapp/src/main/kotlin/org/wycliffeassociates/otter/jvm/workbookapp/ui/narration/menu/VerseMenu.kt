@@ -16,7 +16,7 @@ import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class VerseMenu : MenuButton() {
-    val playVerseTextProperty = SimpleStringProperty(messages["playVerse"])
+    val playVerseTextProperty = SimpleStringProperty(messages["play"])
     val recordAgainTextProperty = SimpleStringProperty(messages["recordAgain"])
     val importVerseTextProperty = SimpleStringProperty(messages["importVerse"])
     val editVerseTextProperty = SimpleStringProperty(messages["openIn"])
@@ -26,7 +26,7 @@ class VerseMenu : MenuButton() {
     val isRecordingProperty = SimpleBooleanProperty()
 
     init {
-        addClass("btn", "btn--primary", "btn--borderless", "wa-menu-button")
+        addClass("btn", "btn--secondary", "btn--borderless", "wa-menu-button", "wa-context-menu")
         graphic = FontIcon(MaterialDesign.MDI_DOTS_VERTICAL)
 
         item(playVerseTextProperty.value) {

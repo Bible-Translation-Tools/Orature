@@ -52,7 +52,9 @@ class Narration @AssistedInject constructor(
             val verses = chapterRepresentation
                 .activeVerses
                 .map {
-                    it.marker
+                    it.marker.copy(
+                        location = chapterRepresentation.absoluteToRelative(it.firstFrame())
+                    )
                 }
             verses
         }
@@ -143,7 +145,8 @@ class Narration @AssistedInject constructor(
     }
 
     fun finalizeVerse(verseIndex: Int) {
-        chapterRepresentation.finalizeVerse(verseIndex, history)
+        val loc = chapterRepresentation.finalizeVerse(verseIndex, history)
+        seek(loc)
     }
 
     fun onNewVerse(verseIndex: Int) {
@@ -166,8 +169,8 @@ class Narration @AssistedInject constructor(
         isRecording.set(true)
     }
 
-    fun onVerseMarker(verseIndex: Int, delta: Int) {
-        val action = VerseMarkerAction(verseIndex, delta)
+    fun onVerseMarkerMoved(verseIndex: Int, delta: Int) {
+        val action = MoveMarkerAction(verseIndex, delta)
         execute(action)
     }
 
@@ -224,13 +227,13 @@ class Narration @AssistedInject constructor(
             player.load(chapterReaderConnection)
             audioLoaded = true
         }
-
         logger.info("Loading verse ${verse.label} into player")
         val range: IntRange? = chapterRepresentation.getRangeOfMarker(verse)
         logger.info("Playback range is ${range?.start}-${range?.last}")
         range?.let {
             val wasPlaying = player.isPlaying()
             player.pause()
+            chapterReaderConnection.lockToVerse(activeVerses.indexOf(verse))
             chapterReaderConnection.start = range.first
             chapterReaderConnection.end = range.last
             player.seek(range.first)
@@ -247,10 +250,16 @@ class Narration @AssistedInject constructor(
 
         val wasPlaying = player.isPlaying()
         player.pause()
+
+        chapterReaderConnection.lockToVerse(null)
         chapterReaderConnection.start = null
         chapterReaderConnection.end = null
-        player.seek(0)
-        chapterReaderConnection.seek(0)
+
+        if (player.getLocationInFrames() == player.getDurationInFrames()) {
+            player.seek(0)
+            chapterReaderConnection.seek(0)
+        }
+
         if (wasPlaying) player.play()
     }
 
@@ -266,6 +275,7 @@ class Narration @AssistedInject constructor(
     }
 
     private fun execute(action: NarrationAction) {
+        chapterReaderConnection.lockToVerse(null)
         history.execute(action, chapterRepresentation.totalVerses, chapterRepresentation.scratchAudio)
         chapterRepresentation.onVersesUpdated()
     }
@@ -336,6 +346,24 @@ class Narration @AssistedInject constructor(
         player.close()
         recorder.stop()
         chapterRepresentation.closeConnections()
+    }
+
+    fun seekToPrevious() {
+        player.pause()
+        val loc = player.getLocationInFrames()
+        val seekLoc = activeVerses.lastOrNull() { it.location < loc }
+        seekLoc?.let {
+            seek(it.location)
+        } ?: seek(0)
+    }
+
+    fun seekToNext() {
+        player.pause()
+        val loc = player.getLocationInFrames()
+        val seekLoc = activeVerses.firstOrNull { it.location > loc }
+        seekLoc?.let {
+            seek(it.location)
+        } ?: seek(player.getDurationInFrames())
     }
 }
 

@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 import javafx.animation.AnimationTimer
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
+import javafx.collections.ObservableList
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.control.ScrollBar
@@ -10,10 +11,13 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
+import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.Drawable
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkerControl
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.verse_markers_layer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.WaveformLayer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.narration_waveform
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.pixelsToFrames
 import tornadofx.*
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
@@ -36,13 +40,16 @@ class AudioWorkspaceView : View() {
 
     val finishedFrame = AtomicBoolean(true)
 
+    val markerNodes = observableListOf<VerseMarkerControl>()
+
     val runnable = Runnable {
         if (finishedFrame.compareAndExchange(true, false)) {
             try {
                 if (canvasInflatedProperty.value) {
                     viewModel.drawWaveform(
                         narrationWaveformLayer.getWaveformContext(),
-                        narrationWaveformLayer.getWaveformCanvas()
+                        narrationWaveformLayer.getWaveformCanvas(),
+                        markerNodes
                     )
                     viewModel.drawVolumeBar(
                         narrationWaveformLayer.getVolumeBarContext(),
@@ -51,8 +58,7 @@ class AudioWorkspaceView : View() {
                 }
             } catch (e: Exception) {
                 logger.error("Exception in render loop", e)
-            }
-            finally {
+            } finally {
                 finishedFrame.set(true)
             }
         }
@@ -64,6 +70,10 @@ class AudioWorkspaceView : View() {
         }
     }
 
+    init {
+        tryImportStylesheet("/css/verse-markers-layer.css")
+    }
+
     override val root = stackpane {
         subscribe<AppCloseRequestEvent> {
             at.stop()
@@ -71,79 +81,38 @@ class AudioWorkspaceView : View() {
             executor.shutdownNow()
         }
 
-        borderpane {
-            center = narration_waveform {
-                narrationWaveformLayer = this
 
-                canvasInflatedProperty.bind(
-                    widthProperty()
-                        .greaterThan(0)
-                        .and(heightProperty().greaterThan(0))
-                )
+        borderpane {
+            center = stackpane {
+                narration_waveform {
+                    narrationWaveformLayer = this
+
+                    canvasInflatedProperty.bind(
+                        widthProperty()
+                            .greaterThan(0)
+                            .and(heightProperty().greaterThan(0))
+                    )
+                }
+                verse_markers_layer {
+                    verseMarkersControls.bind(markerNodes) { it }
+                }
             }
             bottom = ScrollBar().apply {
-                viewModel.audioPositionProperty.onChange {
-                    value = framesToPixels(it).toDouble()
-                }
-
-                maxProperty().bind(viewModel.totalAudioSizeProperty)
-
-                var lastModified = 0L
-
-                valueProperty().onChange {
-                    if (viewModel.isPlayingProperty.value == false && viewModel.isRecordingProperty.value == false) {
-                        if (System.currentTimeMillis() - lastModified > 75L) {
-                            lastModified = System.currentTimeMillis()
-                            viewModel.scrollAudio(pixelsToFrames(it))
-                        }
-                    }
-                }
-            }
-        }
-
-        hbox {
-
-            maxHeight = 50.0
-            hbox {
-                spacing = 10.0
-                paddingHorizontal = 10.0
-
-                bindChildren(viewModel.recordedVerses) { verse ->
-                    val index = viewModel.recordedVerses.indexOf(verse)
-                    val label = verse.label
-
-                    menubutton(label) {
-                        item("") {
-                            text = "Play"
-                            action {
-                                fire(PlayVerseEvent(verse))
-                            }
-                        }
-                        item("") {
-                            text = "Record Again"
-                            action {
-                                fire(RecordAgainEvent(index))
-                            }
-                        }
-                        item("") {
-                            text = "Open in..."
-                            action {
-                                fire(OpenInAudioPluginEvent(index))
-                            }
-                        }
-                    }
-                }
-            }
-
-            button("Play All") {
-                action {
-                    fire(PlayChapterEvent())
-                }
-            }
-            button("Pause") {
-                action {
-                    fire(PauseEvent())
-                }
+//                viewModel.audioPositionProperty.onChange {
+//                    value = framesToPixels(it, width = narrationWaveformLayer.width.toInt()).toDouble()
+//                }
+//
+//                maxProperty().bind(viewModel.totalAudioSizeProperty.integerBinding {
+//                    framesToPixels(it?.let { it.toInt() } ?: 0, narrationWaveformLayer.width.toInt())
+//                })
+//
+//                var lastModified = 0L
+//
+//                valueProperty().onChange {
+//                    if (viewModel.isPlayingProperty.value == false && viewModel.isRecordingProperty.value == false) {
+//                        viewModel.seekPercent(it / narrationWaveformLayer.width)
+//                    }
+//                }
             }
         }
     }
@@ -152,6 +121,15 @@ class AudioWorkspaceView : View() {
     override fun onDock() {
         super.onDock()
         viewModel.onDock()
+        markerNodes.bind(viewModel.recordedVerses) { marker ->
+            VerseMarkerControl().apply {
+                verseProperty.set(marker)
+                verseIndexProperty.set(viewModel.recordedVerses.indexOf(marker))
+                labelProperty.set(marker.label)
+                isRecordingProperty.bind(viewModel.isRecordingProperty)
+            }
+        }
+
         at.start()
     }
 
@@ -178,8 +156,8 @@ class AudioWorkspaceViewModel : ViewModel() {
         narrationViewModel.seekAudio(delta)
     }
 
-    fun drawWaveform(context: GraphicsContext, canvas: Canvas) {
-        narrationViewModel.drawWaveform(context, canvas)
+    fun drawWaveform(context: GraphicsContext, canvas: Canvas, markerNodes: ObservableList<VerseMarkerControl>) {
+        narrationViewModel.drawWaveform(context, canvas, markerNodes)
     }
 
     fun drawVolumeBar(context: GraphicsContext, canvas: Canvas) {
@@ -189,13 +167,7 @@ class AudioWorkspaceViewModel : ViewModel() {
     fun onDock() {
         isRecordingProperty.bind(narrationViewModel.isRecordingProperty)
         isPlayingProperty.bind(narrationViewModel.isPlayingProperty)
-        totalAudioSizeProperty.bind(
-            narrationViewModel.totalAudioSizeProperty.integerBinding {
-                it?.let {
-                    framesToPixels(it.toInt())
-                } ?: 0
-            }
-        )
+        totalAudioSizeProperty.bind(narrationViewModel.totalAudioSizeProperty)
         audioPositionProperty.bind(narrationViewModel.audioPositionProperty)
         recordedVerses.bind(narrationViewModel.recordedVerses) { it }
 
@@ -203,5 +175,9 @@ class AudioWorkspaceViewModel : ViewModel() {
 
     fun onUndock() {
         isRecordingProperty.unbind()
+    }
+
+    fun seekPercent(percent: Double) {
+        narrationViewModel.seekPercent(percent)
     }
 }

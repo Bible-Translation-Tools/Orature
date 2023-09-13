@@ -33,7 +33,7 @@ class AudioScene(
 
     val frameBuffer = FloatArray(width * 2)
 
-    fun getNarrationDrawable(location: Int): FloatArray {
+    fun getNarrationDrawable(location: Int): Pair<FloatArray, IntRange> {
         Arrays.fill(frameBuffer, 0f)
         val framesOnScreen = secondsOnScreen * recordingSampleRate
 
@@ -65,7 +65,7 @@ class AudioScene(
                 System.arraycopy(activeData, 0, frameBuffer, 0, activeData.size)
             }
         }
-        return frameBuffer
+        return Pair(frameBuffer, viewPortRange)
     }
 
     /**

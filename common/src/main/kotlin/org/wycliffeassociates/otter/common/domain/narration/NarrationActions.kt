@@ -33,8 +33,8 @@ internal class NewVerseAction(
     ) {
         logger.info("New verse for index: ${verseIndex}")
 
-        val start = workingAudio.totalFrames
-        val end = workingAudio.totalFrames
+        val start = if (workingAudio.totalFrames == 0) 0 else workingAudio.totalFrames + 1
+        val end = start
 
         node = VerseNode(
             start, end, placed = true, totalVerses[verseIndex].marker.copy()
@@ -125,10 +125,10 @@ internal class RecordAgainAction(
  * The Verse Index corresponds to the marker that was moved, meaning that the marker separates the verse corresponding
  * to the verse index and the previous verse.
  */
-internal class VerseMarkerAction(
+internal class MoveMarkerAction(
     private val verseIndex: Int, private val delta: Int
 ) : NarrationAction {
-    private val logger = LoggerFactory.getLogger(VerseMarkerAction::class.java)
+    private val logger = LoggerFactory.getLogger(MoveMarkerAction::class.java)
 
     private var oldPrecedingVerse: VerseNode? = null
     private var oldVerse: VerseNode? = null
@@ -141,8 +141,8 @@ internal class VerseMarkerAction(
         totalVerses: MutableList<VerseNode>, workingAudio: AudioFile
     ) {
         logger.info("Moving marker of verse index: ${verseIndex}")
-        oldPrecedingVerse = totalVerses[verseIndex].copy()
-        oldVerse = totalVerses.getOrNull(verseIndex - 1)?.copy()
+        oldPrecedingVerse = totalVerses.getOrNull(verseIndex - 1)?.copy()
+        oldVerse = totalVerses[verseIndex].copy()
 
         val bothNull = oldPrecedingVerse == null && oldVerse == null
         val markerMovedBetweenVerses = oldPrecedingVerse != null && oldVerse != null
@@ -170,9 +170,11 @@ internal class VerseMarkerAction(
                 verse = oldVerse!!.copy()
 
                 if (delta < 0) {
-                    precedingVerse!!.addRange(verse!!.takeFramesFromStart(delta.absoluteValue))
+                    val framesToAdd = precedingVerse!!.takeFramesFromEnd(delta.absoluteValue)
+                    verse!!.sectors.addAll(0, framesToAdd)
                 } else {
-                    verse!!.addRange(precedingVerse!!.takeFramesFromEnd(delta.absoluteValue))
+                    val framesToAdd = verse!!.takeFramesFromStart(delta.absoluteValue)
+                    precedingVerse!!.sectors.addAll(framesToAdd)
                 }
 
                 totalVerses[verseIndex] = verse!!.copy()
@@ -183,20 +185,20 @@ internal class VerseMarkerAction(
 
     override fun undo(totalVerses: MutableList<VerseNode>) {
         logger.info("Undoing moving marker of verse index: ${verseIndex}")
-        oldPrecedingVerse?.let {
+        oldVerse?.let {
             totalVerses[verseIndex] = it.copy()
         }
-        oldVerse?.let {
+        oldPrecedingVerse?.let {
             totalVerses[verseIndex - 1] = it.copy()
         }
     }
 
     override fun redo(totalVerses: MutableList<VerseNode>) {
         logger.info("Undoing moving marker of verse index: ${verseIndex}")
-        precedingVerse?.let {
+        verse?.let {
             totalVerses[verseIndex] = it.copy()
         }
-        verse?.let {
+        precedingVerse?.let {
             totalVerses[verseIndex - 1] = it.copy()
         }
     }

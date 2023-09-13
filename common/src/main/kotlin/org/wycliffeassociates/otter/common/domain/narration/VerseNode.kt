@@ -52,13 +52,8 @@ internal data class VerseNode(
     fun finalize(end: Int) {
         if (sectors.isNotEmpty()) {
             val last = sectors.last()
-            if (last.last == UNPLACED_END || last.first == last.last) {
-                sectors.removeLast()
-                sectors.add(last.first..end)
-            } else {
-                throw IllegalStateException("Tried to finalize a finalized VerseNode ${marker.label}!")
-            }
-
+            sectors.removeLast()
+            sectors.add(last.first..end)
         } else {
             throw IllegalStateException("Tried to finalize VerseNode ${marker.label} that was not started!")
         }
@@ -75,16 +70,23 @@ internal data class VerseNode(
     fun takeFramesFromStart(framesToTake: Int): List<IntRange> {
         var remaining = framesToTake
         val toGive = mutableListOf<IntRange>()
-        while (remaining >= 0) {
+        while (remaining > 0) {
             when {
                 // Consume the rest
                 remaining >= length -> {
-                    val total = sectors.map { it }
+                    val total = sectors.map { it } as MutableList
+                    val lastSector = total.last()
+                    total.removeLast()
+                    if (lastSector.first != lastSector.last) {
+                        total.add(lastSector.first until lastSector.last)
+                    }
                     sectors.clear()
+                    // the verse marker should not relinquish its absolute last frame
+                    sectors.add(lastSector.last..lastSector.last)
                     return toGive.apply { this.addAll(total) }
                 }
                 // Consume whole node
-                remaining > sectors.first().last - sectors.first().first -> {
+                remaining >= sectors.first().last - sectors.first().first -> {
                     val sector = sectors.first()
                     remaining -= sector.length()
                     sectors.removeFirst()
@@ -94,7 +96,8 @@ internal data class VerseNode(
                 else -> {
                     val node = sectors.first()
                     toGive.add(node.first..(node.first + remaining))
-                    sectors[0] = (node.first + remaining)..node.last
+                    sectors[0] = (node.first + remaining + 1)..node.last
+                    break
                 }
             }
         }
@@ -112,26 +115,34 @@ internal data class VerseNode(
     fun takeFramesFromEnd(framesToTake: Int): List<IntRange> {
         var remaining = framesToTake
         val toGive = mutableListOf<IntRange>()
-        while (remaining >= 0) {
+        while (remaining > 0) {
             when {
                 // Consume the rest
                 remaining >= length -> {
-                    val total = sectors.map { it }
+                    val total = sectors.map { it } as MutableList
+                    val firstSector = total.first()
+                    total.removeFirst()
+                    if (firstSector.first != firstSector.last) {
+                        total.add(0, firstSector.first + 1..firstSector.last)
+                    }
                     sectors.clear()
-                    return toGive.apply { this.addAll(total) }
+                    // the verse needs to at least hold onto its first frame
+                    sectors.add(firstSector.first..firstSector.first)
+                    return toGive.apply { this.addAll(0, total) }
                 }
                 // Consume whole node
-                remaining > sectors.last().last - sectors.last().first -> {
+                remaining >= sectors.last().length() -> {
                     val node = sectors.last()
                     remaining -= node.last - node.start
                     sectors.removeLast()
-                    toGive.add(node)
+                    toGive.add(0, node)
                 }
                 // Split node
                 else -> {
                     val node = sectors.last()
-                    toGive.add(node.last..(node.last - remaining))
-                    sectors[sectors.lastIndex] = node.first..(node.last - remaining)
+                    toGive.add(0, (node.last - remaining)..node.last)
+                    sectors[sectors.lastIndex] = node.first..(node.last - remaining - 1)
+                    break
                 }
             }
         }
@@ -143,8 +154,6 @@ internal data class VerseNode(
      */
     fun addRange(ranges: List<IntRange>) {
         sectors.addAll(ranges)
-        sectors.sortBy { it.first }
-        flattenSectors()
     }
 
     /**
@@ -198,11 +207,12 @@ internal data class VerseNode(
         }
 
         var frameOffset = 0
-        sectors.forEach { sector ->
+        for (sector in sectors) {
             if (absoluteFrame in sector) {
-                frameOffset += (sector.last - sector.first)
-            } else {
                 frameOffset += absoluteFrame - sector.first
+                break
+            } else {
+                frameOffset += sector.length()
             }
         }
         return frameOffset
@@ -233,7 +243,7 @@ internal data class VerseNode(
 
         val startIndex = sectors.indexOfFirst { framePosition in it }
 
-        val start = framePosition
+        var start = framePosition
         val end = (start + min(sectors[startIndex].last - start, framesToRead))
         val firstRange = start..end
         stuff.add(firstRange)
@@ -242,7 +252,8 @@ internal data class VerseNode(
         for (idx in startIndex + 1 until sectors.size) {
             if (framesToRead <= 0) break
             val sector = sectors[idx]
-            val end = (start + min(sectors[startIndex].last - start, framesToRead))
+            val start = sector.first
+            val end = (start + min(sectors[idx].last - start, framesToRead))
             val range = (sector.first..end)
             framesToRead -= range.length()
             stuff.add(range)
