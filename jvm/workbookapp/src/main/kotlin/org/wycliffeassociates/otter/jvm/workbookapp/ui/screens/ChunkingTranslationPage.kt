@@ -1,12 +1,12 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.SourceTextDrawer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ChunkingStepSelectedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.BlindDraft
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.Chunking
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.ChunkingStepsDrawer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.Consume
@@ -19,12 +19,12 @@ class ChunkingTranslationPage : View() {
     val viewModel: TranslationViewModel2 by inject()
     val workbookDataStore: WorkbookDataStore by inject()
 
-    private val list = observableListOf<ChunkViewData>()
     private val mainFragmentProperty = viewModel.selectedStepProperty.objectBinding {
         it?.let { step ->
             when(step) {
                 ChunkingStep.CONSUME_AND_VERBALIZE -> Consume()
                 ChunkingStep.CHUNKING -> Chunking()
+                ChunkingStep.BLIND_DRAFT -> BlindDraft()
                 else -> null
             }
         }
@@ -39,7 +39,7 @@ class ChunkingTranslationPage : View() {
             vgrow = Priority.ALWAYS
 
             left = ChunkingStepsDrawer(viewModel.selectedStepProperty).apply {
-                chunkItems.setAll(list)
+                chunkItems.bind(viewModel.chunkList) { it }
                 this.reachableStepProperty.bind(viewModel.reachableStepProperty)
             }
 
@@ -56,6 +56,7 @@ class ChunkingTranslationPage : View() {
     init {
         tryImportStylesheet("/css/consume-page.css")
         tryImportStylesheet("/css/chunking-page.css")
+        tryImportStylesheet("/css/blind-draft-page.css")
         tryImportStylesheet("/css/source-content.css")
         tryImportStylesheet("/css/chunk-item.css")
         tryImportStylesheet("/css/chunk-marker.css")
@@ -79,6 +80,6 @@ class ChunkingTranslationPage : View() {
 
     override fun onUndock() {
         super.onUndock()
-        viewModel.selectedStepProperty.set(null)
+        viewModel.undockPage()
     }
 }

@@ -46,20 +46,8 @@ class SourceAudioAccessor(
     private val cache = mutableMapOf<String, File>()
 
     fun getChapter(chapter: Int, target: Book? = null): SourceAudio? {
-        logger.info("Looking for target audio for chapter: $chapter with target book: $target")
-//        target?.let { target ->
-//            val accessor = ProjectFilesAccessor(directoryProvider, metadata, target.resourceMetadata, target)
-//            val dir = accessor.sourceAudioDir
-//            val file = dir.listFiles()?.find {
-//                chapterMatches(it, chapter) && validAudioExtension(it)
-//            }
-//            file?.let {
-//                logger.info("Found the source audio file! ${it.path}")
-//                val oratureAudioFile = OratureAudioFile(it)
-//                val size = oratureAudioFile.totalFrames
-//                return SourceAudio(it, 0, size)
-//            }
-//        }
+        logger.info("Looking for target audio for chapter: $chapter with book: $project")
+
         ResourceContainer.load(metadata.path).use { rc ->
             if (rc.media != null) {
                 val mediaProject = rc.media!!.projects.find { it.identifier == project }
@@ -69,7 +57,7 @@ class SourceAudioAccessor(
                     media = mediaProject?.media?.find { it.identifier == "wav" }
                 }
                 if (media != null) {
-                    return getChapter(media, chapter, rc, target?.resourceMetadata)
+                    return getChapter(media, chapter, rc)
                 }
             }
         }
@@ -97,8 +85,7 @@ class SourceAudioAccessor(
     private fun getChapter(
         media: Media,
         chapter: Int,
-        rc: ResourceContainer,
-        targetMetadata: ResourceMetadata?
+        rc: ResourceContainer
     ): SourceAudio? {
         return if (rc.media != null && media.chapterUrl.isNotEmpty()) {
             val path = media.chapterUrl.replace("{chapter}", chapter.toString())

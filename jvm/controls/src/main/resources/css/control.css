@@ -94,7 +94,7 @@
     -fx-border-color: -wa-primary-dark;
     -fx-text-fill: -wa-primary-btn-text-fill;
     -fx-font-size: 20px;
-    -fx-underline: true;
+    -fx-underline: false;
 }
 
 .btn--primary .ikonli-font-icon {
