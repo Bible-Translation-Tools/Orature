@@ -87,7 +87,7 @@ class AudioWorkspaceView : View() {
         runLater {
             customizeScrollbarSkin()
         }
-        
+
         disableWhen {
             viewModel.isRecordingProperty.or(viewModel.isPlayingProperty)
         }
@@ -126,6 +126,11 @@ class AudioWorkspaceView : View() {
                 }
                 verse_markers_layer {
                     verseMarkersControls.bind(markerNodes) { it }
+                    setOnLayerScroll { delta ->
+                        val pos = viewModel.audioPositionProperty.value
+                        val seekTo = pos + delta
+                        viewModel.seekTo(seekTo)
+                    }
                 }
             }
             bottom = scrollBar
@@ -167,10 +172,6 @@ class AudioWorkspaceViewModel : ViewModel() {
     val audioPositionProperty = SimpleIntegerProperty()
     val totalAudioSizeProperty = SimpleIntegerProperty()
 
-    fun scrollAudio(delta: Int) {
-        narrationViewModel.seekAudio(delta)
-    }
-
     fun drawWaveform(context: GraphicsContext, canvas: Canvas, markerNodes: ObservableList<VerseMarkerControl>) {
         narrationViewModel.drawWaveform(context, canvas, markerNodes)
     }
@@ -194,5 +195,9 @@ class AudioWorkspaceViewModel : ViewModel() {
 
     fun seekPercent(percent: Double) {
         narrationViewModel.seekPercent(percent)
+    }
+
+    fun seekTo(frame: Int) {
+        narrationViewModel.seekTo(frame)
     }
 }

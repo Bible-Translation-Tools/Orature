@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers
 
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
@@ -22,6 +23,7 @@ class VerseMarkersLayer : BorderPane() {
     val markers = observableListOf<VerseMarker>()
 
     val verseMarkersControls: ObservableList<VerseMarkerControl> = observableListOf()
+    private val onScrollProperty = SimpleObjectProperty<(Int) -> Unit>()
 
 
     init {
@@ -29,17 +31,23 @@ class VerseMarkersLayer : BorderPane() {
 
         addClass("verse-markers-layer")
 
-//            setOnMousePressed { event ->
-//                val point = localToParent(event.x, event.y)
-//                scrollOldPos = point.x
-//                scrollDelta = 0.0
-//            }
-//
-//            setOnMouseDragged { event ->
-//                val point = localToParent(event.x, event.y)
-//                scrollDelta = scrollOldPos - point.x
-//                onScrollProperty.value?.invoke(scrollDelta)
-//            }
+        var scrollDelta = 0.0
+        var scrollOldPos = 0.0
+
+        setOnMousePressed { event ->
+            val point = localToParent(event.x, event.y)
+            scrollOldPos = point.x
+            scrollDelta = 0.0
+        }
+
+        setOnMouseDragged { event ->
+            val point = localToParent(event.x, event.y)
+            scrollDelta = scrollOldPos - point.x
+            val frameDelta = pixelsToFrames(scrollDelta, width = this@VerseMarkersLayer.width.toInt())
+            onScrollProperty.value?.invoke(frameDelta)
+            scrollDelta = 0.0
+            scrollOldPos = point.x
+        }
 
 
         bindChildren(verseMarkersControls) { verseMarkerControl ->
@@ -57,42 +65,42 @@ class VerseMarkersLayer : BorderPane() {
                 minHeightProperty().bind(this@VerseMarkersLayer.heightProperty())
                 prefHeightProperty().bind(this@VerseMarkersLayer.heightProperty())
 
-                        dragTarget.setOnMousePressed { event ->
-                            userIsDraggingProperty.set(true)
-                            if (!canBeMovedProperty.value) return@setOnMousePressed
-                            delta = 0.0
-                            oldPos = layoutX
+                dragTarget.setOnMousePressed { event ->
+                    userIsDraggingProperty.set(true)
+                    if (!canBeMovedProperty.value) return@setOnMousePressed
+                    delta = 0.0
+                    oldPos = layoutX
 
-                            event.consume()
-                        }
+                    event.consume()
+                }
 
-                        dragTarget.setOnMouseDragged { event ->
-                            userIsDraggingProperty.set(true)
-                            if (!canBeMovedProperty.value) return@setOnMouseDragged
+                dragTarget.setOnMouseDragged { event ->
+                    userIsDraggingProperty.set(true)
+                    if (!canBeMovedProperty.value) return@setOnMouseDragged
 
-                            val point = localToParent(event.x, event.y)
-                            val currentPos = point.x
+                    val point = localToParent(event.x, event.y)
+                    val currentPos = point.x
 
-                            delta = currentPos - oldPos
-                            layoutX = currentPos
+                    delta = currentPos - oldPos
+                    layoutX = currentPos
 
-                            event.consume()
-                        }
+                    event.consume()
+                }
 
-                        dragTarget.setOnMouseReleased { event ->
-                            if (delta != 0.0) {
-                                // delta -= MARKER_OFFSET
-                                val frameDelta = pixelsToFrames(delta, width = this@VerseMarkersLayer.width.toInt())
-                                FX.eventbus.fire(
-                                    NarrationMarkerChangedEvent(
-                                        verseMarkerControl.verseIndexProperty.value,
-                                        frameDelta
-                                    )
-                                )
-                            }
-                            userIsDraggingProperty.set(false)
-                            event.consume()
-                        }
+                dragTarget.setOnMouseReleased { event ->
+                    if (delta != 0.0) {
+                        // delta -= MARKER_OFFSET
+                        val frameDelta = pixelsToFrames(delta, width = this@VerseMarkersLayer.width.toInt())
+                        FX.eventbus.fire(
+                            NarrationMarkerChangedEvent(
+                                verseMarkerControl.verseIndexProperty.value,
+                                frameDelta
+                            )
+                        )
+                    }
+                    userIsDraggingProperty.set(false)
+                    event.consume()
+                }
 
 
             }
@@ -108,6 +116,10 @@ class VerseMarkersLayer : BorderPane() {
     private fun getNextVerse(verse: VerseMarker): VerseMarker {
         val currentIndex = markers.indexOf(verse)
         return markers.getOrNull(currentIndex + 1) ?: verse
+    }
+
+    fun setOnLayerScroll(op: (Int) -> Unit) {
+        onScrollProperty.set(op)
     }
 }
 

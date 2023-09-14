@@ -507,10 +507,9 @@ class NarrationViewModel : ViewModel() {
         }
     }
 
-    fun seekAudio(frame: Int) {
+    fun seekTo(frame: Int) {
         val wasPlaying = audioPlayer.isPlaying()
         audioPlayer.pause()
-        narration.loadChapterIntoPlayer()
         narration.seek(frame)
         if (wasPlaying) audioPlayer.play()
     }
