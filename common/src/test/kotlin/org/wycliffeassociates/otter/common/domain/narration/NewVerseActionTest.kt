@@ -12,16 +12,19 @@ class NewVerseActionTest {
 
     val totalVerses: MutableList<VerseNode> = mutableListOf()
     lateinit var workingAudioFile: AudioFile
+    lateinit var emptyWorkingAudio: AudioFile
+    val totalFramesInTestAudio = 411000
 
     @Before
     fun setup() {
-        workingAudioFile = mockWorkingAudio()
+        workingAudioFile = mockWorkingAudio(totalFramesInTestAudio)
+        emptyWorkingAudio = mockWorkingAudio(0)
         initializeTotalVerses()
     }
 
-    fun mockWorkingAudio(): AudioFile {
+    fun mockWorkingAudio(totalFramesToReturn: Int): AudioFile {
         return mockk<AudioFile> {
-            every { totalFrames } returns 411000
+            every { totalFrames } returns totalFramesToReturn
         }
     }
 
@@ -37,7 +40,7 @@ class NewVerseActionTest {
 
 
     @Test
-    fun `execute with valid working audio, 31 total verses, and no placed verses`() {
+    fun `execute with empty working audio, 31 total verses, and no placed verses`() {
         val verseIndex = 0
         val newVerseAction = NewVerseAction(verseIndex)
 
@@ -46,14 +49,14 @@ class NewVerseActionTest {
 
         Assert.assertNull(newVerseAction.node)
 
-        newVerseAction.execute(totalVerses, workingAudioFile)
+        newVerseAction.execute(totalVerses, emptyWorkingAudio)
 
         // verify that NewVerseAction.node is valid
-        Assert.assertEquals(411000..411000, newVerseAction.node?.sectors?.last())
+        Assert.assertEquals(0..0, newVerseAction.node?.sectors?.last())
         Assert.assertEquals(true, newVerseAction?.node?.placed)
 
         // verify that totalVerses[verseIndex] is valid
-        Assert.assertEquals(411000..411000, totalVerses[verseIndex].sectors.last())
+        Assert.assertEquals(0..0, totalVerses[verseIndex].sectors.last())
         Assert.assertTrue(totalVerses[verseIndex].placed)
     }
 
@@ -73,11 +76,11 @@ class NewVerseActionTest {
         newVerseAction.execute(totalVerses, workingAudioFile)
 
         // verify that NewVerseAction.node is valid
-        Assert.assertEquals(411000..411000, newVerseAction.node?.sectors?.last())
+        Assert.assertEquals(totalFramesInTestAudio + 1..totalFramesInTestAudio + 1, newVerseAction.node?.sectors?.last())
         Assert.assertEquals(true, newVerseAction?.node?.placed)
 
         // verify that totalVerses[verseIndex] is valid
-        Assert.assertEquals(411000..411000, totalVerses[verseIndex].sectors.last())
+        Assert.assertEquals(totalFramesInTestAudio + 1..totalFramesInTestAudio + 1, totalVerses[verseIndex].sectors.last())
         Assert.assertTrue(totalVerses[verseIndex].placed)
     }
 
