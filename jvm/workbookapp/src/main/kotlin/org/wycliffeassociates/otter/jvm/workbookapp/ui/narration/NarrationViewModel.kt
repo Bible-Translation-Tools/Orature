@@ -300,6 +300,7 @@ class NarrationViewModel : ViewModel() {
             isRecording -> {
                 narration.finalizeVerse(max(index - 1, 0))
                 narration.onNewVerse(index)
+                renderer.clearActiveRecordingData()
             }
 
             recordPause -> {
