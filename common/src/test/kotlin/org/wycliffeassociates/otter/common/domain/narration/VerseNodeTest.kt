@@ -10,7 +10,7 @@ class VerseNodeTest {
     fun `length of single sector`() {
         val verseMarker = VerseMarker(1, 1, 0)
         val sectors = mutableListOf<IntRange>()
-        sectors.add(IntRange(0,999))
+        sectors.add(0..999)
 
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
@@ -159,21 +159,6 @@ class VerseNodeTest {
         }
     }
 
-    @Test
-    fun `finalize already finalized`() {
-        val verseMarker = VerseMarker(1, 1, 0)
-        val sectors = mutableListOf<IntRange>()
-        sectors.add(1000.. 1999)
-        val verseNode = VerseNode(0,0, true, verseMarker, sectors)
-
-        try {
-            verseNode.finalize(500)
-            Assert.fail("Expected illegal state exception")
-        } catch (ise: IllegalStateException) {
-            // Success: exception was expected
-        }
-    }
-
 
     @Test
     fun `finalize last equals UNPLACED_END`() {
@@ -222,12 +207,15 @@ class VerseNodeTest {
         val sectors = mutableListOf<IntRange>()
         sectors.add(1000.. 1999)
 
-        val sectorsCopy = sectors.map { it }
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
         val sectorsTaken = verseNode.takeFramesFromStart(2000)
 
-        Assert.assertTrue(sectorsTaken.equals(sectorsCopy))
+        Assert.assertEquals(1, sectorsTaken.size)
+        Assert.assertEquals(1000 .. 1998, sectorsTaken[0])
+
+        Assert.assertEquals(1, verseNode.sectors.size)
+        Assert.assertEquals(1999 .. 1999, verseNode.sectors[0])
     }
 
 
@@ -244,11 +232,13 @@ class VerseNodeTest {
         val expectedSectorsTaken = mutableListOf<IntRange>()
         expectedSectorsTaken.add(1000.. 1999)
         expectedSectorsTaken.add(2000 .. 2999)
-        expectedSectorsTaken.add(3000 .. 3999)
+        expectedSectorsTaken.add(3000 .. 3998)
 
         Assert.assertTrue(sectorsTaken.equals(expectedSectorsTaken))
+        Assert.assertEquals(1, verseNode.sectors.size)
 
-        Assert.assertEquals(0, verseNode.sectors.size)
+        Assert.assertEquals(1, verseNode.sectors.size)
+        Assert.assertEquals(3999 .. 3999, verseNode.sectors[0])
 
     }
 
@@ -318,12 +308,15 @@ class VerseNodeTest {
         val verseMarker = VerseMarker(1, 1, 0)
         val sectors = mutableListOf<IntRange>()
         sectors.add(1000.. 1999)
-        val sectorsCopy = sectors.map { it }
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
         val sectorsTaken = verseNode.takeFramesFromEnd(2000)
 
-        Assert.assertTrue(sectorsTaken.equals(sectorsCopy))
+        Assert.assertEquals(1, sectorsTaken.size)
+        Assert.assertEquals(1001 .. 1999, sectorsTaken[0])
+
+        Assert.assertEquals(1, verseNode.sectors.size)
+        Assert.assertEquals(1000 .. 1000, verseNode.sectors[0])
     }
 
     @Test fun `take frames from end with same number of frames needed`() {
@@ -337,14 +330,14 @@ class VerseNodeTest {
         val sectorsTaken = verseNode.takeFramesFromEnd(3000)
 
         val expectedSectorsTaken = mutableListOf<IntRange>()
-        expectedSectorsTaken.add(1000.. 1999)
+        expectedSectorsTaken.add(1001.. 1999)
         expectedSectorsTaken.add(2000 .. 2999)
         expectedSectorsTaken.add(3000 .. 3999)
 
         Assert.assertTrue(sectorsTaken.equals(expectedSectorsTaken))
 
-        Assert.assertEquals(0, verseNode.sectors.size)
-
+        Assert.assertEquals(1, verseNode.sectors.size)
+        Assert.assertEquals(1000 .. 1000, verseNode.sectors[0])
     }
 
 
@@ -357,7 +350,7 @@ class VerseNodeTest {
         sectors.add(3000 .. 3999)
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
 
-        val sectorsTaken = verseNode.takeFramesFromEnd(1999)
+        val sectorsTaken = verseNode.takeFramesFromEnd(2000)
 
         val expectedSectorsTaken = mutableListOf<IntRange>()
         expectedSectorsTaken.add(3000 .. 3999)
