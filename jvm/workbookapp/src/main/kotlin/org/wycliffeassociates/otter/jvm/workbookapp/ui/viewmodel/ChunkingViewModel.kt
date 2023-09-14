@@ -134,10 +134,14 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
     fun onUndockChunking() {
         pause()
-        cleanup()
         translationViewModel.selectedStepProperty.value?.let {
-            onNavigateStep(it)
+            // handle when navigating to the next step
+            val hasUnsavedChanges = changeUnsaved.value || markerModel?.changesSaved == false
+            if (hasUnsavedChanges && it.ordinal > ChunkingStep.CHUNKING.ordinal) {
+                saveChanges()
+            }
         }
+        cleanup()
     }
 
     private fun initializeSourceAudio(chapter: Int): SourceAudio? {
@@ -228,14 +232,6 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
     fun pause() {
         audioController?.pause()
-    }
-
-    private fun onNavigateStep(step: ChunkingStep) {
-        // handle when moving to the next step
-        val hasUnsavedChanges = changeUnsaved.value || markerModel?.changesSaved == false
-        if (hasUnsavedChanges && step.ordinal > ChunkingStep.CHUNKING.ordinal) {
-            saveChanges()
-        }
     }
 
     private fun createWaveformImages(audio: OratureAudioFile) {
