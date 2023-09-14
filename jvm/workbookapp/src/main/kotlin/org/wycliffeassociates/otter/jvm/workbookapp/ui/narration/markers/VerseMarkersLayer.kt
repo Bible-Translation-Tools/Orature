@@ -9,6 +9,8 @@ import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.*
 import javafx.event.EventTarget
 import javafx.scene.layout.BorderPane
+import org.slf4j.LoggerFactory
+import java.lang.IllegalStateException
 
 /**
  * This is the offset of the marker line relative
@@ -18,6 +20,7 @@ import javafx.scene.layout.BorderPane
 private const val MARKER_OFFSET = (MARKER_AREA_WIDTH / 2).toInt()
 
 class VerseMarkersLayer : BorderPane() {
+    private val logger = LoggerFactory.getLogger(VerseMarkersLayer::class.java)
 
     val isRecordingProperty = SimpleBooleanProperty()
     val markers = observableListOf<VerseMarker>()
@@ -78,14 +81,25 @@ class VerseMarkersLayer : BorderPane() {
                     userIsDraggingProperty.set(true)
                     if (!canBeMovedProperty.value) return@setOnMouseDragged
 
-                    val point = localToParent(event.x, event.y)
-                    val currentPos = point.x
+                    try {
+                        val point = localToParent(event.x, event.y)
+                        val (start, end) = verseBoundaries(verseIndexProperty.value, this.width)
+                        val currentPos = point.x.coerceIn(start..end)
 
-                    delta = currentPos - oldPos
-                    layoutX = currentPos
+                        delta = currentPos - oldPos
+
+                        layoutX = currentPos
+                    } catch (e: Exception) {
+                        // This can prevent attempting to move a marker that was originally created too close together
+                        // if the user spammed next verse while recording. Moving surrounding markers around will allow
+                        // for this marker to get enough space to move around.
+                        logger.error("Tried to move a marker, but aborted", e)
+                    }
 
                     event.consume()
                 }
+
+
 
                 dragTarget.setOnMouseReleased { event ->
                     if (delta != 0.0) {
@@ -106,6 +120,19 @@ class VerseMarkersLayer : BorderPane() {
             }
         }
 
+    }
+
+    private fun verseBoundaries(verseIndex: Int, boundingWidth: Double): Pair<Double, Double> {
+        val previousVerse = verseMarkersControls.getOrNull(verseIndex - 1)
+        val startBounds = if (previousVerse != null && previousVerse.visibleProperty().value) {
+            previousVerse.layoutX + (MARKER_AREA_WIDTH * 4)
+        } else 0.0
+        val nextVerse = verseMarkersControls.getOrNull(verseIndex + 1)
+        val endBounds = if (nextVerse != null && nextVerse.visibleProperty().value) {
+            nextVerse.layoutX - (MARKER_AREA_WIDTH * 4)
+        } else width
+
+        return Pair(startBounds, endBounds)
     }
 
     private fun getPrevVerse(verse: VerseMarker): VerseMarker {
