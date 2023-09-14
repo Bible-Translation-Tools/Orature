@@ -7,7 +7,7 @@ import org.junit.Test
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 
-class VerseMarkerActionTest {
+class MoveMarkerActionTest {
     val totalVerses: MutableList<VerseNode> = mutableListOf()
     lateinit var workingAudioFile: AudioFile
     val numTestVerses = 31
@@ -41,12 +41,12 @@ class VerseMarkerActionTest {
     @Test
     fun `execute with null verseNodes`() {
         val emptyVerses: MutableList<VerseNode> = mutableListOf()
-        val verseMarkerAction = VerseMarkerAction(0, 500)
+        val verseMarkerAction = MoveMarkerAction(0, 500)
 
         try {
             verseMarkerAction.execute(emptyVerses, workingAudioFile)
             Assert.fail("Expecting IllegalStateException")
-        } catch (ise: IllegalStateException) {
+        } catch (illegalIndex: IndexOutOfBoundsException) {
             // Success: expecting illegalStateException
         }
     }
@@ -56,7 +56,7 @@ class VerseMarkerActionTest {
     fun `execute with markerMovedBetweenVerses true and positive delta`() {
         val verseIndex = 1
         val delta = 500
-        val verseMarkerAction = VerseMarkerAction(verseIndex, delta)
+        val verseMarkerAction = MoveMarkerAction(verseIndex, delta)
 
         // Verify that the verse being moved has correct initial values
         Assert.assertEquals(1, totalVerses[verseIndex].sectors.size)
@@ -65,6 +65,7 @@ class VerseMarkerActionTest {
             totalVerses[verseIndex].sectors.first()
         )
 
+        println(totalVerses)
         // Verify that the verse before the verse being moved has correct initial values
         Assert.assertEquals(1, totalVerses[verseIndex - 1].sectors.size)
         Assert.assertEquals(
@@ -90,7 +91,7 @@ class VerseMarkerActionTest {
     fun `execute with markerMovedBetweenVerses true and negative delta`() {
         val verseIndex = 1
         val delta = -500
-        val verseMarkerAction = VerseMarkerAction(verseIndex, delta)
+        val verseMarkerAction = MoveMarkerAction(verseIndex, delta)
 
         // Verify that the verse being moved has correct initial values
         Assert.assertEquals(1, totalVerses[verseIndex].sectors.size)
@@ -141,7 +142,7 @@ class VerseMarkerActionTest {
     fun `undo after execute with markerMovedBetweenVerses true and positive delta`() {
         val verseIndex = 1
         val delta = 500
-        val verseMarkerAction = VerseMarkerAction(verseIndex, delta)
+        val verseMarkerAction = MoveMarkerAction(verseIndex, delta)
 
         // Verify that the verse being moved has correct initial values
         Assert.assertEquals(1, totalVerses[verseIndex].sectors.size)
@@ -181,7 +182,7 @@ class VerseMarkerActionTest {
     fun `undo after execute with markerMovedBetweenVerses true and negative delta`() {
         val verseIndex = 1
         val delta = -500
-        val verseMarkerAction = VerseMarkerAction(verseIndex, delta)
+        val verseMarkerAction = MoveMarkerAction(verseIndex, delta)
 
         // Verify that the verse being moved has correct initial values
         Assert.assertEquals(1, totalVerses[verseIndex].sectors.size)
@@ -221,7 +222,7 @@ class VerseMarkerActionTest {
     fun `redo after undo after execute with markerMovedBetweenVerses true and positive delta`() {
         val verseIndex = 1
         val delta = 500
-        val verseMarkerAction = VerseMarkerAction(verseIndex, delta)
+        val verseMarkerAction = MoveMarkerAction(verseIndex, delta)
 
         // Verify that the verse being moved has correct initial values
         Assert.assertEquals(1, totalVerses[verseIndex].sectors.size)
@@ -257,7 +258,7 @@ class VerseMarkerActionTest {
     fun `redo after undo after execute with markerMovedBetweenVerses true and negative delta`() {
         val verseIndex = 1
         val delta = -500
-        val verseMarkerAction = VerseMarkerAction(verseIndex, delta)
+        val verseMarkerAction = MoveMarkerAction(verseIndex, delta)
 
         // Verify that the verse being moved has correct initial values
         Assert.assertEquals(1, totalVerses[verseIndex].sectors.size)
