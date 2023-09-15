@@ -21,7 +21,6 @@ class BlindDraftViewModel : ViewModel() {
     val markerModelProperty = SimpleObjectProperty<VerseMarkerModel>()
 
     fun dockBlindDraft() {
-        val wb = workbookDataStore.workbook
         val chapter = workbookDataStore.chapter
         chapter
             .chunks

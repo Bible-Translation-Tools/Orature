@@ -4,7 +4,6 @@ import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.SourceTextDrawer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ChunkingStepSelectedEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.BlindDraft
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.Chunking
@@ -39,7 +38,7 @@ class ChunkingTranslationPage : View() {
             vgrow = Priority.ALWAYS
 
             left = ChunkingStepsDrawer(viewModel.selectedStepProperty).apply {
-                chunkItems.bind(viewModel.chunkList) { it }
+                chunksProperty.bind(viewModel.chunkListProperty)
                 this.reachableStepProperty.bind(viewModel.reachableStepProperty)
             }
 
@@ -75,7 +74,6 @@ class ChunkingTranslationPage : View() {
     override fun onDock() {
         super.onDock()
         viewModel.dockPage()
-        viewModel.selectedStepProperty.set(ChunkingStep.CONSUME_AND_VERBALIZE)
     }
 
     override fun onUndock() {

@@ -165,6 +165,13 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         timer = null
     }
 
+    override fun placeMarker() {
+        super.placeMarker()
+        if (translationViewModel.reachableStepProperty.value == ChunkingStep.CHUNKING) {
+            translationViewModel.reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
+        }
+    }
+
     fun loadAudio(audioFile: File): OratureAudioFile {
         val player = audioConnectionFactory.getPlayer()
         val audio = OratureAudioFile(audioFile)
