@@ -207,7 +207,8 @@ class ChapterRepresentationTest {
         // in the calculation, so we add 13. The 44100*7 is to account for the unused frames added per verse node.
         // Since we add 44100 frames between each newly added sector, and we are adding one sector per verseNode, then
         // we need to offset by 44100*7
-        Assert.assertEquals(1653750 + 13 + spaceBetweenSectors*7, chapterRepresentation.relativeToAbsolute(relativePosition))
+        val absolutePos = chapterRepresentation.relativeToAbsolute(relativePosition)
+        Assert.assertEquals(1653750 + 13 + spaceBetweenSectors*7, absolutePos)
     }
 
     @Test
@@ -239,22 +240,6 @@ class ChapterRepresentationTest {
 
         Assert.assertEquals(44100*(verseNumber - 1) until 44100*verseNumber, markerRange)
     }
-
-//    @Test
-//    fun `getRangeOfMarker with matching verseMarker label and non-sequential sectors`() {
-//        val chapterRepresentation = ChapterRepresentation(workbook, chapter)
-//        initializeVerseNodeList(chapterRepresentation.totalVerses)
-//
-//        // 44100 frames are added between newly added sectors, as specified by the value for spaceBetweenSectors
-//        val spaceBetweenSectors = 44100
-//        addSectorsToEnd(chapterRepresentation.totalVerses, 44100, spaceBetweenSectors)
-//
-//        val verseNumber = 7
-//        val markerRange = chapterRepresentation.getRangeOfMarker(VerseMarker(verseNumber, verseNumber, 0))
-//
-//        // TODO: fix once I get clarification about intended functionality of this
-//        Assert.assertFalse(true)
-//    }
 
 
     @Test
@@ -323,6 +308,35 @@ class ChapterRepresentationTest {
         }
     }
 
+    @Test
+    fun `getPcmBuffer with sequential sectors and reading the first verse`() {
+        val secondsOfAudio = 31
+        val buffer = ByteBuffer.allocate(44100 * secondsOfAudio * 2)
+
+        fillAudioBufferWithPadding(buffer, secondsOfAudio, 0)
+        writeByteBufferToPCMFile(buffer, "${testDirWithAudio}\\chapter_narration.pcm")
+
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
+        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        val chapterRepresentationConnection  = chapterRepresentation.ChapterRepresentationConnection(end = null)
+
+        // Gets the full first verse
+        val byteArray = ByteArray(441000 * 2) { 1 }
+        val responseBuffer = ByteBuffer.allocate(441000 * 2)
+
+        val bytesRead = chapterRepresentationConnection.getPcmBuffer(byteArray)
+        for(i in 0 until bytesRead) {
+            responseBuffer.put(byteArray[i])
+        }
+
+        // TODO: Update so that ends are inclusive
+        Assert.assertEquals(44100 * 2, bytesRead)
+        for(i in 1 .. secondsOfAudio) {
+            for(j in 1 .. 44100) {
+                Assert.assertEquals(i.toShort(), responseBuffer.short)
+            }
+        }
+    }
 
     @Test
     fun `getPcmBuffer with sequential sectors and reading entire file`() {
@@ -338,17 +352,22 @@ class ChapterRepresentationTest {
 
         // Gets the full 10 seconds of audio
         val byteArray = ByteArray(441000 * secondsOfAudio * 2) { 1 }
-        val bytesRead = chapterRepresentationConnection.getPcmBuffer(byteArray)
-        val responseBuffer = ByteBuffer.wrap(byteArray)
+        val responseBuffer = ByteBuffer.allocate(441000 * secondsOfAudio * 2)
+
+        var totalBytesRead = 0
+        while(chapterRepresentationConnection.hasRemaining()) {
+            val bytesRead = chapterRepresentationConnection.getPcmBuffer(byteArray)
+            totalBytesRead += bytesRead
+            for(i in 0 until bytesRead) {
+                responseBuffer.put(byteArray[i])
+            }
+        }
 
         // TODO: Update so that ends are inclusive
-        Assert.assertEquals(44100 * secondsOfAudio * 2, bytesRead)
+        Assert.assertEquals(44100 * secondsOfAudio * 2, totalBytesRead)
         for(i in 1 .. secondsOfAudio) {
             for(j in 1 .. 44100) {
-                if(responseBuffer.short != i.toShort()) {
-                    Assert.assertFalse(true)
-                    break
-                }
+                Assert.assertEquals(i.toShort(), responseBuffer.short)
             }
         }
     }
@@ -371,28 +390,26 @@ class ChapterRepresentationTest {
 
         // Gets 10 seconds of audio
         val byteArray = ByteArray(secondsOfAudio*44100*2) { 1 }
-        val bytesRead = chapterRepresentationConnection.getPcmBuffer(byteArray)
+        val responseBuffer = ByteBuffer.allocate(441000 * secondsOfAudio * 2)
 
-        Assert.assertEquals(secondsOfAudio*44100*2, bytesRead)
-        val responseBuffer = ByteBuffer.wrap(byteArray)
-
-        Assert.assertEquals( 44100 * secondsOfAudio * 2 , bytesRead)
+        var totalBytesRead = 0
+        while(chapterRepresentationConnection.hasRemaining()) {
+            val bytesRead = chapterRepresentationConnection.getPcmBuffer(byteArray)
+            totalBytesRead += bytesRead
+            for(i in 0 until bytesRead) {
+                responseBuffer.put(byteArray[i])
+            }
+        }
+        // TODO: Update so that ends are inclusive
+        // TODO: Figure out why it is not skipping to the correct sections and why it is reading the entire file
+        Assert.assertEquals( 44100 * secondsOfAudio * 2 , totalBytesRead)
 
         for(i in 1 .. secondsOfAudio) {
             for(j in 1 .. 44100) {
                 Assert.assertEquals(i.toShort(), responseBuffer.short)
-//                if(responseBuffer.short != i.toShort()) {
-//                    Assert.assertFalse(true)
-//                    return
-//                }
             }
             for(j in 1 .. 44100) {
                 Assert.assertEquals(0, responseBuffer.short)
-
-//                if(responseBuffer.short != 0.toShort()) {
-//                    Assert.assertFalse(true)
-//                    return
-//                }
             }
         }
     }
