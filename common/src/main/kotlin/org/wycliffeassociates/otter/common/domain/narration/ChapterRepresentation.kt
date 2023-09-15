@@ -113,6 +113,7 @@ internal class ChapterRepresentation(
     private fun serializeVerses() {
         val jsonStr = activeVersesMapper.writeValueAsString(activeVerses)
         serializedVersesFile.writeText(jsonStr)
+        logger.warn(jsonStr)
     }
 
     private fun publishActiveVerses() {
@@ -176,15 +177,22 @@ internal class ChapterRepresentation(
      */
     internal fun relativeToAbsolute(relativeIdx: Int): Int {
         var remaining = relativeIdx
-        activeVerses.forEach { node ->
-            val range = node.length
-            if (range > remaining) {
-                remaining -= range
-            } else {
-                return node.absoluteFrameFromOffset(remaining)
+        val verses = activeVerses
+        if (relativeIdx == 0 && activeVerses.isEmpty()) return 0
+        if (relativeIdx == 0) return activeVerses.first().firstFrame()
+
+        for (verse in verses) {
+            for (sector in verse.sectors) {
+                if (sector.length() < remaining) {
+                    remaining -= sector.length()
+                } else if (sector.length() == remaining){
+                    return sector.last
+                } else {
+                    return sector.first + remaining
+                }
             }
         }
-        return remaining
+        return verses.last().lastFrame()
     }
 
     fun getRangeOfMarker(verse: VerseMarker): IntRange? {
@@ -282,12 +290,13 @@ internal class ChapterRepresentation(
         override fun hasRemaining(): Boolean {
             if (totalFrames == 0) return false
 
+            val current = framePosition
             val verses = activeVerses
             val verseIndex = lockToVerse.get()
             val hasRemaining =  if (verseIndex != CHAPTER_UNLOCKED) {
-                framePosition in verses[verseIndex] && framePosition != verses[verseIndex].lastFrame()
+                current in verses[verseIndex] && current != verses[verseIndex].lastFrame()
             } else {
-                verses.any { framePosition in it } && framePosition != verses.last().lastFrame()
+                verses.any { current in it } && current != verses.last().lastFrame()
             }
             if (!hasRemaining) {
                 logger.info("No audio remaining")
@@ -421,13 +430,7 @@ internal class ChapterRepresentation(
 
         @Synchronized
         override fun seek(sample: Int) {
-            position = when {
-//                sample <= startBounds -> startBounds * frameSizeInBytes
-//                sample >= endBounds -> endBounds - 1 * frameSizeInBytes
-                else -> {
-                    sample * frameSizeInBytes
-                }
-            }
+            position = relativeToAbsolute(sample) * frameSizeInBytes
         }
 
         override fun open() {
