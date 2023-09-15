@@ -149,6 +149,7 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
         chunkImageCleanup()
         compositeDisposable.clear()
         stopAnimationTimer()
+        markerModel = null
     }
 
     fun computeImageWidth(secondsOnScreen: Int): Double {

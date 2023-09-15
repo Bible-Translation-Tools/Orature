@@ -5,12 +5,14 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BlindDraftViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 
 class BlindDraft : Fragment() {
 
     val viewModel: BlindDraftViewModel by inject()
+    val translationViewModel: TranslationViewModel2 by inject()
     val workbookDataStore: WorkbookDataStore by inject()
 
     override val root = vbox {
@@ -20,8 +22,16 @@ class BlindDraft : Fragment() {
             addClass("blind-draft-section")
             label(viewModel.chunkTitleProperty).addClass("h4", "h4--80")
             simpleaudioplayer {
-                playerProperty.bind(viewModel.sourceAudioProperty)
+                playerProperty.bind(viewModel.sourcePlayerProperty)
                 enablePlaybackRateProperty.set(true)
+                onPlaybackProgressChanged = { location ->
+                    viewModel.markerModelProperty.value?.let { markerModel ->
+                        val nearestMarkerFrame = markerModel.seekCurrent(location.toInt())
+                        val currentMarker = markerModel.markers.find { it.frame == nearestMarkerFrame }
+                        val index = currentMarker?.let { markerModel.markers.indexOf(it) } ?: -1
+                        translationViewModel.currentMarkerProperty.set(index)
+                    }
+                }
             }
         }
         vbox {
