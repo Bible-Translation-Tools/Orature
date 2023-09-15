@@ -46,6 +46,7 @@ import org.wycliffeassociates.otter.jvm.controls.button.WaMenuButton
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.controllers.framesToTimecode
 import tornadofx.*
+import tornadofx.FX.Companion.messages
 import java.text.MessageFormat
 
 enum class PlaybackRateType {
@@ -66,6 +67,7 @@ class SimpleAudioPlayer(
 
     val playTextProperty = SimpleStringProperty()
     val pauseTextProperty = SimpleStringProperty()
+    val sideTextProperty = SimpleStringProperty()
     var onPlaybackProgressChanged: (value: Double) -> Unit = {}
 
     private val slider = JFXSlider()
@@ -126,11 +128,11 @@ class SimpleAudioPlayer(
             }
         )
 
+        label(sideTextProperty).addClass("h5", "h5--60")
+
         add(
             menuButton.apply {
-                buttonTextProperty.bind(audioPlaybackRateProperty.stringBinding {
-                    String.format("%.2fx", it)
-                })
+                tooltip(messages["speed"])
                 sideProperty.bind(menuSideProperty)
                 items.bind(menuItems) { it }
 

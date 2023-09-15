@@ -32,15 +32,16 @@ class BlindDraft : Fragment() {
                         translationViewModel.currentMarkerProperty.set(index)
                     }
                 }
+                sideTextProperty.set(messages["sourceAudio"])
             }
         }
         vbox {
             addClass("blind-draft-section", "blind-draft-section--top-indent")
-            label(messages["best_take"]).addClass("h5")
+            label(messages["best_take"]).addClass("h5", "h5--60")
         }
         vbox {
             addClass("blind-draft-section", "blind-draft-section--top-indent")
-            label(messages["available_takes"]).addClass("h5")
+            label(messages["available_takes"]).addClass("h5", "h5--60")
             vgrow = Priority.ALWAYS
         }
         hbox {
