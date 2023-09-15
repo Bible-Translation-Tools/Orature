@@ -30,7 +30,7 @@ class BlindDraftViewModel : ViewModel() {
                     ChunkViewData(
                         it.sort,
                         SimpleBooleanProperty(it.hasSelectedAudio()),
-                        translationViewModel.selectedChunkProperty
+                        translationViewModel.selectedChunkBinding
                     )
                 }
                 translationViewModel.chunkList.setAll(list)

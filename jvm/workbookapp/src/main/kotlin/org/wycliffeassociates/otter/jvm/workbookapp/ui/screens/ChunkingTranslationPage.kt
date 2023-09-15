@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.SourceTextDrawer
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ChunkSelectedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ChunkingStepSelectedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.BlindDraft
@@ -68,6 +69,9 @@ class ChunkingTranslationPage : View() {
 
         subscribe<ChunkingStepSelectedEvent> {
             viewModel.navigateStep(it.step)
+        }
+        subscribe<ChunkSelectedEvent> {
+            viewModel.selectChunk(it.chunkNumber)
         }
     }
 

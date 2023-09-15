@@ -7,6 +7,7 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
 import tornadofx.*
@@ -18,11 +19,11 @@ class TranslationViewModel2 : ViewModel() {
 
     val selectedStepProperty = SimpleObjectProperty<ChunkingStep>(null)
     val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.CHUNKING)
-    val selectedChunkProperty = SimpleIntegerProperty()
     val sourceTextProperty = SimpleStringProperty()
     val currentMarkerProperty = SimpleIntegerProperty(-1)
     val chunkList = observableListOf<ChunkViewData>()
     val chunkListProperty = SimpleListProperty<ChunkViewData>(chunkList)
+    val selectedChunkBinding = workbookDataStore.activeChunkProperty.integerBinding { it?.sort ?: -1 }
 
     private val compositeDisposable = CompositeDisposable()
 
@@ -69,5 +70,11 @@ class TranslationViewModel2 : ViewModel() {
                     reachableStepProperty.set(ChunkingStep.CHUNKING)
                 }
             }.addTo(compositeDisposable)
+    }
+
+    fun selectChunk(chunkNumber: Int) {
+        workbookDataStore.chapter.chunks.value?.find { it.sort == chunkNumber }?.let {
+            workbookDataStore.activeChunkProperty.set(it)
+        }
     }
 }
