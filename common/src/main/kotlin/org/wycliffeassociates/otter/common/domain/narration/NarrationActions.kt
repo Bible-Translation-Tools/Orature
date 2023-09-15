@@ -82,8 +82,8 @@ internal class RecordAgainAction(
         logger.info("Recording again verse for index: ${verseIndex}")
         previous = totalVerses[verseIndex].copy()
 
-        val start = workingAudio.totalFrames
-        val end = workingAudio.totalFrames
+        val start = if (workingAudio.totalFrames == 0) 0 else workingAudio.totalFrames + 1
+        val end = start
 
         node = VerseNode(
             start,
