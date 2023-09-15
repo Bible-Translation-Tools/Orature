@@ -17,22 +17,76 @@
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
 .chunk-item {
-    -fx-text-fill: -wa-regular-text-80;
+    -fx-border-color: -wa-list-item-border-light;
+    -fx-border-width: 0 0 2px 0;
+    -fx-padding: 0 10px 10px 10px;
+    -fx-cursor: hand;
+    -fx-spacing: 20px;
+    -fx-focus-traversable: true;
 }
 
-.chunk-item:completed {
-    -fx-text-fill: -wa-primary;
+.chunk-item:focused {
+    -fx-border-width: 4px;
+    -fx-border-radius: 6px;
+    -fx-border-color: -wa-card-border;
+    -fx-border-insets: -4;
 }
 
-.chunk-item:completed .chunk-item__icon {
-    -fx-icon-color: -wa-primary;
+.chunk-item__title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -wa-regular-text;
 }
 
-.chunk-item:selected {
-    -fx-text-fill: -wa-inverse-text;
-    -fx-background-color: #001533;
+.chunk-item__take-counter {
+    -fx-font-size: 16px;
+    -fx-text-fill: -wa-regular-text;
 }
 
-.chunk-item:selected .chunk-item__icon {
-    -fx-icon-color: -wa-inverse-text;
+.chunk-item__take-counter .ikonli-font-icon {
+    -fx-fill: -wa-regular-text;
+    -fx-icon-size: 24px;
+}
+
+.chunk-item__status {
+    -fx-alignment: center;
+    -fx-spacing: 20px;
+}
+
+.chunk-item__selected-status {
+    -fx-fill: transparent;
+    -fx-stroke: -wa-black-20;
+    -fx-stroke-width: 2px;
+}
+
+.chunk-item__selected-status--active {
+    -fx-fill: -wa-status-active;
+    -fx-stroke: null;
+}
+
+.chunk-item__show-takes .ikonli-font-icon {
+    -fx-icon-size: 24px;
+    -fx-fill: -wa-regular-text;
+}
+
+.chunk-item__takes {
+    -fx-background-color: -wa-background;
+    -fx-background-radius: 16px;
+    -fx-spacing: 10px;
+    -fx-alignment: top-center;
+    -fx-padding: 15px;
+}
+
+.chunk-item__take-items {
+    -fx-spacing: 20px;
+}
+
+.chunk-item__take-items .list-view {
+    -fx-background-color: -wa-transparent;
+}
+
+.chunk-item__take-items .list-view .list-cell:selected,
+.chunk-item__take-items .list-view .list-cell:even,
+.chunk-item__take-items .list-view .list-cell:odd {
+    -fx-background-color: -wa-transparent;
 }
