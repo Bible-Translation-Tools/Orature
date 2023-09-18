@@ -437,25 +437,37 @@ class NarrationViewModel : ViewModel() {
         hasUndo = narration.hasUndo()
         hasRedo = narration.hasRedo()
 
-        narration.onActiveVersesUpdated.subscribe { verses ->
-            totalAudioSizeProperty.set(rendererAudioReader.totalFrames)
+        narration
+            .onActiveVersesUpdated
+            .subscribe(
+                { verses ->
+                    totalAudioSizeProperty.set(rendererAudioReader.totalFrames)
 
-            val verseWasAdded = recordedVerses.size != verses.size
+                    val verseWasAdded = recordedVerses.size != verses.size
 
-            recordedVerses.setAll(verses)
+                    recordedVerses.setAll(verses)
 
-            hasUndo = narration.hasUndo()
-            hasRedo = narration.hasRedo()
+                    hasUndo = narration.hasUndo()
+                    hasRedo = narration.hasRedo()
 
-            val lastVerse = verses.getOrElse(lastRecordedVerseProperty.value, { verses.last() }).location
+                    if (verses.isNotEmpty()) {
+                        val lastVerse = verses.getOrElse(lastRecordedVerseProperty.value, { verses.last() }).location
 
-            if (verseWasAdded) {
-                narration.seek(lastVerse)
-            }
+                        if (verseWasAdded) {
+                            narration.seek(lastVerse)
+                        }
+                    } else {
+                        narration.seek(0)
+                    }
 
-            recordStart = recordedVerses.isEmpty()
-            recordResume = recordedVerses.isNotEmpty()
-        }.let(disposables::add)
+                    recordStart = recordedVerses.isEmpty()
+                    recordResume = recordedVerses.isNotEmpty()
+                },
+                { e ->
+                    logger.error("Error in active verses subscription", e)
+                }
+            )
+            .let(disposables::add)
     }
 
     fun drawWaveform(

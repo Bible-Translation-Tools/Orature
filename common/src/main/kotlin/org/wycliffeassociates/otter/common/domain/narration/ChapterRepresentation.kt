@@ -117,13 +117,15 @@ internal class ChapterRepresentation(
     }
 
     private fun publishActiveVerses() {
-        onActiveVersesUpdated.onNext(
+        val updatedVerses = if (activeVerses.isNotEmpty()) {
             activeVerses.map {
                 val newLoc = absoluteToRelative(it.firstFrame())
                 logger.info("Verse ${it.marker.label} absolute loc is ${it.firstFrame()} relative is ${newLoc}")
                 it.marker.copy(location = newLoc)
             }
-        )
+        } else listOf()
+
+        onActiveVersesUpdated.onNext(updatedVerses)
     }
 
     private fun initializeSerializedVersesFile() {
@@ -185,7 +187,7 @@ internal class ChapterRepresentation(
             for (sector in verse.sectors) {
                 if (sector.length() < remaining) {
                     remaining -= sector.length()
-                } else if (sector.length() == remaining){
+                } else if (sector.length() == remaining) {
                     return sector.last
                 } else {
                     return sector.first + remaining
@@ -194,7 +196,7 @@ internal class ChapterRepresentation(
         }
 
         logger.error("RelativeToAbsolute did not resolve before iterating over active verses. Relative index: ${relativeIdx}")
-        return verses.last().lastFrame()
+        return if (verses.isNotEmpty()) verses.last().lastFrame() else scratchAudio.totalFrames
     }
 
     fun getRangeOfMarker(verse: VerseMarker): IntRange? {
@@ -295,7 +297,7 @@ internal class ChapterRepresentation(
             val current = framePosition
             val verses = activeVerses
             val verseIndex = lockToVerse.get()
-            val hasRemaining =  if (verseIndex != CHAPTER_UNLOCKED) {
+            val hasRemaining = if (verseIndex != CHAPTER_UNLOCKED) {
                 current in verses[verseIndex] && current != verses[verseIndex].lastFrame()
             } else {
                 verses.any { current in it } && current != verses.last().lastFrame()
