@@ -74,6 +74,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
     }
 
     fun getSourceText(): Maybe<String> {
+        println("getting source text for chunk: ${chunk?.sort}")
         return when {
             activeResourceComponent != null -> Maybe.just(
                 activeResourceComponent.textItem.text
@@ -87,12 +88,20 @@ class WorkbookDataStore : Component(), ScopedInstance {
     }
 
     private fun getChunkSourceText(): Maybe<String> {
-        chunk?.let { chunk ->
-            val verses = workbook.projectFilesAccessor.getChunkText(workbook.source.slug, chapter.sort, chunk.start, chunk.end)
-            val text = combineVerses(verses)
-            return Maybe.just(text)
-        }
-        return Maybe.just("")
+        return Maybe
+            .fromCallable {
+                chunk?.let { chunk ->
+                    val verses = workbook.projectFilesAccessor.getChunkText(
+                        workbook.source.slug,
+                        chapter.sort,
+                        chunk.start,
+                        chunk.end
+                    )
+                    val text = combineVerses(verses)
+                    text
+                } ?: ""
+            }
+            .subscribeOn(Schedulers.io())
     }
 
     private fun combineVerses(verses: List<String>): String {
@@ -138,7 +147,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
                         MessageFormat.format(
                             messages["chunkTitle"],
                             messages[activeChunkProperty.value.label],
-                            activeChunkProperty.value.title
+                            activeChunkProperty.value.sort
                         )
                     } else {
                         null

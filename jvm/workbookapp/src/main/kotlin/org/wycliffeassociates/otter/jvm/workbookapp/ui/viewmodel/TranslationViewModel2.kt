@@ -37,12 +37,6 @@ class TranslationViewModel2 : ViewModel() {
             .blockingFirst()
 
         workbookDataStore.activeChapterProperty.set(chapter)
-        workbookDataStore.getSourceText()
-            .observeOnFx()
-            .subscribe {
-                sourceTextProperty.set(it)
-            }
-
         updateStep()
     }
 
@@ -57,7 +51,16 @@ class TranslationViewModel2 : ViewModel() {
         selectedStepProperty.set(target)
     }
 
-    fun updateStep() {
+    fun selectChunk(chunkNumber: Int) {
+        workbookDataStore.chapter.chunks.value?.find { it.sort == chunkNumber }?.let {
+            workbookDataStore.activeChunkProperty.set(it)
+            audioDataStore.updateSourceAudio()
+            audioDataStore.openSourceAudioPlayer()
+            updateSourceText()
+        }
+    }
+
+    private fun updateStep() {
         workbookDataStore.chapter
             .chunks
             .observeOnFx()
@@ -72,9 +75,11 @@ class TranslationViewModel2 : ViewModel() {
             }.addTo(compositeDisposable)
     }
 
-    fun selectChunk(chunkNumber: Int) {
-        workbookDataStore.chapter.chunks.value?.find { it.sort == chunkNumber }?.let {
-            workbookDataStore.activeChunkProperty.set(it)
-        }
+    fun updateSourceText() {
+        workbookDataStore.getSourceText()
+            .observeOnFx()
+            .subscribe {
+                sourceTextProperty.set(it)
+            }
     }
 }

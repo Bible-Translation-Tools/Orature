@@ -12,7 +12,6 @@ import tornadofx.*
 class BlindDraft : Fragment() {
 
     val viewModel: BlindDraftViewModel by inject()
-    val translationViewModel: TranslationViewModel2 by inject()
     val workbookDataStore: WorkbookDataStore by inject()
 
     override val root = vbox {
@@ -24,14 +23,6 @@ class BlindDraft : Fragment() {
             simpleaudioplayer {
                 playerProperty.bind(viewModel.sourcePlayerProperty)
                 enablePlaybackRateProperty.set(true)
-                onPlaybackProgressChanged = { location ->
-                    viewModel.markerModelProperty.value?.let { markerModel ->
-                        val nearestMarkerFrame = markerModel.seekCurrent(location.toInt())
-                        val currentMarker = markerModel.markers.find { it.frame == nearestMarkerFrame }
-                        val index = currentMarker?.let { markerModel.markers.indexOf(it) } ?: -1
-                        translationViewModel.currentMarkerProperty.set(index)
-                    }
-                }
                 sideTextProperty.set(messages["sourceAudio"])
             }
         }
