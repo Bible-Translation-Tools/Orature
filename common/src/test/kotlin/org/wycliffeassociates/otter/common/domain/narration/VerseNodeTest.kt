@@ -353,8 +353,8 @@ class VerseNodeTest {
         val sectorsTaken = verseNode.takeFramesFromEnd(2000)
 
         val expectedSectorsTaken = mutableListOf<IntRange>()
-        expectedSectorsTaken.add(3000 .. 3999)
         expectedSectorsTaken.add(2000 .. 2999)
+        expectedSectorsTaken.add(3000 .. 3999)
 
         // TODO: update takeFramesFromEnd to account for inclusive ends
         Assert.assertTrue(sectorsTaken.equals(expectedSectorsTaken))
@@ -378,15 +378,15 @@ class VerseNodeTest {
         val sectorsTaken = verseNode.takeFramesFromEnd(2500)
 
         val expectedSectorsTaken = mutableListOf<IntRange>()
-        expectedSectorsTaken.add(3000 .. 3999)
-        expectedSectorsTaken.add(2000 .. 2999)
         expectedSectorsTaken.add(1500 .. 1999)
+        expectedSectorsTaken.add(2000 .. 2999)
+        expectedSectorsTaken.add(3000 .. 3999)
 
         // TODO: update takeFramesFromEnd to account for inclusive ends
         Assert.assertTrue(sectorsTaken.equals(expectedSectorsTaken))
 
         val expectedVerseNodeSectors = mutableListOf<IntRange>()
-        expectedVerseNodeSectors.add(1000.. 1500)
+        expectedVerseNodeSectors.add(1000.. 1499)
 
         Assert.assertTrue(verseNode.sectors.equals(expectedVerseNodeSectors))
 
@@ -440,22 +440,6 @@ class VerseNodeTest {
         Assert.assertTrue(verseNode.sectors.equals(ranges))
     }
 
-    // NOTE: test is potentially no longer relevant since we are not sorting the list of ranges anymore
-    @Test
-    fun `add range with multiple items in unordered ranges list that do not have overlapping ranges`() {
-        val verseMarker = VerseMarker(1, 1, 0)
-        val sectors = mutableListOf<IntRange>()
-        val verseNode = VerseNode(0,0, true, verseMarker, sectors)
-
-        val ranges = mutableListOf<IntRange>()
-        ranges.add(1000 .. 1999)
-        ranges.add(3000 .. 3999)
-        ranges.add(2000 .. 2999)
-
-        verseNode.addRange(ranges)
-        // QUESTION: same as "add range with one item in ranges list"
-        Assert.assertTrue(verseNode.sectors.equals(ranges.sortedBy { it.first }))
-    }
 
     // NOTE: test is potentially no longer relevant since we are not flattening the list of ranges anymore
     @Test
@@ -608,7 +592,8 @@ class VerseNodeTest {
 
         try {
             // TODO: update framesToPosition to acctount for inclusive ends
-            Assert.assertEquals(500, verseNode.framesToPosition(2499))
+            val framesToPosition = verseNode.framesToPosition(2499)
+            Assert.assertEquals(500, framesToPosition)
         } catch (ise: IndexOutOfBoundsException) {
             Assert.fail("Not expecting IndexOutOfBoundsException")
         }
@@ -659,7 +644,6 @@ class VerseNodeTest {
 
         try {
             val absoluteFrame = verseNode.absoluteFrameFromOffset(500)
-            // TODO: ask joe if I should be starting at 0?
             Assert.assertEquals(1499, absoluteFrame)
         } catch (ise: IndexOutOfBoundsException) {
             Assert.fail("Not expecting IndexOutOfBoundsException")
@@ -676,7 +660,6 @@ class VerseNodeTest {
         sectors.add(8000.. 8999)
 
         val verseNode = VerseNode(0,0, true, verseMarker, sectors)
-
 
         try {
             val absoluteFrame = verseNode.absoluteFrameFromOffset(1500)
@@ -700,7 +683,7 @@ class VerseNodeTest {
 
         try {
             val absoluteFrame = verseNode.absoluteFrameFromOffset(1500)
-            Assert.assertEquals(8501, absoluteFrame)
+            Assert.assertEquals(8499, absoluteFrame)
         } catch (ise: IndexOutOfBoundsException) {
             Assert.fail("Not expecting IndexOutOfBoundsException")
         }

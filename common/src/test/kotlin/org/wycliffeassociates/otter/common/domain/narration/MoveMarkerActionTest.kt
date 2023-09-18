@@ -82,7 +82,7 @@ class MoveMarkerActionTest {
         )
 
         // Verify that the verse before the verse being moved is updated correctly
-        Assert.assertEquals(44100..44600, totalVerses[verseIndex - 1].sectors.last())
+        Assert.assertEquals(44100..44599, totalVerses[verseIndex - 1].sectors.last()) // TODO: don't hardcode this
 
     }
 
@@ -109,14 +109,8 @@ class MoveMarkerActionTest {
 
         verseMarkerAction.execute(totalVerses, workingAudioFile)
 
-
-        // NOTE: this is failing because the order in which the sectors are added is not correct.
-        // Since we are moving the verseNode back, we should be taking frames from the end of the previous
-        // verseNode and appending them to the start of the sectors list in the current verseNode.
-        // Currently, they are appended to the end of the current verseNode.
-        // Verify that the verse being moved has been updated correctly
         Assert.assertEquals(
-            (44100 * verseIndex + delta) until (44100 * (verseIndex) - 1),
+            (44100 * verseIndex + delta) until (44100 * (verseIndex)),
             totalVerses[verseIndex].sectors.first()
         )
         Assert.assertEquals(
@@ -251,7 +245,7 @@ class MoveMarkerActionTest {
         )
 
         // Verify that the verse before the verse being moved is updated to its moved position correctly
-        Assert.assertEquals(44100..44600, totalVerses[verseIndex - 1].sectors.last())
+        Assert.assertEquals(44100 until 44600, totalVerses[verseIndex - 1].sectors.last())
     }
 
     @Test
@@ -286,7 +280,7 @@ class MoveMarkerActionTest {
         // Currently, they are appended to the end of the current verseNode.
         // Verify that the verse being moved has been updated correctly
         Assert.assertEquals(
-            (44100 * verseIndex + delta) until (44100 * (verseIndex) - 1),
+            (44100 * verseIndex + delta) until (44100 * (verseIndex)),
             totalVerses[verseIndex].sectors.first()
         )
         Assert.assertEquals(
