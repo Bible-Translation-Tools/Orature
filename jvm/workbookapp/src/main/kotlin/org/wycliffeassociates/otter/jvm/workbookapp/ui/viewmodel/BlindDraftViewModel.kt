@@ -38,10 +38,7 @@ class BlindDraftViewModel : ViewModel() {
                     ?.let { translationViewModel.selectChunk(it.sort) }
             }
 
-        audioDataStore.updateSourceAudio()
-        audioDataStore.openSourceAudioPlayer()
         sourcePlayerProperty.bind(audioDataStore.sourceAudioPlayerProperty)
-        loadSourceMarkers(OratureAudioFile(audioDataStore.sourceAudioProperty.value.file))
     }
 
     fun undockBlindDraft() {
@@ -50,12 +47,5 @@ class BlindDraftViewModel : ViewModel() {
         markerModelProperty.set(null)
         translationViewModel.updateSourceText()
         translationViewModel.currentMarkerProperty.set(-1)
-    }
-
-    fun loadSourceMarkers(audio: OratureAudioFile) {
-        audio.clearCues()
-        val verseMarkers = audio.getMarker<VerseMarker>()
-        val markerModel = VerseMarkerModel(audio, verseMarkers.size, verseMarkers.map { it.label })
-        markerModelProperty.set(markerModel)
     }
 }
