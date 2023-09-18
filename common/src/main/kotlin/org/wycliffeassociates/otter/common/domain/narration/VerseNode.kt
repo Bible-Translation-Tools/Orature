@@ -6,7 +6,7 @@ import kotlin.math.min
 
 private const val UNPLACED_END = -1
 
-data class VerseNode(
+internal data class VerseNode(
     /**
      * Start location in audio frames within the scratch audio recording. This is an absolute frame position into
      * the file.
@@ -70,12 +70,6 @@ data class VerseNode(
     fun takeFramesFromStart(framesToTake: Int): List<IntRange> {
         var remaining = framesToTake
         val toGive = mutableListOf<IntRange>()
-
-        // Base case to that it returns an empty list if sectors is empty
-        if(length == 0) {
-            return toGive
-        }
-
         while (remaining > 0) {
             when {
                 // Consume the rest
@@ -101,7 +95,7 @@ data class VerseNode(
                 // Split node
                 else -> {
                     val node = sectors.first()
-                    toGive.add(node.first until(node.first + remaining))
+                    toGive.add(node.first until (node.first + remaining))
                     sectors[0] = (node.first + remaining)..node.last
                     break
                 }
@@ -121,12 +115,6 @@ data class VerseNode(
     fun takeFramesFromEnd(framesToTake: Int): List<IntRange> {
         var remaining = framesToTake
         val toGive = mutableListOf<IntRange>()
-
-        // Base case to that it returns an empty list if sectors is empty
-        if(length == 0) {
-            return toGive
-        }
-
         while (remaining > 0) {
             when {
                 // Consume the rest
@@ -145,7 +133,7 @@ data class VerseNode(
                 // Consume whole node
                 remaining >= sectors.last().length() -> {
                     val node = sectors.last()
-                    remaining -= node.last - node.start + 1
+                    remaining -= node.length()
                     sectors.removeLast()
                     toGive.add(0, node)
                 }
@@ -153,7 +141,7 @@ data class VerseNode(
                 else -> {
                     val node = sectors.last()
                     toGive.add(0, (node.last - remaining + 1)..node.last)
-                    sectors[sectors.lastIndex] = node.first until(node.last - remaining + 1)
+                    sectors[sectors.lastIndex] = node.first until (node.last - remaining + 1)
                     break
                 }
             }
@@ -263,8 +251,7 @@ data class VerseNode(
         val startIndex = sectors.indexOfFirst { framePosition in it }
 
         var start = framePosition
-        // Add - 1 from framesToRead to account for inclusive start/end
-        val end = (start + min(sectors[startIndex].last - start, framesToRead - 1))
+        val end = min(sectors[startIndex].last, start + framesToRead - 1)
         val firstRange = start..end
         stuff.add(firstRange)
         framesToRead -= firstRange.length()
@@ -273,7 +260,7 @@ data class VerseNode(
             if (framesToRead <= 0) break
             val sector = sectors[idx]
             val start = sector.first
-            val end = (start + min(sectors[idx].last - start, framesToRead))
+            val end = min(sectors[idx].last, start + framesToRead - 1)
             val range = (sector.first..end)
             framesToRead -= range.length()
             stuff.add(range)
