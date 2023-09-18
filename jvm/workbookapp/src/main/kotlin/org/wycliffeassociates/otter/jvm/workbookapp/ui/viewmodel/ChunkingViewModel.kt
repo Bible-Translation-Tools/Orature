@@ -117,8 +117,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     fun onDockChunking() {
         val wb = workbookDataStore.workbook
         val chapter = workbookDataStore.chapter
-        val sourceAudio = wb.sourceAudioAccessor.getUserMarkedChapter(chapter.sort, wb.target)
-            ?: initializeSourceAudio(chapter.sort)
+        val sourceAudio = initializeSourceAudio(chapter.sort)
 
         audioDataStore.sourceAudioProperty.set(sourceAudio)
 
