@@ -101,8 +101,10 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
 
     fun initializeAudioController(slider: Slider? = null) {
         audioController = AudioPlayerController(slider)
-        audioController?.load(audioPlayer.get())
-        isPlayingProperty.bind(audioController!!.isPlayingProperty)
+        audioPlayer.value?.let {
+            audioController!!.load(it)
+            isPlayingProperty.bind(audioController!!.isPlayingProperty)
+        }
     }
 
     fun pause() {

@@ -34,8 +34,8 @@ class BlindDraftViewModel : ViewModel() {
                     )
                 }
                 translationViewModel.chunkList.setAll(list)
-                workbookDataStore.activeChunkProperty.set(chunks.firstOrNull { !it.hasSelectedAudio()})
-                translationViewModel.updateSourceText()
+                chunks.firstOrNull { !it.hasSelectedAudio()}
+                    ?.let { translationViewModel.selectChunk(it.sort) }
             }
 
         audioDataStore.updateSourceAudio()

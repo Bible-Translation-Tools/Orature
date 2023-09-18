@@ -38,6 +38,7 @@ class TranslationViewModel2 : ViewModel() {
 
         workbookDataStore.activeChapterProperty.set(chapter)
         updateStep()
+        updateSourceText()
     }
 
     fun undockPage() {
