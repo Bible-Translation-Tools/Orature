@@ -317,6 +317,25 @@ class ChapterRepresentationTest {
             return null
         }
     }
+    
+
+
+    @Test
+    fun `getPcmBuffer with empty sectors and no scratchAudio`() {
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
+        val chapterRepresentationConnection  = chapterRepresentation.ChapterRepresentationConnection(end = null)
+        val byteArray = ByteArray(441000 * 2) { 1 }
+
+        val bytesRead = chapterRepresentationConnection.getPcmBuffer(byteArray)
+
+        Assert.assertEquals(0, bytesRead)
+
+        for(i in byteArray.indices) {
+            Assert.assertEquals(1.toByte(), byteArray[i])
+        }
+    }
+
+
 
     @Test
     fun `getPcmBuffer with sequential sectors and reading the first verse`() {
