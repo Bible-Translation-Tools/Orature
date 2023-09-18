@@ -87,7 +87,7 @@ class RollingSourceText : VBox() {
             val textNodes = chunks
                 .filter { it.isNotBlank() }
                 .mapIndexed { index, chunkText ->
-                    buildChunkText(chunkText, index)
+                    buildChunkText(chunkText, index, chunks.size > 1)
                 }.toMutableList()
 
             nodes.add(sourceTitle)
@@ -114,7 +114,7 @@ class RollingSourceText : VBox() {
         }
     }
 
-    private fun buildChunkText(textContent: String, index: Int): HBox {
+    private fun buildChunkText(textContent: String, index: Int, showNumber: Boolean): HBox {
         return HBox().apply {
             addClass("source-content__chunk")
             highlightedChunk.onChangeAndDoNowWithDisposer { highlightedIndex ->
@@ -127,6 +127,10 @@ class RollingSourceText : VBox() {
             label((index + 1).toString()) {
                 addClass("source-content__verse-number")
                 minWidth = USE_PREF_SIZE
+                if (!showNumber) {
+                    isVisible = false
+                    isManaged = false
+                }
             }
             label(textContent) {
                 addClass("source-content__text")
