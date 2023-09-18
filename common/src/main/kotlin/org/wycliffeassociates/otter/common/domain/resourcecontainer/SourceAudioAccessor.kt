@@ -25,6 +25,7 @@ import org.wycliffeassociates.resourcecontainer.entity.Media
 import java.io.File
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
+import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.workbook.Book
 import org.wycliffeassociates.otter.common.data.audio.OratureCueType
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
@@ -129,6 +130,27 @@ class SourceAudioAccessor(
     }
 
     fun getChunk(chapter: Int, chunk: Int, target: Book?): SourceAudio? {
+        val file = getUserMarkedChapter(chapter, target)?.file
+        if (file != null) {
+            val oratureAudioFile = OratureAudioFile(file)
+            val cues = oratureAudioFile.getCues()
+            cues.sortedBy { it.location }
+            val chunks = oratureAudioFile
+                .getMarker<ChunkMarker>()
+                .sortedBy { it.location }
+            val marker = chunks.find { it.chunk == chunk }
+            if (marker != null) {
+                val markerIndex = chunks.indexOf(marker)
+                val nextMarker = if (chunks.lastIndex > markerIndex) chunks[markerIndex + 1] else null
+                val start = marker.location
+                val end = nextMarker?.location ?: oratureAudioFile.totalFrames
+                return SourceAudio(file, start, end)
+            }
+        }
+        return getVerse(chapter, chunk, target)
+    }
+
+    private fun getVerse(chapter: Int, chunk: Int, target: Book?): SourceAudio? {
         val file = getChapter(chapter, target)?.file
         if (file != null) {
             val oratureAudioFile = OratureAudioFile(file)
