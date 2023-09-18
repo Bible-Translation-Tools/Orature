@@ -74,7 +74,6 @@ class WorkbookDataStore : Component(), ScopedInstance {
     }
 
     fun getSourceText(): Maybe<String> {
-        println("getting source text for chunk: ${chunk?.sort}")
         return when {
             activeResourceComponent != null -> Maybe.just(
                 activeResourceComponent.textItem.text
