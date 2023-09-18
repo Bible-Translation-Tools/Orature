@@ -15,7 +15,6 @@ import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import java.io.File
 import java.io.RandomAccessFile
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.math.log
 import kotlin.math.max
 import kotlin.math.min
 
@@ -178,7 +177,7 @@ internal class ChapterRepresentation(
         var remaining = relativeIdx
         activeVerses.forEach { node ->
             val range = node.length
-            if (range > remaining) {
+            if (range < remaining) {
                 remaining -= range
             } else {
                 return node.absoluteFrameFromOffset(remaining)
