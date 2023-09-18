@@ -60,6 +60,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
 
     val activeTakeNumberProperty = SimpleIntegerProperty()
     val sourceLicenseProperty = SimpleStringProperty()
+    val sourceInfoProperty = SimpleStringProperty()
 
     init {
         activeWorkbookProperty.onChange {
@@ -69,6 +70,13 @@ class WorkbookDataStore : Component(), ScopedInstance {
                 activeChunkProperty.set(null)
             } else {
                 sourceLicenseProperty.set(it.source.resourceMetadata.license)
+                sourceInfoProperty.set(
+                    MessageFormat.format(
+                        messages["source_info_title"],
+                        it.source.language.name,
+                        it.source.resourceMetadata.title
+                    )
+                )
             }
         }
     }

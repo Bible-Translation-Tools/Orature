@@ -7,7 +7,6 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
 import tornadofx.*
@@ -20,6 +19,8 @@ class TranslationViewModel2 : ViewModel() {
     val selectedStepProperty = SimpleObjectProperty<ChunkingStep>(null)
     val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.CHUNKING)
     val sourceTextProperty = SimpleStringProperty()
+    val sourceInfoProperty = workbookDataStore.sourceInfoProperty
+    val sourceLicenseProperty = workbookDataStore.sourceLicenseProperty
     val currentMarkerProperty = SimpleIntegerProperty(-1)
     val chunkList = observableListOf<ChunkViewData>()
     val chunkListProperty = SimpleListProperty<ChunkViewData>(chunkList)

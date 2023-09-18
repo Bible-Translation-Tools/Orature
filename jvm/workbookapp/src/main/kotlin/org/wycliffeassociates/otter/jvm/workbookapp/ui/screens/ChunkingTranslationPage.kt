@@ -47,6 +47,8 @@ class ChunkingTranslationPage : View() {
 
             right = SourceTextDrawer().apply {
                 sourceTextDrawer = this
+                sourceInfoProperty.bind(viewModel.sourceInfoProperty)
+                licenseProperty.bind(viewModel.sourceLicenseProperty)
                 textProperty.bind(viewModel.sourceTextProperty)
                 highlightedChunk.bind(viewModel.currentMarkerProperty)
             }

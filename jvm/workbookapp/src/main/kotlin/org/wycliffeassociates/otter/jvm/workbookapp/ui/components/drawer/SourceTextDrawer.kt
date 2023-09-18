@@ -14,6 +14,7 @@ import org.wycliffeassociates.otter.jvm.controls.RollingSourceText
 import org.wycliffeassociates.otter.jvm.controls.rollingSourceText
 import tornadofx.*
 import tornadofx.FX.Companion.messages
+import java.text.MessageFormat
 
 class SourceTextDrawer : VBox() {
     val sourceInfoProperty = SimpleStringProperty()
@@ -69,7 +70,11 @@ class SourceTextDrawer : VBox() {
             sourceTextContent = this
             sourceTitleProperty.bind(sourceInfoProperty)
             sourceTextProperty.bind(textProperty)
-            licenseTextProperty.bind(licenseProperty)
+            licenseTextProperty.bind(licenseProperty.stringBinding {
+                it?.let {
+                    MessageFormat.format(messages["licenseStatement"], it)
+                } ?: ""
+            })
             this.orientationProperty.bind(this@SourceTextDrawer.orientationProperty)
             this.highlightedChunk.bind(this@SourceTextDrawer.highlightedChunk)
 
