@@ -180,8 +180,10 @@ internal class ChapterRepresentation(
     internal fun relativeToAbsolute(relativeIdx: Int): Int {
         var remaining = relativeIdx
         val verses = activeVerses
-        if (relativeIdx == 0 && activeVerses.isEmpty()) return 0
-        if (relativeIdx == 0) return activeVerses.first().firstFrame()
+        if (relativeIdx <= 0 && activeVerses.isEmpty()) {
+            return if (scratchAudio.totalFrames == 0) 0 else scratchAudio.totalFrames + 1
+        }
+        if (relativeIdx <= 0) return activeVerses.first().firstFrame()
 
         for (verse in verses) {
             for (sector in verse.sectors) {
@@ -276,8 +278,11 @@ internal class ChapterRepresentation(
         }
 
         @get:Synchronized
-        override val framePosition: Int
+        val absoluteFramePosition: Int
             get() = position / frameSizeInBytes
+
+        override val framePosition: Int
+            get() = absoluteToRelative(absoluteFramePosition)
 
         @get:Synchronized
         override val totalFrames: Int
@@ -294,7 +299,7 @@ internal class ChapterRepresentation(
         override fun hasRemaining(): Boolean {
             if (totalFrames == 0) return false
 
-            val current = framePosition
+            val current = absoluteFramePosition
             val verses = activeVerses
             val verseIndex = lockToVerse.get()
             val hasRemaining = if (verseIndex != CHAPTER_UNLOCKED) {
@@ -341,7 +346,7 @@ internal class ChapterRepresentation(
         }
 
         private fun getVerseToReadFrom(verses: List<VerseNode>): VerseNode? {
-            var currentVerseIndex = verses.indexOfFirst { framePosition in it }
+            var currentVerseIndex = verses.indexOfFirst { absoluteFramePosition in it }
             if (currentVerseIndex == -1) {
                 currentVerseIndex = 0
             }
@@ -359,20 +364,20 @@ internal class ChapterRepresentation(
             }
             val raf = randomAccessFile!!
 
-            if (framePosition !in verse) {
+            if (absoluteFramePosition !in verse) {
                 return 0
             }
 
             var framesToRead = min(bytes.size / frameSizeInBytes, verse.length)
 
             // if there is a negative frames to read or
-            if (framesToRead <= 0 || framePosition !in verse) {
-                logger.error("Frames to read is negative: $framePosition, $framesToRead, ${verse.marker.formattedLabel}")
+            if (framesToRead <= 0 || absoluteFramePosition !in verse) {
+                logger.error("Frames to read is negative: $absoluteFramePosition, $framesToRead, ${verse.marker.formattedLabel}")
                 position = verse.lastFrame() * frameSizeInBytes
                 return 0
             }
 
-            val sectors = verse.getSectorsFromOffset(framePosition, framesToRead)
+            val sectors = verse.getSectorsFromOffset(absoluteFramePosition, framesToRead)
 
             if (sectors.isEmpty()) {
                 logger.error("sectors is empty for verse ${verse.marker.label}")
@@ -381,7 +386,7 @@ internal class ChapterRepresentation(
             }
 
             for (sector in sectors) {
-                if (framesToRead <= 0 || framePosition !in verse) break
+                if (framesToRead <= 0 || absoluteFramePosition !in verse) break
 
                 val framesToCopyFromSector = max(min(framesToRead, sector.length()), 0)
 
@@ -398,13 +403,13 @@ internal class ChapterRepresentation(
                 position += toCopy
                 framesToRead -= toCopy / frameSizeInBytes
 
-                if (framePosition !in sector) {
-                    logger.warn("Frame position popped out of sector; it got corrected, but there must be a math issue. framePosition:$framePosition, last:${sector.last}")
+                if (absoluteFramePosition !in sector) {
+                    logger.warn("Frame position popped out of sector; it got corrected, but there must be a math issue. absoluteFramePosition:$absoluteFramePosition, last:${sector.last}")
                     position = sector.last * frameSizeInBytes
                 }
             }
 
-            if (framePosition == verse.lastFrame()) {
+            if (absoluteFramePosition == verse.lastFrame()) {
                 adjustPositionToNextVerse(verse)
             }
 
@@ -412,7 +417,7 @@ internal class ChapterRepresentation(
         }
 
         private fun adjustPositionToNextSector(verse: VerseNode, sector: IntRange, sectors: List<IntRange>) {
-            if (framePosition != sector.last) return
+            if (absoluteFramePosition != sector.last) return
 
             val sectorIndex = sectors.indexOf(sector)
             if (sectorIndex == sectors.lastIndex) {
