@@ -192,6 +192,8 @@ internal class ChapterRepresentation(
                 }
             }
         }
+
+        logger.error("RelativeToAbsolute did not resolve before iterating over active verses. Relative index: ${relativeIdx}")
         return verses.last().lastFrame()
     }
 
