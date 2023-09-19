@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import javafx.animation.AnimationTimer
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
@@ -24,6 +25,7 @@ class RecorderViewModel : ViewModel() {
     @Inject
     lateinit var audioConnectionFactory: AudioConnectionFactory
 
+    val targetFileProperty = SimpleObjectProperty<File>(null)
     var hasWrittenProperty = SimpleBooleanProperty(false)
     @Volatile
     var recordingProperty = SimpleBooleanProperty(false)
@@ -100,7 +102,10 @@ class RecorderViewModel : ViewModel() {
         at.stop()
         recorder.stop()
         waveformCanvas.clearDrawables()
-//        wavAudio.file.copyTo(targetFile, true)
+        targetFileProperty.value?.let {
+            println("file saved to $it")
+            wavAudio.file.copyTo(it, true)
+        }
         reset()
         onFinish()
     }
@@ -131,7 +136,7 @@ class RecorderViewModel : ViewModel() {
         return kotlin.io.path.createTempFile("otter-take",".wav").toFile()
             .also {
                 it.deleteOnExit()
-//                targetFile.copyTo(it, true)
+                targetFileProperty.value?.copyTo(it, true)
             }
     }
 }

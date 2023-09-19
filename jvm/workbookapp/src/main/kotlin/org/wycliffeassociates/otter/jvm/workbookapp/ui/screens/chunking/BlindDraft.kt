@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Node
 import javafx.scene.layout.Priority
@@ -61,6 +62,11 @@ class BlindDraft : Fragment() {
 
                     action {
                         mainSectionProperty.set(recordingView)
+                        viewModel.newTakeFile()
+                            .observeOnFx()
+                            .subscribe { take ->
+                                recorderViewModel.targetFileProperty.set(take.file)
+                            }
                         // use the width of the existing view
                         recorderViewModel.onViewReady(takesView.width.toInt())
                     }
