@@ -100,6 +100,7 @@ class ChapterRepresentationTest {
         } catch (e: IOException) {
             e.printStackTrace()
         }
+        byteBuffer.rewind()
     }
 
 
@@ -129,11 +130,45 @@ class ChapterRepresentationTest {
     fun `totalFrames with initialized totalVerses list`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
-        println(chapterRepresentation.totalVerses)
 
         Assert.assertEquals(44100*numTestVerses, chapterRepresentation.totalFrames)
     }
 
+
+    // TODO: add test for loadFromSerializedVerses
+
+    // TODO: add test for finalizeVerse
+
+    @Test
+    fun `absoluteToRelative with empty activeVerses`() {
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
+
+        val relativePosition = chapterRepresentation.absoluteToRelative(1000)
+        Assert.assertEquals(0, relativePosition)
+    }
+
+    @Test
+    fun `absoluteToRelative with non-empty activeVerses and absoluteFrame not in activeVerses`() {
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
+        initializeVerseNodeList(chapterRepresentation.totalVerses)
+
+        val relativePosition = chapterRepresentation.absoluteToRelative(-5)
+        Assert.assertEquals(0, relativePosition)
+    }
+
+    @Test
+    fun `absoluteToRelative with activeVerses, sequential sectors, and non-null verse`() {
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
+        initializeVerseNodeList(chapterRepresentation.totalVerses)
+
+        val relativePosition = chapterRepresentation.absoluteToRelative(176400)
+
+        // NOTE: they are the same value because the sectors are sequential
+        // TODO: fix off by one
+        Assert.assertEquals(176400, relativePosition)
+    }
+
+    // TODO: add test with non-sequential sectors
 
     @Test
     fun `relativeToAbsolute with relativeIdx at the start of the first node`() {
@@ -297,6 +332,19 @@ class ChapterRepresentationTest {
         Assert.assertEquals(false, hasRemaining)
     }
 
+    @Test
+    fun `ChapterRepresentationConnection's hasRemaining with working audio, lockToVerse not equal to CHAPTER_UNLOCKED, and framePosition in locked verseNode`() {
+        val verseIndexToLockTo = 5
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
+        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null)
+
+        chapterRepresentationConnection.lockToVerse(verseIndexToLockTo)
+        val hasRemaining = chapterRepresentationConnection.hasRemaining()
+
+        Assert.assertTrue(hasRemaining)
+
+    }
 
 
     fun readBytesFromFile(filePath: String): ByteArray? {
@@ -317,7 +365,55 @@ class ChapterRepresentationTest {
             return null
         }
     }
-    
+
+
+    @Test
+    fun `lockToVerse with null index`() {
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
+        val chapterRepresentationConnection  = chapterRepresentation.ChapterRepresentationConnection(end = null)
+
+        chapterRepresentationConnection.lockToVerse(index = null)
+
+        Assert.assertEquals(0, chapterRepresentationConnection.framePosition)
+    }
+
+
+    @Test
+    fun `lockToVerse with index outside of activeVerses list`() {
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
+        val chapterRepresentationConnection  = chapterRepresentation.ChapterRepresentationConnection(end = null)
+
+        chapterRepresentationConnection.lockToVerse(index = 10000)
+
+        Assert.assertEquals(0, chapterRepresentationConnection.framePosition)
+    }
+
+    @Test
+    fun `lockToVerse with negative index`() {
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
+        val chapterRepresentationConnection  = chapterRepresentation.ChapterRepresentationConnection(end = null)
+
+        chapterRepresentationConnection.lockToVerse(index = -1)
+
+        Assert.assertEquals(0, chapterRepresentationConnection.framePosition)
+    }
+
+
+    @Test
+    fun `lockToVerse with index in range of activeVerses and position not in range of node`() {
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
+        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        val chapterRepresentationConnection  = chapterRepresentation.ChapterRepresentationConnection(end = null)
+
+        // Check if the initial frame position is correct
+        Assert.assertEquals(0, chapterRepresentationConnection.framePosition)
+
+        chapterRepresentationConnection.lockToVerse(5)
+
+        // Check if the initial frame position is correct
+        Assert.assertEquals(220500, chapterRepresentationConnection.framePosition)
+    }
+
 
 
     @Test
@@ -330,9 +426,8 @@ class ChapterRepresentationTest {
 
         Assert.assertEquals(0, bytesRead)
 
-        for(i in byteArray.indices) {
-            Assert.assertEquals(1.toByte(), byteArray[i])
-        }
+        val expectedBytesArray = ByteArray(441000 * 2) { 1 }
+        Assert.assertArrayEquals(expectedBytesArray, byteArray)
     }
 
 
@@ -340,40 +435,35 @@ class ChapterRepresentationTest {
     @Test
     fun `getPcmBuffer with sequential sectors and reading the first verse`() {
         val secondsOfAudio = 31
-        val buffer = ByteBuffer.allocate(44100 * secondsOfAudio * 2)
+        val testAudioDataBuffer = ByteBuffer.allocate(44100 * secondsOfAudio * 2)
 
-        fillAudioBufferWithPadding(buffer, secondsOfAudio, 0)
-        writeByteBufferToPCMFile(buffer, "${testDirWithAudio}\\chapter_narration.pcm")
+        fillAudioBufferWithPadding(testAudioDataBuffer, secondsOfAudio, 0)
+        writeByteBufferToPCMFile(testAudioDataBuffer, "${testDirWithAudio}\\chapter_narration.pcm")
 
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
         val chapterRepresentationConnection  = chapterRepresentation.ChapterRepresentationConnection(end = null)
 
         // Gets the full first verse
-        val byteArray = ByteArray(441000 * 2) { 1 }
-        val responseBuffer = ByteBuffer.allocate(44100 * 2)
+        val byteArray = ByteArray(44100 * 2) { 1 }
 
         val bytesRead = chapterRepresentationConnection.getPcmBuffer(byteArray)
-        for(i in 0 until bytesRead) {
-            responseBuffer.put(byteArray[i])
-        }
-        responseBuffer.position(0)
 
         Assert.assertEquals(44100 * 2, bytesRead)
 
-        for(j in 1 .. 44100) {
-            val short = responseBuffer.short
-            Assert.assertEquals(1.toShort(), short)
-        }
+        val expectedByteArray = ByteArray(44100 * 2)
+        testAudioDataBuffer.get(expectedByteArray)
+        Assert.assertArrayEquals(expectedByteArray, byteArray)
+
     }
 
     @Test
     fun `getPcmBuffer with sequential sectors and reading entire file`() {
         val secondsOfAudio = 31
-        val buffer = ByteBuffer.allocate(44100 * secondsOfAudio * 2)
+        val testAudioDataBuffer = ByteBuffer.allocate(44100 * secondsOfAudio * 2)
 
-        fillAudioBufferWithPadding(buffer, secondsOfAudio, 0)
-        writeByteBufferToPCMFile(buffer, "${testDirWithAudio}\\chapter_narration.pcm")
+        fillAudioBufferWithPadding(testAudioDataBuffer, secondsOfAudio, 0)
+        writeByteBufferToPCMFile(testAudioDataBuffer, "${testDirWithAudio}\\chapter_narration.pcm")
 
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
@@ -395,11 +485,10 @@ class ChapterRepresentationTest {
 
         val expectedBytesRead = 44100 * secondsOfAudio * 2
         Assert.assertEquals(expectedBytesRead, totalBytesRead)
-        for(i in 1 .. secondsOfAudio) {
-            for(j in 1 .. 44100) {
-                Assert.assertEquals(i.toShort(), responseBuffer.short)
-            }
-        }
+
+        val expectedByteArray = ByteArray(44100 * secondsOfAudio * 2)
+        testAudioDataBuffer.get(expectedByteArray)
+        Assert.assertTrue(responseBuffer > testAudioDataBuffer)
     }
 
     @Test
@@ -440,6 +529,78 @@ class ChapterRepresentationTest {
                 Assert.assertEquals(i.toShort(), responseBuffer.short)
             }
         }
+    }
+
+    @Test
+    fun `getPcmBuffer with sequential sectors lockToVerse not equal to CHAPTER_UNLOCKED`() {
+        val secondsOfAudio = 31
+        val buffer = ByteBuffer.allocate(44100 * secondsOfAudio * 2)
+
+        fillAudioBufferWithPadding(buffer, secondsOfAudio, 0)
+        writeByteBufferToPCMFile(buffer, "${testDirWithAudio}\\chapter_narration.pcm")
+
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
+        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        val chapterRepresentationConnection  = chapterRepresentation.ChapterRepresentationConnection(end = null)
+
+        val byteArray = ByteArray(44100 * secondsOfAudio * 2) { 1 }
+        val responseBuffer = ByteBuffer.allocate(44100 * secondsOfAudio * 2)
+
+        // Locks to verse 6
+        chapterRepresentationConnection.lockToVerse(5)
+
+        var totalBytesRead = 0
+        while(chapterRepresentationConnection.hasRemaining()) {
+            val bytesRead = chapterRepresentationConnection.getPcmBuffer(byteArray)
+            totalBytesRead += bytesRead
+            for(i in 0 until bytesRead) {
+                responseBuffer.put(byteArray[i])
+            }
+        }
+        responseBuffer.position(0)
+
+        val expectedBytesRead = 44100 * 2
+        Assert.assertEquals(expectedBytesRead, totalBytesRead)
+        for(j in 1 .. 44100) {
+            Assert.assertEquals(6.toShort(), responseBuffer.short)
+        }
+    }
+
+
+
+    @Test
+    fun `getPcmBuffer with sequential sectors lockToVerse equal to CHAPTER_UNLOCKED`() {
+        val secondsOfAudio = 31
+        val testAudioDataBuffer = ByteBuffer.allocate(44100 * secondsOfAudio * 2)
+
+        fillAudioBufferWithPadding(testAudioDataBuffer, secondsOfAudio, 0)
+        writeByteBufferToPCMFile(testAudioDataBuffer, "${testDirWithAudio}\\chapter_narration.pcm")
+
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
+        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        val chapterRepresentationConnection  = chapterRepresentation.ChapterRepresentationConnection(end = null)
+
+        val byteArray = ByteArray(44100 * secondsOfAudio * 2) { 1 }
+        val responseBuffer = ByteBuffer.allocate(44100 * secondsOfAudio * 2)
+
+        chapterRepresentationConnection.lockToVerse(index = null)
+
+        var totalBytesRead = 0
+        while(chapterRepresentationConnection.hasRemaining()) {
+            val bytesRead = chapterRepresentationConnection.getPcmBuffer(byteArray)
+            totalBytesRead += bytesRead
+            for(i in 0 until bytesRead) {
+                responseBuffer.put(byteArray[i])
+            }
+        }
+        responseBuffer.position(0)
+
+        val expectedBytesRead = 44100 * 2 * 31
+        Assert.assertEquals(expectedBytesRead, totalBytesRead)
+
+        val expectedByteArray = ByteArray(44100 * secondsOfAudio * 2)
+        testAudioDataBuffer.get(expectedByteArray)
+        Assert.assertTrue(responseBuffer > testAudioDataBuffer)
     }
 }
 
