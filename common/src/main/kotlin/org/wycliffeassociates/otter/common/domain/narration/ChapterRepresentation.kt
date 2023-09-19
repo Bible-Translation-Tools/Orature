@@ -15,7 +15,6 @@ import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import java.io.File
 import java.io.RandomAccessFile
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.math.log
 import kotlin.math.max
 import kotlin.math.min
 
@@ -75,7 +74,7 @@ internal class ChapterRepresentation(
                 VerseMarker(chunk.start, chunk.end, 0)
             }
             .map { marker ->
-                VerseNode(0, 0, false, marker)
+                VerseNode(false, marker)
             }
             .toList()
             .blockingGet()
@@ -404,7 +403,6 @@ internal class ChapterRepresentation(
                 framesToRead -= toCopy / frameSizeInBytes
 
                 if (absoluteFramePosition !in sector) {
-                    logger.warn("Frame position popped out of sector; it got corrected, but there must be a math issue. absoluteFramePosition:$absoluteFramePosition, last:${sector.last}")
                     position = sector.last * frameSizeInBytes
                 }
             }

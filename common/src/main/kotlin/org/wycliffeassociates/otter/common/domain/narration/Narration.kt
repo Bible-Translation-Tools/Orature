@@ -311,8 +311,6 @@ class Narration @AssistedInject constructor(
             val verseAudio = AudioFile(it.value)
             end += verseAudio.totalFrames
             val node = VerseNode(
-                start,
-                end,
                 true,
                 it.key
             )
