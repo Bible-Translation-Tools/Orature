@@ -6,7 +6,7 @@ import kotlin.math.min
 
 private const val UNPLACED_END = -1
 
-internal data class VerseNode(
+data class VerseNode(
     /**
      * Start location in audio frames within the scratch audio recording. This is an absolute frame position into
      * the file.
@@ -209,10 +209,10 @@ internal data class VerseNode(
         var frameOffset = 0
         for (sector in sectors) {
             if (absoluteFrame in sector) {
-                // The + 1 can be removed if the purpose of this function is to count the number
+                // The + 1 has been removed because the purpose of this function is to count the number
                 //  of frames up to (not including) the absolute frame.
                 //  I.e. if the question this function is answering is "how many frames are behind my current position?"
-                frameOffset += absoluteFrame - sector.first + 1
+                frameOffset += absoluteFrame - sector.first
                 break
             } else {
                 frameOffset += sector.length()
