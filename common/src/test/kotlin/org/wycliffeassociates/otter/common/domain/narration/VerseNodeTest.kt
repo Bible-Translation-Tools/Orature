@@ -588,9 +588,8 @@ class VerseNodeTest {
 
 
         try {
-            // TODO: update framesToPosition to acctount for inclusive ends
             val framesToPosition = verseNode.framesToPosition(2499)
-            Assert.assertEquals(500, framesToPosition)
+            Assert.assertEquals(499, framesToPosition)
         } catch (ise: IndexOutOfBoundsException) {
             Assert.fail("Not expecting IndexOutOfBoundsException")
         }
@@ -607,7 +606,7 @@ class VerseNodeTest {
 
 
         try {
-            Assert.assertEquals(2500, verseNode.framesToPosition(6499))
+            Assert.assertEquals(2499, verseNode.framesToPosition(6499))
         } catch (ise: IndexOutOfBoundsException) {
             Assert.fail("Not expecting IndexOutOfBoundsException")
         }
