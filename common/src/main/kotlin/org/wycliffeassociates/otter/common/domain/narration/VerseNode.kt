@@ -4,20 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import kotlin.math.min
 
-private const val UNPLACED_END = -1
-
 internal data class VerseNode(
-    /**
-     * Start location in audio frames within the scratch audio recording. This is an absolute frame position into
-     * the file.
-     */
-    var startScratchFrame: Int,
-    /**
-     * End location in audio frames within the scratch audio recording. This is an absolute frame position into
-     * the file.
-     */
-    var endScratchFrame: Int,
-
     var placed: Boolean = false,
     val marker: VerseMarker,
     var sectors: MutableList<IntRange> = mutableListOf()
@@ -182,8 +169,6 @@ internal data class VerseNode(
      */
     fun copy(): VerseNode {
         val vn = VerseNode(
-            startScratchFrame,
-            endScratchFrame,
             placed,
             marker
         )
