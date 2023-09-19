@@ -35,7 +35,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewMod
 import tornadofx.*
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 
-// TODO: DELETE THIS CLASS
 class ChunkingPage : View() {
 
     val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
