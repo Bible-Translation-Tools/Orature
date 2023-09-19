@@ -52,9 +52,19 @@ class AudioReaderDrawable(
         val frameSizeBytes = audioReader.frameSizeBytes
         var framesToRead = max(min(totalSamplesToRead, audioReader.totalFrames - clampedLoc), 0) * frameSizeBytes
 
+        var retry = 0
+        while (framesToRead > 0 && audioReader.hasRemaining()) {
+            if (retry >= 10) {
+                logger.error("Aborted reader renderer, read returned 0 bytes several times")
+                break
+            }
 
-        while (framesToRead > 0) {
             val read = audioReader.getPcmBuffer(tempBuff)
+
+            // Read could return 0 if the underlying reader needs to hop over to the next verse; but if this happens
+            // many times in a row, we're in an infinite loop.
+            if (read == 0) retry++ else retry = 0
+
             val toTransfer = if (framesToRead > read) read else framesToRead
             transferBytesToCompressor(pcmCompressor, bb, toTransfer, frameSizeBytes)
             framesToRead -= read
