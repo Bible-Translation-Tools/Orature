@@ -15,7 +15,6 @@ import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import java.io.File
 import java.io.RandomAccessFile
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.math.log
 import kotlin.math.max
 import kotlin.math.min
 
@@ -75,7 +74,7 @@ internal class ChapterRepresentation(
                 VerseMarker(chunk.start, chunk.end, 0)
             }
             .map { marker ->
-                VerseNode(0, 0, false, marker)
+                VerseNode(false, marker)
             }
             .toList()
             .blockingGet()
@@ -113,16 +112,19 @@ internal class ChapterRepresentation(
     private fun serializeVerses() {
         val jsonStr = activeVersesMapper.writeValueAsString(activeVerses)
         serializedVersesFile.writeText(jsonStr)
+        logger.warn(jsonStr)
     }
 
     private fun publishActiveVerses() {
-        onActiveVersesUpdated.onNext(
+        val updatedVerses = if (activeVerses.isNotEmpty()) {
             activeVerses.map {
                 val newLoc = absoluteToRelative(it.firstFrame())
                 logger.info("Verse ${it.marker.label} absolute loc is ${it.firstFrame()} relative is ${newLoc}")
                 it.marker.copy(location = newLoc)
             }
-        )
+        } else listOf()
+
+        onActiveVersesUpdated.onNext(updatedVerses)
     }
 
     private fun initializeSerializedVersesFile() {
@@ -176,15 +178,26 @@ internal class ChapterRepresentation(
      */
     internal fun relativeToAbsolute(relativeIdx: Int): Int {
         var remaining = relativeIdx
-        activeVerses.forEach { node ->
-            val range = node.length
-            if (range > remaining) {
-                remaining -= range
-            } else {
-                return node.absoluteFrameFromOffset(remaining)
+        val verses = activeVerses
+        if (relativeIdx <= 0 && activeVerses.isEmpty()) {
+            return if (scratchAudio.totalFrames == 0) 0 else scratchAudio.totalFrames + 1
+        }
+        if (relativeIdx <= 0) return activeVerses.first().firstFrame()
+
+        for (verse in verses) {
+            for (sector in verse.sectors) {
+                if (sector.length() < remaining) {
+                    remaining -= sector.length()
+                } else if (sector.length() == remaining) {
+                    return sector.last
+                } else {
+                    return sector.first + remaining
+                }
             }
         }
-        return remaining
+
+        logger.error("RelativeToAbsolute did not resolve before iterating over active verses. Relative index: ${relativeIdx}")
+        return if (verses.isNotEmpty()) verses.last().lastFrame() else scratchAudio.totalFrames
     }
 
     fun getRangeOfMarker(verse: VerseMarker): IntRange? {
@@ -231,9 +244,6 @@ internal class ChapterRepresentation(
         private var position: Int
             get() = _position
             set(value) {
-                if (_position !in 0..(totalFrames * frameSizeInBytes)) {
-                    logger.warn("setting position outside of total frames?")
-                }
                 _position = value
             }
 
@@ -267,8 +277,11 @@ internal class ChapterRepresentation(
         }
 
         @get:Synchronized
-        override val framePosition: Int
+        val absoluteFramePosition: Int
             get() = position / frameSizeInBytes
+
+        override val framePosition: Int
+            get() = absoluteToRelative(absoluteFramePosition)
 
         @get:Synchronized
         override val totalFrames: Int
@@ -285,12 +298,13 @@ internal class ChapterRepresentation(
         override fun hasRemaining(): Boolean {
             if (totalFrames == 0) return false
 
+            val current = absoluteFramePosition
             val verses = activeVerses
             val verseIndex = lockToVerse.get()
-            val hasRemaining =  if (verseIndex != CHAPTER_UNLOCKED) {
-                framePosition in verses[verseIndex] && framePosition != verses[verseIndex].lastFrame()
+            val hasRemaining = if (verseIndex != CHAPTER_UNLOCKED) {
+                current in verses[verseIndex] && current != verses[verseIndex].lastFrame()
             } else {
-                verses.any { framePosition in it } && framePosition != verses.last().lastFrame()
+                verses.any { current in it } && current != verses.last().lastFrame()
             }
             if (!hasRemaining) {
                 logger.info("No audio remaining")
@@ -331,7 +345,7 @@ internal class ChapterRepresentation(
         }
 
         private fun getVerseToReadFrom(verses: List<VerseNode>): VerseNode? {
-            var currentVerseIndex = verses.indexOfFirst { framePosition in it }
+            var currentVerseIndex = verses.indexOfFirst { absoluteFramePosition in it }
             if (currentVerseIndex == -1) {
                 currentVerseIndex = 0
             }
@@ -349,20 +363,20 @@ internal class ChapterRepresentation(
             }
             val raf = randomAccessFile!!
 
-            if (framePosition !in verse) {
+            if (absoluteFramePosition !in verse) {
                 return 0
             }
 
             var framesToRead = min(bytes.size / frameSizeInBytes, verse.length)
 
             // if there is a negative frames to read or
-            if (framesToRead <= 0 || framePosition !in verse) {
-                logger.error("Frames to read is negative: $framePosition, $framesToRead, ${verse.marker.formattedLabel}")
+            if (framesToRead <= 0 || absoluteFramePosition !in verse) {
+                logger.error("Frames to read is negative: $absoluteFramePosition, $framesToRead, ${verse.marker.formattedLabel}")
                 position = verse.lastFrame() * frameSizeInBytes
                 return 0
             }
 
-            val sectors = verse.getSectorsFromOffset(framePosition, framesToRead)
+            val sectors = verse.getSectorsFromOffset(absoluteFramePosition, framesToRead)
 
             if (sectors.isEmpty()) {
                 logger.error("sectors is empty for verse ${verse.marker.label}")
@@ -371,7 +385,7 @@ internal class ChapterRepresentation(
             }
 
             for (sector in sectors) {
-                if (framesToRead <= 0 || framePosition !in verse) break
+                if (framesToRead <= 0 || absoluteFramePosition !in verse) break
 
                 val framesToCopyFromSector = max(min(framesToRead, sector.length()), 0)
 
@@ -388,13 +402,12 @@ internal class ChapterRepresentation(
                 position += toCopy
                 framesToRead -= toCopy / frameSizeInBytes
 
-                if (framePosition !in sector) {
-                    logger.warn("Frame position popped out of sector; it got corrected, but there must be a math issue. framePosition:$framePosition, last:${sector.last}")
+                if (absoluteFramePosition !in sector) {
                     position = sector.last * frameSizeInBytes
                 }
             }
 
-            if (framePosition == verse.lastFrame()) {
+            if (absoluteFramePosition == verse.lastFrame()) {
                 adjustPositionToNextVerse(verse)
             }
 
@@ -402,7 +415,7 @@ internal class ChapterRepresentation(
         }
 
         private fun adjustPositionToNextSector(verse: VerseNode, sector: IntRange, sectors: List<IntRange>) {
-            if (framePosition != sector.last) return
+            if (absoluteFramePosition != sector.last) return
 
             val sectorIndex = sectors.indexOf(sector)
             if (sectorIndex == sectors.lastIndex) {
@@ -424,19 +437,12 @@ internal class ChapterRepresentation(
 
         @Synchronized
         override fun seek(sample: Int) {
-            position = when {
-//                sample <= startBounds -> startBounds * frameSizeInBytes
-//                sample >= endBounds -> endBounds - 1 * frameSizeInBytes
-                else -> {
-                    sample * frameSizeInBytes
-                }
-            }
+            position = relativeToAbsolute(sample) * frameSizeInBytes
         }
 
         override fun open() {
             randomAccessFile?.let { release() }
             randomAccessFile = RandomAccessFile(scratchAudio.file, "r")
-            logger.info("open called")
         }
 
         override fun release() {

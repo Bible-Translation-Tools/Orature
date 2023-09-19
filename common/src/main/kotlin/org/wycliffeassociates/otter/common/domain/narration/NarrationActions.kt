@@ -37,7 +37,7 @@ internal class NewVerseAction(
         val end = start
 
         node = VerseNode(
-            start, end, placed = true, totalVerses[verseIndex].marker.copy()
+            placed = true, totalVerses[verseIndex].marker.copy()
         ).also {
             it.addStart(start)
             totalVerses[verseIndex] = it.copy()
@@ -82,12 +82,10 @@ internal class RecordAgainAction(
         logger.info("Recording again verse for index: ${verseIndex}")
         previous = totalVerses[verseIndex].copy()
 
-        val start = workingAudio.totalFrames
-        val end = workingAudio.totalFrames
+        val start = if (workingAudio.totalFrames == 0) 0 else workingAudio.totalFrames + 1
+        val end = start
 
         node = VerseNode(
-            start,
-            end,
             placed = true,
             totalVerses[verseIndex].marker.copy(),
             mutableListOf(start..end)
@@ -222,7 +220,7 @@ internal class EditVerseAction(
 
         val vm = totalVerses[verseIndex].marker.copy()
         node = VerseNode(
-            start, end, placed = true, vm
+            placed = true, vm
         ).also {
             totalVerses[verseIndex] = it.copy()
         }

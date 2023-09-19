@@ -4,20 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import kotlin.math.min
 
-private const val UNPLACED_END = -1
-
 internal data class VerseNode(
-    /**
-     * Start location in audio frames within the scratch audio recording. This is an absolute frame position into
-     * the file.
-     */
-    var startScratchFrame: Int,
-    /**
-     * End location in audio frames within the scratch audio recording. This is an absolute frame position into
-     * the file.
-     */
-    var endScratchFrame: Int,
-
     var placed: Boolean = false,
     val marker: VerseMarker,
     var sectors: MutableList<IntRange> = mutableListOf()
@@ -95,8 +82,8 @@ internal data class VerseNode(
                 // Split node
                 else -> {
                     val node = sectors.first()
-                    toGive.add(node.first..(node.first + remaining))
-                    sectors[0] = (node.first + remaining + 1)..node.last
+                    toGive.add(node.first until (node.first + remaining))
+                    sectors[0] = (node.first + remaining)..node.last
                     break
                 }
             }
@@ -133,15 +120,15 @@ internal data class VerseNode(
                 // Consume whole node
                 remaining >= sectors.last().length() -> {
                     val node = sectors.last()
-                    remaining -= node.last - node.start
+                    remaining -= node.length()
                     sectors.removeLast()
                     toGive.add(0, node)
                 }
                 // Split node
                 else -> {
                     val node = sectors.last()
-                    toGive.add(0, (node.last - remaining)..node.last)
-                    sectors[sectors.lastIndex] = node.first..(node.last - remaining - 1)
+                    toGive.add(0, (node.last - remaining + 1)..node.last)
+                    sectors[sectors.lastIndex] = node.first until (node.last - remaining + 1)
                     break
                 }
             }
@@ -182,8 +169,6 @@ internal data class VerseNode(
      */
     fun copy(): VerseNode {
         val vn = VerseNode(
-            startScratchFrame,
-            endScratchFrame,
             placed,
             marker
         )
@@ -209,7 +194,10 @@ internal data class VerseNode(
         var frameOffset = 0
         for (sector in sectors) {
             if (absoluteFrame in sector) {
-                frameOffset += absoluteFrame - sector.first
+                // The + 1 can be removed if the purpose of this function is to count the number
+                //  of frames up to (not including) the absolute frame.
+                //  I.e. if the question this function is answering is "how many frames are behind my current position?"
+                frameOffset += absoluteFrame - sector.first + 1
                 break
             } else {
                 frameOffset += sector.length()
@@ -228,7 +216,11 @@ internal data class VerseNode(
             if (remaining > sector.length()) {
                 remaining -= sector.length()
             } else {
-                return sector.first + remaining
+                return sector.first +  remaining - 1 // Add - 1 to account for inclusive start
+                // Depending on in the intended functionality, remove the - 1.
+                //  If the question this is answering is "Get the next frame after some offset?", then
+                //  remove the - 1, if the question this is answering is "Offset by some amount, then get me that frame?"
+                //  then we want to keep the -1
             }
         }
 
@@ -244,7 +236,7 @@ internal data class VerseNode(
         val startIndex = sectors.indexOfFirst { framePosition in it }
 
         var start = framePosition
-        val end = (start + min(sectors[startIndex].last - start, framesToRead))
+        val end = min(sectors[startIndex].last, start + framesToRead - 1)
         val firstRange = start..end
         stuff.add(firstRange)
         framesToRead -= firstRange.length()
@@ -253,7 +245,7 @@ internal data class VerseNode(
             if (framesToRead <= 0) break
             val sector = sectors[idx]
             val start = sector.first
-            val end = (start + min(sectors[idx].last - start, framesToRead))
+            val end = min(sectors[idx].last, start + framesToRead - 1)
             val range = (sector.first..end)
             framesToRead -= range.length()
             stuff.add(range)
@@ -264,5 +256,5 @@ internal data class VerseNode(
 }
 
 internal fun IntRange.length(): Int {
-    return last - first
+    return last - first + 1
 }

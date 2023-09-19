@@ -9,11 +9,13 @@ import javafx.scene.canvas.GraphicsContext
 import javafx.scene.control.ScrollBar
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.Drawable
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.NarrationMarkerChangedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkerControl
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.verse_markers_layer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.WaveformLayer
@@ -25,6 +27,8 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
 class AudioWorkspaceView : View() {
+    private val userIsDraggingProperty = SimpleBooleanProperty(false)
+
     private val logger = LoggerFactory.getLogger(AudioWorkspaceView::class.java)
 
     private val viewModel: AudioWorkspaceViewModel by inject()
@@ -56,6 +60,7 @@ class AudioWorkspaceView : View() {
                         narrationWaveformLayer.getVolumeCanvas()
                     )
                 }
+                runLater { updateScrollPosition() }
             } catch (e: Exception) {
                 logger.error("Exception in render loop", e)
             } finally {
@@ -64,10 +69,36 @@ class AudioWorkspaceView : View() {
         }
     }
 
+    fun updateScrollPosition() {
+        if (scrollBar.isDisabled) {
+            val loc = viewModel.audioPositionProperty.value
+            val percent = loc / scrollBar.width
+            scrollBar.valueProperty().set(percent)
+        }
+    }
+
     val at = object : AnimationTimer() {
         override fun handle(now: Long) {
             executor.submit(runnable)
         }
+    }
+
+    val scrollBar = ScrollBar().apply {
+        runLater {
+            customizeScrollbarSkin()
+        }
+
+        disableWhen {
+            viewModel.isRecordingProperty.or(viewModel.isPlayingProperty)
+        }
+
+        valueProperty().onChange {
+            if (!isDisabled) {
+                viewModel.seekPercent(it / width)
+            }
+        }
+
+        maxProperty().bind(widthProperty())
     }
 
     init {
@@ -95,25 +126,14 @@ class AudioWorkspaceView : View() {
                 }
                 verse_markers_layer {
                     verseMarkersControls.bind(markerNodes) { it }
+                    setOnLayerScroll { delta ->
+                        val pos = viewModel.audioPositionProperty.value
+                        val seekTo = pos + delta
+                        viewModel.seekTo(seekTo)
+                    }
                 }
             }
-            bottom = ScrollBar().apply {
-//                viewModel.audioPositionProperty.onChange {
-//                    value = framesToPixels(it, width = narrationWaveformLayer.width.toInt()).toDouble()
-//                }
-//
-//                maxProperty().bind(viewModel.totalAudioSizeProperty.integerBinding {
-//                    framesToPixels(it?.let { it.toInt() } ?: 0, narrationWaveformLayer.width.toInt())
-//                })
-//
-//                var lastModified = 0L
-//
-//                valueProperty().onChange {
-//                    if (viewModel.isPlayingProperty.value == false && viewModel.isRecordingProperty.value == false) {
-//                        viewModel.seekPercent(it / narrationWaveformLayer.width)
-//                    }
-//                }
-            }
+            bottom = scrollBar
         }
     }
 
@@ -152,10 +172,6 @@ class AudioWorkspaceViewModel : ViewModel() {
     val audioPositionProperty = SimpleIntegerProperty()
     val totalAudioSizeProperty = SimpleIntegerProperty()
 
-    fun scrollAudio(delta: Int) {
-        narrationViewModel.seekAudio(delta)
-    }
-
     fun drawWaveform(context: GraphicsContext, canvas: Canvas, markerNodes: ObservableList<VerseMarkerControl>) {
         narrationViewModel.drawWaveform(context, canvas, markerNodes)
     }
@@ -179,5 +195,9 @@ class AudioWorkspaceViewModel : ViewModel() {
 
     fun seekPercent(percent: Double) {
         narrationViewModel.seekPercent(percent)
+    }
+
+    fun seekTo(frame: Int) {
+        narrationViewModel.seekTo(frame)
     }
 }

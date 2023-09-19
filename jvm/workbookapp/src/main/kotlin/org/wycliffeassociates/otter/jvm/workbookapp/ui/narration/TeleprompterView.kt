@@ -10,6 +10,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.util.Duration
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.narration.*
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NarrationTextCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -163,6 +164,8 @@ class TeleprompterView : View() {
                     viewModel.isRecordingAgainProperty
                 )
             }
+
+            runLater { customizeScrollbarSkin() }
         }
 
         stickyVerse {

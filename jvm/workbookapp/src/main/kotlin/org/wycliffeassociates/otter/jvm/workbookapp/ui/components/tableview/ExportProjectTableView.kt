@@ -11,6 +11,7 @@ import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.util.Callback
+import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterDescriptor
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
@@ -100,6 +101,8 @@ class ExportProjectTableView(
                 }
             }
         }
+
+        runLater { customizeScrollbarSkin() }
     }
 }
 

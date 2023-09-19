@@ -300,6 +300,7 @@ class NarrationViewModel : ViewModel() {
             isRecording -> {
                 narration.finalizeVerse(max(index - 1, 0))
                 narration.onNewVerse(index)
+                renderer.clearActiveRecordingData()
             }
 
             recordPause -> {
@@ -436,20 +437,37 @@ class NarrationViewModel : ViewModel() {
         hasUndo = narration.hasUndo()
         hasRedo = narration.hasRedo()
 
-        narration.onActiveVersesUpdated.subscribe { verses ->
-            totalAudioSizeProperty.set(rendererAudioReader.totalFrames)
+        narration
+            .onActiveVersesUpdated
+            .subscribe(
+                { verses ->
+                    totalAudioSizeProperty.set(rendererAudioReader.totalFrames)
 
-            recordedVerses.setAll(verses)
+                    val verseWasAdded = recordedVerses.size != verses.size
 
-            hasUndo = narration.hasUndo()
-            hasRedo = narration.hasRedo()
+                    recordedVerses.setAll(verses)
 
-            val lastVerse = verses.getOrElse(lastRecordedVerseProperty.value, { verses.last() }).location
-            narration.seek(lastVerse)
+                    hasUndo = narration.hasUndo()
+                    hasRedo = narration.hasRedo()
 
-            recordStart = recordedVerses.isEmpty()
-            recordResume = recordedVerses.isNotEmpty()
-        }.let(disposables::add)
+                    if (verses.isNotEmpty()) {
+                        val lastVerse = verses.getOrElse(lastRecordedVerseProperty.value, { verses.last() }).location
+
+                        if (verseWasAdded) {
+                            narration.seek(lastVerse)
+                        }
+                    } else {
+                        narration.seek(0)
+                    }
+
+                    recordStart = recordedVerses.isEmpty()
+                    recordResume = recordedVerses.isNotEmpty()
+                },
+                { e ->
+                    logger.error("Error in active verses subscription", e)
+                }
+            )
+            .let(disposables::add)
     }
 
     fun drawWaveform(
@@ -502,10 +520,9 @@ class NarrationViewModel : ViewModel() {
         }
     }
 
-    fun seekAudio(frame: Int) {
+    fun seekTo(frame: Int) {
         val wasPlaying = audioPlayer.isPlaying()
         audioPlayer.pause()
-        narration.loadChapterIntoPlayer()
         narration.seek(frame)
         if (wasPlaying) audioPlayer.play()
     }
