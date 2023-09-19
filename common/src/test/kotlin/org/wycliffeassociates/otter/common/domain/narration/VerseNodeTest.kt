@@ -683,7 +683,6 @@ class VerseNodeTest {
         }
     }
 
-    // TODO: figure out how to hit the second IndexOutOfBoundsException for absoluteFrameFromOffset
 
 
     @Test

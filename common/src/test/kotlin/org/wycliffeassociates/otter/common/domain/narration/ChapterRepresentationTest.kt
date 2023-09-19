@@ -327,7 +327,6 @@ class ChapterRepresentationTest {
         Assert.assertEquals(1000, framePosition)
     }
 
-    // TODO: add more test for framePosition once I know more about intended use
 
     @Test
     fun `ChapterRepresentationConnection's hasRemaining with null start and end, no scratchAudio recorded, and empty activeVerses`() {
