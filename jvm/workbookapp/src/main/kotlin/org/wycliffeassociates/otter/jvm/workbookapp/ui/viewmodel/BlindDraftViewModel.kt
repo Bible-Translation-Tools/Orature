@@ -3,9 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
-import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
 import tornadofx.*
@@ -46,6 +44,5 @@ class BlindDraftViewModel : ViewModel() {
         workbookDataStore.activeChunkProperty.set(null)
         markerModelProperty.set(null)
         translationViewModel.updateSourceText()
-        translationViewModel.currentMarkerProperty.set(-1)
     }
 }

@@ -53,6 +53,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ConsumeViewMode
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ExportProjectViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectWizardViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
@@ -91,6 +92,7 @@ interface AppDependencyGraph {
     fun inject(viewModel: ConsumeViewModel)
     fun inject(viewModel: ChunkingViewModel)
     fun inject(viewModel: BlindDraftViewModel)
+    fun inject(viewModel: RecorderViewModel)
     fun inject(viewModel: ExportChapterViewModel)
     fun inject(viewModel: ExportProjectViewModel)
     fun injectDatabase(): AppDatabase
