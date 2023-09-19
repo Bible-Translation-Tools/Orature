@@ -220,7 +220,9 @@ internal class EditVerseAction(
 
         val vm = totalVerses[verseIndex].marker.copy()
         node = VerseNode(
-            placed = true, vm
+            placed = true,
+            vm,
+            mutableListOf(start..end)
         ).also {
             totalVerses[verseIndex] = it.copy()
         }

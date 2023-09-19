@@ -175,7 +175,8 @@ class Narration @AssistedInject constructor(
     }
 
     fun onEditVerse(verseIndex: Int, editedFile: File) {
-        val start = chapterRepresentation.scratchAudio.totalFrames
+        val scratchAudio = chapterRepresentation.scratchAudio
+        val start = if (scratchAudio.totalFrames == 0) 0 else scratchAudio.totalFrames + 1
         audioFileUtils.appendFile(chapterRepresentation.scratchAudio, editedFile)
         val end = chapterRepresentation.scratchAudio.totalFrames
 
@@ -215,10 +216,11 @@ class Narration @AssistedInject constructor(
 
     fun getSectionAsFile(index: Int): File {
         val verse = activeVerses[index]
+        chapterReaderConnection.lockToVerse(index)
+        chapterReaderConnection.seek(verse.location)
         return audioFileUtils.getSectionAsFile(
             chapterRepresentation.scratchAudio,
-            verse.start,
-            verse.end
+            chapterReaderConnection
         )
     }
 
