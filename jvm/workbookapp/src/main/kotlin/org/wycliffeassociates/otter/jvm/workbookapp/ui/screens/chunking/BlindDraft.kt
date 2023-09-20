@@ -1,6 +1,5 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 
-import com.github.thomasnield.rxkotlinfx.observeOnFx
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Node
 import javafx.scene.layout.Priority
@@ -9,7 +8,6 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.utils.bindSingleChild
-import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BlindDraftViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -61,14 +59,10 @@ class BlindDraft : Fragment() {
                     graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
 
                     action {
+                        viewModel.onRecordNew()
                         mainSectionProperty.set(recordingView)
-                        viewModel.newTakeFile()
-                            .observeOnFx()
-                            .subscribe { take ->
-                                recorderViewModel.targetFileProperty.set(take.file)
-                            }
-                        // use the width of the existing view
-                        recorderViewModel.onViewReady(takesView.width.toInt())
+                        recorderViewModel.onViewReady(takesView.width.toInt()) // use the width of the existing component
+                        recorderViewModel.toggle()
                     }
                 }
             }
@@ -77,7 +71,10 @@ class BlindDraft : Fragment() {
 
     private fun buildRecordingArea(): RecordingSection {
         return RecordingSection(recorderViewModel).apply {
-            onRecordingFinish = { mainSectionProperty.set(takesView) }
+            onRecordingFinish = { result ->
+                viewModel.onRecordFinish(result)
+                mainSectionProperty.set(takesView)
+            }
         }
     }
 

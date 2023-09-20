@@ -5,12 +5,13 @@ import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel.Result
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
-class RecordingSection(val viewModel: RecorderViewModel) : BorderPane() {
+class RecordingSection(private val viewModel: RecorderViewModel) : BorderPane() {
 
-    var onRecordingFinish: () -> Unit = {}
+    var onRecordingFinish: (Result) -> Unit = {}
 
     private val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
     private val resumeIcon = FontIcon(MaterialDesign.MDI_MICROPHONE)
@@ -46,9 +47,7 @@ class RecordingSection(val viewModel: RecorderViewModel) : BorderPane() {
                 managedWhen(visibleProperty())
 
                 action {
-                    viewModel.saveAndQuit {
-                        onRecordingFinish()
-                    }
+                    viewModel.saveAndQuit(onRecordingFinish)
                 }
             }
             region { hgrow = Priority.ALWAYS }
@@ -60,7 +59,7 @@ class RecordingSection(val viewModel: RecorderViewModel) : BorderPane() {
                 managedWhen(visibleProperty())
 
                 action {
-                    viewModel.reset()
+                    viewModel.cancel(onRecordingFinish)
                 }
             }
         }

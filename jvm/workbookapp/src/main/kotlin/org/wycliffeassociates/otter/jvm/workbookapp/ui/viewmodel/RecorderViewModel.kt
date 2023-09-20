@@ -22,6 +22,12 @@ import java.io.File
 import javax.inject.Inject
 
 class RecorderViewModel : ViewModel() {
+
+    enum class Result {
+        SUCCESS,
+        CANCELLED
+    }
+
     @Inject
     lateinit var audioConnectionFactory: AudioConnectionFactory
 
@@ -97,17 +103,31 @@ class RecorderViewModel : ViewModel() {
         timer.pause()
     }
 
-    fun saveAndQuit(onFinish: () -> Unit = {}) {
+    fun saveAndQuit(onFinish: (Result) -> Unit = {}) {
         pause()
         at.stop()
         recorder.stop()
         waveformCanvas.clearDrawables()
-        targetFileProperty.value?.let {
-            println("file saved to $it")
-            wavAudio.file.copyTo(it, true)
+        if (hasWrittenProperty.value) {
+            targetFileProperty.value?.let {
+                wavAudio.file.copyTo(it, true)
+            }
+            reset()
+            onFinish(Result.SUCCESS)
+        } else {
+            reset()
+            onFinish(Result.CANCELLED)
         }
+        targetFileProperty.set(null)
+    }
+
+    fun cancel(onFinish: (Result) -> Unit = {}) {
+        pause()
+        at.stop()
+        recorder.stop()
+        waveformCanvas.clearDrawables()
         reset()
-        onFinish()
+        onFinish(Result.CANCELLED)
     }
 
     fun reset() {
@@ -116,9 +136,6 @@ class RecorderViewModel : ViewModel() {
         timer.pause()
         timer.reset()
         hasWrittenProperty.value = false
-
-        // reset take
-        initializeAudio()
 
         // clear waveform
         renderer.clearData()
