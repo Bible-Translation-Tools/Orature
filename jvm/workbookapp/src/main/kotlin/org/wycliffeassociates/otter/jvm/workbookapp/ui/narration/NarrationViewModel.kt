@@ -6,6 +6,7 @@ import com.sun.glass.ui.Screen
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
@@ -127,9 +128,13 @@ class NarrationViewModel : ViewModel() {
         val workbook = workbookDataStore.workbook
         getChapterList(workbook.target.chapters)
             .observeOnFx()
-            .subscribe { chapter ->
-                loadChapter(chapter)
-            }
+            .subscribe(
+                { chapter ->
+                    loadChapter(chapter)
+                }, { e ->
+                    logger.error("Error loading chapter list", e)
+                }
+            )
     }
 
     fun onUndock() {
@@ -181,7 +186,7 @@ class NarrationViewModel : ViewModel() {
                 logger.error("Error in getting the chapter list", e)
             }
             .map { list ->
-                val chapterToResume = list.first { !it.hasSelectedAudio() }
+                val chapterToResume = list.firstOrNull { !it.hasSelectedAudio() } ?: list.first()
                 runLater {
                     workbookDataStore.activeChapterProperty.set(chapterToResume)
                 }
@@ -462,6 +467,23 @@ class NarrationViewModel : ViewModel() {
 
                     recordStart = recordedVerses.isEmpty()
                     recordResume = recordedVerses.isNotEmpty()
+
+                    if (potentiallyFinished) {
+                        logger.info("Chapter is potentially finished, creating a chapter take")
+                        narration
+                            .createChapterTake()
+                            .subscribeOn(Schedulers.io())
+                            .subscribe(
+                                {
+                                    logger.info("Created a chapter take for ${chapterTitleProperty.value}")
+                                }, { e ->
+                                    logger.error(
+                                        "Error in creating a chapter take for ${chapterTitleProperty.value}",
+                                        e
+                                    )
+                                }
+                            )
+                    }
                 },
                 { e ->
                     logger.error("Error in active verses subscription", e)

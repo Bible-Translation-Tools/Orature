@@ -3,21 +3,32 @@ package org.wycliffeassociates.otter.common.domain.narration
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
+import jdk.jshell.SourceCodeAnalysis.Completeness
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
+import org.wycliffeassociates.otter.common.audio.wav.WavFile
+import org.wycliffeassociates.otter.common.audio.wav.WavOutputStream
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
+import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.content.FileNamer
+import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
 import org.wycliffeassociates.otter.common.recorder.WavFileWriter
 import java.io.File
+import java.time.LocalDate
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -321,6 +332,57 @@ class Narration @AssistedInject constructor(
         }
 
         onChapterEdited(nodes)
+    }
+
+    fun createChapterTake(): Completable {
+        return chapter
+            .audio
+            .getNewTakeNumber()
+            .map { takeNumber ->
+                val namer =
+                    WorkbookFileNamerBuilder.createFileNamer(
+                        workbook,
+                        chapter,
+                        null,
+                        chapter,
+                        workbook.sourceMetadataSlug
+                    )
+                Pair(namer.generateName(takeNumber, AudioFileFormat.WAV), takeNumber)
+            }.map { (takeName, takeNumber) ->
+                val parentDir = workbook.projectFilesAccessor.getChapterAudioDir(workbook, chapter)
+                val takeFile = File(parentDir, takeName)
+                bounceAudio(takeFile)
+                Pair(takeFile, takeNumber)
+            }.map { (takeFile, takeNumber) ->
+                Take(takeFile.name, takeFile, takeNumber, MimeType.WAV, LocalDate.now())
+            }
+            .map { take ->
+                chapter.audio.insertTake(take)
+            }
+            .ignoreElement()
+    }
+
+    fun bounceAudio(boundedAudio: File) {
+        val bytes = ByteArray(DEFAULT_BUFFER_SIZE)
+        val connection = chapterRepresentation.getAudioFileReader().use { reader ->
+            reader.open()
+            if (boundedAudio.exists() && boundedAudio.length() > 0) {
+                boundedAudio.delete()
+            }
+            val wav = WavFile(boundedAudio, 1, 44100, 16)
+            WavOutputStream(wav).use { out ->
+                while (reader.hasRemaining()) {
+                    val read = reader.getPcmBuffer(bytes)
+                    out.write(bytes, 0, read)
+                }
+            }
+            wav.update()
+            val oaf = OratureAudioFile(boundedAudio)
+            for (verse in activeVerses) {
+                oaf.addMarker<VerseMarker>(verse.copy())
+            }
+            oaf.update()
+        }
     }
 
     fun scrollAudio(delta: Int) {

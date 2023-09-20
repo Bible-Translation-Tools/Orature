@@ -83,9 +83,10 @@ class VerseMarkerControl : BorderPane() {
         }
 
         center = label(labelProperty) {
-            addClass("verse-marker__title")
-            setAlignment(this, Pos.BOTTOM_LEFT)
-        }
+                minWidthProperty().bind(textProperty().length().times(10).plus(5))
+                addClass("verse-marker__title")
+                setAlignment(this, Pos.BOTTOM_LEFT)
+            }
 
         var verseMenu = VerseMenu()
         right = verseMenu.apply {
