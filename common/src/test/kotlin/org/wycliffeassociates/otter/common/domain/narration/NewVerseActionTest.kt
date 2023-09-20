@@ -193,7 +193,6 @@ class NewVerseActionTest {
         newVerseAction.finalize(newLastSectorEnd, totalVerses)
 
         // Verifies that finalization is correct
-        // NOTE: Failure seems to be an issues with swapping inclusive and exclusive
         Assert.assertEquals(lastSectorStart..newLastSectorEnd, totalVerses[verseIndex].sectors.last())
     }
 }

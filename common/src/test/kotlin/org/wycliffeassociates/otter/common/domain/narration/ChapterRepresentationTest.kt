@@ -205,8 +205,6 @@ class ChapterRepresentationTest {
 
         val absolutePositionFromRelativePosition = chapterRepresentation.relativeToAbsolute(relativePosition)
 
-        // TODO: ask Joe if we want to have the relative position start at 0, or 1.
-        //   If 0, then this is not correct, if 1, then this is correct
         Assert.assertEquals(500, absolutePositionFromRelativePosition)
     }
 
@@ -218,8 +216,6 @@ class ChapterRepresentationTest {
 
         val absolutePositionFromRelativePosition = chapterRepresentation.relativeToAbsolute(relativePosition)
 
-        // TODO: ask Joe if we want to have the relative position start at 0, or 1.
-        //   If 0, then this is not correct, if 1, then this is correct
         Assert.assertEquals(44099, absolutePositionFromRelativePosition)
     }
 
@@ -235,8 +231,6 @@ class ChapterRepresentationTest {
 
         val absolutePositionFromRelativePosition = chapterRepresentation.relativeToAbsolute(relativePosition)
 
-        // TODO: ask Joe if we want to have the relative position start at 0, or 1.
-        //   If 0, then this is not correct, if 1, then this is correct
         Assert.assertEquals(1389151, absolutePositionFromRelativePosition)
     }
 
@@ -250,8 +244,6 @@ class ChapterRepresentationTest {
         // sets relative position to 13.5 seconds worth of frames
         val relativePosition = 595350
 
-        // TODO: ask Joe if we want to have the relative position start at 0, or 1.
-        //   If 0, then this is not correct, if 1, then this is correct
         Assert.assertEquals(1653750 + 13, chapterRepresentation.relativeToAbsolute(relativePosition))
     }
 
@@ -268,8 +260,6 @@ class ChapterRepresentationTest {
         // sets relative position to 13.5 seconds worth of frames
         val relativePosition = 595350
 
-        // TODO: ask Joe if we want to have the relative position start at 0, or 1.
-        //   If 0, then this is not correct, if 1, then this is correct
         val absolutePos = chapterRepresentation.relativeToAbsolute(relativePosition)
         Assert.assertEquals(1653750 + 13 + spaceBetweenSectors*7, absolutePos)
     }
@@ -480,7 +470,6 @@ class ChapterRepresentationTest {
         initializeVerseNodeList(chapterRepresentation.totalVerses)
         val chapterRepresentationConnection  = chapterRepresentation.ChapterRepresentationConnection(end = null)
 
-        // Gets the full 10 seconds of audio
         val byteArray = ByteArray(44100 * secondsOfAudio * 2) { 1 }
         val responseBuffer = ByteBuffer.allocate(44100 * secondsOfAudio * 2)
 
@@ -518,7 +507,6 @@ class ChapterRepresentationTest {
 
         chapterRepresentation.onVersesUpdated()
 
-        // Gets 10 seconds of audio
         val byteArray = ByteArray(secondsOfAudio*44100*2) { 1 }
         val responseBuffer = ByteBuffer.allocate(441000 * secondsOfAudio * 2)
 

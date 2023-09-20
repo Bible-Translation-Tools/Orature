@@ -37,7 +37,6 @@ class MoveMarkerActionTest {
         }
     }
 
-    // TODO: This branch is not possible with the current code.
     @Test
     fun `execute with null verseNodes`() {
         val emptyVerses: MutableList<VerseNode> = mutableListOf()
@@ -128,8 +127,7 @@ class MoveMarkerActionTest {
 
     @Test
     fun `execute with firstMarkerMoved true`() {
-        // TODO
-        // NOTE: not sure how to test this or when this happens
+        // TODO not sure how to test this or when this happens.
     }
 
     @Test
@@ -274,11 +272,6 @@ class MoveMarkerActionTest {
 
         verseMarkerAction.redo(totalVerses)
 
-        // NOTE: this is failing because the order in which the sectors are added is not correct.
-        // Since we are moving the verseNode back, we should be taking frames from the end of the previous
-        // verseNode and appending them to the start of the sectors list in the current verseNode.
-        // Currently, they are appended to the end of the current verseNode.
-        // Verify that the verse being moved has been updated correctly
         Assert.assertEquals(
             (44100 * verseIndex + delta) until (44100 * (verseIndex)),
             totalVerses[verseIndex].sectors.first()

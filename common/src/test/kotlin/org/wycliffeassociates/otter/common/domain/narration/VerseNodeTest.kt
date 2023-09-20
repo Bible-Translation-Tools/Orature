@@ -37,7 +37,6 @@ class VerseNodeTest {
 
         val verseNode = VerseNode(true, verseMarker, sectors)
 
-        // QUESTION: is the intended implementation to use exclusive or inclusive vale for end?
         Assert.assertEquals(3000, verseNode.length)
     }
 
@@ -354,7 +353,6 @@ class VerseNodeTest {
         expectedSectorsTaken.add(2000 .. 2999)
         expectedSectorsTaken.add(3000 .. 3999)
 
-        // TODO: update takeFramesFromEnd to account for inclusive ends
         Assert.assertTrue(sectorsTaken.equals(expectedSectorsTaken))
 
         val expectedVerseNodeSectors = mutableListOf<IntRange>()
@@ -413,8 +411,6 @@ class VerseNodeTest {
 
         verseNode.addRange(oneItemList)
 
-        // QUESTION: is loop in flattenSectors supposed to have a range of [0, size-1)
-        // NOTE: should it be [0, size - 1]?
         Assert.assertEquals(1, verseNode.sectors.size)
 
         Assert.assertEquals(1000, verseNode.sectors.first().first)
@@ -433,7 +429,6 @@ class VerseNodeTest {
 
         verseNode.addRange(ranges)
 
-        // QUESTION: same as "add range with one item in ranges list"
         Assert.assertTrue(verseNode.sectors.equals(ranges))
     }
 
@@ -451,7 +446,6 @@ class VerseNodeTest {
         ranges.add(3000 .. 3999)
 
         verseNode.addRange(ranges)
-        // QUESTION: same as "add range with one item in ranges list"
         Assert.assertTrue(verseNode.sectors.equals(ranges))
     }
 
@@ -468,7 +462,6 @@ class VerseNodeTest {
         ranges.add(3000 .. 3999)
 
         verseNode.addRange(ranges)
-        // QUESTION: same as "add range with one item in ranges list"
         Assert.assertTrue(verseNode.sectors.equals(ranges))
     }
 

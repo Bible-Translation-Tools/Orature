@@ -41,8 +41,6 @@ class RecordAgainActionTest {
     }
 
 
-
-    // NOTE: Very similar test as NewVerseActionTest's execute method
     @Test
     fun `execute with valid working audio, 31 total verses, and no placed verses`() {
         val verseIndex = 0
