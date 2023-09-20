@@ -14,8 +14,13 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.nio.ByteBuffer
-const val testDirWithAudio =  "C:\\Users\\hilld\\testProjectChapterDirWithAudio"
-const val testDirWithoutAudio = "C:\\Users\\hilld\\testProjectChapterDirWithoutAudio"
+import java.nio.file.Files
+import java.nio.file.Paths
+
+
+const val testDataRootFilePath = "/Users/DARYL"
+const val testDirWithAudio =  "${testDataRootFilePath}/testProjectChapterDirWithAudio"
+const val testDirWithoutAudio = "${testDataRootFilePath}/testProjectChapterDirWithoutAudio"
 
 class ChapterRepresentationTest {
 
@@ -25,13 +30,29 @@ class ChapterRepresentationTest {
     lateinit var chunk: Observable<Chunk>
     val numTestVerses = 31
 
-
     @Before
     fun setup() {
+        createTestAudioFolders()
         chunk = createObservableChunkMock(mockChunk())
         workbookWithAudio = mockWorkbook(true)
         workbookWithoutAudio = mockWorkbook(false)
         chapter = mockChapter()
+    }
+
+    fun createTestAudioFolders() {
+
+        val testProjectChapterDirWithAudio = "testProjectChapterDirWithAudio" // Replace with the desired folder name
+        val testProjectChapterDirWithoutAudio = "testProjectChapterDirWithoutAudio" // Replace with the desired folder name
+
+        val withAudioPath = Paths.get(testDataRootFilePath, testProjectChapterDirWithAudio)
+        val withoutAudioPath = Paths.get(testDataRootFilePath, testProjectChapterDirWithoutAudio)
+
+        try {
+            Files.createDirectories(withAudioPath)
+            Files.createDirectories(withoutAudioPath)
+        } catch (e: Exception) {
+            println("Failed to create test audio folders' at '$testDataRootFilePath': ${e.message}")
+        }
     }
 
     fun mockWorkbook(withAudio: Boolean) : Workbook {
@@ -60,7 +81,7 @@ class ChapterRepresentationTest {
 
     // Initializes each verse with placed equal to true and with one sector that holds one second worth of frames.
     // where the start of each added sector is offset by "paddingLength" number of frames
-    fun initializeVerseNodeList(verseNodeList : MutableList<VerseNode>, paddingLength: Int = 0) {
+    private fun initializeVerseNodeList(verseNodeList : MutableList<VerseNode>, paddingLength: Int = 0) {
         var start = -1
         for (i in 0 until numTestVerses) {
             val verseMarker = VerseMarker((i + 1), (i + 1), 0)
@@ -74,7 +95,7 @@ class ChapterRepresentationTest {
 
     // Simulates re-recording each verse for some number of frames (sectorLength), with some amount of "dead-space"
     // (spaceBetweenSectors) between each newly added sector
-    fun addSectorsToEnd(verseNodeList : MutableList<VerseNode>, sectorLength : Int, spaceBetweenSectors: Int) {
+    private fun addSectorsToEnd(verseNodeList : MutableList<VerseNode>, sectorLength : Int, spaceBetweenSectors: Int) {
         var lastSectorEnd = verseNodeList.last().sectors.last().last + 1
         for (i in 1 until verseNodeList.size) {
             val start = lastSectorEnd + spaceBetweenSectors
@@ -84,8 +105,7 @@ class ChapterRepresentationTest {
         }
     }
 
-
-    fun writeByteBufferToPCMFile(byteBuffer: ByteBuffer, filePath: String) {
+    private fun writeByteBufferToPCMFile(byteBuffer: ByteBuffer, filePath: String) {
         try {
             val byteArray = ByteArray(byteBuffer.remaining())
             byteBuffer.get(byteArray)
@@ -114,6 +134,7 @@ class ChapterRepresentationTest {
         }
         byteBuffer.rewind()
     }
+
 
     @Test
     fun `totalFrames with initialized totalVerses list`() {
