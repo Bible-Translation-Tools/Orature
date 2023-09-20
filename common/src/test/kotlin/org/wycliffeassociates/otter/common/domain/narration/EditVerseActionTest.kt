@@ -8,7 +8,7 @@ import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 
 class EditVerseActionTest{
 
-    val totalVerses: MutableList<VerseNode> = mutableListOf()
+    private val totalVerses: MutableList<VerseNode> = mutableListOf()
     lateinit var workingAudioFile: AudioFile
     val numTestVerses = 31
 
@@ -26,7 +26,7 @@ class EditVerseActionTest{
 
     // Initializes each verse with placed equal to true and with one sector that holds one second worth of frames.
     // where the start of each added sector is offset by "paddingLength" number of frames
-    fun initializeVerseNodeList(verseNodeList : MutableList<VerseNode>, paddingLength: Int = 0) {
+    private fun initializeVerseNodeList(verseNodeList : MutableList<VerseNode>, paddingLength: Int = 0) {
         var start = -1
         for (i in 0 until numTestVerses) {
             val verseMarker = VerseMarker((i + 1), (i + 1), 0)

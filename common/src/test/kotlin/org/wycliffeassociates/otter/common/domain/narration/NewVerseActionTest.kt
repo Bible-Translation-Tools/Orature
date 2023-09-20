@@ -10,7 +10,7 @@ import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 
 class NewVerseActionTest {
 
-    val totalVerses: MutableList<VerseNode> = mutableListOf()
+    private val totalVerses: MutableList<VerseNode> = mutableListOf()
     lateinit var workingAudioFile: AudioFile
     lateinit var emptyWorkingAudio: AudioFile
     val totalFramesInTestAudio = 411000

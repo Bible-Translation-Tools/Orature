@@ -10,7 +10,7 @@ import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 
 class RecordAgainActionTest {
 
-    val totalVerses: MutableList<VerseNode> = mutableListOf()
+    private val totalVerses: MutableList<VerseNode> = mutableListOf()
     lateinit var workingAudioFile: AudioFile
 
     @Before
