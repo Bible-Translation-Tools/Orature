@@ -68,10 +68,11 @@ class RecorderViewModel : ViewModel() {
 
     fun onViewReady(width: Int) {
         initializeAudio()
+        val renderedWidth = width - volumeCanvas.minWidth.toInt()
         renderer = ActiveRecordingRenderer(
             recorder.getAudioStream(),
             writer.isWriting,
-            width,
+            renderedWidth,
             secondsOnScreen = 10
         )
         volumeCanvas.addDrawable(VolumeBar(recorder.getAudioStream()))

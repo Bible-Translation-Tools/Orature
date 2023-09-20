@@ -145,7 +145,7 @@
     -wa-minimap-slider-background: #B3B9C2;
     -wa-recorder-controls-background: #282CBD;
 
-    -wa-waveform-background: rgb(247, 250, 255);
+    -wa-waveform-background: white;
     -wa-waveform-background-dark: rgb(206, 214, 227);
     -wa-scrolling-waveform-background: -wa-black-30-noalpha;
     -wa-scrolling-waveform-track-border: rgb(167, 182, 207);

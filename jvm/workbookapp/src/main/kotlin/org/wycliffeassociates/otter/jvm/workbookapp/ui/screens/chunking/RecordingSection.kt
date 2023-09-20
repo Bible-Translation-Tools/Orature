@@ -20,7 +20,7 @@ class RecordingSection(private val viewModel: RecorderViewModel) : BorderPane() 
         center = viewModel.waveformCanvas
         right = viewModel.volumeCanvas
         bottom = hbox {
-            addClass("consume__bottom")
+            addClass("consume__bottom", "recording__bottom-section")
             button {
                 addClass("btn", "btn--primary", "consume__btn")
                 textProperty().bind(viewModel.recordingProperty.stringBinding {

@@ -7,6 +7,7 @@ import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.bindSingleChild
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BlindDraftViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel
@@ -39,6 +40,10 @@ class BlindDraft : Fragment() {
         center = stackpane {
             bindSingleChild(mainSectionProperty)
         }
+    }
+
+    init {
+        tryImportStylesheet("/css/recording-screen.css")
     }
 
     private fun buildTakesArea(): VBox {
