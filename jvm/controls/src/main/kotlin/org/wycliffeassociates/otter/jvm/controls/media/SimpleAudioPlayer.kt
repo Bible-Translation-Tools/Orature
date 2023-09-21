@@ -102,6 +102,7 @@ class SimpleAudioPlayer(
             }
             graphicProperty().bind(
                 audioPlayerController.isPlayingProperty.objectBinding { isPlaying ->
+                    togglePseudoClass("active", isPlaying == true)
                     if (isPlaying == true) pauseIcon else playIcon
                 }
             )

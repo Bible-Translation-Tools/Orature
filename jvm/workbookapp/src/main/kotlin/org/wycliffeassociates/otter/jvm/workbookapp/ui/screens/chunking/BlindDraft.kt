@@ -2,14 +2,15 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Node
+import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.jvm.controls.media.SimpleAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.bindSingleChild
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BlindDraftViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -55,18 +56,9 @@ class BlindDraft : Fragment() {
                 label(messages["best_take"]).addClass("h5", "h5--60")
 
                 vbox {
+                    addClass("take-list")
                     bindChildren(viewModel.selectedTake) { take ->
-                        SimpleAudioPlayer(take.audioPlayer).apply {
-                            titleTextProperty.set(
-                                MessageFormat.format(
-                                    messages["takeTitle"],
-                                    messages["take"],
-                                    take.take.number
-                                )
-                            )
-                            enablePlaybackRateProperty.set(false)
-                            sideTextProperty.bind(remainingTimeProperty)
-                        }
+                        buildTakeCard(take)
                     }
                 }
             }
@@ -76,18 +68,9 @@ class BlindDraft : Fragment() {
                 vgrow = Priority.ALWAYS
 
                 vbox {
+                    addClass("take-list")
                     bindChildren(viewModel.availableTakes) { take ->
-                        SimpleAudioPlayer(take.audioPlayer).apply {
-                            titleTextProperty.set(
-                                MessageFormat.format(
-                                    messages["takeTitle"],
-                                    messages["take"],
-                                    take.take.number
-                                )
-                            )
-                            enablePlaybackRateProperty.set(false)
-                            sideTextProperty.bind(remainingTimeProperty)
-                        }
+                        buildTakeCard(take)
                     }
                 }
             }
@@ -126,5 +109,35 @@ class BlindDraft : Fragment() {
     override fun onUndock() {
         super.onUndock()
         viewModel.undockBlindDraft()
+    }
+
+    private fun buildTakeCard(take: TakeCardModel): HBox {
+        return HBox().apply {
+            addClass("take-card")
+            simpleaudioplayer(take.audioPlayer) {
+                hgrow = Priority.ALWAYS
+                titleTextProperty.set(
+                    MessageFormat.format(
+                        messages["takeTitle"],
+                        messages["take"],
+                        take.take.number
+                    )
+                )
+                enablePlaybackRateProperty.set(false)
+                sideTextProperty.bind(remainingTimeProperty)
+            }
+            button {
+                addClass("btn", "btn--icon", "btn--borderless")
+                tooltip(messages["options"])
+                graphic = FontIcon(MaterialDesign.MDI_DOTS_VERTICAL).addClass("option-icon")
+            }
+            button {
+                addClass("btn", "btn--icon")
+                togglePseudoClass("active", take.selected)
+                tooltip(messages["select"])
+                graphic = FontIcon(MaterialDesign.MDI_STAR_OUTLINE).addClass("option-icon")
+
+            }
+        }
     }
 }

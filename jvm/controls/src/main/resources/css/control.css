@@ -38,6 +38,14 @@
     -fx-border-insets: -2;
 }
 
+.btn:active {
+    -fx-background-color: #001533;
+}
+
+.btn:active .ikonli-font-icon {
+    -fx-icon-color: -wa-white;
+}
+
 /* -------------- Button Icon -------------- */
 .btn__icon {
     -fx-icon-color: inherit;
@@ -666,7 +674,7 @@
 .wa-menu-button {
     -fx-pref-height: 48px;
     -fx-padding: 0 10px;
-    -fx-background-color: -wa-filter-button-background;
+    -fx-background-color: -wa-foreground;
     -fx-background-radius: 6px;
     -fx-alignment: center;
     -fx-spacing: 7px;
