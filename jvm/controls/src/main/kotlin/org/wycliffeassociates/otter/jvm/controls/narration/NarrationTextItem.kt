@@ -18,18 +18,87 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.narration
 
+import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.geometry.Pos
+import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import tornadofx.*
 
+//class NarrationTextItem : VBox() {
+//    val verseLabelProperty = SimpleStringProperty()
+//    val verseTextProperty = SimpleStringProperty()
+//    val isRecordingProperty = SimpleBooleanProperty()
+//    val isRecordingAgainProperty = SimpleBooleanProperty()
+//    val isSelectedProperty = SimpleBooleanProperty()
+//    val isLastVerseProperty = SimpleBooleanProperty()
+//
+//    val recordButtonTextProperty = SimpleStringProperty()
+//    val nextChunkTextProperty = SimpleStringProperty()
+//
+//    val onRecordActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+//    val onNextVerseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+//
+//    init {
+//        styleClass.setAll("narration-list__verse-item")
+//
+//        hbox {
+//            addClass("narration-list__verse-block")
+//            label(verseLabelProperty) {
+//                addClass("narration-list__verse-item-text", "narration-list__verse-item-text__title")
+//                translateY -= 5.0
+//            }
+//            label(verseTextProperty).apply {
+//                addClass("narration-list__verse-item-text")
+//                isWrapText = true
+//
+//                prefWidthProperty().bind(this@NarrationTextItem.maxWidthProperty().subtract(50))
+//            }
+//
+//        }
+//        separator {
+//            addClass("narration-list__separator")
+//            visibleProperty().bind(isSelectedProperty)
+//            managedProperty().bind(visibleProperty())
+//        }
+//        hbox {
+//            addClass("narration-list__buttons")
+//            alignment = Pos.BASELINE_LEFT
+//
+//            button(recordButtonTextProperty) {
+//                addClass("btn", "btn--primary")
+//                graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
+//
+//                isRecordingProperty.onChange {
+//                    toggleClass("recording-btn", it)
+//                }
+//
+//                onActionProperty().bind(onRecordActionProperty)
+//            }
+//            button(nextChunkTextProperty) {
+//                addClass("btn", "btn--secondary")
+//                graphic = FontIcon(MaterialDesign.MDI_ARROW_DOWN)
+//
+//                onActionProperty().bind(onNextVerseActionProperty)
+//                disableProperty().bind(isLastVerseProperty.or(isRecordingAgainProperty))
+//            }
+//
+//            visibleProperty().bind(isSelectedProperty)
+//            managedProperty().bind(visibleProperty())
+//        }
+//
+//        disableProperty().bind(isSelectedProperty.not())
+//    }
+//}
+
 class NarrationTextItem : VBox() {
+    val hasRecordingProperty = SimpleBooleanProperty(false)
     val verseLabelProperty = SimpleStringProperty()
     val verseTextProperty = SimpleStringProperty()
     val isRecordingProperty = SimpleBooleanProperty()
@@ -42,56 +111,65 @@ class NarrationTextItem : VBox() {
 
     val onRecordActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onNextVerseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val onPlayActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+
+    val isPlayingProperty = SimpleBooleanProperty(false)
+    val isPlaying by isPlayingProperty
 
     init {
         styleClass.setAll("narration-list__verse-item")
-
         hbox {
-            addClass("narration-list__verse-block")
-            label(verseLabelProperty) {
-                addClass("narration-list__verse-item-text", "narration-list__verse-item-text__title")
-                translateY -= 5.0
-            }
-            label(verseTextProperty).apply {
-                addClass("narration-list__verse-item-text")
-                isWrapText = true
-
-                prefWidthProperty().bind(this@NarrationTextItem.maxWidthProperty().subtract(50))
-            }
-
-        }
-        separator {
-            addClass("narration-list__separator")
-            visibleProperty().bind(isSelectedProperty)
-            managedProperty().bind(visibleProperty())
-        }
-        hbox {
-            addClass("narration-list__buttons")
-            alignment = Pos.BASELINE_LEFT
-
-            button(recordButtonTextProperty) {
-                addClass("btn", "btn--primary")
-                graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
-
-                isRecordingProperty.onChange {
-                    toggleClass("recording-btn", it)
+            styleClass.setAll("narration-list__verse-item")
+            borderpane {
+                center = button {
+                    addClass("btn", "btn--secondary")
+                    graphicProperty().bind(objectBinding(isPlayingProperty) {
+                        when (isPlaying) {
+                            true -> FontIcon(MaterialDesign.MDI_PAUSE)
+                            false -> FontIcon(MaterialDesign.MDI_PLAY)
+                        }
+                    })
+                    disableWhen { !hasRecordingProperty }
+                    togglePseudoClass("inactive", isDisabled)
+                    onActionProperty().bind(onPlayActionProperty)
                 }
-
-                onActionProperty().bind(onRecordActionProperty)
             }
-            button(nextChunkTextProperty) {
-                addClass("btn", "btn--secondary")
-                graphic = FontIcon(MaterialDesign.MDI_ARROW_DOWN)
+            hbox {
+                addClass("narration-list__verse-block")
+                label(verseLabelProperty) {
+                    minWidth = Region.USE_PREF_SIZE
+                    addClass("narration-list__verse-item-text", "narration-list__verse-item-text__title")
+                    translateY += 2.0
+                }
+                label(verseTextProperty) {
+                    addClass("narration-list__verse-item-text")
+                    isWrapText = true
+                }
+            }
+            hbox {
+                addClass("narration-list__buttons")
+                alignment = Pos.BASELINE_LEFT
 
-                onActionProperty().bind(onNextVerseActionProperty)
-                disableProperty().bind(isLastVerseProperty.or(isRecordingAgainProperty))
+                button(recordButtonTextProperty) {
+                    addClass("btn", "btn--primary")
+                    graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
+
+                    isRecordingProperty.onChange {
+                        toggleClass("recording-btn", it)
+                    }
+
+                    onActionProperty().bind(onRecordActionProperty)
+                }
+                button(nextChunkTextProperty) {
+                    addClass("btn", "btn--secondary")
+                    graphic = FontIcon(MaterialDesign.MDI_ARROW_DOWN)
+
+                    onActionProperty().bind(onNextVerseActionProperty)
+                    disableProperty().bind(isLastVerseProperty.or(isRecordingAgainProperty))
+                }
             }
 
-            visibleProperty().bind(isSelectedProperty)
-            managedProperty().bind(visibleProperty())
+            // disableProperty().bind(isSelectedProperty.not())
         }
-
-        disableProperty().bind(isSelectedProperty.not())
     }
 }
-
