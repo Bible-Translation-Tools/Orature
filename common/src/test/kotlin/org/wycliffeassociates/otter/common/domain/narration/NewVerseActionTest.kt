@@ -13,7 +13,9 @@ class NewVerseActionTest {
     private val totalVerses: MutableList<VerseNode> = mutableListOf()
     lateinit var workingAudioFile: AudioFile
     lateinit var emptyWorkingAudio: AudioFile
-    val totalFramesInTestAudio = 411000
+    val numTestVerses = 31
+    val totalFramesInTestAudio = 44100 * numTestVerses
+
 
     @Before
     fun setup() {
@@ -29,8 +31,7 @@ class NewVerseActionTest {
     }
 
     fun initializeTotalVerses() {
-        val numVerses = 31
-        for(i in 0 until numVerses){
+        for(i in 0 until numTestVerses){
             val verseMarker = VerseMarker((i+1), (i+1), 0)
             val sectors = mutableListOf<IntRange>()
             val verseNode = VerseNode(false, verseMarker, sectors)
