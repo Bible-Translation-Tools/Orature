@@ -59,6 +59,7 @@ class ChunkingTranslationPage : View() {
         tryImportStylesheet("/css/consume-page.css")
         tryImportStylesheet("/css/chunking-page.css")
         tryImportStylesheet("/css/blind-draft-page.css")
+        tryImportStylesheet("/css/audio-player.css")
         tryImportStylesheet("/css/source-content.css")
         tryImportStylesheet("/css/chunk-item.css")
         tryImportStylesheet("/css/chunk-marker.css")

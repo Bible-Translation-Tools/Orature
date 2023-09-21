@@ -14,6 +14,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BlindDraftViewM
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
+import java.text.MessageFormat
 
 class BlindDraft : Fragment() {
 
@@ -56,7 +57,15 @@ class BlindDraft : Fragment() {
                 vbox {
                     bindChildren(viewModel.selectedTake) { take ->
                         SimpleAudioPlayer(take.audioPlayer).apply {
+                            titleTextProperty.set(
+                                MessageFormat.format(
+                                    messages["takeTitle"],
+                                    messages["take"],
+                                    take.take.number
+                                )
+                            )
                             enablePlaybackRateProperty.set(false)
+                            sideTextProperty.bind(remainingTimeProperty)
                         }
                     }
                 }
@@ -69,7 +78,15 @@ class BlindDraft : Fragment() {
                 vbox {
                     bindChildren(viewModel.availableTakes) { take ->
                         SimpleAudioPlayer(take.audioPlayer).apply {
+                            titleTextProperty.set(
+                                MessageFormat.format(
+                                    messages["takeTitle"],
+                                    messages["take"],
+                                    take.take.number
+                                )
+                            )
                             enablePlaybackRateProperty.set(false)
+                            sideTextProperty.bind(remainingTimeProperty)
                         }
                     }
                 }
