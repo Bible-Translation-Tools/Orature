@@ -38,6 +38,8 @@ data class Take(
     }
 
     override fun hashCode() = file.hashCode()
+
+    fun isDeleted() = deletedTimestamp.value?.value != null
 }
 
 data class DateHolder(val value: LocalDate?) {

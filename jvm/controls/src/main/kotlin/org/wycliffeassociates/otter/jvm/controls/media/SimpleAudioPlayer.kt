@@ -45,6 +45,7 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.button.WaMenuButton
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.controllers.framesToTimecode
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 import java.text.MessageFormat
@@ -145,7 +146,7 @@ class SimpleAudioPlayer(
     }
 
     private fun initController() {
-        playerProperty.onChange {
+        playerProperty.onChangeAndDoNow {
             it?.let {
                 audioPlayerController.load(it)
             } ?: audioPlayerController.release()

@@ -6,6 +6,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.media.SimpleAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.bindSingleChild
@@ -51,11 +52,27 @@ class BlindDraft : Fragment() {
             vbox {
                 addClass("blind-draft-section", "blind-draft-section--top-indent")
                 label(messages["best_take"]).addClass("h5", "h5--60")
+
+                vbox {
+                    bindChildren(viewModel.selectedTake) { take ->
+                        SimpleAudioPlayer(take.audioPlayer).apply {
+                            enablePlaybackRateProperty.set(false)
+                        }
+                    }
+                }
             }
             vbox {
                 addClass("blind-draft-section", "blind-draft-section--top-indent")
                 label(messages["available_takes"]).addClass("h5", "h5--60")
                 vgrow = Priority.ALWAYS
+
+                vbox {
+                    bindChildren(viewModel.availableTakes) { take ->
+                        SimpleAudioPlayer(take.audioPlayer).apply {
+                            enablePlaybackRateProperty.set(false)
+                        }
+                    }
+                }
             }
             hbox {
                 addClass("consume__bottom")
