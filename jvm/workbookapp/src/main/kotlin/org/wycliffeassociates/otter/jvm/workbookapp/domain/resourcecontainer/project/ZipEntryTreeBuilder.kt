@@ -35,7 +35,7 @@ class ZipEntryTreeBuilder @Inject constructor() : IZipEntryTreeBuilder {
 
     private fun createZipFileSystem(zipFilename: String): FileSystem {
         val path = Paths.get(zipFilename)
-        return FileSystems.newFileSystem(path)
+        return FileSystems.newFileSystem(path, null)
     }
 
     override fun buildOtterFileTree(
