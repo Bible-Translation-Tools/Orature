@@ -19,9 +19,9 @@ import java.nio.file.Paths
 
 
 val testDataRootFilePath: String = System.getProperty("user.home")
-val testDirWithAudio =  "${testDataRootFilePath}/testProjectChapterDirWithAudio"
-val workingAudioFileWithAudio = "${testDirWithAudio}/chapter_narration.pcm"
-val testDirWithoutAudio = "${testDataRootFilePath}/testProjectChapterDirWithoutAudio"
+val testDirWithAudio = File(testDataRootFilePath, "testProjectChapterDirWithAudio")
+val workingAudioFileWithAudio = File(testDirWithAudio, "chapter_narration.pcm")
+val testDirWithoutAudio = File(testDataRootFilePath, "testProjectChapterDirWithoutAudio")
 
 class ChapterRepresentationTest {
 
@@ -59,7 +59,7 @@ class ChapterRepresentationTest {
     fun mockWorkbook(withAudio: Boolean) : Workbook {
         val audioDirectory = if (withAudio) testDirWithAudio else testDirWithoutAudio
         return mockk<Workbook>{
-            every { projectFilesAccessor.getChapterAudioDir(any(), any())} returns File(audioDirectory)
+            every { projectFilesAccessor.getChapterAudioDir(any(), any())} returns audioDirectory
         }
     }
 
@@ -106,13 +106,12 @@ class ChapterRepresentationTest {
         }
     }
 
-    private fun writeByteBufferToPCMFile(byteBuffer: ByteBuffer, filePath: String) {
+    private fun writeByteBufferToPCMFile(byteBuffer: ByteBuffer, PCMFile: File) {
         try {
             val byteArray = ByteArray(byteBuffer.remaining())
             byteBuffer.get(byteArray)
 
-            val file = File(filePath)
-            val fos = FileOutputStream(file)
+            val fos = FileOutputStream(PCMFile)
 
             fos.write(byteArray)
 
