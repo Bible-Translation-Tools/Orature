@@ -114,6 +114,8 @@ class EditVerseActionTest{
         Assert.assertEquals(true, totalVerses[verseEditedIndex].placed)
 
         // Ensure that no other frames also share the new edit range
+        // NOTE: this will cause a failure because currently, two verseNodes can share
+        // sectors when using EditVerseAction
         for (i in totalVerses.indices) {
             if (i == verseEditedIndex) continue
 
