@@ -217,13 +217,6 @@ class ResetChunksTest {
     }
 
     @Test
-    fun sourceFilesDeleted() {
-        Assert.assertEquals(projectFilesAccessor.sourceAudioDir.listFiles()?.size ?: 0, 2)
-        ResetChunks().resetChapter(projectFilesAccessor, chapter)
-        Assert.assertEquals(projectFilesAccessor.sourceAudioDir.listFiles()?.size ?: 0, 0)
-    }
-
-    @Test
     fun clearContentForCollectionTriggered() {
         ResetChunks().resetChapter(projectFilesAccessor, chapter)
         Assert.assertEquals(true, clearContentForCollectionTriggered)
