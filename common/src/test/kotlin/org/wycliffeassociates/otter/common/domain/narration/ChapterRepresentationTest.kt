@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.common.domain.narration
 import io.mockk.every
 import io.mockk.mockk
 import io.reactivex.Observable
+import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -38,6 +39,17 @@ class ChapterRepresentationTest {
         workbookWithAudio = mockWorkbook(true)
         workbookWithoutAudio = mockWorkbook(false)
         chapter = mockChapter()
+    }
+
+    @After
+    fun cleanup() {
+        try {
+            // Delete the test directories and their contents
+            testDirWithAudio.deleteRecursively()
+            testDirWithoutAudio.deleteRecursively()
+        } catch (e: IOException) {
+            println("Failed to delete test audio folders at '$testDataRootFilePath': ${e.message}")
+        }
     }
 
     fun createTestAudioFolders() {
