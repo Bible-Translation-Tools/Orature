@@ -129,14 +129,20 @@ class BlindDraft : Fragment() {
             button {
                 addClass("btn", "btn--icon", "btn--borderless")
                 tooltip(messages["options"])
-                graphic = FontIcon(MaterialDesign.MDI_DOTS_VERTICAL).addClass("option-icon")
+                graphic = FontIcon(MaterialDesign.MDI_DOTS_VERTICAL)
             }
             button {
                 addClass("btn", "btn--icon")
-                togglePseudoClass("active", take.selected)
                 tooltip(messages["select"])
-                graphic = FontIcon(MaterialDesign.MDI_STAR_OUTLINE).addClass("option-icon")
+                togglePseudoClass("active", take.selected)
 
+                graphic = FontIcon(MaterialDesign.MDI_STAR_OUTLINE)
+                isMouseTransparent = take.selected
+                isFocusTraversable = !take.selected
+
+                action {
+                    viewModel.selectTake(take.take)
+                }
             }
         }
     }

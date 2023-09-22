@@ -721,17 +721,17 @@
 
 .wa-menu-button .label {
     -fx-font-family: 'sans-serif';
-    -fx-text-fill: -wa-regular-text;
+    -fx-text-fill: -wa-regular-text-80;
 }
 
 .wa-menu-button .ikonli-font-icon {
     -fx-icon-size: 24px;
-    -fx-fill: -wa-regular-text;
+    -fx-fill: -wa-regular-text-80;
 }
 
 .wa-menu-button__icon .ikonli-font-icon {
     -fx-icon-size: 34;
-    -fx-icon-color: -wa-regular-text;
+    -fx-icon-color: -wa-regular-text-80;
 }
 
 .wa-menu-button__separator {

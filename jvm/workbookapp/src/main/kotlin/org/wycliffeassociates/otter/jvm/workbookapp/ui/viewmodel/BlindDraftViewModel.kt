@@ -113,6 +113,11 @@ class BlindDraftViewModel : ViewModel() {
         }
     }
 
+    fun selectTake(take: Take) {
+        take.file.setLastModified(System.currentTimeMillis())
+        currentChunkProperty.value?.audio?.selectTake(take)
+    }
+
     private fun loadTakes(chunk: Chunk) {
         val selected = chunk.audio.selected.value?.value
 
