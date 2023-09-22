@@ -1,9 +1,11 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
+import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.TakeSelectionAnimationMediator
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.popup.TakeOptionMenu
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ChunkTakeEvent
@@ -14,6 +16,8 @@ import tornadofx.FX.Companion.messages
 import java.text.MessageFormat
 
 class ChunkTakeCard(take: TakeCardModel) : HBox() {
+    val animationMediatorProperty = SimpleObjectProperty<TakeSelectionAnimationMediator<ChunkTakeCard>>()
+
     init {
         addClass("take-card")
         simpleaudioplayer(take.audioPlayer) {
@@ -61,7 +65,15 @@ class ChunkTakeCard(take: TakeCardModel) : HBox() {
             isFocusTraversable = !take.selected
 
             action {
-                FX.eventbus.fire(ChunkTakeEvent(take.take, TakeAction.SELECT))
+                animationMediatorProperty.value?.let { animator ->
+                    if (animator.isAnimating || take.selected) {
+                        return@action
+                    }
+                    animator.node = this@ChunkTakeCard
+                    animator.animate {
+                        FX.eventbus.fire(ChunkTakeEvent(take.take, TakeAction.SELECT))
+                    }
+                } ?: FX.eventbus.fire(ChunkTakeEvent(take.take, TakeAction.SELECT))
             }
         }
     }

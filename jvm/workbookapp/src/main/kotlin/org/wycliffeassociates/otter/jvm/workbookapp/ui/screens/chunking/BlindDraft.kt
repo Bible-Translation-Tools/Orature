@@ -6,13 +6,13 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.TakeSelectionAnimationMediator
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.bindSingleChild
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChunkTakeCard
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ChunkTakeEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.TakeAction
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BlindDraftViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -53,6 +53,8 @@ class BlindDraft : Fragment() {
     }
 
     private fun buildTakesArea(): VBox {
+        val animationMediator = TakeSelectionAnimationMediator<ChunkTakeCard>()
+
         return VBox().apply {
             vbox {
                 addClass("blind-draft-section", "blind-draft-section--top-indent")
@@ -61,7 +63,10 @@ class BlindDraft : Fragment() {
                 vbox {
                     addClass("take-list")
                     bindChildren(viewModel.selectedTake) { take ->
-                        buildTakeCard(take)
+                        ChunkTakeCard(take).apply {
+                            animationMediator.selectedNode = this
+                            animationMediatorProperty.set(animationMediator)
+                        }
                     }
                 }
             }
@@ -72,8 +77,11 @@ class BlindDraft : Fragment() {
 
                 vbox {
                     addClass("take-list")
+                    animationMediator.itemList.bind(childrenUnmodifiable) { it }
                     bindChildren(viewModel.availableTakes) { take ->
-                        buildTakeCard(take)
+                        ChunkTakeCard(take).apply {
+                            animationMediatorProperty.set(animationMediator)
+                        }
                     }
                 }
             }
@@ -122,9 +130,5 @@ class BlindDraft : Fragment() {
                 TakeAction.DELETE -> viewModel.deleteTake(it.take)
             }
         }
-    }
-
-    private fun buildTakeCard(take: TakeCardModel): ChunkTakeCard {
-        return ChunkTakeCard(take)
     }
 }
