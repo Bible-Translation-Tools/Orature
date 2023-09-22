@@ -20,6 +20,7 @@ import java.nio.file.Paths
 
 const val testDataRootFilePath = "/Users/DARYL"
 const val testDirWithAudio =  "${testDataRootFilePath}/testProjectChapterDirWithAudio"
+const val workingAudioFileWithAudio = "${testDirWithAudio}/chapter_narration.pcm"
 const val testDirWithoutAudio = "${testDataRootFilePath}/testProjectChapterDirWithoutAudio"
 
 class ChapterRepresentationTest {
@@ -229,9 +230,9 @@ class ChapterRepresentationTest {
         // sets relative position to 1.5 seconds worth of frames
         val relativePosition = 66150
 
-        val absolutePositionFromRelativePosition = chapterRepresentation.relativeToAbsolute(relativePosition)
-
-        Assert.assertEquals(1389151, absolutePositionFromRelativePosition)
+        val absolutePosition = chapterRepresentation.relativeToAbsolute(relativePosition)
+        val expectedAbsolutePosition = 1389150
+        Assert.assertEquals(expectedAbsolutePosition, absolutePosition)
     }
 
     @Test
@@ -243,8 +244,9 @@ class ChapterRepresentationTest {
 
         // sets relative position to 13.5 seconds worth of frames
         val relativePosition = 595350
-
-        Assert.assertEquals(1653750 + 13, chapterRepresentation.relativeToAbsolute(relativePosition))
+        val absolutePosition = chapterRepresentation.relativeToAbsolute(relativePosition)
+        val expectedAbsolutePosition = 1653750
+        Assert.assertEquals(expectedAbsolutePosition, absolutePosition)
     }
 
 
@@ -260,8 +262,9 @@ class ChapterRepresentationTest {
         // sets relative position to 13.5 seconds worth of frames
         val relativePosition = 595350
 
+        val expectedAbsolutePos = 1653750 + spaceBetweenSectors*7
         val absolutePos = chapterRepresentation.relativeToAbsolute(relativePosition)
-        Assert.assertEquals(1653750 + 13 + spaceBetweenSectors*7, absolutePos)
+        Assert.assertEquals(expectedAbsolutePos, absolutePos)
     }
 
     @Test
@@ -439,7 +442,7 @@ class ChapterRepresentationTest {
         val testAudioDataBuffer = ByteBuffer.allocate(44100 * secondsOfAudio * 2)
 
         fillAudioBufferWithPadding(testAudioDataBuffer, secondsOfAudio, 0)
-        writeByteBufferToPCMFile(testAudioDataBuffer, "${testDirWithAudio}\\chapter_narration.pcm")
+        writeByteBufferToPCMFile(testAudioDataBuffer, workingAudioFileWithAudio)
 
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
@@ -464,7 +467,7 @@ class ChapterRepresentationTest {
         val testAudioDataBuffer = ByteBuffer.allocate(44100 * secondsOfAudio * 2)
 
         fillAudioBufferWithPadding(testAudioDataBuffer, secondsOfAudio, 0)
-        writeByteBufferToPCMFile(testAudioDataBuffer, "${testDirWithAudio}\\chapter_narration.pcm")
+        writeByteBufferToPCMFile(testAudioDataBuffer, workingAudioFileWithAudio)
 
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
@@ -499,7 +502,7 @@ class ChapterRepresentationTest {
         val buffer = ByteBuffer.allocate(44100 * secondsOfAudio * 2 + paddingLength * 2 * numTestVerses)
 
         fillAudioBufferWithPadding(buffer, secondsOfAudio, paddingLength)
-        writeByteBufferToPCMFile(buffer, "${testDirWithAudio}\\chapter_narration.pcm")
+        writeByteBufferToPCMFile(buffer, workingAudioFileWithAudio)
 
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses, 44100)
@@ -536,7 +539,7 @@ class ChapterRepresentationTest {
         val buffer = ByteBuffer.allocate(44100 * secondsOfAudio * 2)
 
         fillAudioBufferWithPadding(buffer, secondsOfAudio, 0)
-        writeByteBufferToPCMFile(buffer, "${testDirWithAudio}\\chapter_narration.pcm")
+        writeByteBufferToPCMFile(buffer, workingAudioFileWithAudio)
 
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
@@ -573,7 +576,7 @@ class ChapterRepresentationTest {
         val testAudioDataBuffer = ByteBuffer.allocate(44100 * secondsOfAudio * 2)
 
         fillAudioBufferWithPadding(testAudioDataBuffer, secondsOfAudio, 0)
-        writeByteBufferToPCMFile(testAudioDataBuffer, "${testDirWithAudio}\\chapter_narration.pcm")
+        writeByteBufferToPCMFile(testAudioDataBuffer, workingAudioFileWithAudio)
 
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
