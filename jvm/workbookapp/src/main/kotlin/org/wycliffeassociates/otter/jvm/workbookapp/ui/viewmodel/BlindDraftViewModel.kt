@@ -64,14 +64,7 @@ class BlindDraftViewModel : ViewModel() {
             .chunks
             .observeOnFx()
             .subscribe { chunks ->
-                val list = chunks.map {
-                    ChunkViewData(
-                        it.sort,
-                        SimpleBooleanProperty(it.hasSelectedAudio()),
-                        translationViewModel.selectedChunkBinding
-                    )
-                }
-                translationViewModel.chunkList.setAll(list)
+                translationViewModel.loadChunks(chunks)
                 (chunks.firstOrNull { !it.hasSelectedAudio() } ?: chunks.firstOrNull())
                     ?.let { chunk ->
                         translationViewModel.selectChunk(chunk.sort)
@@ -157,8 +150,17 @@ class BlindDraftViewModel : ViewModel() {
         chunk.audio.selected
             .observeOnFx()
             .subscribe {
+                refreshChunkList()
                 loadTakes(chunk)
             }.addTo(chunkDisposable)
+    }
+
+    private fun refreshChunkList() {
+        workbookDataStore.activeChapterProperty.value?.let { chapter ->
+            chapter.chunks.value?.let { chunks ->
+                translationViewModel.loadChunks(chunks)
+            }
+        }
     }
 
     private fun newTakeFile(): Single<Take> {
