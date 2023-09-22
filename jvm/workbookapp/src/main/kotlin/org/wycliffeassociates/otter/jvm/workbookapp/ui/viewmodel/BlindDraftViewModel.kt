@@ -4,13 +4,16 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
+import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.transformation.FilteredList
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
@@ -28,6 +31,7 @@ import java.time.LocalDate
 import javax.inject.Inject
 
 class BlindDraftViewModel : ViewModel() {
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     @Inject
     lateinit var waveFileCreator: IWaveFileCreator
@@ -118,6 +122,23 @@ class BlindDraftViewModel : ViewModel() {
         currentChunkProperty.value?.audio?.selectTake(take)
     }
 
+    fun deleteTake(take: Take) {
+        takes.forEach { it.audioPlayer.stop() }
+        audioDataStore.stopPlayers()
+
+        val wasTakeSelected = takes.any { it.take == take && it.selected }
+        take.deletedTimestamp.accept(DateHolder.now())
+        take.deletedTimestamp
+            .filter { dateHolder -> dateHolder.value != null }
+            .doOnError { e ->
+                logger.error("Error in removing deleted take: $take", e)
+            }
+            .subscribe {
+                handlePostDeleteTake(take, wasTakeSelected)
+            }
+            .let { disposables.add(it) }
+    }
+
     private fun loadTakes(chunk: Chunk) {
         val selected = chunk.audio.selected.value?.value
 
@@ -189,6 +210,18 @@ class BlindDraftViewModel : ViewModel() {
             recordable = recordable,
             rcSlug = workbookDataStore.workbook.sourceMetadataSlug
         )
+    }
+
+    private fun handlePostDeleteTake(take: Take, selectAnotherTake: Boolean) {
+        Platform.runLater {
+            takes.removeIf { it.take == take }
+            // select the next take after deleting
+            if (selectAnotherTake) {
+                takes.firstOrNull()?.let {
+                    selectTake(it.take)
+                }
+            }
+        }
     }
 
     fun Take.mapToCardModel(selected: Boolean): TakeCardModel {

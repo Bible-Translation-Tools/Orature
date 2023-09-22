@@ -22,9 +22,9 @@ class ChunkingTranslationPage : View() {
     private val mainFragmentProperty = viewModel.selectedStepProperty.objectBinding {
         it?.let { step ->
             when(step) {
-                ChunkingStep.CONSUME_AND_VERBALIZE -> Consume()
-                ChunkingStep.CHUNKING -> Chunking()
-                ChunkingStep.BLIND_DRAFT -> BlindDraft()
+                ChunkingStep.CONSUME_AND_VERBALIZE -> find<Consume>()
+                ChunkingStep.CHUNKING -> find<Chunking>()
+                ChunkingStep.BLIND_DRAFT -> find<BlindDraft>()
                 else -> null
             }
         }
@@ -65,10 +65,10 @@ class ChunkingTranslationPage : View() {
         tryImportStylesheet("/css/chunk-marker.css")
         tryImportStylesheet("/css/scrolling-waveform.css")
 
-        mainFragmentProperty.addListener { observable, oldValue, newValue ->
-            oldValue?.onUndock()
-            newValue?.onDock()
-        }
+//        mainFragmentProperty.addListener { observable, oldValue, newValue ->
+//            oldValue?.onUndock()
+//            newValue?.onDock()
+//        }
 
         subscribe<ChunkingStepSelectedEvent> {
             viewModel.navigateStep(it.step)

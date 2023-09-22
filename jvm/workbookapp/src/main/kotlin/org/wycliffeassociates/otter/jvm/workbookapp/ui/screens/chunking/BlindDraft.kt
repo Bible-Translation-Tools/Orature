@@ -2,14 +2,18 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Node
-import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
+import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.bindSingleChild
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChunkTakeCard
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ChunkTakeEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.TakeAction
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BlindDraftViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel
@@ -47,6 +51,8 @@ class BlindDraft : Fragment() {
 
     init {
         tryImportStylesheet("/css/recording-screen.css")
+        tryImportStylesheet("/css/popup-menu.css")
+        subscribeEvents()
     }
 
     private fun buildTakesArea(): VBox {
@@ -111,39 +117,17 @@ class BlindDraft : Fragment() {
         viewModel.undockBlindDraft()
     }
 
-    private fun buildTakeCard(take: TakeCardModel): HBox {
-        return HBox().apply {
-            addClass("take-card")
-            simpleaudioplayer(take.audioPlayer) {
-                hgrow = Priority.ALWAYS
-                titleTextProperty.set(
-                    MessageFormat.format(
-                        messages["takeTitle"],
-                        messages["take"],
-                        take.take.number
-                    )
-                )
-                enablePlaybackRateProperty.set(false)
-                sideTextProperty.bind(remainingTimeProperty)
-            }
-            button {
-                addClass("btn", "btn--icon", "btn--borderless")
-                tooltip(messages["options"])
-                graphic = FontIcon(MaterialDesign.MDI_DOTS_VERTICAL)
-            }
-            button {
-                addClass("btn", "btn--icon")
-                tooltip(messages["select"])
-                togglePseudoClass("active", take.selected)
-
-                graphic = FontIcon(MaterialDesign.MDI_STAR_OUTLINE)
-                isMouseTransparent = take.selected
-                isFocusTraversable = !take.selected
-
-                action {
-                    viewModel.selectTake(take.take)
-                }
+    private fun subscribeEvents() {
+        subscribe<ChunkTakeEvent> {
+            when (it.action) {
+                TakeAction.SELECT -> viewModel.selectTake(it.take)
+//                TakeAction.EDIT -> viewModel.editTake(it.take)
+                TakeAction.DELETE -> viewModel.deleteTake(it.take)
             }
         }
+    }
+
+    private fun buildTakeCard(take: TakeCardModel): ChunkTakeCard {
+        return ChunkTakeCard(take)
     }
 }
