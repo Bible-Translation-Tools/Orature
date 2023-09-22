@@ -18,10 +18,10 @@ import java.nio.file.Files
 import java.nio.file.Paths
 
 
-const val testDataRootFilePath = "/Users/DARYL"
-const val testDirWithAudio =  "${testDataRootFilePath}/testProjectChapterDirWithAudio"
-const val workingAudioFileWithAudio = "${testDirWithAudio}/chapter_narration.pcm"
-const val testDirWithoutAudio = "${testDataRootFilePath}/testProjectChapterDirWithoutAudio"
+val testDataRootFilePath: String = System.getProperty("user.home")
+val testDirWithAudio =  "${testDataRootFilePath}/testProjectChapterDirWithAudio"
+val workingAudioFileWithAudio = "${testDirWithAudio}/chapter_narration.pcm"
+val testDirWithoutAudio = "${testDataRootFilePath}/testProjectChapterDirWithoutAudio"
 
 class ChapterRepresentationTest {
 
