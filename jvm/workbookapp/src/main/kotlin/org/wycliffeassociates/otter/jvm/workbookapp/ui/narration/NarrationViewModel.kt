@@ -129,14 +129,14 @@ class NarrationViewModel : ViewModel() {
         narratableList.bind(chunksList) { chunk ->
             NarrationTextItemData(
                 chunk,
-                recordedVerses.any { it.label == chunk.label },
+                recordedVerses.any { it.label == chunk.title },
                 chunk.sort - 1 <= recordedVerses.size
             )
         }
 
         recordedVerses.onChange {
             narratableList.forEach { chunk ->
-                chunk.hasRecording = recordedVerses.any { chunk.chunk.label == it.label }
+                chunk.hasRecording = recordedVerses.any { chunk.chunk.title == it.label }
                 chunk.previousChunksRecorded = chunk.chunk.sort - 1 <= recordedVerses.size
             }
         }

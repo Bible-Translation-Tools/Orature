@@ -161,7 +161,7 @@ class NarrationTextItem : VBox() {
                         prefWidth = 316.0
                         styleClass.clear()
                         addClass("btn", "btn--secondary")
-                        text = FX.messages["rerecord"]
+                        text = FX.messages["reRecord"]
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                         onActionProperty().bind(onRecordAgainActionProperty)
                     }
@@ -176,7 +176,7 @@ class NarrationTextItem : VBox() {
                         styleClass.clear()
                         addClass("btn", "btn--secondary")
                         addPseudoClass("inactive")
-                        text = FX.messages["rerecord"]
+                        text = FX.messages["reRecord"]
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                         onActionProperty().bind(onRecordAgainActionProperty)
                     }
