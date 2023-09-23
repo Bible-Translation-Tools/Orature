@@ -31,11 +31,13 @@ import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
 import org.wycliffeassociates.otter.common.domain.narration.framesToPixels
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
+import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItemState
 import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NarrationTextItemData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.MARKER_AREA_WIDTH
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkerControl
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.NarrationWaveformRenderer
@@ -95,6 +97,7 @@ class NarrationViewModel : ViewModel() {
 
     val chunkTotalProperty = SimpleIntegerProperty(0)
     val chunksList: ObservableList<Chunk> = observableListOf()
+    val narratableList: ObservableList<NarrationTextItemData> = observableListOf()
 
     val recordedVerses = observableListOf<VerseMarker>()
     val hasVersesProperty = SimpleBooleanProperty()
@@ -121,6 +124,21 @@ class NarrationViewModel : ViewModel() {
         subscribe<AppCloseRequestEvent> {
             logger.info("Received close event request")
             onUndock()
+        }
+
+        narratableList.bind(chunksList) { chunk ->
+            NarrationTextItemData(
+                chunk,
+                recordedVerses.any { it.label == chunk.label },
+                chunk.sort - 1 <= recordedVerses.size
+            )
+        }
+
+        recordedVerses.onChange {
+            narratableList.forEach { chunk ->
+                chunk.hasRecording = recordedVerses.any { chunk.chunk.label == it.label }
+                chunk.previousChunksRecorded = chunk.chunk.sort - 1 <= recordedVerses.size
+            }
         }
     }
 

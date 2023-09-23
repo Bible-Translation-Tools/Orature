@@ -213,15 +213,15 @@
 }
 
 .btn--secondary:inactive {
-    -fx-background-color: #F2F3F5FF;
+    -fx-background-color: #E5E8EB;
     -fx-border-width: 0;
 }
 .btn--secondary:inactive .text {
-    -fx-fill: #B3B9C2FF;
-    -fx-text-fill: #B3B9C2FF;
+    -fx-fill: #66768B;
+    -fx-text-fill: #66768B;
 }
 .btn--secondary:inactive .ikonli-font-icon {
-    -fx-icon-color: #B3B9C2FF;
+    -fx-icon-color: #66768B;
 }
 
 .btn--secondary-light {

@@ -1,27 +1,28 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import io.reactivex.Single
+import io.reactivex.Observable
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.util.Duration
-import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
+import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.narration.*
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NarrationTextCell
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NarrationTextItemData
 import tornadofx.*
 import java.text.MessageFormat
+import java.util.concurrent.TimeUnit
 import kotlin.math.max
 
 class TeleprompterViewModel : ViewModel() {
     private val narrationViewModel: NarrationViewModel by inject()
 
-    val chunks = observableListOf<Chunk>()
+    val chunks = observableListOf<NarrationTextItemData>()
 
     val stickyVerseProperty = SimpleObjectProperty<Chunk>()
 
@@ -40,10 +41,10 @@ class TeleprompterViewModel : ViewModel() {
     val isRecordingAgainProperty = SimpleBooleanProperty()
     private var isRecordingAgain by isRecordingAgainProperty
 
-    val lastRecordedVerseProperty = SimpleIntegerProperty()
+    val lastRecordedVerseProperty = SimpleIntegerProperty(0)
 
     init {
-        chunks.bind(narrationViewModel.chunksList) { it }
+        chunks.bind(narrationViewModel.narratableList) { it }
 
         recordStartProperty.bindBidirectional(narrationViewModel.recordStartProperty)
         recordResumeProperty.bindBidirectional(narrationViewModel.recordResumeProperty)
@@ -92,7 +93,7 @@ class TeleprompterViewModel : ViewModel() {
 class TeleprompterView : View() {
 
     private val viewModel: TeleprompterViewModel by inject()
-    private var listView: NarrationTextListView<Chunk> by singleAssign()
+    private var listView: NarrationTextListView<NarrationTextItemData> by singleAssign()
 
     private val subscriptions = mutableListOf<EventRegistration>()
 
@@ -104,6 +105,11 @@ class TeleprompterView : View() {
             }
         }*/
 
+        Observable
+            .interval(1L, TimeUnit.SECONDS)
+            .observeOnFx()
+            .subscribe { listView.refresh() }
+
         subscribe<StickyVerseChangedEvent<Chunk>> {
             it.data?.let { verse ->
                 viewModel.stickyVerseProperty.set(verse)
@@ -114,7 +120,8 @@ class TeleprompterView : View() {
 
         subscribe<ResumeVerseEvent> {
             viewModel.stickyVerseProperty.value?.let { verse ->
-                listView.scrollTo(verse)
+                val item = listView.items.find { it.chunk == verse }
+                listView.scrollTo(item)
             }
         }.let { subscriptions.add(it) }
 
@@ -161,7 +168,8 @@ class TeleprompterView : View() {
                     messages["nextVerse"],
                     viewModel.recordButtonTextBinding(),
                     viewModel.isRecordingProperty,
-                    viewModel.isRecordingAgainProperty
+                    viewModel.isRecordingAgainProperty,
+                    viewModel.lastRecordedVerseProperty
                 )
             }
 

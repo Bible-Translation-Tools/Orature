@@ -11,6 +11,7 @@ import javafx.event.EventTarget
 import javafx.geometry.Pos
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
+import javafx.scene.layout.Region
 import kfoenix.jfxbutton
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
@@ -92,6 +93,7 @@ class NarrationToolBar : View() {
         }
         bottom = separator {
             addClass("narration-toolbar__separator")
+            minHeight = Region.USE_PREF_SIZE
         }
     }
 }

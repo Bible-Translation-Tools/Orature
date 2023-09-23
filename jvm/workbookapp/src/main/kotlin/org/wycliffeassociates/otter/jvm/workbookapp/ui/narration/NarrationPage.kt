@@ -3,15 +3,23 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 import com.github.thomasnield.rxkotlinfx.toLazyBinding
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
+import javafx.scene.paint.Color
 import javafx.util.Duration
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
+import org.wycliffeassociates.otter.jvm.controls.event.ChapterReturnFromPluginEvent
+import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.OpenChapterEvent
+import org.wycliffeassociates.otter.jvm.controls.event.OpenInAudioPluginEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PauseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PlayChapterEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PlayVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
+import org.wycliffeassociates.otter.jvm.controls.event.RecordVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NextVerseEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.RecordVerseEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.NarrationMarkerChangedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationRedoEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationResetChapterEvent
@@ -21,6 +29,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewMod
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.util.*
+import javax.swing.Painter
 
 class NarrationPage : View() {
     private val logger = LoggerFactory.getLogger(NarrationPage::class.java)
@@ -59,6 +68,10 @@ class NarrationPage : View() {
         borderpane {
             top = narrationHeader.root
             center = borderpane {
+                style {
+                    padding = box(0.px, 0.px, 1.px, 0.px)
+                    backgroundColor += Color.WHITE
+                }
                 center = audioWorkspaceView.root
                 bottom = narrationToolbar.root
             }

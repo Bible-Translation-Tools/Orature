@@ -18,28 +18,49 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
+import javafx.beans.property.IntegerProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.value.ObservableValue
 import javafx.event.EventHandler
 import javafx.scene.control.ListCell
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
+import org.wycliffeassociates.otter.jvm.controls.event.RecordVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItem
+import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItemState
+import org.wycliffeassociates.otter.jvm.controls.narration.narrationTextListview
 import tornadofx.FX
-import tornadofx.FXEvent
 import tornadofx.addClass
+
+class NarrationTextItemData(
+    val chunk: Chunk,
+    var hasRecording: Boolean = false,
+    var previousChunksRecorded: Boolean = false
+) {
+    override fun toString(): String {
+        return "${chunk.sort}, $hasRecording, $previousChunksRecorded"
+    }
+}
 
 class NarrationTextCell(
     private val nextChunkText: String,
     private val recordButtonTextProperty: ObservableValue<String>,
     private val isRecordingProperty: ObservableValue<Boolean>,
-    private val isRecordingAgainProperty: ObservableValue<Boolean>
-) : ListCell<Chunk>() {
+    private val isRecordingAgainProperty: ObservableValue<Boolean>,
+    private val recordingIndexProperty: IntegerProperty
+) : ListCell<NarrationTextItemData>() {
+
+    private val logger = LoggerFactory.getLogger(NarrationTextCell::class.java)
+
     private val view = NarrationTextItem()
 
     init {
         addClass("narration-list__verse-cell")
     }
 
-    override fun updateItem(item: Chunk?, empty: Boolean) {
+    override fun updateItem(item: NarrationTextItemData?, empty: Boolean) {
         super.updateItem(item, empty)
 
         if (empty || item == null) {
@@ -47,14 +68,17 @@ class NarrationTextCell(
             return
         }
 
+        logger.info("Refreshing Verse ${item}")
+
+
         val isLast = index == listView.items.lastIndex
 
         view.isSelectedProperty.set(isSelected)
         view.isLastVerseProperty.set(isLast)
 
         graphic = view.apply {
-            verseLabelProperty.set(item.title)
-            verseTextProperty.set(item.textItem.text)
+            verseLabelProperty.set(item.chunk.title)
+            verseTextProperty.set(item.chunk.textItem.text)
 
             recordButtonTextProperty.bind(this@NarrationTextCell.recordButtonTextProperty)
             isRecordingProperty.bind(this@NarrationTextCell.isRecordingProperty)
@@ -62,10 +86,10 @@ class NarrationTextCell(
             nextChunkTextProperty.set(nextChunkText)
 
             onRecordActionProperty.set(EventHandler {
-                FX.eventbus.fire(RecordVerseEvent(index, item))
+                FX.eventbus.fire(RecordVerseEvent(index, item.chunk))
             })
 
-            onNextVerseActionProperty.set(EventHandler  {
+            onNextVerseActionProperty.set(EventHandler {
                 listView.apply {
                     selectionModel.selectNext()
 
@@ -75,12 +99,46 @@ class NarrationTextCell(
                     // than the text needed to actively be narrated being off the screen.
                     scrollTo(selectionModel.selectedIndex - 1)
 
-                    FX.eventbus.fire(NextVerseEvent(selectionModel.selectedIndex, selectionModel.selectedItem))
+                    FX.eventbus.fire(NextVerseEvent(selectionModel.selectedIndex, selectionModel.selectedItem.chunk))
                 }
             })
+
+            onRecordAgainActionProperty.set(EventHandler {
+                FX.eventbus.fire(RecordAgainEvent(index))
+            })
+
+            stateProperty.set(
+                computeState(
+                    index,
+                    isRecording,
+                    isRecordingAgain,
+                    recordingIndexProperty.value,
+                )
+            )
+        }
+    }
+
+    fun computeState(
+        index: Int,
+        isRecording: Boolean,
+        isRecordingAgain: Boolean,
+        recordingIndex: Int
+    ): NarrationTextItemState {
+        val hasRecording = item.hasRecording
+        val previousChunksRecorded = item.previousChunksRecorded
+
+        if (!isRecording && !isRecordingAgain && !hasRecording && previousChunksRecorded) {
+            return NarrationTextItemState.RECORD
+        } else if (isRecording && !isRecordingAgain && index == recordingIndex - 1) {
+            return NarrationTextItemState.RECORD_ACTIVE
+        } else if (!previousChunksRecorded && !hasRecording) {
+            return NarrationTextItemState.RECORD_DISABLED
+        } else if (!isRecording && hasRecording) {
+            return NarrationTextItemState.RE_RECORD
+        } else if (isRecordingAgain && index == recordingIndex - 1) {
+            return NarrationTextItemState.RE_RECORD_ACTIVE
+        } else {
+            return NarrationTextItemState.RE_RECORD_DISABLED
         }
     }
 }
-
-class NextVerseEvent(val index: Int, val chunk: Chunk) : FXEvent()
-class RecordVerseEvent(val index: Int, val chunk: Chunk) : FXEvent()
