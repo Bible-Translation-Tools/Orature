@@ -24,8 +24,10 @@ import javafx.beans.value.ObservableValue
 import javafx.event.EventHandler
 import javafx.scene.control.ListCell
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PlayVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RecordVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItem
@@ -36,6 +38,7 @@ import tornadofx.addClass
 
 class NarrationTextItemData(
     val chunk: Chunk,
+    val marker: VerseMarker?,
     var hasRecording: Boolean = false,
     var previousChunksRecorded: Boolean = false
 ) {
@@ -49,7 +52,9 @@ class NarrationTextCell(
     private val recordButtonTextProperty: ObservableValue<String>,
     private val isRecordingProperty: ObservableValue<Boolean>,
     private val isRecordingAgainProperty: ObservableValue<Boolean>,
-    private val recordingIndexProperty: IntegerProperty
+    private val isPlayingProperty: ObservableValue<Boolean>,
+    private val recordingIndexProperty: IntegerProperty,
+    private val playingVerseProperty: IntegerProperty
 ) : ListCell<NarrationTextItemData>() {
 
     private val logger = LoggerFactory.getLogger(NarrationTextCell::class.java)
@@ -68,9 +73,6 @@ class NarrationTextCell(
             return
         }
 
-        logger.info("Refreshing Verse ${item}")
-
-
         val isLast = index == listView.items.lastIndex
 
         view.isSelectedProperty.set(isSelected)
@@ -80,9 +82,13 @@ class NarrationTextCell(
             verseLabelProperty.set(item.chunk.title)
             verseTextProperty.set(item.chunk.textItem.text)
 
+            hasRecordingProperty.set(item.hasRecording)
             recordButtonTextProperty.bind(this@NarrationTextCell.recordButtonTextProperty)
             isRecordingProperty.bind(this@NarrationTextCell.isRecordingProperty)
             isRecordingAgainProperty.bind(this@NarrationTextCell.isRecordingAgainProperty)
+            isPlayingProperty.bind(this@NarrationTextCell.isPlayingProperty)
+            playingVerseIndexProperty.bind(this@NarrationTextCell.playingVerseProperty)
+            indexProperty.set(index)
             nextChunkTextProperty.set(nextChunkText)
 
             onRecordActionProperty.set(EventHandler {
@@ -107,6 +113,13 @@ class NarrationTextCell(
                 FX.eventbus.fire(RecordAgainEvent(index))
             })
 
+            onPlayActionProperty.set(EventHandler {
+                item.marker?.let {
+                    logger.info("Playing verse index $it")
+                    FX.eventbus.fire(PlayVerseEvent(item.marker))
+                }
+            })
+
             stateProperty.set(
                 computeState(
                     index,
@@ -122,20 +135,20 @@ class NarrationTextCell(
         index: Int,
         isRecording: Boolean,
         isRecordingAgain: Boolean,
-        recordingIndex: Int
+        recordingIndex: Int?
     ): NarrationTextItemState {
         val hasRecording = item.hasRecording
         val previousChunksRecorded = item.previousChunksRecorded
 
         if (!isRecording && !isRecordingAgain && !hasRecording && previousChunksRecorded) {
             return NarrationTextItemState.RECORD
-        } else if (isRecording && !isRecordingAgain && index == recordingIndex - 1) {
+        } else if (isRecording && !isRecordingAgain && index == recordingIndex) {
             return NarrationTextItemState.RECORD_ACTIVE
         } else if (!previousChunksRecorded && !hasRecording) {
             return NarrationTextItemState.RECORD_DISABLED
         } else if (!isRecording && hasRecording) {
             return NarrationTextItemState.RE_RECORD
-        } else if (isRecordingAgain && index == recordingIndex - 1) {
+        } else if (isRecordingAgain && index == recordingIndex) {
             return NarrationTextItemState.RE_RECORD_ACTIVE
         } else {
             return NarrationTextItemState.RE_RECORD_DISABLED

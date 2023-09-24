@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.controls.narration
 
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
@@ -30,6 +31,7 @@ import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.event.PauseEvent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
@@ -44,6 +46,10 @@ enum class NarrationTextItemState {
 }
 
 class NarrationTextItem : VBox() {
+    private val logger = LoggerFactory.getLogger(NarrationTextItem::class.java)
+
+    val indexProperty = SimpleIntegerProperty(0)
+
     val stateProperty = SimpleObjectProperty(NarrationTextItemState.RECORD)
     val state by stateProperty
 
@@ -52,6 +58,8 @@ class NarrationTextItem : VBox() {
     val verseTextProperty = SimpleStringProperty()
     val isRecordingProperty = SimpleBooleanProperty()
     val isRecording by isRecordingProperty
+
+    val playingVerseIndexProperty = SimpleIntegerProperty()
 
     val isRecordingAgainProperty = SimpleBooleanProperty()
     val isRecordingAgain by isRecordingAgainProperty
@@ -77,14 +85,17 @@ class NarrationTextItem : VBox() {
             borderpane {
                 center = button {
                     addClass("btn", "btn--secondary")
-                    graphicProperty().bind(objectBinding(isPlayingProperty) {
-                        when (isPlaying) {
-                            true -> FontIcon(MaterialDesign.MDI_PAUSE)
+                    graphicProperty().bind(objectBinding(isPlayingProperty, playingVerseIndexProperty) {
+                        logger.error("isPlaying $isPlaying, index: ${indexProperty.value} playingIndex: ${playingVerseIndexProperty.value}")
+                        when (isPlaying && indexProperty.value.equals(playingVerseIndexProperty.value)) {
+                            true -> {
+                                FontIcon(MaterialDesign.MDI_PAUSE)
+                            }
                             false -> FontIcon(MaterialDesign.MDI_PLAY)
                         }
                     })
-                    disableWhen { !hasRecordingProperty }
-                    togglePseudoClass("inactive", isDisabled)
+                    disableWhen { hasRecordingProperty.not() }
+                    // togglePseudoClass("inactive", disabledProperty().value)
                     onActionProperty().bind(onPlayActionProperty)
                 }
             }

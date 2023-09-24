@@ -38,10 +38,18 @@ class TeleprompterViewModel : ViewModel() {
     val isRecordingProperty = SimpleBooleanProperty()
     private var isRecording by isRecordingProperty
 
+    val isPlayingProperty = SimpleBooleanProperty()
+    private var isPlaying by isPlayingProperty
+
     val isRecordingAgainProperty = SimpleBooleanProperty()
     private var isRecordingAgain by isRecordingAgainProperty
 
+
+
     val lastRecordedVerseProperty = SimpleIntegerProperty(0)
+
+    val recordingVerseProperty = SimpleIntegerProperty()
+    val playingVerseProperty = SimpleIntegerProperty()
 
     init {
         chunks.bind(narrationViewModel.narratableList) { it }
@@ -49,9 +57,12 @@ class TeleprompterViewModel : ViewModel() {
         recordStartProperty.bindBidirectional(narrationViewModel.recordStartProperty)
         recordResumeProperty.bindBidirectional(narrationViewModel.recordResumeProperty)
         isRecordingProperty.bindBidirectional(narrationViewModel.isRecordingProperty)
+        isPlayingProperty.bind(narrationViewModel.isPlayingProperty)
         recordPauseProperty.bindBidirectional(narrationViewModel.recordPauseProperty)
         isRecordingAgainProperty.bindBidirectional(narrationViewModel.isRecordingAgainProperty)
         lastRecordedVerseProperty.bindBidirectional(narrationViewModel.lastRecordedVerseProperty)
+        recordingVerseProperty.bind(narrationViewModel.recordingVerseIndex)
+        playingVerseProperty.bind(narrationViewModel.playingVerseIndex)
     }
 
     fun currentVerseTextBinding(): StringBinding {
@@ -105,10 +116,10 @@ class TeleprompterView : View() {
             }
         }*/
 
-        Observable
-            .interval(1L, TimeUnit.SECONDS)
-            .observeOnFx()
-            .subscribe { listView.refresh() }
+//        Observable
+//            .interval(1L, TimeUnit.SECONDS)
+//            .observeOnFx()
+//            .subscribe { listView.refresh() }
 
         subscribe<StickyVerseChangedEvent<Chunk>> {
             it.data?.let { verse ->
@@ -169,7 +180,9 @@ class TeleprompterView : View() {
                     viewModel.recordButtonTextBinding(),
                     viewModel.isRecordingProperty,
                     viewModel.isRecordingAgainProperty,
-                    viewModel.lastRecordedVerseProperty
+                    viewModel.isPlayingProperty,
+                    viewModel.recordingVerseProperty,
+                    viewModel.playingVerseProperty
                 )
             }
 

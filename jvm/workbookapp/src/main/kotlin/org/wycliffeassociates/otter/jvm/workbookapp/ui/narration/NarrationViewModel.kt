@@ -80,9 +80,11 @@ class NarrationViewModel : ViewModel() {
     val recordAgainVerseIndexProperty = SimpleObjectProperty<Int?>()
     var recordAgainVerseIndex by recordAgainVerseIndexProperty
     val isPlayingProperty = SimpleBooleanProperty(false)
+    val recordingVerseIndex = SimpleIntegerProperty()
 
     val playingVerseProperty = SimpleObjectProperty<VerseMarker?>()
     var playingVerse by playingVerseProperty
+    val playingVerseIndex = SimpleIntegerProperty(-1)
 
     val hasUndoProperty = SimpleBooleanProperty()
     var hasUndo by hasUndoProperty
@@ -129,6 +131,7 @@ class NarrationViewModel : ViewModel() {
         narratableList.bind(chunksList) { chunk ->
             NarrationTextItemData(
                 chunk,
+                recordedVerses.firstOrNull {it.label == chunk.title},
                 recordedVerses.any { it.label == chunk.title },
                 chunk.sort - 1 <= recordedVerses.size
             )
@@ -167,10 +170,13 @@ class NarrationViewModel : ViewModel() {
         narration = narrationFactory.create(workbookDataStore.workbook, chapter)
         audioPlayer = narration.getPlayer()
         audioPlayer.addEventListener { event: AudioPlayerEvent ->
-            when (event) {
-                AudioPlayerEvent.PLAY -> isPlayingProperty.set(true)
-                AudioPlayerEvent.COMPLETE, AudioPlayerEvent.PAUSE, AudioPlayerEvent.STOP -> isPlayingProperty.set(false)
-                else -> {}
+            runLater {
+                when (event) {
+                    AudioPlayerEvent.PLAY -> isPlayingProperty.set(true)
+                    AudioPlayerEvent.COMPLETE, AudioPlayerEvent.PAUSE, AudioPlayerEvent.STOP -> isPlayingProperty.set(false)
+
+                    else -> {}
+                }
             }
         }
         volumeBar = VolumeBar(narration.getRecorderAudioStream())
@@ -275,6 +281,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun play(verse: VerseMarker) {
+        playingVerseIndex.set(recordedVerses.indexOf(verse))
         renderer.clearActiveRecordingData()
         audioPlayer.pause()
 
@@ -285,6 +292,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun playAll() {
+        playingVerseIndex.set(-1)
         renderer.clearActiveRecordingData()
         audioPlayer.pause()
         narration.loadChapterIntoPlayer()
@@ -302,6 +310,7 @@ class NarrationViewModel : ViewModel() {
         narration.onRecordAgain(verseIndex)
 
         recordAgainVerseIndex = verseIndex
+        recordingVerseIndex.set(verseIndex)
         isRecording = true
         isRecordingAgain = true
         recordPause = false
@@ -324,6 +333,7 @@ class NarrationViewModel : ViewModel() {
                 narration.finalizeVerse(max(index - 1, 0))
                 narration.onNewVerse(index)
                 renderer.clearActiveRecordingData()
+                recordingVerseIndex.set(index)
             }
 
             recordPause -> {
@@ -378,6 +388,7 @@ class NarrationViewModel : ViewModel() {
         isRecording = true
         recordStart = false
         recordResume = false
+        recordingVerseIndex.set(index)
     }
 
     private fun pauseRecording(index: Int) {
