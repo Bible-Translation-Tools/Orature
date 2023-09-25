@@ -122,7 +122,7 @@ class NarrationViewModel : ViewModel() {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
 
         hasVersesProperty.bind(recordedVerses.booleanBinding { it.isNotEmpty() })
-        lastRecordedVerseProperty.bind(recordedVerses.integerBinding { it.size })
+        lastRecordedVerseProperty.bind(recordedVerses.sizeProperty)
 
         subscribe<AppCloseRequestEvent> {
             logger.info("Received close event request")
