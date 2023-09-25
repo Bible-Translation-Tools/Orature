@@ -139,12 +139,12 @@ class NarrationTextCell(
     ): NarrationTextItemState {
         val hasRecording = item.hasRecording
         val previousChunksRecorded = item.previousChunksRecorded
-
+        
         if (!isRecording && !isRecordingAgain && !hasRecording && previousChunksRecorded) {
             return NarrationTextItemState.RECORD
         } else if (isRecording && !isRecordingAgain && index == recordingIndex) {
             return NarrationTextItemState.RECORD_ACTIVE
-        } else if (!previousChunksRecorded && !hasRecording) {
+        } else if (!previousChunksRecorded && !hasRecording || !hasRecording && isRecording && recordingIndex == index - 1) {
             return NarrationTextItemState.RECORD_DISABLED
         } else if (!isRecording && hasRecording) {
             return NarrationTextItemState.RE_RECORD

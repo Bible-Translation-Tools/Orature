@@ -19,6 +19,8 @@ import java.text.MessageFormat
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
 
+object RefreshTeleprompter : FXEvent()
+
 class TeleprompterViewModel : ViewModel() {
     private val narrationViewModel: NarrationViewModel by inject()
 
@@ -120,6 +122,10 @@ class TeleprompterView : View() {
 //            .interval(1L, TimeUnit.SECONDS)
 //            .observeOnFx()
 //            .subscribe { listView.refresh() }
+
+        subscribe<RefreshTeleprompter> {
+            listView.refresh()
+        }
 
         subscribe<StickyVerseChangedEvent<NarrationTextItemData>> {
             it.data?.let { narrationItem ->

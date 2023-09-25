@@ -86,7 +86,6 @@ class NarrationTextItem : VBox() {
                 center = button {
                     addClass("btn", "btn--secondary")
                     graphicProperty().bind(objectBinding(isPlayingProperty, playingVerseIndexProperty) {
-                        logger.error("isPlaying $isPlaying, index: ${indexProperty.value} playingIndex: ${playingVerseIndexProperty.value}")
                         when (isPlaying && indexProperty.value.equals(playingVerseIndexProperty.value)) {
                             true -> {
                                 FontIcon(MaterialDesign.MDI_PAUSE)

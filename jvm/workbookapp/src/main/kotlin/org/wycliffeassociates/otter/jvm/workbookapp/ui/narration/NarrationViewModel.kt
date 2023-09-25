@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.github.thomasnield.rxkotlinfx.toObservable
+import com.github.thomasnield.rxkotlinfx.updates
 import com.sun.glass.ui.Screen
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -138,8 +139,11 @@ class NarrationViewModel : ViewModel() {
         }
 
         recordedVerses.onChange {
-            narratableList.forEach { chunk ->
-                chunk.hasRecording = recordedVerses.any { chunk.chunk.title == it.label }
+            narratableList.forEachIndexed { idx, chunk ->
+                chunk.hasRecording = recordedVerses.any {
+                    val matchingChunk = chunk.chunk.title == it.label
+                    recordingVerseIndex.value != idx && matchingChunk
+                }
                 chunk.previousChunksRecorded = chunk.chunk.sort - 1 <= recordedVerses.size
             }
         }
@@ -314,6 +318,8 @@ class NarrationViewModel : ViewModel() {
         isRecording = true
         isRecordingAgain = true
         recordPause = false
+
+        refreshTeleprompter()
     }
 
     fun openInAudioPlugin(index: Int) {
@@ -325,6 +331,8 @@ class NarrationViewModel : ViewModel() {
         narration.loadFromSelectedChapterFile()
         recordedVerses.setAll(narration.activeVerses)
         updateRecordingState()
+
+        refreshTeleprompter()
     }
 
     fun onNext(index: Int) {
@@ -343,6 +351,8 @@ class NarrationViewModel : ViewModel() {
 
             else -> {}
         }
+
+        refreshTeleprompter()
     }
 
     fun moveMarker(index: Int, delta: Int) {
@@ -360,6 +370,8 @@ class NarrationViewModel : ViewModel() {
                 logger.error("Toggle recording is in the else state.")
             }
         }
+
+        refreshTeleprompter()
     }
 
     fun resetChapter() {
@@ -368,18 +380,24 @@ class NarrationViewModel : ViewModel() {
         recordStart = true
         recordResume = false
         recordPause = false
+
+        refreshTeleprompter()
     }
 
     fun undo() {
         narration.undo()
 
         recordPause = false
+
+        refreshTeleprompter()
     }
 
     fun redo() {
         narration.redo()
 
         recordPause = false
+
+        refreshTeleprompter()
     }
 
     private fun record(index: Int) {
@@ -389,6 +407,8 @@ class NarrationViewModel : ViewModel() {
         recordStart = false
         recordResume = false
         recordingVerseIndex.set(index)
+
+        refreshTeleprompter()
     }
 
     private fun pauseRecording(index: Int) {
@@ -398,6 +418,8 @@ class NarrationViewModel : ViewModel() {
         narration.pauseRecording()
         narration.finalizeVerse(index)
         renderer.clearActiveRecordingData()
+
+        refreshTeleprompter()
     }
 
     private fun resumeRecording() {
@@ -407,6 +429,8 @@ class NarrationViewModel : ViewModel() {
 
         isRecording = true
         recordPause = false
+
+        refreshTeleprompter()
     }
 
     private fun stopRecordAgain() {
@@ -421,6 +445,8 @@ class NarrationViewModel : ViewModel() {
 
             recordPause = false
             recordResume = true
+
+            refreshTeleprompter()
         }
     }
 
@@ -588,5 +614,9 @@ class NarrationViewModel : ViewModel() {
 
     fun seekToPrevious() {
         narration.seekToPrevious()
+    }
+
+    private fun refreshTeleprompter() {
+        FX.eventbus.fire(RefreshTeleprompter)
     }
 }
