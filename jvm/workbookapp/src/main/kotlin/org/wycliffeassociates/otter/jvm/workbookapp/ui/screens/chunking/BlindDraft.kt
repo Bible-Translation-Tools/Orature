@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Node
 import javafx.scene.layout.Priority
@@ -26,6 +27,7 @@ class BlindDraft : Fragment() {
     private val mainSectionProperty = SimpleObjectProperty<Node>(null)
     private val takesView = buildTakesArea()
     private val recordingView = buildRecordingArea()
+    private val hideSourceAudio = SimpleBooleanProperty(false)
 
     override val root = borderpane {
         addClass("blind-draft")
@@ -39,6 +41,8 @@ class BlindDraft : Fragment() {
                     enablePlaybackRateProperty.set(true)
                     sideTextProperty.set(messages["sourceAudio"])
                 }
+                visibleWhen { hideSourceAudio.not() }
+                managedWhen(visibleProperty())
             }
         }
         center = stackpane {
@@ -96,6 +100,7 @@ class BlindDraft : Fragment() {
                         mainSectionProperty.set(recordingView)
                         recorderViewModel.onViewReady(takesView.width.toInt()) // use the width of the existing component
                         recorderViewModel.toggle()
+                        hideSourceAudio.set(true)
                     }
                 }
             }
@@ -107,6 +112,7 @@ class BlindDraft : Fragment() {
             onRecordingFinish = { result ->
                 viewModel.onRecordFinish(result)
                 mainSectionProperty.set(takesView)
+                hideSourceAudio.set(false)
             }
         }
     }
