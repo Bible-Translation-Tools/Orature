@@ -121,9 +121,9 @@ class TeleprompterView : View() {
 //            .observeOnFx()
 //            .subscribe { listView.refresh() }
 
-        subscribe<StickyVerseChangedEvent<Chunk>> {
-            it.data?.let { verse ->
-                viewModel.stickyVerseProperty.set(verse)
+        subscribe<StickyVerseChangedEvent<NarrationTextItemData>> {
+            it.data?.let { narrationItem ->
+                viewModel.stickyVerseProperty.set(narrationItem.chunk)
             } ?: run {
                 viewModel.stickyVerseProperty.set(null)
             }
