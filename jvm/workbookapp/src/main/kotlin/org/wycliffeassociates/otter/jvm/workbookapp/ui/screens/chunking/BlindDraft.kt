@@ -77,7 +77,7 @@ class BlindDraft : Fragment() {
 
                 vbox {
                     addClass("take-list")
-                    animationMediator.itemList.bind(childrenUnmodifiable) { it }
+                    animationMediator.nodeList = childrenUnmodifiable
                     bindChildren(viewModel.availableTakes) { take ->
                         ChunkTakeCard(take).apply {
                             animationMediatorProperty.set(animationMediator)

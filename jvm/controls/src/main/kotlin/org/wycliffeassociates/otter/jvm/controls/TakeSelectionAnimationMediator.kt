@@ -8,14 +8,14 @@ import kotlin.math.abs
 
 class TakeSelectionAnimationMediator<T: Node> {
     var node: T? = null
-    var itemList = observableListOf<Node>()
+    var nodeList = observableListOf<Node>()
     var selectedNode: T? = null
 
     var isAnimating = false
         private set
 
     fun animate(onFinishCallback: () -> Unit) {
-        if (node == null || itemList.isEmpty() || selectedNode == null) {
+        if (node == null || nodeList.isEmpty() || selectedNode == null) {
             onFinishCallback()
             return
         }
@@ -23,37 +23,40 @@ class TakeSelectionAnimationMediator<T: Node> {
         val node = node!!
         val selectedNode = selectedNode!!
 
-        val upTranslation = TranslateTransition(Duration.millis(500.0), node).apply {
-            byY = -verticalDistance(node, selectedNode)
-            setOnFinished {
-                node.revertAnimation {
-                    isAnimating = false
-                    onFinishCallback()
-                }
-            }
-        }
-        upTranslation.play()
-        selectedNode.moveDown(verticalDistance(selectedNode, itemList.first()))
+        node.moveUp(-verticalDistance(node, selectedNode), onFinishCallback)
+        selectedNode.moveDown(verticalDistance(selectedNode, nodeList.first()))
         shiftOtherNodes(node)
     }
 
     private fun shiftOtherNodes(animatedNode: T) {
-        val indexThreshold = itemList.indexOf(animatedNode)
-        itemList.forEachIndexed { index, node ->
+        val indexThreshold = nodeList.indexOf(animatedNode)
+        nodeList.forEachIndexed { index, node ->
             if (index < indexThreshold) {
-                val distance = abs(itemList[index + 1].boundsInParent.minY - itemList[index].boundsInParent.minY)
+                val distance = abs(nodeList[index + 1].boundsInParent.minY - nodeList[index].boundsInParent.minY)
                 node.moveDown(distance)
             }
         }
     }
 
+    private fun Node.moveUp(distance: Double, callback: () -> Unit = {}) {
+        val up = TranslateTransition(Duration.millis(500.0), this)
+        up.byY = distance
+        up.setOnFinished {
+            revertAnimation {
+                isAnimating = false
+                callback()
+            }
+        }
+        up.play()
+    }
+
     private fun Node.moveDown(distance: Double) {
-        val tt = TranslateTransition(Duration.millis(600.0), this)
-        tt.byY = distance
-        tt.setOnFinished {
+        val down = TranslateTransition(Duration.millis(500.0), this)
+        down.byY = distance
+        down.setOnFinished {
             revertAnimation()
         }
-        tt.play()
+        down.play()
     }
 
     private fun Node.revertAnimation(onFinishCallback: () -> Unit = { }) {
