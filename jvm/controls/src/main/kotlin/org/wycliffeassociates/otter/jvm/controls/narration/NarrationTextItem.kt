@@ -94,8 +94,12 @@ class NarrationTextItem : VBox() {
                             false -> FontIcon(MaterialDesign.MDI_PLAY)
                         }
                     })
-                    disableWhen { hasRecordingProperty.not() }
-                    // togglePseudoClass("inactive", disabledProperty().value)
+                    disableWhen {
+                        hasRecordingProperty.not()
+                    }
+                    disabledProperty().onChangeAndDoNow {
+                        togglePseudoClass("inactive", it!!)
+                    }
                     onActionProperty().bind(onPlayActionProperty)
                 }
             }
