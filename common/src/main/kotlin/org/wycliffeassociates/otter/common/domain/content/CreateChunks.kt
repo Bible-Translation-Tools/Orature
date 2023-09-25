@@ -62,7 +62,7 @@ class CreateChunks @Inject constructor(
         val projectSlug = workbook.target.slug
 
         logger.info("Creating ${chunks.size} user defined chunks for project: $projectSlug chapter: $chapterNumber")
-        val chapAudio = workbook.sourceAudioAccessor.getUserMarkedChapter(chapter.sort, workbook.target)
+        val chapAudio = workbook.sourceAudioAccessor.getChapter(chapter.sort, workbook.target)
         val sa = OratureAudioFile(chapAudio!!.file)
         val verseMarkers = sa.getMarker<VerseMarker>().map { it.toCue() }
         val chunkRanges = mapCuesToRanges(chunks)
