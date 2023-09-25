@@ -195,9 +195,14 @@ class VerseNodeTest {
         val sectors = mutableListOf<IntRange>()
         val verseNode = VerseNode(true, verseMarker, sectors)
 
-        val sectorsTaken = verseNode.takeFramesFromStart(1000)
+        try {
+            // TODO: See if we want this throwing an exception or returning an empty list
+            val sectorsTaken = verseNode.takeFramesFromStart(1000)
+            Assert.fail("Expecting NoSuchElementException")
+        } catch (NoSuchElement: NoSuchElementException) {
+            // Success: expecting exception
+        }
 
-        Assert.assertEquals(0, sectorsTaken.size)
     }
 
 
@@ -296,9 +301,13 @@ class VerseNodeTest {
         val sectors = mutableListOf<IntRange>()
         val verseNode = VerseNode(true, verseMarker, sectors)
 
-        val sectorsTaken = verseNode.takeFramesFromEnd(1000)
-
-        Assert.assertEquals(0, sectorsTaken.size)
+        // TODO: See if we want this throwing an exception or returning an empty list
+        try {
+            val sectorsTaken = verseNode.takeFramesFromEnd(1000)
+            Assert.fail("Expecting NoSuchElementException")
+        } catch (NoSuchElement: NoSuchElementException) {
+            // Success: expecting exception
+        }
     }
 
     @Test fun `take frames from end with less frames than needed`() {

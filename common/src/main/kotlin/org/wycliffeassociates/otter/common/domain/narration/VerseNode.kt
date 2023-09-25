@@ -194,10 +194,8 @@ internal data class VerseNode(
         var frameOffset = 0
         for (sector in sectors) {
             if (absoluteFrame in sector) {
-                // The + 1 can be removed if the purpose of this function is to count the number
-                //  of frames up to (not including) the absolute frame.
-                //  I.e. if the question this function is answering is "how many frames are behind my current position?"
-                frameOffset += absoluteFrame - sector.first + 1
+                //  NOTE: The question this function is answering is "how many frames are behind my current position?"
+                frameOffset += absoluteFrame - sector.first
                 break
             } else {
                 frameOffset += sector.length()

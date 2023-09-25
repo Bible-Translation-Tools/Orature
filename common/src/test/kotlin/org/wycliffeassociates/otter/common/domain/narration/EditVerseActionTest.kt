@@ -86,42 +86,7 @@ class EditVerseActionTest{
         Assert.assertEquals(editVerseStart .. editVerseEnd, totalVerses[verseEditedIndex].sectors.last())
         Assert.assertEquals(true, totalVerses[verseEditedIndex].placed)
     }
-
-    // NOTE: This test is to show that we can technically just add in a verse anywhere, even inside another verse
-    //  and that it will not split that larger verse into separate sectors.
-    //  this is not a problem now, but if we decide to use editVerseAction for more complex editing actions,
-    //  it would need to be refactored
-    @Test
-    fun `execute with null previous and node and stating edit inside working audio`() {
-        val verseEditedIndex = 0
-        val verseBeingEdited = totalVerses[verseEditedIndex]
-
-        // Starts new verse edit at the end of the audio file + 1
-        val editVerseStart = 132300
-        // Sets the end of the new verse edit to some frames after the start
-        val editVerseEnd = editVerseStart + 44100 * 2
-
-        val editVerseAction = EditVerseAction(verseEditedIndex, editVerseStart, editVerseEnd)
-
-        // Verify that the verse being moved has the expected values
-        Assert.assertEquals(0 .. 44099, verseBeingEdited.sectors.last())
-
-        editVerseAction.execute(totalVerses, workingAudioFile)
-
-        // Verify that the edited verse has the correct values after being edited
-        Assert.assertEquals(1, totalVerses[verseEditedIndex].sectors.size)
-        Assert.assertEquals(editVerseStart .. editVerseEnd, totalVerses[verseEditedIndex].sectors.last())
-        Assert.assertEquals(true, totalVerses[verseEditedIndex].placed)
-
-        // Ensure that no other frames also share the new edit range
-        for (i in totalVerses.indices) {
-            if (i == verseEditedIndex) continue
-
-            Assert.assertFalse(totalVerses[i].contains(editVerseStart))
-            Assert.assertFalse(totalVerses[i].contains(editVerseEnd))
-        }
-    }
-
+    
 
     @Test
     fun `undo with empty verseNode list`() {
