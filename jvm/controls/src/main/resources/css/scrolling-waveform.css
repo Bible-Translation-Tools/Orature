@@ -54,10 +54,6 @@
     -fx-background-color: -wa-scrolling-waveform-background;
 }
 
-.scrolling-waveform-holder--played {
-    -fx-fill: -wa-played-audio-highlight;
-}
-
 .scrolling-waveform__playback-line {
     -fx-stroke: -wa-playback-line;
 }
