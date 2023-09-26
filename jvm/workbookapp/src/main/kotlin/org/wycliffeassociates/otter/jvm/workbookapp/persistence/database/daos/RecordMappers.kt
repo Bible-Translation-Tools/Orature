@@ -94,7 +94,8 @@ class RecordMappers {
                 record.getValue(table.FORMAT),
                 record.getValue(table.TYPE_FK),
                 record.getValue(table.DRAFT_NUMBER),
-                record.getValue(table.BRIDGED) == 1
+                record.getValue(table.BRIDGED) == 1,
+                record.getValue(table.CHECKING_FK)
             )
         }
 

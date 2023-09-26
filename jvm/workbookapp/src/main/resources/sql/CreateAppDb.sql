@@ -61,7 +61,8 @@ CREATE TABLE IF NOT EXISTS content_entity (
     text             TEXT,
     format           TEXT,
     draft_number     INTEGER DEFAULT 1 NOT NULL,
-    bridged          INTEGER DEFAULT 0 NOT NULL
+    bridged          INTEGER DEFAULT 0 NOT NULL,
+    checking_fk      INTEGER NOT NULL REFERENCES checking_status(id) ON DELETE RESTRICT
 );
 CREATE INDEX IF NOT EXISTS idx_content_entity_collection_start ON content_entity (collection_fk, start, type_fk);
 
@@ -170,4 +171,10 @@ CREATE TABLE IF NOT EXISTS workbook_descriptor_entity (
     target_FK         INTEGER NOT NULL REFERENCES collection_entity(id) ON DELETE CASCADE,
     type_fk           INTEGER NOT NULL REFERENCES workbook_type(id) ON DELETE RESTRICT,
     UNIQUE (source_FK, target_FK, type_fk)
+);
+
+CREATE TABLE IF NOT EXISTS checking_status (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    name        TEXT NOT NULL,
+    UNIQUE (name COLLATE NOCASE) ON CONFLICT IGNORE
 );

@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.common.data.workbook
 
+import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import java.util.*
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.domain.content.ResourceRecordable
@@ -33,6 +34,7 @@ class Chunk(
     val end: Int,
 
     val bridged: Boolean = false,
+    val checkingStatus: CheckingStatus = CheckingStatus.UNCHECKED,
 
     var draftNumber: Int,
 

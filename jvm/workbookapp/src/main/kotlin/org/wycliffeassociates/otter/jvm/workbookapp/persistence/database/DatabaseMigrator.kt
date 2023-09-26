@@ -24,7 +24,7 @@ import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
 import org.slf4j.LoggerFactory
 
-const val SCHEMA_VERSION = 12
+const val SCHEMA_VERSION = 13
 const val DATABASE_INSTALLABLE_NAME = "DATABASE"
 
 class DatabaseMigrator {
@@ -45,6 +45,7 @@ class DatabaseMigrator {
             currentVersion = migrate9to10(dsl, currentVersion)
             currentVersion = migrate10to11(dsl, currentVersion)
             currentVersion = migrate11to12(dsl, currentVersion)
+            currentVersion = migrate12to13(dsl, currentVersion)
             updateDatabaseVersion(dsl, currentVersion)
         }
     }
@@ -347,6 +348,47 @@ class DatabaseMigrator {
             createWorkbookDescriptorTable(dsl)
             logger.info("Updated database from version 11 to 12")
             12
+        } else {
+            current
+        }
+    }
+
+    private fun migrate12to13(dsl: DSLContext, current: Int): Int {
+        return if (current < 13) {
+            dsl
+                .createTableIfNotExists(CheckingStatus.CHECKING_STATUS)
+                .column(CheckingStatus.CHECKING_STATUS.ID)
+                .column(CheckingStatus.CHECKING_STATUS.NAME)
+                .constraints(
+                    DSL.primaryKey(CheckingStatus.CHECKING_STATUS.ID),
+                    DSL.unique(CheckingStatus.CHECKING_STATUS.NAME)
+                )
+                .execute()
+
+            try {
+                dsl
+                    .alterTable(CheckingStatus.CHECKING_STATUS)
+                    .addColumn(ContentEntity.CONTENT_ENTITY.CHECKING_FK)
+                    .execute()
+
+                dsl
+                    .alterTable(CheckingStatus.CHECKING_STATUS)
+                    .add(
+                        DSL.constraint("fk_checking_status")
+                            .foreignKey(ContentEntity.CONTENT_ENTITY.CHECKING_FK)
+                            .references(CheckingStatus.CHECKING_STATUS)
+                    )
+                    .execute()
+
+                clearProjectTables(dsl)
+            } catch (e: DataAccessException) {
+                // Exception is thrown because the column might already exist but an existence check cannot
+                // be performed in sqlite.
+                logger.error("Error in while migrating database from version 12 to 13", e)
+                return 12
+            }
+            logger.info("Updated database from version 12 to 13")
+            13
         } else {
             current
         }
