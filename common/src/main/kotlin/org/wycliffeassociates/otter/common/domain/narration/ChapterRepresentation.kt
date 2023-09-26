@@ -177,7 +177,7 @@ internal class ChapterRepresentation(
      * the range of each active verse.
      */
     internal fun relativeToAbsolute(relativeIdx: Int): Int {
-        var remaining = relativeIdx
+        var remaining = relativeIdx + 1
         val verses = activeVerses
         if (relativeIdx <= 0 && activeVerses.isEmpty()) {
             return if (scratchAudio.totalFrames == 0) 0 else scratchAudio.totalFrames + 1
@@ -188,10 +188,13 @@ internal class ChapterRepresentation(
             for (sector in verse.sectors) {
                 if (sector.length() < remaining) {
                     remaining -= sector.length()
-                } else if (sector.length() == remaining) {
+                }
+                else if (sector.length() == remaining) {
+
                     return sector.last
-                } else {
-                    return sector.first + remaining
+                }
+                else {
+                    return sector.first + remaining - 1
                 }
             }
         }
