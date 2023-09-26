@@ -95,8 +95,23 @@ class BlindDraft : Fragment() {
     }
 
     private fun buildRecordingArea(): RecordingSection {
-        return RecordingSection(recorderViewModel).apply {
-            onRecordingFinish = { result ->
+        return RecordingSection().apply {
+            recorderViewModel.waveformCanvas = waveformCanvas
+            recorderViewModel.volumeCanvas = volumeCanvas
+            isRecordingProperty.bind(recorderViewModel.recordingProperty)
+
+            setToggleRecordingAction {
+                recorderViewModel.toggle()
+            }
+
+            setCancelAction {
+                recorderViewModel.cancel()
+                viewModel.onRecordFinish(RecorderViewModel.Result.CANCELLED)
+                mainSectionProperty.set(takesView)
+            }
+
+            setSaveAction {
+                val result = recorderViewModel.saveAndQuit()
                 viewModel.onRecordFinish(result)
                 mainSectionProperty.set(takesView)
             }
