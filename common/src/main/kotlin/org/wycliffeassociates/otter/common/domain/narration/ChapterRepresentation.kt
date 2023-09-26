@@ -188,9 +188,7 @@ internal class ChapterRepresentation(
             for (sector in verse.sectors) {
                 if (sector.length() < remaining) {
                     remaining -= sector.length()
-                }
-                else if (sector.length() == remaining) {
-
+                } else if (sector.length() == remaining) {
                     return sector.last
                 }
                 else {
