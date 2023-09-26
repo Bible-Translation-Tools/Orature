@@ -33,5 +33,5 @@ data class Content(
     @JsonIgnore
     var id: Int = 0,
     var bridged: Boolean = false,
-    var checkingLevel: CheckingLevel = CheckingLevel.UNCHECKED
+    var checkingStatus: CheckingStatus = CheckingStatus.UNCHECKED
 ) : CollectionOrContent

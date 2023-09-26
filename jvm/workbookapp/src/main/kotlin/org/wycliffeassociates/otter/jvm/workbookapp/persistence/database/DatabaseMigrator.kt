@@ -356,27 +356,27 @@ class DatabaseMigrator {
     private fun migrate12to13(dsl: DSLContext, current: Int): Int {
         return if (current < 13) {
             dsl
-                .createTableIfNotExists(CheckingLevel.CHECKING_LEVEL)
-                .column(CheckingLevel.CHECKING_LEVEL.ID)
-                .column(CheckingLevel.CHECKING_LEVEL.NAME)
+                .createTableIfNotExists(CheckingStatus.CHECKING_STATUS)
+                .column(CheckingStatus.CHECKING_STATUS.ID)
+                .column(CheckingStatus.CHECKING_STATUS.NAME)
                 .constraints(
-                    DSL.primaryKey(CheckingLevel.CHECKING_LEVEL.ID),
-                    DSL.unique(CheckingLevel.CHECKING_LEVEL.NAME)
+                    DSL.primaryKey(CheckingStatus.CHECKING_STATUS.ID),
+                    DSL.unique(CheckingStatus.CHECKING_STATUS.NAME)
                 )
                 .execute()
 
             try {
                 dsl
-                    .alterTable(CheckingLevel.CHECKING_LEVEL)
+                    .alterTable(CheckingStatus.CHECKING_STATUS)
                     .addColumn(ContentEntity.CONTENT_ENTITY.CHECKING_FK)
                     .execute()
 
                 dsl
-                    .alterTable(CheckingLevel.CHECKING_LEVEL)
+                    .alterTable(CheckingStatus.CHECKING_STATUS)
                     .add(
-                        DSL.constraint("fk_checking_level")
+                        DSL.constraint("fk_checking_status")
                             .foreignKey(ContentEntity.CONTENT_ENTITY.CHECKING_FK)
-                            .references(CheckingLevel.CHECKING_LEVEL)
+                            .references(CheckingStatus.CHECKING_STATUS)
                     )
                     .execute()
 

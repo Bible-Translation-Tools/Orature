@@ -254,7 +254,7 @@ class WorkbookRepository(
             contentType = content.type,
             draftNumber = content.draftNumber,
             bridged = content.bridged,
-            checkingLevel = content.checkingLevel
+            checkingStatus = content.checkingStatus
         )
     }
 
