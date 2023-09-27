@@ -59,11 +59,6 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
     val compositeDisposable = CompositeDisposable()
     val isPlayingProperty = SimpleBooleanProperty(false)
 
-    /** Call this before leaving the view */
-    var chunkImageCleanup: () -> Unit = {}
-    /** Call this before leaving the view */
-    var consumeImageCleanup: () -> Unit = {}
-
     private var sampleRate: Int = 0 // beware of divided by 0
     private var sourceTotalFrames: Int = 0 // beware of divided by 0
 
@@ -147,8 +142,6 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
 
     fun cleanup() {
         builder.cancel()
-        consumeImageCleanup()
-        chunkImageCleanup()
         compositeDisposable.clear()
         stopAnimationTimer()
         markerModel = null
