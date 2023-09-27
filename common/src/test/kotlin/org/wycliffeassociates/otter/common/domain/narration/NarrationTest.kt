@@ -3,16 +3,25 @@ import io.mockk.every
 import io.mockk.mockk
 import io.reactivex.Observable
 import io.reactivex.Single
+import io.reactivex.subjects.PublishSubject
+import org.junit.After
+import org.junit.Assert
 import org.junit.Before
+import org.junit.Test
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
-
-
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
+import java.nio.ByteBuffer
+import java.nio.file.Files
+import java.nio.file.Paths
 
 
 class NarrationTest {
@@ -20,6 +29,7 @@ class NarrationTest {
     val testDirWithAudio = File(testDataRootFilePath, "testProjectChapterDirWithAudio")
     val workingAudioFileWithAudio = File(testDirWithAudio, "chapter_narration.pcm")
     val testDirWithoutAudio = File(testDataRootFilePath, "testProjectChapterDirWithoutAudio")
+    val verseEditFile = File(testDirWithAudio, "verseEditFile.pcm")
 
     lateinit var workbook: Workbook
     lateinit var chapter: Chapter
@@ -28,16 +38,45 @@ class NarrationTest {
     lateinit var audioFileUtils: AudioFileUtils
     lateinit var splitAudioOnCues: SplitAudioOnCues
     lateinit var chunk: Observable<Chunk>
+    val numTestVerses = 31
 
     @Before
     fun setup() {
-        chunk = createObservableChunkMock(mockChunk())
+        createTestAudioFolders()
+        chunk = createObservableChunkMock()
         workbook = mockWorkbook(true)
         chapter = mockChapter()
         player = mockIAudioPlayer()
         recorder = mockIAudioRecorder()
-        audioFileUtils = mockAudioFileUtils()
+        audioFileUtils = AudioFileUtils(mockIDirectoryProvider())
         splitAudioOnCues = mockSplitAudioOnCues()
+    }
+
+    @After
+    fun cleanup() {
+        try {
+            // Delete the test directories and their contents
+            testDirWithAudio.deleteRecursively()
+            testDirWithoutAudio.deleteRecursively()
+        } catch (e: IOException) {
+            println("Failed to delete test audio folders at '$testDataRootFilePath': ${e.message}")
+        }
+    }
+
+    fun createTestAudioFolders() {
+
+        val testProjectChapterDirWithAudio = "testProjectChapterDirWithAudio" // Replace with the desired folder name
+        val testProjectChapterDirWithoutAudio = "testProjectChapterDirWithoutAudio" // Replace with the desired folder name
+
+        val withAudioPath = Paths.get(testDataRootFilePath, testProjectChapterDirWithAudio)
+        val withoutAudioPath = Paths.get(testDataRootFilePath, testProjectChapterDirWithoutAudio)
+
+        try {
+            Files.createDirectories(withAudioPath)
+            Files.createDirectories(withoutAudioPath)
+        } catch (e: Exception) {
+            println("Failed to create test audio folders' at '$testDataRootFilePath': ${e.message}")
+        }
     }
 
     fun mockWorkbook(withAudio: Boolean) : Workbook {
@@ -57,17 +96,21 @@ class NarrationTest {
         }
     }
 
-    val verseChunkNum = 0
+    var verseChunkNum = 0
     fun mockChunk() : Chunk {
+        verseChunkNum += 1
         return mockk<Chunk>{
-            every { start } returns verseChunkNum + 1
-            every { end } returns verseChunkNum + 1
+            every { start } returns verseChunkNum
+            every { end } returns verseChunkNum
         }
     }
 
-    private fun createObservableChunkMock(chunk: Chunk): Observable<Chunk> {
-        return Observable.just(chunk, mockChunk(), mockChunk())
+    private fun createObservableChunkMock(): Observable<Chunk> {
+        val numberOfChunks = numTestVerses
+        val chunkList = List(numberOfChunks) { mockChunk() }
+        return Observable.concat(chunkList.map { Observable.just(it) })
     }
+
 
     fun mockIAudioPlayer() : IAudioPlayer {
 
@@ -82,12 +125,22 @@ class NarrationTest {
         }
     }
 
+    private val byteArraySubject = PublishSubject.create<ByteArray>()
     fun mockIAudioRecorder() : IAudioRecorder {
-        val byteArrayObservable: Observable<ByteArray> = Observable.empty()
-
         return mockk<IAudioRecorder>{
-            every {getAudioStream()} returns byteArrayObservable
+            every {getAudioStream()} returns byteArraySubject
             every { start() } returns Unit
+        }
+    }
+
+    // Function to add bytes to the observable
+    fun addBytesToRecorderAudioStream(byteArray: ByteArray) {
+        byteArraySubject.onNext(byteArray)
+    }
+
+    fun mockIDirectoryProvider() : IDirectoryProvider {
+        return mockk<IDirectoryProvider>(){
+            every { createTempFile(any(), any()) } returns verseEditFile
         }
     }
 
@@ -99,5 +152,430 @@ class NarrationTest {
         return mockk<SplitAudioOnCues>{}
     }
 
+
+    private fun writeByteBufferToPCMFile(byteBuffer: ByteBuffer, PCMFile: File) {
+        try {
+            val byteArray = ByteArray(byteBuffer.remaining())
+            byteBuffer.get(byteArray)
+
+            val fos = FileOutputStream(PCMFile, false)
+
+            fos.write(byteArray)
+
+            fos.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        byteBuffer.rewind()
+    }
+
+    fun delayForMilliseconds(milliseconds: Long) {
+        try {
+            Thread.sleep(milliseconds)
+        } catch (e: InterruptedException) {
+            // Handle the exception, e.g., log it or re-throw it
+            Thread.currentThread().interrupt() // Restore interrupted status
+        }
+    }
+
+    // TODO: write a method that allows me to append a ByteBuffer to the PCM file
+
+    fun fillAudioBufferWithPadding(byteBuffer: ByteBuffer, secondsOfAudio: Int, paddingLength: Int) {
+        for (i in 1 .. secondsOfAudio) {
+            for(j in 1 .. 44100) {
+                byteBuffer.putShort(i.toShort())
+            }
+            for(j in 1 .. paddingLength) {
+                byteBuffer.putShort(0)
+            }
+        }
+        byteBuffer.rewind()
+    }
+
+
+    @Test
+    fun `onNewVerse with index greater than totalVerses size`() {
+
+        val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
+
+        try {
+            narration.onNewVerse(10000)
+            Assert.fail("Expecting IndexOutOfBoundsException")
+        } catch (indexOutOfBounds : IndexOutOfBoundsException) {
+            // Success: expecting exception
+        }
+    }
+
+    @Test
+    fun `onNewVerse with negative index`() {
+
+        val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
+
+        try {
+            narration.onNewVerse(-1000)
+            Assert.fail("Expecting IndexOutOfBoundsException")
+        } catch (indexOutOfBounds : IndexOutOfBoundsException) {
+            // Success: expecting exception
+        }
+    }
+
+
+    @Test
+    fun `onNewVerse with valid index`() {
+        val verseIndex = 0
+        val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
+
+        Assert.assertEquals(false, narration.hasUndo())
+        narration.onNewVerse(verseIndex)
+        Assert.assertEquals(true, narration.hasUndo())
+    }
+
+
+    fun addNewVerseWithAudio(narration: Narration, verseIndex: Int, secondsOfAudio: Int) {
+        narration.onNewVerse(verseIndex)
+        // Defaults to adding the verseIndex as a byte, so I can have something to test against
+        addBytesToRecorderAudioStream(ByteArray(44100 * 2 * secondsOfAudio) {verseIndex.toByte()})
+        narration.pauseRecording()
+    }
+
+    @Test
+    fun `finalize with verseIndex equal to 0 and 10 seconds of scratch audio`() {
+        val verseIndex = 0
+        val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
+
+        // Verify that no audio has been recorded and no verses have been placed
+        Assert.assertEquals(0, narration.activeVerses.size)
+
+        // writes 10 seconds of audio
+        addNewVerseWithAudio(narration, verseIndex,10)
+
+        narration.finalizeVerse(verseIndex)
+
+        // Verify that audio was recorded
+        Assert.assertEquals(441000, narration.audioReader.totalFrames)
+        // Verify that activeVerses has been updated and that it contains the first verse
+        Assert.assertEquals(1, narration.activeVerses.size)
+        Assert.assertEquals("orature-vm-1", narration.activeVerses[verseIndex].formattedLabel)
+    }
+
+
+    // NOTE: this will let me record again, even though I have not placed a verse
+    @Test
+    fun `onRecordAgain with verseIndex equal to 0 and empty activeVerses`() {
+        val verseIndex = 0
+        val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
+
+        narration.onRecordAgain(verseIndex)
+        narration.pauseRecording()
+        narration.finalizeVerse(verseIndex)
+        Assert.assertEquals(0, narration.audioReader.totalFrames)
+    }
+
+    @Test
+    fun `onRecordAgain with five seconds of new audio, 10 seconds of existing audio, verseIndex equal to 0, and non-empty activeVerses`() {
+        val verseIndex = 0
+        val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
+
+        // writes 10 seconds of audio
+        addNewVerseWithAudio(narration, verseIndex, 10)
+        // Finalizes the added verse
+        narration.finalizeVerse(verseIndex)
+
+        Assert.assertEquals(44100 * 10, narration.audioReader.totalFrames)
+
+
+        narration.onRecordAgain(verseIndex)
+        addBytesToRecorderAudioStream(ByteArray(44100 * 2 * 5) {1})
+        narration.pauseRecording()
+        narration.finalizeVerse(verseIndex)
+
+
+        // Verify that audio was recorded
+        Assert.assertEquals(44100 * 5, narration.audioReader.totalFrames)
+        // Verify that activeVerses has been updated and that it contains only the first verse
+        Assert.assertEquals(1, narration.activeVerses.size)
+        Assert.assertEquals("orature-vm-1", narration.activeVerses[verseIndex].formattedLabel)
+    }
+
+
+
+    fun recordAndFinalizeVerses(narration: Narration, numVerses: Int, verseRecordingLength: Int) {
+        for(i in 0 until numVerses) {
+            addNewVerseWithAudio(narration, i, verseRecordingLength)
+            narration.finalizeVerse(i)
+        }
+    }
+
+    // TODO: add test for getTotalFrames
+    @Test
+    fun `getTotalFrames with no committed or uncommitted frames`() {
+        val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
+
+        Assert.assertEquals(0, narration.getTotalFrames())
+    }
+
+    @Test
+    fun `getTotalFrames with uncommitted frames and no committed frames`() {
+        val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
+        addNewVerseWithAudio(narration, 0, 1)
+
+        val totalFrames = narration.getTotalFrames()
+
+        // TODO: figure out what is causing this off by one and if it is a problem
+        Assert.assertEquals(44100, totalFrames)
+    }
+
+    @Test
+    fun `getTotalFrames with committed frames and no uncommitted frames`() {
+        val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
+        recordAndFinalizeVerses(narration, 1, 1)
+
+        val totalFrames = narration.getTotalFrames()
+
+        Assert.assertEquals(44100, totalFrames)
+    }
+
+
+    @Test
+    fun `onVerseMarkerMoved with verseIndex greater than activeVerses size`() {
+        val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
+
+        try {
+            narration.onVerseMarkerMoved(1000, 5000)
+            Assert.fail("Expecting IndexOutOfBoundsException")
+        } catch (indexOutOfBounds: IndexOutOfBoundsException) {
+            // Success: expecting exception
+        }
+    }
+
+    @Test
+    fun `onVerseMarkerMoved negative verseIndex`() {
+        val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
+
+        try {
+            narration.onVerseMarkerMoved(-1000, 5000)
+            Assert.fail("Expecting IndexOutOfBoundsException")
+        } catch (indexOutOfBounds: IndexOutOfBoundsException) {
+            // Success: expecting exception
+        }
+    }
+
+
+    @Test
+    fun `onVerseMarkerMoved with valid verseIndex, delta equal to 44100, and existing workingAudio`() {
+        val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
+        // Simulates recording two verses that are 10 seconds long
+        recordAndFinalizeVerses(narration, 2, 10)
+
+        // Verify that we have two verses with 10 seconds each
+        Assert.assertEquals(44100 * 10 * 2, narration.getTotalFrames())
+        Assert.assertEquals(2, narration.activeVerses.size)
+        Assert.assertEquals("orature-vm-1", narration.activeVerses[0].formattedLabel)
+        Assert.assertEquals("orature-vm-2", narration.activeVerses[1].formattedLabel)
+
+        // Verify that verse 2's location is correct
+        val oldVerseLocation = 441000
+        Assert.assertEquals(oldVerseLocation, narration.activeVerses[1].location)
+
+        val delta = 44100
+        narration.onVerseMarkerMoved(1, delta)
+
+        // Verify that we have the same number of frames as before
+        Assert.assertEquals(44100 * 10 * 2, narration.getTotalFrames())
+        // Verify that the new location of verse two is correct.
+        Assert.assertEquals(oldVerseLocation + delta, narration.activeVerses[1].location)
+    }
+
+    @Test
+    fun `onVerseMarkerMoved with valid verseIndex, delta equal to -44100, and existing workingAudio`() {
+        val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
+        // Simulates recording two verses that are 10 seconds long
+        recordAndFinalizeVerses(narration, 2, 10)
+
+        // Verify that we have two verses with 10 seconds each
+        Assert.assertEquals(44100 * 10 * 2, narration.getTotalFrames())
+        Assert.assertEquals(2, narration.activeVerses.size)
+        Assert.assertEquals("orature-vm-1", narration.activeVerses[0].formattedLabel)
+        Assert.assertEquals("orature-vm-2", narration.activeVerses[1].formattedLabel)
+
+        // Verify that verse 2's location is correct
+        val oldVerseLocation = 441000
+        Assert.assertEquals(oldVerseLocation, narration.activeVerses[1].location)
+
+        val delta = -44100
+        narration.onVerseMarkerMoved(1, delta)
+
+        // Verify that we have the same number of frames as before
+        Assert.assertEquals(44100 * 10 * 2, narration.getTotalFrames())
+        // Verify that the new location of verse two is correct.
+        Assert.assertEquals(oldVerseLocation + delta, narration.activeVerses[1].location)
+    }
+
+
+    fun makeVerseEditFile(verseEditFile: File, verseRecordingLength: Int) {
+        val verseEditFileByteBuffer = ByteBuffer.allocate(44100 * verseRecordingLength * 2)
+
+        fillAudioBufferWithPadding(verseEditFileByteBuffer, verseRecordingLength, 0)
+        writeByteBufferToPCMFile(verseEditFileByteBuffer, verseEditFile)
+    }
+
+
+    // NOTE: this may indicate odd behavior because it allows us to place a verseMarker with no audio
+    // corresponding to it.
+    @Test
+    fun `onEditVerse with no scratch audio, no placed verses, and empty edited audio file`() {
+        makeVerseEditFile(verseEditFile, 0)
+
+        val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
+
+        // Verify that no verseMarkers have been placed
+        Assert.assertEquals(0, narration.activeVerses.size)
+
+        // Verify that there is no scratch audio
+        Assert.assertEquals(0, narration.audioReader.totalFrames)
+
+        narration.onEditVerse(0, verseEditFile)
+
+        // Verify that verseMarker 1 have been placed
+        Assert.assertEquals(1, narration.activeVerses.size)
+        Assert.assertEquals("orature-vm-1", narration.activeVerses[0].formattedLabel)
+
+        Assert.assertEquals(0, narration.audioReader.totalFrames)
+    }
+
+    @Test
+    fun `onEditVerse with no scratch audio, no placed verses, and edited audio with 10 seconds`() {
+
+        makeVerseEditFile(verseEditFile, 10)
+
+        val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
+
+        // Verify that no verseMarkers have been placed
+        Assert.assertEquals(0, narration.activeVerses.size)
+
+        // Verify that there is no scratch audio
+        Assert.assertEquals(0, narration.audioReader.totalFrames)
+
+        narration.onEditVerse(0, verseEditFile)
+
+        // Verify that verseMarker 1 have been placed
+        Assert.assertEquals(1, narration.activeVerses.size)
+        Assert.assertEquals("orature-vm-1", narration.activeVerses[0].formattedLabel)
+
+        // Verify that there is 10 seconds of scratch audio
+        Assert.assertEquals(44100 * 10, narration.audioReader.totalFrames)
+    }
+
+
+    @Test
+    fun `onEditVerse with existing scratch audio, 10 placed verses, editing verse 5`() {
+        makeVerseEditFile(verseEditFile, 10)
+
+        val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
+
+        val totalRecordedVersesLength = 10
+        val verseRecordingLength = 1
+        recordAndFinalizeVerses(narration, 10, verseRecordingLength)
+
+        // Verify that 10 verseMarkers have been placed
+        Assert.assertEquals(10, narration.activeVerses.size)
+
+        // Verify that there is 10 seconds of scratch audio
+        val numberAudioFramesBeforeEdit = 44100*totalRecordedVersesLength
+        Assert.assertEquals(numberAudioFramesBeforeEdit, narration.audioReader.totalFrames)
+
+        val editedVerseIndex = 4
+        narration.onEditVerse(editedVerseIndex, verseEditFile)
+
+        // Verify that there is 9 seconds from un-edited verses, and 10 from edited verse
+        Assert.assertEquals(44100 * 10 + 44100 * 9, narration.audioReader.totalFrames)
+    }
+
+    @Test
+    fun `onResetAll with non-empty activeVerses`() {
+        val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
+        val totalRecordedVersesLength = 10
+        val verseRecordingLength = 1
+        recordAndFinalizeVerses(narration, 10, verseRecordingLength)
+
+        // Verify that 10 verseMarkers have been placed
+        Assert.assertEquals(10, narration.activeVerses.size)
+
+        // Verify that there is 10 seconds of scratch audio
+        val numberAudioFramesBeforeEdit = 44100 * totalRecordedVersesLength
+        Assert.assertEquals(numberAudioFramesBeforeEdit, narration.audioReader.totalFrames)
+
+        narration.onResetAll()
+
+        // Verify that no verseMarkers have been placed
+        Assert.assertEquals(0, narration.activeVerses.size)
+        // Verify that total frames is 0
+        Assert.assertEquals(0, narration.getTotalFrames())
+    }
+
+
+    @Test
+    fun `getSectionAsFile with index not in activeVerses`() {
+        val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
+
+        try {
+            narration.getSectionAsFile(1000)
+            Assert.fail("Expecting IndexOutOfBoundsException")
+        } catch (indexOutOfBounds: IndexOutOfBoundsException) {
+            // Success: expecting exception
+        }
+    }
+
+
+    fun checkBytesInFile(file: File, targetByte: Byte): Boolean {
+
+        if (!file.exists() || !file.isFile) {
+            throw IllegalArgumentException("The specified file does not exist or is not a regular file.")
+        }
+
+        var inputStream: FileInputStream? = null
+
+        try {
+            inputStream = FileInputStream(file)
+            var byteRead: Int
+            while (inputStream.read().also { byteRead = it } != -1) {
+                if (byteRead.toByte() != targetByte) {
+                    return false
+                }
+            }
+            return true
+        } catch (e: IOException) {
+            // Handle any potential IO exceptions here
+            return false
+        } finally {
+            inputStream?.close()
+        }
+    }
+
+
+    // TODO: add test for getSectionAsFile
+    @Test
+    fun `getSectionAsFile non-empty activeVerses and valid index`() {
+        val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
+        val verseRecordingLength = 1
+        recordAndFinalizeVerses(narration, 10, verseRecordingLength)
+
+
+        val verseOneFile = narration.getSectionAsFile(0)
+
+        // TODO: verify that verse 1 has all zeros in it and has a size of 44100 * 2
+        val hasCorrectBytes = checkBytesInFile(verseEditFile, 0)
+
+        Assert.assertTrue(hasCorrectBytes)
+        Assert.assertEquals(44100*2, verseEditFile.length())
+    }
+
+    @Test
+    fun `activeVerses test with no placed verses`() {
+        val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
+        val verses = narration.activeVerses
+
+        Assert.assertEquals(0, narration.activeVerses.size)
+    }
 
 }
