@@ -44,6 +44,7 @@ class PeerEditViewModel : ViewModel() {
 
     lateinit var waveform: Observable<Image>
     var timer: AnimationTimer? = null
+    var slider: Slider? = null
     var subscribeOnWaveformImages: () -> Unit = {}
     var cleanUpWaveform: () -> Unit = {}
 
@@ -77,15 +78,6 @@ class PeerEditViewModel : ViewModel() {
         sourcePlayerProperty.unbind()
         compositeDisposable.clear()
         stopAnimationTimer()
-    }
-
-    fun initializeAudioController(slider: Slider? = null) {
-        audioController = AudioPlayerController(slider).also { controller ->
-            targetPlayerProperty.value?.let {
-                controller.load(it)
-                isPlayingProperty.bind(controller.isPlayingProperty)
-            }
-        }
     }
 
     fun toggleAudio() {
@@ -136,11 +128,20 @@ class PeerEditViewModel : ViewModel() {
         }
         targetPlayerProperty.set(audioPlayer)
 
-        initializeAudioController()
+        loadAudioController()
 
         val audio = OratureAudioFile(take.file)
         createWaveformImages(audio)
         subscribeOnWaveformImages()
+    }
+
+    private fun loadAudioController() {
+        audioController = AudioPlayerController(slider).also { controller ->
+            targetPlayerProperty.value?.let {
+                controller.load(it)
+                isPlayingProperty.bind(controller.isPlayingProperty)
+            }
+        }
     }
 
     private fun createWaveformImages(audio: OratureAudioFile) {

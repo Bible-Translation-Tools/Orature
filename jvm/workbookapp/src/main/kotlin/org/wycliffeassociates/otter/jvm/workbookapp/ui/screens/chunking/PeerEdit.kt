@@ -54,9 +54,10 @@ class PeerEdit : Fragment() {
 
                 viewModel.cleanUpWaveform = ::freeImages
             }
-//            slider = createAudioScrollbarSlider()
+            slider = createAudioScrollbarSlider()
+            viewModel.slider = slider
             add(waveform)
-//            add(slider)
+            add(slider)
         }
         bottom = hbox {
             addClass("consume__bottom", "recording__bottom-section")

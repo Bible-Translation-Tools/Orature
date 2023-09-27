@@ -19,6 +19,9 @@ class AudioSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
         add(thumb)
     }
     init {
+        control.player.onChangeAndDoNow {
+            resizeThumbWidth()
+        }
         control.secondsToHighlightProperty.onChangeAndDoNow {
             resizeThumbWidth()
         }
