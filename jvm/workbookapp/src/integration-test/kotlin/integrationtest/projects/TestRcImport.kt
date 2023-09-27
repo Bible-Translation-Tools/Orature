@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.MappingIterator
 import com.fasterxml.jackson.dataformat.csv.CsvMapper
 import com.fasterxml.jackson.dataformat.csv.CsvSchema
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import integrationtest.di.DaggerTestPersistenceComponent
 import javax.inject.Inject
 import javax.inject.Provider
