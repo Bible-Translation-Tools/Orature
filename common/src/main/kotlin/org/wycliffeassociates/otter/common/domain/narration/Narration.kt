@@ -180,6 +180,16 @@ class Narration @AssistedInject constructor(
         isRecording.set(true)
     }
 
+    fun onSaveRecording(verseIndex: Int) {
+        loadChapterIntoPlayer()
+
+        val loc = chapterRepresentation.finalizeVerse(verseIndex, history)
+        seek(loc)
+
+        writer?.pause()
+        isRecording.set(false)
+    }
+
     fun onVerseMarkerMoved(verseIndex: Int, delta: Int) {
         val action = MoveMarkerAction(verseIndex, delta)
         execute(action)

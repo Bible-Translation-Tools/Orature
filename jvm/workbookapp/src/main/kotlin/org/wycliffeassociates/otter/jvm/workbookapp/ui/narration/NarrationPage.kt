@@ -17,6 +17,7 @@ import org.wycliffeassociates.otter.jvm.controls.event.PlayChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PlayVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RecordVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.SaveRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
@@ -148,6 +149,10 @@ class NarrationPage : View() {
 
         subscribe<RecordAgainEvent> {
             viewModel.recordAgain(it.index)
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<SaveRecordingEvent> {
+            viewModel.saveRecording(it.index)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<OpenInAudioPluginEvent> {

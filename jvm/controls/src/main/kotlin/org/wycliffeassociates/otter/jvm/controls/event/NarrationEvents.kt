@@ -8,6 +8,7 @@ import tornadofx.FXEvent
 class NextVerseEvent(val index: Int, val chunk: Chunk) : FXEvent()
 class RecordVerseEvent(val index: Int, val chunk: Chunk) : FXEvent()
 class RecordAgainEvent(val index: Int) : FXEvent()
+class SaveRecordingEvent(val index: Int) : FXEvent()
 class PlayVerseEvent(val verse: VerseMarker) : FXEvent()
 class PlayChapterEvent() : FXEvent()
 class PauseEvent(): FXEvent()

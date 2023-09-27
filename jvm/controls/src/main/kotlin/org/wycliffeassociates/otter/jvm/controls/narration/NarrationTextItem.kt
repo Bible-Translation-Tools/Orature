@@ -90,6 +90,7 @@ class NarrationTextItem : VBox() {
                             true -> {
                                 FontIcon(MaterialDesign.MDI_PAUSE)
                             }
+
                             false -> FontIcon(MaterialDesign.MDI_PLAY)
                         }
                     })
@@ -146,9 +147,30 @@ class NarrationTextItem : VBox() {
                     button {
                         prefWidth = 150.0
                         addClass("btn", "btn--secondary")
-                        text = FX.messages["next"]
                         graphic = FontIcon(MaterialDesign.MDI_ARROW_DOWN)
-                        onActionProperty().bind(onNextVerseActionProperty)
+
+                        onActionProperty().bind(
+                            objectBinding(
+                                isLastVerseProperty,
+                                onSaveRecordingActionProperty,
+                                onNextVerseActionProperty
+                            ) {
+                                if (isLastVerseProperty.value) {
+                                    onSaveRecordingActionProperty.value
+                                } else {
+                                    onNextVerseActionProperty.value
+                                }
+                            }
+                        )
+
+                        textProperty().bind(stringBinding(isLastVerseProperty) {
+                            if (isLastVerseProperty.value) {
+                                FX.messages["save"]
+
+                            } else {
+                                FX.messages["next"]
+                            }
+                        })
                     }
                     visibleProperty().bind(stateProperty.isEqualTo(NarrationTextItemState.RECORD_ACTIVE))
                 }

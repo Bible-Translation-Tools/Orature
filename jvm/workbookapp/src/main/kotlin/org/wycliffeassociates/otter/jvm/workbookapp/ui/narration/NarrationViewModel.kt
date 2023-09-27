@@ -47,6 +47,8 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataSto
 import tornadofx.*
 import java.io.File
 import java.text.MessageFormat
+import java.util.concurrent.Semaphore
+import java.util.concurrent.locks.Lock
 import javax.inject.Inject
 import kotlin.math.floor
 import kotlin.math.max
@@ -317,6 +319,21 @@ class NarrationViewModel : ViewModel() {
         recordingVerseIndex.set(verseIndex)
         isRecording = true
         isRecordingAgain = true
+        recordPause = false
+
+        refreshTeleprompter()
+    }
+
+    fun saveRecording(verseIndex: Int) {
+
+            stopPlayer()
+
+        narration.onSaveRecording(verseIndex)
+
+        recordAgainVerseIndex = verseIndex
+        recordingVerseIndex.set(verseIndex)
+        isRecording = false
+        isRecordingAgain = false
         recordPause = false
 
         refreshTeleprompter()

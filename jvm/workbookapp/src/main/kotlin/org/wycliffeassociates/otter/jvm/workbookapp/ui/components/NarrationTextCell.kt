@@ -30,6 +30,7 @@ import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PlayVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RecordVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.SaveRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItem
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItemState
 import org.wycliffeassociates.otter.jvm.controls.narration.narrationTextListview
@@ -118,6 +119,10 @@ class NarrationTextCell(
                     logger.info("Playing verse index $it")
                     FX.eventbus.fire(PlayVerseEvent(item.marker))
                 }
+            })
+
+            onSaveRecordingActionProperty.set(EventHandler {
+                FX.eventbus.fire(SaveRecordingEvent(index))
             })
 
             stateProperty.set(
