@@ -1,11 +1,17 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
+import javafx.scene.control.Slider
 import javafx.scene.layout.Priority
+import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
+import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
+import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
+import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.ScrollingWaveform
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.PeerEditViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
@@ -16,7 +22,8 @@ class PeerEdit : Fragment() {
     val viewModel: PeerEditViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
 
-    var cleanUpWaveform: () -> Unit = {}
+    private lateinit var slider: Slider
+    private lateinit var waveform: ScrollingWaveform
 
     override val root = borderpane {
         top = vbox {
@@ -28,11 +35,28 @@ class PeerEdit : Fragment() {
                 sideTextProperty.set(messages["sourceAudio"])
             }
         }
-        center = ScrollingWaveform().apply {
-            themeProperty.bind(settingsViewModel.appColorMode)
-            positionProperty.bind(viewModel.positionProperty)
+        center = vbox {
+            waveform = ScrollingWaveform().apply {
+                themeProperty.bind(settingsViewModel.appColorMode)
+                positionProperty.bind(viewModel.positionProperty)
+                clip = Rectangle().apply {
+                    widthProperty().bind(this@vbox.widthProperty())
+                    heightProperty().bind(this@vbox.heightProperty())
+                }
+                setOnWaveformClicked { viewModel.pause() }
+                setOnWaveformDragReleased { deltaPos ->
+                    val deltaFrames = pixelsToFrames(deltaPos)
+                    val curFrames = viewModel.getLocationInFrames()
+                    val duration = viewModel.getDurationInFrames()
+                    val final = Utils.clamp(0, curFrames - deltaFrames, duration)
+                    viewModel.seek(final)
+                }
 
-            cleanUpWaveform = ::freeImages
+                viewModel.cleanUpWaveform = ::freeImages
+            }
+//            slider = createAudioScrollbarSlider()
+            add(waveform)
+//            add(slider)
         }
         bottom = hbox {
             addClass("consume__bottom", "recording__bottom-section")
@@ -47,7 +71,7 @@ class PeerEdit : Fragment() {
                         messages["pause"]
                     } else {
                         graphic = playIcon
-                        messages["playSource"]
+                        messages["play"]
                     }
                 })
 
@@ -66,7 +90,7 @@ class PeerEdit : Fragment() {
                 }
             }
             region { hgrow = Priority.ALWAYS }
-            button(messages["cancel"]) {
+            button(messages["record"]) {
                 addClass("btn", "btn--secondary")
                 graphic = FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE)
 
@@ -82,6 +106,7 @@ class PeerEdit : Fragment() {
     override fun onDock() {
         super.onDock()
         viewModel.dockPeerEdit()
+        viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
     }
 
     override fun onUndock() {
@@ -93,8 +118,18 @@ class PeerEdit : Fragment() {
         viewModel.waveform
             .observeOnFx()
             .subscribe {
-                (root.center as ScrollingWaveform).addWaveformImage(it)
+                waveform.addWaveformImage(it)
             }
             .addTo(viewModel.compositeDisposable)
+    }
+
+    private fun createAudioScrollbarSlider(): Slider {
+        return AudioSlider().apply {
+            hgrow = Priority.ALWAYS
+            colorThemeProperty.bind(settingsViewModel.selectedThemeProperty)
+            setPixelsInHighlightFunction { viewModel.pixelsInHighlight(it) }
+            player.bind(viewModel.targetPlayerProperty)
+            secondsToHighlightProperty.set(SECONDS_ON_SCREEN)
+        }
     }
 }

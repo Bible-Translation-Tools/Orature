@@ -10,6 +10,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.BlindDra
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.Chunking
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.ChunkingStepsDrawer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.Consume
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.PeerEdit
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
@@ -25,6 +26,7 @@ class ChunkingTranslationPage : View() {
                 ChunkingStep.CONSUME_AND_VERBALIZE -> find<Consume>()
                 ChunkingStep.CHUNKING -> find<Chunking>()
                 ChunkingStep.BLIND_DRAFT -> find<BlindDraft>()
+                ChunkingStep.PEER_EDIT -> find<PeerEdit>()
                 else -> null
             }
         }

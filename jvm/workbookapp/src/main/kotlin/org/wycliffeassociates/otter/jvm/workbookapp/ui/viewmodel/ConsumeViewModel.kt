@@ -77,7 +77,6 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
         audioDataStore.sourceAudioProperty.set(sourceAudio)
 
         sourceAudio?.file?.let {
-            (app as IDependencyGraphProvider).dependencyGraph.inject(this)
             audio = loadAudio(it)
             createWaveformImages(audio)
             subscribeOnWaveformImages()

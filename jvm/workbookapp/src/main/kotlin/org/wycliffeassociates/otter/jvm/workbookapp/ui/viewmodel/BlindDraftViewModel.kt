@@ -18,6 +18,7 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
+import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -33,6 +34,8 @@ class BlindDraftViewModel : ViewModel() {
 
     @Inject
     lateinit var waveFileCreator: IWaveFileCreator
+    @Inject
+    lateinit var audioConnectionFactory: AudioConnectionFactory
 
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
@@ -225,7 +228,7 @@ class BlindDraftViewModel : ViewModel() {
     }
 
     fun Take.mapToCardModel(selected: Boolean): TakeCardModel {
-        val audioPlayer: IAudioPlayer = (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
+        val audioPlayer: IAudioPlayer = audioConnectionFactory.getPlayer()
         audioPlayer.load(this.file)
         return TakeCardModel(this, selected, audioPlayer)
     }
