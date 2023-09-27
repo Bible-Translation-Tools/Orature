@@ -39,7 +39,7 @@ import tornadofx.addClass
 
 class NarrationTextItemData(
     val chunk: Chunk,
-    val marker: VerseMarker?,
+    var marker: VerseMarker?,
     var hasRecording: Boolean = false,
     var previousChunksRecorded: Boolean = false
 ) {
@@ -117,7 +117,7 @@ class NarrationTextCell(
             onPlayActionProperty.set(EventHandler {
                 item.marker?.let {
                     logger.info("Playing verse index $it")
-                    FX.eventbus.fire(PlayVerseEvent(item.marker))
+                    FX.eventbus.fire(PlayVerseEvent(it))
                 }
             })
 

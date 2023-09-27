@@ -147,6 +147,7 @@ class NarrationViewModel : ViewModel() {
                     recordingVerseIndex.value != idx && matchingChunk
                 }
                 chunk.previousChunksRecorded = chunk.chunk.sort - 1 <= recordedVerses.size
+                chunk.marker = recordedVerses.getOrNull(idx)
             }
         }
     }
@@ -325,8 +326,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun saveRecording(verseIndex: Int) {
-
-            stopPlayer()
+        stopPlayer()
 
         narration.onSaveRecording(verseIndex)
 
