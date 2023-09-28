@@ -20,19 +20,25 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
 import javafx.beans.property.IntegerProperty
 import javafx.beans.property.SimpleIntegerProperty
+import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.value.ObservableValue
+import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.scene.control.ListCell
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.jvm.controls.event.BeginRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PlayVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RecordVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.SaveRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItem
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItemState
+import org.wycliffeassociates.otter.jvm.controls.narration.ResumeVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.narration.narrationTextListview
 import tornadofx.FX
 import tornadofx.addClass
@@ -125,6 +131,18 @@ class NarrationTextCell(
                 FX.eventbus.fire(SaveRecordingEvent(index))
             })
 
+            onBeginRecordingAction.set(EventHandler {
+                FX.eventbus.fire(BeginRecordingEvent(index, item.chunk))
+            })
+
+            onPauseRecordingAction.set(EventHandler {
+                FX.eventbus.fire(PauseRecordingEvent(index, item.chunk))
+            })
+
+            onResumeRecordingAction.set(EventHandler {
+                FX.eventbus.fire(ResumeRecordingEvent(index, item.chunk))
+            })
+
             stateProperty.set(
                 computeState(
                     index,
@@ -147,6 +165,8 @@ class NarrationTextCell(
         
         if (!isRecording && !isRecordingAgain && !hasRecording && previousChunksRecorded) {
             return NarrationTextItemState.RECORD
+        } else if (!isRecording && !isRecordingAgain && !hasRecording && ) {
+            return NarrationTextItemState.RECORDING_PAUSED
         } else if (isRecording && !isRecordingAgain && index == recordingIndex) {
             return NarrationTextItemState.RECORD_ACTIVE
         } else if (!previousChunksRecorded && !hasRecording || !hasRecording && isRecording && recordingIndex == index - 1) {

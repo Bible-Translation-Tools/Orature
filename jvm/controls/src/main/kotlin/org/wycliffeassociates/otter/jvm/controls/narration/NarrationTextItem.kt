@@ -37,7 +37,9 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 enum class NarrationTextItemState {
+    BEGIN_RECORDING,
     RECORD,
+    RECORDING_PAUSED,
     RECORD_DISABLED,
     RECORD_ACTIVE,
     RE_RECORD,
@@ -69,6 +71,9 @@ class NarrationTextItem : VBox() {
     val recordButtonTextProperty = SimpleStringProperty()
     val nextChunkTextProperty = SimpleStringProperty()
 
+    val onBeginRecordingAction = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val onPauseRecordingAction = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val onResumeRecordingAction = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onRecordActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onRecordAgainActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onSaveRecordingActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
@@ -119,6 +124,20 @@ class NarrationTextItem : VBox() {
             stackpane {
                 alignment = Pos.CENTER
                 hbox {
+                    // BEGIN RECORDING
+                    alignment = Pos.CENTER
+                    button {
+                        alignment = Pos.CENTER
+                        prefWidth = 316.0
+                        styleClass.clear()
+                        addClass("btn", "btn--primary")
+                        text = FX.messages["record"]
+                        graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
+                        onActionProperty().bind(onBeginRecordingAction)
+                    }
+                    visibleProperty().bind(stateProperty.isEqualTo(NarrationTextItemState.BEGIN_RECORDING))
+                }
+                hbox {
                     // RECORD
                     alignment = Pos.CENTER
                     button {
@@ -142,7 +161,48 @@ class NarrationTextItem : VBox() {
                         addPseudoClass("active")
                         text = FX.messages["pause"]
                         graphic = FontIcon(MaterialDesign.MDI_PAUSE)
-                        onActionProperty().bind(onRecordActionProperty)
+                        onActionProperty().bind(onPauseRecordingAction)
+                    }
+                    button {
+                        prefWidth = 150.0
+                        addClass("btn", "btn--secondary")
+                        graphic = FontIcon(MaterialDesign.MDI_ARROW_DOWN)
+
+                        onActionProperty().bind(
+                            objectBinding(
+                                isLastVerseProperty,
+                                onSaveRecordingActionProperty,
+                                onNextVerseActionProperty
+                            ) {
+                                if (isLastVerseProperty.value) {
+                                    onSaveRecordingActionProperty.value
+                                } else {
+                                    onNextVerseActionProperty.value
+                                }
+                            }
+                        )
+
+                        textProperty().bind(stringBinding(isLastVerseProperty) {
+                            if (isLastVerseProperty.value) {
+                                FX.messages["save"]
+
+                            } else {
+                                FX.messages["next"]
+                            }
+                        })
+                    }
+                    visibleProperty().bind(stateProperty.isEqualTo(NarrationTextItemState.RECORD_ACTIVE))
+                }
+                hbox {
+                    // RECORDING PAUSED
+                    alignment = Pos.CENTER
+                    spacing = 16.0
+                    button {
+                        prefWidth = 150.0
+                        addClass("btn", "btn--primary")
+                        text = FX.messages["resume"]
+                        graphic = FontIcon(MaterialDesign.MDI_PAUSE)
+                        onActionProperty().bind(onResumeRecordingAction)
                     }
                     button {
                         prefWidth = 150.0

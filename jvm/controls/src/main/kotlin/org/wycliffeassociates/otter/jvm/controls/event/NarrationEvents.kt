@@ -5,7 +5,11 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import tornadofx.FXEvent
 
+
+class BeginRecordingEvent(val index: Int, val chunk: Chunk): FXEvent()
 class NextVerseEvent(val index: Int, val chunk: Chunk) : FXEvent()
+class PauseRecordingEvent(val index: Int, val chunk: Chunk): FXEvent()
+class ResumeRecordingEvent(val index: Int, val chunk: Chunk) : FXEvent()
 class RecordVerseEvent(val index: Int, val chunk: Chunk) : FXEvent()
 class RecordAgainEvent(val index: Int) : FXEvent()
 class SaveRecordingEvent(val index: Int) : FXEvent()

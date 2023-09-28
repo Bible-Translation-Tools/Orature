@@ -8,15 +8,18 @@ import javafx.util.Duration
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
+import org.wycliffeassociates.otter.jvm.controls.event.BeginRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ChapterReturnFromPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.OpenChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.OpenInAudioPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PauseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PlayChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PlayVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RecordVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.SaveRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
@@ -30,7 +33,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewMod
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.util.*
-import javax.swing.Painter
 
 class NarrationPage : View() {
     private val logger = LoggerFactory.getLogger(NarrationPage::class.java)
@@ -126,6 +128,18 @@ class NarrationPage : View() {
             viewModel.toggleRecording(it.index)
         }.let { eventSubscriptions.add(it) }
 
+        subscribe<BeginRecordingEvent> {
+            viewModel.toggleRecording(it.index)
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<PauseRecordingEvent> {
+            viewModel.toggleRecording(it.index)
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<ResumeRecordingEvent> {
+            viewModel.toggleRecording(it.index)
+        }.let { eventSubscriptions.add(it) }
+
         subscribe<NarrationMarkerChangedEvent> {
             logger.info("Received Narration Moved event")
             viewModel.moveMarker(it.index, it.delta)
@@ -144,7 +158,7 @@ class NarrationPage : View() {
         }.let { eventSubscriptions.add(it) }
 
         subscribe<PauseEvent> {
-            viewModel.pause()
+            viewModel.pausePlayback()
         }.let { eventSubscriptions.add(it) }
 
         subscribe<RecordAgainEvent> {

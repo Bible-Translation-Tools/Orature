@@ -2,7 +2,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.github.thomasnield.rxkotlinfx.toObservable
-import com.github.thomasnield.rxkotlinfx.updates
 import com.sun.glass.ui.Screen
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -32,7 +31,6 @@ import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
 import org.wycliffeassociates.otter.common.domain.narration.framesToPixels
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
-import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItemState
 import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -47,12 +45,9 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataSto
 import tornadofx.*
 import java.io.File
 import java.text.MessageFormat
-import java.util.concurrent.Semaphore
-import java.util.concurrent.locks.Lock
 import javax.inject.Inject
 import kotlin.math.floor
 import kotlin.math.max
-import kotlin.math.roundToInt
 
 class NarrationViewModel : ViewModel() {
     private lateinit var rendererAudioReader: AudioFileReader
@@ -307,7 +302,7 @@ class NarrationViewModel : ViewModel() {
         audioPlayer.play()
     }
 
-    fun pause() {
+    fun pausePlayback() {
         audioPlayer.pause()
     }
 
