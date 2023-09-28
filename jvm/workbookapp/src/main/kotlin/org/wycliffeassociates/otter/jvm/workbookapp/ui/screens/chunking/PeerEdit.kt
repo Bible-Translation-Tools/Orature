@@ -52,6 +52,7 @@ class PeerEdit : Fragment() {
                     viewModel.seek(final)
                 }
 
+                viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
                 viewModel.cleanUpWaveform = ::freeImages
             }
             slider = createAudioScrollbarSlider()
@@ -107,7 +108,6 @@ class PeerEdit : Fragment() {
     override fun onDock() {
         super.onDock()
         viewModel.dockPeerEdit()
-        viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
     }
 
     override fun onUndock() {

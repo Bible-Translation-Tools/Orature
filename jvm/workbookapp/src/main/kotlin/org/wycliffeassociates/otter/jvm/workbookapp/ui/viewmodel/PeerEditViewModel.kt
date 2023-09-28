@@ -12,6 +12,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.Slider
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
+import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -33,6 +34,7 @@ class PeerEditViewModel : ViewModel() {
 
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
+    val translationViewModel: TranslationViewModel2 by inject()
 
     val chunkTitleProperty = workbookDataStore.activeChunkTitleBinding()
     val currentChunkProperty = SimpleObjectProperty<Chunk>()
@@ -65,13 +67,26 @@ class PeerEditViewModel : ViewModel() {
     }
 
     fun dockPeerEdit() {
-        sourcePlayerProperty.bind(audioDataStore.sourceAudioPlayerProperty)
         startAnimationTimer()
+
+        workbookDataStore.chapter
+            .chunks
+            .observeOnFx()
+            .subscribe { chunks ->
+                translationViewModel.loadChunks(chunks)
+                (chunks.firstOrNull { it.checkingStatus == CheckingStatus.UNCHECKED } ?: chunks.firstOrNull())
+                    ?.let { chunk ->
+                        translationViewModel.selectChunk(chunk.sort)
+                    }
+            }.addTo(compositeDisposable)
+
         currentChunkProperty.onChangeAndDoNowWithDisposer {
             it?.let { chunk ->
                 subscribeToSelectedTake(chunk)
             }
         }.also { disposableListeners.add(it) }
+
+        sourcePlayerProperty.bind(audioDataStore.sourceAudioPlayerProperty)
     }
 
     fun undockPeerEdit() {
