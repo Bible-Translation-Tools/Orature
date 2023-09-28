@@ -1,29 +1,38 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 
+import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleObjectProperty
+import javafx.event.ActionEvent
+import javafx.event.EventHandler
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel.Result
+import org.wycliffeassociates.otter.jvm.controls.canvas.CanvasFragment
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
-class RecordingSection(private val viewModel: RecorderViewModel) : BorderPane() {
+class RecordingSection : BorderPane() {
 
-    var onRecordingFinish: (Result) -> Unit = {}
+    val isRecordingProperty = SimpleBooleanProperty(false)
+    private val toggleRecordingProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    private val saveActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    private val cancelActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     private val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
     private val resumeIcon = FontIcon(MaterialDesign.MDI_MICROPHONE)
 
+    val waveformCanvas = CanvasFragment()
+    val volumeCanvas = CanvasFragment().apply { minWidth = 25.0 }
+
     init {
-        center = viewModel.waveformCanvas
-        right = viewModel.volumeCanvas
+        center = waveformCanvas
+        right = volumeCanvas
         bottom = hbox {
             addClass("consume__bottom", "recording__bottom-section")
             button {
                 addClass("btn", "btn--primary", "consume__btn")
-                textProperty().bind(viewModel.recordingProperty.stringBinding {
+                textProperty().bind(isRecordingProperty.stringBinding {
                     togglePseudoClass("active", it == true)
                     if (it == true) {
                         graphic = pauseIcon
@@ -36,18 +45,18 @@ class RecordingSection(private val viewModel: RecorderViewModel) : BorderPane() 
                 tooltip { textProperty().bind(this@button.textProperty()) }
 
                 action {
-                    viewModel.toggle()
+                    toggleRecordingProperty.value?.handle(ActionEvent())
                 }
             }
             button(messages["save"]) {
                 addClass("btn", "btn--secondary")
                 graphic = FontIcon(MaterialDesign.MDI_CHECK_CIRCLE)
 
-                visibleWhen { viewModel.recordingProperty.not() }
+                visibleWhen { isRecordingProperty.not() }
                 managedWhen(visibleProperty())
 
                 action {
-                    viewModel.saveAndQuit(onRecordingFinish)
+                    saveActionProperty.value?.handle(ActionEvent())
                 }
             }
             region { hgrow = Priority.ALWAYS }
@@ -55,13 +64,31 @@ class RecordingSection(private val viewModel: RecorderViewModel) : BorderPane() 
                 addClass("btn", "btn--secondary")
                 graphic = FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE)
 
-                visibleWhen { viewModel.recordingProperty.not() }
+                visibleWhen { isRecordingProperty.not() }
                 managedWhen(visibleProperty())
 
                 action {
-                    viewModel.cancel(onRecordingFinish)
+                    cancelActionProperty.value?.handle(ActionEvent())
                 }
             }
         }
+    }
+
+    fun setToggleRecordingAction(op: () -> Unit) {
+        toggleRecordingProperty.set(
+            EventHandler { op() }
+        )
+    }
+
+    fun setSaveAction(op: () -> Unit) {
+        saveActionProperty.set(
+            EventHandler { op() }
+        )
+    }
+
+    fun setCancelAction(op: () -> Unit) {
+        cancelActionProperty.set(
+            EventHandler { op() }
+        )
     }
 }

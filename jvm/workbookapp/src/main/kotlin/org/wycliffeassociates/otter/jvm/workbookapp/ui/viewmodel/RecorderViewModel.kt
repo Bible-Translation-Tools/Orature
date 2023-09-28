@@ -38,8 +38,8 @@ class RecorderViewModel : ViewModel() {
     var isRecording by recordingProperty
     lateinit var recorder: IAudioRecorder
 
-    val waveformCanvas = CanvasFragment()
-    val volumeCanvas = CanvasFragment().apply { minWidth = 25.0 }
+    lateinit var waveformCanvas: CanvasFragment
+    lateinit var volumeCanvas: CanvasFragment
     val timerTextProperty = SimpleStringProperty("00:00:00")
     lateinit var tempTake: File
     lateinit var wavAudio: OratureAudioFile
@@ -104,31 +104,30 @@ class RecorderViewModel : ViewModel() {
         timer.pause()
     }
 
-    fun saveAndQuit(onFinish: (Result) -> Unit = {}) {
+    fun saveAndQuit(): Result {
         pause()
         at.stop()
         recorder.stop()
         waveformCanvas.clearDrawables()
-        if (hasWrittenProperty.value) {
+        return if (hasWrittenProperty.value) {
             targetFileProperty.value?.let {
                 wavAudio.file.copyTo(it, true)
             }
+            targetFileProperty.set(null)
             reset()
-            onFinish(Result.SUCCESS)
+            Result.SUCCESS
         } else {
             reset()
-            onFinish(Result.CANCELLED)
+            Result.CANCELLED
         }
-        targetFileProperty.set(null)
     }
 
-    fun cancel(onFinish: (Result) -> Unit = {}) {
+    fun cancel() {
         pause()
         at.stop()
         recorder.stop()
         waveformCanvas.clearDrawables()
         reset()
-        onFinish(Result.CANCELLED)
     }
 
     fun reset() {
