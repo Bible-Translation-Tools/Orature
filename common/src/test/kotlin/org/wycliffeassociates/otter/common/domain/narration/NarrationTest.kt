@@ -30,7 +30,6 @@ import kotlin.math.absoluteValue
 class NarrationTest {
     val testDataRootFilePath: String = System.getProperty("user.home")
     val testDirWithAudio = File(testDataRootFilePath, "testProjectChapterDirWithAudio")
-    val workingAudioFileWithAudio = File(testDirWithAudio, "chapter_narration.pcm")
     val testDirWithoutAudio = File(testDataRootFilePath, "testProjectChapterDirWithoutAudio")
     val verseEditFile = File(testDirWithAudio, "verseEditFile.pcm")
 
@@ -147,9 +146,6 @@ class NarrationTest {
         }
     }
 
-    fun mockAudioFileUtils() : AudioFileUtils {
-        return mockk<AudioFileUtils>{}
-    }
 
     fun mockSplitAudioOnCues() : SplitAudioOnCues {
         return mockk<SplitAudioOnCues>{}
@@ -291,6 +287,7 @@ class NarrationTest {
         val verseIndex = 0
         val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
         val secondsOfRecordedAudio = 10
+
         // Verify that no audio has been recorded and no verses have been placed
         Assert.assertEquals(0, narration.activeVerses.size)
 
@@ -301,6 +298,7 @@ class NarrationTest {
 
         // Verify that audio was recorded
         Assert.assertEquals(DEFAULT_SAMPLE_RATE * secondsOfRecordedAudio, narration.audioReader.totalFrames)
+
         // Verify that activeVerses has been updated and that it contains the first verse
         Assert.assertEquals(1, narration.activeVerses.size)
         Assert.assertEquals("orature-vm-${verseIndex + 1}", narration.activeVerses[verseIndex].formattedLabel)
@@ -324,7 +322,7 @@ class NarrationTest {
         val verseIndex = 0
         val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
         val secondsOfAudioBeforeRecordAgain = 10
-        val secondsOfAudioAfterRecordAgain = 10
+        val secondsOfAudioAfterRecordAgain = 5
         // writes 10 seconds of audio
         addNewVerseWithAudio(narration, verseIndex, secondsOfAudioBeforeRecordAgain)
         // Finalizes the added verse
@@ -332,30 +330,27 @@ class NarrationTest {
 
         Assert.assertEquals(DEFAULT_SAMPLE_RATE * secondsOfAudioBeforeRecordAgain, narration.audioReader.totalFrames)
 
-
         narration.onRecordAgain(verseIndex)
         addBytesToRecorderAudioStream(ByteArray(DEFAULT_SAMPLE_RATE * 2 * secondsOfAudioAfterRecordAgain) {1})
         narration.pauseRecording()
         narration.finalizeVerse(verseIndex)
 
-
         // Verify that audio was recorded
-        Assert.assertEquals(DEFAULT_SAMPLE_RATE * secondsOfAudioAfterRecordAgain, narration.audioReader.totalFrames)
+        val expectedFramesAfterRecordAgain = DEFAULT_SAMPLE_RATE * secondsOfAudioAfterRecordAgain
+        Assert.assertEquals(expectedFramesAfterRecordAgain, narration.audioReader.totalFrames)
         // Verify that activeVerses has been updated and that it contains only the first verse
         Assert.assertEquals(1, narration.activeVerses.size)
-        Assert.assertEquals("orature-vm-1", narration.activeVerses[verseIndex].formattedLabel)
+        Assert.assertEquals("orature-vm-${verseIndex + 1}", narration.activeVerses[verseIndex].formattedLabel)
     }
 
 
-
-
-    // TODO: add test for getTotalFrames
     @Test
     fun `getTotalFrames with no committed or uncommitted frames`() {
         val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
 
         Assert.assertEquals(0, narration.getTotalFrames())
     }
+
 
     @Test
     fun `getTotalFrames with uncommitted frames and no committed frames`() {
@@ -409,7 +404,7 @@ class NarrationTest {
 
 
     @Test
-    fun `onVerseMarkerMoved with valid verseIndex, delta equal to 44100, and existing workingAudio`() {
+    fun `onVerseMarkerMoved with verseIndex equal to 2, delta equal to 44100, and existing workingAudio`() {
         val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
         val numVersesToRecord = 2
         val secondsPerVerse = 10
@@ -438,7 +433,7 @@ class NarrationTest {
     }
 
     @Test
-    fun `onVerseMarkerMoved with valid verseIndex, delta equal to -44100, and existing workingAudio`() {
+    fun `onVerseMarkerMoved with verseIndex equal to 2, delta equal to -44100, and existing workingAudio`() {
         val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
         val numVersesToRecord = 2
         val secondsPerVerse = 10
@@ -473,6 +468,7 @@ class NarrationTest {
     fun `onEditVerse with no scratch audio, no placed verses, and empty edited audio file`() {
         makeVerseEditFile(verseEditFile, 0)
 
+        val verseIndex = 0
         val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
 
         // Verify that no verseMarkers have been placed
@@ -481,11 +477,11 @@ class NarrationTest {
         // Verify that there is no scratch audio
         Assert.assertEquals(0, narration.audioReader.totalFrames)
 
-        narration.onEditVerse(0, verseEditFile)
+        narration.onEditVerse(verseIndex, verseEditFile)
 
         // Verify that verseMarker 1 have been placed
         Assert.assertEquals(1, narration.activeVerses.size)
-        Assert.assertEquals("orature-vm-1", narration.activeVerses[0].formattedLabel)
+        Assert.assertEquals("orature-vm-${verseIndex + 1}", narration.activeVerses[verseIndex].formattedLabel)
 
         Assert.assertEquals(0, narration.audioReader.totalFrames)
     }
@@ -661,7 +657,7 @@ class NarrationTest {
         val delta = 1000
         val oldVerseLocation = narration.activeVerses[verseIndexToMove].location
 
-        // Move verse 5
+        // Move verse
         narration.onVerseMarkerMoved(verseIndexToMove, 1000)
 
         // Verify that the verse has been moved to the correct location
@@ -696,7 +692,7 @@ class NarrationTest {
         val spaceBetweenEditedAndNextVerseBeforeEdit = narration.activeVerses[verseIndexToEdit + 1].location -
                 narration.activeVerses[verseIndexToEdit].location
 
-        // Calculate the space between verse 5 and 6 after editing verse 5
+        // Calculate the space between verses after editing
         val spaceBetweenEditedAndNextVerseAfterEdit = narration.activeVerses[verseIndexToEdit + 1].location -
                 narration.activeVerses[verseIndexToEdit].location +
                 (verseLengthInSecondsBeforeEdit - verseLengthInSecondsAfterEdit).absoluteValue * DEFAULT_SAMPLE_RATE
@@ -705,19 +701,19 @@ class NarrationTest {
         makeVerseEditFile(verseEditFile, verseLengthInSecondsAfterEdit)
         narration.onEditVerse(verseIndexToEdit, verseEditFile)
 
-        // Verify that the space between verse 5 and 6 has changed correctly after edit
+        // Verify that the space between verses has changed correctly after edit
         Assert.assertEquals(spaceBetweenEditedAndNextVerseAfterEdit,
             narration.activeVerses[verseIndexToEdit + 1].location - narration.activeVerses[verseIndexToEdit].location)
 
         narration.undo()
 
-        // Verify that the space between verse 5 and 6 has changed correctly after undo
+        // Verify that the space between verses has changed correctly after undo
         Assert.assertEquals(spaceBetweenEditedAndNextVerseBeforeEdit,
             narration.activeVerses[verseIndexToEdit + 1].location - narration.activeVerses[verseIndexToEdit].location)
 
         narration.redo()
 
-        // Verify that the space between verse 5 and 6 has changed correctly after redo
+        // Verify that the space between verses has changed correctly after redo
         Assert.assertEquals(spaceBetweenEditedAndNextVerseAfterEdit,
             narration.activeVerses[verseIndexToEdit + 1].location - narration.activeVerses[verseIndexToEdit].location)
     }
