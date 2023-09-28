@@ -44,6 +44,7 @@ enum class NarrationTextItemState {
     RECORD_ACTIVE,
     RE_RECORD,
     RE_RECORD_ACTIVE,
+    RE_RECORDING_PAUSED,
     RE_RECORD_DISABLED
 }
 
@@ -201,7 +202,7 @@ class NarrationTextItem : VBox() {
                         prefWidth = 150.0
                         addClass("btn", "btn--primary")
                         text = FX.messages["resume"]
-                        graphic = FontIcon(MaterialDesign.MDI_PAUSE)
+                        graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                         onActionProperty().bind(onResumeRecordingAction)
                     }
                     button {
@@ -232,7 +233,7 @@ class NarrationTextItem : VBox() {
                             }
                         })
                     }
-                    visibleProperty().bind(stateProperty.isEqualTo(NarrationTextItemState.RECORD_ACTIVE))
+                    visibleProperty().bind(stateProperty.isEqualTo(NarrationTextItemState.RECORDING_PAUSED))
                 }
                 hbox {
                     // RECORD_DISABLED
@@ -283,22 +284,43 @@ class NarrationTextItem : VBox() {
                     alignment = Pos.CENTER
                     spacing = 16.0
                     button {
-                        addClass("btn", "btn--primary")
-                        prefWidth = 150.0
-                        text = FX.messages["save"]
-                        graphic = FontIcon(MaterialDesign.MDI_CHECKBOX_MARKED_CIRCLE)
+                        addClass("btn", "btn--secondary")
+                        addPseudoClass("active")
+                        text = FX.messages["pause"]
+                        graphic = FontIcon(MaterialDesign.MDI_PAUSE)
                         setOnAction {
-                            onActionProperty().bind(onSaveRecordingActionProperty)
+                            onActionProperty().bind(onPauseRecordingAction)
                         }
                     }
                     button {
                         prefWidth = 150.0
-                        addClass("btn", "btn--secondary")
-                        text = FX.messages["redo"]
+                        addClass("btn", "btn--primary")
+                        text = FX.messages["save"]
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
-                        onActionProperty().bind(onRecordAgainActionProperty)
+                        onActionProperty().bind(onSaveRecordingActionProperty)
                     }
                     visibleProperty().bind(stateProperty.isEqualTo(NarrationTextItemState.RE_RECORD_ACTIVE))
+                }
+                hbox {
+                    // RE_RECORD_ACTIVE
+                    alignment = Pos.CENTER
+                    spacing = 16.0
+                    button {
+                        addClass("btn", "btn--secondary")
+                        text = FX.messages["resume"]
+                        graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
+                        setOnAction {
+                            onActionProperty().bind(onResumeRecordingAction)
+                        }
+                    }
+                    button {
+                        prefWidth = 150.0
+                        addClass("btn", "btn--primary")
+                        text = FX.messages["save"]
+                        graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
+                        onActionProperty().bind(onSaveRecordingActionProperty)
+                    }
+                    visibleProperty().bind(stateProperty.isEqualTo(NarrationTextItemState.RE_RECORDING_PAUSED))
                 }
             }
 

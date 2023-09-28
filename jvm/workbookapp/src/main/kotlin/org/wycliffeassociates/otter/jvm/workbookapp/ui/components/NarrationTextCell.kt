@@ -19,10 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
 import javafx.beans.property.IntegerProperty
-import javafx.beans.property.SimpleIntegerProperty
-import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.value.ObservableValue
-import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.scene.control.ListCell
 import org.slf4j.LoggerFactory
@@ -38,8 +35,6 @@ import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.SaveRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItem
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItemState
-import org.wycliffeassociates.otter.jvm.controls.narration.ResumeVerseEvent
-import org.wycliffeassociates.otter.jvm.controls.narration.narrationTextListview
 import tornadofx.FX
 import tornadofx.addClass
 
@@ -47,7 +42,8 @@ class NarrationTextItemData(
     val chunk: Chunk,
     var marker: VerseMarker?,
     var hasRecording: Boolean = false,
-    var previousChunksRecorded: Boolean = false
+    var previousChunksRecorded: Boolean = false,
+    var state: NarrationTextItemState = NarrationTextItemState.RECORD_DISABLED
 ) {
     override fun toString(): String {
         return "${chunk.sort}, $hasRecording, $previousChunksRecorded"
@@ -143,40 +139,7 @@ class NarrationTextCell(
                 FX.eventbus.fire(ResumeRecordingEvent(index, item.chunk))
             })
 
-            stateProperty.set(
-                computeState(
-                    index,
-                    isRecording,
-                    isRecordingAgain,
-                    recordingIndexProperty.value,
-                )
-            )
-        }
-    }
-
-    fun computeState(
-        index: Int,
-        isRecording: Boolean,
-        isRecordingAgain: Boolean,
-        recordingIndex: Int?
-    ): NarrationTextItemState {
-        val hasRecording = item.hasRecording
-        val previousChunksRecorded = item.previousChunksRecorded
-        
-        if (!isRecording && !isRecordingAgain && !hasRecording && previousChunksRecorded) {
-            return NarrationTextItemState.RECORD
-        } else if (!isRecording && !isRecordingAgain && !hasRecording && ) {
-            return NarrationTextItemState.RECORDING_PAUSED
-        } else if (isRecording && !isRecordingAgain && index == recordingIndex) {
-            return NarrationTextItemState.RECORD_ACTIVE
-        } else if (!previousChunksRecorded && !hasRecording || !hasRecording && isRecording && recordingIndex == index - 1) {
-            return NarrationTextItemState.RECORD_DISABLED
-        } else if (!isRecording && hasRecording) {
-            return NarrationTextItemState.RE_RECORD
-        } else if (isRecordingAgain && index == recordingIndex) {
-            return NarrationTextItemState.RE_RECORD_ACTIVE
-        } else {
-            return NarrationTextItemState.RE_RECORD_DISABLED
+            stateProperty.set(item.state)
         }
     }
 }

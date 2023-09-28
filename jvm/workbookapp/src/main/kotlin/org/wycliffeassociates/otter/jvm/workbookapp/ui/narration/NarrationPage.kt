@@ -126,18 +126,22 @@ class NarrationPage : View() {
 
         subscribe<RecordVerseEvent> {
             viewModel.toggleRecording(it.index)
+            viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<BeginRecordingEvent> {
             viewModel.toggleRecording(it.index)
+            viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<PauseRecordingEvent> {
             viewModel.toggleRecording(it.index)
+            viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<ResumeRecordingEvent> {
             viewModel.toggleRecording(it.index)
+            viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<NarrationMarkerChangedEvent> {
@@ -147,6 +151,7 @@ class NarrationPage : View() {
 
         subscribe<NextVerseEvent> {
             viewModel.onNext(it.index)
+            viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<PlayVerseEvent> {
@@ -163,10 +168,12 @@ class NarrationPage : View() {
 
         subscribe<RecordAgainEvent> {
             viewModel.recordAgain(it.index)
+            viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<SaveRecordingEvent> {
             viewModel.saveRecording(it.index)
+            viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<OpenInAudioPluginEvent> {

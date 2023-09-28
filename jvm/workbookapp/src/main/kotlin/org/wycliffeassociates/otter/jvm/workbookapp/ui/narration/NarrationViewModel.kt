@@ -31,6 +31,14 @@ import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
 import org.wycliffeassociates.otter.common.domain.narration.framesToPixels
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
+import org.wycliffeassociates.otter.jvm.controls.event.BeginRecordingEvent
+import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordingEvent
+import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
+import org.wycliffeassociates.otter.jvm.controls.event.RecordVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingEvent
+import org.wycliffeassociates.otter.jvm.controls.event.SaveRecordingEvent
+import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItemState
 import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -129,7 +137,7 @@ class NarrationViewModel : ViewModel() {
         narratableList.bind(chunksList) { chunk ->
             NarrationTextItemData(
                 chunk,
-                recordedVerses.firstOrNull {it.label == chunk.title},
+                recordedVerses.firstOrNull { it.label == chunk.title },
                 recordedVerses.any { it.label == chunk.title },
                 chunk.sort - 1 <= recordedVerses.size
             )
@@ -175,7 +183,9 @@ class NarrationViewModel : ViewModel() {
             runLater {
                 when (event) {
                     AudioPlayerEvent.PLAY -> isPlayingProperty.set(true)
-                    AudioPlayerEvent.COMPLETE, AudioPlayerEvent.PAUSE, AudioPlayerEvent.STOP -> isPlayingProperty.set(false)
+                    AudioPlayerEvent.COMPLETE, AudioPlayerEvent.PAUSE, AudioPlayerEvent.STOP -> isPlayingProperty.set(
+                        false
+                    )
 
                     else -> {}
                 }
@@ -261,7 +271,21 @@ class NarrationViewModel : ViewModel() {
                 chapter.getDraft()
             }.flatMap { it }
             .observeOnFx()
-            .subscribe { chunksList.add(it) }
+            .subscribe({ chunksList.add(it) }, {}, {
+                initializeTeleprompter()
+            })
+    }
+
+    fun initializeTeleprompter() {
+        narratableList.forEachIndexed { idx, chunk ->
+            if (chunk.state == NarrationTextItemState.RECORD_DISABLED) {
+                if (chunk.hasRecording) {
+                    chunk.state = NarrationTextItemState.RE_RECORD
+                }
+            }
+        }
+        narratableList.firstOrNull { !it.hasRecording }?.state = NarrationTextItemState.RECORD
+        refreshTeleprompter()
     }
 
     private fun setHasNextAndPreviousChapter(chapter: Chapter) {
@@ -630,5 +654,95 @@ class NarrationViewModel : ViewModel() {
 
     private fun refreshTeleprompter() {
         FX.eventbus.fire(RefreshTeleprompter)
+    }
+
+
+    fun handleEvent(event: FXEvent) {
+        when (event) {
+            is BeginRecordingEvent -> {
+                handleBeginRecording(event, narratableList)
+            }
+
+            is NextVerseEvent -> {
+                handleNextVerse(event, narratableList)
+            }
+
+            is PauseRecordingEvent -> {
+                handlePauseRecording(event, narratableList)
+            }
+
+            is ResumeRecordingEvent -> {
+                handleResumeRecording(event, narratableList)
+            }
+
+            is RecordVerseEvent -> {
+                handleRecordVerse(event, narratableList)
+            }
+
+            is RecordAgainEvent -> {
+                handleRecordAgain(event, narratableList)
+            }
+
+            is SaveRecordingEvent -> {
+                handleSaveRecording(event, narratableList)
+            }
+        }
+        refreshTeleprompter()
+    }
+
+    private fun handleBeginRecording(event: BeginRecordingEvent, narratableList: List<NarrationTextItemData>) {
+        val index = event.index
+//            narratableList.forEach {
+//                when (it.hasRecording) {
+//                    true -> it.state = NarrationTextItemState.RE_RECORD_DISABLED
+//                    false -> it.state = NarrationTextItemState.RECORD_DISABLED
+//                }
+//            }
+        narratableList[index].state = NarrationTextItemState.RECORD_ACTIVE
+    }
+
+    private fun handleNextVerse(event: NextVerseEvent, narratableList: List<NarrationTextItemData>) {
+        val index = event.index
+        narratableList.getOrNull(index - 1)?.let {
+            it.state = NarrationTextItemState.RE_RECORD
+        }
+
+        narratableList[index].state = when (isRecording) {
+            true -> NarrationTextItemState.RECORD_ACTIVE
+            false -> NarrationTextItemState.RECORD
+        }
+    }
+
+    private fun handlePauseRecording(event: PauseRecordingEvent, narratableList: List<NarrationTextItemData>) {
+        val index = event.index
+        val reRecording = narratableList[index].state == NarrationTextItemState.RE_RECORD_ACTIVE
+        narratableList[index].state = when (reRecording) {
+            true -> NarrationTextItemState.RE_RECORDING_PAUSED
+            false -> NarrationTextItemState.RECORDING_PAUSED
+        }
+    }
+
+    private fun handleResumeRecording(event: ResumeRecordingEvent, narratableList: List<NarrationTextItemData>) {
+        val index = event.index
+        val reRecording = narratableList[index].state == NarrationTextItemState.RE_RECORDING_PAUSED
+        narratableList[index].state = when (reRecording) {
+            true -> NarrationTextItemState.RE_RECORD_ACTIVE
+            false -> NarrationTextItemState.RECORD_ACTIVE
+        }
+    }
+
+    private fun handleRecordVerse(event: RecordVerseEvent, narratableList: List<NarrationTextItemData>) {
+        val index = event.index
+        narratableList[index].state = NarrationTextItemState.RECORD_ACTIVE
+    }
+
+    private fun handleRecordAgain(event: RecordAgainEvent, narratableList: List<NarrationTextItemData>) {
+        val index = event.index
+        narratableList[index].state = NarrationTextItemState.RE_RECORD_ACTIVE
+    }
+
+    private fun handleSaveRecording(event: SaveRecordingEvent, narratableList: List<NarrationTextItemData>) {
+        val index = event.index
+        narratableList[index].state = NarrationTextItemState.RE_RECORD
     }
 }
