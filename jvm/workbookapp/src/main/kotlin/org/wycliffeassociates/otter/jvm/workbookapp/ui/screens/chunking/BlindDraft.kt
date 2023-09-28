@@ -121,6 +121,7 @@ class BlindDraft : Fragment() {
                 recorderViewModel.cancel()
                 viewModel.onRecordFinish(RecorderViewModel.Result.CANCELLED)
                 mainSectionProperty.set(takesView)
+                hideSourceAudio.set(false)
             }
 
             setSaveAction {
