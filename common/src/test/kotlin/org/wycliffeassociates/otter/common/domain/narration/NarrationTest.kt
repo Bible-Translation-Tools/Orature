@@ -22,6 +22,7 @@ import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.file.Files
 import java.nio.file.Paths
+import kotlin.math.absoluteValue
 
 
 class NarrationTest {
@@ -192,6 +193,65 @@ class NarrationTest {
         byteBuffer.rewind()
     }
 
+    fun addNewVerseWithAudio(narration: Narration, verseIndex: Int, secondsOfAudio: Int) {
+        narration.onNewVerse(verseIndex)
+        // Defaults to adding the verseIndex as a byte, so I can have something to test
+        val bytesToAdd = ByteArray(44100 * 2 * secondsOfAudio) {verseIndex.toByte()}
+        addBytesToRecorderAudioStream(bytesToAdd)
+        narration.pauseRecording()
+    }
+
+
+    fun recordAndFinalizeVerses(narration: Narration, numVerses: Int, verseRecordingLength: Int) {
+        for(i in 0 until numVerses) {
+            addNewVerseWithAudio(narration, i, verseRecordingLength)
+            narration.finalizeVerse(i)
+        }
+    }
+
+    fun makeVerseEditFile(verseEditFile: File, verseRecordingLengthInSeconds: Int) {
+        val verseEditFileByteBuffer = ByteBuffer.allocate(44100 * verseRecordingLengthInSeconds * 2)
+
+        fillAudioBufferWithPadding(verseEditFileByteBuffer, verseRecordingLengthInSeconds, 0)
+        writeByteBufferToPCMFile(verseEditFileByteBuffer, verseEditFile)
+    }
+
+
+    fun checkBytesInFile(file: File, targetByte: Byte): Boolean {
+
+        if (!file.exists() || !file.isFile) {
+            throw IllegalArgumentException("The specified file does not exist or is not a regular file.")
+        }
+
+        var inputStream: FileInputStream? = null
+        var bytesRead = 0
+        try {
+            inputStream = FileInputStream(file)
+            var byteRead: Int
+            while (inputStream.read().also { byteRead = it } != -1) {
+                if (byteRead.toByte() != targetByte) {
+                    return false
+                }
+                bytesRead++
+            }
+
+            return true
+        } catch (e: IOException) {
+            // Handle any potential IO exceptions here
+            return false
+        } finally {
+            inputStream?.close()
+        }
+    }
+
+
+    @Test
+    fun `activeVerses test with no placed verses`() {
+        val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
+
+        Assert.assertEquals(0, narration.activeVerses.size)
+    }
+
 
     @Test
     fun `onNewVerse with index greater than totalVerses size`() {
@@ -226,17 +286,13 @@ class NarrationTest {
         val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
 
         Assert.assertEquals(false, narration.hasUndo())
+        Assert.assertEquals(0, narration.activeVerses.size)
         narration.onNewVerse(verseIndex)
+        Assert.assertEquals(1, narration.activeVerses.size)
+        Assert.assertEquals("orature-vm-1", narration.activeVerses[verseIndex].formattedLabel)
         Assert.assertEquals(true, narration.hasUndo())
     }
 
-
-    fun addNewVerseWithAudio(narration: Narration, verseIndex: Int, secondsOfAudio: Int) {
-        narration.onNewVerse(verseIndex)
-        // Defaults to adding the verseIndex as a byte, so I can have something to test against
-        addBytesToRecorderAudioStream(ByteArray(44100 * 2 * secondsOfAudio) {verseIndex.toByte()})
-        narration.pauseRecording()
-    }
 
     @Test
     fun `finalize with verseIndex equal to 0 and 10 seconds of scratch audio`() {
@@ -299,12 +355,6 @@ class NarrationTest {
 
 
 
-    fun recordAndFinalizeVerses(narration: Narration, numVerses: Int, verseRecordingLength: Int) {
-        for(i in 0 until numVerses) {
-            addNewVerseWithAudio(narration, i, verseRecordingLength)
-            narration.finalizeVerse(i)
-        }
-    }
 
     // TODO: add test for getTotalFrames
     @Test
@@ -412,14 +462,6 @@ class NarrationTest {
     }
 
 
-    fun makeVerseEditFile(verseEditFile: File, verseRecordingLength: Int) {
-        val verseEditFileByteBuffer = ByteBuffer.allocate(44100 * verseRecordingLength * 2)
-
-        fillAudioBufferWithPadding(verseEditFileByteBuffer, verseRecordingLength, 0)
-        writeByteBufferToPCMFile(verseEditFileByteBuffer, verseEditFile)
-    }
-
-
     // NOTE: this may indicate odd behavior because it allows us to place a verseMarker with no audio
     // corresponding to it.
     @Test
@@ -496,7 +538,7 @@ class NarrationTest {
         val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
         val totalRecordedVersesLength = 10
         val verseRecordingLength = 1
-        recordAndFinalizeVerses(narration, 10, verseRecordingLength)
+        recordAndFinalizeVerses(narration, totalRecordedVersesLength, verseRecordingLength)
 
         // Verify that 10 verseMarkers have been placed
         Assert.assertEquals(10, narration.activeVerses.size)
@@ -527,55 +569,143 @@ class NarrationTest {
     }
 
 
-    fun checkBytesInFile(file: File, targetByte: Byte): Boolean {
-
-        if (!file.exists() || !file.isFile) {
-            throw IllegalArgumentException("The specified file does not exist or is not a regular file.")
-        }
-
-        var inputStream: FileInputStream? = null
-
-        try {
-            inputStream = FileInputStream(file)
-            var byteRead: Int
-            while (inputStream.read().also { byteRead = it } != -1) {
-                if (byteRead.toByte() != targetByte) {
-                    return false
-                }
-            }
-            return true
-        } catch (e: IOException) {
-            // Handle any potential IO exceptions here
-            return false
-        } finally {
-            inputStream?.close()
-        }
-    }
-
-
-    // TODO: add test for getSectionAsFile
     @Test
     fun `getSectionAsFile non-empty activeVerses and valid index`() {
         val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
         val verseRecordingLength = 1
-        recordAndFinalizeVerses(narration, 10, verseRecordingLength)
+        recordAndFinalizeVerses(narration, 1, verseRecordingLength)
 
 
         val verseOneFile = narration.getSectionAsFile(0)
 
-        // TODO: verify that verse 1 has all zeros in it and has a size of 44100 * 2
-        val hasCorrectBytes = checkBytesInFile(verseEditFile, 0)
+        // Verify that the file has bytes equal to the verseIndex
+        val hasCorrectBytes = checkBytesInFile(verseOneFile, 0)
 
         Assert.assertTrue(hasCorrectBytes)
-        Assert.assertEquals(44100*2, verseEditFile.length())
+        // TODO: figure out why this is failing. Seems to always be 88214.
+        // Verify that the file representing the verse is of the correct size
+        Assert.assertEquals(44100*2, verseOneFile.length())
+    }
+
+
+    @Test
+    fun `onNewVerse, pauseRecording, finalizeVerse, onRecordAgain, undo, then redo`() {
+        val verseIndex = 0
+        val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
+
+        // Verify that no verses have been placed
+        Assert.assertEquals(0, narration.activeVerses.size)
+
+        // Add new verse
+        narration.onNewVerse(verseIndex)
+
+        // verify that only the expected verse has been placed
+        Assert.assertEquals(1, narration.activeVerses.size)
+        Assert.assertEquals("orature-vm-${verseIndex + 1}", narration.activeVerses[verseIndex].formattedLabel)
+
+        // Pause and finalize the recording for specified verse
+        addBytesToRecorderAudioStream(ByteArray(44100 * 2 * 1) {1})
+        narration.pauseRecording()
+        narration.finalizeVerse(verseIndex)
+        val originalRecordingSizeInFrames = 44100
+
+        // Verify that the audio for specified verse is one seconds long
+        Assert.assertEquals(originalRecordingSizeInFrames, narration.audioReader.totalFrames)
+
+        // Record again
+        narration.onRecordAgain(verseIndex)
+        addBytesToRecorderAudioStream(ByteArray(44100 * 2 * 5) {1})
+        val newRecordingSizeInFrames = 44100 * 5
+
+        // Pause and finalize recording
+        narration.pauseRecording()
+        narration.finalizeVerse(verseIndex)
+
+        // Verify that the specified verse is of the correct size
+        Assert.assertEquals(newRecordingSizeInFrames, narration.audioReader.totalFrames)
+
+        // undo
+        narration.undo()
+        Assert.assertEquals(originalRecordingSizeInFrames, narration.audioReader.totalFrames)
+
+        // redo
+        narration.redo()
+        Assert.assertEquals(newRecordingSizeInFrames, narration.audioReader.totalFrames)
+
     }
 
     @Test
-    fun `activeVerses test with no placed verses`() {
+    fun `record and finalize 10 verses, onVerseMarkerMoved, undo, then redo`() {
         val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
-        val verses = narration.activeVerses
 
-        Assert.assertEquals(0, narration.activeVerses.size)
+        // record and finalize 10 verses
+        recordAndFinalizeVerses(narration, 10, 1)
+
+        val verseIndexToMove = 4
+        val delta = 1000
+        val oldVerseLocation = narration.activeVerses[verseIndexToMove].location
+
+        // Move verse 5
+        narration.onVerseMarkerMoved(verseIndexToMove, 1000)
+
+        // Verify that the verse has been moved to the correct location
+        Assert.assertEquals(oldVerseLocation + delta, narration.activeVerses[verseIndexToMove].location)
+
+        narration.undo()
+
+        // Verify that the verse has been restored to its original location
+        Assert.assertEquals(oldVerseLocation, narration.activeVerses[verseIndexToMove].location)
+
+        narration.redo()
+
+        // Verify that the verse has been moved to the correct location
+        Assert.assertEquals(oldVerseLocation + delta, narration.activeVerses[verseIndexToMove].location)
+
     }
+
+
+    @Test
+    fun `record and finalize 10 verses, onEditVerse, undo, then redo`() {
+
+        val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
+
+        // record and finalize 10 verses
+        recordAndFinalizeVerses(narration, 10, 1)
+
+        val verseIndexToEdit = 4
+        val verseLengthInSecondsAfterEdit = 10
+        val verseLengthInSecondsBeforeEdit = 1
+
+        // Calculate the space between verse 5 and 6 before editing verse 5
+        val spaceBetweenEditedAndNextVerseBeforeEdit = narration.activeVerses[verseIndexToEdit + 1].location -
+                narration.activeVerses[verseIndexToEdit].location
+
+        // Calculate the space between verse 5 and 6 after editing verse 5
+        val spaceBetweenEditedAndNextVerseAfterEdit = narration.activeVerses[verseIndexToEdit + 1].location -
+                narration.activeVerses[verseIndexToEdit].location +
+                (verseLengthInSecondsBeforeEdit - verseLengthInSecondsAfterEdit).absoluteValue * 44100
+
+        // Edit verse
+        makeVerseEditFile(verseEditFile, verseLengthInSecondsAfterEdit)
+        narration.onEditVerse(verseIndexToEdit, verseEditFile)
+
+        // Verify that the space between verse 5 and 6 has changed correctly after edit
+        Assert.assertEquals(spaceBetweenEditedAndNextVerseAfterEdit,
+            narration.activeVerses[verseIndexToEdit + 1].location - narration.activeVerses[verseIndexToEdit].location)
+
+        narration.undo()
+
+        // Verify that the space between verse 5 and 6 has changed correctly after undo
+        Assert.assertEquals(spaceBetweenEditedAndNextVerseBeforeEdit,
+            narration.activeVerses[verseIndexToEdit + 1].location - narration.activeVerses[verseIndexToEdit].location)
+
+        narration.redo()
+
+        // Verify that the space between verse 5 and 6 has changed correctly after redo
+        Assert.assertEquals(spaceBetweenEditedAndNextVerseAfterEdit,
+            narration.activeVerses[verseIndexToEdit + 1].location - narration.activeVerses[verseIndexToEdit].location)
+    }
+
+
 
 }
