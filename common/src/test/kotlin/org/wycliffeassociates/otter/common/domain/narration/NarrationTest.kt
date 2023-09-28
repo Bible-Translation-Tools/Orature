@@ -363,7 +363,7 @@ class NarrationTest {
 
         // NOTE: the + 1 comes from how NewVerse is implemented. NewVerse calls addStart, which adds a sector with
         // a range of start <= .. <= start. This results in the additional frame being added, because that sector is not
-        // updated with the actual end value until after the frames are committed. 
+        // updated with the actual end value until after the frames are committed.
         Assert.assertEquals(DEFAULT_SAMPLE_RATE * secondsOfAudio + 1, totalFrames)
     }
 
@@ -721,5 +721,16 @@ class NarrationTest {
     }
 
 
+    @Test
+    fun `getLocationInFrames 1 second of uncommitted frames`() {
+        val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
+
+        // record and finalize 10 verses
+        val verseIndex = 0
+        val secondsOfAudio = 1
+        addNewVerseWithAudio(narration, verseIndex, secondsOfAudio)
+
+        Assert.assertEquals(DEFAULT_SAMPLE_RATE * secondsOfAudio, narration.getLocationInFrames())
+    }
 
 }
