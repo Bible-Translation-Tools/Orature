@@ -361,8 +361,10 @@ class NarrationTest {
 
         val totalFrames = narration.getTotalFrames()
 
-        // TODO: figure out what is causing this off by one and if it is a problem
-        Assert.assertEquals(DEFAULT_SAMPLE_RATE * secondsOfAudio, totalFrames)
+        // NOTE: the + 1 comes from how NewVerse is implemented. NewVerse calls addStart, which adds a sector with
+        // a range of start <= .. <= start. This results in the additional frame being added, because that sector is not
+        // updated with the actual end value until after the frames are committed. 
+        Assert.assertEquals(DEFAULT_SAMPLE_RATE * secondsOfAudio + 1, totalFrames)
     }
 
     @Test
