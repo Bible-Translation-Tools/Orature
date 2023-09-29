@@ -45,9 +45,7 @@ class BlindDraft : Fragment() {
                 managedWhen(visibleProperty())
             }
         }
-        center = stackpane {
-            bindSingleChild(mainSectionProperty)
-        }
+        centerProperty().bind(mainSectionProperty)
     }
 
     init {
