@@ -18,28 +18,60 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
+import javafx.beans.property.IntegerProperty
 import javafx.beans.value.ObservableValue
+import javafx.event.Event
 import javafx.event.EventHandler
+import javafx.event.EventTarget
 import javafx.scene.control.ListCell
+import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.jvm.controls.event.BeginRecordingEvent
+import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PauseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordingEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PlayVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
+import org.wycliffeassociates.otter.jvm.controls.event.RecordVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingEvent
+import org.wycliffeassociates.otter.jvm.controls.event.SaveRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItem
+import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItemState
 import tornadofx.FX
-import tornadofx.FXEvent
 import tornadofx.addClass
+
+class NarrationTextItemData(
+    val chunk: Chunk,
+    var marker: VerseMarker?,
+    var hasRecording: Boolean = false,
+    var previousChunksRecorded: Boolean = false,
+    var state: NarrationTextItemState = NarrationTextItemState.RECORD_DISABLED
+) {
+    override fun toString(): String {
+        return "${chunk.sort}, $hasRecording, $previousChunksRecorded"
+    }
+}
 
 class NarrationTextCell(
     private val nextChunkText: String,
     private val recordButtonTextProperty: ObservableValue<String>,
     private val isRecordingProperty: ObservableValue<Boolean>,
-    private val isRecordingAgainProperty: ObservableValue<Boolean>
-) : ListCell<Chunk>() {
+    private val isRecordingAgainProperty: ObservableValue<Boolean>,
+    private val isPlayingProperty: ObservableValue<Boolean>,
+    private val recordingIndexProperty: IntegerProperty,
+    private val playingVerseProperty: IntegerProperty
+) : ListCell<NarrationTextItemData>() {
+
+    private val logger = LoggerFactory.getLogger(NarrationTextCell::class.java)
+
     private val view = NarrationTextItem()
 
     init {
         addClass("narration-list__verse-cell")
     }
 
-    override fun updateItem(item: Chunk?, empty: Boolean) {
+    override fun updateItem(item: NarrationTextItemData?, empty: Boolean) {
         super.updateItem(item, empty)
 
         if (empty || item == null) {
@@ -53,19 +85,25 @@ class NarrationTextCell(
         view.isLastVerseProperty.set(isLast)
 
         graphic = view.apply {
-            verseLabelProperty.set(item.title)
-            verseTextProperty.set(item.textItem.text)
+            verseLabelProperty.set(item.chunk.title)
+            verseTextProperty.set(item.chunk.textItem.text)
 
+            logger.info("Item $index hasRecording: ${item.hasRecording}")
+
+            hasRecordingProperty.set(item.hasRecording)
             recordButtonTextProperty.bind(this@NarrationTextCell.recordButtonTextProperty)
             isRecordingProperty.bind(this@NarrationTextCell.isRecordingProperty)
             isRecordingAgainProperty.bind(this@NarrationTextCell.isRecordingAgainProperty)
+            isPlayingProperty.bind(this@NarrationTextCell.isPlayingProperty)
+            playingVerseIndexProperty.bind(this@NarrationTextCell.playingVerseProperty)
+            indexProperty.set(index)
             nextChunkTextProperty.set(nextChunkText)
 
-            onRecordActionProperty.set(EventHandler {
-                FX.eventbus.fire(RecordVerseEvent(index, item))
+            onRecordActionProperty.set(DebouncedEventHandler {
+                FX.eventbus.fire(RecordVerseEvent(index, item.chunk))
             })
 
-            onNextVerseActionProperty.set(EventHandler  {
+            onNextVerseActionProperty.set(DebouncedEventHandler {
                 listView.apply {
                     selectionModel.selectNext()
 
@@ -75,12 +113,56 @@ class NarrationTextCell(
                     // than the text needed to actively be narrated being off the screen.
                     scrollTo(selectionModel.selectedIndex - 1)
 
-                    FX.eventbus.fire(NextVerseEvent(selectionModel.selectedIndex, selectionModel.selectedItem))
+                    FX.eventbus.fire(NextVerseEvent(selectionModel.selectedIndex, selectionModel.selectedItem.chunk))
                 }
             })
+
+            onRecordAgainActionProperty.set(DebouncedEventHandler {
+                FX.eventbus.fire(RecordAgainEvent(index))
+            })
+
+            onPlayActionProperty.set(DebouncedEventHandler {
+                item.marker?.let {
+                    FX.eventbus.fire(PlayVerseEvent(it))
+                }
+            })
+
+            onPauseActionProperty.set(DebouncedEventHandler {
+                item.marker?.let {
+                    FX.eventbus.fire(PauseEvent())
+                }
+            })
+
+            onSaveRecordingActionProperty.set(DebouncedEventHandler {
+                FX.eventbus.fire(SaveRecordingEvent(index))
+            })
+
+            onBeginRecordingAction.set(DebouncedEventHandler {
+                FX.eventbus.fire(BeginRecordingEvent(index, item.chunk))
+            })
+
+            onPauseRecordingAction.set(DebouncedEventHandler {
+                FX.eventbus.fire(PauseRecordingEvent(index, item.chunk))
+            })
+
+            onResumeRecordingAction.set(DebouncedEventHandler {
+                FX.eventbus.fire(ResumeRecordingEvent(index, item.chunk))
+            })
+
+            stateProperty.set(item.state)
         }
     }
-}
 
-class NextVerseEvent(val index: Int, val chunk: Chunk) : FXEvent()
-class RecordVerseEvent(val index: Int, val chunk: Chunk) : FXEvent()
+    private inline fun <T : Event> DebouncedEventHandler(crossinline op: () -> Unit): EventHandler<T> {
+        return EventHandler {
+            if (System.currentTimeMillis() - timeOfLastAction > 500L) {
+                timeOfLastAction = System.currentTimeMillis()
+                op.invoke()
+            }
+        }
+    }
+
+    companion object {
+        var timeOfLastAction = System.currentTimeMillis()
+    }
+}

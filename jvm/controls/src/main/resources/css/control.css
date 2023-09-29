@@ -212,6 +212,18 @@
     -fx-icon-color: -wa-white;
 }
 
+.btn--secondary:inactive {
+    -fx-background-color: #E5E8EB;
+    -fx-border-width: 0;
+}
+.btn--secondary:inactive .text {
+    -fx-fill: #66768B;
+    -fx-text-fill: #66768B;
+}
+.btn--secondary:inactive .ikonli-font-icon {
+    -fx-icon-color: #66768B;
+}
+
 .btn--secondary-light {
     -fx-text-fill: -wa-white;
     -fx-border-color: -wa-white;

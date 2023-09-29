@@ -197,7 +197,7 @@ internal class ChapterRepresentation(
             }
         }
 
-        logger.error("RelativeToAbsolute did not resolve before iterating over active verses. Relative index: ${relativeIdx}")
+        // logger.error("RelativeToAbsolute did not resolve before iterating over active verses. Relative index: ${relativeIdx}")
         return if (verses.isNotEmpty()) verses.last().lastFrame() else scratchAudio.totalFrames
     }
 

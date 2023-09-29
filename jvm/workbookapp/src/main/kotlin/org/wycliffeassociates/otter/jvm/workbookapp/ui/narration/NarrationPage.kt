@@ -3,15 +3,27 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 import com.github.thomasnield.rxkotlinfx.toLazyBinding
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
+import javafx.scene.paint.Color
 import javafx.util.Duration
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
+import org.wycliffeassociates.otter.jvm.controls.event.BeginRecordingEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ChapterReturnFromPluginEvent
+import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.OpenChapterEvent
+import org.wycliffeassociates.otter.jvm.controls.event.OpenInAudioPluginEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PauseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordingEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PlayChapterEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PlayVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
+import org.wycliffeassociates.otter.jvm.controls.event.RecordVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingEvent
+import org.wycliffeassociates.otter.jvm.controls.event.SaveRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NextVerseEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.RecordVerseEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.NarrationMarkerChangedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationRedoEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationResetChapterEvent
@@ -59,6 +71,10 @@ class NarrationPage : View() {
         borderpane {
             top = narrationHeader.root
             center = borderpane {
+                style {
+                    padding = box(0.px, 0.px, 1.px, 0.px)
+                    backgroundColor += Color.WHITE
+                }
                 center = audioWorkspaceView.root
                 bottom = narrationToolbar.root
             }
@@ -110,6 +126,22 @@ class NarrationPage : View() {
 
         subscribe<RecordVerseEvent> {
             viewModel.toggleRecording(it.index)
+            viewModel.handleEvent(it)
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<BeginRecordingEvent> {
+            viewModel.toggleRecording(it.index)
+            viewModel.handleEvent(it)
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<PauseRecordingEvent> {
+            viewModel.toggleRecording(it.index)
+            viewModel.handleEvent(it)
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<ResumeRecordingEvent> {
+            viewModel.toggleRecording(it.index)
+            viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<NarrationMarkerChangedEvent> {
@@ -119,6 +151,7 @@ class NarrationPage : View() {
 
         subscribe<NextVerseEvent> {
             viewModel.onNext(it.index)
+            viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<PlayVerseEvent> {
@@ -130,11 +163,17 @@ class NarrationPage : View() {
         }.let { eventSubscriptions.add(it) }
 
         subscribe<PauseEvent> {
-            viewModel.pause()
+            viewModel.pausePlayback()
         }.let { eventSubscriptions.add(it) }
 
         subscribe<RecordAgainEvent> {
             viewModel.recordAgain(it.index)
+            viewModel.handleEvent(it)
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<SaveRecordingEvent> {
+            viewModel.saveRecording(it.index)
+            viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<OpenInAudioPluginEvent> {
