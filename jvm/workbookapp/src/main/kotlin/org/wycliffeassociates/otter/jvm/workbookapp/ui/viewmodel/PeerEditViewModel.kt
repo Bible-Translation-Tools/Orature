@@ -35,6 +35,8 @@ class PeerEditViewModel : ViewModel() {
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
     val translationViewModel: TranslationViewModel2 by inject()
+    val blindDraftViewModel: BlindDraftViewModel by inject()
+    val recorderViewModel: RecorderViewModel by inject()
 
     val chunkTitleProperty = workbookDataStore.activeChunkTitleBinding()
     val currentChunkProperty = SimpleObjectProperty<Chunk>()
@@ -54,6 +56,7 @@ class PeerEditViewModel : ViewModel() {
     private var targetTotalFrames: Int = 0 // beware of divided by 0
 
     private var audioController: AudioPlayerController? = null
+    private val newTakeProperty = SimpleObjectProperty<Take>(null)
     private val builder = ObservableWaveformBuilder()
     private var imageWidthProperty = SimpleDoubleProperty(0.0)
     private val height = Integer.min(Screen.getMainScreen().platformHeight, 500)
@@ -105,6 +108,24 @@ class PeerEditViewModel : ViewModel() {
 
     fun seek(location: Int) {
         audioController?.seek(location)
+    }
+
+    fun onRecordNew() {
+        blindDraftViewModel.newTakeFile()
+            .observeOnFx()
+            .subscribe { take ->
+                newTakeProperty.set(take)
+                recorderViewModel.targetFileProperty.set(take.file)
+            }
+    }
+
+    fun onRecordFinish(result: RecorderViewModel.Result) {
+        if (result == RecorderViewModel.Result.SUCCESS) {
+            workbookDataStore.chunk?.audio?.insertTake(newTakeProperty.value)
+        } else {
+            newTakeProperty.value?.file?.delete()
+            newTakeProperty.set(null)
+        }
     }
 
     fun pixelsInHighlight(controlWidth: Double): Double {

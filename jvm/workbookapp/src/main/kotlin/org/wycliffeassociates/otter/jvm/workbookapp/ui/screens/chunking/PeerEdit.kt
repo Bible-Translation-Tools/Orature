@@ -3,8 +3,11 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
+import javafx.beans.property.SimpleObjectProperty
+import javafx.scene.Node
 import javafx.scene.control.Slider
 import javafx.scene.layout.Priority
+import javafx.scene.layout.VBox
 import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
@@ -14,6 +17,7 @@ import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.ScrollingWaveform
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.PeerEditViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 
@@ -21,9 +25,14 @@ class PeerEdit : Fragment() {
 
     val viewModel: PeerEditViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
+    val recorderViewModel: RecorderViewModel by inject()
 
     private lateinit var slider: Slider
     private lateinit var waveform: ScrollingWaveform
+
+    private val mainSectionProperty = SimpleObjectProperty<Node>(null)
+    private val playbackView = createPlaybackView()
+    private val recordingView = createRecordingView()
 
     override val root = borderpane {
         top = vbox {
@@ -35,32 +44,20 @@ class PeerEdit : Fragment() {
                 sideTextProperty.set(messages["sourceAudio"])
             }
         }
-        center = vbox {
-            waveform = ScrollingWaveform().apply {
-                themeProperty.bind(settingsViewModel.appColorMode)
-                positionProperty.bind(viewModel.positionProperty)
-                clip = Rectangle().apply {
-                    widthProperty().bind(this@vbox.widthProperty())
-                    heightProperty().bind(this@vbox.heightProperty())
-                }
-                setOnWaveformClicked { viewModel.pause() }
-                setOnWaveformDragReleased { deltaPos ->
-                    val deltaFrames = pixelsToFrames(deltaPos)
-                    val curFrames = viewModel.getLocationInFrames()
-                    val duration = viewModel.getDurationInFrames()
-                    val final = Utils.clamp(0, curFrames - deltaFrames, duration)
-                    viewModel.seek(final)
-                }
+        centerProperty().bind(mainSectionProperty)
+    }
 
-                viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
-                viewModel.cleanUpWaveform = ::freeImages
-            }
-            slider = createAudioScrollbarSlider()
-            viewModel.slider = slider
-            add(waveform)
-            add(slider)
+    private fun createPlaybackView() = VBox().apply {
+        val container = this
+        waveform = createPlaybackWaveform(container)
+        add(waveform)
+
+        val scrollbarSlider = createAudioScrollbarSlider().also {
+            viewModel.slider = it
         }
-        bottom = hbox {
+        add(scrollbarSlider)
+
+        hbox {
             addClass("consume__bottom", "recording__bottom-section")
             button {
                 addClass("btn", "btn--primary", "consume__btn")
@@ -96,11 +93,60 @@ class PeerEdit : Fragment() {
                 addClass("btn", "btn--secondary")
                 graphic = FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE)
 
-                disableWhen { viewModel.isPlayingProperty.not() }
+                disableWhen { viewModel.isPlayingProperty }
 
                 action {
-
+                    viewModel.onRecordNew()
+                    mainSectionProperty.set(recordingView)
+                    recorderViewModel.onViewReady(container.width.toInt()) // use the width of the existing component
+                    recorderViewModel.toggle()
                 }
+            }
+        }
+    }
+
+    private fun createPlaybackWaveform(container: VBox): ScrollingWaveform {
+        return ScrollingWaveform().apply {
+            themeProperty.bind(settingsViewModel.appColorMode)
+            positionProperty.bind(viewModel.positionProperty)
+            clip = Rectangle().apply {
+                widthProperty().bind(container.widthProperty())
+                heightProperty().bind(container.heightProperty())
+            }
+            setOnWaveformClicked { viewModel.pause() }
+            setOnWaveformDragReleased { deltaPos ->
+                val deltaFrames = pixelsToFrames(deltaPos)
+                val curFrames = viewModel.getLocationInFrames()
+                val duration = viewModel.getDurationInFrames()
+                val final = Utils.clamp(0, curFrames - deltaFrames, duration)
+                viewModel.seek(final)
+            }
+
+            viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
+            viewModel.cleanUpWaveform = ::freeImages
+        }
+    }
+
+    private fun createRecordingView(): RecordingSection {
+        return RecordingSection().apply {
+            recorderViewModel.waveformCanvas = waveformCanvas
+            recorderViewModel.volumeCanvas = volumeCanvas
+            isRecordingProperty.bind(recorderViewModel.recordingProperty)
+
+            setToggleRecordingAction {
+                recorderViewModel.toggle()
+            }
+
+            setCancelAction {
+                recorderViewModel.cancel()
+                viewModel.onRecordFinish(RecorderViewModel.Result.CANCELLED)
+                mainSectionProperty.set(playbackView)
+            }
+
+            setSaveAction {
+                val result = recorderViewModel.saveAndQuit()
+                viewModel.onRecordFinish(result)
+                mainSectionProperty.set(playbackView)
             }
         }
     }
@@ -108,6 +154,7 @@ class PeerEdit : Fragment() {
     override fun onDock() {
         super.onDock()
         viewModel.dockPeerEdit()
+        mainSectionProperty.set(playbackView)
     }
 
     override fun onUndock() {

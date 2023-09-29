@@ -164,7 +164,7 @@ class BlindDraftViewModel : ViewModel() {
         }
     }
 
-    private fun newTakeFile(): Single<Take> {
+    fun newTakeFile(): Single<Take> {
         return workbookDataStore.chunk!!.let { chunk ->
             val namer = getFileNamer(chunk)
             val chapter = namer.formatChapterNumber()

@@ -87,5 +87,4 @@
 .audio-scroll-bar__track {
     -fx-min-height: 16;
     -fx-alignment: center-left;
-    -fx-padding: 2;
 }
