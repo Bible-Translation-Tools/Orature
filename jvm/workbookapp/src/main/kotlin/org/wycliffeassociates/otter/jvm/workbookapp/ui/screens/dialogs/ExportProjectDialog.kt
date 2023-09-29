@@ -13,7 +13,9 @@ import org.wycliffeassociates.otter.jvm.controls.model.ChapterDescriptor
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportType
 import org.wycliffeassociates.otter.jvm.controls.button.cardRadioButton
+import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.dialog.OtterDialog
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview.ExportProjectTableView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview.exportProjectTableView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportEvent
 import tornadofx.*
@@ -27,6 +29,7 @@ class ExportProjectDialog : OtterDialog() {
     private val exportTypeProperty = SimpleObjectProperty<ExportType>(ExportType.BACKUP)
     private val selectedChapters = observableSetOf<ChapterDescriptor>()
     private val onCloseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    private lateinit var tableView: ExportProjectTableView
 
     private val content = VBox().apply {
         addClass("confirm-dialog", "export-project-dialog")
@@ -65,11 +68,8 @@ class ExportProjectDialog : OtterDialog() {
                             titleProperty.set(messages["backup"])
                             selectedProperty().onChange {
                                 if (it) {
-                                    subTitleProperty.set(messages["exportBackupDescription"])
                                     exportTypeProperty.set(ExportType.BACKUP)
                                     onSelectExportType(ExportType.BACKUP)
-                                } else {
-                                    subTitleProperty.set("")
                                 }
                             }
                             isSelected = true
@@ -78,11 +78,8 @@ class ExportProjectDialog : OtterDialog() {
                             titleProperty.set(messages["sourceAudio"])
                             selectedProperty().onChange {
                                 if (it) {
-                                    subTitleProperty.set(messages["exportSourceAudioDescription"])
                                     exportTypeProperty.set(ExportType.SOURCE_AUDIO)
                                     onSelectExportType(ExportType.SOURCE_AUDIO)
-                                } else {
-                                    subTitleProperty.set("")
                                 }
                             }
                         }
@@ -90,11 +87,8 @@ class ExportProjectDialog : OtterDialog() {
                             titleProperty.set(messages["listen"])
                             selectedProperty().onChange {
                                 if (it) {
-                                    subTitleProperty.set(messages["exportListenDescription"])
                                     exportTypeProperty.set(ExportType.LISTEN)
                                     onSelectExportType(ExportType.LISTEN)
-                                } else {
-                                    subTitleProperty.set("")
                                 }
                             }
                         }
@@ -102,18 +96,17 @@ class ExportProjectDialog : OtterDialog() {
                             titleProperty.set(messages["publish"])
                             selectedProperty().onChange {
                                 if (it) {
-                                    subTitleProperty.set(messages["exportPublishDescription"])
                                     exportTypeProperty.set(ExportType.PUBLISH)
                                     onSelectExportType(ExportType.PUBLISH)
-                                } else {
-                                    subTitleProperty.set("")
                                 }
                             }
                         }
                     }
                 }
 
-                center = exportProjectTableView(chapters, selectedChapters)
+                center = exportProjectTableView(chapters, selectedChapters) {
+                    tableView = this
+                }
             }
         }
 
@@ -161,6 +154,7 @@ class ExportProjectDialog : OtterDialog() {
     override fun onDock() {
         super.onDock()
         onSelectExportType(ExportType.BACKUP) // selects default option
+        tableView.customizeScrollbarSkin()
     }
 
     fun setOnCloseAction(op: () -> Unit) {
