@@ -54,7 +54,9 @@ class TeleprompterViewModel : ViewModel() {
     val playingVerseProperty = SimpleIntegerProperty()
 
     init {
-        chunks.bind(narrationViewModel.narratableList) { it }
+        chunks.bind(narrationViewModel.narratableList) {
+            it
+        }
 
         recordStartProperty.bindBidirectional(narrationViewModel.recordStartProperty)
         recordResumeProperty.bindBidirectional(narrationViewModel.recordResumeProperty)
@@ -111,18 +113,6 @@ class TeleprompterView : View() {
     private val subscriptions = mutableListOf<EventRegistration>()
 
     init {
-        /*subscribe<WaveformClickedEvent> {
-            listView.apply {
-                selectionModel.select(it.index)
-                scrollTo(it.index)
-            }
-        }*/
-
-//        Observable
-//            .interval(1L, TimeUnit.SECONDS)
-//            .observeOnFx()
-//            .subscribe { listView.refresh() }
-
         subscribe<RefreshTeleprompter> {
             listView.refresh()
         }

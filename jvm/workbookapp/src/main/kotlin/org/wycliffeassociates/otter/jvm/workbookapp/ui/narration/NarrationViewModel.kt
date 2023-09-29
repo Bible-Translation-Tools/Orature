@@ -15,6 +15,7 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
+import javafx.util.Duration
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
@@ -147,7 +148,7 @@ class NarrationViewModel : ViewModel() {
             narratableList.forEachIndexed { idx, chunk ->
                 chunk.hasRecording = recordedVerses.any {
                     val matchingChunk = chunk.chunk.title == it.label
-                    recordingVerseIndex.value != idx && matchingChunk
+                    matchingChunk
                 }
                 chunk.previousChunksRecorded = chunk.chunk.sort - 1 <= recordedVerses.size
                 chunk.marker = recordedVerses.getOrNull(idx)
@@ -417,12 +418,12 @@ class NarrationViewModel : ViewModel() {
         recordResume = false
         recordPause = false
 
+        initializeTeleprompter()
         refreshTeleprompter()
     }
 
     fun undo() {
         narration.undo()
-
         recordPause = false
 
         refreshTeleprompter()
@@ -430,7 +431,6 @@ class NarrationViewModel : ViewModel() {
 
     fun redo() {
         narration.redo()
-
         recordPause = false
 
         refreshTeleprompter()
@@ -692,12 +692,6 @@ class NarrationViewModel : ViewModel() {
 
     private fun handleBeginRecording(event: BeginRecordingEvent, narratableList: List<NarrationTextItemData>) {
         val index = event.index
-//            narratableList.forEach {
-//                when (it.hasRecording) {
-//                    true -> it.state = NarrationTextItemState.RE_RECORD_DISABLED
-//                    false -> it.state = NarrationTextItemState.RECORD_DISABLED
-//                }
-//            }
         narratableList[index].state = NarrationTextItemState.RECORD_ACTIVE
     }
 

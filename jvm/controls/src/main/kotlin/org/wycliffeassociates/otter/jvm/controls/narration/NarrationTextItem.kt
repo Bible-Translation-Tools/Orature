@@ -82,6 +82,7 @@ class NarrationTextItem : VBox() {
     val onSaveRecordingActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onNextVerseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onPlayActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val onPauseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     val isPlayingProperty = SimpleBooleanProperty(false)
     val isPlaying by isPlayingProperty
@@ -91,24 +92,31 @@ class NarrationTextItem : VBox() {
         hbox {
             styleClass.setAll("narration-list__verse-item")
             borderpane {
-                center = narration_button {
-                    addClass("btn", "btn--secondary")
-                    graphicProperty().bind(objectBinding(isPlayingProperty, playingVerseIndexProperty) {
-                        when (isPlaying && indexProperty.value.equals(playingVerseIndexProperty.value)) {
-                            true -> {
-                                FontIcon(MaterialDesign.MDI_PAUSE)
-                            }
-
-                            false -> FontIcon(MaterialDesign.MDI_PLAY)
+                center = stackpane {
+                    button {
+                        addClass("btn", "btn--secondary")
+                        graphic = FontIcon(MaterialDesign.MDI_PLAY)
+                        disableWhen {
+                            hasRecordingProperty.not()
                         }
-                    })
-                    disableWhen {
-                        hasRecordingProperty.not()
+                        disabledProperty().onChangeAndDoNow {
+                            togglePseudoClass("inactive", it!!)
+                        }
+                        onActionProperty().bind(onPlayActionProperty)
+                        visibleProperty().bind(isPlayingProperty.not())
                     }
-                    disabledProperty().onChangeAndDoNow {
-                        togglePseudoClass("inactive", it!!)
+                    button {
+                        addClass("btn", "btn--secondary")
+                        graphic = FontIcon(MaterialDesign.MDI_PAUSE)
+                        disableWhen {
+                            hasRecordingProperty.not()
+                        }
+                        disabledProperty().onChangeAndDoNow {
+                            togglePseudoClass("inactive", it!!)
+                        }
+                        onActionProperty().bind(onPauseActionProperty)
+                        visibleProperty().bind(isPlayingProperty.and(playingVerseIndexProperty.eq(indexProperty)))
                     }
-                    onActionProperty().bind(onPlayActionProperty)
                 }
             }
             hbox {

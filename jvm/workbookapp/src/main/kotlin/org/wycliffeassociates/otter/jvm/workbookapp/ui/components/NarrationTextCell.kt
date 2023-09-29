@@ -20,13 +20,16 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
 import javafx.beans.property.IntegerProperty
 import javafx.beans.value.ObservableValue
+import javafx.event.Event
 import javafx.event.EventHandler
+import javafx.event.EventTarget
 import javafx.scene.control.ListCell
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.jvm.controls.event.BeginRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PauseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PlayVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
@@ -85,6 +88,8 @@ class NarrationTextCell(
             verseLabelProperty.set(item.chunk.title)
             verseTextProperty.set(item.chunk.textItem.text)
 
+            logger.info("Item $index hasRecording: ${item.hasRecording}")
+
             hasRecordingProperty.set(item.hasRecording)
             recordButtonTextProperty.bind(this@NarrationTextCell.recordButtonTextProperty)
             isRecordingProperty.bind(this@NarrationTextCell.isRecordingProperty)
@@ -94,11 +99,11 @@ class NarrationTextCell(
             indexProperty.set(index)
             nextChunkTextProperty.set(nextChunkText)
 
-            onRecordActionProperty.set(EventHandler {
+            onRecordActionProperty.set(DebouncedEventHandler {
                 FX.eventbus.fire(RecordVerseEvent(index, item.chunk))
             })
 
-            onNextVerseActionProperty.set(EventHandler {
+            onNextVerseActionProperty.set(DebouncedEventHandler {
                 listView.apply {
                     selectionModel.selectNext()
 
@@ -112,34 +117,52 @@ class NarrationTextCell(
                 }
             })
 
-            onRecordAgainActionProperty.set(EventHandler {
+            onRecordAgainActionProperty.set(DebouncedEventHandler {
                 FX.eventbus.fire(RecordAgainEvent(index))
             })
 
-            onPlayActionProperty.set(EventHandler {
+            onPlayActionProperty.set(DebouncedEventHandler {
                 item.marker?.let {
-                    logger.info("Playing verse index $it")
                     FX.eventbus.fire(PlayVerseEvent(it))
                 }
             })
 
-            onSaveRecordingActionProperty.set(EventHandler {
+            onPauseActionProperty.set(DebouncedEventHandler {
+                item.marker?.let {
+                    FX.eventbus.fire(PauseEvent())
+                }
+            })
+
+            onSaveRecordingActionProperty.set(DebouncedEventHandler {
                 FX.eventbus.fire(SaveRecordingEvent(index))
             })
 
-            onBeginRecordingAction.set(EventHandler {
+            onBeginRecordingAction.set(DebouncedEventHandler {
                 FX.eventbus.fire(BeginRecordingEvent(index, item.chunk))
             })
 
-            onPauseRecordingAction.set(EventHandler {
+            onPauseRecordingAction.set(DebouncedEventHandler {
                 FX.eventbus.fire(PauseRecordingEvent(index, item.chunk))
             })
 
-            onResumeRecordingAction.set(EventHandler {
+            onResumeRecordingAction.set(DebouncedEventHandler {
                 FX.eventbus.fire(ResumeRecordingEvent(index, item.chunk))
             })
 
             stateProperty.set(item.state)
         }
+    }
+
+    private inline fun <T : Event> DebouncedEventHandler(crossinline op: () -> Unit): EventHandler<T> {
+        return EventHandler {
+            if (System.currentTimeMillis() - timeOfLastAction > 500L) {
+                timeOfLastAction = System.currentTimeMillis()
+                op.invoke()
+            }
+        }
+    }
+
+    companion object {
+        var timeOfLastAction = System.currentTimeMillis()
     }
 }
