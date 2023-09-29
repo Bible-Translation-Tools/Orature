@@ -26,6 +26,8 @@ import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.event.EventTarget
 import javafx.geometry.Pos
+import javafx.scene.Node
+import javafx.scene.control.Button
 import javafx.scene.layout.Region
 import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
@@ -89,7 +91,7 @@ class NarrationTextItem : VBox() {
         hbox {
             styleClass.setAll("narration-list__verse-item")
             borderpane {
-                center = button {
+                center = narration_button {
                     addClass("btn", "btn--secondary")
                     graphicProperty().bind(objectBinding(isPlayingProperty, playingVerseIndexProperty) {
                         when (isPlaying && indexProperty.value.equals(playingVerseIndexProperty.value)) {
@@ -127,7 +129,7 @@ class NarrationTextItem : VBox() {
                 hbox {
                     // BEGIN RECORDING
                     alignment = Pos.CENTER
-                    button {
+                    narration_button {
                         alignment = Pos.CENTER
                         prefWidth = 316.0
                         styleClass.clear()
@@ -141,7 +143,7 @@ class NarrationTextItem : VBox() {
                 hbox {
                     // RECORD
                     alignment = Pos.CENTER
-                    button {
+                    narration_button {
                         alignment = Pos.CENTER
                         prefWidth = 316.0
                         styleClass.clear()
@@ -156,7 +158,7 @@ class NarrationTextItem : VBox() {
                     // RECORD_ACTIVE
                     alignment = Pos.CENTER
                     spacing = 16.0
-                    button {
+                    narration_button {
                         prefWidth = 150.0
                         addClass("btn", "btn--secondary")
                         addPseudoClass("active")
@@ -164,7 +166,7 @@ class NarrationTextItem : VBox() {
                         graphic = FontIcon(MaterialDesign.MDI_PAUSE)
                         onActionProperty().bind(onPauseRecordingAction)
                     }
-                    button {
+                    narration_button {
                         prefWidth = 150.0
                         addClass("btn", "btn--secondary")
                         graphic = FontIcon(MaterialDesign.MDI_ARROW_DOWN)
@@ -198,14 +200,14 @@ class NarrationTextItem : VBox() {
                     // RECORDING PAUSED
                     alignment = Pos.CENTER
                     spacing = 16.0
-                    button {
+                    narration_button {
                         prefWidth = 150.0
                         addClass("btn", "btn--primary")
                         text = FX.messages["resume"]
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                         onActionProperty().bind(onResumeRecordingAction)
                     }
-                    button {
+                    narration_button {
                         prefWidth = 150.0
                         addClass("btn", "btn--secondary")
                         graphic = FontIcon(MaterialDesign.MDI_ARROW_DOWN)
@@ -238,7 +240,7 @@ class NarrationTextItem : VBox() {
                 hbox {
                     // RECORD_DISABLED
                     alignment = Pos.CENTER
-                    button {
+                    narration_button {
                         alignment = Pos.CENTER
                         prefWidth = 316.0
                         styleClass.clear()
@@ -253,7 +255,7 @@ class NarrationTextItem : VBox() {
                 hbox {
                     // RE_RECORD
                     alignment = Pos.CENTER
-                    button {
+                    narration_button {
                         alignment = Pos.CENTER
                         prefWidth = 316.0
                         styleClass.clear()
@@ -267,7 +269,7 @@ class NarrationTextItem : VBox() {
                 hbox {
                     // RE_RECORD_DISABLED
                     alignment = Pos.CENTER
-                    button {
+                    narration_button {
                         alignment = Pos.CENTER
                         prefWidth = 316.0
                         styleClass.clear()
@@ -283,7 +285,7 @@ class NarrationTextItem : VBox() {
                     // RE_RECORD_ACTIVE
                     alignment = Pos.CENTER
                     spacing = 16.0
-                    button {
+                    narration_button {
                         addClass("btn", "btn--secondary")
                         addPseudoClass("active")
                         text = FX.messages["pause"]
@@ -292,7 +294,7 @@ class NarrationTextItem : VBox() {
                             onActionProperty().bind(onPauseRecordingAction)
                         }
                     }
-                    button {
+                    narration_button {
                         prefWidth = 150.0
                         addClass("btn", "btn--primary")
                         text = FX.messages["save"]
@@ -305,7 +307,7 @@ class NarrationTextItem : VBox() {
                     // RE_RECORD_ACTIVE
                     alignment = Pos.CENTER
                     spacing = 16.0
-                    button {
+                    narration_button {
                         addClass("btn", "btn--secondary")
                         text = FX.messages["resume"]
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
@@ -313,7 +315,7 @@ class NarrationTextItem : VBox() {
                             onActionProperty().bind(onResumeRecordingAction)
                         }
                     }
-                    button {
+                    narration_button {
                         prefWidth = 150.0
                         addClass("btn", "btn--primary")
                         text = FX.messages["save"]
@@ -325,6 +327,30 @@ class NarrationTextItem : VBox() {
             }
 
 //             disableProperty().bind(isSelectedProperty.not())
+        }
+    }
+
+    private fun EventTarget.narration_button(
+        text: String = "",
+        graphic: Node? = null,
+        op: Button.() -> Unit = {}
+    ): Button {
+        return Button(text).attachTo(this, op) {
+            it.disableWhen {
+                isPlayingProperty.or(
+                    isRecordingProperty.and(
+                        stateProperty.isNotEqualTo(NarrationTextItemState.RECORD_ACTIVE)
+                            .and(
+                                stateProperty.isNotEqualTo(NarrationTextItemState.RE_RECORD_ACTIVE)
+                            ).and(
+                                stateProperty.isNotEqualTo(NarrationTextItemState.RE_RECORDING_PAUSED)
+                            ).and(
+                                stateProperty.isNotEqualTo(NarrationTextItemState.RECORDING_PAUSED)
+                            )
+                    )
+                )
+            }
+            if (graphic != null) it.graphic = graphic
         }
     }
 }
