@@ -23,7 +23,7 @@ import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import java.io.File
 import java.time.LocalDate
 
-data class Take(
+class Take(
     val name: String,
     val file: File,
     val number: Int,

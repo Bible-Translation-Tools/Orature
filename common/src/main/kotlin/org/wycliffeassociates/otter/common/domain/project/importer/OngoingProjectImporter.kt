@@ -333,7 +333,7 @@ class OngoingProjectImporter @Inject constructor(
         val factory = JsonFactory()
         factory.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET)
         val mapper = ObjectMapper(factory)
-        mapper.registerModule(KotlinModule())
+        mapper.registerKotlinModule()
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
         val chunks = mutableMapOf<Int, List<Content>>()
@@ -370,7 +370,7 @@ class OngoingProjectImporter @Inject constructor(
         } else {
             try {
                 fileReader.stream(RcConstants.CHUNKS_FILE).let { input ->
-                    val mapper = ObjectMapper(JsonFactory()).registerModule(KotlinModule())
+                    val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
                     val chunks: Chunkification = mapper.readValue(input)
                     val chapters = chunks.map { it.key }
                     chapters

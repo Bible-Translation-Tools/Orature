@@ -171,12 +171,6 @@ class RecordScripturePage : View() {
                 recordScriptureViewModel.openTargetAudioPlayer()
             }
         }
-        workspace.subscribe<PluginClosedEvent> {
-            (workspace.dockedComponentProperty.value as? PluginOpenedPage)?.let {
-                workspace.navigateBack()
-            }
-            recordScriptureViewModel.openPlayers()
-        }
 
         fileDragTarget.setOnDragOver {
             if (it.gestureSource != fileDragTarget && it.dragboard.hasFiles()) {

@@ -28,15 +28,19 @@ import java.nio.channels.FileChannel
 
 internal class PcmFileReader(
     val pcm: PcmFile,
-    val start: Int? = null,
-    val end: Int? = null
+    start: Int? = null,
+    end: Int? = null
 ) : AudioFileReader {
     override val sampleRate: Int = pcm.sampleRate
     override val channels: Int = pcm.channels
-    override val sampleSize: Int = pcm.bitsPerSample
+    override val sampleSizeBits: Int = pcm.bitsPerSample
     override val framePosition: Int
         get() = (mappedFile?.position() ?: 0) / pcm.frameSizeInBytes
-    override val totalFrames: Int = pcm.totalFrames
+    override val totalFrames: Int
+        get() = end - start
+
+    val start = start ?: 0
+    val end = end ?: pcm.totalFrames
 
     private var mappedFile: MappedByteBuffer? = null
     private var channel: FileChannel? = null
@@ -106,8 +110,11 @@ internal class PcmFileReader(
 
     private fun computeBounds(): Pair<Int, Int> {
         val fileLength = pcm.file.length().toInt()
-        val begin = if (start != null) Integer.min(Integer.max(0, start), fileLength) else 0
-        val end = if (end != null) Integer.min(Integer.max(begin, end), fileLength) else fileLength
+        var begin = if (start != null) Integer.min(Integer.max(0, start), fileLength) else 0
+        var end = if (end != null) Integer.min(Integer.max(begin, end), fileLength) else fileLength
+
+        begin *= pcm.frameSizeInBytes
+        end *= pcm.frameSizeInBytes
 
         return Pair(begin, end)
     }

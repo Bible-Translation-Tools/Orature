@@ -18,76 +18,71 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.narration
 
-import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.value.ObservableValue
 import javafx.collections.ObservableList
-import javafx.event.ActionEvent
-import javafx.event.EventHandler
 import javafx.event.EventTarget
 import javafx.geometry.Orientation
 import javafx.scene.control.ListView
 import javafx.scene.control.ScrollBar
-import org.wycliffeassociates.otter.jvm.utils.findChildren
-import org.wycliffeassociates.otter.jvm.utils.virtualFlow
+import org.wycliffeassociates.otter.jvm.utils.*
 import tornadofx.*
 
 class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(items) {
-    val cardIsOutOfViewProperty = SimpleBooleanProperty()
-    val onSelectedVerseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
-
-    val initialSelectedItemProperty = SimpleObjectProperty<T>()
+    private val listeners = mutableListOf<ListenerDisposer>()
 
     init {
         addClass("wa-list-view")
+    }
 
-        initialSelectedItemProperty.onChange {
-            cardIsOutOfViewProperty.set(false)
-            selectionModel.select(it)
-            scrollTo(it)
-        }
-
-        skinProperty().onChange {
+    fun addListeners() {
+        skinProperty().onChangeWithDisposer {
             it?.let {
                 try {
                     val scrollBar = virtualFlow().findChildren<ScrollBar>(true).singleOrNull { node ->
                         node.orientation == Orientation.VERTICAL
                     }
-                    scrollBar?.valueProperty()?.onChange {
+                    scrollBar?.valueProperty()?.onChangeWithDisposer {
                         val current = selectionModel.selectedIndex
                         val first = virtualFlow().firstVisibleCell?.index ?: 0
                         val last = virtualFlow().lastVisibleCell?.index ?: 0
 
                         if (current !in (first..last)) {
-                            cardIsOutOfViewProperty.set(true)
-                            onSelectedVerseActionProperty.set(EventHandler {
-                                selectionModel.select(current)
-                                scrollTo(current)
-                            })
+                            FX.eventbus.fire(StickyVerseChangedEvent(selectionModel.selectedItem))
                         } else {
-                            cardIsOutOfViewProperty.set(false)
-                            onSelectedVerseActionProperty.set(null)
+                            FX.eventbus.fire(StickyVerseChangedEvent(null))
                         }
-                    }
+                    }?.also(listeners::add)
                 } catch (e: NullPointerException) {
                     e.printStackTrace()
                 }
             }
-        }
+        }.also(listeners::add)
+
+        selectionModel.selectedItemProperty().onChangeWithDisposer {
+            FX.eventbus.fire(StickyVerseChangedEvent(null))
+        }.also(listeners::add)
+    }
+
+    fun removeListeners() {
+        listeners.forEach(ListenerDisposer::dispose)
+        listeners.clear()
     }
 }
 
-fun <T> EventTarget.narrationtextlistview(values: ObservableList<T>?, op: NarrationTextListView<T>.() -> Unit = {}) =
-    NarrationTextListView<T>().attachTo(this, op) {
+class StickyVerseChangedEvent<T>(val data: T?) : FXEvent()
+
+fun <T> EventTarget.narrationTextListview(
+    values: ObservableList<T>?,
+    op: NarrationTextListView<T>.() -> Unit = {}
+) = NarrationTextListView<T>().attachTo(this, op) {
         if (values is SortedFilteredList<T>) values.bindTo(it)
         else it.items = values
     }
 
-fun <T> EventTarget.narrationtextlistview(
+fun <T> EventTarget.narrationTextListview(
     values: ObservableValue<ObservableList<T>>?,
     op: NarrationTextListView<T>.() -> Unit = {}
-) =
-    NarrationTextListView<T>().attachTo(this, op) {
+) = NarrationTextListView<T>().attachTo(this, op) {
         fun rebinder() {
             (it.items as? SortedFilteredList<T>)?.bindTo(it)
         }

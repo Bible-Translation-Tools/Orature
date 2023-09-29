@@ -19,11 +19,13 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.jakewharton.rxrelay2.BehaviorRelay
+import com.jakewharton.rxrelay2.ReplayRelay
 import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
@@ -41,6 +43,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.AddPluginDialog
 import tornadofx.*
 import java.io.File
+import java.time.LocalDate
 import javax.inject.Inject
 
 class AudioPluginViewModel : ViewModel() {
@@ -145,6 +148,23 @@ class AudioPluginViewModel : ViewModel() {
             recordable = recordable,
             rcSlug = workbookDataStore.workbook.sourceMetadataSlug
         )
+    }
+
+    /**
+     * This method opens the given file in the plugin and returns the result.
+     * It uses dummy AssociatedAudio, that doesn't insert/update the record in the database
+     */
+    fun edit(file: File): Single<PluginActions.Result> {
+        val takes = ReplayRelay.create<Take>()
+        val audio = AssociatedAudio(takes)
+        val take = Take(
+            name = file.name,
+            file = file,
+            number = 1,
+            format = MimeType.WAV,
+            createdTimestamp = LocalDate.now()
+        )
+        return edit(audio, take)
     }
 
     fun edit(audio: AssociatedAudio, take: Take): Single<PluginActions.Result> {

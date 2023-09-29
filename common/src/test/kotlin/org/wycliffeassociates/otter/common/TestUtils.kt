@@ -23,21 +23,19 @@ import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.KotlinModule
-import java.io.File
-import java.util.*
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.junit.Assert
-import org.wycliffeassociates.otter.common.audio.*
+import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
+import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
+import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.audio.wav.CueChunk
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.common.audio.wav.WavMetadata
 import org.wycliffeassociates.otter.common.audio.wav.WavOutputStream
+import org.wycliffeassociates.otter.common.data.primitives.*
 import org.wycliffeassociates.otter.common.data.primitives.Collection
-import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.Language
-import org.wycliffeassociates.otter.common.data.primitives.MimeType
-import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -45,7 +43,9 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDat
 import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.*
+import java.io.File
 import java.time.LocalDate
+import java.util.*
 
 /**
  * Applies the given transformation to each element in the keyset of the map, and uses [doAssertEquals]
@@ -239,7 +239,7 @@ fun readChunksFile(projectDir: File): Map<Int, List<Content>> {
     val factory = JsonFactory()
     factory.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET)
     val mapper = ObjectMapper(factory)
-    mapper.registerModule(KotlinModule())
+    mapper.registerKotlinModule()
     mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
     val chunks = mutableMapOf<Int, List<Content>>()

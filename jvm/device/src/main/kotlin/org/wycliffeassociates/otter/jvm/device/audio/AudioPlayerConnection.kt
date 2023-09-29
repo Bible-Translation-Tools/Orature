@@ -20,9 +20,11 @@ package org.wycliffeassociates.otter.jvm.device.audio
 
 import java.io.File
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
+import org.wycliffeassociates.otter.common.device.AudioFileReaderProvider
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFileReaderProvider
 
 internal class AudioPlayerConnection(
     val id: Int,
@@ -62,18 +64,36 @@ internal class AudioPlayerConnection(
         addListeners()
     }
 
-    override fun load(file: File) {
-        state.file = file
+    override fun load(reader: AudioFileReader) {
+        state.reader = reader
         state.position = 0
         connectionFactory.load(state)
     }
 
-    override fun loadSection(file: File, frameStart: Int, frameEnd: Int) {
-        state.file = file
+    override fun load(readerProvider: AudioFileReaderProvider) {
+        state.readerProvider = readerProvider
+        state.position = 0
+        connectionFactory.load(state)
+    }
+
+    override fun load(file: File) {
+        load(OratureAudioFileReaderProvider(file))
+    }
+
+    override fun loadSection(reader: AudioFileReader, frameStart: Int, frameEnd: Int) {
+        state.reader = reader
         state.begin = frameStart
         state.end = frameEnd
         state.position = 0
         connectionFactory.load(state)
+    }
+
+    override fun loadSection(readerProvider: AudioFileReaderProvider, frameStart: Int, frameEnd: Int) {
+        loadSection(readerProvider.getAudioFileReader(frameStart, frameEnd), frameStart, frameEnd)
+    }
+
+    override fun loadSection(file: File, frameStart: Int, frameEnd: Int) {
+        loadSection(OratureAudioFileReaderProvider(file), frameStart, frameEnd)
     }
 
     override fun getAudioReader(): AudioFileReader? {

@@ -190,3 +190,4 @@ private object IsFXInitialized {
         return true
     }
 }
+

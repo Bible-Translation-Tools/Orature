@@ -16,17 +16,35 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.recorder.app.view.drawables
+package org.wycliffeassociates.otter.jvm.controls.narration
 
+import javafx.animation.AnimationTimer
+import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleObjectProperty
+import javafx.geometry.Pos
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
-import javafx.scene.paint.Paint
+import javafx.scene.layout.StackPane
+import org.wycliffeassociates.otter.jvm.controls.canvas.ResizableCanvas
+import org.wycliffeassociates.otter.jvm.controls.waveform.Drawable
+import tornadofx.*
 
-class BaseWaveLine : Drawable {
-    override fun draw(context: GraphicsContext, canvas: Canvas) {
-        context.fill = Paint.valueOf("#1A1A1A")
-        context.stroke = Paint.valueOf("#1A1A1A")
-        context.lineWidth = 1.0
-        context.strokeLine(0.0, canvas.height / 2.0, canvas.width, canvas.height / 2.0)
+class CanvasFragment : StackPane() {
+    private val cvs = ResizableCanvas()
+    private val ctx = cvs.graphicsContext2D
+
+    fun getCanvas(): Canvas {
+        return cvs
+    }
+
+    fun getContext(): GraphicsContext {
+        return ctx
+    }
+
+    init {
+        addClass("waveform")
+        alignment = Pos.TOP_RIGHT
+
+        add(cvs)
     }
 }

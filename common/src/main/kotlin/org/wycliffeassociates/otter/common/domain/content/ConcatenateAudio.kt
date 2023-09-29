@@ -45,13 +45,13 @@ class ConcatenateAudio @Inject constructor(private val directoryProvider: IDirec
                 files.forEach { file ->
                     val oratureAudioFile = OratureAudioFile(file)
                     val buffer = ByteArray(10240)
-                    val reader = oratureAudioFile.reader()
-                    reader.open()
-                    while (reader.hasRemaining()) {
-                        val written = reader.getPcmBuffer(buffer)
-                        os.write(buffer, 0, written)
+                    oratureAudioFile.reader().use { reader ->
+                        reader.open()
+                        while (reader.hasRemaining()) {
+                            val written = reader.getPcmBuffer(buffer)
+                            os.write(buffer, 0, written)
+                        }
                     }
-                    reader.release()
                 }
             }
             if (includeMarkers) generateMarkers(files, outputFile)

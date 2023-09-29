@@ -20,6 +20,7 @@
     -fx-alignment: center;
     -fx-pref-height: 80px;
     -fx-padding: 0 16px;
+    -fx-background-color: -wa-foreground;
 }
 
 .narration__header .btn {
@@ -40,8 +41,8 @@
 
 .narration__header-title {
     -fx-text-fill: -wa-regular-text;
+    -fx-font-weight: bold;
     -fx-font-size: 24px;
-    -fx-font-weight: 500;
 }
 
 .narration__header-controls {
@@ -49,8 +50,26 @@
     -fx-spacing: 10px;
 }
 
+.narration-toolbar {
+    -fx-background-color: -wa-foreground;
+    -fx-border: 0px 0px 1px 0px;
+}
+
+.narration-toolbar__play-controls {
+    -fx-padding: 12px 16px 12px 16px;
+    -fx-spacing: 8px;
+}
+
+.narration-toolbar__separator .line {
+    -fx-background-color: -wa-foreground-hover;
+    -fx-pref-height: 1px;
+    -fx-border-color: null;
+    -fx-padding: 0 0 2px 0;
+    -fx-margin: 0 0 2px 0;
+}
+
 .narration__recording {
-    -fx-pref-height: 200px;
+    -fx-pref-height: 270px;
     -fx-alignment: top-left;
 }
 
@@ -75,15 +94,13 @@
 }
 
 .narration__list {
-    -fx-padding: 10px 0 0 0;
+    -fx-background-color: -wa-foreground;
 }
 
 .narration-list__verse-item {
-    -fx-max-width: 800px;
     -fx-background-color: -wa-foreground;
-    -fx-background-radius: 15px;
-    -fx-effect: -wa-card-shadow-lower-right;
     -fx-spacing: 5px;
+    -fx-alignment: center;
 }
 
 .narration-list__verse-item:disabled {
@@ -93,6 +110,8 @@
 
 .narration-list__verse-block {
     -fx-padding: 10px;
+    -fx-pref-width: 800px;
+    -fx-max-width: 800px;
 }
 
 .narration-list__verse-item-text {
@@ -108,6 +127,7 @@
 .narration-list__buttons {
     -fx-spacing: 20px;
     -fx-padding: 10px;
+    -fx-min-width: 425px;
 }
 
 .narration-list__buttons .btn {
@@ -142,24 +162,27 @@
 }
 
 .narration__recording .list-view {
-    -fx-background-color: -wa-background-primary-gradient;
+    -fx-background-color: -wa-black-30;
 }
 
 .narration-record__verse-cell {
     -fx-pref-height: 0;
-    -fx-border-color: -wa-regular-text;
-    -fx-border-width: 0 2px 0 0;
     -fx-padding: 0;
 }
 
 .narration-record__verse-item {
+    -fx-border-color: -wa-regular-text;
+    -fx-border-width: 0 2px 0 0;
+    -fx-background-color: -wa-background-primary-gradient;
+}
 
+.narration-record__verse-item.playing {
+    -fx-background-color: -wa-primary;
 }
 
 .narration-record__waveform {
-    -fx-pref-width: 300px;
-    -fx-max-height: 176px;
-    -fx-alignment: center-right;
+    -fx-min-width: 1px;
+    -fx-alignment: center-left;
 }
 
 .narration-record__waveform-overlay {
@@ -172,24 +195,45 @@
 .narration-record__waveform-overlay .label {
     -fx-text-fill: -wa-white;
     -fx-font-weight: 400;
-    -fx-font-size: 20px;A
+    -fx-font-size: 20px;
+}
+
+.narration-record__waveform-cursor {
+    -fx-max-width: 2px;
+    -fx-background-color: -wa-white;
 }
 
 .narration-record__verse-controls {
     -fx-spacing: 10px;
-    -fx-alignment: center;
-    -fx-padding: 10px 10px 0 10px;
+    -fx-alignment: center-right;
+    -fx-padding: 10px;
+    -fx-pref-height: 67px;
+    -fx-max-height: 67px;
 }
 
+.narration__header-controls .btn,
 .narration-record__verse-controls .btn {
     -fx-pref-width: 56px;
     -fx-pref-height: 48px;
     -fx-background-color: -wa-foreground;
+    -fx-border-radius: 16px;
     -fx-background-radius: 16px;
+}
+
+.narration-record__verse-controls .btn.playing {
+    -fx-background-color: -wa-primary-dark
+}
+
+.narration-record__verse-controls .btn:focused.playing {
+    -fx-border-color: -wa-white;
 }
 
 .narration-record__verse-controls .btn .ikonli-font-icon {
     -fx-fill: -wa-regular-text;
+}
+
+.narration-record__verse-controls .btn.playing .ikonli-font-icon {
+    -fx-fill: -wa-white;
 }
 
 .narration-record__verse-text {
@@ -198,25 +242,41 @@
     -fx-text-fill: -wa-primary;
 }
 
+.narration-record__verse-text.playing {
+    -fx-text-fill: -wa-white;
+}
+
 .narration-record__verse-text .ikonli-font-icon {
     -fx-fill: -wa-primary;
 }
 
-.narration__volume-bar {
-    -fx-pref-width: 16px;
-    -fx-background-color: #001533;
-    -fx-alignment: center;
+.narration-record__verse-text.playing .ikonli-font-icon {
+    -fx-fill: -wa-white;
 }
 
-.narration__volume-bar__value {
-    -fx-background-color: -wa-success-color;
-}
-
+.narration__header-controls .wa-menu-button,
 .narration-record__verse-controls .wa-menu-button {
     -fx-padding: 0;
 }
 
+.narration__header-controls .wa-menu-button .arrow-button,
+.narration__header-controls .wa-menu-button .arrow-button .arrow,
 .narration-record__verse-controls .wa-menu-button .arrow-button,
 .narration-record__verse-controls .wa-menu-button .arrow-button .arrow {
     -fx-padding: 0;
+}
+
+.narration-record__volume-bar {
+    -fx-pref-width: 16px;
+    -fx-background-color: #001533;
+    -fx-alignment: bottom-center;
+}
+
+.narration-record__volumebar-filler {
+    -fx-pref-width: 16px;
+    -fx-background-color: #001533;
+}
+
+.narration-list__buttons .recording-btn {
+    -fx-background-color: -wa-primary-dark;
 }

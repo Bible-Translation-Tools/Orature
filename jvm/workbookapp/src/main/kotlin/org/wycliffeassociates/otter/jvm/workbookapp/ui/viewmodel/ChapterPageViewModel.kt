@@ -264,6 +264,8 @@ class ChapterPageViewModel : ViewModel() {
                                 PluginType.EDITOR, PluginType.MARKER -> {
                                     /* no-op */
                                 }
+
+                                else -> {}
                             }
                         }
                     }

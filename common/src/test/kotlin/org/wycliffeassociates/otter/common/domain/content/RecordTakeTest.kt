@@ -28,7 +28,7 @@ import java.io.File
 import java.time.LocalDate
 
 class RecordTakeTest {
-    private val recordTake = PluginActions(mock(), mock())
+    private val recordTake = PluginActions(mock(), mock(), mock())
     private val insertTake: (Take) -> Unit = mock()
 
     private fun createTakeWithMockFile(): Take = doCreateTakeWithMockFileLength(EMPTY_WAVE_FILE_SIZE + 1)
