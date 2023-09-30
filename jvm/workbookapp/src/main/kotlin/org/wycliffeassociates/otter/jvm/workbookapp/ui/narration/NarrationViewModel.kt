@@ -121,7 +121,6 @@ class NarrationViewModel : ViewModel() {
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
-    private val listeners = mutableListOf<ListenerDisposer>()
     private val disposables = CompositeDisposable()
 
     init {
@@ -170,8 +169,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun onUndock() {
-        listeners.forEach(ListenerDisposer::dispose)
-        disposables.dispose()
+        disposables.clear()
         closeNarrationAudio()
         narration.close()
         renderer.close()
@@ -233,6 +231,12 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun loadChapter(chapter: Chapter) {
+        if (::narration.isInitialized && narration != null) {
+            closeNarrationAudio()
+            narration.close()
+            renderer.close()
+        }
+
         chapter
             .chunkCount
             .toObservable()
