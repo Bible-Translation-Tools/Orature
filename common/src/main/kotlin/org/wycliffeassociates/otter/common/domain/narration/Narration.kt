@@ -260,8 +260,8 @@ class Narration @AssistedInject constructor(
             chapterReaderConnection.lockToVerse(activeVerses.indexOf(verse))
             chapterReaderConnection.start = range.first
             chapterReaderConnection.end = range.last
-            player.seek(range.first)
-            chapterReaderConnection.seek(range.first)
+            player.seek(verse.location)
+            chapterReaderConnection.seek(verse.location)
             if (wasPlaying) player.play()
         }
     }
