@@ -104,7 +104,6 @@ class NarrationPage : View() {
         subscribe<PluginOpenedEvent> { pluginInfo ->
             if (!pluginInfo.isNative) {
                 workspace.dock(pluginOpenedPage)
-                //viewModel.openSourcePlayer()
             }
         }.let { eventSubscriptions.add(it) }
 
@@ -219,11 +218,6 @@ class NarrationPage : View() {
     private fun createPluginOpenedPage(): PluginOpenedPage {
         // Plugin active cover
         return find<PluginOpenedPage>().apply {
-            //dialogTitleProperty.bind(viewModel.dialogTitleBinding())
-            //dialogTextProperty.bind(viewModel.dialogTextBinding())
-            //playerProperty.bind(viewModel.sourceAudioPlayerProperty)
-            // targetAudioPlayerProperty.bind(workbookDataStore.targetAudioProperty.objectBinding { it?.player })
-            //audioAvailableProperty.bind(viewModel.sourceAudioAvailableProperty)
             licenseProperty.bind(workbookDataStore.sourceLicenseProperty)
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
             sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())
@@ -241,9 +235,6 @@ class NarrationPage : View() {
                     it.translation.targetRate.toLazyBinding()
                 }
             )
-            /*sourceTextZoomRateProperty.bind(
-                workbookDataStore.sourceTextZoomRateProperty
-            )*/
         }
     }
 }

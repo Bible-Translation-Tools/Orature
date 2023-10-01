@@ -79,6 +79,7 @@ class ActiveRecordingRenderer(
             }
             bb.clear()
         }
+        .also { compositeDisposable.add(it) }
 
     private fun samplesToCompress(width: Int, secondsOnScreen: Int): Int {
         // TODO: get samplerate from wav file, don't assume 44.1khz
@@ -108,5 +109,6 @@ class ActiveRecordingRenderer(
 
     fun close() {
         activeRenderer.dispose()
+        compositeDisposable.clear()
     }
 }

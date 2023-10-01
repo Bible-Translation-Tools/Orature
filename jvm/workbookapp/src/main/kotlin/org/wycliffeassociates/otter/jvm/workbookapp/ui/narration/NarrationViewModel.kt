@@ -121,7 +121,6 @@ class NarrationViewModel : ViewModel() {
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
-    private val listeners = mutableListOf<ListenerDisposer>()
     private val disposables = CompositeDisposable()
 
     init {
@@ -170,8 +169,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun onUndock() {
-        listeners.forEach(ListenerDisposer::dispose)
-        disposables.dispose()
+        disposables.clear()
         closeNarrationAudio()
         narration.close()
         renderer.close()
@@ -232,7 +230,35 @@ class NarrationViewModel : ViewModel() {
             }
     }
 
+    private fun resetState() {
+        if (::narration.isInitialized && narration != null) {
+            closeNarrationAudio()
+            narration.close()
+            renderer.close()
+        }
+
+        recordedVerses.clear()
+        chunksList.clear()
+        narratableList.clear()
+
+        recordStartProperty.set(false)
+        recordPauseProperty.set(false)
+        recordResumeProperty.set(false)
+        isRecordingProperty.set(false)
+        isRecordingAgainProperty.set(false)
+        recordAgainVerseIndexProperty.set(null)
+        isPlayingProperty.set(false)
+        recordingVerseIndex.set(-1)
+        playingVerseProperty.set(null)
+        playingVerseIndex.set(-1)
+        hasUndoProperty.set(false)
+        hasRedoProperty.set(false)
+        audioPositionProperty.set(0)
+        totalAudioSizeProperty.set(0)
+    }
     fun loadChapter(chapter: Chapter) {
+        resetState()
+
         chapter
             .chunkCount
             .toObservable()

@@ -105,6 +105,7 @@ class Narration @AssistedInject constructor(
             }
             .subscribeOn(Schedulers.io())
             .subscribe()
+            .also { disposables.add(it) }
     }
 
     /**
