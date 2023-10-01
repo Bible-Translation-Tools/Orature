@@ -303,6 +303,14 @@ class NarrationViewModel : ViewModel() {
             })
     }
 
+    fun clearTeleprompter() {
+        narratableList.forEachIndexed { idx, chunk ->
+            chunk.state = NarrationTextItemState.RECORD_DISABLED
+        }
+        narratableList[0].state = NarrationTextItemState.RECORD
+        refreshTeleprompter()
+    }
+
     fun initializeTeleprompter() {
         narratableList.forEachIndexed { idx, chunk ->
             if (chunk.state == NarrationTextItemState.RECORD_DISABLED) {
@@ -444,8 +452,7 @@ class NarrationViewModel : ViewModel() {
         recordResume = false
         recordPause = false
 
-        initializeTeleprompter()
-        refreshTeleprompter()
+        clearTeleprompter()
     }
 
     fun undo() {
