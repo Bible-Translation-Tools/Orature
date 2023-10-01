@@ -17,6 +17,7 @@ Orature runs on OpenJDK 11+. Installers for Windows, Debian-based Linux, and Mac
 Orature uses the [Door43 Resource Container](https://resource-container.readthedocs.io/en/latest/index.html) format (in zip) for providing source content to narrate, draft, or translate. Currently, Bible content is supported in USFM format, Bible Stories and translation helps are supported in Markdown. Source Audio is supported if contained in the resource container and referrenced in the [media manifest](https://resource-container.readthedocs.io/en/latest/media.html). Note that paths should be local with respect to the container root, not a URL. Supported audio formats include 44.1khz mono 16 bit WAV, and MP3.
 
 # Quickstart
+*Requires Java version 11 or higher. JavaFX is included as a gradle dependency*
 To quickly get started with Orature, follow these steps:
 
 1. **Clone the repository:**
