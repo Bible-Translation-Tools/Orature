@@ -15,7 +15,6 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
-import javafx.util.Duration
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
@@ -41,7 +40,6 @@ import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.SaveRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItemState
 import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
-import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
@@ -303,6 +301,15 @@ class NarrationViewModel : ViewModel() {
             })
     }
 
+    fun clearTeleprompter() {
+        narratableList.forEachIndexed { idx, chunk ->
+            chunk.state = NarrationTextItemState.RECORD_DISABLED
+        }
+        narratableList[0].state = NarrationTextItemState.RECORD
+        refreshTeleprompter()
+        FX.eventbus.fire(TeleprompterSeekEvent(0))
+    }
+
     fun initializeTeleprompter() {
         narratableList.forEachIndexed { idx, chunk ->
             if (chunk.state == NarrationTextItemState.RECORD_DISABLED) {
@@ -444,8 +451,7 @@ class NarrationViewModel : ViewModel() {
         recordResume = false
         recordPause = false
 
-        initializeTeleprompter()
-        refreshTeleprompter()
+        clearTeleprompter()
     }
 
     fun undo() {
