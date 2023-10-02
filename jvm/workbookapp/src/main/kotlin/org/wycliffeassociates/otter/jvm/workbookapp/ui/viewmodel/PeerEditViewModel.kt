@@ -19,7 +19,6 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
-import org.wycliffeassociates.otter.jvm.controls.waveform.IWaveformViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
@@ -29,7 +28,7 @@ import tornadofx.*
 import javax.inject.Inject
 import kotlin.math.max
 
-class PeerEditViewModel : ViewModel(), IWaveformViewModel {
+class PeerEditViewModel : ViewModel() {
     @Inject
     lateinit var audioConnectionFactory: AudioConnectionFactory
 
@@ -39,10 +38,10 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     val blindDraftViewModel: BlindDraftViewModel by inject()
     val recorderViewModel: RecorderViewModel by inject()
 
-    override val targetPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     val chunkTitleProperty = workbookDataStore.activeChunkTitleBinding()
     val currentChunkProperty = SimpleObjectProperty<Chunk>()
     val sourcePlayerProperty = SimpleObjectProperty<IAudioPlayer>()
+    val targetPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     val positionProperty = SimpleDoubleProperty(0.0)
     val isPlayingProperty = SimpleBooleanProperty(false)
     val compositeDisposable = CompositeDisposable()
@@ -53,8 +52,8 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     var subscribeOnWaveformImages: () -> Unit = {}
     var cleanUpWaveform: () -> Unit = {}
 
-    override var sampleRate: Int = 0 // beware of divided by 0
-    override var targetTotalFrames: Int = 0 // beware of divided by 0
+    private var sampleRate: Int = 0 // beware of divided by 0
+    private var targetTotalFrames: Int = 0 // beware of divided by 0
 
     private var audioController: AudioPlayerController? = null
     private val newTakeProperty = SimpleObjectProperty<Take>(null)
@@ -127,6 +126,24 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
             newTakeProperty.value?.file?.delete()
             newTakeProperty.set(null)
         }
+    }
+
+    fun pixelsInHighlight(controlWidth: Double): Double {
+        if (sampleRate == 0 || targetTotalFrames == 0) {
+            return 1.0
+        }
+
+        val framesInHighlight = sampleRate * SECONDS_ON_SCREEN
+        val framesPerPixel = targetTotalFrames / max(controlWidth, 1.0)
+        return max(framesInHighlight / framesPerPixel, 1.0)
+    }
+
+    fun getLocationInFrames(): Int {
+        return targetPlayerProperty.value?.getLocationInFrames() ?: 0
+    }
+
+    fun getDurationInFrames(): Int {
+        return targetPlayerProperty.value?.getDurationInFrames() ?: 0
     }
 
     private fun subscribeToSelectedTake(chunk: Chunk) {
