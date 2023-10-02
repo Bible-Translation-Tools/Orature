@@ -177,7 +177,6 @@ class NarrationTextItem : VBox() {
                     narration_button {
                         prefWidth = 150.0
                         addClass("btn", "btn--secondary")
-                        graphic = FontIcon(MaterialDesign.MDI_ARROW_DOWN)
 
                         onActionProperty().bind(
                             objectBinding(
@@ -201,6 +200,14 @@ class NarrationTextItem : VBox() {
                                 FX.messages["next"]
                             }
                         })
+
+                        graphicProperty().bind(objectBinding(isLastVerseProperty) {
+                            if (isLastVerseProperty.value) {
+                                FontIcon(MaterialDesign.MDI_CHECKBOX_MARKED_CIRCLE_OUTLINE)
+                            } else {
+                                FontIcon(MaterialDesign.MDI_ARROW_DOWN)
+                            }
+                        })
                     }
                     visibleProperty().bind(stateProperty.isEqualTo(NarrationTextItemState.RECORD_ACTIVE))
                 }
@@ -218,7 +225,6 @@ class NarrationTextItem : VBox() {
                     narration_button {
                         prefWidth = 150.0
                         addClass("btn", "btn--secondary")
-                        graphic = FontIcon(MaterialDesign.MDI_ARROW_DOWN)
 
                         onActionProperty().bind(
                             objectBinding(
@@ -240,6 +246,14 @@ class NarrationTextItem : VBox() {
 
                             } else {
                                 FX.messages["next"]
+                            }
+                        })
+
+                        graphicProperty().bind(objectBinding(isLastVerseProperty) {
+                            if (isLastVerseProperty.value) {
+                                FontIcon(MaterialDesign.MDI_CHECKBOX_MARKED_CIRCLE_OUTLINE)
+                            } else {
+                                FontIcon(MaterialDesign.MDI_ARROW_DOWN)
                             }
                         })
                     }
@@ -306,7 +320,7 @@ class NarrationTextItem : VBox() {
                         prefWidth = 150.0
                         addClass("btn", "btn--primary")
                         text = FX.messages["save"]
-                        graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
+                        graphic = FontIcon(MaterialDesign.MDI_CHECKBOX_MARKED_CIRCLE)
                         onActionProperty().bind(onSaveRecordingActionProperty)
                     }
                     visibleProperty().bind(stateProperty.isEqualTo(NarrationTextItemState.RE_RECORD_ACTIVE))
@@ -327,7 +341,7 @@ class NarrationTextItem : VBox() {
                         prefWidth = 150.0
                         addClass("btn", "btn--primary")
                         text = FX.messages["save"]
-                        graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
+                        graphic = FontIcon(MaterialDesign.MDI_CHECKBOX_MARKED_CIRCLE)
                         onActionProperty().bind(onSaveRecordingActionProperty)
                     }
                     visibleProperty().bind(stateProperty.isEqualTo(NarrationTextItemState.RE_RECORDING_PAUSED))
