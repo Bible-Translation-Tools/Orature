@@ -1,7 +1,5 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
-import com.github.thomasnield.rxkotlinfx.observeOnFx
-import io.reactivex.Observable
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
@@ -16,10 +14,10 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NarrationTextC
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NarrationTextItemData
 import tornadofx.*
 import java.text.MessageFormat
-import java.util.concurrent.TimeUnit
 import kotlin.math.max
 
 object RefreshTeleprompter : FXEvent()
+class TeleprompterSeekEvent(val index: Int) : FXEvent()
 
 class TeleprompterViewModel : ViewModel() {
     private val narrationViewModel: NarrationViewModel by inject()
@@ -113,6 +111,11 @@ class TeleprompterView : View() {
     private val subscriptions = mutableListOf<EventRegistration>()
 
     init {
+        subscribe<TeleprompterSeekEvent> {
+            listView.scrollTo(it.index)
+            listView.selectionModel.selectIndices(it.index)
+        }
+
         subscribe<RefreshTeleprompter> {
             listView.refresh()
         }
@@ -123,21 +126,21 @@ class TeleprompterView : View() {
             } ?: run {
                 viewModel.stickyVerseProperty.set(null)
             }
-        }.let { subscriptions.add(it) }
+        }
 
         subscribe<ResumeVerseEvent> {
             viewModel.stickyVerseProperty.value?.let { verse ->
                 val item = listView.items.find { it.chunk == verse }
                 listView.scrollTo(item)
             }
-        }.let { subscriptions.add(it) }
+        }
 
         subscribe<RecordAgainEvent> {
             listView.apply {
                 selectionModel.select(it.index)
                 scrollTo(it.index - 1)
             }
-        }.let { subscriptions.add(it) }
+        }
     }
 
     override fun onDock() {
