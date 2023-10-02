@@ -16,6 +16,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
 import java.io.FileInputStream
@@ -32,6 +33,7 @@ class NarrationTest {
     val testDirWithAudio = File(testDataRootFilePath, "testProjectChapterDirWithAudio")
     val testDirWithoutAudio = File(testDataRootFilePath, "testProjectChapterDirWithoutAudio")
     val verseEditFile = File(testDirWithAudio, "verseEditFile.pcm")
+    val bounceAudioFile = File(testDirWithAudio, "bounceAudio.wav")
 
     lateinit var workbook: Workbook
     lateinit var chapter: Chapter
@@ -731,6 +733,64 @@ class NarrationTest {
         addNewVerseWithAudio(narration, verseIndex, secondsOfAudio)
 
         Assert.assertEquals(DEFAULT_SAMPLE_RATE * secondsOfAudio, narration.getLocationInFrames())
+    }
+
+
+    @Test
+    fun `bounceAudio with empty boundedAudio, 10 sequential verses, each containing 1 second of recording`() {
+        val numVerses = 10
+        val secondsPerVerse = 1
+        val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
+
+        // Record and finalize 10 verses
+        recordAndFinalizeVerses(narration, numVerses, secondsPerVerse)
+
+        // Bounce audio
+        narration.bounceAudio(bounceAudioFile)
+
+        val producedFile = OratureAudioFile(bounceAudioFile)
+
+        // Verify that the number of cues corresponds to the number of verses
+        Assert.assertEquals(numVerses, producedFile.getCues().size)
+
+        // Verify that each verse marker is correctly labeled and at the correct location
+        val cues = producedFile.getCues()
+        for(i in cues.indices) {
+            Assert.assertEquals("orature-vm-${i+1}", cues[i].label)
+            Assert.assertEquals(DEFAULT_SAMPLE_RATE * i, cues[i].location)
+        }
+    }
+
+
+    @Test
+    fun `bounceAudio with non-empty boundedAudio, 10 sequential verses, each containing 1 second of recording`() {
+        val numVerses = 10
+        val secondsPerVerse = 1
+        val narration = Narration(splitAudioOnCues, audioFileUtils, recorder, player, workbook, chapter)
+
+        // Record and finalize 10 verses
+        recordAndFinalizeVerses(narration, numVerses, secondsPerVerse)
+
+        // Adds some content to the bounceAudioFile
+        val secondsOfOldData = 15
+        val oldData = ByteBuffer.allocate(DEFAULT_SAMPLE_RATE * secondsOfOldData * DEFAULT_BITS_PER_SAMPLE / 8)
+        fillAudioBufferWithPadding(oldData, secondsOfOldData, 0)
+        writeByteBufferToPCMFile(oldData, bounceAudioFile)
+
+        // Bounce audio
+        narration.bounceAudio(bounceAudioFile)
+
+        val producedFile = OratureAudioFile(bounceAudioFile)
+
+        // Verify that the number of cues corresponds to the number of verses
+        Assert.assertEquals(numVerses, producedFile.getCues().size)
+
+        // Verify that each verse marker is correctly labeled and at the correct location
+        val cues = producedFile.getCues()
+        for(i in cues.indices) {
+            Assert.assertEquals("orature-vm-${i+1}", cues[i].label)
+            Assert.assertEquals(DEFAULT_SAMPLE_RATE * i, cues[i].location)
+        }
     }
 
 }
