@@ -105,6 +105,7 @@ class NarrationTextCell(
 
             onNextVerseActionProperty.set(DebouncedEventHandler {
                 listView.apply {
+                    selectionModel.selectIndices(index)
                     selectionModel.selectNext()
 
                     // Scroll to the previous verse because scrolling to the active verse will cause
@@ -113,7 +114,11 @@ class NarrationTextCell(
                     // than the text needed to actively be narrated being off the screen.
                     scrollTo(selectionModel.selectedIndex - 1)
 
-                    FX.eventbus.fire(NextVerseEvent(selectionModel.selectedIndex, selectionModel.selectedItem.chunk))
+                    val nextVerseIndex = index + 1
+                    val nextVerse = items.getOrNull(nextVerseIndex)
+                    nextVerse?.let {
+                        FX.eventbus.fire(NextVerseEvent(nextVerseIndex, nextVerse.chunk))
+                    } ?: logger.error("Tried to select an invalid next verse! Tried to select: $nextVerseIndex from index $index")
                 }
             })
 
