@@ -53,4 +53,5 @@ ext {
     systemThemeDectectorVer='3.8'
     tarsosDspVer = '2.4.1'
     mp3TagVer = '0.9.3'
+    tikaVer = '2.0.0'
 }
