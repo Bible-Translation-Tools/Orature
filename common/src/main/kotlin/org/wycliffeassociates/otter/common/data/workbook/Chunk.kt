@@ -34,7 +34,6 @@ class Chunk(
     val end: Int,
 
     val bridged: Boolean = false,
-    val checkingStatus: CheckingStatus = CheckingStatus.UNCHECKED,
 
     var draftNumber: Int,
 
@@ -45,6 +44,17 @@ class Chunk(
         get() = if (start != end) "${start}-${end}" else "$start"
 
     fun hasSelectedAudio() = audio.selected.value?.value != null
+
+    fun checkingStatus(): CheckingStatus {
+        return audio.selected.value?.value?.let { take ->
+            if (take.checkingState.value?.checksum == take.checksum()) {
+                take.checkingState.value?.status
+            } else {
+                take.checkingState.accept(TakeCheckingState(CheckingStatus.UNCHECKED))
+                null
+            }
+        } ?: CheckingStatus.UNCHECKED
+    }
 
     override fun hashCode(): Int {
         return Objects.hash(
