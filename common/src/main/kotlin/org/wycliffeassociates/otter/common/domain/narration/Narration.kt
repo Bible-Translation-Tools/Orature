@@ -21,6 +21,7 @@ import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
@@ -77,6 +78,7 @@ class Narration @AssistedInject constructor(
 
     private var writer: WavFileWriter? = null
 
+    private var positionToSeekAfterEnd = 0
     init {
         val writer = initializeWavWriter()
 
@@ -89,6 +91,16 @@ class Narration @AssistedInject constructor(
             resetUncommittedFramesOnUpdatedVerses(),
         )
         loadChapterIntoPlayer()
+
+        player.addEventListener { event ->
+            if (event == AudioPlayerEvent.COMPLETE) {
+                // NOTE: this sets the locked verse to null after play-back
+                // fixes issue with persistent locking to a verse after playing it
+                chapterReaderConnection.lockToVerse(null)
+                player.seek(positionToSeekAfterEnd)
+                chapterReaderConnection.seek(positionToSeekAfterEnd)
+            }
+        }
     }
 
     /**
@@ -262,6 +274,7 @@ class Narration @AssistedInject constructor(
             chapterReaderConnection.end = range.last
             player.seek(verse.location)
             chapterReaderConnection.seek(verse.location)
+            positionToSeekAfterEnd = verse.location + chapterReaderConnection.totalFrames
             if (wasPlaying) player.play()
         }
     }

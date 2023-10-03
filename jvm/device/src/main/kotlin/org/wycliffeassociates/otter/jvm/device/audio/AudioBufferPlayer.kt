@@ -206,10 +206,16 @@ class AudioBufferPlayer(
                             }
                             player.drain()
                             if (!pause.get()) {
+
+                                // TODO: seek to proper position
+                                // NOTE: this is an error. This does not give the start position, it
+                                // gives the totalFrames in the selectedVerse.
                                 startPosition = _reader.totalFrames
                                 listeners.forEach { it.onEvent(AudioPlayerEvent.COMPLETE) }
                                 player.close()
-                                seek(startPosition)
+                                // NOTE: this is seeking ot the relativeEnd position of verse 2. This seems to
+                                // mitigate the issue, however, it causes issues later
+                                 seek(startPosition)
                             }
                         } catch (e: LineUnavailableException) {
                             errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, e))
