@@ -27,7 +27,7 @@ To quickly get started with Orature, follow these steps:
 
 2. **Generate Jooq Classes:**
    ```bash
-   ./gradlew :jvm:workbookapp:generateSampleJooqSchemaSource
+   ./gradlew :jvm:workbookapp:generateJooq
    ```
 
 3. **Run Kotlin Kapt:**
