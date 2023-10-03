@@ -449,7 +449,7 @@ class ProjectFilesAccessor(
         startVerse: Int,
         endVerse: Int
     ): List<String> {
-        val chapterText = arrayListOf<String>()
+        val chunkText = arrayListOf<String>()
 
         ResourceContainer.load(sourceMetadata.path).use { rc ->
             val projectEntry = rc.manifest.projects.find { it.identifier == projectSlug }
@@ -463,14 +463,14 @@ class ProjectFilesAccessor(
                     for (i in startVerse..endVerse) {
                         val verse = it.getChildMarkers(VMarker::class.java).find { it.startingVerse == i }
                         verse?.let {
-                            chapterText.add(it.getText())
+                            chunkText.add("${it.verseNumber}. ${it.getText()}")
                         }
                     }
                 }
             }
         }
 
-        return chapterText
+        return chunkText
     }
 
     private fun copySourceWithoutMedia(source: File, target: File) {
