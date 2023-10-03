@@ -22,6 +22,7 @@ import javafx.beans.property.SimpleDoubleProperty
 import javafx.geometry.Pos
 import javafx.scene.layout.StackPane
 import javafx.scene.shape.Line
+import javafx.scene.shape.Rectangle
 import tornadofx.*
 
 class WaveformOverlay : StackPane() {
@@ -32,6 +33,20 @@ class WaveformOverlay : StackPane() {
         isMouseTransparent = true
         alignment = Pos.BOTTOM_CENTER
 
+        add(
+            Rectangle().apply {
+                // managed will prevent responsive resizing of the app
+                managedProperty().set(false)
+                styleClass.add("scrolling-waveform-holder--played")
+                heightProperty().bind(this@WaveformOverlay.heightProperty().minus(80.0))
+                widthProperty().bind(playbackPositionProperty)
+
+                translateYProperty().set(40.0)
+                translateXProperty().bind(
+                    this@WaveformOverlay.widthProperty().divide(2).minus(playbackPositionProperty)
+                )
+            }
+        )
         add(
             Line(0.0, 40.0, 0.0, 0.0).apply {
                 managedProperty().set(false)

@@ -54,6 +54,10 @@
     -fx-background-color: -wa-scrolling-waveform-background;
 }
 
+.scrolling-waveform-holder--played {
+    -fx-fill: -wa-played-audio-highlight;
+}
+
 .scrolling-waveform__playback-line {
     -fx-stroke: -wa-playback-line;
 }
@@ -75,13 +79,9 @@
 }
 
 .scrolling-waveform__highlight--primary {
-    -fx-fill: transparent;
-    -fx-stroke: -wa-border-light;
-    -fx-stroke-width: 1;
+    -fx-fill: -wa-marker-overlay-primary;
 }
 
 .scrolling-waveform__highlight--secondary {
-    -fx-fill: transparent;
-    -fx-stroke: -wa-border-light;
-    -fx-stroke-width: 1;
+    -fx-fill: -wa-marker-overlay-secondary;
 }

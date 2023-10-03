@@ -143,5 +143,10 @@ class MarkerPlacementWaveform : StackPane() {
         }
         add(waveformFrame)
         add(WaveformOverlay().apply { playbackPositionProperty.bind(positionProperty) })
+        add(
+            PlaceMarkerLayer().apply {
+                onPlaceMarkerActionProperty.bind(onPlaceMarker)
+            }
+        )
     }
 }
