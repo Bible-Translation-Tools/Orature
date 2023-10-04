@@ -20,7 +20,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.ma
 
 import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.Take
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.CheckingStatusDao
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.ContentTypeDao
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ContentEntity
 
@@ -56,7 +55,7 @@ class ContentMapper(
             format = obj.format,
             type_fk = contentTypeDao.fetchId(obj.type),
             draftNumber = obj.draftNumber,
-            bridged = obj.bridged,
+            bridged = obj.bridged
         )
     }
 }

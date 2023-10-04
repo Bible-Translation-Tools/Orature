@@ -703,7 +703,7 @@ class CollectionRepository @Inject constructor(
             CONTENT_ENTITY.V_END,
             CONTENT_ENTITY.SORT,
             CONTENT_ENTITY.TYPE_FK,
-            CONTENT_ENTITY.DRAFT_NUMBER,
+            CONTENT_ENTITY.DRAFT_NUMBER
         )
             .select(
                 dsl.select(
