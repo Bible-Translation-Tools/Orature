@@ -17,15 +17,62 @@ Orature runs on OpenJDK 11+. Installers for Windows, Debian-based Linux, and Mac
 Orature uses the [Door43 Resource Container](https://resource-container.readthedocs.io/en/latest/index.html) format (in zip) for providing source content to narrate, draft, or translate. Currently, Bible content is supported in USFM format, Bible Stories and translation helps are supported in Markdown. Source Audio is supported if contained in the resource container and referrenced in the [media manifest](https://resource-container.readthedocs.io/en/latest/media.html). Note that paths should be local with respect to the container root, not a URL. Supported audio formats include 44.1khz mono 16 bit WAV, and MP3.
 
 # Quickstart
-Requires java version 11 or higher. JavaFX is included as a gradle dependency
+*Requires Java version 11 or higher. JavaFX is included as a gradle dependency*
+To quickly get started with Orature, follow these steps:
 
-- Clone this repository
-- Run the gradle task ```:jvm:workbookapp:generateSampleJooqSchemaSource``` in order to generate jooq classes
-- Run the gradle task ```:jvm:workbookapp:kaptKotlin```
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/Bible-Translation-Tools/Orature.git
+   ```
 
- From there you should be able to build and run, the entrypoint is under org.wycliffeassociates.otter.jvm.workbookapp.Mainkt
+2. **Generate Jooq Classes:**
+   ```bash
+   ./gradlew :jvm:workbookapp:generateJooq
+   ```
 
-- Run the gradle task ```:jvm:workbookapp:build``` to build an executable shadow Jar file. 
+3. **Run Kotlin Kapt:**
+   ```bash
+   ./gradlew :jvm:workbookapp:kaptKotlin
+   ```
+
+4. **Build and Run:**
+   You can build and run the application using the following commands:
+   ```bash
+   ./gradlew :jvm:workbookapp:build
+   java -cp jvm/workbookapp/build/libs/workbookapp-<version>-all.jar org.wycliffeassociates.otter.jvm.workbookapp.MainKt
+   ```
+
+   Alternatively, you can use the following command to build an executable shadow JAR file:
+   ```bash
+   ./gradlew :jvm:workbookapp:shadowJar
+   java -jar jvm/workbookapp/build/libs/workbookapp-<version>-all.jar
+   ```
+
+# Quickstart Frequently Asked Questions (FAQ)
+
+### Q: I cloned the repository, but the application is not running. What could be the issue?
+
+**A:** Ensure you have Java version 11 or higher installed. Additionally, verify that you've completed the steps to generate Jooq classes and run Kotlin Kapt. If issues persist, double-check your environment settings and dependencies.
+
+---
+
+### Q: What should I do if I get a "Permission Denied" error when running the build command?
+
+**A:** Ensure you have the necessary permissions to execute the build command. On Unix-based systems, you might need to run `chmod +x gradlew` to make the Gradle wrapper executable.
+
+---
+
+### Q: The application is not recognizing audio files. What could be the issue?
+
+**A:** Verify that your audio files are in the correct format (44.1khz mono 16-bit WAV or MP3). Ensure paths are local to the container root, not URLs.
+
+---
+
+### Q: I want to contribute to the project. How can I get started?
+
+**A:** Fork the repository, create a branch for your changes, and submit a pull request. Make sure to follow the coding standards outlined in the wiki.
+
+---
 
 ## Directory Structure
 
