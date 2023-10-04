@@ -94,8 +94,7 @@ class RecordMappers {
                 record.getValue(table.FORMAT),
                 record.getValue(table.TYPE_FK),
                 record.getValue(table.DRAFT_NUMBER),
-                record.getValue(table.BRIDGED) == 1,
-                record.getValue(table.CHECKING_FK)
+                record.getValue(table.BRIDGED) == 1
             )
         }
 
@@ -118,7 +117,9 @@ class RecordMappers {
                 record.getValue(TAKE_ENTITY.NUMBER),
                 record.getValue(TAKE_ENTITY.CREATED_TS),
                 record.getValue(TAKE_ENTITY.DELETED_TS),
-                record.getValue(TAKE_ENTITY.PLAYED)
+                record.getValue(TAKE_ENTITY.PLAYED),
+                record.getValue(TAKE_ENTITY.CHECKING_FK),
+                record.getValue(TAKE_ENTITY.CHECKSUM),
             )
         }
 

@@ -651,8 +651,7 @@ class CollectionRepository @Inject constructor(
             CONTENT_ENTITY.SORT,
             CONTENT_ENTITY.TYPE_FK,
             CONTENT_ENTITY.DRAFT_NUMBER,
-            CONTENT_ENTITY.BRIDGED,
-            CONTENT_ENTITY.CHECKING_FK
+            CONTENT_ENTITY.BRIDGED
         )
             .select(
                 dsl.select(
@@ -663,8 +662,7 @@ class CollectionRepository @Inject constructor(
                     field("versesort", Int::class.java),
                     field("typefk", Int::class.java),
                     field("draftnumber", Int::class.java),
-                    field("bridged", Int::class.java),
-                    field("checkingfk", Int::class.java)
+                    field("bridged", Int::class.java)
                 )
                     .from(
                         dsl.select(
@@ -676,8 +674,7 @@ class CollectionRepository @Inject constructor(
                             CONTENT_ENTITY.SORT.`as`("versesort"),
                             CONTENT_ENTITY.TYPE_FK.`as`("typefk"),
                             CONTENT_ENTITY.DRAFT_NUMBER.`as`("draftnumber"),
-                            CONTENT_ENTITY.BRIDGED.`as`("bridged"),
-                            CONTENT_ENTITY.CHECKING_FK.`as`("checkingfk")
+                            CONTENT_ENTITY.BRIDGED.`as`("bridged")
                         )
                             .from(CONTENT_ENTITY)
                             .where(
@@ -707,7 +704,6 @@ class CollectionRepository @Inject constructor(
             CONTENT_ENTITY.SORT,
             CONTENT_ENTITY.TYPE_FK,
             CONTENT_ENTITY.DRAFT_NUMBER,
-            CONTENT_ENTITY.CHECKING_FK
         )
             .select(
                 dsl.select(
@@ -717,8 +713,7 @@ class CollectionRepository @Inject constructor(
                     field("verseend", Int::class.java),
                     field("versesort", Int::class.java),
                     field("typefk", Int::class.java),
-                    field("draftnumber", Int::class.java),
-                    field("checkingfk", Int::class.java)
+                    field("draftnumber", Int::class.java)
                 )
                     .from(
                         dsl.select(
@@ -729,8 +724,7 @@ class CollectionRepository @Inject constructor(
                             CONTENT_ENTITY.V_END.`as`("verseend"),
                             CONTENT_ENTITY.SORT.`as`("versesort"),
                             CONTENT_ENTITY.TYPE_FK.`as`("typefk"),
-                            CONTENT_ENTITY.DRAFT_NUMBER.`as`("draftnumber"),
-                            CONTENT_ENTITY.CHECKING_FK.`as`("checkingfk")
+                            CONTENT_ENTITY.DRAFT_NUMBER.`as`("draftnumber")
                         )
                             .from(CONTENT_ENTITY)
                             .where(

@@ -353,6 +353,10 @@ class DatabaseMigrator {
         }
     }
 
+    /**
+     * Version 13
+     * Adds Checking Status table and FK columns to it
+     */
     private fun migrate12to13(dsl: DSLContext, current: Int): Int {
         return if (current < 13) {
             dsl
@@ -367,15 +371,20 @@ class DatabaseMigrator {
 
             try {
                 dsl
-                    .alterTable(CheckingStatus.CHECKING_STATUS)
-                    .addColumn(ContentEntity.CONTENT_ENTITY.CHECKING_FK)
+                    .alterTable(TakeEntity.TAKE_ENTITY)
+                    .addColumn(TakeEntity.TAKE_ENTITY.CHECKING_FK)
                     .execute()
 
                 dsl
-                    .alterTable(CheckingStatus.CHECKING_STATUS)
+                    .alterTable(TakeEntity.TAKE_ENTITY)
+                    .addColumn(TakeEntity.TAKE_ENTITY.CHECKSUM)
+                    .execute()
+
+                dsl
+                    .alterTable(TakeEntity.TAKE_ENTITY)
                     .add(
                         DSL.constraint("fk_checking_status")
-                            .foreignKey(ContentEntity.CONTENT_ENTITY.CHECKING_FK)
+                            .foreignKey(TakeEntity.TAKE_ENTITY.CHECKING_FK)
                             .references(CheckingStatus.CHECKING_STATUS)
                     )
                     .execute()

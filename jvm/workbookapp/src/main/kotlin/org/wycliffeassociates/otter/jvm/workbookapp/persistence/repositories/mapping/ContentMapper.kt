@@ -25,8 +25,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.Co
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ContentEntity
 
 class ContentMapper(
-    private val contentTypeDao: ContentTypeDao,
-    private val checkingStatusDao: CheckingStatusDao
+    private val contentTypeDao: ContentTypeDao
 ) {
     fun mapFromEntity(entity: ContentEntity, selectedTake: Take?): Content {
         return Content(
@@ -58,7 +57,6 @@ class ContentMapper(
             type_fk = contentTypeDao.fetchId(obj.type),
             draftNumber = obj.draftNumber,
             bridged = obj.bridged,
-            checking_fk = checkingStatusDao.fetchId(obj.checkingStatus)
         )
     }
 }

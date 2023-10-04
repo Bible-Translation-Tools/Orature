@@ -54,8 +54,8 @@ class ResourceRepository @Inject constructor(private val database: AppDatabase) 
     private val resourceLinkDao = database.resourceLinkDao
     private val subtreeHasResourceDao = database.subtreeHasResourceDao
     private val languageDao = database.languageDao
-    private val contentMapper: ContentMapper = ContentMapper(contentTypeDao, database.checkingStatusDao)
-    private val takeMapper: TakeMapper = TakeMapper()
+    private val contentMapper: ContentMapper = ContentMapper(contentTypeDao)
+    private val takeMapper: TakeMapper = TakeMapper(database.checkingStatusDao)
     private val markerMapper: MarkerMapper = MarkerMapper()
     private val metadataMapper: ResourceMetadataMapper = ResourceMetadataMapper()
     private val languageMapper: LanguageMapper = LanguageMapper()
