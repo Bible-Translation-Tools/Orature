@@ -74,24 +74,7 @@ class RollingSourceText : VBox() {
             if (txt == null) {
                 return@onChangeAndDoNowWithDisposer
             }
-            val markerRegex = Regex("""\d{1,3}(-\d*)?\.""")
-            val matches = markerRegex.findAll(txt)
-
-            val markerLabels = matches.map { it.value.removeSuffix(".") }.toList()
-            val chunks = markerRegex.split(txt).filter { it.isNotBlank() }.map { it.trim() }.toList()
-
-            val nodes = mutableListOf<Node>()
-            val sourceTitle = buildSourceTitle()
-            val licenseText = buildLicenseText()
-
-            nodes.add(sourceTitle)
-            for (i in 0 until markerLabels.size) {
-                nodes.add(
-                    buildChunkText(chunks[i], markerLabels[i])
-                )
-            }
-            nodes.add(licenseText)
-
+            val nodes = buildTextNodes(txt)
             sourceTextChunksContainer.items.setAll(nodes)
         }
 
@@ -101,6 +84,27 @@ class RollingSourceText : VBox() {
                 addClass("text-zoom-$rate")
             }
         }
+    }
+
+    private fun buildTextNodes(txt: String): List<Node> {
+        val markerRegex = Regex("""\d{1,3}(-\d*)?\.""")
+        val matches = markerRegex.findAll(txt)
+
+        val markerLabels = matches.map { it.value.removeSuffix(".") }.toList()
+        val chunks = markerRegex.split(txt).filter { it.isNotBlank() }.map { it.trim() }.toList()
+
+        val nodes = mutableListOf<Node>()
+        val sourceTitle = buildSourceTitle()
+        val licenseText = buildLicenseText()
+
+        nodes.add(sourceTitle)
+        for (i in 0 until markerLabels.size) {
+            nodes.add(
+                buildChunkText(chunks[i], markerLabels[i])
+            )
+        }
+        nodes.add(licenseText)
+        return nodes
     }
 
     private fun buildSourceTitle(): HBox {
