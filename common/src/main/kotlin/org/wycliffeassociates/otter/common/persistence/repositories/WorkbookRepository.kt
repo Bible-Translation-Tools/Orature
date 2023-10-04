@@ -229,12 +229,11 @@ class WorkbookRepository(
     ): BehaviorRelay<List<Chunk>> {
         val relay = BehaviorRelay.create<List<Chunk>>()
         db.getContentByCollectionActiveConnection(chapterCollection)
-            .map { list ->
-                list
+            .subscribe { contents ->
+                val chunks = contents
                     .filter { it.type == ContentType.TEXT }
                     .map { chunk(it, disposables) }
-            }
-            .subscribe { chunks ->
+
                 relay.accept(chunks)
             }
             .let {
