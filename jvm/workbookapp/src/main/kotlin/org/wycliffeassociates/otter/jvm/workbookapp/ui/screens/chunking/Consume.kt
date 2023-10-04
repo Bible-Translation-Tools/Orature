@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
-import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
+import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
@@ -42,7 +42,7 @@ class Consume : Fragment() {
     val vm: ChunkingViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
 
-    private lateinit var waveform: MarkerPlacementWaveform
+    private lateinit var waveform: MarkerWaveform
     private lateinit var slider: Slider
 
     var cleanUpWaveform: () -> Unit = {}
@@ -78,7 +78,7 @@ class Consume : Fragment() {
             vgrow = Priority.ALWAYS
 
             center = VBox().apply {
-                MarkerPlacementWaveform().apply {
+                MarkerWaveform().apply {
                     waveform = this
                     addClass("consume__scrolling-waveform")
                     vgrow = Priority.ALWAYS
