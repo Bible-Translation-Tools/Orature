@@ -48,7 +48,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     val currentChunkProperty = SimpleObjectProperty<Chunk>()
     val sourcePlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     val isPlayingProperty = SimpleBooleanProperty(false)
-    val compositeDisposable = CompositeDisposable()
+    val disposable = CompositeDisposable()
 
     lateinit var waveform: Observable<Image>
     var slider: Slider? = null
@@ -64,7 +64,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     private val height = Integer.min(Screen.getMainScreen().platformHeight, 500)
     private val width = Screen.getMainScreen().platformWidth
     private val disposableListeners = mutableListOf<ListenerDisposer>()
-    private val chunkDisposable = CompositeDisposable()
+    private val selectedTakeDisposable = CompositeDisposable()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -83,7 +83,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
                     ?.let { chunk ->
                         translationViewModel.selectChunk(chunk.sort)
                     }
-            }.addTo(compositeDisposable)
+            }.addTo(disposable)
 
         currentChunkProperty.onChangeAndDoNowWithDisposer {
             it?.let { chunk ->
@@ -95,9 +95,12 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     }
 
     fun undockPeerEdit() {
-        sourcePlayerProperty.unbind()
-        compositeDisposable.clear()
         stopAnimationTimer()
+        sourcePlayerProperty.unbind()
+        selectedTakeDisposable.clear()
+        disposable.clear()
+        disposableListeners.forEach { it.dispose() }
+        disposableListeners.clear()
     }
 
     fun refreshChunkList() {
@@ -154,12 +157,12 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     }
 
     private fun subscribeToSelectedTake(chunk: Chunk) {
-        chunkDisposable.clear()
+        selectedTakeDisposable.clear()
         chunk.audio.selected
             .observeOnFx()
             .subscribe {
                 it.value?.let { take -> loadTargetAudio(take) }
-            }.addTo(chunkDisposable)
+            }.addTo(selectedTakeDisposable)
     }
 
     private fun loadTargetAudio(take: Take) {

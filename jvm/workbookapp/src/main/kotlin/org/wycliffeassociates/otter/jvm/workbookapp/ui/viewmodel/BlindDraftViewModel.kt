@@ -50,7 +50,7 @@ class BlindDraftViewModel : ViewModel() {
     val availableTakes = FilteredList<TakeCardModel>(takes) { !it.selected }
 
     private val recordedTakeProperty = SimpleObjectProperty<Take>()
-    private val chunkDisposable = CompositeDisposable()
+    private val selectedTakeDisposable = CompositeDisposable()
     private val disposables = CompositeDisposable()
     private val disposableListeners = mutableListOf<ListenerDisposer>()
 
@@ -84,7 +84,7 @@ class BlindDraftViewModel : ViewModel() {
         sourcePlayerProperty.unbind()
         currentChunkProperty.set(null)
         translationViewModel.updateSourceText()
-        chunkDisposable.clear()
+        selectedTakeDisposable.clear()
         disposables.clear()
         disposableListeners.forEach { it.dispose() }
         disposableListeners.clear()
@@ -147,13 +147,13 @@ class BlindDraftViewModel : ViewModel() {
     }
 
     private fun subscribeSelectedTakePropertyToRelay(chunk: Chunk) {
-        chunkDisposable.clear()
+        selectedTakeDisposable.clear()
         chunk.audio.selected
             .observeOnFx()
             .subscribe {
                 refreshChunkList()
                 loadTakes(chunk)
-            }.addTo(chunkDisposable)
+            }.addTo(selectedTakeDisposable)
     }
 
     private fun refreshChunkList() {
