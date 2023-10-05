@@ -1,18 +1,19 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Node
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.TakeSelectionAnimationMediator
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.bindSingleChild
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChunkTakeCard
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ChunkTakeEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.TakeAction
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BlindDraftViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -26,6 +27,7 @@ class BlindDraft : Fragment() {
     private val mainSectionProperty = SimpleObjectProperty<Node>(null)
     private val takesView = buildTakesArea()
     private val recordingView = buildRecordingArea()
+    private val hideSourceAudio = SimpleBooleanProperty(false)
 
     override val root = borderpane {
         addClass("blind-draft")
@@ -39,6 +41,8 @@ class BlindDraft : Fragment() {
                     enablePlaybackRateProperty.set(true)
                     sideTextProperty.set(messages["sourceAudio"])
                 }
+                visibleWhen { hideSourceAudio.not() }
+                managedWhen(visibleProperty())
             }
         }
         center = stackpane {
@@ -53,6 +57,8 @@ class BlindDraft : Fragment() {
     }
 
     private fun buildTakesArea(): VBox {
+        val animationMediator = TakeSelectionAnimationMediator<ChunkTakeCard>()
+
         return VBox().apply {
             vbox {
                 addClass("blind-draft-section", "blind-draft-section--top-indent")
@@ -61,7 +67,10 @@ class BlindDraft : Fragment() {
                 vbox {
                     addClass("take-list")
                     bindChildren(viewModel.selectedTake) { take ->
-                        buildTakeCard(take)
+                        ChunkTakeCard(take).apply {
+                            animationMediator.selectedNode = this
+                            animationMediatorProperty.set(animationMediator)
+                        }
                     }
                 }
             }
@@ -72,8 +81,11 @@ class BlindDraft : Fragment() {
 
                 vbox {
                     addClass("take-list")
+                    animationMediator.nodeList = childrenUnmodifiable
                     bindChildren(viewModel.availableTakes) { take ->
-                        buildTakeCard(take)
+                        ChunkTakeCard(take).apply {
+                            animationMediatorProperty.set(animationMediator)
+                        }
                     }
                 }
             }
@@ -88,6 +100,7 @@ class BlindDraft : Fragment() {
                         mainSectionProperty.set(recordingView)
                         recorderViewModel.onViewReady(takesView.width.toInt()) // use the width of the existing component
                         recorderViewModel.toggle()
+                        hideSourceAudio.set(true)
                     }
                 }
             }
@@ -108,12 +121,14 @@ class BlindDraft : Fragment() {
                 recorderViewModel.cancel()
                 viewModel.onRecordFinish(RecorderViewModel.Result.CANCELLED)
                 mainSectionProperty.set(takesView)
+                hideSourceAudio.set(false)
             }
 
             setSaveAction {
                 val result = recorderViewModel.saveAndQuit()
                 viewModel.onRecordFinish(result)
                 mainSectionProperty.set(takesView)
+                hideSourceAudio.set(false)
             }
         }
     }
@@ -137,9 +152,5 @@ class BlindDraft : Fragment() {
                 TakeAction.DELETE -> viewModel.deleteTake(it.take)
             }
         }
-    }
-
-    private fun buildTakeCard(take: TakeCardModel): ChunkTakeCard {
-        return ChunkTakeCard(take)
     }
 }
