@@ -226,20 +226,22 @@ class WorkbookRepository(
     private fun constructChunks(
         chapterCollection: Collection,
         disposables: MutableList<Disposable>
-    ): ReplayRelay<Chunk> {
-        val rr = ReplayRelay.create<Chunk>()
+    ): BehaviorRelay<List<Chunk>> {
+        val relay = BehaviorRelay.create<List<Chunk>>()
         db.getContentByCollectionActiveConnection(chapterCollection)
-            .filter { it.type == ContentType.TEXT }
-            .map {
-                chunk(it, disposables)
+            .subscribe { contents ->
+                val chunks = contents
+                    .filter { it.type == ContentType.TEXT }
+                    .map { chunk(it, disposables) }
+
+                relay.accept(chunks)
             }
-            .subscribe { rr.accept(it) }
             .let {
                 synchronized(disposables) {
                     disposables.add(it)
                 }
             }
-        return rr
+        return relay
     }
 
     private fun chunk(content: Content, disposables: MutableList<Disposable>): Chunk {
