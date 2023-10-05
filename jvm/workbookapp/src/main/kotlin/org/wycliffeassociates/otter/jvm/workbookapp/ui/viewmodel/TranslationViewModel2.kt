@@ -80,6 +80,9 @@ class TranslationViewModel2 : ViewModel() {
             )
         }
         chunkList.setAll(chunkViewData)
+
+        compositeDisposable.clear()
+        updateStep()
     }
 
     private fun updateStep() {
@@ -87,12 +90,27 @@ class TranslationViewModel2 : ViewModel() {
             .chunks
             .observeOnFx()
             .subscribe { list ->
-                if (list.isNotEmpty() && list.all { it.draftNumber > 0 }) {
-                    reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
-                    selectedStepProperty.set(ChunkingStep.BLIND_DRAFT)
-                } else {
-                    selectedStepProperty.set(ChunkingStep.CONSUME_AND_VERBALIZE)
-                    reachableStepProperty.set(ChunkingStep.CHUNKING)
+                when {
+                    list.isEmpty() -> {
+                        reachableStepProperty.set(ChunkingStep.CHUNKING)
+//                        selectedStepProperty.set(ChunkingStep.CONSUME_AND_VERBALIZE)
+                    }
+                    list.all { it.checkingStatus().ordinal >= CheckingStatus.KEYWORD.ordinal } -> {
+                        reachableStepProperty.set(ChunkingStep.VERSE_CHECK)
+//                        selectedStepProperty.set(ChunkingStep.VERSE_CHECK)
+                    }
+                    list.all { it.checkingStatus().ordinal >= CheckingStatus.PEER_EDIT.ordinal } -> {
+                        reachableStepProperty.set(ChunkingStep.KEYWORD_CHECK)
+//                        selectedStepProperty.set(ChunkingStep.KEYWORD_CHECK)
+                    }
+                    list.all { it.hasSelectedAudio() } -> {
+                        reachableStepProperty.set(ChunkingStep.PEER_EDIT)
+//                        selectedStepProperty.set(ChunkingStep.PEER_EDIT)
+                    }
+                    list.isNotEmpty() -> {
+                        reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
+//                        selectedStepProperty.set(ChunkingStep.BLIND_DRAFT)
+                    }
                 }
             }.addTo(compositeDisposable)
     }
