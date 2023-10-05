@@ -14,6 +14,7 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.PeerEditViewModel
@@ -21,7 +22,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewMod
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 
-class PeerEdit : Fragment() {
+open class PeerEdit : Fragment() {
 
     val viewModel: PeerEditViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
@@ -30,9 +31,9 @@ class PeerEdit : Fragment() {
     private lateinit var slider: Slider
     private lateinit var waveform: MarkerWaveform
 
-    private val mainSectionProperty = SimpleObjectProperty<Node>(null)
-    private val playbackView = createPlaybackView()
-    private val recordingView = createRecordingView()
+    protected val mainSectionProperty = SimpleObjectProperty<Node>(null)
+    protected val playbackView = createPlaybackView()
+    protected val recordingView = createRecordingView()
 
     override val root = borderpane {
         top = vbox {
@@ -45,6 +46,10 @@ class PeerEdit : Fragment() {
             }
         }
         centerProperty().bind(mainSectionProperty)
+    }
+
+    init {
+        tryImportStylesheet("/css/recording-screen.css")
     }
 
     private fun createPlaybackView() = VBox().apply {
