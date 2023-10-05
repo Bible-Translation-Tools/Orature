@@ -27,10 +27,10 @@ import org.wycliffeassociates.otter.common.data.primitives.ContentType
 
 interface IContentRepository : IRepository<Content> {
     // Insert for a collection
-    fun insertForCollection(content: Content, collection: Collection): Single<Int>
+    fun insertForCollection(contentList: List<Content>, collection: Collection): Single<List<Content>>
     // Get all the chunks for a collection
     fun getByCollection(collection: Collection): Single<List<Content>>
-    fun getByCollectionWithPersistentConnection(collection: Collection): Observable<Content>
+    fun getByCollectionWithPersistentConnection(collection: Collection): Observable<List<Content>>
     // Get the collection meta-chunk
     fun getCollectionMetaContent(collection: Collection): Single<Content>
     // Get sources this content is derived from
