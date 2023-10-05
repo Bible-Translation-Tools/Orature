@@ -169,7 +169,7 @@ class PeerEdit : Fragment() {
             .subscribe {
                 waveform.addWaveformImage(it)
             }
-            .addTo(viewModel.compositeDisposable)
+            .addTo(viewModel.disposable)
     }
 
     private fun createAudioScrollbarSlider(): Slider {
