@@ -25,7 +25,6 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.Proj
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDatabaseAccessors
-import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.DublinCore
 import java.io.File
@@ -163,7 +162,7 @@ class ResetChunksTest {
                 val collection = invocation.getArgument<Collection>(0)!!
                 val format = if (collection.resourceContainer == rcTarget) "audio/wav" else "text/usfm"
 
-                val rr = BehaviorRelay.create<List<Content>>()
+                val relay = BehaviorRelay.create<List<Content>>()
                 when (collection.slug.count { it == '_' }) {
                     1 -> {
                         val content = Content(
@@ -178,11 +177,11 @@ class ResetChunksTest {
                             selectedTake = null,
                             draftNumber = 1
                         )
-                        rr.accept(listOf(content))
+                        relay.accept(listOf(content))
                     }
                     else -> {}
                 }
-                rr
+                relay
             }
             whenever(clearContentForCollection(any(), any()))
                 .doAnswer {
