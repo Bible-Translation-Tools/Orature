@@ -68,7 +68,6 @@ class AudioSlider(
     }
 
     override fun createDefaultSkin(): Skin<*> {
-//        return WaveformSliderSkin(this)
         return AudioSliderSkin(this)
     }
 

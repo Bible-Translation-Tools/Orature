@@ -54,6 +54,10 @@
     -fx-background-color: -wa-scrolling-waveform-background;
 }
 
+.scrolling-waveform-holder--played {
+    -fx-fill: -wa-played-audio-highlight;
+}
+
 .scrolling-waveform__playback-line {
     -fx-stroke: -wa-playback-line;
 }
@@ -74,13 +78,16 @@
     -fx-border-color: null null -wa-scrolling-waveform-track-border null;
 }
 
-.scrolling-waveform__highlight--primary {
-    -fx-fill: transparent;
-    -fx-stroke: -wa-border-light;
-    -fx-stroke-width: 1;
+.marker-placement-waveform .scrolling-waveform__highlight--primary {
+    -fx-fill: -wa-marker-overlay-primary;
 }
 
-.scrolling-waveform__highlight--secondary {
+.marker-placement-waveform .scrolling-waveform__highlight--secondary {
+    -fx-fill: -wa-marker-overlay-secondary;
+}
+
+.marker-waveform .scrolling-waveform__highlight--primary,
+.marker-waveform .scrolling-waveform__highlight--secondary {
     -fx-fill: transparent;
     -fx-stroke: -wa-border-light;
     -fx-stroke-width: 1;
