@@ -7,6 +7,7 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
 import tornadofx.*
@@ -60,6 +61,17 @@ class TranslationViewModel2 : ViewModel() {
             audioDataStore.openSourceAudioPlayer()
             updateSourceText()
         }
+    }
+
+    fun loadChunks(chunks: List<Chunk>) {
+        val chunkViewData = chunks.map {
+            ChunkViewData(
+                it.sort,
+                it.hasSelectedAudio(),
+                selectedChunkBinding
+            )
+        }
+        chunkList.setAll(chunkViewData)
     }
 
     private fun updateStep() {

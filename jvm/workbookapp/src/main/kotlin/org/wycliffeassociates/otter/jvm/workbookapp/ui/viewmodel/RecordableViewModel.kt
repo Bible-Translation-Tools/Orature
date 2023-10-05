@@ -368,12 +368,7 @@ open class RecordableViewModel(
         return TakeCardModel(
             this,
             selected,
-            ap,
-            FX.messages["edit"].capitalizeString(),
-            FX.messages["delete"].capitalizeString(),
-            FX.messages["marker"].capitalizeString(),
-            FX.messages["play"].capitalizeString(),
-            FX.messages["pause"].capitalizeString()
+            ap
         )
     }
 }

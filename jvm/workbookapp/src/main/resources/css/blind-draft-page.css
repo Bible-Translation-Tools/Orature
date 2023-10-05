@@ -12,3 +12,12 @@
 .blind-draft-section--top-indent {
     -fx-padding: 32 16 16 16;
 }
+
+.take-list {
+    -fx-spacing: 32;
+}
+
+.take-card {
+    -fx-background-color: -wa-foreground;
+    -fx-spacing: 8;
+}

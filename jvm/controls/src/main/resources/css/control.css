@@ -38,6 +38,14 @@
     -fx-border-insets: -2;
 }
 
+.btn:active {
+    -fx-background-color: #001533;
+}
+
+.btn:active .ikonli-font-icon {
+    -fx-icon-color: -wa-white;
+}
+
 /* -------------- Button Icon -------------- */
 .btn__icon {
     -fx-icon-color: inherit;
@@ -616,10 +624,8 @@
 }
 
 .wa-slider .thumb {
-    -fx-background-color: -wa-primary;
+    -fx-background-color: -wa-primary-dark;
     -fx-background-radius: 10px;
-    -fx-border-width: 2px;
-    -fx-border-color: -wa-white;
     -fx-border-radius: 10px;
     -fx-pref-width: 20px;
     -fx-pref-height: 20px;
@@ -668,7 +674,7 @@
 .wa-menu-button {
     -fx-pref-height: 48px;
     -fx-padding: 0 10px;
-    -fx-background-color: -wa-filter-button-background;
+    -fx-background-color: -wa-foreground;
     -fx-background-radius: 6px;
     -fx-alignment: center;
     -fx-spacing: 7px;
@@ -715,17 +721,17 @@
 
 .wa-menu-button .label {
     -fx-font-family: 'sans-serif';
-    -fx-text-fill: -wa-regular-text;
+    -fx-text-fill: -wa-regular-text-80;
 }
 
 .wa-menu-button .ikonli-font-icon {
     -fx-icon-size: 24px;
-    -fx-fill: -wa-regular-text;
+    -fx-fill: -wa-regular-text-80;
 }
 
 .wa-menu-button__icon .ikonli-font-icon {
     -fx-icon-size: 34;
-    -fx-icon-color: -wa-regular-text;
+    -fx-icon-color: -wa-regular-text-80;
 }
 
 .wa-menu-button__separator {

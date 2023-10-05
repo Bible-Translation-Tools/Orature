@@ -65,7 +65,7 @@ class FileNamer(
         ).joinToString("_", postfix = ".${format.extension}")
     }
 
-    internal fun formatChapterNumber(): String {
+    fun formatChapterNumber(): String {
         val chapterFormat = if (chapterCount > 99) "%03d" else "%02d"
         val chapterNum = chapterFormat.format(chapterTitle.toIntOrNull() ?: chapterSort)
         return "c$chapterNum"

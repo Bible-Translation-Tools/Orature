@@ -31,10 +31,10 @@ import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.BaseWaveLine
 import org.wycliffeassociates.otter.jvm.recorder.app.view.CanvasFragment
 import org.wycliffeassociates.otter.jvm.recorder.app.view.FramerateView
 import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.WaveformLayer
-import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.VolumeBar
 import java.io.File
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
+import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.VolumeBar
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseFinishedEvent
 import tornadofx.*
 
