@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
-import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
+import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
@@ -27,7 +27,7 @@ class Chunking : Fragment() {
     val translationViewModel: TranslationViewModel2 by inject()
     val settingsViewModel: SettingsViewModel by inject()
 
-    private lateinit var waveform: MarkerPlacementWaveform
+    private lateinit var waveform: MarkerWaveform
     private lateinit var slider: Slider
 
     var cleanUpWaveform: () -> Unit = {}
@@ -63,7 +63,7 @@ class Chunking : Fragment() {
             vgrow = Priority.ALWAYS
 
             center = VBox().apply {
-                MarkerPlacementWaveform().apply {
+                MarkerWaveform().apply {
                     waveform = this
                     addClass("consume__scrolling-waveform")
                     vgrow = Priority.ALWAYS
@@ -166,7 +166,7 @@ class Chunking : Fragment() {
             hgrow = Priority.ALWAYS
             colorThemeProperty.bind(settingsViewModel.selectedThemeProperty)
             setPixelsInHighlightFunction { viewModel.pixelsInHighlight(it) }
-            player.bind(viewModel.waveformAudioPlayerProperty)
+            player.bind(viewModel.audioPlayer)
             secondsToHighlightProperty.set(SECONDS_ON_SCREEN)
         }
     }
