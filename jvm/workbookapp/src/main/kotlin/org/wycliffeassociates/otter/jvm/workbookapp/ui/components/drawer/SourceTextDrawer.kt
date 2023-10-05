@@ -76,12 +76,9 @@ class SourceTextDrawer : VBox() {
                 } ?: ""
             })
             this.orientationProperty.bind(this@SourceTextDrawer.orientationProperty)
-            this.highlightedChunk.bind(this@SourceTextDrawer.highlightedChunk)
 
             visibleWhen { isCollapsedProperty.not() }
             managedWhen(visibleProperty())
         }
     }
-
-    fun disposeOfListeners() = sourceTextContent.disposeOfListeners()
 }

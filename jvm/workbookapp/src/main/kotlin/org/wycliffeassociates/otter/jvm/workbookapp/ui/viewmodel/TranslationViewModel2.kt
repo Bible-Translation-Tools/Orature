@@ -80,11 +80,6 @@ class TranslationViewModel2 : ViewModel() {
             )
         }
         chunkList.setAll(chunkViewData)
-
-
-        if (chunkViewData.all { it.isCompleted }) {
-            reachableStepProperty.set(ChunkingStep.PEER_EDIT)
-        }
     }
 
     private fun updateStep() {

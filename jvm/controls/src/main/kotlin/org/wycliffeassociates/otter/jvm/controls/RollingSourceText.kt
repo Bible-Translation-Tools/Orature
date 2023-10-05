@@ -11,9 +11,7 @@ import javafx.scene.control.ListCell
 import javafx.scene.control.ListView
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
-import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
-import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.enableScrollByKey
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import tornadofx.*
@@ -24,11 +22,9 @@ class RollingSourceText : VBox() {
     val sourceTextProperty = SimpleStringProperty()
     val licenseTextProperty = SimpleStringProperty()
     val orientationProperty = SimpleObjectProperty<NodeOrientation>()
-    val highlightedChunk = SimpleIntegerProperty(-1)
     val zoomRateProperty = SimpleIntegerProperty(100)
 
     private lateinit var sourceTextChunksContainer: ListView<Node>
-    private val listeners = mutableListOf<ListenerDisposer>()
 
     init {
         addClass("source-content__top")
@@ -73,36 +69,42 @@ class RollingSourceText : VBox() {
         setUpListeners()
     }
 
-    fun disposeOfListeners() {
-        listeners.forEach { it.dispose() }
-        listeners.clear()
-    }
-
     private fun setUpListeners() {
         sourceTextProperty.onChangeAndDoNowWithDisposer { txt ->
-            val chunks = txt?.trim()?.split(Regex("\\d{1,3}\\.")) ?: listOf()
-            val nodes = mutableListOf<Node>()
-            val sourceTitle = buildSourceTitle()
-            val licenseText = buildLicenseText()
-            val textNodes = chunks
-                .filter { it.isNotBlank() }
-                .mapIndexed { index, chunkText ->
-                    buildChunkText(chunkText, index, chunks.size > 1)
-                }.toMutableList()
-
-            nodes.add(sourceTitle)
-            nodes.addAll(textNodes)
-            nodes.add(licenseText)
-
+            if (txt == null) {
+                return@onChangeAndDoNowWithDisposer
+            }
+            val nodes = buildTextNodes(txt)
             sourceTextChunksContainer.items.setAll(nodes)
-        }.also { listeners.add(it) }
+        }
 
         zoomRateProperty.onChangeAndDoNowWithDisposer { rate ->
             sourceTextChunksContainer.apply {
                 styleClass.removeAll { it.startsWith("text-zoom") }
                 addClass("text-zoom-$rate")
             }
-        }.also { listeners.add(it) }
+        }
+    }
+
+    private fun buildTextNodes(txt: String): List<Node> {
+        val markerRegex = Regex("""\d{1,3}(-\d*)?\.""")
+        val matches = markerRegex.findAll(txt)
+
+        val markerLabels = matches.map { it.value.removeSuffix(".") }.toList()
+        val chunks = markerRegex.split(txt).filter { it.isNotBlank() }.map { it.trim() }.toList()
+
+        val nodes = mutableListOf<Node>()
+        val sourceTitle = buildSourceTitle()
+        val licenseText = buildLicenseText()
+
+        nodes.add(sourceTitle)
+        for (i in 0 until markerLabels.size) {
+            nodes.add(
+                buildChunkText(chunks[i], markerLabels[i])
+            )
+        }
+        nodes.add(licenseText)
+        return nodes
     }
 
     private fun buildSourceTitle(): HBox {
@@ -114,23 +116,12 @@ class RollingSourceText : VBox() {
         }
     }
 
-    private fun buildChunkText(textContent: String, index: Int, showNumber: Boolean): HBox {
+    private fun buildChunkText(textContent: String, chunkLabel: String): HBox {
         return HBox().apply {
             addClass("source-content__chunk")
-            highlightedChunk.onChangeAndDoNowWithDisposer { highlightedIndex ->
-                if (highlightedIndex == index) {
-                    sourceTextChunksContainer.scrollTo(index)
-                }
-                togglePseudoClass("highlighted", highlightedIndex == index)
-            }.also { listeners.add(it) }
-
-            label((index + 1).toString()) {
+            label(chunkLabel) {
                 addClass("source-content__verse-number")
                 minWidth = USE_PREF_SIZE
-                if (!showNumber) {
-                    isVisible = false
-                    isManaged = false
-                }
             }
             label(textContent) {
                 addClass("source-content__text")

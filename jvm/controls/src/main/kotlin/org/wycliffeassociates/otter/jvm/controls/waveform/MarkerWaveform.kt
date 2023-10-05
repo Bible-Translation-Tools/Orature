@@ -1,21 +1,3 @@
-/**
- * Copyright (C) 2020-2022 Wycliffe Associates
- *
- * This file is part of Orature.
- *
- * Orature is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Orature is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
- */
 package org.wycliffeassociates.otter.jvm.controls.waveform
 
 import javafx.beans.property.SimpleBooleanProperty
@@ -26,12 +8,13 @@ import javafx.event.EventHandler
 import javafx.geometry.NodeOrientation
 import javafx.scene.image.Image
 import javafx.scene.layout.StackPane
+import javafx.scene.shape.Line
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
 import tornadofx.*
 
-class MarkerPlacementWaveform : StackPane() {
+class MarkerWaveform : StackPane() {
 
     val themeProperty = SimpleObjectProperty(ColorTheme.LIGHT)
 
@@ -112,7 +95,7 @@ class MarkerPlacementWaveform : StackPane() {
     }
 
     init {
-        addClass("marker-placement-waveform")
+        addClass("marker-waveform")
         minHeight = 120.0
 
         nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
@@ -121,13 +104,13 @@ class MarkerPlacementWaveform : StackPane() {
 
         val topTrack = MarkerTrackControl().apply {
             top = this
-            markers.bind(this@MarkerPlacementWaveform.markers, { it })
-            canMoveMarkerProperty.bind(this@MarkerPlacementWaveform.canMoveMarkerProperty)
+            markers.bind(this@MarkerWaveform.markers, { it })
+            canMoveMarkerProperty.bind(this@MarkerWaveform.canMoveMarkerProperty)
             onPositionChangedProperty.bind(onPositionChanged)
             onLocationRequestProperty.bind(onLocationRequest)
         }
         waveformFrame = WaveformFrame(topTrack).apply {
-            themeProperty.bind(this@MarkerPlacementWaveform.themeProperty)
+            themeProperty.bind(this@MarkerWaveform.themeProperty)
             framePositionProperty.bind(positionProperty)
             onWaveformClickedProperty.bind(onWaveformClicked)
             onWaveformDragReleasedProperty.bind(onWaveformDragReleased)
@@ -139,15 +122,23 @@ class MarkerPlacementWaveform : StackPane() {
             onSeekNextProperty.bind(onSeekNext)
 
             focusedProperty().onChange {
-                this@MarkerPlacementWaveform.togglePseudoClass("active", it)
+                this@MarkerWaveform.togglePseudoClass("active", it)
             }
         }
         add(waveformFrame)
-        add(WaveformOverlay().apply { playbackPositionProperty.bind(positionProperty) })
-        add(
-            PlaceMarkerLayer().apply {
-                onPlaceMarkerActionProperty.bind(onPlaceMarker)
-            }
-        )
+        stackpane {
+            isMouseTransparent = true
+
+            add(
+                Line(0.0, 40.0, 0.0, 0.0).apply {
+                    managedProperty().set(false)
+                    startXProperty().bind(this@stackpane.widthProperty().divide(2))
+                    endXProperty().bind(this@stackpane.widthProperty().divide(2))
+                    endYProperty().bind(this@stackpane.heightProperty())
+                    styleClass.add("scrolling-waveform__playback-line")
+                }
+            )
+        }
     }
+
 }
