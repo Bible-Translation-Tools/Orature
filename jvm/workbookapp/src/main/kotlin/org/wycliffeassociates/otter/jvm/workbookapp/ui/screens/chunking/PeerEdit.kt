@@ -85,7 +85,7 @@ class PeerEdit : Fragment() {
                 visibleWhen { viewModel.isPlayingProperty.not() }
 
                 action {
-
+                    viewModel.confirmChunk()
                 }
             }
             region { hgrow = Priority.ALWAYS }

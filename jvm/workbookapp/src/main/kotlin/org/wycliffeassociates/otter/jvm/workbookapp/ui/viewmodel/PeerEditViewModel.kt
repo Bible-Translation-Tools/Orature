@@ -15,6 +15,7 @@ import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
@@ -24,6 +25,7 @@ import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
 import tornadofx.*
 import javax.inject.Inject
 
@@ -98,6 +100,14 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         stopAnimationTimer()
     }
 
+    fun refreshChunkList() {
+        workbookDataStore.activeChapterProperty.value?.let { chapter ->
+            chapter.chunks.value?.let { chunks ->
+                translationViewModel.loadChunks(chunks)
+            }
+        }
+    }
+
     fun toggleAudio() {
         audioController?.toggle()
     }
@@ -108,6 +118,21 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
 
     fun seek(location: Int) {
         audioController?.seek(location)
+    }
+
+    fun confirmChunk() {
+        currentChunkProperty.value?.let { chunk ->
+            val checkingStatus = when (translationViewModel.selectedStepProperty.value) {
+                ChunkingStep.PEER_EDIT -> CheckingStatus.PEER_EDIT
+                ChunkingStep.KEYWORD_CHECK -> CheckingStatus.KEYWORD
+                ChunkingStep.VERSE_CHECK -> CheckingStatus.VERSE
+                else -> CheckingStatus.UNCHECKED
+            }
+            val take = chunk.audio.selected.value?.value
+            val checkingStage = TakeCheckingState(checkingStatus, take?.checksum())
+            take?.checkingState?.accept(checkingStage)
+            refreshChunkList()
+        }
     }
 
     fun onRecordNew() {

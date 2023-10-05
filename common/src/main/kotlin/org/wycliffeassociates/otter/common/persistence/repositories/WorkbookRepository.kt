@@ -25,6 +25,7 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.primitives.Collection
@@ -386,6 +387,18 @@ class WorkbookRepository(
             }
     }
 
+    private fun subscribeToCheckingStatus(take: WorkbookTake, modelTake: ModelTake): Disposable {
+        return take.checkingState
+            .flatMapCompletable {
+                db.updateTake(
+                    modelTake.copy(checkingStatus =  it.status, checksum = it.checksum)
+                )
+            }
+            .subscribeOn(Schedulers.io())
+            .doOnError { e -> logger.error("Error in Take's Checking Status subscription: $take", e) }
+            .subscribe()
+    }
+
     private fun workbookTake(modelTake: ModelTake): WorkbookTake {
         return WorkbookTake(
             name = modelTake.filename,
@@ -531,6 +544,7 @@ class WorkbookRepository(
                 deselectUponDelete(wbTake, selectedTakeRelay)
                 // When a take becomes deleted, delete it from the database
                 deleteFromDbUponDelete(wbTake, modelTake)
+                subscribeToCheckingStatus(wbTake, modelTake)
             }
 
             // These are new takes
