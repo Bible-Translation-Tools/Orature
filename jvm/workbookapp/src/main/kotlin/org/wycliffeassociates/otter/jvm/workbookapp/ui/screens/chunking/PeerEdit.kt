@@ -15,7 +15,7 @@ import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
-import org.wycliffeassociates.otter.jvm.controls.waveform.ScrollingWaveform
+import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.PeerEditViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
@@ -28,7 +28,7 @@ class PeerEdit : Fragment() {
     val recorderViewModel: RecorderViewModel by inject()
 
     private lateinit var slider: Slider
-    private lateinit var waveform: ScrollingWaveform
+    private lateinit var waveform: MarkerWaveform
 
     private val mainSectionProperty = SimpleObjectProperty<Node>(null)
     private val playbackView = createPlaybackView()
@@ -105,8 +105,9 @@ class PeerEdit : Fragment() {
         }
     }
 
-    private fun createPlaybackWaveform(container: VBox): ScrollingWaveform {
-        return ScrollingWaveform().apply {
+    private fun createPlaybackWaveform(container: VBox): MarkerWaveform {
+        return MarkerWaveform().apply {
+            vgrow = Priority.ALWAYS
             themeProperty.bind(settingsViewModel.appColorMode)
             positionProperty.bind(viewModel.positionProperty)
             clip = Rectangle().apply {
