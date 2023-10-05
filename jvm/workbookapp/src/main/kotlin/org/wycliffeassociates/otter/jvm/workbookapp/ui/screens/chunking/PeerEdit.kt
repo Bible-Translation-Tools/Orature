@@ -176,7 +176,7 @@ class PeerEdit : Fragment() {
             hgrow = Priority.ALWAYS
             colorThemeProperty.bind(settingsViewModel.selectedThemeProperty)
             setPixelsInHighlightFunction { viewModel.pixelsInHighlight(it) }
-            player.bind(viewModel.targetPlayerProperty)
+            player.bind(viewModel.waveformAudioPlayerProperty)
             secondsToHighlightProperty.set(SECONDS_ON_SCREEN)
         }
     }

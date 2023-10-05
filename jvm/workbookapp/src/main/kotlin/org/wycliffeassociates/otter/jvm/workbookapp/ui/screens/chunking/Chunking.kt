@@ -15,8 +15,6 @@ import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ChunkingStepSelectedEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
@@ -168,7 +166,7 @@ class Chunking : Fragment() {
             hgrow = Priority.ALWAYS
             colorThemeProperty.bind(settingsViewModel.selectedThemeProperty)
             setPixelsInHighlightFunction { viewModel.pixelsInHighlight(it) }
-            player.bind(viewModel.audioPlayer)
+            player.bind(viewModel.waveformAudioPlayerProperty)
             secondsToHighlightProperty.set(SECONDS_ON_SCREEN)
         }
     }

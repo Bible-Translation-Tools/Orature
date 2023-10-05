@@ -87,9 +87,12 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     override var resumeAfterScroll: Boolean = false
 
     override var audioController: AudioPlayerController? = null
-    override val audioPlayer = SimpleObjectProperty<IAudioPlayer>()
+    override val waveformAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     override val positionProperty = SimpleDoubleProperty(0.0)
     override var imageWidthProperty = SimpleDoubleProperty(0.0)
+    override var timer: AnimationTimer? = null
+    override var sampleRate: Int = 0 // beware of divided by 0
+    override var totalFrames: Int = 0 // beware of divided by 0
 
     lateinit var audio: OratureAudioFile
     lateinit var waveform: Observable<Image>
@@ -97,18 +100,14 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     private val height = Integer.min(Screen.getMainScreen().platformHeight, 500)
     private val builder = ObservableWaveformBuilder()
 
-    var timer: AnimationTimer? = null
     var subscribeOnWaveformImages: () -> Unit = {}
     /** Call this before leaving the view to avoid memory leak */
     var chunkImageCleanup: () -> Unit = {}
     var consumeImageCleanup: () -> Unit = {}
-
     val isPlayingProperty = SimpleBooleanProperty(false)
+
     val compositeDisposable = CompositeDisposable()
     val changeUnsaved = SimpleBooleanProperty(false)
-
-    private var sampleRate: Int = 0 // beware of divided by 0
-    private var sourceTotalFrames: Int = 0 // beware of divided by 0
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -151,19 +150,6 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         return workbook.sourceAudioAccessor.getUserMarkedChapter(chapter, workbook.target)
     }
 
-    private fun startAnimationTimer() {
-        timer = object : AnimationTimer() {
-            override fun handle(currentNanoTime: Long) {
-                calculatePosition()
-            }
-        }.apply { start() }
-    }
-
-    private fun stopAnimationTimer() {
-        timer?.stop()
-        timer = null
-    }
-
     override fun placeMarker() {
         super.placeMarker()
         if (translationViewModel.reachableStepProperty.value == ChunkingStep.CHUNKING) {
@@ -177,9 +163,9 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         player.load(audioFile)
         player.getAudioReader()?.let {
             sampleRate = it.sampleRate
-            sourceTotalFrames = it.totalFrames
+            totalFrames = it.totalFrames
         }
-        audioPlayer.set(player)
+        waveformAudioPlayerProperty.set(player)
         return audio
     }
 
@@ -208,9 +194,8 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     fun saveChanges() {
         compositeDisposable.clear()
         audioConnectionFactory.clearPlayerConnections()
-        audioPlayer.value.close()
+        waveformAudioPlayerProperty.value.close()
         audioController = null
-
 
         val accessor = workbookDataStore.workbook.projectFilesAccessor
         val wkbk = workbookDataStore.activeWorkbookProperty.value
@@ -229,7 +214,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
     fun initializeAudioController(slider: Slider? = null) {
         audioController = AudioPlayerController(slider).also { controller ->
-            audioPlayer.value?.let {
+            waveformAudioPlayerProperty.value?.let {
                 controller.load(it)
             }
         }
@@ -241,7 +226,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     }
 
     private fun createWaveformImages(audio: OratureAudioFile) {
-        imageWidthProperty.set(computeImageWidth(SECONDS_ON_SCREEN))
+        imageWidthProperty.set(computeImageWidth(width, SECONDS_ON_SCREEN))
 
         waveform = builder.buildAsync(
             audio.reader(),
@@ -250,23 +235,5 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
             wavColor = Color.web(WAV_COLOR),
             background = Color.web(BACKGROUND_COLOR)
         )
-    }
-
-    fun computeImageWidth(secondsOnScreen: Int): Double {
-        val samplesPerScreenWidth = audioPlayer.get().getAudioReader()!!.sampleRate * secondsOnScreen
-        val samplesPerPixel = samplesPerScreenWidth / width
-        val pixelsInDuration = audioPlayer.get().getDurationInFrames() / samplesPerPixel
-        return pixelsInDuration.toDouble()
-    }
-
-
-    fun pixelsInHighlight(controlWidth: Double): Double {
-        if (sampleRate == 0 || sourceTotalFrames == 0) {
-            return 1.0
-        }
-
-        val framesInHighlight = sampleRate * SECONDS_ON_SCREEN
-        val framesPerPixel = sourceTotalFrames / max(controlWidth, 1.0)
-        return max(framesInHighlight / framesPerPixel, 1.0)
     }
 }

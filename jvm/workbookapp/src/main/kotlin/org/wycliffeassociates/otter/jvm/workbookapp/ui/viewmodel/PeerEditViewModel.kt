@@ -18,7 +18,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
-import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
+import org.wycliffeassociates.otter.jvm.controls.waveform.IWaveformViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
@@ -26,9 +26,8 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
 import javax.inject.Inject
-import kotlin.math.max
 
-class PeerEditViewModel : ViewModel() {
+class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     @Inject
     lateinit var audioConnectionFactory: AudioConnectionFactory
 
@@ -38,27 +37,28 @@ class PeerEditViewModel : ViewModel() {
     val blindDraftViewModel: BlindDraftViewModel by inject()
     val recorderViewModel: RecorderViewModel by inject()
 
+    override val waveformAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
+    override val positionProperty = SimpleDoubleProperty(0.0)
+    override var imageWidthProperty = SimpleDoubleProperty()
+    override var timer: AnimationTimer? = null
+
     val chunkTitleProperty = workbookDataStore.activeChunkTitleBinding()
     val currentChunkProperty = SimpleObjectProperty<Chunk>()
     val sourcePlayerProperty = SimpleObjectProperty<IAudioPlayer>()
-    val targetPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
-    val positionProperty = SimpleDoubleProperty(0.0)
     val isPlayingProperty = SimpleBooleanProperty(false)
     val compositeDisposable = CompositeDisposable()
 
     lateinit var waveform: Observable<Image>
-    var timer: AnimationTimer? = null
     var slider: Slider? = null
     var subscribeOnWaveformImages: () -> Unit = {}
     var cleanUpWaveform: () -> Unit = {}
 
-    private var sampleRate: Int = 0 // beware of divided by 0
-    private var targetTotalFrames: Int = 0 // beware of divided by 0
+    override var sampleRate: Int = 0 // beware of divided by 0
+    override var totalFrames: Int = 0 // beware of divided by 0
 
     private var audioController: AudioPlayerController? = null
     private val newTakeProperty = SimpleObjectProperty<Take>(null)
     private val builder = ObservableWaveformBuilder()
-    private var imageWidthProperty = SimpleDoubleProperty(0.0)
     private val height = Integer.min(Screen.getMainScreen().platformHeight, 500)
     private val width = Screen.getMainScreen().platformWidth
     private val disposableListeners = mutableListOf<ListenerDisposer>()
@@ -128,24 +128,6 @@ class PeerEditViewModel : ViewModel() {
         }
     }
 
-    fun pixelsInHighlight(controlWidth: Double): Double {
-        if (sampleRate == 0 || targetTotalFrames == 0) {
-            return 1.0
-        }
-
-        val framesInHighlight = sampleRate * SECONDS_ON_SCREEN
-        val framesPerPixel = targetTotalFrames / max(controlWidth, 1.0)
-        return max(framesInHighlight / framesPerPixel, 1.0)
-    }
-
-    fun getLocationInFrames(): Int {
-        return targetPlayerProperty.value?.getLocationInFrames() ?: 0
-    }
-
-    fun getDurationInFrames(): Int {
-        return targetPlayerProperty.value?.getDurationInFrames() ?: 0
-    }
-
     private fun subscribeToSelectedTake(chunk: Chunk) {
         chunkDisposable.clear()
         chunk.audio.selected
@@ -160,9 +142,9 @@ class PeerEditViewModel : ViewModel() {
         audioPlayer.load(take.file)
         audioPlayer.getAudioReader()?.let {
             sampleRate = it.sampleRate
-            targetTotalFrames = it.totalFrames
+            totalFrames = it.totalFrames
         }
-        targetPlayerProperty.set(audioPlayer)
+        waveformAudioPlayerProperty.set(audioPlayer)
 
         loadAudioController()
 
@@ -173,7 +155,7 @@ class PeerEditViewModel : ViewModel() {
 
     private fun loadAudioController() {
         audioController = AudioPlayerController(slider).also { controller ->
-            targetPlayerProperty.value?.let {
+            waveformAudioPlayerProperty.value?.let {
                 controller.load(it)
                 isPlayingProperty.bind(controller.isPlayingProperty)
             }
@@ -182,7 +164,7 @@ class PeerEditViewModel : ViewModel() {
 
     private fun createWaveformImages(audio: OratureAudioFile) {
         cleanUpWaveform()
-        imageWidthProperty.set(computeImageWidth(targetPlayerProperty.value))
+        imageWidthProperty.set(computeImageWidth(width))
 
         builder.cancel()
         waveform = builder.buildAsync(
@@ -192,35 +174,5 @@ class PeerEditViewModel : ViewModel() {
             wavColor = Color.web(WAV_COLOR),
             background = Color.web(BACKGROUND_COLOR)
         )
-    }
-
-    private fun computeImageWidth(audioPlayer: IAudioPlayer, secondsOnScreen: Int = SECONDS_ON_SCREEN): Double {
-        val samplesPerScreenWidth = sampleRate * secondsOnScreen
-        val samplesPerPixel = samplesPerScreenWidth / width
-        val pixelsInDuration = audioPlayer.getDurationInFrames() / samplesPerPixel
-        return pixelsInDuration.toDouble()
-    }
-
-    private fun startAnimationTimer() {
-        timer = object : AnimationTimer() {
-            override fun handle(currentNanoTime: Long) {
-                calculatePosition()
-            }
-        }.apply { start() }
-    }
-
-    private fun stopAnimationTimer() {
-        timer?.stop()
-        timer = null
-    }
-
-    private fun calculatePosition() {
-        targetPlayerProperty.value?.let { audioPlayer ->
-            val current = audioPlayer.getLocationInFrames()
-            val duration = audioPlayer.getDurationInFrames().toDouble()
-            val percentPlayed = current / duration
-            val pos = percentPlayed * imageWidthProperty.value
-            positionProperty.set(pos)
-        }
     }
 }
