@@ -146,19 +146,17 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         }
         waveformAudioPlayerProperty.set(audioPlayer)
 
-        loadAudioController()
+        loadAudioController(audioPlayer)
 
         val audio = OratureAudioFile(take.file)
         createWaveformImages(audio)
         subscribeOnWaveformImages()
     }
 
-    private fun loadAudioController() {
+    private fun loadAudioController(player: IAudioPlayer) {
         audioController = AudioPlayerController(slider).also { controller ->
-            waveformAudioPlayerProperty.value?.let {
-                controller.load(it)
-                isPlayingProperty.bind(controller.isPlayingProperty)
-            }
+            controller.load(player)
+            isPlayingProperty.bind(controller.isPlayingProperty)
         }
     }
 
