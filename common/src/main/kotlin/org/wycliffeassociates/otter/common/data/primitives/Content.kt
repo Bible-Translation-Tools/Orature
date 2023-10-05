@@ -32,6 +32,5 @@ data class Content(
     var draftNumber: Int,
     @JsonIgnore
     var id: Int = 0,
-    var bridged: Boolean = false,
-    var checkingStatus: CheckingStatus = CheckingStatus.UNCHECKED
+    var bridged: Boolean = false
 ) : CollectionOrContent

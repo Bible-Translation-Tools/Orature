@@ -26,6 +26,7 @@ import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.Content
@@ -42,6 +43,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.common.data.workbook.ResourceGroup
+import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.data.workbook.TakeHolder
 import org.wycliffeassociates.otter.common.data.workbook.TextItem
 import org.wycliffeassociates.otter.common.data.workbook.Translation
@@ -255,8 +257,7 @@ class WorkbookRepository(
             end = content.end,
             contentType = content.type,
             draftNumber = content.draftNumber,
-            bridged = content.bridged,
-            checkingStatus = content.checkingStatus
+            bridged = content.bridged
         )
     }
 
@@ -392,7 +393,8 @@ class WorkbookRepository(
             number = modelTake.number,
             format = MimeType.WAV, // TODO
             createdTimestamp = modelTake.created,
-            deletedTimestamp = BehaviorRelay.createDefault(DateHolder(modelTake.deleted))
+            deletedTimestamp = BehaviorRelay.createDefault(DateHolder(modelTake.deleted)),
+            checkingState = BehaviorRelay.createDefault(TakeCheckingState(modelTake.checkingStatus, modelTake.checksum))
         )
     }
 
@@ -404,6 +406,8 @@ class WorkbookRepository(
             created = workbookTake.createdTimestamp,
             deleted = null,
             played = false,
+            checkingStatus = workbookTake.checkingState.value?.status ?: CheckingStatus.UNCHECKED,
+            checksum = workbookTake.checkingState.value?.checksum,
             markers = markers
         )
     }

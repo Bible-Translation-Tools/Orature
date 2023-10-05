@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.Chunkification
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
+import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.Content
@@ -494,7 +495,7 @@ class OngoingProjectImporter @Inject constructor(
                 val file = File(filepath).canonicalFile
                 val relativeFile = file.relativeTo(projectAudioDir.canonicalFile)
 
-                val take = Take(file.name, file, takeNumber, now, null, false, listOf())
+                val take = Take(file.name, file, takeNumber, now, null, false, CheckingStatus.UNCHECKED, null, listOf())
                 take.id = takeRepository.insertForContent(take, chunk).blockingGet()
 
                 if (relativeFile.invariantSeparatorsPath in selectedTakes) {
@@ -721,7 +722,7 @@ class OngoingProjectImporter @Inject constructor(
             }
         }
 
-        return Take(newFileName, targetTakeFile, newTakeNumber, now, null, false, listOf())
+        return Take(newFileName, targetTakeFile, newTakeNumber, now, null, false, CheckingStatus.UNCHECKED, null, listOf())
     }
 
     private fun getRelativeTakePath(pathInRC: String, metaProjectPath: String): String {

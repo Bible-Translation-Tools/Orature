@@ -61,9 +61,9 @@ CREATE TABLE IF NOT EXISTS content_entity (
     text             TEXT,
     format           TEXT,
     draft_number     INTEGER DEFAULT 1 NOT NULL,
-    bridged          INTEGER DEFAULT 0 NOT NULL,
-    checking_fk      INTEGER NOT NULL REFERENCES checking_status(id) ON DELETE RESTRICT
+    bridged          INTEGER DEFAULT 0 NOT NULL
 );
+
 CREATE INDEX IF NOT EXISTS idx_content_entity_collection_start ON content_entity (collection_fk, start, type_fk);
 
 CREATE TABLE IF NOT EXISTS content_type (
@@ -88,7 +88,9 @@ CREATE TABLE IF NOT EXISTS take_entity (
     number           INTEGER NOT NULL,
     created_ts       TEXT NOT NULL,
     deleted_ts       TEXT DEFAULT NULL,
-    played           INTEGER DEFAULT 0 NOT NULL
+    played           INTEGER DEFAULT 0 NOT NULL,
+    checking_fk      INTEGER NOT NULL REFERENCES checking_status(id) ON DELETE RESTRICT,
+    checksum         TEXT
 );
 
 CREATE TABLE IF NOT EXISTS marker_entity (

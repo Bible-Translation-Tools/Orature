@@ -231,8 +231,7 @@ class ContentDao(
                 CONTENT_ENTITY.FORMAT,
                 CONTENT_ENTITY.TYPE_FK,
                 CONTENT_ENTITY.DRAFT_NUMBER,
-                CONTENT_ENTITY.BRIDGED,
-                CONTENT_ENTITY.CHECKING_FK
+                CONTENT_ENTITY.BRIDGED
             )
             .values(
                 entity.collectionFk,
@@ -245,8 +244,7 @@ class ContentDao(
                 entity.format,
                 entity.type_fk,
                 entity.draftNumber,
-                if (entity.bridged) 1 else 0,
-                entity.checking_fk
+                if (entity.bridged) 1 else 0
             )
             .execute()
 
@@ -274,8 +272,7 @@ class ContentDao(
                 CONTENT_ENTITY.FORMAT,
                 CONTENT_ENTITY.TYPE_FK,
                 CONTENT_ENTITY.DRAFT_NUMBER,
-                CONTENT_ENTITY.BRIDGED,
-                CONTENT_ENTITY.CHECKING_FK
+                CONTENT_ENTITY.BRIDGED
             )
         val insertWithValues = entities.fold(bareInsert) { q, e ->
             if (e.id != 0) throw InsertionException("Entity ID was not 0")
@@ -290,8 +287,7 @@ class ContentDao(
                 e.format,
                 e.type_fk,
                 e.draftNumber,
-                if (e.bridged) 1 else 0,
-                e.checking_fk
+                if (e.bridged) 1 else 0
             )
         }
         insertWithValues.execute()
@@ -334,7 +330,6 @@ class ContentDao(
                     .set(CONTENT_ENTITY.TYPE_FK, entity.type_fk)
                     .set(CONTENT_ENTITY.DRAFT_NUMBER, entity.draftNumber)
                     .set(CONTENT_ENTITY.BRIDGED, if (entity.bridged) 1 else 0)
-                    .set(CONTENT_ENTITY.CHECKING_FK, entity.checking_fk)
                     .where(CONTENT_ENTITY.ID.eq(entity.id))
                     .execute()
             }
@@ -354,7 +349,6 @@ class ContentDao(
             .set(CONTENT_ENTITY.FORMAT, entity.format)
             .set(CONTENT_ENTITY.DRAFT_NUMBER, entity.draftNumber)
             .set(CONTENT_ENTITY.BRIDGED, if (entity.bridged) 1 else 0)
-            .set(CONTENT_ENTITY.CHECKING_FK, entity.checking_fk)
             .where(CONTENT_ENTITY.ID.eq(entity.id))
             .execute()
     }

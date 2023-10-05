@@ -59,7 +59,7 @@ class ResourceContainerRepository @Inject constructor(
     private val resourceMetadataDao = database.resourceMetadataDao
     private val languageDao = database.languageDao
     private val resourceLinkDao = database.resourceLinkDao
-    private val contentMapper = ContentMapper(contentTypeDao, database.checkingStatusDao)
+    private val contentMapper = ContentMapper(contentTypeDao)
 
     override fun importResourceContainer(
         rc: ResourceContainer,
