@@ -126,7 +126,7 @@ class ChapterPageViewModel : ViewModel() {
         chapterCardProperty.set(CardData(workbookDataStore.chapter))
         workbookDataStore.activeChapterProperty.value?.let { chapter ->
             updateLastSelectedChapter(chapter.sort)
-            loadChapterContents(chapter)
+            loadChapterContents(chapter).subscribe()
             val chap = CardData(chapter)
             chapterCardProperty.set(chap)
             subscribeSelectedTakePropertyToRelay(chapter.audio)
@@ -371,11 +371,11 @@ class ChapterPageViewModel : ViewModel() {
         workbookDataStore.workbookRecentChapterMap[workbookHash] = chapterNumber - 1
     }
 
-    private fun loadChapterContents(chapter: Chapter) {
+    private fun loadChapterContents(chapter: Chapter): Observable<CardData> {
         // Remove existing content so the user knows they are outdated
         allContent.clear()
         loading = true
-        chapter.chunks
+        return chapter.chunks
             .flatMap {
                 Observable.fromIterable(it)
             }
@@ -413,7 +413,6 @@ class ChapterPageViewModel : ViewModel() {
                 cardData
             }
             .observeOnFx()
-            .subscribe()
     }
 
     private fun subscribeSelectedTakePropertyToRelay(audio: AssociatedAudio) {

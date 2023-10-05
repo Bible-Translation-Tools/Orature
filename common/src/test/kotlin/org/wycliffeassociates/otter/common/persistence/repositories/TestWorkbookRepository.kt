@@ -39,7 +39,6 @@ import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
-import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.ResourceGroup
 import org.wycliffeassociates.otter.common.data.workbook.Take
@@ -216,7 +215,7 @@ class TestWorkbookRepository {
             val collection = invocation.getArgument<Collection>(0)!!
             val format = if (collection.resourceContainer == rcTarget) "audio/wav" else "text/usfm"
 
-            val rr = BehaviorRelay.create<List<Content>>()
+            val relay = BehaviorRelay.create<List<Content>>()
             when (collection.slug.count { it == '_' }) {
                 1 -> {
                     (1..BasicTestParams.chunksPerChapter).map { verse ->
@@ -233,12 +232,12 @@ class TestWorkbookRepository {
                             draftNumber = 1
                         )
                     }.let {
-                        rr.accept(it)
+                        relay.accept(it)
                     }
                 }
                 else -> {}
             }
-            rr
+            relay
         }
 
         whenever(
