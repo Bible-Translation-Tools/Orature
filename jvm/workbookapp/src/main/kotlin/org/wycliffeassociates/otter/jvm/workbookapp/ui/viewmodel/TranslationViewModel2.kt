@@ -68,9 +68,9 @@ class TranslationViewModel2 : ViewModel() {
         val chunkViewData = chunks.map { chunk ->
             val completed = when(selectedStepProperty.value) {
                 ChunkingStep.BLIND_DRAFT -> chunk.hasSelectedAudio()
-                ChunkingStep.PEER_EDIT -> chunk.checkingStatus.ordinal >= CheckingStatus.PEER_EDIT.ordinal
-                ChunkingStep.KEYWORD_CHECK -> chunk.checkingStatus.ordinal >= CheckingStatus.KEYWORD.ordinal
-                ChunkingStep.VERSE_CHECK -> chunk.checkingStatus.ordinal >= CheckingStatus.VERSE.ordinal
+                ChunkingStep.PEER_EDIT -> chunk.checkingStatus().ordinal >= CheckingStatus.PEER_EDIT.ordinal
+                ChunkingStep.KEYWORD_CHECK -> chunk.checkingStatus().ordinal >= CheckingStatus.KEYWORD.ordinal
+                ChunkingStep.VERSE_CHECK -> chunk.checkingStatus().ordinal >= CheckingStatus.VERSE.ordinal
                 else -> false
             }
             ChunkViewData(

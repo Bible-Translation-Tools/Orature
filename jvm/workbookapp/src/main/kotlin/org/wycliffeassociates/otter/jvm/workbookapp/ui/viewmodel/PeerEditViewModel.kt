@@ -77,7 +77,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
             .observeOnFx()
             .subscribe { chunks ->
                 translationViewModel.loadChunks(chunks)
-                (chunks.firstOrNull { it.checkingStatus == CheckingStatus.UNCHECKED } ?: chunks.firstOrNull())
+                (chunks.firstOrNull { it.checkingStatus() == CheckingStatus.UNCHECKED } ?: chunks.firstOrNull())
                     ?.let { chunk ->
                         translationViewModel.selectChunk(chunk.sort)
                     }
