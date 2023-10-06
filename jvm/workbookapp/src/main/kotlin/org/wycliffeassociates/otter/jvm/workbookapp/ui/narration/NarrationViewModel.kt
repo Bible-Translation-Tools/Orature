@@ -723,6 +723,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     private fun handleBeginRecording(event: BeginRecordingEvent, narratableList: List<NarrationTextItemData>) {
+        finishOutstandingActions()
         val index = event.index
         narratableList[index].state = NarrationTextItemState.RECORD_ACTIVE
     }
@@ -746,6 +747,7 @@ class NarrationViewModel : ViewModel() {
             true -> NarrationTextItemState.RE_RECORDING_PAUSED
             false -> NarrationTextItemState.RECORDING_PAUSED
         }
+        initializeTeleprompter()
     }
 
     private fun handleResumeRecording(event: ResumeRecordingEvent, narratableList: List<NarrationTextItemData>) {
@@ -758,11 +760,13 @@ class NarrationViewModel : ViewModel() {
     }
 
     private fun handleRecordVerse(event: RecordVerseEvent, narratableList: List<NarrationTextItemData>) {
+        finishOutstandingActions()
         val index = event.index
         narratableList[index].state = NarrationTextItemState.RECORD_ACTIVE
     }
 
     private fun handleRecordAgain(event: RecordAgainEvent, narratableList: List<NarrationTextItemData>) {
+        finishOutstandingActions()
         val index = event.index
         narratableList[index].state = NarrationTextItemState.RE_RECORD_ACTIVE
     }
@@ -770,5 +774,22 @@ class NarrationViewModel : ViewModel() {
     private fun handleSaveRecording(event: SaveRecordingEvent, narratableList: List<NarrationTextItemData>) {
         val index = event.index
         narratableList[index].state = NarrationTextItemState.RE_RECORD
+        initializeTeleprompter()
+    }
+
+    private fun finishOutstandingActions() {
+        val unfinalizedStates = listOf(
+            NarrationTextItemState.RECORD_ACTIVE,
+            NarrationTextItemState.RE_RECORD_ACTIVE,
+            NarrationTextItemState.RECORDING_PAUSED,
+            NarrationTextItemState.RE_RECORDING_PAUSED,
+        )
+        narratableList.forEachIndexed { index, item ->
+            if (item.state in unfinalizedStates) {
+                narration.finalizeVerse(index)
+                item.state = NarrationTextItemState.RE_RECORD
+            }
+        }
+        initializeTeleprompter()
     }
 }
