@@ -105,14 +105,20 @@ class NarrationTextCell(
 
             onNextVerseActionProperty.set(DebouncedEventHandler {
                 listView.apply {
-                    selectionModel.selectIndices(index)
-                    selectionModel.selectNext()
 
-                    // Scroll to the previous verse because scrolling to the active verse will cause
-                    // the active verse to move slightly above the viewport. Scrolling -1 will mean that
-                    // the active verse won't be on the top and is unpredictably placed, but is still better
-                    // than the text needed to actively be narrated being off the screen.
-                    scrollTo(selectionModel.selectedIndex - 1)
+                    try {
+                        logger.info("Selecting Index: $index in onNextVerseAction property")
+                        selectionModel.selectIndices(index)
+                        selectionModel.selectNext()
+
+                        // Scroll to the previous verse because scrolling to the active verse will cause
+                        // the active verse to move slightly above the viewport. Scrolling -1 will mean that
+                        // the active verse won't be on the top and is unpredictably placed, but is still better
+                        // than the text needed to actively be narrated being off the screen.
+                        scrollTo(selectionModel.selectedIndex - 1)
+                    } catch (e: Exception) {
+                        logger.error("Error in selecting and scrolling to a Teleprompter item", e)
+                    }
 
                     val nextVerseIndex = index + 1
                     val nextVerse = items.getOrNull(nextVerseIndex)
