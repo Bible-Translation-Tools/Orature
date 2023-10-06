@@ -56,6 +56,9 @@ class MarkerFrameSkin(val control: MarkerFrame) : SkinBase<MarkerFrame>(control)
                 addClass("btn", "btn--icon")
                 graphic = FontIcon(Material.DRAG_HANDLE)
                 rotate = 90.0
+
+                onMouseClickedProperty().bind(control.onClickProperty)
+                onMouseDraggedProperty().bind(control.onDragProperty)
             }
         }
     }

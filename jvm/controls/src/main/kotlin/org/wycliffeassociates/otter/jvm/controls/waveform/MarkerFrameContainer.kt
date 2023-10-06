@@ -102,7 +102,7 @@ class MarkerFrameContainer: Region() {
             })
             markerPositionProperty.set(pixel)
 
-            setOnMouseClicked { me ->
+            setOnClick { me ->
                 val trackWidth = this@MarkerFrameContainer.width
                 if (trackWidth > 0) {
                     dragStart[i] = localToParent(me.x, me.y)
@@ -117,8 +117,8 @@ class MarkerFrameContainer: Region() {
                 this.requestFocus()
             }
 
-            setOnMouseDragged { me ->
-                if (!canBeMovedProperty.value) return@setOnMouseDragged
+            setOnDrag { me ->
+                if (!canBeMovedProperty.value) return@setOnDrag
                 val trackWidth = this@MarkerFrameContainer.width
                 if (trackWidth > 0.0) {
                     if (trackWidth > this.width) {
@@ -142,6 +142,7 @@ class MarkerFrameContainer: Region() {
             }
 
             markerPositionProperty.onChangeAndDoNow {
+                println("marker pos: $it")
                 it?.let {
                     val trackWidth = this@MarkerFrameContainer.width
                     translateX = it.toDouble()

@@ -208,7 +208,7 @@ class MarkerTrackControl : Region() {
             val endPos = widthProperty()
 
             if (i + 1 < highlights.size) {
-                highlights[i + 1]?.let { next ->
+                highlights[i + 1].let { next ->
                     val nextVis = next.visibleProperty()
                     val nextPos = next.translateXProperty()
                     val highlightWidth = Bindings.createDoubleBinding(
