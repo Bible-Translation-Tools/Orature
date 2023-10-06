@@ -149,7 +149,7 @@ class WaveformFrame(
 
                     topTrack?.let {
                         add(it.apply {
-                            val me = (it as MarkerTrackControl)
+                            val me = (it as MarkerFrameContainer)
                             me.onSeekPreviousProperty.bind(this@WaveformFrame.onSeekPreviousProperty)
                             me.onSeekNextProperty.bind(this@WaveformFrame.onSeekNextProperty)
                         })
