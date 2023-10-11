@@ -88,8 +88,6 @@ class NarrationTextCell(
             verseLabelProperty.set(item.chunk.title)
             verseTextProperty.set(item.chunk.textItem.text)
 
-            logger.info("Item $index hasRecording: ${item.hasRecording}")
-
             hasRecordingProperty.set(item.hasRecording)
             recordButtonTextProperty.bind(this@NarrationTextCell.recordButtonTextProperty)
             isRecordingProperty.bind(this@NarrationTextCell.isRecordingProperty)

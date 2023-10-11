@@ -37,6 +37,7 @@ import tornadofx.*
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.PrintWriter
+import java.io.StringWriter
 import java.util.*
 
 class OtterExceptionHandler(
@@ -87,6 +88,8 @@ class OtterExceptionHandler(
     }
 
     override fun uncaughtException(t: Thread, error: Throwable) {
+        if (isListViewScrollBug(error)) return
+
         if (isCycle(error)) {
             logger.info("Detected cycle handling error, aborting.", error)
         } else {
@@ -101,6 +104,30 @@ class OtterExceptionHandler(
                 }
             }
         }
+    }
+
+    /**
+     * FIXME: This is a band-aid, remove this function if a bugfix is made to JavaFX's VirtualFlow
+     *
+     * Analyzes the stack trace of incoming exceptions to see if they match an apparent bug in VirtualFlow which is
+     * used in controls like ListView. This exception is thrown in an async runnable on the JavaFX event loop during
+     * a pulse. It seems to be benign and an issue which is ultimately resolved during further scrolling/pulses.
+     *
+     * While not ideal, the exception happening entirely within framework code prevents being able to silence the
+     * exception with a try catch, and as such, we are having to filter the exception here.
+     */
+    private fun isListViewScrollBug(error: Throwable): Boolean {
+        val sw = StringWriter()
+        val pw = PrintWriter(sw)
+        error.printStackTrace(pw)
+        pw.flush()
+        val stackTrace: String = sw.toString()
+        sw.close()
+
+        return if (stackTrace.contains("findOwnerCell(VirtualFlow.java:695)")) {
+            logger.warn("Error with scrolling in the listview caught, silencing exception.", error)
+            true
+        } else false
     }
 
     private fun isCycle(error: Throwable) = error.stackTrace.any {
