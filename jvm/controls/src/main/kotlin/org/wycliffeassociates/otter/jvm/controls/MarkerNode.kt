@@ -26,6 +26,7 @@ class MarkerNode  : Control() {
 
     init {
         addClass("marker-node")
+        isPickOnBounds = false
         visibleProperty().bind(isPlacedProperty)
     }
 

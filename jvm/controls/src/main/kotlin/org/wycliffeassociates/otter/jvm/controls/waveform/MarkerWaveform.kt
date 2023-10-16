@@ -88,7 +88,7 @@ class MarkerWaveform : StackPane() {
         waveformFrame.addImage(image)
     }
 
-    private lateinit var top: MarkerFrameContainer
+    private lateinit var top: MarkersContainer
 
     fun refreshMarkers() {
         top.refreshMarkers()
@@ -102,7 +102,7 @@ class MarkerWaveform : StackPane() {
 
         add(MarkerViewBackground())
 
-        val topTrack = MarkerFrameContainer().apply {
+        val topTrack = MarkersContainer().apply {
             top = this
             markers.bind(this@MarkerWaveform.markers, { it })
             canMoveMarkerProperty.bind(this@MarkerWaveform.canMoveMarkerProperty)

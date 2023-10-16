@@ -37,6 +37,7 @@ class MarkerNodeSkin(val control: MarkerNode) : SkinBase<MarkerNode>(control) {
     private fun buildMarkerSkin(): VBox {
         return VBox().apply {
             vgrow = Priority.ALWAYS
+            isPickOnBounds = false
 
             hbox {
                 addClass("title-section")
@@ -51,7 +52,10 @@ class MarkerNodeSkin(val control: MarkerNode) : SkinBase<MarkerNode>(control) {
                     graphic = FontIcon(MaterialDesign.MDI_DELETE).addClass("wa-icon")
                 }
             }
-            region { vgrow = Priority.ALWAYS }
+            region {
+                isPickOnBounds = false
+                vgrow = Priority.ALWAYS
+            }
             button {
                 addClass("btn", "btn--icon")
                 graphic = FontIcon(Material.DRAG_HANDLE)

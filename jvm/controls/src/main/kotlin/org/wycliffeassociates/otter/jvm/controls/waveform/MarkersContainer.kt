@@ -19,7 +19,7 @@ import tornadofx.*
 private const val MOVE_MARKER_INTERVAL = 0.001
 private const val MARKER_COUNT = 500
 
-class MarkerFrameContainer: Region() {
+class MarkersContainer: Region() {
 
     val markers = observableListOf<ChunkMarkerModel>()
     val canMoveMarkerProperty = SimpleBooleanProperty(true)
@@ -89,7 +89,7 @@ class MarkerFrameContainer: Region() {
 
     private fun createMarker(i: Int, mk: ChunkMarkerModel): MarkerNode {
         return MarkerNode().apply {
-            prefHeightProperty().bind(this@MarkerFrameContainer.heightProperty())
+            prefHeightProperty().bind(this@MarkersContainer.heightProperty())
             val pixel = framesToPixels(
                 mk.frame
             ).toDouble()
@@ -103,7 +103,7 @@ class MarkerFrameContainer: Region() {
             markerPositionProperty.set(pixel)
 
             setOnClick { me ->
-                val trackWidth = this@MarkerFrameContainer.width
+                val trackWidth = this@MarkersContainer.width
                 if (trackWidth > 0) {
                     dragStart[i] = localToParent(me.x, me.y)
                     val clampedValue: Double = Utils.clamp(
@@ -119,13 +119,13 @@ class MarkerFrameContainer: Region() {
 
             setOnDrag { me ->
                 if (!canBeMovedProperty.value) return@setOnDrag
-                val trackWidth = this@MarkerFrameContainer.width
+                val trackWidth = this@MarkersContainer.width
                 if (trackWidth > 0.0) {
                     if (trackWidth > this.width) {
-                        val cur: Point2D = localToParent(me.x, me.y)
+                        val pos: Point2D = localToParent(me.x, me.y)
                         if (dragStart[i] == null) {
                             // we're getting dragged without getting a mouse press
-                            dragStart[i] = cur
+                            dragStart[i] = pos
                             val clampedValue: Double = Utils.clamp(
                                 0.0,
                                 markerPositionProperty.value,
@@ -133,7 +133,7 @@ class MarkerFrameContainer: Region() {
                             )
                             preDragThumbPos[i] = clampedValue / trackWidth
                         }
-                        val dragPos = cur.x - dragStart[i]!!.x
+                        val dragPos = pos.x - dragStart[i]!!.x
                         updateValue(i, preDragThumbPos[i] + dragPos / (trackWidth - this.width))
                         onPositionChangedProperty.value.invoke(i, _markers[i].markerPositionProperty.value / trackWidth)
                     }
@@ -142,9 +142,8 @@ class MarkerFrameContainer: Region() {
             }
 
             markerPositionProperty.onChangeAndDoNow {
-                println("marker pos: $it")
                 it?.let {
-                    val trackWidth = this@MarkerFrameContainer.width
+                    val trackWidth = this@MarkersContainer.width
                     translateX = it.toDouble()
                     if (trackWidth > 0) {
                         markers[i].frame = pixelsToFrames(
