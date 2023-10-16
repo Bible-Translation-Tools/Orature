@@ -24,10 +24,10 @@ import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.jvm.controls.MarkerFrame
+import org.wycliffeassociates.otter.jvm.controls.MarkerNode
 import tornadofx.*
 
-class MarkerFrameSkin(val control: MarkerFrame) : SkinBase<MarkerFrame>(control) {
+class MarkerNodeSkin(val control: MarkerNode) : SkinBase<MarkerNode>(control) {
 
     init {
         val root = buildMarkerSkin()

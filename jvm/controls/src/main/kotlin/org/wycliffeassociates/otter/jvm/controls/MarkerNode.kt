@@ -10,10 +10,10 @@ import javafx.event.EventHandler
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import javafx.scene.input.MouseEvent
-import org.wycliffeassociates.otter.jvm.controls.skins.MarkerFrameSkin
+import org.wycliffeassociates.otter.jvm.controls.skins.MarkerNodeSkin
 import tornadofx.*
 
-class MarkerFrame  : Control() {
+class MarkerNode  : Control() {
 
     val markerIdProperty = SimpleIntegerProperty(0)
     val markerPositionProperty = SimpleDoubleProperty(0.0)
@@ -25,12 +25,12 @@ class MarkerFrame  : Control() {
     val onDragProperty: ObjectProperty<EventHandler<MouseEvent>> = SimpleObjectProperty()
 
     init {
-        addClass("marker-frame")
+        addClass("marker-node")
         visibleProperty().bind(isPlacedProperty)
     }
 
     override fun createDefaultSkin(): Skin<*> {
-        return MarkerFrameSkin(this)
+        return MarkerNodeSkin(this)
     }
 
     fun setOnClick(eventHandler: EventHandler<MouseEvent>?) {

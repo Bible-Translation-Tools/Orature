@@ -9,7 +9,7 @@ import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Region
 import javafx.scene.shape.Rectangle
-import org.wycliffeassociates.otter.jvm.controls.MarkerFrame
+import org.wycliffeassociates.otter.jvm.controls.MarkerNode
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
@@ -41,13 +41,13 @@ class MarkerFrameContainer: Region() {
         pickOnBoundsProperty().set(false)
     }
 
-    private val _markers = mutableListOf<MarkerFrame>()
+    private val _markers = mutableListOf<MarkerNode>()
     private val highlights = mutableListOf<Rectangle>()
 
     private var preDragThumbPos = DoubleArray(markers.size)
     var dragStart: Array<Point2D?> = Array(markers.size) { null }
 
-    private val focusedMarkerProperty = SimpleObjectProperty<MarkerFrame>()
+    private val focusedMarkerProperty = SimpleObjectProperty<MarkerNode>()
 
     fun refreshMarkers() {
         markers.forEachIndexed { index, chunkMarker ->
@@ -87,8 +87,8 @@ class MarkerFrameContainer: Region() {
         dragStart = Array(MARKER_COUNT) { null }
     }
 
-    private fun createMarker(i: Int, mk: ChunkMarkerModel): MarkerFrame {
-        return MarkerFrame().apply {
+    private fun createMarker(i: Int, mk: ChunkMarkerModel): MarkerNode {
+        return MarkerNode().apply {
             prefHeightProperty().bind(this@MarkerFrameContainer.heightProperty())
             val pixel = framesToPixels(
                 mk.frame
@@ -125,7 +125,7 @@ class MarkerFrameContainer: Region() {
                         val cur: Point2D = localToParent(me.x, me.y)
                         if (dragStart[i] == null) {
                             // we're getting dragged without getting a mouse press
-                            dragStart[i] = localToParent(me.x, me.y)
+                            dragStart[i] = cur
                             val clampedValue: Double = Utils.clamp(
                                 0.0,
                                 markerPositionProperty.value,

@@ -67,7 +67,7 @@ class ChunkingTranslationPage : View() {
         tryImportStylesheet("/css/audio-player.css")
         tryImportStylesheet("/css/source-content.css")
         tryImportStylesheet("/css/chunk-item.css")
-        tryImportStylesheet("/css/marker-frame.css")
+        tryImportStylesheet("/css/marker-node.css")
         tryImportStylesheet("/css/scrolling-waveform.css")
 
 //        mainFragmentProperty.addListener { observable, oldValue, newValue ->
