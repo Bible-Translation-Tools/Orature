@@ -27,6 +27,7 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.Slider
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
@@ -66,6 +67,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
     val chapterTitle get() = workbookDataStore.activeChapterProperty.value?.title ?: ""
     val sourceAudio by audioDataStore.sourceAudioProperty
+    val sourceTextProperty = SimpleStringProperty()
 
     @Inject
     lateinit var directoryProvider: IDirectoryProvider

@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.common.data.workbook
 
+import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import java.util.*
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.domain.content.ResourceRecordable
@@ -43,6 +44,17 @@ class Chunk(
         get() = if (start != end) "${start}-${end}" else "$start"
 
     fun hasSelectedAudio() = audio.selected.value?.value != null
+
+    fun checkingStatus(): CheckingStatus {
+        return audio.selected.value?.value?.let { take ->
+            if (take.checkingState.value?.checksum == take.checksum()) {
+                take.checkingState.value?.status
+            } else {
+                take.checkingState.accept(TakeCheckingState(CheckingStatus.UNCHECKED))
+                null
+            }
+        } ?: CheckingStatus.UNCHECKED
+    }
 
     override fun hashCode(): Int {
         return Objects.hash(
