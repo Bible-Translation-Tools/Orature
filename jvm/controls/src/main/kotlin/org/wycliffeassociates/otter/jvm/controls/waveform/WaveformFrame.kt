@@ -33,6 +33,7 @@ import javafx.scene.layout.Region
 import javafx.scene.layout.StackPane
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
+import org.wycliffeassociates.otter.jvm.controls.marker.MarkersContainer
 
 import tornadofx.*
 

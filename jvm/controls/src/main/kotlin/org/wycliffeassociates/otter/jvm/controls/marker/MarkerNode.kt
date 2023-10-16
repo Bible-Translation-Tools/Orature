@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.controls
+package org.wycliffeassociates.otter.jvm.controls.marker
 
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleBooleanProperty
@@ -13,7 +13,7 @@ import javafx.scene.input.MouseEvent
 import org.wycliffeassociates.otter.jvm.controls.skins.MarkerNodeSkin
 import tornadofx.*
 
-class MarkerNode  : Control() {
+class MarkerNode : Control() {
 
     val markerIdProperty = SimpleIntegerProperty(0)
     val markerPositionProperty = SimpleDoubleProperty(0.0)

@@ -23,7 +23,7 @@ import javafx.scene.control.SkinBase
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
-import org.wycliffeassociates.otter.jvm.controls.ChunkMarker
+import org.wycliffeassociates.otter.jvm.controls.marker.ChunkMarker
 import tornadofx.*
 
 class ChunkMarkerSkin(val control: ChunkMarker) : SkinBase<ChunkMarker>(control) {

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.controls.waveform
+package org.wycliffeassociates.otter.jvm.controls.marker
 
 import com.sun.javafx.util.Utils
 import javafx.beans.binding.Bindings
@@ -24,7 +24,6 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Point2D
 import javafx.scene.layout.Region
 import javafx.scene.shape.Rectangle
-import org.wycliffeassociates.otter.jvm.controls.ChunkMarker
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import java.util.concurrent.Callable

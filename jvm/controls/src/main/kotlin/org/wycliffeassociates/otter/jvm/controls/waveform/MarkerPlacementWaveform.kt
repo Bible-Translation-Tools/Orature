@@ -28,6 +28,7 @@ import javafx.scene.image.Image
 import javafx.scene.layout.StackPane
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
+import org.wycliffeassociates.otter.jvm.controls.marker.MarkerTrackControl
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
 import tornadofx.*
 

@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.controls.waveform
+package org.wycliffeassociates.otter.jvm.controls.marker
 
 import com.sun.javafx.util.Utils
 import javafx.beans.binding.Bindings
@@ -9,7 +9,6 @@ import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Region
 import javafx.scene.shape.Rectangle
-import org.wycliffeassociates.otter.jvm.controls.MarkerNode
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
