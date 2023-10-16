@@ -55,7 +55,6 @@ class MarkerNodeSkin(val control: MarkerNode) : SkinBase<MarkerNode>(control) {
             button {
                 addClass("btn", "btn--icon")
                 graphic = FontIcon(Material.DRAG_HANDLE)
-                rotate = 90.0
 
                 onMouseClickedProperty().bind(control.onClickProperty)
                 onMouseDraggedProperty().bind(control.onDragProperty)
