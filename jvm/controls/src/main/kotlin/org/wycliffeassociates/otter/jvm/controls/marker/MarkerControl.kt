@@ -18,11 +18,17 @@ abstract class MarkerControl : Control() {
     open val isPlacedProperty = SimpleBooleanProperty(true)
     open val canBeMovedProperty = SimpleBooleanProperty(true)
 
-    open val onDragStart: ObjectProperty<EventHandler<MouseEvent>> = SimpleObjectProperty()
+    /**
+     * Delegates the drag start (on marker clicked) to whatever the actual drag control/button is.
+     */
+    open val onDragStartProperty: ObjectProperty<EventHandler<MouseEvent>> = SimpleObjectProperty()
+    /**
+     * Delegates the drag handler (on marker dragged) to whatever the actual drag control/button is.
+     */
     open val onDragProperty: ObjectProperty<EventHandler<MouseEvent>> = SimpleObjectProperty()
 
     fun setOnDragStart(eventHandler: EventHandler<MouseEvent>?) {
-        onDragStart.set(eventHandler)
+        onDragStartProperty.set(eventHandler)
     }
 
     fun setOnDrag(eventHandler: EventHandler<MouseEvent>?) {

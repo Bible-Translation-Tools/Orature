@@ -29,6 +29,9 @@ class ChunkMarker : MarkerControl() {
     init {
         styleClass.add("chunk-marker")
         visibleProperty().bind(isPlacedProperty)
+
+        onMouseClickedProperty().bind(onDragStartProperty)
+        onMouseDraggedProperty().bind(onDragProperty)
     }
 
     override fun createDefaultSkin(): Skin<ChunkMarker> {
