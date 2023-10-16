@@ -1,27 +1,10 @@
-/**
- * Copyright (C) 2020-2023 Wycliffe Associates
- *
- * This file is part of Orature.
- *
- * Orature is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Orature is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
- */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
 import javafx.scene.control.Slider
+import javafx.scene.control.Tooltip
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.scene.shape.Rectangle
@@ -31,15 +14,17 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ConsumeViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 import tornadofx.*
 
-class Consume : Fragment() {
-    private val logger = LoggerFactory.getLogger(Consume::class.java)
+class Chunking : Fragment() {
+    private val logger = LoggerFactory.getLogger(javaClass)
 
-    val viewModel: ConsumeViewModel by inject()
+    val viewModel: ChunkingViewModel by inject()
+    val translationViewModel: TranslationViewModel2 by inject()
     val settingsViewModel: SettingsViewModel by inject()
 
     private lateinit var waveform: MarkerWaveform
@@ -49,19 +34,19 @@ class Consume : Fragment() {
 
     override fun onDock() {
         super.onDock()
-        logger.info("Consume docked")
+        logger.info("Chunking docked")
 
         viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
-        viewModel.onDockConsume()
+        viewModel.onDockChunking()
         viewModel.initializeAudioController(slider)
         waveform.markers.bind(viewModel.markers) { it }
     }
 
     override fun onUndock() {
         super.onUndock()
-        logger.info("Consume undocked")
+        logger.info("Chunking undocked")
         cleanUpWaveform()
-        viewModel.onUndockConsume()
+        viewModel.onUndockChunking()
     }
 
     private fun subscribeOnWaveformImages() {
@@ -88,7 +73,7 @@ class Consume : Fragment() {
                     }
                     themeProperty.bind(settingsViewModel.appColorMode)
                     positionProperty.bind(viewModel.positionProperty)
-                    canMoveMarkerProperty.set(false)
+                    canMoveMarkerProperty.set(true)
                     imageWidthProperty.bind(viewModel.imageWidthProperty)
 
                     setUpWaveformActionHandlers()
@@ -103,23 +88,48 @@ class Consume : Fragment() {
             }
             bottom = hbox {
                 addClass("consume__bottom")
-                button {
+                button(messages["addChunk"]) {
                     addClass("btn", "btn--primary", "consume__btn")
-                    val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
-                    val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
-                    textProperty().bind(viewModel.isPlayingProperty.stringBinding {
-                        togglePseudoClass("active", it == true)
-                        if (it == true) {
-                            graphic = pauseIcon
-                            messages["pause"]
-                        } else {
-                            graphic = playIcon
-                            messages["playSource"]
-                        }
-                    })
+                    tooltip(text)
+                    graphic = FontIcon(MaterialDesign.MDI_PLUS)
 
                     action {
-                        viewModel.mediaToggle()
+                        viewModel.placeMarker()
+                    }
+                }
+                region { hgrow = Priority.ALWAYS }
+                hbox {
+                    addClass("chunking-bottom__media-btn-group")
+                    button {
+                        addClass("btn", "btn--icon")
+                        graphic = FontIcon(MaterialDesign.MDI_SKIP_PREVIOUS)
+
+                        action { viewModel.seekPrevious() }
+                    }
+                    button {
+                        addClass("btn", "btn--icon")
+                        val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
+                        val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
+                        tooltipProperty().bind(
+                            viewModel.isPlayingProperty.objectBinding {
+                                togglePseudoClass("active", it == true)
+                                if (it == true) {
+                                    graphic = pauseIcon
+                                    Tooltip(messages["pause"])
+                                } else {
+                                    graphic = playIcon
+                                    Tooltip(messages["playSource"])
+                                }
+                            }
+                        )
+
+                        action { viewModel.mediaToggle() }
+                    }
+                    button {
+                        addClass("btn", "btn--icon")
+                        graphic = FontIcon(MaterialDesign.MDI_SKIP_NEXT)
+
+                        action { viewModel.seekNext() }
                     }
                 }
             }
@@ -143,6 +153,11 @@ class Consume : Fragment() {
             setOnFastForward(viewModel::fastForward)
             setOnToggleMedia(viewModel::mediaToggle)
             setOnResumeMedia(viewModel::resumeMedia)
+
+            setOnPositionChanged { _, _ ->
+                // markers moved = dirty
+                viewModel.changeUnsaved.set(true)
+            }
         }
     }
 

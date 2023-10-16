@@ -185,6 +185,7 @@ class MarkerTrackControl : Region() {
             }
             mouseTransparentProperty().set(true)
             pickOnBoundsProperty().set(false)
+            isManaged = false
         }
     }
 

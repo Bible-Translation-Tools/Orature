@@ -52,11 +52,9 @@ class VerseMarkerModel(
 
     private var labelIndex = 0
     var changesSaved = true
-        private set
 
     init {
         cues as MutableList
-        if (cues.isEmpty() && markerLabels.isNotEmpty()) cues.add(AudioCue(0, markerLabels.first()))
         cues.sortBy { it.location }
         markerCountProperty.value = cues.size
 
@@ -67,7 +65,8 @@ class VerseMarkerModel(
         if (markers.size < markerTotal) {
             changesSaved = false
 
-            val marker = ChunkMarkerModel(AudioCue(location, "${markerLabels[labelIndex]}}"))
+            val label = markerLabels.getOrElse(labelIndex) { labelIndex + 1 }.toString()
+            val marker = ChunkMarkerModel(AudioCue(location, label))
             val op = Add(marker)
             undoStack.push(op)
             op.apply()

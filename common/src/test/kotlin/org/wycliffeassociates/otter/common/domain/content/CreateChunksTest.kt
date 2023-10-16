@@ -1,7 +1,9 @@
 package org.wycliffeassociates.otter.common.domain.content
 
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.spy
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
 import io.reactivex.Single
@@ -20,9 +22,11 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IVersificationRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDatabaseAccessors
@@ -41,6 +45,7 @@ class CreateChunksTest {
     val projectDir = TemporaryFolder()
 
     private lateinit var sourceAudioDir: File
+    private lateinit var sourceAudioFile: File
     private var chunksAddedToDatabase = false
 
     private var autoincrement: Int = 1
@@ -200,12 +205,16 @@ class CreateChunksTest {
             whenever(getProjectSourceAudioDirectory(any(), any(), any())).thenReturn(sourceAudioDir)
         }
 
-        projectFilesAccessor = ProjectFilesAccessor(mockedDirectoryProvider, rcSource, rcTarget, collTarget)
-        audioSourceAudioAccessor = SourceAudioAccessor(mockedDirectoryProvider, rcSource, collSource.slug)
-        workbook = buildWorkbook(mockedDirectoryProvider, mockedDb, collSource, collTarget)
-        chapter = workbook.target.chapters.blockingFirst()
-
         rc = createRcWithAudio()
+        val sourceMetadata = rc.manifest.dublinCore.mapToMetadata(rc.file, rcSource.language)
+        projectFilesAccessor = ProjectFilesAccessor(mockedDirectoryProvider, sourceMetadata, rcTarget, collTarget)
+        audioSourceAudioAccessor = mock<SourceAudioAccessor> {
+            on { getChapter(any(), any()) } doReturn(SourceAudio(sourceAudioFile, 1, sourceCues.size))
+        }
+
+        workbook = spy(buildWorkbook(mockedDirectoryProvider, mockedDb, collSource, collTarget))
+        doReturn(audioSourceAudioAccessor).whenever(workbook).sourceAudioAccessor
+        chapter = workbook.target.chapters.blockingFirst()
 
         CreateChunks(mock()).createUserDefinedChunks(workbook, chapter, customCues, 1)
     }
@@ -238,7 +247,6 @@ class CreateChunksTest {
         )
         val sourceFile = createWavFile(tempDir.root, "${fileName.replace("{chapter}", "1")}.wav", "123456".toByteArray())
         val sourceCueFile = File(tempDir.root, "${fileName.replace("{chapter}", "1")}.cue").apply { createNewFile() }
-
         val audio = OratureAudioFile(sourceFile)
         audio.metadata.clearMarkers()
         audio.update()
@@ -247,6 +255,7 @@ class CreateChunksTest {
         }
         audio.update()
 
+        sourceAudioFile = sourceFile
         return createTestRc(projectDir.root, dublinCore, listOf(sourceFile, sourceCueFile))
     }
 }

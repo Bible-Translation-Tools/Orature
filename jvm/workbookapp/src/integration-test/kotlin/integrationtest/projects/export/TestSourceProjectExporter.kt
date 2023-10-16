@@ -177,8 +177,7 @@ class TestSourceProjectExporter {
             .blockingGet()
 
         assertEquals(ImportResult.SUCCESS, importResult)
-        509
-        124
+
         db.assertRowCounts(
             RowCount(
                 contents = mapOf(
