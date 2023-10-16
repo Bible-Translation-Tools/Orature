@@ -18,28 +18,20 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.marker
 
-import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleDoubleProperty
-import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.jvm.controls.skins.ChunkMarkerSkin
 
-class ChunkMarker : Control() {
+class ChunkMarker : MarkerControl() {
 
-    val markerIdProperty = SimpleIntegerProperty(0)
-    val markerPositionProperty = SimpleDoubleProperty(0.0)
-    val markerNumberProperty = SimpleStringProperty("1")
-    val isPlacedProperty = SimpleBooleanProperty(true)
-    val canBeMovedProperty = SimpleBooleanProperty(true)
+    override val markerNumberProperty = SimpleStringProperty("1")
 
     init {
         styleClass.add("chunk-marker")
         visibleProperty().bind(isPlacedProperty)
     }
 
-    override fun createDefaultSkin(): Skin<*> {
+    override fun createDefaultSkin(): Skin<ChunkMarker> {
         return ChunkMarkerSkin(this)
     }
 }

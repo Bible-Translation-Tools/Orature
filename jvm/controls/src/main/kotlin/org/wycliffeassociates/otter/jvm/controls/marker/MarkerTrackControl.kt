@@ -59,13 +59,13 @@ class MarkerTrackControl : Region() {
         pickOnBoundsProperty().set(false)
     }
 
-    private val _markers = mutableListOf<ChunkMarker>()
+    private val _markers = mutableListOf<MarkerControl>()
     private val highlights = mutableListOf<Rectangle>()
 
     private var preDragThumbPos = DoubleArray(markers.size)
     var dragStart: Array<Point2D?> = Array(markers.size) { null }
 
-    private val focusedMarkerProperty = SimpleObjectProperty<ChunkMarker>()
+    private val focusedMarkerProperty = SimpleObjectProperty<MarkerControl>()
 
     fun refreshMarkers() {
         markers.forEachIndexed { index, chunkMarker ->
@@ -105,7 +105,7 @@ class MarkerTrackControl : Region() {
         dragStart = Array(MARKER_COUNT) { null }
     }
 
-    private fun createMarker(i: Int, mk: ChunkMarkerModel): ChunkMarker {
+    private fun createMarker(i: Int, mk: ChunkMarkerModel): MarkerControl {
         return ChunkMarker().apply {
             val pixel = framesToPixels(
                 mk.frame
@@ -139,10 +139,10 @@ class MarkerTrackControl : Region() {
                 val trackWidth = this@MarkerTrackControl.width
                 if (trackWidth > 0.0) {
                     if (trackWidth > this.width) {
-                        val cur: Point2D = localToParent(me.x, me.y)
+                        val pos: Point2D = localToParent(me.x, me.y)
                         if (dragStart[i] == null) {
                             // we're getting dragged without getting a mouse press
-                            dragStart[i] = localToParent(me.x, me.y)
+                            dragStart[i] = pos
                             val clampedValue: Double = Utils.clamp(
                                 0.0,
                                 markerPositionProperty.value,
@@ -150,7 +150,7 @@ class MarkerTrackControl : Region() {
                             )
                             preDragThumbPos[i] = clampedValue / trackWidth
                         }
-                        val dragPos = cur.x - dragStart[i]!!.x
+                        val dragPos = pos.x - dragStart[i]!!.x
                         updateValue(i, preDragThumbPos[i] + dragPos / (trackWidth - this.width))
                         onPositionChangedProperty.value.invoke(i, _markers[i].markerPositionProperty.value / trackWidth)
                     }

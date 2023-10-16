@@ -40,13 +40,13 @@ class MarkersContainer: Region() {
         pickOnBoundsProperty().set(false)
     }
 
-    private val _markers = mutableListOf<MarkerNode>()
+    private val _markers = mutableListOf<MarkerControl>()
     private val highlights = mutableListOf<Rectangle>()
 
     private var preDragThumbPos = DoubleArray(markers.size)
     var dragStart: Array<Point2D?> = Array(markers.size) { null }
 
-    private val focusedMarkerProperty = SimpleObjectProperty<MarkerNode>()
+    private val focusedMarkerProperty = SimpleObjectProperty<MarkerControl>()
 
     fun refreshMarkers() {
         markers.forEachIndexed { index, chunkMarker ->
@@ -86,7 +86,7 @@ class MarkersContainer: Region() {
         dragStart = Array(MARKER_COUNT) { null }
     }
 
-    private fun createMarker(i: Int, mk: ChunkMarkerModel): MarkerNode {
+    private fun createMarker(i: Int, mk: ChunkMarkerModel): MarkerControl {
         return MarkerNode().apply {
             prefHeightProperty().bind(this@MarkersContainer.heightProperty())
             val pixel = framesToPixels(
@@ -101,7 +101,7 @@ class MarkersContainer: Region() {
             })
             markerPositionProperty.set(pixel)
 
-            setOnClick { me ->
+            setOnDragStart { me ->
                 val trackWidth = this@MarkersContainer.width
                 if (trackWidth > 0) {
                     dragStart[i] = localToParent(me.x, me.y)
