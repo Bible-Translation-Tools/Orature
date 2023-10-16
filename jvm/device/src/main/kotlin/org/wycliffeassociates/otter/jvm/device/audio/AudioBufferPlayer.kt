@@ -193,6 +193,9 @@ class AudioBufferPlayer(
                                 synchronized(monitor) {
                                     if (_reader.supportsTimeShifting()) {
                                         if (_reader.framePosition > bytes.size / 2) {
+                                            // NOTE: this seek is happening in the active-verses space, and not the
+                                            // individual verse space.
+                                            // NOTE: this condition seems to never be hit.
                                             _reader.seek(_reader.framePosition - processor.overlap)
                                         }
                                         _reader.getPcmBuffer(bytes)
@@ -215,6 +218,12 @@ class AudioBufferPlayer(
                                 player.close()
                                 // NOTE: this is seeking ot the relativeEnd position of verse 2. This seems to
                                 // mitigate the issue, however, it causes issues later
+
+                                // NOTE this seek is happening relative to the verse space
+                                // NOTE: is it because of the above seek (that is relative to the activeVerseSpace)
+                                //   that I am having a hard time setting a condition on relativeToAbsolute, because it
+                                //   while that seek is relative to the activeVerseSpace, this below seek is relative to
+                                //   the verse space.
                                  seek(startPosition)
                             }
                         } catch (e: LineUnavailableException) {
