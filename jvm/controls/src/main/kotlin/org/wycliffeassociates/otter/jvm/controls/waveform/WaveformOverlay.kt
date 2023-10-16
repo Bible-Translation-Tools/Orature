@@ -18,7 +18,6 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.waveform
 
-import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.geometry.Pos
 import javafx.scene.layout.StackPane

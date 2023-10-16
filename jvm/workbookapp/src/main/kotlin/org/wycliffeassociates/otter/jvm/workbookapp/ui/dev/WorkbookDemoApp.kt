@@ -22,9 +22,13 @@ import javafx.stage.Stage
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.demo.ui.screens.RootView
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
+import org.wycliffeassociates.otter.jvm.workbookapp.di.DaggerAppDependencyGraph
+import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
 
-class WorkbookDemoApp : App(RootView::class) {
+class WorkbookDemoApp : App(RootView::class), IDependencyGraphProvider {
+    override val dependencyGraph = DaggerAppDependencyGraph.builder().build()
+
     override fun start(stage: Stage) {
         super.start(stage)
         stage.isMaximized = true
@@ -33,7 +37,7 @@ class WorkbookDemoApp : App(RootView::class) {
     }
 
     override fun onBeforeShow(view: UIComponent) {
-        workspace.dock<ControlsDemoView>() // set the view for demo here
+        workspace.dock<ChunkingDemoView>() // set the view for demo here
         workspace.root.apply {
             contextmenu {
                 item("Change Theme") {

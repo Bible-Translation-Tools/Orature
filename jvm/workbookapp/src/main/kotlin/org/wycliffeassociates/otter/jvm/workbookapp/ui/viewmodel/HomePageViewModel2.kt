@@ -12,6 +12,7 @@ import javafx.collections.transformation.FilteredList
 import javafx.collections.transformation.SortedList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
+import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
@@ -26,6 +27,7 @@ import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChunkingTranslationPage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.WorkbookPage
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
@@ -131,7 +133,7 @@ class HomePageViewModel2 : ViewModel() {
 
     fun selectBook(workbookDescriptor: WorkbookDescriptor) {
         val projectGroup = selectedProjectGroupProperty.value
-        workbookDS.currentModeProperty.set(selectedProjectGroupProperty.value.mode)
+        workbookDS.currentModeProperty.set(projectGroup.mode)
 
         val projects = workbookRepo.getProjects().blockingGet()
         val existingProject = projects.firstOrNull { existingProject ->
@@ -141,8 +143,7 @@ class HomePageViewModel2 : ViewModel() {
         }
 
         existingProject?.let { workbook ->
-            openWorkbook(workbook)
-            navigator.dock<WorkbookPage>()
+            openWorkbook(workbook, projectGroup.mode)
         }
     }
 
@@ -289,10 +290,13 @@ class HomePageViewModel2 : ViewModel() {
             }
     }
 
-    private fun openWorkbook(workbook: Workbook) {
+    private fun openWorkbook(workbook: Workbook, mode: ProjectMode) {
         workbookDS.activeWorkbookProperty.set(workbook)
         initializeProjectFiles(workbook)
         updateWorkbookModifiedDate(workbook)
+        when(mode) {
+            ProjectMode.TRANSLATION -> navigator.dock<ChunkingTranslationPage>()
+        }
     }
 
     private fun initializeProjectFiles(workbook: Workbook) {

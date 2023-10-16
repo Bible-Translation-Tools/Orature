@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.controls
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.event.EventTarget
 import javafx.geometry.NodeOrientation
 import javafx.scene.Node
 import javafx.scene.control.Label
@@ -10,21 +11,17 @@ import javafx.scene.control.ListCell
 import javafx.scene.control.ListView
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
-import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
-import org.controlsfx.control.GridView
 import org.wycliffeassociates.otter.jvm.utils.enableScrollByKey
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import tornadofx.*
 
 class RollingSourceText : VBox() {
 
     val sourceTitleProperty = SimpleStringProperty()
+    val sourceTextProperty = SimpleStringProperty()
     val licenseTextProperty = SimpleStringProperty()
     val orientationProperty = SimpleObjectProperty<NodeOrientation>()
-    val highlightedChunk = SimpleIntegerProperty(-1)
-    val sourceTextProperty = SimpleStringProperty()
     val zoomRateProperty = SimpleIntegerProperty(100)
 
     private lateinit var sourceTextChunksContainer: ListView<Node>
@@ -74,20 +71,10 @@ class RollingSourceText : VBox() {
 
     private fun setUpListeners() {
         sourceTextProperty.onChangeAndDoNowWithDisposer { txt ->
-            val chunks = txt?.trim()?.split(Regex("\\d{1,3}\\.")) ?: listOf()
-            val nodes = mutableListOf<Node>()
-            val sourceTitle = buildSourceTitle()
-            val licenseText = buildLicenseText()
-            val textNodes = chunks
-                .filter { it.isNotBlank() }
-                .mapIndexed { index, chunkText ->
-                buildChunkText(chunkText, index)
-            }.toMutableList()
-
-            nodes.add(sourceTitle)
-            nodes.addAll(textNodes)
-            nodes.add(licenseText)
-
+            if (txt == null) {
+                return@onChangeAndDoNowWithDisposer
+            }
+            val nodes = buildTextNodes(txt)
             sourceTextChunksContainer.items.setAll(nodes)
         }
 
@@ -99,37 +86,46 @@ class RollingSourceText : VBox() {
         }
     }
 
+    private fun buildTextNodes(txt: String): List<Node> {
+        val markerRegex = Regex("""\d{1,3}(-\d*)?\.""")
+        val matches = markerRegex.findAll(txt)
+
+        val markerLabels = matches.map { it.value.removeSuffix(".") }.toList()
+        val chunks = markerRegex.split(txt).filter { it.isNotBlank() }.map { it.trim() }.toList()
+
+        val nodes = mutableListOf<Node>()
+        val sourceTitle = buildSourceTitle()
+        val licenseText = buildLicenseText()
+
+        nodes.add(sourceTitle)
+        for (i in 0 until markerLabels.size) {
+            nodes.add(
+                buildChunkText(chunks[i], markerLabels[i])
+            )
+        }
+        nodes.add(licenseText)
+        return nodes
+    }
+
     private fun buildSourceTitle(): HBox {
         return HBox().apply {
-                label {
-                    addClass("h4")
-                    textProperty().bind(sourceTitleProperty)
+            label {
+                addClass("h4", "h4--80")
+                textProperty().bind(sourceTitleProperty)
             }
         }
     }
 
-    private fun buildChunkText(textContent: String, index: Int): HBox {
-        val isChunkHighlightedProperty = highlightedChunk.booleanBinding { highlightedIndex ->
-            if (highlightedIndex == index) {
-                sourceTextChunksContainer.scrollTo(index)
-            }
-            highlightedIndex == index
-        }
+    private fun buildChunkText(textContent: String, chunkLabel: String): HBox {
         return HBox().apply {
-            label((index + 1).toString()) {
+            addClass("source-content__chunk")
+            label(chunkLabel) {
                 addClass("source-content__verse-number")
-
-                isChunkHighlightedProperty.onChangeAndDoNow {
-                    togglePseudoClass("highlighted", it == true)
-                }
+                minWidth = USE_PREF_SIZE
             }
             label(textContent) {
                 addClass("source-content__text")
-                minHeight = Region.USE_PREF_SIZE // avoid ellipsis
-
-                isChunkHighlightedProperty.onChangeAndDoNow {
-                    togglePseudoClass("highlighted", it == true)
-                }
+                minHeight = USE_PREF_SIZE // avoid ellipsis
             }
         }
     }
@@ -148,3 +144,5 @@ class RollingSourceText : VBox() {
         }
     }
 }
+
+fun EventTarget.rollingSourceText(op: RollingSourceText.() -> Unit = {}) = RollingSourceText().attachTo(this, op)

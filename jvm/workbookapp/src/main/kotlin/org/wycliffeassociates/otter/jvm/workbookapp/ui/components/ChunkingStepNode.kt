@@ -15,6 +15,9 @@ import org.kordamp.ikonli.material.Material
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.utils.bindSingleChild
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.grid.ChunkGrid
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ChunkingStepSelectedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
 import tornadofx.*
 import tornadofx.FX.Companion.messages
@@ -23,32 +26,38 @@ class ChunkingStepNode(
     step: ChunkingStep,
     selectedStepProperty: ObjectProperty<ChunkingStep>,
     reachableStepProperty: ObjectProperty<ChunkingStep>,
-    hideCompletedProperty: BooleanProperty,
-    isCollapsedProperty: BooleanProperty,
-    content: Node? = null
+    isCollapsedProperty: BooleanProperty
 ) : VBox() {
-    private val mainSectionProperty = SimpleObjectProperty<Node>(null)
+    val chunkListProperty = SimpleObjectProperty<List<ChunkViewData>>(null)
+    val isSelectedProperty = selectedStepProperty.booleanBinding {
+        if (it == null) {
+            return@booleanBinding false
+        }
+        togglePseudoClass("selected",  step == selectedStepProperty.value)
+        step == selectedStepProperty.value
+    }
+    private val contentSectionProperty = SimpleObjectProperty<Node>().apply {
+        bind(chunkListProperty.objectBinding {
+            it?.let { list ->
+                ChunkGrid(list)
+            }
+        })
+    }
     private val unavailableProperty = reachableStepProperty.booleanBinding {
         it?.let { reachable ->
             reachable.ordinal < step.ordinal
         } ?: true
     }
-    private val isSelectedProperty = booleanBinding(selectedStepProperty) {
-        step == selectedStepProperty.value
-    }
-    private val completedProperty = booleanBinding(selectedStepProperty) {
+    private val completedProperty = selectedStepProperty.booleanBinding {
+        if (it == null) {
+            return@booleanBinding false
+        }
         step.ordinal < selectedStepProperty.value.ordinal
     }
 
     init {
         addClass("chunking-step")
         isFocusTraversable = true
-        visibleWhen {
-            booleanBinding(hideCompletedProperty, selectedStepProperty) {
-                hideCompletedProperty.value == false || step.ordinal >= selectedStepProperty.value.ordinal
-            }
-        }
-        managedWhen(visibleProperty())
         disableWhen(unavailableProperty)
         completedProperty.onChangeAndDoNow { toggleClass("completed", it == true) }
 
@@ -59,7 +68,7 @@ class ChunkingStepNode(
                 managedWhen(visibleProperty())
 
                 label(messages[step.titleKey]) {
-                    addClass("chunking-step__title", "normal-text")
+                    addClass("chunking-step__title", "h4", "h4--80")
                     graphicProperty().bind(createGraphicBinding(step))
                 }
                 region { hgrow = Priority.ALWAYS }
@@ -78,26 +87,20 @@ class ChunkingStepNode(
         hbox {
             /* expands when step is selected (similar to titled pane & accordion) */
             addClass("chunking-step__content-section")
-            bindSingleChild(mainSectionProperty)
+            bindSingleChild(contentSectionProperty)
 
             visibleWhen { isSelectedProperty.and(isCollapsedProperty.not()) }
             managedWhen(visibleProperty())
-            mainSectionProperty.bind(
-                isSelectedProperty.objectBinding {
-                    this@ChunkingStepNode.togglePseudoClass("selected", it == true)
-                    if (it == true) content else null
-                }
-            )
         }
 
         setOnMouseClicked {
-            selectedStepProperty.set(step)
+            FX.eventbus.fire(ChunkingStepSelectedEvent(step))
             requestFocus()
         }
 
         this.addEventFilter(KeyEvent.KEY_PRESSED) {
             if (it.code == KeyCode.ENTER || it.code == KeyCode.SPACE) {
-                selectedStepProperty.set(step)
+                FX.eventbus.fire(ChunkingStepSelectedEvent(step))
             }
         }
     }
@@ -127,11 +130,6 @@ fun EventTarget.chunkingStep(
     step: ChunkingStep,
     selectedStepProperty: ObjectProperty<ChunkingStep>,
     reachableStepProperty: ObjectProperty<ChunkingStep>,
-    hideCompletedProperty: BooleanProperty,
     isCollapsedProperty: BooleanProperty,
-    content: Node? = null,
     op: ChunkingStepNode.() -> Unit = {}
-) = ChunkingStepNode(step, selectedStepProperty, reachableStepProperty, hideCompletedProperty, isCollapsedProperty, content).attachTo(
-    this,
-    op
-)
+) = ChunkingStepNode(step, selectedStepProperty, reachableStepProperty, isCollapsedProperty).attachTo(this, op)

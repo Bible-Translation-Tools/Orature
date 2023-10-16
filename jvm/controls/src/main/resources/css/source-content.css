@@ -110,8 +110,7 @@
     -fx-padding: 10px 0 0 0;
 }
 
-.source-content__text:highlighted,
-.source-content__verse-number:highlighted {
+.source-content__chunk:highlighted .label {
     -fx-text-fill: -wa-highlight-text;
 }
 

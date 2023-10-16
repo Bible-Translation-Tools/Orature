@@ -3,17 +3,20 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.dev
 import javafx.beans.property.IntegerProperty
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
-import javafx.scene.control.Button
-import javafx.scene.control.ScrollPane
-import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
+import javafx.beans.property.SimpleObjectProperty
+import javafx.scene.control.Label
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.SourceTextDrawer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.ChunkingStepsDrawer
 import tornadofx.*
 
 class ChunkingDemoView : View() {
 
-    private val selectedChunk: IntegerProperty = SimpleIntegerProperty(-1)
-
+    private val selectedChunk: IntegerProperty = SimpleIntegerProperty(2)
+    private val selectedStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.BLIND_DRAFT)
+    private val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.PEER_EDIT)
     private val list = observableListOf(
         ChunkViewData(1, SimpleBooleanProperty(true), selectedChunk),
         ChunkViewData(2, SimpleBooleanProperty(true), selectedChunk),
@@ -24,30 +27,23 @@ class ChunkingDemoView : View() {
     )
 
     override val root = vbox {
-        maxWidth = 300.0
-
-        scrollpane {
-            isFitToWidth = true
-            prefHeight = 200.0
-            vbox {
-                bindChildren(list) {
-                    Button(it.number.toString()).apply {
-                        addClass("btn", "btn--primary")
-                    }
-                }
+        borderpane {
+            left = ChunkingStepsDrawer(selectedStepProperty).apply {
+                chunkItems.setAll(list)
+                this.reachableStepProperty.bind(this@ChunkingDemoView.reachableStepProperty)
             }
-            runLater {
-                // executes this after the view components are created to avoid null (node is not created yet)
-                customizeScrollbarSkin()
-            }
+            center= Label("Fragment here").addClass("h4")
 
-            hbarPolicy = ScrollPane.ScrollBarPolicy.ALWAYS
+            right = SourceTextDrawer().apply {
+                textProperty.set("1. Source text verse 1 here\n2. Verse two text here")
+            }
         }
+
     }
 
     init {
         tryImportStylesheet("/css/chunk-item.css")
         tryImportStylesheet("/css/chunking-page.css")
+        tryImportStylesheet("/css/source-content.css")
     }
 }
-

@@ -26,6 +26,9 @@ import javafx.scene.layout.StackPane
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
+import javafx.scene.Node
+import javafx.scene.layout.Region
+import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import tornadofx.*
@@ -72,7 +75,6 @@ open class ScrollingWaveform : StackPane() {
         vgrow = Priority.ALWAYS
 
         nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
-
         add(MarkerViewBackground())
         waveformFrame = WaveformFrame().apply {
             themeProperty.bind(this@ScrollingWaveform.themeProperty)
