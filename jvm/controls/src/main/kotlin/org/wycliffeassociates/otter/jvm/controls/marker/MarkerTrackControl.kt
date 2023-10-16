@@ -37,7 +37,7 @@ import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 private const val MOVE_MARKER_INTERVAL = 0.001
 private const val MARKER_COUNT = 500
 
-class MarkerTrackControl : Region() {
+open class MarkerTrackControl : Region() {
 
     val markers = observableListOf<ChunkMarkerModel>()
     val canMoveMarkerProperty = SimpleBooleanProperty(true)
@@ -105,8 +105,11 @@ class MarkerTrackControl : Region() {
         dragStart = Array(MARKER_COUNT) { null }
     }
 
+    open fun createMarker(): MarkerControl = ChunkMarker()
+
     private fun createMarker(i: Int, mk: ChunkMarkerModel): MarkerControl {
-        return ChunkMarker().apply {
+        val container = this
+        return createMarker().apply {
             val pixel = framesToPixels(
                 mk.frame
             ).toDouble()
@@ -119,8 +122,8 @@ class MarkerTrackControl : Region() {
             })
             markerPositionProperty.set(pixel)
 
-            setOnMouseClicked { me ->
-                val trackWidth = this@MarkerTrackControl.width
+            setOnDragStart { me ->
+                val trackWidth = container.width
                 if (trackWidth > 0) {
                     dragStart[i] = localToParent(me.x, me.y)
                     val clampedValue: Double = Utils.clamp(
@@ -134,9 +137,9 @@ class MarkerTrackControl : Region() {
                 this.requestFocus()
             }
 
-            setOnMouseDragged { me ->
-                if (!canBeMovedProperty.value) return@setOnMouseDragged
-                val trackWidth = this@MarkerTrackControl.width
+            setOnDrag { me ->
+                if (!canBeMovedProperty.value) return@setOnDrag
+                val trackWidth = container.width
                 if (trackWidth > 0.0) {
                     if (trackWidth > this.width) {
                         val pos: Point2D = localToParent(me.x, me.y)
@@ -160,7 +163,7 @@ class MarkerTrackControl : Region() {
 
             markerPositionProperty.onChangeAndDoNow {
                 it?.let {
-                    val trackWidth = this@MarkerTrackControl.width
+                    val trackWidth = container.width
                     translateX = it.toDouble()
                     if (trackWidth > 0) {
                         markers[i].frame = pixelsToFrames(
