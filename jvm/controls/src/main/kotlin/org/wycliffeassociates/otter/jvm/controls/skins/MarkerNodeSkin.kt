@@ -47,8 +47,8 @@ class MarkerNodeSkin(val control: MarkerNode) : SkinBase<MarkerNode>(control) {
                     addClass("normal-text")
                     graphic = FontIcon(Material.BOOKMARK_OUTLINE).addClass("wa-icon")
                 }
-                label {
-                    addClass("normal-text")
+                button {
+                    addClass("btn", "btn--icon", "btn--borderless", "normal-text")
                     graphic = FontIcon(MaterialDesign.MDI_DELETE).addClass("wa-icon")
                 }
             }
