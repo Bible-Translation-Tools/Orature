@@ -17,19 +17,12 @@ class ChunkingDemoView : View() {
     private val selectedChunk: IntegerProperty = SimpleIntegerProperty(2)
     private val selectedStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.BLIND_DRAFT)
     private val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.PEER_EDIT)
-    private val list = observableListOf(
-        ChunkViewData(1, SimpleBooleanProperty(true), selectedChunk),
-        ChunkViewData(2, SimpleBooleanProperty(true), selectedChunk),
-        ChunkViewData(3, SimpleBooleanProperty(true), selectedChunk),
-        ChunkViewData(4, SimpleBooleanProperty(false), selectedChunk),
-        ChunkViewData(5, SimpleBooleanProperty(false), selectedChunk),
-        ChunkViewData(6, SimpleBooleanProperty(false), selectedChunk)
-    )
+    private val list = observableListOf<ChunkViewData>()
 
     override val root = vbox {
         borderpane {
             left = ChunkingStepsDrawer(selectedStepProperty).apply {
-                chunkItems.setAll(list)
+                chunksProperty.setAll(list)
                 this.reachableStepProperty.bind(this@ChunkingDemoView.reachableStepProperty)
             }
             center= Label("Fragment here").addClass("h4")

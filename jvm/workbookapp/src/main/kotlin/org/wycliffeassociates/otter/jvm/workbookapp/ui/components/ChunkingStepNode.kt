@@ -2,7 +2,9 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
 import javafx.beans.binding.ObjectBinding
 import javafx.beans.property.BooleanProperty
+import javafx.beans.property.ListProperty
 import javafx.beans.property.ObjectProperty
+import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.EventTarget
 import javafx.scene.Node
@@ -28,7 +30,7 @@ class ChunkingStepNode(
     reachableStepProperty: ObjectProperty<ChunkingStep>,
     isCollapsedProperty: BooleanProperty
 ) : VBox() {
-    val chunkListProperty = SimpleObjectProperty<List<ChunkViewData>>(null)
+
     val isSelectedProperty = selectedStepProperty.booleanBinding {
         if (it == null) {
             return@booleanBinding false
@@ -36,12 +38,14 @@ class ChunkingStepNode(
         togglePseudoClass("selected",  step == selectedStepProperty.value)
         step == selectedStepProperty.value
     }
+    val chunkListProperty: ListProperty<ChunkViewData> = SimpleListProperty()
+
     private val contentSectionProperty = SimpleObjectProperty<Node>().apply {
-        bind(chunkListProperty.objectBinding {
-            it?.let { list ->
-                ChunkGrid(list)
+        bind(
+            chunkListProperty.objectBinding { chunkList: List<ChunkViewData> ->
+                ChunkGrid(chunkList)
             }
-        })
+        )
     }
     private val unavailableProperty = reachableStepProperty.booleanBinding {
         it?.let { reachable ->

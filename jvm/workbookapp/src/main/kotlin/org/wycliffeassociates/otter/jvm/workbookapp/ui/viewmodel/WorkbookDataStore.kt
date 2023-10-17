@@ -60,6 +60,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
 
     val activeTakeNumberProperty = SimpleIntegerProperty()
     val sourceLicenseProperty = SimpleStringProperty()
+    val sourceInfoProperty = SimpleStringProperty()
 
     init {
         activeWorkbookProperty.onChange {
@@ -69,6 +70,13 @@ class WorkbookDataStore : Component(), ScopedInstance {
                 activeChunkProperty.set(null)
             } else {
                 sourceLicenseProperty.set(it.source.resourceMetadata.license)
+                sourceInfoProperty.set(
+                    MessageFormat.format(
+                        messages["source_info_title"],
+                        it.source.language.name,
+                        it.source.resourceMetadata.title
+                    )
+                )
             }
         }
     }
@@ -87,12 +95,20 @@ class WorkbookDataStore : Component(), ScopedInstance {
     }
 
     private fun getChunkSourceText(): Maybe<String> {
-        chunk?.let { chunk ->
-            val verses = workbook.projectFilesAccessor.getChunkText(workbook.source.slug, chapter.sort, chunk.start, chunk.end)
-            val text = combineVerses(verses)
-            return Maybe.just(text)
-        }
-        return Maybe.just("")
+        return Maybe
+            .fromCallable {
+                chunk?.let { chunk ->
+                    val verses = workbook.projectFilesAccessor.getChunkText(
+                        workbook.source.slug,
+                        chapter.sort,
+                        chunk.start,
+                        chunk.end
+                    )
+                    val text = combineVerses(verses)
+                    text
+                } ?: ""
+            }
+            .subscribeOn(Schedulers.io())
     }
 
     private fun combineVerses(verses: List<String>): String {
@@ -138,7 +154,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
                         MessageFormat.format(
                             messages["chunkTitle"],
                             messages[activeChunkProperty.value.label],
-                            activeChunkProperty.value.title
+                            activeChunkProperty.value.sort
                         )
                     } else {
                         null

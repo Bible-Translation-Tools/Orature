@@ -1,12 +1,12 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.SourceTextDrawer
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ChunkSelectedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ChunkingStepSelectedEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.BlindDraft
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.Chunking
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.ChunkingStepsDrawer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.Consume
@@ -19,12 +19,12 @@ class ChunkingTranslationPage : View() {
     val viewModel: TranslationViewModel2 by inject()
     val workbookDataStore: WorkbookDataStore by inject()
 
-    private val list = observableListOf<ChunkViewData>()
     private val mainFragmentProperty = viewModel.selectedStepProperty.objectBinding {
         it?.let { step ->
             when(step) {
-                ChunkingStep.CONSUME_AND_VERBALIZE -> Consume()
-                ChunkingStep.CHUNKING -> Chunking()
+                ChunkingStep.CONSUME_AND_VERBALIZE -> find<Consume>()
+                ChunkingStep.CHUNKING -> find<Chunking>()
+                ChunkingStep.BLIND_DRAFT -> find<BlindDraft>()
                 else -> null
             }
         }
@@ -39,7 +39,7 @@ class ChunkingTranslationPage : View() {
             vgrow = Priority.ALWAYS
 
             left = ChunkingStepsDrawer(viewModel.selectedStepProperty).apply {
-                chunkItems.setAll(list)
+                chunksProperty.bind(viewModel.chunkListProperty)
                 this.reachableStepProperty.bind(viewModel.reachableStepProperty)
             }
 
@@ -47,6 +47,8 @@ class ChunkingTranslationPage : View() {
 
             right = SourceTextDrawer().apply {
                 sourceTextDrawer = this
+                sourceInfoProperty.bind(viewModel.sourceInfoProperty)
+                licenseProperty.bind(viewModel.sourceLicenseProperty)
                 textProperty.bind(viewModel.sourceTextProperty)
                 highlightedChunk.bind(viewModel.currentMarkerProperty)
             }
@@ -56,29 +58,33 @@ class ChunkingTranslationPage : View() {
     init {
         tryImportStylesheet("/css/consume-page.css")
         tryImportStylesheet("/css/chunking-page.css")
+        tryImportStylesheet("/css/blind-draft-page.css")
+        tryImportStylesheet("/css/audio-player.css")
         tryImportStylesheet("/css/source-content.css")
         tryImportStylesheet("/css/chunk-item.css")
         tryImportStylesheet("/css/chunk-marker.css")
         tryImportStylesheet("/css/scrolling-waveform.css")
 
-        mainFragmentProperty.addListener { observable, oldValue, newValue ->
-            oldValue?.onUndock()
-            newValue?.onDock()
-        }
+//        mainFragmentProperty.addListener { observable, oldValue, newValue ->
+//            oldValue?.onUndock()
+//            newValue?.onDock()
+//        }
 
         subscribe<ChunkingStepSelectedEvent> {
             viewModel.navigateStep(it.step)
+        }
+        subscribe<ChunkSelectedEvent> {
+            viewModel.selectChunk(it.chunkNumber)
         }
     }
 
     override fun onDock() {
         super.onDock()
         viewModel.dockPage()
-        viewModel.selectedStepProperty.set(ChunkingStep.CONSUME_AND_VERBALIZE)
     }
 
     override fun onUndock() {
         super.onUndock()
-        viewModel.selectedStepProperty.set(null)
+        viewModel.undockPage()
     }
 }

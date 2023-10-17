@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.recorder.app.view.drawables
+package org.wycliffeassociates.otter.jvm.controls.bar
 
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
@@ -24,7 +24,7 @@ import javafx.scene.paint.Paint
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.jvm.controls.bar.VolumeBar
+import org.wycliffeassociates.otter.jvm.controls.canvas.IDrawable
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlin.math.absoluteValue
@@ -32,7 +32,7 @@ import kotlin.math.max
 
 const val RANGE = 32767.0
 
-class VolumeBar(stream: Observable<ByteArray>) : Drawable {
+class VolumeBar(stream: Observable<ByteArray>) : IDrawable {
 
     private val logger = LoggerFactory.getLogger(VolumeBar::class.java)
 

@@ -6,6 +6,7 @@ import javafx.scene.layout.GridPane
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ChunkSelectedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
 import tornadofx.*
 
@@ -28,13 +29,17 @@ class ChunkGrid(list: List<ChunkViewData>) : GridPane() {
             addClass("btn", "btn--secondary", "btn--borderless", "chunk-item")
 
             graphicProperty().bind(
-                objectBinding(chunk.completedProperty, chunk.selectedChunkProperty) {
-                    this.togglePseudoClass("completed", chunk.completedProperty.value)
+                chunk.selectedChunkProperty.objectBinding {
+                    val selected = it == chunk.number
+                    isFocusTraversable = !selected
+                    isMouseTransparent = selected
+                    this.togglePseudoClass("selected", selected)
+                    this.togglePseudoClass("completed", chunk.isCompleted)
                     when {
-                        chunk.completedProperty.value -> FontIcon(MaterialDesign.MDI_CHECK_CIRCLE).apply {
+                        chunk.isCompleted -> FontIcon(MaterialDesign.MDI_CHECK_CIRCLE).apply {
                             addClass("chunk-item__icon")
                         }
-                        chunk.selectedChunkProperty.value == chunk.number -> FontIcon(MaterialDesign.MDI_BOOKMARK).apply {
+                        selected -> FontIcon(MaterialDesign.MDI_BOOKMARK).apply {
                             addClass("chunk-item__icon")
                         }
                         else -> FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE).apply {
@@ -44,15 +49,8 @@ class ChunkGrid(list: List<ChunkViewData>) : GridPane() {
                 }
             )
 
-            chunk.selectedChunkProperty.onChange {
-                val selected = it == chunk.number
-                this.togglePseudoClass("selected", selected)
-                isFocusTraversable = !selected
-                isMouseTransparent = selected
-            }
-
             action {
-                chunk.selectedChunkProperty.set(chunk.number)
+                FX.eventbus.fire(ChunkSelectedEvent(chunk.number))
             }
         }
     }

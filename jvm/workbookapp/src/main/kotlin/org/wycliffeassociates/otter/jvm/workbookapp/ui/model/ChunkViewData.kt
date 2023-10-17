@@ -1,6 +1,5 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.model
 
-import javafx.beans.property.BooleanProperty
-import javafx.beans.property.IntegerProperty
+import javafx.beans.binding.IntegerBinding
 
-class ChunkViewData(val number: Int, val completedProperty: BooleanProperty, val selectedChunkProperty: IntegerProperty)
+class ChunkViewData(val number: Int, val isCompleted: Boolean, val selectedChunkProperty: IntegerBinding)

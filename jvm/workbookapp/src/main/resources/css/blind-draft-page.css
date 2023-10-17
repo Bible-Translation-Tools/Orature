@@ -1,0 +1,23 @@
+.blind-draft {
+    -fx-background-color: -wa-foreground;
+}
+
+.blind-draft-section {
+    -fx-spacing: 24;
+    -fx-padding: 16;
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: -wa-border-light;
+}
+
+.blind-draft-section--top-indent {
+    -fx-padding: 32 16 16 16;
+}
+
+.take-list {
+    -fx-spacing: 32;
+}
+
+.take-card {
+    -fx-background-color: -wa-foreground;
+    -fx-spacing: 8;
+}

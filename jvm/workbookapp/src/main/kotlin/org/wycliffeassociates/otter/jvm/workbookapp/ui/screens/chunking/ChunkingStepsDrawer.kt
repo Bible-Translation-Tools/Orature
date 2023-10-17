@@ -1,8 +1,8 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
-import javafx.event.EventTarget
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
@@ -16,7 +16,7 @@ import tornadofx.*
 class ChunkingStepsDrawer(
     selectedStepProperty: SimpleObjectProperty<ChunkingStep>
 ) : VBox() {
-    val chunkItems = observableListOf<ChunkViewData>()
+    val chunksProperty = SimpleListProperty<ChunkViewData>()
     val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.BLIND_DRAFT)
 
     private val isCollapsedProperty = SimpleBooleanProperty(false)
@@ -59,10 +59,12 @@ class ChunkingStepsDrawer(
                 chunkingStep(ChunkingStep.CONSUME_AND_VERBALIZE,selectedStepProperty,reachableStepProperty, isCollapsedProperty)
                 chunkingStep(ChunkingStep.CHUNKING, selectedStepProperty, reachableStepProperty, isCollapsedProperty)
                 chunkingStep(ChunkingStep.BLIND_DRAFT, selectedStepProperty, reachableStepProperty, isCollapsedProperty) {
-                    chunkItems.onChange { chunkListProperty.set(it.list) }
+                    chunkListProperty.bind(chunksProperty)
                 }
+                chunkingStep(ChunkingStep.PEER_EDIT, selectedStepProperty, reachableStepProperty, isCollapsedProperty)
+                chunkingStep(ChunkingStep.KEYWORD_CHECK, selectedStepProperty, reachableStepProperty, isCollapsedProperty)
+                chunkingStep(ChunkingStep.VERSE_CHECK, selectedStepProperty, reachableStepProperty, isCollapsedProperty)
             }
         }
-
     }
 }

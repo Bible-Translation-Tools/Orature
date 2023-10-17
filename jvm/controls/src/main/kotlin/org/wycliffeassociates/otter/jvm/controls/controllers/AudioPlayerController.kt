@@ -284,6 +284,22 @@ fun framesToTimecode(value: Double, sampleRate: Int = DEFAULT_SAMPLE_RATE): Stri
     return DURATION_FORMAT.format(min, sec)
 }
 
+fun remainingTimecode(
+    progressValue: Double,
+    durationMs: Int,
+    sampleRate: Int = DEFAULT_SAMPLE_RATE
+): String {
+    val framesPerMs = if (sampleRate > 0) {
+        sampleRate / 1000
+    } else {
+        DEFAULT_SAMPLE_RATE / 1000
+    }
+    val remaining = durationMs - (progressValue / framesPerMs).toLong()
+    val min = max(0, TimeUnit.MILLISECONDS.toMinutes(remaining))
+    val sec = max(0, TimeUnit.MILLISECONDS.toSeconds(remaining) % 60)
+    return DURATION_FORMAT.format(min, sec)
+}
+
 private interface ITimerListener {
     var isGarbageCollected: Boolean
     fun onTick()

@@ -27,7 +27,6 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.Slider
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
@@ -67,7 +66,6 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
     val chapterTitle get() = workbookDataStore.activeChapterProperty.value?.title ?: ""
     val sourceAudio by audioDataStore.sourceAudioProperty
-    val sourceTextProperty = SimpleStringProperty()
 
     @Inject
     lateinit var directoryProvider: IDirectoryProvider
@@ -119,8 +117,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     fun onDockChunking() {
         val wb = workbookDataStore.workbook
         val chapter = workbookDataStore.chapter
-        val sourceAudio = wb.sourceAudioAccessor.getUserMarkedChapter(chapter.sort, wb.target)
-            ?: initializeSourceAudio(chapter.sort)
+        val sourceAudio = initializeSourceAudio(chapter.sort)
 
         audioDataStore.sourceAudioProperty.set(sourceAudio)
 
@@ -165,6 +162,13 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     private fun stopAnimationTimer() {
         timer?.stop()
         timer = null
+    }
+
+    override fun placeMarker() {
+        super.placeMarker()
+        if (translationViewModel.reachableStepProperty.value == ChunkingStep.CHUNKING) {
+            translationViewModel.reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
+        }
     }
 
     fun loadAudio(audioFile: File): OratureAudioFile {

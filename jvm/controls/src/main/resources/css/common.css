@@ -85,6 +85,10 @@
     -fx-text-fill: -wa-regular-text-80;
 }
 
+.h5--60 {
+    -fx-text-fill: -wa-note-text;
+}
+
 .normal-text {
     -fx-font-size: 1.4em;
     -fx-text-fill: -wa-regular-text-80;
