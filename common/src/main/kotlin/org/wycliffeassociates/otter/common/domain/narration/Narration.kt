@@ -77,6 +77,8 @@ class Narration @AssistedInject constructor(
 
     private var writer: WavFileWriter? = null
 
+    private var lockedVerseIndex : Int? = null
+
     init {
         val writer = initializeWavWriter()
 
@@ -238,7 +240,8 @@ class Narration @AssistedInject constructor(
 
     fun getSectionAsFile(index: Int): File {
         val verse = activeVerses[index]
-        chapterReaderConnection.lockToVerse(index)
+        lockedVerseIndex = index
+        chapterReaderConnection.lockToVerse(lockedVerseIndex)
         chapterReaderConnection.seek(verse.location)
         return audioFileUtils.getSectionAsFile(
             chapterRepresentation.scratchAudio,
@@ -257,7 +260,8 @@ class Narration @AssistedInject constructor(
         range?.let {
             val wasPlaying = player.isPlaying()
             player.pause()
-            chapterReaderConnection.lockToVerse(activeVerses.indexOf(verse))
+            lockedVerseIndex = activeVerses.indexOf(verse)
+            chapterReaderConnection.lockToVerse(lockedVerseIndex)
             chapterReaderConnection.start = range.first
             chapterReaderConnection.end = range.last
             player.seek(verse.location)
@@ -275,7 +279,8 @@ class Narration @AssistedInject constructor(
         val wasPlaying = player.isPlaying()
         player.pause()
 
-        chapterReaderConnection.lockToVerse(null)
+        lockedVerseIndex = null
+        chapterReaderConnection.lockToVerse(lockedVerseIndex)
         chapterReaderConnection.start = null
         chapterReaderConnection.end = null
 
@@ -299,7 +304,8 @@ class Narration @AssistedInject constructor(
     }
 
     private fun execute(action: NarrationAction) {
-        chapterReaderConnection.lockToVerse(null)
+        lockedVerseIndex = null
+        chapterReaderConnection.lockToVerse(lockedVerseIndex)
         history.execute(action, chapterRepresentation.totalVerses, chapterRepresentation.scratchAudio)
         chapterRepresentation.onVersesUpdated()
     }
