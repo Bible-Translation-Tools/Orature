@@ -1,0 +1,6 @@
+.marker-node .title-section {
+    -fx-pref-height: 48;
+    -fx-alignment: center;
+    -fx-spacing: 15;
+    -fx-padding: 0 16;
+}

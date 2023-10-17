@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.controls.waveform
+package org.wycliffeassociates.otter.jvm.controls.marker
 
 import com.sun.javafx.util.Utils
 import javafx.beans.binding.Bindings
@@ -24,7 +24,6 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Point2D
 import javafx.scene.layout.Region
 import javafx.scene.shape.Rectangle
-import org.wycliffeassociates.otter.jvm.controls.ChunkMarker
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import java.util.concurrent.Callable
@@ -38,7 +37,7 @@ import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 private const val MOVE_MARKER_INTERVAL = 0.001
 private const val MARKER_COUNT = 500
 
-class MarkerTrackControl : Region() {
+open class MarkerTrackControl : Region() {
 
     val markers = observableListOf<ChunkMarkerModel>()
     val canMoveMarkerProperty = SimpleBooleanProperty(true)
@@ -60,13 +59,13 @@ class MarkerTrackControl : Region() {
         pickOnBoundsProperty().set(false)
     }
 
-    private val _markers = mutableListOf<ChunkMarker>()
+    private val _markers = mutableListOf<MarkerControl>()
     private val highlights = mutableListOf<Rectangle>()
 
     private var preDragThumbPos = DoubleArray(markers.size)
     var dragStart: Array<Point2D?> = Array(markers.size) { null }
 
-    private val focusedMarkerProperty = SimpleObjectProperty<ChunkMarker>()
+    private val focusedMarkerProperty = SimpleObjectProperty<MarkerControl>()
 
     fun refreshMarkers() {
         markers.forEachIndexed { index, chunkMarker ->
@@ -106,8 +105,11 @@ class MarkerTrackControl : Region() {
         dragStart = Array(MARKER_COUNT) { null }
     }
 
-    private fun createMarker(i: Int, mk: ChunkMarkerModel): ChunkMarker {
-        return ChunkMarker().apply {
+    open fun createMarker(): MarkerControl = ChunkMarker()
+
+    private fun createMarker(i: Int, mk: ChunkMarkerModel): MarkerControl {
+        val container = this
+        return createMarker().apply {
             val pixel = framesToPixels(
                 mk.frame
             ).toDouble()
@@ -120,8 +122,8 @@ class MarkerTrackControl : Region() {
             })
             markerPositionProperty.set(pixel)
 
-            setOnMouseClicked { me ->
-                val trackWidth = this@MarkerTrackControl.width
+            setOnDragStart { me ->
+                val trackWidth = container.width
                 if (trackWidth > 0) {
                     dragStart[i] = localToParent(me.x, me.y)
                     val clampedValue: Double = Utils.clamp(
@@ -135,15 +137,15 @@ class MarkerTrackControl : Region() {
                 this.requestFocus()
             }
 
-            setOnMouseDragged { me ->
-                if (!canBeMovedProperty.value) return@setOnMouseDragged
-                val trackWidth = this@MarkerTrackControl.width
+            setOnDrag { me ->
+                if (!canBeMovedProperty.value) return@setOnDrag
+                val trackWidth = container.width
                 if (trackWidth > 0.0) {
                     if (trackWidth > this.width) {
-                        val cur: Point2D = localToParent(me.x, me.y)
+                        val pos: Point2D = localToParent(me.x, me.y)
                         if (dragStart[i] == null) {
                             // we're getting dragged without getting a mouse press
-                            dragStart[i] = localToParent(me.x, me.y)
+                            dragStart[i] = pos
                             val clampedValue: Double = Utils.clamp(
                                 0.0,
                                 markerPositionProperty.value,
@@ -151,7 +153,7 @@ class MarkerTrackControl : Region() {
                             )
                             preDragThumbPos[i] = clampedValue / trackWidth
                         }
-                        val dragPos = cur.x - dragStart[i]!!.x
+                        val dragPos = pos.x - dragStart[i]!!.x
                         updateValue(i, preDragThumbPos[i] + dragPos / (trackWidth - this.width))
                         onPositionChangedProperty.value.invoke(i, _markers[i].markerPositionProperty.value / trackWidth)
                     }
@@ -161,7 +163,7 @@ class MarkerTrackControl : Region() {
 
             markerPositionProperty.onChangeAndDoNow {
                 it?.let {
-                    val trackWidth = this@MarkerTrackControl.width
+                    val trackWidth = container.width
                     translateX = it.toDouble()
                     if (trackWidth > 0) {
                         markers[i].frame = pixelsToFrames(
@@ -208,7 +210,7 @@ class MarkerTrackControl : Region() {
             val endPos = widthProperty()
 
             if (i + 1 < highlights.size) {
-                highlights[i + 1]?.let { next ->
+                highlights[i + 1].let { next ->
                     val nextVis = next.visibleProperty()
                     val nextPos = next.translateXProperty()
                     val highlightWidth = Bindings.createDoubleBinding(

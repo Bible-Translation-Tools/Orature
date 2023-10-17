@@ -11,6 +11,7 @@ import javafx.scene.layout.StackPane
 import javafx.scene.shape.Line
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
+import org.wycliffeassociates.otter.jvm.controls.marker.MarkersContainer
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
 import tornadofx.*
 
@@ -88,7 +89,7 @@ class MarkerWaveform : StackPane() {
         waveformFrame.addImage(image)
     }
 
-    private lateinit var top: MarkerTrackControl
+    private lateinit var top: MarkersContainer
 
     fun refreshMarkers() {
         top.refreshMarkers()
@@ -102,7 +103,7 @@ class MarkerWaveform : StackPane() {
 
         add(MarkerViewBackground())
 
-        val topTrack = MarkerTrackControl().apply {
+        val topTrack = MarkersContainer().apply {
             top = this
             markers.bind(this@MarkerWaveform.markers, { it })
             canMoveMarkerProperty.bind(this@MarkerWaveform.canMoveMarkerProperty)
