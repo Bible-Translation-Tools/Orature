@@ -463,7 +463,7 @@ class ChapterRepresentationTest {
 
 
     @Test
-    fun `lockToVerse with null index`() {
+    fun `ChapterRepresentationConnection's lockToVerse with null index`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         val chapterRepresentationConnection  = chapterRepresentation.ChapterRepresentationConnection(end = null)
 
@@ -474,7 +474,7 @@ class ChapterRepresentationTest {
 
 
     @Test
-    fun `lockToVerse with index outside of activeVerses list`() {
+    fun `ChapterRepresentationConnection's lockToVerse with index outside of activeVerses list`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         val chapterRepresentationConnection  = chapterRepresentation.ChapterRepresentationConnection(end = null)
 
@@ -485,7 +485,7 @@ class ChapterRepresentationTest {
 
 
     @Test
-    fun `lockToVerse with negative index`() {
+    fun `ChapterRepresentationConnection's lockToVerse with negative index`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         val chapterRepresentationConnection  = chapterRepresentation.ChapterRepresentationConnection(end = null)
 
@@ -496,7 +496,7 @@ class ChapterRepresentationTest {
 
 
     @Test
-    fun `lockToVerse with index in range of activeVerses and position not in range of node`() {
+    fun `ChapterRepresentationConnection's lockToVerse with index in range of activeVerses and position not in range of node`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
         val chapterRepresentationConnection  = chapterRepresentation.ChapterRepresentationConnection(end = null)
@@ -504,15 +504,88 @@ class ChapterRepresentationTest {
         // Check if the initial frame position is correct
         Assert.assertEquals(0, chapterRepresentationConnection.framePosition)
 
+        Assert.assertEquals(0,chapterRepresentationConnection.absoluteFramePosition )
+
         chapterRepresentationConnection.lockToVerse(5)
 
-        Assert.assertEquals(220500, chapterRepresentationConnection.framePosition)
+        // Verify that the framePosition is in the relative verse space
+        Assert.assertEquals(0, chapterRepresentationConnection.framePosition)
+
+        // Verify that the absoluteFrame position is in the absolute chapter space
+        Assert.assertEquals(chapterRepresentation.activeVerses[5].firstFrame(),chapterRepresentationConnection.absoluteFramePosition )
+
     }
 
 
+    @Test
+    fun `ChapterRepresentationConnection's seek with sample in range of relative chapter space and sequential sectors`() {
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
+        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        val chapterRepresentationConnection  = chapterRepresentation.ChapterRepresentationConnection(end = null)
+
+        // Check if the initial frame positions is correct
+        Assert.assertEquals(0, chapterRepresentationConnection.framePosition)
+        Assert.assertEquals(0,chapterRepresentationConnection.absoluteFramePosition )
+
+        // A random sample in the relative chapter space
+        val sample = 82000
+
+        chapterRepresentationConnection.seek(sample)
+
+        // Check if positions are correct. In this case they are the same due to sequential sectors
+        Assert.assertEquals(sample, chapterRepresentationConnection.framePosition)
+        Assert.assertEquals(sample,chapterRepresentationConnection.absoluteFramePosition )
+    }
 
     @Test
-    fun `getPcmBuffer with empty sectors and no scratchAudio`() {
+    fun `ChapterRepresentationConnection's seek with sample in range of relative chapter space, empty spaces, and non-sequential sectors`() {
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
+        initializeVerseNodeList(chapterRepresentation.totalVerses, 44100)
+        addSectorsToEnd(chapterRepresentation.totalVerses, 44100, 0)
+        val chapterRepresentationConnection  = chapterRepresentation.ChapterRepresentationConnection(end = null)
+
+
+        // Check if the initial frame positions is correct
+        Assert.assertEquals(0, chapterRepresentationConnection.framePosition)
+        Assert.assertEquals(0,chapterRepresentationConnection.absoluteFramePosition )
+
+        // Sample corresponding to the middle of verse 5
+        val sample = 44100 * 9
+
+        chapterRepresentationConnection.seek(sample)
+
+        // Check if positions are correct. In this case they are the same due to sequential sectors
+        Assert.assertEquals(sample, chapterRepresentationConnection.framePosition)
+        Assert.assertEquals(chapterRepresentation.activeVerses[4].sectors[1].first, chapterRepresentationConnection.absoluteFramePosition)
+    }
+
+
+    @Test
+    fun `ChapterRepresentationConnection's seek, locking to verse, with sample in relative verse space, and sequential sectors`() {
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
+        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        val chapterRepresentationConnection  = chapterRepresentation.ChapterRepresentationConnection(end = null)
+
+        // Check if the initial frame positions is correct
+        Assert.assertEquals(0, chapterRepresentationConnection.framePosition)
+        Assert.assertEquals(0,chapterRepresentationConnection.absoluteFramePosition )
+
+        val verseIndexToLockTo = 4
+        chapterRepresentationConnection.lockToVerse(verseIndexToLockTo)
+
+
+        // A random sample in the relative chapter space
+        val sample = 500
+
+        chapterRepresentationConnection.seek(sample)
+
+        // Check if positions are correct. In this case they are the same due to sequential sectors
+        Assert.assertEquals(sample, chapterRepresentationConnection.framePosition)
+        Assert.assertEquals(chapterRepresentation.activeVerses[verseIndexToLockTo].firstFrame() + sample,chapterRepresentationConnection.absoluteFramePosition )
+    }
+
+    @Test
+    fun `ChapterRepresentationConnection's getPcmBuffer with empty sectors and no scratchAudio`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         val chapterRepresentationConnection  = chapterRepresentation.ChapterRepresentationConnection(end = null)
         val byteArray = ByteArray(441000 * 2) { 1 }
@@ -528,7 +601,7 @@ class ChapterRepresentationTest {
 
 
     @Test
-    fun `getPcmBuffer with sequential sectors and reading the first verse`() {
+    fun `ChapterRepresentationConnection's getPcmBuffer with sequential sectors and reading the first verse`() {
         val secondsOfAudio = 31
         val testAudioDataBuffer = ByteBuffer.allocate(44100 * secondsOfAudio * 2)
 
@@ -553,7 +626,7 @@ class ChapterRepresentationTest {
     }
 
     @Test
-    fun `getPcmBuffer with sequential sectors and reading entire file`() {
+    fun `ChapterRepresentationConnection's getPcmBuffer with sequential sectors and reading entire file`() {
         val secondsOfAudio = 31
         val testAudioDataBuffer = ByteBuffer.allocate(44100 * secondsOfAudio * 2)
 
@@ -586,7 +659,7 @@ class ChapterRepresentationTest {
     }
 
     @Test
-    fun `getPcmBuffer with sequential sectors, 1 second of padding between verses, and reading entire audio file`() {
+    fun `ChapterRepresentationConnection's getPcmBuffer with sequential sectors, 1 second of padding between verses, and reading entire audio file`() {
         val secondsOfAudio = 31
         val paddingLength = 44100
         // byteBuffer for 10 seconds of audio
@@ -625,7 +698,7 @@ class ChapterRepresentationTest {
     }
 
     @Test
-    fun `getPcmBuffer with sequential sectors lockToVerse not equal to CHAPTER_UNLOCKED`() {
+    fun `ChapterRepresentationConnection's getPcmBuffer with sequential sectors lockToVerse not equal to CHAPTER_UNLOCKED`() {
         val secondsOfAudio = 31
         val buffer = ByteBuffer.allocate(44100 * secondsOfAudio * 2)
 
@@ -662,7 +735,7 @@ class ChapterRepresentationTest {
 
 
     @Test
-    fun `getPcmBuffer with sequential sectors lockToVerse equal to CHAPTER_UNLOCKED`() {
+    fun `ChapterRepresentationConnection's getPcmBuffer with sequential sectors lockToVerse equal to CHAPTER_UNLOCKED`() {
         val secondsOfAudio = 31
         val testAudioDataBuffer = ByteBuffer.allocate(44100 * secondsOfAudio * 2)
 
