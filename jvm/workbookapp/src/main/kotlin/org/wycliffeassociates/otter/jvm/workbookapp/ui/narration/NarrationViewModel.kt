@@ -669,9 +669,7 @@ class NarrationViewModel : ViewModel() {
         val wasPlaying = audioPlayer.isPlaying()
         audioPlayer.pause()
         narration.seek(frame)
-        if (wasPlaying) {
-            audioPlayer.play()
-        }
+        if (wasPlaying) audioPlayer.play()
     }
 
     fun seekPercent(percent: Double) {

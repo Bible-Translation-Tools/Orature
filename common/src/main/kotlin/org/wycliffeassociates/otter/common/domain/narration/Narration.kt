@@ -259,11 +259,11 @@ class Narration @AssistedInject constructor(
         range?.let {
             val wasPlaying = player.isPlaying()
             player.pause()
+            chapterReaderConnection.lockToVerse(activeVerses.indexOf(verse))
             chapterReaderConnection.start = range.first
             chapterReaderConnection.end = range.last
             player.seek(verse.location)
             chapterReaderConnection.seek(verse.location)
-            chapterReaderConnection.lockToVerse(activeVerses.indexOf(verse))
             positionToSeekAfterEnd = verse.location + chapterReaderConnection.totalFrames
             player.play()
         }
@@ -409,8 +409,6 @@ class Narration @AssistedInject constructor(
     }
 
     fun getLocationInFrames(): Int {
-
-        // TODO: clean this up.
         // This corrects the incorrect value returned from player.getLocationInFrames as a result of the incorrect
         // value being assigned to startPosition (_reader.totalFrames) after verse playback
         // the condition checks if the chapterReaderConnection (the player's reader) has reached the last frame in the

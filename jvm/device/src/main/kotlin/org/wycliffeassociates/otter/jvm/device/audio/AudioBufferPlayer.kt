@@ -214,12 +214,11 @@ class AudioBufferPlayer(
                             player.drain()
                             if (!pause.get()) {
 
-                                // TODO: seek to proper position
                                 // NOTE: this is an error. This does not give the start position, it
                                 // gives the totalFrames in the selectedVerse.
                                 startPosition = _reader.totalFrames
-
-
+                                listeners.forEach { it.onEvent(AudioPlayerEvent.COMPLETE) }
+                                player.close()
                                 // NOTE: this is seeking ot the relativeEnd position of verse 2. This seems to
                                 // mitigate the issue, however, it causes issues later
 
@@ -228,14 +227,7 @@ class AudioBufferPlayer(
                                 //   that I am having a hard time setting a condition on relativeToAbsolute, because it
                                 //   while that seek is relative to the activeVerseSpace, this below seek is relative to
                                 //   the verse space.
-                                // NOTE: for some reason, this seek method is being called twice, by different threads
-                                //  what I think this means is that we are performing the first seek correctly, then
-                                //  unlocking from the verse, and performing the next seek incorrectly.
                                 seek(startPosition)
-                                //seek(160767)
-
-                                listeners.forEach { it.onEvent(AudioPlayerEvent.COMPLETE) }
-                                player.close()
                             }
                         } catch (e: LineUnavailableException) {
                             errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, e))
@@ -307,7 +299,7 @@ class AudioBufferPlayer(
         startPosition = position
         reader?.seek(position)
         if (resume) {
-            //play()
+            play()
         }
     }
 
