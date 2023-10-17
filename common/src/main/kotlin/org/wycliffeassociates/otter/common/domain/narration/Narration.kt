@@ -149,11 +149,15 @@ class Narration @AssistedInject constructor(
     }
 
     fun undo() {
+        lockedVerseIndex = null
+        chapterReaderConnection.lockToVerse(lockedVerseIndex)
         history.undo(chapterRepresentation.totalVerses)
         chapterRepresentation.onVersesUpdated()
     }
 
     fun redo() {
+        lockedVerseIndex = null
+        chapterReaderConnection.lockToVerse(lockedVerseIndex)
         history.redo(chapterRepresentation.totalVerses)
         chapterRepresentation.onVersesUpdated()
     }
@@ -264,8 +268,7 @@ class Narration @AssistedInject constructor(
             chapterReaderConnection.lockToVerse(lockedVerseIndex)
             chapterReaderConnection.start = range.first
             chapterReaderConnection.end = range.last
-            player.seek(verse.location)
-            chapterReaderConnection.seek(verse.location)
+            seek(0)
             if (wasPlaying) player.play()
         }
     }
@@ -412,7 +415,12 @@ class Narration @AssistedInject constructor(
     }
 
     fun getLocationInFrames(): Int {
-        return player.getLocationInFrames() + uncommittedRecordedFrames.get()
+        val mappedLocation = if(lockedVerseIndex != null) {
+            chapterReaderConnection.relativeVerseToRelativeChapter(player.getLocationInFrames(), lockedVerseIndex!!)
+        } else {
+            player.getLocationInFrames()
+        }
+        return mappedLocation + uncommittedRecordedFrames.get()
     }
 
     fun getTotalFrames(): Int {
@@ -429,7 +437,13 @@ class Narration @AssistedInject constructor(
 
     fun seekToPrevious() {
         player.pause()
-        val loc = player.getLocationInFrames()
+        val loc = if(lockedVerseIndex != null) {
+            chapterReaderConnection.relativeVerseToRelativeChapter(player.getLocationInFrames(), lockedVerseIndex!!)
+        } else {
+            player.getLocationInFrames()
+        }
+        lockedVerseIndex = null
+        chapterReaderConnection.lockToVerse(lockedVerseIndex)
         val seekLoc = activeVerses.lastOrNull() { it.location < loc }
         seekLoc?.let {
             seek(it.location)
@@ -438,11 +452,20 @@ class Narration @AssistedInject constructor(
 
     fun seekToNext() {
         player.pause()
-        val loc = player.getLocationInFrames()
+        val loc = if(lockedVerseIndex != null) {
+            chapterReaderConnection.relativeVerseToRelativeChapter(player.getLocationInFrames(), lockedVerseIndex!!)
+        } else {
+            player.getLocationInFrames()
+        }
+        lockedVerseIndex = null
+        chapterReaderConnection.lockToVerse(lockedVerseIndex)
         val seekLoc = activeVerses.firstOrNull { it.location > loc }
         seekLoc?.let {
             seek(it.location)
-        } ?: seek(player.getDurationInFrames())
+        } ?: chapterRepresentation.apply {
+            val lastFrame = absoluteToRelative(activeVerses.last().lastFrame())
+            seek(lastFrame)
+        }
     }
 }
 
