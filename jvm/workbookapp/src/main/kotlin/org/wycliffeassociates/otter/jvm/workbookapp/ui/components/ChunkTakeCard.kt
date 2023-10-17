@@ -8,8 +8,8 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.TakeSelectionAnimationMediator
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.popup.TakeOptionMenu
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ChunkTakeEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.TakeAction
+import org.wycliffeassociates.otter.jvm.controls.event.ChunkTakeEvent
+import org.wycliffeassociates.otter.jvm.controls.event.TakeAction
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import tornadofx.*
 import tornadofx.FX.Companion.messages

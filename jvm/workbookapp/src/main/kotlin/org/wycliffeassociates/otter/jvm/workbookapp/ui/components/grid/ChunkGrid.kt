@@ -6,7 +6,7 @@ import javafx.scene.layout.GridPane
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ChunkSelectedEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ChunkSelectedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
 import tornadofx.*
 

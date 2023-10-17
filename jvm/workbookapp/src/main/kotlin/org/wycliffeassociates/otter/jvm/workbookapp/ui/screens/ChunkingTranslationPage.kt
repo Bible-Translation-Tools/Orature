@@ -3,9 +3,9 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.SourceTextDrawer
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ChunkSelectedEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ChunkingStepSelectedEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
+import org.wycliffeassociates.otter.jvm.controls.event.ChunkSelectedEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepSelectedEvent
+import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.BlindDraft
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.Chunking
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.ChunkingStepsDrawer

@@ -48,7 +48,7 @@ import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
+import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import tornadofx.ViewModel
 import tornadofx.getValue
 import tornadofx.observableListOf

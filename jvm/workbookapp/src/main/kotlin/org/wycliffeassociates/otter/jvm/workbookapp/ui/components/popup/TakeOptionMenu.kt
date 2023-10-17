@@ -6,8 +6,8 @@ import javafx.scene.control.MenuItem
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ChunkTakeEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.TakeAction
+import org.wycliffeassociates.otter.jvm.controls.event.ChunkTakeEvent
+import org.wycliffeassociates.otter.jvm.controls.event.TakeAction
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 

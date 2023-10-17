@@ -12,6 +12,8 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
+import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkMarker
+import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkMarker
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
@@ -43,6 +45,12 @@ class Chunking : Fragment() {
         waveform.markers.bind(viewModel.markers) { it }
 
         subscribe<MarkerDeletedEvent> { viewModel.deleteMarker(it.markerId) }
+        subscribe<UndoChunkMarker> {
+            viewModel.undoMarker()
+        }
+        subscribe<RedoChunkMarker> {
+            viewModel.redoMarker()
+        }
     }
 
     override fun onUndock() {
@@ -103,6 +111,15 @@ class Chunking : Fragment() {
                 region { hgrow = Priority.ALWAYS }
                 hbox {
                     addClass("chunking-bottom__media-btn-group")
+
+                    button("undo") {
+                        addClass("btn", "btn--icon")
+                        action { FX.eventbus.fire(UndoChunkMarker())}
+                    }
+                    button("redo") {
+                        addClass("btn", "btn--icon")
+                        action { FX.eventbus.fire(RedoChunkMarker())}
+                    }
                     button {
                         addClass("btn", "btn--icon")
                         graphic = FontIcon(MaterialDesign.MDI_SKIP_PREVIOUS)

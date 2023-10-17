@@ -1,14 +1,13 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.dev
 
 import javafx.beans.property.IntegerProperty
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.Label
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.SourceTextDrawer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
+import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.ChunkingStepsDrawer
 import tornadofx.*
 
