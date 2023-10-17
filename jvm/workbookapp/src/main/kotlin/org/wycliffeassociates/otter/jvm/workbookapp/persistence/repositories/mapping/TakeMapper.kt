@@ -20,12 +20,15 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.ma
 
 import org.wycliffeassociates.otter.common.data.primitives.Marker
 import org.wycliffeassociates.otter.common.data.primitives.Take
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.CheckingStatusDao
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.TakeEntity
 import java.io.File
 import java.time.LocalDate
 import javax.inject.Inject
 
-class TakeMapper @Inject constructor() {
+class TakeMapper(
+    private val checkingStatusDao: CheckingStatusDao
+) {
     fun mapFromEntity(entity: TakeEntity, markers: List<Marker>): Take {
         return Take(
             filename = entity.filename,
@@ -35,6 +38,8 @@ class TakeMapper @Inject constructor() {
             deleted = entity.deletedTs?.let(LocalDate::parse),
             played = entity.played == 1,
             markers = markers,
+            checkingStatus = checkingStatusDao.fetchById(entity.checkingFk)!!,
+            checksum = entity.checksum,
             id = entity.id
         )
     }
@@ -48,7 +53,9 @@ class TakeMapper @Inject constructor() {
             number = obj.number,
             createdTs = obj.created.toString(),
             deletedTs = obj.deleted?.toString(),
-            played = if (obj.played) 1 else 0
+            played = if (obj.played) 1 else 0,
+            checkingFk = checkingStatusDao.fetchId(obj.checkingStatus),
+            checksum = obj.checksum
         )
     }
 }

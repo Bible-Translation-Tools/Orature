@@ -19,7 +19,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database
 
 import jooq.tables.InstalledEntity
-import org.jooq.CloseableDSLContext
 import org.jooq.DSLContext
 import org.jooq.SQLDialect
 import org.jooq.exception.DataAccessException
@@ -108,6 +107,7 @@ class AppDatabase(
     val versificationDao = VersificationDao(dsl)
     val workbookTypeDao = WorkbookTypeDao(dsl)
     val workbookDescriptorDao = WorkbookDescriptorDao(dsl)
+    val checkingStatusDao = CheckingStatusDao(dsl)
 
     // Transaction support
     fun transaction(block: (DSLContext) -> Unit) {
