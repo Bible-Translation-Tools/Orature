@@ -39,12 +39,12 @@ import javax.inject.Inject
 
 class TakeRepository @Inject constructor(
     private val database: AppDatabase,
+    private val takeMapper: TakeMapper,
     private val markerMapper: MarkerMapper,
     private val collectionMapper: CollectionMapper
 ) : ITakeRepository {
 
     private val logger = LoggerFactory.getLogger(TakeRepository::class.java)
-    private val takeMapper = TakeMapper(database.checkingStatusDao)
 
     private val takeDao = database.takeDao
     private val markerDao = database.markerDao

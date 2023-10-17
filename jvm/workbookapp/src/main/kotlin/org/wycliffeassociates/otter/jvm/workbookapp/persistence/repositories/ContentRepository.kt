@@ -50,7 +50,7 @@ class ContentRepository @Inject constructor(
     private val contentTypeDao = database.contentTypeDao
     private val contentMapper: ContentMapper = ContentMapper(contentTypeDao)
     private val collectionMapper = CollectionMapper()
-    private val takeMapper: TakeMapper = TakeMapper(database.checkingStatusDao)
+    private val takeMapper: TakeMapper = TakeMapper()
     private val markerMapper: MarkerMapper = MarkerMapper()
 
     override fun getByCollection(collection: Collection): Single<List<Content>> {

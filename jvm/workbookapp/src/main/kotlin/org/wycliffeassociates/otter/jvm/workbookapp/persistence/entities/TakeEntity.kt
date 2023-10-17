@@ -26,7 +26,5 @@ data class TakeEntity(
     var number: Int,
     var createdTs: String,
     var deletedTs: String?,
-    var played: Int,
-    var checkingFk: Int,
-    var checksum: String?
+    var played: Int
 )

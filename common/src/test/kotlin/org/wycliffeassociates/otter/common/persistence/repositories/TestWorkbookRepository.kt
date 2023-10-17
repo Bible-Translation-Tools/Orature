@@ -31,7 +31,6 @@ import java.io.File
 import java.time.LocalDate
 import org.junit.Assert
 import org.junit.Test
-import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.Content
@@ -370,9 +369,7 @@ class TestWorkbookRepository {
                     markers = listOf(),
                     played = false,
                     created = LocalDate.now(),
-                    deleted = null,
-                    checkingStatus = CheckingStatus.UNCHECKED,
-                    checksum = null
+                    deleted = null
                 )
             } else {
                 null
