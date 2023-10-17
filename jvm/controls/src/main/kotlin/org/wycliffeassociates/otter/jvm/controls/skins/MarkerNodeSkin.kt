@@ -24,6 +24,7 @@ import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
 import org.wycliffeassociates.otter.jvm.controls.marker.MarkerNode
 import tornadofx.*
 
@@ -50,6 +51,10 @@ class MarkerNodeSkin(val control: MarkerNode) : SkinBase<MarkerNode>(control) {
                 button {
                     addClass("btn", "btn--icon", "btn--borderless", "normal-text")
                     graphic = FontIcon(MaterialDesign.MDI_DELETE).addClass("wa-icon")
+
+                    action {
+                        FX.eventbus.fire(MarkerDeletedEvent(control.markerIdProperty.value))
+                    }
                 }
             }
             region {

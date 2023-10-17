@@ -70,6 +70,7 @@ open class MarkerTrackControl : Region() {
     fun refreshMarkers() {
         markers.forEachIndexed { index, chunkMarker ->
             val marker = _markers[index]
+            marker.markerIdProperty.set(chunkMarker.id)
             marker.isPlacedProperty.set(chunkMarker.placed)
             marker.markerPositionProperty.set(
                 framesToPixels(
@@ -115,11 +116,9 @@ open class MarkerTrackControl : Region() {
             ).toDouble()
 
             isPlacedProperty.set(mk.placed)
-            markerIdProperty.set(i)
+            markerIndexProperty.set(i)
             markerNumberProperty.set(mk.label)
-            canBeMovedProperty.bind(canMoveMarkerProperty.booleanBinding {
-                it == true && i != 0
-            })
+            canBeMovedProperty.bind(canMoveMarkerProperty)
             markerPositionProperty.set(pixel)
 
             setOnDragStart { me ->
@@ -192,7 +191,7 @@ open class MarkerTrackControl : Region() {
     }
 
     private fun preallocateMarkers() {
-        for (i in 0..MARKER_COUNT) {
+        for (i in 0 until MARKER_COUNT) {
             val mk = ChunkMarkerModel(0, i.toString(), false)
             val marker = createMarker(i, mk)
             val rect = createHighlight(i, mk)
@@ -278,9 +277,6 @@ open class MarkerTrackControl : Region() {
 
     private fun moveMarker(code: KeyCode) {
         focusedMarkerProperty.value?.let { marker ->
-            val id = marker.markerIdProperty.value
-            if (id == 0) return // don't move the first marker
-
             val position = marker.markerPositionProperty.value
             val percent = position / width
             val moveTo = if (code == KeyCode.LEFT) {
@@ -288,7 +284,7 @@ open class MarkerTrackControl : Region() {
             } else {
                 percent + MOVE_MARKER_INTERVAL
             }
-            updateValue(marker.markerIdProperty.value, moveTo)
+            updateValue(marker.markerIndexProperty.value, moveTo)
         }
     }
 

@@ -13,6 +13,7 @@ import javafx.scene.input.MouseEvent
 
 abstract class MarkerControl : Control() {
     open val markerIdProperty = SimpleIntegerProperty(0)
+    open val markerIndexProperty = SimpleIntegerProperty(0)
     open val markerPositionProperty = SimpleDoubleProperty(0.0)
     open val markerNumberProperty: StringProperty = SimpleStringProperty()
     open val isPlacedProperty = SimpleBooleanProperty(true)

@@ -61,6 +61,11 @@ class VerseMarkerModel(
         markers.setAll(initializeMarkers(markerTotal, cues))
     }
 
+    fun loadMarkers(chunkMarkers: List<ChunkMarkerModel>) {
+        markers.addAll(chunkMarkers)
+        refreshMarkers()
+    }
+
     fun addMarker(location: Int) {
         if (markers.size < markerTotal) {
             changesSaved = false
@@ -72,13 +77,20 @@ class VerseMarkerModel(
             op.apply()
             redoStack.clear()
 
-            markers.sortBy { it.frame }
-            markers.forEachIndexed { index, chunkMarker ->
-                if (index < markerLabels.size) {
-                    chunkMarker.label = markerLabels[index]
-                }
-            }
-            markerCountProperty.value = markers.filter { it.placed }.size
+            refreshMarkers()
+        }
+    }
+
+    fun deleteMarker(id: Int) {
+        if (markerCountProperty.value > 0) {
+            changesSaved = false
+
+            val op = Delete(id)
+            undoStack.push(op)
+            op.apply()
+            redoStack.clear()
+
+            refreshMarkers()
         }
     }
 
@@ -88,13 +100,7 @@ class VerseMarkerModel(
             redoStack.push(op)
             op.undo()
 
-            markers.sortBy { it.frame }
-            markers.forEachIndexed { index, chunkMarker ->
-                if (index < markerLabels.size) {
-                    chunkMarker.label = markerLabels[index]
-                }
-            }
-            markerCountProperty.value = markers.filter { it.placed }.size
+            refreshMarkers()
         }
     }
 
@@ -104,13 +110,7 @@ class VerseMarkerModel(
             undoStack.push(op)
             op.apply()
 
-            markers.sortBy { it.frame }
-            markers.forEachIndexed { index, chunkMarker ->
-                if (index < markerLabels.size) {
-                    chunkMarker.label = markerLabels[index]
-                }
-            }
-            markerCountProperty.value = markers.filter { it.placed }.size
+            refreshMarkers()
         }
     }
 
@@ -133,6 +133,16 @@ class VerseMarkerModel(
     fun seekPrevious(location: Int): Int {
         val filtered = markers.filter { it.placed }
         return findMarkerPrecedingPosition(location, filtered).frame
+    }
+
+    private fun refreshMarkers() {
+        markers.sortBy { it.frame }
+        markers.forEachIndexed { index, chunkMarker ->
+            if (index < markerLabels.size) {
+                chunkMarker.label = markerLabels[index]
+            }
+        }
+        markerCountProperty.value = markers.filter { it.placed }.size
     }
 
     private fun findMarkerPrecedingPosition(
