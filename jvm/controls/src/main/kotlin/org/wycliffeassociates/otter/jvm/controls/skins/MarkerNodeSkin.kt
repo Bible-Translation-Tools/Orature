@@ -66,7 +66,7 @@ class MarkerNodeSkin(val control: MarkerNode) : SkinBase<MarkerNode>(control) {
                 graphic = FontIcon(Material.DRAG_HANDLE)
 
                 // delegates the mouse drag events to the "drag" button
-                onMouseClickedProperty().bind(control.onDragStartProperty)
+                onMousePressedProperty().bind(control.onDragStartProperty)
                 onMouseDraggedProperty().bind(control.onDragProperty)
             }
         }
