@@ -435,6 +435,7 @@ class Narration @AssistedInject constructor(
     }
 
     fun seekToPrevious() {
+        chapterReaderConnection.lockToVerse(null)
         player.pause()
         val loc = player.getLocationInFrames()
         val seekLoc = activeVerses.lastOrNull() { it.location < loc }
@@ -444,6 +445,7 @@ class Narration @AssistedInject constructor(
     }
 
     fun seekToNext() {
+        chapterReaderConnection.lockToVerse(null)
         player.pause()
         val loc = player.getLocationInFrames()
         val seekLoc = activeVerses.firstOrNull { it.location > loc }
