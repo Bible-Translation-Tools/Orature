@@ -62,7 +62,7 @@ class VerseMarkerModel(
     }
 
     fun loadMarkers(chunkMarkers: List<ChunkMarkerModel>) {
-        markers.addAll(chunkMarkers)
+        markers.setAll(chunkMarkers)
         refreshMarkers()
     }
 
