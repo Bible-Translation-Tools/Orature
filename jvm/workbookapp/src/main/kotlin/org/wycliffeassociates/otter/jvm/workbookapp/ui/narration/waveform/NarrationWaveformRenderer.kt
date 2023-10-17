@@ -37,11 +37,11 @@ class NarrationWaveformRenderer(
         fillImageDataWithDefaultColor()
     }
 
-    fun draw(context: GraphicsContext, canvas: Canvas, location: Int, reRecordLocation: Int? = null): IntRange {
+    fun draw(context: GraphicsContext, canvas: Canvas, location: Int, reRecordLocation: Int? = null): List<IntRange> {
         heightProperty.set(canvas.height)
 
         //val buffer = renderer.getFrameData()
-        val (buffer, viewport) = renderer.getNarrationDrawable(location, reRecordLocation)
+        val (buffer, viewports) = renderer.getNarrationDrawable(location, reRecordLocation)
 
         fillImageDataWithDefaultColor()
         addLinesToImageData(buffer)
@@ -62,7 +62,7 @@ class NarrationWaveformRenderer(
             context.strokeLine(canvas.width / 2.0, 0.0, canvas.width / 2.0, canvas.height)
         }
 
-        return viewport
+        return viewports
     }
 
     private fun scaleAmplitude(sample: Double, height: Double): Double {

@@ -33,11 +33,12 @@ class AudioScene(
 
     val frameBuffer = FloatArray(width * 2)
 
-    fun getNarrationDrawable(location: Int, reRecordLocation: Int? = null): Pair<FloatArray, IntRange> {
+    fun getNarrationDrawable(location: Int, reRecordLocation: Int? = null): Pair<FloatArray, List<IntRange>> {
         Arrays.fill(frameBuffer, 0f)
         val framesOnScreen = secondsOnScreen * recordingSampleRate
 
         val viewPortRange = getViewPortRange(location)
+        val viewports = mutableListOf(viewPortRange)
 
         val hasActiveData = activeDrawable.hasData()
         val readerData = readerDrawable.getWaveformDrawable(viewPortRange.first)
@@ -68,9 +69,14 @@ class AudioScene(
             if (reRecordLocation != null) {
                 val nextVerseData = readerDrawable.getWaveformDrawable(reRecordLocation)
                 System.arraycopy(nextVerseData, 0, frameBuffer, frameBuffer.size / 2, frameBuffer.size / 2)
+
+                viewports[0] = viewPortRange.first..(viewPortRange.first + (viewPortRange.length() / 2))
+                val reRecordViewPort = getViewPortRange(reRecordLocation)
+                val secondViewport = reRecordViewPort.last - (reRecordViewPort.length() / 2).. reRecordViewPort.last
+                viewports.add(secondViewport)
             }
         }
-        return Pair(frameBuffer, viewPortRange)
+        return Pair(frameBuffer, viewports)
     }
 
     /**

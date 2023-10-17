@@ -176,7 +176,7 @@ class Narration @AssistedInject constructor(
         val action = RecordAgainAction(verseIndex)
         execute(action)
 
-        player.seek(activeVerses[verseIndex].location)
+        seek(activeVerses[verseIndex].location)
         writer?.start()
         isRecording.set(true)
     }
@@ -188,6 +188,7 @@ class Narration @AssistedInject constructor(
         seek(loc)
 
         writer?.pause()
+        uncommittedRecordedFrames.set(0)
         isRecording.set(false)
     }
 

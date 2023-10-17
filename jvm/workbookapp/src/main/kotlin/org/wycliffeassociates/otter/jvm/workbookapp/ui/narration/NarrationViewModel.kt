@@ -643,8 +643,8 @@ class NarrationViewModel : ViewModel() {
                     }
                 }
 
-                val viewport = renderer.draw(context, canvas, position, reRecordLoc)
-                adjustMarkers(markerNodes, viewport, canvas.width.toInt())
+                val viewports = renderer.draw(context, canvas, position, reRecordLoc)
+                adjustMarkers(markerNodes, viewports, canvas.width.toInt())
             } catch (e: Exception) {
                 logger.error("", e)
             }
@@ -657,24 +657,34 @@ class NarrationViewModel : ViewModel() {
         }
     }
 
-    private fun adjustMarkers(markerNodes: ObservableList<VerseMarkerControl>, viewport: IntRange, width: Int) {
+    private fun adjustMarkers(
+        markerNodes: ObservableList<VerseMarkerControl>,
+        viewports: List<IntRange>,
+        width: Int
+    ) {
         for (marker in markerNodes) {
             if (marker.userIsDraggingProperty.value == true) continue
 
             val verse = marker.verseProperty.value
-            if (verse.location in viewport) {
-                val newPos = framesToPixels(
-                    verse.location - viewport.first,
-                    width,
-                    viewport.last - viewport.first
-                ).toDouble() - (MARKER_AREA_WIDTH / 2)
-                runLater {
-                    marker.visibleProperty().set(true)
-                    if (marker.layoutX != newPos) {
-                        marker.layoutX = newPos
+            var found = false
+            viewports.forEachIndexed { idx, viewport ->
+                if (verse.location in viewport) {
+                    val viewportOffset = (width / viewports.size) * idx
+                    val newPos = framesToPixels(
+                        verse.location - viewport.first,
+                        width,
+                        viewport.last - viewport.first
+                    ).toDouble() - (MARKER_AREA_WIDTH / 2) + viewportOffset
+                    runLater {
+                        marker.visibleProperty().set(true)
+                        if (marker.layoutX != newPos) {
+                            marker.layoutX = newPos
+                        }
                     }
+                    found = true
                 }
-            } else {
+            }
+            if (!found) {
                 runLater {
                     marker.visibleProperty().set(false)
                 }
