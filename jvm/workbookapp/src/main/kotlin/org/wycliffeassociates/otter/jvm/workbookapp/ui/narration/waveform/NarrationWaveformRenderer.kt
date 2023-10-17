@@ -37,11 +37,11 @@ class NarrationWaveformRenderer(
         fillImageDataWithDefaultColor()
     }
 
-    fun draw(context: GraphicsContext, canvas: Canvas, location: Int): IntRange {
+    fun draw(context: GraphicsContext, canvas: Canvas, location: Int, reRecordLocation: Int? = null): IntRange {
         heightProperty.set(canvas.height)
 
         //val buffer = renderer.getFrameData()
-        val (buffer, viewport) = renderer.getNarrationDrawable(location)
+        val (buffer, viewport) = renderer.getNarrationDrawable(location, reRecordLocation)
 
         fillImageDataWithDefaultColor()
         addLinesToImageData(buffer)
