@@ -78,6 +78,9 @@ open class PeerEdit : Fragment() {
                         messages["play"]
                     }
                 })
+                tooltip {
+                    textProperty().bind(this@button.textProperty())
+                }
 
                 action {
                     viewModel.toggleAudio()
@@ -86,6 +89,7 @@ open class PeerEdit : Fragment() {
             button(messages["confirm"]) {
                 addClass("btn", "btn--secondary")
                 graphic = FontIcon(MaterialDesign.MDI_CHECK_CIRCLE)
+                tooltip(text)
 
                 visibleWhen { viewModel.isPlayingProperty.not() }
 
@@ -96,7 +100,8 @@ open class PeerEdit : Fragment() {
             region { hgrow = Priority.ALWAYS }
             button(messages["record"]) {
                 addClass("btn", "btn--secondary")
-                graphic = FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE)
+                graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
+                tooltip(text)
 
                 disableWhen { viewModel.isPlayingProperty }
 
@@ -108,6 +113,10 @@ open class PeerEdit : Fragment() {
                 }
             }
         }
+    }
+
+    init {
+        tryImportStylesheet("/css/recording-screen.css")
     }
 
     private fun createPlaybackWaveform(container: VBox): MarkerWaveform {

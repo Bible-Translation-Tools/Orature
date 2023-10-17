@@ -154,7 +154,7 @@ class SimpleAudioPlayer(
 
         add(
             menuButton.apply {
-                tooltip(messages["speed"])
+                tooltip(messages["playbackSpeed"])
                 sideProperty.bind(menuSideProperty)
                 items.bind(menuItems) { it }
 
