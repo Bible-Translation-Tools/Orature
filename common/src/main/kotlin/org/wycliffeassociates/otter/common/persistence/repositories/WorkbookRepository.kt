@@ -544,7 +544,6 @@ class WorkbookRepository(
                 deselectUponDelete(wbTake, selectedTakeRelay)
                 // When a take becomes deleted, delete it from the database
                 deleteFromDbUponDelete(wbTake, modelTake)
-                subscribeToCheckingStatus(wbTake, modelTake)
             }
 
             // These are new takes
@@ -565,6 +564,7 @@ class WorkbookRepository(
                     .subscribe { insertionId ->
                         modelTake.id = insertionId
                         selectedTakeRelay.accept(TakeHolder(wbTake))
+                        subscribeToCheckingStatus(wbTake, modelTake)
                     }
             }
 

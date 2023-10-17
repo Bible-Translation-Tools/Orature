@@ -14,6 +14,7 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.PeerEditViewModel
@@ -73,6 +74,9 @@ class PeerEdit : Fragment() {
                         messages["play"]
                     }
                 })
+                tooltip {
+                    textProperty().bind(this@button.textProperty())
+                }
 
                 action {
                     viewModel.toggleAudio()
@@ -81,6 +85,7 @@ class PeerEdit : Fragment() {
             button(messages["confirm"]) {
                 addClass("btn", "btn--secondary")
                 graphic = FontIcon(MaterialDesign.MDI_CHECK_CIRCLE)
+                tooltip(text)
 
                 visibleWhen { viewModel.isPlayingProperty.not() }
 
@@ -91,7 +96,8 @@ class PeerEdit : Fragment() {
             region { hgrow = Priority.ALWAYS }
             button(messages["record"]) {
                 addClass("btn", "btn--secondary")
-                graphic = FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE)
+                graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
+                tooltip(text)
 
                 disableWhen { viewModel.isPlayingProperty }
 
@@ -103,6 +109,10 @@ class PeerEdit : Fragment() {
                 }
             }
         }
+    }
+
+    init {
+        tryImportStylesheet("/css/recording-screen.css")
     }
 
     private fun createPlaybackWaveform(container: VBox): MarkerWaveform {
