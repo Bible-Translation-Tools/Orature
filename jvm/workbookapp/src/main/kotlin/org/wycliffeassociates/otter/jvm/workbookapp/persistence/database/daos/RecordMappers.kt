@@ -117,9 +117,7 @@ class RecordMappers {
                 record.getValue(TAKE_ENTITY.NUMBER),
                 record.getValue(TAKE_ENTITY.CREATED_TS),
                 record.getValue(TAKE_ENTITY.DELETED_TS),
-                record.getValue(TAKE_ENTITY.PLAYED),
-                record.getValue(TAKE_ENTITY.CHECKING_FK),
-                record.getValue(TAKE_ENTITY.CHECKSUM),
+                record.getValue(TAKE_ENTITY.PLAYED)
             )
         }
 

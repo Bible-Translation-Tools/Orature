@@ -160,9 +160,7 @@ class CreateChunksTest {
                         markers = listOf(),
                         played = false,
                         created = LocalDate.now(),
-                        deleted = null,
-                        checkingStatus = CheckingStatus.UNCHECKED,
-                        checksum = null
+                        deleted = null
                     )
                 } else {
                     null

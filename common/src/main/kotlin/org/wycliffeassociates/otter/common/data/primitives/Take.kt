@@ -28,8 +28,6 @@ data class Take(
     var created: LocalDate,
     var deleted: LocalDate?,
     var played: Boolean,
-    var checkingStatus: CheckingStatus,
-    var checksum: String?,
     var markers: List<Marker>,
     var id: Int = 0
 )
