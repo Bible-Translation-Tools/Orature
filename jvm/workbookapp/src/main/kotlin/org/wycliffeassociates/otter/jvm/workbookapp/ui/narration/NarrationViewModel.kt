@@ -254,6 +254,7 @@ class NarrationViewModel : ViewModel() {
         audioPositionProperty.set(0)
         totalAudioSizeProperty.set(0)
     }
+
     fun loadChapter(chapter: Chapter) {
         resetState()
 
@@ -297,11 +298,11 @@ class NarrationViewModel : ViewModel() {
             }.flatMap { it }
             .observeOnFx()
             .subscribe({ chunksList.add(it) }, {}, {
-                initializeTeleprompter()
+                resetTeleprompter()
             })
     }
 
-    fun clearTeleprompter() {
+    private fun clearTeleprompter() {
         narratableList.forEachIndexed { idx, chunk ->
             chunk.state = NarrationTextItemState.RECORD_DISABLED
         }
@@ -310,15 +311,19 @@ class NarrationViewModel : ViewModel() {
         FX.eventbus.fire(TeleprompterSeekEvent(0))
     }
 
-    fun initializeTeleprompter() {
+    private fun resetTeleprompter() {
         narratableList.forEachIndexed { idx, chunk ->
-            if (chunk.state == NarrationTextItemState.RECORD_DISABLED) {
-                if (chunk.hasRecording) {
-                    chunk.state = NarrationTextItemState.RE_RECORD
-                }
+            if (chunk.hasRecording) {
+                chunk.state = NarrationTextItemState.RE_RECORD
+            } else {
+                chunk.state = NarrationTextItemState.RECORD_DISABLED
             }
         }
-        narratableList.firstOrNull { !it.hasRecording }?.state = NarrationTextItemState.RECORD
+        val lastIndex = narratableList.indexOfFirst { !it.hasRecording }
+        if (lastIndex != -1) {
+            narratableList.get(lastIndex).state = NarrationTextItemState.RECORD
+            FX.eventbus.fire(TeleprompterSeekEvent(lastIndex))
+        }
         refreshTeleprompter()
     }
 
@@ -458,14 +463,14 @@ class NarrationViewModel : ViewModel() {
         narration.undo()
         recordPause = false
 
-        refreshTeleprompter()
+        resetTeleprompter()
     }
 
     fun redo() {
         narration.redo()
         recordPause = false
 
-        refreshTeleprompter()
+        resetTeleprompter()
     }
 
     private fun record(index: Int) {
@@ -626,7 +631,19 @@ class NarrationViewModel : ViewModel() {
                 runLater {
                     audioPositionProperty.set(position)
                 }
-                val viewport = renderer.draw(context, canvas, position)
+                var reRecordLoc: Int? = null
+                if (isRecordingAgain) {
+                    val reRecordingIndex = recordingVerseIndex.value
+                    val nextChunk = chunksList.getOrNull(reRecordingIndex + 1)
+                    if (nextChunk != null) {
+                        val next = recordedVerses.firstOrNull { it.label == nextChunk.title }
+                        if (next != null) {
+                            reRecordLoc = next.location
+                        }
+                    }
+                }
+
+                val viewport = renderer.draw(context, canvas, position, reRecordLoc)
                 adjustMarkers(markerNodes, viewport, canvas.width.toInt())
             } catch (e: Exception) {
                 logger.error("", e)
@@ -747,7 +764,7 @@ class NarrationViewModel : ViewModel() {
             true -> NarrationTextItemState.RE_RECORDING_PAUSED
             false -> NarrationTextItemState.RECORDING_PAUSED
         }
-        initializeTeleprompter()
+        resetTeleprompter()
     }
 
     private fun handleResumeRecording(event: ResumeRecordingEvent, narratableList: List<NarrationTextItemData>) {
@@ -774,7 +791,7 @@ class NarrationViewModel : ViewModel() {
     private fun handleSaveRecording(event: SaveRecordingEvent, narratableList: List<NarrationTextItemData>) {
         val index = event.index
         narratableList[index].state = NarrationTextItemState.RE_RECORD
-        initializeTeleprompter()
+        resetTeleprompter()
     }
 
     private fun finishOutstandingActions() {
@@ -790,6 +807,6 @@ class NarrationViewModel : ViewModel() {
                 item.state = NarrationTextItemState.RE_RECORD
             }
         }
-        initializeTeleprompter()
+        resetTeleprompter()
     }
 }
