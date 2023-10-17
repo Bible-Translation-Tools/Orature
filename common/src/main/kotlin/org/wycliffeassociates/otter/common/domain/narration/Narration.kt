@@ -91,16 +91,6 @@ class Narration @AssistedInject constructor(
             resetUncommittedFramesOnUpdatedVerses(),
         )
         loadChapterIntoPlayer()
-
-        player.addEventListener { event ->
-            if (event == AudioPlayerEvent.COMPLETE) {
-                // NOTE: this sets the locked verse to null after play-back
-                // fixes issue with persistent locking to a verse after playing it
-                chapterReaderConnection.lockToVerse(null)
-                player.seek(positionToSeekAfterEnd)
-                chapterReaderConnection.seek(positionToSeekAfterEnd)
-            }
-        }
     }
 
     /**
@@ -269,13 +259,13 @@ class Narration @AssistedInject constructor(
         range?.let {
             val wasPlaying = player.isPlaying()
             player.pause()
-            chapterReaderConnection.lockToVerse(activeVerses.indexOf(verse))
             chapterReaderConnection.start = range.first
             chapterReaderConnection.end = range.last
             player.seek(verse.location)
             chapterReaderConnection.seek(verse.location)
+            chapterReaderConnection.lockToVerse(activeVerses.indexOf(verse))
             positionToSeekAfterEnd = verse.location + chapterReaderConnection.totalFrames
-            if (wasPlaying) player.play()
+            player.play()
         }
     }
 
@@ -419,7 +409,19 @@ class Narration @AssistedInject constructor(
     }
 
     fun getLocationInFrames(): Int {
-        return player.getLocationInFrames() + uncommittedRecordedFrames.get()
+
+        // TODO: clean this up.
+        // This corrects the incorrect value returned from player.getLocationInFrames as a result of the incorrect
+        // value being assigned to startPosition (_reader.totalFrames) after verse playback
+        // the condition checks if the chapterReaderConnection (the player's reader) has reached the last frame in the
+        // verse. If so, then we need to add the verseOffset (the first relative frame of the locked verse) to our
+        // position.
+        val framePosition = chapterReaderConnection.framePosition
+        val offset = if(chapterReaderConnection.totalFrames == framePosition) {
+            chapterReaderConnection.getVerseOffset()
+        } else 0
+
+        return player.getLocationInFrames() + uncommittedRecordedFrames.get() + offset
     }
 
     fun getTotalFrames(): Int {

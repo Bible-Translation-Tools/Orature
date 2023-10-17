@@ -251,6 +251,12 @@ internal class ChapterRepresentation(
         private val CHAPTER_UNLOCKED: Int = -1
         private val lockToVerse = AtomicInteger(CHAPTER_UNLOCKED)
 
+        fun getVerseOffset() : Int {
+            return if(lockToVerse.get() != CHAPTER_UNLOCKED) {
+                absoluteToRelative(activeVerses[lockToVerse.get()].firstFrame())
+            } else 0
+        }
+
         @Synchronized
         fun lockToVerse(index: Int?) {
             if (index != null) {
