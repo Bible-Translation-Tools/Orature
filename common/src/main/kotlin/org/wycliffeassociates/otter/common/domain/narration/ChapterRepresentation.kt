@@ -285,6 +285,13 @@ internal class ChapterRepresentation(
             get() = absoluteToRelative(absoluteFramePosition)
 
 
+        /**
+         * Converts an absoluteFrame position in the scratch audio file to a position relative to the
+         * "relative verse space" or "relative chapter space", depending on the value stored in lockToVerse.
+         * When lockToVerse is not null, the absolute frame is mapped to a position relative to the verse specified by
+         * lockToVerse. When lockToVerse is null, the absoluteFrame position is mapped to a position relative to the
+         * chapter.
+         */
         fun absoluteToRelative(absoluteFrame: Int) : Int {
             return if(lockToVerse.get() == CHAPTER_UNLOCKED) {
                 absoluteToRelativeChapter(absoluteFrame)
@@ -292,6 +299,10 @@ internal class ChapterRepresentation(
                 absoluteToRelativeVerse(absoluteFrame)
             }
         }
+
+        /**
+         * Converts an absoluteFrame position in the scratch audio file to a position in the "relative chapter space".
+         */
         fun absoluteToRelativeChapter(absoluteFrame: Int): Int {
             val verses = activeVerses
             var verse = findVerse(absoluteFrame)
@@ -307,6 +318,11 @@ internal class ChapterRepresentation(
             return 0
         }
 
+        /**
+         * Converts an absoluteFrame position in the scratch audio file to a position in the "relative verse space".
+         * This is performed by finding the verse that contains the absolute frame, and counting how many frames are
+         * from the start of the verse, to the given absoluteFrame position.
+         */
         fun absoluteToRelativeVerse(absoluteFrame: Int): Int {
             val verse = findVerse(absoluteFrame)
             var rel = 0
@@ -480,12 +496,12 @@ internal class ChapterRepresentation(
             // so we need to map the sample to call relativeVerseToRelativeChapter(), then pass the return to
             // relativeToAbsolute
             val lockedVerse = lockToVerse.get()
-            val mappedSample = if(lockedVerse != CHAPTER_UNLOCKED) {
+            val relativeChapterSample = if(lockedVerse != CHAPTER_UNLOCKED) {
                 relativeVerseToRelativeChapter(sample, lockedVerse)
             } else {
                 sample
             }
-            position = relativeToAbsolute(mappedSample) * frameSizeInBytes
+            position = relativeToAbsolute(relativeChapterSample) * frameSizeInBytes
         }
 
         override fun open() {
