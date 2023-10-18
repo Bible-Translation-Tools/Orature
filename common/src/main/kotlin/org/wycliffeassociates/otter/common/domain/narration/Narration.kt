@@ -407,9 +407,19 @@ class Narration @AssistedInject constructor(
         chapterReaderConnection.seek(delta)
     }
 
-    fun seek(location: Int) {
+    fun seek(location: Int, unlockFromVerse: Boolean = false) {
+        if(unlockFromVerse) {
+            lockToVerse(null)
+        }
         player.seek(location)
         chapterReaderConnection.seek(location)
+    }
+
+    /**
+     * Gets the duration of the relative chapter space in frames
+     */
+    fun getDurationInFrames() : Int {
+        return chapterRepresentation.totalFrames
     }
 
 
