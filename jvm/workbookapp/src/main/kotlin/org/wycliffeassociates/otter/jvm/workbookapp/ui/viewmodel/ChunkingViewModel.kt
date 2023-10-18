@@ -103,10 +103,9 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     /** Call this before leaving the view to avoid memory leak */
     var chunkImageCleanup: () -> Unit = {}
     var consumeImageCleanup: () -> Unit = {}
-    val isPlayingProperty = SimpleBooleanProperty(false)
 
+    val isPlayingProperty = SimpleBooleanProperty(false)
     val compositeDisposable = CompositeDisposable()
-    val dirtyMarkers = SimpleBooleanProperty(false)
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -133,7 +132,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         pause()
         translationViewModel.selectedStepProperty.value?.let {
             // handle when navigating to the next step
-            val hasUnsavedChanges = dirtyMarkers.value || markerModel?.changesSaved == false
+            val hasUnsavedChanges = markerCountProperty.value != 0 && markerModel?.hasDirtyMarkers() == true
             if (hasUnsavedChanges && it.ordinal > ChunkingStep.CHUNKING.ordinal) {
                 saveChanges()
             }
@@ -154,18 +153,6 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         if (translationViewModel.reachableStepProperty.value == ChunkingStep.CHUNKING) {
             translationViewModel.reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
         }
-    }
-
-    override fun deleteMarker(id: Int) {
-        super.deleteMarker(id)
-        if (markerCountProperty.value == 0) {
-            markerModel?.changesSaved = true
-            dirtyMarkers.set(false)
-        }
-    }
-
-    fun onMoveMarker(id: Int, start: Int, end: Int) {
-        moveMarker(id, start, end)
     }
 
     fun loadAudio(audioFile: File): OratureAudioFile {
@@ -194,7 +181,6 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
             (1..totalMarkers).map { it.toString() }
         ).apply {
             loadMarkers(chunkMarkers)
-            changesSaved = true
         }
     }
 
@@ -223,9 +209,6 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
         ChunkAudioUseCase(directoryProvider, accessor)
             .createChunkedSourceAudio(sourceAudio.file, cues)
-
-        markerModel?.changesSaved = true
-        dirtyMarkers.value = false
     }
 
     fun initializeAudioController(slider: Slider? = null) {

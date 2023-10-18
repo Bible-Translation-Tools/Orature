@@ -50,7 +50,6 @@ class VerseMarkerModel(
     private val audioEnd = audio.totalFrames
 
     private var labelIndex = 0
-    var changesSaved = true
 
     init {
         cues as MutableList
@@ -67,8 +66,6 @@ class VerseMarkerModel(
 
     fun addMarker(location: Int) {
         if (markers.size < markerTotal) {
-            changesSaved = false
-
             val label = markerLabels.getOrElse(labelIndex) { labelIndex + 1 }.toString()
             val marker = ChunkMarkerModel(AudioCue(location, label))
             val op = Add(marker)
@@ -82,8 +79,6 @@ class VerseMarkerModel(
 
     fun deleteMarker(id: Int) {
         if (markerCountProperty.value > 0) {
-            changesSaved = false
-
             val op = Delete(id)
             undoStack.push(op)
             op.apply()
@@ -94,11 +89,12 @@ class VerseMarkerModel(
     }
 
     fun moveMarker(id: Int, start: Int, end: Int) {
-        changesSaved = false
         val op = Move(id, start, end)
         undoStack.push(op)
         op.apply()
         redoStack.clear()
+
+        refreshMarkers()
     }
 
     fun undo() {
@@ -142,6 +138,8 @@ class VerseMarkerModel(
         return findMarkerPrecedingPosition(location, filtered).frame
     }
 
+    fun hasDirtyMarkers() = undoStack.isNotEmpty()
+
     private fun refreshMarkers() {
         markers.sortBy { it.frame }
         markers.forEachIndexed { index, chunkMarker ->
@@ -176,7 +174,6 @@ class VerseMarkerModel(
             audio.clearVerseMarkers()
             cues.forEach { audio.addVerseMarker(it.location, it.label) }
             audio.update()
-            changesSaved = true
         }.ignoreElement()
     }
 

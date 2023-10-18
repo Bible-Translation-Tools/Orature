@@ -35,9 +35,7 @@ interface IMarkerViewModel : IWaveformViewModel {
     }
 
     fun moveMarker(id: Int, start: Int, end: Int) {
-        markerModel?.let { markerModel ->
-            markerModel.moveMarker(id, start, end)
-        }
+        markerModel?.moveMarker(id, start, end)
     }
 
     fun seekNext() {

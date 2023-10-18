@@ -48,7 +48,7 @@ class Chunking : Fragment() {
             viewModel.deleteMarker(it.markerId)
         }
         subscribe<MarkerMovedEvent> {
-            viewModel.onMoveMarker(it.markerId, it.start, it.end)
+            viewModel.moveMarker(it.markerId, it.start, it.end)
         }
         subscribe<UndoChunkMarkerEvent> {
             viewModel.undoMarker()
@@ -178,11 +178,6 @@ class Chunking : Fragment() {
             setOnFastForward(viewModel::fastForward)
             setOnToggleMedia(viewModel::mediaToggle)
             setOnResumeMedia(viewModel::resumeMedia)
-
-            setOnPositionChanged { _, _ ->
-                // markers moved = dirty
-                viewModel.dirtyMarkers.set(true)
-            }
         }
     }
 

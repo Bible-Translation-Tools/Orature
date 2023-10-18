@@ -167,7 +167,6 @@ open class MarkerTrackControl : Region() {
                 if (container.width > 0) {
                     val start = pixelsToFrames(startPos)
                     val end = pixelsToFrames(markerPositionProperty.value)
-                    markers[i].frame = end
                     FX.eventbus.fire(MarkerMovedEvent(markerIdProperty.value, start, end))
                 }
             }
