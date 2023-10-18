@@ -93,6 +93,11 @@ class Narration @AssistedInject constructor(
         loadChapterIntoPlayer()
     }
 
+    fun lockToVerse(verseIndex : Int?) {
+        lockedVerseIndex = verseIndex
+        chapterReaderConnection.lockToVerse(verseIndex)
+    }
+
     /**
      * Counts the number of audio frames that have been recorded since activating a recording
      */
@@ -149,15 +154,13 @@ class Narration @AssistedInject constructor(
     }
 
     fun undo() {
-        lockedVerseIndex = null
-        chapterReaderConnection.lockToVerse(lockedVerseIndex)
+        lockToVerse(null)
         history.undo(chapterRepresentation.totalVerses)
         chapterRepresentation.onVersesUpdated()
     }
 
     fun redo() {
-        lockedVerseIndex = null
-        chapterReaderConnection.lockToVerse(lockedVerseIndex)
+        lockToVerse(null)
         history.redo(chapterRepresentation.totalVerses)
         chapterRepresentation.onVersesUpdated()
     }
@@ -244,8 +247,7 @@ class Narration @AssistedInject constructor(
 
     fun getSectionAsFile(index: Int): File {
         val verse = activeVerses[index]
-        lockedVerseIndex = index
-        chapterReaderConnection.lockToVerse(lockedVerseIndex)
+        lockToVerse(index)
         chapterReaderConnection.seek(verse.location)
         return audioFileUtils.getSectionAsFile(
             chapterRepresentation.scratchAudio,
@@ -264,8 +266,7 @@ class Narration @AssistedInject constructor(
         range?.let {
             val wasPlaying = player.isPlaying()
             player.pause()
-            lockedVerseIndex = activeVerses.indexOf(verse)
-            chapterReaderConnection.lockToVerse(lockedVerseIndex)
+            lockToVerse(activeVerses.indexOf(verse))
             chapterReaderConnection.start = range.first
             chapterReaderConnection.end = range.last
             seek(0)
@@ -281,9 +282,7 @@ class Narration @AssistedInject constructor(
 
         val wasPlaying = player.isPlaying()
         player.pause()
-
-        lockedVerseIndex = null
-        chapterReaderConnection.lockToVerse(lockedVerseIndex)
+        lockToVerse(null)
         chapterReaderConnection.start = null
         chapterReaderConnection.end = null
 
@@ -307,8 +306,7 @@ class Narration @AssistedInject constructor(
     }
 
     private fun execute(action: NarrationAction) {
-        lockedVerseIndex = null
-        chapterReaderConnection.lockToVerse(lockedVerseIndex)
+        lockToVerse(null)
         history.execute(action, chapterRepresentation.totalVerses, chapterRepresentation.scratchAudio)
         chapterRepresentation.onVersesUpdated()
     }
@@ -414,13 +412,18 @@ class Narration @AssistedInject constructor(
         chapterReaderConnection.seek(location)
     }
 
-    fun getLocationInFrames(): Int {
-        val mappedLocation = if(lockedVerseIndex != null) {
+
+    fun getRelativeChapterLocation(): Int {
+        return if(lockedVerseIndex != null) {
             chapterReaderConnection.relativeVerseToRelativeChapter(player.getLocationInFrames(), lockedVerseIndex!!)
         } else {
             player.getLocationInFrames()
         }
-        return mappedLocation + uncommittedRecordedFrames.get()
+    }
+
+    fun getLocationInFrames(): Int {
+        val relativeChapterLocation = getRelativeChapterLocation()
+        return relativeChapterLocation + uncommittedRecordedFrames.get()
     }
 
     fun getTotalFrames(): Int {
@@ -437,13 +440,8 @@ class Narration @AssistedInject constructor(
 
     fun seekToPrevious() {
         player.pause()
-        val loc = if(lockedVerseIndex != null) {
-            chapterReaderConnection.relativeVerseToRelativeChapter(player.getLocationInFrames(), lockedVerseIndex!!)
-        } else {
-            player.getLocationInFrames()
-        }
-        lockedVerseIndex = null
-        chapterReaderConnection.lockToVerse(lockedVerseIndex)
+        val loc = getRelativeChapterLocation()
+        lockToVerse(null)
         val seekLoc = activeVerses.lastOrNull() { it.location < loc }
         seekLoc?.let {
             seek(it.location)
@@ -452,13 +450,8 @@ class Narration @AssistedInject constructor(
 
     fun seekToNext() {
         player.pause()
-        val loc = if(lockedVerseIndex != null) {
-            chapterReaderConnection.relativeVerseToRelativeChapter(player.getLocationInFrames(), lockedVerseIndex!!)
-        } else {
-            player.getLocationInFrames()
-        }
-        lockedVerseIndex = null
-        chapterReaderConnection.lockToVerse(lockedVerseIndex)
+        val loc = getRelativeChapterLocation()
+        lockToVerse(null)
         val seekLoc = activeVerses.firstOrNull { it.location > loc }
         seekLoc?.let {
             seek(it.location)
