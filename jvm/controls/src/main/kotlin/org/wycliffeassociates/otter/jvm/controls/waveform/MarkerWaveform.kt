@@ -23,6 +23,7 @@ class MarkerWaveform : StackPane() {
     val imageWidthProperty = SimpleDoubleProperty()
     val positionProperty = SimpleDoubleProperty(0.0)
     val canMoveMarkerProperty = SimpleBooleanProperty(true)
+    val canDeleteMarkerProperty = SimpleBooleanProperty(true)
 
     private val onPositionChanged = SimpleObjectProperty<(Int, Double) -> Unit> { _, _ -> }
     fun setOnPositionChanged(op: (Int, Double) -> Unit) {
@@ -107,6 +108,7 @@ class MarkerWaveform : StackPane() {
             top = this
             markers.bind(this@MarkerWaveform.markers, { it })
             canMoveMarkerProperty.bind(this@MarkerWaveform.canMoveMarkerProperty)
+            canDeleteMarkerProperty.bind(this@MarkerWaveform.canDeleteMarkerProperty)
             onPositionChangedProperty.bind(onPositionChanged)
             onLocationRequestProperty.bind(onLocationRequest)
         }

@@ -90,6 +90,7 @@ class Chunking : Fragment() {
                     themeProperty.bind(settingsViewModel.appColorMode)
                     positionProperty.bind(viewModel.positionProperty)
                     canMoveMarkerProperty.set(true)
+                    canDeleteMarkerProperty.set(true)
                     imageWidthProperty.bind(viewModel.imageWidthProperty)
 
                     setUpWaveformActionHandlers()

@@ -42,6 +42,7 @@ open class MarkerTrackControl : Region() {
 
     val markers = observableListOf<ChunkMarkerModel>()
     val canMoveMarkerProperty = SimpleBooleanProperty(true)
+    val canDeleteMarkerProperty = SimpleBooleanProperty(true)
     val onPositionChangedProperty = SimpleObjectProperty<(Int, Double) -> Unit>()
     val onSeekPreviousProperty = SimpleObjectProperty<() -> Unit>()
     val onSeekNextProperty = SimpleObjectProperty<() -> Unit>()
@@ -121,6 +122,7 @@ open class MarkerTrackControl : Region() {
             markerIndexProperty.set(i)
             markerNumberProperty.set(mk.label)
             canBeMovedProperty.bind(canMoveMarkerProperty)
+            canBeDeletedProperty.bind(canDeleteMarkerProperty)
             markerPositionProperty.set(pixel)
 
             setOnDragStart { me ->
