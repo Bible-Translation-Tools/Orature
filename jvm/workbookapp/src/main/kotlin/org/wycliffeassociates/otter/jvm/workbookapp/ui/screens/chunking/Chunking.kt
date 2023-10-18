@@ -115,14 +115,6 @@ class Chunking : Fragment() {
                 hbox {
                     addClass("chunking-bottom__media-btn-group")
 
-                    button("undo") {
-                        addClass("btn", "btn--icon")
-                        action { FX.eventbus.fire(UndoChunkMarkerEvent())}
-                    }
-                    button("redo") {
-                        addClass("btn", "btn--icon")
-                        action { FX.eventbus.fire(RedoChunkMarkerEvent())}
-                    }
                     button {
                         addClass("btn", "btn--icon")
                         graphic = FontIcon(MaterialDesign.MDI_SKIP_PREVIOUS)
