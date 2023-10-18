@@ -94,7 +94,6 @@ class VerseMarkerModel(
     }
 
     fun moveMarker(id: Int, start: Int, end: Int) {
-        println("move $id from $start to $end")
         changesSaved = false
         val op = Move(id, start, end)
         undoStack.push(op)
