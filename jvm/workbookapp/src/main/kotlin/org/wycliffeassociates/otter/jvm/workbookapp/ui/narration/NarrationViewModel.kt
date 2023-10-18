@@ -632,18 +632,26 @@ class NarrationViewModel : ViewModel() {
                     audioPositionProperty.set(position)
                 }
                 var reRecordLoc: Int? = null
+                var nextVerseLoc: Int? = null
                 if (isRecordingAgain) {
                     val reRecordingIndex = recordingVerseIndex.value
                     val nextChunk = chunksList.getOrNull(reRecordingIndex + 1)
                     if (nextChunk != null) {
                         val next = recordedVerses.firstOrNull { it.label == nextChunk.title }
                         if (next != null) {
-                            reRecordLoc = next.location
+                            nextVerseLoc = next.location
                         }
                     }
+                    reRecordLoc = recordedVerses[reRecordingIndex].location
                 }
 
-                val viewports = renderer.draw(context, canvas, position, reRecordLoc)
+                val viewports = renderer.draw(
+                    context,
+                    canvas,
+                    position,
+                    reRecordLoc,
+                    nextVerseLoc
+                )
                 adjustMarkers(markerNodes, viewports, canvas.width.toInt())
             } catch (e: Exception) {
                 logger.error("", e)
