@@ -12,8 +12,8 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
-import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkMarker
-import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkMarker
+import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkMarkerEvent
+import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkMarkerEvent
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
@@ -47,10 +47,10 @@ class Chunking : Fragment() {
         subscribe<MarkerDeletedEvent> {
             viewModel.deleteMarker(it.markerId)
         }
-        subscribe<UndoChunkMarker> {
+        subscribe<UndoChunkMarkerEvent> {
             viewModel.undoMarker()
         }
-        subscribe<RedoChunkMarker> {
+        subscribe<RedoChunkMarkerEvent> {
             viewModel.redoMarker()
         }
     }
@@ -87,6 +87,7 @@ class Chunking : Fragment() {
                     themeProperty.bind(settingsViewModel.appColorMode)
                     positionProperty.bind(viewModel.positionProperty)
                     canMoveMarkerProperty.set(true)
+                    canDeleteMarkerProperty.set(true)
                     imageWidthProperty.bind(viewModel.imageWidthProperty)
 
                     setUpWaveformActionHandlers()
@@ -116,11 +117,11 @@ class Chunking : Fragment() {
 
                     button("undo") {
                         addClass("btn", "btn--icon")
-                        action { FX.eventbus.fire(UndoChunkMarker())}
+                        action { FX.eventbus.fire(UndoChunkMarkerEvent())}
                     }
                     button("redo") {
                         addClass("btn", "btn--icon")
-                        action { FX.eventbus.fire(RedoChunkMarker())}
+                        action { FX.eventbus.fire(RedoChunkMarkerEvent())}
                     }
                     button {
                         addClass("btn", "btn--icon")

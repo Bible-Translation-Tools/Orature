@@ -52,6 +52,9 @@ class MarkerNodeSkin(val control: MarkerNode) : SkinBase<MarkerNode>(control) {
                     addClass("btn", "btn--icon", "btn--borderless", "normal-text")
                     graphic = FontIcon(MaterialDesign.MDI_DELETE).addClass("wa-icon")
 
+                    visibleWhen { control.canBeDeletedProperty }
+                    managedWhen(visibleProperty())
+
                     action {
                         FX.eventbus.fire(MarkerDeletedEvent(control.markerIdProperty.value))
                     }
@@ -65,6 +68,8 @@ class MarkerNodeSkin(val control: MarkerNode) : SkinBase<MarkerNode>(control) {
                 addClass("btn", "btn--icon")
                 graphic = FontIcon(Material.DRAG_HANDLE)
 
+                visibleWhen { control.canBeMovedProperty }
+                managedWhen(visibleProperty())
                 // delegates the mouse drag events to the "drag" button
                 onMousePressedProperty().bind(control.onDragStartProperty)
                 onMouseDraggedProperty().bind(control.onDragProperty)
