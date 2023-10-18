@@ -190,8 +190,7 @@ internal class ChapterRepresentation(
                     remaining -= sector.length()
                 } else if (sector.length() == remaining) {
                     return sector.last
-                }
-                else {
+                } else {
                     return sector.first + remaining - 1
                 }
             }
@@ -292,8 +291,8 @@ internal class ChapterRepresentation(
          * lockToVerse. When lockToVerse is null, the absoluteFrame position is mapped to a position relative to the
          * chapter.
          */
-        fun absoluteToRelative(absoluteFrame: Int) : Int {
-            return if(lockToVerse.get() == CHAPTER_UNLOCKED) {
+        fun absoluteToRelative(absoluteFrame: Int): Int {
+            return if (lockToVerse.get() == CHAPTER_UNLOCKED) {
                 absoluteToRelativeChapter(absoluteFrame)
             } else {
                 absoluteToRelativeVerse(absoluteFrame)
@@ -496,7 +495,7 @@ internal class ChapterRepresentation(
             // so we need to map the sample to call relativeVerseToRelativeChapter(), then pass the return to
             // relativeToAbsolute
             val lockedVerse = lockToVerse.get()
-            val relativeChapterSample = if(lockedVerse != CHAPTER_UNLOCKED) {
+            val relativeChapterSample = if (lockedVerse != CHAPTER_UNLOCKED) {
                 relativeVerseToRelativeChapter(sample, lockedVerse)
             } else {
                 sample

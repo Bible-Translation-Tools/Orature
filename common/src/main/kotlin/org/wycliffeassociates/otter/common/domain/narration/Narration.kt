@@ -77,7 +77,7 @@ class Narration @AssistedInject constructor(
 
     private var writer: WavFileWriter? = null
 
-    private var lockedVerseIndex : Int? = null
+    private var lockedVerseIndex: Int? = null
 
     init {
         val writer = initializeWavWriter()
@@ -93,7 +93,7 @@ class Narration @AssistedInject constructor(
         loadChapterIntoPlayer()
     }
 
-    fun lockToVerse(verseIndex : Int?) {
+    fun lockToVerse(verseIndex: Int?) {
         lockedVerseIndex = verseIndex
         chapterReaderConnection.lockToVerse(verseIndex)
     }
@@ -408,7 +408,7 @@ class Narration @AssistedInject constructor(
     }
 
     fun seek(location: Int, unlockFromVerse: Boolean = false) {
-        if(unlockFromVerse) {
+        if (unlockFromVerse) {
             lockToVerse(null)
         }
         player.seek(location)
@@ -418,14 +418,15 @@ class Narration @AssistedInject constructor(
     /**
      * Gets the duration of the relative chapter space in frames
      */
-    fun getDurationInFrames() : Int {
+    fun getDurationInFrames(): Int {
         return chapterRepresentation.totalFrames
     }
 
 
     fun getRelativeChapterLocation(): Int {
-        return if(lockedVerseIndex != null) {
-            chapterReaderConnection.relativeVerseToRelativeChapter(player.getLocationInFrames(), lockedVerseIndex!!)
+        return if (lockedVerseIndex != null) {
+            chapterReaderConnection
+                .relativeVerseToRelativeChapter(player.getLocationInFrames(), lockedVerseIndex!!)
         } else {
             player.getLocationInFrames()
         }
