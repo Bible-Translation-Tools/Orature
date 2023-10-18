@@ -154,12 +154,14 @@ class Narration @AssistedInject constructor(
     }
 
     fun undo() {
+        seek(getRelativeChapterLocation())
         lockToVerse(null)
         history.undo(chapterRepresentation.totalVerses)
         chapterRepresentation.onVersesUpdated()
     }
 
     fun redo() {
+        seek(getRelativeChapterLocation())
         lockToVerse(null)
         history.redo(chapterRepresentation.totalVerses)
         chapterRepresentation.onVersesUpdated()
@@ -201,6 +203,7 @@ class Narration @AssistedInject constructor(
     }
 
     fun onVerseMarkerMoved(verseIndex: Int, delta: Int) {
+        seek(getRelativeChapterLocation())
         val action = MoveMarkerAction(verseIndex, delta)
         execute(action)
     }
