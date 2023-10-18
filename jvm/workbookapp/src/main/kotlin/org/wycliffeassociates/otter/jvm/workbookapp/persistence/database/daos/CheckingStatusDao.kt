@@ -29,7 +29,10 @@ class CheckingStatusDao(instanceDsl: DSLContext) {
 
     private fun insert(checkingStatus: CheckingStatus, dsl: DSLContext): Int {
         return dsl
-            .insertInto(checkingStatusTable.CHECKING_STATUS, checkingStatusTable.CHECKING_STATUS.NAME)
+            .insertInto(
+                checkingStatusTable.CHECKING_STATUS,
+                checkingStatusTable.CHECKING_STATUS.NAME
+            )
             .values(checkingStatus.name)
             .returning(checkingStatusTable.CHECKING_STATUS.ID)
             .fetchOne()!!
