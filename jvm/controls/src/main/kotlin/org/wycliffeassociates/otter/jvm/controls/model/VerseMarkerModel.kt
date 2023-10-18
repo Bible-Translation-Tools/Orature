@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
-import org.wycliffeassociates.otter.common.data.audio.OratureCueType
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import tornadofx.*
 import kotlin.math.absoluteValue
@@ -92,6 +91,15 @@ class VerseMarkerModel(
 
             refreshMarkers()
         }
+    }
+
+    fun moveMarker(id: Int, start: Int, end: Int) {
+        println("move $id from $start to $end")
+        changesSaved = false
+        val op = Move(id, start, end)
+        undoStack.push(op)
+        op.apply()
+        redoStack.clear()
     }
 
     fun undo() {
@@ -340,6 +348,23 @@ class VerseMarkerModel(
             marker?.let {
                 markers.add(it)
             }
+        }
+    }
+
+    private inner class Move(
+        id: Int,
+        val start: Int,
+        val end: Int
+    ): MarkerOperation(id) {
+        var marker: ChunkMarkerModel? = null
+
+        override fun apply() {
+            marker = markers.find { it.id == markerId }
+            marker?.frame = end
+        }
+
+        override fun undo() {
+            marker?.frame = start
         }
     }
 }

@@ -164,6 +164,10 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         }
     }
 
+    fun onMoveMarker(id: Int, start: Int, end: Int) {
+        moveMarker(id, start, end)
+    }
+
     fun loadAudio(audioFile: File): OratureAudioFile {
         val player = audioConnectionFactory.getPlayer()
         val audio = OratureAudioFile(audioFile)
