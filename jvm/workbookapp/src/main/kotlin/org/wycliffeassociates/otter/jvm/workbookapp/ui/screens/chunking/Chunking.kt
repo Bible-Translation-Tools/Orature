@@ -44,7 +44,9 @@ class Chunking : Fragment() {
         viewModel.initializeAudioController(slider)
         waveform.markers.bind(viewModel.markers) { it }
 
-        subscribe<MarkerDeletedEvent> { viewModel.deleteMarker(it.markerId) }
+        subscribe<MarkerDeletedEvent> {
+            viewModel.deleteMarker(it.markerId)
+        }
         subscribe<UndoChunkMarker> {
             viewModel.undoMarker()
         }
