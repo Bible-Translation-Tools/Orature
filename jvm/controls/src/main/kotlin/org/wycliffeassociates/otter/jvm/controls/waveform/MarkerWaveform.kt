@@ -102,7 +102,9 @@ class MarkerWaveform : StackPane() {
 
         nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
 
-        add(MarkerViewBackground())
+        vbox {
+            addClass("scrolling-waveform-frame__center")
+        }
 
         val topTrack = MarkersContainer().apply {
             top = this
@@ -129,19 +131,15 @@ class MarkerWaveform : StackPane() {
             }
         }
         add(waveformFrame)
-        stackpane {
-            isMouseTransparent = true
-
-            add(
-                Line(0.0, 40.0, 0.0, 0.0).apply {
-                    managedProperty().set(false)
-                    startXProperty().bind(this@stackpane.widthProperty().divide(2))
-                    endXProperty().bind(this@stackpane.widthProperty().divide(2))
-                    endYProperty().bind(this@stackpane.heightProperty())
-                    styleClass.add("scrolling-waveform__playback-line")
-                }
-            )
-        }
+        add(
+            Line(0.0, 80.0, 0.0, 0.0).apply {
+                managedProperty().set(false)
+                startXProperty().bind(this@MarkerWaveform.widthProperty().divide(2))
+                endXProperty().bind(this@MarkerWaveform.widthProperty().divide(2))
+                endYProperty().bind(this@MarkerWaveform.heightProperty())
+                styleClass.add("scrolling-waveform__playback-line")
+            }
+        )
     }
 
 }

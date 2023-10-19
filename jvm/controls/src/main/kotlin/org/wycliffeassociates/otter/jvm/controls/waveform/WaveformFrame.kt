@@ -93,9 +93,6 @@ class WaveformFrame(
 
     lateinit var imageRegion: Region
 
-    lateinit var topTrackRegion: Region
-    lateinit var bottomTrackRegion: Region
-
     init {
         addClass("vm-waveform-frame")
 
@@ -128,24 +125,6 @@ class WaveformFrame(
                     hbox {
                         alignment = Pos.CENTER
                         imageHolder = this@hbox
-                    }
-
-                    borderpane {
-                        top {
-                            region {
-                                topTrackRegion = this
-                                styleClass.add("scrolling-waveform-frame__top-track")
-                            }
-                        }
-                        bottom {
-                            region {
-                                bottomTrackRegion = this
-                                styleClass.add("scrolling-waveform-frame__bottom-track")
-                                bottomTrack?.let {
-                                    add(it)
-                                }
-                            }
-                        }
                     }
 
                     topTrack?.let {
@@ -235,12 +214,7 @@ class WaveformFrame(
                 addClass("waveform-image")
                 this.effect = waveformColorEffect
                 // This is to adjust the height of the image to fit within the tracks
-                fitHeightProperty()
-                    .bind(
-                        imageRegion.heightProperty()
-                            .minus(topTrackRegion.heightProperty())
-                            .minus(bottomTrackRegion.heightProperty())
-                    )
+                fitHeightProperty().bind(imageRegion.heightProperty())
             }
         )
     }

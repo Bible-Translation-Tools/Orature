@@ -204,8 +204,9 @@ open class MarkerTrackControl : Region() {
             val mk = ChunkMarkerModel(0, i.toString(), false)
             val marker = createMarker(i, mk)
             val rect = createHighlight(i, mk)
-            rect.heightProperty().bind(heightProperty().minus(40.0))
+            rect.heightProperty().bind(heightProperty().minus(80))
             rect.translateXProperty().bind(marker.translateXProperty())
+            rect.translateY = 80.0
             rect.visibleProperty().bind(marker.visibleProperty())
 
             _markers.add(marker)
