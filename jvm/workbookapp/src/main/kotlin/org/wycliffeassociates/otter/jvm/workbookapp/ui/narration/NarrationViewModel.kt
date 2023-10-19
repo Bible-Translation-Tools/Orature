@@ -394,6 +394,8 @@ class NarrationViewModel : ViewModel() {
         isRecordingAgain = false
         recordPause = false
 
+        renderer.clearActiveRecordingData()
+
         refreshTeleprompter()
     }
 
@@ -507,20 +509,21 @@ class NarrationViewModel : ViewModel() {
     }
 
     private fun stopRecordAgain() {
+        narration.pauseRecording()
+        recordAgainVerseIndex = null
+        isRecording = false
+        isRecordingAgain = false
+
+        recordPause = false
+        recordResume = true
+
+        renderer.clearActiveRecordingData()
+
         recordAgainVerseIndex?.let { verseIndex ->
-            narration.pauseRecording()
-            renderer.clearActiveRecordingData()
             narration.finalizeVerse(verseIndex)
-
-            recordAgainVerseIndex = null
-            isRecording = false
-            isRecordingAgain = false
-
-            recordPause = false
-            recordResume = true
-
-            refreshTeleprompter()
         }
+
+        refreshTeleprompter()
     }
 
     private fun stopPlayer() {
