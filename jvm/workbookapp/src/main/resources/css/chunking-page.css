@@ -65,6 +65,7 @@
     -fx-alignment: center;
     -fx-border-width: 1;
     -fx-border-color: transparent transparent -wa-border-light transparent;
+    -fx-padding: 16;
 }
 
 
