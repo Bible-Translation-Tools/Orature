@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.common.data.workbook
 
+import io.reactivex.Observable
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import java.util.*
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
@@ -46,7 +47,7 @@ class Chunk(
     fun hasSelectedAudio() = audio.selected.value?.value != null
 
     fun checkingStatus(): CheckingStatus {
-        return audio.selected.value?.value?.let { take ->
+        return audio.getSelectedTake()?.let { take ->
             if (take.checkingState.value?.checksum == take.checksum()) {
                 take.checkingState.value?.status
             } else {
