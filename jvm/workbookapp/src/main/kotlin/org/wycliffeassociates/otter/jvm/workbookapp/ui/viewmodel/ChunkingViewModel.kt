@@ -150,9 +150,28 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
     override fun placeMarker() {
         super.placeMarker()
-        if (translationViewModel.reachableStepProperty.value == ChunkingStep.CHUNKING) {
-            translationViewModel.reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
-        }
+        // any changes in chunking will affect the subsequent steps
+        translationViewModel.reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
+    }
+
+    override fun deleteMarker(id: Int) {
+        super.deleteMarker(id)
+        translationViewModel.reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
+    }
+
+    override fun moveMarker(id: Int, start: Int, end: Int) {
+        super.moveMarker(id, start, end)
+        translationViewModel.reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
+    }
+
+    override fun undoMarker() {
+        super.undoMarker()
+        translationViewModel.updateStep()
+    }
+
+    override fun redoMarker() {
+        super.redoMarker()
+        translationViewModel.reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
     }
 
     fun loadAudio(audioFile: File): OratureAudioFile {

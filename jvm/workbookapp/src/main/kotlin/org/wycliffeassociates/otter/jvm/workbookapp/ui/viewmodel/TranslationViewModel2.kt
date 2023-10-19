@@ -81,11 +81,12 @@ class TranslationViewModel2 : ViewModel() {
         }
         chunkList.setAll(chunkViewData)
 
-        compositeDisposable.clear()
         updateStep()
     }
 
-    private fun updateStep() {
+    fun updateStep() {
+        compositeDisposable.clear()
+
         workbookDataStore.chapter
             .chunks
             .observeOnFx()

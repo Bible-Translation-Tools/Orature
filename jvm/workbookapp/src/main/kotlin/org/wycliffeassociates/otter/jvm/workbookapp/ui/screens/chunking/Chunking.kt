@@ -158,7 +158,6 @@ class Chunking : Fragment() {
         waveform.apply {
             setOnSeekNext { viewModel.seekNext() }
             setOnSeekPrevious { viewModel.seekPrevious() }
-            setOnPlaceMarker { viewModel.placeMarker() }
             setOnWaveformClicked { viewModel.pause() }
             setOnWaveformDragReleased { deltaPos ->
                 val deltaFrames = pixelsToFrames(deltaPos)
