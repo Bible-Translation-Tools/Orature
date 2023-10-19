@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.waveform
 
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.ActionEvent
@@ -41,7 +42,10 @@ class WaveformFrame(
     topTrack: Node? = null,
     bottomTrack: Node? = null
 ) : StackPane() {
-
+    /**
+     * Flag to determine if this reusable component follows the old or new design.
+     */
+    val isNewDesignProperty = SimpleBooleanProperty(false)
     val onWaveformClickedProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onWaveformDragReleasedProperty = SimpleObjectProperty<(pixel: Double) -> Unit>()
     val onRewindProperty = SimpleObjectProperty<(ScrollSpeed) -> Unit>()
@@ -93,6 +97,9 @@ class WaveformFrame(
 
     lateinit var imageRegion: Region
 
+    lateinit var topTrackRegion: Region
+    lateinit var bottomTrackRegion: Region
+
     init {
         addClass("vm-waveform-frame")
 
@@ -125,6 +132,27 @@ class WaveformFrame(
                     hbox {
                         alignment = Pos.CENTER
                         imageHolder = this@hbox
+                    }
+
+                    borderpane {
+                        visibleWhen { isNewDesignProperty.not() }
+                        managedWhen(visibleProperty())
+
+                        top {
+                            region {
+                                topTrackRegion = this
+                                styleClass.add("scrolling-waveform-frame__top-track")
+                            }
+                        }
+                        bottom {
+                            region {
+                                bottomTrackRegion = this
+                                styleClass.add("scrolling-waveform-frame__bottom-track")
+                                bottomTrack?.let {
+                                    add(it)
+                                }
+                            }
+                        }
                     }
 
                     topTrack?.let {
@@ -214,7 +242,16 @@ class WaveformFrame(
                 addClass("waveform-image")
                 this.effect = waveformColorEffect
                 // This is to adjust the height of the image to fit within the tracks
-                fitHeightProperty().bind(imageRegion.heightProperty())
+                if (isNewDesignProperty.value == true) {
+                    fitHeightProperty().bind(imageRegion.heightProperty())
+                } else {
+                    fitHeightProperty()
+                        .bind(
+                            imageRegion.heightProperty()
+                                .minus(topTrackRegion.heightProperty())
+                                .minus(bottomTrackRegion.heightProperty())
+                        )
+                }
             }
         )
     }

@@ -117,6 +117,7 @@ class MarkerWaveform : StackPane() {
         waveformFrame = WaveformFrame(topTrack).apply {
             themeProperty.bind(this@MarkerWaveform.themeProperty)
             framePositionProperty.bind(positionProperty)
+            isNewDesignProperty.set(true)
             onWaveformClickedProperty.bind(onWaveformClicked)
             onWaveformDragReleasedProperty.bind(onWaveformDragReleased)
             onRewindProperty.bind(onRewind)

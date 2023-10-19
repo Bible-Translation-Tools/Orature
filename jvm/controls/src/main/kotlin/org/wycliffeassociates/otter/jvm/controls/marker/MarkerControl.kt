@@ -11,6 +11,9 @@ import javafx.event.EventHandler
 import javafx.scene.control.Control
 import javafx.scene.input.MouseEvent
 
+/**
+ * Provides a common interface for the old and new marker UI controls.
+ */
 abstract class MarkerControl : Control() {
     open val markerIdProperty = SimpleIntegerProperty(0)
     open val markerIndexProperty = SimpleIntegerProperty(0)
