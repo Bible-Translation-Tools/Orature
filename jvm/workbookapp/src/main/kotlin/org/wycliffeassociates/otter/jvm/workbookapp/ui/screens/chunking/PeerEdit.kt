@@ -22,7 +22,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewMod
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 
-class PeerEdit : Fragment() {
+open class PeerEdit : Fragment() {
 
     val viewModel: PeerEditViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
@@ -46,6 +46,10 @@ class PeerEdit : Fragment() {
             }
         }
         centerProperty().bind(mainSectionProperty)
+    }
+
+    init {
+        tryImportStylesheet("/css/recording-screen.css")
     }
 
     private fun createPlaybackView() = VBox().apply {
