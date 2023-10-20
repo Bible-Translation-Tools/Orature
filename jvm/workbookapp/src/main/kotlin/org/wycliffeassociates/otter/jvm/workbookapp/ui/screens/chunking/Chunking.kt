@@ -36,44 +36,6 @@ class Chunking : Fragment() {
 
     var cleanUpWaveform: () -> Unit = {}
 
-    override fun onDock() {
-        super.onDock()
-        logger.info("Chunking docked")
-
-        viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
-        viewModel.onDockChunking()
-        viewModel.initializeAudioController(slider)
-
-        subscribe<MarkerDeletedEvent> {
-            viewModel.deleteMarker(it.markerId)
-        }
-        subscribe<MarkerMovedEvent> {
-            viewModel.moveMarker(it.markerId, it.start, it.end)
-        }
-        subscribe<UndoChunkingPageEvent> {
-            viewModel.undoMarker()
-        }
-        subscribe<RedoChunkingPageEvent> {
-            viewModel.redoMarker()
-        }
-    }
-
-    override fun onUndock() {
-        super.onUndock()
-        logger.info("Chunking undocked")
-        cleanUpWaveform()
-        viewModel.onUndockChunking()
-    }
-
-    private fun subscribeOnWaveformImages() {
-        viewModel.waveform
-            .observeOnFx()
-            .subscribe {
-                waveform.addWaveformImage(it)
-            }
-            .addTo(viewModel.compositeDisposable)
-    }
-
     override val root = vbox {
         borderpane {
             vgrow = Priority.ALWAYS
@@ -152,6 +114,46 @@ class Chunking : Fragment() {
                 }
             }
         }
+    }
+
+    init {
+        subscribe<MarkerDeletedEvent> {
+            viewModel.deleteMarker(it.markerId)
+        }
+        subscribe<MarkerMovedEvent> {
+            viewModel.moveMarker(it.markerId, it.start, it.end)
+        }
+        subscribe<UndoChunkingPageEvent> {
+            viewModel.undoMarker()
+        }
+        subscribe<RedoChunkingPageEvent> {
+            viewModel.redoMarker()
+        }
+    }
+
+    override fun onDock() {
+        super.onDock()
+        logger.info("Chunking docked")
+
+        viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
+        viewModel.onDockChunking()
+        viewModel.initializeAudioController(slider)
+    }
+
+    override fun onUndock() {
+        super.onUndock()
+        logger.info("Chunking undocked")
+        cleanUpWaveform()
+        viewModel.onUndockChunking()
+    }
+
+    private fun subscribeOnWaveformImages() {
+        viewModel.waveform
+            .observeOnFx()
+            .subscribe {
+                waveform.addWaveformImage(it)
+            }
+            .addTo(viewModel.compositeDisposable)
     }
 
     private fun setUpWaveformActionHandlers() {

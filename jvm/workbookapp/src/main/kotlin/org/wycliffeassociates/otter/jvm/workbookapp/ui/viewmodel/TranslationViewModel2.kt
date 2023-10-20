@@ -60,6 +60,7 @@ class TranslationViewModel2 : ViewModel() {
     }
 
     fun selectChunk(chunkNumber: Int) {
+        resetUndoRedo()
         workbookDataStore.chapter.chunks.value?.find { it.sort == chunkNumber }?.let {
             workbookDataStore.activeChunkProperty.set(it)
             audioDataStore.updateSourceAudio()

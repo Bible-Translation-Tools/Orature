@@ -11,6 +11,8 @@ import javafx.scene.layout.VBox
 import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
+import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
@@ -50,6 +52,12 @@ open class PeerEdit : Fragment() {
 
     init {
         tryImportStylesheet("/css/recording-screen.css")
+        subscribe<UndoChunkingPageEvent> {
+            viewModel.undo()
+        }
+        subscribe<RedoChunkingPageEvent> {
+            viewModel.redo()
+        }
     }
 
     private fun createPlaybackView() = VBox().apply {

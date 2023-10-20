@@ -26,7 +26,11 @@ import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkOperation
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkConfirmAction
 import tornadofx.*
+import java.util.ArrayDeque
+import java.util.Deque
 import javax.inject.Inject
 
 class PeerEditViewModel : ViewModel(), IWaveformViewModel {
@@ -65,6 +69,9 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     private val width = Screen.getMainScreen().platformWidth
     private val disposableListeners = mutableListOf<ListenerDisposer>()
     private val selectedTakeDisposable = CompositeDisposable()
+
+    private val undoStack: Deque<ChunkOperation> = ArrayDeque()
+    private val redoStack: Deque<ChunkOperation> = ArrayDeque()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -122,11 +129,41 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
                 ChunkingStep.VERSE_CHECK -> CheckingStatus.VERSE
                 else -> CheckingStatus.UNCHECKED
             }
-            val take = chunk.audio.getSelectedTake()
-            val checkingStage = TakeCheckingState(checkingStatus, take?.checksum())
-            take?.checkingState?.accept(checkingStage)
+            val take = chunk.audio.getSelectedTake()!!
+            val op = ChunkConfirmAction(
+                take,
+                checkingStatus,
+                TakeCheckingState(CheckingStatus.UNCHECKED, null)
+            )
+            undoStack.push(op)
+            op.apply()
+            redoStack.clear()
+            onUndoableAction()
             refreshChunkList()
         }
+    }
+
+    fun undo() {
+        val dirty = undoStack.isNotEmpty()
+        if (dirty) {
+            val op = undoStack.pop()
+            redoStack.push(op)
+            op.undo()
+            refreshChunkList()
+            translationViewModel.canRedoProperty.set(true)
+        }
+        translationViewModel.canUndoProperty.set(undoStack.isNotEmpty())
+    }
+
+    fun redo() {
+        if (redoStack.isNotEmpty()) {
+            val op = redoStack.pop()
+            undoStack.push(op)
+            op.apply()
+            refreshChunkList()
+            translationViewModel.canUndoProperty.set(true)
+        }
+        translationViewModel.canRedoProperty.set(redoStack.isNotEmpty())
     }
 
     fun onRecordNew() {
@@ -204,5 +241,10 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
             wavColor = Color.web(WAV_COLOR),
             background = Color.web(BACKGROUND_COLOR)
         )
+    }
+
+    private fun onUndoableAction() {
+        translationViewModel.canUndoProperty.set(true)
+        translationViewModel.canRedoProperty.set(false)
     }
 }
