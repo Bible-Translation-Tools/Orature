@@ -10,8 +10,10 @@ class CheckingStatusDao(instanceDsl: DSLContext) {
     private val mapToId: Map<CheckingStatus, Int> by lazy { loadToDatabase(instanceDsl) }
     private val mapToEnum: Map<Int, CheckingStatus> by lazy { mapToId.entries.associate { (k, v) -> v to k } }
 
-    fun fetchId(mode: CheckingStatus) = mapToId[mode]
-        ?: throw IllegalStateException("Mode: $mode does not exist in database table.")
+    fun fetchId(mode: CheckingStatus): Int {
+        return mapToId[mode]
+            ?: throw IllegalStateException("Mode: $mode does not exist in database table.")
+    }
 
     fun fetchById(databaseId: Int) = mapToEnum[databaseId]
 
@@ -29,7 +31,10 @@ class CheckingStatusDao(instanceDsl: DSLContext) {
 
     private fun insert(checkingStatus: CheckingStatus, dsl: DSLContext): Int {
         return dsl
-            .insertInto(checkingStatusTable.CHECKING_STATUS, checkingStatusTable.CHECKING_STATUS.NAME)
+            .insertInto(
+                checkingStatusTable.CHECKING_STATUS,
+                checkingStatusTable.CHECKING_STATUS.NAME
+            )
             .values(checkingStatus.name)
             .returning(checkingStatusTable.CHECKING_STATUS.ID)
             .fetchOne()!!

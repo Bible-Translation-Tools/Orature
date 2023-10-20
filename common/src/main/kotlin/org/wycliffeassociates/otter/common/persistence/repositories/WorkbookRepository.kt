@@ -407,7 +407,9 @@ class WorkbookRepository(
             format = MimeType.WAV, // TODO
             createdTimestamp = modelTake.created,
             deletedTimestamp = BehaviorRelay.createDefault(DateHolder(modelTake.deleted)),
-            checkingState = BehaviorRelay.createDefault(TakeCheckingState(modelTake.checkingStatus, modelTake.checksum))
+            checkingState = BehaviorRelay.createDefault(
+                TakeCheckingState(modelTake.checkingStatus, modelTake.checksum)
+            )
         )
     }
 
@@ -420,7 +422,7 @@ class WorkbookRepository(
             deleted = null,
             played = false,
             checkingStatus = workbookTake.checkingState.value?.status ?: CheckingStatus.UNCHECKED,
-            checksum = workbookTake.checkingState.value?.checksum,
+            checksum = workbookTake.getSavedChecksum(),
             markers = markers
         )
     }
