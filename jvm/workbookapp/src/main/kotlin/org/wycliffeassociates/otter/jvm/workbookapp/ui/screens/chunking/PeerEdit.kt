@@ -31,9 +31,9 @@ open class PeerEdit : Fragment() {
     private lateinit var slider: Slider
     private lateinit var waveform: MarkerWaveform
 
-    protected val mainSectionProperty = SimpleObjectProperty<Node>(null)
-    protected val playbackView = createPlaybackView()
-    protected val recordingView = createRecordingView()
+    private val mainSectionProperty = SimpleObjectProperty<Node>(null)
+    private val playbackView = createPlaybackView()
+    private val recordingView = createRecordingView()
 
     override val root = borderpane {
         top = vbox {
