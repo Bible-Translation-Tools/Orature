@@ -52,6 +52,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewMod
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ConsumeViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ExportProjectViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel2
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.PeerEditViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectWizardViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
@@ -92,6 +93,7 @@ interface AppDependencyGraph {
     fun inject(viewModel: ConsumeViewModel)
     fun inject(viewModel: ChunkingViewModel)
     fun inject(viewModel: BlindDraftViewModel)
+    fun inject(viewModel: PeerEditViewModel)
     fun inject(viewModel: RecorderViewModel)
     fun inject(viewModel: ExportChapterViewModel)
     fun inject(viewModel: ExportProjectViewModel)

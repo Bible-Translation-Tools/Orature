@@ -18,6 +18,7 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
+import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -33,6 +34,8 @@ class BlindDraftViewModel : ViewModel() {
 
     @Inject
     lateinit var waveFileCreator: IWaveFileCreator
+    @Inject
+    lateinit var audioConnectionFactory: AudioConnectionFactory
 
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
@@ -47,7 +50,7 @@ class BlindDraftViewModel : ViewModel() {
     val availableTakes = FilteredList<TakeCardModel>(takes) { !it.selected }
 
     private val recordedTakeProperty = SimpleObjectProperty<Take>()
-    private val chunkDisposable = CompositeDisposable()
+    private val selectedTakeDisposable = CompositeDisposable()
     private val disposables = CompositeDisposable()
     private val disposableListeners = mutableListOf<ListenerDisposer>()
 
@@ -81,7 +84,7 @@ class BlindDraftViewModel : ViewModel() {
         sourcePlayerProperty.unbind()
         currentChunkProperty.set(null)
         translationViewModel.updateSourceText()
-        chunkDisposable.clear()
+        selectedTakeDisposable.clear()
         disposables.clear()
         disposableListeners.forEach { it.dispose() }
         disposableListeners.clear()
@@ -144,13 +147,13 @@ class BlindDraftViewModel : ViewModel() {
     }
 
     private fun subscribeSelectedTakePropertyToRelay(chunk: Chunk) {
-        chunkDisposable.clear()
+        selectedTakeDisposable.clear()
         chunk.audio.selected
             .observeOnFx()
             .subscribe {
                 refreshChunkList()
                 loadTakes(chunk)
-            }.addTo(chunkDisposable)
+            }.addTo(selectedTakeDisposable)
     }
 
     private fun refreshChunkList() {
@@ -161,7 +164,7 @@ class BlindDraftViewModel : ViewModel() {
         }
     }
 
-    private fun newTakeFile(): Single<Take> {
+    fun newTakeFile(): Single<Take> {
         return workbookDataStore.chunk!!.let { chunk ->
             val namer = getFileNamer(chunk)
             val chapter = namer.formatChapterNumber()
@@ -225,7 +228,7 @@ class BlindDraftViewModel : ViewModel() {
     }
 
     fun Take.mapToCardModel(selected: Boolean): TakeCardModel {
-        val audioPlayer: IAudioPlayer = (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
+        val audioPlayer: IAudioPlayer = audioConnectionFactory.getPlayer()
         audioPlayer.load(this.file)
         return TakeCardModel(this, selected, audioPlayer)
     }

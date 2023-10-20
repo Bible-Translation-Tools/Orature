@@ -166,7 +166,7 @@ class Chunking : Fragment() {
             hgrow = Priority.ALWAYS
             colorThemeProperty.bind(settingsViewModel.selectedThemeProperty)
             setPixelsInHighlightFunction { viewModel.pixelsInHighlight(it) }
-            player.bind(viewModel.audioPlayer)
+            player.bind(viewModel.waveformAudioPlayerProperty)
             secondsToHighlightProperty.set(SECONDS_ON_SCREEN)
         }
     }

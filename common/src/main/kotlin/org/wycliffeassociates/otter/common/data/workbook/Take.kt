@@ -19,7 +19,9 @@
 package org.wycliffeassociates.otter.common.data.workbook
 
 import com.jakewharton.rxrelay2.BehaviorRelay
+import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
+import org.wycliffeassociates.otter.common.utils.computeFileChecksum
 import java.io.File
 import java.time.LocalDate
 
@@ -29,8 +31,13 @@ data class Take(
     val number: Int,
     val format: MimeType,
     val createdTimestamp: LocalDate,
-    val deletedTimestamp: BehaviorRelay<DateHolder> = BehaviorRelay.createDefault(DateHolder.empty)
+    val deletedTimestamp: BehaviorRelay<DateHolder> = BehaviorRelay.createDefault(DateHolder.empty),
+    val checkingState: BehaviorRelay<TakeCheckingState> = BehaviorRelay.createDefault(TakeCheckingState(CheckingStatus.UNCHECKED, null))
 ) {
+    fun checksum() = computeFileChecksum(file)
+
+    fun getSavedChecksum() = checkingState.value?.checksum
+
     override fun equals(other: Any?): Boolean {
         return (other as? Take)?.let {
             it.file == this.file

@@ -31,8 +31,6 @@ import kotlin.math.max
 
 class ConsumeViewModel : ViewModel(), IMarkerViewModel {
 
-    var timer: AnimationTimer? = null
-
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
     val translationViewModel: TranslationViewModel2 by inject()
@@ -41,6 +39,7 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
     lateinit var audioConnectionFactory: AudioConnectionFactory
 
     lateinit var audio: OratureAudioFile
+
     lateinit var waveform: Observable<Image>
     var subscribeOnWaveformImages: () -> Unit = {}
 
@@ -48,24 +47,18 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
     override val markers = observableListOf<ChunkMarkerModel>()
     override val markerCountProperty = markers.sizeProperty
     override val currentMarkerNumberProperty = SimpleIntegerProperty(-1)
+    override var resumeAfterScroll: Boolean = false
 
     override var audioController: AudioPlayerController? = null
-    override val audioPlayer = SimpleObjectProperty<IAudioPlayer>()
-
+    override val waveformAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
+    override var sampleRate: Int = 0 // beware of divided by 0
+    override var totalFrames: Int = 0 // beware of divided by 0
     override val positionProperty = SimpleDoubleProperty(0.0)
-    override var resumeAfterScroll: Boolean = false
     override var imageWidthProperty = SimpleDoubleProperty(0.0)
+    override var timer: AnimationTimer? = null
 
     val compositeDisposable = CompositeDisposable()
     val isPlayingProperty = SimpleBooleanProperty(false)
-
-    /** Call this before leaving the view */
-    var chunkImageCleanup: () -> Unit = {}
-    /** Call this before leaving the view */
-    var consumeImageCleanup: () -> Unit = {}
-
-    private var sampleRate: Int = 0 // beware of divided by 0
-    private var sourceTotalFrames: Int = 0 // beware of divided by 0
 
     private val builder = ObservableWaveformBuilder()
     private val width = Screen.getMainScreen().platformWidth
@@ -82,7 +75,6 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
         audioDataStore.sourceAudioProperty.set(sourceAudio)
 
         sourceAudio?.file?.let {
-            (app as IDependencyGraphProvider).dependencyGraph.inject(this)
             audio = loadAudio(it)
             createWaveformImages(audio)
             subscribeOnWaveformImages()
@@ -101,7 +93,7 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
 
     fun initializeAudioController(slider: Slider? = null) {
         audioController = AudioPlayerController(slider)
-        audioPlayer.value?.let {
+        waveformAudioPlayerProperty.value?.let {
             audioController!!.load(it)
             isPlayingProperty.bind(audioController!!.isPlayingProperty)
         }
@@ -127,14 +119,14 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
         player.load(audioFile)
         player.getAudioReader()?.let {
             sampleRate = it.sampleRate
-            sourceTotalFrames = it.totalFrames
+            totalFrames = it.totalFrames
         }
-        audioPlayer.set(player)
+        waveformAudioPlayerProperty.set(player)
         return audio
     }
 
     fun createWaveformImages(audio: OratureAudioFile) {
-        imageWidthProperty.set(computeImageWidth(SECONDS_ON_SCREEN))
+        imageWidthProperty.set(computeImageWidth(width, SECONDS_ON_SCREEN))
 
         waveform = builder.buildAsync(
             audio.reader(),
@@ -147,40 +139,8 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
 
     fun cleanup() {
         builder.cancel()
-        consumeImageCleanup()
-        chunkImageCleanup()
         compositeDisposable.clear()
         stopAnimationTimer()
         markerModel = null
-    }
-
-    fun computeImageWidth(secondsOnScreen: Int): Double {
-        val samplesPerScreenWidth = audioPlayer.get().getAudioReader()!!.sampleRate * secondsOnScreen
-        val samplesPerPixel = samplesPerScreenWidth / width
-        val pixelsInDuration = audioPlayer.get().getDurationInFrames() / samplesPerPixel
-        return pixelsInDuration.toDouble()
-    }
-
-    fun pixelsInHighlight(controlWidth: Double): Double {
-        if (sampleRate == 0 || sourceTotalFrames == 0) {
-            return 1.0
-        }
-
-        val framesInHighlight = sampleRate * SECONDS_ON_SCREEN
-        val framesPerPixel = sourceTotalFrames / max(controlWidth, 1.0)
-        return max(framesInHighlight / framesPerPixel, 1.0)
-    }
-
-    private fun startAnimationTimer() {
-        timer = object : AnimationTimer() {
-            override fun handle(currentNanoTime: Long) {
-                calculatePosition()
-            }
-        }.apply { start() }
-    }
-
-    private fun stopAnimationTimer() {
-        timer?.stop()
-        timer = null
     }
 }

@@ -19,6 +19,9 @@
 package org.wycliffeassociates.otter.common.utils
 
 import java.io.File
+import java.io.FileInputStream
+import java.security.DigestInputStream
+import java.security.MessageDigest
 
 /**
  *  Returns a new file path with the suffix appended to the file name
@@ -33,4 +36,31 @@ fun filePathWithSuffix(path: String, suffix: String): String {
         .parentFile
         .resolve(file.nameWithoutExtension + suffix + ".${file.extension}")
         .invariantSeparatorsPath
+}
+
+/**
+ * Returns the MD5 checksum of the given file or null if the file doesn't exist.
+ */
+fun computeFileChecksum(file: File): String? {
+    if (!file.exists()) {
+        return null
+    }
+    val md = MessageDigest.getInstance("MD5")
+
+    FileInputStream(file).use { inputStream ->
+        DigestInputStream(inputStream, md).use { digestInputStream ->
+            val buffer = ByteArray(8192)
+            while (digestInputStream.read(buffer) != -1) {
+                // Continue reading the file
+            }
+        }
+    }
+
+    val md5Bytes = md.digest()
+    val md5Checksum = StringBuilder()
+    for (byte in md5Bytes) {
+        md5Checksum.append(String.format("%02x", byte))
+    }
+
+    return md5Checksum.toString()
 }

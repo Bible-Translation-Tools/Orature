@@ -7,6 +7,7 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
@@ -64,14 +65,24 @@ class TranslationViewModel2 : ViewModel() {
     }
 
     fun loadChunks(chunks: List<Chunk>) {
-        val chunkViewData = chunks.map {
+        val chunkViewData = chunks.map { chunk ->
+            val completed = when(selectedStepProperty.value) {
+                ChunkingStep.BLIND_DRAFT -> chunk.hasSelectedAudio()
+                ChunkingStep.PEER_EDIT -> chunk.checkingStatus().ordinal >= CheckingStatus.PEER_EDIT.ordinal
+                ChunkingStep.KEYWORD_CHECK -> chunk.checkingStatus().ordinal >= CheckingStatus.KEYWORD.ordinal
+                ChunkingStep.VERSE_CHECK -> chunk.checkingStatus().ordinal >= CheckingStatus.VERSE.ordinal
+                else -> false
+            }
             ChunkViewData(
-                it.sort,
-                it.hasSelectedAudio(),
+                chunk.sort,
+                completed,
                 selectedChunkBinding
             )
         }
         chunkList.setAll(chunkViewData)
+
+        compositeDisposable.clear()
+        updateStep()
     }
 
     private fun updateStep() {
@@ -79,12 +90,22 @@ class TranslationViewModel2 : ViewModel() {
             .chunks
             .observeOnFx()
             .subscribe { list ->
-                if (list.isNotEmpty() && list.all { it.draftNumber > 0 }) {
-                    reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
-                    selectedStepProperty.set(ChunkingStep.BLIND_DRAFT)
-                } else {
-                    selectedStepProperty.set(ChunkingStep.CONSUME_AND_VERBALIZE)
-                    reachableStepProperty.set(ChunkingStep.CHUNKING)
+                when {
+                    list.isEmpty() -> {
+                        reachableStepProperty.set(ChunkingStep.CHUNKING)
+                    }
+                    list.all { it.checkingStatus().ordinal >= CheckingStatus.KEYWORD.ordinal } -> {
+                        reachableStepProperty.set(ChunkingStep.VERSE_CHECK)
+                    }
+                    list.all { it.checkingStatus().ordinal >= CheckingStatus.PEER_EDIT.ordinal } -> {
+                        reachableStepProperty.set(ChunkingStep.KEYWORD_CHECK)
+                    }
+                    list.all { it.hasSelectedAudio() } -> {
+                        reachableStepProperty.set(ChunkingStep.PEER_EDIT)
+                    }
+                    list.isNotEmpty() -> {
+                        reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
+                    }
                 }
             }.addTo(compositeDisposable)
     }

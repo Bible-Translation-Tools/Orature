@@ -93,8 +93,12 @@ class ChunkingStepNode(
             addClass("chunking-step__content-section")
             bindSingleChild(contentSectionProperty)
 
-            visibleWhen { isSelectedProperty.and(isCollapsedProperty.not()) }
-            managedWhen(visibleProperty())
+            visibleWhen {
+                isSelectedProperty.and(isCollapsedProperty.not())
+            }
+            managedWhen {
+                visibleProperty().and(chunkListProperty.emptyProperty().not())
+            }
         }
 
         setOnMouseClicked {

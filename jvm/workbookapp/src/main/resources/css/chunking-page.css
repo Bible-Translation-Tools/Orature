@@ -63,6 +63,8 @@
 
 .chunking-step__content-section {
     -fx-alignment: center;
+    -fx-border-width: 1;
+    -fx-border-color: transparent transparent -wa-border-light transparent;
 }
 
 
@@ -85,5 +87,4 @@
 .audio-scroll-bar__track {
     -fx-min-height: 16;
     -fx-alignment: center-left;
-    -fx-padding: 2;
 }

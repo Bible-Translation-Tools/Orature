@@ -19,6 +19,9 @@ class AudioSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
         add(thumb)
     }
     init {
+        control.player.onChangeAndDoNow {
+            resizeThumbWidth()
+        }
         control.secondsToHighlightProperty.onChangeAndDoNow {
             resizeThumbWidth()
         }
@@ -44,8 +47,8 @@ class AudioSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
     }
 
     private fun moveThumb() {
-        val controlWidth = control.widthProperty().value
-        val pos = (control.valueProperty().value / control.max) * control.widthProperty().value
+        val controlWidth = control.width
+        val pos = (control.value / control.max) * control.width
         var xFinalThumb = min(pos, controlWidth - thumb.width / 2.0)
         val xCurrent = thumb.layoutX
 
