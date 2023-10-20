@@ -73,6 +73,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
 
     fun dockPeerEdit() {
         startAnimationTimer()
+        translationViewModel.resetUndoRedo()
 
         workbookDataStore.chapter
             .chunks

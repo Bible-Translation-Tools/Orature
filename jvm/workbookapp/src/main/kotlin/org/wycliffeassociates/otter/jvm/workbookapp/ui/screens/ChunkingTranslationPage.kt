@@ -1,6 +1,9 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.layout.Priority
+import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.SourceTextDrawer
 import org.wycliffeassociates.otter.jvm.controls.event.ChunkSelectedEvent
@@ -13,6 +16,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.Consume
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.KeywordCheck
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.PeerEdit
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.VerseCheck
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.translationHeader
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
@@ -39,6 +43,16 @@ class ChunkingTranslationPage : View() {
 
     override val root = vbox {
         vgrow = Priority.ALWAYS
+
+        translationHeader {
+            titleProperty.bind(
+                workbookDataStore.activeWorkbookProperty.stringBinding {
+                    it?.target?.title
+                }
+            )
+            canUndoProperty.bind(viewModel.canUndoProperty)
+            canRedoProperty.bind(viewModel.canRedoProperty)
+        }
 
         borderpane {
             vgrow = Priority.ALWAYS

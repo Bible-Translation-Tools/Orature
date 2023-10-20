@@ -60,6 +60,8 @@ class BlindDraftViewModel : ViewModel() {
     }
 
     fun dockBlindDraft() {
+        translationViewModel.resetUndoRedo()
+
         val chapter = workbookDataStore.chapter
         chapter
             .chunks
