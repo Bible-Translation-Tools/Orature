@@ -154,15 +154,15 @@ class Narration @AssistedInject constructor(
     }
 
     fun undo() {
-        seek(getRelativeChapterLocation())
-        lockToVerse(null)
+        // Ensures we are not locked to a verse and that the location is in the relative chapter space
+        seek(getRelativeChapterLocation(), true)
         history.undo(chapterRepresentation.totalVerses)
         chapterRepresentation.onVersesUpdated()
     }
 
     fun redo() {
-        seek(getRelativeChapterLocation())
-        lockToVerse(null)
+        // Ensures we are not locked to a verse and that the location is in the relative chapter space
+        seek(getRelativeChapterLocation(), true)
         history.redo(chapterRepresentation.totalVerses)
         chapterRepresentation.onVersesUpdated()
     }
@@ -203,7 +203,6 @@ class Narration @AssistedInject constructor(
     }
 
     fun onVerseMarkerMoved(verseIndex: Int, delta: Int) {
-        seek(getRelativeChapterLocation())
         val action = MoveMarkerAction(verseIndex, delta)
         execute(action)
     }
@@ -309,7 +308,8 @@ class Narration @AssistedInject constructor(
     }
 
     private fun execute(action: NarrationAction) {
-        lockToVerse(null)
+        // Ensures we are not locked to a verse and that the location is in the relative chapter space
+        seek(getRelativeChapterLocation(), true)
         history.execute(action, chapterRepresentation.totalVerses, chapterRepresentation.scratchAudio)
         chapterRepresentation.onVersesUpdated()
     }
@@ -410,6 +410,10 @@ class Narration @AssistedInject constructor(
         chapterReaderConnection.seek(delta)
     }
 
+    /**
+     * Seeks the player and chapterReaderConnection to a relative chapter location or relative verse location, and
+     * allows the caller to specify when to unlock from all verses before seeking to the specified location.
+     */
     fun seek(location: Int, unlockFromVerse: Boolean = false) {
         if (unlockFromVerse) {
             lockToVerse(null)
