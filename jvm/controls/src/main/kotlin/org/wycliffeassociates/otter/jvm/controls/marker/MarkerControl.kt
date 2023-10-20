@@ -13,10 +13,12 @@ import javafx.scene.input.MouseEvent
 
 abstract class MarkerControl : Control() {
     open val markerIdProperty = SimpleIntegerProperty(0)
+    open val markerIndexProperty = SimpleIntegerProperty(0)
     open val markerPositionProperty = SimpleDoubleProperty(0.0)
     open val markerNumberProperty: StringProperty = SimpleStringProperty()
     open val isPlacedProperty = SimpleBooleanProperty(true)
     open val canBeMovedProperty = SimpleBooleanProperty(true)
+    open val canBeDeletedProperty = SimpleBooleanProperty(true)
 
     /**
      * Delegates the drag start (on marker clicked) to whatever the actual drag control/button is.

@@ -27,6 +27,13 @@ interface IMarkerViewModel : IWaveformViewModel {
         }
     }
 
+    fun deleteMarker(id: Int) {
+        markerModel?.let { markerModel ->
+            markerModel.deleteMarker(id)
+            markers.setAll(markerModel.markers)
+        }
+    }
+
     fun seekNext() {
         val wasPlaying = waveformAudioPlayerProperty.get().isPlaying()
         if (wasPlaying) {
@@ -57,7 +64,6 @@ interface IMarkerViewModel : IWaveformViewModel {
         audioController?.seek(location)
         updateCurrentPlaybackMarker(location)
     }
-
 
     private fun updateCurrentPlaybackMarker(currentFrame: Int) {
         markerModel?.let { markerModel ->

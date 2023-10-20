@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.model
+package org.wycliffeassociates.otter.jvm.controls.model
 
 enum class ChunkingStep(val titleKey: String) {
     CONSUME_AND_VERBALIZE("consume_and_verbalize"),

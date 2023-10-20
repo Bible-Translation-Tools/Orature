@@ -10,7 +10,7 @@ import javafx.beans.property.SimpleStringProperty
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
+import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import tornadofx.*
 
 class TranslationViewModel2 : ViewModel() {

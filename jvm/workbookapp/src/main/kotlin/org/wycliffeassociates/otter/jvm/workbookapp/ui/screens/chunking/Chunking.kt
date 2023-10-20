@@ -11,6 +11,9 @@ import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
+import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkMarkerEvent
+import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkMarkerEvent
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
@@ -40,6 +43,16 @@ class Chunking : Fragment() {
         viewModel.onDockChunking()
         viewModel.initializeAudioController(slider)
         waveform.markers.bind(viewModel.markers) { it }
+
+        subscribe<MarkerDeletedEvent> {
+            viewModel.deleteMarker(it.markerId)
+        }
+        subscribe<UndoChunkMarkerEvent> {
+            viewModel.undoMarker()
+        }
+        subscribe<RedoChunkMarkerEvent> {
+            viewModel.redoMarker()
+        }
     }
 
     override fun onUndock() {
@@ -74,6 +87,7 @@ class Chunking : Fragment() {
                     themeProperty.bind(settingsViewModel.appColorMode)
                     positionProperty.bind(viewModel.positionProperty)
                     canMoveMarkerProperty.set(true)
+                    canDeleteMarkerProperty.set(true)
                     imageWidthProperty.bind(viewModel.imageWidthProperty)
 
                     setUpWaveformActionHandlers()
@@ -100,6 +114,7 @@ class Chunking : Fragment() {
                 region { hgrow = Priority.ALWAYS }
                 hbox {
                     addClass("chunking-bottom__media-btn-group")
+
                     button {
                         addClass("btn", "btn--icon")
                         graphic = FontIcon(MaterialDesign.MDI_SKIP_PREVIOUS)
@@ -156,7 +171,7 @@ class Chunking : Fragment() {
 
             setOnPositionChanged { _, _ ->
                 // markers moved = dirty
-                viewModel.changeUnsaved.set(true)
+                viewModel.dirtyMarkers.set(true)
             }
         }
     }

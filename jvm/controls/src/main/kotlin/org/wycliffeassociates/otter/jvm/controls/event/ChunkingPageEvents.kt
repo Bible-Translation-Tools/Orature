@@ -1,7 +1,7 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.events
+package org.wycliffeassociates.otter.jvm.controls.event
 
 import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkingStep
+import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import tornadofx.FXEvent
 
 class ChunkingStepSelectedEvent(val step: ChunkingStep) : FXEvent()
@@ -12,3 +12,7 @@ enum class TakeAction {
     EDIT,
     DELETE
 }
+class MarkerDeletedEvent(val markerId: Int): FXEvent()
+
+class UndoChunkMarkerEvent: FXEvent()
+class RedoChunkMarkerEvent: FXEvent()
