@@ -14,5 +14,5 @@ enum class TakeAction {
 }
 class MarkerDeletedEvent(val markerId: Int): FXEvent()
 class MarkerMovedEvent(val markerId: Int, val start: Int, val end: Int): FXEvent()
-class UndoChunkMarkerEvent: FXEvent()
-class RedoChunkMarkerEvent: FXEvent()
+class UndoChunkingPageEvent: FXEvent()
+class RedoChunkingPageEvent: FXEvent()

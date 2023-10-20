@@ -1,3 +1,21 @@
+.top-navigation-pane {
+    -fx-alignment: center;
+    -fx-pref-height: 80px;
+    -fx-padding: 0 16px;
+    -fx-background-color: -wa-foreground;
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: -wa-border-light;
+}
+
+.top-navigation-pane__title-section {
+    -fx-alignment: center-left;
+}
+
+.top-navigation-pane__control-section {
+    -fx-alignment: center-right;
+    -fx-spacing: 8;
+}
+
 .chunking-step-drawer {
     -fx-pref-width: 360;
     -fx-background-color: -wa-foreground;

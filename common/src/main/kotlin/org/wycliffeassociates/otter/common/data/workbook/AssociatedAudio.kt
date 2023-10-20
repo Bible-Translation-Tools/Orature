@@ -49,6 +49,8 @@ class AssociatedAudio(
                 ?.plus(1)
                 ?: 1
         )
+
+    fun getSelectedTake() = selected.value?.value
 }
 
 data class TakeHolder(val value: Take?) {

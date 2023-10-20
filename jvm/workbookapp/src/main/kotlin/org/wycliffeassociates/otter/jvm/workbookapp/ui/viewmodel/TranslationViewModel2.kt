@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -18,6 +19,8 @@ class TranslationViewModel2 : ViewModel() {
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
 
+    val canUndoProperty = SimpleBooleanProperty(false)
+    val canRedoProperty = SimpleBooleanProperty(false)
     val selectedStepProperty = SimpleObjectProperty<ChunkingStep>(null)
     val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.CHUNKING)
     val sourceTextProperty = SimpleStringProperty()
@@ -42,6 +45,7 @@ class TranslationViewModel2 : ViewModel() {
         workbookDataStore.activeChapterProperty.set(chapter)
         updateStep()
         updateSourceText()
+        resetUndoRedo()
     }
 
     fun undockPage() {
@@ -94,23 +98,18 @@ class TranslationViewModel2 : ViewModel() {
                 when {
                     list.isEmpty() -> {
                         reachableStepProperty.set(ChunkingStep.CHUNKING)
-//                        selectedStepProperty.set(ChunkingStep.CONSUME_AND_VERBALIZE)
                     }
                     list.all { it.checkingStatus().ordinal >= CheckingStatus.KEYWORD.ordinal } -> {
                         reachableStepProperty.set(ChunkingStep.VERSE_CHECK)
-//                        selectedStepProperty.set(ChunkingStep.VERSE_CHECK)
                     }
                     list.all { it.checkingStatus().ordinal >= CheckingStatus.PEER_EDIT.ordinal } -> {
                         reachableStepProperty.set(ChunkingStep.KEYWORD_CHECK)
-//                        selectedStepProperty.set(ChunkingStep.KEYWORD_CHECK)
                     }
                     list.all { it.hasSelectedAudio() } -> {
                         reachableStepProperty.set(ChunkingStep.PEER_EDIT)
-//                        selectedStepProperty.set(ChunkingStep.PEER_EDIT)
                     }
                     list.isNotEmpty() -> {
                         reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
-//                        selectedStepProperty.set(ChunkingStep.BLIND_DRAFT)
                     }
                 }
             }.addTo(compositeDisposable)
@@ -122,5 +121,10 @@ class TranslationViewModel2 : ViewModel() {
             .subscribe {
                 sourceTextProperty.set(it)
             }
+    }
+
+    fun resetUndoRedo() {
+        canUndoProperty.set(false)
+        canRedoProperty.set(false)
     }
 }

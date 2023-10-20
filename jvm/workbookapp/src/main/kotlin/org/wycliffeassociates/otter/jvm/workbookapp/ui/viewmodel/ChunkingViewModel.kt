@@ -112,7 +112,8 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     }
 
     fun onDockChunking() {
-        val wb = workbookDataStore.workbook
+        translationViewModel.resetUndoRedo()
+
         val chapter = workbookDataStore.chapter
         val sourceAudio = initializeSourceAudio(chapter.sort)
 
@@ -150,27 +151,32 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
     override fun placeMarker() {
         super.placeMarker()
-        // any changes in chunking will affect the subsequent steps
-        translationViewModel.reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
+        onUndoableAction()
     }
 
     override fun deleteMarker(id: Int) {
         super.deleteMarker(id)
-        translationViewModel.reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
+        onUndoableAction()
     }
 
     override fun moveMarker(id: Int, start: Int, end: Int) {
         super.moveMarker(id, start, end)
-        translationViewModel.reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
+        onUndoableAction()
     }
 
     override fun undoMarker() {
         super.undoMarker()
-        translationViewModel.updateStep()
+        val dirty = markerModel?.hasDirtyMarkers() ?: false
+        translationViewModel.canUndoProperty.set(dirty)
+        translationViewModel.canRedoProperty.set(true)
+        if (!dirty) {
+            translationViewModel.updateStep()
+        }
     }
 
     override fun redoMarker() {
         super.redoMarker()
+        translationViewModel.canUndoProperty.set(true)
         translationViewModel.reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
     }
 
@@ -253,5 +259,12 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
             wavColor = Color.web(WAV_COLOR),
             background = Color.web(BACKGROUND_COLOR)
         )
+    }
+
+    private fun onUndoableAction() {
+        translationViewModel.canUndoProperty.set(true)
+        translationViewModel.canRedoProperty.set(false)
+        // any changes in chunking will affect the subsequent steps
+        translationViewModel.reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
     }
 }

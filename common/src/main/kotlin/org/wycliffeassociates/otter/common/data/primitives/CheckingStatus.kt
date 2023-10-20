@@ -8,7 +8,9 @@ enum class CheckingStatus {
 
     companion object {
         fun get(name: String): CheckingStatus? {
-            return CheckingStatus.values().firstOrNull { it.name.lowercase() == name.lowercase() }
+            return CheckingStatus.values().firstOrNull {
+                it.name.lowercase() == name.lowercase()
+            }
         }
     }
 }

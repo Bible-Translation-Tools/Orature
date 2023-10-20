@@ -38,7 +38,13 @@ fun filePathWithSuffix(path: String, suffix: String): String {
         .invariantSeparatorsPath
 }
 
-fun calculateMD5Checksum(file: String): String {
+/**
+ * Returns the MD5 checksum of the given file or null if the file doesn't exist.
+ */
+fun computeFileChecksum(file: File): String? {
+    if (!file.exists()) {
+        return null
+    }
     val md = MessageDigest.getInstance("MD5")
 
     FileInputStream(file).use { inputStream ->
