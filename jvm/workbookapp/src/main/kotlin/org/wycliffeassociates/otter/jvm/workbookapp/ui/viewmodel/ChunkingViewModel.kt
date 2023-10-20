@@ -177,6 +177,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     override fun redoMarker() {
         super.redoMarker()
         translationViewModel.canUndoProperty.set(true)
+        translationViewModel.canRedoProperty.set(markerModel?.canRedo() == true)
         translationViewModel.reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
     }
 

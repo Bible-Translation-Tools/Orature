@@ -139,6 +139,7 @@ class VerseMarkerModel(
     }
 
     fun hasDirtyMarkers() = undoStack.isNotEmpty()
+    fun canRedo() = redoStack.isNotEmpty()
 
     private fun refreshMarkers() {
         markers.sortBy { it.frame }
