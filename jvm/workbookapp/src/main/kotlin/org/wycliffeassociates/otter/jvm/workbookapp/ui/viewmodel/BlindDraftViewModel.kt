@@ -61,18 +61,7 @@ class BlindDraftViewModel : ViewModel() {
 
     fun dockBlindDraft() {
         translationViewModel.resetUndoRedo()
-
-        val chapter = workbookDataStore.chapter
-        chapter
-            .chunks
-            .observeOnFx()
-            .subscribe { chunks ->
-                translationViewModel.loadChunks(chunks)
-                (chunks.firstOrNull { !it.hasSelectedAudio() } ?: chunks.firstOrNull())
-                    ?.let { chunk ->
-                        translationViewModel.selectChunk(chunk.sort)
-                    }
-            }.addTo(disposables)
+        subscribeToChunks()
 
         sourcePlayerProperty.bind(audioDataStore.sourceAudioPlayerProperty)
         currentChunkProperty.onChangeAndDoNowWithDisposer {
@@ -133,6 +122,20 @@ class BlindDraftViewModel : ViewModel() {
                 handlePostDeleteTake(take, wasTakeSelected)
             }
             .let { disposables.add(it) }
+    }
+
+    private fun subscribeToChunks() {
+        val chapter = workbookDataStore.chapter
+        chapter
+            .chunks
+            .observeOnFx()
+            .subscribe { chunks ->
+                translationViewModel.loadChunks(chunks)
+                (chunks.firstOrNull { !it.hasSelectedAudio() } ?: chunks.firstOrNull())
+                    ?.let { chunk ->
+                        translationViewModel.selectChunk(chunk.sort)
+                    }
+            }.addTo(disposables)
     }
 
     private fun loadTakes(chunk: Chunk) {

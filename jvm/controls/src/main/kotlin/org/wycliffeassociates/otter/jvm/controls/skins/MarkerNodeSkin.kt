@@ -66,7 +66,8 @@ class MarkerNodeSkin(val control: MarkerNode) : SkinBase<MarkerNode>(control) {
             }
             button {
                 addClass("btn", "btn--icon")
-                graphic = FontIcon(Material.DRAG_HANDLE)
+                graphic = FontIcon(Material.DRAG_HANDLE).apply { rotate = 90.0 }
+                translateXProperty().bind(widthProperty().divide(2).negate())
 
                 visibleWhen { control.canBeMovedProperty }
                 managedWhen(visibleProperty())

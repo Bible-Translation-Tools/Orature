@@ -10,8 +10,10 @@ class WorkbookTypeDao(instanceDsl: DSLContext) {
     private val mapToId: Map<ProjectMode, Int> by lazy { loadToDatabase(instanceDsl) }
     private val mapToEnum: Map<Int, ProjectMode> by lazy { mapToId.entries.associate { (k, v) -> v to k } }
 
-    fun fetchId(mode: ProjectMode) = mapToId[mode]
-        ?: throw IllegalStateException("Mode: $mode does not exist in database table.")
+    fun fetchId(mode: ProjectMode): Int {
+        return mapToId[mode]
+            ?: throw IllegalStateException("Mode: $mode does not exist in database table.")
+    }
 
     fun fetchById(databaseId: Int) = mapToEnum[databaseId]
 

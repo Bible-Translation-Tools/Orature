@@ -74,17 +74,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     fun dockPeerEdit() {
         startAnimationTimer()
         translationViewModel.resetUndoRedo()
-
-        workbookDataStore.chapter
-            .chunks
-            .observeOnFx()
-            .subscribe { chunks ->
-                translationViewModel.loadChunks(chunks)
-                (chunks.firstOrNull { it.checkingStatus() == CheckingStatus.UNCHECKED } ?: chunks.firstOrNull())
-                    ?.let { chunk ->
-                        translationViewModel.selectChunk(chunk.sort)
-                    }
-            }.addTo(disposable)
+        subscribeToChunks()
 
         currentChunkProperty.onChangeAndDoNowWithDisposer {
             it?.let { chunk ->
@@ -132,7 +122,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
                 ChunkingStep.VERSE_CHECK -> CheckingStatus.VERSE
                 else -> CheckingStatus.UNCHECKED
             }
-            val take = chunk.audio.selected.value?.value
+            val take = chunk.audio.getSelectedTake()
             val checkingStage = TakeCheckingState(checkingStatus, take?.checksum())
             take?.checkingState?.accept(checkingStage)
             refreshChunkList()
@@ -155,6 +145,19 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
             newTakeProperty.value?.file?.delete()
             newTakeProperty.set(null)
         }
+    }
+
+    private fun subscribeToChunks() {
+        workbookDataStore.chapter
+            .chunks
+            .observeOnFx()
+            .subscribe { chunks ->
+                translationViewModel.loadChunks(chunks)
+                (chunks.firstOrNull { it.checkingStatus() == CheckingStatus.UNCHECKED } ?: chunks.firstOrNull())
+                    ?.let { chunk ->
+                        translationViewModel.selectChunk(chunk.sort)
+                    }
+            }.addTo(disposable)
     }
 
     private fun subscribeToSelectedTake(chunk: Chunk) {
