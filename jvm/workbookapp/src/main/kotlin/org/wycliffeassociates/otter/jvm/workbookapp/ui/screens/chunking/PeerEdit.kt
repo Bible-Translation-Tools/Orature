@@ -100,6 +100,7 @@ open class PeerEdit : Fragment() {
                 tooltip(text)
 
                 visibleWhen { viewModel.isPlayingProperty.not() }
+                disableWhen { viewModel.chunkConfirmed }
 
                 action {
                     viewModel.confirmChunk()

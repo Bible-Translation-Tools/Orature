@@ -112,11 +112,8 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     }
 
     fun onDockChunking() {
-        translationViewModel.resetUndoRedo()
-
         val chapter = workbookDataStore.chapter
         val sourceAudio = initializeSourceAudio(chapter.sort)
-
         audioDataStore.sourceAudioProperty.set(sourceAudio)
 
         sourceAudio?.file?.let {
@@ -137,6 +134,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
             if (hasUnsavedChanges && it.ordinal > ChunkingStep.CHUNKING.ordinal) {
                 saveChanges()
             }
+            translationViewModel.updateStep()
         }
         cleanup()
     }

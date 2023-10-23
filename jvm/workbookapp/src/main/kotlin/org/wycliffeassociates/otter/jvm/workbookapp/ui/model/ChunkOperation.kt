@@ -19,8 +19,6 @@ class ChunkConfirmAction(
     }
 
     override fun undo() {
-        take.checkingState.accept(
-            TakeCheckingState(oldCheckingStage.status, oldCheckingStage.checksum)
-        )
+        take.checkingState.accept(oldCheckingStage)
     }
 }

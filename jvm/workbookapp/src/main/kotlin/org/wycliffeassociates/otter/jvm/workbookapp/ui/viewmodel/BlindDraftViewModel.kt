@@ -60,7 +60,6 @@ class BlindDraftViewModel : ViewModel() {
     }
 
     fun dockBlindDraft() {
-        translationViewModel.resetUndoRedo()
         subscribeToChunks()
 
         sourcePlayerProperty.bind(audioDataStore.sourceAudioPlayerProperty)

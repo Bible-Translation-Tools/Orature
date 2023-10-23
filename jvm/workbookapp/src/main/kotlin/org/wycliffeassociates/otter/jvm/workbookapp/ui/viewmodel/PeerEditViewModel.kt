@@ -50,6 +50,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
 
     val chunkTitleProperty = workbookDataStore.activeChunkTitleBinding()
     val currentChunkProperty = SimpleObjectProperty<Chunk>()
+    val chunkConfirmed = SimpleBooleanProperty(false)
     val sourcePlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     val isPlayingProperty = SimpleBooleanProperty(false)
     val disposable = CompositeDisposable()
@@ -80,12 +81,15 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
 
     fun dockPeerEdit() {
         startAnimationTimer()
-        translationViewModel.resetUndoRedo()
         subscribeToChunks()
 
         currentChunkProperty.onChangeAndDoNowWithDisposer {
             it?.let { chunk ->
                 subscribeToSelectedTake(chunk)
+                val currentStep = translationViewModel.selectedStepProperty.value
+                chunkConfirmed.set(
+                    chunk.checkingStatus().ordinal >= checkingStatusFromStep(currentStep).ordinal
+                )
             }
         }.also { disposableListeners.add(it) }
 
@@ -99,6 +103,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         disposable.clear()
         disposableListeners.forEach { it.dispose() }
         disposableListeners.clear()
+        clearUndoRedoHistory()
     }
 
     fun refreshChunkList() {
@@ -123,23 +128,25 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
 
     fun confirmChunk() {
         currentChunkProperty.value?.let { chunk ->
-            val checkingStatus = when (translationViewModel.selectedStepProperty.value) {
-                ChunkingStep.PEER_EDIT -> CheckingStatus.PEER_EDIT
-                ChunkingStep.KEYWORD_CHECK -> CheckingStatus.KEYWORD
-                ChunkingStep.VERSE_CHECK -> CheckingStatus.VERSE
-                else -> CheckingStatus.UNCHECKED
-            }
-            val take = chunk.audio.getSelectedTake()!!
-            val op = ChunkConfirmAction(
-                take,
-                checkingStatus,
-                TakeCheckingState(CheckingStatus.UNCHECKED, null)
+            chunkConfirmed.set(true)
+            val checkingStatus = checkingStatusFromStep(
+                translationViewModel.selectedStepProperty.value
             )
-            undoStack.push(op)
-            op.apply()
-            redoStack.clear()
-            onUndoableAction()
-            refreshChunkList()
+            val take = chunk.audio.getSelectedTake()!!
+            take.checkingState
+                .take(1)
+                .subscribe { currentChecking ->
+                    val op = ChunkConfirmAction(
+                        take,
+                        checkingStatus,
+                        currentChecking
+                    )
+                    undoStack.push(op)
+                    op.apply()
+                    redoStack.clear()
+                    onUndoableAction()
+                    refreshChunkList()
+                }
         }
     }
 
@@ -246,5 +253,19 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     private fun onUndoableAction() {
         translationViewModel.canUndoProperty.set(true)
         translationViewModel.canRedoProperty.set(false)
+    }
+
+    private fun clearUndoRedoHistory() {
+        undoStack.clear()
+        redoStack.clear()
+    }
+
+    private fun checkingStatusFromStep(step: ChunkingStep): CheckingStatus {
+        return when (step) {
+            ChunkingStep.PEER_EDIT -> CheckingStatus.PEER_EDIT
+            ChunkingStep.KEYWORD_CHECK -> CheckingStatus.KEYWORD
+            ChunkingStep.VERSE_CHECK -> CheckingStatus.VERSE
+            else -> CheckingStatus.UNCHECKED
+        }
     }
 }

@@ -53,10 +53,12 @@ class TranslationViewModel2 : ViewModel() {
         workbookDataStore.activeChapterProperty.set(null)
         workbookDataStore.activeWorkbookProperty.set(null)
         compositeDisposable.clear()
+        resetUndoRedo()
     }
 
     fun navigateStep(target: ChunkingStep) {
         selectedStepProperty.set(target)
+        resetUndoRedo()
     }
 
     fun selectChunk(chunkNumber: Int) {
@@ -124,7 +126,7 @@ class TranslationViewModel2 : ViewModel() {
             }
     }
 
-    fun resetUndoRedo() {
+    private fun resetUndoRedo() {
         canUndoProperty.set(false)
         canRedoProperty.set(false)
     }
