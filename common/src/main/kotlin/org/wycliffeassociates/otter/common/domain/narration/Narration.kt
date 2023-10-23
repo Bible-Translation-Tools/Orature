@@ -428,9 +428,8 @@ class Narration @AssistedInject constructor(
     fun getDurationInFrames(): Int {
         return chapterRepresentation.totalFrames
     }
-
-
-    fun getRelativeChapterLocation(): Int {
+    
+    private fun getRelativeChapterLocation(): Int {
         return if (lockedVerseIndex != null) {
             chapterReaderConnection
                 .relativeVerseToRelativeChapter(player.getLocationInFrames(), lockedVerseIndex!!)
