@@ -146,9 +146,8 @@ class BlindDraft : Fragment() {
     private fun subscribeEvents() {
         subscribe<ChunkTakeEvent> {
             when (it.action) {
-                TakeAction.SELECT -> viewModel.selectTake(it.take)
-//                TakeAction.EDIT -> viewModel.editTake(it.take)
-                TakeAction.DELETE -> viewModel.deleteTake(it.take)
+                TakeAction.SELECT -> viewModel.onSelectTake(it.take)
+                TakeAction.DELETE -> viewModel.onDeleteTake(it.take)
             }
         }
         subscribe<UndoChunkingPageEvent> {
