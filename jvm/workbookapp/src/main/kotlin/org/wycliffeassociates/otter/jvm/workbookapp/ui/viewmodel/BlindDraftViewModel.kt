@@ -52,6 +52,9 @@ class BlindDraftViewModel : ViewModel() {
     val availableTakes = FilteredList<TakeCardModel>(takes) { !it.selected }
 
     private val recordedTakeProperty = SimpleObjectProperty<Take>()
+    private val undoStack: Deque<ChunkOperation> = ArrayDeque()
+    private val redoStack: Deque<ChunkOperation> = ArrayDeque()
+
     private val selectedTakeDisposable = CompositeDisposable()
     private val disposables = CompositeDisposable()
     private val disposableListeners = mutableListOf<ListenerDisposer>()
@@ -69,6 +72,7 @@ class BlindDraftViewModel : ViewModel() {
             it?.let { chunk ->
                 subscribeSelectedTakePropertyToRelay(chunk)
             }
+            clearUndoRedoHistory()
         }.also { disposableListeners.add(it) }
     }
 
@@ -94,7 +98,15 @@ class BlindDraftViewModel : ViewModel() {
     fun onRecordFinish(result: Result) {
         if (result == Result.SUCCESS) {
             workbookDataStore.chunk?.let { chunk ->
-                chunk.audio.insertTake(recordedTakeProperty.value)
+                val op = ChunkTakeRecordAction(
+                    recordedTakeProperty.value,
+                    chunk,
+                    chunk.audio.getSelectedTake()
+                )
+                undoStack.push(op)
+                op.apply()
+                redoStack.clear()
+                onUndoableAction()
                 loadTakes(chunk)
             }
         } else {
@@ -109,20 +121,39 @@ class BlindDraftViewModel : ViewModel() {
     }
 
     fun deleteTake(take: Take) {
-        takes.forEach { it.audioPlayer.stop() }
-        audioDataStore.stopPlayers()
+        currentChunkProperty.value?.let { chunk ->
+            val op = ChunkTakeDeleteAction(take, chunk, takes.any { it.take == take && it.selected })
+            undoStack.push(op)
+            op.apply()
+            redoStack.clear()
+            onUndoableAction()
+        }
+    }
 
-        val wasTakeSelected = takes.any { it.take == take && it.selected }
-        take.deletedTimestamp.accept(DateHolder.now())
-        take.deletedTimestamp
-            .filter { dateHolder -> dateHolder.value != null }
-            .doOnError { e ->
-                logger.error("Error in removing deleted take: $take", e)
-            }
-            .subscribe {
-                handlePostDeleteTake(take, wasTakeSelected)
-            }
-            .let { disposables.add(it) }
+    fun undo() {
+        if (undoStack.isEmpty()) {
+            translationViewModel.canUndoProperty.set(false)
+            return
+        }
+
+        val op = undoStack.pop()
+        redoStack.push(op)
+        op.undo()
+        translationViewModel.canUndoProperty.set(undoStack.isNotEmpty())
+        translationViewModel.canRedoProperty.set(true)
+    }
+
+    fun redo() {
+        if (redoStack.isEmpty()) {
+            translationViewModel.canRedoProperty.set(false)
+            return
+        }
+
+        val op = redoStack.pop()
+        undoStack.push(op)
+        op.redo()
+        translationViewModel.canRedoProperty.set(redoStack.isNotEmpty())
+        translationViewModel.canUndoProperty.set(true)
     }
 
     private fun subscribeToChunks() {
@@ -233,9 +264,98 @@ class BlindDraftViewModel : ViewModel() {
         }
     }
 
+    private fun onUndoableAction() {
+        translationViewModel.canUndoProperty.set(true)
+        translationViewModel.canRedoProperty.set(false)
+    }
+
+    private fun clearUndoRedoHistory() {
+        undoStack.clear()
+        redoStack.clear()
+    }
+
     fun Take.mapToCardModel(selected: Boolean): TakeCardModel {
         val audioPlayer: IAudioPlayer = audioConnectionFactory.getPlayer()
         audioPlayer.load(this.file)
         return TakeCardModel(this, selected, audioPlayer)
+    }
+
+    private inner class ChunkTakeRecordAction(
+        private val take: Take,
+        private val chunk: Chunk,
+        private val oldSelectedTake: Take? = null
+    ) : ChunkOperation {
+        override fun apply() {
+            chunk.audio.insertTake(take)
+        }
+
+        override fun undo() {
+            takes.forEach { it.audioPlayer.stop() }
+            audioDataStore.stopPlayers()
+
+            take.deletedTimestamp.accept(DateHolder.now())
+            take.deletedTimestamp
+                .filter { dateHolder -> dateHolder.value != null }
+                .doOnError { e ->
+                    logger.error("Error in removing deleted take: $take", e)
+                }
+                .subscribe {
+                    oldSelectedTake?.let {
+                        selectTake(it)
+                    }
+                    takes.removeIf { it.take == take }
+                }
+                .let { disposables.add(it) }
+        }
+
+        override fun redo() {
+            chunk.audio.getAllTakes()
+                .find { it == take }?.deletedTimestamp?.accept(DateHolder.empty)
+
+            selectTake(take)
+        }
+    }
+
+    private inner class ChunkTakeDeleteAction(
+        private val take: Take,
+        private val chunk: Chunk,
+        private val isTakeSelected: Boolean
+    ) : ChunkOperation {
+
+        private val disposable = CompositeDisposable()
+
+        override fun apply() {
+            takes.forEach { it.audioPlayer.stop() }
+            audioDataStore.stopPlayers()
+
+            take.deletedTimestamp.accept(DateHolder.now())
+            take.deletedTimestamp
+                .filter { dateHolder -> dateHolder.value != null }
+                .doOnError { e ->
+                    logger.error("Error in removing deleted take: $take", e)
+                }
+                .subscribe {
+                    handlePostDeleteTake(take, isTakeSelected)
+                }
+                .let {
+                    disposables.add(it)
+                    disposable.add(it)
+                }
+        }
+
+        override fun undo() {
+            disposable.clear()
+
+            chunk.audio.getAllTakes()
+                .find { it == take }?.deletedTimestamp?.accept(DateHolder.empty)
+
+            if (isTakeSelected) {
+                selectTake(take)
+            } else {
+                loadTakes(chunk)
+            }
+        }
+
+        override fun redo() = apply()
     }
 }

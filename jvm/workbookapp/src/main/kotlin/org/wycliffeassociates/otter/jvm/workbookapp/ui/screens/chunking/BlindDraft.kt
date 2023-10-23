@@ -12,7 +12,9 @@ import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChunkTakeCard
 import org.wycliffeassociates.otter.jvm.controls.event.ChunkTakeEvent
+import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.TakeAction
+import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BlindDraftViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -148,6 +150,12 @@ class BlindDraft : Fragment() {
 //                TakeAction.EDIT -> viewModel.editTake(it.take)
                 TakeAction.DELETE -> viewModel.deleteTake(it.take)
             }
+        }
+        subscribe<UndoChunkingPageEvent> {
+            viewModel.undo()
+        }
+        subscribe<RedoChunkingPageEvent> {
+            viewModel.redo()
         }
     }
 }
