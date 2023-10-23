@@ -388,7 +388,7 @@ class NarrationViewModel : ViewModel() {
 
         narration.onSaveRecording(verseIndex)
 
-        recordAgainVerseIndex = verseIndex
+        recordAgainVerseIndex = null
         recordingVerseIndex.set(verseIndex)
         isRecording = false
         isRecordingAgain = false
@@ -673,17 +673,28 @@ class NarrationViewModel : ViewModel() {
         viewports: List<IntRange>,
         width: Int
     ) {
-        for (marker in markerNodes) {
+        val checkpointRAVI = recordAgainVerseIndex
+        val adjustedWidth = if (checkpointRAVI == null) width else width / viewports.size
+        for (i in markerNodes.indices) {
+            val marker = markerNodes[i]
             if (marker.userIsDraggingProperty.value == true) continue
 
             val verse = marker.verseProperty.value
             var found = false
-            viewports.forEachIndexed { idx, viewport ->
+            for (viewPortIndex in viewports.indices) {
+                val viewport = viewports[viewPortIndex]
+
+                val checkpointRAVI = recordAgainVerseIndex
+                if (checkpointRAVI != null) {
+                    if (viewPortIndex != viewports.lastIndex && i > checkpointRAVI) continue
+                    if (viewPortIndex == viewports.lastIndex && i <= checkpointRAVI) continue
+                }
+
                 if (verse.location in viewport) {
-                    val viewportOffset = (width / viewports.size) * idx
+                    val viewportOffset = (width / viewports.size) * viewPortIndex
                     val newPos = framesToPixels(
                         verse.location - viewport.first,
-                        width,
+                        adjustedWidth,
                         viewport.last - viewport.first
                     ).toDouble() - (MARKER_AREA_WIDTH / 2) + viewportOffset
                     runLater {
