@@ -169,7 +169,7 @@ class Narration @AssistedInject constructor(
 
     fun finalizeVerse(verseIndex: Int) {
         val loc = chapterRepresentation.finalizeVerse(verseIndex, history)
-        val relLoc = chapterRepresentation.absoluteToRelative(loc)
+        val relLoc = chapterRepresentation.absoluteToRelativeChapter(loc)
         seek(relLoc)
     }
 
@@ -197,7 +197,7 @@ class Narration @AssistedInject constructor(
         loadChapterIntoPlayer()
 
         val loc = chapterRepresentation.finalizeVerse(verseIndex, history)
-        val relLoc = chapterRepresentation.absoluteToRelative(loc)
+        val relLoc = chapterRepresentation.absoluteToRelativeChapter(loc)
         seek(relLoc)
 
         writer?.pause()
