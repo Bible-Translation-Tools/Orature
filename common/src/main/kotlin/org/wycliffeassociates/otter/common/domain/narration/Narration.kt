@@ -64,7 +64,7 @@ class Narration @AssistedInject constructor(
                 .activeVerses
                 .map {
                     it.marker.copy(
-                        location = chapterRepresentation.absoluteToRelative(it.firstFrame())
+                        location = chapterRepresentation.absoluteToRelativeChapter(it.firstFrame())
                     )
                 }
             verses
@@ -76,6 +76,8 @@ class Narration @AssistedInject constructor(
     private val firstVerse: VerseMarker
 
     private var writer: WavFileWriter? = null
+
+    private var lockedVerseIndex: Int? = null
 
     init {
         val writer = initializeWavWriter()
@@ -89,6 +91,11 @@ class Narration @AssistedInject constructor(
             resetUncommittedFramesOnUpdatedVerses(),
         )
         loadChapterIntoPlayer()
+    }
+
+    fun lockToVerse(verseIndex: Int?) {
+        lockedVerseIndex = verseIndex
+        chapterReaderConnection.lockToVerse(verseIndex)
     }
 
     /**
@@ -147,11 +154,15 @@ class Narration @AssistedInject constructor(
     }
 
     fun undo() {
+        // Ensures we are not locked to a verse and that the location is in the relative chapter space
+        seek(getRelativeChapterLocation(), true)
         history.undo(chapterRepresentation.totalVerses)
         chapterRepresentation.onVersesUpdated()
     }
 
     fun redo() {
+        // Ensures we are not locked to a verse and that the location is in the relative chapter space
+        seek(getRelativeChapterLocation(), true)
         history.redo(chapterRepresentation.totalVerses)
         chapterRepresentation.onVersesUpdated()
     }
@@ -238,7 +249,7 @@ class Narration @AssistedInject constructor(
 
     fun getSectionAsFile(index: Int): File {
         val verse = activeVerses[index]
-        chapterReaderConnection.lockToVerse(index)
+        lockToVerse(index)
         chapterReaderConnection.seek(verse.location)
         return audioFileUtils.getSectionAsFile(
             chapterRepresentation.scratchAudio,
@@ -257,11 +268,10 @@ class Narration @AssistedInject constructor(
         range?.let {
             val wasPlaying = player.isPlaying()
             player.pause()
-            chapterReaderConnection.lockToVerse(activeVerses.indexOf(verse))
+            lockToVerse(activeVerses.indexOf(verse))
             chapterReaderConnection.start = range.first
             chapterReaderConnection.end = range.last
-            player.seek(verse.location)
-            chapterReaderConnection.seek(verse.location)
+            seek(0)
             if (wasPlaying) player.play()
         }
     }
@@ -274,8 +284,7 @@ class Narration @AssistedInject constructor(
 
         val wasPlaying = player.isPlaying()
         player.pause()
-
-        chapterReaderConnection.lockToVerse(null)
+        lockToVerse(null)
         chapterReaderConnection.start = null
         chapterReaderConnection.end = null
 
@@ -299,7 +308,8 @@ class Narration @AssistedInject constructor(
     }
 
     private fun execute(action: NarrationAction) {
-        chapterReaderConnection.lockToVerse(null)
+        // Ensures we are not locked to a verse and that the location is in the relative chapter space
+        seek(getRelativeChapterLocation(), true)
         history.execute(action, chapterRepresentation.totalVerses, chapterRepresentation.scratchAudio)
         chapterRepresentation.onVersesUpdated()
     }
@@ -400,13 +410,37 @@ class Narration @AssistedInject constructor(
         chapterReaderConnection.seek(delta)
     }
 
-    fun seek(location: Int) {
+    /**
+     * Seeks the player and chapterReaderConnection to a relative chapter location or relative verse location, and
+     * allows the caller to specify when to unlock from all verses before seeking to the specified location.
+     */
+    fun seek(location: Int, unlockFromVerse: Boolean = false) {
+        if (unlockFromVerse) {
+            lockToVerse(null)
+        }
         player.seek(location)
         chapterReaderConnection.seek(location)
     }
 
+    /**
+     * Gets the duration of the relative chapter space in frames
+     */
+    fun getDurationInFrames(): Int {
+        return chapterRepresentation.totalFrames
+    }
+    
+    private fun getRelativeChapterLocation(): Int {
+        return if (lockedVerseIndex != null) {
+            chapterReaderConnection
+                .relativeVerseToRelativeChapter(player.getLocationInFrames(), lockedVerseIndex!!)
+        } else {
+            player.getLocationInFrames()
+        }
+    }
+
     fun getLocationInFrames(): Int {
-        return player.getLocationInFrames() + uncommittedRecordedFrames.get()
+        val relativeChapterLocation = getRelativeChapterLocation()
+        return relativeChapterLocation + uncommittedRecordedFrames.get()
     }
 
     fun getTotalFrames(): Int {
@@ -423,7 +457,8 @@ class Narration @AssistedInject constructor(
 
     fun seekToPrevious() {
         player.pause()
-        val loc = player.getLocationInFrames()
+        val loc = getRelativeChapterLocation()
+        lockToVerse(null)
         val seekLoc = activeVerses.lastOrNull() { it.location < loc }
         seekLoc?.let {
             seek(it.location)
@@ -432,11 +467,15 @@ class Narration @AssistedInject constructor(
 
     fun seekToNext() {
         player.pause()
-        val loc = player.getLocationInFrames()
+        val loc = getRelativeChapterLocation()
+        lockToVerse(null)
         val seekLoc = activeVerses.firstOrNull { it.location > loc }
         seekLoc?.let {
             seek(it.location)
-        } ?: seek(player.getDurationInFrames())
+        } ?: chapterRepresentation.apply {
+            val lastFrame = absoluteToRelativeChapter(activeVerses.last().lastFrame())
+            seek(lastFrame)
+        }
     }
 }
 
