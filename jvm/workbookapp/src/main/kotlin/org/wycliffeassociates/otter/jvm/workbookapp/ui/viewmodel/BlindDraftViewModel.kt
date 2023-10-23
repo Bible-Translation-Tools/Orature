@@ -22,7 +22,7 @@ import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.common.domain.chunking.ChunkOperation
+import org.wycliffeassociates.otter.common.domain.chunking.IChunkOperation
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel.Result
 import tornadofx.*
@@ -52,8 +52,8 @@ class BlindDraftViewModel : ViewModel() {
     val availableTakes = FilteredList<TakeCardModel>(takes) { !it.selected }
 
     private val recordedTakeProperty = SimpleObjectProperty<Take>()
-    private val undoStack: Deque<ChunkOperation> = ArrayDeque()
-    private val redoStack: Deque<ChunkOperation> = ArrayDeque()
+    private val undoStack: Deque<IChunkOperation> = ArrayDeque()
+    private val redoStack: Deque<IChunkOperation> = ArrayDeque()
 
     private val selectedTakeDisposable = CompositeDisposable()
     private val disposables = CompositeDisposable()
@@ -293,7 +293,7 @@ class BlindDraftViewModel : ViewModel() {
         private val take: Take,
         private val chunk: Chunk,
         private val oldSelectedTake: Take? = null
-    ) : ChunkOperation {
+    ) : IChunkOperation {
         override fun apply() {
             chunk.audio.insertTake(take)
         }
@@ -329,7 +329,7 @@ class BlindDraftViewModel : ViewModel() {
         private val take: Take,
         private val chunk: Chunk,
         private val isTakeSelected: Boolean
-    ) : ChunkOperation {
+    ) : IChunkOperation {
 
         private val disposable = CompositeDisposable()
 
@@ -371,7 +371,7 @@ class BlindDraftViewModel : ViewModel() {
     private inner class ChunkTakeSelectAction(
         private val take: Take,
         private val oldSelectedTake: Take? = null
-    ) : ChunkOperation {
+    ) : IChunkOperation {
         override fun apply() {
             selectTake(take)
         }

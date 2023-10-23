@@ -15,6 +15,7 @@ import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
@@ -25,8 +26,7 @@ import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
-import org.wycliffeassociates.otter.common.domain.chunking.ChunkOperation
-import org.wycliffeassociates.otter.common.domain.chunking.ChunkConfirmAction
+import org.wycliffeassociates.otter.common.domain.chunking.IChunkOperation
 import tornadofx.*
 import java.util.ArrayDeque
 import java.util.Deque
@@ -70,8 +70,8 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     private val disposableListeners = mutableListOf<ListenerDisposer>()
     private val selectedTakeDisposable = CompositeDisposable()
 
-    private val undoStack: Deque<ChunkOperation> = ArrayDeque()
-    private val redoStack: Deque<ChunkOperation> = ArrayDeque()
+    private val undoStack: Deque<IChunkOperation> = ArrayDeque()
+    private val redoStack: Deque<IChunkOperation> = ArrayDeque()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -266,5 +266,21 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
             ChunkingStep.VERSE_CHECK -> CheckingStatus.VERSE
             else -> CheckingStatus.UNCHECKED
         }
+    }
+
+    private inner class ChunkConfirmAction(
+        private val take: Take,
+        private val checking: CheckingStatus,
+        private val oldCheckingStage: TakeCheckingState
+    ) : IChunkOperation {
+        override fun apply() {
+            take.checkingState.accept(TakeCheckingState(checking, take.checksum()))
+        }
+
+        override fun undo() {
+            take.checkingState.accept(oldCheckingStage)
+        }
+
+        override fun redo() = apply()
     }
 }
