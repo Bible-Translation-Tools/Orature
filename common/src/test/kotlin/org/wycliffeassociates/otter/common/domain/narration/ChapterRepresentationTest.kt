@@ -95,14 +95,15 @@ class ChapterRepresentationTest {
 
     // Initializes each verse with placed equal to true and with one sector that holds one second worth of frames.
     // where the start of each added sector is offset by "paddingLength" number of frames
+    val framesPerVerse = 44100
     private fun initializeVerseNodeList(verseNodeList: MutableList<VerseNode>, paddingLength: Int = 0) {
         var start = -1
         for (i in 0 until numTestVerses) {
             val verseMarker = VerseMarker((i + 1), (i + 1), 0)
             val sectors = mutableListOf<IntRange>()
             val verseNode = VerseNode(true, verseMarker, sectors)
-            sectors.add(start + 1..start + 44100)
-            start += 44100 + paddingLength
+            sectors.add(start + 1..start + framesPerVerse)
+            start += framesPerVerse + paddingLength
             verseNodeList.add(verseNode)
         }
     }
@@ -426,6 +427,76 @@ class ChapterRepresentationTest {
 
 
     @Test
+    fun `absoluteToRelativeVerse with absoluteFrame in range of verse`() {
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
+        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null)
+
+        val verseIndex = 3
+        val offsetIntoVerse = 500
+        val absoluteFrame = chapterRepresentation.activeVerses[verseIndex].firstFrame() + offsetIntoVerse
+        val actualRelativeVersePosition = chapterRepresentationConnection
+            .absoluteToRelativeVerse(absoluteFrame, verseIndex)
+        // Verify that the relativeVerse position is equal to the number of frames from the first frame, to the
+        // specified absolute position
+        Assert.assertEquals(offsetIntoVerse, actualRelativeVersePosition)
+    }
+
+    @Test
+    fun `absoluteToRelativeVerse with absoluteFrame not in range of verse`() {
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
+        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null)
+
+        val verseIndex = 3
+        val absoluteFrame = chapterRepresentation.activeVerses[verseIndex].lastFrame() + 500
+
+        try {
+            chapterRepresentationConnection.absoluteToRelativeVerse(absoluteFrame, verseIndex)
+            Assert.fail("Error: expecting exception")
+        } catch (indexOutOfBoundsException: IndexOutOfBoundsException) {
+            // Success: expecting exception
+        }
+    }
+
+    @Test
+    fun `absoluteToRelative with lockToVerse equal to CHAPTER_UNLOCKED and padding between verse sectors`() {
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
+        val paddingBetweenVerses = 1000
+        initializeVerseNodeList(chapterRepresentation.totalVerses, paddingBetweenVerses)
+        val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null)
+
+        // Sets the absolute frame to the beginning of verse specified by verseIndex
+        val verseIndex = 3
+        val absoluteFrame = framesPerVerse * verseIndex + paddingBetweenVerses * verseIndex
+
+        val actualRelativePos = chapterRepresentationConnection.absoluteToRelative(absoluteFrame)
+        val expectedRelativePos = framesPerVerse * verseIndex
+        Assert.assertEquals(expectedRelativePos, actualRelativePos)
+    }
+
+    @Test
+    fun `absoluteToRelative with lockToVerse not equal to CHAPTER_UNLOCKED and padding between verse sectors`() {
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
+        val paddingBetweenVerses = 1000
+        initializeVerseNodeList(chapterRepresentation.totalVerses, paddingBetweenVerses)
+        val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null)
+
+        // Sets the absolute frame to the beginning of verse specified by verseIndex
+        val verseIndex = 3
+        val absoluteFrame = framesPerVerse * verseIndex + paddingBetweenVerses * verseIndex
+
+        // Locks to verse specified by verseIndex
+        chapterRepresentationConnection.lockToVerse(verseIndex)
+
+        val actualRelativePos = chapterRepresentationConnection.absoluteToRelative(absoluteFrame)
+        val expectedRelativePos = absoluteFrame - chapterRepresentation.activeVerses[verseIndex].firstFrame()
+        Assert.assertEquals(expectedRelativePos, actualRelativePos)
+    }
+    // TODO: add test for absoluteToRelative
+
+
+    @Test
     fun `ChapterRepresentationConnection's hasRemaining with null start and end, no scratchAudio recorded, and empty activeVerses`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithoutAudio, chapter)
 
@@ -522,6 +593,26 @@ class ChapterRepresentationTest {
 
     }
 
+    @Test
+    fun `ChapterRepresentationConnection's relativeVerseToRelativeChapter`() {
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
+        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null)
+
+        // Specifies what verse and what frame from the start of that verse to test
+        val verseIndex = 3
+        val sampleInVerseSpace = 500
+
+        // Verify that the verse is starting at the expected actual position
+        Assert.assertEquals(framesPerVerse * verseIndex, chapterRepresentation.activeVerses[verseIndex].firstFrame())
+
+        // Verify that the given relativeVerse position maps to the correct relativeChapter location
+        val expectedRelativeChapterPos = sampleInVerseSpace + framesPerVerse * verseIndex
+        val actualRelativeChapterPos = chapterRepresentationConnection
+            .relativeVerseToRelativeChapter(sampleInVerseSpace, verseIndex)
+
+        Assert.assertEquals(expectedRelativeChapterPos, actualRelativeChapterPos)
+    }
 
     @Test
     fun `ChapterRepresentationConnection's seek with sample in range of relative chapter space and sequential sectors`() {
