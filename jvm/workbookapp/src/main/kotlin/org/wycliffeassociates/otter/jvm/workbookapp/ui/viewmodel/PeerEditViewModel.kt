@@ -90,6 +90,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
                     chunk.checkingStatus().ordinal >= checkingStatusFromStep(currentStep).ordinal
                 )
             }
+            clearUndoRedoHistory()
         }.also { disposableListeners.add(it) }
 
         sourcePlayerProperty.bind(audioDataStore.sourceAudioPlayerProperty)
@@ -140,10 +141,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
                         checkingStatus,
                         currentChecking
                     )
-                    undoStack.push(op)
-                    op.apply()
-                    redoStack.clear()
-                    onUndoableAction()
+                    onUndoableAction(op)
                     refreshChunkList()
                 }
         }
@@ -249,7 +247,10 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         )
     }
 
-    private fun onUndoableAction() {
+    private fun onUndoableAction(op: IChunkOperation) {
+        undoStack.push(op)
+        op.apply()
+        redoStack.clear()
         translationViewModel.canUndoProperty.set(true)
         translationViewModel.canRedoProperty.set(false)
     }

@@ -103,10 +103,7 @@ class BlindDraftViewModel : ViewModel() {
                     chunk,
                     chunk.audio.getSelectedTake()
                 )
-                undoStack.push(op)
-                op.apply()
-                redoStack.clear()
-                onUndoableAction()
+                onUndoableAction(op)
                 loadTakes(chunk)
             }
         } else {
@@ -118,10 +115,7 @@ class BlindDraftViewModel : ViewModel() {
     fun onSelectTake(take: Take) {
         val selectedTake = currentChunkProperty.value?.audio?.getSelectedTake()
         val op = ChunkTakeSelectAction(take, selectedTake)
-        undoStack.push(op)
-        op.apply()
-        redoStack.clear()
-        onUndoableAction()
+        onUndoableAction(op)
     }
 
     private fun selectTake(take: Take) {
@@ -132,10 +126,7 @@ class BlindDraftViewModel : ViewModel() {
     fun onDeleteTake(take: Take) {
         currentChunkProperty.value?.let { chunk ->
             val op = ChunkTakeDeleteAction(take, chunk, takes.any { it.take == take && it.selected })
-            undoStack.push(op)
-            op.apply()
-            redoStack.clear()
-            onUndoableAction()
+            onUndoableAction(op)
         }
     }
 
@@ -273,7 +264,10 @@ class BlindDraftViewModel : ViewModel() {
         }
     }
 
-    private fun onUndoableAction() {
+    private fun onUndoableAction(op: IChunkOperation) {
+        undoStack.push(op)
+        op.apply()
+        redoStack.clear()
         translationViewModel.canUndoProperty.set(true)
         translationViewModel.canRedoProperty.set(false)
     }
