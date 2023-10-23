@@ -158,39 +158,39 @@ class ChapterRepresentationTest {
     }
 
     @Test
-    fun `absoluteToRelative with empty activeVerses`() {
+    fun `absoluteToRelativeChapter with empty activeVerses`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
 
-        val relativePosition = chapterRepresentation.absoluteToRelative(1000)
+        val relativePosition = chapterRepresentation.absoluteToRelativeChapter(1000)
         Assert.assertEquals(0, relativePosition)
     }
 
     @Test
-    fun `absoluteToRelative with non-empty activeVerses and absoluteFrame not in activeVerses`() {
+    fun `absoluteToRelativeChapter with non-empty activeVerses and absoluteFrame not in activeVerses`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
 
-        val relativePosition = chapterRepresentation.absoluteToRelative(-5)
+        val relativePosition = chapterRepresentation.absoluteToRelativeChapter(-5)
         Assert.assertEquals(0, relativePosition)
     }
 
     @Test
-    fun `absoluteToRelative with activeVerses, sequential sectors, and non-null verse`() {
+    fun `absoluteToRelativeChapter with activeVerses, sequential sectors, and non-null verse`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
 
-        val relativePosition = chapterRepresentation.absoluteToRelative(176400)
+        val relativePosition = chapterRepresentation.absoluteToRelativeChapter(176400)
 
         // NOTE: they are the same value because the sectors are sequential
         Assert.assertEquals(176400, relativePosition)
     }
 
     @Test
-    fun `absoluteToRelative with activeVerses, sequential sectors with padding between each verseNode, and non-null verse`() {
+    fun `absoluteToRelativeChapter with activeVerses, sequential sectors with padding between each verseNode, and non-null verse`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses, 44100)
 
-        val relativePosition = chapterRepresentation.absoluteToRelative(88200)
+        val relativePosition = chapterRepresentation.absoluteToRelativeChapter(88200)
 
         // NOTE: we expect 44100, because the frame 88200 is the start of the second frame in first verse node.
         // so relatively, it is the frame at index 44100.
@@ -198,12 +198,12 @@ class ChapterRepresentationTest {
     }
 
     @Test
-    fun `absoluteToRelative with activeVerses, non-sequential sectors, padding between sectors, and non-null verse`() {
+    fun `absoluteToRelativeChapter with activeVerses, non-sequential sectors, padding between sectors, and non-null verse`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses, 44100)
         addSectorsToEnd(chapterRepresentation.totalVerses, 44100, 0)
 
-        val relativePosition = chapterRepresentation.absoluteToRelative(2690100)
+        val relativePosition = chapterRepresentation.absoluteToRelativeChapter(2690100)
 
         // NOTE: we expect 44100, because the frame 2690100 is the start of the second frame in first verse node.
         // so relatively, it is the frame at index 44100.
@@ -211,62 +211,62 @@ class ChapterRepresentationTest {
     }
 
     @Test
-    fun `relativeToAbsolute with relativeIdx at the start of the first node`() {
+    fun `relativeChapterToAbsolute with relativeIdx at the start of the first node`() {
         val relativePosition = 500
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
 
-        val absolutePositionFromRelativePosition = chapterRepresentation.relativeToAbsolute(relativePosition)
+        val absolutePositionFromRelativePosition = chapterRepresentation.relativeChapterToAbsolute(relativePosition)
 
         Assert.assertEquals(500, absolutePositionFromRelativePosition)
     }
 
     @Test
-    fun `relativeToAbsolute with relativeIdx at the end of the first node`() {
+    fun `relativeChapterToAbsolute with relativeIdx at the end of the first node`() {
         val relativePosition = 44099
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
 
-        val absolutePositionFromRelativePosition = chapterRepresentation.relativeToAbsolute(relativePosition)
+        val absolutePositionFromRelativePosition = chapterRepresentation.relativeChapterToAbsolute(relativePosition)
 
         Assert.assertEquals(44099, absolutePositionFromRelativePosition)
     }
 
     @Test
-    fun `relativeToAbsolute with relativeIdx at the start of the second node`() {
+    fun `relativeChapterToAbsolute with relativeIdx at the start of the second node`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
 
         val secondNodesStart = 44100
-        val absolutePositionFromRelativePosition = chapterRepresentation.relativeToAbsolute(secondNodesStart)
+        val absolutePositionFromRelativePosition = chapterRepresentation.relativeChapterToAbsolute(secondNodesStart)
 
         Assert.assertEquals(secondNodesStart, absolutePositionFromRelativePosition)
     }
 
     @Test
-    fun `relativeToAbsolute with relativeIdx in the second node`() {
+    fun `relativeChapterToAbsolute with relativeIdx in the second node`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
 
         val secondNodesStart = 44100 * 2 + 31
-        val absolutePositionFromRelativePosition = chapterRepresentation.relativeToAbsolute(secondNodesStart)
+        val absolutePositionFromRelativePosition = chapterRepresentation.relativeChapterToAbsolute(secondNodesStart)
 
         Assert.assertEquals(secondNodesStart, absolutePositionFromRelativePosition)
     }
 
     @Test
-    fun `relativeToAbsolute with relativeIdx at the end of the second node`() {
+    fun `relativeChapterToAbsolute with relativeIdx at the end of the second node`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
 
         val secondNodesStart = 44100 * 2 - 1
-        val absolutePositionFromRelativePosition = chapterRepresentation.relativeToAbsolute(secondNodesStart)
+        val absolutePositionFromRelativePosition = chapterRepresentation.relativeChapterToAbsolute(secondNodesStart)
 
         Assert.assertEquals(secondNodesStart, absolutePositionFromRelativePosition)
     }
 
     @Test
-    fun `relativeToAbsolute with relativeIdx in range of first node, with non-sequential sectors, and no unused frames`() {
+    fun `relativeChapterToAbsolute with relativeIdx in range of first node, with non-sequential sectors, and no unused frames`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
 
@@ -275,14 +275,14 @@ class ChapterRepresentationTest {
         // sets relative position to 1.5 seconds worth of frames
         val relativePosition = 66150
 
-        val absolutePosition = chapterRepresentation.relativeToAbsolute(relativePosition)
+        val absolutePosition = chapterRepresentation.relativeChapterToAbsolute(relativePosition)
         val expectedAbsolutePosition = 1389150
         Assert.assertEquals(expectedAbsolutePosition, absolutePosition)
     }
 
 
     @Test
-    fun `relativeToAbsolute with relativeIdx at the start of the second node, with non-sequential sectors and no unused frames`() {
+    fun `relativeChapterToAbsolute with relativeIdx at the start of the second node, with non-sequential sectors and no unused frames`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
 
@@ -290,14 +290,14 @@ class ChapterRepresentationTest {
 
         val relativePosition = 44100 * 2
 
-        val absolutePosition = chapterRepresentation.relativeToAbsolute(relativePosition)
+        val absolutePosition = chapterRepresentation.relativeChapterToAbsolute(relativePosition)
         val expectedAbsolutePosition = 44100
         Assert.assertEquals(expectedAbsolutePosition, absolutePosition)
     }
 
 
     @Test
-    fun `relativeToAbsolute with relativeIdx at the end of the second node, with non-sequential sectors and no unused frames`() {
+    fun `relativeChapterToAbsolute with relativeIdx at the end of the second node, with non-sequential sectors and no unused frames`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
 
@@ -305,13 +305,13 @@ class ChapterRepresentationTest {
 
         val relativePosition = 44100 * 4 - 1
 
-        val absolutePosition = chapterRepresentation.relativeToAbsolute(relativePosition)
+        val absolutePosition = chapterRepresentation.relativeChapterToAbsolute(relativePosition)
         val expectedAbsolutePosition = 1455299
         Assert.assertEquals(expectedAbsolutePosition, absolutePosition)
     }
 
     @Test
-    fun `relativeToAbsolute with relativeIdx in range of 7th node, with non-sequential sectors, and no unused frames`() {
+    fun `relativeChapterToAbsolute with relativeIdx in range of 7th node, with non-sequential sectors, and no unused frames`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
 
@@ -319,14 +319,14 @@ class ChapterRepresentationTest {
 
         // sets relative position to 13.5 seconds worth of frames
         val relativePosition = 595350
-        val absolutePosition = chapterRepresentation.relativeToAbsolute(relativePosition)
+        val absolutePosition = chapterRepresentation.relativeChapterToAbsolute(relativePosition)
         val expectedAbsolutePosition = 1653750
         Assert.assertEquals(expectedAbsolutePosition, absolutePosition)
     }
 
 
     @Test
-    fun `relativeToAbsolute with relativeIdx at the end of the second node, with non-sequential sectors, and unused frames`() {
+    fun `relativeChapterToAbsolute with relativeIdx at the end of the second node, with non-sequential sectors, and unused frames`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
 
@@ -338,12 +338,12 @@ class ChapterRepresentationTest {
         val relativePosition = 44100 * 4 - 1
 
         val expectedAbsolutePos = 1543499
-        val absolutePos = chapterRepresentation.relativeToAbsolute(relativePosition)
+        val absolutePos = chapterRepresentation.relativeChapterToAbsolute(relativePosition)
         Assert.assertEquals(expectedAbsolutePos, absolutePos)
     }
 
     @Test
-    fun `relativeToAbsolute with relativeIdx in range of 7th node, with non-sequential sectors, and unused frames`() {
+    fun `relativeChapterToAbsolute with relativeIdx in range of 7th node, with non-sequential sectors, and unused frames`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
 
@@ -355,7 +355,7 @@ class ChapterRepresentationTest {
         val relativePosition = 595350
 
         val expectedAbsolutePos = 1653750 + spaceBetweenSectors * 7
-        val absolutePos = chapterRepresentation.relativeToAbsolute(relativePosition)
+        val absolutePos = chapterRepresentation.relativeChapterToAbsolute(relativePosition)
         Assert.assertEquals(expectedAbsolutePos, absolutePos)
     }
 

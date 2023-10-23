@@ -118,7 +118,7 @@ internal class ChapterRepresentation(
     private fun publishActiveVerses() {
         val updatedVerses = if (activeVerses.isNotEmpty()) {
             activeVerses.map {
-                val newLoc = absoluteToRelative(it.firstFrame())
+                val newLoc = absoluteToRelativeChapter(it.firstFrame())
                 logger.info("Verse ${it.marker.label} absolute loc is ${it.firstFrame()} relative is ${newLoc}")
                 it.marker.copy(location = newLoc)
             }
@@ -150,7 +150,7 @@ internal class ChapterRepresentation(
      * Converts the absolute audio frame position within the scratch audio file to a "relative" position as if the
      * audio only contained the segments referrenced by the active verse nodes.
      */
-    fun absoluteToRelative(absoluteFrame: Int): Int {
+    fun absoluteToRelativeChapter(absoluteFrame: Int): Int {
         val verses = activeVerses
         var verse = findVerse(absoluteFrame)
         verse?.let {
@@ -176,7 +176,7 @@ internal class ChapterRepresentation(
      * to an absolute position into the scratch audio file. This conversion is performed by counting frames through
      * the range of each active verse.
      */
-    internal fun relativeToAbsolute(relativeIdx: Int): Int {
+    internal fun relativeChapterToAbsolute(relativeIdx: Int): Int {
         var remaining = relativeIdx + 1
         val verses = activeVerses
         if (relativeIdx <= 0 && activeVerses.isEmpty()) {
@@ -297,24 +297,6 @@ internal class ChapterRepresentation(
             } else {
                 absoluteToRelativeVerse(absoluteFrame)
             }
-        }
-
-        /**
-         * Converts an absoluteFrame position in the scratch audio file to a position in the "relative chapter space".
-         */
-        fun absoluteToRelativeChapter(absoluteFrame: Int): Int {
-            val verses = activeVerses
-            var verse = findVerse(absoluteFrame)
-            verse?.let {
-                val index = verses.indexOf(verse)
-                var rel = 0
-                for (idx in 0 until index) {
-                    rel += verses[idx].length
-                }
-                rel += it.framesToPosition(absoluteFrame)
-                return rel
-            }
-            return 0
         }
 
         /**
@@ -500,7 +482,7 @@ internal class ChapterRepresentation(
             } else {
                 sample
             }
-            position = relativeToAbsolute(relativeChapterSample) * frameSizeInBytes
+            position = relativeChapterToAbsolute(relativeChapterSample) * frameSizeInBytes
         }
 
         override fun open() {

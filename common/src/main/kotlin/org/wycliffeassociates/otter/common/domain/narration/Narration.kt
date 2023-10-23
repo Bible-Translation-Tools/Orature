@@ -64,7 +64,7 @@ class Narration @AssistedInject constructor(
                 .activeVerses
                 .map {
                     it.marker.copy(
-                        location = chapterRepresentation.absoluteToRelative(it.firstFrame())
+                        location = chapterRepresentation.absoluteToRelativeChapter(it.firstFrame())
                     )
                 }
             verses
@@ -474,7 +474,7 @@ class Narration @AssistedInject constructor(
         seekLoc?.let {
             seek(it.location)
         } ?: chapterRepresentation.apply {
-            val lastFrame = absoluteToRelative(activeVerses.last().lastFrame())
+            val lastFrame = absoluteToRelativeChapter(activeVerses.last().lastFrame())
             seek(lastFrame)
         }
     }
