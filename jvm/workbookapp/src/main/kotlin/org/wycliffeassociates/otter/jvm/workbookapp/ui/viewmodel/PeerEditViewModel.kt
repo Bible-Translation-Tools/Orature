@@ -86,9 +86,8 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
             it?.let { chunk ->
                 subscribeToSelectedTake(chunk)
                 val currentStep = translationViewModel.selectedStepProperty.value
-                chunkConfirmed.set(
-                    chunk.checkingStatus().ordinal >= checkingStatusFromStep(currentStep).ordinal
-                )
+                val isConfirmed = chunk.checkingStatus().ordinal >= checkingStatusFromStep(currentStep).ordinal
+                chunkConfirmed.set(isConfirmed)
             }
             clearUndoRedoHistory()
         }.also { disposableListeners.add(it) }

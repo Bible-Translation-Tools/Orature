@@ -125,7 +125,11 @@ class BlindDraftViewModel : ViewModel() {
 
     fun onDeleteTake(take: Take) {
         currentChunkProperty.value?.let { chunk ->
-            val op = ChunkTakeDeleteAction(take, chunk, takes.any { it.take == take && it.selected })
+            val op = ChunkTakeDeleteAction(
+                take,
+                chunk,
+                takes.any { it.take == take && it.selected }
+            )
             onUndoableAction(op)
         }
     }
