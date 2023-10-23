@@ -148,7 +148,7 @@ internal class ChapterRepresentation(
 
     /**
      * Converts the absolute audio frame position within the scratch audio file to a "relative" position as if the
-     * audio only contained the segments referrenced by the active verse nodes.
+     * audio only contained the segments referenced by the active verse nodes.
      */
     fun absoluteToRelativeChapter(absoluteFrame: Int): Int {
         val verses = activeVerses
@@ -287,15 +287,16 @@ internal class ChapterRepresentation(
         /**
          * Converts an absoluteFrame position in the scratch audio file to a position relative to the
          * "relative verse space" or "relative chapter space", depending on the value stored in lockToVerse.
-         * When lockToVerse is not null, the absolute frame is mapped to a position relative to the verse specified by
-         * lockToVerse. When lockToVerse is null, the absoluteFrame position is mapped to a position relative to the
+         * When lockToVerse is not CHAPTER_UNLOCKED, the absolute frame is mapped to a position relative to the verse specified by
+         * lockToVerse. When lockToVerse is equal to CHAPTER_UNLOCKED, the absoluteFrame position is mapped to a position relative to the
          * chapter.
          */
         fun absoluteToRelative(absoluteFrame: Int): Int {
-            return if (lockToVerse.get() == CHAPTER_UNLOCKED) {
+            val lockedVerse = lockToVerse.get()
+            return if (lockedVerse == CHAPTER_UNLOCKED) {
                 absoluteToRelativeChapter(absoluteFrame)
             } else {
-                absoluteToRelativeVerse(absoluteFrame)
+                absoluteToRelativeVerse(absoluteFrame, lockedVerse)
             }
         }
 
@@ -304,8 +305,8 @@ internal class ChapterRepresentation(
          * This is performed by finding the verse that contains the absolute frame, and counting how many frames are
          * from the start of the verse, to the given absoluteFrame position.
          */
-        fun absoluteToRelativeVerse(absoluteFrame: Int): Int {
-            val verse = findVerse(absoluteFrame)
+        fun absoluteToRelativeVerse(absoluteFrame: Int, verseIndex: Int): Int {
+            val verse = activeVerses[verseIndex]
             var rel = 0
             verse?.let {
                 rel = it.framesToPosition(absoluteFrame)
