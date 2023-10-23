@@ -43,7 +43,9 @@ class TranslationViewModel2 : ViewModel() {
             .blockingFirst()
 
         workbookDataStore.activeChapterProperty.set(chapter)
-        updateStep()
+        updateStep {
+            selectedStepProperty.set(reachableStepProperty.value)
+        }
         updateSourceText()
         resetUndoRedo()
     }
@@ -91,7 +93,7 @@ class TranslationViewModel2 : ViewModel() {
         updateStep()
     }
 
-    fun updateStep() {
+    fun updateStep(callback: () -> Unit = {}) {
         compositeDisposable.clear()
 
         workbookDataStore.chapter
@@ -115,6 +117,7 @@ class TranslationViewModel2 : ViewModel() {
                         reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
                     }
                 }
+                callback()
             }.addTo(compositeDisposable)
     }
 
