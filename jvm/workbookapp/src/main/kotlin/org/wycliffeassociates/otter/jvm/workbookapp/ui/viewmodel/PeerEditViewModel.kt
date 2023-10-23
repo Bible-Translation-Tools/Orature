@@ -15,7 +15,6 @@ import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
@@ -26,8 +25,8 @@ import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkOperation
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkConfirmAction
+import org.wycliffeassociates.otter.common.domain.chunking.ChunkOperation
+import org.wycliffeassociates.otter.common.domain.chunking.ChunkConfirmAction
 import tornadofx.*
 import java.util.ArrayDeque
 import java.util.Deque
@@ -166,7 +165,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         if (redoStack.isNotEmpty()) {
             val op = redoStack.pop()
             undoStack.push(op)
-            op.apply()
+            op.redo()
             refreshChunkList()
             translationViewModel.canUndoProperty.set(true)
         }
