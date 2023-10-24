@@ -124,6 +124,9 @@ class BlindDraftViewModel : ViewModel() {
     }
 
     fun onDeleteTake(take: Take) {
+        takes.forEach { it.audioPlayer.stop() }
+        audioDataStore.stopPlayers()
+
         currentChunkProperty.value?.let { chunk ->
             val op = ChunkTakeDeleteAction(
                 take,
@@ -332,9 +335,6 @@ class BlindDraftViewModel : ViewModel() {
         private val disposable = CompositeDisposable()
 
         override fun execute() {
-            takes.forEach { it.audioPlayer.stop() }
-            audioDataStore.stopPlayers()
-
             take.deletedTimestamp.accept(DateHolder.now())
             take.deletedTimestamp
                 .filter { dateHolder -> dateHolder.value != null }
