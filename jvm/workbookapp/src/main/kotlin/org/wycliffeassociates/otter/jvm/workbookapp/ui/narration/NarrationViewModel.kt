@@ -254,6 +254,7 @@ class NarrationViewModel : ViewModel() {
         audioPositionProperty.set(0)
         totalAudioSizeProperty.set(0)
     }
+
     fun loadChapter(chapter: Chapter) {
         resetState()
 
@@ -297,11 +298,11 @@ class NarrationViewModel : ViewModel() {
             }.flatMap { it }
             .observeOnFx()
             .subscribe({ chunksList.add(it) }, {}, {
-                initializeTeleprompter()
+                resetTeleprompter()
             })
     }
 
-    fun clearTeleprompter() {
+    private fun clearTeleprompter() {
         narratableList.forEachIndexed { idx, chunk ->
             chunk.state = NarrationTextItemState.RECORD_DISABLED
         }
@@ -310,15 +311,19 @@ class NarrationViewModel : ViewModel() {
         FX.eventbus.fire(TeleprompterSeekEvent(0))
     }
 
-    fun initializeTeleprompter() {
+    private fun resetTeleprompter() {
         narratableList.forEachIndexed { idx, chunk ->
-            if (chunk.state == NarrationTextItemState.RECORD_DISABLED) {
-                if (chunk.hasRecording) {
-                    chunk.state = NarrationTextItemState.RE_RECORD
-                }
+            if (chunk.hasRecording) {
+                chunk.state = NarrationTextItemState.RE_RECORD
+            } else {
+                chunk.state = NarrationTextItemState.RECORD_DISABLED
             }
         }
-        narratableList.firstOrNull { !it.hasRecording }?.state = NarrationTextItemState.RECORD
+        val lastIndex = narratableList.indexOfFirst { !it.hasRecording }
+        if (lastIndex != -1) {
+            narratableList.get(lastIndex).state = NarrationTextItemState.RECORD
+            FX.eventbus.fire(TeleprompterSeekEvent(lastIndex))
+        }
         refreshTeleprompter()
     }
 
@@ -383,11 +388,13 @@ class NarrationViewModel : ViewModel() {
 
         narration.onSaveRecording(verseIndex)
 
-        recordAgainVerseIndex = verseIndex
+        recordAgainVerseIndex = null
         recordingVerseIndex.set(verseIndex)
         isRecording = false
         isRecordingAgain = false
         recordPause = false
+
+        renderer.clearActiveRecordingData()
 
         refreshTeleprompter()
     }
@@ -458,14 +465,14 @@ class NarrationViewModel : ViewModel() {
         narration.undo()
         recordPause = false
 
-        refreshTeleprompter()
+        resetTeleprompter()
     }
 
     fun redo() {
         narration.redo()
         recordPause = false
 
-        refreshTeleprompter()
+        resetTeleprompter()
     }
 
     private fun record(index: Int) {
@@ -502,20 +509,21 @@ class NarrationViewModel : ViewModel() {
     }
 
     private fun stopRecordAgain() {
+        narration.pauseRecording()
+        recordAgainVerseIndex = null
+        isRecording = false
+        isRecordingAgain = false
+
+        recordPause = false
+        recordResume = true
+
+        renderer.clearActiveRecordingData()
+
         recordAgainVerseIndex?.let { verseIndex ->
-            narration.pauseRecording()
-            renderer.clearActiveRecordingData()
             narration.finalizeVerse(verseIndex)
-
-            recordAgainVerseIndex = null
-            isRecording = false
-            isRecordingAgain = false
-
-            recordPause = false
-            recordResume = true
-
-            refreshTeleprompter()
         }
+
+        refreshTeleprompter()
     }
 
     private fun stopPlayer() {
@@ -626,8 +634,28 @@ class NarrationViewModel : ViewModel() {
                 runLater {
                     audioPositionProperty.set(position)
                 }
-                val viewport = renderer.draw(context, canvas, position)
-                adjustMarkers(markerNodes, viewport, canvas.width.toInt())
+                var reRecordLoc: Int? = null
+                var nextVerseLoc: Int? = null
+                if (isRecordingAgain) {
+                    val reRecordingIndex = recordingVerseIndex.value
+                    val nextChunk = chunksList.getOrNull(reRecordingIndex + 1)
+                    if (nextChunk != null) {
+                        val next = recordedVerses.firstOrNull { it.label == nextChunk.title }
+                        if (next != null) {
+                            nextVerseLoc = next.location
+                        }
+                    }
+                    reRecordLoc = recordedVerses[reRecordingIndex].location
+                }
+
+                val viewports = renderer.draw(
+                    context,
+                    canvas,
+                    position,
+                    reRecordLoc,
+                    nextVerseLoc
+                )
+                adjustMarkers(markerNodes, viewports, canvas.width.toInt())
             } catch (e: Exception) {
                 logger.error("", e)
             }
@@ -640,24 +668,45 @@ class NarrationViewModel : ViewModel() {
         }
     }
 
-    private fun adjustMarkers(markerNodes: ObservableList<VerseMarkerControl>, viewport: IntRange, width: Int) {
-        for (marker in markerNodes) {
+    private fun adjustMarkers(
+        markerNodes: ObservableList<VerseMarkerControl>,
+        viewports: List<IntRange>,
+        width: Int
+    ) {
+        val checkpointRAVI = recordAgainVerseIndex
+        val adjustedWidth = if (checkpointRAVI == null) width else width / viewports.size
+        for (i in markerNodes.indices) {
+            val marker = markerNodes[i]
             if (marker.userIsDraggingProperty.value == true) continue
 
             val verse = marker.verseProperty.value
-            if (verse.location in viewport) {
-                val newPos = framesToPixels(
-                    verse.location - viewport.first,
-                    width,
-                    viewport.last - viewport.first
-                ).toDouble() - (MARKER_AREA_WIDTH / 2)
-                runLater {
-                    marker.visibleProperty().set(true)
-                    if (marker.layoutX != newPos) {
-                        marker.layoutX = newPos
-                    }
+            var found = false
+            for (viewPortIndex in viewports.indices) {
+                val viewport = viewports[viewPortIndex]
+
+                val checkpointRAVI = recordAgainVerseIndex
+                if (checkpointRAVI != null) {
+                    if (viewPortIndex != viewports.lastIndex && i > checkpointRAVI) continue
+                    if (viewPortIndex == viewports.lastIndex && i <= checkpointRAVI) continue
                 }
-            } else {
+
+                if (verse.location in viewport) {
+                    val viewportOffset = (width / viewports.size) * viewPortIndex
+                    val newPos = framesToPixels(
+                        verse.location - viewport.first,
+                        adjustedWidth,
+                        viewport.last - viewport.first
+                    ).toDouble() - (MARKER_AREA_WIDTH / 2) + viewportOffset
+                    runLater {
+                        marker.visibleProperty().set(true)
+                        if (marker.layoutX != newPos) {
+                            marker.layoutX = newPos
+                        }
+                    }
+                    found = true
+                }
+            }
+            if (!found) {
                 runLater {
                     marker.visibleProperty().set(false)
                 }
@@ -747,7 +796,7 @@ class NarrationViewModel : ViewModel() {
             true -> NarrationTextItemState.RE_RECORDING_PAUSED
             false -> NarrationTextItemState.RECORDING_PAUSED
         }
-        initializeTeleprompter()
+        resetTeleprompter()
     }
 
     private fun handleResumeRecording(event: ResumeRecordingEvent, narratableList: List<NarrationTextItemData>) {
@@ -774,7 +823,7 @@ class NarrationViewModel : ViewModel() {
     private fun handleSaveRecording(event: SaveRecordingEvent, narratableList: List<NarrationTextItemData>) {
         val index = event.index
         narratableList[index].state = NarrationTextItemState.RE_RECORD
-        initializeTeleprompter()
+        resetTeleprompter()
     }
 
     private fun finishOutstandingActions() {
@@ -790,6 +839,6 @@ class NarrationViewModel : ViewModel() {
                 item.state = NarrationTextItemState.RE_RECORD
             }
         }
-        initializeTeleprompter()
+        resetTeleprompter()
     }
 }
