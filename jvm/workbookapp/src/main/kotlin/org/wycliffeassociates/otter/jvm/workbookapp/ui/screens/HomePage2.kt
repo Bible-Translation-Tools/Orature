@@ -201,6 +201,9 @@ class HomePage2 : View() {
         subscribe<LanguageSelectedEvent> {
             if (projectWizardViewModel.selectedSourceLanguageProperty.value == null) {
                 wizardFragment.nextStep()
+            } else {
+                // open loading dialog when creating project
+                viewModel.isLoadingProperty.set(true)
             }
             projectWizardViewModel.onLanguageSelected(it.item) {
                 viewModel.loadProjects()
