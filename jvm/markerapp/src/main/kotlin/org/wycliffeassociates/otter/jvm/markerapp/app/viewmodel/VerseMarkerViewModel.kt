@@ -32,7 +32,7 @@ import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
-import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
@@ -42,8 +42,7 @@ import javafx.animation.AnimationTimer
 import javafx.beans.binding.Bindings
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseFinishedEvent
-import kotlin.math.max
-import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
 
