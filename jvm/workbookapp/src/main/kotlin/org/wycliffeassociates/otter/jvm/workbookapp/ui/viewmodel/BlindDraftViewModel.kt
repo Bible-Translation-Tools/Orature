@@ -15,6 +15,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.common.domain.IUndoable
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
@@ -22,7 +23,6 @@ import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.common.domain.chunking.IChunkOperation
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel.Result
 import tornadofx.*
@@ -52,8 +52,8 @@ class BlindDraftViewModel : ViewModel() {
     val availableTakes = FilteredList<TakeCardModel>(takes) { !it.selected }
 
     private val recordedTakeProperty = SimpleObjectProperty<Take>()
-    private val undoStack: Deque<IChunkOperation> = ArrayDeque()
-    private val redoStack: Deque<IChunkOperation> = ArrayDeque()
+    private val undoStack: Deque<IUndoable> = ArrayDeque()
+    private val redoStack: Deque<IUndoable> = ArrayDeque()
 
     private val selectedTakeDisposable = CompositeDisposable()
     private val disposables = CompositeDisposable()
@@ -268,9 +268,9 @@ class BlindDraftViewModel : ViewModel() {
         }
     }
 
-    private fun onUndoableAction(op: IChunkOperation) {
+    private fun onUndoableAction(op: IUndoable) {
         undoStack.push(op)
-        op.apply()
+        op.execute()
         redoStack.clear()
         translationViewModel.canUndoProperty.set(true)
         translationViewModel.canRedoProperty.set(false)
@@ -291,8 +291,8 @@ class BlindDraftViewModel : ViewModel() {
         private val take: Take,
         private val chunk: Chunk,
         private val oldSelectedTake: Take? = null
-    ) : IChunkOperation {
-        override fun apply() {
+    ) : IUndoable {
+        override fun execute() {
             chunk.audio.insertTake(take)
         }
 
@@ -327,11 +327,11 @@ class BlindDraftViewModel : ViewModel() {
         private val take: Take,
         private val chunk: Chunk,
         private val isTakeSelected: Boolean
-    ) : IChunkOperation {
+    ) : IUndoable {
 
         private val disposable = CompositeDisposable()
 
-        override fun apply() {
+        override fun execute() {
             takes.forEach { it.audioPlayer.stop() }
             audioDataStore.stopPlayers()
 
@@ -363,14 +363,14 @@ class BlindDraftViewModel : ViewModel() {
             }
         }
 
-        override fun redo() = apply()
+        override fun redo() = execute()
     }
 
     private inner class ChunkTakeSelectAction(
         private val take: Take,
         private val oldSelectedTake: Take? = null
-    ) : IChunkOperation {
-        override fun apply() {
+    ) : IUndoable {
+        override fun execute() {
             selectTake(take)
         }
 
@@ -378,6 +378,6 @@ class BlindDraftViewModel : ViewModel() {
             oldSelectedTake?.let { selectTake(it) }
         }
 
-        override fun redo() = apply()
+        override fun redo() = execute()
     }
 }
