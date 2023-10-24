@@ -130,6 +130,7 @@ class ChunkingStepNode(
         ChunkingStep.PEER_EDIT -> FontIcon(MaterialDesign.MDI_ACCOUNT_MULTIPLE).apply { addClass("icon") }
         ChunkingStep.KEYWORD_CHECK -> FontIcon(Material.BORDER_COLOR).apply { addClass("icon") }
         ChunkingStep.VERSE_CHECK -> FontIcon(Material.MENU_BOOK).apply { addClass("icon") }
+        ChunkingStep.CHAPTER_REVIEW -> FontIcon(MaterialDesign.MDI_PLAY).apply { addClass("icon") }
         else -> null
     }
 }

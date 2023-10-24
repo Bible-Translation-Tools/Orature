@@ -70,6 +70,7 @@ class ChunkingStepsDrawer(
                 chunkingStep(ChunkingStep.VERSE_CHECK, selectedStepProperty, reachableStepProperty, isCollapsedProperty) {
                     chunkListProperty.bind(chunksProperty)
                 }
+                chunkingStep(ChunkingStep.CHAPTER_REVIEW, selectedStepProperty, reachableStepProperty, isCollapsedProperty)
             }
         }
     }

@@ -104,6 +104,9 @@ class TranslationViewModel2 : ViewModel() {
                     list.isEmpty() -> {
                         reachableStepProperty.set(ChunkingStep.CHUNKING)
                     }
+                    list.all { it.checkingStatus() == CheckingStatus.VERSE } -> {
+                        reachableStepProperty.set(ChunkingStep.CHAPTER_REVIEW)
+                    }
                     list.all { it.checkingStatus().ordinal >= CheckingStatus.KEYWORD.ordinal } -> {
                         reachableStepProperty.set(ChunkingStep.VERSE_CHECK)
                     }

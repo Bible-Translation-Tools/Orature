@@ -30,7 +30,6 @@ open class PeerEdit : Fragment() {
     val settingsViewModel: SettingsViewModel by inject()
     val recorderViewModel: RecorderViewModel by inject()
 
-    private lateinit var slider: Slider
     private lateinit var waveform: MarkerWaveform
 
     private val mainSectionProperty = SimpleObjectProperty<Node>(null)
