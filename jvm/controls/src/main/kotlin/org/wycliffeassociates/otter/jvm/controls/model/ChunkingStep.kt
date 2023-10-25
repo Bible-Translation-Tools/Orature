@@ -7,5 +7,5 @@ enum class ChunkingStep(val titleKey: String) {
     PEER_EDIT("peer_edit"),
     KEYWORD_CHECK("keyword_check"),
     VERSE_CHECK("verse_check"),
-    CHAPTER_REVIEW("chapter_review")
+    CHAPTER_REVIEW("final_review")
 }

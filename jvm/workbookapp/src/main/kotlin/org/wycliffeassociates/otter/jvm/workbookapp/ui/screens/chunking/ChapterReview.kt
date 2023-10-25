@@ -26,7 +26,7 @@ class ChapterReview : Fragment() {
     override val root = borderpane {
         top = vbox {
             addClass("blind-draft-section")
-            label(viewModel.chunkTitleProperty).addClass("h4", "h4--80")
+            label(viewModel.chapterTitleProperty).addClass("h4", "h4--80")
             simpleaudioplayer {
                 playerProperty.bind(viewModel.sourcePlayerProperty)
                 enablePlaybackRateProperty.set(true)
@@ -101,7 +101,8 @@ class ChapterReview : Fragment() {
                 }
                 region { hgrow = Priority.ALWAYS }
                 button(messages["next_chapter"]) {
-
+                    addClass("btn", "btn--primary", "consume__btn")
+                    graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
                 }
             }
         }

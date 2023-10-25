@@ -130,15 +130,13 @@ class WorkbookDataStore : Component(), ScopedInstance {
 
     fun activeChapterTitleBinding(): StringBinding {
         return Bindings.createStringBinding(
-            Callable {
-                if (activeWorkbookProperty.value != null && activeChapterProperty.value != null) {
+            {
+                activeChapterProperty.value?.let { chapter ->
                     MessageFormat.format(
-                        messages["bookChapterTitle"],
-                        activeWorkbookProperty.value.source.title,
+                        messages["chapterTitle"],
+                        messages[chapter.label],
                         activeChapterProperty.value.title,
                     )
-                } else {
-                    null
                 }
             },
             activeWorkbookProperty,

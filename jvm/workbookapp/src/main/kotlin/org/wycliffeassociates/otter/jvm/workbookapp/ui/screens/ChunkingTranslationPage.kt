@@ -83,11 +83,6 @@ class ChunkingTranslationPage : View() {
         tryImportStylesheet("/css/marker-node.css")
         tryImportStylesheet("/css/scrolling-waveform.css")
 
-//        mainFragmentProperty.addListener { observable, oldValue, newValue ->
-//            oldValue?.onUndock()
-//            newValue?.onDock()
-//        }
-
         subscribe<ChunkingStepSelectedEvent> {
             viewModel.navigateStep(it.step)
         }

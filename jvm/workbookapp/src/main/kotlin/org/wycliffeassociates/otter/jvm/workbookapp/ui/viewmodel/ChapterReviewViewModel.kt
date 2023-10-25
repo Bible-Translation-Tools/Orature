@@ -2,7 +2,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Single
-import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
@@ -26,6 +25,8 @@ class ChapterReviewViewModel : PeerEditViewModel() {
     @Inject
     lateinit var waveFileCreator: IWaveFileCreator
 
+    val chapterTitleProperty = workbookDataStore.activeChapterTitleBinding()
+
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
     }
@@ -38,7 +39,6 @@ class ChapterReviewViewModel : PeerEditViewModel() {
         audioDataStore.updateSourceAudio()
         audioDataStore.openSourceAudioPlayer()
 
-        subscribeToChapterTake()
         compile()
     }
 
@@ -53,14 +53,12 @@ class ChapterReviewViewModel : PeerEditViewModel() {
 
         // Don't place verse markers if the draft comes from user chunks
         concatenateAudio.execute(takes, includeMarkers = false)
-            .doOnSuccess {
-                logger.info("Chapter ${chapter.sort} compiled successfully.")
-            }
             .flatMap { file ->
                 compiled = file
-                addNewTake(file)
+                newChapterTake(file)
             }
-            .map {
+            .doOnSuccess {
+                logger.info("Chapter ${chapter.sort} compiled successfully.")
                 chapter.audio.insertTake(it)
             }
             .subscribeOn(Schedulers.io())
@@ -71,22 +69,12 @@ class ChapterReviewViewModel : PeerEditViewModel() {
             .doFinally {
                 compiled?.delete()
             }
-            .subscribe()
+            .subscribe { take ->
+                loadTargetAudio(take)
+            }
     }
 
-    private fun subscribeToChapterTake() {
-        selectedTakeDisposable.clear()
-        val chapter = workbookDataStore.chapter
-        chapter.audio.selected
-            .observeOnFx()
-            .subscribe {
-                it?.value?.let { take ->
-                    loadTargetAudio(take)
-                }
-            }.addTo(selectedTakeDisposable)
-    }
-
-    private fun addNewTake(file: File): Single<Take> {
+    private fun newChapterTake(file: File): Single<Take> {
         return workbookDataStore.chapter.let { chapter ->
             val namer = getFileNamer(chapter)
             val chapterNumber = namer.formatChapterNumber()
