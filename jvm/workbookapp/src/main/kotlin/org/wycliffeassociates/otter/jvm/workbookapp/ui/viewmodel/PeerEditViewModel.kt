@@ -32,7 +32,7 @@ import java.util.ArrayDeque
 import java.util.Deque
 import javax.inject.Inject
 
-class PeerEditViewModel : ViewModel(), IWaveformViewModel {
+open class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     @Inject
     lateinit var audioConnectionFactory: AudioConnectionFactory
 
@@ -68,7 +68,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     private val height = Integer.min(Screen.getMainScreen().platformHeight, 500)
     private val width = Screen.getMainScreen().platformWidth
     private val disposableListeners = mutableListOf<ListenerDisposer>()
-    private val selectedTakeDisposable = CompositeDisposable()
+    protected val selectedTakeDisposable = CompositeDisposable()
 
     private val undoStack: Deque<IUndoable> = ArrayDeque()
     private val redoStack: Deque<IUndoable> = ArrayDeque()
@@ -78,7 +78,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         currentChunkProperty.bindBidirectional(workbookDataStore.activeChunkProperty)
     }
 
-    fun dockPeerEdit() {
+    open fun dock() {
         startAnimationTimer()
         subscribeToChunks()
 
@@ -95,7 +95,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         sourcePlayerProperty.bind(audioDataStore.sourceAudioPlayerProperty)
     }
 
-    fun undockPeerEdit() {
+    open fun undock() {
         stopAnimationTimer()
         sourcePlayerProperty.unbind()
         selectedTakeDisposable.clear()
@@ -209,7 +209,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
             }.addTo(selectedTakeDisposable)
     }
 
-    private fun loadTargetAudio(take: Take) {
+    protected fun loadTargetAudio(take: Take) {
         val audioPlayer: IAudioPlayer = audioConnectionFactory.getPlayer()
         audioPlayer.load(take.file)
         audioPlayer.getAudioReader()?.let {

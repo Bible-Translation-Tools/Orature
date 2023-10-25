@@ -14,12 +14,12 @@ import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.PeerEditViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterReviewViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 
 class ChapterReview : Fragment() {
-    val viewModel: PeerEditViewModel by inject()
+    val viewModel: ChapterReviewViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
     private lateinit var waveform: MarkerWaveform
 
@@ -90,7 +90,7 @@ class ChapterReview : Fragment() {
                             }
                         )
 
-//                        action { viewModel.mediaToggle() }
+                        action { viewModel.toggleAudio() }
                     }
                     button {
                         addClass("btn", "btn--icon")
@@ -105,6 +105,14 @@ class ChapterReview : Fragment() {
                 }
             }
         }
+    }
+
+    override fun onDock() {
+        viewModel.dock()
+    }
+
+    override fun onUndock() {
+        viewModel.undock()
     }
 
     private fun subscribeOnWaveformImages() {

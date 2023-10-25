@@ -176,13 +176,13 @@ open class PeerEdit : Fragment() {
 
     override fun onDock() {
         super.onDock()
-        viewModel.dockPeerEdit()
+        viewModel.dock()
         mainSectionProperty.set(playbackView)
     }
 
     override fun onUndock() {
         super.onUndock()
-        viewModel.undockPeerEdit()
+        viewModel.undock()
     }
 
     private fun subscribeOnWaveformImages() {
