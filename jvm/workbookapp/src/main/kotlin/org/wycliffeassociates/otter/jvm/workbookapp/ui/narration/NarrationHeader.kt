@@ -20,8 +20,10 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
+import org.wycliffeassociates.otter.jvm.controls.chapterselector.ChapterGrid
 import org.wycliffeassociates.otter.jvm.controls.event.ChapterReturnFromPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.OpenChapterEvent
+import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.chapterSelector
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
@@ -43,7 +45,12 @@ class NarrationHeader : View() {
         }
     }
 
+
+    // TODO: figure out how the chaperMenu is being opened, and open the chapterGrid the same way
+    // TODO: make sure that I do not have anything named "ChapterMenu" because that already exist
+
     override val root = hbox {
+
         addClass("narration__header")
 
         hbox {
@@ -79,6 +86,11 @@ class NarrationHeader : View() {
             chapterSelector {
                 chapterTitleProperty.bind(viewModel.chapterTitleProperty)
 
+                // TODO: try wrapping the grid in a MenuButton so that it appears over the correct location
+                setOnOpenChapterGridActionProperty {
+                    viewModel.toggleChapterMenu()
+                }
+
                 prevDisabledProperty.bind(viewModel.hasPreviousChapter.not())
                 nextDisabledProperty.bind(viewModel.hasNextChapter.not())
 
@@ -110,6 +122,7 @@ class NarrationHeaderViewModel : ViewModel() {
     }
 
     val chapterTitleProperty = SimpleStringProperty()
+    val chapterMenuOpenProperty = SimpleBooleanProperty(false)
 
     val hasNextChapter = SimpleBooleanProperty()
     val hasPreviousChapter = SimpleBooleanProperty()
@@ -149,6 +162,10 @@ class NarrationHeaderViewModel : ViewModel() {
 
     fun selectNextChapter() {
         stepToChapter(StepDirection.FORWARD)
+    }
+
+    fun toggleChapterMenu() {
+        narrationViewModel.toggleChapterGridOpen()
     }
 
     private fun stepToChapter(direction: StepDirection) {

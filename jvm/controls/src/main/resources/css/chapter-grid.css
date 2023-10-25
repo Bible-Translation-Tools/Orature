@@ -2,6 +2,18 @@
     -fx-padding: 14 16;
 }
 
+.chapter-grid {
+    /*
+        TODO:
+        1) update the shadow to be something that we are already using
+        2) update the border and ensure that it is correct and that I do not need to use a pre-defined style
+    */
+    -fx-background-color: -wa-foreground;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0.5, 0, 0);
+    -fx-background-radius: 10;
+    -fx-alignment: top-right
+}
+
 .chapter-grid .chapter-grid__icon-alignment-box {
     -fx-alignment: top-right;
     -fx-padding: 4;
