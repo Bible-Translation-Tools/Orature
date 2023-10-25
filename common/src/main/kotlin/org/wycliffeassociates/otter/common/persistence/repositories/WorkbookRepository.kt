@@ -532,7 +532,14 @@ class WorkbookRepository(
         val takesRelay = ReplayRelay.create<WorkbookTake>()
         takesFromDb
             // Record the mapping between data types.
-            .doOnNext { (wbTake, modelTake) -> takeMap[wbTake] = modelTake }
+            .doOnNext { (wbTake, modelTake) ->
+                if (content.type == ContentType.TEXT) {
+                    wbTake?.let {
+                        subscribeToCheckingStatus(it, modelTake) // subscribe to takes from db
+                    }
+                }
+                takeMap[wbTake] = modelTake
+            }
             // Feed the initial list to takesRelay
             .map { (wbTake, _) -> wbTake }
             .doOnError { e -> logger.error("Error in takesRelay, content: $content", e) }
@@ -546,7 +553,6 @@ class WorkbookRepository(
                 deselectUponDelete(wbTake, selectedTakeRelay)
                 // When a take becomes deleted, delete it from the database
                 deleteFromDbUponDelete(wbTake, modelTake)
-                subscribeToCheckingStatus(wbTake, modelTake)
             }
 
             // These are new takes
@@ -567,7 +573,10 @@ class WorkbookRepository(
                     .subscribe { insertionId ->
                         modelTake.id = insertionId
                         selectedTakeRelay.accept(TakeHolder(wbTake))
-//                        subscribeToCheckingStatus(wbTake, modelTake)
+
+                        if (content.type == ContentType.TEXT) {
+                            subscribeToCheckingStatus(wbTake, modelTake) // subscribe to takes from UI
+                        }
                     }
             }
 
