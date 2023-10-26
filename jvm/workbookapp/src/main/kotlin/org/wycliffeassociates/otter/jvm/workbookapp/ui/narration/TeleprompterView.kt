@@ -116,7 +116,7 @@ class TeleprompterView : View() {
         subscribe<TeleprompterSeekEvent> {
             try {
                 logger.info("Scrolling to ${it.index} for TeleprompterSeekEvent")
-                listView.scrollTo(it.index)
+                listView.scrollTo(it.index - 1)
                 listView.selectionModel.selectIndices(it.index)
             } catch (e: Exception) {
                 logger.error("Error in selecting and scrolling to a Teleprompter item", e)
