@@ -57,7 +57,7 @@ import tornadofx.sizeProperty
 const val WAV_COLOR = "#66768B"
 const val BACKGROUND_COLOR = "#fff"
 
-class ChunkingViewModel : ViewModel(), IMarkerViewModel {
+open class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
@@ -100,9 +100,6 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     private val builder = ObservableWaveformBuilder()
 
     var subscribeOnWaveformImages: () -> Unit = {}
-    /** Call this before leaving the view to avoid memory leak */
-    var chunkImageCleanup: () -> Unit = {}
-    var consumeImageCleanup: () -> Unit = {}
 
     val isPlayingProperty = SimpleBooleanProperty(false)
     val compositeDisposable = CompositeDisposable()
@@ -111,7 +108,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
     }
 
-    fun onDockChunking() {
+    open fun dock() {
         val chapter = workbookDataStore.chapter
         val sourceAudio = initializeSourceAudio(chapter.sort)
         audioDataStore.sourceAudioProperty.set(sourceAudio)
@@ -126,7 +123,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         startAnimationTimer()
     }
 
-    fun onUndockChunking() {
+    fun undock() {
         pause()
         translationViewModel.selectedStepProperty.value?.let {
             // handle when navigating to the next step
@@ -179,7 +176,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         translationViewModel.reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
     }
 
-    fun loadAudio(audioFile: File): OratureAudioFile {
+    private fun loadAudio(audioFile: File): OratureAudioFile {
         val player = audioConnectionFactory.getPlayer()
         val audio = OratureAudioFile(audioFile)
         player.load(audioFile)
@@ -210,8 +207,6 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
     fun cleanup() {
         builder.cancel()
-        consumeImageCleanup()
-        chunkImageCleanup()
         compositeDisposable.clear()
         stopAnimationTimer()
         markerModel = null
@@ -248,7 +243,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         audioController?.pause()
     }
 
-    private fun createWaveformImages(audio: OratureAudioFile) {
+    protected fun createWaveformImages(audio: OratureAudioFile) {
         imageWidthProperty.set(computeImageWidth(width, SECONDS_ON_SCREEN))
 
         waveform = builder.buildAsync(

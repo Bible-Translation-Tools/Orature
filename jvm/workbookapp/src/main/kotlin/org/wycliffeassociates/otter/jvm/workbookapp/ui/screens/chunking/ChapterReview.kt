@@ -10,6 +10,10 @@ import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.event.GoToNextChapterEvent
+import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
+import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
+import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
+import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
@@ -57,6 +61,8 @@ class ChapterReview : Fragment() {
 
                 viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
                 viewModel.cleanUpWaveform = ::freeImages
+
+                markers.bind(viewModel.markers) { it }
             }
             add(waveform)
 
@@ -67,6 +73,16 @@ class ChapterReview : Fragment() {
 
             hbox {
                 addClass("consume__bottom", "recording__bottom-section")
+                button(messages["addVerse"]) {
+                    addClass("btn", "btn--primary", "consume__btn")
+                    tooltip(text)
+                    graphic = FontIcon(MaterialDesign.MDI_PLUS)
+
+                    action {
+                        viewModel.placeMarker()
+                    }
+                }
+                region { hgrow = Priority.ALWAYS }
                 hbox {
                     addClass("chunking-bottom__media-btn-group")
 
@@ -74,7 +90,7 @@ class ChapterReview : Fragment() {
                         addClass("btn", "btn--icon")
                         graphic = FontIcon(MaterialDesign.MDI_SKIP_PREVIOUS)
 
-//                        action { viewModel.seekPrevious() }
+                        action { viewModel.seekPrevious() }
                     }
                     button {
                         addClass("btn", "btn--icon")
@@ -93,26 +109,40 @@ class ChapterReview : Fragment() {
                             }
                         )
 
-                        action { viewModel.toggleAudio() }
+                        action { viewModel.mediaToggle() }
                     }
                     button {
                         addClass("btn", "btn--icon")
                         graphic = FontIcon(MaterialDesign.MDI_SKIP_NEXT)
 
-//                        action { viewModel.seekNext() }
+                        action { viewModel.seekNext() }
                     }
-                }
-                region { hgrow = Priority.ALWAYS }
-                button(messages["nextChapter"]) {
-                    addClass("btn", "btn--primary", "consume__btn")
-                    graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
-                    disableWhen { translationViewModel.isLastChapterProperty }
+                    button(messages["nextChapter"]) {
+                        addClass("btn", "btn--primary", "consume__btn")
+                        graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
+                        disableWhen { translationViewModel.isLastChapterProperty }
 
-                    setOnAction {
-                        FX.eventbus.fire(GoToNextChapterEvent())
+                        setOnAction {
+                            FX.eventbus.fire(GoToNextChapterEvent())
+                        }
                     }
                 }
             }
+        }
+    }
+
+    init {
+        subscribe<MarkerDeletedEvent> {
+            viewModel.deleteMarker(it.markerId)
+        }
+        subscribe<MarkerMovedEvent> {
+            viewModel.moveMarker(it.markerId, it.start, it.end)
+        }
+        subscribe<UndoChunkingPageEvent> {
+            viewModel.undoMarker()
+        }
+        subscribe<RedoChunkingPageEvent> {
+            viewModel.redoMarker()
         }
     }
 

@@ -136,7 +136,7 @@ class Chunking : Fragment() {
         logger.info("Chunking docked")
 
         viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
-        viewModel.onDockChunking()
+        viewModel.dock()
         viewModel.initializeAudioController(slider)
     }
 
@@ -144,7 +144,7 @@ class Chunking : Fragment() {
         super.onUndock()
         logger.info("Chunking undocked")
         cleanUpWaveform()
-        viewModel.onUndockChunking()
+        viewModel.undock()
     }
 
     private fun subscribeOnWaveformImages() {
