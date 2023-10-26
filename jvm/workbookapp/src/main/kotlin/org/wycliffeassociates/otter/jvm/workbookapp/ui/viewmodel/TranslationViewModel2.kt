@@ -129,6 +129,9 @@ class TranslationViewModel2 : ViewModel() {
     fun updateSourceText() {
         workbookDataStore.getSourceText()
             .observeOnFx()
+            .doOnComplete {
+                sourceTextProperty.set(null)
+            }
             .subscribe {
                 sourceTextProperty.set(it)
             }
@@ -149,6 +152,8 @@ class TranslationViewModel2 : ViewModel() {
 
     private fun loadChapter(chapter: Chapter) {
         workbookDataStore.activeChapterProperty.set(chapter)
+        resetUndoRedo()
+        updateSourceText()
 
         val wb = workbookDataStore.workbook
         wb.target
@@ -164,15 +169,11 @@ class TranslationViewModel2 : ViewModel() {
         if (sourceAudio == null) {
             reachableStepProperty.set(null)
             compositeDisposable.clear()
-            resetUndoRedo()
-            return
+        } else {
+            updateStep {
+                selectedStepProperty.set(reachableStepProperty.value)
+            }
         }
-
-        updateStep {
-            selectedStepProperty.set(reachableStepProperty.value)
-        }
-        updateSourceText()
-        resetUndoRedo()
     }
 
     private fun resetUndoRedo() {

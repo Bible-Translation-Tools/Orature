@@ -33,6 +33,7 @@ class ChunkingStepNode(
 
     val isSelectedProperty = selectedStepProperty.booleanBinding {
         if (it == null) {
+            removePseudoClass("selected")
             return@booleanBinding false
         }
         togglePseudoClass("selected",  step == selectedStepProperty.value)
