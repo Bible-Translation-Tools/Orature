@@ -123,7 +123,7 @@ open class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         startAnimationTimer()
     }
 
-    fun undock() {
+    open fun undock() {
         pause()
         translationViewModel.selectedStepProperty.value?.let {
             // handle when navigating to the next step

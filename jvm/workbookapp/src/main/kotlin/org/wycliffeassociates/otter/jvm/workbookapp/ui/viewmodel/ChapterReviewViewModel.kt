@@ -58,6 +58,16 @@ class ChapterReviewViewModel : ChunkingViewModel() {
         compile()
     }
 
+    override fun undock() {
+        pause()
+        waveformAudioPlayerProperty.value?.stop()
+        audioDataStore.stopPlayers()
+        markerModel
+            ?.writeMarkers()
+            ?.subscribe()
+        cleanup()
+    }
+
     fun compile() {
         val chapter = workbookDataStore.chapter
         val takes = chapter.chunks.value
