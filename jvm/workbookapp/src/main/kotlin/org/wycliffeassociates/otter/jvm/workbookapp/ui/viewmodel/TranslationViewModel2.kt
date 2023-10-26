@@ -58,6 +58,14 @@ class TranslationViewModel2 : ViewModel() {
         resetUndoRedo()
     }
 
+    fun nextChapter() {
+        navigateChapter(workbookDataStore.chapter.sort + 1)
+    }
+
+    fun previousChapter() {
+        navigateChapter(workbookDataStore.chapter.sort - 1)
+    }
+
     fun navigateStep(target: ChunkingStep) {
         selectedStepProperty.set(target)
         resetUndoRedo()
@@ -129,6 +137,34 @@ class TranslationViewModel2 : ViewModel() {
             .observeOnFx()
             .subscribe {
                 sourceTextProperty.set(it)
+            }
+    }
+
+    private fun navigateChapter(chapter: Int) {
+        selectedStepProperty.set(null)
+
+        workbookDataStore.workbook.target
+            .chapters
+            .filter { it.sort == chapter }
+            .singleElement()
+            .observeOnFx()
+            .subscribe {
+                workbookDataStore.activeChapterProperty.set(it)
+
+                val wb = workbookDataStore.workbook
+                val sourceAudio = wb.sourceAudioAccessor.getChapter(chapter, wb.target)
+                if (sourceAudio == null) {
+                    reachableStepProperty.set(null)
+                    compositeDisposable.clear()
+                    resetUndoRedo()
+                    return@subscribe
+                }
+
+                updateStep {
+                    selectedStepProperty.set(reachableStepProperty.value)
+                }
+                updateSourceText()
+                resetUndoRedo()
             }
     }
 

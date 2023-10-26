@@ -5,6 +5,8 @@ import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.SourceTextDrawer
 import org.wycliffeassociates.otter.jvm.controls.event.ChunkSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepSelectedEvent
+import org.wycliffeassociates.otter.jvm.controls.event.GoToNextChapterEvent
+import org.wycliffeassociates.otter.jvm.controls.event.GoToPreviousChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.BlindDraft
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.Chunking
@@ -49,6 +51,7 @@ class ChunkingTranslationPage : View() {
                     it?.target?.title
                 }
             )
+            chapterTitleProperty.bind(workbookDataStore.activeChapterTitleBinding())
             canUndoProperty.bind(viewModel.canUndoProperty)
             canRedoProperty.bind(viewModel.canRedoProperty)
         }
@@ -74,6 +77,7 @@ class ChunkingTranslationPage : View() {
     }
 
     init {
+        tryImportStylesheet("/css/chapter-selector.css")
         tryImportStylesheet("/css/consume-page.css")
         tryImportStylesheet("/css/chunking-page.css")
         tryImportStylesheet("/css/blind-draft-page.css")
@@ -88,6 +92,12 @@ class ChunkingTranslationPage : View() {
         }
         subscribe<ChunkSelectedEvent> {
             viewModel.selectChunk(it.chunkNumber)
+        }
+        subscribe<GoToNextChapterEvent> {
+            viewModel.nextChapter()
+        }
+        subscribe<GoToPreviousChapterEvent> {
+            viewModel.previousChapter()
         }
     }
 
