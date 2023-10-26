@@ -9,6 +9,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.event.GoToNextChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
@@ -16,10 +17,12 @@ import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterReviewViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 import tornadofx.*
 
 class ChapterReview : Fragment() {
     val viewModel: ChapterReviewViewModel by inject()
+    val translationViewModel: TranslationViewModel2 by inject()
     val settingsViewModel: SettingsViewModel by inject()
     private lateinit var waveform: MarkerWaveform
 
@@ -100,9 +103,14 @@ class ChapterReview : Fragment() {
                     }
                 }
                 region { hgrow = Priority.ALWAYS }
-                button(messages["next_chapter"]) {
+                button(messages["nextChapter"]) {
                     addClass("btn", "btn--primary", "consume__btn")
                     graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
+                    disableWhen { translationViewModel.isLastChapterProperty }
+
+                    setOnAction {
+                        FX.eventbus.fire(GoToNextChapterEvent())
+                    }
                 }
             }
         }

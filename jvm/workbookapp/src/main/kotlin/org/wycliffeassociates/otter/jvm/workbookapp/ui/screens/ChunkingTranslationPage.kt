@@ -54,6 +54,8 @@ class ChunkingTranslationPage : View() {
             chapterTitleProperty.bind(workbookDataStore.activeChapterTitleBinding())
             canUndoProperty.bind(viewModel.canUndoProperty)
             canRedoProperty.bind(viewModel.canRedoProperty)
+            canGoNextProperty.bind(viewModel.isLastChapterProperty.not())
+            canGoPreviousProperty.bind(viewModel.isFirstChapterProperty.not())
         }
 
         borderpane {

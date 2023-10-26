@@ -22,6 +22,8 @@ class TranslationHeader : HBox() {
     val chapterTitleProperty = SimpleStringProperty()
     val canUndoProperty = SimpleBooleanProperty(false)
     val canRedoProperty = SimpleBooleanProperty(false)
+    val canGoNextProperty = SimpleBooleanProperty(false)
+    val canGoPreviousProperty = SimpleBooleanProperty(false)
 
     init {
         addClass("top-navigation-pane")
@@ -58,6 +60,9 @@ class TranslationHeader : HBox() {
             }
             chapterSelector {
                 chapterTitleProperty.bind(this@TranslationHeader.chapterTitleProperty)
+
+                nextDisabledProperty.bind(canGoNextProperty.not())
+                prevDisabledProperty.bind(canGoPreviousProperty.not())
 
                 setOnNextChapter {
                     FX.eventbus.fire(GoToNextChapterEvent())
