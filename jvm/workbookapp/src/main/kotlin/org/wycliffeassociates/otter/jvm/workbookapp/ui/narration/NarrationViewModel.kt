@@ -213,9 +213,8 @@ class NarrationViewModel : ViewModel() {
         recordResume = recordedVerses.isNotEmpty()
     }
 
-    fun toggleChapterGridOpen() {
-        logger.info("toggling chapterGridOpen to ${!chapterGridOpen.value}") // TODO: see what is in the chapterList now
-        chapterGridOpen.set(!chapterGridOpen.value)
+    fun setChapterGridOpen(open: Boolean) {
+        chapterGridOpen.set(open)
     }
 
     private fun getChapterList(chapters: Observable<Chapter>): Single<Chapter> {
