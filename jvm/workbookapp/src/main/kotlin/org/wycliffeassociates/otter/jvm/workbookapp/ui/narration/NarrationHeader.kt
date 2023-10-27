@@ -1,32 +1,27 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import io.reactivex.Observable
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.ObservableValue
 import javafx.collections.ObservableList
 import javafx.event.EventTarget
-import javafx.scene.control.Tooltip
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
-import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
-import org.wycliffeassociates.otter.jvm.controls.chapterselector.ChapterGrid
 import org.wycliffeassociates.otter.jvm.controls.event.ChapterReturnFromPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.OpenChapterEvent
-import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.chapterSelector
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.popup.ChapterGridMenu
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationOpenInPluginEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationRedoEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationUndoEvent
@@ -39,15 +34,23 @@ import java.text.MessageFormat
 class NarrationHeader : View() {
     private val viewModel by inject<NarrationHeaderViewModel>()
 
+    private val popupMenu = ChapterGridMenu().apply {
+        chapterList.bind(viewModel.chapterList) { it }
+        onChapterSelectedProperty.set {
+            viewModel.selectChapter(it)
+        }
+        setOnHidden { event ->
+            if (viewModel.chapterGridMenuOpenProperty.value == true) {
+                viewModel.setChapterGridOpen(false)
+            }
+        }
+    }
+
     init {
         subscribe<NarrationOpenInPluginEvent> {
             viewModel.processWithPlugin(it.plugin)
         }
     }
-
-
-    // TODO: figure out how the chaperMenu is being opened, and open the chapterGrid the same way
-    // TODO: make sure that I do not have anything named "ChapterMenu" because that already exist
 
     override val root = hbox {
 
@@ -86,9 +89,8 @@ class NarrationHeader : View() {
             chapterSelector {
                 chapterTitleProperty.bind(viewModel.chapterTitleProperty)
 
-                // TODO: try wrapping the grid in a MenuButton so that it appears over the correct location
-                setOnOpenChapterGridActionProperty {
-                    viewModel.toggleChapterMenu()
+                setOnTitleClickedProperty {
+                    viewModel.setChapterGridOpen(!viewModel.chapterGridMenuOpenProperty.value)
                 }
 
                 prevDisabledProperty.bind(viewModel.hasPreviousChapter.not())
@@ -100,6 +102,20 @@ class NarrationHeader : View() {
                 setOnNextChapter {
                     viewModel.selectNextChapter()
                 }
+            }
+        }
+
+        viewModel.chapterGridMenuOpenProperty.addListener { _, old, new ->
+            if (new == true) {
+                val bound = this.boundsInLocal
+                val screenBound = this.localToScreen(bound)
+                popupMenu.show(
+                    FX.primaryStage
+                )
+                popupMenu.x = screenBound.minX - popupMenu.width + this.width
+                popupMenu.y = screenBound.maxY - 25
+            } else {
+                popupMenu.hide()
             }
         }
     }
@@ -122,7 +138,7 @@ class NarrationHeaderViewModel : ViewModel() {
     }
 
     val chapterTitleProperty = SimpleStringProperty()
-    val chapterMenuOpenProperty = SimpleBooleanProperty(false)
+    val chapterGridMenuOpenProperty = SimpleBooleanProperty(false)
 
     val hasNextChapter = SimpleBooleanProperty()
     val hasPreviousChapter = SimpleBooleanProperty()
@@ -136,7 +152,7 @@ class NarrationHeaderViewModel : ViewModel() {
 
     val pluginContextProperty = SimpleObjectProperty(PluginType.EDITOR)
 
-    private val chapterList: ObservableList<Chapter> = observableListOf()
+    val chapterList: ObservableList<Chapter> = observableListOf()
 
     init {
         chapterList.bind(narrationViewModel.chapterList) { it }
@@ -145,6 +161,7 @@ class NarrationHeaderViewModel : ViewModel() {
         chapterTitleProperty.bind(narrationViewModel.chapterTitleProperty)
         hasNextChapter.bind(narrationViewModel.hasNextChapter)
         hasPreviousChapter.bind(narrationViewModel.hasPreviousChapter)
+        chapterGridMenuOpenProperty.bind(narrationViewModel.chapterGridOpen)
 
         hasUndoProperty.bind(narrationViewModel.hasUndoProperty)
         hasRedoProperty.bind(narrationViewModel.hasRedoProperty)
@@ -164,10 +181,6 @@ class NarrationHeaderViewModel : ViewModel() {
         stepToChapter(StepDirection.FORWARD)
     }
 
-    fun toggleChapterMenu() {
-        narrationViewModel.toggleChapterGridOpen()
-    }
-
     private fun stepToChapter(direction: StepDirection) {
         val step = when (direction) {
             StepDirection.FORWARD -> 1
@@ -177,6 +190,18 @@ class NarrationHeaderViewModel : ViewModel() {
 
         chapterList
             .elementAtOrNull(nextIndex)
+            ?.let { chapter ->
+                fire(OpenChapterEvent(chapter))
+            }
+    }
+
+    fun setChapterGridOpen(open: Boolean) {
+        narrationViewModel.setChapterGridOpen(open)
+    }
+
+    fun selectChapter(chapterIndex: Int) {
+        chapterList
+            .elementAtOrNull(chapterIndex)
             ?.let { chapter ->
                 fire(OpenChapterEvent(chapter))
             }
