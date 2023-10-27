@@ -1,14 +1,14 @@
-package org.wycliffeassociates.otter.common.domain.chunking
+package org.wycliffeassociates.otter.common.domain.model
 
 import org.wycliffeassociates.otter.common.domain.IUndoable
 import java.util.*
 import java.util.ArrayDeque
 
-class ChunkingHistory {
+class UndoableActionHistory<T : IUndoable> {
     private val undoStack: Deque<IUndoable> = ArrayDeque()
     private val redoStack: Deque<IUndoable> = ArrayDeque()
 
-    fun execute(action: IUndoable) {
+    fun execute(action: T) {
         undoStack.push(action)
         redoStack.clear()
         action.execute()

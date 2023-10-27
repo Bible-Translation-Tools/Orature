@@ -5,11 +5,16 @@ import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.IUndoable
 
+abstract class ChunkTakeAction(
+    protected val take: Take,
+    protected val chunk: Chunk
+) : IUndoable
+
 class ChunkTakeRecordAction(
-    private val take: Take,
-    private val chunk: Chunk,
-    private val oldSelectedTake: Take? = null
-) : IUndoable {
+    take: Take,
+    chunk: Chunk,
+    private val previouslySelectedTake: Take? = null
+) : ChunkTakeAction(take, chunk) {
 
     override fun execute() {
         chunk.audio.insertTake(take)
@@ -17,7 +22,7 @@ class ChunkTakeRecordAction(
 
     override fun undo() {
         take.deletedTimestamp.accept(DateHolder.now())
-        oldSelectedTake?.let {
+        previouslySelectedTake?.let {
             chunk.audio.selectTake(it)
         }
     }
@@ -35,11 +40,11 @@ class ChunkTakeRecordAction(
 }
 
 class ChunkTakeDeleteAction(
-    private val take: Take,
-    private val chunk: Chunk,
+    take: Take,
+    chunk: Chunk,
     private val isTakeSelected: Boolean,
     private val postDeleteCallback: (Take, Boolean) -> Unit
-) : IUndoable {
+) : ChunkTakeAction(take, chunk) {
 
     override fun execute() {
         take.deletedTimestamp.accept(DateHolder.now())
@@ -60,17 +65,17 @@ class ChunkTakeDeleteAction(
 }
 
 class ChunkTakeSelectAction(
-    private val take: Take,
-    private val chunk: Chunk,
-    private val oldSelectedTake: Take? = null
-) : IUndoable {
+    take: Take,
+    chunk: Chunk,
+    private val previouslySelectedTake: Take? = null
+) : ChunkTakeAction(take, chunk) {
     override fun execute() {
         take.file.setLastModified(System.currentTimeMillis())
         chunk.audio.selectTake(take)
     }
 
     override fun undo() {
-        oldSelectedTake?.let {
+        previouslySelectedTake?.let {
             chunk.audio.selectTake(it)
         }
     }

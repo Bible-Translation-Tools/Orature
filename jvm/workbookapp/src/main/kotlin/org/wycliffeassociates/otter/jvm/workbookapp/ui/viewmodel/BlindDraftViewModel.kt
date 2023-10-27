@@ -25,13 +25,12 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.common.domain.chunking.ChunkTakeDeleteAction
 import org.wycliffeassociates.otter.common.domain.chunking.ChunkTakeRecordAction
 import org.wycliffeassociates.otter.common.domain.chunking.ChunkTakeSelectAction
-import org.wycliffeassociates.otter.common.domain.chunking.ChunkingHistory
+import org.wycliffeassociates.otter.common.domain.model.UndoableActionHistory
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel.Result
 import tornadofx.*
 import java.io.File
 import java.time.LocalDate
-import java.util.*
 import javax.inject.Inject
 
 class BlindDraftViewModel : ViewModel() {
@@ -55,7 +54,7 @@ class BlindDraftViewModel : ViewModel() {
     val availableTakes = FilteredList<TakeCardModel>(takes) { !it.selected }
 
     private val recordedTakeProperty = SimpleObjectProperty<Take>()
-    private val actionHistory = ChunkingHistory()
+    private val actionHistory = UndoableActionHistory<IUndoable>()
 
     private val selectedTakeDisposable = CompositeDisposable()
     private val disposables = CompositeDisposable()
