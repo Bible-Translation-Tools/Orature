@@ -26,16 +26,13 @@ import javafx.event.EventHandler
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import javafx.scene.input.MouseEvent
-import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
 import org.wycliffeassociates.otter.jvm.controls.skins.chapterselector.ChapterSelectorSkin
-import tornadofx.add
 
 class ChapterSelector : Control() {
     val chapterTitleProperty = SimpleStringProperty()
+    val onTitleClickedProperty = SimpleObjectProperty<EventHandler<MouseEvent>>()
     val onPrevChapterActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onNextChapterActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
-    val onOpenChapterGridActionProperty = SimpleObjectProperty<EventHandler<MouseEvent>>()
-
     val prevDisabledProperty = SimpleBooleanProperty()
     val nextDisabledProperty = SimpleBooleanProperty()
 
@@ -55,7 +52,7 @@ class ChapterSelector : Control() {
         onNextChapterActionProperty.set(EventHandler { op.invoke() })
     }
 
-    fun setOnOpenChapterGridActionProperty(op: () -> Unit) {
-        onOpenChapterGridActionProperty.set(EventHandler { op.invoke() })
+    fun setOnTitleClickedProperty(op: () -> Unit) {
+        onTitleClickedProperty.set(EventHandler { op.invoke() })
     }
 }

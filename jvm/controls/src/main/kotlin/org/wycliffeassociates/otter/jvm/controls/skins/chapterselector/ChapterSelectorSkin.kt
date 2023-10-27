@@ -52,7 +52,7 @@ class ChapterSelectorSkin(val selector: ChapterSelector) : SkinBase<ChapterSelec
     private fun bindText() {
         chapterTitle.apply {
             textProperty().bind(selector.chapterTitleProperty)
-            onMouseClickedProperty().bind(selector.onOpenChapterGridActionProperty)
+            onMouseClickedProperty().bind(selector.onTitleClickedProperty)
         }
     }
 
