@@ -36,6 +36,7 @@ open class PeerEdit : Fragment() {
     private val mainSectionProperty = SimpleObjectProperty<Node>(null)
     private val playbackView = createPlaybackView()
     private val recordingView = createRecordingView()
+    private val eventSubscriptions = mutableListOf<EventRegistration>()
 
     override val root = borderpane {
         top = vbox {
@@ -52,12 +53,6 @@ open class PeerEdit : Fragment() {
 
     init {
         tryImportStylesheet("/css/recording-screen.css")
-        subscribe<UndoChunkingPageEvent> {
-            viewModel.undo()
-        }
-        subscribe<RedoChunkingPageEvent> {
-            viewModel.redo()
-        }
     }
 
     private fun createPlaybackView() = VBox().apply {
@@ -173,6 +168,7 @@ open class PeerEdit : Fragment() {
 
     override fun onDock() {
         super.onDock()
+        subscribeEvents()
         viewModel.dockPeerEdit()
         mainSectionProperty.set(playbackView)
     }
@@ -180,6 +176,21 @@ open class PeerEdit : Fragment() {
     override fun onUndock() {
         super.onUndock()
         viewModel.undockPeerEdit()
+        unsubscribeEvents()
+    }
+
+    private fun subscribeEvents() {
+        subscribe<UndoChunkingPageEvent> {
+            viewModel.undo()
+        }
+        subscribe<RedoChunkingPageEvent> {
+            viewModel.redo()
+        }
+    }
+
+    private fun unsubscribeEvents() {
+        eventSubscriptions.forEach { it.unsubscribe() }
+        eventSubscriptions.clear()
     }
 
     private fun subscribeOnWaveformImages() {
