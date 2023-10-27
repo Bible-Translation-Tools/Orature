@@ -25,6 +25,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.common.domain.chunking.ChunkTakeDeleteAction
 import org.wycliffeassociates.otter.common.domain.chunking.ChunkTakeRecordAction
 import org.wycliffeassociates.otter.common.domain.chunking.ChunkTakeSelectAction
+import org.wycliffeassociates.otter.common.domain.chunking.ChunkingHistory
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel.Result
 import tornadofx.*
@@ -54,8 +55,7 @@ class BlindDraftViewModel : ViewModel() {
     val availableTakes = FilteredList<TakeCardModel>(takes) { !it.selected }
 
     private val recordedTakeProperty = SimpleObjectProperty<Take>()
-    private val undoStack: Deque<IUndoable> = ArrayDeque()
-    private val redoStack: Deque<IUndoable> = ArrayDeque()
+    private val actionHistory = ChunkingHistory()
 
     private val selectedTakeDisposable = CompositeDisposable()
     private val disposables = CompositeDisposable()
@@ -74,7 +74,7 @@ class BlindDraftViewModel : ViewModel() {
             it?.let { chunk ->
                 subscribeSelectedTakePropertyToRelay(chunk)
             }
-            clearUndoRedoHistory()
+            actionHistory.clear()
         }.also { disposableListeners.add(it) }
     }
 
@@ -105,7 +105,8 @@ class BlindDraftViewModel : ViewModel() {
                     chunk,
                     chunk.audio.getSelectedTake()
                 )
-                onUndoableAction(op)
+                actionHistory.execute(op)
+                onUndoableAction()
                 loadTakes(chunk)
             }
         } else {
@@ -119,7 +120,8 @@ class BlindDraftViewModel : ViewModel() {
             take.file.setLastModified(System.currentTimeMillis())
             val selectedTake = chunk.audio.getSelectedTake()
             val op = ChunkTakeSelectAction(take, chunk, selectedTake)
-            onUndoableAction(op)
+            actionHistory.execute(op)
+            onUndoableAction()
         }
     }
 
@@ -138,41 +140,36 @@ class BlindDraftViewModel : ViewModel() {
                 takes.any { it.take == take && it.selected },
                 ::handlePostDeleteTake
             )
-            onUndoableAction(op)
+            actionHistory.execute(op)
+            onUndoableAction()
         }
     }
 
     fun undo() {
-        if (undoStack.isEmpty()) {
+        if (!actionHistory.canUndo()) {
             translationViewModel.canUndoProperty.set(false)
             return
         }
 
         takes.forEach { it.audioPlayer.stop() }
         audioDataStore.stopPlayers()
-
-        val op = undoStack.pop()
-        redoStack.push(op)
-        op.undo()
+        actionHistory.undo()
         currentChunkProperty.value?.let { loadTakes(it) }
-        translationViewModel.canUndoProperty.set(undoStack.isNotEmpty())
+        translationViewModel.canUndoProperty.set(actionHistory.canUndo())
         translationViewModel.canRedoProperty.set(true)
     }
 
     fun redo() {
-        if (redoStack.isEmpty()) {
+        if (!actionHistory.canRedo()) {
             translationViewModel.canRedoProperty.set(false)
             return
         }
 
         takes.forEach { it.audioPlayer.stop() }
         audioDataStore.stopPlayers()
-
-        val op = redoStack.pop()
-        undoStack.push(op)
-        op.redo()
+        actionHistory.redo()
         currentChunkProperty.value?.let { loadTakes(it) }
-        translationViewModel.canRedoProperty.set(redoStack.isNotEmpty())
+        translationViewModel.canRedoProperty.set(actionHistory.canRedo())
         translationViewModel.canUndoProperty.set(true)
     }
 
@@ -284,17 +281,9 @@ class BlindDraftViewModel : ViewModel() {
         }
     }
 
-    private fun onUndoableAction(op: IUndoable) {
-        undoStack.push(op)
-        op.execute()
-        redoStack.clear()
+    private fun onUndoableAction() {
         translationViewModel.canUndoProperty.set(true)
         translationViewModel.canRedoProperty.set(false)
-    }
-
-    private fun clearUndoRedoHistory() {
-        undoStack.clear()
-        redoStack.clear()
     }
 
     fun Take.mapToCardModel(selected: Boolean): TakeCardModel {
