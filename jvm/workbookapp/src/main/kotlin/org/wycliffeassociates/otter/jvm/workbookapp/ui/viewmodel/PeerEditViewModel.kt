@@ -19,6 +19,7 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.IUndoable
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.chunking.ChunkConfirmAction
+import org.wycliffeassociates.otter.common.domain.model.UndoableActionHistory
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.waveform.IWaveformViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
@@ -28,8 +29,6 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import tornadofx.*
-import java.util.ArrayDeque
-import java.util.Deque
 import javax.inject.Inject
 
 class PeerEditViewModel : ViewModel(), IWaveformViewModel {
@@ -70,8 +69,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     private val disposableListeners = mutableListOf<ListenerDisposer>()
     private val selectedTakeDisposable = CompositeDisposable()
 
-    private val undoStack: Deque<IUndoable> = ArrayDeque()
-    private val redoStack: Deque<IUndoable> = ArrayDeque()
+    private val actionHistory = UndoableActionHistory<IUndoable>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -89,7 +87,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
                 val isConfirmed = chunk.checkingStatus().ordinal >= checkingStatusFromStep(currentStep).ordinal
                 chunkConfirmed.set(isConfirmed)
             }
-            clearUndoRedoHistory()
+            actionHistory.clear()
         }.also { disposableListeners.add(it) }
 
         sourcePlayerProperty.bind(audioDataStore.sourceAudioPlayerProperty)
@@ -102,7 +100,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         disposable.clear()
         disposableListeners.forEach { it.dispose() }
         disposableListeners.clear()
-        clearUndoRedoHistory()
+        actionHistory.clear()
     }
 
     fun refreshChunkList() {
@@ -134,39 +132,32 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
             val take = chunk.audio.getSelectedTake()!!
             take.checkingState
                 .take(1)
+                .observeOnFx()
                 .subscribe { currentChecking ->
                     val op = ChunkConfirmAction(
                         take,
                         checkingStatus,
                         currentChecking
                     )
-                    onUndoableAction(op)
+                    actionHistory.execute(op)
+                    onUndoableAction()
                     refreshChunkList()
-                }
+                }.dispose()
         }
     }
 
     fun undo() {
-        val dirty = undoStack.isNotEmpty()
-        if (dirty) {
-            val op = undoStack.pop()
-            redoStack.push(op)
-            op.undo()
-            refreshChunkList()
-            translationViewModel.canRedoProperty.set(true)
-        }
-        translationViewModel.canUndoProperty.set(undoStack.isNotEmpty())
+        actionHistory.undo()
+        refreshChunkList()
+        translationViewModel.canRedoProperty.set(true)
+        translationViewModel.canUndoProperty.set(actionHistory.canUndo())
     }
 
     fun redo() {
-        if (redoStack.isNotEmpty()) {
-            val op = redoStack.pop()
-            undoStack.push(op)
-            op.redo()
-            refreshChunkList()
-            translationViewModel.canUndoProperty.set(true)
-        }
-        translationViewModel.canRedoProperty.set(redoStack.isNotEmpty())
+        actionHistory.redo()
+        refreshChunkList()
+        translationViewModel.canUndoProperty.set(true)
+        translationViewModel.canRedoProperty.set(actionHistory.canRedo())
     }
 
     fun onRecordNew() {
@@ -246,17 +237,9 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         )
     }
 
-    private fun onUndoableAction(op: IUndoable) {
-        undoStack.push(op)
-        op.execute()
-        redoStack.clear()
+    private fun onUndoableAction() {
         translationViewModel.canUndoProperty.set(true)
         translationViewModel.canRedoProperty.set(false)
-    }
-
-    private fun clearUndoRedoHistory() {
-        undoStack.clear()
-        redoStack.clear()
     }
 
     private fun checkingStatusFromStep(step: ChunkingStep): CheckingStatus {

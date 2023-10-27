@@ -12,7 +12,6 @@ import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
-import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.IUndoable
@@ -23,12 +22,15 @@ import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.common.domain.chunking.ChunkTakeDeleteAction
+import org.wycliffeassociates.otter.common.domain.chunking.ChunkTakeRecordAction
+import org.wycliffeassociates.otter.common.domain.chunking.ChunkTakeSelectAction
+import org.wycliffeassociates.otter.common.domain.model.UndoableActionHistory
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel.Result
 import tornadofx.*
 import java.io.File
 import java.time.LocalDate
-import java.util.*
 import javax.inject.Inject
 
 class BlindDraftViewModel : ViewModel() {
@@ -52,8 +54,7 @@ class BlindDraftViewModel : ViewModel() {
     val availableTakes = FilteredList<TakeCardModel>(takes) { !it.selected }
 
     private val recordedTakeProperty = SimpleObjectProperty<Take>()
-    private val undoStack: Deque<IUndoable> = ArrayDeque()
-    private val redoStack: Deque<IUndoable> = ArrayDeque()
+    private val actionHistory = UndoableActionHistory<IUndoable>()
 
     private val selectedTakeDisposable = CompositeDisposable()
     private val disposables = CompositeDisposable()
@@ -72,7 +73,7 @@ class BlindDraftViewModel : ViewModel() {
             it?.let { chunk ->
                 subscribeSelectedTakePropertyToRelay(chunk)
             }
-            clearUndoRedoHistory()
+            actionHistory.clear()
         }.also { disposableListeners.add(it) }
     }
 
@@ -103,7 +104,8 @@ class BlindDraftViewModel : ViewModel() {
                     chunk,
                     chunk.audio.getSelectedTake()
                 )
-                onUndoableAction(op)
+                actionHistory.execute(op)
+                onUndoableAction()
                 loadTakes(chunk)
             }
         } else {
@@ -113,13 +115,16 @@ class BlindDraftViewModel : ViewModel() {
     }
 
     fun onSelectTake(take: Take) {
-        val selectedTake = currentChunkProperty.value?.audio?.getSelectedTake()
-        val op = ChunkTakeSelectAction(take, selectedTake)
-        onUndoableAction(op)
+        currentChunkProperty.value?.let { chunk ->
+            take.file.setLastModified(System.currentTimeMillis())
+            val selectedTake = chunk.audio.getSelectedTake()
+            val op = ChunkTakeSelectAction(take, chunk, selectedTake)
+            actionHistory.execute(op)
+            onUndoableAction()
+        }
     }
 
     private fun selectTake(take: Take) {
-        take.file.setLastModified(System.currentTimeMillis())
         currentChunkProperty.value?.audio?.selectTake(take)
     }
 
@@ -131,35 +136,39 @@ class BlindDraftViewModel : ViewModel() {
             val op = ChunkTakeDeleteAction(
                 take,
                 chunk,
-                takes.any { it.take == take && it.selected }
+                takes.any { it.take == take && it.selected },
+                ::handlePostDeleteTake
             )
-            onUndoableAction(op)
+            actionHistory.execute(op)
+            onUndoableAction()
         }
     }
 
     fun undo() {
-        if (undoStack.isEmpty()) {
+        if (!actionHistory.canUndo()) {
             translationViewModel.canUndoProperty.set(false)
             return
         }
 
-        val op = undoStack.pop()
-        redoStack.push(op)
-        op.undo()
-        translationViewModel.canUndoProperty.set(undoStack.isNotEmpty())
+        takes.forEach { it.audioPlayer.stop() }
+        audioDataStore.stopPlayers()
+        actionHistory.undo()
+        currentChunkProperty.value?.let { loadTakes(it) }
+        translationViewModel.canUndoProperty.set(actionHistory.canUndo())
         translationViewModel.canRedoProperty.set(true)
     }
 
     fun redo() {
-        if (redoStack.isEmpty()) {
+        if (!actionHistory.canRedo()) {
             translationViewModel.canRedoProperty.set(false)
             return
         }
 
-        val op = redoStack.pop()
-        undoStack.push(op)
-        op.redo()
-        translationViewModel.canRedoProperty.set(redoStack.isNotEmpty())
+        takes.forEach { it.audioPlayer.stop() }
+        audioDataStore.stopPlayers()
+        actionHistory.redo()
+        currentChunkProperty.value?.let { loadTakes(it) }
+        translationViewModel.canRedoProperty.set(actionHistory.canRedo())
         translationViewModel.canUndoProperty.set(true)
     }
 
@@ -271,113 +280,14 @@ class BlindDraftViewModel : ViewModel() {
         }
     }
 
-    private fun onUndoableAction(op: IUndoable) {
-        undoStack.push(op)
-        op.execute()
-        redoStack.clear()
+    private fun onUndoableAction() {
         translationViewModel.canUndoProperty.set(true)
         translationViewModel.canRedoProperty.set(false)
-    }
-
-    private fun clearUndoRedoHistory() {
-        undoStack.clear()
-        redoStack.clear()
     }
 
     fun Take.mapToCardModel(selected: Boolean): TakeCardModel {
         val audioPlayer: IAudioPlayer = audioConnectionFactory.getPlayer()
         audioPlayer.load(this.file)
         return TakeCardModel(this, selected, audioPlayer)
-    }
-
-    private inner class ChunkTakeRecordAction(
-        private val take: Take,
-        private val chunk: Chunk,
-        private val oldSelectedTake: Take? = null
-    ) : IUndoable {
-        override fun execute() {
-            chunk.audio.insertTake(take)
-        }
-
-        override fun undo() {
-            takes.forEach { it.audioPlayer.stop() }
-            audioDataStore.stopPlayers()
-
-            take.deletedTimestamp.accept(DateHolder.now())
-            take.deletedTimestamp
-                .filter { dateHolder -> dateHolder.value != null }
-                .doOnError { e ->
-                    logger.error("Error in removing deleted take: $take", e)
-                }
-                .subscribe {
-                    oldSelectedTake?.let {
-                        selectTake(it)
-                    }
-                    takes.removeIf { it.take == take }
-                }
-                .let { disposables.add(it) }
-        }
-
-        override fun redo() {
-            chunk.audio.getAllTakes()
-                .find { it == take }?.deletedTimestamp?.accept(DateHolder.empty)
-
-            selectTake(take)
-        }
-    }
-
-    private inner class ChunkTakeDeleteAction(
-        private val take: Take,
-        private val chunk: Chunk,
-        private val isTakeSelected: Boolean
-    ) : IUndoable {
-
-        private val disposable = CompositeDisposable()
-
-        override fun execute() {
-            take.deletedTimestamp.accept(DateHolder.now())
-            take.deletedTimestamp
-                .filter { dateHolder -> dateHolder.value != null }
-                .doOnError { e ->
-                    logger.error("Error in removing deleted take: $take", e)
-                }
-                .subscribe {
-                    handlePostDeleteTake(take, isTakeSelected)
-                }
-                .let {
-                    disposables.add(it)
-                    disposable.add(it)
-                }
-        }
-
-        override fun undo() {
-            disposable.clear()
-
-            chunk.audio.getAllTakes()
-                .find { it == take }?.deletedTimestamp?.accept(DateHolder.empty)
-
-            if (isTakeSelected) {
-                selectTake(take)
-            } else {
-                loadTakes(chunk)
-            }
-        }
-
-        override fun redo() = execute()
-    }
-
-    private inner class ChunkTakeSelectAction(
-        private val take: Take,
-        private val oldSelectedTake: Take? = null
-    ) : IUndoable {
-        override fun execute() {
-            selectTake(take)
-        }
-
-        override fun undo() {
-            oldSelectedTake?.let { selectTake(it) }
-        }
-
-        override fun redo() = execute()
     }
 }

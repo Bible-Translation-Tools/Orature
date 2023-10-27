@@ -123,10 +123,6 @@ open class PeerEdit : Fragment() {
         }
     }
 
-    init {
-        tryImportStylesheet("/css/recording-screen.css")
-    }
-
     private fun createPlaybackWaveform(container: VBox): MarkerWaveform {
         return MarkerWaveform().apply {
             vgrow = Priority.ALWAYS
