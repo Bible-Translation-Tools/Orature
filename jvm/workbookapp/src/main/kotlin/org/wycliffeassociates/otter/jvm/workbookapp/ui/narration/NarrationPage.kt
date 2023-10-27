@@ -54,6 +54,7 @@ class NarrationPage : View() {
     init {
         tryImportStylesheet(resources["/css/narration.css"])
         tryImportStylesheet(resources["/css/chapter-selector.css"])
+        tryImportStylesheet("/css/chapter-grid.css")
 
         pluginOpenedPage = createPluginOpenedPage()
     }
