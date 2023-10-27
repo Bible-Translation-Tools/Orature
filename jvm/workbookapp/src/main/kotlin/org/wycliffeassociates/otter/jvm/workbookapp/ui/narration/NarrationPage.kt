@@ -3,18 +3,10 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 import com.github.thomasnield.rxkotlinfx.toLazyBinding
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
-import javafx.beans.property.SimpleBooleanProperty
-import javafx.collections.ObservableList
-import javafx.geometry.Pos
-import javafx.scene.Scene
-import javafx.scene.layout.Priority
-import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import javafx.util.Duration
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ColorTheme
-import org.wycliffeassociates.otter.common.data.workbook.Chapter
-import org.wycliffeassociates.otter.jvm.controls.chapterselector.ChapterGrid
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.event.BeginRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ChapterReturnFromPluginEvent
@@ -29,7 +21,6 @@ import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RecordVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.SaveRecordingEvent
-import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
@@ -59,9 +50,6 @@ class NarrationPage : View() {
     private lateinit var audioWorkspaceView: AudioWorkspaceView
     private lateinit var narrationToolbar: NarrationToolBar
     private lateinit var teleprompterView: TeleprompterView
-    private var chapterGrid: ChapterGrid
-
-    private val chapterList: ObservableList<ChapterGridItemData> = observableListOf()
 
     init {
         tryImportStylesheet(resources["/css/narration.css"])
@@ -69,21 +57,6 @@ class NarrationPage : View() {
         tryImportStylesheet("/css/chapter-grid.css")
 
         pluginOpenedPage = createPluginOpenedPage()
-        chapterGrid = ChapterGrid(chapterList)
-
-        // TODO: set the default selected chapter to actual true/false
-        viewModel.chapterList.onChange {
-            runLater {
-                chapterGrid.clear()
-                chapterList.setAll(emptyList())
-                chapterList.setAll(viewModel.chapterList.map {
-                    ChapterGridItemData(
-                        it.sort,
-                        SimpleBooleanProperty(false)
-                    )
-                })
-            }
-        }
 
     }
 
@@ -109,33 +82,6 @@ class NarrationPage : View() {
                 bottom = narrationToolbar.root
             }
             bottom = teleprompterView.root
-        }
-
-        borderpane {
-            visibleProperty().bind(viewModel.chapterGridOpen)
-            managedProperty().bind(viewModel.chapterGridOpen)
-
-            right = vbox {
-                maxWidth = 500.0
-                minWidth = 500.0
-                style {
-                    // TODO: don't hardcode the paddingTop and paddingRight here. Put them in the stylesheet
-                    paddingTop = 80
-                    paddingRight = 16
-                }
-                hgrow = Priority.NEVER // TODO: see if I can remove this
-                add(chapterGrid)
-            }
-
-            setOnMouseClicked { event ->
-                val rightControlBounds = right.localToScene(right.boundsInLocal)
-                val clickPoint = javafx.geometry.Point2D(event.sceneX, event.sceneY)
-
-                // Check if the click is outside the bounds of the right control
-                if (!rightControlBounds.contains(clickPoint)) {
-                    viewModel.toggleChapterGridOpen()
-                }
-            }
         }
     }
 
