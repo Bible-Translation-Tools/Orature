@@ -36,9 +36,6 @@ class NarrationHeader : View() {
 
     private val popupMenu = ChapterGridMenu().apply {
         chapterList.bind(viewModel.chapterList) { it }
-        onChapterSelectedProperty.set {
-            viewModel.selectChapter(it)
-        }
         setOnHidden { event ->
             if (viewModel.chapterGridMenuOpenProperty.value == true) {
                 viewModel.setChapterGridOpen(false)
@@ -197,14 +194,6 @@ class NarrationHeaderViewModel : ViewModel() {
 
     fun setChapterGridOpen(open: Boolean) {
         narrationViewModel.setChapterGridOpen(open)
-    }
-
-    fun selectChapter(chapterIndex: Int) {
-        chapterList
-            .elementAtOrNull(chapterIndex)
-            ?.let { chapter ->
-                fire(OpenChapterEvent(chapter))
-            }
     }
 
     fun processWithPlugin(pluginType: PluginType) {
