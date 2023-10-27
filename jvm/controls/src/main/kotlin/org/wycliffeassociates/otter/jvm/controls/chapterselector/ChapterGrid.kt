@@ -1,5 +1,7 @@
 package org.wycliffeassociates.otter.jvm.controls.chapterselector
 
+import javafx.application.Platform
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.collections.ObservableList
 import javafx.scene.layout.GridPane
 import javafx.scene.layout.StackPane
@@ -12,9 +14,14 @@ private const val GRID_COLUMNS = 5
 
 class ChapterGrid(list: ObservableList<ChapterGridItemData>) : GridPane() {
 
+    val selectedChapterIndexProperty = SimpleIntegerProperty()
+
     init {
         addClass("chapter-grid")
         list.onChange {
+            Platform.runLater {
+                children.clear()
+            }
             list.forEachIndexed { index, chapter ->
                 val node = StackPane().apply {
                     button(chapter.number.toString()) {
@@ -24,7 +31,9 @@ class ChapterGrid(list: ObservableList<ChapterGridItemData>) : GridPane() {
                         prefWidthProperty().bind(
                             this@ChapterGrid.widthProperty().divide(GRID_COLUMNS.toDouble())
                         )
-                        // TODO: add onclick that calls viewmodel method
+                        setOnAction {
+                            selectedChapterIndexProperty.set(index)
+                        }
                     }
                     hbox {
                         addClass("chapter-grid__icon-alignment-box")
