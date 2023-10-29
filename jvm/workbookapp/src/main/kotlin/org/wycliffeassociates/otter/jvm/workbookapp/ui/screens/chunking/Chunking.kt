@@ -33,6 +33,7 @@ class Chunking : Fragment() {
 
     private lateinit var waveform: MarkerWaveform
     private lateinit var slider: Slider
+    private val eventSubscriptions = mutableListOf<EventRegistration>()
 
     var cleanUpWaveform: () -> Unit = {}
 
@@ -116,7 +117,25 @@ class Chunking : Fragment() {
         }
     }
 
-    init {
+    override fun onDock() {
+        super.onDock()
+        logger.info("Chunking docked")
+        subscribeEvents()
+
+        viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
+        viewModel.dock()
+        viewModel.initializeAudioController(slider)
+    }
+
+    override fun onUndock() {
+        super.onUndock()
+        logger.info("Chunking undocked")
+        unsubscribeEvents()
+        cleanUpWaveform()
+        viewModel.undock()
+    }
+
+    private fun subscribeEvents() {
         subscribe<MarkerDeletedEvent> {
             viewModel.deleteMarker(it.markerId)
         }
@@ -131,20 +150,9 @@ class Chunking : Fragment() {
         }
     }
 
-    override fun onDock() {
-        super.onDock()
-        logger.info("Chunking docked")
-
-        viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
-        viewModel.dock()
-        viewModel.initializeAudioController(slider)
-    }
-
-    override fun onUndock() {
-        super.onUndock()
-        logger.info("Chunking undocked")
-        cleanUpWaveform()
-        viewModel.undock()
+    private fun unsubscribeEvents() {
+        eventSubscriptions.forEach { it.unsubscribe() }
+        eventSubscriptions.clear()
     }
 
     private fun subscribeOnWaveformImages() {
@@ -155,6 +163,7 @@ class Chunking : Fragment() {
             }
             .addTo(viewModel.compositeDisposable)
     }
+
 
     private fun setUpWaveformActionHandlers() {
         waveform.apply {

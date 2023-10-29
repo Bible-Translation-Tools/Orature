@@ -29,6 +29,7 @@ class BlindDraft : Fragment() {
     private val takesView = buildTakesArea()
     private val recordingView = buildRecordingArea()
     private val hideSourceAudio = SimpleBooleanProperty(false)
+    private val eventSubscriptions = mutableListOf<EventRegistration>()
 
     override val root = borderpane {
         addClass("blind-draft")
@@ -52,7 +53,6 @@ class BlindDraft : Fragment() {
     init {
         tryImportStylesheet("/css/recording-screen.css")
         tryImportStylesheet("/css/popup-menu.css")
-        subscribeEvents()
     }
 
     private fun buildTakesArea(): VBox {
@@ -136,11 +136,13 @@ class BlindDraft : Fragment() {
         super.onDock()
         mainSectionProperty.set(takesView)
         viewModel.dockBlindDraft()
+        subscribeEvents()
     }
 
     override fun onUndock() {
         super.onUndock()
         viewModel.undockBlindDraft()
+        unsubscribeEvents()
     }
 
     private fun subscribeEvents() {
@@ -149,12 +151,19 @@ class BlindDraft : Fragment() {
                 TakeAction.SELECT -> viewModel.onSelectTake(it.take)
                 TakeAction.DELETE -> viewModel.onDeleteTake(it.take)
             }
-        }
+        }.also { eventSubscriptions.add(it) }
+
         subscribe<UndoChunkingPageEvent> {
             viewModel.undo()
-        }
+        }.also { eventSubscriptions.add(it) }
+
         subscribe<RedoChunkingPageEvent> {
             viewModel.redo()
-        }
+        }.also { eventSubscriptions.add(it) }
+    }
+
+    private fun unsubscribeEvents() {
+        eventSubscriptions.forEach { it.unsubscribe() }
+        eventSubscriptions.clear()
     }
 }
