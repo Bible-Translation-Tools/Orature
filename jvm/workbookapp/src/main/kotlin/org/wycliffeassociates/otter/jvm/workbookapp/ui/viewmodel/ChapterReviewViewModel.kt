@@ -11,8 +11,11 @@ import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
+import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
@@ -21,6 +24,7 @@ import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
 import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
+import org.wycliffeassociates.otter.common.utils.computeFileChecksum
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import java.io.File
@@ -80,12 +84,20 @@ class ChapterReviewViewModel : ChunkingViewModel() {
         // Don't place verse markers if the draft comes from user chunks
         concatenateAudio.execute(takes, includeMarkers = false)
             .flatMap { file ->
-                compiled = file
-                newChapterTake(file)
+                val checksum = computeFileChecksum(file)
+                if (checksum != null && chapterContentHasChanged(checksum, chapter)) {
+                    Single.just(chapter.audio.getSelectedTake()!!)
+                } else {
+                    compiled = file
+                    newChapterTake(file)
+                }
             }
-            .doOnSuccess {
+            .doOnSuccess { take ->
                 logger.info("Chapter ${chapter.sort} compiled successfully.")
-                chapter.audio.insertTake(it)
+                take.checkingState.accept(
+                    TakeCheckingState(CheckingStatus.VERSE, take.checksum())
+                )
+                chapter.audio.insertTake(take)
             }
             .subscribeOn(Schedulers.io())
             .doOnError { e ->
@@ -96,6 +108,7 @@ class ChapterReviewViewModel : ChunkingViewModel() {
                 compiled?.delete()
             }
             .subscribe { take ->
+                // TODO: refactor the code above to model
                 loadTargetAudio(take)
             }
     }
@@ -233,5 +246,9 @@ class ChapterReviewViewModel : ChunkingViewModel() {
     private fun onUndoableAction() {
         translationViewModel.canUndoProperty.set(true)
         translationViewModel.canRedoProperty.set(false)
+    }
+
+    private fun chapterContentHasChanged(checksum: String, chapter: Chapter): Boolean {
+        return checksum == chapter.audio.getSelectedTake()?.checkingState?.value?.checksum
     }
 }
