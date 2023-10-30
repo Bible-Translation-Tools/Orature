@@ -101,7 +101,6 @@ class NarrationViewModel : ViewModel() {
     val chapterTakeProperty = SimpleObjectProperty<Take>()
     val hasNextChapter = SimpleBooleanProperty()
     val hasPreviousChapter = SimpleBooleanProperty()
-    val chapterGridOpen = SimpleBooleanProperty()
 
     val chunkTotalProperty = SimpleIntegerProperty(0)
     val chunksList: ObservableList<Chunk> = observableListOf()
@@ -212,10 +211,6 @@ class NarrationViewModel : ViewModel() {
         recordResume = recordedVerses.isNotEmpty()
     }
 
-    fun setChapterGridOpen(open: Boolean) {
-        chapterGridOpen.set(open)
-    }
-
     private fun getChapterList(chapters: Observable<Chapter>): Single<Chapter> {
         return chapters
             .toList()
@@ -258,7 +253,6 @@ class NarrationViewModel : ViewModel() {
         hasRedoProperty.set(false)
         audioPositionProperty.set(0)
         totalAudioSizeProperty.set(0)
-        chapterGridOpen.set(false)
     }
 
     fun loadChapter(chapter: Chapter) {

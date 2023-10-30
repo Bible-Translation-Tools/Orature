@@ -1,12 +1,14 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.ObservableValue
 import javafx.collections.ObservableList
 import javafx.event.EventTarget
+import javafx.geometry.Bounds
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
@@ -18,6 +20,7 @@ import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.event.ChapterReturnFromPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.OpenChapterEvent
+import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.chapterSelector
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
@@ -35,11 +38,11 @@ class NarrationHeader : View() {
     private val viewModel by inject<NarrationHeaderViewModel>()
 
     private val popupMenu = ChapterGridMenu().apply {
-        chapterList.bind(viewModel.chapterList) { it }
-        setOnHidden { event ->
-            if (viewModel.chapterGridMenuOpenProperty.value == true) {
-                viewModel.setChapterGridOpen(false)
-            }
+        chapterGridItemList.bind(viewModel.chapterList) {
+            ChapterGridItemData(
+                it.sort,
+                SimpleBooleanProperty(it.hasSelectedAudio())
+            )
         }
     }
 
@@ -87,7 +90,13 @@ class NarrationHeader : View() {
                 chapterTitleProperty.bind(viewModel.chapterTitleProperty)
 
                 setOnTitleClickedProperty {
-                    viewModel.setChapterGridOpen(!viewModel.chapterGridMenuOpenProperty.value)
+                    val bound = this.boundsInLocal
+                    val screenBound = this.localToScreen(bound)
+
+                    popupMenu.show(FX.primaryStage)
+
+                    popupMenu.x = screenBound.minX - popupMenu.width + this.width
+                    popupMenu.y = screenBound.maxY - 25
                 }
 
                 prevDisabledProperty.bind(viewModel.hasPreviousChapter.not())
@@ -99,20 +108,6 @@ class NarrationHeader : View() {
                 setOnNextChapter {
                     viewModel.selectNextChapter()
                 }
-            }
-        }
-
-        viewModel.chapterGridMenuOpenProperty.addListener { _, old, new ->
-            if (new == true) {
-                val bound = this.boundsInLocal
-                val screenBound = this.localToScreen(bound)
-                popupMenu.show(
-                    FX.primaryStage
-                )
-                popupMenu.x = screenBound.minX - popupMenu.width + this.width
-                popupMenu.y = screenBound.maxY - 25
-            } else {
-                popupMenu.hide()
             }
         }
     }
@@ -135,7 +130,6 @@ class NarrationHeaderViewModel : ViewModel() {
     }
 
     val chapterTitleProperty = SimpleStringProperty()
-    val chapterGridMenuOpenProperty = SimpleBooleanProperty(false)
 
     val hasNextChapter = SimpleBooleanProperty()
     val hasPreviousChapter = SimpleBooleanProperty()
@@ -158,7 +152,6 @@ class NarrationHeaderViewModel : ViewModel() {
         chapterTitleProperty.bind(narrationViewModel.chapterTitleProperty)
         hasNextChapter.bind(narrationViewModel.hasNextChapter)
         hasPreviousChapter.bind(narrationViewModel.hasPreviousChapter)
-        chapterGridMenuOpenProperty.bind(narrationViewModel.chapterGridOpen)
 
         hasUndoProperty.bind(narrationViewModel.hasUndoProperty)
         hasRedoProperty.bind(narrationViewModel.hasRedoProperty)
@@ -192,9 +185,6 @@ class NarrationHeaderViewModel : ViewModel() {
             }
     }
 
-    fun setChapterGridOpen(open: Boolean) {
-        narrationViewModel.setChapterGridOpen(open)
-    }
 
     fun processWithPlugin(pluginType: PluginType) {
         chapterTakeProperty.value?.let { take ->
