@@ -50,7 +50,7 @@ class ChapterReview : Fragment() {
                     widthProperty().bind(container.widthProperty())
                     heightProperty().bind(container.heightProperty())
                 }
-                setOnWaveformClicked { viewModel.pause() }
+                setOnWaveformClicked { viewModel.pauseAudio() }
                 setOnWaveformDragReleased { deltaPos ->
                     val deltaFrames = pixelsToFrames(deltaPos)
                     val curFrames = viewModel.getLocationInFrames()
@@ -166,7 +166,7 @@ class ChapterReview : Fragment() {
             .subscribe {
                 waveform.addWaveformImage(it)
             }
-            .addTo(viewModel.disposable)
+            .addTo(viewModel.compositeDisposable)
     }
 
     private fun createAudioScrollbarSlider(): Slider {

@@ -243,7 +243,7 @@ open class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         audioController?.pause()
     }
 
-    protected fun createWaveformImages(audio: OratureAudioFile) {
+    private fun createWaveformImages(audio: OratureAudioFile) {
         imageWidthProperty.set(computeImageWidth(width, SECONDS_ON_SCREEN))
 
         waveform = builder.buildAsync(
