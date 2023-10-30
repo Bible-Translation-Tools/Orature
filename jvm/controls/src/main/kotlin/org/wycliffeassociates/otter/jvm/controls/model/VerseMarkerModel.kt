@@ -137,7 +137,11 @@ class VerseMarkerModel(
 
     fun seekPrevious(location: Int): Int {
         val filtered = markers.filter { it.placed }
-        return findMarkerPrecedingPosition(location, filtered).frame
+        return if (filtered.isNotEmpty()) {
+            findMarkerPrecedingPosition(location, filtered).frame
+        } else {
+            0
+        }
     }
 
     private fun findMarkerPrecedingPosition(
