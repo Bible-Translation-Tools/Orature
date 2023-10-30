@@ -72,15 +72,21 @@ class ChapterReview : Fragment() {
             add(scrollbarSlider)
 
             hbox {
-                addClass("consume__bottom", "recording__bottom-section")
+                addClass("consume__bottom", "chunking-bottom__media-btn-group")
                 button(messages["addVerse"]) {
                     addClass("btn", "btn--primary", "consume__btn")
                     tooltip(text)
                     graphic = FontIcon(MaterialDesign.MDI_PLUS)
+                    disableWhen {
+                        viewModel.markersPlacedCountProperty.isEqualTo(viewModel.totalMarkersProperty)
+                    }
 
                     action {
                         viewModel.placeMarker()
                     }
+                }
+                label(viewModel.markerProgressCounterProperty) {
+                    addClass("normal-text")
                 }
                 region { hgrow = Priority.ALWAYS }
                 hbox {
@@ -120,7 +126,7 @@ class ChapterReview : Fragment() {
                     button(messages["nextChapter"]) {
                         addClass("btn", "btn--primary", "consume__btn")
                         graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
-                        disableWhen { translationViewModel.isLastChapterProperty }
+                        enableWhen { viewModel.canGoNextChapterProperty }
 
                         setOnAction {
                             FX.eventbus.fire(GoToNextChapterEvent())

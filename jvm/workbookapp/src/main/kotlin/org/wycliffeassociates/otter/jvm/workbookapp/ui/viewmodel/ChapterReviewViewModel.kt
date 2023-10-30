@@ -4,7 +4,10 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import javafx.beans.binding.BooleanBinding
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.Slider
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioCue
@@ -26,10 +29,14 @@ import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
 import org.wycliffeassociates.otter.common.utils.computeFileChecksum
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import tornadofx.*
 import java.io.File
+import java.text.MessageFormat
 import java.time.LocalDate
 import javax.inject.Inject
+import kotlin.collections.sortBy
 
 class ChapterReviewViewModel : ChunkingViewModel() {
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -41,7 +48,13 @@ class ChapterReviewViewModel : ChunkingViewModel() {
 
     val chapterTitleProperty = workbookDataStore.activeChapterTitleBinding()
     val sourcePlayerProperty = SimpleObjectProperty<IAudioPlayer>()
+    val markerProgressCounterProperty = SimpleStringProperty()
     val disposable = CompositeDisposable()
+    val totalMarkersProperty = SimpleIntegerProperty(0)
+    val markersPlacedCountProperty = SimpleIntegerProperty(0)
+    val canGoNextChapterProperty: BooleanBinding = translationViewModel.isLastChapterProperty.not().and(
+        markersPlacedCountProperty.isEqualTo(totalMarkersProperty)
+    )
 
     var slider: Slider? = null
     var cleanUpWaveform: () -> Unit = {}
@@ -59,6 +72,18 @@ class ChapterReviewViewModel : ChunkingViewModel() {
         audioDataStore.updateSourceAudio()
         audioDataStore.openSourceAudioPlayer()
 
+        markersPlacedCountProperty.bind(markers.sizeProperty)
+
+        markerProgressCounterProperty.bind(
+            stringBinding(markersPlacedCountProperty, totalMarkersProperty) {
+                MessageFormat.format(
+                    messages["marker_placed_ratio"],
+                    markersPlacedCountProperty.value ?: 0,
+                    totalMarkersProperty.value ?: 0
+                )
+            }
+        )
+
         compile()
     }
 
@@ -68,7 +93,8 @@ class ChapterReviewViewModel : ChunkingViewModel() {
         audioDataStore.stopPlayers()
         markerModel
             ?.writeMarkers()
-            ?.subscribe()
+            ?.blockingAwait()
+
         cleanup()
     }
 
@@ -181,9 +207,9 @@ class ChapterReviewViewModel : ChunkingViewModel() {
         markers.clear()
         val sourceAudio = OratureAudioFile(sourceAudio.file)
         val sourceMarkers = sourceAudio.getMarker<VerseMarker>()
-
         val verseMarkers = audio.getMarker<VerseMarker>()
 
+        totalMarkersProperty.set(sourceMarkers.size)
         markerModel = VerseMarkerModel(
             audio,
             sourceMarkers.size,
