@@ -4,6 +4,8 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.collections.ObservableList
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.CustomMenuItem
+import javafx.scene.control.MenuItem
+import org.w3c.dom.Text
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.jvm.controls.chapterselector.ChapterGrid
 import org.wycliffeassociates.otter.jvm.controls.event.OpenChapterEvent
@@ -12,24 +14,16 @@ import tornadofx.*
 
 class ChapterGridMenu : ContextMenu() {
 
-    val chapterList: ObservableList<Chapter> = observableListOf()
     val chapterGridItemList: ObservableList<ChapterGridItemData> = observableListOf()
 
     init {
-
-        // Handle changes in chapterList. Isn't necessary, but prevents the list from updating chapter count on open.
-        chapterList.onChange {
-            updateChapterGridItemList()
-        }
-
-        // Handle changes in showingProperty. Used to update completed icon for each chapter.
-        showingProperty().onChange { showing ->
-            updateChapterGridItemList()
-        }
-
         val chapterGridOption = CustomMenuItem().apply {
             addClass("chapter-grid-context-menu-item")
             val chapterGrid = ChapterGrid(chapterGridItemList).apply {
+                // Handle changes in showingProperty. Used to update completed icon for each chapter.
+                chapterGridItemList.onChange {
+                    updateChapterList()
+                }
                 prefWidth = 500.0
             }
             content = chapterGrid
@@ -37,15 +31,8 @@ class ChapterGridMenu : ContextMenu() {
 
         addClass("chapter-grid-context-menu")
         isAutoHide = true
-        items.setAll(chapterGridOption)
-    }
-
-    private fun updateChapterGridItemList() {
-        chapterGridItemList.setAll(chapterList.map {
-            ChapterGridItemData(
-                it.sort,
-                SimpleBooleanProperty(it.hasSelectedAudio())
-            )
-        })
+        items.setAll(
+            chapterGridOption,
+        )
     }
 }
