@@ -237,19 +237,19 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
         markers.clear()
         val sourceAudio = OratureAudioFile(sourceAudio.file)
         val sourceMarkers = sourceAudio.getMarker<VerseMarker>()
-        val verseMarkers = audio.getMarker<VerseMarker>()
+        val markerList = audio.getMarker<VerseMarker>().map {
+            ChunkMarkerModel(AudioCue(it.location, it.label))
+        }
 
         totalMarkersProperty.set(sourceMarkers.size)
         markerModel = VerseMarkerModel(
             audio,
             sourceMarkers.size,
             sourceMarkers.map { it.label }
-        )
-        markers.setAll(
-            verseMarkers.map {
-                ChunkMarkerModel(AudioCue(it.location, it.label))
-            }
-        )
+        ).also {
+            it.loadMarkers(markerList)
+        }
+        markers.setAll(markerList)
         markers.sortBy { it.frame }
     }
 
