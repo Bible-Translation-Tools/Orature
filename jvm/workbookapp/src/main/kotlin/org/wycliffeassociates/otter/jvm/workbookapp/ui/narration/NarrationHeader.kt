@@ -187,8 +187,8 @@ class NarrationHeaderViewModel : ViewModel() {
 
         chapterList
             .elementAtOrNull(nextIndex)
-            ?.let { chapter ->
-                fire(OpenChapterEvent(chapter))
+            ?.let {
+                fire(OpenChapterEvent(nextIndex))
             }
     }
 
