@@ -1,20 +1,18 @@
 package org.wycliffeassociates.otter.jvm.controls.chapterselector
 
 import javafx.application.Platform
-import javafx.beans.property.SimpleIntegerProperty
 import javafx.collections.ObservableList
 import javafx.scene.layout.GridPane
 import javafx.scene.layout.StackPane
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.event.OpenChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
 import tornadofx.*
 
 private const val GRID_COLUMNS = 5
 
 class ChapterGrid(list: ObservableList<ChapterGridItemData>) : GridPane() {
-
-    val selectedChapterIndexProperty = SimpleIntegerProperty()
 
     init {
         addClass("chapter-grid")
@@ -32,7 +30,7 @@ class ChapterGrid(list: ObservableList<ChapterGridItemData>) : GridPane() {
                             this@ChapterGrid.widthProperty().divide(GRID_COLUMNS.toDouble())
                         )
                         setOnAction {
-                            selectedChapterIndexProperty.set(index)
+                            selectChapter(index)
                         }
                     }
                     hbox {
@@ -51,5 +49,9 @@ class ChapterGrid(list: ObservableList<ChapterGridItemData>) : GridPane() {
                 }
             }
         }
+    }
+
+    fun selectChapter(chapterIndex: Int) {
+        FX.eventbus.fire(OpenChapterEvent(chapterIndex))
     }
 }

@@ -31,9 +31,6 @@ class ChapterGridMenu : ContextMenu() {
             addClass("chapter-grid-context-menu-item")
             val chapterGrid = ChapterGrid(chapterGridItemList).apply {
                 prefWidth = 500.0
-                selectedChapterIndexProperty.addListener { _, old, new ->
-                    selectChapter(new.toInt())
-                }
             }
             content = chapterGrid
         }
@@ -41,14 +38,6 @@ class ChapterGridMenu : ContextMenu() {
         addClass("chapter-grid-context-menu")
         isAutoHide = true
         items.setAll(chapterGridOption)
-    }
-
-    fun selectChapter(chapterIndex: Int) {
-        chapterList
-            .elementAtOrNull(chapterIndex)
-            ?.let { chapter ->
-                FX.eventbus.fire(OpenChapterEvent(chapterList[chapterIndex]))
-            }
     }
 
     private fun updateChapterGridItemList() {
