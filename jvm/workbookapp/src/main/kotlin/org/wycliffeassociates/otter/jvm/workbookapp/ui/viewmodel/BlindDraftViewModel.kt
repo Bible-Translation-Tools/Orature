@@ -100,8 +100,8 @@ class BlindDraftViewModel : ViewModel() {
         if (result == Result.SUCCESS) {
             workbookDataStore.chunk?.let { chunk ->
                 val op = ChunkTakeRecordAction(
-                    recordedTakeProperty.value,
                     chunk,
+                    recordedTakeProperty.value,
                     chunk.audio.getSelectedTake()
                 )
                 actionHistory.execute(op)
@@ -118,7 +118,7 @@ class BlindDraftViewModel : ViewModel() {
         currentChunkProperty.value?.let { chunk ->
             take.file.setLastModified(System.currentTimeMillis())
             val selectedTake = chunk.audio.getSelectedTake()
-            val op = ChunkTakeSelectAction(take, chunk, selectedTake)
+            val op = ChunkTakeSelectAction(chunk, take, selectedTake)
             actionHistory.execute(op)
             onUndoableAction()
         }
@@ -134,8 +134,8 @@ class BlindDraftViewModel : ViewModel() {
 
         currentChunkProperty.value?.let { chunk ->
             val op = ChunkTakeDeleteAction(
-                take,
                 chunk,
+                take,
                 takes.any { it.take == take && it.selected },
                 ::handlePostDeleteTake
             )
