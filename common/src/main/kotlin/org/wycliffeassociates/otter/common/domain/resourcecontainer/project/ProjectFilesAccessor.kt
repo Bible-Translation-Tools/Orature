@@ -18,13 +18,16 @@
  */
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.project
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.cast
+import io.reactivex.rxkotlin.toObservable
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
@@ -51,6 +54,7 @@ import org.wycliffeassociates.otter.common.audio.AudioMetadataFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.*
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.workbook.Book
+import org.wycliffeassociates.otter.common.domain.project.TakeCheckingSerializable
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.usfm.getText
 import org.wycliffeassociates.usfmtools.USFMParser
 import org.wycliffeassociates.usfmtools.models.markers.CMarker
@@ -316,6 +320,29 @@ class ProjectFilesAccessor(
         }
     }
 
+    fun writeTakeCheckingStatus(
+        fileWriter: IFileWriter,
+        workbook: Workbook,
+        takeFilter: (String) -> Boolean =  { true }
+    ) {
+        fetchTakes(workbook)
+            .filter { takeFilter(it.name) }
+            .map {
+                val path = relativeTakePath(it)
+                TakeCheckingSerializable(path, it.checkingState.value!!.status, it.getSavedChecksum())
+            }
+            .toList()
+            .subscribe { list ->
+                fileWriter.bufferedWriter(RcConstants.CHECKING_STATUS_FILE).use { writer ->
+                    val mapper = ObjectMapper(JsonFactory())
+                        .registerModule(KotlinModule())
+                        .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+
+                    mapper.writeValue(writer, list)
+                }
+            }
+    }
+
     fun copyTakeFiles(
         fileReader: IFileReader,
         manifestProject: Project,
@@ -471,6 +498,23 @@ class ProjectFilesAccessor(
         }
 
         return chunkText
+    }
+
+    private fun fetchTakes(
+        workbook: Workbook
+    ): Observable<Take> {
+        val chapters = workbook.target.chapters
+        return chapters
+            .flatMap { chapter ->
+                chapter.chunks
+                    .take(1)
+                    .flatMapIterable { it }
+                    .cast<BookElement>()
+                    .startWith(chapter as BookElement)
+                    .concatMap {
+                        it.audio.getAllTakes().toObservable()
+                    }
+            }
     }
 
     private fun copySourceWithoutMedia(source: File, target: File) {
