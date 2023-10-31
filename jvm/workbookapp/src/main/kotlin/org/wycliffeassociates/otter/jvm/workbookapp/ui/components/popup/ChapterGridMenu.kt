@@ -14,7 +14,7 @@ import tornadofx.*
 
 class ChapterGridMenu : ContextMenu() {
 
-    private val chapterGridItemList: MutableList<ChapterGridItemData> = listOf<ChapterGridItemData>().toMutableList()
+    private val chapterGridItemList: MutableList<ChapterGridItemData> = mutableListOf()
     private val chapterGrid = ChapterGrid(chapterGridItemList)
 
     init {
@@ -33,18 +33,9 @@ class ChapterGridMenu : ContextMenu() {
         )
     }
 
-    fun updateChapterGrid(newChapterList: List<Chapter>) {
-
+    fun updateChapterGrid(newChapterList: List<ChapterGridItemData>) {
         chapterGridItemList.clear()
-        newChapterList.forEach {
-            chapterGridItemList.add(
-                ChapterGridItemData(
-                    it.sort,
-                    SimpleBooleanProperty(it.hasSelectedAudio())
-                )
-            )
-        }
-
+        chapterGridItemList.addAll(newChapterList)
         chapterGrid.updateChapterGridNodes()
     }
 
