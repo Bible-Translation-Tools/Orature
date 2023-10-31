@@ -1,19 +1,15 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.ObservableValue
-import javafx.collections.ObservableList
 import javafx.event.EventTarget
-import javafx.geometry.Bounds
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
@@ -82,9 +78,9 @@ class NarrationHeader : View() {
             chapterSelector {
                 chapterTitleProperty.bind(viewModel.chapterTitleProperty)
 
-                setOnTitleClickedProperty {
+                setOnChapterSelectorOpenedProperty {
 
-                    popupMenu.updateChapterGrid(viewModel.chapterList.map { it })
+                    popupMenu.updateChapterGrid(viewModel.chapterList)
 
                     val bound = this.boundsInLocal
                     val screenBound = this.localToScreen(bound)
@@ -139,11 +135,18 @@ class NarrationHeaderViewModel : ViewModel() {
 
     val pluginContextProperty = SimpleObjectProperty(PluginType.EDITOR)
 
-    val chapterList: ObservableList<Chapter> = observableListOf()
+    val chapterList: List<ChapterGridItemData>
+        get() {
+            return narrationViewModel.chapterList.map {
+                val gridItem = ChapterGridItemData(
+                    it.sort,
+                    it.hasSelectedAudio()
+                )
+                gridItem
+            }
+        }
 
     init {
-        chapterList.bind(narrationViewModel.chapterList) { it }
-
         chapterTakeProperty.bind(narrationViewModel.chapterTakeProperty)
         chapterTitleProperty.bind(narrationViewModel.chapterTitleProperty)
         hasNextChapter.bind(narrationViewModel.hasNextChapter)
@@ -172,9 +175,10 @@ class NarrationHeaderViewModel : ViewModel() {
             StepDirection.FORWARD -> 1
             StepDirection.BACKWARD -> -1
         }
-        val nextIndex = chapterList.indexOf(workbookDataStore.chapter) + step
+        val nextIndex =
+            narrationViewModel.chapterList.indexOf(workbookDataStore.chapter) + step
 
-        chapterList
+        narrationViewModel.chapterList
             .elementAtOrNull(nextIndex)
             ?.let {
                 fire(OpenChapterEvent(nextIndex))
