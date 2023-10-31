@@ -23,7 +23,7 @@ class ChapterGrid(val list: List<ChapterGridItemData>) : GridPane() {
         FX.eventbus.fire(OpenChapterEvent(chapterIndex))
     }
 
-    fun updateChapterList() {
+    fun updateChapterGridNodes() {
         children.clear()
         addChaptersToGrid()
     }
