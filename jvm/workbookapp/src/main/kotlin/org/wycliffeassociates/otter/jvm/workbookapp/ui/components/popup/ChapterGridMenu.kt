@@ -14,16 +14,13 @@ import tornadofx.*
 
 class ChapterGridMenu : ContextMenu() {
 
-    val chapterGridItemList: ObservableList<ChapterGridItemData> = observableListOf()
+    private val chapterGridItemList: MutableList<ChapterGridItemData> = listOf<ChapterGridItemData>().toMutableList()
+    private val chapterGrid = ChapterGrid(chapterGridItemList)
 
     init {
         val chapterGridOption = CustomMenuItem().apply {
             addClass("chapter-grid-context-menu-item")
-            val chapterGrid = ChapterGrid(chapterGridItemList).apply {
-                // Handle changes in showingProperty. Used to update completed icon for each chapter.
-                chapterGridItemList.onChange {
-                    updateChapterList()
-                }
+            chapterGrid.apply {
                 prefWidth = 500.0
             }
             content = chapterGrid
@@ -35,4 +32,20 @@ class ChapterGridMenu : ContextMenu() {
             chapterGridOption,
         )
     }
+
+    fun updateChapterGrid(newChapterList: List<Chapter>) {
+
+        chapterGridItemList.clear()
+        newChapterList.forEach {
+            chapterGridItemList.add(
+                ChapterGridItemData(
+                    it.sort,
+                    SimpleBooleanProperty(it.hasSelectedAudio())
+                )
+            )
+        }
+
+        chapterGrid.updateChapterGridNodes()
+    }
+
 }

@@ -37,14 +37,7 @@ import java.text.MessageFormat
 class NarrationHeader : View() {
     private val viewModel by inject<NarrationHeaderViewModel>()
 
-    private val popupMenu = ChapterGridMenu().apply {
-        chapterGridItemList.bind(viewModel.chapterList) {
-            ChapterGridItemData(
-                it.sort,
-                SimpleBooleanProperty(it.hasSelectedAudio())
-            )
-        }
-    }
+    private val popupMenu = ChapterGridMenu()
 
     init {
         subscribe<NarrationOpenInPluginEvent> {
@@ -90,6 +83,9 @@ class NarrationHeader : View() {
                 chapterTitleProperty.bind(viewModel.chapterTitleProperty)
 
                 setOnTitleClickedProperty {
+
+                    popupMenu.updateChapterGrid(viewModel.chapterList.map { it })
+
                     val bound = this.boundsInLocal
                     val screenBound = this.localToScreen(bound)
 
