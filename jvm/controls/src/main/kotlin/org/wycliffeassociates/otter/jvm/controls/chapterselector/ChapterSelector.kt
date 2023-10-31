@@ -25,12 +25,12 @@ import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
-import javafx.scene.input.MouseEvent
 import org.wycliffeassociates.otter.jvm.controls.skins.chapterselector.ChapterSelectorSkin
 
 class ChapterSelector : Control() {
     val chapterTitleProperty = SimpleStringProperty()
-    val onTitleClickedProperty = SimpleObjectProperty<EventHandler<MouseEvent>>()
+    val onChapterSelectorOpenedProperty =
+        SimpleObjectProperty<EventHandler<ActionEvent>>() // TODO: change this to a button so I get the ActionEvent
     val onPrevChapterActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onNextChapterActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val prevDisabledProperty = SimpleBooleanProperty()
@@ -52,7 +52,7 @@ class ChapterSelector : Control() {
         onNextChapterActionProperty.set(EventHandler { op.invoke() })
     }
 
-    fun setOnTitleClickedProperty(op: () -> Unit) {
-        onTitleClickedProperty.set(EventHandler { op.invoke() })
+    fun setOnChapterSelectorOpenedProperty(op: () -> Unit) {
+        onChapterSelectorOpenedProperty.set(EventHandler { op.invoke() })
     }
 }
