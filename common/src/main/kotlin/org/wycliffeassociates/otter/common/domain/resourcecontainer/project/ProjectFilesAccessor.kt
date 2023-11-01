@@ -324,23 +324,24 @@ class ProjectFilesAccessor(
         fileWriter: IFileWriter,
         workbook: Workbook,
         takeFilter: (String) -> Boolean =  { true }
-    ) {
-        fetchTakes(workbook)
+    ): Completable {
+        return fetchTakes(workbook)
             .filter { takeFilter(it.name) }
             .map {
                 val path = relativeTakePath(it)
                 TakeCheckingSerializable(path, it.checkingState.value!!.status, it.getSavedChecksum())
             }
             .toList()
-            .subscribe { list ->
+            .doOnSuccess { list ->
                 fileWriter.bufferedWriter(RcConstants.CHECKING_STATUS_FILE).use { writer ->
                     val mapper = ObjectMapper(JsonFactory())
-                        .registerModule(KotlinModule())
+                        .registerKotlinModule()
                         .setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
                     mapper.writeValue(writer, list)
                 }
             }
+            .ignoreElement()
     }
 
     fun copyTakeFiles(
