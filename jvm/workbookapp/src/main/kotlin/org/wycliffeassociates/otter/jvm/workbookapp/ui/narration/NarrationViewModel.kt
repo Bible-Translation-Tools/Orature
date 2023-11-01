@@ -606,6 +606,7 @@ class NarrationViewModel : ViewModel() {
                             .subscribeOn(Schedulers.io())
                             .subscribe(
                                 {
+                                    chapterTakeProperty.set(workbookDataStore.chapter.getSelectedTake())
                                     logger.info("Created a chapter take for ${chapterTitleProperty.value}")
                                 }, { e ->
                                     logger.error(
