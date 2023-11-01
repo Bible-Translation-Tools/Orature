@@ -18,7 +18,10 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
+import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
@@ -157,6 +160,17 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     }
 
     fun pauseAudio() = audioController?.pause()
+
+    fun resetChapterTake() {
+        workbookDataStore.chapter
+            .audio
+            .getSelectedTake()
+            ?.let { take ->
+                take.checkingState.accept(
+                    TakeCheckingState(CheckingStatus.UNCHECKED, null)
+                )
+            }
+    }
 
     private fun loadChapterTake() {
         chapterTranslationTake.fetch(

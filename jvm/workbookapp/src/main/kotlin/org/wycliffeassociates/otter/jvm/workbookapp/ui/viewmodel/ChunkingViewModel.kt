@@ -32,6 +32,8 @@ import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
+import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
+import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import javax.inject.Inject
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -62,6 +64,7 @@ open class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
     val translationViewModel: TranslationViewModel2 by inject()
+    val chapterReviewViewModel: ChapterReviewViewModel by inject()
 
     val chapterTitle get() = workbookDataStore.activeChapterProperty.value?.title ?: ""
     val sourceAudio by audioDataStore.sourceAudioProperty
@@ -132,6 +135,9 @@ open class ChunkingViewModel : ViewModel(), IMarkerViewModel {
                 saveChanges()
             }
             translationViewModel.updateStep()
+        }
+        if (markerModel?.hasDirtyMarkers() == true) {
+            chapterReviewViewModel.resetChapterTake()
         }
         cleanup()
     }

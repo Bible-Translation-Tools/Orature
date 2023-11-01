@@ -124,6 +124,6 @@ class ChapterTranslationTake @Inject constructor(
     private fun needNewChapterTake(checksum: String, chapter: Chapter): Boolean {
         return chapter.audio.getSelectedTake()?.checkingState?.value?.let {
             checksum != it.checksum && it.status != CheckingStatus.VERSE
-        } ?: false
+        } ?: true
     }
 }
