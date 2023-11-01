@@ -82,6 +82,10 @@ class BlindDraftViewModel : ViewModel() {
     }
 
     fun undockBlindDraft() {
+        if (actionHistory.canUndo()) {
+            chapterReviewViewModel.invalidateChapterTake()
+            actionHistory.clear()
+        }
         sourcePlayerProperty.unbind()
         currentChunkProperty.set(null)
         translationViewModel.updateSourceText()
@@ -89,10 +93,6 @@ class BlindDraftViewModel : ViewModel() {
         disposables.clear()
         disposableListeners.forEach { it.dispose() }
         disposableListeners.clear()
-        if (actionHistory.canUndo()) {
-            chapterReviewViewModel.invalidateChapterTake()
-            actionHistory.clear()
-        }
     }
 
     fun onRecordNew() {

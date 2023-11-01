@@ -19,6 +19,7 @@ import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
+import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -167,10 +168,12 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
         workbookDataStore.chapter
             .audio
             .getSelectedTake()
-            ?.checkingState
-            ?.accept(
-                TakeCheckingState(CheckingStatus.UNCHECKED, null)
-            )
+            ?.let {
+                it.checkingState.accept(
+                    TakeCheckingState(CheckingStatus.UNCHECKED, null)
+                )
+                it.deletedTimestamp.accept(DateHolder.now())
+            }
     }
 
     private fun loadChapterTake() {
