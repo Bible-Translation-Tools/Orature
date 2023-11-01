@@ -32,8 +32,6 @@ import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
-import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
-import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import javax.inject.Inject
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -137,7 +135,7 @@ open class ChunkingViewModel : ViewModel(), IMarkerViewModel {
             translationViewModel.updateStep()
         }
         if (markerModel?.hasDirtyMarkers() == true) {
-            chapterReviewViewModel.resetChapterTake()
+            chapterReviewViewModel.invalidateChapterTake()
         }
         cleanup()
     }

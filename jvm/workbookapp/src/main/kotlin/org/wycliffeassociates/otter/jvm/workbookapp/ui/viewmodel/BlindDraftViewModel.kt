@@ -74,7 +74,7 @@ class BlindDraftViewModel : ViewModel() {
             it?.let { chunk ->
                 subscribeSelectedTakePropertyToRelay(chunk)
                 if (actionHistory.canUndo()) {
-                    chapterReviewViewModel.resetChapterTake() // resets chapter target audio when changes detected
+                    chapterReviewViewModel.invalidateChapterTake() // resets chapter target audio when changes detected
                 }
             }
             actionHistory.clear()
@@ -90,7 +90,7 @@ class BlindDraftViewModel : ViewModel() {
         disposableListeners.forEach { it.dispose() }
         disposableListeners.clear()
         if (actionHistory.canUndo()) {
-            chapterReviewViewModel.resetChapterTake()
+            chapterReviewViewModel.invalidateChapterTake()
             actionHistory.clear()
         }
     }
