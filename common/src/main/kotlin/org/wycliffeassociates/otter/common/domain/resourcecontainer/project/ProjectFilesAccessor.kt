@@ -21,12 +21,12 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.project
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.cast
+import io.reactivex.rxkotlin.toMap
 import io.reactivex.rxkotlin.toObservable
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
@@ -54,7 +54,8 @@ import org.wycliffeassociates.otter.common.audio.AudioMetadataFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.*
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.workbook.Book
-import org.wycliffeassociates.otter.common.domain.project.TakeCheckingSerializable
+import org.wycliffeassociates.otter.common.domain.project.CheckingStatusSerializable
+import org.wycliffeassociates.otter.common.domain.project.TakeCheckingStatusMap
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.usfm.getText
 import org.wycliffeassociates.usfmtools.USFMParser
 import org.wycliffeassociates.usfmtools.models.markers.CMarker
@@ -329,16 +330,17 @@ class ProjectFilesAccessor(
             .filter { takeFilter(it.name) }
             .map {
                 val path = relativeTakePath(it)
-                TakeCheckingSerializable(path, it.checkingState.value!!.status, it.getSavedChecksum())
+                val checking = CheckingStatusSerializable(it.checkingState.value!!.status, it.getSavedChecksum())
+                Pair(path, checking)
             }
-            .toList()
-            .doOnSuccess { list ->
+            .toMap()
+            .doOnSuccess { takeCheckingMap: TakeCheckingStatusMap ->
                 fileWriter.bufferedWriter(RcConstants.CHECKING_STATUS_FILE).use { writer ->
                     val mapper = ObjectMapper(JsonFactory())
                         .registerKotlinModule()
                         .setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
-                    mapper.writeValue(writer, list)
+                    mapper.writeValue(writer, takeCheckingMap)
                 }
             }
             .ignoreElement()
