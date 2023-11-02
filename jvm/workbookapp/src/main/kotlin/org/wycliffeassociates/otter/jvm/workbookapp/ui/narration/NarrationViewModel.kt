@@ -29,6 +29,7 @@ import org.wycliffeassociates.otter.common.domain.narration.AudioScene
 import org.wycliffeassociates.otter.common.domain.narration.Narration
 import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
 import org.wycliffeassociates.otter.common.domain.narration.NarrationStateMachine
+import org.wycliffeassociates.otter.common.domain.narration.NarrationStateTransitions
 import org.wycliffeassociates.otter.common.domain.narration.NarrationTextItemState
 import org.wycliffeassociates.otter.common.domain.narration.framesToPixels
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
@@ -747,37 +748,44 @@ class NarrationViewModel : ViewModel() {
     fun handleEvent(event: FXEvent) {
         val list = when (event) {
             is BeginRecordingEvent -> {
-                narrationStateMachine.changeState(event.index, NarrationTextItemState.BEGIN_RECORDING)
+                narrationStateMachine.applyTransition(NarrationStateTransitions.RECORD, event.index)
+                //narrationStateMachine.changeState(event.index, NarrationTextItemState.BEGIN_RECORDING)
                 // handleBeginRecording(event, narratableList)
             }
 
             is NextVerseEvent -> {
-                narrationStateMachine.changeState(event.index, NarrationTextItemState.RECORD_ACTIVE)
+                narrationStateMachine.applyTransition(NarrationStateTransitions.NEXT, event.index)
+                //narrationStateMachine.changeState(event.index, NarrationTextItemState.RECORD_ACTIVE)
                 // handleNextVerse(event, narratableList)
             }
 
             is PauseRecordingEvent -> {
-                narrationStateMachine.changeState(event.index, NarrationTextItemState.RECORDING_PAUSED)
+                narrationStateMachine.applyTransition(NarrationStateTransitions.PAUSE_RECORDING, event.index)
+                //narrationStateMachine.changeState(event.index, NarrationTextItemState.RECORDING_PAUSED)
                 // handlePauseRecording(event, narratableList)
             }
 
             is ResumeRecordingEvent -> {
-                narrationStateMachine.changeState(event.index, NarrationTextItemState.RECORD_ACTIVE)
+                narrationStateMachine.applyTransition(NarrationStateTransitions.RECORD, event.index)
+                //narrationStateMachine.changeState(event.index, NarrationTextItemState.RECORD_ACTIVE)
                 // handleResumeRecording(event, narratableList)
             }
 
             is RecordVerseEvent -> {
-                narrationStateMachine.changeState(event.index, NarrationTextItemState.RECORD_ACTIVE)
+                narrationStateMachine.applyTransition(NarrationStateTransitions.RECORD, event.index)
+                //narrationStateMachine.changeState(event.index, NarrationTextItemState.RECORD_ACTIVE)
                 // handleRecordVerse(event, narratableList)
             }
 
             is RecordAgainEvent -> {
-                narrationStateMachine.changeState(event.index, NarrationTextItemState.RE_RECORD_ACTIVE)
+                narrationStateMachine.applyTransition(NarrationStateTransitions.RE_RECORD, event.index)
+                //narrationStateMachine.changeState(event.index, NarrationTextItemState.RE_RECORD_ACTIVE)
                 // handleRecordAgain(event, narratableList)
             }
 
             is SaveRecordingEvent -> {
-                narrationStateMachine.changeState(event.index, NarrationTextItemState.RE_RECORD)
+                narrationStateMachine.applyTransition(NarrationStateTransitions.SAVE, event.index)
+                //narrationStateMachine.changeState(event.index, NarrationTextItemState.RE_RECORD)
                 // handleSaveRecording(event, narratableList)
             }
 
