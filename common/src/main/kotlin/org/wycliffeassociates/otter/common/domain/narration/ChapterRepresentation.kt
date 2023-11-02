@@ -127,6 +127,16 @@ internal class ChapterRepresentation(
         onActiveVersesUpdated.onNext(updatedVerses)
     }
 
+    fun versesWithRecordings(): List<Boolean> {
+        val recorded = activeVerses.filter { it.length > 0 }
+        val versesWithRecordings = totalVerses.map { false }.toMutableList()
+        for (verse in recorded) {
+            val index = totalVerses.indexOfFirst { it.marker.label == verse.marker.label }
+            versesWithRecordings[index] = true
+        }
+        return versesWithRecordings
+    }
+
     private fun initializeSerializedVersesFile() {
         val projectChapterDir = workbook.projectFilesAccessor.getChapterAudioDir(workbook, chapter)
         serializedVersesFile = File(projectChapterDir, ACTIVE_VERSES_FILE_NAME).also {

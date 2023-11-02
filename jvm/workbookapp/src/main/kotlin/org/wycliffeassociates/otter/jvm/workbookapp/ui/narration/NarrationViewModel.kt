@@ -209,7 +209,7 @@ class NarrationViewModel : ViewModel() {
         )
         totalAudioSizeProperty.set(rendererAudioReader.totalFrames)
         narrationStateMachine = NarrationStateMachine(narration.totalVerses)
-
+        narrationStateMachine.initialize(narration.versesWithRecordings())
     }
 
     private fun updateRecordingState() {
@@ -459,7 +459,7 @@ class NarrationViewModel : ViewModel() {
 
     fun resetChapter() {
         narration.onResetAll()
-
+        narrationStateMachine.initialize(narration.versesWithRecordings())
         recordStart = true
         recordResume = false
         recordPause = false
@@ -469,6 +469,7 @@ class NarrationViewModel : ViewModel() {
 
     fun undo() {
         narration.undo()
+        narrationStateMachine.initialize(narration.versesWithRecordings())
         recordPause = false
 
         resetTeleprompter()
@@ -476,6 +477,7 @@ class NarrationViewModel : ViewModel() {
 
     fun redo() {
         narration.redo()
+        narrationStateMachine.initialize(narration.versesWithRecordings())
         recordPause = false
 
         resetTeleprompter()
@@ -588,8 +590,6 @@ class NarrationViewModel : ViewModel() {
                     val verseWasAdded = recordedVerses.size != verses.size
 
                     recordedVerses.setAll(verses)
-
-                    narrationStateMachine.initialize(verses)
 
                     hasUndo = narration.hasUndo()
                     hasRedo = narration.hasRedo()

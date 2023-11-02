@@ -39,33 +39,16 @@ class NarrationStateMachine(
     private val logger = LoggerFactory.getLogger(NarrationStateMachine::class.java)
     private lateinit var contexts: MutableList<NarrationStateContext>
 
-    fun initialize(active: List<AudioMarker>) {
-        if (!::contexts.isInitialized) {
-            contexts = total.map { NarrationStateContext() }.toMutableList()
-            val recordedIndices = mutableListOf<Int>()
-            active.forEach { active ->
-                val index = total.indexOfFirst { it.label == active.label }
-                if (index != -1) {
-                    contexts[index].state = ReRecordState
-                    recordedIndices.add(index)
-                }
-            }
-            val lastRecorded = total.indexOfLast { active.last().label == it.label }
-            if (lastRecorded != -1 && lastRecorded + 1 <= contexts.lastIndex) {
-                contexts[lastRecorded + 1].state = RecordState
-                recordedIndices.add(lastRecorded + 1)
-            }
-            // initial blank recording places a marker with nothing recorded
-            if (lastRecorded == 0) {
-                contexts[0].state = RecordState
-                contexts[1].state = RecordDisabledState
-            }
-            for (index in contexts.indices) {
-                if (index !in recordedIndices) {
-                    contexts[index].state = RecordDisabledState
-                }
-            }
+    init {
+        contexts = total.map { NarrationStateContext() }.toMutableList()
+    }
+
+    fun initialize(active: List<Boolean>) {
+        contexts = total.map { NarrationStateContext() }.toMutableList()
+        active.forEachIndexed { index, hasRecording ->
+            contexts[index].state = if (hasRecording) ReRecordState else RecordDisabledState
         }
+        contexts.firstOrNull { it.state.type == NarrationTextItemState.RECORD_DISABLED }?.state = RecordState
     }
 
     fun changeState(

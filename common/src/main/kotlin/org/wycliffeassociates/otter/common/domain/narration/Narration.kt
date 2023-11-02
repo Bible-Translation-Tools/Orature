@@ -82,6 +82,10 @@ class Narration @AssistedInject constructor(
             verses
         }
 
+    fun versesWithRecordings(): List<Boolean> {
+        return chapterRepresentation.versesWithRecordings()
+    }
+
     val onActiveVersesUpdated: PublishSubject<List<VerseMarker>>
         get() = chapterRepresentation.onActiveVersesUpdated
 
