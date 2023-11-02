@@ -475,7 +475,8 @@ object ReRecordActiveState : NarrationState {
     override val type = NarrationTextItemState.RE_RECORD_ACTIVE
 
     override val validStateTransitions = setOf(
-        NarrationTextItemState.RE_RECORDING_PAUSED
+        NarrationTextItemState.RE_RECORDING_PAUSED,
+        NarrationTextItemState.RE_RECORD
     )
 
     override fun changeState(request: NarrationTextItemState): NarrationState {
@@ -485,6 +486,7 @@ object ReRecordActiveState : NarrationState {
 
         return when (request) {
             NarrationTextItemState.RE_RECORDING_PAUSED -> ReRecordPausedState
+            NarrationTextItemState.RE_RECORD -> ReRecordState
             else -> {
                 throw IllegalStateException("State: $type tried to transition to state: $request")
             }
