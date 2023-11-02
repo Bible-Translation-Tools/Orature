@@ -34,21 +34,22 @@ import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.domain.narration.NarrationTextItemState
 import org.wycliffeassociates.otter.jvm.controls.event.PauseEvent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
-enum class NarrationTextItemState {
-    BEGIN_RECORDING,
-    RECORD,
-    RECORDING_PAUSED,
-    RECORD_DISABLED,
-    RECORD_ACTIVE,
-    RE_RECORD,
-    RE_RECORD_ACTIVE,
-    RE_RECORDING_PAUSED,
-    RE_RECORD_DISABLED
-}
+//enum class NarrationTextItemState {
+//    BEGIN_RECORDING,
+//    RECORD,
+//    RECORDING_PAUSED,
+//    RECORD_DISABLED,
+//    RECORD_ACTIVE,
+//    RE_RECORD,
+//    RE_RECORD_ACTIVE,
+//    RE_RECORDING_PAUSED,
+//    RE_RECORD_DISABLED
+//}
 
 class NarrationTextItem : VBox() {
     private val logger = LoggerFactory.getLogger(NarrationTextItem::class.java)

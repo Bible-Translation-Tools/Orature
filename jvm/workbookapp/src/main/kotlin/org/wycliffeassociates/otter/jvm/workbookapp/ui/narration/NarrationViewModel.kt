@@ -28,6 +28,8 @@ import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.narration.AudioScene
 import org.wycliffeassociates.otter.common.domain.narration.Narration
 import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
+import org.wycliffeassociates.otter.common.domain.narration.NarrationStateMachine
+import org.wycliffeassociates.otter.common.domain.narration.NarrationTextItemState
 import org.wycliffeassociates.otter.common.domain.narration.framesToPixels
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
@@ -38,7 +40,6 @@ import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RecordVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.SaveRecordingEvent
-import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItemState
 import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
@@ -69,6 +70,7 @@ class NarrationViewModel : ViewModel() {
 
     private lateinit var narration: Narration
     private lateinit var renderer: NarrationWaveformRenderer
+    private lateinit var narrationStateMachine: NarrationStateMachine
 
     private lateinit var volumeBar: VolumeBar
     val recordStartProperty = SimpleBooleanProperty()
@@ -204,6 +206,8 @@ class NarrationViewModel : ViewModel() {
             )
         )
         totalAudioSizeProperty.set(rendererAudioReader.totalFrames)
+        narrationStateMachine = NarrationStateMachine(narration.totalVerses)
+
     }
 
     private fun updateRecordingState() {
@@ -583,6 +587,8 @@ class NarrationViewModel : ViewModel() {
 
                     recordedVerses.setAll(verses)
 
+                    narrationStateMachine.initialize(verses)
+
                     hasUndo = narration.hasUndo()
                     hasRedo = narration.hasRedo()
 
@@ -739,35 +745,48 @@ class NarrationViewModel : ViewModel() {
 
 
     fun handleEvent(event: FXEvent) {
-        when (event) {
+        val list = when (event) {
             is BeginRecordingEvent -> {
-                handleBeginRecording(event, narratableList)
+                narrationStateMachine.changeState(event.index, NarrationTextItemState.BEGIN_RECORDING)
+                // handleBeginRecording(event, narratableList)
             }
 
             is NextVerseEvent -> {
-                handleNextVerse(event, narratableList)
+                narrationStateMachine.changeState(event.index, NarrationTextItemState.RECORD_ACTIVE)
+                // handleNextVerse(event, narratableList)
             }
 
             is PauseRecordingEvent -> {
-                handlePauseRecording(event, narratableList)
+                narrationStateMachine.changeState(event.index, NarrationTextItemState.RECORDING_PAUSED)
+                // handlePauseRecording(event, narratableList)
             }
 
             is ResumeRecordingEvent -> {
-                handleResumeRecording(event, narratableList)
+                narrationStateMachine.changeState(event.index, NarrationTextItemState.RECORD_ACTIVE)
+                // handleResumeRecording(event, narratableList)
             }
 
             is RecordVerseEvent -> {
-                handleRecordVerse(event, narratableList)
+                narrationStateMachine.changeState(event.index, NarrationTextItemState.RECORD_ACTIVE)
+                // handleRecordVerse(event, narratableList)
             }
 
             is RecordAgainEvent -> {
-                handleRecordAgain(event, narratableList)
+                narrationStateMachine.changeState(event.index, NarrationTextItemState.RE_RECORD_ACTIVE)
+                // handleRecordAgain(event, narratableList)
             }
 
             is SaveRecordingEvent -> {
-                handleSaveRecording(event, narratableList)
+                narrationStateMachine.changeState(event.index, NarrationTextItemState.RE_RECORD)
+                // handleSaveRecording(event, narratableList)
+            }
+
+            else -> {
+                return
             }
         }
+        val updated = narratableList.mapIndexed { idx, item -> item.apply { item.state = list[idx] } }
+        narratableList.setAll(updated)
         refreshTeleprompter()
     }
 

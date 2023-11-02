@@ -27,6 +27,7 @@ import javafx.scene.control.ListCell
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.common.domain.narration.NarrationTextItemState
 import org.wycliffeassociates.otter.jvm.controls.event.BeginRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PauseEvent
@@ -37,7 +38,6 @@ import org.wycliffeassociates.otter.jvm.controls.event.RecordVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.SaveRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItem
-import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItemState
 import tornadofx.FX
 import tornadofx.addClass
 
