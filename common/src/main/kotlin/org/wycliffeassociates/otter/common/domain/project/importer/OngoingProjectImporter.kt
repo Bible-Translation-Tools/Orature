@@ -594,12 +594,10 @@ class OngoingProjectImporter @Inject constructor(
                         content,
                         manifestProject,
                         fileReader
-                    ).apply {
-                        takesCheckingMap[takeName]
-                            ?.let {
-                                checkingStatus = it.checking
-                                checksum = it.checksum
-                            }
+                    )
+                    takesCheckingMap[takeName]?.let {
+                        take.checkingStatus = it.checking
+                        take.checksum = it.checksum
                     }
                     take.id = takeRepository.insertForContent(take, content).blockingGet()
 

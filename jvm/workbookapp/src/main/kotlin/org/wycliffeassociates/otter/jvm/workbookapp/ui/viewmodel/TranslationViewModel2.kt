@@ -47,7 +47,6 @@ class TranslationViewModel2 : ViewModel() {
     fun undockPage() {
         selectedStepProperty.set(null)
         workbookDataStore.activeChapterProperty.set(null)
-        workbookDataStore.activeWorkbookProperty.set(null)
         compositeDisposable.clear()
         resetUndoRedo()
     }
