@@ -328,9 +328,12 @@ class ProjectFilesAccessor(
     ): Completable {
         return fetchTakes(workbook)
             .filter { takeFilter(it.name) }
-            .map {
-                val path = relativeTakePath(it)
-                val checking = CheckingStatusSerializable(it.checkingState.value!!.status, it.getSavedChecksum())
+            .map { take ->
+                val path = relativeTakePath(take)
+                val checking = CheckingStatusSerializable(
+                    take.checkingState.value!!.status,
+                    take.getSavedChecksum()
+                )
                 Pair(path, checking)
             }
             .toMap()
