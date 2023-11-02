@@ -170,17 +170,6 @@ object PauseRecordingAction {
         }
 
         contexts[index].changeState(NarrationTextItemState.RECORDING_PAUSED)
-
-        // Make next item available to record
-        if (index < contexts.lastIndex) {
-            contexts[index + 1].changeState(NarrationTextItemState.RECORD)
-            for (i in index + 1..contexts.lastIndex) {
-                contexts[i].restore()
-                if (contexts[i].state.type == NarrationTextItemState.RE_RECORD_DISABLED) {
-                    contexts[i].changeState(NarrationTextItemState.RE_RECORD)
-                }
-            }
-        }
     }
 }
 
@@ -210,11 +199,12 @@ object NextVerseAction {
     fun apply(contexts: MutableList<NarrationStateContext>, index: Int) {
         val wasActive = contexts[index - 1].state.type == NarrationTextItemState.RECORD_ACTIVE
 
-        contexts[index - 1].changeState(NarrationTextItemState.RE_RECORD_DISABLED)
-
-        when (wasActive) {
-            true -> contexts[index].changeState(NarrationTextItemState.RECORD_ACTIVE)
-            false -> contexts[index].changeState(NarrationTextItemState.RECORDING_PAUSED)
+        if (wasActive) {
+            contexts[index - 1].changeState(NarrationTextItemState.RE_RECORD_DISABLED)
+            contexts[index].changeState(NarrationTextItemState.RECORD_ACTIVE)
+        } else {
+            contexts[index - 1].changeState(NarrationTextItemState.RE_RECORD)
+            contexts[index].changeState(NarrationTextItemState.RECORD)
         }
     }
 }
