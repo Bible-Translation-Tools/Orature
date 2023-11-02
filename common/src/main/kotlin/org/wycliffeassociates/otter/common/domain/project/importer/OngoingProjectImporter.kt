@@ -32,6 +32,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.takeFilenamePattern
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
+import org.wycliffeassociates.otter.common.domain.project.TakeCheckingStatusMap
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
@@ -74,6 +75,7 @@ class OngoingProjectImporter @Inject constructor(
     private var projectName = ""
     private var takesInChapterFilter: Map<String, Int>? = null
     private var duplicatedTakes: MutableList<String> = mutableListOf()
+    private var takesCheckingMap: TakeCheckingStatusMap = mapOf()
 
     override fun import(
         file: File,
@@ -423,6 +425,17 @@ class OngoingProjectImporter @Inject constructor(
             ?.toMutableList()
             ?: mutableListOf()
 
+        takesCheckingMap = if (fileReader.exists(RcConstants.CHECKING_STATUS_FILE)) {
+            fileReader.stream(RcConstants.CHECKING_STATUS_FILE).use {
+                val mapper = ObjectMapper(JsonFactory())
+                    .registerKotlinModule()
+                    .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                mapper.readValue<TakeCheckingStatusMap>(it)
+            }
+        } else {
+            mapOf()
+        }
+
         projectFilesAccessor.copySelectedTakesFile(fileReader)
         projectFilesAccessor.copyTakeFiles(fileReader, manifestProject, ::takeCopyFilter)
             .doOnError { e ->
@@ -507,10 +520,16 @@ class OngoingProjectImporter @Inject constructor(
                     listOf()
                 )
                 take.id = takeRepository.insertForContent(take, chunk).blockingGet()
+                val relativePath = relativeFile.invariantSeparatorsPath
 
-                if (relativeFile.invariantSeparatorsPath in selectedTakes) {
+                if (relativePath in selectedTakes) {
                     chunk.selectedTake = take
                     contentRepository.update(chunk).blockingAwait()
+                }
+                takesCheckingMap[relativePath]?.let {
+                    take.checkingStatus = it.checking
+                    take.checksum = it.checksum
+                    takeRepository.update(take).subscribe()
                 }
             }
         }
