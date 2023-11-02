@@ -426,11 +426,12 @@ class OngoingProjectImporter @Inject constructor(
             ?: mutableListOf()
 
         takesCheckingMap = if (fileReader.exists(RcConstants.CHECKING_STATUS_FILE)) {
-            fileReader.stream(RcConstants.CHECKING_STATUS_FILE).use {
-                val mapper = ObjectMapper(JsonFactory())
+            fileReader.stream(RcConstants.CHECKING_STATUS_FILE).use { stream ->
+                ObjectMapper(JsonFactory())
                     .registerKotlinModule()
                     .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-                mapper.readValue<TakeCheckingStatusMap>(it)
+                    .readValue<TakeCheckingStatusMap>(stream)
+                    .mapKeys { File(it.key).name } // take name as key
             }
         } else {
             mapOf()
@@ -507,6 +508,7 @@ class OngoingProjectImporter @Inject constructor(
                 val now = LocalDate.now()
                 val file = File(filepath).canonicalFile
                 val relativeFile = file.relativeTo(projectAudioDir.canonicalFile)
+                val checkingStatus = takesCheckingMap[relativeFile.name]
 
                 val take = Take(
                     file.name,
@@ -515,21 +517,15 @@ class OngoingProjectImporter @Inject constructor(
                     now,
                     null,
                     false,
-                    CheckingStatus.UNCHECKED,
-                    null,
+                    checkingStatus?.checking ?: CheckingStatus.UNCHECKED,
+                    checkingStatus?.checksum,
                     listOf()
                 )
                 take.id = takeRepository.insertForContent(take, chunk).blockingGet()
-                val relativePath = relativeFile.invariantSeparatorsPath
 
-                if (relativePath in selectedTakes) {
+                if (relativeFile.invariantSeparatorsPath in selectedTakes) {
                     chunk.selectedTake = take
                     contentRepository.update(chunk).blockingAwait()
-                }
-                takesCheckingMap[relativePath]?.let {
-                    take.checkingStatus = it.checking
-                    take.checksum = it.checksum
-                    takeRepository.update(take).subscribe()
                 }
             }
         }
@@ -591,6 +587,7 @@ class OngoingProjectImporter @Inject constructor(
         duplicatedTakes.forEach { takePath ->
             parseNumbers(takePath)?.let { (sig, _) ->
                 getContent(sig, project, metadata)?.let { content ->
+                    val takeName = File(takePath).name
                     val take = copyDuplicatedTakeToProjectDir(
                         takePath,
                         projectAudioDir,
@@ -598,10 +595,17 @@ class OngoingProjectImporter @Inject constructor(
                         manifestProject,
                         fileReader
                     ).apply {
-                        id = takeRepository.insertForContent(this, content).blockingGet()
+                        takesCheckingMap[takeName]
+                            ?.let {
+                                checkingStatus = it.checking
+                                checksum = it.checksum
+                            }
                     }
+                    take.id = takeRepository.insertForContent(take, content).blockingGet()
 
-                    if (selectedTakes.any { it.contains(File(takePath).name)}) {
+                    if (
+                        selectedTakes.any { selected -> File(selected).name == takeName }
+                    ) {
                         content.selectedTake = take
                         contentRepository.update(content).blockingAwait()
                     }
