@@ -14,6 +14,7 @@ import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.OpenChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.OpenInAudioPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PauseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PlayChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PlayVerseEvent
@@ -124,24 +125,34 @@ class NarrationPage : View() {
         }.let { eventSubscriptions.add(it) }
 
         subscribe<RecordVerseEvent> {
-            viewModel.toggleRecording(it.index)
+            viewModel.record(it.index)
             viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<BeginRecordingEvent> {
-            viewModel.toggleRecording(it.index)
+            viewModel.record(it.index)
             viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<PauseRecordingEvent> {
-            viewModel.toggleRecording(it.index)
+            viewModel.pauseRecording(it.index)
+            viewModel.handleEvent(it)
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<PauseRecordAgainEvent> {
+            viewModel.pauseRecording(it.index)
             viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<ResumeRecordingEvent> {
-            viewModel.toggleRecording(it.index)
+            viewModel.resumeRecording()
             viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
+
+//        subscribe<ResumeReRecordingEvent> {
+//            viewModel.toggleRecording(it.index)
+//            viewModel.handleEvent(it)
+//        }.let { eventSubscriptions.add(it) }
 
         subscribe<NarrationMarkerChangedEvent> {
             logger.info("Received Narration Moved event")

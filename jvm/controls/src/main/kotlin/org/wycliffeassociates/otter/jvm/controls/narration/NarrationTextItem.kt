@@ -77,7 +77,9 @@ class NarrationTextItem : VBox() {
 
     val onBeginRecordingAction = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onPauseRecordingAction = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val onPauseRecordAgainAction = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onResumeRecordingAction = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val onResumeRecordingAgainAction= SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onRecordActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onRecordAgainActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onSaveRecordingActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
@@ -314,7 +316,7 @@ class NarrationTextItem : VBox() {
                         text = FX.messages["pause"]
                         graphic = FontIcon(MaterialDesign.MDI_PAUSE)
                         setOnAction {
-                            onActionProperty().bind(onPauseRecordingAction)
+                            onActionProperty().bind(onPauseRecordAgainAction)
                         }
                     }
                     narration_button {
@@ -327,7 +329,7 @@ class NarrationTextItem : VBox() {
                     visibleProperty().bind(stateProperty.isEqualTo(NarrationTextItemState.RE_RECORD_ACTIVE))
                 }
                 hbox {
-                    // RE_RECORD_ACTIVE
+                    // RE_RECORDING_PAUSED
                     alignment = Pos.CENTER
                     spacing = 16.0
                     narration_button {
@@ -335,7 +337,7 @@ class NarrationTextItem : VBox() {
                         text = FX.messages["resume"]
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                         setOnAction {
-                            onActionProperty().bind(onResumeRecordingAction)
+                            onActionProperty().bind(onResumeRecordingAgainAction)
                         }
                     }
                     narration_button {

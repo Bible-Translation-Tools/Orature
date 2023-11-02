@@ -18,8 +18,10 @@ enum class NarrationTextItemState {
 enum class NarrationStateTransitions {
     RECORD,
     PAUSE_RECORDING,
+    RESUME_RECORDING,
     NEXT,
     RE_RECORD,
+    RESUME_RE_RECORDING,
     PAUSE_RE_RECORD,
     SAVE
 }
@@ -93,9 +95,11 @@ class NarrationStateMachine(
             when (request) {
                 NarrationStateTransitions.RECORD -> RecordAction.apply(contexts, requestIndex)
                 NarrationStateTransitions.PAUSE_RECORDING -> PauseRecordingAction.apply(contexts, requestIndex)
+                NarrationStateTransitions.RESUME_RECORDING -> ResumeRecordAction.apply(contexts, requestIndex)
                 NarrationStateTransitions.NEXT -> NextVerseAction.apply(contexts, requestIndex)
                 NarrationStateTransitions.RE_RECORD -> ReRecordAction.apply(contexts, requestIndex)
                 NarrationStateTransitions.PAUSE_RE_RECORD -> PauseReRecordingAction.apply(contexts, requestIndex)
+                NarrationStateTransitions.RESUME_RE_RECORDING -> ResumeReRecordAction.apply(contexts, requestIndex)
                 NarrationStateTransitions.SAVE -> SaveRecordingAction.apply(contexts, requestIndex)
             }
         } catch (e: java.lang.IllegalStateException) {
@@ -160,7 +164,7 @@ object PauseRecordingAction {
             for (i in 0 until index) {
                 contexts[i].restore()
                 if (contexts[i].state.type == NarrationTextItemState.RE_RECORD_DISABLED) {
-                    contexts[i].state.type == NarrationTextItemState.RE_RECORD
+                    contexts[i].changeState(NarrationTextItemState.RE_RECORD)
                 }
             }
         }
@@ -173,8 +177,30 @@ object PauseRecordingAction {
             for (i in index + 1..contexts.lastIndex) {
                 contexts[i].restore()
                 if (contexts[i].state.type == NarrationTextItemState.RE_RECORD_DISABLED) {
-                    contexts[i].state.type == NarrationTextItemState.RE_RECORD
+                    contexts[i].changeState(NarrationTextItemState.RE_RECORD)
                 }
+            }
+        }
+    }
+}
+
+object ResumeRecordAction {
+    fun apply(contexts: MutableList<NarrationStateContext>, index: Int) {
+        if (index !in contexts.indices) return
+
+        if (0 != index) {
+            for (i in 0 until index) {
+                contexts[i].disable()
+            }
+        }
+
+        contexts[index].changeState(NarrationTextItemState.RECORD_ACTIVE)
+
+        // Make next item available to record
+        if (index < contexts.lastIndex) {
+            contexts[index + 1].changeState(NarrationTextItemState.RECORD)
+            for (i in index + 1..contexts.lastIndex) {
+                contexts[i].disable()
             }
         }
     }
@@ -216,6 +242,27 @@ object ReRecordAction {
 object PauseReRecordingAction {
     fun apply(contexts: MutableList<NarrationStateContext>, index: Int) {
         contexts[index].changeState(NarrationTextItemState.RE_RECORDING_PAUSED)
+    }
+}
+
+object ResumeReRecordAction {
+    fun apply(contexts: MutableList<NarrationStateContext>, index: Int) {
+        if (index !in contexts.indices) return
+
+        if (0 != index) {
+            for (i in 0 until index) {
+                contexts[i].disable()
+            }
+        }
+
+        contexts[index].changeState(NarrationTextItemState.RE_RECORD_ACTIVE)
+
+        // Make next item available to record
+        if (index < contexts.lastIndex) {
+            for (i in index + 1..contexts.lastIndex) {
+                contexts[i].disable()
+            }
+        }
     }
 }
 
@@ -358,8 +405,7 @@ object RecordPausedState : NarrationState {
         NarrationTextItemState.RE_RECORD_DISABLED
     )
 
-    override val disabledState: NarrationState
-        get() = throw IllegalStateException("Tried to disable a paused recording")
+    override val disabledState = RecordDisabledState
 
     override fun changeState(request: NarrationTextItemState): NarrationState {
         if (request !in validStateTransitions) {
@@ -445,12 +491,11 @@ object ReRecordActiveState : NarrationState {
         }
     }
 
-    override val disabledState: NarrationState
-        get() = throw IllegalStateException("Tried to disable an active re-recording")
+    override val disabledState = ReRecordDisabledState
 }
 
 object ReRecordPausedState : NarrationState {
-    override val type = NarrationTextItemState.RE_RECORD_ACTIVE
+    override val type = NarrationTextItemState.RE_RECORDING_PAUSED
 
     override val validStateTransitions = setOf(
         NarrationTextItemState.RE_RECORD_ACTIVE,

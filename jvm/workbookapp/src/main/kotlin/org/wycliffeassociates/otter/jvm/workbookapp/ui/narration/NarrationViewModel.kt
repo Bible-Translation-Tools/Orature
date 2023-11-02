@@ -36,6 +36,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.event.BeginRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RecordVerseEvent
@@ -480,7 +481,7 @@ class NarrationViewModel : ViewModel() {
         resetTeleprompter()
     }
 
-    private fun record(index: Int) {
+    fun record(index: Int) {
         narration.onNewVerse(index)
 
         isRecording = true
@@ -491,7 +492,7 @@ class NarrationViewModel : ViewModel() {
         refreshTeleprompter()
     }
 
-    private fun pauseRecording(index: Int) {
+    fun pauseRecording(index: Int) {
         isRecording = false
         recordPause = true
 
@@ -502,7 +503,7 @@ class NarrationViewModel : ViewModel() {
         refreshTeleprompter()
     }
 
-    private fun resumeRecording() {
+    fun resumeRecording() {
         stopPlayer()
 
         narration.resumeRecording()
@@ -513,7 +514,7 @@ class NarrationViewModel : ViewModel() {
         refreshTeleprompter()
     }
 
-    private fun stopRecordAgain() {
+    fun stopRecordAgain() {
         narration.pauseRecording()
         recordAgainVerseIndex = null
         isRecording = false
@@ -763,6 +764,10 @@ class NarrationViewModel : ViewModel() {
                 narrationStateMachine.applyTransition(NarrationStateTransitions.PAUSE_RECORDING, event.index)
                 //narrationStateMachine.changeState(event.index, NarrationTextItemState.RECORDING_PAUSED)
                 // handlePauseRecording(event, narratableList)
+            }
+
+            is PauseRecordAgainEvent -> {
+                narrationStateMachine.applyTransition(NarrationStateTransitions.PAUSE_RE_RECORD, event.index)
             }
 
             is ResumeRecordingEvent -> {

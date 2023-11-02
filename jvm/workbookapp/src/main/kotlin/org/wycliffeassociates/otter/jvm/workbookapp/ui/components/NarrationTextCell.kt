@@ -31,10 +31,12 @@ import org.wycliffeassociates.otter.common.domain.narration.NarrationTextItemSta
 import org.wycliffeassociates.otter.jvm.controls.event.BeginRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PauseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PlayVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RecordVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.SaveRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItem
@@ -154,8 +156,16 @@ class NarrationTextCell(
                 FX.eventbus.fire(PauseRecordingEvent(index, item.chunk))
             })
 
+            onPauseRecordAgainAction.set(DebouncedEventHandler {
+                FX.eventbus.fire(PauseRecordAgainEvent(index, item.chunk))
+            })
+
             onResumeRecordingAction.set(DebouncedEventHandler {
                 FX.eventbus.fire(ResumeRecordingEvent(index, item.chunk))
+            })
+
+            onResumeRecordingAgainAction.set(DebouncedEventHandler {
+                FX.eventbus.fire(ResumeRecordingAgainEvent(index, item.chunk))
             })
 
             stateProperty.set(item.state)
