@@ -22,12 +22,11 @@ import javafx.beans.property.IntegerProperty
 import javafx.beans.value.ObservableValue
 import javafx.event.Event
 import javafx.event.EventHandler
-import javafx.event.EventTarget
 import javafx.scene.control.ListCell
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
-import org.wycliffeassociates.otter.common.domain.narration.NarrationTextItemState
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterItemState
 import org.wycliffeassociates.otter.jvm.controls.event.BeginRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PauseEvent
@@ -48,7 +47,7 @@ class NarrationTextItemData(
     var marker: VerseMarker?,
     var hasRecording: Boolean = false,
     var previousChunksRecorded: Boolean = false,
-    var state: NarrationTextItemState = NarrationTextItemState.RECORD_DISABLED
+    var state: TeleprompterItemState = TeleprompterItemState.RECORD_DISABLED
 ) {
     override fun toString(): String {
         return "${chunk.sort}, $hasRecording, $previousChunksRecorded"

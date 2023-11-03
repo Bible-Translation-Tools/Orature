@@ -29,13 +29,11 @@ import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Button
 import javafx.scene.layout.Region
-import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.domain.narration.NarrationTextItemState
-import org.wycliffeassociates.otter.jvm.controls.event.PauseEvent
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterItemState
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
@@ -56,7 +54,7 @@ class NarrationTextItem : VBox() {
 
     val indexProperty = SimpleIntegerProperty(0)
 
-    val stateProperty = SimpleObjectProperty(NarrationTextItemState.RECORD)
+    val stateProperty = SimpleObjectProperty(TeleprompterItemState.RECORD)
     val state by stateProperty
 
     val hasRecordingProperty = SimpleBooleanProperty(false)
@@ -149,7 +147,7 @@ class NarrationTextItem : VBox() {
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                         onActionProperty().bind(onBeginRecordingAction)
                     }
-                    visibleProperty().bind(stateProperty.isEqualTo(NarrationTextItemState.BEGIN_RECORDING))
+                    visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.BEGIN_RECORDING))
                 }
                 hbox {
                     // RECORD
@@ -163,7 +161,7 @@ class NarrationTextItem : VBox() {
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                         onActionProperty().bind(onRecordActionProperty)
                     }
-                    visibleProperty().bind(stateProperty.isEqualTo(NarrationTextItemState.RECORD))
+                    visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.RECORD))
                 }
                 hbox {
                     // RECORD_ACTIVE
@@ -212,7 +210,7 @@ class NarrationTextItem : VBox() {
                             }
                         })
                     }
-                    visibleProperty().bind(stateProperty.isEqualTo(NarrationTextItemState.RECORD_ACTIVE))
+                    visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.RECORD_ACTIVE))
                 }
                 hbox {
                     // RECORDING PAUSED
@@ -260,7 +258,7 @@ class NarrationTextItem : VBox() {
                             }
                         })
                     }
-                    visibleProperty().bind(stateProperty.isEqualTo(NarrationTextItemState.RECORDING_PAUSED))
+                    visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.RECORDING_PAUSED))
                 }
                 hbox {
                     // RECORD_DISABLED
@@ -275,7 +273,7 @@ class NarrationTextItem : VBox() {
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                         setDisabled(true)
                     }
-                    visibleProperty().bind(stateProperty.isEqualTo(NarrationTextItemState.RECORD_DISABLED))
+                    visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.RECORD_DISABLED))
                 }
                 hbox {
                     // RE_RECORD
@@ -289,7 +287,7 @@ class NarrationTextItem : VBox() {
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                         onActionProperty().bind(onRecordAgainActionProperty)
                     }
-                    visibleProperty().bind(stateProperty.isEqualTo(NarrationTextItemState.RE_RECORD))
+                    visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.RE_RECORD))
                 }
                 hbox {
                     // RE_RECORD_DISABLED
@@ -304,7 +302,7 @@ class NarrationTextItem : VBox() {
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                         onActionProperty().bind(onRecordAgainActionProperty)
                     }
-                    visibleProperty().bind(stateProperty.isEqualTo(NarrationTextItemState.RE_RECORD_DISABLED))
+                    visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.RE_RECORD_DISABLED))
                 }
                 hbox {
                     // RE_RECORD_ACTIVE
@@ -326,7 +324,7 @@ class NarrationTextItem : VBox() {
                         graphic = FontIcon(MaterialDesign.MDI_CHECKBOX_MARKED_CIRCLE)
                         onActionProperty().bind(onSaveRecordingActionProperty)
                     }
-                    visibleProperty().bind(stateProperty.isEqualTo(NarrationTextItemState.RE_RECORD_ACTIVE))
+                    visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.RE_RECORD_ACTIVE))
                 }
                 hbox {
                     // RE_RECORDING_PAUSED
@@ -347,7 +345,7 @@ class NarrationTextItem : VBox() {
                         graphic = FontIcon(MaterialDesign.MDI_CHECKBOX_MARKED_CIRCLE)
                         onActionProperty().bind(onSaveRecordingActionProperty)
                     }
-                    visibleProperty().bind(stateProperty.isEqualTo(NarrationTextItemState.RE_RECORDING_PAUSED))
+                    visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.RE_RECORDING_PAUSED))
                 }
             }
 
@@ -364,13 +362,13 @@ class NarrationTextItem : VBox() {
             it.disableWhen {
                 isPlayingProperty.or(
                     isRecordingProperty.and(
-                        stateProperty.isNotEqualTo(NarrationTextItemState.RECORD_ACTIVE)
+                        stateProperty.isNotEqualTo(TeleprompterItemState.RECORD_ACTIVE)
                             .and(
-                                stateProperty.isNotEqualTo(NarrationTextItemState.RE_RECORD_ACTIVE)
+                                stateProperty.isNotEqualTo(TeleprompterItemState.RE_RECORD_ACTIVE)
                             ).and(
-                                stateProperty.isNotEqualTo(NarrationTextItemState.RE_RECORDING_PAUSED)
+                                stateProperty.isNotEqualTo(TeleprompterItemState.RE_RECORDING_PAUSED)
                             ).and(
-                                stateProperty.isNotEqualTo(NarrationTextItemState.RECORDING_PAUSED)
+                                stateProperty.isNotEqualTo(TeleprompterItemState.RECORDING_PAUSED)
                             )
                     )
                 )
