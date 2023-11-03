@@ -22,6 +22,7 @@ import jooq.tables.*
 import org.jooq.DSLContext
 import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
+import org.jooq.impl.DSL.foreignKey
 import org.slf4j.LoggerFactory
 
 const val SCHEMA_VERSION = 13
@@ -355,7 +356,7 @@ class DatabaseMigrator {
 
     /**
      * Version 13
-     * Adds Checking Status table and FK columns to it
+     * Adds Checking Status table and Take Entity's FK column reference.
      */
     private fun migrate12to13(dsl: DSLContext, current: Int): Int {
         return if (current < 13) {
@@ -370,26 +371,32 @@ class DatabaseMigrator {
                 .execute()
 
             try {
-                dsl
-                    .alterTable(TakeEntity.TAKE_ENTITY)
-                    .addColumn(TakeEntity.TAKE_ENTITY.CHECKING_FK)
+                /**
+                 * To add a column with foreign key in SQLite, DROP and CREATE the table again.
+                 * ADD CONSTRAINT is not supported - https://www.sqlite.org/omitted.html
+                 */
+                clearProjectTables(dsl)
+                dsl.dropTable(TakeEntity.TAKE_ENTITY)
                     .execute()
 
-                dsl
-                    .alterTable(TakeEntity.TAKE_ENTITY)
-                    .addColumn(TakeEntity.TAKE_ENTITY.CHECKSUM)
-                    .execute()
-
-                dsl
-                    .alterTable(TakeEntity.TAKE_ENTITY)
-                    .add(
+                dsl.createTable(TakeEntity.TAKE_ENTITY)
+                    .column(TakeEntity.TAKE_ENTITY.ID)
+                    .column(TakeEntity.TAKE_ENTITY.CONTENT_FK)
+                    .column(TakeEntity.TAKE_ENTITY.FILENAME)
+                    .column(TakeEntity.TAKE_ENTITY.PATH)
+                    .column(TakeEntity.TAKE_ENTITY.NUMBER)
+                    .column(TakeEntity.TAKE_ENTITY.CREATED_TS)
+                    .column(TakeEntity.TAKE_ENTITY.DELETED_TS)
+                    .column(TakeEntity.TAKE_ENTITY.PLAYED)
+                    .column(TakeEntity.TAKE_ENTITY.CHECKING_FK)
+                    .column(TakeEntity.TAKE_ENTITY.CHECKSUM)
+                    .constraints(
+                        DSL.primaryKey(TakeEntity.TAKE_ENTITY.ID),
                         DSL.constraint("fk_checking_status")
                             .foreignKey(TakeEntity.TAKE_ENTITY.CHECKING_FK)
                             .references(CheckingStatus.CHECKING_STATUS)
                     )
-                    .execute()
 
-                clearProjectTables(dsl)
             } catch (e: DataAccessException) {
                 // Exception is thrown because the column might already exist but an existence check cannot
                 // be performed in sqlite.
