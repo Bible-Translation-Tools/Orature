@@ -114,6 +114,8 @@ class SettingsViewModel : ViewModel() {
         subscribe<ThemeColorEvent<UIComponent>> {
             updateTheme(it.data)
         }
+
+        refreshPlugins()
     }
 
     fun bind() {
