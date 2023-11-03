@@ -348,9 +348,6 @@ internal class ChapterRepresentation(
             } else {
                 verses.any { current in it } && current != verses.last().lastFrame()
             }
-            if (!hasRemaining) {
-                // logger.info("No audio remaining")
-            }
             return hasRemaining
         }
 

@@ -37,18 +37,6 @@ import org.wycliffeassociates.otter.common.domain.narration.teleprompter.Telepro
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
-//enum class NarrationTextItemState {
-//    BEGIN_RECORDING,
-//    RECORD,
-//    RECORDING_PAUSED,
-//    RECORD_DISABLED,
-//    RECORD_ACTIVE,
-//    RE_RECORD,
-//    RE_RECORD_ACTIVE,
-//    RE_RECORDING_PAUSED,
-//    RE_RECORD_DISABLED
-//}
-
 class NarrationTextItem : VBox() {
     private val logger = LoggerFactory.getLogger(NarrationTextItem::class.java)
 
