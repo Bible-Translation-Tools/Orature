@@ -51,28 +51,6 @@ class NarrationStateMachine(
         contexts.firstOrNull { it.state.type == NarrationTextItemState.RECORD_DISABLED }?.state = RecordState
     }
 
-    fun changeState(
-        request: NarrationTextItemState,
-        requestIndex: Int
-    ): List<NarrationTextItemState> {
-        if (request !in contexts[requestIndex].state.validStateTransitions) {
-            throw IllegalStateException(
-                "Could not complete state transition, $request is not a valid transition from ${contexts[requestIndex].state.type}"
-            )
-        }
-        return contexts.mapIndexed { index, context ->
-            val orientation = when {
-                requestIndex == index -> NarrationStateEventPosition.CURRENT
-                requestIndex - 1 == index -> NarrationStateEventPosition.PRECEDING
-                requestIndex + 1 == index -> NarrationStateEventPosition.SUCCEEDING
-                else -> NarrationStateEventPosition.PERIPHERAL
-            }
-
-            context.changeState(request)
-            context.state.type
-        }
-    }
-
     fun applyTransition(request: NarrationStateTransitions, requestIndex: Int): List<NarrationTextItemState> {
         try {
             when (request) {
@@ -243,8 +221,10 @@ object SaveRecordingAction {
     fun apply(contexts: MutableList<NarrationStateContext>, index: Int) {
         if (index !in contexts.indices) return
 
-        for (i in 0 until index) {
-            contexts[i].restore()
+        if (index != 0) {
+            for (i in 0 until index) {
+                contexts[i].restore()
+            }
         }
 
         contexts[index].changeState(NarrationTextItemState.RE_RECORD)

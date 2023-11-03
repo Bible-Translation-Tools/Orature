@@ -20,6 +20,7 @@ import org.wycliffeassociates.otter.jvm.controls.event.PlayChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PlayVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RecordVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.SaveRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
@@ -149,10 +150,10 @@ class NarrationPage : View() {
             viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
-//        subscribe<ResumeReRecordingEvent> {
-//            viewModel.toggleRecording(it.index)
-//            viewModel.handleEvent(it)
-//        }.let { eventSubscriptions.add(it) }
+        subscribe<ResumeRecordingAgainEvent> {
+            viewModel.resumeRecording()
+            viewModel.handleEvent(it)
+        }.let { eventSubscriptions.add(it) }
 
         subscribe<NarrationMarkerChangedEvent> {
             logger.info("Received Narration Moved event")
