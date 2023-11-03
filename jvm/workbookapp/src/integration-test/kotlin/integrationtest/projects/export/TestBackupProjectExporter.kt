@@ -188,6 +188,7 @@ class TestBackupProjectExporter {
             .addTake(3, ContentType.META, 1, true)
             .addTake(1, ContentType.TEXT, 1, true, chapter = 1, start = 1, end = 1)
             .addTake(2, ContentType.TEXT, 1, true, chapter = 2, start = 1, end = 1)
+            // set checking status to be imported
             .addTake(3, ContentType.TEXT, 1, true, chapter = 3, start = 1, end = 1, checking = verseChecking)
             .buildFile()
     }
