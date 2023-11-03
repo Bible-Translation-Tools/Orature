@@ -54,13 +54,12 @@ import org.wycliffeassociates.otter.common.audio.AudioMetadataFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.*
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.workbook.Book
-import org.wycliffeassociates.otter.common.domain.project.CheckingStatusSerializable
+import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.domain.project.TakeCheckingStatusMap
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.usfm.getText
 import org.wycliffeassociates.usfmtools.USFMParser
 import org.wycliffeassociates.usfmtools.models.markers.CMarker
 import org.wycliffeassociates.usfmtools.models.markers.VMarker
-
 
 class ProjectFilesAccessor(
     directoryProvider: IDirectoryProvider,
@@ -330,7 +329,7 @@ class ProjectFilesAccessor(
             .filter { takeFilter(it.name) }
             .map { take ->
                 val path = relativeTakePath(take)
-                val checking = CheckingStatusSerializable(
+                val checking = TakeCheckingState(
                     take.checkingState.value!!.status,
                     take.getSavedChecksum()
                 )

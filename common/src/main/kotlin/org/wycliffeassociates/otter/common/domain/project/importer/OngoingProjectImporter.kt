@@ -517,7 +517,7 @@ class OngoingProjectImporter @Inject constructor(
                     now,
                     null,
                     false,
-                    checkingStatus?.checking ?: CheckingStatus.UNCHECKED,
+                    checkingStatus?.status ?: CheckingStatus.UNCHECKED,
                     checkingStatus?.checksum,
                     listOf()
                 )
@@ -596,7 +596,7 @@ class OngoingProjectImporter @Inject constructor(
                         fileReader
                     )
                     takesCheckingMap[takeName]?.let {
-                        take.checkingStatus = it.checking
+                        take.checkingStatus = it.status
                         take.checksum = it.checksum
                     }
                     take.id = takeRepository.insertForContent(take, content).blockingGet()

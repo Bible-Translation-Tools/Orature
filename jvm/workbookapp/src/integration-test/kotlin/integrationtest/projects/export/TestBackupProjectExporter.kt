@@ -18,6 +18,11 @@
  */
 package integrationtest.projects.export
 
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.core.JsonFactory
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import integrationtest.di.DaggerTestPersistenceComponent
 import integrationtest.projects.DatabaseEnvironment
 import org.junit.After
@@ -26,10 +31,13 @@ import org.junit.Before
 import org.junit.Test
 import org.wycliffeassociates.otter.common.ResourceContainerBuilder
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
+import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
+import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.takeFilenamePattern
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
+import org.wycliffeassociates.otter.common.domain.project.TakeCheckingStatusMap
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOptions
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.BackupProjectExporter
@@ -65,6 +73,7 @@ class TestBackupProjectExporter {
     private val db = dbEnvProvider.get() // bootstrap the db
     private val takesPerChapter = 2
     private val contributors = listOf("user1", "user2")
+    private val verseChecking = TakeCheckingState(CheckingStatus.VERSE, "test-checksum")
     private val seedProject = buildProjectFile()
     private lateinit var workbook: Workbook
     private lateinit var outputDir: File
@@ -140,6 +149,36 @@ class TestBackupProjectExporter {
         )
     }
 
+    @Test
+    fun exportTranslationWithChecking() {
+        val result = exportBackupUseCase.get()
+            .export(
+                outputDir,
+                workbook,
+                callback = null,
+                options = null
+            )
+            .blockingGet()
+
+        Assert.assertEquals(ExportResult.SUCCESS, result)
+
+        val file = outputDir.listFiles().singleOrNull()
+
+        Assert.assertNotNull(file)
+
+        ResourceContainer.load(file!!).use { rc ->
+            rc.accessor.getInputStream(ResourceContainerBuilder.checkingStatusFilePath).use { stream ->
+                val mapper = ObjectMapper(JsonFactory())
+                    .registerKotlinModule()
+                    .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                val takeCheckingMap = mapper.readValue<TakeCheckingStatusMap>(stream)
+
+                Assert.assertEquals(6, takeCheckingMap.size)
+                Assert.assertEquals(1, takeCheckingMap.values.filter { it == verseChecking }.size )
+            }
+        }
+    }
+
     private fun buildProjectFile(): File {
         return ResourceContainerBuilder
             .setUpEmptyProjectBuilder()
@@ -149,7 +188,7 @@ class TestBackupProjectExporter {
             .addTake(3, ContentType.META, 1, true)
             .addTake(1, ContentType.TEXT, 1, true, chapter = 1, start = 1, end = 1)
             .addTake(2, ContentType.TEXT, 1, true, chapter = 2, start = 1, end = 1)
-            .addTake(3, ContentType.TEXT, 1, true, chapter = 3, start = 1, end = 1)
+            .addTake(3, ContentType.TEXT, 1, true, chapter = 3, start = 1, end = 1, checking = verseChecking)
             .buildFile()
     }
 
