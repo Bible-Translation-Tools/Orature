@@ -142,7 +142,7 @@ class WorkbookDataStoreTest {
             return Chapter(
                 1,
                 "1",
-                "1",
+                "chapter",
                 createAssociatedAudio(),
                 listOf(),
                 listOf(),
@@ -230,7 +230,7 @@ class WorkbookDataStoreTest {
         val stringProperty = SimpleStringProperty()
         stringProperty.bind(workbookDataStore.activeChapterTitleBinding())
 
-        Assert.assertEquals("Genesis 1", stringProperty.value)
+        Assert.assertEquals("Chapter 1", stringProperty.value)
     }
 
     @Test
