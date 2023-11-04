@@ -264,7 +264,7 @@ class NarrationTextItem : VBox() {
                     visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.RECORD_DISABLED))
                 }
                 hbox {
-                    // RE_RECORD
+                    // RECORD_AGAIN
                     alignment = Pos.CENTER
                     narration_button {
                         alignment = Pos.CENTER
@@ -275,10 +275,10 @@ class NarrationTextItem : VBox() {
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                         onActionProperty().bind(onRecordAgainActionProperty)
                     }
-                    visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.RE_RECORD))
+                    visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.RECORD_AGAIN))
                 }
                 hbox {
-                    // RE_RECORD_DISABLED
+                    // RECORD_AGAIN_DISABLED
                     alignment = Pos.CENTER
                     narration_button {
                         alignment = Pos.CENTER
@@ -290,10 +290,10 @@ class NarrationTextItem : VBox() {
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                         onActionProperty().bind(onRecordAgainActionProperty)
                     }
-                    visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.RE_RECORD_DISABLED))
+                    visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.RECORD_AGAIN_DISABLED))
                 }
                 hbox {
-                    // RE_RECORD_ACTIVE
+                    // RECORD_AGAIN_ACTIVE
                     alignment = Pos.CENTER
                     spacing = 16.0
                     narration_button {
@@ -312,10 +312,10 @@ class NarrationTextItem : VBox() {
                         graphic = FontIcon(MaterialDesign.MDI_CHECKBOX_MARKED_CIRCLE)
                         onActionProperty().bind(onSaveRecordingActionProperty)
                     }
-                    visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.RE_RECORD_ACTIVE))
+                    visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.RECORD_AGAIN_ACTIVE))
                 }
                 hbox {
-                    // RE_RECORDING_PAUSED
+                    // RECORD_AGAIN_PAUSED
                     alignment = Pos.CENTER
                     spacing = 16.0
                     narration_button {
@@ -333,11 +333,9 @@ class NarrationTextItem : VBox() {
                         graphic = FontIcon(MaterialDesign.MDI_CHECKBOX_MARKED_CIRCLE)
                         onActionProperty().bind(onSaveRecordingActionProperty)
                     }
-                    visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.RE_RECORDING_PAUSED))
+                    visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.RECORD_AGAIN_PAUSED))
                 }
             }
-
-//             disableProperty().bind(isSelectedProperty.not())
         }
     }
 
@@ -352,9 +350,9 @@ class NarrationTextItem : VBox() {
                     isRecordingProperty.and(
                         stateProperty.isNotEqualTo(TeleprompterItemState.RECORD_ACTIVE)
                             .and(
-                                stateProperty.isNotEqualTo(TeleprompterItemState.RE_RECORD_ACTIVE)
+                                stateProperty.isNotEqualTo(TeleprompterItemState.RECORD_AGAIN_ACTIVE)
                             ).and(
-                                stateProperty.isNotEqualTo(TeleprompterItemState.RE_RECORDING_PAUSED)
+                                stateProperty.isNotEqualTo(TeleprompterItemState.RECORD_AGAIN_PAUSED)
                             ).and(
                                 stateProperty.isNotEqualTo(TeleprompterItemState.RECORDING_PAUSED)
                             )

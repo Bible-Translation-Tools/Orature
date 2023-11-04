@@ -16,22 +16,22 @@ class TeleprompterStateMachine(
     fun initialize(active: List<Boolean>) {
         contexts = total.map { TeleprompterStateContext() }.toMutableList()
         active.forEachIndexed { index, hasRecording ->
-            contexts[index].state = if (hasRecording) ReRecordState else RecordDisabledState
+            contexts[index].state = if (hasRecording) RecordAgainState else RecordDisabledState
         }
         contexts.firstOrNull { it.state.type == TeleprompterItemState.RECORD_DISABLED }?.state = RecordState
     }
 
-    fun applyTransition(request: TeleprompterStateTransitions, requestIndex: Int): List<TeleprompterItemState> {
+    fun transition(request: TeleprompterStateTransition, requestIndex: Int): List<TeleprompterItemState> {
         try {
             when (request) {
-                TeleprompterStateTransitions.RECORD -> RecordAction.apply(contexts, requestIndex)
-                TeleprompterStateTransitions.PAUSE_RECORDING -> PauseRecordingAction.apply(contexts, requestIndex)
-                TeleprompterStateTransitions.RESUME_RECORDING -> ResumeRecordAction.apply(contexts, requestIndex)
-                TeleprompterStateTransitions.NEXT -> NextVerseAction.apply(contexts, requestIndex)
-                TeleprompterStateTransitions.RE_RECORD -> ReRecordAction.apply(contexts, requestIndex)
-                TeleprompterStateTransitions.PAUSE_RE_RECORD -> PauseReRecordingAction.apply(contexts, requestIndex)
-                TeleprompterStateTransitions.RESUME_RE_RECORDING -> ResumeReRecordAction.apply(contexts, requestIndex)
-                TeleprompterStateTransitions.SAVE -> SaveRecordingAction.apply(contexts, requestIndex)
+                TeleprompterStateTransition.RECORD -> RecordAction.apply(contexts, requestIndex)
+                TeleprompterStateTransition.PAUSE_RECORDING -> PauseRecordingAction.apply(contexts, requestIndex)
+                TeleprompterStateTransition.RESUME_RECORDING -> ResumeRecordAction.apply(contexts, requestIndex)
+                TeleprompterStateTransition.NEXT -> NextVerseAction.apply(contexts, requestIndex)
+                TeleprompterStateTransition.RECORD_AGAIN -> RecordAgainAction.apply(contexts, requestIndex)
+                TeleprompterStateTransition.PAUSE_RECORD_AGAIN -> PauseRecordAgainAction.apply(contexts, requestIndex)
+                TeleprompterStateTransition.RESUME_RECORD_AGAIN -> ResumeRecordAgainAction.apply(contexts, requestIndex)
+                TeleprompterStateTransition.SAVE -> SaveRecordingAction.apply(contexts, requestIndex)
             }
         } catch (e: java.lang.IllegalStateException) {
             logger.error("Error in state transition for requestIndex: $requestIndex, action $request", e)

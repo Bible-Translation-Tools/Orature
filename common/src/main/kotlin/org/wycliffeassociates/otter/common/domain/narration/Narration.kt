@@ -61,17 +61,17 @@ class Narration @AssistedInject constructor(
         get() = chapterRepresentation.getAudioFileReader()
 
     val totalVerses: List<AudioMarker>
-        get() = run {
+        get() {
             val verses = chapterRepresentation
                 .totalVerses
                 .map {
                     it.marker
                 }
-            verses
+            return verses
         }
 
     val activeVerses: List<VerseMarker>
-        get() = run {
+        get() {
             val verses = chapterRepresentation
                 .activeVerses
                 .map {
@@ -79,7 +79,7 @@ class Narration @AssistedInject constructor(
                         location = chapterRepresentation.absoluteToRelativeChapter(it.firstFrame())
                     )
                 }
-            verses
+            return verses
         }
 
     fun versesWithRecordings(): List<Boolean> {
@@ -447,7 +447,7 @@ class Narration @AssistedInject constructor(
     fun getDurationInFrames(): Int {
         return chapterRepresentation.totalFrames
     }
-    
+
     private fun getRelativeChapterLocation(): Int {
         return if (lockedVerseIndex != null) {
             chapterReaderConnection

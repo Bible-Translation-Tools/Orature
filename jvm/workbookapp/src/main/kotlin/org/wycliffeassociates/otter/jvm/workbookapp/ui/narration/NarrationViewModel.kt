@@ -29,7 +29,7 @@ import org.wycliffeassociates.otter.common.domain.narration.AudioScene
 import org.wycliffeassociates.otter.common.domain.narration.Narration
 import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterStateMachine
-import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterStateTransitions
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterStateTransition
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterItemState
 import org.wycliffeassociates.otter.common.domain.narration.framesToPixels
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
@@ -321,7 +321,7 @@ class NarrationViewModel : ViewModel() {
     private fun resetTeleprompter() {
         narratableList.forEachIndexed { idx, chunk ->
             if (chunk.hasRecording) {
-                chunk.state = TeleprompterItemState.RE_RECORD
+                chunk.state = TeleprompterItemState.RECORD_AGAIN
             } else {
                 chunk.state = TeleprompterItemState.RECORD_DISABLED
             }
@@ -749,40 +749,40 @@ class NarrationViewModel : ViewModel() {
     fun handleEvent(event: FXEvent) {
         val list = when (event) {
             is BeginRecordingEvent -> {
-                teleprompterStateMachine.applyTransition(TeleprompterStateTransitions.RECORD, event.index)
+                teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD, event.index)
             }
 
             is NextVerseEvent -> {
-                teleprompterStateMachine.applyTransition(TeleprompterStateTransitions.NEXT, event.index)
+                teleprompterStateMachine.transition(TeleprompterStateTransition.NEXT, event.index)
             }
 
             is PauseRecordingEvent -> {
-                teleprompterStateMachine.applyTransition(TeleprompterStateTransitions.PAUSE_RECORDING, event.index)
+                teleprompterStateMachine.transition(TeleprompterStateTransition.PAUSE_RECORDING, event.index)
             }
 
 
             is ResumeRecordingEvent -> {
-                teleprompterStateMachine.applyTransition(TeleprompterStateTransitions.RECORD, event.index)
+                teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD, event.index)
             }
 
             is RecordVerseEvent -> {
-                teleprompterStateMachine.applyTransition(TeleprompterStateTransitions.RECORD, event.index)
+                teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD, event.index)
             }
 
             is RecordAgainEvent -> {
-                teleprompterStateMachine.applyTransition(TeleprompterStateTransitions.RE_RECORD, event.index)
+                teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD_AGAIN, event.index)
             }
 
             is PauseRecordAgainEvent -> {
-                teleprompterStateMachine.applyTransition(TeleprompterStateTransitions.PAUSE_RE_RECORD, event.index)
+                teleprompterStateMachine.transition(TeleprompterStateTransition.PAUSE_RECORD_AGAIN, event.index)
             }
 
             is ResumeRecordingAgainEvent -> {
-                teleprompterStateMachine.applyTransition(TeleprompterStateTransitions.RESUME_RE_RECORDING, event.index)
+                teleprompterStateMachine.transition(TeleprompterStateTransition.RESUME_RECORD_AGAIN, event.index)
             }
 
             is SaveRecordingEvent -> {
-                teleprompterStateMachine.applyTransition(TeleprompterStateTransitions.SAVE, event.index)
+                teleprompterStateMachine.transition(TeleprompterStateTransition.SAVE, event.index)
             }
 
             else -> {
