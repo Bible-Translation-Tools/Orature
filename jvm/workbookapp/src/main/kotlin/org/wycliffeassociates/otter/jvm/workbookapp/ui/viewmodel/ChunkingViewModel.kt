@@ -57,7 +57,7 @@ import tornadofx.sizeProperty
 const val WAV_COLOR = "#66768B"
 const val BACKGROUND_COLOR = "#fff"
 
-open class ChunkingViewModel : ViewModel(), IMarkerViewModel {
+class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
@@ -109,7 +109,7 @@ open class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
     }
 
-    open fun dock() {
+    fun dock() {
         val chapter = workbookDataStore.chapter
         val sourceAudio = initializeSourceAudio(chapter.sort)
         audioDataStore.sourceAudioProperty.set(sourceAudio)
@@ -124,7 +124,7 @@ open class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         startAnimationTimer()
     }
 
-    open fun undock() {
+    fun undock() {
         pause()
         translationViewModel.selectedStepProperty.value?.let {
             // handle when navigating to the next step
