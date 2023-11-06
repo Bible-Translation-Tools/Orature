@@ -16,6 +16,7 @@ import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.common.audio.wav.WavOutputStream
+import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
@@ -40,6 +41,7 @@ class Narration @AssistedInject constructor(
     @Assisted private val workbook: Workbook,
     @Assisted private val chapter: Chapter
 ) {
+
     private val DEFAULT_FRAME_SIZE_BYTES = 2
     private val logger = LoggerFactory.getLogger(Narration::class.java)
 
@@ -58,8 +60,18 @@ class Narration @AssistedInject constructor(
     val audioReader: AudioFileReader
         get() = chapterRepresentation.getAudioFileReader()
 
+    val totalVerses: List<AudioMarker>
+        get() {
+            val verses = chapterRepresentation
+                .totalVerses
+                .map {
+                    it.marker
+                }
+            return verses
+        }
+
     val activeVerses: List<VerseMarker>
-        get() = run {
+        get() {
             val verses = chapterRepresentation
                 .activeVerses
                 .map {
@@ -67,8 +79,12 @@ class Narration @AssistedInject constructor(
                         location = chapterRepresentation.absoluteToRelativeChapter(it.firstFrame())
                     )
                 }
-            verses
+            return verses
         }
+
+    fun versesWithRecordings(): List<Boolean> {
+        return chapterRepresentation.versesWithRecordings()
+    }
 
     val onActiveVersesUpdated: PublishSubject<List<VerseMarker>>
         get() = chapterRepresentation.onActiveVersesUpdated
@@ -431,7 +447,7 @@ class Narration @AssistedInject constructor(
     fun getDurationInFrames(): Int {
         return chapterRepresentation.totalFrames
     }
-    
+
     private fun getRelativeChapterLocation(): Int {
         return if (lockedVerseIndex != null) {
             chapterReaderConnection

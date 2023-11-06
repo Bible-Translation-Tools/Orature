@@ -14,11 +14,13 @@ import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.OpenChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.OpenInAudioPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PauseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PlayChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PlayVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RecordVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.SaveRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
@@ -125,22 +127,26 @@ class NarrationPage : View() {
         }.let { eventSubscriptions.add(it) }
 
         subscribe<RecordVerseEvent> {
-            viewModel.toggleRecording(it.index)
             viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<BeginRecordingEvent> {
-            viewModel.toggleRecording(it.index)
             viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<PauseRecordingEvent> {
-            viewModel.toggleRecording(it.index)
+            viewModel.handleEvent(it)
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<PauseRecordAgainEvent> {
             viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<ResumeRecordingEvent> {
-            viewModel.toggleRecording(it.index)
+            viewModel.handleEvent(it)
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<ResumeRecordingAgainEvent> {
             viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
@@ -150,7 +156,6 @@ class NarrationPage : View() {
         }.let { eventSubscriptions.add(it) }
 
         subscribe<NextVerseEvent> {
-            viewModel.onNext(it.index)
             viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
@@ -167,12 +172,10 @@ class NarrationPage : View() {
         }.let { eventSubscriptions.add(it) }
 
         subscribe<RecordAgainEvent> {
-            viewModel.recordAgain(it.index)
             viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<SaveRecordingEvent> {
-            viewModel.saveRecording(it.index)
             viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
