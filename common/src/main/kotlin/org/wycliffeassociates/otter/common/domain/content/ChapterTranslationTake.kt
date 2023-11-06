@@ -21,11 +21,11 @@ class ChapterTranslationTake @Inject constructor(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     /**
-     * Compiles chunks into one chapter take and compares it with the current selected take.
-     * If they are matching, the selected take will be returned. Otherwise, the newly compiled
-     * take will be selected and returned.
+     * Compiles all chunks' takes into a single candidate take and compares it with
+     * the currently selected take (chapter). If they are matching, the selected take
+     * will be returned. Otherwise, the candidate take will be selected and returned.
      */
-    fun fetch(workbook: Workbook, chapter: Chapter) : Single<Take> {
+    fun getOrCompile(workbook: Workbook, chapter: Chapter) : Single<Take> {
         val takes = chapter.chunks.value
             ?.filter { it.hasSelectedAudio() }
             ?.mapNotNull { it.audio.getSelectedTake()?.file }
@@ -33,7 +33,6 @@ class ChapterTranslationTake @Inject constructor(
 
         var compiled: File? = null
 
-        // Don't place verse markers if the draft comes from user chunks
         return concatenateAudio.execute(takes, includeMarkers = false)
             .flatMap { file ->
                 compiled = file

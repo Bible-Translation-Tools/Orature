@@ -177,7 +177,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     }
 
     private fun loadChapterTake() {
-        chapterTranslationTake.fetch(
+        chapterTranslationTake.getOrCompile(
             workbookDataStore.workbook,
             workbookDataStore.chapter
         )
