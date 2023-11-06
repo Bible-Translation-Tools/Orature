@@ -749,39 +749,48 @@ class NarrationViewModel : ViewModel() {
     fun handleEvent(event: FXEvent) {
         val list = when (event) {
             is BeginRecordingEvent -> {
+                record(event.index)
                 teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD, event.index)
             }
 
             is NextVerseEvent -> {
+                onNext(event.index)
                 teleprompterStateMachine.transition(TeleprompterStateTransition.NEXT, event.index)
             }
 
             is PauseRecordingEvent -> {
+                pauseRecording(event.index)
                 teleprompterStateMachine.transition(TeleprompterStateTransition.PAUSE_RECORDING, event.index)
             }
 
 
             is ResumeRecordingEvent -> {
+                resumeRecording()
                 teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD, event.index)
             }
 
             is RecordVerseEvent -> {
+                record(event.index)
                 teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD, event.index)
             }
 
             is RecordAgainEvent -> {
+                recordAgain(event.index)
                 teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD_AGAIN, event.index)
             }
 
             is PauseRecordAgainEvent -> {
+                pauseRecording(event.index)
                 teleprompterStateMachine.transition(TeleprompterStateTransition.PAUSE_RECORD_AGAIN, event.index)
             }
 
             is ResumeRecordingAgainEvent -> {
+                resumeRecording()
                 teleprompterStateMachine.transition(TeleprompterStateTransition.RESUME_RECORD_AGAIN, event.index)
             }
 
             is SaveRecordingEvent -> {
+                saveRecording(event.index)
                 teleprompterStateMachine.transition(TeleprompterStateTransition.SAVE, event.index)
             }
 

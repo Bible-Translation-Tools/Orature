@@ -126,32 +126,26 @@ class NarrationPage : View() {
         }.let { eventSubscriptions.add(it) }
 
         subscribe<RecordVerseEvent> {
-            viewModel.record(it.index)
             viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<BeginRecordingEvent> {
-            viewModel.record(it.index)
             viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<PauseRecordingEvent> {
-            viewModel.pauseRecording(it.index)
             viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<PauseRecordAgainEvent> {
-            viewModel.pauseRecording(it.index)
             viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<ResumeRecordingEvent> {
-            viewModel.resumeRecording()
             viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<ResumeRecordingAgainEvent> {
-            viewModel.resumeRecording()
             viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
@@ -161,7 +155,6 @@ class NarrationPage : View() {
         }.let { eventSubscriptions.add(it) }
 
         subscribe<NextVerseEvent> {
-            viewModel.onNext(it.index)
             viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
@@ -178,12 +171,10 @@ class NarrationPage : View() {
         }.let { eventSubscriptions.add(it) }
 
         subscribe<RecordAgainEvent> {
-            viewModel.recordAgain(it.index)
             viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
         subscribe<SaveRecordingEvent> {
-            viewModel.saveRecording(it.index)
             viewModel.handleEvent(it)
         }.let { eventSubscriptions.add(it) }
 
