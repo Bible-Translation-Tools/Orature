@@ -65,7 +65,7 @@ class NarrationTextItem : VBox() {
     val onPauseRecordingAction = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onPauseRecordAgainAction = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onResumeRecordingAction = SimpleObjectProperty<EventHandler<ActionEvent>>()
-    val onResumeRecordingAgainAction= SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val onResumeRecordingAgainAction = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onRecordActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onRecordAgainActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onSaveRecordingActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
@@ -301,9 +301,7 @@ class NarrationTextItem : VBox() {
                         addPseudoClass("active")
                         text = FX.messages["pause"]
                         graphic = FontIcon(MaterialDesign.MDI_PAUSE)
-                        setOnAction {
-                            onActionProperty().bind(onPauseRecordAgainAction)
-                        }
+                        onActionProperty().bind(onPauseRecordAgainAction)
                     }
                     narration_button {
                         prefWidth = 150.0
@@ -322,9 +320,7 @@ class NarrationTextItem : VBox() {
                         addClass("btn", "btn--secondary")
                         text = FX.messages["resume"]
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
-                        setOnAction {
-                            onActionProperty().bind(onResumeRecordingAgainAction)
-                        }
+                        onActionProperty().bind(onResumeRecordingAgainAction)
                     }
                     narration_button {
                         prefWidth = 150.0

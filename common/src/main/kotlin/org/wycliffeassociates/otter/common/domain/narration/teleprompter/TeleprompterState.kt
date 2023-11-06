@@ -155,6 +155,7 @@ object RecordAgainState : TeleprompterState {
     override val type = TeleprompterItemState.RECORD_AGAIN
 
     override val validStateTransitions = setOf(
+        TeleprompterItemState.RECORD_AGAIN,
         TeleprompterItemState.RECORD_AGAIN_ACTIVE,
         TeleprompterItemState.RECORD_AGAIN_DISABLED,
     )
@@ -167,6 +168,7 @@ object RecordAgainState : TeleprompterState {
         }
 
         return when (request) {
+            TeleprompterItemState.RECORD_AGAIN -> RecordAgainState
             TeleprompterItemState.RECORD_AGAIN_ACTIVE -> RecordAgainActiveState
             TeleprompterItemState.RECORD_AGAIN_DISABLED -> RecordAgainDisabledState
             else -> {

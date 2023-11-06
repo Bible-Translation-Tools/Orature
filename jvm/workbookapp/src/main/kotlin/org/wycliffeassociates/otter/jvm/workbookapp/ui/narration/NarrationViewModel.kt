@@ -395,6 +395,8 @@ class NarrationViewModel : ViewModel() {
 
         narration.onSaveRecording(verseIndex)
 
+        teleprompterStateMachine.initialize(narration.versesWithRecordings())
+
         recordAgainVerseIndex = null
         recordingVerseIndex.set(verseIndex)
         isRecording = false
