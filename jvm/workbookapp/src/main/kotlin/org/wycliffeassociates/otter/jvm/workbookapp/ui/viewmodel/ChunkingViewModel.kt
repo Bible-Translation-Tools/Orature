@@ -35,15 +35,15 @@ import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import javax.inject.Inject
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.common.domain.chunking.ChunkAudioUseCase
+import org.wycliffeassociates.otter.common.domain.translation.ChunkAudioUseCase
 import org.wycliffeassociates.otter.common.domain.content.CreateChunks
 import org.wycliffeassociates.otter.common.domain.content.ResetChunks
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
-import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
-import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
@@ -112,11 +112,8 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     }
 
     fun onDockChunking() {
-        translationViewModel.resetUndoRedo()
-
         val chapter = workbookDataStore.chapter
         val sourceAudio = initializeSourceAudio(chapter.sort)
-
         audioDataStore.sourceAudioProperty.set(sourceAudio)
 
         sourceAudio?.file?.let {
@@ -137,6 +134,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
             if (hasUnsavedChanges && it.ordinal > ChunkingStep.CHUNKING.ordinal) {
                 saveChanges()
             }
+            translationViewModel.updateStep()
         }
         cleanup()
     }
@@ -177,6 +175,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     override fun redoMarker() {
         super.redoMarker()
         translationViewModel.canUndoProperty.set(true)
+        translationViewModel.canRedoProperty.set(markerModel?.canRedo() == true)
         translationViewModel.reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
     }
 
