@@ -134,7 +134,7 @@ class MarkerWaveform : StackPane() {
         }
         add(waveformFrame)
         add(
-            Line(0.0, 80.0, 0.0, 0.0).apply {
+            Line(0.0, 0.0, 0.0, 0.0).apply {
                 isMouseTransparent = true
                 isManaged = false
                 startXProperty().bind(this@MarkerWaveform.widthProperty().divide(2))
