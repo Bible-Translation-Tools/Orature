@@ -22,6 +22,7 @@ import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
@@ -96,7 +97,7 @@ class DeleteProject @Inject constructor(
                 listOf(sourceMetadata),
                 workbookDescriptor.sourceCollection,
                 workbookDescriptor.targetLanguage,
-                false,
+                workbookDescriptor.mode != ProjectMode.TRANSLATION,
                 workbookDescriptor.mode
             )
             .doOnError {
