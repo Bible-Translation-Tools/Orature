@@ -28,7 +28,7 @@ import org.wycliffeassociates.otter.jvm.controls.chapterselector.ChapterSelector
 
 class ChapterSelectorSkin(val selector: ChapterSelector) : SkinBase<ChapterSelector>(selector) {
     @FXML
-    lateinit var chapterTitle: Label
+    lateinit var chapterTitle: Button
 
     @FXML
     lateinit var prevChapterBtn: Button
@@ -50,7 +50,9 @@ class ChapterSelectorSkin(val selector: ChapterSelector) : SkinBase<ChapterSelec
     }
 
     private fun bindText() {
-        chapterTitle.textProperty().bind(selector.chapterTitleProperty)
+        chapterTitle.apply {
+            textProperty().bind(selector.chapterTitleProperty)
+        }
     }
 
     private fun bindAction() {
@@ -59,6 +61,9 @@ class ChapterSelectorSkin(val selector: ChapterSelector) : SkinBase<ChapterSelec
         }
         nextChapterBtn.apply {
             onActionProperty().bind(selector.onNextChapterActionProperty)
+        }
+        chapterTitle.apply {
+            onActionProperty().bind(selector.onChapterSelectorOpenedProperty)
         }
     }
 
