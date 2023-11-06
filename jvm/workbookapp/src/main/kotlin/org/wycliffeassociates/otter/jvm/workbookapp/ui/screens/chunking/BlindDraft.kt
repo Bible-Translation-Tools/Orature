@@ -12,7 +12,9 @@ import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChunkTakeCard
 import org.wycliffeassociates.otter.jvm.controls.event.ChunkTakeEvent
+import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.TakeAction
+import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BlindDraftViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -27,6 +29,7 @@ class BlindDraft : Fragment() {
     private val takesView = buildTakesArea()
     private val recordingView = buildRecordingArea()
     private val hideSourceAudio = SimpleBooleanProperty(false)
+    private val eventSubscriptions = mutableListOf<EventRegistration>()
 
     override val root = borderpane {
         addClass("blind-draft")
@@ -50,7 +53,6 @@ class BlindDraft : Fragment() {
     init {
         tryImportStylesheet("/css/recording-screen.css")
         tryImportStylesheet("/css/popup-menu.css")
-        subscribeEvents()
     }
 
     private fun buildTakesArea(): VBox {
@@ -134,20 +136,34 @@ class BlindDraft : Fragment() {
         super.onDock()
         mainSectionProperty.set(takesView)
         viewModel.dockBlindDraft()
+        subscribeEvents()
     }
 
     override fun onUndock() {
         super.onUndock()
         viewModel.undockBlindDraft()
+        unsubscribeEvents()
     }
 
     private fun subscribeEvents() {
         subscribe<ChunkTakeEvent> {
             when (it.action) {
-                TakeAction.SELECT -> viewModel.selectTake(it.take)
-//                TakeAction.EDIT -> viewModel.editTake(it.take)
-                TakeAction.DELETE -> viewModel.deleteTake(it.take)
+                TakeAction.SELECT -> viewModel.onSelectTake(it.take)
+                TakeAction.DELETE -> viewModel.onDeleteTake(it.take)
             }
-        }
+        }.also { eventSubscriptions.add(it) }
+
+        subscribe<UndoChunkingPageEvent> {
+            viewModel.undo()
+        }.also { eventSubscriptions.add(it) }
+
+        subscribe<RedoChunkingPageEvent> {
+            viewModel.redo()
+        }.also { eventSubscriptions.add(it) }
+    }
+
+    private fun unsubscribeEvents() {
+        eventSubscriptions.forEach { it.unsubscribe() }
+        eventSubscriptions.clear()
     }
 }

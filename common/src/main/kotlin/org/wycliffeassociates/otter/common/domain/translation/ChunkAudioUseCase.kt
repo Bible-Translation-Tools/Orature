@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.domain.chunking
+package org.wycliffeassociates.otter.common.domain.translation
 
 import java.io.File
 import org.wycliffeassociates.otter.common.audio.AudioCue

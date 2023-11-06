@@ -11,6 +11,8 @@ import javafx.scene.layout.VBox
 import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
+import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
@@ -34,6 +36,7 @@ open class PeerEdit : Fragment() {
     private val mainSectionProperty = SimpleObjectProperty<Node>(null)
     private val playbackView = createPlaybackView()
     private val recordingView = createRecordingView()
+    private val eventSubscriptions = mutableListOf<EventRegistration>()
 
     override val root = borderpane {
         top = vbox {
@@ -92,6 +95,7 @@ open class PeerEdit : Fragment() {
                 tooltip(text)
 
                 visibleWhen { viewModel.isPlayingProperty.not() }
+                disableWhen { viewModel.chunkConfirmed }
 
                 action {
                     viewModel.confirmChunk()
@@ -113,10 +117,6 @@ open class PeerEdit : Fragment() {
                 }
             }
         }
-    }
-
-    init {
-        tryImportStylesheet("/css/recording-screen.css")
     }
 
     private fun createPlaybackWaveform(container: VBox): MarkerWaveform {
@@ -168,6 +168,7 @@ open class PeerEdit : Fragment() {
 
     override fun onDock() {
         super.onDock()
+        subscribeEvents()
         viewModel.dockPeerEdit()
         mainSectionProperty.set(playbackView)
     }
@@ -175,6 +176,22 @@ open class PeerEdit : Fragment() {
     override fun onUndock() {
         super.onUndock()
         viewModel.undockPeerEdit()
+        unsubscribeEvents()
+    }
+
+    private fun subscribeEvents() {
+        subscribe<UndoChunkingPageEvent> {
+            viewModel.undo()
+        }.also { eventSubscriptions.add(it) }
+
+        subscribe<RedoChunkingPageEvent> {
+            viewModel.redo()
+        }.also { eventSubscriptions.add(it) }
+    }
+
+    private fun unsubscribeEvents() {
+        eventSubscriptions.forEach { it.unsubscribe() }
+        eventSubscriptions.clear()
     }
 
     private fun subscribeOnWaveformImages() {

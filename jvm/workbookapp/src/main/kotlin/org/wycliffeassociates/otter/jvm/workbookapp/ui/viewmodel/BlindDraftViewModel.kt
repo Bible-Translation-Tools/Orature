@@ -12,9 +12,9 @@ import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
-import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.common.domain.IUndoable
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
@@ -22,6 +22,10 @@ import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.common.domain.translation.TranslationTakeDeleteAction
+import org.wycliffeassociates.otter.common.domain.translation.TranslationTakeRecordAction
+import org.wycliffeassociates.otter.common.domain.translation.TranslationTakeSelectAction
+import org.wycliffeassociates.otter.common.domain.model.UndoableActionHistory
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel.Result
 import tornadofx.*
@@ -50,6 +54,8 @@ class BlindDraftViewModel : ViewModel() {
     val availableTakes = FilteredList<TakeCardModel>(takes) { !it.selected }
 
     private val recordedTakeProperty = SimpleObjectProperty<Take>()
+    private val actionHistory = UndoableActionHistory<IUndoable>()
+
     private val selectedTakeDisposable = CompositeDisposable()
     private val disposables = CompositeDisposable()
     private val disposableListeners = mutableListOf<ListenerDisposer>()
@@ -60,7 +66,6 @@ class BlindDraftViewModel : ViewModel() {
     }
 
     fun dockBlindDraft() {
-        translationViewModel.resetUndoRedo()
         subscribeToChunks()
 
         sourcePlayerProperty.bind(audioDataStore.sourceAudioPlayerProperty)
@@ -68,6 +73,7 @@ class BlindDraftViewModel : ViewModel() {
             it?.let { chunk ->
                 subscribeSelectedTakePropertyToRelay(chunk)
             }
+            actionHistory.clear()
         }.also { disposableListeners.add(it) }
     }
 
@@ -93,7 +99,13 @@ class BlindDraftViewModel : ViewModel() {
     fun onRecordFinish(result: Result) {
         if (result == Result.SUCCESS) {
             workbookDataStore.chunk?.let { chunk ->
-                chunk.audio.insertTake(recordedTakeProperty.value)
+                val op = TranslationTakeRecordAction(
+                    chunk,
+                    recordedTakeProperty.value,
+                    chunk.audio.getSelectedTake()
+                )
+                actionHistory.execute(op)
+                onUndoableAction()
                 loadTakes(chunk)
             }
         } else {
@@ -102,26 +114,62 @@ class BlindDraftViewModel : ViewModel() {
         }
     }
 
-    fun selectTake(take: Take) {
-        take.file.setLastModified(System.currentTimeMillis())
+    fun onSelectTake(take: Take) {
+        currentChunkProperty.value?.let { chunk ->
+            take.file.setLastModified(System.currentTimeMillis())
+            val selectedTake = chunk.audio.getSelectedTake()
+            val op = TranslationTakeSelectAction(chunk, take, selectedTake)
+            actionHistory.execute(op)
+            onUndoableAction()
+        }
+    }
+
+    private fun selectTake(take: Take) {
         currentChunkProperty.value?.audio?.selectTake(take)
     }
 
-    fun deleteTake(take: Take) {
+    fun onDeleteTake(take: Take) {
         takes.forEach { it.audioPlayer.stop() }
         audioDataStore.stopPlayers()
 
-        val wasTakeSelected = takes.any { it.take == take && it.selected }
-        take.deletedTimestamp.accept(DateHolder.now())
-        take.deletedTimestamp
-            .filter { dateHolder -> dateHolder.value != null }
-            .doOnError { e ->
-                logger.error("Error in removing deleted take: $take", e)
-            }
-            .subscribe {
-                handlePostDeleteTake(take, wasTakeSelected)
-            }
-            .let { disposables.add(it) }
+        currentChunkProperty.value?.let { chunk ->
+            val op = TranslationTakeDeleteAction(
+                chunk,
+                take,
+                takes.any { it.take == take && it.selected },
+                ::handlePostDeleteTake
+            )
+            actionHistory.execute(op)
+            onUndoableAction()
+        }
+    }
+
+    fun undo() {
+        if (!actionHistory.canUndo()) {
+            translationViewModel.canUndoProperty.set(false)
+            return
+        }
+
+        takes.forEach { it.audioPlayer.stop() }
+        audioDataStore.stopPlayers()
+        actionHistory.undo()
+        currentChunkProperty.value?.let { loadTakes(it) }
+        translationViewModel.canUndoProperty.set(actionHistory.canUndo())
+        translationViewModel.canRedoProperty.set(true)
+    }
+
+    fun redo() {
+        if (!actionHistory.canRedo()) {
+            translationViewModel.canRedoProperty.set(false)
+            return
+        }
+
+        takes.forEach { it.audioPlayer.stop() }
+        audioDataStore.stopPlayers()
+        actionHistory.redo()
+        currentChunkProperty.value?.let { loadTakes(it) }
+        translationViewModel.canRedoProperty.set(actionHistory.canRedo())
+        translationViewModel.canUndoProperty.set(true)
     }
 
     private fun subscribeToChunks() {
@@ -230,6 +278,11 @@ class BlindDraftViewModel : ViewModel() {
                 }
             }
         }
+    }
+
+    private fun onUndoableAction() {
+        translationViewModel.canUndoProperty.set(true)
+        translationViewModel.canRedoProperty.set(false)
     }
 
     fun Take.mapToCardModel(selected: Boolean): TakeCardModel {

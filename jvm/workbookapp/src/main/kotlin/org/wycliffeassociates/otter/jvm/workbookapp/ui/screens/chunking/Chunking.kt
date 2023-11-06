@@ -33,46 +33,9 @@ class Chunking : Fragment() {
 
     private lateinit var waveform: MarkerWaveform
     private lateinit var slider: Slider
+    private val eventSubscriptions = mutableListOf<EventRegistration>()
 
     var cleanUpWaveform: () -> Unit = {}
-
-    override fun onDock() {
-        super.onDock()
-        logger.info("Chunking docked")
-
-        viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
-        viewModel.onDockChunking()
-        viewModel.initializeAudioController(slider)
-
-        subscribe<MarkerDeletedEvent> {
-            viewModel.deleteMarker(it.markerId)
-        }
-        subscribe<MarkerMovedEvent> {
-            viewModel.moveMarker(it.markerId, it.start, it.end)
-        }
-        subscribe<UndoChunkingPageEvent> {
-            viewModel.undoMarker()
-        }
-        subscribe<RedoChunkingPageEvent> {
-            viewModel.redoMarker()
-        }
-    }
-
-    override fun onUndock() {
-        super.onUndock()
-        logger.info("Chunking undocked")
-        cleanUpWaveform()
-        viewModel.onUndockChunking()
-    }
-
-    private fun subscribeOnWaveformImages() {
-        viewModel.waveform
-            .observeOnFx()
-            .subscribe {
-                waveform.addWaveformImage(it)
-            }
-            .addTo(viewModel.compositeDisposable)
-    }
 
     override val root = vbox {
         borderpane {
@@ -153,6 +116,57 @@ class Chunking : Fragment() {
             }
         }
     }
+
+    override fun onDock() {
+        super.onDock()
+        logger.info("Chunking docked")
+        subscribeEvents()
+
+        viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
+        viewModel.onDockChunking()
+        viewModel.initializeAudioController(slider)
+    }
+
+    override fun onUndock() {
+        super.onUndock()
+        logger.info("Chunking undocked")
+        unsubscribeEvents()
+        cleanUpWaveform()
+        viewModel.onUndockChunking()
+    }
+
+    private fun subscribeEvents() {
+        subscribe<MarkerDeletedEvent> {
+            viewModel.deleteMarker(it.markerId)
+        }.also { eventSubscriptions.add(it) }
+
+        subscribe<MarkerMovedEvent> {
+            viewModel.moveMarker(it.markerId, it.start, it.end)
+        }.also { eventSubscriptions.add(it) }
+
+        subscribe<UndoChunkingPageEvent> {
+            viewModel.undoMarker()
+        }.also { eventSubscriptions.add(it) }
+
+        subscribe<RedoChunkingPageEvent> {
+            viewModel.redoMarker()
+        }.also { eventSubscriptions.add(it) }
+    }
+
+    private fun unsubscribeEvents() {
+        eventSubscriptions.forEach { it.unsubscribe() }
+        eventSubscriptions.clear()
+    }
+
+    private fun subscribeOnWaveformImages() {
+        viewModel.waveform
+            .observeOnFx()
+            .subscribe {
+                waveform.addWaveformImage(it)
+            }
+            .addTo(viewModel.compositeDisposable)
+    }
+
 
     private fun setUpWaveformActionHandlers() {
         waveform.apply {

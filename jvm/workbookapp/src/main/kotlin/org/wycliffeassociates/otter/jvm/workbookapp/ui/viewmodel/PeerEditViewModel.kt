@@ -15,9 +15,11 @@ import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.common.domain.IUndoable
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.translation.TranslationTakeApproveAction
+import org.wycliffeassociates.otter.common.domain.model.UndoableActionHistory
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.waveform.IWaveformViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
@@ -46,6 +48,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
 
     val chunkTitleProperty = workbookDataStore.activeChunkTitleBinding()
     val currentChunkProperty = SimpleObjectProperty<Chunk>()
+    val chunkConfirmed = SimpleBooleanProperty(false)
     val sourcePlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     val isPlayingProperty = SimpleBooleanProperty(false)
     val disposable = CompositeDisposable()
@@ -66,6 +69,8 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     private val disposableListeners = mutableListOf<ListenerDisposer>()
     private val selectedTakeDisposable = CompositeDisposable()
 
+    private val actionHistory = UndoableActionHistory<IUndoable>()
+
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
         currentChunkProperty.bindBidirectional(workbookDataStore.activeChunkProperty)
@@ -73,13 +78,16 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
 
     fun dockPeerEdit() {
         startAnimationTimer()
-        translationViewModel.resetUndoRedo()
         subscribeToChunks()
 
         currentChunkProperty.onChangeAndDoNowWithDisposer {
             it?.let { chunk ->
                 subscribeToSelectedTake(chunk)
+                val currentStep = translationViewModel.selectedStepProperty.value
+                val isConfirmed = chunk.checkingStatus().ordinal >= checkingStatusFromStep(currentStep).ordinal
+                chunkConfirmed.set(isConfirmed)
             }
+            actionHistory.clear()
         }.also { disposableListeners.add(it) }
 
         sourcePlayerProperty.bind(audioDataStore.sourceAudioPlayerProperty)
@@ -92,6 +100,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         disposable.clear()
         disposableListeners.forEach { it.dispose() }
         disposableListeners.clear()
+        actionHistory.clear()
     }
 
     fun refreshChunkList() {
@@ -116,17 +125,39 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
 
     fun confirmChunk() {
         currentChunkProperty.value?.let { chunk ->
-            val checkingStatus = when (translationViewModel.selectedStepProperty.value) {
-                ChunkingStep.PEER_EDIT -> CheckingStatus.PEER_EDIT
-                ChunkingStep.KEYWORD_CHECK -> CheckingStatus.KEYWORD
-                ChunkingStep.VERSE_CHECK -> CheckingStatus.VERSE
-                else -> CheckingStatus.UNCHECKED
-            }
-            val take = chunk.audio.getSelectedTake()
-            val checkingStage = TakeCheckingState(checkingStatus, take?.checksum())
-            take?.checkingState?.accept(checkingStage)
-            refreshChunkList()
+            chunkConfirmed.set(true)
+            val checkingStatus = checkingStatusFromStep(
+                translationViewModel.selectedStepProperty.value
+            )
+            val take = chunk.audio.getSelectedTake()!!
+            take.checkingState
+                .take(1)
+                .observeOnFx()
+                .subscribe { currentChecking ->
+                    val op = TranslationTakeApproveAction(
+                        take,
+                        checkingStatus,
+                        currentChecking
+                    )
+                    actionHistory.execute(op)
+                    onUndoableAction()
+                    refreshChunkList()
+                }.dispose()
         }
+    }
+
+    fun undo() {
+        actionHistory.undo()
+        refreshChunkList()
+        translationViewModel.canRedoProperty.set(true)
+        translationViewModel.canUndoProperty.set(actionHistory.canUndo())
+    }
+
+    fun redo() {
+        actionHistory.redo()
+        refreshChunkList()
+        translationViewModel.canUndoProperty.set(true)
+        translationViewModel.canRedoProperty.set(actionHistory.canRedo())
     }
 
     fun onRecordNew() {
@@ -204,5 +235,19 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
             wavColor = Color.web(WAV_COLOR),
             background = Color.web(BACKGROUND_COLOR)
         )
+    }
+
+    private fun onUndoableAction() {
+        translationViewModel.canUndoProperty.set(true)
+        translationViewModel.canRedoProperty.set(false)
+    }
+
+    private fun checkingStatusFromStep(step: ChunkingStep): CheckingStatus {
+        return when (step) {
+            ChunkingStep.PEER_EDIT -> CheckingStatus.PEER_EDIT
+            ChunkingStep.KEYWORD_CHECK -> CheckingStatus.KEYWORD
+            ChunkingStep.VERSE_CHECK -> CheckingStatus.VERSE
+            else -> CheckingStatus.UNCHECKED
+        }
     }
 }
