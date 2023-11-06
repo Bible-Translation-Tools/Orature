@@ -12,8 +12,9 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
-import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkMarkerEvent
-import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkMarkerEvent
+import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
+import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
+import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
@@ -42,15 +43,17 @@ class Chunking : Fragment() {
         viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
         viewModel.onDockChunking()
         viewModel.initializeAudioController(slider)
-        waveform.markers.bind(viewModel.markers) { it }
 
         subscribe<MarkerDeletedEvent> {
             viewModel.deleteMarker(it.markerId)
         }
-        subscribe<UndoChunkMarkerEvent> {
+        subscribe<MarkerMovedEvent> {
+            viewModel.moveMarker(it.markerId, it.start, it.end)
+        }
+        subscribe<UndoChunkingPageEvent> {
             viewModel.undoMarker()
         }
-        subscribe<RedoChunkMarkerEvent> {
+        subscribe<RedoChunkingPageEvent> {
             viewModel.redoMarker()
         }
     }
@@ -155,7 +158,6 @@ class Chunking : Fragment() {
         waveform.apply {
             setOnSeekNext { viewModel.seekNext() }
             setOnSeekPrevious { viewModel.seekPrevious() }
-            setOnPlaceMarker { viewModel.placeMarker() }
             setOnWaveformClicked { viewModel.pause() }
             setOnWaveformDragReleased { deltaPos ->
                 val deltaFrames = pixelsToFrames(deltaPos)
@@ -168,11 +170,6 @@ class Chunking : Fragment() {
             setOnFastForward(viewModel::fastForward)
             setOnToggleMedia(viewModel::mediaToggle)
             setOnResumeMedia(viewModel::resumeMedia)
-
-            setOnPositionChanged { _, _ ->
-                // markers moved = dirty
-                viewModel.dirtyMarkers.set(true)
-            }
         }
     }
 

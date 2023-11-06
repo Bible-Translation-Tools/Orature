@@ -1,15 +1,12 @@
 package org.wycliffeassociates.otter.jvm.controls.waveform
 
 import javafx.beans.binding.IntegerBinding
-import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
-import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
-import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
-import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
-import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
 
 interface IMarkerViewModel : IWaveformViewModel {
     var markerModel: VerseMarkerModel?
@@ -32,6 +29,10 @@ interface IMarkerViewModel : IWaveformViewModel {
             markerModel.deleteMarker(id)
             markers.setAll(markerModel.markers)
         }
+    }
+
+    fun moveMarker(id: Int, start: Int, end: Int) {
+        markerModel?.moveMarker(id, start, end)
     }
 
     fun seekNext() {

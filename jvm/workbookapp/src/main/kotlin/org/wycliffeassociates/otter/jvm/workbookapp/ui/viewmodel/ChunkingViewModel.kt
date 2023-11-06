@@ -41,9 +41,9 @@ import org.wycliffeassociates.otter.common.domain.content.ResetChunks
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
-import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
-import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
@@ -103,17 +103,17 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     /** Call this before leaving the view to avoid memory leak */
     var chunkImageCleanup: () -> Unit = {}
     var consumeImageCleanup: () -> Unit = {}
-    val isPlayingProperty = SimpleBooleanProperty(false)
 
+    val isPlayingProperty = SimpleBooleanProperty(false)
     val compositeDisposable = CompositeDisposable()
-    val dirtyMarkers = SimpleBooleanProperty(false)
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
     }
 
     fun onDockChunking() {
-        val wb = workbookDataStore.workbook
+        translationViewModel.resetUndoRedo()
+
         val chapter = workbookDataStore.chapter
         val sourceAudio = initializeSourceAudio(chapter.sort)
 
@@ -133,7 +133,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         pause()
         translationViewModel.selectedStepProperty.value?.let {
             // handle when navigating to the next step
-            val hasUnsavedChanges = dirtyMarkers.value || markerModel?.changesSaved == false
+            val hasUnsavedChanges = markerCountProperty.value != 0 && markerModel?.hasDirtyMarkers() == true
             if (hasUnsavedChanges && it.ordinal > ChunkingStep.CHUNKING.ordinal) {
                 saveChanges()
             }
@@ -151,17 +151,34 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
     override fun placeMarker() {
         super.placeMarker()
-        if (translationViewModel.reachableStepProperty.value == ChunkingStep.CHUNKING) {
-            translationViewModel.reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
-        }
+        onUndoableAction()
     }
 
     override fun deleteMarker(id: Int) {
         super.deleteMarker(id)
-        if (markerCountProperty.value == 0) {
-            markerModel?.changesSaved = true
-            dirtyMarkers.set(false)
+        onUndoableAction()
+    }
+
+    override fun moveMarker(id: Int, start: Int, end: Int) {
+        super.moveMarker(id, start, end)
+        onUndoableAction()
+    }
+
+    override fun undoMarker() {
+        super.undoMarker()
+        val dirty = markerModel?.hasDirtyMarkers() ?: false
+        translationViewModel.canUndoProperty.set(dirty)
+        translationViewModel.canRedoProperty.set(true)
+        if (!dirty) {
+            translationViewModel.updateStep()
         }
+    }
+
+    override fun redoMarker() {
+        super.redoMarker()
+        translationViewModel.canUndoProperty.set(true)
+        translationViewModel.canRedoProperty.set(markerModel?.canRedo() == true)
+        translationViewModel.reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
     }
 
     fun loadAudio(audioFile: File): OratureAudioFile {
@@ -190,7 +207,6 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
             (1..totalMarkers).map { it.toString() }
         ).apply {
             loadMarkers(chunkMarkers)
-            changesSaved = true
         }
     }
 
@@ -219,9 +235,6 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
         ChunkAudioUseCase(directoryProvider, accessor)
             .createChunkedSourceAudio(sourceAudio.file, cues)
-
-        markerModel?.changesSaved = true
-        dirtyMarkers.value = false
     }
 
     fun initializeAudioController(slider: Slider? = null) {
@@ -247,5 +260,12 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
             wavColor = Color.web(WAV_COLOR),
             background = Color.web(BACKGROUND_COLOR)
         )
+    }
+
+    private fun onUndoableAction() {
+        translationViewModel.canUndoProperty.set(true)
+        translationViewModel.canRedoProperty.set(false)
+        // any changes in chunking will affect the subsequent steps
+        translationViewModel.reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
     }
 }

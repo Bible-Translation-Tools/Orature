@@ -30,7 +30,8 @@ import java.util.concurrent.Callable
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
-import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
+import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
+import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 
@@ -111,6 +112,7 @@ open class MarkerTrackControl : Region() {
 
     private fun createMarker(i: Int, mk: ChunkMarkerModel): MarkerControl {
         val container = this
+        var startPos = 0.0
         return createMarker().apply {
             val pixel = framesToPixels(
                 mk.frame
@@ -132,6 +134,7 @@ open class MarkerTrackControl : Region() {
                         markerPositionProperty.value,
                         trackWidth
                     )
+                    startPos = clampedValue
                     preDragThumbPos[i] = clampedValue / trackWidth
                     me.consume()
                 }
@@ -162,15 +165,19 @@ open class MarkerTrackControl : Region() {
                 }
             }
 
+            setOnDragFinish {
+                if (container.width > 0) {
+                    val start = pixelsToFrames(startPos)
+                    val end = pixelsToFrames(markerPositionProperty.value)
+                    if (start != end) {
+                        FX.eventbus.fire(MarkerMovedEvent(markerIdProperty.value, start, end))
+                    }
+                }
+            }
+
             markerPositionProperty.onChangeAndDoNow {
                 it?.let {
-                    val trackWidth = container.width
                     translateX = it.toDouble()
-                    if (trackWidth > 0) {
-                        markers[i].frame = pixelsToFrames(
-                            it.toDouble()
-                        )
-                    }
                 }
             }
 
