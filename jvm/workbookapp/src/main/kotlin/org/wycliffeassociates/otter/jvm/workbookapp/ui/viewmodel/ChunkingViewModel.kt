@@ -134,6 +134,7 @@ open class ChunkingViewModel : ViewModel(), IMarkerViewModel {
             }
             translationViewModel.updateStep()
         }
+
         if (markerModel?.hasDirtyMarkers() == true) {
             chapterReviewViewModel.invalidateChapterTake()
         }
