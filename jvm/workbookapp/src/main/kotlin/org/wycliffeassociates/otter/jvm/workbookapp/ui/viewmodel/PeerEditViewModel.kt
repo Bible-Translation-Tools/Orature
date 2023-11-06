@@ -18,7 +18,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.IUndoable
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
-import org.wycliffeassociates.otter.common.domain.chunking.ChunkTakeConfirmAction
+import org.wycliffeassociates.otter.common.domain.translation.TranslationTakeApproveAction
 import org.wycliffeassociates.otter.common.domain.model.UndoableActionHistory
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.waveform.IWaveformViewModel
@@ -134,7 +134,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
                 .take(1)
                 .observeOnFx()
                 .subscribe { currentChecking ->
-                    val op = ChunkTakeConfirmAction(
+                    val op = TranslationTakeApproveAction(
                         take,
                         checkingStatus,
                         currentChecking

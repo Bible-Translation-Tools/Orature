@@ -138,16 +138,19 @@ class Chunking : Fragment() {
     private fun subscribeEvents() {
         subscribe<MarkerDeletedEvent> {
             viewModel.deleteMarker(it.markerId)
-        }
+        }.also { eventSubscriptions.add(it) }
+
         subscribe<MarkerMovedEvent> {
             viewModel.moveMarker(it.markerId, it.start, it.end)
-        }
+        }.also { eventSubscriptions.add(it) }
+
         subscribe<UndoChunkingPageEvent> {
             viewModel.undoMarker()
-        }
+        }.also { eventSubscriptions.add(it) }
+
         subscribe<RedoChunkingPageEvent> {
             viewModel.redoMarker()
-        }
+        }.also { eventSubscriptions.add(it) }
     }
 
     private fun unsubscribeEvents() {
