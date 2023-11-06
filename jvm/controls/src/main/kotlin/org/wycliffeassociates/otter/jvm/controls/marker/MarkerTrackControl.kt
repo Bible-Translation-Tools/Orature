@@ -35,8 +35,8 @@ import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 
-private const val MOVE_MARKER_INTERVAL = 0.001
-private const val MARKER_COUNT = 500
+const val MOVE_MARKER_INTERVAL = 0.001
+const val MARKER_COUNT = 500
 
 open class MarkerTrackControl : Region() {
 
@@ -61,8 +61,8 @@ open class MarkerTrackControl : Region() {
         pickOnBoundsProperty().set(false)
     }
 
-    private val _markers = mutableListOf<MarkerControl>()
-    private val highlights = mutableListOf<Rectangle>()
+    protected val _markers = mutableListOf<MarkerControl>()
+    protected val highlights = mutableListOf<Rectangle>()
 
     private var preDragThumbPos = DoubleArray(markers.size)
     var dragStart: Array<Point2D?> = Array(markers.size) { null }
@@ -110,7 +110,7 @@ open class MarkerTrackControl : Region() {
 
     open fun createMarker(): MarkerControl = ChunkMarker()
 
-    private fun createMarker(i: Int, mk: ChunkMarkerModel): MarkerControl {
+    protected fun createMarker(i: Int, mk: ChunkMarkerModel): MarkerControl {
         val container = this
         var startPos = 0.0
         return createMarker().apply {
@@ -187,7 +187,7 @@ open class MarkerTrackControl : Region() {
         }
     }
 
-    private fun createHighlight(i: Int, mk: ChunkMarkerModel): Rectangle {
+    protected fun createHighlight(i: Int, mk: ChunkMarkerModel): Rectangle {
         return Rectangle().apply {
             when (i % 2 == 0) {
                 true -> styleClass.setAll("scrolling-waveform__highlight--primary")
@@ -199,7 +199,7 @@ open class MarkerTrackControl : Region() {
         }
     }
 
-    private fun preallocateMarkers() {
+    protected open fun preallocateMarkers() {
         for (i in 0 until MARKER_COUNT) {
             val mk = ChunkMarkerModel(0, i.toString(), false)
             val marker = createMarker(i, mk)

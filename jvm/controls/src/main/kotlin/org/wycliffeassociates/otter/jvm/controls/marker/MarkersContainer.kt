@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.jvm.controls.marker
 
-import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
 import tornadofx.*
 
 class MarkersContainer: MarkerTrackControl() {
