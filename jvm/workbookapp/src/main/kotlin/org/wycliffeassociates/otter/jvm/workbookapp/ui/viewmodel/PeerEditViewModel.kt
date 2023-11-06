@@ -40,6 +40,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     val translationViewModel: TranslationViewModel2 by inject()
     val blindDraftViewModel: BlindDraftViewModel by inject()
     val recorderViewModel: RecorderViewModel by inject()
+    val chapterReviewViewModel: ChapterReviewViewModel by inject()
 
     override val waveformAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     override val positionProperty = SimpleDoubleProperty(0.0)
@@ -172,6 +173,10 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     fun onRecordFinish(result: RecorderViewModel.Result) {
         if (result == RecorderViewModel.Result.SUCCESS) {
             workbookDataStore.chunk?.audio?.insertTake(newTakeProperty.value)
+            chapterReviewViewModel.invalidateChapterTake()
+            // any change(s) to chunk's take requires checking again
+            translationViewModel.selectedStepProperty.set(null)
+            translationViewModel.navigateStep(ChunkingStep.PEER_EDIT)
         } else {
             newTakeProperty.value?.file?.delete()
             newTakeProperty.set(null)
