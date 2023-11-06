@@ -114,7 +114,7 @@ class TestInitializeProjects {
             RowCount(
                 contents = mapOf(
                     ContentType.META to 2400,
-                    ContentType.TEXT to 61843
+                    ContentType.TEXT to 31124
                 ),
                 collections = 2511,
                 links = 0
