@@ -19,9 +19,10 @@ class MarkersContainer: MarkerTrackControl() {
             val mk = ChunkMarkerModel(0, i.toString(), false)
             val marker = createMarker(i, mk)
             val rect = createHighlight(i, mk)
-            rect.heightProperty().bind(heightProperty().minus(80))
+            val headerOffset = 80.0
+            rect.heightProperty().bind(heightProperty().minus(headerOffset))
             rect.translateXProperty().bind(marker.translateXProperty())
-            rect.translateY = 80.0
+            rect.translateY = headerOffset
             rect.visibleProperty().bind(marker.visibleProperty())
 
             _markers.add(marker)
