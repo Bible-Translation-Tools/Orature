@@ -78,7 +78,6 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
 
     fun dockPeerEdit() {
         startAnimationTimer()
-        translationViewModel.resetUndoRedo()
         subscribeToChunks()
 
         currentChunkProperty.onChangeAndDoNowWithDisposer {

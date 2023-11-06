@@ -68,8 +68,6 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
     }
 
     fun onDockConsume() {
-        translationViewModel.resetUndoRedo()
-
         val wb = workbookDataStore.workbook
         val chapter = workbookDataStore.chapter
         val sourceAudio = wb.sourceAudioAccessor.getChapter(chapter.sort, wb.target)

@@ -182,10 +182,11 @@ open class PeerEdit : Fragment() {
     private fun subscribeEvents() {
         subscribe<UndoChunkingPageEvent> {
             viewModel.undo()
-        }
+        }.also { eventSubscriptions.add(it) }
+
         subscribe<RedoChunkingPageEvent> {
             viewModel.redo()
-        }
+        }.also { eventSubscriptions.add(it) }
     }
 
     private fun unsubscribeEvents() {
