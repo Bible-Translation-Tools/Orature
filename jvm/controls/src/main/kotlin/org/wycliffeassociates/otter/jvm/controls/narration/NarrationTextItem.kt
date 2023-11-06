@@ -312,9 +312,8 @@ class NarrationTextItem : VBox() {
                         addPseudoClass("active")
                         text = FX.messages["pause"]
                         graphic = FontIcon(MaterialDesign.MDI_PAUSE)
-                        setOnAction {
-                            onActionProperty().bind(onPauseRecordingAction)
-                        }
+                        onActionProperty().bind(onPauseRecordingAction)
+
                     }
                     narration_button {
                         prefWidth = 150.0
@@ -333,9 +332,7 @@ class NarrationTextItem : VBox() {
                         addClass("btn", "btn--secondary")
                         text = FX.messages["resume"]
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
-                        setOnAction {
-                            onActionProperty().bind(onResumeRecordingAction)
-                        }
+                        onActionProperty().bind(onResumeRecordingAction)
                     }
                     narration_button {
                         prefWidth = 150.0
