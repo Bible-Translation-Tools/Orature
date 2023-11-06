@@ -21,13 +21,13 @@ import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterReviewViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 import tornadofx.*
 
 class ChapterReview : Fragment() {
     val viewModel: ChapterReviewViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
     private lateinit var waveform: MarkerWaveform
+    private val eventSubscriptions = mutableListOf<EventRegistration>()
 
     override val root = borderpane {
         top = vbox {
@@ -136,27 +136,37 @@ class ChapterReview : Fragment() {
         }
     }
 
-    init {
-        subscribe<MarkerDeletedEvent> {
-            viewModel.deleteMarker(it.markerId)
-        }
-        subscribe<MarkerMovedEvent> {
-            viewModel.moveMarker(it.markerId, it.start, it.end)
-        }
-        subscribe<UndoChunkingPageEvent> {
-            viewModel.undoMarker()
-        }
-        subscribe<RedoChunkingPageEvent> {
-            viewModel.redoMarker()
-        }
-    }
-
     override fun onDock() {
         viewModel.dock()
+        subscribeEvents()
     }
 
     override fun onUndock() {
         viewModel.undock()
+        unsubscribeEvents()
+    }
+
+    private fun subscribeEvents() {
+        subscribe<MarkerDeletedEvent> {
+            viewModel.deleteMarker(it.markerId)
+        }.also { eventSubscriptions.add(it) }
+
+        subscribe<MarkerMovedEvent> {
+            viewModel.moveMarker(it.markerId, it.start, it.end)
+        }.also { eventSubscriptions.add(it) }
+
+        subscribe<UndoChunkingPageEvent> {
+            viewModel.undoMarker()
+        }.also { eventSubscriptions.add(it) }
+
+        subscribe<RedoChunkingPageEvent> {
+            viewModel.redoMarker()
+        }.also { eventSubscriptions.add(it) }
+    }
+
+    private fun unsubscribeEvents() {
+        eventSubscriptions.forEach { it.unsubscribe() }
+        eventSubscriptions.clear()
     }
 
     private fun subscribeOnWaveformImages() {
