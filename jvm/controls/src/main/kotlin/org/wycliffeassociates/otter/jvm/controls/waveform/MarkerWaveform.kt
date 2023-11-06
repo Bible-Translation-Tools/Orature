@@ -10,6 +10,7 @@ import javafx.scene.image.Image
 import javafx.scene.layout.StackPane
 import javafx.scene.shape.Line
 import org.wycliffeassociates.otter.common.data.ColorTheme
+import org.wycliffeassociates.otter.jvm.controls.UIVersion
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import org.wycliffeassociates.otter.jvm.controls.marker.MarkersContainer
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
@@ -117,7 +118,7 @@ class MarkerWaveform : StackPane() {
         waveformFrame = WaveformFrame(topTrack).apply {
             themeProperty.bind(this@MarkerWaveform.themeProperty)
             framePositionProperty.bind(positionProperty)
-            isNewDesignProperty.set(true)
+            uiVersionProperty.set(UIVersion.THREE)
             onWaveformClickedProperty.bind(onWaveformClicked)
             onWaveformDragReleasedProperty.bind(onWaveformDragReleased)
             onRewindProperty.bind(onRewind)
