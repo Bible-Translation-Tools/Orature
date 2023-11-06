@@ -101,7 +101,7 @@ class CreateChunks @Inject constructor(
                 )
             )
         }
-        chapter.addChunk(chunksToAdd)
+        chapter.addChunk(chunksToAdd).blockingAwait()
         writeChunkFile(workbook, chapterNumber, chunksToAdd)
     }
 
@@ -129,7 +129,7 @@ class CreateChunks @Inject constructor(
                 val allocatedVerses = preallocateVerses(it, workbook.target, chapterNumber, draftNumber)
                 val versesFromText = getVersesFromText(workbook, projectSlug, chapterNumber, draftNumber)
                 val finalizedVerses = overlayVerses(allocatedVerses, versesFromText)
-                chapter.addChunk(finalizedVerses)
+                chapter.addChunk(finalizedVerses).blockingAwait()
             }
             .doOnError { logger.error("Error creating chunks from verses", it) }
             .subscribeOn(Schedulers.io())
