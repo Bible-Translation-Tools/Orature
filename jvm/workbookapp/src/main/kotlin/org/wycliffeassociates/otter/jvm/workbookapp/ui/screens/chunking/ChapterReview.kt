@@ -26,7 +26,6 @@ import tornadofx.*
 
 class ChapterReview : Fragment() {
     val viewModel: ChapterReviewViewModel by inject()
-    val translationViewModel: TranslationViewModel2 by inject()
     val settingsViewModel: SettingsViewModel by inject()
     private lateinit var waveform: MarkerWaveform
 
