@@ -30,6 +30,7 @@ import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.yellowcouch.javazoom.RandomAccessDecoder
 import java.io.OutputStream
+import java.lang.IllegalStateException
 
 // arbitrary size, though setting this too small results in choppy playback
 private const val MP3_BUFFER_SIZE = 24576
@@ -43,7 +44,7 @@ class MP3FileReader(
     private var decoder: RandomAccessDecoder? = RandomAccessDecoder(file.absolutePath)
 
     val start = start ?: 0
-    val end = end ?: decoder!!.sampleCount
+    val end = end ?: decoder?.sampleCount ?: 0
     private var pos = min(max(0, this.start), this.end)
 
     override val sampleRate: Int = DEFAULT_SAMPLE_RATE
@@ -96,21 +97,25 @@ class MP3FileReader(
     }
 
     private fun fillBuffers(pos: Int, leftRight: ShortArray) {
-        val sourceAudio = decoder!!.audioShorts
-        var sourceIdx = 0
-        try {
-            sourceIdx = decoder!!.seek(pos, leftRight.size / 2) and RandomAccessDecoder.BUFFER_LAST
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-        for (i in leftRight.indices) {
-            leftRight[i] = sourceAudio[sourceIdx++]
-            sourceIdx = sourceIdx and RandomAccessDecoder.BUFFER_LAST
+        decoder?.let { _decoder ->
+            val sourceAudio = _decoder.audioShorts
+            var sourceIdx = 0
+            try {
+                sourceIdx = _decoder.seek(pos, leftRight.size / 2) and RandomAccessDecoder.BUFFER_LAST
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+            for (i in leftRight.indices) {
+                leftRight[i] = sourceAudio[sourceIdx++]
+                sourceIdx = sourceIdx and RandomAccessDecoder.BUFFER_LAST
+            }
         }
     }
 
     override fun hasRemaining(): Boolean {
-        return pos < min(decoder!!.sampleCount, end)
+        return decoder?.let { _decoder ->
+            pos < min(_decoder.sampleCount, end)
+        } ?: throw IllegalStateException("hasRemaining called before opening file")
     }
 
     override fun getPcmBuffer(bytes: ByteArray): Int {
@@ -129,10 +134,12 @@ class MP3FileReader(
     }
 
     override fun open() {
+        decoder?.let { release() }
+        decoder = RandomAccessDecoder(file.absolutePath)
     }
 
     override fun release() {
-        decoder!!.stop()
+        decoder?.stop()
         decoder = null
         pos = 0
         System.gc()

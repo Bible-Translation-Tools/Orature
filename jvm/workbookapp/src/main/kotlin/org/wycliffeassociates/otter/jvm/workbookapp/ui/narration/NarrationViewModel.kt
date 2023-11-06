@@ -262,6 +262,14 @@ class NarrationViewModel : ViewModel() {
         totalAudioSizeProperty.set(0)
     }
 
+    fun loadChapter(chapterNumber: Int) {
+        chapterList
+            .elementAtOrNull(chapterNumber)
+            ?.let {
+                loadChapter(it)
+            }
+    }
+
     fun loadChapter(chapter: Chapter) {
         resetState()
 

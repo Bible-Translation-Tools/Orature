@@ -1,30 +1,26 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import io.reactivex.Observable
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.ObservableValue
-import javafx.collections.ObservableList
 import javafx.event.EventTarget
-import javafx.scene.control.Tooltip
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.common.data.workbook.Chapter
-import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.event.ChapterReturnFromPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.OpenChapterEvent
+import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.chapterSelector
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.popup.ChapterGridMenu
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationOpenInPluginEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationRedoEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationUndoEvent
@@ -37,6 +33,8 @@ import java.text.MessageFormat
 class NarrationHeader : View() {
     private val viewModel by inject<NarrationHeaderViewModel>()
 
+    private val popupMenu = ChapterGridMenu()
+
     init {
         subscribe<NarrationOpenInPluginEvent> {
             viewModel.processWithPlugin(it.plugin)
@@ -44,6 +42,7 @@ class NarrationHeader : View() {
     }
 
     override val root = hbox {
+
         addClass("narration__header")
 
         hbox {
@@ -78,6 +77,19 @@ class NarrationHeader : View() {
             }
             chapterSelector {
                 chapterTitleProperty.bind(viewModel.chapterTitleProperty)
+
+                setOnChapterSelectorOpenedProperty {
+
+                    popupMenu.updateChapterGrid(viewModel.chapterList)
+
+                    val bound = this.boundsInLocal
+                    val screenBound = this.localToScreen(bound)
+
+                    popupMenu.show(FX.primaryStage)
+
+                    popupMenu.x = screenBound.minX - popupMenu.width + this.width
+                    popupMenu.y = screenBound.maxY - 25
+                }
 
                 prevDisabledProperty.bind(viewModel.hasPreviousChapter.not())
                 nextDisabledProperty.bind(viewModel.hasNextChapter.not())
@@ -123,11 +135,18 @@ class NarrationHeaderViewModel : ViewModel() {
 
     val pluginContextProperty = SimpleObjectProperty(PluginType.EDITOR)
 
-    private val chapterList: ObservableList<Chapter> = observableListOf()
+    val chapterList: List<ChapterGridItemData>
+        get() {
+            return narrationViewModel.chapterList.map {
+                val gridItem = ChapterGridItemData(
+                    it.sort,
+                    it.hasSelectedAudio()
+                )
+                gridItem
+            }
+        }
 
     init {
-        chapterList.bind(narrationViewModel.chapterList) { it }
-
         chapterTakeProperty.bind(narrationViewModel.chapterTakeProperty)
         chapterTitleProperty.bind(narrationViewModel.chapterTitleProperty)
         hasNextChapter.bind(narrationViewModel.hasNextChapter)
@@ -156,14 +175,16 @@ class NarrationHeaderViewModel : ViewModel() {
             StepDirection.FORWARD -> 1
             StepDirection.BACKWARD -> -1
         }
-        val nextIndex = chapterList.indexOf(workbookDataStore.chapter) + step
+        val nextIndex =
+            narrationViewModel.chapterList.indexOf(workbookDataStore.chapter) + step
 
-        chapterList
+        narrationViewModel.chapterList
             .elementAtOrNull(nextIndex)
-            ?.let { chapter ->
-                fire(OpenChapterEvent(chapter))
+            ?.let {
+                fire(OpenChapterEvent(nextIndex))
             }
     }
+
 
     fun processWithPlugin(pluginType: PluginType) {
         chapterTakeProperty.value?.let { take ->

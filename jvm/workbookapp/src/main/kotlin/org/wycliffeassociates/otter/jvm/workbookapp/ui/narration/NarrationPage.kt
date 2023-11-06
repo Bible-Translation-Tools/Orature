@@ -56,6 +56,7 @@ class NarrationPage : View() {
     init {
         tryImportStylesheet(resources["/css/narration.css"])
         tryImportStylesheet(resources["/css/chapter-selector.css"])
+        tryImportStylesheet("/css/chapter-grid.css")
 
         pluginOpenedPage = createPluginOpenedPage()
     }
@@ -187,7 +188,7 @@ class NarrationPage : View() {
         }.let { eventSubscriptions.add(it) }
 
         subscribe<OpenChapterEvent> {
-            viewModel.loadChapter(it.chapter)
+            viewModel.loadChapter(it.chapterNumber)
         }.let { eventSubscriptions.add(it) }
     }
 

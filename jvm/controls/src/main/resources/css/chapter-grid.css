@@ -2,7 +2,15 @@
     -fx-padding: 14 16;
 }
 
-.chapter-grid .chapter-grid__icon-alignment-box {
+.chapter-grid {
+    -fx-background-color: -wa-foreground;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0.5, 0, 0);
+    -fx-background-radius: 10;
+    -fx-alignment: top-right;
+    -fx-faint-focus-color: transparent;
+}
+
+.chapter-grid__icon-alignment-box {
     -fx-alignment: top-right;
     -fx-padding: 4;
 }
@@ -10,4 +18,14 @@
 .chapter-grid .complete-icon {
     -fx-font-size: 1.8em;
     -fx-icon-color: -wa-primary;
+}
+
+.chapter-grid-context-menu {
+    -fx-faint-focus-color: transparent;
+    -fx-background-radius: 8px;
+    -fx-background-color: none;
+}
+
+.chapter-grid-context-menu-item {
+    -fx-background-color: transparent;
 }
