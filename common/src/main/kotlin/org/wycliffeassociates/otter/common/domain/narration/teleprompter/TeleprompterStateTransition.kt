@@ -140,6 +140,11 @@ object SaveRecordingAction {
         if (index != 0) {
             for (i in 0 until index) {
                 contexts[i].restore()
+                if (contexts[i].state.type == TeleprompterItemState.RECORD_AGAIN_DISABLED) {
+                    contexts[i].changeState(TeleprompterItemState.RECORD_AGAIN)
+                } else if (contexts[i].state.type == TeleprompterItemState.RECORD_DISABLED) {
+                    contexts[i].changeState(TeleprompterItemState.RECORD)
+                }
             }
         }
 
