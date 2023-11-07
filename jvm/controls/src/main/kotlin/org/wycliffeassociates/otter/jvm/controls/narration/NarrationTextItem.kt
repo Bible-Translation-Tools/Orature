@@ -320,7 +320,7 @@ class NarrationTextItem : VBox() {
                         addClass("btn", "btn--secondary")
                         text = FX.messages["resume"]
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
-                        onActionProperty().bind(onResumeRecordingAction)
+                        onActionProperty().bind(onResumeRecordingAgainAction)
                     }
                     narration_button {
                         prefWidth = 150.0
