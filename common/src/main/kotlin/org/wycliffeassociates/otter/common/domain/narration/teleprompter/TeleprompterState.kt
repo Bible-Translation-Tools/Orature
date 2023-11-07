@@ -102,6 +102,7 @@ object RecordActiveState : TeleprompterState {
 
     override val validStateTransitions = setOf(
         TeleprompterItemState.RECORDING_PAUSED,
+        TeleprompterItemState.RECORD_AGAIN,
         TeleprompterItemState.RECORD_AGAIN_DISABLED
     )
 
@@ -116,6 +117,7 @@ object RecordActiveState : TeleprompterState {
         return when (request) {
             // NarrationTextItemState.RECORD_ACTIVE -> RecordActiveState
             TeleprompterItemState.RECORDING_PAUSED -> RecordPausedState
+            TeleprompterItemState.RECORD_AGAIN -> RecordAgainState
             TeleprompterItemState.RECORD_AGAIN_DISABLED -> RecordAgainDisabledState
             else -> {
                 throw IllegalStateException("State: $type tried to transition to state: $request")
