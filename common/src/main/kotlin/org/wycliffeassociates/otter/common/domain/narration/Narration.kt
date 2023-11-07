@@ -257,8 +257,8 @@ class Narration @AssistedInject constructor(
     }
 
     fun resumeRecordingAgain() {
-        // TODO: note, this seek is not correct when resuming from a re-record.
-        //player.seek(player.getDurationInFrames())
+        val lastRecordingPositon = chapterRepresentation.scratchAudio.totalFrames
+        player.seek(chapterRepresentation.absoluteToRelativeChapter(lastRecordingPositon))
         writer?.start()
         isRecording.set(true)
     }
