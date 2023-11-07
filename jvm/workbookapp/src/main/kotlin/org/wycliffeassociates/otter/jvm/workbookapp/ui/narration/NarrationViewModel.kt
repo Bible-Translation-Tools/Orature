@@ -28,21 +28,12 @@ import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.domain.narration.AudioScene
 import org.wycliffeassociates.otter.common.domain.narration.Narration
 import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
+import org.wycliffeassociates.otter.common.domain.narration.framesToPixels
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterItemState
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterStateMachine
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterStateTransition
-import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterItemState
-import org.wycliffeassociates.otter.common.domain.narration.framesToPixels
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
-import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
-import org.wycliffeassociates.otter.jvm.controls.event.BeginRecordingEvent
-import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
-import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordAgainEvent
-import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordingEvent
-import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
-import org.wycliffeassociates.otter.jvm.controls.event.RecordVerseEvent
-import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingAgainEvent
-import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingEvent
-import org.wycliffeassociates.otter.jvm.controls.event.SaveRecordingEvent
+import org.wycliffeassociates.otter.jvm.controls.event.*
 import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
@@ -514,6 +505,31 @@ class NarrationViewModel : ViewModel() {
         refreshTeleprompter()
     }
 
+
+    fun pauseRecordAgain(index: Int) {
+        isRecording = false
+        recordPause = true
+
+        narration.pauseRecording()
+        narration.finalizeVerse(index)
+        // TODO: note, removing this line on pause recording for re-record removes the apparent offset when resuming
+        //  re-record
+//        renderer.clearActiveRecordingData()
+        refreshTeleprompter()
+
+    }
+
+    fun resumeRecordingAgain() {
+        stopPlayer()
+
+        narration.resumeRecordingAgain()
+
+        isRecording = true
+        recordPause = false
+
+        refreshTeleprompter()
+    }
+
     fun resumeRecording() {
         stopPlayer()
 
@@ -662,6 +678,9 @@ class NarrationViewModel : ViewModel() {
                             nextVerseLoc = next.location
                         }
                     }
+
+                    // NOTE: this is throwing an exception after undoing a re-record.
+                    // This also likely needs to be mapped to the verse space if we are locked to a verse.
                     reRecordLoc = recordedVerses[reRecordingIndex].location
                 }
 
@@ -788,12 +807,12 @@ class NarrationViewModel : ViewModel() {
             }
 
             is PauseRecordAgainEvent -> {
-                pauseRecording(event.index)
+                pauseRecordAgain(event.index)
                 teleprompterStateMachine.transition(TeleprompterStateTransition.PAUSE_RECORD_AGAIN, event.index)
             }
 
             is ResumeRecordingAgainEvent -> {
-                resumeRecording()
+                resumeRecordingAgain()
                 teleprompterStateMachine.transition(TeleprompterStateTransition.RESUME_RECORD_AGAIN, event.index)
             }
 
