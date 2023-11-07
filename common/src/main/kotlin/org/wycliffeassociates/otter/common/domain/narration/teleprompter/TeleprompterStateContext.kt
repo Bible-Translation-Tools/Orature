@@ -14,12 +14,13 @@ class TeleprompterStateContext {
     }
 
     fun disable() {
-        temporarilyDisabledState = state
+        if (temporarilyDisabledState == null) {
+            temporarilyDisabledState = state
+        }
         state = state.disabledState
     }
 
     fun restore() {
         state = temporarilyDisabledState ?: state
-        temporarilyDisabledState = null
     }
 }
