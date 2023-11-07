@@ -28,7 +28,12 @@ class TeleprompterStateMachine(
                 TeleprompterStateTransition.PAUSE_RECORDING -> PauseRecordingAction.apply(contexts, requestIndex)
                 TeleprompterStateTransition.RESUME_RECORDING -> ResumeRecordAction.apply(contexts, requestIndex)
                 TeleprompterStateTransition.NEXT -> NextVerseAction.apply(contexts, requestIndex)
-                TeleprompterStateTransition.RECORD_AGAIN -> RecordAgainAction.apply(contexts, requestIndex)
+                TeleprompterStateTransition.RECORD_AGAIN -> {
+                    if (contexts.any { it.state.type == TeleprompterItemState.RECORDING_PAUSED }) {
+                        completePausedRecording()
+                    }
+                    RecordAgainAction.apply(contexts, requestIndex)
+                }
                 TeleprompterStateTransition.PAUSE_RECORD_AGAIN -> PauseRecordAgainAction.apply(contexts, requestIndex)
                 TeleprompterStateTransition.RESUME_RECORD_AGAIN -> ResumeRecordAgainAction.apply(contexts, requestIndex)
                 TeleprompterStateTransition.SAVE -> SaveRecordingAction.apply(contexts, requestIndex)
@@ -38,5 +43,20 @@ class TeleprompterStateMachine(
             throw e
         }
         return contexts.map { it.state.type }
+    }
+
+    /**
+     * If a record again action happens before the chapter is completed, the last recording will be paused. In order to
+     * be able to resume correctly after the re-record is finished, we need to first "finish" this verse by moving its
+     * state to re-record and enabling recording of the next verse.
+     */
+    private fun completePausedRecording() {
+        val pausedRecordingIndex = contexts.indexOfFirst { it.state.type == TeleprompterItemState.RECORDING_PAUSED}
+        if (pausedRecordingIndex < 0) return
+
+        contexts[pausedRecordingIndex].changeState(TeleprompterItemState.RECORD_AGAIN)
+        if (pausedRecordingIndex != contexts.lastIndex) {
+            contexts[pausedRecordingIndex + 1].changeState(TeleprompterItemState.RECORD)
+        }
     }
 }
