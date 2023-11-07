@@ -1,6 +1,8 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Completable
+import io.reactivex.Maybe
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
@@ -50,6 +52,7 @@ class TranslationViewModel2 : ViewModel() {
         workbookDataStore.activeChapterProperty.set(null)
         workbookDataStore.activeWorkbookProperty.set(null)
         compositeDisposable.clear()
+        audioDataStore.closePlayers()
         resetUndoRedo()
     }
 
@@ -70,9 +73,14 @@ class TranslationViewModel2 : ViewModel() {
         resetUndoRedo()
         workbookDataStore.chapter.chunks.value?.find { it.sort == chunkNumber }?.let {
             workbookDataStore.activeChunkProperty.set(it)
-            audioDataStore.updateSourceAudio()
-            audioDataStore.openSourceAudioPlayer()
             updateSourceText()
+            Completable
+                .fromAction {
+                    audioDataStore.updateSourceAudio()
+                    audioDataStore.openSourceAudioPlayer()
+                }
+                .subscribeOn(Schedulers.io())
+                .subscribe()
         }
     }
 
@@ -167,15 +175,22 @@ class TranslationViewModel2 : ViewModel() {
                 isLastChapterProperty.set(chapter.sort.toLong() == count)
             }
 
-        val sourceAudio = wb.sourceAudioAccessor.getChapter(chapter.sort, wb.target)
-        if (sourceAudio == null) {
-            reachableStepProperty.set(null)
-            compositeDisposable.clear()
-        } else {
-            updateStep {
-                selectedStepProperty.set(reachableStepProperty.value)
+        Maybe
+            .fromCallable {
+                wb.sourceAudioAccessor.getChapter(chapter.sort, wb.target)
             }
-        }
+            .subscribeOn(Schedulers.io())
+            .observeOnFx()
+            .doOnSuccess {
+                updateStep {
+                    selectedStepProperty.set(reachableStepProperty.value)
+                }
+            }
+            .doOnComplete {
+                reachableStepProperty.set(null)
+                compositeDisposable.clear()
+            }
+            .subscribe()
     }
 
     private fun resetUndoRedo() {

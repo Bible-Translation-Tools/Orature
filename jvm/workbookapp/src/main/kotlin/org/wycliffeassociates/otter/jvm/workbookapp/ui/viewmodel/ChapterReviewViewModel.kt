@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.glass.ui.Screen
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -106,11 +107,15 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
 
         sourcePlayerProperty.bind(audioDataStore.sourceAudioPlayerProperty)
         workbookDataStore.activeChunkProperty.set(null)
-        audioDataStore.updateSourceAudio()
-        audioDataStore.openSourceAudioPlayer()
+
+        Completable
+            .fromAction {
+                audioDataStore.updateSourceAudio()
+                audioDataStore.openSourceAudioPlayer()
+            }
+            .subscribe()
 
         markersPlacedCountProperty.bind(markers.sizeProperty)
-
         markerProgressCounterProperty.bind(
             stringBinding(markersPlacedCountProperty, totalMarkersProperty) {
                 MessageFormat.format(
@@ -128,6 +133,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
         pauseAudio()
         waveformAudioPlayerProperty.value?.stop()
         audioDataStore.stopPlayers()
+        audioDataStore.closePlayers()
         markerModel
             ?.writeMarkers()
             ?.blockingAwait()
@@ -184,11 +190,10 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                 workbookDataStore.chapter
             )
             .subscribeOn(Schedulers.io())
-            .doOnSuccess { take ->
+            .observeOnFx()
+            .subscribe { take ->
                 loadTargetAudio(take)
             }
-            .observeOnFx()
-            .subscribe()
     }
 
     private fun loadTargetAudio(take: Take) {
