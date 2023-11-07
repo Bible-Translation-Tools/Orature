@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
+import io.reactivex.schedulers.Schedulers
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleListProperty
@@ -128,6 +129,7 @@ class TranslationViewModel2 : ViewModel() {
 
     fun updateSourceText() {
         workbookDataStore.getSourceText()
+            .subscribeOn(Schedulers.io())
             .observeOnFx()
             .doOnComplete {
                 sourceTextProperty.set(null)

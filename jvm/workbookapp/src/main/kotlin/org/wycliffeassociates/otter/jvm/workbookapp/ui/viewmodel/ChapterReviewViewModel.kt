@@ -4,6 +4,7 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.glass.ui.Screen
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import javafx.animation.AnimationTimer
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
@@ -177,14 +178,17 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     }
 
     private fun loadChapterTake() {
-        chapterTranslationTake.getOrCompile(
-            workbookDataStore.workbook,
-            workbookDataStore.chapter
-        )
-            .observeOnFx()
-            .subscribe { take ->
+        chapterTranslationTake
+            .getOrCompile(
+                workbookDataStore.workbook,
+                workbookDataStore.chapter
+            )
+            .subscribeOn(Schedulers.io())
+            .doOnSuccess { take ->
                 loadTargetAudio(take)
             }
+            .observeOnFx()
+            .subscribe()
     }
 
     private fun loadTargetAudio(take: Take) {
