@@ -26,7 +26,7 @@ class ChunkingTranslationPage : View() {
 
     private val mainFragmentProperty = viewModel.selectedStepProperty.objectBinding {
         it?.let { step ->
-            when(step) {
+            val fragment = when(step) {
                 ChunkingStep.CONSUME_AND_VERBALIZE -> find<Consume>()
                 ChunkingStep.CHUNKING -> find<Chunking>()
                 ChunkingStep.BLIND_DRAFT -> find<BlindDraft>()
@@ -35,6 +35,7 @@ class ChunkingTranslationPage : View() {
                 ChunkingStep.VERSE_CHECK -> find<PeerEdit>()
                 ChunkingStep.CHAPTER_REVIEW -> find<ChapterReview>()
             }
+            fragment.root
         }
     }
 
@@ -64,7 +65,7 @@ class ChunkingTranslationPage : View() {
                 this.reachableStepProperty.bind(viewModel.reachableStepProperty)
             }
 
-            centerProperty().bind(mainFragmentProperty.objectBinding { it?.root })
+            centerProperty().bind(mainFragmentProperty)
 
             right = SourceTextDrawer().apply {
                 sourceTextDrawer = this
