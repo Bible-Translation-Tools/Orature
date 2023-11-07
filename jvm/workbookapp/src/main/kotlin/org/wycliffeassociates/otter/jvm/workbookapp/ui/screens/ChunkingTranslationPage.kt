@@ -8,18 +8,13 @@ import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.GoToNextChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.GoToPreviousChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
-import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
-import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.BlindDraft
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.Chunking
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.ChunkingStepsDrawer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.Consume
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.KeywordCheck
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.PeerEdit
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.ChapterReview
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.VerseCheck
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.translationHeader
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
@@ -35,9 +30,9 @@ class ChunkingTranslationPage : View() {
                 ChunkingStep.CONSUME_AND_VERBALIZE -> find<Consume>()
                 ChunkingStep.CHUNKING -> find<Chunking>()
                 ChunkingStep.BLIND_DRAFT -> find<BlindDraft>()
-                ChunkingStep.PEER_EDIT -> find<PeerEdit>()
-                ChunkingStep.KEYWORD_CHECK -> find<KeywordCheck>()
-                ChunkingStep.VERSE_CHECK -> find<VerseCheck>()
+                ChunkingStep.PEER_EDIT,
+                ChunkingStep.KEYWORD_CHECK,
+                ChunkingStep.VERSE_CHECK -> find<PeerEdit>()
                 ChunkingStep.CHAPTER_REVIEW -> find<ChapterReview>()
             }
         }
