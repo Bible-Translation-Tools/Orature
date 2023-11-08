@@ -372,14 +372,11 @@ class DatabaseMigrator {
 
             try {
                 /**
-                 * To add a column with foreign key in SQLite, DROP and CREATE the table again.
-                 * ADD CONSTRAINT is not supported - https://www.sqlite.org/omitted.html
+                 * To add a column with foreign key, DROP and CREATE the table again.
+                 * ADD CONSTRAINT is not supported in SQLite - https://www.sqlite.org/omitted.html
                  */
-                clearProjectTables(dsl)
-                dsl.dropTable(TakeEntity.TAKE_ENTITY)
-                    .execute()
 
-                dsl.createTable(TakeEntity.TAKE_ENTITY)
+                dsl.createTable("take_entity_temp")
                     .column(TakeEntity.TAKE_ENTITY.ID)
                     .column(TakeEntity.TAKE_ENTITY.CONTENT_FK)
                     .column(TakeEntity.TAKE_ENTITY.FILENAME)
@@ -396,6 +393,37 @@ class DatabaseMigrator {
                             .foreignKey(TakeEntity.TAKE_ENTITY.CHECKING_FK)
                             .references(CheckingStatus.CHECKING_STATUS)
                     )
+                    .execute()
+
+                dsl.insertInto(DSL.table("take_entity_temp"))
+                    .select(
+                        dsl
+                            .select(
+                                TakeEntity.TAKE_ENTITY.ID,
+                                TakeEntity.TAKE_ENTITY.CONTENT_FK,
+                                TakeEntity.TAKE_ENTITY.FILENAME,
+                                TakeEntity.TAKE_ENTITY.PATH,
+                                TakeEntity.TAKE_ENTITY.NUMBER,
+                                TakeEntity.TAKE_ENTITY.CREATED_TS,
+                                TakeEntity.TAKE_ENTITY.DELETED_TS,
+                                TakeEntity.TAKE_ENTITY.PLAYED,
+                                TakeEntity.TAKE_ENTITY.CHECKING_FK,
+                                TakeEntity.TAKE_ENTITY.CHECKSUM
+                            )
+                            .from(TakeEntity.TAKE_ENTITY)
+                    )
+                    .execute()
+
+                dsl
+                    .deleteFrom(TakeEntity.TAKE_ENTITY)
+                    .execute()
+
+                dsl.dropTable(TakeEntity.TAKE_ENTITY)
+                    .execute()
+
+                dsl.alterTable(DSL.table("take_entity_temp"))
+                    .renameTo(TakeEntity.TAKE_ENTITY)
+                    .execute()
 
             } catch (e: DataAccessException) {
                 // Exception is thrown because the column might already exist but an existence check cannot
