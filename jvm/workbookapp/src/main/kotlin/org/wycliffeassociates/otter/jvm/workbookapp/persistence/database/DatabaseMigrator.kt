@@ -373,6 +373,7 @@ class DatabaseMigrator {
 
             seedCheckingStatus(dsl)
 
+            /** Default value for new column in Take Entity */
             val uncheckedId = dsl.select(CheckingStatus.CHECKING_STATUS.ID)
                 .from(CheckingStatus.CHECKING_STATUS)
                 .where(
@@ -384,8 +385,9 @@ class DatabaseMigrator {
 
             try {
                 /**
-                 * To add a column with foreign key, DROP and CREATE the table again.
-                 * ADD CONSTRAINT is not supported in SQLite - https://www.sqlite.org/omitted.html
+                 * Since ADD CONSTRAINT is not supported in SQLite - https://www.sqlite.org/omitted.html,
+                 * we copy the data to another table (same fields), drop the original table and rename
+                 * the new table back to the original one.
                  */
 
                 dsl.createTable("take_entity_temp")
