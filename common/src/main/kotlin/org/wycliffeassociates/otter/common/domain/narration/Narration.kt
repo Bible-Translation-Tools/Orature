@@ -9,7 +9,6 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
-import jdk.jshell.SourceCodeAnalysis.Completeness
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
@@ -25,7 +24,6 @@ import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
-import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
 import org.wycliffeassociates.otter.common.recorder.WavFileWriter
 import java.io.File
@@ -254,6 +252,14 @@ class Narration @AssistedInject constructor(
 
     fun resumeRecording() {
         player.seek(player.getDurationInFrames())
+        writer?.start()
+        isRecording.set(true)
+    }
+
+    fun resumeRecordingAgain() {
+        // Seeks to the end of the scratchAudio, since the re-record has not yet been finalized.
+        val lastRecordingPosition = chapterRepresentation.scratchAudio.totalFrames
+        player.seek(chapterRepresentation.absoluteToRelativeChapter(lastRecordingPosition))
         writer?.start()
         isRecording.set(true)
     }
