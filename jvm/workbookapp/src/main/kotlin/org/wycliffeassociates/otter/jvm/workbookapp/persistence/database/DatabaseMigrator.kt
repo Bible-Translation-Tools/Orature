@@ -22,8 +22,9 @@ import jooq.tables.*
 import org.jooq.DSLContext
 import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
-import org.jooq.impl.DSL.foreignKey
+import org.jooq.impl.SQLDataType
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus as CheckingStatusEnum
 
 const val SCHEMA_VERSION = 13
 const val DATABASE_INSTALLABLE_NAME = "DATABASE"
@@ -370,6 +371,17 @@ class DatabaseMigrator {
                 )
                 .execute()
 
+            seedCheckingStatus(dsl)
+
+            val uncheckedId = dsl.select(CheckingStatus.CHECKING_STATUS.ID)
+                .from(CheckingStatus.CHECKING_STATUS)
+                .where(
+                    CheckingStatus.CHECKING_STATUS.NAME
+                        .eq(CheckingStatusEnum.UNCHECKED.name)
+                )
+                .fetchOne()!!
+                .get(CheckingStatus.CHECKING_STATUS.ID)
+
             try {
                 /**
                  * To add a column with foreign key, DROP and CREATE the table again.
@@ -385,8 +397,8 @@ class DatabaseMigrator {
                     .column(TakeEntity.TAKE_ENTITY.CREATED_TS)
                     .column(TakeEntity.TAKE_ENTITY.DELETED_TS)
                     .column(TakeEntity.TAKE_ENTITY.PLAYED)
-                    .column(TakeEntity.TAKE_ENTITY.CHECKING_FK)
-                    .column(TakeEntity.TAKE_ENTITY.CHECKSUM)
+                    .column(TakeEntity.TAKE_ENTITY.CHECKING_FK, SQLDataType.INTEGER.defaultValue(uncheckedId))
+                    .column(TakeEntity.TAKE_ENTITY.CHECKSUM, SQLDataType.VARCHAR.nullable(true))
                     .constraints(
                         DSL.primaryKey(TakeEntity.TAKE_ENTITY.ID),
                         DSL.constraint("fk_checking_status")
@@ -406,9 +418,7 @@ class DatabaseMigrator {
                                 TakeEntity.TAKE_ENTITY.NUMBER,
                                 TakeEntity.TAKE_ENTITY.CREATED_TS,
                                 TakeEntity.TAKE_ENTITY.DELETED_TS,
-                                TakeEntity.TAKE_ENTITY.PLAYED,
-                                TakeEntity.TAKE_ENTITY.CHECKING_FK,
-                                TakeEntity.TAKE_ENTITY.CHECKSUM
+                                TakeEntity.TAKE_ENTITY.PLAYED
                             )
                             .from(TakeEntity.TAKE_ENTITY)
                     )
@@ -475,6 +485,18 @@ class DatabaseMigrator {
                 DSL.foreignKey(WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.TYPE_FK)
                     .references(WorkbookType.WORKBOOK_TYPE)
             )
+            .execute()
+    }
+
+    private fun seedCheckingStatus(dsl: DSLContext) {
+        val enumList = CheckingStatusEnum.values().map { it.name }
+
+        dsl
+            .insertInto(
+                CheckingStatus.CHECKING_STATUS,
+                CheckingStatus.CHECKING_STATUS.NAME
+            )
+            .values(enumList)
             .execute()
     }
 
