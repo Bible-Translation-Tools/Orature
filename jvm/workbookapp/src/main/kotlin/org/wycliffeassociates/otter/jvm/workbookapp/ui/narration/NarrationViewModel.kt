@@ -512,18 +512,13 @@ class NarrationViewModel : ViewModel() {
 
         narration.pauseRecording()
         narration.finalizeVerse(index)
-        // TODO: note, removing this line on pause recording for re-record removes the apparent offset when resuming
-        //  re-record
-//        renderer.clearActiveRecordingData()
         refreshTeleprompter()
-
     }
 
     fun resumeRecordingAgain() {
         stopPlayer()
 
         narration.resumeRecordingAgain()
-
         isRecording = true
         recordPause = false
 
@@ -679,8 +674,6 @@ class NarrationViewModel : ViewModel() {
                         }
                     }
 
-                    // NOTE: this is throwing an exception after undoing a re-record.
-                    // This also likely needs to be mapped to the verse space if we are locked to a verse.
                     reRecordLoc = recordedVerses[reRecordingIndex].location
                 }
 
