@@ -22,8 +22,9 @@ import jooq.tables.*
 import org.jooq.DSLContext
 import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
-import org.jooq.impl.DSL.foreignKey
+import org.jooq.impl.SQLDataType
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus as CheckingStatusEnum
 
 const val SCHEMA_VERSION = 13
 const val DATABASE_INSTALLABLE_NAME = "DATABASE"
@@ -370,16 +371,26 @@ class DatabaseMigrator {
                 )
                 .execute()
 
+            seedCheckingStatus(dsl)
+
+            /** Default value for new column in Take Entity */
+            val uncheckedId = dsl.select(CheckingStatus.CHECKING_STATUS.ID)
+                .from(CheckingStatus.CHECKING_STATUS)
+                .where(
+                    CheckingStatus.CHECKING_STATUS.NAME
+                        .eq(CheckingStatusEnum.UNCHECKED.name)
+                )
+                .fetchOne()!!
+                .get(CheckingStatus.CHECKING_STATUS.ID)
+
             try {
                 /**
-                 * To add a column with foreign key in SQLite, DROP and CREATE the table again.
-                 * ADD CONSTRAINT is not supported - https://www.sqlite.org/omitted.html
+                 * Since ADD CONSTRAINT is not supported in SQLite - https://www.sqlite.org/omitted.html,
+                 * we copy the data to another table (same fields), drop the original table and rename
+                 * the new table back to the original one.
                  */
-                clearProjectTables(dsl)
-                dsl.dropTable(TakeEntity.TAKE_ENTITY)
-                    .execute()
 
-                dsl.createTable(TakeEntity.TAKE_ENTITY)
+                dsl.createTable("take_entity_temp")
                     .column(TakeEntity.TAKE_ENTITY.ID)
                     .column(TakeEntity.TAKE_ENTITY.CONTENT_FK)
                     .column(TakeEntity.TAKE_ENTITY.FILENAME)
@@ -388,14 +399,41 @@ class DatabaseMigrator {
                     .column(TakeEntity.TAKE_ENTITY.CREATED_TS)
                     .column(TakeEntity.TAKE_ENTITY.DELETED_TS)
                     .column(TakeEntity.TAKE_ENTITY.PLAYED)
-                    .column(TakeEntity.TAKE_ENTITY.CHECKING_FK)
-                    .column(TakeEntity.TAKE_ENTITY.CHECKSUM)
+                    .column(TakeEntity.TAKE_ENTITY.CHECKING_FK, SQLDataType.INTEGER.defaultValue(uncheckedId))
+                    .column(TakeEntity.TAKE_ENTITY.CHECKSUM, SQLDataType.VARCHAR.nullable(true))
                     .constraints(
                         DSL.primaryKey(TakeEntity.TAKE_ENTITY.ID),
                         DSL.constraint("fk_checking_status")
                             .foreignKey(TakeEntity.TAKE_ENTITY.CHECKING_FK)
                             .references(CheckingStatus.CHECKING_STATUS)
                     )
+                    .execute()
+
+                dsl.insertInto(DSL.table("take_entity_temp"))
+                    .select(
+                        dsl
+                            .select(
+                                TakeEntity.TAKE_ENTITY.ID,
+                                TakeEntity.TAKE_ENTITY.CONTENT_FK,
+                                TakeEntity.TAKE_ENTITY.FILENAME,
+                                TakeEntity.TAKE_ENTITY.PATH,
+                                TakeEntity.TAKE_ENTITY.NUMBER,
+                                TakeEntity.TAKE_ENTITY.CREATED_TS,
+                                TakeEntity.TAKE_ENTITY.DELETED_TS,
+                                TakeEntity.TAKE_ENTITY.PLAYED,
+                                DSL.inline(uncheckedId), // Default value for CHECKING_FK
+                                DSL.inline(null, TakeEntity.TAKE_ENTITY.CHECKSUM) // Default value for CHECKSUM
+                            )
+                            .from(TakeEntity.TAKE_ENTITY)
+                    )
+                    .execute()
+
+                dsl.dropTable(TakeEntity.TAKE_ENTITY)
+                    .execute()
+
+                dsl.alterTable(DSL.table("take_entity_temp"))
+                    .renameTo(TakeEntity.TAKE_ENTITY.name)
+                    .execute()
 
             } catch (e: DataAccessException) {
                 // Exception is thrown because the column might already exist but an existence check cannot
@@ -447,6 +485,20 @@ class DatabaseMigrator {
                 DSL.foreignKey(WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.TYPE_FK)
                     .references(WorkbookType.WORKBOOK_TYPE)
             )
+            .execute()
+    }
+
+    private fun seedCheckingStatus(dsl: DSLContext) {
+        dsl
+            .insertInto(
+                CheckingStatus.CHECKING_STATUS,
+                CheckingStatus.CHECKING_STATUS.NAME
+            )
+            .also { insert ->
+                CheckingStatusEnum.values().forEach { status ->
+                    insert.values(status.name)
+                }
+            }
             .execute()
     }
 
