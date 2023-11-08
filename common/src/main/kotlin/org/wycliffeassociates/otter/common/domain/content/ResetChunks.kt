@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.reactivex.Completable
+import io.reactivex.schedulers.Schedulers
 import org.wycliffeassociates.otter.common.data.Chunkification
 import java.io.File
 import javax.inject.Inject
@@ -12,9 +14,13 @@ import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 
 class ResetChunks @Inject constructor() {
-    fun resetChapter(accessor: ProjectFilesAccessor, chapter: Chapter) {
-        markTakesForDeletion(chapter)
-        chapter.reset().blockingAwait()
+    fun resetChapter(accessor: ProjectFilesAccessor, chapter: Chapter): Completable {
+        return Completable
+            .fromAction {
+                markTakesForDeletion(chapter)
+            }
+            .andThen(chapter.reset())
+            .subscribeOn(Schedulers.io())
     }
 
     private fun deleteChunkedSourceAudio(accessor: ProjectFilesAccessor, chapter: Chapter) {

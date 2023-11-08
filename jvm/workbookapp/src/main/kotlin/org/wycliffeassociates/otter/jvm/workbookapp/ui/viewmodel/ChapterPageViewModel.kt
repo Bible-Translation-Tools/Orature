@@ -486,6 +486,7 @@ class ChapterPageViewModel : ViewModel() {
         val chapter = workbookDataStore.activeChapterProperty.value
 
         createChunks.createChunksFromVerses(wkbk, chapter, 1)
+            .subscribe()
     }
 
     fun resetChapter() {
@@ -493,6 +494,7 @@ class ChapterPageViewModel : ViewModel() {
         filteredContent.clear()
         val chapter = workbookDataStore.activeChapterProperty.value
         resetChunks.resetChapter(workbookDataStore.workbook.projectFilesAccessor, chapter)
+            .subscribe()
         audioDataStore.updateSourceAudio()
     }
 }

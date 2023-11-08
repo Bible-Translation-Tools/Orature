@@ -219,7 +219,7 @@ class ResetChunksTest {
 
     @Test
     fun clearContentForCollectionTriggered() {
-        ResetChunks().resetChapter(projectFilesAccessor, chapter)
+        ResetChunks().resetChapter(projectFilesAccessor, chapter).blockingAwait()
         Assert.assertEquals(true, clearContentForCollectionTriggered)
 
         chapter.chunks.take(1).blockingFirst().forEach {
@@ -234,7 +234,7 @@ class ResetChunksTest {
         }
         Assert.assertEquals(1, takes.size)
 
-        ResetChunks().resetChapter(projectFilesAccessor, chapter)
+        ResetChunks().resetChapter(projectFilesAccessor, chapter).blockingAwait()
 
         val deletedTakes = chapter.chunks.take(1).blockingFirst().map { chunk ->
             chunk.audio.getAllTakes().filter { it.deletedTimestamp.value?.value != null }
