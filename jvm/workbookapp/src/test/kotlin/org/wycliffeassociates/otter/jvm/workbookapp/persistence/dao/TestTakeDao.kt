@@ -55,7 +55,7 @@ class TestTakeDao {
         }
         database.dsl.execute("PRAGMA foreign_keys = OFF;")
         for ((idx, f) in files.withIndex()) {
-            dao.insert(TakeEntity(0, idx % 2, f.name, f.absolutePath, idx, LocalDate.now().toString(), null, 0))
+            dao.insert(TakeEntity(0, idx % 2, f.name, f.absolutePath, idx, LocalDate.now().toString(), null, 0, 1, null))
         }
     }
 
@@ -122,11 +122,11 @@ class TestTakeDao {
                 assertTrue("Take $idx is a soft deleted take", dao.fetchSoftDeletedTakes().contains(dao.fetchById(idx)))
             }
         }
-        TakeRepository(database, TakeMapper(), MarkerMapper(), CollectionMapper()).deleteExpiredTakes(0).blockingGet()
+        TakeRepository(database, MarkerMapper(), CollectionMapper()).deleteExpiredTakes(0).blockingGet()
         assertTrue("Soft Deleted Takes are gone", dao.fetchSoftDeletedTakes().isEmpty())
         for ((idx, f) in files.withIndex()) {
             if (idx % 2 == 0) {
-                assertTrue("Deleted File deleted", !f.exists())
+                assertTrue("Deleted File deleted", !f.exists()) // this may fail on Windows
             } else {
                 assertTrue("Remaining file exists", f.exists())
             }

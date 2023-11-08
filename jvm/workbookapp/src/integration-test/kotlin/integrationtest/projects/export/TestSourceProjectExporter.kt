@@ -182,7 +182,7 @@ class TestSourceProjectExporter {
             RowCount(
                 contents = mapOf(
                     ContentType.META to 3589,
-                    ContentType.TEXT to 92947
+                    ContentType.TEXT to 62228
                 ),
                 collections = 3767,
                 links = 0
