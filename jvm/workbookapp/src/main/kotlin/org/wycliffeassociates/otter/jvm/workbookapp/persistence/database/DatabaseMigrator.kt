@@ -418,21 +418,19 @@ class DatabaseMigrator {
                                 TakeEntity.TAKE_ENTITY.NUMBER,
                                 TakeEntity.TAKE_ENTITY.CREATED_TS,
                                 TakeEntity.TAKE_ENTITY.DELETED_TS,
-                                TakeEntity.TAKE_ENTITY.PLAYED
+                                TakeEntity.TAKE_ENTITY.PLAYED,
+                                DSL.inline(uncheckedId), // Default value for CHECKING_FK
+                                DSL.inline(null, TakeEntity.TAKE_ENTITY.CHECKSUM) // Default value for CHECKSUM
                             )
                             .from(TakeEntity.TAKE_ENTITY)
                     )
-                    .execute()
-
-                dsl
-                    .deleteFrom(TakeEntity.TAKE_ENTITY)
                     .execute()
 
                 dsl.dropTable(TakeEntity.TAKE_ENTITY)
                     .execute()
 
                 dsl.alterTable(DSL.table("take_entity_temp"))
-                    .renameTo(TakeEntity.TAKE_ENTITY)
+                    .renameTo(TakeEntity.TAKE_ENTITY.name)
                     .execute()
 
             } catch (e: DataAccessException) {
