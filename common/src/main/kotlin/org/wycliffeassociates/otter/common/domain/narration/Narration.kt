@@ -257,8 +257,9 @@ class Narration @AssistedInject constructor(
     }
 
     fun resumeRecordingAgain() {
-        val lastRecordingPositon = chapterRepresentation.scratchAudio.totalFrames
-        player.seek(chapterRepresentation.absoluteToRelativeChapter(lastRecordingPositon))
+        // Seeks to the end of the scratchAudio, since the re-record has not yet been finalized.
+        val lastRecordingPosition = chapterRepresentation.scratchAudio.totalFrames
+        player.seek(chapterRepresentation.absoluteToRelativeChapter(lastRecordingPosition))
         writer?.start()
         isRecording.set(true)
     }
