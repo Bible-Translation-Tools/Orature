@@ -489,14 +489,16 @@ class DatabaseMigrator {
     }
 
     private fun seedCheckingStatus(dsl: DSLContext) {
-        val enumList = CheckingStatusEnum.values().map { it.name }
-
         dsl
             .insertInto(
                 CheckingStatus.CHECKING_STATUS,
                 CheckingStatus.CHECKING_STATUS.NAME
             )
-            .values(enumList)
+            .also { insert ->
+                CheckingStatusEnum.values().forEach { status ->
+                    insert.values(status.name)
+                }
+            }
             .execute()
     }
 
