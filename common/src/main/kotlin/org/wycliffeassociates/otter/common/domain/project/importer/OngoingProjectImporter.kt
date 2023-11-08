@@ -425,17 +425,7 @@ class OngoingProjectImporter @Inject constructor(
             ?.toMutableList()
             ?: mutableListOf()
 
-        takesCheckingMap = if (fileReader.exists(RcConstants.CHECKING_STATUS_FILE)) {
-            fileReader.stream(RcConstants.CHECKING_STATUS_FILE).use { stream ->
-                ObjectMapper(JsonFactory())
-                    .registerKotlinModule()
-                    .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-                    .readValue<TakeCheckingStatusMap>(stream)
-                    .mapKeys { File(it.key).name } // take name as key
-            }
-        } else {
-            mapOf()
-        }
+        takesCheckingMap = parseCheckingStatusFile(fileReader)
 
         projectFilesAccessor.copySelectedTakesFile(fileReader)
         projectFilesAccessor.copyTakeFiles(fileReader, manifestProject, ::takeCopyFilter)
@@ -482,6 +472,19 @@ class OngoingProjectImporter @Inject constructor(
             }
             .toSet()
     }
+
+    private fun parseCheckingStatusFile(fileReader: IFileReader) =
+        if (fileReader.exists(RcConstants.CHECKING_STATUS_FILE)) {
+            fileReader.stream(RcConstants.CHECKING_STATUS_FILE).use { stream ->
+                ObjectMapper(JsonFactory())
+                    .registerKotlinModule()
+                    .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                    .readValue<TakeCheckingStatusMap>(stream)
+                    .mapKeys { File(it.key).name } // take name as key
+            }
+        } else {
+            mapOf()
+        }
 
     /**
      * Filters only takes that are chosen to import (based on the callback result)

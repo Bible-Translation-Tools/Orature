@@ -156,15 +156,7 @@ class ResourceContainerBuilder(baseRC: File? = null) {
                 }
             }
             if (takeCheckingMap.isNotEmpty()) {
-                rc.accessor.write(RcConstants.CHECKING_STATUS_FILE) { outputStream ->
-                    outputStream.use { stream ->
-                        val mapper = ObjectMapper(JsonFactory())
-                            .registerKotlinModule()
-                            .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-
-                        mapper.writeValue(stream, takeCheckingMap)
-                    }
-                }
+                writeCheckingStatusFile(rc)
             }
 
             rc.manifest = this.manifest
@@ -202,6 +194,18 @@ class ResourceContainerBuilder(baseRC: File? = null) {
 
 
         return tempFile
+    }
+
+    private fun writeCheckingStatusFile(rc: ResourceContainer) {
+        rc.accessor.write(RcConstants.CHECKING_STATUS_FILE) { outputStream ->
+            outputStream.use { stream ->
+                val mapper = ObjectMapper(JsonFactory())
+                    .registerKotlinModule()
+                    .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+
+                mapper.writeValue(stream, takeCheckingMap)
+            }
+        }
     }
 
     companion object {

@@ -337,13 +337,7 @@ class ProjectFilesAccessor(
             }
             .toMap()
             .doOnSuccess { takeCheckingMap: TakeCheckingStatusMap ->
-                fileWriter.bufferedWriter(RcConstants.CHECKING_STATUS_FILE).use { writer ->
-                    val mapper = ObjectMapper(JsonFactory())
-                        .registerKotlinModule()
-                        .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-
-                    mapper.writeValue(writer, takeCheckingMap)
-                }
+                writeTakeChecking(fileWriter, takeCheckingMap)
             }
             .ignoreElement()
     }
@@ -520,6 +514,19 @@ class ProjectFilesAccessor(
                         it.audio.getAllTakes().toObservable()
                     }
             }
+    }
+
+    private fun writeTakeChecking(
+        fileWriter: IFileWriter,
+        takeCheckingMap: TakeCheckingStatusMap
+    ) {
+        fileWriter.bufferedWriter(RcConstants.CHECKING_STATUS_FILE).use { writer ->
+            val mapper = ObjectMapper(JsonFactory())
+                .registerKotlinModule()
+                .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+
+            mapper.writeValue(writer, takeCheckingMap)
+        }
     }
 
     private fun copySourceWithoutMedia(source: File, target: File) {
