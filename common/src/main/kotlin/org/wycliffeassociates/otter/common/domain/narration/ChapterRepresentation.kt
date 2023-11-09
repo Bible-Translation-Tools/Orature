@@ -162,7 +162,7 @@ internal class ChapterRepresentation(
      */
     fun absoluteToRelativeChapter(absoluteFrame: Int): Int {
         val verses = activeVerses
-        var verse = findVerse(absoluteFrame)
+        val verse = findVerse(absoluteFrame)
         verse?.let {
             val index = verses.indexOf(verse)
             var rel = 0
@@ -216,8 +216,8 @@ internal class ChapterRepresentation(
 
         verses
             .find { it.marker.label == verse.label }
-            ?.let { verse ->
-                return verse.firstFrame()..verse.lastFrame()
+            ?.let { _verse ->
+                return _verse.firstFrame().._verse.lastFrame()
             }
         return null
     }
@@ -316,7 +316,7 @@ internal class ChapterRepresentation(
          * from the start of the verse, to the given absoluteFrame position.
          */
         fun absoluteToRelativeVerse(absoluteFrame: Int, verseIndex: Int): Int {
-            val verse = activeVerses[verseIndex]
+            val verse = activeVerses.getOrNull(verseIndex)
             var rel = 0
             verse?.let {
                 rel = it.framesToPosition(absoluteFrame)
@@ -339,6 +339,7 @@ internal class ChapterRepresentation(
         @Synchronized
         override fun hasRemaining(): Boolean {
             if (totalFrames == 0) return false
+            if (randomAccessFile == null) return false
 
             val current = absoluteFramePosition
             val verses = activeVerses
@@ -355,13 +356,9 @@ internal class ChapterRepresentation(
             return false
         }
 
-        private val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
-
         @Synchronized
         override fun getPcmBuffer(bytes: ByteArray): Int {
             if (totalFrames == 0) return 0
-
-
 
             return when (lockToVerse.get()) {
                 CHAPTER_UNLOCKED -> getPcmBufferChapter(bytes)
@@ -396,61 +393,58 @@ internal class ChapterRepresentation(
         @Synchronized
         private fun getPcmBufferVerse(bytes: ByteArray, verse: VerseNode): Int {
             var bytesWritten = 0
-            if (randomAccessFile == null) {
-                logger.error("Should have opened the file, this is weird")
-                open()
-            }
-            val raf = randomAccessFile!!
-
-            if (absoluteFramePosition !in verse) {
-                return 0
-            }
-
-            var framesToRead = min(bytes.size / frameSizeInBytes, verse.length)
-
-            // if there is a negative frames to read or
-            if (framesToRead <= 0 || absoluteFramePosition !in verse) {
-                logger.error("Frames to read is negative: $absoluteFramePosition, $framesToRead, ${verse.marker.formattedLabel}")
-                position = verse.lastFrame() * frameSizeInBytes
-                return 0
-            }
-
-            val sectors = verse.getSectorsFromOffset(absoluteFramePosition, framesToRead)
-
-            if (sectors.isEmpty()) {
-                logger.error("sectors is empty for verse ${verse.marker.label}")
-                position = verse.lastFrame() * frameSizeInBytes
-                return 0
-            }
-
-            for (sector in sectors) {
-                if (framesToRead <= 0 || absoluteFramePosition !in verse) break
-
-                val framesToCopyFromSector = max(min(framesToRead, sector.length()), 0)
-
-                val seekLoc = (sector.first * frameSizeInBytes).toLong()
-                raf.seek(seekLoc)
-                val temp = ByteArray(framesToCopyFromSector * frameSizeInBytes)
-                val toCopy = raf.read(temp)
-                try {
-                    System.arraycopy(temp, 0, bytes, bytesWritten, toCopy)
-                } catch (e: ArrayIndexOutOfBoundsException) {
-                    logger.error("arraycopy out of bounds, $bytesWritten bytes written, $toCopy toCopy", e)
+            randomAccessFile?.let { raf ->
+                if (absoluteFramePosition !in verse) {
+                    return 0
                 }
-                bytesWritten += toCopy
-                position += toCopy
-                framesToRead -= toCopy / frameSizeInBytes
 
-                if (absoluteFramePosition !in sector) {
-                    position = sector.last * frameSizeInBytes
+                var framesToRead = min(bytes.size / frameSizeInBytes, verse.length)
+
+                // if there is a negative frames to read or
+                if (framesToRead <= 0 || absoluteFramePosition !in verse) {
+                    logger.error("Frames to read is negative: $absoluteFramePosition, $framesToRead, ${verse.marker.formattedLabel}")
+                    position = verse.lastFrame() * frameSizeInBytes
+                    return 0
                 }
-            }
 
-            if (absoluteFramePosition == verse.lastFrame()) {
-                adjustPositionToNextVerse(verse)
-            }
+                val sectors = verse.getSectorsFromOffset(absoluteFramePosition, framesToRead)
 
-            return bytesWritten
+                if (sectors.isEmpty()) {
+                    logger.error("sectors is empty for verse ${verse.marker.label}")
+                    position = verse.lastFrame() * frameSizeInBytes
+                    return 0
+                }
+
+                for (sector in sectors) {
+                    if (framesToRead <= 0 || absoluteFramePosition !in verse) break
+
+                    val framesToCopyFromSector = max(min(framesToRead, sector.length()), 0)
+
+                    val seekLoc = (sector.first * frameSizeInBytes).toLong()
+                    raf.seek(seekLoc)
+                    val temp = ByteArray(framesToCopyFromSector * frameSizeInBytes)
+                    val toCopy = raf.read(temp)
+                    try {
+                        System.arraycopy(temp, 0, bytes, bytesWritten, toCopy)
+
+                        bytesWritten += toCopy
+                        position += toCopy
+                        framesToRead -= toCopy / frameSizeInBytes
+                    } catch (e: ArrayIndexOutOfBoundsException) {
+                        logger.error("arraycopy out of bounds, $bytesWritten bytes written, $toCopy toCopy", e)
+                    }
+
+                    if (absoluteFramePosition !in sector) {
+                        position = sector.last * frameSizeInBytes
+                    }
+                }
+
+                if (absoluteFramePosition == verse.lastFrame()) {
+                    adjustPositionToNextVerse(verse)
+                }
+
+                return bytesWritten
+            } ?: throw IllegalAccessException("getPcmBufferVerse called before opening file")
         }
 
         private fun adjustPositionToNextSector(verse: VerseNode, sector: IntRange, sectors: List<IntRange>) {

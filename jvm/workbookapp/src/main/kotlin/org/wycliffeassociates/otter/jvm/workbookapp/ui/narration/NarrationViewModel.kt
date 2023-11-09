@@ -97,6 +97,7 @@ class NarrationViewModel : ViewModel() {
     val chapterTakeProperty = SimpleObjectProperty<Take>()
     val hasNextChapter = SimpleBooleanProperty()
     val hasPreviousChapter = SimpleBooleanProperty()
+    val chapterTakeBusyProperty = SimpleBooleanProperty()
 
     val chunkTotalProperty = SimpleIntegerProperty(0)
     val chunksList: ObservableList<Chunk> = observableListOf()
@@ -160,6 +161,7 @@ class NarrationViewModel : ViewModel() {
                     logger.error("Error loading chapter list", e)
                 }
             )
+            .let { disposables.add(it) }
     }
 
     fun onUndock() {
@@ -188,6 +190,7 @@ class NarrationViewModel : ViewModel() {
         subscribeActiveVersesChanged()
         updateRecordingState()
         rendererAudioReader = narration.audioReader
+        rendererAudioReader.open()
         renderer = NarrationWaveformRenderer(
             // NarrationAudioScene(
             AudioScene(
@@ -218,16 +221,17 @@ class NarrationViewModel : ViewModel() {
             }
             .map { list ->
                 val chapterToResume = list.firstOrNull { !it.hasSelectedAudio() } ?: list.first()
+                val activeChapter = workbookDataStore.activeChapterProperty.value ?: chapterToResume
                 runLater {
-                    workbookDataStore.activeChapterProperty.set(chapterToResume)
+                    workbookDataStore.activeChapterProperty.set(activeChapter)
                 }
                 chapterList.setAll(list)
-                chapterToResume
+                activeChapter
             }
     }
 
     private fun resetState() {
-        if (::narration.isInitialized && narration != null) {
+        if (::narration.isInitialized) {
             closeNarrationAudio()
             narration.close()
             renderer.close()
@@ -251,6 +255,29 @@ class NarrationViewModel : ViewModel() {
         hasRedoProperty.set(false)
         audioPositionProperty.set(0)
         totalAudioSizeProperty.set(0)
+    }
+
+    private fun createPotentiallyFinishedChapterTake() {
+        if (potentiallyFinished) {
+            chapterTakeBusyProperty.set(true)
+            logger.info("Chapter is potentially finished, creating a chapter take")
+            narration
+                .createChapterTake()
+                .subscribeOn(Schedulers.io())
+                .subscribe(
+                    {
+                        chapterTakeProperty.set(it)
+                        chapterTakeBusyProperty.set(false)
+                        logger.info("Created a chapter take for ${chapterTitleProperty.value}")
+                    }, { e ->
+                        logger.error(
+                            "Error in creating a chapter take for ${chapterTitleProperty.value}",
+                            e
+                        )
+                        chapterTakeBusyProperty.set(false)
+                    }
+                ).let { disposables.add(it) }
+        }
     }
 
     fun loadChapter(chapterNumber: Int) {
@@ -299,8 +326,8 @@ class NarrationViewModel : ViewModel() {
             .map {
                 it.find { it.sort == chapter.sort }
             }
-            .map { chapter ->
-                chapter.getDraft()
+            .map { _chapter ->
+                _chapter.getDraft()
             }.flatMap { it }
             .observeOnFx()
             .subscribe({ chunksList.add(it) }, {}, {
@@ -443,20 +470,6 @@ class NarrationViewModel : ViewModel() {
         narration.onVerseMarkerMoved(index, delta)
     }
 
-    fun toggleRecording(index: Int) {
-        when {
-            isRecording && !isRecordingAgain -> pauseRecording(index)
-            isRecording && isRecordingAgain -> stopRecordAgain()
-            recordPause -> resumeRecording()
-            recordStart || recordResume -> record(index)
-            else -> {
-                logger.error("Toggle recording is in the else state.")
-            }
-        }
-
-        refreshTeleprompter()
-    }
-
     fun resetChapter() {
         narration.onResetAll()
         teleprompterStateMachine.initialize(narration.versesWithRecordings())
@@ -536,24 +549,6 @@ class NarrationViewModel : ViewModel() {
         refreshTeleprompter()
     }
 
-    fun stopRecordAgain() {
-        narration.pauseRecording()
-        recordAgainVerseIndex = null
-        isRecording = false
-        isRecordingAgain = false
-
-        recordPause = false
-        recordResume = true
-
-        renderer.clearActiveRecordingData()
-
-        recordAgainVerseIndex?.let { verseIndex ->
-            narration.finalizeVerse(verseIndex)
-        }
-
-        refreshTeleprompter()
-    }
-
     private fun stopPlayer() {
         audioPlayer.pause()
         playingVerse = null
@@ -615,7 +610,7 @@ class NarrationViewModel : ViewModel() {
                     hasRedo = narration.hasRedo()
 
                     if (verses.isNotEmpty()) {
-                        val lastVerse = verses.getOrElse(lastRecordedVerseProperty.value, { verses.last() }).location
+                        val lastVerse = verses.getOrElse(lastRecordedVerseProperty.value) { verses.last() }.location
 
                         if (verseWasAdded) {
                             narration.seek(lastVerse)
@@ -627,22 +622,7 @@ class NarrationViewModel : ViewModel() {
                     recordStart = recordedVerses.isEmpty()
                     recordResume = recordedVerses.isNotEmpty()
 
-                    if (potentiallyFinished) {
-                        logger.info("Chapter is potentially finished, creating a chapter take")
-                        narration
-                            .createChapterTake()
-                            .subscribeOn(Schedulers.io())
-                            .subscribe(
-                                {
-                                    logger.info("Created a chapter take for ${chapterTitleProperty.value}")
-                                }, { e ->
-                                    logger.error(
-                                        "Error in creating a chapter take for ${chapterTitleProperty.value}",
-                                        e
-                                    )
-                                }
-                            )
-                    }
+                    createPotentiallyFinishedChapterTake()
                 },
                 { e ->
                     logger.error("Error in active verses subscription", e)
