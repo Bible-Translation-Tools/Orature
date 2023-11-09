@@ -11,6 +11,7 @@ import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.jvm.controls.PartialView
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
@@ -24,7 +25,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewMod
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 import tornadofx.*
 
-class Chunking : View() {
+class Chunking : PartialView() {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     val viewModel: ChunkingViewModel by inject()

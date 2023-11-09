@@ -11,6 +11,7 @@ import javafx.scene.layout.VBox
 import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.PartialView
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
@@ -24,7 +25,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewMod
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 
-open class PeerEdit : View() {
+open class PeerEdit : PartialView() {
 
     val viewModel: PeerEditViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
