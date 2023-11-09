@@ -224,15 +224,21 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         audioController = null
 
         val accessor = workbookDataStore.workbook.projectFilesAccessor
-        val wkbk = workbookDataStore.activeWorkbookProperty.value
+        val wb = workbookDataStore.activeWorkbookProperty.value
         val chapter = workbookDataStore.activeChapterProperty.value
         val cues = markers.filter { it.placed }.map { it.toAudioCue() }
 
         resetChunks.resetChapter(accessor, chapter)
-        createChunks.createUserDefinedChunks(wkbk, chapter, cues, 2)
-
-        ChunkAudioUseCase(directoryProvider, accessor)
-            .createChunkedSourceAudio(sourceAudio.file, cues)
+            .andThen(
+                createChunks.createUserDefinedChunks(wb, chapter, cues)
+            )
+            .andThen { completable ->
+                ChunkAudioUseCase(directoryProvider, accessor)
+                    .createChunkedSourceAudio(sourceAudio.file, cues)
+                
+                completable.onComplete()
+            }
+            .subscribe()
     }
 
     fun initializeAudioController(slider: Slider? = null) {
