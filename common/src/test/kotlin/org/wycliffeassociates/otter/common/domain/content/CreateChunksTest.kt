@@ -216,7 +216,7 @@ class CreateChunksTest {
         doReturn(audioSourceAudioAccessor).whenever(workbook).sourceAudioAccessor
         chapter = workbook.target.chapters.blockingFirst()
 
-        CreateChunks(mock()).createUserDefinedChunks(workbook, chapter, customCues, 1)
+        CreateChunks(mock()).createUserDefinedChunks(workbook, chapter, customCues).blockingAwait()
     }
 
     @After
