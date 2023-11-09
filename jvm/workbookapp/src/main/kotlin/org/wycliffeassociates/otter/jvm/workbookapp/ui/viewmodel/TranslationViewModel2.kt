@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -18,6 +19,8 @@ class TranslationViewModel2 : ViewModel() {
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
 
+    val canUndoProperty = SimpleBooleanProperty(false)
+    val canRedoProperty = SimpleBooleanProperty(false)
     val selectedStepProperty = SimpleObjectProperty<ChunkingStep>(null)
     val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.CHUNKING)
     val sourceTextProperty = SimpleStringProperty()
@@ -40,8 +43,11 @@ class TranslationViewModel2 : ViewModel() {
             .blockingFirst()
 
         workbookDataStore.activeChapterProperty.set(chapter)
-        updateStep()
+        updateStep {
+            selectedStepProperty.set(reachableStepProperty.value)
+        }
         updateSourceText()
+        resetUndoRedo()
     }
 
     fun undockPage() {
@@ -49,13 +55,16 @@ class TranslationViewModel2 : ViewModel() {
         workbookDataStore.activeChapterProperty.set(null)
         workbookDataStore.activeWorkbookProperty.set(null)
         compositeDisposable.clear()
+        resetUndoRedo()
     }
 
     fun navigateStep(target: ChunkingStep) {
         selectedStepProperty.set(target)
+        resetUndoRedo()
     }
 
     fun selectChunk(chunkNumber: Int) {
+        resetUndoRedo()
         workbookDataStore.chapter.chunks.value?.find { it.sort == chunkNumber }?.let {
             workbookDataStore.activeChunkProperty.set(it)
             audioDataStore.updateSourceAudio()
@@ -81,11 +90,12 @@ class TranslationViewModel2 : ViewModel() {
         }
         chunkList.setAll(chunkViewData)
 
-        compositeDisposable.clear()
         updateStep()
     }
 
-    private fun updateStep() {
+    fun updateStep(callback: () -> Unit = {}) {
+        compositeDisposable.clear()
+
         workbookDataStore.chapter
             .chunks
             .observeOnFx()
@@ -107,6 +117,7 @@ class TranslationViewModel2 : ViewModel() {
                         reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
                     }
                 }
+                callback()
             }.addTo(compositeDisposable)
     }
 
@@ -116,5 +127,10 @@ class TranslationViewModel2 : ViewModel() {
             .subscribe {
                 sourceTextProperty.set(it)
             }
+    }
+
+    private fun resetUndoRedo() {
+        canUndoProperty.set(false)
+        canRedoProperty.set(false)
     }
 }

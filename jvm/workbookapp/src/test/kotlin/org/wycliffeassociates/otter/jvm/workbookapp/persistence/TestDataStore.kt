@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence
 
+import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import java.io.File
 import java.time.LocalDate
 import org.wycliffeassociates.otter.common.data.primitives.Collection
@@ -129,7 +130,9 @@ object TestDataStore {
                     created = LocalDate.now(),
                     deleted = null,
                     played = false,
-                    markers = markers.subList(0, 1)
+                    markers = markers.subList(0, 1),
+                    checkingStatus = CheckingStatus.UNCHECKED,
+                    checksum = null
             ),
             Take(
                     filename = "take2.wav",
@@ -138,7 +141,9 @@ object TestDataStore {
                     created = LocalDate.now(),
                     deleted = null,
                     played = true,
-                    markers = markers.subList(2, 3)
+                    markers = markers.subList(2, 3),
+                    checkingStatus = CheckingStatus.UNCHECKED,
+                    checksum = null
             )
     )
 

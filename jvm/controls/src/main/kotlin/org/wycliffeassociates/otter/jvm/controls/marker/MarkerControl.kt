@@ -29,11 +29,17 @@ abstract class MarkerControl : Control() {
      */
     open val onDragProperty: ObjectProperty<EventHandler<MouseEvent>> = SimpleObjectProperty()
 
+    open val onDragFinishProperty: ObjectProperty<EventHandler<MouseEvent>> = SimpleObjectProperty()
+
     fun setOnDragStart(eventHandler: EventHandler<MouseEvent>?) {
         onDragStartProperty.set(eventHandler)
     }
 
     fun setOnDrag(eventHandler: EventHandler<MouseEvent>?) {
         onDragProperty.set(eventHandler)
+    }
+
+    fun setOnDragFinish(eventHandler: EventHandler<MouseEvent>?) {
+        onDragFinishProperty.set(eventHandler)
     }
 }
