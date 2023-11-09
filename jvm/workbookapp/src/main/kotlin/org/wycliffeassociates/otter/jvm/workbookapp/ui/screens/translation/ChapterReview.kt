@@ -9,6 +9,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.PartialView
 import org.wycliffeassociates.otter.jvm.controls.event.GoToNextChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
@@ -25,8 +26,11 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewMod
 import tornadofx.*
 
 class ChapterReview : PartialView() {
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     val viewModel: ChapterReviewViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
+
     private lateinit var waveform: MarkerWaveform
     private val eventSubscriptions = mutableListOf<EventRegistration>()
 
@@ -138,12 +142,14 @@ class ChapterReview : PartialView() {
     }
 
     override fun onDock() {
+        logger.info("Final Review docked.")
         viewModel.dock()
         subscribeEvents()
     }
 
     override fun onUndock() {
         viewModel.undock()
+        logger.info("Final Review undocked.")
         unsubscribeEvents()
     }
 

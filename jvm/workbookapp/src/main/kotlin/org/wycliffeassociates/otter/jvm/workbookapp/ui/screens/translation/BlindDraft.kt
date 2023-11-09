@@ -7,6 +7,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.PartialView
 import org.wycliffeassociates.otter.jvm.controls.TakeSelectionAnimationMediator
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
@@ -22,6 +23,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataSto
 import tornadofx.*
 
 class BlindDraft : PartialView() {
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     val viewModel: BlindDraftViewModel by inject()
     val recorderViewModel: RecorderViewModel by inject()
@@ -135,6 +137,7 @@ class BlindDraft : PartialView() {
 
     override fun onDock() {
         super.onDock()
+        logger.info("Blind Draft docked.")
         mainSectionProperty.set(takesView)
         viewModel.dockBlindDraft()
         subscribeEvents()
@@ -142,6 +145,7 @@ class BlindDraft : PartialView() {
 
     override fun onUndock() {
         super.onUndock()
+        logger.info("Blind Draft undocked.")
         viewModel.undockBlindDraft()
         unsubscribeEvents()
     }

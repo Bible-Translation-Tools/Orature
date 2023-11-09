@@ -11,6 +11,7 @@ import javafx.scene.layout.VBox
 import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.PartialView
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
@@ -26,6 +27,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewMod
 import tornadofx.*
 
 open class PeerEdit : PartialView() {
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     val viewModel: PeerEditViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
@@ -168,6 +170,7 @@ open class PeerEdit : PartialView() {
 
     override fun onDock() {
         super.onDock()
+        logger.info("Checking docked.")
         viewModel.dock()
         subscribeEvents()
         mainSectionProperty.set(playbackView)
@@ -175,6 +178,7 @@ open class PeerEdit : PartialView() {
 
     override fun onUndock() {
         super.onUndock()
+        logger.info("Checking undocked.")
         viewModel.undock()
         unsubscribeEvents()
     }
