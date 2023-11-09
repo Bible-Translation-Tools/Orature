@@ -36,7 +36,7 @@ import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 
-class Consume : Fragment() {
+class Consume : View() {
     private val logger = LoggerFactory.getLogger(Consume::class.java)
 
     val viewModel: ConsumeViewModel by inject()

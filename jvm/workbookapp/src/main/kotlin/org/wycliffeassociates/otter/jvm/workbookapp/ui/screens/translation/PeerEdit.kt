@@ -24,7 +24,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewMod
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 
-open class PeerEdit : Fragment() {
+open class PeerEdit : View() {
 
     val viewModel: PeerEditViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()

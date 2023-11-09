@@ -20,7 +20,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewMod
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 
-class BlindDraft : Fragment() {
+class BlindDraft : View() {
 
     val viewModel: BlindDraftViewModel by inject()
     val recorderViewModel: RecorderViewModel by inject()

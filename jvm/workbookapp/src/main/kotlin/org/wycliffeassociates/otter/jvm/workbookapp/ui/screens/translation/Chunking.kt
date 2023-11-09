@@ -24,7 +24,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewMod
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 import tornadofx.*
 
-class Chunking : Fragment() {
+class Chunking : View() {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     val viewModel: ChunkingViewModel by inject()

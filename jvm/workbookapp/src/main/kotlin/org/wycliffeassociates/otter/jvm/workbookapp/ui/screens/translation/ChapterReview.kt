@@ -23,7 +23,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterReviewVi
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 
-class ChapterReview : Fragment() {
+class ChapterReview : View() {
     val viewModel: ChapterReviewViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
     private lateinit var waveform: MarkerWaveform
