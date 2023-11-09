@@ -81,7 +81,6 @@ class TranslationViewModel2 : ViewModel() {
                 it.onComplete()
             }
             .subscribeOn(Schedulers.io())
-//            .blockingAwait()
             .subscribe()
     }
 
