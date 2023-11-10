@@ -18,9 +18,12 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.glass.ui.Screen
+import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import java.io.File
 import javafx.animation.AnimationTimer
 import javafx.beans.property.SimpleBooleanProperty
@@ -96,6 +99,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
     lateinit var audio: OratureAudioFile
     lateinit var waveform: Observable<Image>
+    lateinit var slider: Slider
     private val width = Screen.getMainScreen().platformWidth
     private val height = Integer.min(Screen.getMainScreen().platformHeight, 500)
     private val builder = ObservableWaveformBuilder()
@@ -110,18 +114,18 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     }
 
     fun dock() {
-        val chapter = workbookDataStore.chapter
-        val sourceAudio = initializeSourceAudio(chapter.sort)
-        audioDataStore.sourceAudioProperty.set(sourceAudio)
-
-        sourceAudio?.file?.let {
-            (app as IDependencyGraphProvider).dependencyGraph.inject(this)
-            audio = loadAudio(it)
-            createWaveformImages(audio)
-            subscribeOnWaveformImages()
-            loadChunkMarkers(audio)
-        }
         startAnimationTimer()
+
+        initializeSourceAudio(workbookDataStore.chapter.sort)
+            .subscribeOn(Schedulers.io())
+            .observeOnFx()
+            .subscribe { sa ->
+                audioDataStore.sourceAudioProperty.set(sa)
+                audio = loadAudio(sa.file)
+                createWaveformImages(audio)
+                loadChunkMarkers(audio)
+                subscribeOnWaveformImages()
+            }
     }
 
     fun undock() {
@@ -141,12 +145,14 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         cleanup()
     }
 
-    private fun initializeSourceAudio(chapter: Int): SourceAudio? {
-        val workbook = workbookDataStore.workbook
-        ChunkAudioUseCase(directoryProvider, workbook.projectFilesAccessor)
-            .copySourceAudioToProject(sourceAudio.file)
+    private fun initializeSourceAudio(chapter: Int): Maybe<SourceAudio> {
+        return Maybe.fromCallable {
+            val workbook = workbookDataStore.workbook
+            ChunkAudioUseCase(directoryProvider, workbook.projectFilesAccessor)
+                .copySourceAudioToProject(sourceAudio.file)
 
-        return workbook.sourceAudioAccessor.getUserMarkedChapter(chapter, workbook.target)
+            workbook.sourceAudioAccessor.getUserMarkedChapter(chapter, workbook.target)
+        }
     }
 
     override fun placeMarker() {
@@ -189,7 +195,10 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
             sampleRate = it.sampleRate
             totalFrames = it.totalFrames
         }
+
         waveformAudioPlayerProperty.set(player)
+        initializeAudioController(player)
+
         return audio
     }
 
@@ -235,23 +244,21 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
             .andThen { completable ->
                 ChunkAudioUseCase(directoryProvider, accessor)
                     .createChunkedSourceAudio(sourceAudio.file, cues)
-                
+
                 completable.onComplete()
             }
             .subscribe()
     }
 
-    fun initializeAudioController(slider: Slider? = null) {
-        audioController = AudioPlayerController(slider).also { controller ->
-            waveformAudioPlayerProperty.value?.let {
-                controller.load(it)
-            }
-        }
-        isPlayingProperty.bind(audioController!!.isPlayingProperty)
-    }
-
     fun pause() {
         audioController?.pause()
+    }
+
+    private fun initializeAudioController(player: IAudioPlayer) {
+        audioController = AudioPlayerController(slider).also { controller ->
+            controller.load(player)
+        }
+        isPlayingProperty.bind(audioController!!.isPlayingProperty)
     }
 
     private fun createWaveformImages(audio: OratureAudioFile) {

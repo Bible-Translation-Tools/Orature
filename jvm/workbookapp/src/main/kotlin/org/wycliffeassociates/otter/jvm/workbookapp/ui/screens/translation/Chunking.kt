@@ -22,18 +22,15 @@ import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 import tornadofx.*
 
 class Chunking : PartialView() {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     val viewModel: ChunkingViewModel by inject()
-    val translationViewModel: TranslationViewModel2 by inject()
     val settingsViewModel: SettingsViewModel by inject()
 
     private lateinit var waveform: MarkerWaveform
-    private lateinit var slider: Slider
     private val eventSubscriptions = mutableListOf<EventRegistration>()
 
     var cleanUpWaveform: () -> Unit = {}
@@ -63,8 +60,9 @@ class Chunking : PartialView() {
                     // Marker stuff
                     this.markers.bind(viewModel.markers) { it }
                 }
-                slider = createAudioScrollbarSlider()
                 add(waveform)
+                val slider = createAudioScrollbarSlider()
+                    .also { viewModel.slider = it }
                 add(slider)
             }
             bottom = hbox {
@@ -125,7 +123,6 @@ class Chunking : PartialView() {
 
         viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
         viewModel.dock()
-        viewModel.initializeAudioController(slider)
     }
 
     override fun onUndock() {
