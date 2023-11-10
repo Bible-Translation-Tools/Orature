@@ -61,8 +61,7 @@ class Chunking : PartialView() {
                     this.markers.bind(viewModel.markers) { it }
                 }
                 add(waveform)
-                val slider = createAudioScrollbarSlider()
-                    .also { viewModel.slider = it }
+                val slider = createAudioScrollbarSlider().also { viewModel.slider = it }
                 add(slider)
             }
             bottom = hbox {

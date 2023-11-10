@@ -44,7 +44,6 @@ class Consume : PartialView() {
     val settingsViewModel: SettingsViewModel by inject()
 
     private lateinit var waveform: MarkerWaveform
-    private lateinit var slider: Slider
 
     var cleanUpWaveform: () -> Unit = {}
 
@@ -54,7 +53,6 @@ class Consume : PartialView() {
 
         viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
         viewModel.onDockConsume()
-        viewModel.initializeAudioController(slider)
         waveform.markers.bind(viewModel.markers) { it }
     }
 
@@ -99,8 +97,8 @@ class Consume : PartialView() {
                     // Marker stuff
                     this.markers.bind(viewModel.markers) { it }
                 }
-                slider = createAudioScrollbarSlider()
                 add(waveform)
+                val slider = createAudioScrollbarSlider().also { viewModel.slider = it }
                 add(slider)
             }
             bottom = hbox {
