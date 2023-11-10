@@ -4,6 +4,7 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.glass.ui.Screen
 import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import javafx.animation.AnimationTimer
@@ -113,6 +114,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                 audioDataStore.updateSourceAudio()
                 audioDataStore.openSourceAudioPlayer()
             }
+            .subscribeOn(Schedulers.io())
             .subscribe()
 
         markersPlacedCountProperty.bind(markers.sizeProperty)
@@ -190,27 +192,31 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                 workbookDataStore.chapter
             )
             .subscribeOn(Schedulers.io())
-            .observeOnFx()
-            .subscribe { take ->
+            .flatMap { take ->
                 loadTargetAudio(take)
+            }
+            .subscribeOn(Schedulers.io())
+            .observeOnFx()
+            .subscribe { audio ->
+                loadVerseMarkers(audio)
+                createWaveformImages(audio)
+                subscribeOnWaveformImages()
             }
     }
 
-    private fun loadTargetAudio(take: Take) {
-        val audioPlayer: IAudioPlayer = audioConnectionFactory.getPlayer()
-        audioPlayer.load(take.file)
-        audioPlayer.getAudioReader()?.let {
-            sampleRate = it.sampleRate
-            totalFrames = it.totalFrames
-        }
-        waveformAudioPlayerProperty.set(audioPlayer)
-
-        loadAudioController(audioPlayer)
-
-        val audio = OratureAudioFile(take.file)
-        loadVerseMarkers(audio)
-        createWaveformImages(audio)
-        subscribeOnWaveformImages()
+    private fun loadTargetAudio(take: Take) : Single<OratureAudioFile> {
+        return Single
+            .fromCallable {
+                val audioPlayer: IAudioPlayer = audioConnectionFactory.getPlayer()
+                audioPlayer.load(take.file)
+                audioPlayer.getAudioReader()?.let {
+                    sampleRate = it.sampleRate
+                    totalFrames = it.totalFrames
+                }
+                loadAudioController(audioPlayer)
+                OratureAudioFile(take.file)
+            }
+            .subscribeOn(Schedulers.io())
     }
 
     private fun loadAudioController(player: IAudioPlayer) {
@@ -218,6 +224,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
             controller.load(player)
             isPlayingProperty.bind(controller.isPlayingProperty)
         }
+        waveformAudioPlayerProperty.set(player)
     }
 
     private fun loadVerseMarkers(audio: OratureAudioFile) {
