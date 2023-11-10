@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.common.domain.content
 
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
@@ -202,8 +203,8 @@ class ResetChunksTest {
         sourceAudioDir = projectDir.newFolder(*RcConstants.SOURCE_AUDIO_DIR.split("/").toTypedArray())
 
         mockedDirectoryProvider.apply {
-            whenever(getProjectDirectory(any(), any(), any() as Collection)).thenReturn(projectDir.root)
-            whenever(getProjectSourceAudioDirectory(any(), any(), any())).thenReturn(sourceAudioDir)
+            whenever(getProjectDirectory(any(), anyOrNull(), any<Collection>())).thenReturn(projectDir.root)
+            whenever(getProjectSourceAudioDirectory(any(), anyOrNull(), any())).thenReturn(sourceAudioDir)
         }
 
         projectFilesAccessor = ProjectFilesAccessor(mockedDirectoryProvider, rcSource, rcTarget, collTarget)
