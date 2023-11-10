@@ -112,7 +112,7 @@ class AudioDataStoreTest {
 
         private val sourceAudioAccessor = mock<SourceAudioAccessor> {
             on { getChapter(any(), any()) } doReturn SourceAudio(sourceTakeFile, 0, 10)
-            on { getChunk(any(), any(), any()) } doReturn SourceAudio(sourceTakeFile, 0, 1)
+            on { getChunk(any(), any(), any(), any()) } doReturn SourceAudio(sourceTakeFile, 0, 1)
         }
 
         private val workbook = mock<Workbook> {

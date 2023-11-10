@@ -129,7 +129,7 @@ class SourceAudioAccessor(
         }
     }
 
-    fun getChunk(chapter: Int, chunk: Int, target: Book?): SourceAudio? {
+    fun getChunk(chapter: Int, chunk: Int, verse: Int, target: Book?): SourceAudio? {
         val file = getUserMarkedChapter(chapter, target)?.file
         if (file != null) {
             val oratureAudioFile = OratureAudioFile(file)
@@ -145,7 +145,7 @@ class SourceAudioAccessor(
                 return SourceAudio(file, start, end)
             }
         }
-        return getVerse(chapter, chunk, target)
+        return getVerse(chapter, verse, target)
     }
 
     private fun getVerse(chapter: Int, chunk: Int, target: Book?): SourceAudio? {
