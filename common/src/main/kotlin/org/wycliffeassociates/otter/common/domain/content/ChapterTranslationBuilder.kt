@@ -15,7 +15,7 @@ import java.io.File
 import java.time.LocalDate
 import javax.inject.Inject
 
-class ChapterTranslationTake @Inject constructor(
+class ChapterTranslationBuilder @Inject constructor(
     private val concatenateAudio: ConcatenateAudio
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)

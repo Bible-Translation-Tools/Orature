@@ -35,7 +35,7 @@ class ChunkingTranslationPage : View() {
                 ChunkingStep.PEER_EDIT -> find<PeerEdit>()
                 ChunkingStep.KEYWORD_CHECK -> find<KeywordCheck>()
                 ChunkingStep.VERSE_CHECK -> find<VerseCheck>()
-                ChunkingStep.CHAPTER_REVIEW -> find<ChapterReview>()
+                ChunkingStep.FINAL_REVIEW -> find<ChapterReview>()
             }
         }
     }

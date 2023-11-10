@@ -25,7 +25,7 @@ import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
-import org.wycliffeassociates.otter.common.domain.content.ChapterTranslationTake
+import org.wycliffeassociates.otter.common.domain.content.ChapterTranslationBuilder
 import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
@@ -52,7 +52,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     lateinit var audioConnectionFactory: AudioConnectionFactory
 
     @Inject
-    lateinit var chapterTranslationTake: ChapterTranslationTake
+    lateinit var chapterTranslationBuilder: ChapterTranslationBuilder
 
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
@@ -177,7 +177,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     }
 
     private fun loadChapterTake() {
-        chapterTranslationTake.getOrCompile(
+        chapterTranslationBuilder.getOrCompile(
             workbookDataStore.workbook,
             workbookDataStore.chapter
         )
