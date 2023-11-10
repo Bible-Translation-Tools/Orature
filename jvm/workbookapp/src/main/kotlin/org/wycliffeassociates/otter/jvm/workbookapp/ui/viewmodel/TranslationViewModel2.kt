@@ -136,12 +136,10 @@ class TranslationViewModel2 : ViewModel() {
     }
 
     fun updateSourceText() : Completable {
+        sourceTextProperty.set(null)
         return workbookDataStore.getSourceText()
             .subscribeOn(Schedulers.io())
             .observeOnFx()
-            .doOnComplete {
-                sourceTextProperty.set(null)
-            }
             .doOnSuccess {
                 sourceTextProperty.set(it)
             }
