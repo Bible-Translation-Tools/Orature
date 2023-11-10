@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import io.reactivex.rxkotlin.toObservable
 import io.reactivex.subjects.PublishSubject
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
@@ -69,7 +70,9 @@ internal class ChapterRepresentation(
 
     private fun initalizeActiveVerses(): MutableList<VerseNode> {
         return chapter
-            .getDraft()
+            .chunks
+            .take(1)
+            .flatMap { it.toObservable() }
             .map { chunk ->
                 VerseMarker(chunk.start, chunk.end, 0)
             }

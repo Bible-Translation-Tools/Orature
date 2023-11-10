@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.common.domain.narration
 
+import com.jakewharton.rxrelay2.BehaviorRelay
 import io.mockk.every
 import io.mockk.mockk
 import io.reactivex.Observable
@@ -79,6 +80,7 @@ class ChapterRepresentationTest {
     fun mockChapter(): Chapter {
         return mockk<Chapter> {
             every { getDraft() } returns chunk
+            every { chunks } returns BehaviorRelay.create<List<Chunk>>().also { it.accept(listOf(mockChunk())) }
         }
     }
 

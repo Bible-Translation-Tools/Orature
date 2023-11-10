@@ -156,7 +156,12 @@ class RecordScriptureViewModel : ViewModel() {
         workbookDataStore.activeChapterProperty.onChangeAndDoNowWithDisposer { chapter ->
             setHasNextAndPreviousChapter()
             chapter?.let {
-                getChunkList(chapter.chunks)
+                val chunks = if (chapter.chunks.value?.all { c -> c.draftNumber > 0 } == true) {
+                    chapter.chunks.value!!
+                } else {
+                    listOf()
+                }
+                getChunkList(chunks)
                 recordable = it
             }
         }.let(listeners::add)
@@ -323,23 +328,9 @@ class RecordScriptureViewModel : ViewModel() {
             }
     }
 
-    private fun getChunkList(chunks: Observable<Chunk>) {
-        var draft = 0
-        activeChunkSubscription?.dispose()
-        chunkList.clear()
-        activeChunkSubscription = chunks
-            .observeOnFx()
-            .doOnError { e ->
-                logger.error("Error in getting the chunk list", e)
-            }
-            .subscribe {
-                if (it.draftNumber > draft) {
-                    draft = it.draftNumber
-                    chunkList.removeIf { it.draftNumber < draft }
-                }
-                chunkList.add(it)
-                chunkList.sortBy { it.sort }
-            }
+    private fun getChunkList(chunks: List<Chunk>) {
+        chunkList.setAll(chunks)
+        chunkList.sortBy { it.sort }
     }
 
     private fun stepToChapter(direction: StepDirection) {

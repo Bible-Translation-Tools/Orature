@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
+import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.ReplayRelay
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
@@ -143,8 +144,8 @@ class RecordScriptureViewModelTest {
 
         private fun createChapter(): Chapter {
             chunk1 = createChunk()
-            val chunks = ReplayRelay.create<Chunk>()
-            chunks.accept(chunk1)
+            val chunks = BehaviorRelay.create<List<Chunk>>()
+            chunks.accept(listOf(chunk1))
             return Chapter(
                 1,
                 "1",

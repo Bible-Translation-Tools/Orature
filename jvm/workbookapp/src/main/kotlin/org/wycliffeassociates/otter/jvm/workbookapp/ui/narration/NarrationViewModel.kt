@@ -6,6 +6,7 @@ import com.sun.glass.ui.Screen
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.toObservable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
@@ -300,8 +301,10 @@ class NarrationViewModel : ViewModel() {
                 it.find { it.sort == chapter.sort }
             }
             .map { chapter ->
-                chapter.getDraft()
-            }.flatMap { it }
+                chapter.chunks.take(1)
+            }
+            .flatMap { it }
+            .flatMap { Observable.fromIterable(it) }
             .observeOnFx()
             .subscribe({ chunksList.add(it) }, {}, {
                 resetTeleprompter()
