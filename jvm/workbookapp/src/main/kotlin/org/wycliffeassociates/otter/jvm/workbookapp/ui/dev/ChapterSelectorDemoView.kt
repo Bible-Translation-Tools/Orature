@@ -10,16 +10,16 @@ import tornadofx.*
 class ChapterSelectorDemoView : View() {
 
     private val list = listOf(
-        ChapterGridItemData(1, SimpleBooleanProperty(false)),
-        ChapterGridItemData(2, SimpleBooleanProperty(true)),
-        ChapterGridItemData(3, SimpleBooleanProperty(false)),
-        ChapterGridItemData(4, SimpleBooleanProperty(true)),
-        ChapterGridItemData(5, SimpleBooleanProperty(false)),
-        ChapterGridItemData(6, SimpleBooleanProperty(true)),
-        ChapterGridItemData(7, SimpleBooleanProperty(false)),
-        ChapterGridItemData(8, SimpleBooleanProperty(false)),
-        ChapterGridItemData(9, SimpleBooleanProperty(false)),
-        ChapterGridItemData(10, SimpleBooleanProperty(false))
+        ChapterGridItemData(1, false),
+        ChapterGridItemData(2, true),
+        ChapterGridItemData(3, false),
+        ChapterGridItemData(4, true),
+        ChapterGridItemData(5, false),
+        ChapterGridItemData(6, true),
+        ChapterGridItemData(7, false),
+        ChapterGridItemData(8, false),
+        ChapterGridItemData(9, false),
+        ChapterGridItemData(10, false)
     )
 
     override val root = VBox().apply {

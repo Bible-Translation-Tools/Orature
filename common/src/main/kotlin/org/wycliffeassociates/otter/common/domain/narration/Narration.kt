@@ -9,13 +9,13 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
-import jdk.jshell.SourceCodeAnalysis.Completeness
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.common.audio.wav.WavOutputStream
+import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
@@ -24,7 +24,6 @@ import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
-import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
 import org.wycliffeassociates.otter.common.recorder.WavFileWriter
 import java.io.File
@@ -40,6 +39,7 @@ class Narration @AssistedInject constructor(
     @Assisted private val workbook: Workbook,
     @Assisted private val chapter: Chapter
 ) {
+
     private val DEFAULT_FRAME_SIZE_BYTES = 2
     private val logger = LoggerFactory.getLogger(Narration::class.java)
 
@@ -58,17 +58,31 @@ class Narration @AssistedInject constructor(
     val audioReader: AudioFileReader
         get() = chapterRepresentation.getAudioFileReader()
 
+    val totalVerses: List<AudioMarker>
+        get() {
+            val verses = chapterRepresentation
+                .totalVerses
+                .map {
+                    it.marker
+                }
+            return verses
+        }
+
     val activeVerses: List<VerseMarker>
-        get() = run {
+        get() {
             val verses = chapterRepresentation
                 .activeVerses
                 .map {
                     it.marker.copy(
-                        location = chapterRepresentation.absoluteToRelative(it.firstFrame())
+                        location = chapterRepresentation.absoluteToRelativeChapter(it.firstFrame())
                     )
                 }
-            verses
+            return verses
         }
+
+    fun versesWithRecordings(): List<Boolean> {
+        return chapterRepresentation.versesWithRecordings()
+    }
 
     val onActiveVersesUpdated: PublishSubject<List<VerseMarker>>
         get() = chapterRepresentation.onActiveVersesUpdated
@@ -76,6 +90,8 @@ class Narration @AssistedInject constructor(
     private val firstVerse: VerseMarker
 
     private var writer: WavFileWriter? = null
+
+    private var lockedVerseIndex: Int? = null
 
     init {
         val writer = initializeWavWriter()
@@ -89,6 +105,11 @@ class Narration @AssistedInject constructor(
             resetUncommittedFramesOnUpdatedVerses(),
         )
         loadChapterIntoPlayer()
+    }
+
+    fun lockToVerse(verseIndex: Int?) {
+        lockedVerseIndex = verseIndex
+        chapterReaderConnection.lockToVerse(verseIndex)
     }
 
     /**
@@ -147,18 +168,23 @@ class Narration @AssistedInject constructor(
     }
 
     fun undo() {
+        // Ensures we are not locked to a verse and that the location is in the relative chapter space
+        seek(getRelativeChapterLocation(), true)
         history.undo(chapterRepresentation.totalVerses)
         chapterRepresentation.onVersesUpdated()
     }
 
     fun redo() {
+        // Ensures we are not locked to a verse and that the location is in the relative chapter space
+        seek(getRelativeChapterLocation(), true)
         history.redo(chapterRepresentation.totalVerses)
         chapterRepresentation.onVersesUpdated()
     }
 
     fun finalizeVerse(verseIndex: Int) {
         val loc = chapterRepresentation.finalizeVerse(verseIndex, history)
-        seek(loc)
+        val relLoc = chapterRepresentation.absoluteToRelativeChapter(loc)
+        seek(relLoc)
     }
 
     fun onNewVerse(verseIndex: Int) {
@@ -176,7 +202,7 @@ class Narration @AssistedInject constructor(
         val action = RecordAgainAction(verseIndex)
         execute(action)
 
-        player.seek(activeVerses[verseIndex].location)
+        seek(activeVerses[verseIndex].location)
         writer?.start()
         isRecording.set(true)
     }
@@ -185,9 +211,11 @@ class Narration @AssistedInject constructor(
         loadChapterIntoPlayer()
 
         val loc = chapterRepresentation.finalizeVerse(verseIndex, history)
-        seek(loc)
+        val relLoc = chapterRepresentation.absoluteToRelativeChapter(loc)
+        seek(relLoc)
 
         writer?.pause()
+        uncommittedRecordedFrames.set(0)
         isRecording.set(false)
     }
 
@@ -228,6 +256,14 @@ class Narration @AssistedInject constructor(
         isRecording.set(true)
     }
 
+    fun resumeRecordingAgain() {
+        // Seeks to the end of the scratchAudio, since the re-record has not yet been finalized.
+        val lastRecordingPosition = chapterRepresentation.scratchAudio.totalFrames
+        player.seek(chapterRepresentation.absoluteToRelativeChapter(lastRecordingPosition))
+        writer?.start()
+        isRecording.set(true)
+    }
+
     fun hasUndo(): Boolean {
         return history.hasUndo()
     }
@@ -238,7 +274,7 @@ class Narration @AssistedInject constructor(
 
     fun getSectionAsFile(index: Int): File {
         val verse = activeVerses[index]
-        chapterReaderConnection.lockToVerse(index)
+        lockToVerse(index)
         chapterReaderConnection.seek(verse.location)
         return audioFileUtils.getSectionAsFile(
             chapterRepresentation.scratchAudio,
@@ -257,11 +293,10 @@ class Narration @AssistedInject constructor(
         range?.let {
             val wasPlaying = player.isPlaying()
             player.pause()
-            chapterReaderConnection.lockToVerse(activeVerses.indexOf(verse))
+            lockToVerse(activeVerses.indexOf(verse))
             chapterReaderConnection.start = range.first
             chapterReaderConnection.end = range.last
-            player.seek(verse.location)
-            chapterReaderConnection.seek(verse.location)
+            seek(0)
             if (wasPlaying) player.play()
         }
     }
@@ -274,8 +309,7 @@ class Narration @AssistedInject constructor(
 
         val wasPlaying = player.isPlaying()
         player.pause()
-
-        chapterReaderConnection.lockToVerse(null)
+        lockToVerse(null)
         chapterReaderConnection.start = null
         chapterReaderConnection.end = null
 
@@ -299,7 +333,8 @@ class Narration @AssistedInject constructor(
     }
 
     private fun execute(action: NarrationAction) {
-        chapterReaderConnection.lockToVerse(null)
+        // Ensures we are not locked to a verse and that the location is in the relative chapter space
+        seek(getRelativeChapterLocation(), true)
         history.execute(action, chapterRepresentation.totalVerses, chapterRepresentation.scratchAudio)
         chapterRepresentation.onVersesUpdated()
     }
@@ -400,13 +435,37 @@ class Narration @AssistedInject constructor(
         chapterReaderConnection.seek(delta)
     }
 
-    fun seek(location: Int) {
+    /**
+     * Seeks the player and chapterReaderConnection to a relative chapter location or relative verse location, and
+     * allows the caller to specify when to unlock from all verses before seeking to the specified location.
+     */
+    fun seek(location: Int, unlockFromVerse: Boolean = false) {
+        if (unlockFromVerse) {
+            lockToVerse(null)
+        }
         player.seek(location)
         chapterReaderConnection.seek(location)
     }
 
+    /**
+     * Gets the duration of the relative chapter space in frames
+     */
+    fun getDurationInFrames(): Int {
+        return chapterRepresentation.totalFrames
+    }
+
+    private fun getRelativeChapterLocation(): Int {
+        return if (lockedVerseIndex != null) {
+            chapterReaderConnection
+                .relativeVerseToRelativeChapter(player.getLocationInFrames(), lockedVerseIndex!!)
+        } else {
+            player.getLocationInFrames()
+        }
+    }
+
     fun getLocationInFrames(): Int {
-        return player.getLocationInFrames() + uncommittedRecordedFrames.get()
+        val relativeChapterLocation = getRelativeChapterLocation()
+        return relativeChapterLocation + uncommittedRecordedFrames.get()
     }
 
     fun getTotalFrames(): Int {
@@ -423,7 +482,8 @@ class Narration @AssistedInject constructor(
 
     fun seekToPrevious() {
         player.pause()
-        val loc = player.getLocationInFrames()
+        val loc = getRelativeChapterLocation()
+        lockToVerse(null)
         val seekLoc = activeVerses.lastOrNull() { it.location < loc }
         seekLoc?.let {
             seek(it.location)
@@ -432,11 +492,15 @@ class Narration @AssistedInject constructor(
 
     fun seekToNext() {
         player.pause()
-        val loc = player.getLocationInFrames()
+        val loc = getRelativeChapterLocation()
+        lockToVerse(null)
         val seekLoc = activeVerses.firstOrNull { it.location > loc }
         seekLoc?.let {
             seek(it.location)
-        } ?: seek(player.getDurationInFrames())
+        } ?: chapterRepresentation.apply {
+            val lastFrame = absoluteToRelativeChapter(activeVerses.last().lastFrame())
+            seek(lastFrame)
+        }
     }
 }
 

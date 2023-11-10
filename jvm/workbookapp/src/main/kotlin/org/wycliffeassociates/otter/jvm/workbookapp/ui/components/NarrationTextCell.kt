@@ -22,22 +22,23 @@ import javafx.beans.property.IntegerProperty
 import javafx.beans.value.ObservableValue
 import javafx.event.Event
 import javafx.event.EventHandler
-import javafx.event.EventTarget
 import javafx.scene.control.ListCell
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterItemState
 import org.wycliffeassociates.otter.jvm.controls.event.BeginRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PauseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PlayVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RecordVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.SaveRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItem
-import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItemState
 import tornadofx.FX
 import tornadofx.addClass
 
@@ -46,7 +47,7 @@ class NarrationTextItemData(
     var marker: VerseMarker?,
     var hasRecording: Boolean = false,
     var previousChunksRecorded: Boolean = false,
-    var state: NarrationTextItemState = NarrationTextItemState.RECORD_DISABLED
+    var state: TeleprompterItemState = TeleprompterItemState.RECORD_DISABLED
 ) {
     override fun toString(): String {
         return "${chunk.sort}, $hasRecording, $previousChunksRecorded"
@@ -88,8 +89,6 @@ class NarrationTextCell(
             verseLabelProperty.set(item.chunk.title)
             verseTextProperty.set(item.chunk.textItem.text)
 
-            logger.info("Item $index hasRecording: ${item.hasRecording}")
-
             hasRecordingProperty.set(item.hasRecording)
             recordButtonTextProperty.bind(this@NarrationTextCell.recordButtonTextProperty)
             isRecordingProperty.bind(this@NarrationTextCell.isRecordingProperty)
@@ -105,14 +104,20 @@ class NarrationTextCell(
 
             onNextVerseActionProperty.set(DebouncedEventHandler {
                 listView.apply {
-                    selectionModel.selectIndices(index)
-                    selectionModel.selectNext()
 
-                    // Scroll to the previous verse because scrolling to the active verse will cause
-                    // the active verse to move slightly above the viewport. Scrolling -1 will mean that
-                    // the active verse won't be on the top and is unpredictably placed, but is still better
-                    // than the text needed to actively be narrated being off the screen.
-                    scrollTo(selectionModel.selectedIndex - 1)
+                    try {
+                        logger.info("Selecting Index: $index in onNextVerseAction property")
+                        selectionModel.selectIndices(index)
+                        selectionModel.selectNext()
+
+                        // Scroll to the previous verse because scrolling to the active verse will cause
+                        // the active verse to move slightly above the viewport. Scrolling -1 will mean that
+                        // the active verse won't be on the top and is unpredictably placed, but is still better
+                        // than the text needed to actively be narrated being off the screen.
+                        scrollTo(selectionModel.selectedIndex - 1)
+                    } catch (e: Exception) {
+                        logger.error("Error in selecting and scrolling to a Teleprompter item", e)
+                    }
 
                     val nextVerseIndex = index + 1
                     val nextVerse = items.getOrNull(nextVerseIndex)
@@ -150,8 +155,16 @@ class NarrationTextCell(
                 FX.eventbus.fire(PauseRecordingEvent(index, item.chunk))
             })
 
+            onPauseRecordAgainAction.set(DebouncedEventHandler {
+                FX.eventbus.fire(PauseRecordAgainEvent(index, item.chunk))
+            })
+
             onResumeRecordingAction.set(DebouncedEventHandler {
                 FX.eventbus.fire(ResumeRecordingEvent(index, item.chunk))
+            })
+
+            onResumeRecordingAgainAction.set(DebouncedEventHandler {
+                FX.eventbus.fire(ResumeRecordingAgainEvent(index, item.chunk))
             })
 
             stateProperty.set(item.state)

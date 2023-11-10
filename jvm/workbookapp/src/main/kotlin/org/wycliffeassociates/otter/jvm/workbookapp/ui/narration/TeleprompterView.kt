@@ -6,6 +6,7 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.util.Duration
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
@@ -43,7 +44,6 @@ class TeleprompterViewModel : ViewModel() {
 
     val isRecordingAgainProperty = SimpleBooleanProperty()
     private var isRecordingAgain by isRecordingAgainProperty
-
 
 
     val lastRecordedVerseProperty = SimpleIntegerProperty(0)
@@ -105,6 +105,8 @@ class TeleprompterViewModel : ViewModel() {
 
 class TeleprompterView : View() {
 
+    private val logger = LoggerFactory.getLogger(TeleprompterView::class.java)
+
     private val viewModel: TeleprompterViewModel by inject()
     private var listView: NarrationTextListView<NarrationTextItemData> by singleAssign()
 
@@ -112,8 +114,13 @@ class TeleprompterView : View() {
 
     init {
         subscribe<TeleprompterSeekEvent> {
-            listView.scrollTo(it.index)
-            listView.selectionModel.selectIndices(it.index)
+            try {
+                logger.info("Scrolling to ${it.index} for TeleprompterSeekEvent")
+                listView.scrollTo(it.index - 1)
+                listView.selectionModel.selectIndices(it.index)
+            } catch (e: Exception) {
+                logger.error("Error in selecting and scrolling to a Teleprompter item", e)
+            }
         }
 
         subscribe<RefreshTeleprompter> {
@@ -131,14 +138,25 @@ class TeleprompterView : View() {
         subscribe<ResumeVerseEvent> {
             viewModel.stickyVerseProperty.value?.let { verse ->
                 val item = listView.items.find { it.chunk == verse }
-                listView.scrollTo(item)
+                try {
+                    logger.info("Scrolling to $item for ResumeVerseEvent")
+                    listView.scrollTo(item)
+                } catch (e: Exception) {
+                    logger.error("Error in selecting and scrolling to a Teleprompter item", e)
+                }
+
             }
         }
 
         subscribe<RecordAgainEvent> {
             listView.apply {
-                selectionModel.select(it.index)
-                scrollTo(it.index - 1)
+                try {
+                    logger.info("Selecting index ${it.index} for RecordAgainEvent")
+                    selectionModel.select(it.index)
+                    scrollTo(it.index - 1)
+                } catch (e: Exception) {
+                    logger.error("Error in selecting and scrolling to a Teleprompter item", e)
+                }
             }
         }
     }
@@ -151,8 +169,13 @@ class TeleprompterView : View() {
             listView.apply {
                 runLater(Duration.millis(1000.0)) {
                     val index = lastVerse.coerceIn(0, max(viewModel.chunks.size - 1, 0))
-                    selectionModel.select(index)
-                    scrollTo(index)
+                    try {
+                        logger.info("Selecting index: $index for lastecordedVerseProperty")
+                        selectionModel.select(index)
+                        scrollTo(index)
+                    } catch (e: Exception) {
+                        logger.error("Error in selecting and scrolling to a Teleprompter item", e)
+                    }
                 }
             }
         }

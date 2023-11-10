@@ -4,9 +4,6 @@ import io.reactivex.Observable
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import java.util.*
-import kotlin.math.absoluteValue
-import kotlin.math.max
-import kotlin.math.min
 
 class AudioScene(
     private val existingAudioReader: AudioFileReader,
@@ -33,11 +30,70 @@ class AudioScene(
 
     val frameBuffer = FloatArray(width * 2)
 
-    fun getNarrationDrawable(location: Int): Pair<FloatArray, IntRange> {
+    fun getReRecordNarrationDrawable(
+        location: Int,
+        reRecordStart: Int,
+        nextVerseLocation: Int
+    ): Pair<FloatArray, List<IntRange>> {
         Arrays.fill(frameBuffer, 0f)
         val framesOnScreen = secondsOnScreen * recordingSampleRate
 
         val viewPortRange = getViewPortRange(location)
+        val viewports = mutableListOf(viewPortRange)
+
+        val hasActiveData = activeDrawable.hasData()
+        val readerData = readerDrawable.getWaveformDrawable(viewPortRange.first)
+
+        // Copy reader data
+        System.arraycopy(readerData, 0, frameBuffer, 0, readerData.size)
+
+        // If there is active data, we can apply it by overwriting the read data
+        if (hasActiveData) {
+            val readerEnd = reRecordStart
+            val activeData = activeDrawable.getWaveformDrawable()
+
+            if (readerEnd in viewPortRange) {
+                // multiply by two because each pixel is a min and a max
+                val minMaxBufferStart = framesToPixels(readerEnd - viewPortRange.first, width, framesOnScreen) * 2
+                System.arraycopy(
+                    activeData,
+                    // due to how the ring buffer works, the oldest recorded data will begin at 0
+                    0,
+                    frameBuffer,
+                    minMaxBufferStart,
+                    (frameBuffer.size / 2) - minMaxBufferStart)
+            }
+            else {
+                System.arraycopy(activeData, 0, frameBuffer, 0, activeData.size)
+            }
+
+            if (nextVerseLocation != null) {
+                val nextVerseData = readerDrawable.getWaveformDrawable(nextVerseLocation)
+                System.arraycopy(nextVerseData, 0, frameBuffer, frameBuffer.size / 2, frameBuffer.size / 2)
+
+                viewports[0] = viewPortRange.first..(viewPortRange.first + (viewPortRange.length() / 2))
+                val reRecordViewPort = getViewPortRange(nextVerseLocation)
+                val secondViewport = reRecordViewPort.last - (reRecordViewPort.length() / 2).. reRecordViewPort.last
+                viewports.add(secondViewport)
+            }
+        }
+        return Pair(frameBuffer, viewports)
+    }
+
+    fun getNarrationDrawable(
+        location: Int,
+        reRecordLocation: Int? = null,
+        followingVerseLocation: Int? = null
+    ): Pair<FloatArray, List<IntRange>> {
+        if (reRecordLocation != null && followingVerseLocation != null) {
+            return getReRecordNarrationDrawable(location, reRecordLocation, followingVerseLocation)
+        }
+
+        Arrays.fill(frameBuffer, 0f)
+        val framesOnScreen = secondsOnScreen * recordingSampleRate
+
+        val viewPortRange = getViewPortRange(location)
+        val viewports = mutableListOf(viewPortRange)
 
         val hasActiveData = activeDrawable.hasData()
         val readerData = readerDrawable.getWaveformDrawable(viewPortRange.first)
@@ -65,7 +121,7 @@ class AudioScene(
                 System.arraycopy(activeData, 0, frameBuffer, 0, activeData.size)
             }
         }
-        return Pair(frameBuffer, viewPortRange)
+        return Pair(frameBuffer, viewports)
     }
 
     /**

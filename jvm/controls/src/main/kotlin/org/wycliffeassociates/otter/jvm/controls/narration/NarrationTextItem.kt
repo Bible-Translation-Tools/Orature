@@ -29,33 +29,20 @@ import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Button
 import javafx.scene.layout.Region
-import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.jvm.controls.event.PauseEvent
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterItemState
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
-
-enum class NarrationTextItemState {
-    BEGIN_RECORDING,
-    RECORD,
-    RECORDING_PAUSED,
-    RECORD_DISABLED,
-    RECORD_ACTIVE,
-    RE_RECORD,
-    RE_RECORD_ACTIVE,
-    RE_RECORDING_PAUSED,
-    RE_RECORD_DISABLED
-}
 
 class NarrationTextItem : VBox() {
     private val logger = LoggerFactory.getLogger(NarrationTextItem::class.java)
 
     val indexProperty = SimpleIntegerProperty(0)
 
-    val stateProperty = SimpleObjectProperty(NarrationTextItemState.RECORD)
+    val stateProperty = SimpleObjectProperty(TeleprompterItemState.RECORD)
     val state by stateProperty
 
     val hasRecordingProperty = SimpleBooleanProperty(false)
@@ -76,7 +63,9 @@ class NarrationTextItem : VBox() {
 
     val onBeginRecordingAction = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onPauseRecordingAction = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val onPauseRecordAgainAction = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onResumeRecordingAction = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val onResumeRecordingAgainAction= SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onRecordActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onRecordAgainActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onSaveRecordingActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
@@ -146,7 +135,7 @@ class NarrationTextItem : VBox() {
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                         onActionProperty().bind(onBeginRecordingAction)
                     }
-                    visibleProperty().bind(stateProperty.isEqualTo(NarrationTextItemState.BEGIN_RECORDING))
+                    visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.BEGIN_RECORDING))
                 }
                 hbox {
                     // RECORD
@@ -160,7 +149,7 @@ class NarrationTextItem : VBox() {
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                         onActionProperty().bind(onRecordActionProperty)
                     }
-                    visibleProperty().bind(stateProperty.isEqualTo(NarrationTextItemState.RECORD))
+                    visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.RECORD))
                 }
                 hbox {
                     // RECORD_ACTIVE
@@ -209,7 +198,7 @@ class NarrationTextItem : VBox() {
                             }
                         })
                     }
-                    visibleProperty().bind(stateProperty.isEqualTo(NarrationTextItemState.RECORD_ACTIVE))
+                    visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.RECORD_ACTIVE))
                 }
                 hbox {
                     // RECORDING PAUSED
@@ -257,7 +246,7 @@ class NarrationTextItem : VBox() {
                             }
                         })
                     }
-                    visibleProperty().bind(stateProperty.isEqualTo(NarrationTextItemState.RECORDING_PAUSED))
+                    visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.RECORDING_PAUSED))
                 }
                 hbox {
                     // RECORD_DISABLED
@@ -272,10 +261,10 @@ class NarrationTextItem : VBox() {
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                         setDisabled(true)
                     }
-                    visibleProperty().bind(stateProperty.isEqualTo(NarrationTextItemState.RECORD_DISABLED))
+                    visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.RECORD_DISABLED))
                 }
                 hbox {
-                    // RE_RECORD
+                    // RECORD_AGAIN
                     alignment = Pos.CENTER
                     narration_button {
                         alignment = Pos.CENTER
@@ -286,10 +275,10 @@ class NarrationTextItem : VBox() {
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                         onActionProperty().bind(onRecordAgainActionProperty)
                     }
-                    visibleProperty().bind(stateProperty.isEqualTo(NarrationTextItemState.RE_RECORD))
+                    visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.RECORD_AGAIN))
                 }
                 hbox {
-                    // RE_RECORD_DISABLED
+                    // RECORD_AGAIN_DISABLED
                     alignment = Pos.CENTER
                     narration_button {
                         alignment = Pos.CENTER
@@ -301,10 +290,10 @@ class NarrationTextItem : VBox() {
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                         onActionProperty().bind(onRecordAgainActionProperty)
                     }
-                    visibleProperty().bind(stateProperty.isEqualTo(NarrationTextItemState.RE_RECORD_DISABLED))
+                    visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.RECORD_AGAIN_DISABLED))
                 }
                 hbox {
-                    // RE_RECORD_ACTIVE
+                    // RECORD_AGAIN_ACTIVE
                     alignment = Pos.CENTER
                     spacing = 16.0
                     narration_button {
@@ -312,9 +301,7 @@ class NarrationTextItem : VBox() {
                         addPseudoClass("active")
                         text = FX.messages["pause"]
                         graphic = FontIcon(MaterialDesign.MDI_PAUSE)
-                        setOnAction {
-                            onActionProperty().bind(onPauseRecordingAction)
-                        }
+                        onActionProperty().bind(onPauseRecordAgainAction)
                     }
                     narration_button {
                         prefWidth = 150.0
@@ -323,19 +310,17 @@ class NarrationTextItem : VBox() {
                         graphic = FontIcon(MaterialDesign.MDI_CHECKBOX_MARKED_CIRCLE)
                         onActionProperty().bind(onSaveRecordingActionProperty)
                     }
-                    visibleProperty().bind(stateProperty.isEqualTo(NarrationTextItemState.RE_RECORD_ACTIVE))
+                    visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.RECORD_AGAIN_ACTIVE))
                 }
                 hbox {
-                    // RE_RECORD_ACTIVE
+                    // RECORD_AGAIN_PAUSED
                     alignment = Pos.CENTER
                     spacing = 16.0
                     narration_button {
                         addClass("btn", "btn--secondary")
                         text = FX.messages["resume"]
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
-                        setOnAction {
-                            onActionProperty().bind(onResumeRecordingAction)
-                        }
+                        onActionProperty().bind(onResumeRecordingAgainAction)
                     }
                     narration_button {
                         prefWidth = 150.0
@@ -344,11 +329,9 @@ class NarrationTextItem : VBox() {
                         graphic = FontIcon(MaterialDesign.MDI_CHECKBOX_MARKED_CIRCLE)
                         onActionProperty().bind(onSaveRecordingActionProperty)
                     }
-                    visibleProperty().bind(stateProperty.isEqualTo(NarrationTextItemState.RE_RECORDING_PAUSED))
+                    visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.RECORD_AGAIN_PAUSED))
                 }
             }
-
-//             disableProperty().bind(isSelectedProperty.not())
         }
     }
 
@@ -361,13 +344,13 @@ class NarrationTextItem : VBox() {
             it.disableWhen {
                 isPlayingProperty.or(
                     isRecordingProperty.and(
-                        stateProperty.isNotEqualTo(NarrationTextItemState.RECORD_ACTIVE)
+                        stateProperty.isNotEqualTo(TeleprompterItemState.RECORD_ACTIVE)
                             .and(
-                                stateProperty.isNotEqualTo(NarrationTextItemState.RE_RECORD_ACTIVE)
+                                stateProperty.isNotEqualTo(TeleprompterItemState.RECORD_AGAIN_ACTIVE)
                             ).and(
-                                stateProperty.isNotEqualTo(NarrationTextItemState.RE_RECORDING_PAUSED)
+                                stateProperty.isNotEqualTo(TeleprompterItemState.RECORD_AGAIN_PAUSED)
                             ).and(
-                                stateProperty.isNotEqualTo(NarrationTextItemState.RECORDING_PAUSED)
+                                stateProperty.isNotEqualTo(TeleprompterItemState.RECORDING_PAUSED)
                             )
                     )
                 )
