@@ -133,8 +133,6 @@ class SourceAudioAccessor(
         val file = getUserMarkedChapter(chapter, target)?.file
         if (file != null) {
             val oratureAudioFile = OratureAudioFile(file)
-            val cues = oratureAudioFile.getCues()
-            cues.sortedBy { it.location }
             val chunks = oratureAudioFile
                 .getMarker<ChunkMarker>()
                 .sortedBy { it.location }
@@ -154,8 +152,6 @@ class SourceAudioAccessor(
         val file = getChapter(chapter, target)?.file
         if (file != null) {
             val oratureAudioFile = OratureAudioFile(file)
-            val cues = oratureAudioFile.getCues()
-            cues.sortedBy { it.location }
             val verses = oratureAudioFile
                 .getMarker<VerseMarker>()
                 .sortedBy { it.location }
