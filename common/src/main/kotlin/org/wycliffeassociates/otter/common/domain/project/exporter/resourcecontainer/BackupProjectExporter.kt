@@ -76,7 +76,7 @@ class BackupProjectExporter @Inject constructor(
                     ) {
                         takesFilter(it, options)
                     }
-                    callback?.onNotifyProgress(75.0, messageKey = "copyingSource")
+                    callback?.onNotifyProgress(70.0, messageKey = "copyingSource")
 
                     val linkedResource = workbook.source.linkedResources
                         .firstOrNull { it.identifier == resourceMetadata.identifier }

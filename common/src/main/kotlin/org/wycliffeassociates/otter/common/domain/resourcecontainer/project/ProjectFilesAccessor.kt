@@ -209,6 +209,8 @@ class ProjectFilesAccessor(
                 val newSource = filterSourceFileToContainProjectRelatedMedia(source, sourceTempDir)
                 fileWriter.copyFile(newSource, RcConstants.SOURCE_DIR)
             }
+
+        fileWriter.copyDirectory(sourceAudioDir, RcConstants.SOURCE_AUDIO_DIR)
     }
 
     fun initializeResourceContainerInDir(overwrite: Boolean = true) {

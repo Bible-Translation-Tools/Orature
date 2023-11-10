@@ -211,7 +211,7 @@ class OngoingProjectImporter @Inject constructor(
                 directoryProvider.newFileReader(resourceContainer).use { fileReader ->
                     val existingSource = fetchExistingSource(manifestProject, manifestSources)
                     try {
-                        callback?.onNotifyProgress(localizeKey = "importingSource", percent = 20.0)
+                        callback?.onNotifyProgress(localizeKey = "importingSource", percent = 25.0)
                         // Import Sources even if existing source exists in order to potentially merge source audio
                         importSources(fileReader)
                     } catch (e: ImportException) {
@@ -280,7 +280,7 @@ class OngoingProjectImporter @Inject constructor(
         projectFilesAccessor.initializeResourceContainerInDir()
         projectFilesAccessor.setProjectMode(mode)
 
-        callback?.onNotifyProgress(localizeKey = "copyingSource", percent = 40.0)
+        callback?.onNotifyProgress(localizeKey = "copyingSource", percent = 50.0)
         projectFilesAccessor.copySourceFiles(fileReader)
 
         importContributorInfo(metadata, projectFilesAccessor)
