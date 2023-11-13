@@ -23,14 +23,17 @@ import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.wycliffeassociates.otter.common.ResourceContainerBuilder
+import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
-import org.wycliffeassociates.otter.common.data.primitives.ContentType.BODY
+import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.ContentType.META
 import org.wycliffeassociates.otter.common.data.primitives.ContentType.TEXT
-import org.wycliffeassociates.otter.common.data.primitives.ContentType.TITLE
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.time.LocalDate
@@ -195,5 +198,40 @@ class TestProjectImport {
         }
 
         assertEquals(expectedContributors, projectContributors.size)
+    }
+
+    @Test
+    fun importProjectWithCheckedChunks() {
+        val projectToImport = createProjectWithCheckedChunks("en-x-demo1-ulb-rev.zip", CheckingStatus.PEER_EDIT)
+        val result = db.importer
+            .import(projectToImport)
+            .blockingGet()
+
+        Assert.assertEquals(ImportResult.SUCCESS, result)
+        val takes = db.db
+            .takeDao
+            .fetchAll()
+
+        Assert.assertTrue(takes.size >= 3)
+
+        val checkedTakes = takes
+            .map {
+                db.db.checkingStatusDao.fetchById(it.checkingFk)
+            }
+            .filter { it == CheckingStatus.PEER_EDIT }
+            .size
+
+        Assert.assertEquals(2, checkedTakes)
+    }
+
+    private fun createProjectWithCheckedChunks(projectFileName: String, checking: CheckingStatus): File {
+        val file = File(
+            javaClass.classLoader.getResource("resource-containers/$projectFileName").path
+        )
+        return ResourceContainerBuilder(file)
+            .addTake(1, ContentType.TEXT, 1, true, chapter = 1, start = 1, end = 1)
+            .addTake(2, ContentType.TEXT, 1, true, chapter = 2, start = 1, end = 1, checking = TakeCheckingState(checking, "test"))
+            .addTake(3, ContentType.TEXT, 1, true, chapter = 3, start = 1, end = 1, checking = TakeCheckingState(checking, "test"))
+            .buildFile()
     }
 }
