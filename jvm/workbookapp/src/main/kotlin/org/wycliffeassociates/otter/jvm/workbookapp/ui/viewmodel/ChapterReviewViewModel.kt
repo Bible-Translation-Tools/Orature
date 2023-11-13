@@ -73,7 +73,6 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     override val waveformAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     override val positionProperty = SimpleDoubleProperty(0.0)
     override var imageWidthProperty = SimpleDoubleProperty(0.0)
-    override var timer: AnimationTimer? = null
     override var sampleRate: Int = 0 // beware of divided by 0
     override var totalFrames: Int = 0 // beware of divided by 0
 
@@ -103,8 +102,6 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     }
 
     fun dock() {
-        startAnimationTimer()
-
         sourcePlayerProperty.bind(audioDataStore.sourceAudioPlayerProperty)
         workbookDataStore.activeChunkProperty.set(null)
 
@@ -244,7 +241,6 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     private fun cleanup() {
         builder.cancel()
         compositeDisposable.clear()
-        stopAnimationTimer()
         markerModel = null
     }
 

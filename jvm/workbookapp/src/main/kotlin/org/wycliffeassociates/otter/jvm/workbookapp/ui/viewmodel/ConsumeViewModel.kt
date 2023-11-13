@@ -60,7 +60,6 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
     override var totalFrames: Int = 0 // beware of divided by 0
     override val positionProperty = SimpleDoubleProperty(0.0)
     override var imageWidthProperty = SimpleDoubleProperty(0.0)
-    override var timer: AnimationTimer? = null
 
     val compositeDisposable = CompositeDisposable()
     val isPlayingProperty = SimpleBooleanProperty(false)
@@ -90,7 +89,6 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
                 loadSourceMarkers(audio)
             }
 
-        startAnimationTimer()
         translationViewModel.currentMarkerProperty.bind(currentMarkerNumberProperty)
     }
 
@@ -130,7 +128,6 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
     fun cleanup() {
         builder.cancel()
         compositeDisposable.clear()
-        stopAnimationTimer()
         markerModel = null
     }
 

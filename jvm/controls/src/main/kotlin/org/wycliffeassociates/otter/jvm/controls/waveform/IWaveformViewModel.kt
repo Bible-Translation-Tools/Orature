@@ -13,7 +13,6 @@ interface IWaveformViewModel {
     val waveformAudioPlayerProperty: ObjectProperty<IAudioPlayer>
     val positionProperty: SimpleDoubleProperty
     var imageWidthProperty: SimpleDoubleProperty
-    var timer: AnimationTimer?
 
     fun pixelsInHighlight(controlWidth: Double): Double {
         if (sampleRate == 0 || totalFrames == 0) {
@@ -38,19 +37,6 @@ interface IWaveformViewModel {
         val samplesPerPixel = samplesPerScreenWidth / width
         val pixelsInDuration = waveformAudioPlayerProperty.value.getDurationInFrames() / samplesPerPixel
         return pixelsInDuration.toDouble()
-    }
-
-    fun startAnimationTimer() {
-        timer = object : AnimationTimer() {
-            override fun handle(currentNanoTime: Long) {
-                calculatePosition()
-            }
-        }.apply { start() }
-    }
-
-    fun stopAnimationTimer() {
-        timer?.stop()
-        timer = null
     }
 
     fun calculatePosition() {

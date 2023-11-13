@@ -45,7 +45,6 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     override val waveformAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     override val positionProperty = SimpleDoubleProperty(0.0)
     override var imageWidthProperty = SimpleDoubleProperty()
-    override var timer: AnimationTimer? = null
 
     val chunkTitleProperty = workbookDataStore.activeChunkTitleBinding()
     val currentChunkProperty = SimpleObjectProperty<Chunk>()
@@ -78,7 +77,6 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     }
 
     fun dock() {
-        startAnimationTimer()
         subscribeToChunks()
 
         currentChunkProperty.onChangeAndDoNowWithDisposer {
@@ -95,7 +93,6 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     }
 
     fun undock() {
-        stopAnimationTimer()
         sourcePlayerProperty.unbind()
         selectedTakeDisposable.clear()
         disposable.clear()

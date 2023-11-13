@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
+import javafx.animation.AnimationTimer
 import javafx.scene.control.Slider
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
@@ -34,6 +35,7 @@ import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ConsumeViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
+import org.wycliffeassociates.otter.jvm.controls.waveform.startAnimationTimer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 
@@ -47,10 +49,12 @@ class Consume : View() {
     private lateinit var scrollbarSlider: Slider
 
     var cleanUpWaveform: () -> Unit = {}
+    private var timer: AnimationTimer? = null
 
     override fun onDock() {
         super.onDock()
         logger.info("Consume docked")
+        timer = startAnimationTimer { viewModel.calculatePosition() }
         viewModel.audioController = AudioPlayerController(scrollbarSlider)
         viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
         viewModel.onDockConsume()
@@ -60,6 +64,7 @@ class Consume : View() {
     override fun onUndock() {
         super.onUndock()
         logger.info("Consume undocked")
+        timer?.stop()
         cleanUpWaveform()
         viewModel.onUndockConsume()
     }

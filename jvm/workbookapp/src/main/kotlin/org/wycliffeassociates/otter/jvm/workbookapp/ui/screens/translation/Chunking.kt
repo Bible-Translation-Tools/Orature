@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
+import javafx.animation.AnimationTimer
 import javafx.scene.control.Slider
 import javafx.scene.control.Tooltip
 import javafx.scene.layout.Priority
@@ -20,6 +21,7 @@ import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
+import org.wycliffeassociates.otter.jvm.controls.waveform.startAnimationTimer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
@@ -35,6 +37,7 @@ class Chunking : View() {
     private val eventSubscriptions = mutableListOf<EventRegistration>()
 
     var cleanUpWaveform: () -> Unit = {}
+    private var timer: AnimationTimer? = null
 
     override val root = vbox {
         borderpane {
@@ -120,7 +123,7 @@ class Chunking : View() {
         super.onDock()
         logger.info("Chunking docked")
         subscribeEvents()
-
+        timer = startAnimationTimer { viewModel.calculatePosition() }
         viewModel.audioController = AudioPlayerController(scrollbarSlider)
         viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
         viewModel.dock()
@@ -129,6 +132,7 @@ class Chunking : View() {
     override fun onUndock() {
         super.onUndock()
         logger.info("Chunking undocked")
+        timer?.stop()
         unsubscribeEvents()
         cleanUpWaveform()
         viewModel.undock()

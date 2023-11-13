@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
+import javafx.animation.AnimationTimer
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Node
 import javafx.scene.control.Slider
@@ -21,6 +22,7 @@ import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
+import org.wycliffeassociates.otter.jvm.controls.waveform.startAnimationTimer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.PeerEditViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
@@ -35,6 +37,7 @@ open class PeerEdit : View() {
 
     private lateinit var waveform: MarkerWaveform
     private lateinit var scrollbarSlider: Slider
+    private var timer: AnimationTimer? = null
 
     private val mainSectionProperty = SimpleObjectProperty<Node>(null)
     private val playbackView = createPlaybackView()
@@ -170,6 +173,7 @@ open class PeerEdit : View() {
     override fun onDock() {
         super.onDock()
         logger.info("Checking docked.")
+        timer = startAnimationTimer { viewModel.calculatePosition() }
         viewModel.audioController = AudioPlayerController(scrollbarSlider)
         viewModel.dock()
         subscribeEvents()
@@ -179,8 +183,9 @@ open class PeerEdit : View() {
     override fun onUndock() {
         super.onUndock()
         logger.info("Checking undocked.")
-        viewModel.undock()
+        timer?.stop()
         unsubscribeEvents()
+        viewModel.undock()
     }
 
     private fun subscribeEvents() {

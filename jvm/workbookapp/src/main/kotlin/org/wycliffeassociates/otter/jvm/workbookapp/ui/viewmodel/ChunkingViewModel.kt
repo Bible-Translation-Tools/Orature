@@ -94,7 +94,6 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     override val waveformAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     override val positionProperty = SimpleDoubleProperty(0.0)
     override var imageWidthProperty = SimpleDoubleProperty(0.0)
-    override var timer: AnimationTimer? = null
     override var sampleRate: Int = 0 // beware of divided by 0
     override var totalFrames: Int = 0 // beware of divided by 0
 
@@ -114,8 +113,6 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     }
 
     fun dock() {
-        startAnimationTimer()
-
         initializeSourceAudio(workbookDataStore.chapter.sort)
             .subscribeOn(Schedulers.io())
             .observeOnFx()
@@ -224,7 +221,6 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     fun cleanup() {
         builder.cancel()
         compositeDisposable.clear()
-        stopAnimationTimer()
         markerModel = null
     }
 
