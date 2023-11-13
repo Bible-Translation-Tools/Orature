@@ -120,7 +120,7 @@ class AudioWorkspaceView : View() {
                 verse_markers_layer {
                     verseMarkersControls.bind(markerNodes) { it }
                     setOnLayerScroll { delta ->
-                        val pos = viewModel.audioPositionProperty.value
+                        val pos = viewModel.relativeChapterPositionProperty.value
                         val seekTo = pos + delta
                         viewModel.seekTo(seekTo)
                     }
