@@ -33,7 +33,7 @@ class ChunkingTranslationPage : View() {
                 ChunkingStep.PEER_EDIT,
                 ChunkingStep.KEYWORD_CHECK,
                 ChunkingStep.VERSE_CHECK -> find<PeerEdit>()
-                ChunkingStep.CHAPTER_REVIEW -> find<ChapterReview>()
+                ChunkingStep.FINAL_REVIEW -> find<ChapterReview>()
             }
             fragment.root
         }
