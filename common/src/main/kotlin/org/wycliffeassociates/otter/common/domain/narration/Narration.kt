@@ -447,6 +447,10 @@ class Narration @AssistedInject constructor(
         chapterReaderConnection.seek(location)
     }
 
+    fun getFramePosition(): Int {
+        return chapterRepresentation.absoluteToRelativeChapter(chapterReaderConnection.absoluteFramePosition)
+    }
+
     /**
      * Gets the duration of the relative chapter space in frames
      */

@@ -108,6 +108,7 @@ class NarrationViewModel : ViewModel() {
     val lastRecordedVerseProperty = SimpleIntegerProperty()
     val audioPositionProperty = SimpleIntegerProperty()
     val totalAudioSizeProperty = SimpleIntegerProperty()
+    val relativeChapterPositionProperty = SimpleIntegerProperty()
 
     val potentiallyFinishedProperty = chunkTotalProperty.eq(recordedVerses.sizeProperty)
     val potentiallyFinished by potentiallyFinishedProperty
@@ -662,8 +663,10 @@ class NarrationViewModel : ViewModel() {
         if (::renderer.isInitialized) {
             try {
                 val position = narration.getLocationInFrames()
+                val relativeChapterPosition = narration.getFramePosition()
                 runLater {
                     audioPositionProperty.set(position)
+                    relativeChapterPositionProperty.set(relativeChapterPosition)
                 }
                 var reRecordLoc: Int? = null
                 var nextVerseLoc: Int? = null
