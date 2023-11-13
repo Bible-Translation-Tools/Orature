@@ -10,6 +10,7 @@ import javafx.scene.image.Image
 import javafx.scene.layout.StackPane
 import javafx.scene.shape.Line
 import org.wycliffeassociates.otter.common.data.ColorTheme
+import org.wycliffeassociates.otter.jvm.controls.UIVersion
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import org.wycliffeassociates.otter.jvm.controls.marker.MarkersContainer
 import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
@@ -102,7 +103,9 @@ class MarkerWaveform : StackPane() {
 
         nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
 
-        add(MarkerViewBackground())
+        vbox {
+            addClass("scrolling-waveform-frame__center")
+        }
 
         val topTrack = MarkersContainer().apply {
             top = this
@@ -115,6 +118,7 @@ class MarkerWaveform : StackPane() {
         waveformFrame = WaveformFrame(topTrack).apply {
             themeProperty.bind(this@MarkerWaveform.themeProperty)
             framePositionProperty.bind(positionProperty)
+            uiVersionProperty.set(UIVersion.THREE)
             onWaveformClickedProperty.bind(onWaveformClicked)
             onWaveformDragReleasedProperty.bind(onWaveformDragReleased)
             onRewindProperty.bind(onRewind)
@@ -129,19 +133,16 @@ class MarkerWaveform : StackPane() {
             }
         }
         add(waveformFrame)
-        stackpane {
-            isMouseTransparent = true
-
-            add(
-                Line(0.0, 40.0, 0.0, 0.0).apply {
-                    managedProperty().set(false)
-                    startXProperty().bind(this@stackpane.widthProperty().divide(2))
-                    endXProperty().bind(this@stackpane.widthProperty().divide(2))
-                    endYProperty().bind(this@stackpane.heightProperty())
-                    styleClass.add("scrolling-waveform__playback-line")
-                }
-            )
-        }
+        add(
+            Line(0.0, 0.0, 0.0, 0.0).apply {
+                isMouseTransparent = true
+                isManaged = false
+                startXProperty().bind(this@MarkerWaveform.widthProperty().divide(2))
+                endXProperty().bind(this@MarkerWaveform.widthProperty().divide(2))
+                endYProperty().bind(this@MarkerWaveform.heightProperty())
+                styleClass.add("scrolling-waveform__playback-line")
+            }
+        )
     }
 
 }
