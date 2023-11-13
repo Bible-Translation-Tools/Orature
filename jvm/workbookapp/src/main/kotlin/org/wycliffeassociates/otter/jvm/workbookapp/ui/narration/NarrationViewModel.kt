@@ -265,17 +265,18 @@ class NarrationViewModel : ViewModel() {
             narration
                 .createChapterTake()
                 .subscribeOn(Schedulers.io())
+                .doFinally {
+                    chapterTakeBusyProperty.set(false)
+                }
                 .subscribe(
                     {
                         chapterTakeProperty.set(it)
-                        chapterTakeBusyProperty.set(false)
                         logger.info("Created a chapter take for ${chapterTitleProperty.value}")
                     }, { e ->
                         logger.error(
                             "Error in creating a chapter take for ${chapterTitleProperty.value}",
                             e
                         )
-                        chapterTakeBusyProperty.set(false)
                     }
                 ).let { disposables.add(it) }
         }
