@@ -6,76 +6,86 @@ import io.reactivex.rxkotlin.addTo
 import javafx.scene.control.Slider
 import javafx.scene.control.Tooltip
 import javafx.scene.layout.Priority
-import javafx.scene.layout.VBox
 import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.jvm.controls.event.GoToNextChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
+import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterReviewViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 import tornadofx.*
 
-class Chunking : Fragment() {
-    private val logger = LoggerFactory.getLogger(javaClass)
-
-    val viewModel: ChunkingViewModel by inject()
-    val translationViewModel: TranslationViewModel2 by inject()
+class ChapterReview : Fragment() {
+    val viewModel: ChapterReviewViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
-
     private lateinit var waveform: MarkerWaveform
-    private lateinit var slider: Slider
     private val eventSubscriptions = mutableListOf<EventRegistration>()
 
-    var cleanUpWaveform: () -> Unit = {}
-
-    override val root = vbox {
-        borderpane {
-            vgrow = Priority.ALWAYS
-
-            center = VBox().apply {
-                MarkerWaveform().apply {
-                    waveform = this
-                    addClass("consume__scrolling-waveform")
-                    vgrow = Priority.ALWAYS
-                    clip = Rectangle().apply {
-                        widthProperty().bind(this@vbox.widthProperty())
-                        heightProperty().bind(this@vbox.heightProperty())
-                    }
-                    themeProperty.bind(settingsViewModel.appColorMode)
-                    positionProperty.bind(viewModel.positionProperty)
-                    canMoveMarkerProperty.set(true)
-                    canDeleteMarkerProperty.set(true)
-                    imageWidthProperty.bind(viewModel.imageWidthProperty)
-
-                    setUpWaveformActionHandlers()
-                    cleanUpWaveform = ::freeImages
-
-                    // Marker stuff
-                    this.markers.bind(viewModel.markers) { it }
-                }
-                slider = createAudioScrollbarSlider()
-                add(waveform)
-                add(slider)
+    override val root = borderpane {
+        top = vbox {
+            addClass("blind-draft-section")
+            label(viewModel.chapterTitleProperty).addClass("h4", "h4--80")
+            simpleaudioplayer {
+                playerProperty.bind(viewModel.sourcePlayerProperty)
+                enablePlaybackRateProperty.set(true)
+                sideTextProperty.set(messages["sourceAudio"])
             }
-            bottom = hbox {
-                addClass("consume__bottom")
-                button(messages["addChunk"]) {
+        }
+        center = vbox {
+            val container = this
+            waveform = MarkerWaveform().apply {
+                vgrow = Priority.ALWAYS
+                themeProperty.bind(settingsViewModel.appColorMode)
+                positionProperty.bind(viewModel.positionProperty)
+                clip = Rectangle().apply {
+                    widthProperty().bind(container.widthProperty())
+                    heightProperty().bind(container.heightProperty())
+                }
+                setOnWaveformClicked { viewModel.pauseAudio() }
+                setOnWaveformDragReleased { deltaPos ->
+                    val deltaFrames = pixelsToFrames(deltaPos)
+                    val curFrames = viewModel.getLocationInFrames()
+                    val duration = viewModel.getDurationInFrames()
+                    val final = Utils.clamp(0, curFrames - deltaFrames, duration)
+                    viewModel.seek(final)
+                }
+
+                viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
+                viewModel.cleanUpWaveform = ::freeImages
+
+                markers.bind(viewModel.markers) { it }
+            }
+            add(waveform)
+
+            val scrollbarSlider = createAudioScrollbarSlider().also {
+                viewModel.slider = it
+            }
+            add(scrollbarSlider)
+
+            hbox {
+                addClass("consume__bottom", "chunking-bottom__media-btn-group")
+                button(messages["addVerse"]) {
                     addClass("btn", "btn--primary", "consume__btn")
                     tooltip(text)
                     graphic = FontIcon(MaterialDesign.MDI_PLUS)
+                    disableWhen {
+                        viewModel.markersPlacedCountProperty.isEqualTo(viewModel.totalMarkersProperty)
+                    }
 
                     action {
                         viewModel.placeMarker()
                     }
+                }
+                label(viewModel.markerProgressCounterProperty) {
+                    addClass("normal-text")
                 }
                 region { hgrow = Priority.ALWAYS }
                 hbox {
@@ -99,7 +109,7 @@ class Chunking : Fragment() {
                                     Tooltip(messages["pause"])
                                 } else {
                                     graphic = playIcon
-                                    Tooltip(messages["playSource"])
+                                    Tooltip(messages["play"])
                                 }
                             }
                         )
@@ -112,27 +122,28 @@ class Chunking : Fragment() {
 
                         action { viewModel.seekNext() }
                     }
+                    button(messages["nextChapter"]) {
+                        addClass("btn", "btn--primary", "consume__btn")
+                        graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
+                        enableWhen { viewModel.canGoNextChapterProperty }
+
+                        setOnAction {
+                            FX.eventbus.fire(GoToNextChapterEvent())
+                        }
+                    }
                 }
             }
         }
     }
 
     override fun onDock() {
-        super.onDock()
-        logger.info("Chunking docked")
-        subscribeEvents()
-
-        viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
         viewModel.dock()
-        viewModel.initializeAudioController(slider)
+        subscribeEvents()
     }
 
     override fun onUndock() {
-        super.onUndock()
-        logger.info("Chunking undocked")
-        unsubscribeEvents()
-        cleanUpWaveform()
         viewModel.undock()
+        unsubscribeEvents()
     }
 
     private fun subscribeEvents() {
@@ -165,26 +176,6 @@ class Chunking : Fragment() {
                 waveform.addWaveformImage(it)
             }
             .addTo(viewModel.compositeDisposable)
-    }
-
-
-    private fun setUpWaveformActionHandlers() {
-        waveform.apply {
-            setOnSeekNext { viewModel.seekNext() }
-            setOnSeekPrevious { viewModel.seekPrevious() }
-            setOnWaveformClicked { viewModel.pause() }
-            setOnWaveformDragReleased { deltaPos ->
-                val deltaFrames = pixelsToFrames(deltaPos)
-                val curFrames = viewModel.getLocationInFrames()
-                val duration = viewModel.getDurationInFrames()
-                val final = Utils.clamp(0, curFrames - deltaFrames, duration)
-                viewModel.seek(final)
-            }
-            setOnRewind(viewModel::rewind)
-            setOnFastForward(viewModel::fastForward)
-            setOnToggleMedia(viewModel::mediaToggle)
-            setOnResumeMedia(viewModel::resumeMedia)
-        }
     }
 
     private fun createAudioScrollbarSlider(): Slider {

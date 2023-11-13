@@ -1,13 +1,12 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.layout.Priority
-import org.kordamp.ikonli.javafx.FontIcon
-import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.SourceTextDrawer
 import org.wycliffeassociates.otter.jvm.controls.event.ChunkSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepSelectedEvent
+import org.wycliffeassociates.otter.jvm.controls.event.GoToNextChapterEvent
+import org.wycliffeassociates.otter.jvm.controls.event.GoToPreviousChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.BlindDraft
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.Chunking
@@ -15,6 +14,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.Chunking
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.Consume
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.KeywordCheck
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.PeerEdit
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.ChapterReview
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.VerseCheck
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.translationHeader
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
@@ -35,6 +35,7 @@ class ChunkingTranslationPage : View() {
                 ChunkingStep.PEER_EDIT -> find<PeerEdit>()
                 ChunkingStep.KEYWORD_CHECK -> find<KeywordCheck>()
                 ChunkingStep.VERSE_CHECK -> find<VerseCheck>()
+                ChunkingStep.FINAL_REVIEW -> find<ChapterReview>()
             }
         }
     }
@@ -50,8 +51,11 @@ class ChunkingTranslationPage : View() {
                     it?.target?.title
                 }
             )
+            chapterTitleProperty.bind(workbookDataStore.activeChapterTitleBinding())
             canUndoProperty.bind(viewModel.canUndoProperty)
             canRedoProperty.bind(viewModel.canRedoProperty)
+            canGoNextProperty.bind(viewModel.isLastChapterProperty.not())
+            canGoPreviousProperty.bind(viewModel.isFirstChapterProperty.not())
         }
 
         borderpane {
@@ -75,6 +79,7 @@ class ChunkingTranslationPage : View() {
     }
 
     init {
+        tryImportStylesheet("/css/chapter-selector.css")
         tryImportStylesheet("/css/consume-page.css")
         tryImportStylesheet("/css/chunking-page.css")
         tryImportStylesheet("/css/blind-draft-page.css")
@@ -84,16 +89,17 @@ class ChunkingTranslationPage : View() {
         tryImportStylesheet("/css/marker-node.css")
         tryImportStylesheet("/css/scrolling-waveform.css")
 
-//        mainFragmentProperty.addListener { observable, oldValue, newValue ->
-//            oldValue?.onUndock()
-//            newValue?.onDock()
-//        }
-
         subscribe<ChunkingStepSelectedEvent> {
             viewModel.navigateStep(it.step)
         }
         subscribe<ChunkSelectedEvent> {
             viewModel.selectChunk(it.chunkNumber)
+        }
+        subscribe<GoToNextChapterEvent> {
+            viewModel.nextChapter()
+        }
+        subscribe<GoToPreviousChapterEvent> {
+            viewModel.previousChapter()
         }
     }
 

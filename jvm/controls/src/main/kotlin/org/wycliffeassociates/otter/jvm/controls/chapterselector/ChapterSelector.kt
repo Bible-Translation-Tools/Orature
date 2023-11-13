@@ -23,9 +23,11 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
+import javafx.event.EventTarget
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.jvm.controls.skins.chapterselector.ChapterSelectorSkin
+import tornadofx.*
 
 class ChapterSelector : Control() {
     val chapterTitleProperty = SimpleStringProperty()
@@ -51,3 +53,5 @@ class ChapterSelector : Control() {
         onNextChapterActionProperty.set(EventHandler { op.invoke() })
     }
 }
+
+fun EventTarget.chapterSelector(op: ChapterSelector.() -> Unit) = ChapterSelector().attachTo(this, op)

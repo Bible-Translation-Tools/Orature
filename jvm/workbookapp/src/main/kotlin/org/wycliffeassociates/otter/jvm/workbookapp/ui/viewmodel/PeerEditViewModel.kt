@@ -40,6 +40,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     val translationViewModel: TranslationViewModel2 by inject()
     val blindDraftViewModel: BlindDraftViewModel by inject()
     val recorderViewModel: RecorderViewModel by inject()
+    val chapterReviewViewModel: ChapterReviewViewModel by inject()
 
     override val waveformAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     override val positionProperty = SimpleDoubleProperty(0.0)
@@ -76,7 +77,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         currentChunkProperty.bindBidirectional(workbookDataStore.activeChunkProperty)
     }
 
-    fun dockPeerEdit() {
+    fun dock() {
         startAnimationTimer()
         subscribeToChunks()
 
@@ -93,7 +94,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         sourcePlayerProperty.bind(audioDataStore.sourceAudioPlayerProperty)
     }
 
-    fun undockPeerEdit() {
+    fun undock() {
         stopAnimationTimer()
         sourcePlayerProperty.unbind()
         selectedTakeDisposable.clear()
@@ -172,6 +173,10 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     fun onRecordFinish(result: RecorderViewModel.Result) {
         if (result == RecorderViewModel.Result.SUCCESS) {
             workbookDataStore.chunk?.audio?.insertTake(newTakeProperty.value)
+            chapterReviewViewModel.invalidateChapterTake()
+            // any change(s) to chunk's take requires checking again
+            translationViewModel.selectedStepProperty.set(null)
+            translationViewModel.navigateStep(ChunkingStep.PEER_EDIT)
         } else {
             newTakeProperty.value?.file?.delete()
             newTakeProperty.set(null)
@@ -200,7 +205,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
             }.addTo(selectedTakeDisposable)
     }
 
-    private fun loadTargetAudio(take: Take) {
+    fun loadTargetAudio(take: Take) {
         val audioPlayer: IAudioPlayer = audioConnectionFactory.getPlayer()
         audioPlayer.load(take.file)
         audioPlayer.getAudioReader()?.let {

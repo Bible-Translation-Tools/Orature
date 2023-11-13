@@ -30,7 +30,6 @@
     -fx-text-fill: -wa-regular-text;
     -fx-padding: 0 20px;
     -fx-font-size: 20px;
-    -fx-max-height: infinity;
 }
 
 .chapter-selector__title .ikonli-font-icon {
@@ -40,7 +39,6 @@
 
 .chapter-selector .btn {
     -fx-effect: null;
-    -fx-max-height: infinity;
 }
 
 .chapter-selector .btn:focused {
@@ -49,8 +47,15 @@
 
 .chapter-selector .btn.chapter-selector__btn-prev {
     -fx-background-radius: 16px 0 0 16px;
+    -fx-border-radius: 16px 0 0 16px;
+    -fx-border-width: 0 1 0 0;
+    -fx-border-color: -wa-foreground-hover;
+;
 }
 
 .chapter-selector .btn.chapter-selector__btn-next {
     -fx-background-radius: 0 16px 16px 0;
+    -fx-border-radius: 0 16px 16px 0;
+    -fx-border-width: 0 0 0 1;
+    -fx-border-color: -wa-foreground-hover;
 }

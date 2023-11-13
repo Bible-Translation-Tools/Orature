@@ -45,6 +45,7 @@ class BlindDraftViewModel : ViewModel() {
     val audioDataStore: AudioDataStore by inject()
     val translationViewModel: TranslationViewModel2 by inject()
     val recorderViewModel: RecorderViewModel by inject()
+    val chapterReviewViewModel: ChapterReviewViewModel by inject()
 
     val sourcePlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     val currentChunkProperty = SimpleObjectProperty<Chunk>()
@@ -72,12 +73,19 @@ class BlindDraftViewModel : ViewModel() {
         currentChunkProperty.onChangeAndDoNowWithDisposer {
             it?.let { chunk ->
                 subscribeSelectedTakePropertyToRelay(chunk)
+                if (actionHistory.canUndo()) {
+                    chapterReviewViewModel.invalidateChapterTake() // resets chapter target audio when changes detected
+                }
             }
             actionHistory.clear()
         }.also { disposableListeners.add(it) }
     }
 
     fun undockBlindDraft() {
+        if (actionHistory.canUndo()) {
+            chapterReviewViewModel.invalidateChapterTake()
+            actionHistory.clear()
+        }
         sourcePlayerProperty.unbind()
         currentChunkProperty.set(null)
         translationViewModel.updateSourceText()

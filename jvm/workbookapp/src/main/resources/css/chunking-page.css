@@ -1,7 +1,7 @@
 .top-navigation-pane {
     -fx-alignment: center;
     -fx-pref-height: 80px;
-    -fx-padding: 0 16px;
+    -fx-padding: 16px;
     -fx-background-color: -wa-foreground;
     -fx-border-width: 0 0 1 0;
     -fx-border-color: -wa-border-light;

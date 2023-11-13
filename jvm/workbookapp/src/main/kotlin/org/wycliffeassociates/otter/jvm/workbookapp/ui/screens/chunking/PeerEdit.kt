@@ -30,7 +30,6 @@ open class PeerEdit : Fragment() {
     val settingsViewModel: SettingsViewModel by inject()
     val recorderViewModel: RecorderViewModel by inject()
 
-    private lateinit var slider: Slider
     private lateinit var waveform: MarkerWaveform
 
     private val mainSectionProperty = SimpleObjectProperty<Node>(null)
@@ -168,14 +167,14 @@ open class PeerEdit : Fragment() {
 
     override fun onDock() {
         super.onDock()
+        viewModel.dock()
         subscribeEvents()
-        viewModel.dockPeerEdit()
         mainSectionProperty.set(playbackView)
     }
 
     override fun onUndock() {
         super.onUndock()
-        viewModel.undockPeerEdit()
+        viewModel.undock()
         unsubscribeEvents()
     }
 

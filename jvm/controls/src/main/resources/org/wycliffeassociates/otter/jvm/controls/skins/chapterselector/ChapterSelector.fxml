@@ -24,21 +24,21 @@
     <children>
         <HBox styleClass="chapter-selector__controls">
             <children>
-                <JFXButton fx:id="prevChapterBtn" styleClass="btn, btn--primary, btn--borderless, chapter-selector__btn-prev">
+                <Button fx:id="prevChapterBtn" styleClass="btn, btn--secondary, btn--borderless, chapter-selector__btn-prev">
                     <graphic>
                         <FontIcon iconLiteral="mdi-chevron-left" />
                     </graphic>
-                </JFXButton>
+                </Button>
                 <Label fx:id="chapterTitle" text="Chapter 2" styleClass="chapter-selector__title">
                     <graphic>
                         <FontIcon iconLiteral="mdi-file" />
                     </graphic>
                 </Label>
-                <JFXButton fx:id="nextChapterBtn" styleClass="btn, btn--primary, btn--borderless, chapter-selector__btn-next">
+                <Button fx:id="nextChapterBtn" styleClass="btn, btn--secondary, btn--borderless, chapter-selector__btn-next">
                     <graphic>
                         <FontIcon iconLiteral="mdi-chevron-right" />
                     </graphic>
-                </JFXButton>
+                </Button>
             </children>
         </HBox>
     </children>

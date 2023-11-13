@@ -7,6 +7,10 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.chapterselector.ChapterSelector
+import org.wycliffeassociates.otter.jvm.controls.chapterselector.chapterSelector
+import org.wycliffeassociates.otter.jvm.controls.event.GoToNextChapterEvent
+import org.wycliffeassociates.otter.jvm.controls.event.GoToPreviousChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
 import tornadofx.*
@@ -15,8 +19,11 @@ import tornadofx.FX.Companion.messages
 class TranslationHeader : HBox() {
 
     val titleProperty = SimpleStringProperty()
+    val chapterTitleProperty = SimpleStringProperty()
     val canUndoProperty = SimpleBooleanProperty(false)
     val canRedoProperty = SimpleBooleanProperty(false)
+    val canGoNextProperty = SimpleBooleanProperty(false)
+    val canGoPreviousProperty = SimpleBooleanProperty(false)
 
     init {
         addClass("top-navigation-pane")
@@ -49,6 +56,20 @@ class TranslationHeader : HBox() {
 
                 setOnAction {
                     FX.eventbus.fire(RedoChunkingPageEvent())
+                }
+            }
+            chapterSelector {
+                chapterTitleProperty.bind(this@TranslationHeader.chapterTitleProperty)
+
+                nextDisabledProperty.bind(canGoNextProperty.not())
+                prevDisabledProperty.bind(canGoPreviousProperty.not())
+
+                setOnNextChapter {
+                    FX.eventbus.fire(GoToNextChapterEvent())
+                }
+
+                setOnPreviousChapter {
+                    FX.eventbus.fire(GoToPreviousChapterEvent())
                 }
             }
         }

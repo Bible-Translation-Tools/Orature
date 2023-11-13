@@ -9,6 +9,7 @@ import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
+import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
@@ -21,6 +22,8 @@ class TranslationViewModel2 : ViewModel() {
 
     val canUndoProperty = SimpleBooleanProperty(false)
     val canRedoProperty = SimpleBooleanProperty(false)
+    val isFirstChapterProperty = SimpleBooleanProperty(false)
+    val isLastChapterProperty = SimpleBooleanProperty(false)
     val selectedStepProperty = SimpleObjectProperty<ChunkingStep>(null)
     val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.CHUNKING)
     val sourceTextProperty = SimpleStringProperty()
@@ -38,16 +41,7 @@ class TranslationViewModel2 : ViewModel() {
             workbookDataStore.workbook.hashCode(),
             1
         )
-        val chapter = workbookDataStore.workbook.target.chapters
-            .filter { it.sort == recentChapter }
-            .blockingFirst()
-
-        workbookDataStore.activeChapterProperty.set(chapter)
-        updateStep {
-            selectedStepProperty.set(reachableStepProperty.value)
-        }
-        updateSourceText()
-        resetUndoRedo()
+        navigateChapter(recentChapter)
     }
 
     fun undockPage() {
@@ -56,6 +50,14 @@ class TranslationViewModel2 : ViewModel() {
         workbookDataStore.activeWorkbookProperty.set(null)
         compositeDisposable.clear()
         resetUndoRedo()
+    }
+
+    fun nextChapter() {
+        navigateChapter(workbookDataStore.chapter.sort + 1)
+    }
+
+    fun previousChapter() {
+        navigateChapter(workbookDataStore.chapter.sort - 1)
     }
 
     fun navigateStep(target: ChunkingStep) {
@@ -104,6 +106,9 @@ class TranslationViewModel2 : ViewModel() {
                     list.isEmpty() -> {
                         reachableStepProperty.set(ChunkingStep.CHUNKING)
                     }
+                    list.all { it.checkingStatus() == CheckingStatus.VERSE } -> {
+                        reachableStepProperty.set(ChunkingStep.FINAL_REVIEW)
+                    }
                     list.all { it.checkingStatus().ordinal >= CheckingStatus.KEYWORD.ordinal } -> {
                         reachableStepProperty.set(ChunkingStep.VERSE_CHECK)
                     }
@@ -124,9 +129,51 @@ class TranslationViewModel2 : ViewModel() {
     fun updateSourceText() {
         workbookDataStore.getSourceText()
             .observeOnFx()
+            .doOnComplete {
+                sourceTextProperty.set(null)
+            }
             .subscribe {
                 sourceTextProperty.set(it)
             }
+    }
+
+    private fun navigateChapter(chapter: Int) {
+        selectedStepProperty.set(null)
+
+        workbookDataStore.workbook.target
+            .chapters
+            .filter { it.sort == chapter }
+            .singleElement()
+            .observeOnFx()
+            .subscribe {
+                loadChapter(it)
+            }
+    }
+
+    private fun loadChapter(chapter: Chapter) {
+        workbookDataStore.activeChapterProperty.set(chapter)
+        resetUndoRedo()
+        updateSourceText()
+
+        val wb = workbookDataStore.workbook
+        wb.target
+            .chapters
+            .count()
+            .observeOnFx()
+            .subscribe { count ->
+                isFirstChapterProperty.set(chapter.sort == 1)
+                isLastChapterProperty.set(chapter.sort.toLong() == count)
+            }
+
+        val sourceAudio = wb.sourceAudioAccessor.getChapter(chapter.sort, wb.target)
+        if (sourceAudio == null) {
+            reachableStepProperty.set(null)
+            compositeDisposable.clear()
+        } else {
+            updateStep {
+                selectedStepProperty.set(reachableStepProperty.value)
+            }
+        }
     }
 
     private fun resetUndoRedo() {
