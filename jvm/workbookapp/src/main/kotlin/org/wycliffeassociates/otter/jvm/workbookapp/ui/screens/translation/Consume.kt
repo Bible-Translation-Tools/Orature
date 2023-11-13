@@ -16,11 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
+package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
+import javafx.animation.AnimationTimer
 import javafx.scene.control.Slider
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
@@ -28,38 +29,42 @@ import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ConsumeViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
+import org.wycliffeassociates.otter.jvm.controls.waveform.startAnimationTimer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 
-class Consume : Fragment() {
+class Consume : View() {
     private val logger = LoggerFactory.getLogger(Consume::class.java)
 
     val viewModel: ConsumeViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
 
     private lateinit var waveform: MarkerWaveform
-    private lateinit var slider: Slider
+    private lateinit var scrollbarSlider: Slider
 
     var cleanUpWaveform: () -> Unit = {}
+    private var timer: AnimationTimer? = null
 
     override fun onDock() {
         super.onDock()
         logger.info("Consume docked")
-
+        timer = startAnimationTimer { viewModel.calculatePosition() }
+        viewModel.audioController = AudioPlayerController(scrollbarSlider)
         viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
         viewModel.onDockConsume()
-        viewModel.initializeAudioController(slider)
         waveform.markers.bind(viewModel.markers) { it }
     }
 
     override fun onUndock() {
         super.onUndock()
         logger.info("Consume undocked")
+        timer?.stop()
         cleanUpWaveform()
         viewModel.onUndockConsume()
     }
@@ -98,9 +103,9 @@ class Consume : Fragment() {
                     // Marker stuff
                     this.markers.bind(viewModel.markers) { it }
                 }
-                slider = createAudioScrollbarSlider()
+                scrollbarSlider = createAudioScrollbarSlider()
                 add(waveform)
-                add(slider)
+                add(scrollbarSlider)
             }
             bottom = hbox {
                 addClass("consume__bottom")

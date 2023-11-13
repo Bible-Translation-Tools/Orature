@@ -72,6 +72,7 @@ class RollingSourceText : VBox() {
     private fun setUpListeners() {
         sourceTextProperty.onChangeAndDoNowWithDisposer { txt ->
             if (txt == null) {
+                sourceTextChunksContainer.items.clear()
                 return@onChangeAndDoNowWithDisposer
             }
             val nodes = buildTextNodes(txt)

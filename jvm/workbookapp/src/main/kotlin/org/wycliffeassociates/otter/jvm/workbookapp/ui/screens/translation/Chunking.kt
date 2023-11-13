@@ -1,8 +1,9 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
+package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
+import javafx.animation.AnimationTimer
 import javafx.scene.control.Slider
 import javafx.scene.control.Tooltip
 import javafx.scene.layout.Priority
@@ -11,6 +12,7 @@ import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
@@ -19,23 +21,23 @@ import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
+import org.wycliffeassociates.otter.jvm.controls.waveform.startAnimationTimer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 import tornadofx.*
 
-class Chunking : Fragment() {
+class Chunking : View() {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     val viewModel: ChunkingViewModel by inject()
-    val translationViewModel: TranslationViewModel2 by inject()
     val settingsViewModel: SettingsViewModel by inject()
 
     private lateinit var waveform: MarkerWaveform
-    private lateinit var slider: Slider
+    private lateinit var scrollbarSlider: Slider
     private val eventSubscriptions = mutableListOf<EventRegistration>()
 
     var cleanUpWaveform: () -> Unit = {}
+    private var timer: AnimationTimer? = null
 
     override val root = vbox {
         borderpane {
@@ -62,9 +64,9 @@ class Chunking : Fragment() {
                     // Marker stuff
                     this.markers.bind(viewModel.markers) { it }
                 }
-                slider = createAudioScrollbarSlider()
+                scrollbarSlider = createAudioScrollbarSlider()
                 add(waveform)
-                add(slider)
+                add(scrollbarSlider)
             }
             bottom = hbox {
                 addClass("consume__bottom")
@@ -121,15 +123,16 @@ class Chunking : Fragment() {
         super.onDock()
         logger.info("Chunking docked")
         subscribeEvents()
-
+        timer = startAnimationTimer { viewModel.calculatePosition() }
+        viewModel.audioController = AudioPlayerController(scrollbarSlider)
         viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
         viewModel.dock()
-        viewModel.initializeAudioController(slider)
     }
 
     override fun onUndock() {
         super.onUndock()
         logger.info("Chunking undocked")
+        timer?.stop()
         unsubscribeEvents()
         cleanUpWaveform()
         viewModel.undock()

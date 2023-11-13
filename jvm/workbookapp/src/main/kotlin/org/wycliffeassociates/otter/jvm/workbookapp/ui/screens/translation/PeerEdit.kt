@@ -1,8 +1,9 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
+package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
+import javafx.animation.AnimationTimer
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Node
 import javafx.scene.control.Slider
@@ -11,6 +12,8 @@ import javafx.scene.layout.VBox
 import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
@@ -19,18 +22,22 @@ import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
+import org.wycliffeassociates.otter.jvm.controls.waveform.startAnimationTimer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.PeerEditViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 
-open class PeerEdit : Fragment() {
+open class PeerEdit : View() {
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     val viewModel: PeerEditViewModel by inject()
     val settingsViewModel: SettingsViewModel by inject()
     val recorderViewModel: RecorderViewModel by inject()
 
     private lateinit var waveform: MarkerWaveform
+    private lateinit var scrollbarSlider: Slider
+    private var timer: AnimationTimer? = null
 
     private val mainSectionProperty = SimpleObjectProperty<Node>(null)
     private val playbackView = createPlaybackView()
@@ -59,9 +66,7 @@ open class PeerEdit : Fragment() {
         waveform = createPlaybackWaveform(container)
         add(waveform)
 
-        val scrollbarSlider = createAudioScrollbarSlider().also {
-            viewModel.slider = it
-        }
+        scrollbarSlider = createAudioScrollbarSlider()
         add(scrollbarSlider)
 
         hbox {
@@ -167,6 +172,9 @@ open class PeerEdit : Fragment() {
 
     override fun onDock() {
         super.onDock()
+        logger.info("Checking docked.")
+        timer = startAnimationTimer { viewModel.calculatePosition() }
+        viewModel.audioController = AudioPlayerController(scrollbarSlider)
         viewModel.dock()
         subscribeEvents()
         mainSectionProperty.set(playbackView)
@@ -174,8 +182,10 @@ open class PeerEdit : Fragment() {
 
     override fun onUndock() {
         super.onUndock()
-        viewModel.undock()
+        logger.info("Checking undocked.")
+        timer?.stop()
         unsubscribeEvents()
+        viewModel.undock()
     }
 
     private fun subscribeEvents() {

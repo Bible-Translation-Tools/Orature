@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.waveform
 
+import javafx.animation.AnimationTimer
 import javafx.scene.effect.ColorAdjust
 import org.wycliffeassociates.otter.common.data.ColorTheme
 
@@ -32,4 +33,12 @@ fun adjustWaveformColorByTheme(theme: ColorTheme, adjust: ColorAdjust) {
             adjust.contrast = 0.5
         }
     }
+}
+
+fun startAnimationTimer(onRefresh: () -> Unit): AnimationTimer {
+    return object : AnimationTimer() {
+        override fun handle(currentNanoTime: Long) {
+            onRefresh()
+        }
+    }.apply { start() }
 }

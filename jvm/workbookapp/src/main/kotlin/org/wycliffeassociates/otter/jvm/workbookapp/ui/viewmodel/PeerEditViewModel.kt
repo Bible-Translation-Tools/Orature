@@ -45,7 +45,6 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     override val waveformAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     override val positionProperty = SimpleDoubleProperty(0.0)
     override var imageWidthProperty = SimpleDoubleProperty()
-    override var timer: AnimationTimer? = null
 
     val chunkTitleProperty = workbookDataStore.activeChunkTitleBinding()
     val currentChunkProperty = SimpleObjectProperty<Chunk>()
@@ -55,14 +54,14 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     val disposable = CompositeDisposable()
 
     lateinit var waveform: Observable<Image>
-    var slider: Slider? = null
+    /** This property must be initialized before calling dock() */
+    var audioController: AudioPlayerController? = null
     var subscribeOnWaveformImages: () -> Unit = {}
     var cleanUpWaveform: () -> Unit = {}
 
     override var sampleRate: Int = 0 // beware of divided by 0
     override var totalFrames: Int = 0 // beware of divided by 0
 
-    private var audioController: AudioPlayerController? = null
     private val newTakeProperty = SimpleObjectProperty<Take>(null)
     private val builder = ObservableWaveformBuilder()
     private val height = Integer.min(Screen.getMainScreen().platformHeight, 500)
@@ -78,7 +77,6 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     }
 
     fun dock() {
-        startAnimationTimer()
         subscribeToChunks()
 
         currentChunkProperty.onChangeAndDoNowWithDisposer {
@@ -95,7 +93,6 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     }
 
     fun undock() {
-        stopAnimationTimer()
         sourcePlayerProperty.unbind()
         selectedTakeDisposable.clear()
         disposable.clear()
@@ -205,7 +202,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
             }.addTo(selectedTakeDisposable)
     }
 
-    fun loadTargetAudio(take: Take) {
+    private fun loadTargetAudio(take: Take) {
         val audioPlayer: IAudioPlayer = audioConnectionFactory.getPlayer()
         audioPlayer.load(take.file)
         audioPlayer.getAudioReader()?.let {
@@ -213,19 +210,14 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
             totalFrames = it.totalFrames
         }
         waveformAudioPlayerProperty.set(audioPlayer)
-
-        loadAudioController(audioPlayer)
+        audioController?.let { controller ->
+            controller.load(audioPlayer)
+            isPlayingProperty.bind(controller.isPlayingProperty)
+        }
 
         val audio = OratureAudioFile(take.file)
         createWaveformImages(audio)
         subscribeOnWaveformImages()
-    }
-
-    private fun loadAudioController(player: IAudioPlayer) {
-        audioController = AudioPlayerController(slider).also { controller ->
-            controller.load(player)
-            isPlayingProperty.bind(controller.isPlayingProperty)
-        }
     }
 
     private fun createWaveformImages(audio: OratureAudioFile) {

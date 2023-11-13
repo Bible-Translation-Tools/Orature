@@ -1,8 +1,11 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Completable
+import io.reactivex.Maybe
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
+import io.reactivex.schedulers.Schedulers
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleListProperty
@@ -48,6 +51,7 @@ class TranslationViewModel2 : ViewModel() {
         selectedStepProperty.set(null)
         workbookDataStore.activeChapterProperty.set(null)
         compositeDisposable.clear()
+        audioDataStore.closePlayers()
         resetUndoRedo()
     }
 
@@ -66,12 +70,17 @@ class TranslationViewModel2 : ViewModel() {
 
     fun selectChunk(chunkNumber: Int) {
         resetUndoRedo()
-        workbookDataStore.chapter.chunks.value?.find { it.sort == chunkNumber }?.let {
-            workbookDataStore.activeChunkProperty.set(it)
-            audioDataStore.updateSourceAudio()
-            audioDataStore.openSourceAudioPlayer()
-            updateSourceText()
-        }
+        val chunk = workbookDataStore.chapter.chunks.value?.find { it.sort == chunkNumber } ?: return
+        workbookDataStore.activeChunkProperty.set(chunk)
+
+        updateSourceText()
+            .andThen {
+                audioDataStore.updateSourceAudio()
+                audioDataStore.openSourceAudioPlayer()
+                it.onComplete()
+            }
+            .subscribeOn(Schedulers.io())
+            .subscribe()
     }
 
     fun loadChunks(chunks: List<Chunk>) {
@@ -125,15 +134,15 @@ class TranslationViewModel2 : ViewModel() {
             }.addTo(compositeDisposable)
     }
 
-    fun updateSourceText() {
-        workbookDataStore.getSourceText()
+    fun updateSourceText() : Completable {
+        sourceTextProperty.set(null)
+        return workbookDataStore.getSourceText()
+            .subscribeOn(Schedulers.io())
             .observeOnFx()
-            .doOnComplete {
-                sourceTextProperty.set(null)
-            }
-            .subscribe {
+            .doOnSuccess {
                 sourceTextProperty.set(it)
             }
+            .ignoreElement()
     }
 
     private fun navigateChapter(chapter: Int) {
@@ -152,7 +161,7 @@ class TranslationViewModel2 : ViewModel() {
     private fun loadChapter(chapter: Chapter) {
         workbookDataStore.activeChapterProperty.set(chapter)
         resetUndoRedo()
-        updateSourceText()
+        updateSourceText().subscribe()
 
         val wb = workbookDataStore.workbook
         wb.target
@@ -164,15 +173,22 @@ class TranslationViewModel2 : ViewModel() {
                 isLastChapterProperty.set(chapter.sort.toLong() == count)
             }
 
-        val sourceAudio = wb.sourceAudioAccessor.getChapter(chapter.sort, wb.target)
-        if (sourceAudio == null) {
-            reachableStepProperty.set(null)
-            compositeDisposable.clear()
-        } else {
-            updateStep {
-                selectedStepProperty.set(reachableStepProperty.value)
+        Maybe
+            .fromCallable {
+                wb.sourceAudioAccessor.getChapter(chapter.sort, wb.target)
             }
-        }
+            .subscribeOn(Schedulers.io())
+            .observeOnFx()
+            .doOnSuccess {
+                updateStep {
+                    selectedStepProperty.set(reachableStepProperty.value)
+                }
+            }
+            .doOnComplete {
+                reachableStepProperty.set(null)
+                compositeDisposable.clear()
+            }
+            .subscribe()
     }
 
     private fun resetUndoRedo() {

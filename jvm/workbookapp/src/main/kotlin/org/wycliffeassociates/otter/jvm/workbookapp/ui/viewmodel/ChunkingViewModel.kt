@@ -18,9 +18,12 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.glass.ui.Screen
+import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import java.io.File
 import javafx.animation.AnimationTimer
 import javafx.beans.property.SimpleBooleanProperty
@@ -86,11 +89,11 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     override val currentMarkerNumberProperty = SimpleIntegerProperty(-1)
     override var resumeAfterScroll: Boolean = false
 
+    /** This property must be initialized before calling dock() */
     override var audioController: AudioPlayerController? = null
     override val waveformAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     override val positionProperty = SimpleDoubleProperty(0.0)
     override var imageWidthProperty = SimpleDoubleProperty(0.0)
-    override var timer: AnimationTimer? = null
     override var sampleRate: Int = 0 // beware of divided by 0
     override var totalFrames: Int = 0 // beware of divided by 0
 
@@ -110,18 +113,16 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     }
 
     fun dock() {
-        val chapter = workbookDataStore.chapter
-        val sourceAudio = initializeSourceAudio(chapter.sort)
-        audioDataStore.sourceAudioProperty.set(sourceAudio)
-
-        sourceAudio?.file?.let {
-            (app as IDependencyGraphProvider).dependencyGraph.inject(this)
-            audio = loadAudio(it)
-            createWaveformImages(audio)
-            subscribeOnWaveformImages()
-            loadChunkMarkers(audio)
-        }
-        startAnimationTimer()
+        initializeSourceAudio(workbookDataStore.chapter.sort)
+            .subscribeOn(Schedulers.io())
+            .observeOnFx()
+            .subscribe { sa ->
+                audioDataStore.sourceAudioProperty.set(sa)
+                audio = loadAudio(sa.file)
+                createWaveformImages(audio)
+                loadChunkMarkers(audio)
+                subscribeOnWaveformImages()
+            }
     }
 
     fun undock() {
@@ -141,12 +142,14 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         cleanup()
     }
 
-    private fun initializeSourceAudio(chapter: Int): SourceAudio? {
-        val workbook = workbookDataStore.workbook
-        ChunkAudioUseCase(directoryProvider, workbook.projectFilesAccessor)
-            .copySourceAudioToProject(sourceAudio.file)
+    private fun initializeSourceAudio(chapter: Int): Maybe<SourceAudio> {
+        return Maybe.fromCallable {
+            val workbook = workbookDataStore.workbook
+            ChunkAudioUseCase(directoryProvider, workbook.projectFilesAccessor)
+                .copySourceAudioToProject(sourceAudio.file)
 
-        return workbook.sourceAudioAccessor.getUserMarkedChapter(chapter, workbook.target)
+            workbook.sourceAudioAccessor.getUserMarkedChapter(chapter, workbook.target)
+        }
     }
 
     override fun placeMarker() {
@@ -189,7 +192,12 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
             sampleRate = it.sampleRate
             totalFrames = it.totalFrames
         }
+
         waveformAudioPlayerProperty.set(player)
+        audioController?.let { controller ->
+            controller.load(player)
+            isPlayingProperty.bind(controller.isPlayingProperty)
+        }
         return audio
     }
 
@@ -213,7 +221,6 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     fun cleanup() {
         builder.cancel()
         compositeDisposable.clear()
-        stopAnimationTimer()
         markerModel = null
     }
 
@@ -235,19 +242,10 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
             .andThen { completable ->
                 ChunkAudioUseCase(directoryProvider, accessor)
                     .createChunkedSourceAudio(sourceAudio.file, cues)
-                
+
                 completable.onComplete()
             }
             .subscribe()
-    }
-
-    fun initializeAudioController(slider: Slider? = null) {
-        audioController = AudioPlayerController(slider).also { controller ->
-            waveformAudioPlayerProperty.value?.let {
-                controller.load(it)
-            }
-        }
-        isPlayingProperty.bind(audioController!!.isPlayingProperty)
     }
 
     fun pause() {

@@ -84,7 +84,7 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
 
     override var resumeAfterScroll = false
 
-    override var timer: AnimationTimer? = object : AnimationTimer() {
+    private var timer: AnimationTimer? = object : AnimationTimer() {
         override fun handle(currentNanoTime: Long) {
             calculatePosition()
         }

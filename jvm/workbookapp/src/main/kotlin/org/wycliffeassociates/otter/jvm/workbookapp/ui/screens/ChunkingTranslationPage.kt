@@ -8,15 +8,13 @@ import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.GoToNextChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.GoToPreviousChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.BlindDraft
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.Chunking
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.ChunkingStepsDrawer
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.Consume
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.KeywordCheck
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.PeerEdit
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.ChapterReview
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.VerseCheck
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.translationHeader
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.BlindDraft
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.Chunking
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.ChunkingStepsDrawer
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.Consume
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.PeerEdit
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.ChapterReview
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.translationHeader
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
@@ -28,15 +26,16 @@ class ChunkingTranslationPage : View() {
 
     private val mainFragmentProperty = viewModel.selectedStepProperty.objectBinding {
         it?.let { step ->
-            when(step) {
+            val fragment = when(step) {
                 ChunkingStep.CONSUME_AND_VERBALIZE -> find<Consume>()
                 ChunkingStep.CHUNKING -> find<Chunking>()
                 ChunkingStep.BLIND_DRAFT -> find<BlindDraft>()
-                ChunkingStep.PEER_EDIT -> find<PeerEdit>()
-                ChunkingStep.KEYWORD_CHECK -> find<KeywordCheck>()
-                ChunkingStep.VERSE_CHECK -> find<VerseCheck>()
+                ChunkingStep.PEER_EDIT,
+                ChunkingStep.KEYWORD_CHECK,
+                ChunkingStep.VERSE_CHECK -> find<PeerEdit>()
                 ChunkingStep.FINAL_REVIEW -> find<ChapterReview>()
             }
+            fragment.root
         }
     }
 
@@ -66,7 +65,7 @@ class ChunkingTranslationPage : View() {
                 this.reachableStepProperty.bind(viewModel.reachableStepProperty)
             }
 
-            centerProperty().bind(mainFragmentProperty.objectBinding { it?.root })
+            centerProperty().bind(mainFragmentProperty)
 
             right = SourceTextDrawer().apply {
                 sourceTextDrawer = this

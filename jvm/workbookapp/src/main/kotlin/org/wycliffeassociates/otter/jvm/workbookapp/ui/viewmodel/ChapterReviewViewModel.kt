@@ -2,8 +2,11 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.glass.ui.Screen
+import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import javafx.animation.AnimationTimer
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
@@ -65,11 +68,11 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     override val currentMarkerNumberProperty = SimpleIntegerProperty(-1)
     override var resumeAfterScroll: Boolean = false
 
+    /** This property must be initialized before calling dock() */
     override var audioController: AudioPlayerController? = null
     override val waveformAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     override val positionProperty = SimpleDoubleProperty(0.0)
     override var imageWidthProperty = SimpleDoubleProperty(0.0)
-    override var timer: AnimationTimer? = null
     override var sampleRate: Int = 0 // beware of divided by 0
     override var totalFrames: Int = 0 // beware of divided by 0
 
@@ -80,6 +83,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     private val builder = ObservableWaveformBuilder()
 
     var subscribeOnWaveformImages: () -> Unit = {}
+    var cleanUpWaveform: () -> Unit = {}
 
     val chapterTitleProperty = workbookDataStore.activeChapterTitleBinding()
     val sourcePlayerProperty = SimpleObjectProperty<IAudioPlayer>()
@@ -92,24 +96,24 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     val isPlayingProperty = SimpleBooleanProperty(false)
     val compositeDisposable = CompositeDisposable()
 
-    var slider: Slider? = null
-    var cleanUpWaveform: () -> Unit = {}
-
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
     }
 
     fun dock() {
-        startAnimationTimer()
-
         sourcePlayerProperty.bind(audioDataStore.sourceAudioPlayerProperty)
         workbookDataStore.activeChunkProperty.set(null)
-        audioDataStore.updateSourceAudio()
-        audioDataStore.openSourceAudioPlayer()
+
+        Completable
+            .fromAction {
+                audioDataStore.updateSourceAudio()
+                audioDataStore.openSourceAudioPlayer()
+            }
+            .subscribeOn(Schedulers.io())
+            .subscribe()
 
         markersPlacedCountProperty.bind(markers.sizeProperty)
-
         markerProgressCounterProperty.bind(
             stringBinding(markersPlacedCountProperty, totalMarkersProperty) {
                 MessageFormat.format(
@@ -127,6 +131,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
         pauseAudio()
         waveformAudioPlayerProperty.value?.stop()
         audioDataStore.stopPlayers()
+        audioDataStore.closePlayers()
         markerModel
             ?.writeMarkers()
             ?.blockingAwait()
@@ -177,38 +182,40 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     }
 
     private fun loadChapterTake() {
-        chapterTranslationBuilder.getOrCompile(
-            workbookDataStore.workbook,
-            workbookDataStore.chapter
-        )
-            .observeOnFx()
-            .subscribe { take ->
+        chapterTranslationBuilder
+            .getOrCompile(
+                workbookDataStore.workbook,
+                workbookDataStore.chapter
+            )
+            .flatMap { take ->
                 loadTargetAudio(take)
+            }
+            .subscribeOn(Schedulers.io())
+            .observeOnFx()
+            .subscribe { audio ->
+                loadVerseMarkers(audio)
+                createWaveformImages(audio)
+                subscribeOnWaveformImages()
             }
     }
 
-    private fun loadTargetAudio(take: Take) {
-        val audioPlayer: IAudioPlayer = audioConnectionFactory.getPlayer()
-        audioPlayer.load(take.file)
-        audioPlayer.getAudioReader()?.let {
-            sampleRate = it.sampleRate
-            totalFrames = it.totalFrames
-        }
-        waveformAudioPlayerProperty.set(audioPlayer)
-
-        loadAudioController(audioPlayer)
-
-        val audio = OratureAudioFile(take.file)
-        loadVerseMarkers(audio)
-        createWaveformImages(audio)
-        subscribeOnWaveformImages()
-    }
-
-    private fun loadAudioController(player: IAudioPlayer) {
-        audioController = AudioPlayerController(slider).also { controller ->
-            controller.load(player)
-            isPlayingProperty.bind(controller.isPlayingProperty)
-        }
+    private fun loadTargetAudio(take: Take) : Single<OratureAudioFile> {
+        return Single
+            .fromCallable {
+                val audioPlayer: IAudioPlayer = audioConnectionFactory.getPlayer()
+                audioPlayer.load(take.file)
+                audioPlayer.getAudioReader()?.let {
+                    sampleRate = it.sampleRate
+                    totalFrames = it.totalFrames
+                }
+                audioController?.let { controller ->
+                    controller.load(audioPlayer)
+                    isPlayingProperty.bind(controller.isPlayingProperty)
+                }
+                waveformAudioPlayerProperty.set(audioPlayer)
+                OratureAudioFile(take.file)
+            }
+            .subscribeOn(Schedulers.io())
     }
 
     private fun loadVerseMarkers(audio: OratureAudioFile) {
@@ -234,7 +241,6 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     private fun cleanup() {
         builder.cancel()
         compositeDisposable.clear()
-        stopAnimationTimer()
         markerModel = null
     }
 

@@ -88,7 +88,7 @@ class BlindDraftViewModel : ViewModel() {
         }
         sourcePlayerProperty.unbind()
         currentChunkProperty.set(null)
-        translationViewModel.updateSourceText()
+        translationViewModel.updateSourceText().subscribe()
         selectedTakeDisposable.clear()
         disposables.clear()
         disposableListeners.forEach { it.dispose() }

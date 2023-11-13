@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
+package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -7,6 +7,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.TakeSelectionAnimationMediator
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
@@ -20,7 +21,8 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewMod
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 
-class BlindDraft : Fragment() {
+class BlindDraft : View() {
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     val viewModel: BlindDraftViewModel by inject()
     val recorderViewModel: RecorderViewModel by inject()
@@ -134,6 +136,7 @@ class BlindDraft : Fragment() {
 
     override fun onDock() {
         super.onDock()
+        logger.info("Blind Draft docked.")
         mainSectionProperty.set(takesView)
         viewModel.dockBlindDraft()
         subscribeEvents()
@@ -141,6 +144,7 @@ class BlindDraft : Fragment() {
 
     override fun onUndock() {
         super.onUndock()
+        logger.info("Blind Draft undocked.")
         viewModel.undockBlindDraft()
         unsubscribeEvents()
     }
