@@ -23,6 +23,7 @@ import com.jakewharton.rxrelay2.ReplayRelay
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import javafx.beans.property.SimpleStringProperty
@@ -148,8 +149,8 @@ class WorkbookDataStoreTest {
                 listOf(),
                 lazy { chunks },
                 Single.just(1),
-                {},
-                {}
+                { Completable.complete() },
+                { Completable.complete() }
             )
         }
 
