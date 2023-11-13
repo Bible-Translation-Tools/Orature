@@ -36,6 +36,7 @@ class ChapterReview : View() {
     private lateinit var waveform: MarkerWaveform
     private lateinit var scrollbarSlider: Slider
     private var timer: AnimationTimer? = null
+    private var cleanUpWaveform: () -> Unit = {}
 
     private val eventSubscriptions = mutableListOf<EventRegistration>()
 
@@ -69,7 +70,7 @@ class ChapterReview : View() {
                 }
 
                 viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
-                viewModel.cleanUpWaveform = ::freeImages
+                cleanUpWaveform = ::freeImages
 
                 markers.bind(viewModel.markers) { it }
             }
@@ -155,6 +156,7 @@ class ChapterReview : View() {
         logger.info("Final Review undocked.")
         timer?.stop()
         viewModel.undock()
+        cleanUpWaveform()
         unsubscribeEvents()
     }
 

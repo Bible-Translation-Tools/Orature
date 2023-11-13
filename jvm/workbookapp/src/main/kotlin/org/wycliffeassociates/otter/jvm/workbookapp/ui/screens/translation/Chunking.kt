@@ -36,7 +36,7 @@ class Chunking : View() {
     private lateinit var scrollbarSlider: Slider
     private val eventSubscriptions = mutableListOf<EventRegistration>()
 
-    var cleanUpWaveform: () -> Unit = {}
+    private var cleanUpWaveform: () -> Unit = {}
     private var timer: AnimationTimer? = null
 
     override val root = vbox {
