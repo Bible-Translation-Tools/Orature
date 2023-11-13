@@ -447,10 +447,6 @@ class Narration @AssistedInject constructor(
         chapterReaderConnection.seek(location)
     }
 
-    fun getFramePosition(): Int {
-        return chapterRepresentation.absoluteToRelativeChapter(chapterReaderConnection.absoluteFramePosition)
-    }
-
     /**
      * Gets the duration of the relative chapter space in frames
      */
@@ -458,7 +454,11 @@ class Narration @AssistedInject constructor(
         return chapterRepresentation.totalFrames
     }
 
-    private fun getRelativeChapterLocation(): Int {
+    fun getTotalFrames(): Int {
+        return chapterReaderConnection.totalFrames + uncommittedRecordedFrames.get()
+    }
+
+    fun getRelativeChapterLocation(): Int {
         return if (lockedVerseIndex != null) {
             chapterReaderConnection
                 .relativeVerseToRelativeChapter(player.getLocationInFrames(), lockedVerseIndex!!)
@@ -470,10 +470,6 @@ class Narration @AssistedInject constructor(
     fun getLocationInFrames(): Int {
         val relativeChapterLocation = getRelativeChapterLocation()
         return relativeChapterLocation + uncommittedRecordedFrames.get()
-    }
-
-    fun getTotalFrames(): Int {
-        return chapterReaderConnection.totalFrames + uncommittedRecordedFrames.get()
     }
 
     fun close() {

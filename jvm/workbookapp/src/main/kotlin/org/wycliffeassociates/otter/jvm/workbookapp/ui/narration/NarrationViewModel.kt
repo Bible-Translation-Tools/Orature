@@ -663,7 +663,7 @@ class NarrationViewModel : ViewModel() {
         if (::renderer.isInitialized) {
             try {
                 val position = narration.getLocationInFrames()
-                val relativeChapterPosition = narration.getFramePosition()
+                val relativeChapterPosition = narration.getRelativeChapterLocation()
                 runLater {
                     audioPositionProperty.set(position)
                     relativeChapterPositionProperty.set(relativeChapterPosition)
