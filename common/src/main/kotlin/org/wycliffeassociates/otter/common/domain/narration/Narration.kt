@@ -458,7 +458,7 @@ class Narration @AssistedInject constructor(
         return chapterReaderConnection.totalFrames + uncommittedRecordedFrames.get()
     }
 
-    fun getRelativeChapterLocation(): Int {
+    private fun getRelativeChapterLocation(): Int {
         return if (lockedVerseIndex != null) {
             chapterReaderConnection
                 .relativeVerseToRelativeChapter(player.getLocationInFrames(), lockedVerseIndex!!)

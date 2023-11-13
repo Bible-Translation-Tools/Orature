@@ -82,12 +82,12 @@ class AudioWorkspaceView : View() {
         }
 
         valueProperty().onChange { pos ->
-            if (pos.toInt() != viewModel.relativeChapterPositionProperty.value) {
+            if (pos.toInt() != viewModel.audioPositionProperty.value) {
                 viewModel.seekTo(pos.toInt())
             }
         }
 
-        viewModel.relativeChapterPositionProperty.onChange { pos ->
+        viewModel.audioPositionProperty.onChange { pos ->
             viewModel.scrollBarPositionProperty.set(pos.toDouble())
         }
 
@@ -120,7 +120,7 @@ class AudioWorkspaceView : View() {
                 verse_markers_layer {
                     verseMarkersControls.bind(markerNodes) { it }
                     setOnLayerScroll { delta ->
-                        val pos = viewModel.relativeChapterPositionProperty.value
+                        val pos = viewModel.audioPositionProperty.value
                         val seekTo = pos + delta
                         viewModel.seekTo(seekTo)
                     }
@@ -165,7 +165,6 @@ class AudioWorkspaceViewModel : ViewModel() {
     val audioPositionProperty = SimpleIntegerProperty()
     val totalAudioSizeProperty = SimpleIntegerProperty()
 
-    val relativeChapterPositionProperty = SimpleIntegerProperty()
     val scrollBarPositionProperty = SimpleDoubleProperty()
 
     fun drawWaveform(context: GraphicsContext, canvas: Canvas, markerNodes: ObservableList<VerseMarkerControl>) {
@@ -181,7 +180,6 @@ class AudioWorkspaceViewModel : ViewModel() {
         isPlayingProperty.bind(narrationViewModel.isPlayingProperty)
         totalAudioSizeProperty.bind(narrationViewModel.totalAudioSizeProperty)
         audioPositionProperty.bind(narrationViewModel.audioPositionProperty)
-        relativeChapterPositionProperty.bindBidirectional(narrationViewModel.relativeChapterPositionProperty)
         recordedVerses.bind(narrationViewModel.recordedVerses) { it }
     }
 
