@@ -44,7 +44,6 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
     lateinit var audio: OratureAudioFile
 
     lateinit var waveform: Observable<Image>
-    lateinit var slider: Slider
 
     var subscribeOnWaveformImages: () -> Unit = {}
 
@@ -54,6 +53,7 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
     override val currentMarkerNumberProperty = SimpleIntegerProperty(-1)
     override var resumeAfterScroll: Boolean = false
 
+    /** This property must be initialized before calling dock() */
     override var audioController: AudioPlayerController? = null
     override val waveformAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     override var sampleRate: Int = 0 // beware of divided by 0
@@ -144,15 +144,11 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
         }
 
         waveformAudioPlayerProperty.set(player)
-        initializeAudioController(player)
+        audioController?.let {
+            it.load(player)
+            isPlayingProperty.bind(it.isPlayingProperty)
+        }
 
         return audio
-    }
-
-    private fun initializeAudioController(player: IAudioPlayer) {
-        audioController = AudioPlayerController(slider).also {
-            it.load(player)
-        }
-        isPlayingProperty.bind(audioController!!.isPlayingProperty)
     }
 }

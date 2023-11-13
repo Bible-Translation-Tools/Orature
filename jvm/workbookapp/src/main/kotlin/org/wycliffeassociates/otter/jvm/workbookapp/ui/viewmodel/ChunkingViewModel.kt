@@ -89,6 +89,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     override val currentMarkerNumberProperty = SimpleIntegerProperty(-1)
     override var resumeAfterScroll: Boolean = false
 
+    /** This property must be initialized before calling dock() */
     override var audioController: AudioPlayerController? = null
     override val waveformAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     override val positionProperty = SimpleDoubleProperty(0.0)
@@ -99,7 +100,6 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
     lateinit var audio: OratureAudioFile
     lateinit var waveform: Observable<Image>
-    lateinit var slider: Slider
     private val width = Screen.getMainScreen().platformWidth
     private val height = Integer.min(Screen.getMainScreen().platformHeight, 500)
     private val builder = ObservableWaveformBuilder()
@@ -197,8 +197,10 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         }
 
         waveformAudioPlayerProperty.set(player)
-        initializeAudioController(player)
-
+        audioController?.let { controller ->
+            controller.load(player)
+            isPlayingProperty.bind(controller.isPlayingProperty)
+        }
         return audio
     }
 
@@ -252,13 +254,6 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
     fun pause() {
         audioController?.pause()
-    }
-
-    private fun initializeAudioController(player: IAudioPlayer) {
-        audioController = AudioPlayerController(slider).also { controller ->
-            controller.load(player)
-        }
-        isPlayingProperty.bind(audioController!!.isPlayingProperty)
     }
 
     private fun createWaveformImages(audio: OratureAudioFile) {

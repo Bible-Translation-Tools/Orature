@@ -10,6 +10,7 @@ import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.event.GoToNextChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
@@ -31,6 +32,8 @@ class ChapterReview : View() {
     val settingsViewModel: SettingsViewModel by inject()
 
     private lateinit var waveform: MarkerWaveform
+    private lateinit var scrollbarSlider: Slider
+
     private val eventSubscriptions = mutableListOf<EventRegistration>()
 
     override val root = borderpane {
@@ -67,11 +70,8 @@ class ChapterReview : View() {
 
                 markers.bind(viewModel.markers) { it }
             }
+            scrollbarSlider = createAudioScrollbarSlider()
             add(waveform)
-
-            val scrollbarSlider = createAudioScrollbarSlider().also {
-                viewModel.slider = it
-            }
             add(scrollbarSlider)
 
             hbox {
@@ -142,6 +142,7 @@ class ChapterReview : View() {
 
     override fun onDock() {
         logger.info("Final Review docked.")
+        viewModel.audioController = AudioPlayerController(scrollbarSlider)
         viewModel.dock()
         subscribeEvents()
     }

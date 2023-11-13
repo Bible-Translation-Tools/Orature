@@ -12,6 +12,7 @@ import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
@@ -33,6 +34,7 @@ open class PeerEdit : View() {
     val recorderViewModel: RecorderViewModel by inject()
 
     private lateinit var waveform: MarkerWaveform
+    private lateinit var scrollbarSlider: Slider
 
     private val mainSectionProperty = SimpleObjectProperty<Node>(null)
     private val playbackView = createPlaybackView()
@@ -61,9 +63,7 @@ open class PeerEdit : View() {
         waveform = createPlaybackWaveform(container)
         add(waveform)
 
-        val scrollbarSlider = createAudioScrollbarSlider().also {
-            viewModel.slider = it
-        }
+        scrollbarSlider = createAudioScrollbarSlider()
         add(scrollbarSlider)
 
         hbox {
@@ -170,6 +170,7 @@ open class PeerEdit : View() {
     override fun onDock() {
         super.onDock()
         logger.info("Checking docked.")
+        viewModel.audioController = AudioPlayerController(scrollbarSlider)
         viewModel.dock()
         subscribeEvents()
         mainSectionProperty.set(playbackView)

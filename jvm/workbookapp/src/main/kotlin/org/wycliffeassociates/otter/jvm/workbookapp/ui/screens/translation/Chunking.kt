@@ -11,6 +11,7 @@ import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
@@ -30,6 +31,7 @@ class Chunking : View() {
     val settingsViewModel: SettingsViewModel by inject()
 
     private lateinit var waveform: MarkerWaveform
+    private lateinit var scrollbarSlider: Slider
     private val eventSubscriptions = mutableListOf<EventRegistration>()
 
     var cleanUpWaveform: () -> Unit = {}
@@ -59,9 +61,9 @@ class Chunking : View() {
                     // Marker stuff
                     this.markers.bind(viewModel.markers) { it }
                 }
+                scrollbarSlider = createAudioScrollbarSlider()
                 add(waveform)
-                val slider = createAudioScrollbarSlider().also { viewModel.slider = it }
-                add(slider)
+                add(scrollbarSlider)
             }
             bottom = hbox {
                 addClass("consume__bottom")
@@ -119,6 +121,7 @@ class Chunking : View() {
         logger.info("Chunking docked")
         subscribeEvents()
 
+        viewModel.audioController = AudioPlayerController(scrollbarSlider)
         viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
         viewModel.dock()
     }

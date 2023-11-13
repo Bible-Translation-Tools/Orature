@@ -68,6 +68,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     override val currentMarkerNumberProperty = SimpleIntegerProperty(-1)
     override var resumeAfterScroll: Boolean = false
 
+    /** This property must be initialized before calling dock() */
     override var audioController: AudioPlayerController? = null
     override val waveformAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     override val positionProperty = SimpleDoubleProperty(0.0)
@@ -83,6 +84,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     private val builder = ObservableWaveformBuilder()
 
     var subscribeOnWaveformImages: () -> Unit = {}
+    var cleanUpWaveform: () -> Unit = {}
 
     val chapterTitleProperty = workbookDataStore.activeChapterTitleBinding()
     val sourcePlayerProperty = SimpleObjectProperty<IAudioPlayer>()
@@ -94,9 +96,6 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     )
     val isPlayingProperty = SimpleBooleanProperty(false)
     val compositeDisposable = CompositeDisposable()
-
-    var slider: Slider? = null
-    var cleanUpWaveform: () -> Unit = {}
 
 
     init {
@@ -212,18 +211,14 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                     sampleRate = it.sampleRate
                     totalFrames = it.totalFrames
                 }
-                loadAudioController(audioPlayer)
+                audioController?.let { controller ->
+                    controller.load(audioPlayer)
+                    isPlayingProperty.bind(controller.isPlayingProperty)
+                }
+                waveformAudioPlayerProperty.set(audioPlayer)
                 OratureAudioFile(take.file)
             }
             .subscribeOn(Schedulers.io())
-    }
-
-    private fun loadAudioController(player: IAudioPlayer) {
-        audioController = AudioPlayerController(slider).also { controller ->
-            controller.load(player)
-            isPlayingProperty.bind(controller.isPlayingProperty)
-        }
-        waveformAudioPlayerProperty.set(player)
     }
 
     private fun loadVerseMarkers(audio: OratureAudioFile) {
