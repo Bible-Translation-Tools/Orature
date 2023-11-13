@@ -22,9 +22,9 @@ import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.common.domain.chunking.ChunkTakeDeleteAction
-import org.wycliffeassociates.otter.common.domain.chunking.ChunkTakeRecordAction
-import org.wycliffeassociates.otter.common.domain.chunking.ChunkTakeSelectAction
+import org.wycliffeassociates.otter.common.domain.translation.TranslationTakeDeleteAction
+import org.wycliffeassociates.otter.common.domain.translation.TranslationTakeRecordAction
+import org.wycliffeassociates.otter.common.domain.translation.TranslationTakeSelectAction
 import org.wycliffeassociates.otter.common.domain.model.UndoableActionHistory
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel.Result
@@ -45,6 +45,7 @@ class BlindDraftViewModel : ViewModel() {
     val audioDataStore: AudioDataStore by inject()
     val translationViewModel: TranslationViewModel2 by inject()
     val recorderViewModel: RecorderViewModel by inject()
+    val chapterReviewViewModel: ChapterReviewViewModel by inject()
 
     val sourcePlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     val currentChunkProperty = SimpleObjectProperty<Chunk>()
@@ -72,12 +73,19 @@ class BlindDraftViewModel : ViewModel() {
         currentChunkProperty.onChangeAndDoNowWithDisposer {
             it?.let { chunk ->
                 subscribeSelectedTakePropertyToRelay(chunk)
+                if (actionHistory.canUndo()) {
+                    chapterReviewViewModel.invalidateChapterTake() // resets chapter target audio when changes detected
+                }
             }
             actionHistory.clear()
         }.also { disposableListeners.add(it) }
     }
 
     fun undockBlindDraft() {
+        if (actionHistory.canUndo()) {
+            chapterReviewViewModel.invalidateChapterTake()
+            actionHistory.clear()
+        }
         sourcePlayerProperty.unbind()
         currentChunkProperty.set(null)
         translationViewModel.updateSourceText()
@@ -99,7 +107,7 @@ class BlindDraftViewModel : ViewModel() {
     fun onRecordFinish(result: Result) {
         if (result == Result.SUCCESS) {
             workbookDataStore.chunk?.let { chunk ->
-                val op = ChunkTakeRecordAction(
+                val op = TranslationTakeRecordAction(
                     chunk,
                     recordedTakeProperty.value,
                     chunk.audio.getSelectedTake()
@@ -118,7 +126,7 @@ class BlindDraftViewModel : ViewModel() {
         currentChunkProperty.value?.let { chunk ->
             take.file.setLastModified(System.currentTimeMillis())
             val selectedTake = chunk.audio.getSelectedTake()
-            val op = ChunkTakeSelectAction(chunk, take, selectedTake)
+            val op = TranslationTakeSelectAction(chunk, take, selectedTake)
             actionHistory.execute(op)
             onUndoableAction()
         }
@@ -133,7 +141,7 @@ class BlindDraftViewModel : ViewModel() {
         audioDataStore.stopPlayers()
 
         currentChunkProperty.value?.let { chunk ->
-            val op = ChunkTakeDeleteAction(
+            val op = TranslationTakeDeleteAction(
                 chunk,
                 take,
                 takes.any { it.take == take && it.selected },

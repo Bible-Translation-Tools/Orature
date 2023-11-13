@@ -18,7 +18,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.IUndoable
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
-import org.wycliffeassociates.otter.common.domain.chunking.ChunkTakeConfirmAction
+import org.wycliffeassociates.otter.common.domain.translation.TranslationTakeApproveAction
 import org.wycliffeassociates.otter.common.domain.model.UndoableActionHistory
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.waveform.IWaveformViewModel
@@ -40,6 +40,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     val translationViewModel: TranslationViewModel2 by inject()
     val blindDraftViewModel: BlindDraftViewModel by inject()
     val recorderViewModel: RecorderViewModel by inject()
+    val chapterReviewViewModel: ChapterReviewViewModel by inject()
 
     override val waveformAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     override val positionProperty = SimpleDoubleProperty(0.0)
@@ -134,7 +135,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
                 .take(1)
                 .observeOnFx()
                 .subscribe { currentChecking ->
-                    val op = ChunkTakeConfirmAction(
+                    val op = TranslationTakeApproveAction(
                         take,
                         checkingStatus,
                         currentChecking
@@ -172,6 +173,10 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     fun onRecordFinish(result: RecorderViewModel.Result) {
         if (result == RecorderViewModel.Result.SUCCESS) {
             workbookDataStore.chunk?.audio?.insertTake(newTakeProperty.value)
+            chapterReviewViewModel.invalidateChapterTake()
+            // any change(s) to chunk's take requires checking again
+            translationViewModel.selectedStepProperty.set(null)
+            translationViewModel.navigateStep(ChunkingStep.PEER_EDIT)
         } else {
             newTakeProperty.value?.file?.delete()
             newTakeProperty.set(null)

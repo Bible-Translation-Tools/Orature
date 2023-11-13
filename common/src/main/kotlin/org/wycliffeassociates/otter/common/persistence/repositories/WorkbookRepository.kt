@@ -217,10 +217,10 @@ class WorkbookRepository(
                     subtreeResources = db.getSubtreeResourceMetadata(chapterCollection),
                     chunkCount = db.getChunkCount(chapterCollection),
                     addChunk = {
-                        db.addContentForCollection(chapterCollection, it).subscribe()
+                        db.addContentForCollection(chapterCollection, it)
                     },
                     reset = {
-                        db.clearContentForCollection(chapterCollection, ContentType.TEXT).subscribe()
+                        db.clearContentForCollection(chapterCollection, ContentType.TEXT).ignoreElement()
                     }
                 ).also { it.text = metaContent.text ?: "" }
             }

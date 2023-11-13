@@ -44,7 +44,7 @@ class VerseMarkerModel(
     private val cues = sanitizeCues(audio, markerLabels)
     val markers = mutableListOf<ChunkMarkerModel>()
 
-    var markerCount = 1
+    private var placedMarkersCount = 0
     private val audioEnd = audio.totalFrames
 
     private var labelIndex = 0
@@ -52,7 +52,7 @@ class VerseMarkerModel(
     init {
         cues as MutableList
         cues.sortBy { it.location }
-        markerCount = cues.size
+        placedMarkersCount = cues.size
 
         markers.addAll(initializeMarkers(markerTotal, cues))
     }
@@ -77,7 +77,7 @@ class VerseMarkerModel(
     }
 
     fun deleteMarker(id: Int) {
-        if (markerCount > 0) {
+        if (placedMarkersCount > 0) {
             val op = Delete(id)
             undoStack.push(op)
             op.execute()
@@ -147,7 +147,7 @@ class VerseMarkerModel(
                 chunkMarker.label = markerLabels[index]
             }
         }
-        markerCount = markers.filter { it.placed }.size
+        placedMarkersCount = markers.filter { it.placed }.size
     }
 
     private fun findMarkerPrecedingPosition(
