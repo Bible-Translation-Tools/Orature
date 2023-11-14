@@ -9,6 +9,7 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.event.OpenChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
 import tornadofx.*
+import kotlin.math.min
 
 private const val GRID_COLUMNS = 5
 
@@ -25,17 +26,18 @@ class ChapterGrid(val list: List<ChapterGridItemData>) : GridPane() {
 
     fun updateChapterGridNodes() {
         children.clear()
+        columnConstraints.clear()
         addChaptersToGrid()
     }
 
     private fun addChaptersToGrid() {
         list.forEachIndexed { index, chapter ->
             val node = StackPane().apply {
-                addClass("chapter-grid__item")
                 button(chapter.number.toString()) {
                     addClass(
                         "btn", "btn--secondary", "btn--borderless", "chapter-grid__btn"
                     )
+                    useMaxWidth = true
                     prefWidthProperty().bind(
                         this@ChapterGrid.widthProperty().divide(GRID_COLUMNS.toDouble())
                     )
@@ -55,6 +57,9 @@ class ChapterGrid(val list: List<ChapterGridItemData>) : GridPane() {
                 }
             }
             this.add(node, index % GRID_COLUMNS, index / GRID_COLUMNS)
+        }
+        repeat(min(list.size, GRID_COLUMNS)) {
+            columnConstraints.add(ColumnConstraints(100.0))
         }
     }
 }

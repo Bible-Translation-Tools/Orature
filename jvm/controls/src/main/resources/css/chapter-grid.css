@@ -1,18 +1,18 @@
-.chapter-grid__btn {
-    -fx-padding: 14 16;
-}
-
 .chapter-grid {
     -fx-background-color: -wa-foreground;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0.5, 0, 0);
+    -fx-effect: -wa-level2;
     -fx-background-radius: 10;
     -fx-alignment: top-right;
     -fx-faint-focus-color: transparent;
 }
 
+.chapter-grid__btn {
+    -fx-padding: 14 16;
+}
+
 .chapter-grid__icon-alignment-box {
     -fx-alignment: top-right;
-    -fx-padding: 4;
+    -fx-padding: 4 8;
 }
 
 .chapter-grid .complete-icon {
