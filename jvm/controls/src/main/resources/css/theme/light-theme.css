@@ -59,13 +59,12 @@
     -wa-regular-text-80: #33445C;
     -wa-note-text: -wa-black-70;
     -wa-highlight-text: -wa-primary;
-    -wa-active-text: -wa-primary;
     -wa-disabled-text: -wa-gray-light;
     -wa-disabled-background: -wa-black-15;
-    -wa-status-active: -wa-green;
+    -wa-status-active: -wa-primary;
     -wa-status-inactive: -wa-gray;
-    -wa-status-complete: -wa-blue;
-    -wa-inverse-text: -wa-gray-dark;
+    -wa-status-complete: #82A93F;
+    -wa-inverse-text: -wa-white;
 
     /* borders */
     -wa-border-neutral: -wa-gray;

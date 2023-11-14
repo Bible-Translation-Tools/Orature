@@ -29,11 +29,11 @@
                         <FontIcon iconLiteral="mdi-chevron-left" />
                     </graphic>
                 </Button>
-                <Label fx:id="chapterTitle" text="Chapter 2" styleClass="chapter-selector__title">
+                <Button fx:id="chapterTitle" text="Chapter 2" styleClass="chapter-selector__title">
                     <graphic>
                         <FontIcon iconLiteral="mdi-file" />
                     </graphic>
-                </Label>
+                </Button>
                 <Button fx:id="nextChapterBtn" styleClass="btn, btn--secondary, btn--borderless, chapter-selector__btn-next">
                     <graphic>
                         <FontIcon iconLiteral="mdi-chevron-right" />

@@ -154,6 +154,9 @@ class BlindDraft : View() {
             when (it.action) {
                 TakeAction.SELECT -> viewModel.onSelectTake(it.take)
                 TakeAction.DELETE -> viewModel.onDeleteTake(it.take)
+                TakeAction.EDIT -> {
+                    // TODO()
+                }
             }
         }.also { eventSubscriptions.add(it) }
 

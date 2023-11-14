@@ -1,6 +1,5 @@
 package org.wycliffeassociates.otter.jvm.controls.canvas
 
-import ResizableCanvas
 import javafx.geometry.Pos
 import javafx.scene.layout.StackPane
 import tornadofx.add
