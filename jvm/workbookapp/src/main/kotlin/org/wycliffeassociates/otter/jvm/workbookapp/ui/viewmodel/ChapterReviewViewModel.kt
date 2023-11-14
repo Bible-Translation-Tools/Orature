@@ -109,6 +109,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                 audioDataStore.updateSourceAudio()
                 audioDataStore.openSourceAudioPlayer()
             }
+            .andThen(translationViewModel.updateSourceText())
             .subscribeOn(Schedulers.io())
             .subscribe()
 
