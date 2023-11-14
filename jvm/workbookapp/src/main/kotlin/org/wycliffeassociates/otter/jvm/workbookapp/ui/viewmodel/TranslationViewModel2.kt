@@ -42,15 +42,6 @@ class TranslationViewModel2 : ViewModel() {
     private val compositeDisposable = CompositeDisposable()
 
     fun dockPage() {
-        workbookDataStore.workbook.target
-            .chapters
-            .toList()
-            .subscribe { chapters ->
-                chapterList.setAll(
-                    chapters.map { ChapterGridItemData(it.sort, it.hasSelectedAudio()) }
-                )
-            }
-
         val recentChapter = workbookDataStore.workbookRecentChapterMap.getOrDefault(
             workbookDataStore.workbook.hashCode(),
             1
@@ -84,6 +75,21 @@ class TranslationViewModel2 : ViewModel() {
             .observeOnFx()
             .subscribe {
                 loadChapter(it)
+            }
+
+        workbookDataStore.workbook.target
+            .chapters
+            .toList()
+            .subscribe { chapters ->
+                chapterList.setAll(
+                    chapters.map {
+                        ChapterGridItemData(
+                            it.sort,
+                            it.hasSelectedAudio(),
+                            chapter == it.sort
+                        )
+                    }
+                )
             }
     }
 

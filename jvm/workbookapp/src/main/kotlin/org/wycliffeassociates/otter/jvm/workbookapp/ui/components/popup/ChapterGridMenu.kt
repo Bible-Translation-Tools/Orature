@@ -19,9 +19,7 @@ class ChapterGridMenu : ContextMenu() {
 
         addClass("chapter-grid-context-menu")
         isAutoHide = true
-        items.setAll(
-            chapterGridOption,
-        )
+        items.setAll(chapterGridOption)
     }
 
     fun updateChapterGrid(newChapterList: List<ChapterGridItemData>) {

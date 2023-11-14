@@ -2,7 +2,6 @@ package org.wycliffeassociates.otter.jvm.controls.chapterselector
 
 import javafx.scene.layout.ColumnConstraints
 import javafx.scene.layout.GridPane
-import javafx.scene.layout.Region
 import javafx.scene.layout.StackPane
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
@@ -37,7 +36,9 @@ class ChapterGrid(val list: List<ChapterGridItemData>) : GridPane() {
                     addClass(
                         "btn", "btn--secondary", "btn--borderless", "chapter-grid__btn"
                     )
+                    togglePseudoClass("selected", chapter.selected)
                     useMaxWidth = true
+
                     prefWidthProperty().bind(
                         this@ChapterGrid.widthProperty().divide(GRID_COLUMNS.toDouble())
                     )

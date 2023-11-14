@@ -140,7 +140,8 @@ class NarrationHeaderViewModel : ViewModel() {
             return narrationViewModel.chapterList.map {
                 val gridItem = ChapterGridItemData(
                     it.sort,
-                    it.hasSelectedAudio()
+                    it.hasSelectedAudio(),
+                    workbookDataStore.activeChapterProperty.value?.sort == it.sort
                 )
                 gridItem
             }

@@ -7,7 +7,14 @@
 }
 
 .chapter-grid__btn {
+    -fx-background-radius: 12;
     -fx-padding: 14 16;
+}
+
+.chapter-grid__btn:selected {
+    -fx-background-color: -wa-primary-light;
+    -fx-border-width: 1px;
+    -fx-border-color: -wa-primary;
 }
 
 .chapter-grid__icon-alignment-box {
