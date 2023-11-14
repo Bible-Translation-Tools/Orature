@@ -201,7 +201,7 @@ class CreateChunksTest {
         sourceAudioDir = projectDir.newFolder(*RcConstants.SOURCE_AUDIO_DIR.split("/").toTypedArray())
 
         mockedDirectoryProvider.apply {
-            whenever(getProjectDirectory(any(), any(), any() as Collection)).thenReturn(projectDir.root)
+            whenever(getProjectDirectory(any(), any(), any<Collection>())).thenReturn(projectDir.root)
             whenever(getProjectSourceAudioDirectory(any(), any(), any())).thenReturn(sourceAudioDir)
         }
 
