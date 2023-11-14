@@ -1,8 +1,8 @@
 package org.wycliffeassociates.otter.jvm.controls.chapterselector
 
-import javafx.application.Platform
-import javafx.collections.ObservableList
+import javafx.scene.layout.ColumnConstraints
 import javafx.scene.layout.GridPane
+import javafx.scene.layout.Region
 import javafx.scene.layout.StackPane
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
@@ -31,6 +31,7 @@ class ChapterGrid(val list: List<ChapterGridItemData>) : GridPane() {
     private fun addChaptersToGrid() {
         list.forEachIndexed { index, chapter ->
             val node = StackPane().apply {
+                addClass("chapter-grid__item")
                 button(chapter.number.toString()) {
                     addClass(
                         "btn", "btn--secondary", "btn--borderless", "chapter-grid__btn"
@@ -39,7 +40,7 @@ class ChapterGrid(val list: List<ChapterGridItemData>) : GridPane() {
                         this@ChapterGrid.widthProperty().divide(GRID_COLUMNS.toDouble())
                     )
                     setOnAction {
-                        selectChapter(index)
+                        selectChapter(index + 1)
                     }
                 }
                 hbox {

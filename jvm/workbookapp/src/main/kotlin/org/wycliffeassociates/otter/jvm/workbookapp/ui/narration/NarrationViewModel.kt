@@ -256,7 +256,7 @@ class NarrationViewModel : ViewModel() {
 
     fun loadChapter(chapterNumber: Int) {
         chapterList
-            .elementAtOrNull(chapterNumber)
+            .find { it.sort == chapterNumber }
             ?.let {
                 loadChapter(it)
             }

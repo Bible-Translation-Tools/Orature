@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
+import javafx.beans.binding.Bindings
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.SourceTextDrawer
@@ -7,6 +8,7 @@ import org.wycliffeassociates.otter.jvm.controls.event.ChunkSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.GoToNextChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.GoToPreviousChapterEvent
+import org.wycliffeassociates.otter.jvm.controls.event.OpenChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.BlindDraft
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.Chunking
@@ -55,6 +57,7 @@ class ChunkingTranslationPage : View() {
             canRedoProperty.bind(viewModel.canRedoProperty)
             canGoNextProperty.bind(viewModel.isLastChapterProperty.not())
             canGoPreviousProperty.bind(viewModel.isFirstChapterProperty.not())
+            Bindings.bindContent(chapterList, viewModel.chapterList)
         }
 
         borderpane {
@@ -79,6 +82,7 @@ class ChunkingTranslationPage : View() {
 
     init {
         tryImportStylesheet("/css/chapter-selector.css")
+        tryImportStylesheet("/css/chapter-grid.css")
         tryImportStylesheet("/css/consume-page.css")
         tryImportStylesheet("/css/chunking-page.css")
         tryImportStylesheet("/css/blind-draft-page.css")
@@ -99,6 +103,9 @@ class ChunkingTranslationPage : View() {
         }
         subscribe<GoToPreviousChapterEvent> {
             viewModel.previousChapter()
+        }
+        subscribe<OpenChapterEvent> {
+            viewModel.navigateChapter(it.chapterNumber)
         }
     }
 
