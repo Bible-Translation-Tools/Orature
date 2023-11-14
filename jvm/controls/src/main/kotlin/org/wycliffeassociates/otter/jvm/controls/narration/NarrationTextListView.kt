@@ -24,7 +24,10 @@ import javafx.event.EventTarget
 import javafx.geometry.Orientation
 import javafx.scene.control.ListView
 import javafx.scene.control.ScrollBar
-import org.wycliffeassociates.otter.jvm.utils.*
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.findChildren
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
+import org.wycliffeassociates.otter.jvm.utils.virtualFlow
 import tornadofx.*
 
 class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(items) {
@@ -51,6 +54,10 @@ class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(i
                         } else {
                             FX.eventbus.fire(StickyVerseChangedEvent(null))
                         }
+                        // TODO: note, this fixes the issue, however, it seems like a lot of overhead.
+                        //  Since, refresh only updates items that are visible to the user, we have to call this on
+                        //  scroll so it actually updates the items.
+                        this@NarrationTextListView.refresh()
                     }?.also(listeners::add)
                 } catch (e: NullPointerException) {
                     e.printStackTrace()
