@@ -10,14 +10,6 @@ import tornadofx.*
 import javafx.event.EventTarget
 import javafx.scene.layout.BorderPane
 import org.slf4j.LoggerFactory
-import java.lang.IllegalStateException
-
-/**
- * This is the offset of the marker line relative
- * to the draggable area. In other words,
- * it's a half the length of marker draggable area.
- */
-private const val MARKER_OFFSET = (MARKER_AREA_WIDTH / 2).toInt()
 
 class VerseMarkersLayer : BorderPane() {
     private val logger = LoggerFactory.getLogger(VerseMarkersLayer::class.java)
@@ -27,7 +19,7 @@ class VerseMarkersLayer : BorderPane() {
 
     val verseMarkersControls: ObservableList<VerseMarkerControl> = observableListOf()
     private val onScrollProperty = SimpleObjectProperty<(Int) -> Unit>()
-
+    private val onDragStartedProperty = SimpleObjectProperty<() -> Unit>()
 
     init {
         tryImportStylesheet("/css/verse-markers-layer.css")
@@ -41,22 +33,26 @@ class VerseMarkersLayer : BorderPane() {
             val point = localToParent(event.x, event.y)
             scrollOldPos = point.x
             scrollDelta = 0.0
+            onDragStartedProperty.value?.invoke()
+            event.consume()
         }
 
         setOnMouseDragged { event ->
             val point = localToParent(event.x, event.y)
             scrollDelta = scrollOldPos - point.x
+
             val frameDelta = pixelsToFrames(scrollDelta, width = this@VerseMarkersLayer.width.toInt())
             onScrollProperty.value?.invoke(frameDelta)
-            scrollDelta = 0.0
-            scrollOldPos = point.x
+            event.consume()
         }
 
+        setOnMouseReleased { event ->
+            scrollDelta = 0.0
+            scrollOldPos = 0.0
+            event.consume()
+        }
 
         bindChildren(verseMarkersControls) { verseMarkerControl ->
-
-            val prevVerse = getPrevVerse(verseMarkerControl.verseProperty.value)
-            val nextVerse = getNextVerse(verseMarkerControl.verseProperty.value)
 
             verseMarkerControl.apply {
 
@@ -69,21 +65,21 @@ class VerseMarkersLayer : BorderPane() {
                 prefHeightProperty().bind(this@VerseMarkersLayer.heightProperty())
 
                 dragTarget.setOnMousePressed { event ->
+                    event.consume()
                     userIsDraggingProperty.set(true)
                     if (!canBeMovedProperty.value) return@setOnMousePressed
                     delta = 0.0
                     oldPos = layoutX
-
-                    event.consume()
                 }
 
                 dragTarget.setOnMouseDragged { event ->
+                    event.consume()
                     userIsDraggingProperty.set(true)
                     if (!canBeMovedProperty.value) return@setOnMouseDragged
 
                     try {
                         val point = localToParent(event.x, event.y)
-                        val (start, end) = verseBoundaries(verseIndexProperty.value, this.width)
+                        val (start, end) = verseBoundaries(verseIndexProperty.value)
                         val currentPos = point.x.coerceIn(start..end)
 
                         delta = currentPos - oldPos
@@ -95,15 +91,10 @@ class VerseMarkersLayer : BorderPane() {
                         // for this marker to get enough space to move around.
                         logger.error("Tried to move a marker, but aborted", e)
                     }
-
-                    event.consume()
                 }
-
-
 
                 dragTarget.setOnMouseReleased { event ->
                     if (delta != 0.0) {
-                        // delta -= MARKER_OFFSET
                         val frameDelta = pixelsToFrames(delta, width = this@VerseMarkersLayer.width.toInt())
                         FX.eventbus.fire(
                             NarrationMarkerChangedEvent(
@@ -115,14 +106,11 @@ class VerseMarkersLayer : BorderPane() {
                     userIsDraggingProperty.set(false)
                     event.consume()
                 }
-
-
             }
         }
-
     }
 
-    private fun verseBoundaries(verseIndex: Int, boundingWidth: Double): Pair<Double, Double> {
+    private fun verseBoundaries(verseIndex: Int): Pair<Double, Double> {
         val previousVerse = verseMarkersControls.getOrNull(verseIndex - 1)
         val startBounds = if (previousVerse != null && previousVerse.visibleProperty().value) {
             previousVerse.layoutX + (MARKER_AREA_WIDTH * 4)
@@ -135,18 +123,12 @@ class VerseMarkersLayer : BorderPane() {
         return Pair(startBounds, endBounds)
     }
 
-    private fun getPrevVerse(verse: VerseMarker): VerseMarker {
-        val currentIndex = markers.indexOf(verse)
-        return markers.getOrNull(currentIndex - 1) ?: verse
-    }
-
-    private fun getNextVerse(verse: VerseMarker): VerseMarker {
-        val currentIndex = markers.indexOf(verse)
-        return markers.getOrNull(currentIndex + 1) ?: verse
-    }
-
     fun setOnLayerScroll(op: (Int) -> Unit) {
         onScrollProperty.set(op)
+    }
+
+    fun setOnDragStarted(op: () -> Unit) {
+        onDragStartedProperty.set(op)
     }
 }
 

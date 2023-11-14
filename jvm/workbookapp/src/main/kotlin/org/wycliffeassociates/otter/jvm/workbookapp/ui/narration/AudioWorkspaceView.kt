@@ -11,11 +11,8 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
-import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
-import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.Drawable
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.NarrationMarkerChangedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkerControl
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.verse_markers_layer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.WaveformLayer
@@ -126,10 +123,21 @@ class AudioWorkspaceView : View() {
                 }
                 verse_markers_layer {
                     verseMarkersControls.bind(markerNodes) { it }
+
+                    var pos = 0
+
+                    setOnDragStarted {
+                        // caching current position on drag start
+                        // to add delta to it later on drag continue
+                        pos = viewModel.audioPositionProperty.value
+                    }
+
                     setOnLayerScroll { delta ->
-                        val pos = viewModel.audioPositionProperty.value
                         val seekTo = pos + delta
-                        viewModel.seekTo(seekTo)
+                        // Keep position inside audio bounds
+                        if (seekTo in 0..viewModel.totalAudioSizeProperty.value) {
+                            viewModel.seekTo(seekTo)
+                        }
                     }
                 }
             }
