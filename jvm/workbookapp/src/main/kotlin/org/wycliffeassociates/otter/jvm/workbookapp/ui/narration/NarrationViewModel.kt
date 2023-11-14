@@ -329,11 +329,16 @@ class NarrationViewModel : ViewModel() {
             }
         }
         val lastIndex = narratableList.indexOfFirst { !it.hasRecording }
+        var scrollToVerse = 0
+
         if (lastIndex != -1) {
             narratableList.get(lastIndex).state = TeleprompterItemState.RECORD
-            FX.eventbus.fire(TeleprompterSeekEvent(lastIndex))
+            scrollToVerse = lastIndex
         }
+        // TODO: note, this is hit when navigating to a new chapter. The states are correct, however, they are not
+        //  reflected in the teleprompterListView.
         refreshTeleprompter()
+        FX.eventbus.fire(TeleprompterSeekEvent(scrollToVerse))
     }
 
     private fun setHasNextAndPreviousChapter(chapter: Chapter) {
