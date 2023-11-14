@@ -124,7 +124,16 @@ class TeleprompterView : View() {
         }
 
         subscribe<RefreshTeleprompter> {
+            val testView = viewModel // This is here for debugging
+
+            // forces the whole list to be updated from the start
+            listView.itemsProperty().set(viewModel.chunks.filtered { true })
             listView.refresh()
+            
+            // TODO: note, this also fixes the issue. Simulates the user clicking on all the list items.
+//            for(item in 0 until listView.items.size) {
+//                listView.selectionModel.select(item)
+//            }
         }
 
         subscribe<StickyVerseChangedEvent<NarrationTextItemData>> {
