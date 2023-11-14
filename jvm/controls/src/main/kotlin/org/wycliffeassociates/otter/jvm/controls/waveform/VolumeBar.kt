@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.recorder.app.view.drawables
+package org.wycliffeassociates.otter.jvm.controls.waveform
 
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
@@ -76,6 +76,7 @@ class VolumeBar(stream: Observable<ByteArray>) : Drawable {
     }
 
     override fun draw(context: GraphicsContext, canvas: Canvas) {
+        context.clearRect(0.0, 0.0, canvas.width, canvas.height)
         calculateDbPixelLocations(canvas.height)
         drawBar(canvas, context)
     }

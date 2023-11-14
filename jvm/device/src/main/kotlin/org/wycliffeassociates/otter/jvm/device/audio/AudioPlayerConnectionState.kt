@@ -18,12 +18,14 @@
  */
 package org.wycliffeassociates.otter.jvm.device.audio
 
+import org.wycliffeassociates.otter.common.audio.AudioFileReader
+import org.wycliffeassociates.otter.common.device.AudioFileReaderProvider
 import java.io.File
 import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFileReaderProvider
 
 internal class AudioPlayerConnectionState(
     val id: Int,
-    var file: File = File(""),
     var begin: Int? = null,
     var end: Int? = null,
     var rate: Double = 1.0,
@@ -33,4 +35,15 @@ internal class AudioPlayerConnectionState(
     var locationInFrames: Int = 0,
     var locationInMs: Int = 0,
     val listeners: MutableList<IAudioPlayerListener> = mutableListOf()
-)
+) {
+    var readerProvider: AudioFileReaderProvider? = null
+
+    private var _reader: AudioFileReader? = null
+    var reader: AudioFileReader
+        set(value) {
+            _reader = value
+        }
+        get() {
+            return _reader ?: readerProvider?.getAudioFileReader() ?: throw UninitializedPropertyAccessException()
+        }
+}

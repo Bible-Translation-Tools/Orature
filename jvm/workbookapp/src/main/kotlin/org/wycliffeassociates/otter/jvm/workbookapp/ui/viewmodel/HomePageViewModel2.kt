@@ -11,8 +11,8 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.collections.transformation.FilteredList
 import javafx.collections.transformation.SortedList
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
+import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
@@ -28,7 +28,7 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChunkingTranslationPage
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.WorkbookPage
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.NarrationPage
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
 import java.time.LocalDateTime
@@ -296,6 +296,7 @@ class HomePageViewModel2 : ViewModel() {
         updateWorkbookModifiedDate(workbook)
         when(mode) {
             ProjectMode.TRANSLATION -> navigator.dock<ChunkingTranslationPage>()
+            ProjectMode.NARRATION, ProjectMode.DIALECT -> navigator.dock<NarrationPage>()
         }
     }
 

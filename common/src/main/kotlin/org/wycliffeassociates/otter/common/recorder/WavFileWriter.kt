@@ -24,10 +24,12 @@ import io.reactivex.subjects.PublishSubject
 import org.slf4j.LoggerFactory
 import java.util.concurrent.atomic.AtomicBoolean
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
+import java.util.concurrent.atomic.AtomicInteger
 
 class WavFileWriter(
     private val oratureAudioFile: OratureAudioFile,
     private val audioStream: Observable<ByteArray>,
+    private val append: Boolean = false,
     private val onComplete: () -> Unit
 ) {
     private val logger = LoggerFactory.getLogger(WavFileWriter::class.java)
@@ -49,12 +51,13 @@ class WavFileWriter(
     val writer = Observable
         .using(
             {
-                oratureAudioFile.writer(append = false, buffered = true)
+                oratureAudioFile.writer(append = append, buffered = true)
             },
             { writer ->
                 audioStream.map {
                     if (record.get()) {
                         writer.write(it)
+                        writer.flush()
                     }
                 }
             },

@@ -34,11 +34,13 @@ import javafx.scene.input.MouseEvent
 import javafx.util.Duration
 import kotlin.reflect.KClass
 
-inline fun <reified T: Node> Node.findChild(includeInvisible: Boolean = false): Node? =
+inline fun <reified T : Node> Node.findChild(includeInvisible: Boolean = false): Node? =
     findChildren<T>(includeInvisible).firstOrNull()
-inline fun <reified T: Node> Node.findChildren(includeInvisible: Boolean = false): List<T> =
+
+inline fun <reified T : Node> Node.findChildren(includeInvisible: Boolean = false): List<T> =
     findChildren(T::class, includeInvisible)
-fun <T: Node> Node.findChildren(type: KClass<T>, includeInvisible: Boolean = false): List<T> {
+
+fun <T : Node> Node.findChildren(type: KClass<T>, includeInvisible: Boolean = false): List<T> {
     if (this !is Parent) return listOf()
 
     val list: MutableList<T> = this.childrenUnmodifiable
@@ -112,6 +114,7 @@ fun <T> ComboBox<T>.overrideDefaultKeyEventHandler(action: (T) -> Unit = {}) {
                 oldValue = this.value
                 it.consume()
             }
+
             KeyCode.ESCAPE -> {
                 if (oldValue != null && oldValue != this.value) {
                     this.value = oldValue
@@ -121,6 +124,8 @@ fun <T> ComboBox<T>.overrideDefaultKeyEventHandler(action: (T) -> Unit = {}) {
                     wasOpen = false
                 }
             }
+
+            else -> {}
         }
     }
 
@@ -131,17 +136,22 @@ fun <T> ComboBox<T>.overrideDefaultKeyEventHandler(action: (T) -> Unit = {}) {
                 wasOpen = true
                 this.show()
             }
+
             KeyCode.RIGHT, KeyCode.DOWN -> {
                 it.consume()
                 this.simulateKeyPress(KeyCode.TAB)
             }
+
             KeyCode.LEFT, KeyCode.UP -> {
                 it.consume()
                 this.simulateKeyPress(KeyCode.TAB, shiftDown = true)
             }
+
             KeyCode.TAB -> {
                 if (this.isShowing) it.consume()
             }
+
+            else -> {}
         }
     }
 }
@@ -159,18 +169,23 @@ fun <T> ListView<T>.enableScrollByKey(
                 flow.scrollPixels(-smallDelta)
                 keyEvent.consume()
             }
+
             KeyCode.DOWN -> {
                 flow.scrollPixels(smallDelta)
                 keyEvent.consume()
             }
+
             KeyCode.PAGE_UP -> {
                 flow.scrollPixels(-largeDelta)
                 keyEvent.consume()
             }
+
             KeyCode.PAGE_DOWN -> {
                 flow.scrollPixels(largeDelta)
                 keyEvent.consume()
             }
+
+            else -> {}
         }
     }
 }
@@ -182,6 +197,8 @@ fun <T> ListView<T>.overrideDefaultKeyEventHandler(action: (KeyCode) -> Unit = {
                 it.consume()
                 action(it.code)
             }
+
+            else -> {}
         }
     }
 }
@@ -215,6 +232,8 @@ fun TextArea.overrideDefaultKeyEventHandler(action: (String) -> Unit = {}) {
                     )
                 }
             }
+
+            else -> {}
         }
     }
 }

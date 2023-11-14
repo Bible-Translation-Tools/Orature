@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
@@ -76,7 +77,7 @@ class ImportLanguages @Inject constructor(
 
     private fun mapLanguages(inputStream: InputStream): List<Language> {
         val mapper = ObjectMapper(JsonFactory())
-        mapper.registerModule(KotlinModule())
+        mapper.registerKotlinModule()
         val languages = inputStream.bufferedReader().use {
             mapper.readValue(it, Array<Door43Language>::class.java)
         }

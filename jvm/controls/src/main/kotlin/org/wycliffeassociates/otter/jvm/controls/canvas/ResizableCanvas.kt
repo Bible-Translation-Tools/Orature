@@ -1,3 +1,5 @@
+package org.wycliffeassociates.otter.jvm.controls.canvas
+
 import javafx.scene.canvas.Canvas
 
 class ResizableCanvas : Canvas() {

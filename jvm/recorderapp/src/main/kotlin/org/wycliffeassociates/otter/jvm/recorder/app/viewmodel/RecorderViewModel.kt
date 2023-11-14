@@ -23,18 +23,18 @@ import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
 import org.wycliffeassociates.otter.common.recorder.RecordingTimer
 import org.wycliffeassociates.otter.common.recorder.WavFileWriter
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
-import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.BaseWaveLine
+import org.wycliffeassociates.otter.jvm.controls.waveform.BaseWaveLine
 import org.wycliffeassociates.otter.jvm.recorder.app.view.CanvasFragment
 import org.wycliffeassociates.otter.jvm.recorder.app.view.FramerateView
-import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.WaveformLayer
+import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformLayer
 import java.io.File
+import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
+import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
-import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.VolumeBar
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseFinishedEvent
 import tornadofx.*
 

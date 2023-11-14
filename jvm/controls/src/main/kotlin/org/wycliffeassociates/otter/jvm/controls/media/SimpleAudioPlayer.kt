@@ -383,6 +383,8 @@ class SimpleAudioPlayer(
                             onSelected()
                             menuButton.hide()
                         }
+
+                        else -> {}
                     }
                 }
             }

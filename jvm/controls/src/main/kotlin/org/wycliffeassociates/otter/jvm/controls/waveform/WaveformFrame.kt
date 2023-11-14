@@ -209,6 +209,8 @@ class WaveformFrame(
                         onFastForwardProperty.value?.invoke(speed)
                         it.consume()
                     }
+
+                    else -> {}
                 }
             }
             setOnKeyReleased {
@@ -221,6 +223,8 @@ class WaveformFrame(
                         onToggleMediaProperty.value?.invoke()
                         it.consume()
                     }
+
+                    else -> {}
                 }
             }
         }

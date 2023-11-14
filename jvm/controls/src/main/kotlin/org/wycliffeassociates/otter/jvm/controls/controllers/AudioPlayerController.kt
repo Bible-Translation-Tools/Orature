@@ -124,6 +124,8 @@ class AudioPlayerController(
                             startAtLocation = 0
                             player.getAudioReader()?.seek(0)
                         }
+
+                        else -> {}
                     }
                 }
             } else if (it == AudioPlayerEvent.PLAY) {
@@ -183,6 +185,7 @@ class AudioPlayerController(
                 }
                 KeyCode.DOWN -> audioSlider?.simulateKeyPress(KeyCode.TAB)
                 KeyCode.UP -> audioSlider?.simulateKeyPress(KeyCode.TAB, shiftDown = true)
+                else -> {}
             }
         }
         audioSlider?.setOnKeyReleased {
@@ -198,11 +201,13 @@ class AudioPlayerController(
                     toggle()
                     it.consume()
                 }
+
+                else -> {}
             }
         }
     }
 
-    private fun play() {
+    fun play() {
         isPlayingProperty.set(true)
         if (startAtLocation != 0) {
             seek(startAtLocation)
@@ -258,6 +263,7 @@ class AudioPlayerController(
             when (keyCode) {
                 KeyCode.LEFT -> location -= interval
                 KeyCode.RIGHT -> location += interval
+                else -> {}
             }
             seek(Utils.clamp(0, location, it.getDurationInFrames()))
         }

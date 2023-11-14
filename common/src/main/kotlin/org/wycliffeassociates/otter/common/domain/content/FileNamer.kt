@@ -71,7 +71,7 @@ class FileNamer(
         return "c$chapterNum"
     }
 
-    internal fun formatVerseNumber(): String? {
+    fun formatVerseNumber(): String? {
         val verseFormat = if (chunkCount > 99) "%03d" else "%02d"
         val verseNum = when (start) {
             null -> null

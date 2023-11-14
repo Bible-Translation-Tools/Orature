@@ -20,8 +20,8 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.project
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.JsonFactory
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -31,10 +31,6 @@ import io.reactivex.rxkotlin.toObservable
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
-import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
-import org.wycliffeassociates.otter.common.data.workbook.BookElement
-import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.buildManifest
 import org.wycliffeassociates.otter.common.io.zip.IFileReader
@@ -56,6 +52,9 @@ import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.workbook.Book
 import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.domain.project.TakeCheckingStatusMap
+import org.wycliffeassociates.otter.common.data.workbook.*
+import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.usfm.getText
 import org.wycliffeassociates.usfmtools.USFMParser
 import org.wycliffeassociates.usfmtools.models.markers.CMarker
@@ -100,6 +99,28 @@ class ProjectFilesAccessor(
         targetMetadata,
         project
     )
+
+    fun getChapterAudioDir(workbook: Workbook, chapter: Chapter): File {
+        val namer = FileNamer(
+            bookSlug = workbook.target.slug,
+            languageSlug = workbook.target.language.slug,
+            chapterCount = workbook.target.chapters.count().blockingGet(),
+            chapterTitle = chapter.title,
+            chapterSort = chapter.sort,
+            chunkCount = chapter.chunkCount.blockingGet().toLong(),
+            contentType = ContentType.TEXT,
+            rcSlug = if (workbook.source.language.slug == workbook.target.language.slug) {
+                workbook.sourceMetadataSlug
+            } else {
+                FileNamer.DEFAULT_RC_SLUG
+            }
+        )
+        val formattedChapterName = namer.formatChapterNumber()
+        val chapterDir = audioDir.resolve(formattedChapterName).also {
+            if (!it.exists()) it.mkdirs()
+        }
+        return chapterDir
+    }
 
     fun isInitialized(): Boolean {
         return try {
@@ -717,7 +738,7 @@ class ProjectFilesAccessor(
         val file = projectDir.resolve(RcConstants.PROJECT_MODE_FILE)
         return if (file.exists() && file.length() > 0) {
             val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
-            val serialized: SerializableProjectMode = mapper.readValue(file)
+            val serialized: SerializableProjectMode = mapper.readValue(file, object : TypeReference<SerializableProjectMode>() {})
             serialized.mode
         } else {
             null

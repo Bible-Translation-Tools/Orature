@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.MappingIterator
 import com.fasterxml.jackson.dataformat.csv.CsvMapper
 import com.fasterxml.jackson.dataformat.csv.CsvSchema
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import integrationtest.di.DaggerTestPersistenceComponent
 import javax.inject.Inject
 import javax.inject.Provider
@@ -177,7 +178,7 @@ class TestRcImport {
         val tests = mutableListOf<ChapterVerse>()
         for (book in books) {
             val csv = javaClass.classLoader.getResource("verse-count-en_ulb-v21-05/$book.csv").readText()
-            val mapper = CsvMapper().registerModule(KotlinModule())
+            val mapper = CsvMapper().registerKotlinModule()
             val schema = CsvSchema.builder().addColumn("Chapter").addColumn("Verses").setUseHeader(true).build()
             val reader: MappingIterator<ChapterVerse> = mapper
                 .readerFor(ChapterVerse::class.java)

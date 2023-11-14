@@ -142,6 +142,7 @@ open class RecordableViewModel(
                 when (result) {
                     PluginActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noEditor"])
                     PluginActions.Result.SUCCESS -> takeEvent.onComplete()
+                    else -> {}
                 }
             }
     }

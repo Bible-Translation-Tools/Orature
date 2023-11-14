@@ -5,11 +5,10 @@ import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.reactivex.Completable
-import io.reactivex.Observable
 import io.reactivex.Single
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.reactivex.schedulers.Schedulers
 import java.io.File
 import org.slf4j.LoggerFactory
@@ -278,8 +277,8 @@ class CreateChunks @Inject constructor(
     ) {
         val factory = JsonFactory()
         factory.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET)
-        val mapper = ObjectMapper(factory)
-        mapper.registerModule(KotlinModule())
+        val mapper = ObjectMapper(factory).registerKotlinModule()
+
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
         val chunks = mutableMapOf<Int, List<Content>>()

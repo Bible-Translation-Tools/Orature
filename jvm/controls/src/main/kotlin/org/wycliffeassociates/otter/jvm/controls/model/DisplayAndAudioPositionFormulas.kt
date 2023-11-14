@@ -37,14 +37,20 @@ fun positionToMs(x: Int, width: Double, durationMs: Int): Int {
     return (x * msInPixels).toInt()
 }
 
-fun pixelsToFrames(pixels: Double): Int {
-    val framesOnScreen = SECONDS_ON_SCREEN * SAMPLE_RATE
-    val framesInPixel = framesOnScreen / Screen.getMainScreen().platformWidth
+fun pixelsToFrames(
+    pixels: Double,
+    width: Int = Screen.getMainScreen().platformWidth,
+    framesOnScreen: Int = SECONDS_ON_SCREEN * SAMPLE_RATE
+): Int {
+    val framesInPixel = framesOnScreen / width.toFloat()
     return (pixels * framesInPixel).toInt()
 }
 
-fun framesToPixels(frames: Int): Int {
-    val framesOnScreen = SECONDS_ON_SCREEN * SAMPLE_RATE
-    val framesInPixel = framesOnScreen / Screen.getMainScreen().platformWidth
-    return (frames / framesInPixel)
+fun framesToPixels(
+    frames: Int,
+    width: Int = Screen.getMainScreen().platformWidth,
+    framesOnScreen: Int = SECONDS_ON_SCREEN * SAMPLE_RATE
+): Int {
+    val framesInPixel = framesOnScreen / width.toFloat()
+    return (frames / framesInPixel).toInt()
 }

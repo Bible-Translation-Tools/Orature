@@ -32,6 +32,7 @@ fun adjustWaveformColorByTheme(theme: ColorTheme, adjust: ColorAdjust) {
             adjust.brightness = -0.65
             adjust.contrast = 0.5
         }
+        else -> {}
     }
 }
 
