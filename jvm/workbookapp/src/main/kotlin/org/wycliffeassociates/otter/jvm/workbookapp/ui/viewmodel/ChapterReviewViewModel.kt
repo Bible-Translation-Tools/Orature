@@ -83,7 +83,6 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     private val builder = ObservableWaveformBuilder()
 
     var subscribeOnWaveformImages: () -> Unit = {}
-    var cleanUpWaveform: () -> Unit = {}
 
     val chapterTitleProperty = workbookDataStore.activeChapterTitleBinding()
     val sourcePlayerProperty = SimpleObjectProperty<IAudioPlayer>()
@@ -110,6 +109,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                 audioDataStore.updateSourceAudio()
                 audioDataStore.openSourceAudioPlayer()
             }
+            .andThen(translationViewModel.updateSourceText())
             .subscribeOn(Schedulers.io())
             .subscribe()
 

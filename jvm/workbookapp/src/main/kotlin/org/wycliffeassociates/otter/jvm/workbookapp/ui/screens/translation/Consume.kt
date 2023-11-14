@@ -48,7 +48,7 @@ class Consume : View() {
     private lateinit var waveform: MarkerWaveform
     private lateinit var scrollbarSlider: Slider
 
-    var cleanUpWaveform: () -> Unit = {}
+    private var cleanUpWaveform: () -> Unit = {}
     private var timer: AnimationTimer? = null
 
     override fun onDock() {
