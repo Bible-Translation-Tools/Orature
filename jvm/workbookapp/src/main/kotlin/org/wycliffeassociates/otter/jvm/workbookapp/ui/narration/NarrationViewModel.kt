@@ -6,7 +6,6 @@ import com.sun.glass.ui.Screen
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.toObservable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
@@ -335,8 +334,9 @@ class NarrationViewModel : ViewModel() {
             narratableList.get(lastIndex).state = TeleprompterItemState.RECORD
             scrollToVerse = lastIndex
         }
-        // TODO: note, this is hit when navigating to a new chapter. The states are correct, however, they are not
-        //  reflected in the teleprompterListView.
+
+        narratableList.setAll(narratableList.map { it })
+
         refreshTeleprompter()
         FX.eventbus.fire(TeleprompterSeekEvent(scrollToVerse))
     }
