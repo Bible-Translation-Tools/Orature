@@ -30,19 +30,10 @@ class TeleprompterStateMachineTest {
         for(i in audioMarkers.indices) {
             if(i == index) {
                 Assert.assertEquals(TeleprompterItemState.RECORD_ACTIVE, newContext[i])
-            } else if(i == index + 1) {
-                // TODO: this is causing an error because transitioning to RECORD does not change the next item to
-                //  RECORD, but instead, it stays RECORD_DISABLED
-                Assert.assertEquals(TeleprompterItemState.RECORD, newContext[i])
             } else {
                 Assert.assertEquals(TeleprompterItemState.RECORD_DISABLED, newContext[i])
             }
         }
-    }
-
-    @Test
-    fun `transition from RECORD to RECORD with multiple items in context and active`() {
-        // TODO: finish once bug is resolved in Record.apply
     }
 
     @Test
@@ -93,9 +84,6 @@ class TeleprompterStateMachineTest {
 
         newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.NEXT, index + 1)
 
-        // TODO: note, this is an error. Performing these actions results in the following array
-        //  [RECORD_AGAIN_DISABLED, RECORD_AGAIN, RECORD, RECORD_DISABLED, ..., RECORD_DISABLED] when it should be
-        //  [RECORD_AGAIN, RECORD_AGAIN, RECORD, RECORD_DISABLED, ..., RECORD_DISABLED]
         for(i in newContext.indices) {
             if(i < index + 1) {
                 Assert.assertEquals(TeleprompterItemState.RECORD_AGAIN, newContext[i])
