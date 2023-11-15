@@ -54,10 +54,6 @@ class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(i
                         } else {
                             FX.eventbus.fire(StickyVerseChangedEvent(null))
                         }
-                        // TODO: note, this fixes the issue, however, it seems like a lot of overhead.
-                        //  Since, refresh only updates items that are visible to the user, we have to call this on
-                        //  scroll so it actually updates the items.
-                        this@NarrationTextListView.refresh()
                     }?.also(listeners::add)
                 } catch (e: NullPointerException) {
                     e.printStackTrace()
