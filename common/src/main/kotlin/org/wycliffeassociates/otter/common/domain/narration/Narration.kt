@@ -68,12 +68,12 @@ class Narration @AssistedInject constructor(
             return verses
         }
 
-    val activeVerses: List<VerseMarker>
+    val activeVerses: List<AudioMarker>
         get() {
             val verses = chapterRepresentation
                 .activeVerses
                 .map {
-                    it.marker.copy(
+                    it.copyMarker(
                         location = chapterRepresentation.absoluteToRelativeChapter(it.firstFrame())
                     )
                 }
@@ -84,7 +84,7 @@ class Narration @AssistedInject constructor(
         return chapterRepresentation.versesWithRecordings()
     }
 
-    val onActiveVersesUpdated: PublishSubject<List<VerseMarker>>
+    val onActiveVersesUpdated: PublishSubject<List<AudioMarker>>
         get() = chapterRepresentation.onActiveVersesUpdated
 
     private val firstVerse: VerseMarker
@@ -282,7 +282,7 @@ class Narration @AssistedInject constructor(
         )
     }
 
-    fun loadSectionIntoPlayer(verse: VerseMarker) {
+    fun loadSectionIntoPlayer(verse: AudioMarker) {
         if (!audioLoaded) {
             player.load(chapterReaderConnection)
             audioLoaded = true
@@ -425,7 +425,7 @@ class Narration @AssistedInject constructor(
             wav.update()
             val oaf = OratureAudioFile(boundedAudio)
             for (verse in activeVerses) {
-                oaf.addMarker<VerseMarker>(verse.copy())
+                oaf.addMarker<AudioMarker>(verse.clone())
             }
             oaf.update()
         }

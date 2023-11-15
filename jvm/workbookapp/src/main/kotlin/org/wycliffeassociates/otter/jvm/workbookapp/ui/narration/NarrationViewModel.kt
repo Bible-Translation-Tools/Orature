@@ -19,6 +19,7 @@ import javafx.scene.canvas.GraphicsContext
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
+import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
@@ -103,7 +104,7 @@ class NarrationViewModel : ViewModel() {
     val chunksList: ObservableList<Chunk> = observableListOf()
     val narratableList: ObservableList<NarrationTextItemData> = observableListOf()
 
-    val recordedVerses = observableListOf<VerseMarker>()
+    val recordedVerses = observableListOf<AudioMarker>()
     val hasVersesProperty = SimpleBooleanProperty()
     val lastRecordedVerseProperty = SimpleIntegerProperty()
     val audioPositionProperty = SimpleIntegerProperty()
@@ -354,7 +355,7 @@ class NarrationViewModel : ViewModel() {
         snackBarObservable.onNext(message)
     }
 
-    fun play(verse: VerseMarker) {
+    fun play(verse: AudioMarker) {
         playingVerseIndex.set(recordedVerses.indexOf(verse))
         renderer.clearActiveRecordingData()
         audioPlayer.pause()

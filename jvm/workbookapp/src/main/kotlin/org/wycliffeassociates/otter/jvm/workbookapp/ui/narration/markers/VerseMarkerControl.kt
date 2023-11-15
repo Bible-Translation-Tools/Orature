@@ -11,6 +11,7 @@ import javafx.scene.Node
 import javafx.scene.layout.BorderPane
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.VerseMenu
 import tornadofx.*
@@ -21,7 +22,7 @@ internal const val MARKER_WIDTH = 2.0
 
 class VerseMarkerControl : BorderPane() {
 
-    val verseProperty = SimpleObjectProperty<VerseMarker>()
+    val verseProperty = SimpleObjectProperty<AudioMarker>()
     val verseIndexProperty = SimpleIntegerProperty()
     val labelProperty = SimpleStringProperty()
     val canBeMovedProperty: BooleanBinding = verseIndexProperty.greaterThan(0)

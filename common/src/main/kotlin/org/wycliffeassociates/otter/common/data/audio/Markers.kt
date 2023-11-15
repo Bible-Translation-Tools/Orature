@@ -18,6 +18,8 @@ interface AudioMarker {
     fun toCue(): AudioCue {
         return AudioCue(location, formattedLabel)
     }
+
+    fun clone(): AudioMarker
 }
 
 data class UnknownMarker(override val location: Int, override val label: String) : AudioMarker {
@@ -28,6 +30,46 @@ data class UnknownMarker(override val location: Int, override val label: String)
 
     override fun toString(): String {
         return formattedLabel
+    }
+
+    override fun clone(): UnknownMarker {
+        return copy()
+    }
+}
+
+data class BookMarker(val bookSlug: String, override val location: Int) : AudioMarker {
+    override val label: String
+        @JsonIgnore
+        get() = bookSlug
+
+    override val formattedLabel
+        @JsonIgnore
+        get() = "orature-book-${label}"
+
+    override fun toString(): String {
+        return formattedLabel
+    }
+
+    override fun clone(): BookMarker {
+        return copy()
+    }
+}
+
+data class ChapterMarker(val chapterNumber: Int, override val location: Int) : AudioMarker {
+    override val label: String
+        @JsonIgnore
+        get() = "$chapterNumber"
+
+    override val formattedLabel
+        @JsonIgnore
+        get() = "orature-chapter-${label}"
+
+    override fun toString(): String {
+        return formattedLabel
+    }
+
+    override fun clone(): ChapterMarker {
+        return copy()
     }
 }
 
@@ -44,6 +86,10 @@ data class VerseMarker(val start: Int, val end: Int, override val location: Int)
     override fun toString(): String {
         return formattedLabel
     }
+
+    override fun clone(): VerseMarker {
+        return copy()
+    }
 }
 
 data class ChunkMarker(val chunk: Int, override val location: Int) : AudioMarker {
@@ -53,5 +99,9 @@ data class ChunkMarker(val chunk: Int, override val location: Int) : AudioMarker
 
     override fun toString(): String {
         return formattedLabel
+    }
+
+    override fun clone(): ChunkMarker {
+        return copy()
     }
 }
