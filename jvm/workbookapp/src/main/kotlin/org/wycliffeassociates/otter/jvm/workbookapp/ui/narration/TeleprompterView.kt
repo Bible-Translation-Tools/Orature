@@ -23,8 +23,7 @@ class TeleprompterSeekEvent(val index: Int) : FXEvent()
 class TeleprompterViewModel : ViewModel() {
     private val narrationViewModel: NarrationViewModel by inject()
 
-    val chunks = observableListOf<NarrationTextItemData>()
-
+    val chunks = narrationViewModel.narratableList
     val stickyVerseProperty = SimpleObjectProperty<Chunk>()
 
     private val recordStartProperty = SimpleBooleanProperty()
@@ -52,10 +51,6 @@ class TeleprompterViewModel : ViewModel() {
     val playingVerseProperty = SimpleIntegerProperty()
 
     init {
-        chunks.bind(narrationViewModel.narratableList) {
-            it
-        }
-
         recordStartProperty.bindBidirectional(narrationViewModel.recordStartProperty)
         recordResumeProperty.bindBidirectional(narrationViewModel.recordResumeProperty)
         isRecordingProperty.bindBidirectional(narrationViewModel.isRecordingProperty)
@@ -124,14 +119,7 @@ class TeleprompterView : View() {
         }
 
         subscribe<RefreshTeleprompter> {
-            val testView = viewModel // This is here for debugging
-
             listView.refresh()
-            
-            // TODO: note, this also fixes the issue. Simulates the user clicking on all the list items.
-//            for(item in 0 until listView.items.size) {
-//                listView.selectionModel.select(item)
-//            }
         }
 
         subscribe<StickyVerseChangedEvent<NarrationTextItemData>> {
