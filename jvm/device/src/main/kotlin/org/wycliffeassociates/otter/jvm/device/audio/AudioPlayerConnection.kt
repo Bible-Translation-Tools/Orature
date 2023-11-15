@@ -151,9 +151,7 @@ internal class AudioPlayerConnection(
     }
 
     override fun seek(position: Int) {
-        connectionFactory.load(state)
         connectionFactory.player.seek(position)
-        connectionFactory.load(state)
     }
 
     override fun isPlaying(): Boolean {
