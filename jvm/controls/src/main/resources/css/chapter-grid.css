@@ -1,4 +1,5 @@
 .chapter-grid {
+    -fx-padding: 12 16;
     -fx-background-color: -wa-foreground;
     -fx-effect: -wa-level2;
     -fx-background-radius: 10;
@@ -7,8 +8,9 @@
 }
 
 .chapter-grid__btn {
+    -fx-pref-width: 100;
+    -fx-padding: 0 12;
     -fx-background-radius: 12;
-    -fx-padding: 14 16;
 }
 
 .chapter-grid__btn:selected {

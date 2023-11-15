@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.popup
 
 import javafx.scene.control.ContextMenu
-import javafx.scene.control.CustomMenuItem
+import javafx.scene.control.MenuItem
 import org.wycliffeassociates.otter.jvm.controls.chapterselector.ChapterGrid
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
 import tornadofx.*
@@ -12,9 +12,9 @@ class ChapterGridMenu : ContextMenu() {
     private val chapterGrid = ChapterGrid(chapterGridItemList)
 
     init {
-        val chapterGridOption = CustomMenuItem().apply {
+        val chapterGridOption = MenuItem().apply {
             addClass("chapter-grid-context-menu-item")
-            content = chapterGrid
+            graphic = chapterGrid
         }
 
         addClass("chapter-grid-context-menu")

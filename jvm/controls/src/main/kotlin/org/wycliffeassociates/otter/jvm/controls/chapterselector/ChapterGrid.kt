@@ -1,6 +1,5 @@
 package org.wycliffeassociates.otter.jvm.controls.chapterselector
 
-import javafx.scene.layout.ColumnConstraints
 import javafx.scene.layout.GridPane
 import javafx.scene.layout.StackPane
 import org.kordamp.ikonli.javafx.FontIcon
@@ -8,7 +7,6 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.event.OpenChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
 import tornadofx.*
-import kotlin.math.min
 
 private const val GRID_COLUMNS = 5
 
@@ -38,10 +36,6 @@ class ChapterGrid(val list: List<ChapterGridItemData>) : GridPane() {
                     )
                     togglePseudoClass("selected", chapter.selected)
                     useMaxWidth = true
-
-                    prefWidthProperty().bind(
-                        this@ChapterGrid.widthProperty().divide(GRID_COLUMNS.toDouble())
-                    )
                     setOnAction {
                         selectChapter(index + 1)
                     }
@@ -58,9 +52,6 @@ class ChapterGrid(val list: List<ChapterGridItemData>) : GridPane() {
                 }
             }
             this.add(node, index % GRID_COLUMNS, index / GRID_COLUMNS)
-        }
-        repeat(min(list.size, GRID_COLUMNS)) {
-            columnConstraints.add(ColumnConstraints(100.0))
         }
     }
 }
