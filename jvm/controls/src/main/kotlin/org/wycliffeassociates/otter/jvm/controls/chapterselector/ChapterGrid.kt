@@ -37,7 +37,7 @@ class ChapterGrid(val list: List<ChapterGridItemData>) : GridPane() {
                     togglePseudoClass("selected", chapter.selected)
                     useMaxWidth = true
                     setOnAction {
-                        selectChapter(index + 1)
+                        selectChapter(chapter.number)
                     }
                 }
                 hbox {
