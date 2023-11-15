@@ -80,7 +80,11 @@ object NextVerseAction {
             contexts[index - 1].changeState(TeleprompterItemState.RECORD_AGAIN_DISABLED)
             contexts[index].changeState(TeleprompterItemState.RECORD_ACTIVE)
         } else {
-            contexts[index - 1].changeState(TeleprompterItemState.RECORD_AGAIN)
+            for(i in 0 until index) {
+                if(contexts[i].state != RecordAgainState) {
+                    contexts[i].changeState(TeleprompterItemState.RECORD_AGAIN)
+                }
+            }
             contexts[index].changeState(TeleprompterItemState.RECORD)
         }
     }
