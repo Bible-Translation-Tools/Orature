@@ -59,6 +59,9 @@ class AppBar : Fragment() {
         textProperty().set(messages["import"])
         graphicProperty().set(FontIcon(MaterialDesign.MDI_DOWNLOAD))
         toggleGroup = buttonsToggleGroup
+        visibleWhen { workspace.dockedComponentProperty.booleanBinding { it is HomePage2 } }
+        managedWhen(visibleProperty())
+
         selectedProperty().onChange {
             toggleOpen<AddFilesView>(it)
         }
