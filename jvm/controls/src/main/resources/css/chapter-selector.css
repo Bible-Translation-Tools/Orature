@@ -30,6 +30,11 @@
     -fx-text-fill: -wa-regular-text;
     -fx-padding: 0 20px;
     -fx-font-size: 20px;
+    -fx-cursor: hand;
+}
+
+.chapter-selector__title: hover {
+    -fx-underline: true;
 }
 
 .chapter-selector__title .ikonli-font-icon {

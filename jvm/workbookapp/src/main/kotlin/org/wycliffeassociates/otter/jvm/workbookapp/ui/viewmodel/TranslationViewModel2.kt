@@ -14,6 +14,7 @@ import javafx.beans.property.SimpleStringProperty
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import tornadofx.*
@@ -33,6 +34,7 @@ class TranslationViewModel2 : ViewModel() {
     val sourceInfoProperty = workbookDataStore.sourceInfoProperty
     val sourceLicenseProperty = workbookDataStore.sourceLicenseProperty
     val currentMarkerProperty = SimpleIntegerProperty(-1)
+    val chapterList = observableListOf<ChapterGridItemData>()
     val chunkList = observableListOf<ChunkViewData>()
     val chunkListProperty = SimpleListProperty<ChunkViewData>(chunkList)
     val selectedChunkBinding = workbookDataStore.activeChunkProperty.integerBinding { it?.sort ?: -1 }
@@ -61,6 +63,21 @@ class TranslationViewModel2 : ViewModel() {
 
     fun previousChapter() {
         navigateChapter(workbookDataStore.chapter.sort - 1)
+    }
+
+    fun navigateChapter(chapter: Int) {
+        selectedStepProperty.set(null)
+
+        workbookDataStore.workbook.target
+            .chapters
+            .filter { it.sort == chapter }
+            .singleElement()
+            .observeOnFx()
+            .subscribe {
+                loadChapter(it)
+            }
+
+        updateChapterSelector(chapter)
     }
 
     fun navigateStep(target: ChunkingStep) {
@@ -145,19 +162,6 @@ class TranslationViewModel2 : ViewModel() {
             .ignoreElement()
     }
 
-    private fun navigateChapter(chapter: Int) {
-        selectedStepProperty.set(null)
-
-        workbookDataStore.workbook.target
-            .chapters
-            .filter { it.sort == chapter }
-            .singleElement()
-            .observeOnFx()
-            .subscribe {
-                loadChapter(it)
-            }
-    }
-
     private fun loadChapter(chapter: Chapter) {
         workbookDataStore.activeChapterProperty.set(chapter)
         resetUndoRedo()
@@ -194,5 +198,22 @@ class TranslationViewModel2 : ViewModel() {
     private fun resetUndoRedo() {
         canUndoProperty.set(false)
         canRedoProperty.set(false)
+    }
+
+    private fun updateChapterSelector(chapter: Int) {
+        workbookDataStore.workbook.target
+            .chapters
+            .toList()
+            .subscribe { chapters ->
+                chapterList.setAll(
+                    chapters.map {
+                        ChapterGridItemData(
+                            it.sort,
+                            it.hasSelectedAudio(),
+                            chapter == it.sort
+                        )
+                    }
+                )
+            }
     }
 }

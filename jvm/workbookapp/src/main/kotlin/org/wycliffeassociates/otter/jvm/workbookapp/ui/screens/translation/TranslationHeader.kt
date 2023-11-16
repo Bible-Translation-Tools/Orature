@@ -12,6 +12,8 @@ import org.wycliffeassociates.otter.jvm.controls.event.GoToNextChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.GoToPreviousChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
+import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.popup.ChapterGridMenu
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
@@ -23,6 +25,8 @@ class TranslationHeader : HBox() {
     val canRedoProperty = SimpleBooleanProperty(false)
     val canGoNextProperty = SimpleBooleanProperty(false)
     val canGoPreviousProperty = SimpleBooleanProperty(false)
+    val chapterList = observableListOf<ChapterGridItemData>()
+    private val popupMenu = ChapterGridMenu()
 
     init {
         addClass("top-navigation-pane")
@@ -69,6 +73,18 @@ class TranslationHeader : HBox() {
 
                 setOnPreviousChapter {
                     FX.eventbus.fire(GoToPreviousChapterEvent())
+                }
+
+                setOnChapterSelectorOpenedProperty {
+                    popupMenu.updateChapterGrid(chapterList)
+
+                    val bound = this.boundsInLocal
+                    val screenBound = this.localToScreen(bound)
+
+                    popupMenu.show(FX.primaryStage)
+
+                    popupMenu.x = screenBound.minX - popupMenu.width + this.width
+                    popupMenu.y = screenBound.maxY - 25
                 }
             }
         }
