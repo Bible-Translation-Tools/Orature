@@ -177,9 +177,12 @@ class NarrationViewModel : ViewModel() {
                         matchingChunk
                     }
                 }
+                // how much to pad the sort value due to injecting book and chapter titles
+                // the first chapter will be the only chapter with a book title
+                val sortPadding = if (workbookDataStore.chapter.sort == 1) 2 else 1
 
                 chunk.hasRecording = hasRecording
-                chunk.previousChunksRecorded = chunk.chunk.sort + 2 - 1 <= recordedVerses.size
+                chunk.previousChunksRecorded = chunk.chunk.sort + sortPadding - 1 <= recordedVerses.size
                 chunk.marker = recordedVerses.getOrNull(idx)
             }
         }
