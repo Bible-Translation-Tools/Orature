@@ -161,39 +161,39 @@ class ChapterRepresentationTest {
     }
 
     @Test
-    fun `absoluteToRelativeChapter with empty activeVerses`() {
+    fun `audioLocationToLocationInChapter with empty activeVerses`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
 
-        val relativePosition = chapterRepresentation.absoluteToRelativeChapter(1000)
+        val relativePosition = chapterRepresentation.audioLocationToLocationInChapter(1000)
         Assert.assertEquals(0, relativePosition)
     }
 
     @Test
-    fun `absoluteToRelativeChapter with non-empty activeVerses and absoluteFrame not in activeVerses`() {
+    fun `audioLocationToLocationInChapter with non-empty activeVerses and absoluteFrame not in activeVerses`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
 
-        val relativePosition = chapterRepresentation.absoluteToRelativeChapter(-5)
+        val relativePosition = chapterRepresentation.audioLocationToLocationInChapter(-5)
         Assert.assertEquals(0, relativePosition)
     }
 
     @Test
-    fun `absoluteToRelativeChapter with activeVerses, sequential sectors, and non-null verse`() {
+    fun `audioLocationToLocationInChapter with activeVerses, sequential sectors, and non-null verse`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
 
-        val relativePosition = chapterRepresentation.absoluteToRelativeChapter(176400)
+        val relativePosition = chapterRepresentation.audioLocationToLocationInChapter(176400)
 
         // NOTE: they are the same value because the sectors are sequential
         Assert.assertEquals(176400, relativePosition)
     }
 
     @Test
-    fun `absoluteToRelativeChapter with activeVerses, sequential sectors with padding between each verseNode, and non-null verse`() {
+    fun `audioLocationToLocationInChapter with activeVerses, sequential sectors with padding between each verseNode, and non-null verse`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses, 44100)
 
-        val relativePosition = chapterRepresentation.absoluteToRelativeChapter(88200)
+        val relativePosition = chapterRepresentation.audioLocationToLocationInChapter(88200)
 
         // NOTE: we expect 44100, because the frame 88200 is the start of the second frame in first verse node.
         // so relatively, it is the frame at index 44100.
@@ -201,12 +201,12 @@ class ChapterRepresentationTest {
     }
 
     @Test
-    fun `absoluteToRelativeChapter with activeVerses, non-sequential sectors, padding between sectors, and non-null verse`() {
+    fun `audioLocationToLocationInChapter with activeVerses, non-sequential sectors, padding between sectors, and non-null verse`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses, 44100)
         addSectorsToEnd(chapterRepresentation.totalVerses, 44100, 0)
 
-        val relativePosition = chapterRepresentation.absoluteToRelativeChapter(2690100)
+        val relativePosition = chapterRepresentation.audioLocationToLocationInChapter(2690100)
 
         // NOTE: we expect 44100, because the frame 2690100 is the start of the second frame in first verse node.
         // so relatively, it is the frame at index 44100.
@@ -611,7 +611,7 @@ class ChapterRepresentationTest {
         // Verify that the given relativeVerse position maps to the correct relativeChapter location
         val expectedRelativeChapterPos = sampleInVerseSpace + framesPerVerse * verseIndex
         val actualRelativeChapterPos = chapterRepresentationConnection
-            .relativeVerseToRelativeChapter(sampleInVerseSpace, verseIndex)
+            .locationInVerseToLocationInChapter(sampleInVerseSpace, verseIndex)
 
         Assert.assertEquals(expectedRelativeChapterPos, actualRelativeChapterPos)
     }

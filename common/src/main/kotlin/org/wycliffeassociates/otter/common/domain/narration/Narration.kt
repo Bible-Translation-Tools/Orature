@@ -74,7 +74,7 @@ class Narration @AssistedInject constructor(
                 .activeVerses
                 .map {
                     it.marker.copy(
-                        location = chapterRepresentation.absoluteToRelativeChapter(it.firstFrame())
+                        location = chapterRepresentation.audioLocationToLocationInChapter(it.firstFrame())
                     )
                 }
             return verses
@@ -169,21 +169,21 @@ class Narration @AssistedInject constructor(
 
     fun undo() {
         // Ensures we are not locked to a verse and that the location is in the relative chapter space
-        seek(getRelativeChapterLocation(), true)
+        seek(getLocationInChapter(), true)
         history.undo(chapterRepresentation.totalVerses)
         chapterRepresentation.onVersesUpdated()
     }
 
     fun redo() {
         // Ensures we are not locked to a verse and that the location is in the relative chapter space
-        seek(getRelativeChapterLocation(), true)
+        seek(getLocationInChapter(), true)
         history.redo(chapterRepresentation.totalVerses)
         chapterRepresentation.onVersesUpdated()
     }
 
     fun finalizeVerse(verseIndex: Int) {
         val loc = chapterRepresentation.finalizeVerse(verseIndex, history)
-        val relLoc = chapterRepresentation.absoluteToRelativeChapter(loc)
+        val relLoc = chapterRepresentation.audioLocationToLocationInChapter(loc)
         seek(relLoc)
     }
 
@@ -211,7 +211,7 @@ class Narration @AssistedInject constructor(
         loadChapterIntoPlayer()
 
         val loc = chapterRepresentation.finalizeVerse(verseIndex, history)
-        val relLoc = chapterRepresentation.absoluteToRelativeChapter(loc)
+        val relLoc = chapterRepresentation.audioLocationToLocationInChapter(loc)
         seek(relLoc)
 
         writer?.pause()
@@ -259,7 +259,7 @@ class Narration @AssistedInject constructor(
     fun resumeRecordingAgain() {
         // Seeks to the end of the scratchAudio, since the re-record has not yet been finalized.
         val lastRecordingPosition = chapterRepresentation.scratchAudio.totalFrames
-        player.seek(chapterRepresentation.absoluteToRelativeChapter(lastRecordingPosition))
+        player.seek(chapterRepresentation.audioLocationToLocationInChapter(lastRecordingPosition))
         writer?.start()
         isRecording.set(true)
     }
@@ -334,7 +334,7 @@ class Narration @AssistedInject constructor(
 
     private fun execute(action: NarrationAction) {
         // Ensures we are not locked to a verse and that the location is in the relative chapter space
-        seek(getRelativeChapterLocation(), true)
+        seek(getLocationInChapter(), true)
         history.execute(action, chapterRepresentation.totalVerses, chapterRepresentation.scratchAudio)
         chapterRepresentation.onVersesUpdated()
     }
@@ -454,18 +454,18 @@ class Narration @AssistedInject constructor(
         return chapterRepresentation.totalFrames
     }
 
-    private fun getRelativeChapterLocation(): Int {
+    private fun getLocationInChapter(): Int {
         return if (lockedVerseIndex != null) {
             chapterReaderConnection
-                .relativeVerseToRelativeChapter(player.getLocationInFrames(), lockedVerseIndex!!)
+                .locationInVerseToLocationInChapter(player.getLocationInFrames(), lockedVerseIndex!!)
         } else {
             player.getLocationInFrames()
         }
     }
 
     fun getLocationInFrames(): Int {
-        val relativeChapterLocation = getRelativeChapterLocation()
-        return relativeChapterLocation + uncommittedRecordedFrames.get()
+        val chapterLocation = getLocationInChapter()
+        return chapterLocation + uncommittedRecordedFrames.get()
     }
 
     fun getTotalFrames(): Int {
@@ -482,7 +482,7 @@ class Narration @AssistedInject constructor(
 
     fun seekToPrevious() {
         player.pause()
-        val loc = getRelativeChapterLocation()
+        val loc = getLocationInChapter()
         lockToVerse(null)
         val seekLoc = activeVerses.lastOrNull() { it.location < loc }
         seekLoc?.let {
@@ -492,13 +492,13 @@ class Narration @AssistedInject constructor(
 
     fun seekToNext() {
         player.pause()
-        val loc = getRelativeChapterLocation()
+        val loc = getLocationInChapter()
         lockToVerse(null)
         val seekLoc = activeVerses.firstOrNull { it.location > loc }
         seekLoc?.let {
             seek(it.location)
         } ?: chapterRepresentation.apply {
-            val lastFrame = absoluteToRelativeChapter(activeVerses.last().lastFrame())
+            val lastFrame = audioLocationToLocationInChapter(activeVerses.last().lastFrame())
             seek(lastFrame)
         }
     }
