@@ -87,7 +87,11 @@ class NarrationTextCell(
         view.isLastVerseProperty.set(isLast)
 
         graphic = view.apply {
-            verseLabelProperty.set(item.chunk.title)
+
+            val title = if (item.marker is VerseMarker) item.chunk.title else ""
+
+            verseLabelProperty.set(title)
+
             verseTextProperty.set(item.chunk.textItem.text)
 
             hasRecordingProperty.set(item.hasRecording)

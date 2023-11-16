@@ -9,6 +9,7 @@ import javafx.geometry.Pos
 import javafx.scene.Cursor
 import javafx.scene.Node
 import javafx.scene.layout.BorderPane
+import javafx.scene.layout.Region
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
@@ -84,7 +85,7 @@ class VerseMarkerControl : BorderPane() {
         }
 
         center = label(labelProperty) {
-                minWidthProperty().bind(textProperty().length().times(10).plus(5))
+                minWidth = Region.USE_PREF_SIZE
                 addClass("verse-marker__title")
                 setAlignment(this, Pos.BOTTOM_LEFT)
             }

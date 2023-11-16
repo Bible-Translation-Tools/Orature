@@ -9,6 +9,7 @@ import javafx.scene.canvas.GraphicsContext
 import javafx.scene.control.ScrollBar
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
+import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
@@ -144,9 +145,14 @@ class AudioWorkspaceView : View() {
         viewModel.onDock()
         markerNodes.bind(viewModel.recordedVerses) { marker ->
             VerseMarkerControl().apply {
+                val markerLabel = when(marker) {
+                    is ChapterMarker -> "c${marker.label}"
+                    else -> marker.label
+                }
+
                 verseProperty.set(marker)
                 verseIndexProperty.set(viewModel.recordedVerses.indexOf(marker))
-                labelProperty.set(marker.label)
+                labelProperty.set(markerLabel)
                 isRecordingProperty.bind(viewModel.isRecordingProperty)
             }
         }
