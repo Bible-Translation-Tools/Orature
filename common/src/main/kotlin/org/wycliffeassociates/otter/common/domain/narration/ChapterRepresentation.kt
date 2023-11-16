@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.common.domain.narration
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.jsontype.NamedType
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.reactivex.rxkotlin.toObservable
 import io.reactivex.subjects.PublishSubject
@@ -57,7 +58,15 @@ internal class ChapterRepresentation(
     internal val totalVerses: MutableList<VerseNode>
 
     private lateinit var serializedVersesFile: File
-    private val activeVersesMapper = ObjectMapper().registerKotlinModule()
+    private val activeVersesMapper = ObjectMapper()
+        .registerKotlinModule()
+        .apply {
+            this.registerSubtypes(
+                NamedType(VerseMarker::class.java, "VerseMarker"),
+                NamedType(ChapterMarker::class.java, "ChapterMarker"),
+                NamedType(BookMarker::class.java, "BookMarker")
+            )
+        }
 
     val onActiveVersesUpdated = PublishSubject.create<List<AudioMarker>>()
 

@@ -1,8 +1,22 @@
 package org.wycliffeassociates.otter.common.data.audio
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import org.wycliffeassociates.otter.common.audio.AudioCue
 
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "type",
+    defaultImpl = VerseMarker::class
+)
+@JsonSubTypes(
+    JsonSubTypes.Type(value = VerseMarker::class, name = "verse_marker"),
+    JsonSubTypes.Type(value = ChapterMarker::class, name = "chapter_marker"),
+    JsonSubTypes.Type(value = BookMarker::class, name = "book_marker"),
+    JsonSubTypes.Type(value = UnknownMarker::class, name = "unknown_marker")
+)
 interface AudioMarker {
     /**
      * The marker label which does not contain any namespacing, most often a verse number or verse range
