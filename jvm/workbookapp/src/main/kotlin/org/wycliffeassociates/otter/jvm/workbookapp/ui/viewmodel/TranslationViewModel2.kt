@@ -77,20 +77,7 @@ class TranslationViewModel2 : ViewModel() {
                 loadChapter(it)
             }
 
-        workbookDataStore.workbook.target
-            .chapters
-            .toList()
-            .subscribe { chapters ->
-                chapterList.setAll(
-                    chapters.map {
-                        ChapterGridItemData(
-                            it.sort,
-                            it.hasSelectedAudio(),
-                            chapter == it.sort
-                        )
-                    }
-                )
-            }
+        updateChapterSelector(chapter)
     }
 
     fun navigateStep(target: ChunkingStep) {
@@ -211,5 +198,22 @@ class TranslationViewModel2 : ViewModel() {
     private fun resetUndoRedo() {
         canUndoProperty.set(false)
         canRedoProperty.set(false)
+    }
+
+    private fun updateChapterSelector(chapter: Int) {
+        workbookDataStore.workbook.target
+            .chapters
+            .toList()
+            .subscribe { chapters ->
+                chapterList.setAll(
+                    chapters.map {
+                        ChapterGridItemData(
+                            it.sort,
+                            it.hasSelectedAudio(),
+                            chapter == it.sort
+                        )
+                    }
+                )
+            }
     }
 }
