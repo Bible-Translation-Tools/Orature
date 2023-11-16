@@ -7,7 +7,6 @@ import com.sun.glass.ui.Screen
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.toObservable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
@@ -42,7 +41,6 @@ import org.wycliffeassociates.otter.common.domain.narration.teleprompter.Telepro
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterStateMachine
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterStateTransition
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
-import org.wycliffeassociates.otter.common.utils.capitalizeString
 import org.wycliffeassociates.otter.jvm.controls.event.*
 import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -61,8 +59,8 @@ import javax.inject.Inject
 import kotlin.math.floor
 import kotlin.math.max
 
-private const val BOOK_SORT = -2
-private const val CHAPTER_SORT = -1
+private const val BOOK_TITLE_SORT = -2
+private const val CHAPTER_TITLE_SORT = -1
 
 class NarrationViewModel : ViewModel() {
     private lateinit var rendererAudioReader: AudioFileReader
@@ -143,16 +141,17 @@ class NarrationViewModel : ViewModel() {
 
         narratableList.bind(chunksList) { chunk ->
 
+            //FIXME: Refactor this if and when Chunk entries are officially added for Titles in the Workbook
             val marker = when (chunk.sort) {
-                BOOK_SORT -> recordedVerses.firstOrNull { it is BookMarker }
-                CHAPTER_SORT -> recordedVerses.firstOrNull { it is ChapterMarker}
+                BOOK_TITLE_SORT -> recordedVerses.firstOrNull { it is BookMarker }
+                CHAPTER_TITLE_SORT -> recordedVerses.firstOrNull { it is ChapterMarker}
                 else -> recordedVerses.firstOrNull {
                     it.label == chunk.title && it is VerseMarker
                 }
             }
             val hasRecording = when (chunk.sort) {
-                BOOK_SORT -> recordedVerses.any { it is BookMarker }
-                CHAPTER_SORT -> recordedVerses.any { it is ChapterMarker}
+                BOOK_TITLE_SORT -> recordedVerses.any { it is BookMarker }
+                CHAPTER_TITLE_SORT -> recordedVerses.any { it is ChapterMarker}
                 else -> recordedVerses.any {
                     it.label == chunk.title && it is VerseMarker
                 }
@@ -168,9 +167,11 @@ class NarrationViewModel : ViewModel() {
 
         recordedVerses.onChange {
             narratableList.forEachIndexed { idx, chunk ->
+
+                //FIXME: Refactor this if and when Chunk entries are officially added for Titles in the Workbook
                 val hasRecording = when (chunk.chunk.sort) {
-                    BOOK_SORT -> recordedVerses.any { it is BookMarker }
-                    CHAPTER_SORT -> recordedVerses.any { it is ChapterMarker}
+                    BOOK_TITLE_SORT -> recordedVerses.any { it is BookMarker }
+                    CHAPTER_TITLE_SORT -> recordedVerses.any { it is ChapterMarker}
                     else -> recordedVerses.any {
                         val matchingChunk = chunk.chunk.title == it.label && it is VerseMarker
                         matchingChunk
@@ -211,7 +212,9 @@ class NarrationViewModel : ViewModel() {
             runLater {
                 when (event) {
                     AudioPlayerEvent.PLAY -> isPlayingProperty.set(true)
-                    AudioPlayerEvent.COMPLETE, AudioPlayerEvent.PAUSE, AudioPlayerEvent.STOP -> isPlayingProperty.set(
+                    AudioPlayerEvent.COMPLETE,
+                    AudioPlayerEvent.PAUSE,
+                    AudioPlayerEvent.STOP -> isPlayingProperty.set(
                         false
                     )
 
@@ -224,7 +227,6 @@ class NarrationViewModel : ViewModel() {
         updateRecordingState()
         rendererAudioReader = narration.audioReader
         renderer = NarrationWaveformRenderer(
-            // NarrationAudioScene(
             AudioScene(
                 rendererAudioReader,
                 narration.getRecorderAudioStream(),
@@ -347,15 +349,20 @@ class NarrationViewModel : ViewModel() {
             })
     }
 
+    /**
+     * //FIXME remove this if and when titles are added to the database/workbook
+     *
+     * Inserts a Chunk for the Book and Chapter titles since the database and workbook do not have this data
+     */
     private fun insertTitles(chapter: Chapter, chunks: List<Chunk>): List<Chunk> {
         chunks as MutableList
         val chapterTitle = chapterTitleProperty.value
-        chunks.add(0, Chunk(-1, chapter.label, AssociatedAudio(ReplayRelay.create()), listOf(), TextItem(chapterTitle, MimeType.USFM), 1, chunks.size, false, 1, ContentType.TITLE))
+        chunks.add(0, Chunk(CHAPTER_TITLE_SORT, chapter.label, AssociatedAudio(ReplayRelay.create()), listOf(), TextItem(chapterTitle, MimeType.USFM), 1, chunks.size, false, 1, ContentType.TITLE))
 
         val addBookTitle = chapter.sort == 1
         if (addBookTitle) {
             val book = workbookDataStore.workbook.source
-            chunks.add(0, Chunk(-2, book.label, AssociatedAudio(ReplayRelay.create()), listOf(), TextItem(book.title, MimeType.USFM), 1, chunks.size, false, 1, ContentType.TITLE))
+            chunks.add(0, Chunk(BOOK_TITLE_SORT, book.label, AssociatedAudio(ReplayRelay.create()), listOf(), TextItem(book.title, MimeType.USFM), 1, chunks.size, false, 1, ContentType.TITLE))
         }
         return chunks
     }
