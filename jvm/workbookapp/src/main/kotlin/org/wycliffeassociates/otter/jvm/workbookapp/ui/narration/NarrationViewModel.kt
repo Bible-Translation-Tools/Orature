@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.github.thomasnield.rxkotlinfx.toObservable
+import com.jakewharton.rxrelay2.ReplayRelay
 import com.sun.glass.ui.Screen
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -20,10 +21,16 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
+import org.wycliffeassociates.otter.common.data.audio.BookMarker
+import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.common.data.primitives.ContentType
+import org.wycliffeassociates.otter.common.data.primitives.MimeType
+import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.data.workbook.TextItem
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
@@ -35,6 +42,7 @@ import org.wycliffeassociates.otter.common.domain.narration.teleprompter.Telepro
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterStateMachine
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterStateTransition
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
+import org.wycliffeassociates.otter.common.utils.capitalizeString
 import org.wycliffeassociates.otter.jvm.controls.event.*
 import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -52,6 +60,9 @@ import java.text.MessageFormat
 import javax.inject.Inject
 import kotlin.math.floor
 import kotlin.math.max
+
+private const val BOOK_SORT = -2
+private const val CHAPTER_SORT = -1
 
 class NarrationViewModel : ViewModel() {
     private lateinit var rendererAudioReader: AudioFileReader
@@ -131,21 +142,43 @@ class NarrationViewModel : ViewModel() {
         }
 
         narratableList.bind(chunksList) { chunk ->
+
+            val marker = when (chunk.sort) {
+                BOOK_SORT -> recordedVerses.firstOrNull { it is BookMarker }
+                CHAPTER_SORT -> recordedVerses.firstOrNull { it is ChapterMarker}
+                else -> recordedVerses.firstOrNull {
+                    it.label == chunk.title && it is VerseMarker
+                }
+            }
+            val hasRecording = when (chunk.sort) {
+                BOOK_SORT -> recordedVerses.any { it is BookMarker }
+                CHAPTER_SORT -> recordedVerses.any { it is ChapterMarker}
+                else -> recordedVerses.any {
+                    it.label == chunk.title && it is VerseMarker
+                }
+            }
+
             NarrationTextItemData(
                 chunk,
-                recordedVerses.firstOrNull { it.label == chunk.title },
-                recordedVerses.any { it.label == chunk.title },
+                marker,
+                hasRecording,
                 chunk.sort - 1 <= recordedVerses.size
             )
         }
 
         recordedVerses.onChange {
             narratableList.forEachIndexed { idx, chunk ->
-                chunk.hasRecording = recordedVerses.any {
-                    val matchingChunk = chunk.chunk.title == it.label
-                    matchingChunk
+                val hasRecording = when (chunk.chunk.sort) {
+                    BOOK_SORT -> recordedVerses.any { it is BookMarker }
+                    CHAPTER_SORT -> recordedVerses.any { it is ChapterMarker}
+                    else -> recordedVerses.any {
+                        val matchingChunk = chunk.chunk.title == it.label && it is VerseMarker
+                        matchingChunk
+                    }
                 }
-                chunk.previousChunksRecorded = chunk.chunk.sort - 1 <= recordedVerses.size
+
+                chunk.hasRecording = hasRecording
+                chunk.previousChunksRecorded = chunk.chunk.sort + 2 - 1 <= recordedVerses.size
                 chunk.marker = recordedVerses.getOrNull(idx)
             }
         }
@@ -266,6 +299,14 @@ class NarrationViewModel : ViewModel() {
     fun loadChapter(chapter: Chapter) {
         resetState()
 
+        chapterTitleProperty.set(
+            MessageFormat.format(
+                messages["chapterTitle"],
+                messages["chapter"],
+                chapter.title
+            )
+        )
+
         chapter
             .chunkCount
             .toObservable()
@@ -282,13 +323,6 @@ class NarrationViewModel : ViewModel() {
 
         setHasNextAndPreviousChapter(chapter)
         chapterTakeProperty.set(chapter.getSelectedTake())
-        chapterTitleProperty.set(
-            MessageFormat.format(
-                messages["chapterTitle"],
-                messages["chapter"],
-                chapter.title
-            )
-        )
     }
 
     private fun loadChunks(chapter: Chapter) {
@@ -305,11 +339,25 @@ class NarrationViewModel : ViewModel() {
                 chapter.chunks.take(1)
             }
             .flatMap { it }
+            .map { insertTitles(chapter, it) }
             .flatMap { Observable.fromIterable(it) }
             .observeOnFx()
             .subscribe({ chunksList.add(it) }, {}, {
                 resetTeleprompter()
             })
+    }
+
+    private fun insertTitles(chapter: Chapter, chunks: List<Chunk>): List<Chunk> {
+        chunks as MutableList
+        val chapterTitle = chapterTitleProperty.value
+        chunks.add(0, Chunk(-1, chapter.label, AssociatedAudio(ReplayRelay.create()), listOf(), TextItem(chapterTitle, MimeType.USFM), 1, chunks.size, false, 1, ContentType.TITLE))
+
+        val addBookTitle = chapter.sort == 1
+        if (addBookTitle) {
+            val book = workbookDataStore.workbook.source
+            chunks.add(0, Chunk(-2, book.label, AssociatedAudio(ReplayRelay.create()), listOf(), TextItem(book.title, MimeType.USFM), 1, chunks.size, false, 1, ContentType.TITLE))
+        }
+        return chunks
     }
 
     private fun clearTeleprompter() {
