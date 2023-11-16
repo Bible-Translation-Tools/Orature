@@ -215,11 +215,10 @@ class NarrationViewModel : ViewModel() {
             runLater {
                 when (event) {
                     AudioPlayerEvent.PLAY -> isPlayingProperty.set(true)
+
                     AudioPlayerEvent.COMPLETE,
                     AudioPlayerEvent.PAUSE,
-                    AudioPlayerEvent.STOP -> isPlayingProperty.set(
-                        false
-                    )
+                    AudioPlayerEvent.STOP -> isPlayingProperty.set(false)
 
                     else -> {}
                 }

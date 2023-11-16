@@ -85,8 +85,8 @@ internal class ChapterRepresentation(
         return chapter
             .chunks
             .take(1)
-            .map { chapter ->
-                chapter.map { chunk -> VerseMarker(chunk.start, chunk.end, 0) }
+            .map { chunks ->
+                chunks.map { chunk -> VerseMarker(chunk.start, chunk.end, 0) }
             }
             .map { insertTitles(it) }
             .flatMap { it.toObservable() }
@@ -97,15 +97,15 @@ internal class ChapterRepresentation(
             .blockingGet()
     }
 
-    private fun insertTitles(list: List<AudioMarker>): List<AudioMarker> {
-        list as MutableList
-        list.add(0, ChapterMarker(chapter.sort, 0))
+    private fun insertTitles(verseMarkers: List<AudioMarker>): List<AudioMarker> {
+        val versesAndTitles = verseMarkers.toMutableList()
+        versesAndTitles.add(0, ChapterMarker(chapter.sort, 0))
 
         val addBookTitle = chapter.sort == 1
         if (addBookTitle) {
-            list.add(0, BookMarker(workbook.source.slug, 0))
+            versesAndTitles.add(0, BookMarker(workbook.source.slug, 0))
         }
-        return list
+        return versesAndTitles
     }
 
     fun loadFromSerializedVerses() {
