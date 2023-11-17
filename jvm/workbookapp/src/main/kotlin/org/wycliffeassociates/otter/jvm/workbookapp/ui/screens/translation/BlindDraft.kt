@@ -30,7 +30,7 @@ class BlindDraft : View() {
     private val mainSectionProperty = SimpleObjectProperty<Node>(null)
     private val takesView = buildTakesArea()
     private val recordingView = buildRecordingArea()
-    private val hideSourceAudio = SimpleBooleanProperty(false)
+    private val hideSourceAudio = mainSectionProperty.booleanBinding { it == recordingView }
     private val eventSubscriptions = mutableListOf<EventRegistration>()
 
     override val root = borderpane {
@@ -101,7 +101,6 @@ class BlindDraft : View() {
                         mainSectionProperty.set(recordingView)
                         recorderViewModel.onViewReady(takesView.width.toInt()) // use the width of the existing component
                         recorderViewModel.toggle()
-                        hideSourceAudio.set(true)
                     }
                 }
             }
@@ -122,14 +121,12 @@ class BlindDraft : View() {
                 recorderViewModel.cancel()
                 viewModel.onRecordFinish(RecorderViewModel.Result.CANCELLED)
                 mainSectionProperty.set(takesView)
-                hideSourceAudio.set(false)
             }
 
             setSaveAction {
                 val result = recorderViewModel.saveAndQuit()
                 viewModel.onRecordFinish(result)
                 mainSectionProperty.set(takesView)
-                hideSourceAudio.set(false)
             }
         }
     }
