@@ -454,6 +454,10 @@ class Narration @AssistedInject constructor(
         return chapterRepresentation.totalFrames
     }
 
+    fun getTotalFrames(): Int {
+        return chapterReaderConnection.totalFrames + uncommittedRecordedFrames.get()
+    }
+
     private fun getRelativeChapterLocation(): Int {
         return if (lockedVerseIndex != null) {
             chapterReaderConnection
@@ -466,10 +470,6 @@ class Narration @AssistedInject constructor(
     fun getLocationInFrames(): Int {
         val relativeChapterLocation = getRelativeChapterLocation()
         return relativeChapterLocation + uncommittedRecordedFrames.get()
-    }
-
-    fun getTotalFrames(): Int {
-        return chapterReaderConnection.totalFrames + uncommittedRecordedFrames.get()
     }
 
     fun close() {
