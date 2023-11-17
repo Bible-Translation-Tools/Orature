@@ -23,6 +23,7 @@ import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
 import org.wycliffeassociates.otter.jvm.controls.waveform.startAnimationTimer
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.PeerEditViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel
@@ -44,6 +45,7 @@ open class PeerEdit : View() {
     private val playbackView = createPlaybackView()
     private val recordingView = createRecordingView()
     private val eventSubscriptions = mutableListOf<EventRegistration>()
+    private val listenerDisposers = mutableListOf<ListenerDisposer>()
 
     override val root = borderpane {
         top = vbox {
@@ -60,14 +62,6 @@ open class PeerEdit : View() {
 
     init {
         tryImportStylesheet("/css/recording-screen.css")
-
-        viewModel.currentChunkProperty.onChangeWithDisposer { selectedChunk ->
-            // clears recording screen if another chunk is selected
-            if (selectedChunk != null && mainSectionProperty.value == recordingView) {
-                recorderViewModel.cancel()
-                mainSectionProperty.set(playbackView)
-            }
-        }
     }
 
     private fun createPlaybackView() = VBox().apply {
@@ -199,6 +193,14 @@ open class PeerEdit : View() {
     }
 
     private fun subscribeEvents() {
+        viewModel.currentChunkProperty.onChangeWithDisposer { selectedChunk ->
+            // clears recording screen if another chunk is selected
+            if (selectedChunk != null && mainSectionProperty.value == recordingView) {
+                recorderViewModel.cancel()
+                mainSectionProperty.set(playbackView)
+            }
+        }.also { listenerDisposers.add(it) }
+
         subscribe<UndoChunkingPageEvent> {
             viewModel.undo()
         }.also { eventSubscriptions.add(it) }

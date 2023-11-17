@@ -1,6 +1,5 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Node
 import javafx.scene.control.ScrollPane
@@ -18,6 +17,7 @@ import org.wycliffeassociates.otter.jvm.controls.event.ChunkTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.TakeAction
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BlindDraftViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel
@@ -35,6 +35,7 @@ class BlindDraft : View() {
     private val recordingView = buildRecordingArea()
     private val hideSourceAudio = mainSectionProperty.booleanBinding { it == recordingView }
     private val eventSubscriptions = mutableListOf<EventRegistration>()
+    private val listenerDisposers = mutableListOf<ListenerDisposer>()
 
     override val root = borderpane {
         addClass("blind-draft")
@@ -58,14 +59,6 @@ class BlindDraft : View() {
     init {
         tryImportStylesheet("/css/recording-screen.css")
         tryImportStylesheet("/css/popup-menu.css")
-
-        viewModel.currentChunkProperty.onChangeWithDisposer { selectedChunk ->
-            // clears recording screen if another chunk is selected
-            if (selectedChunk != null && mainSectionProperty.value == recordingView) {
-                recorderViewModel.cancel()
-                mainSectionProperty.set(takesView)
-            }
-        }
     }
 
     private fun buildTakesArea(): VBox {
@@ -169,6 +162,14 @@ class BlindDraft : View() {
     }
 
     private fun subscribeEvents() {
+        viewModel.currentChunkProperty.onChangeWithDisposer { selectedChunk ->
+            // clears recording screen if another chunk is selected
+            if (selectedChunk != null && mainSectionProperty.value == recordingView) {
+                recorderViewModel.cancel()
+                mainSectionProperty.set(takesView)
+            }
+        }.also { listenerDisposers.add(it) }
+        
         subscribe<ChunkTakeEvent> {
             when (it.action) {
                 TakeAction.SELECT -> viewModel.onSelectTake(it.take)
@@ -191,5 +192,7 @@ class BlindDraft : View() {
     private fun unsubscribeEvents() {
         eventSubscriptions.forEach { it.unsubscribe() }
         eventSubscriptions.clear()
+        listenerDisposers.forEach { it.dispose() }
+        listenerDisposers.clear()
     }
 }
