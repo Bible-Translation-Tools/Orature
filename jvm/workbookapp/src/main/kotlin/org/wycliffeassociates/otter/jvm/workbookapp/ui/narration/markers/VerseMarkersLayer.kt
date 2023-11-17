@@ -10,15 +10,6 @@ import tornadofx.*
 import javafx.event.EventTarget
 import javafx.scene.layout.BorderPane
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.audio.AudioMarker
-import java.lang.IllegalStateException
-
-/**
- * This is the offset of the marker line relative
- * to the draggable area. In other words,
- * it's a half the length of marker draggable area.
- */
-private const val MARKER_OFFSET = (MARKER_AREA_WIDTH / 2).toInt()
 
 class VerseMarkersLayer : BorderPane() {
     private val logger = LoggerFactory.getLogger(VerseMarkersLayer::class.java)
@@ -132,16 +123,6 @@ class VerseMarkersLayer : BorderPane() {
         return Pair(startBounds, endBounds)
     }
 
-    private fun getPrevVerse(verse: AudioMarker): AudioMarker {
-        val currentIndex = markers.indexOf(verse)
-        return markers.getOrNull(currentIndex - 1) ?: verse
-    }
-
-    private fun getNextVerse(verse: AudioMarker): AudioMarker {
-        val currentIndex = markers.indexOf(verse)
-        return markers.getOrNull(currentIndex + 1) ?: verse
-    }
-    
     fun setOnLayerScroll(op: (Int) -> Unit) {
         onScrollProperty.set(op)
     }
