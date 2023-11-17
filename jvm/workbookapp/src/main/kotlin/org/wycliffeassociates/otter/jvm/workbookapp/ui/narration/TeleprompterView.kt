@@ -23,7 +23,7 @@ class TeleprompterSeekEvent(val index: Int) : FXEvent()
 class TeleprompterViewModel : ViewModel() {
     private val narrationViewModel: NarrationViewModel by inject()
 
-    val chunks = observableListOf<NarrationTextItemData>()
+    val chunks = narrationViewModel.narratableList
 
     val stickyVerseProperty = SimpleObjectProperty<Chunk>()
 
@@ -52,10 +52,6 @@ class TeleprompterViewModel : ViewModel() {
     val playingVerseProperty = SimpleIntegerProperty()
 
     init {
-        chunks.bind(narrationViewModel.narratableList) {
-            it
-        }
-
         recordStartProperty.bindBidirectional(narrationViewModel.recordStartProperty)
         recordResumeProperty.bindBidirectional(narrationViewModel.recordResumeProperty)
         isRecordingProperty.bindBidirectional(narrationViewModel.isRecordingProperty)

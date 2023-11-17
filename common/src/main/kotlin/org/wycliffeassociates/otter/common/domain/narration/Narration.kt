@@ -138,9 +138,8 @@ class Narration @AssistedInject constructor(
         }
     }
 
-    private fun getFirstVerseMarker(): VerseMarker {
-        val firstVerse = chapter.getDraft().blockingFirst()
-        return VerseMarker(firstVerse.start, firstVerse.end, 0)
+    private fun getFirstVerseMarker(): AudioMarker {
+        return chapterRepresentation.totalVerses.first().marker
     }
 
     fun loadFromSelectedChapterFile() {

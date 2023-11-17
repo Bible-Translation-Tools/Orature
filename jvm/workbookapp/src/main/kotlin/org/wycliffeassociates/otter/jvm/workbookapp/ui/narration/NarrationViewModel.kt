@@ -144,14 +144,14 @@ class NarrationViewModel : ViewModel() {
             //FIXME: Refactor this if and when Chunk entries are officially added for Titles in the Workbook
             val marker = when (chunk.sort) {
                 BOOK_TITLE_SORT -> recordedVerses.firstOrNull { it is BookMarker }
-                CHAPTER_TITLE_SORT -> recordedVerses.firstOrNull { it is ChapterMarker}
+                CHAPTER_TITLE_SORT -> recordedVerses.firstOrNull { it is ChapterMarker }
                 else -> recordedVerses.firstOrNull {
                     it.label == chunk.title && it is VerseMarker
                 }
             }
             val hasRecording = when (chunk.sort) {
                 BOOK_TITLE_SORT -> recordedVerses.any { it is BookMarker }
-                CHAPTER_TITLE_SORT -> recordedVerses.any { it is ChapterMarker}
+                CHAPTER_TITLE_SORT -> recordedVerses.any { it is ChapterMarker }
                 else -> recordedVerses.any {
                     it.label == chunk.title && it is VerseMarker
                 }
@@ -171,7 +171,7 @@ class NarrationViewModel : ViewModel() {
                 //FIXME: Refactor this if and when Chunk entries are officially added for Titles in the Workbook
                 val hasRecording = when (chunk.chunk.sort) {
                     BOOK_TITLE_SORT -> recordedVerses.any { it is BookMarker }
-                    CHAPTER_TITLE_SORT -> recordedVerses.any { it is ChapterMarker}
+                    CHAPTER_TITLE_SORT -> recordedVerses.any { it is ChapterMarker }
                     else -> recordedVerses.any {
                         val matchingChunk = chunk.chunk.title == it.label && it is VerseMarker
                         matchingChunk
@@ -344,11 +344,12 @@ class NarrationViewModel : ViewModel() {
             }
             .flatMap { it }
             .map { insertTitles(chapter, it) }
-            .flatMap { Observable.fromIterable(it) }
             .observeOnFx()
-            .subscribe({ chunksList.add(it) }, {}, {
-                resetTeleprompter()
-            })
+            .subscribe(
+                { chunksList.setAll(it) },
+                {},
+                { resetTeleprompter() }
+            )
     }
 
     /**
@@ -357,16 +358,44 @@ class NarrationViewModel : ViewModel() {
      * Inserts a Chunk for the Book and Chapter titles since the database and workbook do not have this data
      */
     private fun insertTitles(chapter: Chapter, chunks: List<Chunk>): List<Chunk> {
-        chunks as MutableList
+        val chunksWithTitles = chunks.toMutableList()
         val chapterTitle = chapterTitleProperty.value
-        chunks.add(0, Chunk(CHAPTER_TITLE_SORT, chapter.label, AssociatedAudio(ReplayRelay.create()), listOf(), TextItem(chapterTitle, MimeType.USFM), 1, chunks.size, false, 1, ContentType.TITLE))
+        chunksWithTitles.add(
+            0,
+            Chunk(
+                CHAPTER_TITLE_SORT,
+                chapter.label,
+                AssociatedAudio(ReplayRelay.create()),
+                listOf(),
+                TextItem(chapterTitle, MimeType.USFM),
+                1,
+                chunks.size,
+                false,
+                1,
+                ContentType.TITLE
+            )
+        )
 
         val addBookTitle = chapter.sort == 1
         if (addBookTitle) {
             val book = workbookDataStore.workbook.source
-            chunks.add(0, Chunk(BOOK_TITLE_SORT, book.label, AssociatedAudio(ReplayRelay.create()), listOf(), TextItem(book.title, MimeType.USFM), 1, chunks.size, false, 1, ContentType.TITLE))
+            chunksWithTitles.add(
+                0,
+                Chunk(
+                    BOOK_TITLE_SORT,
+                    book.label,
+                    AssociatedAudio(ReplayRelay.create()),
+                    listOf(),
+                    TextItem(book.title, MimeType.USFM),
+                    1,
+                    chunks.size,
+                    false,
+                    1,
+                    ContentType.TITLE
+                )
+            )
         }
-        return chunks
+        return chunksWithTitles
     }
 
     private fun clearTeleprompter() {
