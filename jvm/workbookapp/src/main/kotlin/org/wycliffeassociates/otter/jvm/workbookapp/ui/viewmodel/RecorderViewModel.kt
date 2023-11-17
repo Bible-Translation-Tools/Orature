@@ -124,6 +124,7 @@ class RecorderViewModel : ViewModel() {
 
     fun cancel() {
         pause()
+        isRecording = false
         at.stop()
         recorder.stop()
         waveformCanvas.clearDrawables()
