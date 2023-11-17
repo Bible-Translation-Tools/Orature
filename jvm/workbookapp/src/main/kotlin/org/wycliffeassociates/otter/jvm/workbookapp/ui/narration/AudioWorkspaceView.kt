@@ -119,10 +119,21 @@ class AudioWorkspaceView : View() {
                 }
                 verse_markers_layer {
                     verseMarkersControls.bind(markerNodes) { it }
+
+                    var pos = 0
+
+                    setOnDragStarted {
+                        // caching current position on drag start
+                        // to add delta to it later on drag continue
+                        pos = viewModel.audioPositionProperty.value
+                    }
+
                     setOnLayerScroll { delta ->
-                        val pos = viewModel.audioPositionProperty.value
                         val seekTo = pos + delta
-                        viewModel.seekTo(seekTo)
+                        // Keep position inside audio bounds
+                        if (seekTo in 0..viewModel.totalAudioSizeProperty.value) {
+                            viewModel.seekTo(seekTo)
+                        }
                     }
                 }
             }

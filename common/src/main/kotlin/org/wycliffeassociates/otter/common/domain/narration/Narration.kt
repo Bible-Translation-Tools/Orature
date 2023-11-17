@@ -184,13 +184,19 @@ class Narration @AssistedInject constructor(
     fun finalizeVerse(verseIndex: Int) {
         val loc = chapterRepresentation.finalizeVerse(verseIndex, history)
         val relLoc = chapterRepresentation.absoluteToRelativeChapter(loc)
+
+        audioLoaded = false
+        loadChapterIntoPlayer()
+
         seek(relLoc)
     }
 
     fun onNewVerse(verseIndex: Int) {
-        loadChapterIntoPlayer()
         val action = NewVerseAction(verseIndex)
         execute(action)
+
+        audioLoaded = false
+        loadChapterIntoPlayer()
 
         player.seek(player.getDurationInFrames())
         writer?.start()
@@ -198,9 +204,11 @@ class Narration @AssistedInject constructor(
     }
 
     fun onRecordAgain(verseIndex: Int) {
-        loadChapterIntoPlayer()
         val action = RecordAgainAction(verseIndex)
         execute(action)
+
+        audioLoaded = false
+        loadChapterIntoPlayer()
 
         seek(activeVerses[verseIndex].location)
         writer?.start()
@@ -208,10 +216,12 @@ class Narration @AssistedInject constructor(
     }
 
     fun onSaveRecording(verseIndex: Int) {
-        loadChapterIntoPlayer()
-
         val loc = chapterRepresentation.finalizeVerse(verseIndex, history)
         val relLoc = chapterRepresentation.absoluteToRelativeChapter(loc)
+
+        audioLoaded = false
+        loadChapterIntoPlayer()
+
         seek(relLoc)
 
         writer?.pause()
