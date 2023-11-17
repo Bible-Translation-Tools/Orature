@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.common.data.workbook
 
 import com.jakewharton.rxrelay2.BehaviorRelay
+import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -40,8 +41,8 @@ class Chapter(
     override val subtreeResources: List<ResourceMetadata>,
     private val lazychunks: Lazy<BehaviorRelay<List<Chunk>>>,
     val chunkCount: Single<Int>,
-    val addChunk: (List<Content>) -> Unit,
-    val reset: () -> Unit
+    val addChunk: (List<Content>) -> Completable,
+    val reset: () -> Completable
 ) : BookElement, BookElementContainer, Recordable {
 
     override val contentType: ContentType = ContentType.META

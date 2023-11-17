@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.controls.skins.waveform
+package org.wycliffeassociates.otter.jvm.controls.skins.slider
 
 import com.sun.javafx.util.Utils
 import javafx.scene.Cursor

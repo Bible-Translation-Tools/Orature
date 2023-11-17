@@ -32,7 +32,9 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.Region
 import javafx.scene.layout.StackPane
 import org.wycliffeassociates.otter.common.data.ColorTheme
+import org.wycliffeassociates.otter.jvm.controls.UIVersion
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
+import org.wycliffeassociates.otter.jvm.controls.marker.MarkersContainer
 
 import tornadofx.*
 
@@ -40,7 +42,10 @@ class WaveformFrame(
     topTrack: Node? = null,
     bottomTrack: Node? = null
 ) : StackPane() {
-
+    /**
+     * Flag to determine if this reusable component follows the old or new design.
+     */
+    val uiVersionProperty = SimpleObjectProperty(UIVersion.ONE)
     val onWaveformClickedProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onWaveformDragReleasedProperty = SimpleObjectProperty<(pixel: Double) -> Unit>()
     val onRewindProperty = SimpleObjectProperty<(ScrollSpeed) -> Unit>()
@@ -130,6 +135,9 @@ class WaveformFrame(
                     }
 
                     borderpane {
+                        visibleWhen { uiVersionProperty.booleanBinding { it == UIVersion.ONE } }
+                        managedWhen(visibleProperty())
+
                         top {
                             region {
                                 topTrackRegion = this
@@ -149,7 +157,7 @@ class WaveformFrame(
 
                     topTrack?.let {
                         add(it.apply {
-                            val me = (it as MarkerTrackControl)
+                            val me = (it as MarkersContainer)
                             me.onSeekPreviousProperty.bind(this@WaveformFrame.onSeekPreviousProperty)
                             me.onSeekNextProperty.bind(this@WaveformFrame.onSeekNextProperty)
                         })
@@ -238,12 +246,16 @@ class WaveformFrame(
                 addClass("waveform-image")
                 this.effect = waveformColorEffect
                 // This is to adjust the height of the image to fit within the tracks
-                fitHeightProperty()
-                    .bind(
-                        imageRegion.heightProperty()
-                            .minus(topTrackRegion.heightProperty())
-                            .minus(bottomTrackRegion.heightProperty())
-                    )
+                if (uiVersionProperty.value == UIVersion.THREE) {
+                    fitHeightProperty().bind(imageRegion.heightProperty())
+                } else {
+                    fitHeightProperty()
+                        .bind(
+                            imageRegion.heightProperty()
+                                .minus(topTrackRegion.heightProperty())
+                                .minus(bottomTrackRegion.heightProperty())
+                        )
+                }
             }
         )
     }

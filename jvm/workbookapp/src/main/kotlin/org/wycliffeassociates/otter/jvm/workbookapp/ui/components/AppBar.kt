@@ -46,8 +46,10 @@ class AppBar : Fragment() {
     private val homeButton = AppBarButton().apply {
         textProperty().set(messages["home"])
         graphicProperty().set(FontIcon(MaterialDesign.MDI_HOME))
+
         toggleGroup = buttonsToggleGroup
         setOnMouseClicked {
+            isSelected = false
             val homePage = find<HomePage2>()
             fire(NavigationRequestEvent(homePage))
         }

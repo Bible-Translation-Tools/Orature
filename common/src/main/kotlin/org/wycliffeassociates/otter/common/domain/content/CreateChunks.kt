@@ -5,8 +5,9 @@ import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.reactivex.Completable
+import io.reactivex.Single
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.reactivex.schedulers.Schedulers
 import java.io.File
@@ -19,7 +20,6 @@ import org.wycliffeassociates.otter.common.data.workbook.Book
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
-import org.wycliffeassociates.otter.common.data.audio.OratureCueType
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.domain.versification.Versification
 import org.wycliffeassociates.otter.common.persistence.repositories.IVersificationRepository
@@ -56,54 +56,21 @@ class CreateChunks @Inject constructor(
     fun createUserDefinedChunks(
         workbook: Workbook,
         chapter: Chapter,
-        chunks: List<AudioCue>,
-        draftNumber: Int
-    ) {
-        val chapterNumber = chapter.sort
+        chunks: List<AudioCue>
+    ): Completable {
         val projectSlug = workbook.target.slug
+        val chapterNumber = chapter.sort
 
         logger.info("Creating ${chunks.size} user defined chunks for project: $projectSlug chapter: $chapterNumber")
-        val chapAudio = workbook.sourceAudioAccessor.getChapter(chapter.sort, workbook.target)
-        val sa = OratureAudioFile(chapAudio!!.file)
-        val verseMarkers = sa.getMarker<VerseMarker>().map { it.toCue() }
-        val chunkRanges = mapCuesToRanges(chunks)
-        val verseRanges = mapCuesToRanges(verseMarkers)
-        val chunksToAdd = mutableListOf<Content>()
-
-        for ((idx, chunk) in chunkRanges.withIndex()) {
-            val verses = findVerseRange(verseRanges, chunk)
-
-            // use the chapter range and text if there are no verse markers (which would make the verse range empty)
-            val chapterText = workbook.projectFilesAccessor.getChapterText(projectSlug, chapterNumber)
-            var start = 1
-            var end = chapterText.size
-            var text = ""
-
-            // adjust verse range and text based on verse markers
-            if (verses.isNotEmpty()) {
-                start = verses.first()
-                end = verses.last()
-                val v = workbook.projectFilesAccessor.getChunkText(projectSlug, chapterNumber, start, end)
-                text = StringBuilder().apply { v.forEach { append("$it\n") } }.toString()
-            } else {
-                text = StringBuilder().apply { chapterText.forEach { append(it) } }.toString()
+        return Single
+            .fromCallable {
+                buildChunkContent(workbook, chapterNumber, chunks)
             }
-            chunksToAdd.add(
-                Content(
-                    idx + 1,
-                    "chunk",
-                    start,
-                    end,
-                    null,
-                    text,
-                    "usfm",
-                    ContentType.TEXT,
-                    draftNumber
-                )
-            )
-        }
-        chapter.addChunk(chunksToAdd)
-        writeChunkFile(workbook, chapterNumber, chunksToAdd)
+            .flatMapCompletable { chunksToAdd ->
+                writeChunkFile(workbook, chapterNumber, chunksToAdd)
+                chapter.addChunk(chunksToAdd)
+            }
+            .subscribeOn(Schedulers.io())
     }
 
     /**
@@ -117,16 +84,19 @@ class CreateChunks @Inject constructor(
         workbook: Workbook,
         chapter: Chapter,
         draftNumber: Int
-    ) {
+    ): Completable {
         val chapterNumber = chapter.sort
         val projectSlug = workbook.target.slug
 
-        ResourceContainer
+        return ResourceContainer
             .load(workbook.source.resourceMetadata.path).use { rc ->
-                val vrsSlug =
-                    rc.manifest.projects.firstOrNull { !it.versification.isNullOrEmpty() }?.versification ?: ""
+                val vrsSlug = rc.manifest.projects.firstOrNull {
+                    it.versification.isNotEmpty()
+                }?.versification ?: ""
+
                 versificationRepository.getVersification(vrsSlug)
-            }.map {
+            }
+            .flatMapCompletable {
                 val allocatedVerses = preallocateVerses(it, workbook.target, chapterNumber, draftNumber)
                 val versesFromText = getVersesFromText(workbook, projectSlug, chapterNumber, draftNumber)
                 val finalizedVerses = overlayVerses(allocatedVerses, versesFromText)
@@ -134,7 +104,55 @@ class CreateChunks @Inject constructor(
             }
             .doOnError { logger.error("Error creating chunks from verses", it) }
             .subscribeOn(Schedulers.io())
-            .subscribe()
+    }
+
+    private fun buildChunkContent(
+        workbook: Workbook,
+        chapter: Int,
+        chunks: List<AudioCue>
+    ): List<Content> {
+        val projectSlug = workbook.target.slug
+        val chapAudio = workbook.sourceAudioAccessor.getChapter(chapter, workbook.target)
+        val sa = OratureAudioFile(chapAudio!!.file)
+        val verseMarkers = sa.getMarker<VerseMarker>().map { it.toCue() }
+        val chunkRanges = mapCuesToRanges(chunks)
+        val verseRanges = mapCuesToRanges(verseMarkers)
+        val chunkContents = mutableListOf<Content>()
+
+        for ((idx, chunk) in chunkRanges.withIndex()) {
+            val verses = findVerseRange(verseRanges, chunk)
+
+            // use the chapter range and text if there are no verse markers (which would make the verse range empty)
+            val chapterText = workbook.projectFilesAccessor.getChapterText(projectSlug, chapter)
+            var start = 1
+            var end = chapterText.size
+            var text = ""
+
+            // adjust verse range and text based on verse markers
+            if (verses.isNotEmpty()) {
+                start = verses.first()
+                end = verses.last()
+                val v = workbook.projectFilesAccessor.getChunkText(projectSlug, chapter, start, end)
+                text = StringBuilder().apply { v.forEach { append("$it\n") } }.toString()
+            } else {
+                text = StringBuilder().apply { chapterText.forEach { append(it) } }.toString()
+            }
+            chunkContents.add(
+                Content(
+                    idx + 1,
+                    "chunk",
+                    start,
+                    end,
+                    null,
+                    text,
+                    "usfm",
+                    ContentType.TEXT,
+                    2
+                )
+            )
+        }
+
+        return chunkContents
     }
 
     /**

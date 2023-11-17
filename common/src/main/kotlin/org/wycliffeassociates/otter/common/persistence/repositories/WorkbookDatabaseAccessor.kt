@@ -31,6 +31,7 @@ interface IWorkbookDatabaseAccessors {
     fun getSubtreeResourceMetadata(collection: Collection): List<ResourceMetadata>
     fun insertTakeForContent(take: ModelTake, content: Content): Single<Int>
     fun getTakeByContent(content: Content): Single<List<ModelTake>>
+    fun updateTake(take: ModelTake): Completable
     fun deleteTake(take: ModelTake, date: DateHolder): Completable
     fun getSoftDeletedTakes(metadata: ResourceMetadata, projectSlug: String): Single<List<ModelTake>>
     fun getDerivedProject(sourceCollection: Collection): Maybe<Collection>
@@ -133,6 +134,7 @@ class WorkbookDatabaseAccessor(
 
     override fun insertTakeForContent(take: ModelTake, content: Content) = takeRepo.insertForContent(take, content)
     override fun getTakeByContent(content: Content) = takeRepo.getByContent(content, includeDeleted = true)
+    override fun updateTake(take: ModelTake) = takeRepo.update(take)
     override fun deleteTake(take: ModelTake, date: DateHolder) = takeRepo.update(take.copy(deleted = date.value))
 
     override fun getSoftDeletedTakes(metadata: ResourceMetadata, projectSlug: String) =

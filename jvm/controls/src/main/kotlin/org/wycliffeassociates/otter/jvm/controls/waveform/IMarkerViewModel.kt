@@ -1,56 +1,61 @@
 package org.wycliffeassociates.otter.jvm.controls.waveform
 
 import javafx.beans.binding.IntegerBinding
-import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
-import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
-import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
-import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
-import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
 
-interface IMarkerViewModel {
+interface IMarkerViewModel : IWaveformViewModel {
     var markerModel: VerseMarkerModel?
     val markers: ObservableList<ChunkMarkerModel>
     val markerCountProperty: IntegerBinding
-    val audioPlayer: SimpleObjectProperty<IAudioPlayer>
     var audioController: AudioPlayerController?
     val currentMarkerNumberProperty: SimpleIntegerProperty
-    val positionProperty: SimpleDoubleProperty
-    var imageWidthProperty: SimpleDoubleProperty
 
     var resumeAfterScroll: Boolean
 
     fun placeMarker() {
         markerModel?.let { markerModel ->
-            markerModel.addMarker(audioPlayer.get().getLocationInFrames())
+            markerModel.addMarker(waveformAudioPlayerProperty.get().getLocationInFrames())
             markers.setAll(markerModel.markers)
         }
     }
 
+    fun deleteMarker(id: Int) {
+        markerModel?.let { markerModel ->
+            markerModel.deleteMarker(id)
+            markers.setAll(markerModel.markers)
+        }
+    }
+
+    fun moveMarker(id: Int, start: Int, end: Int) {
+        markerModel?.moveMarker(id, start, end)
+    }
+
     fun seekNext() {
-        val wasPlaying = audioPlayer.get().isPlaying()
+        val wasPlaying = waveformAudioPlayerProperty.get().isPlaying()
         if (wasPlaying) {
             audioController?.toggle()
         }
         markerModel?.let { markerModel ->
-            seek(markerModel.seekNext(audioPlayer.get().getLocationInFrames()))
-        } ?: run { seek(audioPlayer.get().getLocationInFrames()) }
+            seek(markerModel.seekNext(waveformAudioPlayerProperty.get().getLocationInFrames()))
+        } ?: run { seek(waveformAudioPlayerProperty.get().getLocationInFrames()) }
         if (wasPlaying) {
             audioController?.toggle()
         }
     }
 
     fun seekPrevious() {
-        val wasPlaying = audioPlayer.get().isPlaying()
+        val wasPlaying = waveformAudioPlayerProperty.get().isPlaying()
         if (wasPlaying) {
             audioController?.toggle()
         }
         markerModel?.let { markerModel ->
-            seek(markerModel.seekPrevious(audioPlayer.get().getLocationInFrames()))
-        } ?: run { seek(audioPlayer.get().getLocationInFrames()) }
+            seek(markerModel.seekPrevious(waveformAudioPlayerProperty.get().getLocationInFrames()))
+        } ?: run { seek(waveformAudioPlayerProperty.get().getLocationInFrames()) }
         if (wasPlaying) {
             audioController?.toggle()
         }
@@ -60,7 +65,6 @@ interface IMarkerViewModel {
         audioController?.seek(location)
         updateCurrentPlaybackMarker(location)
     }
-
 
     private fun updateCurrentPlaybackMarker(currentFrame: Int) {
         markerModel?.let { markerModel ->
@@ -72,7 +76,7 @@ interface IMarkerViewModel {
     }
 
     fun requestAudioLocation(): Int {
-        return audioPlayer.value?.getLocationInFrames() ?: 0
+        return waveformAudioPlayerProperty.value?.getLocationInFrames() ?: 0
     }
 
     fun undoMarker() {
@@ -87,25 +91,6 @@ interface IMarkerViewModel {
             markerModel.redo()
             markers.setAll(markerModel.markers)
         }
-    }
-
-    fun calculatePosition() {
-        audioPlayer.get()?.let { audioPlayer ->
-            val current = audioPlayer.getLocationInFrames()
-            val duration = audioPlayer.getDurationInFrames().toDouble()
-            val percentPlayed = current / duration
-            val pos = percentPlayed * imageWidthProperty.value
-            positionProperty.set(pos)
-            updateCurrentPlaybackMarker(current)
-        }
-    }
-
-    fun getLocationInFrames(): Int {
-        return audioPlayer.get().getLocationInFrames() ?: 0
-    }
-
-    fun getDurationInFrames(): Int {
-        return audioPlayer.get().getDurationInFrames() ?: 0
     }
 
     fun rewind(speed: ScrollSpeed) {

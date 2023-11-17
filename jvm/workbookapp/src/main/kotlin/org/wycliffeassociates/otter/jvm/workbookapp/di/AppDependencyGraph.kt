@@ -40,7 +40,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ExportChapterVi
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SplashScreenViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioDataStore
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AppPreferencesStore
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookPageViewModel
@@ -51,11 +50,18 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.NarrationDebugA
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.AudioWorkspaceViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.NarrationViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AppInfoViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BlindDraftViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterReviewViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ConsumeViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ExportProjectViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel2
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.PeerEditViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectWizardViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 
 @Component(
     modules = [
@@ -84,11 +90,17 @@ interface AppDependencyGraph {
     fun inject(viewModel: SettingsViewModel)
     fun inject(viewModel: AddFilesViewModel)
     fun inject(viewModel: TranslationViewModel)
+    fun inject(viewModel: TranslationViewModel2)
     fun inject(viewModel: BookWizardViewModel)
     fun inject(viewModel: ProjectWizardViewModel)
     fun inject(viewModel: ChapterPageViewModel)
     fun inject(viewModel: AppInfoViewModel)
+    fun inject(viewModel: ConsumeViewModel)
     fun inject(viewModel: ChunkingViewModel)
+    fun inject(viewModel: BlindDraftViewModel)
+    fun inject(viewModel: PeerEditViewModel)
+    fun inject(viewModel: ChapterReviewViewModel)
+    fun inject(viewModel: RecorderViewModel)
     fun inject(viewModel: ExportChapterViewModel)
     fun inject(viewModel: ExportProjectViewModel)
     fun inject(viewModel: AudioWorkspaceViewModel)

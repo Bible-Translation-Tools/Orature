@@ -40,7 +40,7 @@ class MinimapFragment : Fragment() {
             colorThemeProperty.bind(viewModel.themeColorProperty)
             waveformImageProperty.bind(viewModel.waveformMinimapImage)
             setPixelsInHighlightFunction { viewModel.pixelsInHighlight(it) }
-            player.bind(viewModel.audioPlayer)
+            player.bind(viewModel.waveformAudioPlayerProperty)
             secondsToHighlightProperty.set(SECONDS_ON_SCREEN)
 
             viewModel.markers.onChangeAndDoNow {

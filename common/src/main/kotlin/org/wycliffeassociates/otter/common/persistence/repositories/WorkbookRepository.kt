@@ -25,7 +25,9 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.Content
@@ -42,6 +44,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.common.data.workbook.ResourceGroup
+import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.data.workbook.TakeHolder
 import org.wycliffeassociates.otter.common.data.workbook.TextItem
 import org.wycliffeassociates.otter.common.data.workbook.Translation
@@ -214,10 +217,10 @@ class WorkbookRepository(
                     subtreeResources = db.getSubtreeResourceMetadata(chapterCollection),
                     chunkCount = db.getChunkCount(chapterCollection),
                     addChunk = {
-                        db.addContentForCollection(chapterCollection, it).subscribe()
+                        db.addContentForCollection(chapterCollection, it)
                     },
                     reset = {
-                        db.clearContentForCollection(chapterCollection, ContentType.TEXT).subscribe()
+                        db.clearContentForCollection(chapterCollection, ContentType.TEXT).ignoreElement()
                     }
                 ).also { it.text = metaContent.text ?: "" }
             }
@@ -384,6 +387,18 @@ class WorkbookRepository(
             }
     }
 
+    private fun subscribeToCheckingStatus(take: WorkbookTake, modelTake: ModelTake): Disposable {
+        return take.checkingState
+            .flatMapCompletable {
+                db.updateTake(
+                    modelTake.copy(checkingStatus =  it.status, checksum = it.checksum)
+                )
+            }
+            .subscribeOn(Schedulers.io())
+            .doOnError { e -> logger.error("Error in Take's Checking Status subscription: $take", e) }
+            .subscribe()
+    }
+
     private fun workbookTake(modelTake: ModelTake): WorkbookTake {
         return WorkbookTake(
             name = modelTake.filename,
@@ -391,7 +406,10 @@ class WorkbookRepository(
             number = modelTake.number,
             format = MimeType.WAV, // TODO
             createdTimestamp = modelTake.created,
-            deletedTimestamp = BehaviorRelay.createDefault(DateHolder(modelTake.deleted))
+            deletedTimestamp = BehaviorRelay.createDefault(DateHolder(modelTake.deleted)),
+            checkingState = BehaviorRelay.createDefault(
+                TakeCheckingState(modelTake.checkingStatus, modelTake.checksum)
+            )
         )
     }
 
@@ -403,6 +421,8 @@ class WorkbookRepository(
             created = workbookTake.createdTimestamp,
             deleted = null,
             played = false,
+            checkingStatus = workbookTake.checkingState.value?.status ?: CheckingStatus.UNCHECKED,
+            checksum = workbookTake.getSavedChecksum(),
             markers = markers
         )
     }
@@ -512,7 +532,14 @@ class WorkbookRepository(
         val takesRelay = ReplayRelay.create<WorkbookTake>()
         takesFromDb
             // Record the mapping between data types.
-            .doOnNext { (wbTake, modelTake) -> takeMap[wbTake] = modelTake }
+            .doOnNext { (wbTake, modelTake) ->
+                if (content.type == ContentType.TEXT) {
+                    wbTake?.let {
+                        subscribeToCheckingStatus(it, modelTake) // subscribe to takes from db
+                    }
+                }
+                takeMap[wbTake] = modelTake
+            }
             // Feed the initial list to takesRelay
             .map { (wbTake, _) -> wbTake }
             .doOnError { e -> logger.error("Error in takesRelay, content: $content", e) }
@@ -546,6 +573,10 @@ class WorkbookRepository(
                     .subscribe { insertionId ->
                         modelTake.id = insertionId
                         selectedTakeRelay.accept(TakeHolder(wbTake))
+
+                        if (content.type == ContentType.TEXT) {
+                            subscribeToCheckingStatus(wbTake, modelTake) // subscribe to takes from UI
+                        }
                     }
             }
 

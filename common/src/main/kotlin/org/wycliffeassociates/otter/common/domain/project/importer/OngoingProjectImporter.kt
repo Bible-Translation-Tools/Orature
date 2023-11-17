@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.Chunkification
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
+import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.Content
@@ -31,6 +32,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.takeFilenamePattern
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
+import org.wycliffeassociates.otter.common.domain.project.TakeCheckingStatusMap
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
@@ -73,6 +75,7 @@ class OngoingProjectImporter @Inject constructor(
     private var projectName = ""
     private var takesInChapterFilter: Map<String, Int>? = null
     private var duplicatedTakes: MutableList<String> = mutableListOf()
+    private var takesCheckingMap: TakeCheckingStatusMap = mapOf()
 
     override fun import(
         file: File,
@@ -208,7 +211,7 @@ class OngoingProjectImporter @Inject constructor(
                 directoryProvider.newFileReader(resourceContainer).use { fileReader ->
                     val existingSource = fetchExistingSource(manifestProject, manifestSources)
                     try {
-                        callback?.onNotifyProgress(localizeKey = "importingSource", percent = 20.0)
+                        callback?.onNotifyProgress(localizeKey = "importingSource", percent = 25.0)
                         // Import Sources even if existing source exists in order to potentially merge source audio
                         importSources(fileReader)
                     } catch (e: ImportException) {
@@ -277,7 +280,7 @@ class OngoingProjectImporter @Inject constructor(
         projectFilesAccessor.initializeResourceContainerInDir()
         projectFilesAccessor.setProjectMode(mode)
 
-        callback?.onNotifyProgress(localizeKey = "copyingSource", percent = 40.0)
+        callback?.onNotifyProgress(localizeKey = "copyingSource", percent = 50.0)
         projectFilesAccessor.copySourceFiles(fileReader)
 
         importContributorInfo(metadata, projectFilesAccessor)
@@ -422,6 +425,8 @@ class OngoingProjectImporter @Inject constructor(
             ?.toMutableList()
             ?: mutableListOf()
 
+        takesCheckingMap = parseCheckingStatusFile(fileReader)
+
         projectFilesAccessor.copySelectedTakesFile(fileReader)
         projectFilesAccessor.copyTakeFiles(fileReader, manifestProject, ::takeCopyFilter)
             .doOnError { e ->
@@ -468,6 +473,19 @@ class OngoingProjectImporter @Inject constructor(
             .toSet()
     }
 
+    private fun parseCheckingStatusFile(fileReader: IFileReader) =
+        if (fileReader.exists(RcConstants.CHECKING_STATUS_FILE)) {
+            fileReader.stream(RcConstants.CHECKING_STATUS_FILE).use { stream ->
+                ObjectMapper(JsonFactory())
+                    .registerKotlinModule()
+                    .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                    .readValue<TakeCheckingStatusMap>(stream)
+                    .mapKeys { File(it.key).name } // take name as key
+            }
+        } else {
+            mapOf()
+        }
+
     /**
      * Filters only takes that are chosen to import (based on the callback result)
      * AND excludes duplicated takes (takes that already exist).
@@ -493,8 +511,19 @@ class OngoingProjectImporter @Inject constructor(
                 val now = LocalDate.now()
                 val file = File(filepath).canonicalFile
                 val relativeFile = file.relativeTo(projectAudioDir.canonicalFile)
+                val checkingStatus = takesCheckingMap[relativeFile.name]
 
-                val take = Take(file.name, file, takeNumber, now, null, false, listOf())
+                val take = Take(
+                    file.name,
+                    file,
+                    takeNumber,
+                    now,
+                    null,
+                    false,
+                    checkingStatus?.status ?: CheckingStatus.UNCHECKED,
+                    checkingStatus?.checksum,
+                    listOf()
+                )
                 take.id = takeRepository.insertForContent(take, chunk).blockingGet()
 
                 if (relativeFile.invariantSeparatorsPath in selectedTakes) {
@@ -561,17 +590,23 @@ class OngoingProjectImporter @Inject constructor(
         duplicatedTakes.forEach { takePath ->
             parseNumbers(takePath)?.let { (sig, _) ->
                 getContent(sig, project, metadata)?.let { content ->
+                    val takeName = File(takePath).name
                     val take = copyDuplicatedTakeToProjectDir(
                         takePath,
                         projectAudioDir,
                         content,
                         manifestProject,
                         fileReader
-                    ).apply {
-                        id = takeRepository.insertForContent(this, content).blockingGet()
+                    )
+                    takesCheckingMap[takeName]?.let {
+                        take.checkingStatus = it.status
+                        take.checksum = it.checksum
                     }
+                    take.id = takeRepository.insertForContent(take, content).blockingGet()
 
-                    if (selectedTakes.any { it.contains(File(takePath).name)}) {
+                    if (
+                        selectedTakes.any { selected -> File(selected).name == takeName }
+                    ) {
                         content.selectedTake = take
                         contentRepository.update(content).blockingAwait()
                     }
@@ -721,7 +756,16 @@ class OngoingProjectImporter @Inject constructor(
             }
         }
 
-        return Take(newFileName, targetTakeFile, newTakeNumber, now, null, false, listOf())
+        return Take(
+            newFileName,
+            targetTakeFile,
+            newTakeNumber,
+            now,
+            null,
+            false,
+            CheckingStatus.UNCHECKED,
+            null,
+            listOf())
     }
 
     private fun getRelativeTakePath(pathInRC: String, metaProjectPath: String): String {

@@ -18,71 +18,56 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.glass.ui.Screen
+import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import java.io.File
-import java.text.MessageFormat
 import javafx.animation.AnimationTimer
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
+import javafx.scene.control.Slider
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
+import org.wycliffeassociates.otter.common.audio.AudioCue
+import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import javax.inject.Inject
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.common.domain.chunking.ChunkAudioUseCase
+import org.wycliffeassociates.otter.common.domain.translation.ChunkAudioUseCase
 import org.wycliffeassociates.otter.common.domain.content.CreateChunks
+import org.wycliffeassociates.otter.common.domain.content.ResetChunks
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
-import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
-import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import tornadofx.ViewModel
-import tornadofx.get
 import tornadofx.getValue
 import tornadofx.observableListOf
-import tornadofx.onChange
 import tornadofx.sizeProperty
 
-const val ACTIVE = "chunking-wizard__step--active"
-const val COMPLETE = "chunking-wizard__step--complete"
-const val INACTIVE = "chunking-wizard__step--inactive"
+const val WAV_COLOR = "#66768B"
+const val BACKGROUND_COLOR = "#fff"
 
-private const val WAV_COLOR = "#0A337390"
-private const val BACKGROUND_COLOR = "#F7FAFF"
-
-enum class ChunkingWizardPage {
-    CONSUME,
-    VERBALIZE,
-    CHUNK
-}
-
-
-class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
-
-    var timer: AnimationTimer? = null
+class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
-
-    val consumeStepColor = SimpleStringProperty(ACTIVE)
-    val verbalizeStepColor = SimpleStringProperty(INACTIVE)
-    val chunkStepColor = SimpleStringProperty(INACTIVE)
+    val translationViewModel: TranslationViewModel2 by inject()
+    val chapterReviewViewModel: ChapterReviewViewModel by inject()
 
     val chapterTitle get() = workbookDataStore.activeChapterProperty.value?.title ?: ""
-    val pageProperty = SimpleObjectProperty(ChunkingWizardPage.CONSUME)
-    val titleProperty = SimpleStringProperty("")
-    val stepProperty = SimpleStringProperty("")
-
     val sourceAudio by audioDataStore.sourceAudioProperty
 
     @Inject
@@ -94,162 +79,173 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
     @Inject
     lateinit var createChunks: CreateChunks
 
+    @Inject
+    lateinit var resetChunks: ResetChunks
+
     override var markerModel: VerseMarkerModel? = null
     override val markers = observableListOf<ChunkMarkerModel>()
 
     override val markerCountProperty = markers.sizeProperty
-    override val currentMarkerNumberProperty = SimpleIntegerProperty(1)
+    override val currentMarkerNumberProperty = SimpleIntegerProperty(-1)
     override var resumeAfterScroll: Boolean = false
 
-    private val width = Screen.getMainScreen().platformWidth
-    private val height = Integer.min(Screen.getMainScreen().platformHeight, 500)
-
-    private val builder = ObservableWaveformBuilder()
-    lateinit var waveform: Observable<Image>
-
-    /** Call this before leaving the view to avoid memory leak */
-    var chunkImageCleanup: () -> Unit = {}
-    var consumeImageCleanup: () -> Unit = {}
-
+    /** This property must be initialized before calling dock() */
     override var audioController: AudioPlayerController? = null
-    override val audioPlayer = SimpleObjectProperty<IAudioPlayer>()
-    val isPlayingProperty = SimpleBooleanProperty(false)
-    val compositeDisposable = CompositeDisposable()
+    override val waveformAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     override val positionProperty = SimpleDoubleProperty(0.0)
     override var imageWidthProperty = SimpleDoubleProperty(0.0)
-
-    private val disposeables = mutableListOf<Disposable>()
+    override var sampleRate: Int = 0 // beware of divided by 0
+    override var totalFrames: Int = 0 // beware of divided by 0
 
     lateinit var audio: OratureAudioFile
+    lateinit var waveform: Observable<Image>
+    private val width = Screen.getMainScreen().platformWidth
+    private val height = Integer.min(Screen.getMainScreen().platformHeight, 500)
+    private val builder = ObservableWaveformBuilder()
 
     var subscribeOnWaveformImages: () -> Unit = {}
 
+    val isPlayingProperty = SimpleBooleanProperty(false)
+    val compositeDisposable = CompositeDisposable()
+
     init {
-        pageProperty.onChange {
-            when (it) {
-                ChunkingWizardPage.CONSUME -> {
-                    consumeStepColor.set(ACTIVE)
-                    verbalizeStepColor.set(INACTIVE)
-                    chunkStepColor.set(INACTIVE)
-                }
-                ChunkingWizardPage.VERBALIZE -> {
-                    consumeStepColor.set(COMPLETE)
-                    verbalizeStepColor.set(ACTIVE)
-                    chunkStepColor.set(INACTIVE)
-                }
-                ChunkingWizardPage.CHUNK -> {
-                    consumeStepColor.set(COMPLETE)
-                    verbalizeStepColor.set(COMPLETE)
-                    chunkStepColor.set(ACTIVE)
-                }
+        (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+    }
 
-                else -> {}
+    fun dock() {
+        initializeSourceAudio(workbookDataStore.chapter.sort)
+            .subscribeOn(Schedulers.io())
+            .observeOnFx()
+            .subscribe { sa ->
+                audioDataStore.sourceAudioProperty.set(sa)
+                audio = loadAudio(sa.file)
+                createWaveformImages(audio)
+                loadChunkMarkers(audio)
+                subscribeOnWaveformImages()
             }
+    }
+
+    fun undock() {
+        pause()
+        translationViewModel.selectedStepProperty.value?.let {
+            // handle when navigating to the next step
+            val hasUnsavedChanges = markerCountProperty.value != 0 && markerModel?.hasDirtyMarkers() == true
+            if (hasUnsavedChanges && it.ordinal > ChunkingStep.CHUNKING.ordinal) {
+                saveChanges()
+            }
+            translationViewModel.updateStep()
+        }
+
+        if (markerModel?.hasDirtyMarkers() == true) {
+            chapterReviewViewModel.invalidateChapterTake()
+        }
+        cleanup()
+    }
+
+    private fun initializeSourceAudio(chapter: Int): Maybe<SourceAudio> {
+        return Maybe.fromCallable {
+            val workbook = workbookDataStore.workbook
+            ChunkAudioUseCase(directoryProvider, workbook.projectFilesAccessor)
+                .copySourceAudioToProject(sourceAudio.file)
+
+            workbook.sourceAudioAccessor.getUserMarkedChapter(chapter, workbook.target)
         }
     }
 
-    fun onDockConsume() {
-        pageProperty.set(ChunkingWizardPage.CONSUME)
-        titleProperty.set(messages["consumeTitle"])
-        stepProperty.set(MessageFormat.format(messages["consumeDescription"], chapterTitle))
+    override fun placeMarker() {
+        super.placeMarker()
+        onUndoableAction()
+    }
 
-        sourceAudio?.file?.let {
-            (app as IDependencyGraphProvider).dependencyGraph.inject(this)
-            audio = loadAudio(it)
-            createWaveformImages(audio)
-            initializeAudioController()
-            subscribeOnWaveformImages()
+    override fun deleteMarker(id: Int) {
+        super.deleteMarker(id)
+        onUndoableAction()
+    }
+
+    override fun moveMarker(id: Int, start: Int, end: Int) {
+        super.moveMarker(id, start, end)
+        onUndoableAction()
+    }
+
+    override fun undoMarker() {
+        super.undoMarker()
+        val dirty = markerModel?.hasDirtyMarkers() ?: false
+        translationViewModel.canUndoProperty.set(dirty)
+        translationViewModel.canRedoProperty.set(true)
+        if (!dirty) {
+            translationViewModel.updateStep()
         }
-        startAnimationTimer()
     }
 
-    fun onUndockConsume() {
-        stopAnimationTimer()
-        pause()
-        compositeDisposable.clear()
+    override fun redoMarker() {
+        super.redoMarker()
+        translationViewModel.canUndoProperty.set(true)
+        translationViewModel.canRedoProperty.set(markerModel?.canRedo() == true)
+        translationViewModel.reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
     }
 
-    fun onDockChunk() {
-        pageProperty.set(ChunkingWizardPage.CHUNK)
-        titleProperty.set(messages["chunkingTitle"])
-        stepProperty.set(messages["chunkingDescription"])
-
-        loadMarkers(audio)
-        subscribeOnWaveformImages()
-        startAnimationTimer()
-        seek(0)
-    }
-
-    fun onUndockChunk() {
-        pause()
-        compositeDisposable.clear()
-        stopAnimationTimer()
-    }
-
-    private fun startAnimationTimer() {
-        timer = object : AnimationTimer() {
-            override fun handle(currentNanoTime: Long) {
-                calculatePosition()
-            }
-        }.apply { start() }
-    }
-
-    private fun stopAnimationTimer() {
-        timer?.stop()
-        timer = null
-    }
-
-    fun loadAudio(audioFile: File): OratureAudioFile {
+    private fun loadAudio(audioFile: File): OratureAudioFile {
         val player = audioConnectionFactory.getPlayer()
         val audio = OratureAudioFile(audioFile)
         player.load(audioFile)
-        audioPlayer.set(player)
+        player.getAudioReader()?.let {
+            sampleRate = it.sampleRate
+            totalFrames = it.totalFrames
+        }
+
+        waveformAudioPlayerProperty.set(player)
+        audioController?.let { controller ->
+            controller.load(player)
+            isPlayingProperty.bind(controller.isPlayingProperty)
+        }
         return audio
     }
 
-    fun loadMarkers(audio: OratureAudioFile) {
-        val totalMarkers: Int = 500
+    private fun loadChunkMarkers(audio: OratureAudioFile) {
+        markers.clear()
+        val totalMarkers = 500
         audio.clearCues()
-        markerModel = VerseMarkerModel(audio, totalMarkers, listOf())
-        markerModel?.let { markerModel ->
-            markers.setAll(markerModel.markers)
+        val chunkMarkers = audio.getMarker<ChunkMarker>().map {
+            ChunkMarkerModel(AudioCue(it.location, it.label))
+        }
+        markers.setAll(chunkMarkers)
+        markerModel = VerseMarkerModel(
+            audio,
+            totalMarkers,
+            (1..totalMarkers).map { it.toString() }
+        ).apply {
+            loadMarkers(chunkMarkers)
         }
     }
 
     fun cleanup() {
         builder.cancel()
-        consumeImageCleanup()
-        chunkImageCleanup()
         compositeDisposable.clear()
-        stopAnimationTimer()
-        disposeables.forEach { it.dispose() }
+        markerModel = null
     }
 
-    fun saveAndQuit() {
+    fun saveChanges() {
         compositeDisposable.clear()
         audioConnectionFactory.clearPlayerConnections()
-        audioPlayer.value.close()
+        waveformAudioPlayerProperty.value.close()
         audioController = null
 
         val accessor = workbookDataStore.workbook.projectFilesAccessor
-        val wkbk = workbookDataStore.activeWorkbookProperty.value
+        val wb = workbookDataStore.activeWorkbookProperty.value
         val chapter = workbookDataStore.activeChapterProperty.value
         val cues = markers.filter { it.placed }.map { it.toAudioCue() }
 
-        createChunks.createUserDefinedChunks(wkbk, chapter, cues, 1)
+        resetChunks.resetChapter(accessor, chapter)
+            .andThen(
+                createChunks.createUserDefinedChunks(wb, chapter, cues)
+            )
+            .andThen { completable ->
+                ChunkAudioUseCase(directoryProvider, accessor)
+                    .createChunkedSourceAudio(sourceAudio.file, cues)
 
-        pageProperty.set(ChunkingWizardPage.CONSUME)
-
-        ChunkAudioUseCase(directoryProvider, accessor)
-            .createChunkedSourceAudio(sourceAudio.file, cues)
-
-        disposeables.forEach { it.dispose() }
-    }
-
-    private fun initializeAudioController() {
-        audioController = AudioPlayerController()
-        audioController?.load(audioPlayer.get())
-        isPlayingProperty.bind(audioController!!.isPlayingProperty)
+                completable.onComplete()
+            }
+            .subscribe()
     }
 
     fun pause() {
@@ -257,7 +253,7 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
     }
 
     private fun createWaveformImages(audio: OratureAudioFile) {
-        imageWidthProperty.set(computeImageWidth(SECONDS_ON_SCREEN))
+        imageWidthProperty.set(computeImageWidth(width, SECONDS_ON_SCREEN))
 
         waveform = builder.buildAsync(
             audio.reader(),
@@ -268,10 +264,10 @@ class ChunkingViewModel() : ViewModel(), IMarkerViewModel {
         )
     }
 
-    fun computeImageWidth(secondsOnScreen: Int): Double {
-        val samplesPerScreenWidth = audioPlayer.get().getAudioReader()!!.sampleRate * secondsOnScreen
-        val samplesPerPixel = samplesPerScreenWidth / width
-        val pixelsInDuration = audioPlayer.get().getDurationInFrames() / samplesPerPixel
-        return pixelsInDuration.toDouble()
+    private fun onUndoableAction() {
+        translationViewModel.canUndoProperty.set(true)
+        translationViewModel.canRedoProperty.set(false)
+        // any changes in chunking will affect the subsequent steps
+        translationViewModel.reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
     }
 }

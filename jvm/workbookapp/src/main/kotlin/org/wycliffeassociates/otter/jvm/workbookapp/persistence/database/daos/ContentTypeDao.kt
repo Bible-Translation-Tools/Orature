@@ -31,8 +31,10 @@ class ContentTypeDao(
     private val mapToEnum: Map<Int, ContentType> by lazy { mapToId.entries.associate { (k, v) -> v to k } }
 
     /** This value's ID in database table content_type. */
-    fun fetchId(contentType: ContentType) = mapToId[contentType]
-        ?: throw IllegalStateException("$contentType is missing from ContentType table.")
+    fun fetchId(contentType: ContentType): Int {
+        return mapToId[contentType]
+            ?: throw IllegalStateException("$contentType is missing from ContentType table.")
+    }
 
     /** Get value by ID in database table content_type. */
     fun fetchForId(databaseId: Int) = mapToEnum[databaseId]

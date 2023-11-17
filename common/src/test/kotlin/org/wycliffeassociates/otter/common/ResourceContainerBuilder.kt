@@ -1,9 +1,13 @@
 package org.wycliffeassociates.otter.common
 
-import junit.runner.Version
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.core.JsonFactory
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
@@ -22,6 +26,7 @@ class ResourceContainerBuilder(baseRC: File? = null) {
         .apply { deleteOnExit() }
 
     private val selectedTakes: MutableList<String> = mutableListOf()
+    private val takeCheckingMap = mutableMapOf<String, TakeCheckingState>()
     private val rcFile: File = baseRC ?: getDefaultRCFile()
     private val manifest: Manifest
 
@@ -96,7 +101,8 @@ class ResourceContainerBuilder(baseRC: File? = null) {
         selected: Boolean,
         chapter: Int = sort,
         start: Int? = null,
-        end: Int? = null
+        end: Int? = null,
+        checking: TakeCheckingState? = null
     ): ResourceContainerBuilder {
         val fileName = FileNamer(
             start = start,
@@ -121,15 +127,21 @@ class ResourceContainerBuilder(baseRC: File? = null) {
             }
 
         val chapterDirTokens = "c${chapter.toString().padStart(2, '0')}"
+        val relativePath = "$chapterDirTokens/$fileName"
         val pathInRC = if (selected && contentType == ContentType.META) {
-            "${RcConstants.MEDIA_DIR}/$chapterDirTokens/$fileName"
+            "${RcConstants.MEDIA_DIR}/$relativePath"
         } else {
-            "${RcConstants.TAKE_DIR}/$chapterDirTokens/$fileName"
+            "${RcConstants.TAKE_DIR}/$relativePath"
         }
         ResourceContainer.load(rcFile).use {
             it.addFileToContainer(takeToAdd, pathInRC)
         }
-        selectedTakes.add("$chapterDirTokens/$fileName")
+        if (selected) {
+            selectedTakes.add(relativePath)
+        }
+        if (checking != null) {
+            takeCheckingMap[relativePath] = checking
+        }
 
         return this
     }
@@ -142,6 +154,9 @@ class ResourceContainerBuilder(baseRC: File? = null) {
                         selectedTakes.joinToString("\n").byteInputStream().readAllBytes()
                     )
                 }
+            }
+            if (takeCheckingMap.isNotEmpty()) {
+                writeCheckingStatusFile(rc)
             }
 
             rc.manifest = this.manifest
@@ -181,8 +196,21 @@ class ResourceContainerBuilder(baseRC: File? = null) {
         return tempFile
     }
 
+    private fun writeCheckingStatusFile(rc: ResourceContainer) {
+        rc.accessor.write(RcConstants.CHECKING_STATUS_FILE) { outputStream ->
+            outputStream.use { stream ->
+                val mapper = ObjectMapper(JsonFactory())
+                    .registerKotlinModule()
+                    .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+
+                mapper.writeValue(stream, takeCheckingMap)
+            }
+        }
+    }
+
     companion object {
-        val defaultProjectSlug = "jhn"
+        const val defaultProjectSlug = "jhn"
+        const val checkingStatusFilePath = RcConstants.CHECKING_STATUS_FILE
 
         fun setUpEmptyProjectBuilder(): ResourceContainerBuilder {
             return ResourceContainerBuilder()

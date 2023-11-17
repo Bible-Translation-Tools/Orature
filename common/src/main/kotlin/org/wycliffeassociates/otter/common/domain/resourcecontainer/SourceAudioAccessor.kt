@@ -25,6 +25,7 @@ import org.wycliffeassociates.resourcecontainer.entity.Media
 import java.io.File
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
+import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.workbook.Book
 import org.wycliffeassociates.otter.common.data.audio.OratureCueType
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
@@ -46,20 +47,8 @@ class SourceAudioAccessor(
     private val cache = mutableMapOf<String, File>()
 
     fun getChapter(chapter: Int, target: Book? = null): SourceAudio? {
-        logger.info("Looking for target audio for chapter: $chapter with target book: $target")
-        target?.let { target ->
-            val accessor = ProjectFilesAccessor(directoryProvider, metadata, target.resourceMetadata, target)
-            val dir = accessor.sourceAudioDir
-            val file = dir.listFiles()?.find {
-                chapterMatches(it, chapter) && validAudioExtension(it)
-            }
-            file?.let {
-                logger.info("Found the source audio file! ${it.path}")
-                val oratureAudioFile = OratureAudioFile(it)
-                val size = oratureAudioFile.totalFrames
-                return SourceAudio(it, 0, size)
-            }
-        }
+        logger.info("Looking for target audio for chapter: $chapter with book: $project")
+
         ResourceContainer.load(metadata.path).use { rc ->
             if (rc.media != null) {
                 val mediaProject = rc.media!!.projects.find { it.identifier == project }
@@ -69,7 +58,7 @@ class SourceAudioAccessor(
                     media = mediaProject?.media?.find { it.identifier == "wav" }
                 }
                 if (media != null) {
-                    return getChapter(media, chapter, rc, target?.resourceMetadata)
+                    return getChapter(media, chapter, rc)
                 }
             }
         }
@@ -77,11 +66,27 @@ class SourceAudioAccessor(
         return null
     }
 
+    fun getUserMarkedChapter(chapter: Int, target: Book? = null): SourceAudio? {
+        logger.info("Looking for source audio (chunks) for chapter: $chapter with target book: $target")
+        return target?.let { target ->
+            val accessor = ProjectFilesAccessor(directoryProvider, metadata, target.resourceMetadata, target)
+            val dir = accessor.sourceAudioDir
+            val file = dir.listFiles()?.find {
+                chapterMatches(it, chapter) && validAudioExtension(it)
+            }
+            file?.let {
+                logger.info("Found the source audio file! ${it.path}")
+                val oratureAudioFile = OratureAudioFile(it)
+                val size = oratureAudioFile.totalFrames
+                SourceAudio(it, 0, size)
+            }
+        }
+    }
+
     private fun getChapter(
         media: Media,
         chapter: Int,
-        rc: ResourceContainer,
-        targetMetadata: ResourceMetadata?
+        rc: ResourceContainer
     ): SourceAudio? {
         return if (rc.media != null && media.chapterUrl.isNotEmpty()) {
             val path = media.chapterUrl.replace("{chapter}", chapter.toString())
@@ -124,12 +129,29 @@ class SourceAudioAccessor(
         }
     }
 
-    fun getChunk(chapter: Int, chunk: Int, target: Book?): SourceAudio? {
+    fun getChunk(chapter: Int, chunk: Int, verse: Int, target: Book?): SourceAudio? {
+        val file = getUserMarkedChapter(chapter, target)?.file
+        if (file != null) {
+            val oratureAudioFile = OratureAudioFile(file)
+            val chunks = oratureAudioFile
+                .getMarker<ChunkMarker>()
+                .sortedBy { it.location }
+            val marker = chunks.find { it.chunk == chunk }
+            if (marker != null) {
+                val markerIndex = chunks.indexOf(marker)
+                val nextMarker = if (chunks.lastIndex > markerIndex) chunks[markerIndex + 1] else null
+                val start = marker.location
+                val end = nextMarker?.location ?: oratureAudioFile.totalFrames
+                return SourceAudio(file, start, end)
+            }
+        }
+        return getVerse(chapter, verse, target)
+    }
+
+    private fun getVerse(chapter: Int, chunk: Int, target: Book?): SourceAudio? {
         val file = getChapter(chapter, target)?.file
         if (file != null) {
             val oratureAudioFile = OratureAudioFile(file)
-            val cues = oratureAudioFile.getCues()
-            cues.sortedBy { it.location }
             val verses = oratureAudioFile
                 .getMarker<VerseMarker>()
                 .sortedBy { it.location }

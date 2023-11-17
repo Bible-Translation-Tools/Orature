@@ -60,7 +60,6 @@ import java.util.*
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Pos
 import kotlin.math.max
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.ChunkingWizard
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.*
 
 class ChapterPage : View() {
@@ -412,7 +411,7 @@ class ChapterPage : View() {
                             graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
 
                             setOnAction {
-                                workspace.dock<ChunkingWizard>(chunkingScope)
+//                                workspace.dock<ChunkingWizard>(chunkingScope)
                             }
 
                             enableWhen(audioDataStore.sourceAudioAvailableProperty)

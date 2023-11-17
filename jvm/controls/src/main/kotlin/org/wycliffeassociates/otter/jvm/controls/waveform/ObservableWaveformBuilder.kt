@@ -15,6 +15,7 @@ import javafx.scene.paint.Color
 import kotlin.math.absoluteValue
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
+import java.util.concurrent.CopyOnWriteArrayList
 
 const val SIGNED_SHORT_MAX = 32767
 
@@ -34,7 +35,7 @@ class ObservableWaveformBuilder {
     private val cancelled = AtomicBoolean(false)
 
     private val images = mutableListOf<Image>()
-    private val subscribers = mutableListOf<ObservableEmitter<Image>>()
+    private val subscribers = CopyOnWriteArrayList<ObservableEmitter<Image>>()
 
     private fun start() {
         synchronized(started) {

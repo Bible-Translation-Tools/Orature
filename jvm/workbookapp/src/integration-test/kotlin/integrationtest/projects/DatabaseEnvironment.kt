@@ -54,7 +54,7 @@ class DatabaseEnvironment @Inject constructor(
     fun getContentDao() = db.contentDao
     fun getMetadataDao() = db.resourceMetadataDao
 
-    private val importer
+    val importer
         get() = importRcFactory.makeImporter()
 
     fun import(rcFile: String, importAsStream: Boolean = false, unzip: Boolean = false): DatabaseEnvironment {

@@ -16,30 +16,33 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.controls.waveform
+package org.wycliffeassociates.otter.jvm.controls.marker
 
 import com.sun.javafx.util.Utils
 import javafx.beans.binding.Bindings
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Point2D
 import javafx.scene.layout.Region
 import javafx.scene.shape.Rectangle
-import org.wycliffeassociates.otter.jvm.controls.ChunkMarker
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import java.util.concurrent.Callable
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
-import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
+import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
+import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 
-private const val MOVE_MARKER_INTERVAL = 0.001
-private const val MARKER_COUNT = 500
+const val MOVE_MARKER_INTERVAL = 0.001
+const val MARKER_COUNT = 500
 
-class MarkerTrackControl : Region() {
+open class MarkerTrackControl : Region() {
 
     val markers = observableListOf<ChunkMarkerModel>()
+    val canMoveMarkerProperty = SimpleBooleanProperty(true)
+    val canDeleteMarkerProperty = SimpleBooleanProperty(true)
     val onPositionChangedProperty = SimpleObjectProperty<(Int, Double) -> Unit>()
     val onSeekPreviousProperty = SimpleObjectProperty<() -> Unit>()
     val onSeekNextProperty = SimpleObjectProperty<() -> Unit>()
@@ -53,23 +56,23 @@ class MarkerTrackControl : Region() {
         onLocationRequestProperty.set(op)
     }
 
-
     init {
         // Makes the the region mouse transparent but not children
         pickOnBoundsProperty().set(false)
     }
 
-    private val _markers = mutableListOf<ChunkMarker>()
-    private val highlights = mutableListOf<Rectangle>()
+    protected val _markers = mutableListOf<MarkerControl>()
+    protected val highlights = mutableListOf<Rectangle>()
 
     private var preDragThumbPos = DoubleArray(markers.size)
     var dragStart: Array<Point2D?> = Array(markers.size) { null }
 
-    private val focusedMarkerProperty = SimpleObjectProperty<ChunkMarker>()
+    private val focusedMarkerProperty = SimpleObjectProperty<MarkerControl>()
 
     fun refreshMarkers() {
         markers.forEachIndexed { index, chunkMarker ->
             val marker = _markers[index]
+            marker.markerIdProperty.set(chunkMarker.id)
             marker.isPlacedProperty.set(chunkMarker.placed)
             marker.markerPositionProperty.set(
                 framesToPixels(
@@ -105,20 +108,25 @@ class MarkerTrackControl : Region() {
         dragStart = Array(MARKER_COUNT) { null }
     }
 
-    private fun createMarker(i: Int, mk: ChunkMarkerModel): ChunkMarker {
-        return ChunkMarker().apply {
+    open fun createMarker(): MarkerControl = ChunkMarker()
+
+    protected fun createMarker(i: Int, mk: ChunkMarkerModel): MarkerControl {
+        val container = this
+        var startPos = 0.0
+        return createMarker().apply {
             val pixel = framesToPixels(
                 mk.frame
             ).toDouble()
 
             isPlacedProperty.set(mk.placed)
-            markerIdProperty.set(i)
+            markerIndexProperty.set(i)
             markerNumberProperty.set(mk.label)
-            canBeMovedProperty.set(i != 0)
+            canBeMovedProperty.bind(canMoveMarkerProperty)
+            canBeDeletedProperty.bind(canDeleteMarkerProperty)
             markerPositionProperty.set(pixel)
 
-            setOnMouseClicked { me ->
-                val trackWidth = this@MarkerTrackControl.width
+            setOnDragStart { me ->
+                val trackWidth = container.width
                 if (trackWidth > 0) {
                     dragStart[i] = localToParent(me.x, me.y)
                     val clampedValue: Double = Utils.clamp(
@@ -126,21 +134,22 @@ class MarkerTrackControl : Region() {
                         markerPositionProperty.value,
                         trackWidth
                     )
+                    startPos = clampedValue
                     preDragThumbPos[i] = clampedValue / trackWidth
                     me.consume()
                 }
                 this.requestFocus()
             }
 
-            setOnMouseDragged { me ->
-                if (!canBeMovedProperty.value) return@setOnMouseDragged
-                val trackWidth = this@MarkerTrackControl.width
+            setOnDrag { me ->
+                if (!canBeMovedProperty.value) return@setOnDrag
+                val trackWidth = container.width
                 if (trackWidth > 0.0) {
                     if (trackWidth > this.width) {
-                        val cur: Point2D = localToParent(me.x, me.y)
+                        val pos: Point2D = localToParent(me.x, me.y)
                         if (dragStart[i] == null) {
                             // we're getting dragged without getting a mouse press
-                            dragStart[i] = localToParent(me.x, me.y)
+                            dragStart[i] = pos
                             val clampedValue: Double = Utils.clamp(
                                 0.0,
                                 markerPositionProperty.value,
@@ -148,7 +157,7 @@ class MarkerTrackControl : Region() {
                             )
                             preDragThumbPos[i] = clampedValue / trackWidth
                         }
-                        val dragPos = cur.x - dragStart[i]!!.x
+                        val dragPos = pos.x - dragStart[i]!!.x
                         updateValue(i, preDragThumbPos[i] + dragPos / (trackWidth - this.width))
                         onPositionChangedProperty.value.invoke(i, _markers[i].markerPositionProperty.value / trackWidth)
                     }
@@ -156,15 +165,19 @@ class MarkerTrackControl : Region() {
                 }
             }
 
+            setOnDragFinish {
+                if (container.width > 0) {
+                    val start = pixelsToFrames(startPos)
+                    val end = pixelsToFrames(markerPositionProperty.value)
+                    if (start != end) {
+                        FX.eventbus.fire(MarkerMovedEvent(markerIdProperty.value, start, end))
+                    }
+                }
+            }
+
             markerPositionProperty.onChangeAndDoNow {
                 it?.let {
-                    val trackWidth = this@MarkerTrackControl.width
                     translateX = it.toDouble()
-                    if (trackWidth > 0) {
-                        markers[i].frame = pixelsToFrames(
-                            it.toDouble()
-                        )
-                    }
                 }
             }
 
@@ -174,7 +187,7 @@ class MarkerTrackControl : Region() {
         }
     }
 
-    private fun createHighlight(i: Int, mk: ChunkMarkerModel): Rectangle {
+    protected fun createHighlight(i: Int, mk: ChunkMarkerModel): Rectangle {
         return Rectangle().apply {
             when (i % 2 == 0) {
                 true -> styleClass.setAll("scrolling-waveform__highlight--primary")
@@ -182,11 +195,12 @@ class MarkerTrackControl : Region() {
             }
             mouseTransparentProperty().set(true)
             pickOnBoundsProperty().set(false)
+            isManaged = false
         }
     }
 
-    private fun preallocateMarkers() {
-        for (i in 0..MARKER_COUNT) {
+    protected open fun preallocateMarkers() {
+        for (i in 0 until MARKER_COUNT) {
             val mk = ChunkMarkerModel(0, i.toString(), false)
             val marker = createMarker(i, mk)
             val rect = createHighlight(i, mk)
@@ -204,7 +218,7 @@ class MarkerTrackControl : Region() {
             val endPos = widthProperty()
 
             if (i + 1 < highlights.size) {
-                highlights[i + 1]?.let { next ->
+                highlights[i + 1].let { next ->
                     val nextVis = next.visibleProperty()
                     val nextPos = next.translateXProperty()
                     val highlightWidth = Bindings.createDoubleBinding(
@@ -247,7 +261,9 @@ class MarkerTrackControl : Region() {
         setOnKeyPressed { e ->
             when (e.code) {
                 KeyCode.LEFT, KeyCode.RIGHT -> {
-                    moveMarker(e.code)
+                    if (canMoveMarkerProperty.value) {
+                        moveMarker(e.code)
+                    }
                     e.consume()
                 }
                 KeyCode.TAB -> {
@@ -273,9 +289,6 @@ class MarkerTrackControl : Region() {
 
     private fun moveMarker(code: KeyCode) {
         focusedMarkerProperty.value?.let { marker ->
-            val id = marker.markerIdProperty.value
-            if (id == 0) return // don't move the first marker
-
             val position = marker.markerPositionProperty.value
             val percent = position / width
             val moveTo = if (code == KeyCode.LEFT) {
@@ -283,7 +296,7 @@ class MarkerTrackControl : Region() {
             } else {
                 percent + MOVE_MARKER_INTERVAL
             }
-            updateValue(marker.markerIdProperty.value, moveTo)
+            updateValue(marker.markerIndexProperty.value, moveTo)
         }
     }
 

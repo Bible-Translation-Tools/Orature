@@ -3,8 +3,8 @@ package org.wycliffeassociates.otter.common.domain.narration
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
@@ -183,13 +183,19 @@ class Narration @AssistedInject constructor(
     fun finalizeVerse(verseIndex: Int) {
         val loc = chapterRepresentation.finalizeVerse(verseIndex, history)
         val relLoc = chapterRepresentation.absoluteToRelativeChapter(loc)
+
+        audioLoaded = false
+        loadChapterIntoPlayer()
+
         seek(relLoc)
     }
 
     fun onNewVerse(verseIndex: Int) {
-        loadChapterIntoPlayer()
         val action = NewVerseAction(verseIndex)
         execute(action)
+
+        audioLoaded = false
+        loadChapterIntoPlayer()
 
         player.seek(player.getDurationInFrames())
         writer?.start()
@@ -197,9 +203,11 @@ class Narration @AssistedInject constructor(
     }
 
     fun onRecordAgain(verseIndex: Int) {
-        loadChapterIntoPlayer()
         val action = RecordAgainAction(verseIndex)
         execute(action)
+
+        audioLoaded = false
+        loadChapterIntoPlayer()
 
         seek(activeVerses[verseIndex].location)
         writer?.start()
@@ -207,10 +215,12 @@ class Narration @AssistedInject constructor(
     }
 
     fun onSaveRecording(verseIndex: Int) {
-        loadChapterIntoPlayer()
-
         val loc = chapterRepresentation.finalizeVerse(verseIndex, history)
         val relLoc = chapterRepresentation.absoluteToRelativeChapter(loc)
+
+        audioLoaded = false
+        loadChapterIntoPlayer()
+
         seek(relLoc)
 
         writer?.pause()
@@ -365,21 +375,22 @@ class Narration @AssistedInject constructor(
         var start = chapterRepresentation.scratchAudio.totalFrames
         var end = chapterRepresentation.scratchAudio.totalFrames
 
-        segments.forEach {
-            val verseAudio = AudioFile(it.value)
+        segments.forEach { (marker, file) ->
+            val verseAudio = AudioFile(file)
             end += verseAudio.totalFrames
             val node = VerseNode(
                 true,
-                it.key
+                marker,
+                mutableListOf(IntRange(start, end))
             )
             nodes.add(node)
-            start = end
+            start = end + 1
         }
 
         onChapterEdited(nodes)
     }
 
-    fun createChapterTake(): Completable {
+    fun createChapterTake(): Single<Take> {
         return chapter
             .audio
             .getNewTakeNumber()
@@ -393,24 +404,27 @@ class Narration @AssistedInject constructor(
                         workbook.sourceMetadataSlug
                     )
                 Pair(namer.generateName(takeNumber, AudioFileFormat.WAV), takeNumber)
-            }.map { (takeName, takeNumber) ->
+            }
+            .map { (takeName, takeNumber) ->
                 val parentDir = workbook.projectFilesAccessor.getChapterAudioDir(workbook, chapter)
                 val takeFile = File(parentDir, takeName)
-                bounceAudio(takeFile)
-                Pair(takeFile, takeNumber)
-            }.map { (takeFile, takeNumber) ->
-                Take(takeFile.name, takeFile, takeNumber, MimeType.WAV, LocalDate.now())
+                val take = Take(takeFile.name, takeFile, takeNumber, MimeType.WAV, LocalDate.now())
+                chapter.audio.insertTake(take)
+                take
             }
             .map { take ->
-                chapter.audio.insertTake(take)
+                bounceAudio(take.file)
+                take
             }
-            .ignoreElement()
     }
 
-    fun bounceAudio(boundedAudio: File) {
+    private fun bounceAudio(boundedAudio: File) {
         val bytes = ByteArray(DEFAULT_BUFFER_SIZE)
-        val connection = chapterRepresentation.getAudioFileReader().use { reader ->
+
+        chapterRepresentation.getAudioFileReader().use { reader ->
             reader.open()
+            reader.seek(0)
+
             if (boundedAudio.exists() && boundedAudio.length() > 0) {
                 boundedAudio.delete()
             }
@@ -453,6 +467,10 @@ class Narration @AssistedInject constructor(
         return chapterRepresentation.totalFrames
     }
 
+    fun getTotalFrames(): Int {
+        return chapterReaderConnection.totalFrames + uncommittedRecordedFrames.get()
+    }
+
     private fun getRelativeChapterLocation(): Int {
         return if (lockedVerseIndex != null) {
             chapterReaderConnection
@@ -465,10 +483,6 @@ class Narration @AssistedInject constructor(
     fun getLocationInFrames(): Int {
         val relativeChapterLocation = getRelativeChapterLocation()
         return relativeChapterLocation + uncommittedRecordedFrames.get()
-    }
-
-    fun getTotalFrames(): Int {
-        return chapterReaderConnection.totalFrames + uncommittedRecordedFrames.get()
     }
 
     fun close() {

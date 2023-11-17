@@ -23,6 +23,7 @@ import com.jakewharton.rxrelay2.ReplayRelay
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import javafx.beans.property.SimpleStringProperty
@@ -111,7 +112,7 @@ class WorkbookDataStoreTest {
 
         private val sourceAudioAccessor = mock<SourceAudioAccessor> {
             on { getChapter(any(), any()) } doReturn SourceAudio(sourceTakeFile, 0, 10)
-            on { getChunk(any(), any(), any()) } doReturn SourceAudio(sourceTakeFile, 0, 1)
+            on { getChunk(any(), any(), any(), any()) } doReturn SourceAudio(sourceTakeFile, 0, 1)
         }
 
         private val workbook = mock<Workbook> {
@@ -142,14 +143,14 @@ class WorkbookDataStoreTest {
             return Chapter(
                 1,
                 "1",
-                "1",
+                "chapter",
                 createAssociatedAudio(),
                 listOf(),
                 listOf(),
                 lazy { chunks },
                 Single.just(1),
-                {},
-                {}
+                { Completable.complete() },
+                { Completable.complete() }
             )
         }
 
@@ -230,7 +231,7 @@ class WorkbookDataStoreTest {
         val stringProperty = SimpleStringProperty()
         stringProperty.bind(workbookDataStore.activeChapterTitleBinding())
 
-        Assert.assertEquals("Genesis 1", stringProperty.value)
+        Assert.assertEquals("Chapter 1", stringProperty.value)
     }
 
     @Test

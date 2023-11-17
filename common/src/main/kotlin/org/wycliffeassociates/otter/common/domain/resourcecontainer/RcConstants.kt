@@ -27,6 +27,7 @@ internal object RcConstants {
     const val SELECTED_TAKES_FILE = "$APP_SPECIFIC_DIR/selected.txt"
     const val CHUNKS_FILE = "$APP_SPECIFIC_DIR/chunks.json"
     const val PROJECT_MODE_FILE = "$APP_SPECIFIC_DIR/project_mode.json"
+    const val CHECKING_STATUS_FILE = "$APP_SPECIFIC_DIR/checking_status.json"
     const val LICENSE_FILE = "LICENSE.md"
     const val SOURCE_MEDIA_DIR = "media"
 }

@@ -90,6 +90,7 @@ class CreateProject @Inject constructor(
         targetLanguage: Language,
         projectMode: ProjectMode
     ): Completable {
+        val isVerseByVerse = projectMode != ProjectMode.TRANSLATION
         return collectionRepo.getRootSources()
             .flattenAsObservable {
                 it
@@ -103,7 +104,7 @@ class CreateProject @Inject constructor(
                     .deriveProjects(
                         rootCollection,
                         targetLanguage,
-                        true,
+                        isVerseByVerse,
                         projectMode
                     )
             }

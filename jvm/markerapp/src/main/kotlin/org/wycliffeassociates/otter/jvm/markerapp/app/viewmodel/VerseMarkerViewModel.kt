@@ -32,7 +32,7 @@ import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
-import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
@@ -42,8 +42,7 @@ import javafx.animation.AnimationTimer
 import javafx.beans.binding.Bindings
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseFinishedEvent
-import kotlin.math.max
-import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
 
@@ -68,10 +67,11 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
     override var markerModel: VerseMarkerModel? = null
     override val markers = observableListOf<ChunkMarkerModel>()
     override val markerCountProperty = markers.sizeProperty
-
+    override var sampleRate: Int = 0 // beware of divided by 0
+    override var totalFrames: Int = 0 // beware of divided by 0
     override var audioController: AudioPlayerController? = null
 
-    override val audioPlayer = SimpleObjectProperty<IAudioPlayer>()
+    override val waveformAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
 
     val isLoadingProperty = SimpleBooleanProperty(false)
     val isPlayingProperty = SimpleBooleanProperty(false)
@@ -82,18 +82,16 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
     override val positionProperty = SimpleDoubleProperty(0.0)
     override var imageWidthProperty = SimpleDoubleProperty()
 
-    private var sampleRate: Int = 0 // beware of divided by 0
-    private var totalFrames: Int = 0 // beware of divided by 0
     override var resumeAfterScroll = false
 
-    val timer = object : AnimationTimer() {
+    private var timer: AnimationTimer? = object : AnimationTimer() {
         override fun handle(currentNanoTime: Long) {
             calculatePosition()
         }
     }
 
     fun onDock(op: () -> Unit) {
-        timer.start()
+        timer?.start()
         isLoadingProperty.set(true)
         val audio = loadAudio()
         loadMarkers(audio)
@@ -125,7 +123,7 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
             sampleRate = it.sampleRate
             totalFrames = it.totalFrames
         }
-        audioPlayer.set(player)
+        waveformAudioPlayerProperty.set(player)
         return audio
     }
 
@@ -158,14 +156,14 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
     }
 
     private fun writeMarkers(): Completable {
-        audioPlayer.get()?.pause()
-        audioPlayer.get()?.close()
+        waveformAudioPlayerProperty.get()?.pause()
+        waveformAudioPlayerProperty.get()?.close()
         return markerModel?.writeMarkers() ?: Completable.complete()
     }
 
     fun saveAndQuit() {
         logger.info("Saving Marker data...")
-        timer.stop()
+        timer?.stop()
         compositeDisposable.clear()
         waveformMinimapImage.set(null)
         currentMarkerNumberProperty.set(-1)
@@ -189,7 +187,7 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
 
     fun initializeAudioController(slider: Slider) {
         audioController = AudioPlayerController(slider)
-        audioController?.load(audioPlayer.get())
+        audioController?.load(waveformAudioPlayerProperty.get())
         isPlayingProperty.bind(audioController!!.isPlayingProperty)
     }
 
@@ -236,17 +234,7 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
 
         val samplesPerScreenWidth = sampleRate * secondsOnScreen
         val samplesPerPixel = samplesPerScreenWidth / width
-        val pixelsInDuration = audioPlayer.get().getDurationInFrames() / samplesPerPixel
+        val pixelsInDuration = waveformAudioPlayerProperty.get().getDurationInFrames() / samplesPerPixel
         return pixelsInDuration.toDouble()
-    }
-
-    fun pixelsInHighlight(controlWidth: Double): Double {
-        if (sampleRate == 0 || totalFrames == 0) {
-            return 1.0
-        }
-
-        val framesInHighlight = sampleRate * SECONDS_ON_SCREEN
-        val framesPerPixel = totalFrames / max(controlWidth, 1.0)
-        return max(framesInHighlight / framesPerPixel, 1.0)
     }
 }

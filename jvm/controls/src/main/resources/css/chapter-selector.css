@@ -30,7 +30,11 @@
     -fx-text-fill: -wa-regular-text;
     -fx-padding: 0 20px;
     -fx-font-size: 20px;
-    -fx-max-height: infinity;
+    -fx-cursor: hand;
+}
+
+.chapter-selector__title: hover {
+    -fx-underline: true;
 }
 
 .chapter-selector__title .ikonli-font-icon {
@@ -40,7 +44,6 @@
 
 .chapter-selector .btn {
     -fx-effect: null;
-    -fx-max-height: infinity;
 }
 
 .chapter-selector .btn:focused {

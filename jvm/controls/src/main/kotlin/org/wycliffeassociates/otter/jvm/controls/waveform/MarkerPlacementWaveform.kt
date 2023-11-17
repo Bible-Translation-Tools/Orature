@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.waveform
 
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.ActionEvent
@@ -27,7 +28,8 @@ import javafx.scene.image.Image
 import javafx.scene.layout.StackPane
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
-import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
+import org.wycliffeassociates.otter.jvm.controls.marker.MarkerTrackControl
+import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
 import tornadofx.*
 
 class MarkerPlacementWaveform : StackPane() {
@@ -37,6 +39,7 @@ class MarkerPlacementWaveform : StackPane() {
     val markers = observableListOf<ChunkMarkerModel>()
     val imageWidthProperty = SimpleDoubleProperty()
     val positionProperty = SimpleDoubleProperty(0.0)
+    val canMoveMarkerProperty = SimpleBooleanProperty(true)
 
     private val onPositionChanged = SimpleObjectProperty<(Int, Double) -> Unit> { _, _ -> }
     fun setOnPositionChanged(op: (Int, Double) -> Unit) {
@@ -110,6 +113,7 @@ class MarkerPlacementWaveform : StackPane() {
     }
 
     init {
+        addClass("marker-placement-waveform")
         minHeight = 120.0
 
         nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
@@ -119,6 +123,7 @@ class MarkerPlacementWaveform : StackPane() {
         val topTrack = MarkerTrackControl().apply {
             top = this
             markers.bind(this@MarkerPlacementWaveform.markers, { it })
+            canMoveMarkerProperty.bind(this@MarkerPlacementWaveform.canMoveMarkerProperty)
             onPositionChangedProperty.bind(onPositionChanged)
             onLocationRequestProperty.bind(onLocationRequest)
         }

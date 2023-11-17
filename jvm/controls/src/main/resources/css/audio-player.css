@@ -1,0 +1,12 @@
+.audio-player__root {
+    -fx-alignment: center;
+    -fx-spacing: 16;
+}
+
+.audio-player--center {
+    -fx-alignment: center-left;
+}
+
+.audio-player__title {
+    -fx-padding: 0 0 8 0;
+}

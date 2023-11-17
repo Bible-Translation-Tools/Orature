@@ -1,0 +1,109 @@
+.top-navigation-pane {
+    -fx-alignment: center;
+    -fx-pref-height: 80px;
+    -fx-padding: 16px;
+    -fx-background-color: -wa-foreground;
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: -wa-border-light;
+}
+
+.top-navigation-pane__title-section {
+    -fx-alignment: center-left;
+}
+
+.top-navigation-pane__control-section {
+    -fx-alignment: center-right;
+    -fx-spacing: 8;
+}
+
+.chunking-step-drawer {
+    -fx-pref-width: 360;
+    -fx-background-color: -wa-foreground;
+    -fx-border-width: 0 1 0 0;
+    -fx-border-color: -wa-border-light;
+}
+
+.chunking-step-drawer:collapsed {
+    -fx-max-width: 80;
+}
+
+.chunking-step {
+    -fx-cursor: hand;
+}
+
+.chunking-step:disabled {
+    -fx-background-color: #E5E8EB;
+}
+
+.chunking-step:focused .chunking-step__header-section {
+    -fx-border-width: 2;
+    -fx-border-color: -wa-button-border;
+}
+
+.chunking-step.completed .chunking-step__title {
+    -fx-text-fill: -wa-status-complete;
+}
+
+.chunking-step.completed .chunking-step__title .complete-icon {
+    -fx-font-size: 1.8em;
+    -fx-icon-color: -wa-status-complete;
+}
+
+.chunking-step .chunking-step__title .icon {
+    -fx-font-size: 1.8em;
+    -fx-icon-color: -wa-regular-text-80;
+}
+
+.chunking-step:selected .chunking-step__title .icon {
+    -fx-icon-color: -wa-primary;
+}
+
+.chunking-step:selected .chunking-step__title {
+    -fx-text-fill: -wa-primary;
+}
+
+.chunking-step__header-section,
+.source-text-drawer__header-section {
+    -fx-alignment: center;
+    -fx-padding: 16;
+    -fx-border-width: 1;
+    -fx-border-color: transparent transparent -wa-border-light transparent;
+}
+
+.chunking-step__header-section .chunking-step__title {
+    -fx-graphic-text-gap: 0.6em;
+}
+
+.chunk-step__header-section__menu-btn .complete-icon {
+    -fx-icon-color: -wa-status-complete;
+    -fx-font-size: 1.8em;
+}
+
+.chunking-step__content-section {
+    -fx-alignment: center;
+    -fx-border-width: 1;
+    -fx-border-color: transparent transparent -wa-border-light transparent;
+    -fx-padding: 16;
+}
+
+
+.chunking-bottom__media-btn-group {
+    -fx-spacing: 6;
+}
+
+.source-text-drawer {
+    -fx-pref-width: 360;
+    -fx-background-color: -wa-foreground;
+    -fx-border-width: 0 0 0 1;
+    -fx-border-color: -wa-border-light;
+}
+
+.drawer-graphic-container {
+    -fx-alignment: center;
+    -fx-spacing: 5;
+}
+
+.audio-scroll-bar__track {
+    -fx-min-height: 16;
+    -fx-alignment: center-left;
+}

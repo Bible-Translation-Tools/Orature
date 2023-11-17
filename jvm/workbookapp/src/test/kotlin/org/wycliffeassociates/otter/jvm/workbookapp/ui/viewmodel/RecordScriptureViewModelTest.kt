@@ -155,8 +155,8 @@ class RecordScriptureViewModelTest {
                 listOf(),
                 lazy { chunks },
                 Single.just(1),
-                {},
-                {}
+                { Completable.complete() },
+                { Completable.complete() }
             )
         }
 

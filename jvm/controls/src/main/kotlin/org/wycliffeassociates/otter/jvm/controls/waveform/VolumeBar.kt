@@ -24,6 +24,7 @@ import javafx.scene.paint.Paint
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.jvm.controls.bar.VolumeBar
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlin.math.absoluteValue

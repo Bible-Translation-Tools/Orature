@@ -58,7 +58,7 @@ class NarrationHeader : View() {
                 setOnAction {
                     FX.eventbus.fire(NarrationUndoEvent())
                 }
-                enableWhen(viewModel.hasUndoProperty)
+                enableWhen(viewModel.hasUndoProperty.and(viewModel.chapterTakeBusyProperty.not()))
             }
             button {
                 tooltip = tooltip(messages["redoAction"])
@@ -67,13 +67,15 @@ class NarrationHeader : View() {
                 setOnAction {
                     FX.eventbus.fire(NarrationRedoEvent())
                 }
-                enableWhen(viewModel.hasRedoProperty)
+                enableWhen(viewModel.hasRedoProperty.and(viewModel.chapterTakeBusyProperty.not()))
             }
             narrationMenu {
                 hasUndoProperty.bind(viewModel.hasUndoProperty)
                 hasRedoProperty.bind(viewModel.hasRedoProperty)
                 hasChapterTakeProperty.bind(viewModel.hasChapterTakeProperty)
                 hasVersesProperty.bind(viewModel.hasVersesProperty)
+
+                enableWhen(viewModel.chapterTakeBusyProperty.not())
             }
             chapterSelector {
                 chapterTitleProperty.bind(viewModel.chapterTitleProperty)
@@ -100,6 +102,8 @@ class NarrationHeader : View() {
                 setOnNextChapter {
                     viewModel.selectNextChapter()
                 }
+
+                enableWhen(viewModel.chapterTakeBusyProperty.not())
             }
         }
     }
@@ -129,6 +133,7 @@ class NarrationHeaderViewModel : ViewModel() {
 
     val chapterTakeProperty = SimpleObjectProperty<Take>()
     val hasChapterTakeProperty = chapterTakeProperty.isNotNull
+    val chapterTakeBusyProperty = SimpleBooleanProperty()
 
     val hasUndoProperty = SimpleBooleanProperty()
     val hasRedoProperty = SimpleBooleanProperty()
@@ -140,7 +145,8 @@ class NarrationHeaderViewModel : ViewModel() {
             return narrationViewModel.chapterList.map {
                 val gridItem = ChapterGridItemData(
                     it.sort,
-                    it.hasSelectedAudio()
+                    it.hasSelectedAudio(),
+                    workbookDataStore.activeChapterProperty.value?.sort == it.sort
                 )
                 gridItem
             }
@@ -151,6 +157,7 @@ class NarrationHeaderViewModel : ViewModel() {
         chapterTitleProperty.bind(narrationViewModel.chapterTitleProperty)
         hasNextChapter.bind(narrationViewModel.hasNextChapter)
         hasPreviousChapter.bind(narrationViewModel.hasPreviousChapter)
+        chapterTakeBusyProperty.bind(narrationViewModel.chapterTakeBusyProperty)
 
         hasUndoProperty.bind(narrationViewModel.hasUndoProperty)
         hasRedoProperty.bind(narrationViewModel.hasRedoProperty)

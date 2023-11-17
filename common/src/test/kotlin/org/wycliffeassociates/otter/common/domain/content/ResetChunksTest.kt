@@ -139,7 +139,9 @@ class ResetChunksTest {
                         markers = listOf(),
                         played = false,
                         created = LocalDate.now(),
-                        deleted = null
+                        deleted = null,
+                        checkingStatus = CheckingStatus.UNCHECKED,
+                        checksum = null
                     )
                 } else {
                     null
@@ -217,15 +219,8 @@ class ResetChunksTest {
     }
 
     @Test
-    fun sourceFilesDeleted() {
-        Assert.assertEquals(projectFilesAccessor.sourceAudioDir.listFiles()?.size ?: 0, 2)
-        ResetChunks().resetChapter(projectFilesAccessor, chapter)
-        Assert.assertEquals(projectFilesAccessor.sourceAudioDir.listFiles()?.size ?: 0, 0)
-    }
-
-    @Test
     fun clearContentForCollectionTriggered() {
-        ResetChunks().resetChapter(projectFilesAccessor, chapter)
+        ResetChunks().resetChapter(projectFilesAccessor, chapter).blockingAwait()
         Assert.assertEquals(true, clearContentForCollectionTriggered)
 
         chapter.chunks.take(1).blockingFirst().forEach {
@@ -240,7 +235,7 @@ class ResetChunksTest {
         }
         Assert.assertEquals(1, takes.size)
 
-        ResetChunks().resetChapter(projectFilesAccessor, chapter)
+        ResetChunks().resetChapter(projectFilesAccessor, chapter).blockingAwait()
 
         val deletedTakes = chapter.chunks.take(1).blockingFirst().map { chunk ->
             chunk.audio.getAllTakes().filter { it.deletedTimestamp.value?.value != null }

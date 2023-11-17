@@ -45,7 +45,10 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.button.WaMenuButton
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.controllers.framesToTimecode
+import org.wycliffeassociates.otter.jvm.controls.controllers.remainingTimecode
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
+import tornadofx.FX.Companion.messages
 import java.text.MessageFormat
 
 enum class PlaybackRateType {
@@ -66,6 +69,9 @@ class SimpleAudioPlayer(
 
     val playTextProperty = SimpleStringProperty()
     val pauseTextProperty = SimpleStringProperty()
+    val sideTextProperty = SimpleStringProperty()
+    val titleTextProperty = SimpleStringProperty()
+    val remainingTimeProperty = SimpleStringProperty("00:00")
     var onPlaybackProgressChanged: (value: Double) -> Unit = {}
 
     private val slider = JFXSlider()
@@ -76,6 +82,7 @@ class SimpleAudioPlayer(
     private val customPlayIcon = FontIcon(MaterialDesign.MDI_PLAY)
     private val customPauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
     private val audioSampleRate = SimpleIntegerProperty(0)
+    private val audioDurationMs = SimpleIntegerProperty(0)
     private val playbackRateOptions = observableListOf(0.25, 0.50, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0)
     private var customRateProperty = SimpleDoubleProperty(1.0)
     private val menuItems: ObservableList<MenuItem> = observableListOf()
@@ -84,14 +91,9 @@ class SimpleAudioPlayer(
     private val menuButton = WaMenuButton()
 
     init {
+        addClass("audio-player__root")
         nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
 
-        playerProperty.onChange {
-            audioSampleRate.set(it?.getAudioReader()?.sampleRate ?: DEFAULT_SAMPLE_RATE)
-        }
-
-        alignment = Pos.CENTER
-        spacing = 10.0
         button {
             addClass("btn", "btn--icon")
             textProperty().bind(playPauseTextBinding())
@@ -100,6 +102,7 @@ class SimpleAudioPlayer(
             }
             graphicProperty().bind(
                 audioPlayerController.isPlayingProperty.objectBinding { isPlaying ->
+                    togglePseudoClass("active", isPlaying == true)
                     if (isPlaying == true) pauseIcon else playIcon
                 }
             )
@@ -109,28 +112,49 @@ class SimpleAudioPlayer(
             visibleProperty().bind(playButtonProperty.isNull)
             managedProperty().bind(visibleProperty())
         }
-        add(
-            slider.apply {
-                addClass("wa-slider")
-                hgrow = Priority.ALWAYS
-                value = 0.0
+        vbox {
+            hgrow = Priority.ALWAYS
+            addClass("audio-player--center")
 
-                setValueFactory {
-                    valueProperty().stringBinding {
-                        it?.let {
-                            onPlaybackProgressChanged(it.toDouble())
-                            framesToTimecode(it.toDouble(), audioSampleRate.value)
+            label(titleTextProperty){
+                addClass("h5", "h5--60", "audio-player__title")
+                visibleWhen { textProperty().isNotEmpty }
+                managedWhen(visibleProperty())
+            }
+            hbox {
+                hgrow = Priority.ALWAYS
+                spacing = 4.0
+                add(
+                    slider.apply {
+                        addClass("wa-slider")
+                        hgrow = Priority.ALWAYS
+                        value = 0.0
+
+                        setValueFactory {
+                            valueProperty().stringBinding {
+                                it?.let {
+                                    onPlaybackProgressChanged(it.toDouble())
+                                    remainingTimeProperty.set(
+                                        remainingTimecode(it.toDouble(), audioDurationMs.value, audioSampleRate.value)
+                                    )
+                                    framesToTimecode(it.toDouble(), audioSampleRate.value)
+                                }
+                            }
                         }
                     }
+                )
+                label(sideTextProperty) {
+                    addClass("h5", "h5--60")
+                    visibleWhen { textProperty().isNotEmpty }
+                    managedWhen(visibleProperty())
                 }
             }
-        )
+        }
+
 
         add(
             menuButton.apply {
-                buttonTextProperty.bind(audioPlaybackRateProperty.stringBinding {
-                    String.format("%.2fx", it)
-                })
+                tooltip(messages["playbackSpeed"])
                 sideProperty.bind(menuSideProperty)
                 items.bind(menuItems) { it }
 
@@ -143,9 +167,14 @@ class SimpleAudioPlayer(
     }
 
     private fun initController() {
-        playerProperty.onChange {
-            it?.let {
-                audioPlayerController.load(it)
+        playerProperty.onChangeAndDoNow {
+            it?.let { player ->
+                audioPlayerController.load(player)
+                audioSampleRate.set(player.getAudioReader()?.sampleRate ?: DEFAULT_SAMPLE_RATE)
+                audioDurationMs.set(player.getDurationMs())
+                remainingTimeProperty.set(
+                    remainingTimecode(slider.value, audioDurationMs.value, audioSampleRate.value)
+                )
             } ?: audioPlayerController.release()
         }
 

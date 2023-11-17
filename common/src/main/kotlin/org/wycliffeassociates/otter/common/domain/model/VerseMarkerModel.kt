@@ -16,20 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.controls.model
+package org.wycliffeassociates.otter.common.domain.model
 
 import io.reactivex.Completable
 import io.reactivex.Single
 import java.util.*
-import javafx.beans.property.SimpleIntegerProperty
-import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
-import org.wycliffeassociates.otter.common.data.audio.OratureCueType
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
-import tornadofx.*
+import org.wycliffeassociates.otter.common.domain.IUndoable
 import kotlin.math.absoluteValue
 
 private const val SEEK_EPSILON = 15_000
@@ -45,46 +42,58 @@ class VerseMarkerModel(
     private val redoStack: Deque<MarkerOperation> = ArrayDeque()
 
     private val cues = sanitizeCues(audio, markerLabels)
-    val markers: ObservableList<ChunkMarkerModel> = observableListOf()
+    val markers = mutableListOf<ChunkMarkerModel>()
 
-    val markerCountProperty = SimpleIntegerProperty(1)
+    private var placedMarkersCount = 0
     private val audioEnd = audio.totalFrames
 
     private var labelIndex = 0
-    var changesSaved = true
-        private set
 
     init {
         cues as MutableList
-        if (cues.isEmpty()) {
-            cues.add(AudioCue(0, markerLabels.firstOrNull() ?: "1"))
-            labelIndex++
-        }
         cues.sortBy { it.location }
-        markerCountProperty.value = cues.size
+        placedMarkersCount = cues.size
 
-        markers.setAll(initializeMarkers(markerTotal, cues))
+        markers.addAll(initializeMarkers(markerTotal, cues))
+    }
+
+    fun loadMarkers(chunkMarkers: List<ChunkMarkerModel>) {
+        markers.clear()
+        markers.addAll(chunkMarkers)
+        refreshMarkers()
     }
 
     fun addMarker(location: Int) {
         if (markers.size < markerTotal) {
-            changesSaved = false
-
             val label = markerLabels.getOrElse(labelIndex) { labelIndex + 1 }.toString()
             val marker = ChunkMarkerModel(AudioCue(location, label))
             val op = Add(marker)
             undoStack.push(op)
-            op.apply()
+            op.execute()
             redoStack.clear()
 
-            markers.sortBy { it.frame }
-            markers.forEachIndexed { index, chunkMarker ->
-                if (index < markerLabels.size) {
-                    chunkMarker.label = markerLabels[index]
-                }
-            }
-            markerCountProperty.value = markers.filter { it.placed }.size
+            refreshMarkers()
         }
+    }
+
+    fun deleteMarker(id: Int) {
+        if (placedMarkersCount > 0) {
+            val op = Delete(id)
+            undoStack.push(op)
+            op.execute()
+            redoStack.clear()
+
+            refreshMarkers()
+        }
+    }
+
+    fun moveMarker(id: Int, start: Int, end: Int) {
+        val op = Move(id, start, end)
+        undoStack.push(op)
+        op.execute()
+        redoStack.clear()
+
+        refreshMarkers()
     }
 
     fun undo() {
@@ -93,13 +102,7 @@ class VerseMarkerModel(
             redoStack.push(op)
             op.undo()
 
-            markers.sortBy { it.frame }
-            markers.forEachIndexed { index, chunkMarker ->
-                if (index < markerLabels.size) {
-                    chunkMarker.label = markerLabels[index]
-                }
-            }
-            markerCountProperty.value = markers.filter { it.placed }.size
+            refreshMarkers()
         }
     }
 
@@ -107,15 +110,9 @@ class VerseMarkerModel(
         if (redoStack.isNotEmpty()) {
             val op = redoStack.pop()
             undoStack.push(op)
-            op.apply()
+            op.redo()
 
-            markers.sortBy { it.frame }
-            markers.forEachIndexed { index, chunkMarker ->
-                if (index < markerLabels.size) {
-                    chunkMarker.label = markerLabels[index]
-                }
-            }
-            markerCountProperty.value = markers.filter { it.placed }.size
+            refreshMarkers()
         }
     }
 
@@ -137,7 +134,24 @@ class VerseMarkerModel(
 
     fun seekPrevious(location: Int): Int {
         val filtered = markers.filter { it.placed }
-        return findMarkerPrecedingPosition(location, filtered).frame
+        return if (filtered.isNotEmpty()) {
+            findMarkerPrecedingPosition(location, filtered).frame
+        } else {
+            0
+        }
+    }
+
+    fun hasDirtyMarkers() = undoStack.isNotEmpty()
+    fun canRedo() = redoStack.isNotEmpty()
+
+    private fun refreshMarkers() {
+        markers.sortBy { it.frame }
+        markers.forEachIndexed { index, chunkMarker ->
+            if (index < markerLabels.size) {
+                chunkMarker.label = markerLabels[index]
+            }
+        }
+        placedMarkersCount = markers.filter { it.placed }.size
     }
 
     private fun findMarkerPrecedingPosition(
@@ -164,7 +178,6 @@ class VerseMarkerModel(
             audio.clearVerseMarkers()
             cues.forEach { audio.addVerseMarker(it.location, it.label) }
             audio.update()
-            changesSaved = true
         }.ignoreElement()
     }
 
@@ -288,27 +301,10 @@ class VerseMarkerModel(
         return markerLabels.find { it.contains("-") } != null
     }
 
-    private fun initializeHighlights(markers: List<ChunkMarkerModel>): List<MarkerHighlightState> {
-        val highlightState = mutableListOf<MarkerHighlightState>()
-        markers.forEachIndexed { i, _ ->
-            val highlight = MarkerHighlightState()
-            if (i % 2 == 0) {
-                highlight.styleClass.bind(highlight.secondaryStyleClass)
-            } else {
-                highlight.styleClass.bind(highlight.primaryStyleClass)
-            }
-            highlightState.add(highlight)
-        }
-        return highlightState
-    }
-
-    private abstract inner class MarkerOperation(val markerId: Int) {
-        abstract fun apply()
-        abstract fun undo()
-    }
+    private abstract inner class MarkerOperation(val markerId: Int) : IUndoable
 
     private inner class Add(val marker: ChunkMarkerModel) : MarkerOperation(marker.id) {
-        override fun apply() {
+        override fun execute() {
             labelIndex++
             markers.add(marker)
         }
@@ -317,12 +313,14 @@ class VerseMarkerModel(
             labelIndex--
             markers.remove(marker)
         }
+
+        override fun redo() = execute()
     }
 
     private inner class Delete(id: Int) : MarkerOperation(id) {
         var marker: ChunkMarkerModel? = null
 
-        override fun apply() {
+        override fun execute() {
             labelIndex--
             marker = markers.find { it.id == markerId }
             marker?.let {
@@ -336,6 +334,27 @@ class VerseMarkerModel(
                 markers.add(it)
             }
         }
+
+        override fun redo() = execute()
+    }
+
+    private inner class Move(
+        id: Int,
+        val start: Int,
+        val end: Int
+    ): MarkerOperation(id) {
+        var marker: ChunkMarkerModel? = null
+
+        override fun execute() {
+            marker = markers.find { it.id == markerId }
+            marker?.frame = end
+        }
+
+        override fun undo() {
+            marker?.frame = start
+        }
+
+        override fun redo() = execute()
     }
 }
 

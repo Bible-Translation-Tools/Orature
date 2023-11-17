@@ -31,6 +31,7 @@ import java.io.File
 import java.time.LocalDate
 import org.junit.Assert
 import org.junit.Test
+import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.Content
@@ -369,7 +370,9 @@ class TestWorkbookRepository {
                     markers = listOf(),
                     played = false,
                     created = LocalDate.now(),
-                    deleted = null
+                    deleted = null,
+                    checkingStatus = CheckingStatus.UNCHECKED,
+                    checksum = null
                 )
             } else {
                 null
@@ -515,10 +518,10 @@ class TestWorkbookRepository {
         val workbook = buildBasicTestWorkbook()
         val chapter = workbook.source.chapters.blockingIterable().minByOrNull { it.sort }!!
 
-//        Assert.assertArrayEquals(
-//            chapter.children.blockingIterable().sortedBy { it.sort }.toTypedArray(),
-//            chapter.chunks.getValues(Array<Chunk?>(BasicTestParams.chunksPerChapter, init = {null})).sortedBy { it?.sort }.toTypedArray()
-//        )
+        Assert.assertArrayEquals(
+            chapter.children.blockingIterable().sortedBy { it.sort }.toTypedArray(),
+            chapter.chunks.value!!.sortedBy { it.sort }.toTypedArray()
+        )
     }
 
     @Test
