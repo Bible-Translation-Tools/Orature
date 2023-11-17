@@ -94,6 +94,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
 
     fun undock() {
         sourcePlayerProperty.unbind()
+        currentChunkProperty.set(null)
         selectedTakeDisposable.clear()
         disposable.clear()
         disposableListeners.forEach { it.dispose() }

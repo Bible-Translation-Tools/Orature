@@ -158,7 +158,9 @@ class BlindDraft : View() {
         logger.info("Blind Draft undocked.")
         unsubscribeEvents()
         viewModel.undockBlindDraft()
-        recorderViewModel.cancel()
+        if (mainSectionProperty.value == recordingView) {
+            recorderViewModel.cancel()
+        }
     }
 
     private fun subscribeEvents() {

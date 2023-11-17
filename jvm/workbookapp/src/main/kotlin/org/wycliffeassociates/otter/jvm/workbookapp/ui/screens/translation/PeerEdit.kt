@@ -189,7 +189,9 @@ open class PeerEdit : View() {
         timer?.stop()
         unsubscribeEvents()
         viewModel.undock()
-        recorderViewModel.cancel()
+        if (mainSectionProperty.value == recordingView) {
+            recorderViewModel.cancel()
+        }
     }
 
     private fun subscribeEvents() {
