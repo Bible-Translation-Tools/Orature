@@ -18,6 +18,7 @@ import org.wycliffeassociates.otter.jvm.controls.event.ChunkTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.TakeAction
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BlindDraftViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -57,6 +58,14 @@ class BlindDraft : View() {
     init {
         tryImportStylesheet("/css/recording-screen.css")
         tryImportStylesheet("/css/popup-menu.css")
+
+        viewModel.currentChunkProperty.onChangeWithDisposer { selectedChunk ->
+            // clears recording screen if another chunk is selected
+            if (selectedChunk != null && mainSectionProperty.value == recordingView) {
+                recorderViewModel.cancel()
+                mainSectionProperty.set(takesView)
+            }
+        }
     }
 
     private fun buildTakesArea(): VBox {
@@ -144,6 +153,8 @@ class BlindDraft : View() {
     override fun onDock() {
         super.onDock()
         logger.info("Blind Draft docked.")
+        recorderViewModel.waveformCanvas = recordingView.waveformCanvas
+        recorderViewModel.volumeCanvas = recordingView.volumeCanvas
         mainSectionProperty.set(takesView)
         viewModel.dockBlindDraft()
         subscribeEvents()
@@ -152,8 +163,9 @@ class BlindDraft : View() {
     override fun onUndock() {
         super.onUndock()
         logger.info("Blind Draft undocked.")
-        viewModel.undockBlindDraft()
         unsubscribeEvents()
+        viewModel.undockBlindDraft()
+        recorderViewModel.cancel()
     }
 
     private fun subscribeEvents() {
