@@ -3,12 +3,14 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Node
+import javafx.scene.control.ScrollPane
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.TakeSelectionAnimationMediator
+import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChunkTakeCard
@@ -80,14 +82,22 @@ class BlindDraft : View() {
                 label(messages["available_takes"]).addClass("h5", "h5--60")
                 vgrow = Priority.ALWAYS
 
-                vbox {
-                    addClass("take-list")
-                    animationMediator.nodeList = childrenUnmodifiable
-                    bindChildren(viewModel.availableTakes) { take ->
-                        ChunkTakeCard(take).apply {
-                            animationMediatorProperty.set(animationMediator)
+                scrollpane {
+                    vgrow = Priority.ALWAYS
+                    isFitToWidth = true
+                    hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
+
+                    vbox {
+                        addClass("take-list")
+                        animationMediator.nodeList = childrenUnmodifiable
+                        bindChildren(viewModel.availableTakes) { take ->
+                            ChunkTakeCard(take).apply {
+                                animationMediatorProperty.set(animationMediator)
+                            }
                         }
                     }
+
+                    runLater { customizeScrollbarSkin() }
                 }
             }
             hbox {
