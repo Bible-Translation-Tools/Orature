@@ -87,7 +87,7 @@ class Narration @AssistedInject constructor(
     val onActiveVersesUpdated: PublishSubject<List<AudioMarker>>
         get() = chapterRepresentation.onActiveVersesUpdated
 
-    private val firstVerse: VerseMarker
+    private val firstVerse: AudioMarker
 
     private var writer: WavFileWriter? = null
 
