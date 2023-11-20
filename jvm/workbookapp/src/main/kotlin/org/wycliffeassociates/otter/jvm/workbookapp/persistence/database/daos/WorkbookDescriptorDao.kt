@@ -10,6 +10,19 @@ class WorkbookDescriptorDao(
     private val instanceDsl: DSLContext
 ) {
 
+    fun fetch(sourceId: Int, targetId: Int, typeId: Int, dsl: DSLContext = instanceDsl): WorkbookDescriptorEntity? {
+        return dsl
+            .select()
+            .from(WORKBOOK_DESCRIPTOR_ENTITY)
+            .where(WORKBOOK_DESCRIPTOR_ENTITY.SOURCE_FK.eq(sourceId))
+            .and(WORKBOOK_DESCRIPTOR_ENTITY.TARGET_FK.eq(targetId))
+            .and(WORKBOOK_DESCRIPTOR_ENTITY.TYPE_FK.eq(typeId))
+            .fetchOne()
+            ?.let {
+                RecordMappers.mapToWorkbookDescriptorEntity(it)
+            }
+    }
+
     fun fetchById(id: Int, dsl: DSLContext = instanceDsl): WorkbookDescriptorEntity? {
         return dsl
             .select()

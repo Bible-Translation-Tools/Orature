@@ -42,7 +42,7 @@ class DeleteProject @Inject constructor(
 
     fun delete(workbook: Workbook, deleteFiles: Boolean): Completable {
         // Order matters here, files won't remove anything from the database
-        // delete resources will only remove take entries, but needs derived RCs and links in tact
+        // delete resources will only remove take entries, but needs derived RCs and links intact
         // delete project may remove derived RCs and links, and thus needs to be last
         val targetProject = workbook.target.toCollection()
         return deleteFiles(workbook, deleteFiles)
@@ -82,9 +82,7 @@ class DeleteProject @Inject constructor(
             .fromAction {
                 list.map { workbookRepository.get(it.sourceCollection, it.targetCollection) }
                     .forEach {
-                        if (it.projectFilesAccessor.isInitialized()) {
-                            delete(it, true).blockingAwait() // avoid concurrent accesses to the same file
-                        }
+                        delete(it, true).blockingAwait() // avoid concurrent accesses to the same file
                     }
             }
             .andThen(workbookDescriptorRepo.delete(list))
