@@ -32,6 +32,7 @@ class ChunkMarker : MarkerControl() {
 
         onMouseClickedProperty().bind(onDragStartProperty)
         onMouseDraggedProperty().bind(onDragProperty)
+        onMouseReleasedProperty().bind(onDragFinishProperty)
     }
 
     override fun createDefaultSkin(): Skin<ChunkMarker> {
