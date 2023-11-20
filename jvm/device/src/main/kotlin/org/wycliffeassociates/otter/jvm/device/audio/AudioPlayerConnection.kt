@@ -112,6 +112,7 @@ internal class AudioPlayerConnection(
     }
 
     override fun pause() {
+        connectionFactory.load(state)
         connectionFactory.currentConnection?.id?.let {
             if (it == id) {
                 state.position = connectionFactory.player.getLocationInFrames()
