@@ -14,10 +14,10 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
+import org.wycliffeassociates.otter.jvm.controls.chapterselector.chapterSelector
 import org.wycliffeassociates.otter.jvm.controls.event.ChapterReturnFromPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.OpenChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.chapterSelector
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.popup.ChapterGridMenu
@@ -188,7 +188,7 @@ class NarrationHeaderViewModel : ViewModel() {
         narrationViewModel.chapterList
             .elementAtOrNull(nextIndex)
             ?.let {
-                fire(OpenChapterEvent(nextIndex))
+                fire(OpenChapterEvent(it.sort))
             }
     }
 
