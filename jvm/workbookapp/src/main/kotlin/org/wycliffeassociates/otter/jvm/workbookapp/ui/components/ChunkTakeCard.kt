@@ -52,7 +52,7 @@ class ChunkTakeCard(take: TakeCardModel) : HBox() {
                     FX.primaryStage
                 )
                 menu.x = screenBound.minX - menu.width + this.width
-                menu.y = screenBound.maxY
+                menu.y = screenBound.centerY
             }
         }
         button {

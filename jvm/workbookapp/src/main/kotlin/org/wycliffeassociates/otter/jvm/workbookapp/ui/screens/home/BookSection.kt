@@ -59,7 +59,7 @@ class BookSection(
                             FX.primaryStage
                         )
                         projectsOptionMenu.x = screenBound.minX
-                        projectsOptionMenu.y = screenBound.maxY
+                        projectsOptionMenu.y = screenBound.centerY
                     }
                 }
                 label(titleProperty) { addClass("h4") }
