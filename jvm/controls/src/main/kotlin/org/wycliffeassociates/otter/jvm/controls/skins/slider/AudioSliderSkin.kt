@@ -27,8 +27,8 @@ class AudioSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
         }
         control.valueProperty().onChangeAndDoNow { moveThumb() }
         control.widthProperty().onChangeAndDoNow {
-            moveThumb()
             resizeThumbWidth()
+            moveThumb()
         }
         thumb.setOnMouseDragged {
             val x = control.sceneToLocal(it.sceneX, it.sceneY).x

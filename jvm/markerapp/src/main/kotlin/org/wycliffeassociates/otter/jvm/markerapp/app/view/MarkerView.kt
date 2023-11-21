@@ -22,6 +22,7 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import javafx.geometry.Orientation
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
+import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
@@ -63,6 +64,10 @@ class MarkerView : PluginEntrypoint() {
         subscribe<PluginCloseRequestEvent> {
             unsubscribe()
             viewModel.saveAndQuit()
+        }
+
+        subscribe<MarkerMovedEvent> {
+            viewModel.moveMarker(it.markerId, it.start, it.end)
         }
     }
 

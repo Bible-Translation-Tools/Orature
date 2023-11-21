@@ -62,6 +62,7 @@ import org.wycliffeassociates.resourcecontainer.entity.Manifest
 import org.wycliffeassociates.resourcecontainer.entity.dublincore
 import org.wycliffeassociates.resourcecontainer.entity.project
 import java.io.File
+import java.lang.Exception
 import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.inject.Inject
@@ -105,21 +106,25 @@ class CollectionRepository @Inject constructor(
                 // 2. Load the resource container
                 val metadata = project.resourceContainer
                 if (metadata != null) {
-                    ResourceContainer.load(metadata.path).use { container ->
-                        // 3. Remove the project from the manifest
-                        container.manifest.projects = container
-                            .manifest
-                            .projects
-                            .filter { it.identifier != project.slug }
-                        // 4a. If the manifest has more projects, write out the new manifest
-                        if (container.manifest.projects.isNotEmpty()) {
-                            container.writeManifest()
-                        } else {
-                            // 4b. If the manifest has no projects left,
-                            // delete the RC folder and the metadata from the database
-                            metadata.path.deleteRecursively()
-                            metadataDao.delete(metadataMapper.mapToEntity(metadata))
+                    try {
+                        ResourceContainer.load(metadata.path).use { container ->
+                            // 3. Remove the project from the manifest
+                            container.manifest.projects = container
+                                .manifest
+                                .projects
+                                .filter { it.identifier != project.slug }
+                            // 4a. If the manifest has more projects, write out the new manifest
+                            if (container.manifest.projects.isNotEmpty()) {
+                                container.writeManifest()
+                            } else {
+                                // 4b. If the manifest has no projects left,
+                                // delete the RC folder and the metadata from the database
+                                metadata.path.deleteRecursively()
+                                metadataDao.delete(metadataMapper.mapToEntity(metadata))
+                            }
                         }
+                    } catch (e: Exception) {
+                        log.info("Manifest doesn't exist, so no changes needed. Project : $project.")
                     }
                 }
             }
@@ -463,15 +468,23 @@ class CollectionRepository @Inject constructor(
                         }
                     }
 
-                    // copy the content under chapter-level
-                    if (verseByVerse) {
-                        copyContent(dsl, sourceCollectionEntity.id, mainDerivedMetadata.id)
-                        linkDerivativeContent(dsl, sourceCollectionEntity.id, projectEntity.id)
-                    } else {
-                        copyMetaContent(dsl, sourceCollectionEntity.id, mainDerivedMetadata.id)
-                    }
+                    val workbookDescriptor = database.workbookDescriptorDao.fetch(
+                        sourceCollection.id,
+                        projectEntity.id,
+                        workbookTypeDao.fetchId(mode)
+                    )
 
-                    insertWorkbookDescriptor(sourceCollection.id, projectEntity.id, mode)
+                    if (workbookDescriptor == null) {
+                        // copy the content under chapter-level
+                        if (verseByVerse) {
+                            copyContent(dsl, sourceCollectionEntity.id, mainDerivedMetadata.id)
+                            linkDerivativeContent(dsl, sourceCollectionEntity.id, projectEntity.id)
+                        } else {
+                            copyMetaContent(dsl, sourceCollectionEntity.id, mainDerivedMetadata.id)
+                        }
+
+                        insertWorkbookDescriptor(sourceCollection.id, projectEntity.id, mode)
+                    }
 
                     return@transactionResult collectionMapper.mapFromEntity(
                         projectEntity,
