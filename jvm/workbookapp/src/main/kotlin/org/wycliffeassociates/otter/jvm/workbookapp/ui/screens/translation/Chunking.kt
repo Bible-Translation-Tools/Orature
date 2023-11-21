@@ -86,7 +86,7 @@ class Chunking : View() {
                     button {
                         addClass("btn", "btn--icon")
                         graphic = FontIcon(MaterialDesign.MDI_SKIP_PREVIOUS)
-
+                        tooltip(messages["previousChunk"])
                         action { viewModel.seekPrevious() }
                     }
                     button {
@@ -111,7 +111,7 @@ class Chunking : View() {
                     button {
                         addClass("btn", "btn--icon")
                         graphic = FontIcon(MaterialDesign.MDI_SKIP_NEXT)
-
+                        tooltip(messages["nextChunk"])
                         action { viewModel.seekNext() }
                     }
                 }
