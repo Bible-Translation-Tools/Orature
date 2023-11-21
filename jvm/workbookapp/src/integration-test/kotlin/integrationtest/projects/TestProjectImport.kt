@@ -137,7 +137,7 @@ class TestProjectImport {
                 RowCount(
                     contents = mapOf(
                         META to 2378,
-                        TEXT to 31104
+                        TEXT to 31124
                     ),
                     collections = 2511,
                     links = 0
@@ -161,7 +161,7 @@ class TestProjectImport {
                 RowCount(
                     contents = mapOf(
                         META to 2378,
-                        TEXT to 31104
+                        TEXT to 31124
                     ),
                     collections = 2511,
                     links = 0
