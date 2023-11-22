@@ -398,7 +398,6 @@ class ChapterRepresentationTest {
         val verseNumber = 7
         val markerRange = chapterRepresentation.getRangeOfMarker(VerseMarker(verseNumber, verseNumber, 0))
 
-        // TODO: figure out why this test failed.
         Assert.assertEquals(44100 * verseNumber until 44100 * (verseNumber + 1), markerRange)
     }
 
