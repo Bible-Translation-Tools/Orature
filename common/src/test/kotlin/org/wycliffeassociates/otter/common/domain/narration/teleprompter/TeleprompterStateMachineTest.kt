@@ -55,7 +55,6 @@ class TeleprompterStateMachineTest {
 
         for(i in newContext.indices) {
             if(i == index) {
-                // Verify that newContext[index] is in the RECORDING_PAUSED state.
                 Assert.assertEquals(TeleprompterItemState.RECORDING_PAUSED, newContext[i])
             } else {
                 Assert.assertEquals(TeleprompterItemState.RECORD_DISABLED, newContext[i])
@@ -64,7 +63,7 @@ class TeleprompterStateMachineTest {
     }
 
     @Test
-    fun `transition from RECORD_AGAIN, RECORD_AGAIN_PAUSED, then NEXT with first two active and recording second verse`() {
+    fun `transition from RECORD_AGAIN then RECORD_AGAIN_PAUSED with first two active and recording second verse`() {
         val audioMarkers = makeAudioMarkerLists(10)
         val teleprompterStateMachine = TeleprompterStateMachine(audioMarkers)
         val activeVerses = MutableList(10) {false}
@@ -82,15 +81,13 @@ class TeleprompterStateMachineTest {
 
         Assert.assertEquals(TeleprompterItemState.RECORD_AGAIN_PAUSED, newContext[index])
 
-        newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.NEXT, index + 1)
-
         for(i in newContext.indices) {
-            if(i < index + 1) {
-                Assert.assertEquals(TeleprompterItemState.RECORD_AGAIN, newContext[i])
+            if(i < index) {
+                Assert.assertEquals(TeleprompterItemState.RECORD_AGAIN_DISABLED, newContext[i])
+            } else if(i == index) {
+                Assert.assertEquals(TeleprompterItemState.RECORD_AGAIN_PAUSED, newContext[i])
             } else if (i > index + 1) {
                 Assert.assertEquals(TeleprompterItemState.RECORD_DISABLED, newContext[i])
-            } else {
-                Assert.assertEquals(TeleprompterItemState.RECORD, newContext[i])
             }
         }
     }
@@ -106,13 +103,13 @@ class TeleprompterStateMachineTest {
         val index = 0
 
         // Start recording
-        teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD, index)
+        var newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD, index)
 
         // Pause recording
-        teleprompterStateMachine.transition(TeleprompterStateTransition.PAUSE_RECORDING, index)
+        newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.PAUSE_RECORDING, index)
 
         // Resume recording
-        val newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.RESUME_RECORDING, index)
+        newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.RESUME_RECORDING, index)
 
         for(i in newContext.indices) {
             if(i == index) {
