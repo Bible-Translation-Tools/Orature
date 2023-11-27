@@ -143,6 +143,7 @@ open class PeerEdit : View() {
 
             viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
             viewModel.cleanUpWaveform = ::freeImages
+            minWidth = 0.0
         }
     }
 
@@ -219,6 +220,7 @@ open class PeerEdit : View() {
             setPixelsInHighlightFunction { viewModel.pixelsInHighlight(it) }
             player.bind(viewModel.waveformAudioPlayerProperty)
             secondsToHighlightProperty.set(SECONDS_ON_SCREEN)
+            minWidth = 0.0
         }
     }
 }

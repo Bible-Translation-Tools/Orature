@@ -34,7 +34,7 @@ import javafx.scene.layout.StackPane
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.UIVersion
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
-import org.wycliffeassociates.otter.jvm.controls.marker.MarkersContainer
+import org.wycliffeassociates.otter.jvm.controls.marker.MarkerTrackControl
 
 import tornadofx.*
 
@@ -157,7 +157,7 @@ class WaveformFrame(
 
                     topTrack?.let {
                         add(it.apply {
-                            val me = (it as MarkersContainer)
+                            val me = (it as MarkerTrackControl)
                             me.onSeekPreviousProperty.bind(this@WaveformFrame.onSeekPreviousProperty)
                             me.onSeekNextProperty.bind(this@WaveformFrame.onSeekNextProperty)
                         })

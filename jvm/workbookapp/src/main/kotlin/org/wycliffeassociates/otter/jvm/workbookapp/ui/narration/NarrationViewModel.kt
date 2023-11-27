@@ -444,11 +444,17 @@ class NarrationViewModel : ViewModel() {
             }
         }
         val lastIndex = narratableList.indexOfFirst { !it.hasRecording }
+        var scrollToVerse = 0
+
         if (lastIndex != -1) {
             narratableList.get(lastIndex).state = TeleprompterItemState.RECORD
-            FX.eventbus.fire(TeleprompterSeekEvent(lastIndex))
+            scrollToVerse = lastIndex
         }
+
+        narratableList.setAll(narratableList.map { it })
+
         refreshTeleprompter()
+        FX.eventbus.fire(TeleprompterSeekEvent(scrollToVerse))
     }
 
     private fun setHasNextAndPreviousChapter(chapter: Chapter) {

@@ -72,6 +72,6 @@ class AudioSlider(
     }
 
     fun updateMarker(id: Int, position: Double) {
-        (skin as WaveformSliderSkin).updateMarker(id, position)
+        (skin as? WaveformSliderSkin)?.updateMarker(id, position)
     }
 }
