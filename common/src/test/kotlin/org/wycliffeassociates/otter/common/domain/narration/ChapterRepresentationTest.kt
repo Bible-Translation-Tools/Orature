@@ -511,7 +511,9 @@ class ChapterRepresentationTest {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
 
-        val hasRemaining = chapterRepresentation.ChapterRepresentationConnection(end = null).hasRemaining()
+        val hasRemaining = chapterRepresentation.ChapterRepresentationConnection(end = null).apply {
+            open()
+        }.hasRemaining()
         Assert.assertEquals(true, hasRemaining)
     }
 
@@ -528,7 +530,9 @@ class ChapterRepresentationTest {
         val verseIndexToLockTo = 5
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
-        val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null)
+        val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null).apply {
+            open()
+        }
 
         chapterRepresentationConnection.lockToVerse(verseIndexToLockTo)
         val hasRemaining = chapterRepresentationConnection.hasRemaining()
@@ -714,7 +718,9 @@ class ChapterRepresentationTest {
 
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
-        val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null)
+        val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null).apply {
+            open()
+        }
 
         // Gets the full first verse
         val byteArray = ByteArray(44100 * 2) { 1 }
@@ -739,7 +745,9 @@ class ChapterRepresentationTest {
 
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
-        val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null)
+        val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null).apply {
+            open()
+        }
 
         val byteArray = ByteArray(44100 * secondsOfAudio * 2) { 1 }
         val responseBuffer = ByteBuffer.allocate(44100 * secondsOfAudio * 2)
@@ -774,7 +782,9 @@ class ChapterRepresentationTest {
 
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses, 44100)
-        val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null)
+        val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null).apply {
+            open()
+        }
 
         chapterRepresentation.onVersesUpdated()
 
@@ -811,7 +821,9 @@ class ChapterRepresentationTest {
 
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
-        val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null)
+        val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null).apply {
+            open()
+        }
 
         val byteArray = ByteArray(44100 * secondsOfAudio * 2) { 1 }
         val responseBuffer = ByteBuffer.allocate(44100 * secondsOfAudio * 2)
@@ -847,7 +859,9 @@ class ChapterRepresentationTest {
 
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         initializeVerseNodeList(chapterRepresentation.totalVerses)
-        val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null)
+        val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null).apply {
+            open()
+        }
 
         val byteArray = ByteArray(44100 * secondsOfAudio * 2) { 1 }
         val responseBuffer = ByteBuffer.allocate(44100 * secondsOfAudio * 2)
