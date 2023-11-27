@@ -115,7 +115,9 @@ class HomePageViewModel2 : ViewModel() {
     }
 
     fun loadProjects(onFinishCallback: () -> Unit = {}) {
-        isLoadingProperty.set(true)
+        runLater {
+            isLoadingProperty.set(true)
+        }
         // reset sort to default book order
         sortedBooks.comparator = Comparator { wb1, wb2 ->
             wb1.sort.compareTo(wb2.sort)

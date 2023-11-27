@@ -66,7 +66,6 @@ class HomePage2 : View() {
     private val exportProjectViewModel: ExportProjectViewModel by inject()
     private val navigator: NavigationMediator by inject()
 
-    private lateinit var loadingModal: LoadingModal
     private val mainSectionProperty = SimpleObjectProperty<Node>(null)
     private val breadCrumb = BreadCrumb().apply {
         titleProperty.set(messages["home"])
@@ -316,17 +315,17 @@ class HomePage2 : View() {
     }
 
     private fun setUpLoadingModal() {
-        loadingModal = LoadingModal().apply {
+        find<LoadingModal>().apply {
             orientationProperty.set(settingsViewModel.orientationProperty.value)
             themeProperty.set(settingsViewModel.appColorMode.value)
+            viewModel.isLoadingProperty.onChangeWithDisposer {
+                if (it == true) {
+                    open()
+                } else {
+                    close()
+                }
+            }.also { listeners.add(it) }
         }
-        viewModel.isLoadingProperty.onChangeWithDisposer {
-            if (it == true) {
-                loadingModal.open()
-            } else {
-                loadingModal.close()
-            }
-        }.also { listeners.add(it) }
     }
 
     private fun exitWizard() {
