@@ -146,7 +146,7 @@ internal class ChapterRepresentation(
     private fun publishActiveVerses() {
         val updatedVerses = if (activeVerses.isNotEmpty()) {
             activeVerses.map {
-                val newLoc = absoluteToRelativeChapter(it.firstFrame())
+                val newLoc = audioLocationToLocationInChapter(it.firstFrame())
                 logger.info("Verse ${it.marker.label} absolute loc is ${it.firstFrame()} relative is ${newLoc}")
                 it.copyMarker(location = newLoc)
             }
@@ -188,7 +188,7 @@ internal class ChapterRepresentation(
      * Converts the absolute audio frame position within the scratch audio file to a "relative" position as if the
      * audio only contained the segments referenced by the active verse nodes.
      */
-    fun absoluteToRelativeChapter(absoluteFrame: Int): Int {
+    fun audioLocationToLocationInChapter(absoluteFrame: Int): Int {
         val verses = activeVerses
         val verse = findVerse(absoluteFrame)
         verse?.let {
@@ -332,7 +332,7 @@ internal class ChapterRepresentation(
         fun absoluteToRelative(absoluteFrame: Int): Int {
             val lockedVerse = lockToVerse.get()
             return if (lockedVerse == CHAPTER_UNLOCKED) {
-                absoluteToRelativeChapter(absoluteFrame)
+                audioLocationToLocationInChapter(absoluteFrame)
             } else {
                 absoluteToRelativeVerse(absoluteFrame, lockedVerse)
             }
@@ -496,9 +496,9 @@ internal class ChapterRepresentation(
             position = verses[index + 1].firstFrame() * frameSizeInBytes
         }
 
-        fun relativeVerseToRelativeChapter(sample: Int, verseIndex: Int): Int {
+        fun locationInVerseToLocationInChapter(sample: Int, verseIndex: Int): Int {
             val verse = activeVerses[verseIndex]
-            return sample + absoluteToRelativeChapter(verse.firstFrame())
+            return sample + audioLocationToLocationInChapter(verse.firstFrame())
         }
 
         @Synchronized
@@ -508,7 +508,7 @@ internal class ChapterRepresentation(
             // relativeToAbsolute
             val lockedVerse = lockToVerse.get()
             val relativeChapterSample = if (lockedVerse != CHAPTER_UNLOCKED) {
-                relativeVerseToRelativeChapter(sample, lockedVerse)
+                locationInVerseToLocationInChapter(sample, lockedVerse)
             } else {
                 sample
             }
