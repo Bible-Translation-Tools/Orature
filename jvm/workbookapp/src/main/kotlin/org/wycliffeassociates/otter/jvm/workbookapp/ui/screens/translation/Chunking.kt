@@ -56,7 +56,6 @@ class Chunking : View() {
                     positionProperty.bind(viewModel.positionProperty)
                     canMoveMarkerProperty.set(true)
                     canDeleteMarkerProperty.set(true)
-                    imageWidthProperty.bind(viewModel.imageWidthProperty)
 
                     setUpWaveformActionHandlers()
                     cleanUpWaveform = ::freeImages

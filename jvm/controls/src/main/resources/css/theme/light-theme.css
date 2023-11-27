@@ -104,8 +104,8 @@
     -wa-secondary-btn-background-pressed: -wa-primary-10;
     -wa-secondary-btn-border: -wa-border-light;
     -wa-btn-icon-background: -wa-white;
-    -wa-btn-icon-background-hover: -wa-black-05;
-    -wa-btn-icon-background-pressed: -wa-black-10;
+    -wa-btn-icon-background-hover: #f0f0f0;
+    -wa-btn-icon-background-pressed: #e6e6e6;
     -wa-btn-icon-background-selected: -wa-primary-10;
     -wa-btn-icon-border-color: -wa-black-20;
     -wa-filter-button-background: -wa-black-10;

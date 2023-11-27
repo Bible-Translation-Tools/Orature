@@ -95,7 +95,6 @@ class Consume : View() {
                     positionProperty.bind(viewModel.positionProperty)
                     canMoveMarkerProperty.set(false)
                     canDeleteMarkerProperty.set(false)
-                    imageWidthProperty.bind(viewModel.imageWidthProperty)
 
                     setUpWaveformActionHandlers()
                     cleanUpWaveform = ::freeImages

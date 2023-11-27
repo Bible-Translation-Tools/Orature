@@ -151,6 +151,9 @@ internal class AudioPlayerConnection(
     }
 
     override fun seek(position: Int) {
+        if (connectionFactory.currentConnection?.id != id) {
+            connectionFactory.load(state)
+        }
         connectionFactory.player.seek(position)
     }
 
