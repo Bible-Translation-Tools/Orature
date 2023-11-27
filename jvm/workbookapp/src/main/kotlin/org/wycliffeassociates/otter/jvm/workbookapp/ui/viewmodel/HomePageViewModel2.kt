@@ -135,16 +135,11 @@ class HomePageViewModel2 : ViewModel() {
         val projectGroup = selectedProjectGroupProperty.value
         workbookDS.currentModeProperty.set(projectGroup.mode)
 
-        val projects = workbookRepo.getProjects().blockingGet()
-        val existingProject = projects.firstOrNull { existingProject ->
-            existingProject.source.language.slug == projectGroup.sourceLanguage &&
-                    existingProject.target.language.slug == projectGroup.targetLanguage &&
-                    existingProject.target.slug == workbookDescriptor.slug
-        }
-
-        existingProject?.let { workbook ->
-            openWorkbook(workbook, projectGroup.mode)
-        }
+        val workbook = workbookRepo.get(
+            workbookDescriptor.sourceCollection,
+            workbookDescriptor.targetCollection
+        )
+        openWorkbook(workbook, projectGroup.mode)
     }
 
     /**
