@@ -3,13 +3,18 @@ package org.wycliffeassociates.otter.common.domain.narration
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.jsontype.NamedType
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.reactivex.rxkotlin.toObservable
 import io.reactivex.subjects.PublishSubject
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
+import org.wycliffeassociates.otter.common.data.audio.AudioMarker
+import org.wycliffeassociates.otter.common.data.audio.BookMarker
+import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
+import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.device.AudioFileReaderProvider
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
@@ -53,9 +58,17 @@ internal class ChapterRepresentation(
     internal val totalVerses: MutableList<VerseNode>
 
     private lateinit var serializedVersesFile: File
-    private val activeVersesMapper = ObjectMapper().registerKotlinModule()
+    private val activeVersesMapper = ObjectMapper()
+        .registerKotlinModule()
+        .apply {
+            this.registerSubtypes(
+                NamedType(VerseMarker::class.java, "VerseMarker"),
+                NamedType(ChapterMarker::class.java, "ChapterMarker"),
+                NamedType(BookMarker::class.java, "BookMarker")
+            )
+        }
 
-    val onActiveVersesUpdated = PublishSubject.create<List<VerseMarker>>()
+    val onActiveVersesUpdated = PublishSubject.create<List<AudioMarker>>()
 
     // Represents an ever growing tape of audio. This tape may have "dirty" sectors corresponding to outdated
     // content, which needs to be removed before finalizing the audio.
@@ -72,15 +85,27 @@ internal class ChapterRepresentation(
         return chapter
             .chunks
             .take(1)
-            .flatMap { it.toObservable() }
-            .map { chunk ->
-                VerseMarker(chunk.start, chunk.end, 0)
+            .map { chunks ->
+                chunks.map { chunk -> VerseMarker(chunk.start, chunk.end, 0) }
             }
+            .map { insertTitles(it) }
+            .flatMap { it.toObservable() }
             .map { marker ->
                 VerseNode(false, marker)
             }
             .toList()
             .blockingGet()
+    }
+
+    private fun insertTitles(verseMarkers: List<AudioMarker>): List<AudioMarker> {
+        val versesAndTitles = verseMarkers.toMutableList()
+        versesAndTitles.add(0, ChapterMarker(chapter.sort, 0))
+
+        val addBookTitle = chapter.sort == 1
+        if (addBookTitle) {
+            versesAndTitles.add(0, BookMarker(workbook.source.slug, 0))
+        }
+        return versesAndTitles
     }
 
     fun loadFromSerializedVerses() {
@@ -123,7 +148,7 @@ internal class ChapterRepresentation(
             activeVerses.map {
                 val newLoc = audioLocationToLocationInChapter(it.firstFrame())
                 logger.info("Verse ${it.marker.label} absolute loc is ${it.firstFrame()} relative is ${newLoc}")
-                it.marker.copy(location = newLoc)
+                it.copyMarker(location = newLoc)
             }
         } else listOf()
 
@@ -213,7 +238,7 @@ internal class ChapterRepresentation(
         return if (verses.isNotEmpty()) verses.last().lastFrame() else scratchAudio.totalFrames
     }
 
-    fun getRangeOfMarker(verse: VerseMarker): IntRange? {
+    fun getRangeOfMarker(verse: AudioMarker): IntRange? {
         val verses = activeVerses.map { it }
         if (verses.isEmpty()) return null
 

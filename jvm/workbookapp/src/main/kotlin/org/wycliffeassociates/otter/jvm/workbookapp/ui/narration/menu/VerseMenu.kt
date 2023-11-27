@@ -8,6 +8,7 @@ import javafx.event.EventTarget
 import javafx.scene.control.MenuButton
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.controls.event.OpenInAudioPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PlayVerseEvent
@@ -21,7 +22,7 @@ class VerseMenu : MenuButton() {
     val importVerseTextProperty = SimpleStringProperty(messages["importVerse"])
     val editVerseTextProperty = SimpleStringProperty(messages["openIn"])
 
-    val verseProperty = SimpleObjectProperty<VerseMarker>()
+    val verseProperty = SimpleObjectProperty<AudioMarker>()
     val verseIndexProperty = SimpleIntegerProperty()
     val isRecordingProperty = SimpleBooleanProperty()
 

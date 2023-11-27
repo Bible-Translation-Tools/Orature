@@ -68,12 +68,12 @@ class Narration @AssistedInject constructor(
             return verses
         }
 
-    val activeVerses: List<VerseMarker>
+    val activeVerses: List<AudioMarker>
         get() {
             val verses = chapterRepresentation
                 .activeVerses
                 .map {
-                    it.marker.copy(
+                    it.copyMarker(
                         location = chapterRepresentation.audioLocationToLocationInChapter(it.firstFrame())
                     )
                 }
@@ -84,10 +84,10 @@ class Narration @AssistedInject constructor(
         return chapterRepresentation.versesWithRecordings()
     }
 
-    val onActiveVersesUpdated: PublishSubject<List<VerseMarker>>
+    val onActiveVersesUpdated: PublishSubject<List<AudioMarker>>
         get() = chapterRepresentation.onActiveVersesUpdated
 
-    private val firstVerse: VerseMarker
+    private val firstVerse: AudioMarker
 
     private var writer: WavFileWriter? = null
 
@@ -138,9 +138,8 @@ class Narration @AssistedInject constructor(
         }
     }
 
-    private fun getFirstVerseMarker(): VerseMarker {
-        val firstVerse = chapter.getDraft().blockingFirst()
-        return VerseMarker(firstVerse.start, firstVerse.end, 0)
+    private fun getFirstVerseMarker(): AudioMarker {
+        return chapterRepresentation.totalVerses.first().marker
     }
 
     fun loadFromSelectedChapterFile() {
@@ -291,7 +290,7 @@ class Narration @AssistedInject constructor(
         )
     }
 
-    fun loadSectionIntoPlayer(verse: VerseMarker) {
+    fun loadSectionIntoPlayer(verse: AudioMarker) {
         if (!audioLoaded) {
             player.load(chapterReaderConnection)
             audioLoaded = true
@@ -438,7 +437,7 @@ class Narration @AssistedInject constructor(
             wav.update()
             val oaf = OratureAudioFile(boundedAudio)
             for (verse in activeVerses) {
-                oaf.addMarker<VerseMarker>(verse.copy())
+                oaf.addMarker<AudioMarker>(verse.clone())
             }
             oaf.update()
         }

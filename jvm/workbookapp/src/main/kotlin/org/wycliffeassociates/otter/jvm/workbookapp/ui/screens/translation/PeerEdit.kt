@@ -5,6 +5,7 @@ import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
 import javafx.animation.AnimationTimer
 import javafx.beans.property.SimpleObjectProperty
+import javafx.geometry.Side
 import javafx.scene.Node
 import javafx.scene.control.Slider
 import javafx.scene.layout.Priority
@@ -23,6 +24,8 @@ import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
 import org.wycliffeassociates.otter.jvm.controls.waveform.startAnimationTimer
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.PeerEditViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
@@ -43,6 +46,7 @@ open class PeerEdit : View() {
     private val playbackView = createPlaybackView()
     private val recordingView = createRecordingView()
     private val eventSubscriptions = mutableListOf<EventRegistration>()
+    private val listenerDisposers = mutableListOf<ListenerDisposer>()
 
     override val root = borderpane {
         top = vbox {
@@ -52,6 +56,7 @@ open class PeerEdit : View() {
                 playerProperty.bind(viewModel.sourcePlayerProperty)
                 enablePlaybackRateProperty.set(true)
                 sideTextProperty.set(messages["sourceAudio"])
+                menuSideProperty.set(Side.BOTTOM)
             }
         }
         centerProperty().bind(mainSectionProperty)
@@ -68,6 +73,7 @@ open class PeerEdit : View() {
 
         scrollbarSlider = createAudioScrollbarSlider()
         add(scrollbarSlider)
+        viewModel.audioController = AudioPlayerController(scrollbarSlider)
 
         hbox {
             addClass("consume__bottom", "recording__bottom-section")
@@ -149,8 +155,6 @@ open class PeerEdit : View() {
 
     private fun createRecordingView(): RecordingSection {
         return RecordingSection().apply {
-            recorderViewModel.waveformCanvas = waveformCanvas
-            recorderViewModel.volumeCanvas = volumeCanvas
             isRecordingProperty.bind(recorderViewModel.recordingProperty)
 
             setToggleRecordingAction {
@@ -174,11 +178,12 @@ open class PeerEdit : View() {
     override fun onDock() {
         super.onDock()
         logger.info("Checking docked.")
+        recorderViewModel.waveformCanvas = recordingView.waveformCanvas
+        recorderViewModel.volumeCanvas = recordingView.volumeCanvas
+        mainSectionProperty.set(playbackView)
         timer = startAnimationTimer { viewModel.calculatePosition() }
-        viewModel.audioController = AudioPlayerController(scrollbarSlider)
         viewModel.dock()
         subscribeEvents()
-        mainSectionProperty.set(playbackView)
     }
 
     override fun onUndock() {
@@ -187,9 +192,20 @@ open class PeerEdit : View() {
         timer?.stop()
         unsubscribeEvents()
         viewModel.undock()
+        if (mainSectionProperty.value == recordingView) {
+            recorderViewModel.cancel()
+        }
     }
 
     private fun subscribeEvents() {
+        viewModel.currentChunkProperty.onChangeWithDisposer { selectedChunk ->
+            // clears recording screen if another chunk is selected
+            if (selectedChunk != null && mainSectionProperty.value == recordingView) {
+                recorderViewModel.cancel()
+                mainSectionProperty.set(playbackView)
+            }
+        }.also { listenerDisposers.add(it) }
+
         subscribe<UndoChunkingPageEvent> {
             viewModel.undo()
         }.also { eventSubscriptions.add(it) }

@@ -37,7 +37,7 @@ internal class NewVerseAction(
         val end = start
 
         node = VerseNode(
-            placed = true, totalVerses[verseIndex].marker.copy()
+            placed = true, totalVerses[verseIndex].marker.clone()
         ).also {
             it.addStart(start)
             totalVerses[verseIndex] = it.copy()
@@ -87,7 +87,7 @@ internal class RecordAgainAction(
 
         node = VerseNode(
             placed = true,
-            totalVerses[verseIndex].marker.copy(),
+            totalVerses[verseIndex].marker.clone(),
             mutableListOf(start..end)
         ).also {
             totalVerses[verseIndex] = it.copy()
@@ -218,7 +218,7 @@ internal class EditVerseAction(
         logger.info("Editing verse index: ${verseIndex}")
         previous = totalVerses[verseIndex]
 
-        val vm = totalVerses[verseIndex].marker.copy()
+        val vm = totalVerses[verseIndex].marker.clone()
         node = VerseNode(
             placed = true,
             vm,

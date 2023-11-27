@@ -38,8 +38,13 @@ class RecorderViewModel : ViewModel() {
     var isRecording by recordingProperty
     lateinit var recorder: IAudioRecorder
 
+    /**
+     * These property must be assigned everytime the view is docked, since it could be dirty
+     * from the other View(s) that share this ViewModel.
+     * */
     lateinit var waveformCanvas: CanvasFragment
     lateinit var volumeCanvas: CanvasFragment
+
     val timerTextProperty = SimpleStringProperty("00:00:00")
     lateinit var tempTake: File
     lateinit var wavAudio: OratureAudioFile
@@ -124,6 +129,7 @@ class RecorderViewModel : ViewModel() {
 
     fun cancel() {
         pause()
+        isRecording = false
         at.stop()
         recorder.stop()
         waveformCanvas.clearDrawables()

@@ -24,6 +24,7 @@ import javafx.event.Event
 import javafx.event.EventHandler
 import javafx.scene.control.ListCell
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterItemState
@@ -44,7 +45,7 @@ import tornadofx.addClass
 
 class NarrationTextItemData(
     val chunk: Chunk,
-    var marker: VerseMarker?,
+    var marker: AudioMarker?,
     var hasRecording: Boolean = false,
     var previousChunksRecorded: Boolean = false,
     var state: TeleprompterItemState = TeleprompterItemState.RECORD_DISABLED
@@ -86,7 +87,11 @@ class NarrationTextCell(
         view.isLastVerseProperty.set(isLast)
 
         graphic = view.apply {
-            verseLabelProperty.set(item.chunk.title)
+
+            val title = if (item.marker is VerseMarker) item.chunk.title else ""
+
+            verseLabelProperty.set(title)
+
             verseTextProperty.set(item.chunk.textItem.text)
 
             hasRecordingProperty.set(item.hasRecording)

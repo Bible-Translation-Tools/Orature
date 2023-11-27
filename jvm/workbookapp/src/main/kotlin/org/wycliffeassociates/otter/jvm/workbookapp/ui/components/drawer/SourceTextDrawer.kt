@@ -57,11 +57,7 @@ class SourceTextDrawer : VBox() {
                     })
                 }
                 action {
-                    this@SourceTextDrawer.maxWidth = if (isCollapsedProperty.value) {
-                        320.0
-                    } else {
-                        80.0
-                    }
+                    this@SourceTextDrawer.togglePseudoClass("collapsed", !isCollapsedProperty.value)
                     isCollapsedProperty.set(!isCollapsedProperty.value)
                 }
             }

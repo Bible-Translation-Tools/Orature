@@ -62,7 +62,7 @@ class ChunkingStepNode(
 
     init {
         addClass("chunking-step")
-        isFocusTraversable = true
+        focusTraversableProperty().bind(isSelectedProperty.not())
         disableWhen(unavailableProperty)
         completedProperty.onChangeAndDoNow { toggleClass("completed", it == true) }
 
@@ -103,12 +103,16 @@ class ChunkingStepNode(
         }
 
         setOnMouseClicked {
-            FX.eventbus.fire(ChunkingStepSelectedEvent(step))
-            requestFocus()
+            if (!isSelectedProperty.value) {
+                FX.eventbus.fire(ChunkingStepSelectedEvent(step))
+                requestFocus()
+            }
         }
 
         this.addEventFilter(KeyEvent.KEY_PRESSED) {
-            if (it.code == KeyCode.ENTER || it.code == KeyCode.SPACE) {
+            if (
+                (it.code == KeyCode.ENTER || it.code == KeyCode.SPACE) && !isSelectedProperty.value
+            ) {
                 FX.eventbus.fire(ChunkingStepSelectedEvent(step))
             }
         }

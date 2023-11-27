@@ -540,21 +540,23 @@ class OngoingProjectImporter @Inject constructor(
         mode: ProjectMode,
         verseByVerse: Boolean
     ): Collection {
-        // populate all books when importing a project
-        return createProjectUseCase.createAllBooks(
-            sourceCollection.resourceContainer!!.language,
+        val project = createProjectUseCase.create(
+            sourceCollection,
             language,
-            mode
-        ).andThen(
-            createProjectUseCase.create(
-                sourceCollection,
-                language,
-                mode,
-                deriveProjectFromVerses = verseByVerse
-            )
+            mode,
+            deriveProjectFromVerses = verseByVerse
         ).doOnError {
             logger.error("Error while deriving project(s) during import", it)
         }.blockingGet()
+
+        // populate all books when importing a project
+        createProjectUseCase.createAllBooks(
+            sourceCollection.resourceContainer!!.language,
+            language,
+            mode
+        ).blockingAwait()
+
+        return project
     }
 
     private fun findSourceCollection(manifestSources: Set<Source>, manifestProject: Project): Collection {

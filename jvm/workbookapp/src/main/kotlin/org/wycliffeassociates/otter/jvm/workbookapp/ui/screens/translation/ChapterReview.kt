@@ -4,6 +4,7 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
 import javafx.animation.AnimationTimer
+import javafx.geometry.Side
 import javafx.scene.control.Slider
 import javafx.scene.control.Tooltip
 import javafx.scene.layout.Priority
@@ -48,6 +49,7 @@ class ChapterReview : View() {
                 playerProperty.bind(viewModel.sourcePlayerProperty)
                 enablePlaybackRateProperty.set(true)
                 sideTextProperty.set(messages["sourceAudio"])
+                menuSideProperty.set(Side.BOTTOM)
             }
         }
         center = vbox {
@@ -102,6 +104,7 @@ class ChapterReview : View() {
                     button {
                         addClass("btn", "btn--icon")
                         graphic = FontIcon(MaterialDesign.MDI_SKIP_PREVIOUS)
+                        tooltip(messages["previousChunk"])
 
                         action { viewModel.seekPrevious() }
                     }
@@ -127,6 +130,7 @@ class ChapterReview : View() {
                     button {
                         addClass("btn", "btn--icon")
                         graphic = FontIcon(MaterialDesign.MDI_SKIP_NEXT)
+                        tooltip(messages["nextChunk"])
 
                         action { viewModel.seekNext() }
                     }
@@ -134,6 +138,7 @@ class ChapterReview : View() {
                         addClass("btn", "btn--primary", "consume__btn")
                         graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
                         enableWhen { viewModel.canGoNextChapterProperty }
+                        tooltip(text)
 
                         setOnAction {
                             FX.eventbus.fire(GoToNextChapterEvent())

@@ -136,7 +136,7 @@ class TestProjectImport {
             .assertRowCounts(
                 RowCount(
                     contents = mapOf(
-                        META to 2400,
+                        META to 2378,
                         TEXT to 31124
                     ),
                     collections = 2511,
@@ -160,7 +160,7 @@ class TestProjectImport {
             .assertRowCounts(
                 RowCount(
                     contents = mapOf(
-                        META to 2400,
+                        META to 2378,
                         TEXT to 31124
                     ),
                     collections = 2511,

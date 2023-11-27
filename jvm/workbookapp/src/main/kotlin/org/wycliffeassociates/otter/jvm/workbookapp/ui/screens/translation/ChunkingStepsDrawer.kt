@@ -7,6 +7,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.chunkingStep
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
@@ -72,6 +73,8 @@ class ChunkingStepsDrawer(
                 }
                 chunkingStep(ChunkingStep.FINAL_REVIEW, selectedStepProperty, reachableStepProperty, isCollapsedProperty)
             }
+
+            runLater { customizeScrollbarSkin() }
         }
     }
 }

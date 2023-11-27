@@ -1,14 +1,16 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.geometry.Side
 import javafx.scene.Node
+import javafx.scene.control.ScrollPane
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.TakeSelectionAnimationMediator
+import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChunkTakeCard
@@ -16,6 +18,8 @@ import org.wycliffeassociates.otter.jvm.controls.event.ChunkTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.TakeAction
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BlindDraftViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -30,8 +34,9 @@ class BlindDraft : View() {
     private val mainSectionProperty = SimpleObjectProperty<Node>(null)
     private val takesView = buildTakesArea()
     private val recordingView = buildRecordingArea()
-    private val hideSourceAudio = SimpleBooleanProperty(false)
+    private val hideSourceAudio = mainSectionProperty.booleanBinding { it == recordingView }
     private val eventSubscriptions = mutableListOf<EventRegistration>()
+    private val listenerDisposers = mutableListOf<ListenerDisposer>()
 
     override val root = borderpane {
         addClass("blind-draft")
@@ -44,6 +49,7 @@ class BlindDraft : View() {
                     playerProperty.bind(viewModel.sourcePlayerProperty)
                     enablePlaybackRateProperty.set(true)
                     sideTextProperty.set(messages["sourceAudio"])
+                    menuSideProperty.set(Side.BOTTOM)
                 }
                 visibleWhen { hideSourceAudio.not() }
                 managedWhen(visibleProperty())
@@ -80,14 +86,22 @@ class BlindDraft : View() {
                 label(messages["available_takes"]).addClass("h5", "h5--60")
                 vgrow = Priority.ALWAYS
 
-                vbox {
-                    addClass("take-list")
-                    animationMediator.nodeList = childrenUnmodifiable
-                    bindChildren(viewModel.availableTakes) { take ->
-                        ChunkTakeCard(take).apply {
-                            animationMediatorProperty.set(animationMediator)
+                scrollpane {
+                    vgrow = Priority.ALWAYS
+                    isFitToWidth = true
+                    hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
+
+                    vbox {
+                        addClass("take-list")
+                        animationMediator.nodeList = childrenUnmodifiable
+                        bindChildren(viewModel.availableTakes) { take ->
+                            ChunkTakeCard(take).apply {
+                                animationMediatorProperty.set(animationMediator)
+                            }
                         }
                     }
+
+                    runLater { customizeScrollbarSkin() }
                 }
             }
             hbox {
@@ -101,7 +115,6 @@ class BlindDraft : View() {
                         mainSectionProperty.set(recordingView)
                         recorderViewModel.onViewReady(takesView.width.toInt()) // use the width of the existing component
                         recorderViewModel.toggle()
-                        hideSourceAudio.set(true)
                     }
                 }
             }
@@ -122,14 +135,12 @@ class BlindDraft : View() {
                 recorderViewModel.cancel()
                 viewModel.onRecordFinish(RecorderViewModel.Result.CANCELLED)
                 mainSectionProperty.set(takesView)
-                hideSourceAudio.set(false)
             }
 
             setSaveAction {
                 val result = recorderViewModel.saveAndQuit()
                 viewModel.onRecordFinish(result)
                 mainSectionProperty.set(takesView)
-                hideSourceAudio.set(false)
             }
         }
     }
@@ -137,6 +148,8 @@ class BlindDraft : View() {
     override fun onDock() {
         super.onDock()
         logger.info("Blind Draft docked.")
+        recorderViewModel.waveformCanvas = recordingView.waveformCanvas
+        recorderViewModel.volumeCanvas = recordingView.volumeCanvas
         mainSectionProperty.set(takesView)
         viewModel.dockBlindDraft()
         subscribeEvents()
@@ -145,11 +158,22 @@ class BlindDraft : View() {
     override fun onUndock() {
         super.onUndock()
         logger.info("Blind Draft undocked.")
-        viewModel.undockBlindDraft()
         unsubscribeEvents()
+        viewModel.undockBlindDraft()
+        if (mainSectionProperty.value == recordingView) {
+            recorderViewModel.cancel()
+        }
     }
 
     private fun subscribeEvents() {
+        viewModel.currentChunkProperty.onChangeWithDisposer { selectedChunk ->
+            // clears recording screen if another chunk is selected
+            if (selectedChunk != null && mainSectionProperty.value == recordingView) {
+                recorderViewModel.cancel()
+                mainSectionProperty.set(takesView)
+            }
+        }.also { listenerDisposers.add(it) }
+        
         subscribe<ChunkTakeEvent> {
             when (it.action) {
                 TakeAction.SELECT -> viewModel.onSelectTake(it.take)
@@ -172,5 +196,7 @@ class BlindDraft : View() {
     private fun unsubscribeEvents() {
         eventSubscriptions.forEach { it.unsubscribe() }
         eventSubscriptions.clear()
+        listenerDisposers.forEach { it.dispose() }
+        listenerDisposers.clear()
     }
 }

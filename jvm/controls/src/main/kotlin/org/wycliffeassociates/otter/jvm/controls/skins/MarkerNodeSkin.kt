@@ -27,6 +27,7 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
 import org.wycliffeassociates.otter.jvm.controls.marker.MarkerNode
 import tornadofx.*
+import tornadofx.FX.Companion.messages
 
 class MarkerNodeSkin(val control: MarkerNode) : SkinBase<MarkerNode>(control) {
 
@@ -51,7 +52,7 @@ class MarkerNodeSkin(val control: MarkerNode) : SkinBase<MarkerNode>(control) {
                 button {
                     addClass("btn", "btn--icon", "btn--borderless", "normal-text")
                     graphic = FontIcon(MaterialDesign.MDI_DELETE).addClass("wa-icon")
-
+                    tooltip(messages["remove_chunk"])
                     visibleWhen { control.canBeDeletedProperty }
                     managedWhen(visibleProperty())
 
@@ -67,6 +68,7 @@ class MarkerNodeSkin(val control: MarkerNode) : SkinBase<MarkerNode>(control) {
             button {
                 addClass("btn", "btn--icon")
                 graphic = FontIcon(Material.DRAG_HANDLE).apply { rotate = 90.0 }
+                tooltip(messages["move_chunk"])
                 translateXProperty().bind(widthProperty().divide(2).negate())
 
                 visibleWhen { control.canBeMovedProperty }
