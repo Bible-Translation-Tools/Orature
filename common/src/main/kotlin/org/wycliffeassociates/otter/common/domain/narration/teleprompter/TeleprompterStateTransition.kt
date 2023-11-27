@@ -83,8 +83,6 @@ object NextVerseAction {
             contexts[index - 1].changeState(TeleprompterItemState.RECORD_AGAIN_DISABLED)
             contexts[index].changeState(TeleprompterItemState.RECORD_ACTIVE)
         } else {
-            // TODO: this needs to reset all other items that had a state of RECORD_AGAIN_DISABLED
-            //  to RECORD_AGAIN. Curently this just changes one prior to the new verse.
             contexts[index - 1].changeState(TeleprompterItemState.RECORD_AGAIN)
             contexts[index].changeState(TeleprompterItemState.RECORD)
         }
