@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
 import javafx.beans.property.SimpleObjectProperty
+import javafx.geometry.Side
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
@@ -60,7 +61,11 @@ class ChunkTakeCard(take: TakeCardModel) : HBox() {
             tooltip(messages["select"])
             togglePseudoClass("active", take.selected)
 
-            graphic = FontIcon(MaterialDesign.MDI_STAR_OUTLINE)
+            graphic = if (take.selected) {
+                FontIcon(MaterialDesign.MDI_STAR)
+            } else {
+                FontIcon(MaterialDesign.MDI_STAR_OUTLINE)
+            }
             isMouseTransparent = take.selected
             isFocusTraversable = !take.selected
 

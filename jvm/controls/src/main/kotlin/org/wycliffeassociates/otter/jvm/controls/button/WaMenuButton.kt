@@ -74,7 +74,13 @@ class WaMenuButton : Button() {
     }
 
     fun show() {
-        menu?.show(this, sideProperty.value, 0.0, 0.0)
+        val bound = this.boundsInLocal
+        val screenBound = this.localToScreen(bound)
+        menu?.let { popupMenu ->
+            popupMenu.show(this, sideProperty.value, 0.0, 0.0)
+            popupMenu.x = screenBound.minX - popupMenu.width + this.width
+            popupMenu.y = screenBound.centerY
+        }
     }
 
     fun hide() {

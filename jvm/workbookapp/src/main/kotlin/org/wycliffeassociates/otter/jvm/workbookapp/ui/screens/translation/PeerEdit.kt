@@ -5,6 +5,7 @@ import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
 import javafx.animation.AnimationTimer
 import javafx.beans.property.SimpleObjectProperty
+import javafx.geometry.Side
 import javafx.scene.Node
 import javafx.scene.control.Slider
 import javafx.scene.layout.Priority
@@ -55,6 +56,7 @@ open class PeerEdit : View() {
                 playerProperty.bind(viewModel.sourcePlayerProperty)
                 enablePlaybackRateProperty.set(true)
                 sideTextProperty.set(messages["sourceAudio"])
+                menuSideProperty.set(Side.BOTTOM)
             }
         }
         centerProperty().bind(mainSectionProperty)
