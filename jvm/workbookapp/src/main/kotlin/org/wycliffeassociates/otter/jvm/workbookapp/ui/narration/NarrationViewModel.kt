@@ -6,7 +6,6 @@ import com.sun.glass.ui.Screen
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.toObservable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
@@ -357,11 +356,17 @@ class NarrationViewModel : ViewModel() {
             }
         }
         val lastIndex = narratableList.indexOfFirst { !it.hasRecording }
+        var scrollToVerse = 0
+
         if (lastIndex != -1) {
             narratableList.get(lastIndex).state = TeleprompterItemState.RECORD
-            FX.eventbus.fire(TeleprompterSeekEvent(lastIndex))
+            scrollToVerse = lastIndex
         }
+
+        narratableList.setAll(narratableList.map { it })
+
         refreshTeleprompter()
+        FX.eventbus.fire(TeleprompterSeekEvent(scrollToVerse))
     }
 
     private fun setHasNextAndPreviousChapter(chapter: Chapter) {
