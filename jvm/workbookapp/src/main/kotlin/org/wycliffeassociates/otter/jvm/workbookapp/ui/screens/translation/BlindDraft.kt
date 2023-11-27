@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 
 import javafx.beans.property.SimpleObjectProperty
+import javafx.geometry.Side
 import javafx.scene.Node
 import javafx.scene.control.ScrollPane
 import javafx.scene.layout.Priority
@@ -48,6 +49,7 @@ class BlindDraft : View() {
                     playerProperty.bind(viewModel.sourcePlayerProperty)
                     enablePlaybackRateProperty.set(true)
                     sideTextProperty.set(messages["sourceAudio"])
+                    menuSideProperty.set(Side.BOTTOM)
                 }
                 visibleWhen { hideSourceAudio.not() }
                 managedWhen(visibleProperty())

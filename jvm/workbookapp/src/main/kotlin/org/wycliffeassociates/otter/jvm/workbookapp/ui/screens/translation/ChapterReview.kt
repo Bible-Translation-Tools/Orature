@@ -4,6 +4,7 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
 import javafx.animation.AnimationTimer
+import javafx.geometry.Side
 import javafx.scene.control.Slider
 import javafx.scene.control.Tooltip
 import javafx.scene.layout.Priority
@@ -48,6 +49,7 @@ class ChapterReview : View() {
                 playerProperty.bind(viewModel.sourcePlayerProperty)
                 enablePlaybackRateProperty.set(true)
                 sideTextProperty.set(messages["sourceAudio"])
+                menuSideProperty.set(Side.BOTTOM)
             }
         }
         center = vbox {

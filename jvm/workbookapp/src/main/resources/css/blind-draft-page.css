@@ -15,7 +15,7 @@
 
 .take-list {
     -fx-spacing: 32;
-    -fx-padding: 0 16 0 0;
+    -fx-padding: 8 16 0 0;
 }
 
 .take-card {
