@@ -325,9 +325,7 @@ class TeleprompterStateMachineTest {
             }
         }
     }
-
-    // TODO: add test that cover if branch in ResumeRecordingAgainAction
-
+    
     @Test
     fun `transition from RECORD, RECORDING_PAUSED, then NEXT, repeated until end of chapter, then SAVE with none previously active`() {
         val numMarkers = 10
