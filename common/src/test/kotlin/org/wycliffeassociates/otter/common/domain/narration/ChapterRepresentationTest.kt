@@ -82,7 +82,7 @@ class ChapterRepresentationTest {
     fun mockChapter(): Chapter {
         return mockk<Chapter> {
             every { getDraft() } returns chunk
-            every { chunks } returns BehaviorRelay.create<List<Chunk>>().also { it.accept(listOf(mockChunk())) }
+            every { chunks } returns BehaviorRelay.create<List<Chunk>>().also { it.accept(emptyList<Chunk>()) }
             every { sort } returns sortCount++
         }
     }
@@ -103,18 +103,14 @@ class ChapterRepresentationTest {
     val framesPerVerse = 44100
     private fun initializeVerseNodeList(verseNodeList: MutableList<VerseNode>, paddingLength: Int = 0) {
         var start = -1
-        verseNodeList[2].apply {
-            sectors.add(start + 1..start + framesPerVerse)
-            placed = true
-        }
-        start += framesPerVerse + paddingLength
-        for (i in 0 until numTestVerses - 1) {
+        val numTitles = getNumberOfTitles(verseNodeList)
+        for (i in 0 until numTestVerses) {
             val verseMarker = VerseMarker((i + 1), (i + 1), 0)
             val sectors = mutableListOf<IntRange>()
             val verseNode = VerseNode(true, verseMarker, sectors)
             sectors.add(start + 1..start + framesPerVerse)
             start += framesPerVerse + paddingLength
-            verseNodeList.add(verseNode)
+            verseNodeList.add(i + numTitles, verseNode)
         }
     }
 
@@ -122,14 +118,26 @@ class ChapterRepresentationTest {
     // (spaceBetweenSectors) between each newly added sector
     private fun addSectorsToEnd(verseNodeList: MutableList<VerseNode>, sectorLength: Int, spaceBetweenSectors: Int) {
         var lastSectorEnd = verseNodeList.last().sectors.last().last + 1
-        val numTitles = verseNodeList.size - numTestVerses
-        for (i in numTitles until numTestVerses + numTitles) {
+        val numTitles = getNumberOfTitles(verseNodeList)
+        for (i in 0 until numTestVerses) {
             val start = lastSectorEnd + spaceBetweenSectors
             val end = start + sectorLength
             lastSectorEnd = end
-            verseNodeList[i].sectors.add(start until end)
+            verseNodeList[i + numTitles].sectors.add(start until end)
         }
     }
+
+    // Returns the number of titles present in the verseNodeList
+    private fun getNumberOfTitles(verseNodeList: MutableList<VerseNode>): Int {
+        var numTitles = 0
+        verseNodeList.forEach {
+            if (!it.marker.formattedLabel.matches(Regex("orature-vm-\\d*"))) {
+                numTitles++
+            }
+        }
+        return numTitles
+    }
+
 
     private fun writeByteBufferToPCMFile(byteBuffer: ByteBuffer, PCMFile: File) {
         try {
@@ -398,7 +406,7 @@ class ChapterRepresentationTest {
         val verseNumber = 7
         val markerRange = chapterRepresentation.getRangeOfMarker(VerseMarker(verseNumber, verseNumber, 0))
 
-        Assert.assertEquals(44100 * verseNumber until 44100 * (verseNumber + 1), markerRange)
+        Assert.assertEquals(44100 * (verseNumber - 1) until 44100 * verseNumber, markerRange)
     }
 
 
