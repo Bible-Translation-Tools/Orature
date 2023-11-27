@@ -115,7 +115,9 @@ class HomePageViewModel2 : ViewModel() {
     }
 
     fun loadProjects(onFinishCallback: () -> Unit = {}) {
-        isLoadingProperty.set(true)
+        runLater {
+            isLoadingProperty.set(true)
+        }
         // reset sort to default book order
         sortedBooks.comparator = Comparator { wb1, wb2 ->
             wb1.sort.compareTo(wb2.sort)
@@ -135,16 +137,11 @@ class HomePageViewModel2 : ViewModel() {
         val projectGroup = selectedProjectGroupProperty.value
         workbookDS.currentModeProperty.set(projectGroup.mode)
 
-        val projects = workbookRepo.getProjects().blockingGet()
-        val existingProject = projects.firstOrNull { existingProject ->
-            existingProject.source.language.slug == projectGroup.sourceLanguage &&
-                    existingProject.target.language.slug == projectGroup.targetLanguage &&
-                    existingProject.target.slug == workbookDescriptor.slug
-        }
-
-        existingProject?.let { workbook ->
-            openWorkbook(workbook, projectGroup.mode)
-        }
+        val workbook = workbookRepo.get(
+            workbookDescriptor.sourceCollection,
+            workbookDescriptor.targetCollection
+        )
+        openWorkbook(workbook, projectGroup.mode)
     }
 
     /**

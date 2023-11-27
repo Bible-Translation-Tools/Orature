@@ -3,15 +3,17 @@
 }
 
 .wa-context-menu {
-    -fx-padding: 5;
+    -fx-padding: 8 0;
     -fx-background-radius: 8px;
     -fx-background-color: -wa-foreground;
 }
 
 .wa-context-menu .menu-item {
+    -fx-pref-height: 48;
+    -fx-min-width: 200;
     -fx-background-radius: 4px;
     -fx-cursor: hand;
-    -fx-font-size: 1.3em;
+    -fx-font-size: 1.4em;
 }
 
 .wa-context-menu .menu-item:disabled {
@@ -19,12 +21,14 @@
 }
 
 .wa-context-menu .menu-item .label {
+    -fx-padding: 12 16;
+    -fx-graphic-text-gap: 16;
     -fx-text-fill: -wa-regular-text;
 }
 
 .wa-context-menu .menu-item .ikonli-font-icon {
     -fx-icon-color: -wa-regular-text;
-    -fx-icon-size: 18px;
+    -fx-icon-size: 24px;
 }
 
 .wa-context-menu .menu-item.danger .label {

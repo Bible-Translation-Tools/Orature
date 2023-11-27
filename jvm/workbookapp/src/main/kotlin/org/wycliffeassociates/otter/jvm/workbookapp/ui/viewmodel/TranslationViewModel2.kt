@@ -185,7 +185,11 @@ class TranslationViewModel2 : ViewModel() {
             .observeOnFx()
             .doOnSuccess {
                 updateStep {
-                    selectedStepProperty.set(reachableStepProperty.value)
+                    if (reachableStepProperty.value == ChunkingStep.CHUNKING) {
+                        selectedStepProperty.set(ChunkingStep.CONSUME_AND_VERBALIZE)
+                    } else {
+                        selectedStepProperty.set(reachableStepProperty.value)
+                    }
                 }
             }
             .doOnComplete {

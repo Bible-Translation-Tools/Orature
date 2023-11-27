@@ -196,7 +196,7 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
     }
 
     override fun appTheme(): Single<String> {
-        return getString(APP_THEME_KEY, ColorTheme.SYSTEM.name)
+        return getString(APP_THEME_KEY, ColorTheme.LIGHT.name) // default theme color
     }
 
     override fun setAppTheme(theme: String): Completable {

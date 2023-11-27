@@ -102,6 +102,7 @@ class ChapterReview : View() {
                     button {
                         addClass("btn", "btn--icon")
                         graphic = FontIcon(MaterialDesign.MDI_SKIP_PREVIOUS)
+                        tooltip(messages["previousChunk"])
 
                         action { viewModel.seekPrevious() }
                     }
@@ -127,6 +128,7 @@ class ChapterReview : View() {
                     button {
                         addClass("btn", "btn--icon")
                         graphic = FontIcon(MaterialDesign.MDI_SKIP_NEXT)
+                        tooltip(messages["nextChunk"])
 
                         action { viewModel.seekNext() }
                     }
@@ -134,6 +136,7 @@ class ChapterReview : View() {
                         addClass("btn", "btn--primary", "consume__btn")
                         graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
                         enableWhen { viewModel.canGoNextChapterProperty }
+                        tooltip(text)
 
                         setOnAction {
                             FX.eventbus.fire(GoToNextChapterEvent())

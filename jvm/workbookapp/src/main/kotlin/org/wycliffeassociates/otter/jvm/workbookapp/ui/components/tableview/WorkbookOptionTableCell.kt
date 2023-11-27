@@ -82,7 +82,7 @@ class WorkbookOptionTableCell(
                 FX.primaryStage
             )
             popupMenu.x = screenBound.minX - popupMenu.width + this.width
-            popupMenu.y = screenBound.maxY
+            popupMenu.y = screenBound.centerY
         }
 
         graphic = graphicContent
