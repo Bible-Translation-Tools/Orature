@@ -1,12 +1,17 @@
 package org.wycliffeassociates.otter.common.domain.narration
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import org.wycliffeassociates.otter.common.data.audio.AudioMarker
+import org.wycliffeassociates.otter.common.data.audio.BookMarker
+import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
+import org.wycliffeassociates.otter.common.data.audio.UnknownMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import java.lang.UnsupportedOperationException
 import kotlin.math.min
 
 internal data class VerseNode(
     var placed: Boolean = false,
-    val marker: VerseMarker,
+    val marker: AudioMarker,
     var sectors: MutableList<IntRange> = mutableListOf()
 ) {
     @get:JsonIgnore
@@ -250,6 +255,16 @@ internal data class VerseNode(
         }
 
         return stuff
+    }
+
+    fun copyMarker(location: Int): AudioMarker {
+        return when (marker) {
+            is ChapterMarker -> marker.copy(location = location)
+            is BookMarker -> marker.copy(location = location)
+            is VerseMarker -> marker.copy(location = location)
+            is UnknownMarker -> marker.copy(location = location)
+            else -> { throw UnsupportedOperationException("Copy is not supported for marker $marker") }
+        }
     }
 }
 

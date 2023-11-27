@@ -24,6 +24,7 @@ class TeleprompterViewModel : ViewModel() {
     private val narrationViewModel: NarrationViewModel by inject()
 
     val chunks = narrationViewModel.narratableList
+
     val stickyVerseProperty = SimpleObjectProperty<Chunk>()
 
     private val recordStartProperty = SimpleBooleanProperty()
