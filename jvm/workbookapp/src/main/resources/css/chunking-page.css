@@ -92,10 +92,16 @@
 }
 
 .source-text-drawer {
-    -fx-pref-width: 360;
+    -fx-max-width: 360;
+    -fx-min-width: 360;
     -fx-background-color: -wa-foreground;
     -fx-border-width: 0 0 0 1;
     -fx-border-color: -wa-border-light;
+}
+
+.source-text-drawer:collapsed {
+    -fx-max-width: 90;
+    -fx-min-width: 90;
 }
 
 .drawer-graphic-container {

@@ -71,6 +71,14 @@ class ChunkingTranslationPage : View() {
             centerProperty().bind(mainFragmentProperty)
 
             right = SourceTextDrawer().apply {
+                visibleWhen {
+                    viewModel.selectedStepProperty.booleanBinding { step ->
+                        step?.let {
+                            it.ordinal >= ChunkingStep.PEER_EDIT.ordinal
+                        } ?: false
+                    }
+                }
+                managedWhen(visibleProperty())
                 sourceTextDrawer = this
                 sourceInfoProperty.bind(viewModel.sourceInfoProperty)
                 licenseProperty.bind(viewModel.sourceLicenseProperty)
