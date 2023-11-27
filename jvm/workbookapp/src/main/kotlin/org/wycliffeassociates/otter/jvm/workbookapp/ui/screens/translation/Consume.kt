@@ -22,6 +22,8 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
 import javafx.animation.AnimationTimer
+import javafx.beans.property.SimpleDoubleProperty
+import javafx.scene.control.ScrollBar
 import javafx.scene.control.Slider
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
@@ -30,6 +32,7 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
+import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
@@ -104,7 +107,8 @@ class Consume : View() {
                 }
                 scrollbarSlider = createAudioScrollbarSlider()
                 add(waveform)
-                add(scrollbarSlider)
+//                add(scrollbarSlider)
+                add(createScrollbar())
             }
             bottom = hbox {
                 addClass("consume__bottom")
@@ -157,6 +161,22 @@ class Consume : View() {
             setPixelsInHighlightFunction { viewModel.pixelsInHighlight(it) }
             player.bind(viewModel.waveformAudioPlayerProperty)
             secondsToHighlightProperty.set(SECONDS_ON_SCREEN)
+        }
+    }
+
+    private fun createScrollbar(): ScrollBar {
+        return ScrollBar().apply {
+            runLater { customizeScrollbarSkin() }
+            disableWhen { viewModel.isPlayingProperty }
+
+            valueProperty().onChange { value ->
+                if (!viewModel.isPlayingProperty.value) {
+                    viewModel.seek(value.toInt())
+                }
+            }
+            valueProperty().bindBidirectional(viewModel.audioPositionProperty)
+
+            maxProperty().bind(viewModel.totalFramesProperty)
         }
     }
 }

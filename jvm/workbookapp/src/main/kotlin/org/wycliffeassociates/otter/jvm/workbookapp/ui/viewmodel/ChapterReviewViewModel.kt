@@ -72,6 +72,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     override var audioController: AudioPlayerController? = null
     override val waveformAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     override val positionProperty = SimpleDoubleProperty(0.0)
+    override val audioPositionProperty = SimpleIntegerProperty()
     override var imageWidthProperty = SimpleDoubleProperty(0.0)
     override var sampleRate: Int = 0 // beware of divided by 0
     override var totalFrames: Int = 0 // beware of divided by 0

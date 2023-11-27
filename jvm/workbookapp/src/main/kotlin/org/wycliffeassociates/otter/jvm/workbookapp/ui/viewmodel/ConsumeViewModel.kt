@@ -60,9 +60,12 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
     override var totalFrames: Int = 0 // beware of divided by 0
     override val positionProperty = SimpleDoubleProperty(0.0)
     override var imageWidthProperty = SimpleDoubleProperty(0.0)
+    override val audioPositionProperty = SimpleIntegerProperty()
 
     val compositeDisposable = CompositeDisposable()
     val isPlayingProperty = SimpleBooleanProperty(false)
+
+    val totalFramesProperty = SimpleIntegerProperty()
 
     private val builder = ObservableWaveformBuilder()
     private val width = Screen.getMainScreen().platformWidth
@@ -138,6 +141,7 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
         player.getAudioReader()?.let {
             sampleRate = it.sampleRate
             totalFrames = it.totalFrames
+            totalFramesProperty.set(totalFrames)
         }
 
         waveformAudioPlayerProperty.set(player)

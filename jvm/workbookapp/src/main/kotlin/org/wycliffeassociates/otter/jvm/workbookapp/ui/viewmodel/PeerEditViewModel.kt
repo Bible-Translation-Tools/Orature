@@ -8,6 +8,7 @@ import io.reactivex.rxkotlin.addTo
 import javafx.animation.AnimationTimer
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.Slider
 import javafx.scene.image.Image
@@ -45,6 +46,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     override val waveformAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     override val positionProperty = SimpleDoubleProperty(0.0)
     override var imageWidthProperty = SimpleDoubleProperty()
+    override val audioPositionProperty = SimpleIntegerProperty()
 
     val chunkTitleProperty = workbookDataStore.activeChunkTitleBinding()
     val currentChunkProperty = SimpleObjectProperty<Chunk>()

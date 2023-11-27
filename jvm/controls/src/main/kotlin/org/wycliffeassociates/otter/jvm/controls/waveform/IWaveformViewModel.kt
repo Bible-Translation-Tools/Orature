@@ -1,8 +1,8 @@
 package org.wycliffeassociates.otter.jvm.controls.waveform
 
-import javafx.animation.AnimationTimer
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleDoubleProperty
+import javafx.beans.property.SimpleIntegerProperty
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import kotlin.math.max
@@ -13,6 +13,7 @@ interface IWaveformViewModel {
     val waveformAudioPlayerProperty: ObjectProperty<IAudioPlayer>
     val positionProperty: SimpleDoubleProperty
     var imageWidthProperty: SimpleDoubleProperty
+    val audioPositionProperty: SimpleIntegerProperty
 
     fun pixelsInHighlight(controlWidth: Double): Double {
         if (sampleRate == 0 || totalFrames == 0) {
@@ -46,6 +47,7 @@ interface IWaveformViewModel {
             val percentPlayed = current / duration
             val pos = percentPlayed * imageWidthProperty.value
             positionProperty.set(pos)
+            audioPositionProperty.set(current)
         }
     }
 }
