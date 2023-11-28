@@ -325,6 +325,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun loadChapter(chapter: Chapter) {
+        logger.info("Loading chapter: ${chapter.sort}")
         resetState()
 
         chapterTitleProperty.set(
