@@ -147,7 +147,6 @@ class TeleprompterView : View() {
         subscribe<RecordAgainEvent> {
             listView.apply {
                 try {
-                    logger.info("Selecting index ${it.index} for RecordAgainEvent")
                     selectionModel.select(it.index)
                     scrollTo(it.index - 1)
                 } catch (e: Exception) {

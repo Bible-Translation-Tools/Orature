@@ -25,11 +25,7 @@ import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
-import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
-import org.wycliffeassociates.otter.common.data.workbook.Chapter
-import org.wycliffeassociates.otter.common.data.workbook.Chunk
-import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.common.data.workbook.TextItem
+import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
@@ -563,7 +559,6 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun moveMarker(index: Int, delta: Int) {
-        logger.info("Moving marker ${index} by $delta frames")
         narration.onVerseMarkerMoved(index, delta)
     }
 
