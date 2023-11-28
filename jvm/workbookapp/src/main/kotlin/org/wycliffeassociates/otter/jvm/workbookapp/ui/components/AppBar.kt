@@ -109,7 +109,7 @@ class AppBar : Fragment() {
 
             region { vgrow = Priority.ALWAYS }
 
-            add(addButton)
+//            add(addButton)
             add(settingsButton)
             add(infoButton)
 
