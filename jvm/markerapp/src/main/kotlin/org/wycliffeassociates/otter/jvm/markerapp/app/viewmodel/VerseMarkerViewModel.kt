@@ -63,12 +63,13 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
     val waveformMinimapImage = SimpleObjectProperty<Image>()
 
     override val currentMarkerNumberProperty = SimpleIntegerProperty(0)
-
+    override val audioPositionProperty = SimpleIntegerProperty()
     override var markerModel: VerseMarkerModel? = null
     override val markers = observableListOf<ChunkMarkerModel>()
     override val markerCountProperty = markers.sizeProperty
     override var sampleRate: Int = 0 // beware of divided by 0
-    override var totalFrames: Int = 0 // beware of divided by 0
+    override val totalFramesProperty = SimpleIntegerProperty(0)
+    override var totalFrames: Int by totalFramesProperty // beware of divided by 0
     override var audioController: AudioPlayerController? = null
 
     override val waveformAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()

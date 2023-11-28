@@ -25,12 +25,10 @@ import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import java.io.File
-import javafx.animation.AnimationTimer
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
-import javafx.scene.control.Slider
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.audio.AudioCue
@@ -52,10 +50,7 @@ import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuil
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
-import tornadofx.ViewModel
-import tornadofx.getValue
-import tornadofx.observableListOf
-import tornadofx.sizeProperty
+import tornadofx.*
 
 const val WAV_COLOR = "#66768B"
 const val BACKGROUND_COLOR = "#fff"
@@ -89,13 +84,14 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     override val currentMarkerNumberProperty = SimpleIntegerProperty(-1)
     override var resumeAfterScroll: Boolean = false
 
-    /** This property must be initialized before calling dock() */
     override var audioController: AudioPlayerController? = null
     override val waveformAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     override val positionProperty = SimpleDoubleProperty(0.0)
-    override var imageWidthProperty = SimpleDoubleProperty(0.0)
+    override val audioPositionProperty = SimpleIntegerProperty()
+    override val imageWidthProperty = SimpleDoubleProperty(0.0)
     override var sampleRate: Int = 0 // beware of divided by 0
-    override var totalFrames: Int = 0 // beware of divided by 0
+    override val totalFramesProperty = SimpleIntegerProperty(0)
+    override var totalFrames: Int by totalFramesProperty // beware of divided by 0
 
     lateinit var audio: OratureAudioFile
     lateinit var waveform: Observable<Image>
@@ -194,7 +190,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         }
 
         waveformAudioPlayerProperty.set(player)
-        audioController?.let { controller ->
+        audioController = AudioPlayerController().also { controller ->
             controller.load(player)
             isPlayingProperty.bind(controller.isPlayingProperty)
         }
