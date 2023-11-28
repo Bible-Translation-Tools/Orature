@@ -29,7 +29,6 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
-import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ConsumeViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
@@ -76,7 +75,6 @@ class Consume : View() {
             .observeOnFx()
             .subscribe {
                 waveform.addWaveformImage(it)
-                audioScrollBar.customizeScrollbarSkin()
             }
             .addTo(viewModel.compositeDisposable)
     }

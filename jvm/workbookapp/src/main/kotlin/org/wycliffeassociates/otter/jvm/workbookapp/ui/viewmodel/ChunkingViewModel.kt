@@ -52,10 +52,7 @@ import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuil
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
-import tornadofx.ViewModel
-import tornadofx.getValue
-import tornadofx.observableListOf
-import tornadofx.sizeProperty
+import tornadofx.*
 
 const val WAV_COLOR = "#66768B"
 const val BACKGROUND_COLOR = "#fff"
@@ -94,9 +91,10 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     override val waveformAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     override val positionProperty = SimpleDoubleProperty(0.0)
     override val audioPositionProperty = SimpleIntegerProperty()
-    override var imageWidthProperty = SimpleDoubleProperty(0.0)
+    override val imageWidthProperty = SimpleDoubleProperty(0.0)
     override var sampleRate: Int = 0 // beware of divided by 0
-    override var totalFrames: Int = 0 // beware of divided by 0
+    override val totalFramesProperty = SimpleIntegerProperty(0)
+    override var totalFrames: Int by totalFramesProperty // beware of divided by 0
 
     lateinit var audio: OratureAudioFile
     lateinit var waveform: Observable<Image>

@@ -62,7 +62,8 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     var cleanUpWaveform: () -> Unit = {}
 
     override var sampleRate: Int = 0 // beware of divided by 0
-    override var totalFrames: Int = 0 // beware of divided by 0
+    override val totalFramesProperty = SimpleIntegerProperty(0)
+    override var totalFrames: Int by totalFramesProperty // beware of divided by 0
 
     private val newTakeProperty = SimpleObjectProperty<Take>(null)
     private val builder = ObservableWaveformBuilder()
