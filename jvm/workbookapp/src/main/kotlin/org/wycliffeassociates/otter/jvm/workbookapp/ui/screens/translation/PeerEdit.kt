@@ -7,21 +7,18 @@ import javafx.animation.AnimationTimer
 import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Side
 import javafx.scene.Node
-import javafx.scene.control.Slider
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
+import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
-import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
-import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
 import org.wycliffeassociates.otter.jvm.controls.waveform.startAnimationTimer
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
@@ -39,7 +36,12 @@ open class PeerEdit : View() {
     val recorderViewModel: RecorderViewModel by inject()
 
     private lateinit var waveform: MarkerWaveform
-    private lateinit var scrollbarSlider: Slider
+    private val audioScrollBar = createAudioScrollBar(
+        viewModel.audioPositionProperty,
+        viewModel.totalFramesProperty,
+        viewModel.isPlayingProperty,
+        viewModel::seek
+    )
     private var timer: AnimationTimer? = null
 
     private val mainSectionProperty = SimpleObjectProperty<Node>(null)
@@ -70,10 +72,7 @@ open class PeerEdit : View() {
         val container = this
         waveform = createPlaybackWaveform(container)
         add(waveform)
-
-        scrollbarSlider = createAudioScrollbarSlider()
-        add(scrollbarSlider)
-        viewModel.audioController = AudioPlayerController(scrollbarSlider)
+        add(audioScrollBar)
 
         hbox {
             addClass("consume__bottom", "recording__bottom-section")
@@ -227,16 +226,5 @@ open class PeerEdit : View() {
                 waveform.addWaveformImage(it)
             }
             .addTo(viewModel.disposable)
-    }
-
-    private fun createAudioScrollbarSlider(): Slider {
-        return AudioSlider().apply {
-            hgrow = Priority.ALWAYS
-            colorThemeProperty.bind(settingsViewModel.selectedThemeProperty)
-            setPixelsInHighlightFunction { viewModel.pixelsInHighlight(it) }
-            player.bind(viewModel.waveformAudioPlayerProperty)
-            secondsToHighlightProperty.set(SECONDS_ON_SCREEN)
-            minWidth = 0.0
-        }
     }
 }
