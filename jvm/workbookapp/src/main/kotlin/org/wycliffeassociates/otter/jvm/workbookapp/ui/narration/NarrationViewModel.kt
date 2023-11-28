@@ -483,6 +483,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun playAll() {
+        logger.info("Playing all")
         playingVerseIndex.set(-1)
         renderer.clearActiveRecordingData()
         audioPlayer.pause()
@@ -492,6 +493,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun pausePlayback() {
+        logger.info("Pausing playback")
         audioPlayer.pause()
     }
 
@@ -510,6 +512,8 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun saveRecording(verseIndex: Int) {
+        logger.info("Saving recording for: ${narration.totalVerses[verseIndex].formattedLabel}")
+
         stopPlayer()
 
         narration.onSaveRecording(verseIndex)
@@ -600,6 +604,8 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun pauseRecording(index: Int) {
+        logger.info("Pausing recording for: ${narration.totalVerses[index].formattedLabel}")
+
         isRecording = false
         recordPause = true
 
@@ -612,6 +618,8 @@ class NarrationViewModel : ViewModel() {
 
 
     fun pauseRecordAgain(index: Int) {
+        logger.info("Pausing record again for: ${narration.totalVerses[index].formattedLabel}")
+
         isRecording = false
         recordPause = true
 
@@ -621,6 +629,8 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun resumeRecordingAgain() {
+        logger.info("Resuming record again for: ${narration.totalVerses[recordingVerseIndex.value].formattedLabel}")
+
         stopPlayer()
 
         narration.resumeRecordingAgain()
@@ -631,6 +641,8 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun resumeRecording() {
+        logger.info("Resuming record ${narration.totalVerses[recordingVerseIndex.value].formattedLabel}")
+
         stopPlayer()
 
         narration.resumeRecording()
