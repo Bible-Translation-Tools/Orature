@@ -404,6 +404,7 @@ class HomePage2 : View() {
         val dialog = find<ProgressDialog> {
             orientationProperty.set(settingsViewModel.orientationProperty.value)
             themeProperty.set(settingsViewModel.appColorMode.value)
+            allowCloseProperty.set(false)
             cancelMessageProperty.set(null)
             dialogTitleProperty.bind(importProjectViewModel.importedProjectTitleProperty.stringBinding {
                 it?.let {
