@@ -49,7 +49,6 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
     override val currentMarkerNumberProperty = SimpleIntegerProperty(-1)
     override var resumeAfterScroll: Boolean = false
 
-    /** This property must be initialized before calling dock() */
     override var audioController: AudioPlayerController? = null
     override val waveformAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     override var sampleRate: Int = 0 // beware of divided by 0

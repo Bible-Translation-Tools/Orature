@@ -84,7 +84,6 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     override val currentMarkerNumberProperty = SimpleIntegerProperty(-1)
     override var resumeAfterScroll: Boolean = false
 
-    /** This property must be initialized before calling dock() */
     override var audioController: AudioPlayerController? = null
     override val waveformAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     override val positionProperty = SimpleDoubleProperty(0.0)
