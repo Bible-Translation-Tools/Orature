@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.jvm.controls.SCROLL_INCREMENT_UNIT
+import org.wycliffeassociates.otter.jvm.controls.SCROLL_JUMP_UNIT
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
@@ -82,6 +84,9 @@ class AudioWorkspaceView : View() {
         disableWhen {
             viewModel.isRecordingProperty.or(viewModel.isPlayingProperty)
         }
+
+        unitIncrement = SCROLL_INCREMENT_UNIT
+        blockIncrement = SCROLL_JUMP_UNIT
 
         valueProperty().onChange { pos ->
             if (pos.toInt() != viewModel.audioPositionProperty.value) {

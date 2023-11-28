@@ -36,14 +36,24 @@ fun Parent.customizeScrollbarSkin() {
         }
 }
 
-private const val SCROLL_INCREMENT_UNIT = 20_000.0 // audio frames
-private const val SCROLL_JUMP_UNIT = 400_000.0 // audio frames
+/** The distance of scroll bar increment/decrement measured in audio frames */
+const val SCROLL_INCREMENT_UNIT = 20_000.0
+/** The distance of scroll bar jump measured in audio frames */
+const val SCROLL_JUMP_UNIT = 400_000.0
 
+/**
+ * Constructs a custom horizontal scroll bar for the audio waveform.
+ *
+ * @param audioPositionProperty the frame position of the current playback
+ * @param totalFramesProperty the total number of frames in the audio
+ * @param isPlayingProperty binding to playback status
+ * @param onScroll invoked when the user interacts with the scroll bar
+ */
 fun createAudioScrollBar(
     audioPositionProperty: IntegerProperty,
     totalFramesProperty: IntegerProperty,
     isPlayingProperty: BooleanProperty,
-    onValueChanged: (Int) -> Unit = {}
+    onScroll: (Int) -> Unit = {}
 ): ScrollBar {
     return ScrollBar().apply {
         orientation = Orientation.HORIZONTAL
@@ -54,7 +64,7 @@ fun createAudioScrollBar(
 
         valueProperty().onChange { value ->
             if (!isPlayingProperty.value) {
-                onValueChanged(value.toInt())
+                onScroll(value.toInt())
             }
         }
         valueProperty().bindBidirectional(audioPositionProperty) // sync when audio played
