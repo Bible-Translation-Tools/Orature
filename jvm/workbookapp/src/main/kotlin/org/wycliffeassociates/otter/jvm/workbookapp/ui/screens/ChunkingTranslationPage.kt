@@ -1,7 +1,14 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import javafx.beans.binding.Bindings
+import javafx.scene.Node
+import javafx.scene.control.Separator
 import javafx.scene.layout.Priority
+import javafx.scene.layout.VBox
+import javafx.stage.FileChooser
+import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.SourceTextDrawer
 import org.wycliffeassociates.otter.jvm.controls.event.ChunkSelectedEvent
@@ -20,11 +27,14 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.trans
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
+import java.text.MessageFormat
 
 class ChunkingTranslationPage : View() {
 
     val viewModel: TranslationViewModel2 by inject()
     val workbookDataStore: WorkbookDataStore by inject()
+
+    private val sourceAudioMissingView = createSourceAudioMissingView()
 
     private val mainFragmentProperty = viewModel.selectedStepProperty.objectBinding {
         it?.let { step ->
@@ -38,7 +48,7 @@ class ChunkingTranslationPage : View() {
                 ChunkingStep.FINAL_REVIEW -> find<ChapterReview>()
             }
             fragment.root
-        }
+        } ?: sourceAudioMissingView
     }
 
     private lateinit var sourceTextDrawer: SourceTextDrawer
@@ -99,6 +109,7 @@ class ChunkingTranslationPage : View() {
         tryImportStylesheet("/css/chunk-item.css")
         tryImportStylesheet("/css/marker-node.css")
         tryImportStylesheet("/css/scrolling-waveform.css")
+        tryImportStylesheet("/css/source-audio-missing.css")
 
         subscribe<ChunkingStepSelectedEvent> {
             viewModel.navigateStep(it.step)
@@ -125,5 +136,96 @@ class ChunkingTranslationPage : View() {
     override fun onUndock() {
         super.onUndock()
         viewModel.undockPage()
+    }
+
+    private fun createSourceAudioMissingView(): Node {
+        return VBox().apply {
+            addClass("audio-missing-view")
+            vgrow = Priority.ALWAYS
+
+            label {
+                textProperty().bind(
+                    workbookDataStore.activeChapterTitleBinding().stringBinding {
+                        MessageFormat.format(
+                            messages["source_audio_missing_for"],
+                            it
+                        )
+                    }
+                )
+            }
+            label(messages["source_audio_missing_description"]) {
+                addClass("normal-text")
+            }
+
+            vbox {
+                addClass("drag-drop-area")
+
+                label {
+                    addClass("")
+                    graphic = FontIcon(MaterialDesign.MDI_FOLDER_OUTLINE)
+                }
+
+                label(messages["dragToImport"]) {
+                    fitToParentWidth()
+                    addClass("")
+                }
+
+                button(messages["browseFiles"]) {
+                    addClass(
+                        "btn",
+                        "btn--primary"
+                    )
+                    tooltip(text)
+                    graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
+                    action {
+                        chooseFile(
+                            FX.messages["importResourceFromZip"],
+                            arrayOf(
+                                FileChooser.ExtensionFilter(
+                                    messages["oratureFileTypes"],
+                                    *OratureFileFormat.extensionList.map { "*.$it" }.toTypedArray()
+                                )
+                            ),
+                            mode = FileChooserMode.Single,
+                            owner = currentWindow
+                        )//.firstOrNull()?.let { importFile(it) }
+                    }
+                }
+            }
+
+            stackpane {
+                addClass("separator-area")
+                separator { fitToParentWidth() }
+            }
+
+            label(messages["need_source_audio"]) {
+                addClass("h3")
+            }
+
+            textflow {
+                text(messages["source_audio_download_description"]) {
+                    addClass("normal-text")
+                }
+                hyperlink("audio.bibleineverylanguage.org").apply {
+                    addClass("wa-text--hyperlink", "app-drawer__text--link")
+                    tooltip("audio.bibleineverylanguage.org/gl")
+                    action {
+                        hostServices.showDocument("https://audio.bibleineverylanguage.org/gl")
+                    }
+                }
+            }
+
+            hbox {
+                button(messages["check_online"]) {
+                    addClass("btn", "btn--primary")
+                    tooltip(text)
+                    graphic = FontIcon(MaterialDesign.MDI_EXPORT)
+                }
+                button(messages["begin_narrating_book_chapter"]) {
+                    addClass("btn", "btn--secondary")
+                    graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
+                }
+            }
+        }
     }
 }
