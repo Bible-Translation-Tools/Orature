@@ -26,7 +26,6 @@ object RecordAction {
         // Make next item available to record
         if (index < contexts.lastIndex) {
             contexts[index + 1].changeState(TeleprompterItemState.RECORD)
-            // NOTE: this should be index + 2, because we are overriding the Record above
             for (i in index + 1..contexts.lastIndex) {
                 contexts[i].disable()
             }
@@ -41,7 +40,6 @@ object PauseRecordingAction {
         if (0 != index) {
             for (i in 0 until index) {
                 contexts[i].restore()
-                // Why does this need a condition and why can't it utilize the restore method?
                 if (contexts[i].state.type == TeleprompterItemState.RECORD_AGAIN_DISABLED) {
                     contexts[i].changeState(TeleprompterItemState.RECORD_AGAIN)
                 }
@@ -67,7 +65,6 @@ object ResumeRecordAction {
         // Make next item available to record
         if (index < contexts.lastIndex) {
             contexts[index + 1].changeState(TeleprompterItemState.RECORD)
-            // This also seems that it should be index + 2
             for (i in index + 1..contexts.lastIndex) {
                 contexts[i].disable()
             }
