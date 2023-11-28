@@ -1,5 +1,7 @@
 package org.wycliffeassociates.otter.jvm.controls
 
+import javafx.beans.property.BooleanProperty
+import javafx.beans.property.IntegerProperty
 import javafx.geometry.Orientation
 import javafx.scene.Parent
 import javafx.scene.control.ScrollBar
@@ -32,4 +34,35 @@ fun Parent.customizeScrollbarSkin() {
                 }
             }
         }
+}
+
+private const val SCROLL_INCREMENT_UNIT = 20_000.0 // audio frames
+private const val SCROLL_JUMP_UNIT = 400_000.0 // audio frames
+
+fun createAudioScrollBar(
+    audioPositionProperty: IntegerProperty,
+    totalFramesProperty: IntegerProperty,
+    isPlayingProperty: BooleanProperty,
+    onValueChanged: (Int) -> Unit = {}
+): ScrollBar {
+    return ScrollBar().apply {
+        orientation = Orientation.HORIZONTAL
+        disableWhen { isPlayingProperty }
+
+        unitIncrement = SCROLL_INCREMENT_UNIT
+        blockIncrement = SCROLL_JUMP_UNIT
+
+        valueProperty().onChange { value ->
+            if (!isPlayingProperty.value) {
+                onValueChanged(value.toInt())
+            }
+        }
+        valueProperty().bindBidirectional(audioPositionProperty) // sync when audio played
+
+        maxProperty().bind(totalFramesProperty)
+
+        runLater {
+            customizeScrollbarSkin()
+        }
+    }
 }
