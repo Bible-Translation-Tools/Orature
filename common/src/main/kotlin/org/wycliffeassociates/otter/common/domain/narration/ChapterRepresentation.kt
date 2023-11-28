@@ -113,6 +113,7 @@ internal class ChapterRepresentation(
 
         try {
             val nodes = activeVersesMapper.readValue(json, reference)
+            logger.info("Loading ${nodes.size} audio markers from serialized data")
             totalVerses.forEach { it.clear() }
             totalVerses.forEachIndexed { idx, _ ->
                 nodes.getOrNull(idx)?.let { totalVerses[idx] = it }
