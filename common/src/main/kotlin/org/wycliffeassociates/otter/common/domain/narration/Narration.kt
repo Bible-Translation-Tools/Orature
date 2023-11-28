@@ -16,7 +16,6 @@ import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.common.audio.wav.WavOutputStream
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
-import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Take
@@ -295,7 +294,7 @@ class Narration @AssistedInject constructor(
             player.load(chapterReaderConnection)
             audioLoaded = true
         }
-        logger.info("Loading verse ${verse.label} into player")
+        logger.info("Loading ${verse.formattedLabel} into player")
         val range: IntRange? = chapterRepresentation.getRangeOfMarker(verse)
         logger.info("Playback range is ${range?.start}-${range?.last}")
         range?.let {
