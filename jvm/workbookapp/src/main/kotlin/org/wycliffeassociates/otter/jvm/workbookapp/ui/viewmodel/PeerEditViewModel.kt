@@ -5,11 +5,10 @@ import com.sun.glass.ui.Screen
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
-import javafx.animation.AnimationTimer
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
-import javafx.scene.control.Slider
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
@@ -45,6 +44,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     override val waveformAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     override val positionProperty = SimpleDoubleProperty(0.0)
     override var imageWidthProperty = SimpleDoubleProperty()
+    override val audioPositionProperty = SimpleIntegerProperty()
 
     val chunkTitleProperty = workbookDataStore.activeChunkTitleBinding()
     val currentChunkProperty = SimpleObjectProperty<Chunk>()
@@ -54,13 +54,13 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     val disposable = CompositeDisposable()
 
     lateinit var waveform: Observable<Image>
-    /** This property must be initialized before calling dock() */
-    var audioController: AudioPlayerController? = null
     var subscribeOnWaveformImages: () -> Unit = {}
     var cleanUpWaveform: () -> Unit = {}
+    private var audioController: AudioPlayerController? = null
 
     override var sampleRate: Int = 0 // beware of divided by 0
-    override var totalFrames: Int = 0 // beware of divided by 0
+    override val totalFramesProperty = SimpleIntegerProperty(0)
+    override var totalFrames: Int by totalFramesProperty // beware of divided by 0
 
     private val newTakeProperty = SimpleObjectProperty<Take>(null)
     private val builder = ObservableWaveformBuilder()
@@ -212,7 +212,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
             totalFrames = it.totalFrames
         }
         waveformAudioPlayerProperty.set(audioPlayer)
-        audioController?.let { controller ->
+        audioController = AudioPlayerController().also { controller ->
             controller.load(audioPlayer)
             isPlayingProperty.bind(controller.isPlayingProperty)
         }

@@ -5,23 +5,20 @@ import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
 import javafx.animation.AnimationTimer
 import javafx.geometry.Side
-import javafx.scene.control.Slider
 import javafx.scene.control.Tooltip
 import javafx.scene.layout.Priority
 import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
+import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
 import org.wycliffeassociates.otter.jvm.controls.event.GoToNextChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
-import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
-import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
 import org.wycliffeassociates.otter.jvm.controls.waveform.startAnimationTimer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterReviewViewModel
@@ -35,7 +32,12 @@ class ChapterReview : View() {
     val settingsViewModel: SettingsViewModel by inject()
 
     private lateinit var waveform: MarkerWaveform
-    private lateinit var scrollbarSlider: Slider
+    private val audioScrollBar = createAudioScrollBar(
+        viewModel.audioPositionProperty,
+        viewModel.totalFramesProperty,
+        viewModel.isPlayingProperty,
+        viewModel::seek
+    )
     private var timer: AnimationTimer? = null
     private var cleanUpWaveform: () -> Unit = {}
 
@@ -76,9 +78,8 @@ class ChapterReview : View() {
 
                 markers.bind(viewModel.markers) { it }
             }
-            scrollbarSlider = createAudioScrollbarSlider()
             add(waveform)
-            add(scrollbarSlider)
+            add(audioScrollBar)
 
             hbox {
                 addClass("consume__bottom", "chunking-bottom__media-btn-group")
@@ -152,7 +153,6 @@ class ChapterReview : View() {
     override fun onDock() {
         logger.info("Final Review docked.")
         timer = startAnimationTimer { viewModel.calculatePosition() }
-        viewModel.audioController = AudioPlayerController(scrollbarSlider)
         viewModel.dock()
         subscribeEvents()
     }
@@ -195,15 +195,5 @@ class ChapterReview : View() {
                 waveform.addWaveformImage(it)
             }
             .addTo(viewModel.compositeDisposable)
-    }
-
-    private fun createAudioScrollbarSlider(): Slider {
-        return AudioSlider().apply {
-            hgrow = Priority.ALWAYS
-            colorThemeProperty.bind(settingsViewModel.selectedThemeProperty)
-            setPixelsInHighlightFunction { viewModel.pixelsInHighlight(it) }
-            player.bind(viewModel.waveformAudioPlayerProperty)
-            secondsToHighlightProperty.set(SECONDS_ON_SCREEN)
-        }
     }
 }
