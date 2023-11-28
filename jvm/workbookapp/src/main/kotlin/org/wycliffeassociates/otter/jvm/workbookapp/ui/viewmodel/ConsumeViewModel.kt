@@ -145,7 +145,7 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
         }
 
         waveformAudioPlayerProperty.set(player)
-        audioController?.let {
+        audioController = AudioPlayerController().also {
             it.load(player)
             isPlayingProperty.bind(it.isPlayingProperty)
         }

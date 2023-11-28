@@ -22,20 +22,15 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
 import javafx.animation.AnimationTimer
-import javafx.beans.property.SimpleDoubleProperty
-import javafx.scene.control.ScrollBar
-import javafx.scene.control.Slider
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
+import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
-import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
-import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ConsumeViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
 import org.wycliffeassociates.otter.jvm.controls.waveform.startAnimationTimer
@@ -49,7 +44,12 @@ class Consume : View() {
     val settingsViewModel: SettingsViewModel by inject()
 
     private lateinit var waveform: MarkerWaveform
-    private lateinit var scrollbarSlider: Slider
+    private val audioScrollBar = createAudioScrollBar(
+        viewModel.audioPositionProperty,
+        viewModel.totalFramesProperty,
+        viewModel.isPlayingProperty,
+        viewModel::seek
+    )
 
     private var cleanUpWaveform: () -> Unit = {}
     private var timer: AnimationTimer? = null
@@ -58,7 +58,6 @@ class Consume : View() {
         super.onDock()
         logger.info("Consume docked")
         timer = startAnimationTimer { viewModel.calculatePosition() }
-        viewModel.audioController = AudioPlayerController(scrollbarSlider)
         viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
         viewModel.onDockConsume()
         waveform.markers.bind(viewModel.markers) { it }
@@ -77,6 +76,7 @@ class Consume : View() {
             .observeOnFx()
             .subscribe {
                 waveform.addWaveformImage(it)
+                audioScrollBar.customizeScrollbarSkin()
             }
             .addTo(viewModel.compositeDisposable)
     }
@@ -105,10 +105,9 @@ class Consume : View() {
                     // Marker stuff
                     this.markers.bind(viewModel.markers) { it }
                 }
-                scrollbarSlider = createAudioScrollbarSlider()
                 add(waveform)
-//                add(scrollbarSlider)
-                add(createScrollbar())
+                audioScrollBar
+                add(audioScrollBar)
             }
             bottom = hbox {
                 addClass("consume__bottom")
@@ -151,32 +150,6 @@ class Consume : View() {
             setOnFastForward(viewModel::fastForward)
             setOnToggleMedia(viewModel::mediaToggle)
             setOnResumeMedia(viewModel::resumeMedia)
-        }
-    }
-
-    private fun createAudioScrollbarSlider(): Slider {
-        return AudioSlider().apply {
-            hgrow = Priority.ALWAYS
-            colorThemeProperty.bind(settingsViewModel.selectedThemeProperty)
-            setPixelsInHighlightFunction { viewModel.pixelsInHighlight(it) }
-            player.bind(viewModel.waveformAudioPlayerProperty)
-            secondsToHighlightProperty.set(SECONDS_ON_SCREEN)
-        }
-    }
-
-    private fun createScrollbar(): ScrollBar {
-        return ScrollBar().apply {
-            runLater { customizeScrollbarSkin() }
-            disableWhen { viewModel.isPlayingProperty }
-
-            valueProperty().onChange { value ->
-                if (!viewModel.isPlayingProperty.value) {
-                    viewModel.seek(value.toInt())
-                }
-            }
-            valueProperty().bindBidirectional(viewModel.audioPositionProperty)
-
-            maxProperty().bind(viewModel.totalFramesProperty)
         }
     }
 }
