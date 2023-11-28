@@ -25,12 +25,10 @@ import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import java.io.File
-import javafx.animation.AnimationTimer
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
-import javafx.scene.control.Slider
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.audio.AudioCue
@@ -193,7 +191,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         }
 
         waveformAudioPlayerProperty.set(player)
-        audioController?.let { controller ->
+        audioController = AudioPlayerController().also { controller ->
             controller.load(player)
             isPlayingProperty.bind(controller.isPlayingProperty)
         }
