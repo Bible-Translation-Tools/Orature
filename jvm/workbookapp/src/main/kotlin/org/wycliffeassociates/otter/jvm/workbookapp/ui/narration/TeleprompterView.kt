@@ -165,7 +165,7 @@ class TeleprompterView : View() {
                 runLater(Duration.millis(1000.0)) {
                     val index = lastVerse.coerceIn(0, max(viewModel.chunks.size - 1, 0))
                     try {
-                        logger.info("Selecting index: $index for lastecordedVerseProperty")
+                        logger.info("Selecting item: ${index + 1} in Teleprompter")
                         selectionModel.select(index)
                         scrollTo(index)
                     } catch (e: Exception) {
