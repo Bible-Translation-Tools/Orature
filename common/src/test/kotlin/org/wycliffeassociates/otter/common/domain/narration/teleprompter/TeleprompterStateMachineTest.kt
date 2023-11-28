@@ -7,11 +7,11 @@ import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 
 class TeleprompterStateMachineTest {
 
-    fun mockAudioMarker() : AudioMarker {
-        return mockk<AudioMarker>{}
+    fun mockAudioMarker(): AudioMarker {
+        return mockk<AudioMarker> {}
     }
 
-    fun makeAudioMarkerLists(size: Int) : List<AudioMarker> {
+    fun makeAudioMarkerLists(size: Int): List<AudioMarker> {
         return List(size) { mockAudioMarker() }
     }
 
@@ -19,7 +19,7 @@ class TeleprompterStateMachineTest {
     fun `transition from RECORD to RECORD with multiple items in context and none active`() {
         val audioMarkers = makeAudioMarkerLists(10)
         val teleprompterStateMachine = TeleprompterStateMachine(audioMarkers)
-        val activeVerses = List(10) {false}
+        val activeVerses = List(10) { false }
 
         teleprompterStateMachine.initialize(activeVerses)
 
@@ -27,8 +27,8 @@ class TeleprompterStateMachineTest {
         val newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD, index)
 
         // Verifies that the state at index is RECORD_ACTIVE, and that the rest are RECORD_DISABLED
-        for(i in audioMarkers.indices) {
-            if(i == index) {
+        for (i in audioMarkers.indices) {
+            if (i == index) {
                 Assert.assertEquals(TeleprompterItemState.RECORD_ACTIVE, newContext[i])
             } else {
                 Assert.assertEquals(TeleprompterItemState.RECORD_DISABLED, newContext[i])
@@ -40,7 +40,7 @@ class TeleprompterStateMachineTest {
     fun `transition from RECORD to RECORDING_PAUSED and none active`() {
         val audioMarkers = makeAudioMarkerLists(10)
         val teleprompterStateMachine = TeleprompterStateMachine(audioMarkers)
-        val activeVerses = List(10) {false}
+        val activeVerses = List(10) { false }
 
         teleprompterStateMachine.initialize(activeVerses)
 
@@ -53,8 +53,8 @@ class TeleprompterStateMachineTest {
 
         newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.PAUSE_RECORDING, index)
 
-        for(i in newContext.indices) {
-            if(i == index) {
+        for (i in newContext.indices) {
+            if (i == index) {
                 Assert.assertEquals(TeleprompterItemState.RECORDING_PAUSED, newContext[i])
             } else {
                 Assert.assertEquals(TeleprompterItemState.RECORD_DISABLED, newContext[i])
@@ -66,7 +66,7 @@ class TeleprompterStateMachineTest {
     fun `transition from RECORD_AGAIN then RECORD_AGAIN_PAUSED with first two active and recording second verse`() {
         val audioMarkers = makeAudioMarkerLists(10)
         val teleprompterStateMachine = TeleprompterStateMachine(audioMarkers)
-        val activeVerses = MutableList(10) {false}
+        val activeVerses = MutableList(10) { false }
         activeVerses[0] = true
         activeVerses[1] = true
 
@@ -81,10 +81,10 @@ class TeleprompterStateMachineTest {
 
         Assert.assertEquals(TeleprompterItemState.RECORD_AGAIN_PAUSED, newContext[index])
 
-        for(i in newContext.indices) {
-            if(i < index) {
+        for (i in newContext.indices) {
+            if (i < index) {
                 Assert.assertEquals(TeleprompterItemState.RECORD_AGAIN_DISABLED, newContext[i])
-            } else if(i == index) {
+            } else if (i == index) {
                 Assert.assertEquals(TeleprompterItemState.RECORD_AGAIN_PAUSED, newContext[i])
             } else if (i > index + 1) {
                 Assert.assertEquals(TeleprompterItemState.RECORD_DISABLED, newContext[i])
@@ -96,7 +96,7 @@ class TeleprompterStateMachineTest {
     fun `transition from RECORD, RECORDING_PAUSED, then RESUME_RECORDING with none previously active`() {
         val audioMarkers = makeAudioMarkerLists(10)
         val teleprompterStateMachine = TeleprompterStateMachine(audioMarkers)
-        val activeVerses = List(10) {false}
+        val activeVerses = List(10) { false }
 
         teleprompterStateMachine.initialize(activeVerses)
 
@@ -111,8 +111,8 @@ class TeleprompterStateMachineTest {
         // Resume recording
         newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.RESUME_RECORDING, index)
 
-        for(i in newContext.indices) {
-            if(i == index) {
+        for (i in newContext.indices) {
+            if (i == index) {
                 Assert.assertEquals(TeleprompterItemState.RECORD_ACTIVE, newContext[i])
             } else {
                 Assert.assertEquals(TeleprompterItemState.RECORD_DISABLED, newContext[i])
@@ -125,7 +125,7 @@ class TeleprompterStateMachineTest {
     fun `transition from RECORD, RECORDING_PAUSED, RESUME_RECORDING, then NEXT with none previously active`() {
         val audioMarkers = makeAudioMarkerLists(10)
         val teleprompterStateMachine = TeleprompterStateMachine(audioMarkers)
-        val activeVerses = List(10) {false}
+        val activeVerses = List(10) { false }
 
         teleprompterStateMachine.initialize(activeVerses)
 
@@ -143,10 +143,10 @@ class TeleprompterStateMachineTest {
         // Next
         val newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.NEXT, index + 1)
 
-        for(i in newContext.indices) {
-            if(i == index) {
+        for (i in newContext.indices) {
+            if (i == index) {
                 Assert.assertEquals(TeleprompterItemState.RECORD_AGAIN_DISABLED, newContext[i])
-            } else if(i == index + 1) {
+            } else if (i == index + 1) {
                 Assert.assertEquals(TeleprompterItemState.RECORD_ACTIVE, newContext[i])
             } else {
                 Assert.assertEquals(TeleprompterItemState.RECORD_DISABLED, newContext[i])
@@ -159,7 +159,7 @@ class TeleprompterStateMachineTest {
     fun `transition from RECORD, RECORDING_PAUSED, RESUME_RECORDING, with none previously active and resuming recording of verse 3`() {
         val audioMarkers = makeAudioMarkerLists(10)
         val teleprompterStateMachine = TeleprompterStateMachine(audioMarkers)
-        val activeVerses = List(10) {false}
+        val activeVerses = List(10) { false }
 
         teleprompterStateMachine.initialize(activeVerses)
 
@@ -178,10 +178,10 @@ class TeleprompterStateMachineTest {
         teleprompterStateMachine.transition(TeleprompterStateTransition.PAUSE_RECORDING, 2)
         val newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.RESUME_RECORDING, 2)
 
-        for(i in newContext.indices) {
-            if(i < 2) {
+        for (i in newContext.indices) {
+            if (i < 2) {
                 Assert.assertEquals(TeleprompterItemState.RECORD_AGAIN_DISABLED, newContext[i])
-            } else if(i == 2) {
+            } else if (i == 2) {
                 Assert.assertEquals(TeleprompterItemState.RECORD_ACTIVE, newContext[i])
             } else {
                 Assert.assertEquals(TeleprompterItemState.RECORD_DISABLED, newContext[i])
@@ -194,7 +194,7 @@ class TeleprompterStateMachineTest {
     fun `transition from RECORD, RECORDING_PAUSED, then NEXT with none previously active`() {
         val audioMarkers = makeAudioMarkerLists(10)
         val teleprompterStateMachine = TeleprompterStateMachine(audioMarkers)
-        val activeVerses = List(10) {false}
+        val activeVerses = List(10) { false }
 
         teleprompterStateMachine.initialize(activeVerses)
 
@@ -209,10 +209,10 @@ class TeleprompterStateMachineTest {
         // Next
         val newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.NEXT, index + 1)
 
-        for(i in newContext.indices) {
-            if(i == index) {
+        for (i in newContext.indices) {
+            if (i == index) {
                 Assert.assertEquals(TeleprompterItemState.RECORD_AGAIN, newContext[i])
-            } else if(i == index + 1) {
+            } else if (i == index + 1) {
                 Assert.assertEquals(TeleprompterItemState.RECORD, newContext[i])
             } else {
                 Assert.assertEquals(TeleprompterItemState.RECORD_DISABLED, newContext[i])
@@ -224,7 +224,7 @@ class TeleprompterStateMachineTest {
     fun `transition from RECORD, RECORDING_PAUSED, then RECORD_AGAIN with none previously active`() {
         val audioMarkers = makeAudioMarkerLists(10)
         val teleprompterStateMachine = TeleprompterStateMachine(audioMarkers)
-        val activeVerses = List(10) {false}
+        val activeVerses = List(10) { false }
 
         teleprompterStateMachine.initialize(activeVerses)
 
@@ -244,8 +244,8 @@ class TeleprompterStateMachineTest {
 
         newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD_AGAIN, index)
 
-        for(i in newContext.indices) {
-            if(i == index) {
+        for (i in newContext.indices) {
+            if (i == index) {
                 Assert.assertEquals(TeleprompterItemState.RECORD_AGAIN_ACTIVE, newContext[i])
             } else {
                 Assert.assertEquals(TeleprompterItemState.RECORD_DISABLED, newContext[i])
@@ -257,7 +257,7 @@ class TeleprompterStateMachineTest {
     fun `transition from RECORD, RECORDING_PAUSED, RECORD_AGAIN, then PAUSE_RECORD_AGAIN with none previously active`() {
         val audioMarkers = makeAudioMarkerLists(10)
         val teleprompterStateMachine = TeleprompterStateMachine(audioMarkers)
-        val activeVerses = List(10) {false}
+        val activeVerses = List(10) { false }
 
         teleprompterStateMachine.initialize(activeVerses)
 
@@ -280,8 +280,8 @@ class TeleprompterStateMachineTest {
         // Pause recording
         newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.PAUSE_RECORD_AGAIN, index)
 
-        for(i in newContext.indices) {
-            if(i == index) {
+        for (i in newContext.indices) {
+            if (i == index) {
                 Assert.assertEquals(TeleprompterItemState.RECORD_AGAIN_PAUSED, newContext[i])
             } else {
                 Assert.assertEquals(TeleprompterItemState.RECORD_DISABLED, newContext[i])
@@ -293,7 +293,7 @@ class TeleprompterStateMachineTest {
     fun `transition from RECORD, RECORDING_PAUSED, RECORD_AGAIN, PAUSE_RECORD_AGAIN, RESUME_RECORD_AGAIN with none previously active`() {
         val audioMarkers = makeAudioMarkerLists(10)
         val teleprompterStateMachine = TeleprompterStateMachine(audioMarkers)
-        val activeVerses = List(10) {false}
+        val activeVerses = List(10) { false }
 
         teleprompterStateMachine.initialize(activeVerses)
 
@@ -317,27 +317,27 @@ class TeleprompterStateMachineTest {
         val newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.RESUME_RECORD_AGAIN, index)
 
 
-        for(i in newContext.indices) {
-            if(i == index) {
+        for (i in newContext.indices) {
+            if (i == index) {
                 Assert.assertEquals(TeleprompterItemState.RECORD_AGAIN_ACTIVE, newContext[i])
             } else {
                 Assert.assertEquals(TeleprompterItemState.RECORD_DISABLED, newContext[i])
             }
         }
     }
-    
+
     @Test
     fun `transition from RECORD, RECORDING_PAUSED, then NEXT, repeated until end of chapter, then SAVE with none previously active`() {
         val numMarkers = 10
         val audioMarkers = makeAudioMarkerLists(numMarkers)
         val teleprompterStateMachine = TeleprompterStateMachine(audioMarkers)
-        val activeVerses = List(numMarkers) {false}
+        val activeVerses = List(numMarkers) { false }
 
         teleprompterStateMachine.initialize(activeVerses)
 
         // Puts all verses up to the last verse in a RECORD_AGAIN state
         var newContext: List<TeleprompterItemState>? = null
-        for(i in 0 until numMarkers - 1) {
+        for (i in 0 until numMarkers - 1) {
             // Start recording
             teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD, i)
 
@@ -357,11 +357,9 @@ class TeleprompterStateMachineTest {
         // Saves
         newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.SAVE, numMarkers - 1)
 
-        for(i in newContext?.indices!!) {
+        for (i in newContext?.indices!!) {
             Assert.assertEquals(TeleprompterItemState.RECORD_AGAIN, newContext[i])
         }
     }
-
-
 
 }
