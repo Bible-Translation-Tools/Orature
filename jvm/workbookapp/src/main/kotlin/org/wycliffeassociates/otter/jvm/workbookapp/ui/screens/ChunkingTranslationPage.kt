@@ -1,14 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import javafx.beans.binding.Bindings
-import javafx.scene.Node
 import javafx.scene.layout.Priority
-import javafx.scene.layout.VBox
-import javafx.scene.text.TextAlignment
-import javafx.stage.FileChooser
-import org.kordamp.ikonli.javafx.FontIcon
-import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.SourceTextDrawer
 import org.wycliffeassociates.otter.jvm.controls.event.ChunkSelectedEvent
@@ -28,7 +21,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.trans
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
-import java.text.MessageFormat
 
 class ChunkingTranslationPage : View() {
 

@@ -1,21 +1,35 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
+import javafx.event.EventHandler
+import javafx.scene.input.DragEvent
+import javafx.scene.input.TransferMode
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.scene.text.TextAlignment
 import javafx.stage.FileChooser
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
+import org.wycliffeassociates.otter.jvm.controls.dialog.ProgressDialog
+import org.wycliffeassociates.otter.jvm.controls.event.OpenChapterEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ImportProjectViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
+import java.io.File
 import java.text.MessageFormat
 
 class SourceAudioMissing : View() {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     private val viewModel: TranslationViewModel2 by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
-
+    private val settingsViewModel: SettingsViewModel by inject()
+    private val importProjectViewModel: ImportProjectViewModel by inject()
 
     override val root = VBox().apply {
         addClass("audio-missing-view")
@@ -40,6 +54,8 @@ class SourceAudioMissing : View() {
 
         vbox {
             addClass("audio-missing__drag-drop-area")
+            onDragOver = onDragOverHandler()
+            onDragDropped = onDragDroppedHandler()
 
             label {
                 graphic = FontIcon(MaterialDesign.MDI_FOLDER_OUTLINE).addClass("big-icon")
@@ -70,7 +86,7 @@ class SourceAudioMissing : View() {
                             ),
                             mode = FileChooserMode.Single,
                             owner = currentWindow
-                        )//.firstOrNull()?.let { importFile(it) }
+                        ).firstOrNull()?.let { handleImportFile(it) }
                     }
                 }
                 text(suffixText) {
@@ -137,5 +153,86 @@ class SourceAudioMissing : View() {
                 }
             }
         }
+    }
+
+    private fun onDragOverHandler(): EventHandler<DragEvent> {
+        return EventHandler {
+            if (it.gestureSource != this && it.dragboard.hasFiles()) {
+                it.acceptTransferModes(TransferMode.COPY)
+            }
+            it.consume()
+        }
+    }
+
+    private fun onDragDroppedHandler(): EventHandler<DragEvent> {
+        return EventHandler {
+            var success = false
+            if (it.dragboard.hasFiles()) {
+                onDropFile(it.dragboard.files)
+                success = true
+            }
+            it.isDropCompleted = success
+            it.consume()
+        }
+    }
+
+    private fun onDropFile(files: List<File>) {
+        if (importProjectViewModel.isValidImportFile(files)) {
+            val fileToImport = files.first()
+            logger.info("Drag-drop import: $fileToImport")
+            handleImportFile(fileToImport)
+        }
+    }
+
+    private fun handleImportFile(file: File) {
+        importProjectViewModel.setProjectInfo(file)
+
+        val dialog = setupProgressDialog()
+
+        importProjectViewModel.importProject(file)
+            .observeOnFx()
+            .doFinally {
+                dialog.dialogTitleProperty.unbind()
+                dialog.percentageProperty.set(0.0)
+                dialog.close()
+                refresh()
+            }
+            .subscribe { progressStatus ->
+                progressStatus.percent?.let { percent ->
+                    dialog.percentageProperty.set(percent)
+                }
+                if (progressStatus.titleKey != null && progressStatus.titleMessage != null) {
+                    val message = MessageFormat.format(messages[progressStatus.titleKey!!], messages[progressStatus.titleMessage!!])
+                    dialog.progressMessageProperty.set(message)
+                } else if (progressStatus.titleKey != null) {
+                    dialog.progressMessageProperty.set(messages[progressStatus.titleKey!!])
+                }
+            }
+    }
+
+    private fun setupProgressDialog() = find<ProgressDialog> {
+        orientationProperty.set(settingsViewModel.orientationProperty.value)
+        themeProperty.set(settingsViewModel.appColorMode.value)
+        allowCloseProperty.set(false)
+        cancelMessageProperty.set(null)
+        dialogTitleProperty.bind(importProjectViewModel.importedProjectTitleProperty.stringBinding {
+            it?.let {
+                MessageFormat.format(
+                    messages["importProjectTitle"],
+                    messages["import"],
+                    it
+                )
+            } ?: messages["importResource"]
+        })
+
+        setOnCloseAction { close() }
+
+        open()
+    }
+
+    private fun refresh() {
+        val chapter = workbookDataStore.chapter.sort
+        workbookDataStore.activeChapterProperty.set(null)
+        FX.eventbus.fire(OpenChapterEvent(chapter))
     }
 }
