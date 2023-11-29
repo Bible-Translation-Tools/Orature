@@ -107,7 +107,6 @@ class NarrationViewModel : ViewModel() {
     val chapterTakeBusyProperty = SimpleBooleanProperty()
 
     val chunkTotalProperty = SimpleIntegerProperty(0)
-    var numberOfTitlesProperty = SimpleIntegerProperty(0)
     val chunksList: ObservableList<Chunk> = observableListOf()
     val narratableList: ObservableList<NarrationTextItemData> = observableListOf()
     val recordedVerses = observableListOf<AudioMarker>()
@@ -117,7 +116,10 @@ class NarrationViewModel : ViewModel() {
     val totalAudioSizeProperty = SimpleIntegerProperty()
 
     //FIXME: Refactor this if and when Chunk entries are officially added for Titles in the Workbook
-    val potentiallyFinishedProperty = chunkTotalProperty.eq(recordedVerses.sizeProperty.minus(numberOfTitlesProperty))
+    var numberOfTitlesProperty = SimpleIntegerProperty(0)
+    val potentiallyFinishedProperty = chunkTotalProperty
+        .eq(recordedVerses.sizeProperty.minus(numberOfTitlesProperty))
+        .and(!isRecording)
     val potentiallyFinished by potentiallyFinishedProperty
 
     val pluginContextProperty = SimpleObjectProperty(PluginType.EDITOR)
@@ -294,7 +296,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     private fun createPotentiallyFinishedChapterTake() {
-        if (potentiallyFinished && isRecording == false) {
+        if (potentiallyFinished) {
             chapterTakeBusyProperty.set(true)
             logger.info("Chapter is potentially finished, creating a chapter take")
             narration
