@@ -74,6 +74,10 @@
     -fx-background-color: -wa-btn-icon-background-hover;
 }
 
+.btn--icon:active:hover {
+    -fx-background-color: #001533;
+}
+
 .btn--icon:pressed {
     -fx-background-color: -wa-btn-icon-background-pressed;
 }
