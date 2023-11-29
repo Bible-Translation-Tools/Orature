@@ -24,10 +24,14 @@ class TranslationViewModel2 : ViewModel() {
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
 
+    val bookTitleProperty = workbookDataStore.activeWorkbookProperty.stringBinding {
+        it?.target?.title
+    }
     val canUndoProperty = SimpleBooleanProperty(false)
     val canRedoProperty = SimpleBooleanProperty(false)
     val isFirstChapterProperty = SimpleBooleanProperty(false)
     val isLastChapterProperty = SimpleBooleanProperty(false)
+    val showAudioMissingViewProperty = SimpleBooleanProperty(false)
     val selectedStepProperty = SimpleObjectProperty<ChunkingStep>(null)
     val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.CHUNKING)
     val sourceTextProperty = SimpleStringProperty()
@@ -67,6 +71,7 @@ class TranslationViewModel2 : ViewModel() {
 
     fun navigateChapter(chapter: Int) {
         selectedStepProperty.set(null)
+        showAudioMissingViewProperty.set(false)
 
         workbookDataStore.workbook.target
             .chapters
@@ -193,6 +198,7 @@ class TranslationViewModel2 : ViewModel() {
                 }
             }
             .doOnComplete {
+                showAudioMissingViewProperty.set(true)
                 reachableStepProperty.set(null)
                 compositeDisposable.clear()
             }

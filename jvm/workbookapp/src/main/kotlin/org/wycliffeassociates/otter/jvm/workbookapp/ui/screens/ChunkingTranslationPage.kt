@@ -2,9 +2,9 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import javafx.beans.binding.Bindings
 import javafx.scene.Node
-import javafx.scene.control.Separator
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
+import javafx.scene.text.TextAlignment
 import javafx.stage.FileChooser
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
@@ -57,11 +57,7 @@ class ChunkingTranslationPage : View() {
         vgrow = Priority.ALWAYS
 
         translationHeader {
-            titleProperty.bind(
-                workbookDataStore.activeWorkbookProperty.stringBinding {
-                    it?.target?.title
-                }
-            )
+            titleProperty.bind(viewModel.bookTitleProperty)
             chapterTitleProperty.bind(workbookDataStore.activeChapterTitleBinding())
             canUndoProperty.bind(viewModel.canUndoProperty)
             canRedoProperty.bind(viewModel.canRedoProperty)
@@ -71,6 +67,7 @@ class ChunkingTranslationPage : View() {
         }
 
         borderpane {
+            addClass("translation-view")
             vgrow = Priority.ALWAYS
 
             left = ChunkingStepsDrawer(viewModel.selectedStepProperty).apply {
@@ -142,8 +139,11 @@ class ChunkingTranslationPage : View() {
         return VBox().apply {
             addClass("audio-missing-view")
             vgrow = Priority.ALWAYS
+            visibleWhen { viewModel.showAudioMissingViewProperty }
+            managedWhen(visibleProperty())
 
             label {
+                addClass("audio-missing__title")
                 textProperty().bind(
                     workbookDataStore.activeChapterTitleBinding().stringBinding {
                         MessageFormat.format(
@@ -154,47 +154,52 @@ class ChunkingTranslationPage : View() {
                 )
             }
             label(messages["source_audio_missing_description"]) {
-                addClass("normal-text")
+                addClass("normal-text", "audio-missing__description")
             }
 
             vbox {
-                addClass("drag-drop-area")
+                addClass("audio-missing__drag-drop-area")
 
                 label {
-                    addClass("")
-                    graphic = FontIcon(MaterialDesign.MDI_FOLDER_OUTLINE)
+                    graphic = FontIcon(MaterialDesign.MDI_FOLDER_OUTLINE).addClass("big-icon")
                 }
 
-                label(messages["dragToImport"]) {
-                    fitToParentWidth()
-                    addClass("")
-                }
+                textflow {
+                    addClass("audio-missing__text-flow")
+                    textAlignment = TextAlignment.CENTER
 
-                button(messages["browseFiles"]) {
-                    addClass(
-                        "btn",
-                        "btn--primary"
-                    )
-                    tooltip(text)
-                    graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
-                    action {
-                        chooseFile(
-                            FX.messages["importResourceFromZip"],
-                            arrayOf(
-                                FileChooser.ExtensionFilter(
-                                    messages["oratureFileTypes"],
-                                    *OratureFileFormat.extensionList.map { "*.$it" }.toTypedArray()
-                                )
-                            ),
-                            mode = FileChooserMode.Single,
-                            owner = currentWindow
-                        )//.firstOrNull()?.let { importFile(it) }
+                    val textMessage = messages["drag_drop_or_browse_import__template"]
+                    val prefixText = textMessage.substringBefore('{')
+                    val suffixText = textMessage.substringAfter('}')
+
+                    text(prefixText) {
+                        addClass("normal-text", "centered")
+                    }
+                    hyperlink(messages["choose_file"]).apply {
+                        addClass("wa-text--hyperlink", "audio-missing__link-text")
+                        tooltip(text)
+                        action {
+                            chooseFile(
+                                FX.messages["importResourceFromZip"],
+                                arrayOf(
+                                    FileChooser.ExtensionFilter(
+                                        messages["oratureFileTypes"],
+                                        *OratureFileFormat.extensionList.map { "*.$it" }.toTypedArray()
+                                    )
+                                ),
+                                mode = FileChooserMode.Single,
+                                owner = currentWindow
+                            )//.firstOrNull()?.let { importFile(it) }
+                        }
+                    }
+                    text(suffixText) {
+                        addClass("normal-text", "centered")
                     }
                 }
             }
 
             stackpane {
-                addClass("separator-area")
+                addClass("audio-missing__separator-area")
                 separator { fitToParentWidth() }
             }
 
@@ -203,27 +208,48 @@ class ChunkingTranslationPage : View() {
             }
 
             textflow {
-                text(messages["source_audio_download_description"]) {
+                addClass("audio-missing__text-flow")
+
+                val textMessage = messages["source_audio_download_description__template"]
+                val prefixText = textMessage.substringBefore('{')
+                val suffixText = textMessage.substringAfter('}')
+                text(prefixText) {
                     addClass("normal-text")
                 }
                 hyperlink("audio.bibleineverylanguage.org").apply {
-                    addClass("wa-text--hyperlink", "app-drawer__text--link")
+                    addClass("wa-text--hyperlink", "audio-missing__link-text")
                     tooltip("audio.bibleineverylanguage.org/gl")
                     action {
                         hostServices.showDocument("https://audio.bibleineverylanguage.org/gl")
                     }
                 }
+                text(suffixText) {
+                    addClass("normal-text")
+                }
             }
 
             hbox {
+                addClass("audio-missing__actions")
+
                 button(messages["check_online"]) {
                     addClass("btn", "btn--primary")
                     tooltip(text)
                     graphic = FontIcon(MaterialDesign.MDI_EXPORT)
+                    prefWidthProperty().bind(this@hbox.widthProperty().divide(2))
+                    action {
+                        hostServices.showDocument("https://audio.bibleineverylanguage.org/gl")
+                    }
                 }
-                button(messages["begin_narrating_book_chapter"]) {
+
+                button {
                     addClass("btn", "btn--secondary")
+                    text = MessageFormat.format(
+                        messages["begin_narrating_book"],
+                        viewModel.bookTitleProperty.value
+                    )
+                    tooltip(text)
                     graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
+                    prefWidthProperty().bind(this@hbox.widthProperty().divide(2))
                 }
             }
         }

@@ -1,23 +1,50 @@
 .audio-missing-view {
-    -fx-alignment: center;
+    -fx-alignment: center-left;
     -fx-padding: 50;
     -fx-spacing: 16;
     -fx-max-width: 850;
 }
 
-.drag-drop-area {
+.audio-missing__title {
+    -fx-font-size: 2.4em;
+    -fx-text-fill: -wa-regular-text-80;
+}
+
+.audio-missing__description {
+    -fx-wrap-text: true;
+}
+
+.audio-missing__drag-drop-area {
     -fx-min-height: 160px;
     -fx-alignment: center;
     -fx-border-width: 2px;
     -fx-border-radius: 40px;
-    -fx-border-color: -wa-border-light;
-    -fx-border-style: segments(20, 10);
+    -fx-border-color: -wa-black-30;
+    -fx-border-style: segments(15, 15);
     -fx-background-radius: 40px;
-    -fx-padding: 25px;
+    -fx-padding: 40px;
     -fx-spacing: 10px;
 }
 
-.separator-area {
+.audio-missing__text-flow > .normal-text {
+    -fx-fill: -wa-regular-text-80;
+}
+
+.audio-missing__separator-area {
     -fx-padding: 40 0;
     -fx-alignment: center;
+}
+
+.audio-missing__link-text {
+    -fx-padding: 0;
+    -fx-font-size: 1.4em;
+}
+
+.audio-missing__actions {
+    -fx-spacing: 16;
+}
+
+.big-icon {
+    -fx-icon-size: 48;
+    -fx-icon-color: -wa-regular-text;
 }
