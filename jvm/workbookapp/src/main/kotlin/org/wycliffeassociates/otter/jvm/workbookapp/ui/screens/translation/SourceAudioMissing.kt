@@ -192,10 +192,10 @@ class SourceAudioMissing : View() {
         importProjectViewModel.importProject(file)
             .observeOnFx()
             .doFinally {
+                refresh()
                 dialog.dialogTitleProperty.unbind()
                 dialog.percentageProperty.set(0.0)
                 dialog.close()
-                refresh()
             }
             .subscribe { progressStatus ->
                 progressStatus.percent?.let { percent ->

@@ -401,25 +401,7 @@ class HomePage2 : View() {
     private fun handleImportFile(file: File) {
         importProjectViewModel.setProjectInfo(file)
 
-        val dialog = find<ProgressDialog> {
-            orientationProperty.set(settingsViewModel.orientationProperty.value)
-            themeProperty.set(settingsViewModel.appColorMode.value)
-            allowCloseProperty.set(false)
-            cancelMessageProperty.set(null)
-            dialogTitleProperty.bind(importProjectViewModel.importedProjectTitleProperty.stringBinding {
-                it?.let {
-                    MessageFormat.format(
-                        messages["importProjectTitle"],
-                        messages["import"],
-                        it
-                    )
-                } ?: messages["importResource"]
-            })
-
-            setOnCloseAction { close() }
-
-            open()
-        }
+        val dialog = setupImportProgressDialog()
 
         importProjectViewModel.importProject(file)
             .observeOnFx()
@@ -439,6 +421,26 @@ class HomePage2 : View() {
                     dialog.progressMessageProperty.set(messages[progressStatus.titleKey!!])
                 }
             }
+    }
+
+    private fun setupImportProgressDialog() = find<ProgressDialog> {
+        orientationProperty.set(settingsViewModel.orientationProperty.value)
+        themeProperty.set(settingsViewModel.appColorMode.value)
+        allowCloseProperty.set(false)
+        cancelMessageProperty.set(null)
+        dialogTitleProperty.bind(importProjectViewModel.importedProjectTitleProperty.stringBinding {
+            it?.let {
+                MessageFormat.format(
+                    messages["importProjectTitle"],
+                    messages["import"],
+                    it
+                )
+            } ?: messages["importResource"]
+        })
+
+        setOnCloseAction { close() }
+
+        open()
     }
 
     private fun createImportNotification(event: ProjectImportFinishEvent): NotificationViewData {
