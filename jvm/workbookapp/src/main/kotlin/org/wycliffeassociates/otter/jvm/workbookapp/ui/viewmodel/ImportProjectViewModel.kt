@@ -44,7 +44,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.AddFilesView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.DrawerEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.DrawerEventAction
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ProjectImportEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ProjectImportFinishEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ImportConflictDialog
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
@@ -52,9 +52,9 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Provider
 
-class AddFilesViewModel : ViewModel() {
+class ImportProjectViewModel : ViewModel() {
 
-    private val logger = LoggerFactory.getLogger(AddFilesViewModel::class.java)
+    private val logger = LoggerFactory.getLogger(ImportProjectViewModel::class.java)
 
     val settingsViewModel: SettingsViewModel by inject()
 
@@ -141,7 +141,7 @@ class AddFilesViewModel : ViewModel() {
 
             override fun onNotifySuccess(language: String?, project: String?, workbookDescriptor: WorkbookDescriptor?) {
                 FX.eventbus.fire(
-                    ProjectImportEvent(
+                    ProjectImportFinishEvent(
                         ImportResult.SUCCESS,
                         language = language,
                         project = project,
@@ -152,7 +152,7 @@ class AddFilesViewModel : ViewModel() {
 
             override fun onError(filePath: String) {
                 FX.eventbus.fire(
-                    ProjectImportEvent(ImportResult.FAILED, filePath = filePath)
+                    ProjectImportFinishEvent(ImportResult.FAILED, filePath = filePath)
                 )
             }
 

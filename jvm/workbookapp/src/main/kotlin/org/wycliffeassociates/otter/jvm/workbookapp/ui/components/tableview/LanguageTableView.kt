@@ -10,7 +10,7 @@ import javafx.scene.layout.Region
 import javafx.util.Callback
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.LanguageSelectedEvent
+import org.wycliffeassociates.otter.jvm.controls.event.LanguageSelectedEvent
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
