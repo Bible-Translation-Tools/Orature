@@ -500,7 +500,7 @@ class Narration @AssistedInject constructor(
             logger.info("Seeking to previous: ${it.formattedLabel}")
             seek(it.location)
         } ?: {
-            logger.info("Seeking to previous: previous marker not found")
+            logger.info("Previous marker not found, seeking to 0")
             seek(0)
         }
     }
@@ -514,7 +514,7 @@ class Narration @AssistedInject constructor(
             logger.info("Seeking to next: ${it.formattedLabel}")
             seek(it.location)
         } ?: chapterRepresentation.apply {
-            logger.info("Seeking to next: next marker not found")
+            logger.info("Next marker not found, seeking to end of audio")
             val lastFrame = audioLocationToLocationInChapter(activeVerses.last().lastFrame())
             seek(lastFrame)
         }
