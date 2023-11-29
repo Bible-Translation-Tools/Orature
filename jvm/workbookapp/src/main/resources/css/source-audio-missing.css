@@ -16,7 +16,7 @@
 }
 
 .audio-missing__drag-drop-area {
-    -fx-min-height: 160px;
+    -fx-min-height: 200px;
     -fx-alignment: center;
     -fx-border-width: 2px;
     -fx-border-radius: 40px;
@@ -25,6 +25,15 @@
     -fx-background-radius: 40px;
     -fx-padding: 40px;
     -fx-spacing: 10px;
+}
+
+.audio-missing__drag-drop-area:drag-over {
+    -fx-background-color: -wa-drag-drop-area;
+    -fx-border-color: -wa-primary;
+}
+
+.audio-missing__drag-drop-area:drag-over .big-icon {
+    -fx-icon-color: -wa-primary;
 }
 
 .audio-missing__text-flow > .normal-text {

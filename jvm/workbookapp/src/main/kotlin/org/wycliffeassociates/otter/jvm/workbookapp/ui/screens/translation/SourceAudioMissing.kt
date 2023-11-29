@@ -54,8 +54,6 @@ class SourceAudioMissing : View() {
 
         vbox {
             addClass("audio-missing__drag-drop-area")
-            onDragOver = onDragOverHandler()
-            onDragDropped = onDragDroppedHandler()
 
             label {
                 graphic = FontIcon(MaterialDesign.MDI_FOLDER_OUTLINE).addClass("big-icon")
@@ -92,6 +90,17 @@ class SourceAudioMissing : View() {
                 text(suffixText) {
                     addClass("normal-text", "centered")
                 }
+            }
+
+            setOnDragOver {
+                if (it.dragboard.hasFiles()) {
+                    togglePseudoClass("drag-over", true)
+                }
+                onDragOverHandler().handle(it)
+            }
+            onDragDropped = onDragDroppedHandler()
+            setOnDragExited {
+                togglePseudoClass("drag-over", false)
             }
         }
 
