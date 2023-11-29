@@ -13,8 +13,9 @@ import tornadofx.*
 import java.text.MessageFormat
 
 class SourceAudioMissing : View() {
-    val viewModel: TranslationViewModel2 by inject()
-    val workbookDataStore: WorkbookDataStore by inject()
+    private val viewModel: TranslationViewModel2 by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
+
 
     override val root = VBox().apply {
         addClass("audio-missing-view")
@@ -130,6 +131,10 @@ class SourceAudioMissing : View() {
                 tooltip(text)
                 graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
                 prefWidthProperty().bind(this@hbox.widthProperty().divide(2))
+
+                action {
+                    viewModel.goToNarration()
+                }
             }
         }
     }
