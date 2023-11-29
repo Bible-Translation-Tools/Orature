@@ -98,10 +98,10 @@ class SourceAudioMissing : View() {
                 }
                 onDragOverHandler().handle(it)
             }
-            onDragDropped = onDragDroppedHandler()
             setOnDragExited {
                 togglePseudoClass("drag-over", false)
             }
+            onDragDropped = onDragDroppedHandler()
         }
 
         stackpane {
