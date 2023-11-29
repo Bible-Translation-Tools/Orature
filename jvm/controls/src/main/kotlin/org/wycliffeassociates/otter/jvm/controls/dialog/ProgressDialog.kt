@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.controls.dialog
 
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -19,6 +20,7 @@ class ProgressDialog : OtterDialog() {
     val percentageProperty = SimpleDoubleProperty(0.0)
     val progressMessageProperty = SimpleStringProperty()
     val cancelMessageProperty = SimpleStringProperty()
+    val allowCloseProperty = SimpleBooleanProperty(true)
 
     private val onCloseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     
@@ -36,6 +38,8 @@ class ProgressDialog : OtterDialog() {
                 addClass("btn", "btn--icon", "btn--borderless")
                 graphic = FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE)
                 tooltip(messages["close"])
+                visibleWhen { allowCloseProperty }
+                managedWhen(visibleProperty())
                 onActionProperty().bind(onCloseActionProperty)
             }
         }

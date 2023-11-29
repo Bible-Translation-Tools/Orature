@@ -106,7 +106,7 @@
 .app-drawer__text--centered {
     -fx-font-size: 20px;
     -fx-wrap-text: true;
-    -fx-text-alignment: center;
+    -fx-alignment: center;
     -fx-text-fill: -wa-regular-text;
 }
 

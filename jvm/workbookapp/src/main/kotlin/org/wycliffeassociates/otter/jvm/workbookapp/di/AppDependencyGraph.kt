@@ -31,7 +31,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.DirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.ZipEntryTreeBuilderModule
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AddFilesViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ImportProjectViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AddPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BookWizardViewModel
@@ -88,7 +88,7 @@ interface AppDependencyGraph {
     fun inject(viewModel: AudioPluginViewModel)
     fun inject(viewModel: WorkbookPageViewModel)
     fun inject(viewModel: SettingsViewModel)
-    fun inject(viewModel: AddFilesViewModel)
+    fun inject(viewModel: ImportProjectViewModel)
     fun inject(viewModel: TranslationViewModel)
     fun inject(viewModel: TranslationViewModel2)
     fun inject(viewModel: BookWizardViewModel)
