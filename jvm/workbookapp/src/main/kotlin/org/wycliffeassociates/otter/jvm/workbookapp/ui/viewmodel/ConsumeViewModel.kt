@@ -93,6 +93,7 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
     fun onUndockConsume() {
         pause()
         cleanup()
+        audioConnectionFactory.releasePlayer()
         translationViewModel.currentMarkerProperty.unbind()
         translationViewModel.currentMarkerProperty.set(-1)
     }

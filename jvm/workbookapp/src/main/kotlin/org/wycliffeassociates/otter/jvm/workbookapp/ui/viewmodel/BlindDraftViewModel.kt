@@ -82,6 +82,9 @@ class BlindDraftViewModel : ViewModel() {
     }
 
     fun undockBlindDraft() {
+        audioDataStore.stopPlayers()
+        audioDataStore.closePlayers()
+        audioConnectionFactory.releasePlayer()
         if (actionHistory.canUndo()) {
             chapterReviewViewModel.invalidateChapterTake()
             actionHistory.clear()

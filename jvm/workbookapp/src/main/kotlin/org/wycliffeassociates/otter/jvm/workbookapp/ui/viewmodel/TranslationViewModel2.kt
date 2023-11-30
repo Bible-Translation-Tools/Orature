@@ -90,6 +90,9 @@ class TranslationViewModel2 : ViewModel() {
         val chunk = workbookDataStore.chapter.chunks.value?.find { it.sort == chunkNumber } ?: return
         workbookDataStore.activeChunkProperty.set(chunk)
 
+        audioDataStore.stopPlayers()
+        audioDataStore.closePlayers()
+
         updateSourceText()
             .andThen {
                 audioDataStore.updateSourceAudio()

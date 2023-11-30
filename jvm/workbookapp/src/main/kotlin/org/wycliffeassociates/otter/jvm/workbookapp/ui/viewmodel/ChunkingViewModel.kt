@@ -123,6 +123,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
     fun undock() {
         pause()
+        audioConnectionFactory.releasePlayer()
         translationViewModel.selectedStepProperty.value?.let {
             // handle when navigating to the next step
             val hasUnsavedChanges = markerCountProperty.value != 0 && markerModel?.hasDirtyMarkers() == true

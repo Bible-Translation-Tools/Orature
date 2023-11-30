@@ -93,6 +93,10 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     }
 
     fun undock() {
+        audioDataStore.stopPlayers()
+        audioDataStore.closePlayers()
+        waveformAudioPlayerProperty.value?.stop()
+        waveformAudioPlayerProperty.value?.close()
         sourcePlayerProperty.unbind()
         currentChunkProperty.set(null)
         selectedTakeDisposable.clear()

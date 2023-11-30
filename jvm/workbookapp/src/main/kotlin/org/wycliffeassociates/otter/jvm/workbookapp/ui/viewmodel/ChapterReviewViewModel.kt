@@ -130,9 +130,10 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
 
     fun undock() {
         pauseAudio()
-        waveformAudioPlayerProperty.value?.stop()
         audioDataStore.stopPlayers()
         audioDataStore.closePlayers()
+        waveformAudioPlayerProperty.value?.stop()
+        waveformAudioPlayerProperty.value?.close()
         markerModel
             ?.writeMarkers()
             ?.blockingAwait()
