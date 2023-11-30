@@ -97,7 +97,15 @@ class ImportProjectDialog : OtterDialog() {
                     }
                 }
 
-                onDragOver = onDragOverHandler()
+                setOnDragOver {
+                    if (it.dragboard.hasFiles()) {
+                        togglePseudoClass("drag-over", true)
+                    }
+                    onDragOverHandler().handle(it)
+                }
+                setOnDragExited {
+                    togglePseudoClass("drag-over", false)
+                }
                 onDragDropped = onDragDroppedHandler()
             }
         }
