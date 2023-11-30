@@ -145,7 +145,7 @@ class ImportProjectDialog : OtterDialog() {
     }
 
     private fun importFile(file: File) {
-        close()
+        runLater { close() } // avoid ghost image after file dropped
         FX.eventbus.fire(ProjectImportEvent(file))
     }
 }
