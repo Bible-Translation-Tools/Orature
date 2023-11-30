@@ -40,6 +40,15 @@
     -fx-fill: -wa-regular-text-80;
 }
 
+.audio-missing__text-flow .bold-text {
+    -fx-font-weight: bold;
+}
+
+.audio-missing__text-flow .note-text {
+    -fx-font-size: 1.2em;
+    -fx-fill: -wa-regular-text-80;
+}
+
 .audio-missing__separator-area {
     -fx-padding: 40 0;
     -fx-alignment: center;
@@ -54,7 +63,7 @@
     -fx-spacing: 16;
 }
 
-.big-icon {
+.audio-missing__drag-drop-area .big-icon {
     -fx-icon-size: 48;
-    -fx-icon-color: -wa-regular-text;
+    -fx-icon-color: -wa-regular-text-80;
 }

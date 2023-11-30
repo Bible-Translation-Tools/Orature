@@ -68,15 +68,14 @@ class SourceAudioMissing : View() {
             }
 
             textflow {
-                addClass("audio-missing__text-flow")
-                textAlignment = TextAlignment.CENTER
+                addClass("audio-missing__text-flow", "text-centered")
 
                 val textMessage = messages["drag_drop_or_browse_import__template"]
                 val prefixText = textMessage.substringBefore('{')
                 val suffixText = textMessage.substringAfter('}')
 
                 text(prefixText) {
-                    addClass("normal-text", "centered")
+                    addClass("normal-text")
                 }
                 hyperlink(messages["choose_file"]).apply {
                     addClass("wa-text--hyperlink", "audio-missing__link-text")
@@ -96,7 +95,24 @@ class SourceAudioMissing : View() {
                     }
                 }
                 text(suffixText) {
-                    addClass("normal-text", "centered")
+                    addClass("normal-text")
+                }
+            }
+            textflow {
+                addClass("audio-missing__text-flow", "text-centered")
+
+                val textMessage = messages["file_extension_supported"]
+                val prefixText = textMessage.substringBefore('{')
+                val suffixText = textMessage.substringAfter('}')
+
+                text(prefixText) {
+                    addClass("note-text")
+                }
+                text("orature") {
+                    addClass("h5", "bold")
+                }
+                text(suffixText) {
+                    addClass("note-text")
                 }
             }
 
