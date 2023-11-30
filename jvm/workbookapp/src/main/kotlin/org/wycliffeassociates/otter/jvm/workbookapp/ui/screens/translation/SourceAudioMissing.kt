@@ -5,9 +5,9 @@ import com.jfoenix.controls.JFXSnackbar
 import javafx.event.EventHandler
 import javafx.scene.input.DragEvent
 import javafx.scene.input.TransferMode
+import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
-import javafx.scene.text.TextAlignment
 import javafx.stage.FileChooser
 import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
@@ -219,8 +219,17 @@ class SourceAudioMissing : View() {
     private fun onDropFile(files: List<File>) {
         if (importProjectViewModel.isValidImportFile(files)) {
             val fileToImport = files.first()
-            logger.info("Drag-drop import: $fileToImport")
-            handleImportFile(fileToImport)
+            if (importProjectViewModel.isSourceAudioProject(fileToImport)) {
+                logger.info("Drag-drop import: $fileToImport")
+                handleImportFile(fileToImport)
+            } else {
+                val notSourceNotification = NotificationViewData(
+                    title = messages["importFailed"],
+                    message = messages["importErrorNotSourceAudio"],
+                    statusType = NotificationStatusType.FAILED
+                )
+                showNotification(notSourceNotification)
+            }
         }
     }
 
