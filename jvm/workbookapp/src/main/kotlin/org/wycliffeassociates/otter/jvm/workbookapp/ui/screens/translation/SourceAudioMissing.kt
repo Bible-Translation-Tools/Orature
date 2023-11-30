@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.jfoenix.controls.JFXSnackbar
 import javafx.event.EventHandler
 import javafx.scene.input.DragEvent
 import javafx.scene.input.TransferMode
@@ -8,13 +9,20 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.scene.text.TextAlignment
 import javafx.stage.FileChooser
+import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.jvm.controls.dialog.ProgressDialog
 import org.wycliffeassociates.otter.jvm.controls.event.OpenChapterEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ProjectImportFinishEvent
+import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
+import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
+import org.wycliffeassociates.otter.jvm.controls.popup.NotificationSnackBar
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ImportProjectViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.NOTIFICATION_DURATION_SEC
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -164,6 +172,13 @@ class SourceAudioMissing : View() {
         }
     }
 
+    init {
+        subscribe<ProjectImportFinishEvent> { event ->
+            val notification = createImportNotification(event)
+            showNotification(notification)
+        }
+    }
+
     private fun onDragOverHandler(): EventHandler<DragEvent> {
         return EventHandler {
             if (it.gestureSource != this && it.dragboard.hasFiles()) {
@@ -237,6 +252,43 @@ class SourceAudioMissing : View() {
         setOnCloseAction { close() }
 
         open()
+    }
+
+    private fun createImportNotification(event: ProjectImportFinishEvent): NotificationViewData {
+        if (event.result == ImportResult.FAILED) {
+            return NotificationViewData(
+                title = messages["importFailed"],
+                message = MessageFormat.format(messages["importFailedMessage"], event.filePath),
+                statusType = NotificationStatusType.FAILED
+            )
+        }
+
+        // source import
+        val messageBody = MessageFormat.format(
+            messages["importSourceSuccessfulMessage"],
+            event.language
+        )
+        return NotificationViewData(
+            title = messages["importSuccessful"],
+            message = messageBody,
+            statusType = NotificationStatusType.SUCCESSFUL,
+        )
+    }
+
+    private fun showNotification(notification: NotificationViewData) {
+        val snackBar = JFXSnackbar(root)
+        val graphic = NotificationSnackBar(notification).apply {
+            setOnDismiss {
+                snackBar.hide()
+            }
+        }
+
+        snackBar.enqueue(
+            JFXSnackbar.SnackbarEvent(
+                graphic,
+                Duration.seconds(NOTIFICATION_DURATION_SEC)
+            )
+        )
     }
 
     private fun refresh() {
