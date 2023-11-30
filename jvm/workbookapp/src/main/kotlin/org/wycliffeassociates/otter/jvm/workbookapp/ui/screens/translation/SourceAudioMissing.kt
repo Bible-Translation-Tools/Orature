@@ -109,7 +109,7 @@ class SourceAudioMissing : View() {
                     addClass("note-text")
                 }
                 text("orature") {
-                    addClass("h5", "bold")
+                    addClass("h5", "bold-text")
                 }
                 text(suffixText) {
                     addClass("note-text")

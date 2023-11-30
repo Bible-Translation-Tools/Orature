@@ -41,12 +41,13 @@
 }
 
 .audio-missing__text-flow .bold-text {
+    -fx-fill: -wa-regular-text-80;
     -fx-font-weight: bold;
 }
 
 .audio-missing__text-flow .note-text {
     -fx-font-size: 1.2em;
-    -fx-fill: -wa-regular-text-80;
+    -fx-fill: -wa-note-text;
 }
 
 .audio-missing__separator-area {
