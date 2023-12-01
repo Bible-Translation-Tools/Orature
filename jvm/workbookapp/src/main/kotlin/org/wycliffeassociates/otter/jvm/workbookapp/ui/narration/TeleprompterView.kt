@@ -27,6 +27,7 @@ class TeleprompterViewModel : ViewModel() {
     val chunks = narrationViewModel.narratableList
 
     val stickyVerseProperty = SimpleObjectProperty<Chunk>()
+    val showStickyVerseProperty = SimpleBooleanProperty(false)
 
     private val recordStartProperty = SimpleBooleanProperty()
     private var recordStart by recordStartProperty
@@ -98,6 +99,14 @@ class TeleprompterViewModel : ViewModel() {
             isRecordingAgainProperty
         )
     }
+
+    fun updateStickyVerse() {
+        val verse = narrationViewModel.narratableList
+                .firstOrNull { !it.hasRecording }
+                ?.chunk
+
+        stickyVerseProperty.set(verse)
+    }
 }
 
 class TeleprompterView : View() {
@@ -122,14 +131,11 @@ class TeleprompterView : View() {
 
         subscribe<RefreshTeleprompter> {
             listView.refresh()
+            viewModel.updateStickyVerse()
         }
 
-        subscribe<StickyVerseChangedEvent<NarrationTextItemData>> {
-            it.data?.let { narrationItem ->
-                viewModel.stickyVerseProperty.set(narrationItem.chunk)
-            } ?: run {
-                viewModel.stickyVerseProperty.set(null)
-            }
+        subscribe<StickyVerseChangedEvent> {
+            viewModel.showStickyVerseProperty.set(it.showBanner)
         }
 
         subscribe<ResumeVerseEvent> {
@@ -193,9 +199,7 @@ class TeleprompterView : View() {
             verseLabelProperty.bind(viewModel.currentVerseTextBinding())
             resumeTextProperty.set(messages["resume"])
 
-            visibleWhen {
-                viewModel.stickyVerseProperty.isNotNull
-            }
+            visibleWhen { viewModel.showStickyVerseProperty.and(viewModel.stickyVerseProperty.isNotNull) }
             managedWhen(visibleProperty())
         }
 

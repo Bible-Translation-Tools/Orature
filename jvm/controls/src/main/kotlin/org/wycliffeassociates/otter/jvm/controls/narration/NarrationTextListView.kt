@@ -50,19 +50,15 @@ class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(i
                         val last = virtualFlow().lastVisibleCell?.index ?: 0
 
                         if (current !in (first..last)) {
-                            FX.eventbus.fire(StickyVerseChangedEvent(selectionModel.selectedItem))
+                            FX.eventbus.fire(StickyVerseChangedEvent(true))
                         } else {
-                            FX.eventbus.fire(StickyVerseChangedEvent(null))
+                            FX.eventbus.fire(StickyVerseChangedEvent(false))
                         }
                     }?.also(listeners::add)
                 } catch (e: NullPointerException) {
                     e.printStackTrace()
                 }
             }
-        }.also(listeners::add)
-
-        selectionModel.selectedItemProperty().onChangeWithDisposer {
-            FX.eventbus.fire(StickyVerseChangedEvent(null))
         }.also(listeners::add)
     }
 
@@ -72,7 +68,7 @@ class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(i
     }
 }
 
-class StickyVerseChangedEvent<T>(val data: T?) : FXEvent()
+class StickyVerseChangedEvent(val showBanner: Boolean) : FXEvent()
 
 fun <T> EventTarget.narrationTextListview(
     values: ObservableList<T>?,
