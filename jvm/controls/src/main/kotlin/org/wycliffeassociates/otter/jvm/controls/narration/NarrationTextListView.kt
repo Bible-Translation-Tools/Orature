@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.narration
 
+import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.value.ObservableValue
 import javafx.collections.ObservableList
 import javafx.event.EventTarget
@@ -31,6 +32,8 @@ import org.wycliffeassociates.otter.jvm.utils.virtualFlow
 import tornadofx.*
 
 class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(items) {
+
+    val firstVerseToResumeProperty = SimpleObjectProperty<T>()
     private val listeners = mutableListOf<ListenerDisposer>()
 
     init {
@@ -45,7 +48,7 @@ class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(i
                         node.orientation == Orientation.VERTICAL
                     }
                     scrollBar?.valueProperty()?.onChangeWithDisposer {
-                        val current = selectionModel.selectedIndex
+                        val current = items.indexOf(firstVerseToResumeProperty.value)
                         val first = virtualFlow().firstVisibleCell?.index ?: 0
                         val last = virtualFlow().lastVisibleCell?.index ?: 0
 

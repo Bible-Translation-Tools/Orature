@@ -8,7 +8,6 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.layout.Priority
 import javafx.util.Duration
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.narration.*
@@ -26,7 +25,7 @@ class TeleprompterViewModel : ViewModel() {
 
     val chunks = narrationViewModel.narratableList
 
-    val stickyVerseProperty = SimpleObjectProperty<Chunk>()
+    val stickyVerseProperty = SimpleObjectProperty<NarrationTextItemData>()
     val showStickyVerseProperty = SimpleBooleanProperty(false)
 
     private val recordStartProperty = SimpleBooleanProperty()
@@ -70,7 +69,7 @@ class TeleprompterViewModel : ViewModel() {
             {
                 val title = messages["currentVerseTitle"]
                 val verseTitle = messages["verse"]
-                val stickyVerseLabel = stickyVerseProperty.value?.title
+                val stickyVerseLabel = stickyVerseProperty.value?.chunk?.title
 
                 MessageFormat.format(
                     title,
@@ -103,7 +102,6 @@ class TeleprompterViewModel : ViewModel() {
     fun updateStickyVerse() {
         val verse = narrationViewModel.narratableList
                 .firstOrNull { !it.hasRecording }
-                ?.chunk
 
         stickyVerseProperty.set(verse)
     }
@@ -140,15 +138,15 @@ class TeleprompterView : View() {
 
         subscribe<ResumeVerseEvent> {
             viewModel.stickyVerseProperty.value?.let { verse ->
-                val item = listView.items.find { it.chunk == verse }
+                val item = listView.items.find { it == verse }
                 try {
                     logger.info("Scrolling to $item for ResumeVerseEvent")
                     listView.scrollTo(item)
                 } catch (e: Exception) {
                     logger.error("Error in selecting and scrolling to a Teleprompter item", e)
                 }
-
             }
+            viewModel.showStickyVerseProperty.set(false)
         }
 
         subscribe<RecordAgainEvent> {
@@ -208,6 +206,7 @@ class TeleprompterView : View() {
             vgrow = Priority.ALWAYS
 
             listView = this
+            firstVerseToResumeProperty.bind(viewModel.stickyVerseProperty)
 
             setCellFactory {
                 NarrationTextCell(
