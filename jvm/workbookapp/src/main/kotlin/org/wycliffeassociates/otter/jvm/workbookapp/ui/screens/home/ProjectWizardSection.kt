@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home
 
 import javafx.animation.TranslateTransition
+import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -30,7 +31,8 @@ class ProjectWizardSection(
     sourceLanguages: ObservableList<Language>,
     targetLanguages: ObservableList<Language>,
     selectedModeProperty: SimpleObjectProperty<ProjectMode>,
-    selectedSourceLanguageProperty: SimpleObjectProperty<Language>
+    selectedSourceLanguageProperty: SimpleObjectProperty<Language>,
+    existingLanguagePairs: ObservableList<Pair<Language, Language>>
 ) : StackPane() {
     val sourceLanguageSearchQueryProperty =  SimpleStringProperty()
     val targetLanguageSearchQueryProperty = SimpleStringProperty()
@@ -138,6 +140,14 @@ class ProjectWizardSection(
         }
 
         languageTableView(targetLanguages) {
+            selectedSourceLanguageProperty.onChange {
+                it?.let { src ->
+                    disabledLanguages.setAll(
+                        existingLanguagePairs.filter { it.first == src }.map { it.second }
+                    )
+                } ?: disabledLanguages.clear()
+            }
+
             this@apply.visibleProperty().onChange {
                 if (it) customizeScrollbarSkin()
             }

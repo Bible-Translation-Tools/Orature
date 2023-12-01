@@ -18,6 +18,8 @@ class LanguageTableView(
     languages: ObservableList<Language>
 ) : TableView<Language>(languages) {
 
+    val disabledLanguages = observableListOf<Language>()
+
     init {
         addClass("wa-table-view")
         vgrow = Priority.ALWAYS

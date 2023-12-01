@@ -88,7 +88,8 @@ class HomePage2 : View() {
             projectWizardViewModel.sortedSourceLanguages,
             projectWizardViewModel.sortedTargetLanguages,
             projectWizardViewModel.selectedModeProperty,
-            projectWizardViewModel.selectedSourceLanguageProperty
+            projectWizardViewModel.selectedSourceLanguageProperty,
+            projectWizardViewModel.existingLanguagePairs
         ).apply {
 
             sourceLanguageSearchQueryProperty.bindBidirectional(projectWizardViewModel.sourceLanguageSearchQueryProperty)

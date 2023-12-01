@@ -35,6 +35,7 @@ class ProjectWizardViewModel : ViewModel() {
     private val filteredTargetLanguage = FilteredList(targetLanguages)
     val sortedSourceLanguages = SortedList(filteredSourceLanguages)
     val sortedTargetLanguages = SortedList(filteredTargetLanguage)
+    val existingLanguagePairs = observableListOf<Pair<Language, Language>>()
 
     val selectedModeProperty = SimpleObjectProperty<ProjectMode>(null)
     val selectedSourceLanguageProperty = SimpleObjectProperty<Language>(null)
@@ -118,6 +119,7 @@ class ProjectWizardViewModel : ViewModel() {
                 )
                 .observeOnFx()
                 .subscribe {
+                    existingLanguagePairs.add(Pair(sourceLanguage, language))
                     reset()
                     onNavigateBack()
                 }
