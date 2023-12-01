@@ -18,7 +18,7 @@
  */
 .narration__header {
     -fx-alignment: center;
-    -fx-pref-height: 80px;
+    -fx-min-height: 80px;
     -fx-padding: 0 16px;
     -fx-background-color: -wa-foreground;
 }

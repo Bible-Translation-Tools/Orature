@@ -5,6 +5,7 @@ import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.scene.layout.Priority
 import javafx.util.Duration
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
@@ -186,6 +187,7 @@ class TeleprompterView : View() {
 
     override val root = vbox {
         addClass("narration__verses")
+        vgrow = Priority.ALWAYS
 
         stickyVerse {
             verseLabelProperty.bind(viewModel.currentVerseTextBinding())
@@ -199,6 +201,7 @@ class TeleprompterView : View() {
 
         narrationTextListview(viewModel.chunks) {
             addClass("narration__list")
+            vgrow = Priority.ALWAYS
 
             listView = this
 
