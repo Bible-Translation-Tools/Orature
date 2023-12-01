@@ -184,8 +184,18 @@ class TeleprompterView : View() {
         subscriptions.clear()
     }
 
-    override val root = stackpane {
+    override val root = vbox {
         addClass("narration__verses")
+
+        stickyVerse {
+            verseLabelProperty.bind(viewModel.currentVerseTextBinding())
+            resumeTextProperty.set(messages["resume"])
+
+            visibleWhen {
+                viewModel.stickyVerseProperty.isNotNull
+            }
+            managedWhen(visibleProperty())
+        }
 
         narrationTextListview(viewModel.chunks) {
             addClass("narration__list")
@@ -205,15 +215,6 @@ class TeleprompterView : View() {
             }
 
             runLater { customizeScrollbarSkin() }
-        }
-
-        stickyVerse {
-            verseLabelProperty.bind(viewModel.currentVerseTextBinding())
-            resumeTextProperty.set(messages["resume"])
-
-            visibleWhen {
-                viewModel.stickyVerseProperty.isNotNull
-            }
         }
     }
 }
