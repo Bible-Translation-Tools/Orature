@@ -27,15 +27,20 @@ import tornadofx.FX.Companion.messages
 class TranslationCard2(
     private val sourceLanguage: Language,
     private val targetLanguage: Language,
-    val mode: ProjectMode,
+    private val mode: ProjectMode,
     selectedProjectGroupProperty: ObservableValue<ProjectGroupKey>
 ) : ButtonBase() {
 
     val cardTitleProperty = SimpleStringProperty(
-        MessageFormat.format(FX.messages["translationMode"], FX.messages[mode.titleKey])
+        MessageFormat.format(messages["translationMode"], messages[mode.titleKey])
     )
     val sourceLanguageProperty = SimpleObjectProperty(sourceLanguage)
     val targetLanguageProperty = SimpleObjectProperty(targetLanguage)
+    val cardInfo: String = when (mode) {
+        ProjectMode.TRANSLATION -> messages["oralTranslationDesc"]
+        ProjectMode.NARRATION -> messages["narrationDesc"]
+        ProjectMode.DIALECT -> messages["dialectDesc"]
+    }
 
     init {
         addClass("translation-card-button")
@@ -131,13 +136,7 @@ class ActiveTranslationCardSkin(card: TranslationCard2) : SkinBase<TranslationCa
             region { hgrow = Priority.ALWAYS }
             label {
                 graphic = FontIcon(MaterialDesign.MDI_INFORMATION_OUTLINE)
-                tooltip {
-                    this.text = when (card.mode) {
-                        ProjectMode.TRANSLATION -> messages["oralTranslationDesc"]
-                        ProjectMode.NARRATION -> messages["narrationDesc"]
-                        ProjectMode.DIALECT -> messages["dialectDesc"]
-                    }
-                }
+                tooltip(card.cardInfo)
             }
         }
         vbox {
