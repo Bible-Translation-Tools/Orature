@@ -79,7 +79,7 @@ class LanguageTableView(
         }
 
         sortPolicy = CUSTOM_SORT_POLICY as (Callback<TableView<Language>, Boolean>)
-        setRowFactory { LanguageTableRow() }
+        setRowFactory { LanguageTableRow(disabledLanguages) }
 
         /* accessibility */
         focusedProperty().onChange {

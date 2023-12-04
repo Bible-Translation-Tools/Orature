@@ -142,10 +142,14 @@ class ProjectWizardSection(
         languageTableView(targetLanguages) {
             selectedSourceLanguageProperty.onChange {
                 it?.let { src ->
-                    disabledLanguages.setAll(
-                        existingLanguagePairs.filter { it.first == src }.map { it.second }
-                    )
-                } ?: disabledLanguages.clear()
+                    val duplicated = existingLanguagePairs
+                        .filter { it.first == src }
+                        .map { it.second }
+
+                    disabledLanguages.setAll(duplicated)
+                } ?: {
+                    disabledLanguages.clear()
+                }
             }
 
             this@apply.visibleProperty().onChange {
