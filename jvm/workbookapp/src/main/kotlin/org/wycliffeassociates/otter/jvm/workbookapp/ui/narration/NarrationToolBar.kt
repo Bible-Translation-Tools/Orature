@@ -30,6 +30,10 @@ class NarrationToolBar : View() {
                 addClass("btn", "btn--secondary")
                 addPseudoClass("active")
 
+                disableWhen {
+                    viewModel.isRecordingProperty.or(!viewModel.hasVersesProperty)
+                }
+
                 viewModel.isPlayingProperty.onChangeAndDoNow {
                     it?.let { playing ->
                         runLater {
@@ -61,7 +65,7 @@ class NarrationToolBar : View() {
                     viewModel.seekToPrevious()
                 }
                 disableWhen {
-                    viewModel.isPlayingProperty.or(viewModel.isRecordingProperty)
+                    viewModel.isPlayingProperty.or(viewModel.isRecordingProperty).or(!viewModel.hasVersesProperty)
                 }
             }
             button {
@@ -71,7 +75,7 @@ class NarrationToolBar : View() {
                     viewModel.seekToNext()
                 }
                 disableWhen {
-                    viewModel.isPlayingProperty.or(viewModel.isRecordingProperty)
+                    viewModel.isPlayingProperty.or(viewModel.isRecordingProperty).or(!viewModel.hasVersesProperty)
                 }
             }
         }
