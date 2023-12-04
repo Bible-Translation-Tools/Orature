@@ -145,7 +145,6 @@ internal class ChapterRepresentation(
 
     private fun publishActiveVerses() {
         val updatedVerses = if (activeVerses.isNotEmpty()) {
-            var locationAccumulator = 0
             activeVerses.map {
                 val newLoc = audioLocationToLocationInChapter(it.firstFrame())
                 logger.info("Verse ${it.marker.label} absolute loc is ${it.firstFrame()} relative is ${newLoc}")
