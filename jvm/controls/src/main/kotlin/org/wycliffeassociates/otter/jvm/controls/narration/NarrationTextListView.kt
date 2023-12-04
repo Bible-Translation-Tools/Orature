@@ -27,6 +27,7 @@ import javafx.scene.control.ListView
 import javafx.scene.control.ScrollBar
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.findChildren
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.utils.virtualFlow
 import tornadofx.*
@@ -41,7 +42,7 @@ class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(i
     }
 
     fun addListeners() {
-        skinProperty().onChangeWithDisposer {
+        skinProperty().onChangeAndDoNowWithDisposer {
             it?.let {
                 try {
                     val scrollBar = virtualFlow().findChildren<ScrollBar>(true).singleOrNull { node ->
