@@ -509,8 +509,10 @@ class Narration @AssistedInject constructor(
         seekLoc?.let {
             seek(it.location)
         } ?: chapterRepresentation.apply {
-            val lastFrame = audioLocationToLocationInChapter(activeVerses.last().lastFrame())
-            seek(lastFrame)
+            if(activeVerses.isNotEmpty()) {
+                val lastFrame = audioLocationToLocationInChapter(activeVerses.last().lastFrame())
+                seek(lastFrame)
+            }
         }
     }
 }
