@@ -92,6 +92,7 @@ class ProjectWizardViewModel : ViewModel() {
             }
             .subscribe { collections ->
                 sourceLanguages.setAll(collections.map { it.language })
+                updateExistingLanguagePairs()
             }
     }
 
@@ -160,5 +161,13 @@ class ProjectWizardViewModel : ViewModel() {
         selectedTargetLanguageProperty.set(null)
         sourceLanguageSearchQueryProperty.set("")
         targetLanguageSearchQueryProperty.set("")
+    }
+
+    private fun updateExistingLanguagePairs() {
+        val homePageViewModel = find<HomePageViewModel2>()
+        val languagePairs = homePageViewModel.projectGroups.map {
+            Pair(it.sourceLanguage, it.targetLanguage)
+        }
+        existingLanguagePairs.setAll(languagePairs)
     }
 }

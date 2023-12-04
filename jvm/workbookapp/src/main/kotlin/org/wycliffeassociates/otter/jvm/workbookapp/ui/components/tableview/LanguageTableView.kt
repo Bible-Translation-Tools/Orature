@@ -93,7 +93,9 @@ class LanguageTableView(
         addEventFilter(KeyEvent.KEY_PRESSED) { keyEvent ->
             if (keyEvent.code == KeyCode.SPACE || keyEvent.code == KeyCode.ENTER) {
                 selectedItem?.let { language ->
-                    FX.eventbus.fire(LanguageSelectedEvent(language))
+                    if (selectedItem !in disabledLanguages) {
+                        FX.eventbus.fire(LanguageSelectedEvent(language))
+                    }
                 }
                 keyEvent.consume()
             }
