@@ -61,8 +61,12 @@ class ExportProjectViewModel : ViewModel() {
                             chapter.hasSelectedAudio() -> 1.0
                             chunkCount != 0 -> {
                                 // collect chunks from the relay as soon as it starts emitting (blocking)
-                                val chunkWithAudio = chapter.chunks.value!!
-                                    .count { it.hasSelectedAudio() }
+                                val chunkWithAudio = chapter.chunks
+                                    .take(1)
+                                    .map {
+                                        it.count { it.hasSelectedAudio() }
+                                    }
+                                    .blockingFirst()
 
                                 chunkWithAudio.toDouble() / chunkCount
                             }
