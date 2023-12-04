@@ -719,6 +719,7 @@ class NarrationViewModel : ViewModel() {
                     recordStart = recordedVerses.isEmpty()
                     recordResume = recordedVerses.isNotEmpty()
 
+                    // TODO: note, should we be serializing the verses here?
                     createPotentiallyFinishedChapterTake()
                 },
                 { e ->

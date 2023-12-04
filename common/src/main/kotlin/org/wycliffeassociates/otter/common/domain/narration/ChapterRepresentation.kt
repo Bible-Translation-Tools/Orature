@@ -133,8 +133,10 @@ internal class ChapterRepresentation(
     }
 
     fun onVersesUpdated() {
-        serializeVerses()
+        // TODO: note, the order of these method calls should be reversed. Because when serializing, all location are
+        //  0, because they have not been updated yet, and publishActiveVerses updates them correctly.
         publishActiveVerses()
+        serializeVerses()
     }
 
     private fun serializeVerses() {
@@ -145,6 +147,7 @@ internal class ChapterRepresentation(
 
     private fun publishActiveVerses() {
         val updatedVerses = if (activeVerses.isNotEmpty()) {
+            var locationAccumulator = 0
             activeVerses.map {
                 val newLoc = audioLocationToLocationInChapter(it.firstFrame())
                 logger.info("Verse ${it.marker.label} absolute loc is ${it.firstFrame()} relative is ${newLoc}")
@@ -152,6 +155,14 @@ internal class ChapterRepresentation(
             }
         } else listOf()
 
+        // TODO: note, updatedVerses is correct. I.e. the markers have the correctly location. Need to update the
+        //  methods that are subscribing to onActiveVersesUpdated so that they are using the correct value.
+        //  TODO: note, we are not actually updating activeVerses here.
+        updatedVerses.forEachIndexed { idx, marker ->
+            totalVerses[idx] = VerseNode(
+                true, marker, totalVerses[idx].sectors
+            )
+        }
         onActiveVersesUpdated.onNext(updatedVerses)
     }
 
