@@ -133,8 +133,6 @@ internal class ChapterRepresentation(
     }
 
     fun onVersesUpdated() {
-        // TODO: note, the order of these method calls should be reversed. Because when serializing, all location are
-        //  0, because they have not been updated yet, and publishActiveVerses updates them correctly.
         publishActiveVerses()
         serializeVerses()
     }
@@ -155,9 +153,6 @@ internal class ChapterRepresentation(
             }
         } else listOf()
 
-        // TODO: note, updatedVerses is correct. I.e. the markers have the correctly location. Need to update the
-        //  methods that are subscribing to onActiveVersesUpdated so that they are using the correct value.
-        //  TODO: note, we are not actually updating activeVerses here.
         updatedVerses.forEachIndexed { idx, marker ->
             totalVerses[idx] = VerseNode(
                 true, marker, totalVerses[idx].sectors

@@ -74,13 +74,6 @@ class Narration @AssistedInject constructor(
                 .activeVerses
                 .map {
                     it.copyMarker(
-                        // TODO: note, this is why from this point on, the location is correct, and prior to this
-                        //  the location is wrong.
-                        //  We need to be able to see the uncommittedTotalFrames when adding a new verse marker in
-                        //  chapter representation, so that chapterRepresentation.audioLocationToLocationInChapter
-                        //  Does not always return zero in publishActiveVerses.
-                        //  NOTE: this update in location seems like it is addressing the symptom of the problem
-                        //  and not the actual problem
                         location = chapterRepresentation.audioLocationToLocationInChapter(it.firstFrame())
                     )
                 }
