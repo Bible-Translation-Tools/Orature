@@ -25,6 +25,8 @@ class NarrationMenu : MenuButton() {
         addClass("btn", "btn--secondary", "wa-menu-button")
         graphic = FontIcon(MaterialDesign.MDI_DOTS_VERTICAL)
         addClass("wa-context-menu")
+        tooltip(messages["options"])
+
         item(openChapterInTextProperty.value) {
             graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
             action {
