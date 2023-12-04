@@ -77,7 +77,6 @@ class NarrationTextItem : VBox() {
     val isPlaying by isPlayingProperty
 
     init {
-        styleClass.setAll("narration-list__verse-item")
         hbox {
             styleClass.setAll("narration-list__verse-item")
             borderpane {

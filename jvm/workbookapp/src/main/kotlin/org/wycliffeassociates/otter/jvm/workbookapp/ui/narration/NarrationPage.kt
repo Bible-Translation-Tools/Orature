@@ -77,8 +77,8 @@ class NarrationPage : View() {
             add(narrationHeader.root)
             add(
                 audioWorkspaceView.root.apply {
-                    maxHeightProperty().bind(narrationRoot.heightProperty().multiply(2.0 / 5.0))
-                    prefHeightProperty().bind(maxHeightProperty())
+                    maxHeightProperty().bind(narrationRoot.heightProperty().multiply(1.0 / 3.0))
+                    minHeightProperty().bind(maxHeightProperty())
                 }
             )
             add(narrationToolbar.root)

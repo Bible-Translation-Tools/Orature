@@ -101,8 +101,9 @@
 
 .narration-list__verse-item {
     -fx-background-color: -wa-foreground;
-    -fx-spacing: 5px;
+    -fx-spacing: 16;
     -fx-alignment: center;
+    -fx-padding: 16 0;
 }
 
 .narration-list__verse-item:disabled {
@@ -118,7 +119,7 @@
 
 .narration-list__verse-item-text {
     -fx-text-fill: -wa-regular-text;
-    -fx-font-size: 24px;
+    -fx-font-size: 1.6em;
 }
 
 .narration-list__verse-item-text__title {
@@ -145,14 +146,17 @@
     -fx-alignment: top-left;
 }
 
-.narration__selected-verse {
+.narration__resume-to-verse {
     -fx-background-color: -wa-foreground;
     -fx-border-width: 0 0 1 0;
     -fx-border-color: -wa-border-light;
-    -fx-alignment: center-left;
-    -fx-min-height: 80px;
-    -fx-effect: -wa-bottom-shadow;
+    -fx-alignment: center;
+    -fx-max-height: 72;
     -fx-padding: 12 16;
+}
+
+.narration__resume-to-verse__spacer {
+    -fx-max-width: 800;
 }
 
 .narration__recording .list-view {
