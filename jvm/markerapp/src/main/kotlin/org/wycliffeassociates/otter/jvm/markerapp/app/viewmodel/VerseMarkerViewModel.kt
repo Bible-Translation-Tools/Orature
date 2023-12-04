@@ -234,8 +234,8 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
         }
 
         val samplesPerScreenWidth = sampleRate * secondsOnScreen
-        val samplesPerPixel = samplesPerScreenWidth / width
+        val samplesPerPixel = samplesPerScreenWidth / width.toDouble()
         val pixelsInDuration = waveformAudioPlayerProperty.get().getDurationInFrames() / samplesPerPixel
-        return pixelsInDuration.toDouble()
+        return pixelsInDuration
     }
 }
