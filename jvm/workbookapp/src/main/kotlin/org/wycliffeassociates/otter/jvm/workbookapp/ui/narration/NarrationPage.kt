@@ -47,16 +47,10 @@ class NarrationPage : View() {
 
     private val eventSubscriptions = mutableListOf<EventRegistration>()
 
-    private lateinit var narrationHeader: NarrationHeader
-    private lateinit var audioWorkspaceView: AudioWorkspaceView
-    private lateinit var narrationToolbar: NarrationToolBar
-    private lateinit var teleprompterView: TeleprompterView
-
     init {
         tryImportStylesheet(resources["/css/narration.css"])
         tryImportStylesheet(resources["/css/chapter-selector.css"])
         tryImportStylesheet("/css/chapter-grid.css")
-        tryImportStylesheet("/css/popup-menu.css")
 
         pluginOpenedPage = createPluginOpenedPage()
     }
@@ -67,21 +61,14 @@ class NarrationPage : View() {
 
         createSnackBar()
 
-        narrationHeader = find()
-        audioWorkspaceView = find()
-        narrationToolbar = find()
-        teleprompterView = find()
-
         vbox {
-            add(narrationHeader.root)
-            add(
-                audioWorkspaceView.root.apply {
-                    maxHeightProperty().bind(narrationRoot.heightProperty().multiply(1.0 / 3.0))
-                    minHeightProperty().bind(maxHeightProperty())
-                }
-            )
-            add(narrationToolbar.root)
-            add(teleprompterView.root)
+            add<NarrationHeader>()
+            add<AudioWorkspaceView> {
+                this.root.maxHeightProperty().bind(narrationRoot.heightProperty().multiply(1.0 / 3.0))
+                this.root.minHeightProperty().bind(this.root.maxHeightProperty())
+            }
+            add<NarrationToolBar>()
+            add<TeleprompterView>()
         }
     }
 
@@ -89,18 +76,12 @@ class NarrationPage : View() {
         super.onDock()
         subscribeToEvents()
         viewModel.onDock()
-        narrationHeader.onDock()
-        audioWorkspaceView.onDock()
-        teleprompterView.onDock()
     }
 
     override fun onUndock() {
         super.onUndock()
         unsubscribeFromEvents()
         viewModel.onUndock()
-        narrationHeader.onUndock()
-        audioWorkspaceView.onUndock()
-        teleprompterView.onUndock()
     }
 
     private fun subscribeToEvents() {
