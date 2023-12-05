@@ -251,7 +251,7 @@ internal class EditVerseAction(
  */
 internal class ResetAllAction(private val chapterAudio: AssociatedAudio) : NarrationAction {
     private val nodes = ArrayList<VerseNode>()
-    private lateinit var recoverableTake: Take
+    private var recoverableTake: Take? = null
 
     override fun execute(totalVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
         // use copy to get nodes that won't share the same pointer otherwise clearing totalVerses will result in
@@ -269,12 +269,13 @@ internal class ResetAllAction(private val chapterAudio: AssociatedAudio) : Narra
         totalVerses.clear()
         // same as with execute; copy the nodes otherwise undo/redo will start erasing the data saved in nodes.
         totalVerses.addAll(nodes.map { it.copy() })
-        recoverableTake
-            .deletedTimestamp
-            .accept(DateHolder.empty)
-            .also {
-                chapterAudio.selectTake(recoverableTake)
-            }
+        recoverableTake?.let {
+            it.deletedTimestamp
+                .accept(DateHolder.empty)
+                .also {
+                    chapterAudio.selectTake(recoverableTake)
+                }
+        }
     }
 
     override fun redo(totalVerses: MutableList<VerseNode>) {
