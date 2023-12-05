@@ -3,6 +3,9 @@ package org.wycliffeassociates.otter.common.domain.narration
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
+import org.wycliffeassociates.otter.common.data.workbook.DateHolder
+import org.wycliffeassociates.otter.common.data.workbook.Take
 import kotlin.collections.ArrayList
 import kotlin.math.absoluteValue
 
@@ -246,24 +249,40 @@ internal class EditVerseAction(
 /**
  * This action is to clear the list of verse nodes
  */
-internal class ResetAllAction : NarrationAction {
+internal class ResetAllAction(private val chapterAudio: AssociatedAudio) : NarrationAction {
     private val nodes = ArrayList<VerseNode>()
+    private lateinit var recoverableTake: Take
 
     override fun execute(totalVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
         // use copy to get nodes that won't share the same pointer otherwise clearing totalVerses will result in
         // erasing the state from nodes as well.
         nodes.addAll(totalVerses.map { it.copy() })
         totalVerses.forEach { it.clear() }
+        chapterAudio
+            .getSelectedTake()
+            ?.also { recoverableTake = it }
+            ?.deletedTimestamp
+            ?.accept(DateHolder.now())
     }
 
     override fun undo(totalVerses: MutableList<VerseNode>) {
         totalVerses.clear()
         // same as with execute; copy the nodes otherwise undo/redo will start erasing the data saved in nodes.
         totalVerses.addAll(nodes.map { it.copy() })
+        recoverableTake
+            .deletedTimestamp
+            .accept(DateHolder.empty)
+            .also {
+                chapterAudio.selectTake(recoverableTake)
+            }
     }
 
     override fun redo(totalVerses: MutableList<VerseNode>) {
         totalVerses.forEach { it.clear() }
+        chapterAudio
+            .getSelectedTake()
+            ?.deletedTimestamp
+            ?.accept(DateHolder.now())
     }
 }
 

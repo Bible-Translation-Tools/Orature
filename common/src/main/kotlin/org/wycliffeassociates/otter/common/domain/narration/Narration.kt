@@ -19,6 +19,7 @@ import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
+import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -243,7 +244,7 @@ class Narration @AssistedInject constructor(
     }
 
     fun onResetAll() {
-        val action = ResetAllAction()
+        val action = ResetAllAction(chapter.audio)
         execute(action)
     }
 
