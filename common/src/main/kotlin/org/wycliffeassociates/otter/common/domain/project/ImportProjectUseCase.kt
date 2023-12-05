@@ -11,6 +11,8 @@ import org.wycliffeassociates.otter.common.domain.project.importer.OngoingProjec
 import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
 import org.wycliffeassociates.otter.common.domain.project.importer.RCImporterFactory
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
 import java.lang.IllegalArgumentException
 import javax.inject.Inject
@@ -23,6 +25,9 @@ class ImportProjectUseCase @Inject constructor() {
 
     @Inject
     lateinit var rcImporterProvider: Provider<OngoingProjectImporter>
+
+    @Inject
+    lateinit var directoryProvider: IDirectoryProvider
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -57,6 +62,12 @@ class ImportProjectUseCase @Inject constructor() {
         return rcFactoryProvider.get()
             .makeImporter()
             .isAlreadyImported(file)
+    }
+
+    fun isSourceAudioProject(file: File): Boolean {
+        return directoryProvider.newFileReader(file).use {
+            !it.exists(RcConstants.SELECTED_TAKES_FILE) && it.exists(RcConstants.SOURCE_MEDIA_DIR)
+        }
     }
 
     fun getSourceMetadata(file: File): Maybe<ResourceMetadata> {

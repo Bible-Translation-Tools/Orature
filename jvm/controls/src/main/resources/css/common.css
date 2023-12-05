@@ -46,6 +46,14 @@
     -fx-font-size: 10pt;
 }
 
+.centered {
+    -fx-alignment: center;
+}
+
+.text-centered {
+    -fx-text-alignment: center;
+}
+
 /* by default, scroll pane always has a gray background */
 .scroll-pane,
 .scroll-pane > .viewport{

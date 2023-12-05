@@ -1,0 +1,70 @@
+.audio-missing-view {
+    -fx-alignment: center-left;
+    -fx-padding: 20;
+    -fx-spacing: 16;
+    -fx-max-width: 850;
+}
+
+.audio-missing__title {
+    -fx-font-size: 2.4em;
+    -fx-text-fill: -wa-regular-text-80;
+    -fx-wrap-text: true;
+}
+
+.audio-missing__description {
+    -fx-wrap-text: true;
+}
+
+.audio-missing__drag-drop-area {
+    -fx-min-height: 200px;
+    -fx-alignment: center;
+    -fx-border-width: 2px;
+    -fx-border-radius: 40px;
+    -fx-border-color: -wa-black-30;
+    -fx-border-style: segments(15, 15);
+    -fx-background-radius: 40px;
+    -fx-padding: 40px;
+    -fx-spacing: 10px;
+}
+
+.audio-missing__drag-drop-area:drag-over {
+    -fx-background-color: -wa-drag-drop-area;
+    -fx-border-color: -wa-primary;
+}
+
+.audio-missing__drag-drop-area:drag-over .big-icon {
+    -fx-icon-color: -wa-primary;
+}
+
+.audio-missing__text-flow > .normal-text {
+    -fx-fill: -wa-regular-text-80;
+}
+
+.audio-missing__text-flow .bold-text {
+    -fx-fill: -wa-regular-text-80;
+    -fx-font-weight: bold;
+}
+
+.audio-missing__text-flow .note-text {
+    -fx-font-size: 1.2em;
+    -fx-fill: -wa-note-text;
+}
+
+.audio-missing__separator-area {
+    -fx-padding: 25 0;
+    -fx-alignment: center;
+}
+
+.audio-missing__link-text {
+    -fx-padding: 0;
+    -fx-font-size: 1.4em;
+}
+
+.audio-missing__actions {
+    -fx-spacing: 16;
+}
+
+.audio-missing__drag-drop-area .big-icon {
+    -fx-icon-size: 48;
+    -fx-icon-color: -wa-regular-text-80;
+}

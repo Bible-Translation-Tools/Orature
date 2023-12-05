@@ -97,7 +97,15 @@ class ImportProjectDialog : OtterDialog() {
                     }
                 }
 
-                onDragOver = onDragOverHandler()
+                setOnDragOver {
+                    if (it.dragboard.hasFiles()) {
+                        togglePseudoClass("drag-over", true)
+                    }
+                    onDragOverHandler().handle(it)
+                }
+                setOnDragExited {
+                    togglePseudoClass("drag-over", false)
+                }
                 onDragDropped = onDragDroppedHandler()
             }
         }
@@ -137,7 +145,7 @@ class ImportProjectDialog : OtterDialog() {
     }
 
     private fun importFile(file: File) {
-        close()
+        runLater { close() } // avoid ghost image after file dropped
         FX.eventbus.fire(ProjectImportEvent(file))
     }
 }

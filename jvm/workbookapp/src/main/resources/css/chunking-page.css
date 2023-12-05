@@ -16,6 +16,10 @@
     -fx-spacing: 8;
 }
 
+.translation-view {
+    -fx-background-color: -wa-foreground;
+}
+
 .chunking-step-drawer {
     -fx-pref-width: 360;
     -fx-background-color: -wa-foreground;
