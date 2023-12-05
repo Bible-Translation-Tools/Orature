@@ -13,7 +13,6 @@ import javafx.scene.layout.Region
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
-import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.VerseMenu
 import tornadofx.*
 
@@ -50,12 +49,10 @@ class VerseMarkerControl : BorderPane() {
                 line {
                     addClass("verse-marker__line")
 
-                    //startXProperty().bind(this@region.layoutXProperty())
                     startXProperty().bind(this@region.layoutXProperty().plus(MARKER_AREA_WIDTH / 2))
                     startYProperty().bind(this@region.layoutYProperty())
                     endXProperty().bind(this@region.widthProperty().minus(MARKER_AREA_WIDTH / 2))
-                    //endXProperty().bind(this@region.layoutXProperty())
-                    endYProperty().bind(this@region.heightProperty())
+                    endYProperty().bind(this@VerseMarkerControl.prefHeightProperty())
                     strokeWidth = MARKER_WIDTH
                 }
             }
