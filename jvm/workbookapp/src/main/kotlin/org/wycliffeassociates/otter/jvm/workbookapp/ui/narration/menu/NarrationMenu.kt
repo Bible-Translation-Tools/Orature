@@ -1,54 +1,80 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu
 
 import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleStringProperty
-import javafx.beans.value.ObservableValue
+import javafx.beans.value.ObservableBooleanValue
 import javafx.event.EventTarget
-import javafx.scene.control.MenuButton
+import javafx.scene.control.Button
+import javafx.scene.control.ContextMenu
+import javafx.scene.control.MenuItem
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
-class NarrationMenu : MenuButton() {
-    val openChapterInTextProperty = SimpleStringProperty(messages["openChapterIn"])
-    val editVerseMarkersTextProperty = SimpleStringProperty(messages["editVerseMarkers"])
-    val resetChapterTextProperty = SimpleStringProperty(messages["restartChapter"])
+class NarrationMenu : ContextMenu() {
 
-    val hasUndoProperty = SimpleBooleanProperty()
-    val hasRedoProperty = SimpleBooleanProperty()
     val hasChapterTakeProperty = SimpleBooleanProperty()
     val hasVersesProperty = SimpleBooleanProperty()
 
     init {
-        addClass("btn", "btn--secondary", "wa-menu-button")
-        graphic = FontIcon(MaterialDesign.MDI_DOTS_VERTICAL)
         addClass("wa-context-menu")
-        tooltip(messages["options"])
+        isAutoHide = true
 
-        item(openChapterInTextProperty.value) {
-            graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
+        val openChapterOpt = MenuItem().apply {
+            graphic = label(messages["openChapterIn"]) {
+                graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
+                tooltip(text)
+            }
             action {
                 FX.eventbus.fire(NarrationOpenInPluginEvent(PluginType.EDITOR))
             }
             enableWhen(hasChapterTakeProperty)
         }
-        item(editVerseMarkersTextProperty.value) {
-            graphic = FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE)
+        val verseMarkerOpt = MenuItem().apply {
+            graphic = label(messages["editVerseMarkers"]) {
+                graphic = FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE)
+            }
             action {
                 FX.eventbus.fire(NarrationOpenInPluginEvent(PluginType.MARKER))
             }
             enableWhen(hasChapterTakeProperty)
         }
-        item(resetChapterTextProperty.value) {
-            graphic = FontIcon(MaterialDesign.MDI_DELETE)
+        val restartChapterOpt = MenuItem().apply {
+            graphic = label(messages["restartChapter"]) {
+                graphic = FontIcon(MaterialDesign.MDI_DELETE)
+            }
             action {
                 FX.eventbus.fire(NarrationResetChapterEvent())
             }
             enableWhen(hasVersesProperty)
         }
+
+        items.setAll(openChapterOpt, verseMarkerOpt, restartChapterOpt)
     }
 }
 
-fun EventTarget.narrationMenu(op: NarrationMenu.() -> Unit = {}) = NarrationMenu().attachTo(this, op)
+fun EventTarget.narrationMenuButton(
+    hasChapterTakeBinding: ObservableBooleanValue,
+    hasVersesBinding: ObservableBooleanValue,
+    op: Button.() -> Unit = {}
+): Button {
+    return Button().attachTo(this).apply {
+        addClass("btn", "btn--icon")
+        graphic = FontIcon(MaterialDesign.MDI_DOTS_VERTICAL)
+        tooltip(messages["options"])
+
+        val menu = NarrationMenu().apply {
+            this.hasChapterTakeProperty.bind(hasChapterTakeBinding)
+            this.hasVersesProperty.bind(hasVersesBinding)
+        }
+
+        action {
+            val screenBound = localToScreen(boundsInLocal)
+            menu.show(FX.primaryStage)
+            menu.x = screenBound.minX - menu.width + this.width
+            menu.y = screenBound.centerY
+        }
+        op()
+    }
+}

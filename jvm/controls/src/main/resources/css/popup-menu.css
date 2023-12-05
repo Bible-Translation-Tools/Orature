@@ -14,6 +14,7 @@
     -fx-background-radius: 4px;
     -fx-cursor: hand;
     -fx-font-size: 1.4em;
+    -fx-padding: 12 16;
 }
 
 .wa-context-menu .menu-item:disabled {
@@ -21,7 +22,6 @@
 }
 
 .wa-context-menu .menu-item .label {
-    -fx-padding: 12 16;
     -fx-graphic-text-gap: 16;
     -fx-text-fill: -wa-regular-text;
 }

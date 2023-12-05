@@ -252,18 +252,6 @@
     -fx-fill: -wa-white;
 }
 
-.narration__header-controls .wa-menu-button,
-.narration-record__verse-controls .wa-menu-button {
-    -fx-padding: 0;
-}
-
-.narration__header-controls .wa-menu-button .arrow-button,
-.narration__header-controls .wa-menu-button .arrow-button .arrow,
-.narration-record__verse-controls .wa-menu-button .arrow-button,
-.narration-record__verse-controls .wa-menu-button .arrow-button .arrow {
-    -fx-padding: 0;
-}
-
 .narration-record__volume-bar {
     -fx-pref-width: 16px;
     -fx-background-color: #001533;

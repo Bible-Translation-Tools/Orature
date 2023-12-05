@@ -3,8 +3,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 import com.github.thomasnield.rxkotlinfx.toLazyBinding
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
-import javafx.scene.layout.Priority
-import javafx.scene.paint.Color
 import javafx.util.Duration
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ColorTheme
@@ -58,6 +56,7 @@ class NarrationPage : View() {
         tryImportStylesheet(resources["/css/narration.css"])
         tryImportStylesheet(resources["/css/chapter-selector.css"])
         tryImportStylesheet("/css/chapter-grid.css")
+        tryImportStylesheet("/css/popup-menu.css")
 
         pluginOpenedPage = createPluginOpenedPage()
     }
