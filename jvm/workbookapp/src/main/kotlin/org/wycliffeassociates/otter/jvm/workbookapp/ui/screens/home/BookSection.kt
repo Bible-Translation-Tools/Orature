@@ -51,6 +51,13 @@ class BookSection(
                     graphic = FontIcon(MaterialDesign.MDI_DOTS_VERTICAL)
 
                     projectsOptionMenu.books.setAll(filteredBooks)
+                    projectsOptionMenu.setOnShowing {
+                        addPseudoClass("active")
+                    }
+                    projectsOptionMenu.setOnHidden {
+                        removePseudoClass("active")
+                    }
+
                     setOnAction {
                         val bound = this.boundsInLocal
                         val screenBound = this.localToScreen(bound)
