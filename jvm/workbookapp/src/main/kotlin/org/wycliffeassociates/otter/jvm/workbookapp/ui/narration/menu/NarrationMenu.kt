@@ -34,6 +34,7 @@ class NarrationMenu : ContextMenu() {
         val verseMarkerOpt = MenuItem().apply {
             graphic = label(messages["editVerseMarkers"]) {
                 graphic = FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE)
+                tooltip(text)
             }
             action {
                 FX.eventbus.fire(NarrationOpenInPluginEvent(PluginType.MARKER))
@@ -43,6 +44,7 @@ class NarrationMenu : ContextMenu() {
         val restartChapterOpt = MenuItem().apply {
             graphic = label(messages["restartChapter"]) {
                 graphic = FontIcon(MaterialDesign.MDI_DELETE)
+                tooltip(text)
             }
             action {
                 FX.eventbus.fire(NarrationResetChapterEvent())
@@ -69,11 +71,14 @@ fun EventTarget.narrationMenuButton(
             this.hasVersesProperty.bind(hasVersesBinding)
         }
 
+        menu.setOnShowing { addPseudoClass("active") }
+        menu.setOnHidden { removePseudoClass("active") }
+
         action {
             val screenBound = localToScreen(boundsInLocal)
             menu.show(FX.primaryStage)
-            menu.x = screenBound.minX - menu.width + this.width
-            menu.y = screenBound.centerY
+            menu.x = screenBound.centerX - menu.width + this.width
+            menu.y = screenBound.minY + this.height - 5.0
         }
         op()
     }
