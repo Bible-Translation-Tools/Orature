@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
+import com.sun.javafx.util.Utils
 import javafx.animation.AnimationTimer
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
@@ -11,7 +12,6 @@ import javafx.scene.control.ScrollBar
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
-import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.controls.SCROLL_INCREMENT_UNIT
 import org.wycliffeassociates.otter.jvm.controls.SCROLL_JUMP_UNIT
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
@@ -136,11 +136,9 @@ class AudioWorkspaceView : View() {
                     }
 
                     setOnLayerScroll { delta ->
-                        val seekTo = pos + delta
                         // Keep position inside audio bounds
-                        if (seekTo in 0..viewModel.totalAudioSizeProperty.value) {
-                            viewModel.seekTo(seekTo)
-                        }
+                        val seekTo = Utils.clamp(0, pos + delta, viewModel.totalAudioSizeProperty.value)
+                        viewModel.seekTo(seekTo)
                     }
                 }
             }
