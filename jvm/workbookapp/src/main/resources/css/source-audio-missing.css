@@ -1,6 +1,6 @@
 .audio-missing-view {
     -fx-alignment: center-left;
-    -fx-padding: 50;
+    -fx-padding: 20;
     -fx-spacing: 16;
     -fx-max-width: 850;
 }
@@ -51,7 +51,7 @@
 }
 
 .audio-missing__separator-area {
-    -fx-padding: 40 0;
+    -fx-padding: 25 0;
     -fx-alignment: center;
 }
 

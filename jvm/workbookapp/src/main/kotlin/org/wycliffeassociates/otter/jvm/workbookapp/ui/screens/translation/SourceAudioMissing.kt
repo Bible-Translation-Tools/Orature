@@ -7,6 +7,7 @@ import javafx.scene.input.DragEvent
 import javafx.scene.input.TransferMode
 import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
+import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
 import javafx.stage.FileChooser
 import javafx.util.Duration
@@ -58,6 +59,7 @@ class SourceAudioMissing : View() {
         }
         label(messages["source_audio_missing_description"]) {
             addClass("normal-text", "audio-missing__description")
+            minHeight = Region.USE_PREF_SIZE // avoids ellipsis
         }
 
         vbox {
