@@ -138,10 +138,10 @@ class TeleprompterView : View() {
 
         subscribe<ResumeVerseEvent> {
             viewModel.stickyVerseProperty.value?.let { verse ->
-                val item = listView.items.find { it == verse }
+                val index = listView.items.indexOfFirst { it == verse }
                 try {
-                    logger.info("Scrolling to $item for ResumeVerseEvent")
-                    listView.scrollTo(item)
+                    logger.info("Scrolling to $index for ResumeVerseEvent")
+                    listView.scrollTo(max(0, index - 1)) // scrolls to item above the target for visual offset
                 } catch (e: Exception) {
                     logger.error("Error in selecting and scrolling to a Teleprompter item", e)
                 }
