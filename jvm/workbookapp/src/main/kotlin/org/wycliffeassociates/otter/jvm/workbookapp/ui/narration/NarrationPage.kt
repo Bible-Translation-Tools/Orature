@@ -47,6 +47,11 @@ class NarrationPage : View() {
 
     private val eventSubscriptions = mutableListOf<EventRegistration>()
 
+    private lateinit var narrationHeader: NarrationHeader
+    private lateinit var audioWorkspaceView: AudioWorkspaceView
+    private lateinit var narrationToolbar: NarrationToolBar
+    private lateinit var teleprompterView: TeleprompterView
+
     init {
         tryImportStylesheet(resources["/css/narration.css"])
         tryImportStylesheet(resources["/css/chapter-selector.css"])
@@ -62,13 +67,20 @@ class NarrationPage : View() {
         createSnackBar()
 
         vbox {
-            add<NarrationHeader>()
+            add<NarrationHeader>() {
+                narrationHeader = this
+            }
             add<AudioWorkspaceView> {
+                audioWorkspaceView = this
                 this.root.maxHeightProperty().bind(narrationRoot.heightProperty().multiply(1.0 / 3.0))
                 this.root.minHeightProperty().bind(this.root.maxHeightProperty())
             }
-            add<NarrationToolBar>()
-            add<TeleprompterView>()
+            add<NarrationToolBar>() {
+                narrationToolbar = this
+            }
+            add<TeleprompterView>() {
+                teleprompterView = this
+            }
         }
     }
 
@@ -76,12 +88,18 @@ class NarrationPage : View() {
         super.onDock()
         subscribeToEvents()
         viewModel.onDock()
+        narrationHeader.onDock()
+        audioWorkspaceView.onDock()
+        teleprompterView.onDock()
     }
 
     override fun onUndock() {
         super.onUndock()
         unsubscribeFromEvents()
         viewModel.onUndock()
+        narrationHeader.onUndock()
+        audioWorkspaceView.onUndock()
+        teleprompterView.onUndock()
     }
 
     private fun subscribeToEvents() {
