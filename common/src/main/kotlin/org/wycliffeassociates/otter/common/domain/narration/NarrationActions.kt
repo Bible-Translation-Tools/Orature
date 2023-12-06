@@ -228,15 +228,15 @@ internal class EditVerseAction(
     }
 
     override fun undo(totalVerses: MutableList<VerseNode>) {
-        logger.info("Undoing edit: ${totalVerses[verseIndex].marker.formattedLabel}")
         previous?.let {
+            logger.info("Undoing edit: ${totalVerses[verseIndex].marker.formattedLabel}")
             totalVerses[verseIndex] = it.copy()
         }
     }
 
     override fun redo(totalVerses: MutableList<VerseNode>) {
-        logger.info("Redoing edit: ${totalVerses[verseIndex].marker.formattedLabel}")
         node?.let {
+            logger.info("Redoing edit: ${totalVerses[verseIndex].marker.formattedLabel}")
             totalVerses[verseIndex] = it.copy()
         }
     }
