@@ -8,6 +8,7 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
 import javafx.scene.Cursor
 import javafx.scene.Node
+import javafx.scene.control.Button
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Region
 import org.kordamp.ikonli.javafx.FontIcon
@@ -16,6 +17,7 @@ import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.VerseMenu
 import tornadofx.*
+import tornadofx.FX.Companion.messages
 
 
 const val MARKER_AREA_WIDTH = 24.0
@@ -90,14 +92,27 @@ class VerseMarkerControl : BorderPane() {
                 setAlignment(this, Pos.BOTTOM_LEFT)
             }
 
-        var verseMenu = VerseMenu()
-        right = verseMenu.apply {
-            addClass("verse-marker__menu")
+        right = Button().apply {
+            addClass("btn", "btn--icon", "verse-marker__menu")
             setAlignment(this, Pos.BOTTOM_LEFT)
+            graphic = FontIcon(MaterialDesign.MDI_DOTS_VERTICAL)
+            tooltip(messages["options"])
 
-            isRecordingProperty.bind(this@VerseMarkerControl.isRecordingProperty)
-            verseProperty.bind(this@VerseMarkerControl.verseProperty)
-            verseIndexProperty.bind(this@VerseMarkerControl.verseIndexProperty)
+            val menu = VerseMenu().apply {
+                isRecordingProperty.bind(this@VerseMarkerControl.isRecordingProperty)
+                verseProperty.bind(this@VerseMarkerControl.verseProperty)
+                verseIndexProperty.bind(this@VerseMarkerControl.verseIndexProperty)
+            }
+
+            menu.setOnShowing { addPseudoClass("active") }
+            menu.setOnHidden { removePseudoClass("active") }
+
+            action {
+                val screenBound = localToScreen(boundsInLocal)
+                menu.show(FX.primaryStage)
+                menu.x = screenBound.centerX - (menu.width / 2)
+                menu.y = screenBound.centerY - menu.height
+            }
         }
     }
 }
