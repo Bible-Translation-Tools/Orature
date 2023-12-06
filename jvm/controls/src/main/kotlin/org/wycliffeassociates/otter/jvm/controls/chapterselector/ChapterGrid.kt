@@ -21,6 +21,10 @@ class ChapterGrid(val list: List<ChapterGridItemData>) : GridPane() {
         FX.eventbus.fire(OpenChapterEvent(chapterIndex))
     }
 
+    fun focusOnSelectedChapter() {
+        lookupAll(":selected").firstOrNull()?.requestFocus()
+    }
+
     fun updateChapterGridNodes() {
         children.clear()
         columnConstraints.clear()

@@ -26,13 +26,13 @@
     -fx-icon-color: -wa-primary;
 }
 
-.chapter-grid-context-menu {
+.chapter-selector-popup {
     -fx-padding: 12;
     -fx-background-radius: 8px;
     -fx-background-color: -wa-foreground;
     -fx-background-radius: 10;
 }
 
-.chapter-grid-context-menu__scroll-pane {
+.chapter-selector-popup__scroll-pane {
     -fx-max-height: 500;
 }

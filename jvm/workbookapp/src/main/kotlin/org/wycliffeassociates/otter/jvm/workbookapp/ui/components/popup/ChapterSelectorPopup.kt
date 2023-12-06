@@ -5,12 +5,13 @@ import javafx.scene.control.PopupControl
 import javafx.scene.control.ScrollPane
 import javafx.scene.control.Skin
 import javafx.scene.layout.VBox
+import javafx.stage.Window
 import org.wycliffeassociates.otter.jvm.controls.chapterselector.ChapterGrid
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
 import tornadofx.*
 
-class ChapterGridMenu : PopupControl() {
+class ChapterSelectorPopup : PopupControl() {
 
     val chapterGridItemList: MutableList<ChapterGridItemData> = mutableListOf()
     private val chapterGrid = ChapterGrid(chapterGridItemList)
@@ -19,8 +20,13 @@ class ChapterGridMenu : PopupControl() {
         isAutoHide = true
     }
 
+    override fun show(owner: Window?) {
+        super.show(owner)
+        chapterGrid.focusOnSelectedChapter()
+    }
+
     override fun createDefaultSkin(): Skin<*> {
-        return ChapterMenuSkin(this, chapterGrid)
+        return ChapterSelectorPopupSkin(this, chapterGrid)
     }
 
     fun updateChapterGrid(newChapterList: List<ChapterGridItemData>) {
@@ -31,17 +37,17 @@ class ChapterGridMenu : PopupControl() {
 
 }
 
-class ChapterMenuSkin(
-    val control: ChapterGridMenu,
+class ChapterSelectorPopupSkin(
+    val control: ChapterSelectorPopup,
     chapterGrid: ChapterGrid
-) : Skin<ChapterGridMenu> {
+) : Skin<ChapterSelectorPopup> {
 
     private val root = VBox().apply {
-        addClass("chapter-grid-context-menu")
+        addClass("chapter-selector-popup")
 
         add(
             ScrollPane(chapterGrid).apply {
-                addClass("chapter-grid-context-menu__scroll-pane")
+                addClass("chapter-selector-popup__scroll-pane")
                 isFitToWidth = true
 
                 runLater { customizeScrollbarSkin() }
@@ -49,7 +55,7 @@ class ChapterMenuSkin(
         )
     }
 
-    override fun getSkinnable(): ChapterGridMenu {
+    override fun getSkinnable(): ChapterSelectorPopup {
         return control
     }
 
