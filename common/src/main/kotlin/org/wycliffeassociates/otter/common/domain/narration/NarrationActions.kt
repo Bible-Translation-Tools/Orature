@@ -49,8 +49,8 @@ internal class NewVerseAction(
     }
 
     override fun redo(totalVerses: MutableList<VerseNode>) {
-        logger.info("Redoing new marker: ${totalVerses[verseIndex].marker.formattedLabel}")
         node?.let {
+            logger.info("Redoing new marker: ${totalVerses[verseIndex].marker.formattedLabel}")
             totalVerses[verseIndex] = it.copy()
         }
     }
@@ -94,15 +94,15 @@ internal class RecordAgainAction(
     }
 
     override fun undo(totalVerses: MutableList<VerseNode>) {
-        logger.info("Undoing record again for: ${totalVerses[verseIndex].marker.formattedLabel}")
         previous?.let {
+            logger.info("Undoing record again for: ${totalVerses[verseIndex].marker.formattedLabel}")
             totalVerses[verseIndex] = it.copy()
         }
     }
 
     override fun redo(totalVerses: MutableList<VerseNode>) {
-        logger.info("Redoing record again for: ${totalVerses[verseIndex].marker.formattedLabel}")
         node?.let {
+            logger.info("Redoing record again for: ${totalVerses[verseIndex].marker.formattedLabel}")
             totalVerses[verseIndex] = it.copy()
         }
     }
@@ -181,8 +181,8 @@ internal class MoveMarkerAction(
     }
 
     override fun undo(totalVerses: MutableList<VerseNode>) {
-        logger.info("Undoing moving marker: ${totalVerses[verseIndex].marker.formattedLabel}")
         oldVerse?.let {
+            logger.info("Undoing moving marker: ${totalVerses[verseIndex].marker.formattedLabel}")
             totalVerses[verseIndex] = it.copy()
         }
         oldPrecedingVerse?.let {
@@ -191,8 +191,8 @@ internal class MoveMarkerAction(
     }
 
     override fun redo(totalVerses: MutableList<VerseNode>) {
-        logger.info("Redoing moving marker: ${totalVerses[verseIndex].marker.formattedLabel}")
         verse?.let {
+            logger.info("Redoing moving marker: ${totalVerses[verseIndex].marker.formattedLabel}")
             totalVerses[verseIndex] = it.copy()
         }
         precedingVerse?.let {
