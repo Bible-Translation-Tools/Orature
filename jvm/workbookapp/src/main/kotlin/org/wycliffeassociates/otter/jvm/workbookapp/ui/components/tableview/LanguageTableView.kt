@@ -18,6 +18,8 @@ class LanguageTableView(
     languages: ObservableList<Language>
 ) : TableView<Language>(languages) {
 
+    val disabledLanguages = observableListOf<Language>()
+
     init {
         addClass("wa-table-view")
         vgrow = Priority.ALWAYS
@@ -77,7 +79,7 @@ class LanguageTableView(
         }
 
         sortPolicy = CUSTOM_SORT_POLICY as (Callback<TableView<Language>, Boolean>)
-        setRowFactory { LanguageTableRow() }
+        setRowFactory { LanguageTableRow(disabledLanguages) }
 
         /* accessibility */
         focusedProperty().onChange {
@@ -91,7 +93,9 @@ class LanguageTableView(
         addEventFilter(KeyEvent.KEY_PRESSED) { keyEvent ->
             if (keyEvent.code == KeyCode.SPACE || keyEvent.code == KeyCode.ENTER) {
                 selectedItem?.let { language ->
-                    FX.eventbus.fire(LanguageSelectedEvent(language))
+                    if (selectedItem !in disabledLanguages) {
+                        FX.eventbus.fire(LanguageSelectedEvent(language))
+                    }
                 }
                 keyEvent.consume()
             }

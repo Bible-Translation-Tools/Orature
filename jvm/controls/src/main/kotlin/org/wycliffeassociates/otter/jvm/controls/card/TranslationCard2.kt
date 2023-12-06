@@ -21,6 +21,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupKey
 import java.text.MessageFormat
 import tornadofx.*
+import tornadofx.FX.Companion.messages
 
 // TODO: remove number "2" suffix after deleting the original control. Same for css named translation-card-2.css
 class TranslationCard2(
@@ -31,10 +32,15 @@ class TranslationCard2(
 ) : ButtonBase() {
 
     val cardTitleProperty = SimpleStringProperty(
-        MessageFormat.format(FX.messages["translationMode"], FX.messages[mode.titleKey])
+        MessageFormat.format(messages["translationMode"], messages[mode.titleKey])
     )
     val sourceLanguageProperty = SimpleObjectProperty(sourceLanguage)
     val targetLanguageProperty = SimpleObjectProperty(targetLanguage)
+    val cardInfo: String = when (mode) {
+        ProjectMode.TRANSLATION -> messages["oralTranslationDesc"]
+        ProjectMode.NARRATION -> messages["narrationDesc"]
+        ProjectMode.DIALECT -> messages["dialectDesc"]
+    }
 
     init {
         addClass("translation-card-button")
@@ -130,6 +136,7 @@ class ActiveTranslationCardSkin(card: TranslationCard2) : SkinBase<TranslationCa
             region { hgrow = Priority.ALWAYS }
             label {
                 graphic = FontIcon(MaterialDesign.MDI_INFORMATION_OUTLINE)
+                tooltip(card.cardInfo)
             }
         }
         vbox {
