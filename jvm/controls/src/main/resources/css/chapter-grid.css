@@ -31,6 +31,7 @@
     -fx-background-radius: 8px;
     -fx-background-color: -wa-foreground;
     -fx-background-radius: 10;
+    -fx-effect: -wa-level1;
 }
 
 .chapter-selector-popup__scroll-pane {
