@@ -31,12 +31,10 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ConflictResolution
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.ProgressStatus
-import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportCallbackParameter
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.ArtworkAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -97,6 +95,8 @@ class ImportProjectViewModel : ViewModel() {
                 }
         }
     }
+
+    fun isSourceAudioProject(file: File) = importProjectProvider.get().isSourceAudioProject(file)
 
     private fun setupImportCallback(
         emitter: ObservableEmitter<ProgressStatus>
@@ -216,10 +216,12 @@ class ImportProjectViewModel : ViewModel() {
                     .subscribe { resourceMetadata ->
                         resourceMetadata?.let {
                             importedProjectTitleProperty.set(project.title)
-                            val coverArtAccessor = ArtworkAccessor(directoryProvider, it, project.identifier)
-                            importedProjectCoverProperty.set(
-                                coverArtAccessor.getArtwork(ImageRatio.FOUR_BY_ONE)?.file
-                            )
+
+                            /* cover art graphic can be reused later by uncommenting */
+                            //  val coverArtAccessor = ArtworkAccessor(directoryProvider, it, project.identifier)
+                            //  importedProjectCoverProperty.set(
+                            //      coverArtAccessor.getArtwork(ImageRatio.FOUR_BY_ONE)?.file
+                            //  )
                         }
                     }
             }

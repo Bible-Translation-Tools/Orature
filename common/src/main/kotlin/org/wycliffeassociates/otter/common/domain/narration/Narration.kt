@@ -281,9 +281,8 @@ class Narration @AssistedInject constructor(
     }
 
     fun getSectionAsFile(index: Int): File {
-        val verse = activeVerses[index]
         lockToVerse(index)
-        chapterReaderConnection.seek(verse.location)
+        chapterReaderConnection.seek(0)
         return audioFileUtils.getSectionAsFile(
             chapterRepresentation.scratchAudio,
             chapterReaderConnection

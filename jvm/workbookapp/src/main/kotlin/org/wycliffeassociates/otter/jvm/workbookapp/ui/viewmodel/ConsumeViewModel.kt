@@ -124,6 +124,7 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
     }
 
     fun cleanup() {
+        audioConnectionFactory.releasePlayer()
         builder.cancel()
         compositeDisposable.clear()
         markerModel = null
