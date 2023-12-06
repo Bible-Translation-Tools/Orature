@@ -1,5 +1,8 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
+import javafx.animation.ParallelTransition
+import javafx.animation.ScaleTransition
+import javafx.animation.TranslateTransition
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
@@ -120,10 +123,11 @@ class TeleprompterView : View() {
         subscribe<TeleprompterSeekEvent> {
             try {
                 logger.info("Scrolling to ${it.index} for TeleprompterSeekEvent")
-                listView.scrollTo(it.index - 1)
-                listView.selectionModel.selectIndices(it.index)
+                runLater {
+                    listView.scrollTo(it.index - 1)
+                }
             } catch (e: Exception) {
-                logger.error("Error in selecting and scrolling to a Teleprompter item", e)
+                logger.error("Error scrolling to a Teleprompter item", e)
             }
         }
 
@@ -143,7 +147,7 @@ class TeleprompterView : View() {
                     logger.info("Scrolling to $index for ResumeVerseEvent")
                     listView.scrollTo(max(0, index - 1)) // scrolls to item above the target for visual offset
                 } catch (e: Exception) {
-                    logger.error("Error in selecting and scrolling to a Teleprompter item", e)
+                    logger.error("Error scrolling to a Teleprompter item", e)
                 }
             }
             viewModel.showStickyVerseProperty.set(false)
@@ -152,11 +156,10 @@ class TeleprompterView : View() {
         subscribe<RecordAgainEvent> {
             listView.apply {
                 try {
-                    logger.info("Selecting index ${it.index} for RecordAgainEvent")
-                    selectionModel.select(it.index)
+                    logger.info("Scrolling to index ${it.index} for RecordAgainEvent")
                     scrollTo(it.index - 1)
                 } catch (e: Exception) {
-                    logger.error("Error in selecting and scrolling to a Teleprompter item", e)
+                    logger.error("Error scrolling to a Teleprompter item", e)
                 }
             }
         }
@@ -165,21 +168,6 @@ class TeleprompterView : View() {
     override fun onDock() {
         super.onDock()
         listView.addListeners()
-
-        viewModel.lastRecordedVerseProperty.value?.let { lastVerse ->
-            listView.apply {
-                runLater(Duration.millis(1000.0)) {
-                    val index = lastVerse.coerceIn(0, max(viewModel.chunks.size - 1, 0))
-                    try {
-                        logger.info("Selecting index: $index for lastecordedVerseProperty")
-                        selectionModel.select(index)
-                        scrollTo(index)
-                    } catch (e: Exception) {
-                        logger.error("Error in selecting and scrolling to a Teleprompter item", e)
-                    }
-                }
-            }
-        }
     }
 
     override fun onUndock() {
@@ -199,6 +187,10 @@ class TeleprompterView : View() {
 
             visibleWhen { viewModel.showStickyVerseProperty.and(viewModel.stickyVerseProperty.isNotNull) }
             managedWhen(visibleProperty())
+
+            visibleProperty().onChange {
+                animateStickyVerse(it)
+            }
         }
 
         narrationTextListview(viewModel.chunks) {
@@ -221,6 +213,24 @@ class TeleprompterView : View() {
             }
 
             runLater { customizeScrollbarSkin() }
+        }
+    }
+
+    private fun StickyVerse.animateStickyVerse(showing: Boolean) {
+        if (showing) {
+            opacity = 1.0
+            val scaleTransition = ScaleTransition(Duration.seconds(0.6), this).apply {
+                fromY = 0.2
+                toY = 1.0
+            }
+            val tt1 = TranslateTransition(Duration.seconds(0.6), this).apply {
+                fromY = -maxHeight / 2
+                toY = 0.0
+            }
+            val animation = ParallelTransition(scaleTransition, tt1)
+            animation.play()
+        } else {
+            opacity = 0.0
         }
     }
 }

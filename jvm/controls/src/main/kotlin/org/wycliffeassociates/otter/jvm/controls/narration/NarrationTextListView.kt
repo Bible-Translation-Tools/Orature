@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.narration
 
+import javafx.animation.PauseTransition
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.value.ObservableValue
 import javafx.collections.ObservableList
@@ -25,6 +26,7 @@ import javafx.event.EventTarget
 import javafx.geometry.Orientation
 import javafx.scene.control.ListView
 import javafx.scene.control.ScrollBar
+import javafx.util.Duration
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.findChildren
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
@@ -36,6 +38,7 @@ class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(i
 
     val firstVerseToResumeProperty = SimpleObjectProperty<T>()
     private val listeners = mutableListOf<ListenerDisposer>()
+    private var scrollHandlerDelay: PauseTransition = PauseTransition(Duration.seconds(0.2))
 
     init {
         addClass("wa-list-view")
@@ -49,15 +52,11 @@ class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(i
                         node.orientation == Orientation.VERTICAL
                     }
                     scrollBar?.valueProperty()?.onChangeWithDisposer {
-                        val current = items.indexOf(firstVerseToResumeProperty.value)
-                        val first = virtualFlow().firstVisibleCell?.index ?: 0
-                        val last = virtualFlow().lastVisibleCell?.index ?: 0
-
-                        if (current !in (first..last)) {
-                            FX.eventbus.fire(StickyVerseChangedEvent(true))
-                        } else {
-                            FX.eventbus.fire(StickyVerseChangedEvent(false))
+                        scrollHandlerDelay.stop()
+                        scrollHandlerDelay.setOnFinished {
+                            scrollValueChanged()
                         }
+                        scrollHandlerDelay.play()
                     }?.also(listeners::add)
                 } catch (e: NullPointerException) {
                     e.printStackTrace()
@@ -69,6 +68,18 @@ class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(i
     fun removeListeners() {
         listeners.forEach(ListenerDisposer::dispose)
         listeners.clear()
+    }
+
+    private fun scrollValueChanged() {
+        val current = items.indexOf(firstVerseToResumeProperty.value)
+        val first = virtualFlow().firstVisibleCell?.index ?: 0
+        val last = virtualFlow().lastVisibleCell?.index ?: 0
+
+        if (current !in (first..last)) {
+            FX.eventbus.fire(StickyVerseChangedEvent(true))
+        } else {
+            FX.eventbus.fire(StickyVerseChangedEvent(false))
+        }
     }
 }
 
