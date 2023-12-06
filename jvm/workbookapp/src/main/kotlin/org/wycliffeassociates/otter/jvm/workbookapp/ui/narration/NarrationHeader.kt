@@ -203,6 +203,7 @@ class NarrationHeaderViewModel : ViewModel() {
                         logger.error("Error in processing take with plugin type: $pluginType, ${e.message}")
                     }
                     .flatMapSingle { plugin ->
+                        narrationViewModel.pluginOpenedProperty.set(true)
                         fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
                         when (pluginType) {
                             PluginType.EDITOR -> audioPluginViewModel.edit(audio, take)

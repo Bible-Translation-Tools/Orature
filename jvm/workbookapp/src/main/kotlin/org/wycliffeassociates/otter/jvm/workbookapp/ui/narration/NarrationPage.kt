@@ -87,6 +87,10 @@ class NarrationPage : View() {
     override fun onDock() {
         super.onDock()
         subscribeToEvents()
+        if (viewModel.pluginOpenedProperty.value) {
+            viewModel.pluginOpenedProperty.set(false)
+            return
+        }
         viewModel.onDock()
         narrationHeader.onDock()
         audioWorkspaceView.onDock()
@@ -96,6 +100,9 @@ class NarrationPage : View() {
     override fun onUndock() {
         super.onUndock()
         unsubscribeFromEvents()
+        if (viewModel.pluginOpenedProperty.value) {
+            return
+        }
         viewModel.onUndock()
         narrationHeader.onUndock()
         audioWorkspaceView.onUndock()

@@ -124,6 +124,7 @@ class NarrationViewModel : ViewModel() {
     val potentiallyFinished by potentiallyFinishedProperty
 
     val pluginContextProperty = SimpleObjectProperty(PluginType.EDITOR)
+    val pluginOpenedProperty = SimpleBooleanProperty(false)
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
@@ -665,6 +666,7 @@ class NarrationViewModel : ViewModel() {
                 logger.error("Error in processing take with plugin type: $pluginType, ${e.message}")
             }
             .flatMapSingle { plugin ->
+                pluginOpenedProperty.set(true)
                 workbookDataStore.activeTakeNumberProperty.set(1)
                 FX.eventbus.fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
                 audioPluginViewModel.edit(file)
