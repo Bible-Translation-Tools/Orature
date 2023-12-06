@@ -127,7 +127,7 @@ class TeleprompterView : View() {
                     listView.scrollTo(it.index - 1)
                 }
             } catch (e: Exception) {
-                logger.error("Error in selecting and scrolling to a Teleprompter item", e)
+                logger.error("Error scrolling to a Teleprompter item", e)
             }
         }
 
@@ -147,7 +147,7 @@ class TeleprompterView : View() {
                     logger.info("Scrolling to $index for ResumeVerseEvent")
                     listView.scrollTo(max(0, index - 1)) // scrolls to item above the target for visual offset
                 } catch (e: Exception) {
-                    logger.error("Error in selecting and scrolling to a Teleprompter item", e)
+                    logger.error("Error scrolling to a Teleprompter item", e)
                 }
             }
             viewModel.showStickyVerseProperty.set(false)
@@ -156,11 +156,10 @@ class TeleprompterView : View() {
         subscribe<RecordAgainEvent> {
             listView.apply {
                 try {
-                    logger.info("Selecting index ${it.index} for RecordAgainEvent")
-                    selectionModel.select(it.index)
+                    logger.info("Scrolling to index ${it.index} for RecordAgainEvent")
                     scrollTo(it.index - 1)
                 } catch (e: Exception) {
-                    logger.error("Error in selecting and scrolling to a Teleprompter item", e)
+                    logger.error("Error scrolling to a Teleprompter item", e)
                 }
             }
         }
@@ -169,21 +168,6 @@ class TeleprompterView : View() {
     override fun onDock() {
         super.onDock()
         listView.addListeners()
-
-        viewModel.lastRecordedVerseProperty.value?.let { lastVerse ->
-            listView.apply {
-                runLater(Duration.millis(1000.0)) {
-                    val index = lastVerse.coerceIn(0, max(viewModel.chunks.size - 1, 0))
-                    try {
-                        logger.info("Selecting index: $index for lastecordedVerseProperty")
-                        selectionModel.select(index)
-                        scrollTo(index)
-                    } catch (e: Exception) {
-                        logger.error("Error in selecting and scrolling to a Teleprompter item", e)
-                    }
-                }
-            }
-        }
     }
 
     override fun onUndock() {
