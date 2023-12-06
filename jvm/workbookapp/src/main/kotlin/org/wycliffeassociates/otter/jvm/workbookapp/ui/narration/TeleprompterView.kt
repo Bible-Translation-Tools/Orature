@@ -70,15 +70,20 @@ class TeleprompterViewModel : ViewModel() {
     fun currentVerseTextBinding(): StringBinding {
         return Bindings.createStringBinding(
             {
-                val title = messages["currentVerseTitle"]
-                val verseTitle = messages["verse"]
-                val stickyVerseLabel = stickyVerseProperty.value?.chunk?.title
-
-                MessageFormat.format(
-                    title,
-                    verseTitle,
-                    stickyVerseLabel
-                )
+                stickyVerseProperty.value?.let { itemData ->
+                    if (itemData.chunk.label == "verse") {
+                        MessageFormat.format(
+                            messages["currentVerseTitle"],
+                            messages["verse"],
+                            itemData.chunk.title
+                        )
+                    } else {
+                        MessageFormat.format(
+                            messages["currentTitle"],
+                            itemData.chunk.textItem.text
+                        )
+                    }
+                }
             },
             stickyVerseProperty
         )
