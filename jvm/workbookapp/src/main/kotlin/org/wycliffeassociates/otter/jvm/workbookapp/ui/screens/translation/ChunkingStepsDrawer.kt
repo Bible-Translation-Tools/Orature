@@ -55,6 +55,7 @@ class ChunkingStepsDrawer(
 
         }
         scrollpane {
+            vgrow = Priority.ALWAYS
             isFitToWidth = true
             vbox {
                 chunkingStep(ChunkingStep.CONSUME_AND_VERBALIZE,selectedStepProperty,reachableStepProperty, isCollapsedProperty)

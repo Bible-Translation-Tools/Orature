@@ -22,7 +22,8 @@ import org.wycliffeassociates.otter.jvm.controls.card.translationCreationCard
 import org.wycliffeassociates.otter.jvm.controls.dialog.LoadingModal
 import org.wycliffeassociates.otter.jvm.controls.dialog.ContributorDialog
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.LanguageSelectedEvent
+import org.wycliffeassociates.otter.jvm.controls.dialog.ImportProjectDialog
+import org.wycliffeassociates.otter.jvm.controls.event.LanguageSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ProjectGroupDeleteEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportFinishEvent
@@ -32,10 +33,11 @@ import org.wycliffeassociates.otter.jvm.controls.popup.NotificationSnackBar
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.bindSingleChild
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ProjectImportEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ProjectImportFinishEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookDeleteEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ExportProjectDialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.ProgressDialog
+import org.wycliffeassociates.otter.jvm.controls.event.ProjectImportEvent
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.controls.event.ProjectContributorsEvent
@@ -46,12 +48,14 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportDial
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookOpenEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookQuickBackupEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ImportProjectViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ExportProjectViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.NOTIFICATION_DURATION_SEC
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectWizardViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
+import java.io.File
 import java.lang.Exception
 import java.text.MessageFormat
 
@@ -61,6 +65,8 @@ class HomePage2 : View() {
     private val listeners = mutableListOf<ListenerDisposer>()
 
     private val viewModel: HomePageViewModel2 by inject()
+    private val importProjectViewModel: ImportProjectViewModel by inject()
+
     private val projectWizardViewModel: ProjectWizardViewModel by inject()
     private val settingsViewModel: SettingsViewModel by inject()
     private val exportProjectViewModel: ExportProjectViewModel by inject()
@@ -82,7 +88,8 @@ class HomePage2 : View() {
             projectWizardViewModel.sortedSourceLanguages,
             projectWizardViewModel.sortedTargetLanguages,
             projectWizardViewModel.selectedModeProperty,
-            projectWizardViewModel.selectedSourceLanguageProperty
+            projectWizardViewModel.selectedSourceLanguageProperty,
+            projectWizardViewModel.existingLanguagePairs
         ).apply {
 
             sourceLanguageSearchQueryProperty.bindBidirectional(projectWizardViewModel.sourceLanguageSearchQueryProperty)
@@ -97,6 +104,7 @@ class HomePage2 : View() {
     init {
         tryImportStylesheet("/css/control.css")
         tryImportStylesheet("/css/home-page.css")
+        tryImportStylesheet("/css/app-drawer.css")
         tryImportStylesheet("/css/contributor-info.css")
         tryImportStylesheet("/css/translation-card-2.css")
         tryImportStylesheet("/css/popup-menu.css")
@@ -168,6 +176,17 @@ class HomePage2 : View() {
                 }
 
                 runLater { customizeScrollbarSkin() }
+            }
+
+            button(messages["import"]) {
+                addClass("btn", "btn--secondary")
+                tooltip(text)
+                graphic = FontIcon(MaterialDesign.MDI_DOWNLOAD)
+                useMaxWidth = true
+
+                action {
+                    showImportModal()
+                }
             }
 
             visibleWhen {
@@ -296,7 +315,7 @@ class HomePage2 : View() {
             showNotification(notification)
         }
 
-        subscribe<ProjectImportEvent> { event ->
+        subscribe<ProjectImportFinishEvent> { event ->
             logger.info("Import project event received, reloading projects...")
             if (event.result == ImportResult.SUCCESS) {
                 viewModel.loadProjects {
@@ -311,6 +330,10 @@ class HomePage2 : View() {
             event.workbookDescriptor?.let {
                 viewModel.mergeContributorFromImport(it)
             }
+        }
+
+        subscribe<ProjectImportEvent> {
+            handleImportFile(it.file)
         }
     }
 
@@ -376,7 +399,52 @@ class HomePage2 : View() {
             }
     }
 
-    private fun createImportNotification(event: ProjectImportEvent): NotificationViewData {
+    private fun handleImportFile(file: File) {
+        importProjectViewModel.setProjectInfo(file)
+
+        val dialog = setupImportProgressDialog()
+
+        importProjectViewModel.importProject(file)
+            .observeOnFx()
+            .doFinally {
+                dialog.dialogTitleProperty.unbind()
+                dialog.percentageProperty.set(0.0)
+                dialog.close()
+            }
+            .subscribe { progressStatus ->
+                progressStatus.percent?.let { percent ->
+                    dialog.percentageProperty.set(percent)
+                }
+                if (progressStatus.titleKey != null && progressStatus.titleMessage != null) {
+                    val message = MessageFormat.format(messages[progressStatus.titleKey!!], messages[progressStatus.titleMessage!!])
+                    dialog.progressMessageProperty.set(message)
+                } else if (progressStatus.titleKey != null) {
+                    dialog.progressMessageProperty.set(messages[progressStatus.titleKey!!])
+                }
+            }
+    }
+
+    private fun setupImportProgressDialog() = find<ProgressDialog> {
+        orientationProperty.set(settingsViewModel.orientationProperty.value)
+        themeProperty.set(settingsViewModel.appColorMode.value)
+        allowCloseProperty.set(false)
+        cancelMessageProperty.set(null)
+        dialogTitleProperty.bind(importProjectViewModel.importedProjectTitleProperty.stringBinding {
+            it?.let {
+                MessageFormat.format(
+                    messages["importProjectTitle"],
+                    messages["import"],
+                    it
+                )
+            } ?: messages["importResource"]
+        })
+
+        setOnCloseAction { close() }
+
+        open()
+    }
+
+    private fun createImportNotification(event: ProjectImportFinishEvent): NotificationViewData {
         if (event.result == ImportResult.FAILED) {
             return NotificationViewData(
                 title = messages["importFailed"],
@@ -512,5 +580,16 @@ class HomePage2 : View() {
                 Duration.seconds(NOTIFICATION_DURATION_SEC)
             )
         )
+    }
+
+    private fun showImportModal() {
+        find<ImportProjectDialog>().apply {
+            themeProperty.set(settingsViewModel.appColorMode.value)
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
+            validateFileCallback.set {
+                importProjectViewModel.isValidImportFile(it)
+            }
+            open()
+        }
     }
 }

@@ -31,12 +31,10 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ConflictResolution
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.ProgressStatus
-import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportCallbackParameter
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.ArtworkAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -44,7 +42,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.AddFilesView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.DrawerEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.DrawerEventAction
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.ProjectImportEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ProjectImportFinishEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ImportConflictDialog
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
@@ -52,9 +50,9 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Provider
 
-class AddFilesViewModel : ViewModel() {
+class ImportProjectViewModel : ViewModel() {
 
-    private val logger = LoggerFactory.getLogger(AddFilesViewModel::class.java)
+    private val logger = LoggerFactory.getLogger(ImportProjectViewModel::class.java)
 
     val settingsViewModel: SettingsViewModel by inject()
 
@@ -97,6 +95,8 @@ class AddFilesViewModel : ViewModel() {
                 }
         }
     }
+
+    fun isSourceAudioProject(file: File) = importProjectProvider.get().isSourceAudioProject(file)
 
     private fun setupImportCallback(
         emitter: ObservableEmitter<ProgressStatus>
@@ -141,7 +141,7 @@ class AddFilesViewModel : ViewModel() {
 
             override fun onNotifySuccess(language: String?, project: String?, workbookDescriptor: WorkbookDescriptor?) {
                 FX.eventbus.fire(
-                    ProjectImportEvent(
+                    ProjectImportFinishEvent(
                         ImportResult.SUCCESS,
                         language = language,
                         project = project,
@@ -152,7 +152,7 @@ class AddFilesViewModel : ViewModel() {
 
             override fun onError(filePath: String) {
                 FX.eventbus.fire(
-                    ProjectImportEvent(ImportResult.FAILED, filePath = filePath)
+                    ProjectImportFinishEvent(ImportResult.FAILED, filePath = filePath)
                 )
             }
 
@@ -216,10 +216,12 @@ class AddFilesViewModel : ViewModel() {
                     .subscribe { resourceMetadata ->
                         resourceMetadata?.let {
                             importedProjectTitleProperty.set(project.title)
-                            val coverArtAccessor = ArtworkAccessor(directoryProvider, it, project.identifier)
-                            importedProjectCoverProperty.set(
-                                coverArtAccessor.getArtwork(ImageRatio.FOUR_BY_ONE)?.file
-                            )
+
+                            /* cover art graphic can be reused later by uncommenting */
+                            //  val coverArtAccessor = ArtworkAccessor(directoryProvider, it, project.identifier)
+                            //  importedProjectCoverProperty.set(
+                            //      coverArtAccessor.getArtwork(ImageRatio.FOUR_BY_ONE)?.file
+                            //  )
                         }
                     }
             }

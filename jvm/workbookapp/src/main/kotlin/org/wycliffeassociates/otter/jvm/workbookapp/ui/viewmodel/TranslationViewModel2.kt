@@ -12,22 +12,35 @@ import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
+import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
+import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import tornadofx.*
+import javax.inject.Inject
 
 class TranslationViewModel2 : ViewModel() {
 
+    @Inject
+    lateinit var creationUseCase: CreateProject
+
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
+    private val navigator: NavigationMediator by inject()
 
+    val bookTitleProperty = workbookDataStore.activeWorkbookProperty.stringBinding {
+        it?.target?.title
+    }
     val canUndoProperty = SimpleBooleanProperty(false)
     val canRedoProperty = SimpleBooleanProperty(false)
     val isFirstChapterProperty = SimpleBooleanProperty(false)
     val isLastChapterProperty = SimpleBooleanProperty(false)
+    val showAudioMissingViewProperty = SimpleBooleanProperty(false)
     val selectedStepProperty = SimpleObjectProperty<ChunkingStep>(null)
     val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.CHUNKING)
     val sourceTextProperty = SimpleStringProperty()
@@ -40,6 +53,10 @@ class TranslationViewModel2 : ViewModel() {
     val selectedChunkBinding = workbookDataStore.activeChunkProperty.integerBinding { it?.sort ?: -1 }
 
     private val compositeDisposable = CompositeDisposable()
+
+    init {
+        (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+    }
 
     fun dockPage() {
         val recentChapter = workbookDataStore.workbookRecentChapterMap.getOrDefault(
@@ -67,6 +84,7 @@ class TranslationViewModel2 : ViewModel() {
 
     fun navigateChapter(chapter: Int) {
         selectedStepProperty.set(null)
+        showAudioMissingViewProperty.set(false)
 
         workbookDataStore.workbook.target
             .chapters
@@ -89,6 +107,9 @@ class TranslationViewModel2 : ViewModel() {
         resetUndoRedo()
         val chunk = workbookDataStore.chapter.chunks.value?.find { it.sort == chunkNumber } ?: return
         workbookDataStore.activeChunkProperty.set(chunk)
+
+        audioDataStore.stopPlayers()
+        audioDataStore.closePlayers()
 
         updateSourceText()
             .andThen {
@@ -162,6 +183,21 @@ class TranslationViewModel2 : ViewModel() {
             .ignoreElement()
     }
 
+    fun goToNarration() {
+        showAudioMissingViewProperty.set(false)
+        creationUseCase
+            .createAllBooks(
+                workbookDataStore.workbook.source.language,
+                workbookDataStore.workbook.source.language,
+                ProjectMode.NARRATION
+            )
+            .subscribe {
+                runLater {
+                    navigator.home()
+                }
+            }
+    }
+
     private fun loadChapter(chapter: Chapter) {
         workbookDataStore.activeChapterProperty.set(chapter)
         resetUndoRedo()
@@ -193,6 +229,7 @@ class TranslationViewModel2 : ViewModel() {
                 }
             }
             .doOnComplete {
+                showAudioMissingViewProperty.set(true)
                 reachableStepProperty.set(null)
                 compositeDisposable.clear()
             }

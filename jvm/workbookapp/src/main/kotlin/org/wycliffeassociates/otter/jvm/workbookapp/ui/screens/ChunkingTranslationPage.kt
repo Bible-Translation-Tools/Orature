@@ -16,6 +16,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.Chunk
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.Consume
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.PeerEdit
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.ChapterReview
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.SourceAudioMissing
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.translationHeader
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -26,19 +27,18 @@ class ChunkingTranslationPage : View() {
     val viewModel: TranslationViewModel2 by inject()
     val workbookDataStore: WorkbookDataStore by inject()
 
-    private val mainFragmentProperty = viewModel.selectedStepProperty.objectBinding {
-        it?.let { step ->
-            val fragment = when(step) {
-                ChunkingStep.CONSUME_AND_VERBALIZE -> find<Consume>()
-                ChunkingStep.CHUNKING -> find<Chunking>()
-                ChunkingStep.BLIND_DRAFT -> find<BlindDraft>()
-                ChunkingStep.PEER_EDIT,
-                ChunkingStep.KEYWORD_CHECK,
-                ChunkingStep.VERSE_CHECK -> find<PeerEdit>()
-                ChunkingStep.FINAL_REVIEW -> find<ChapterReview>()
-            }
-            fragment.root
+    private val mainFragmentProperty = viewModel.selectedStepProperty.objectBinding { step ->
+        val fragment = when(step) {
+            ChunkingStep.CONSUME_AND_VERBALIZE -> find<Consume>()
+            ChunkingStep.CHUNKING -> find<Chunking>()
+            ChunkingStep.BLIND_DRAFT -> find<BlindDraft>()
+            ChunkingStep.PEER_EDIT,
+            ChunkingStep.KEYWORD_CHECK,
+            ChunkingStep.VERSE_CHECK -> find<PeerEdit>()
+            ChunkingStep.FINAL_REVIEW -> find<ChapterReview>()
+            null -> find<SourceAudioMissing>()
         }
+        fragment.root
     }
 
     private lateinit var sourceTextDrawer: SourceTextDrawer
@@ -47,11 +47,7 @@ class ChunkingTranslationPage : View() {
         vgrow = Priority.ALWAYS
 
         translationHeader {
-            titleProperty.bind(
-                workbookDataStore.activeWorkbookProperty.stringBinding {
-                    it?.target?.title
-                }
-            )
+            titleProperty.bind(viewModel.bookTitleProperty)
             chapterTitleProperty.bind(workbookDataStore.activeChapterTitleBinding())
             canUndoProperty.bind(viewModel.canUndoProperty)
             canRedoProperty.bind(viewModel.canRedoProperty)
@@ -61,6 +57,7 @@ class ChunkingTranslationPage : View() {
         }
 
         borderpane {
+            addClass("translation-view")
             vgrow = Priority.ALWAYS
 
             left = ChunkingStepsDrawer(viewModel.selectedStepProperty).apply {
@@ -99,6 +96,7 @@ class ChunkingTranslationPage : View() {
         tryImportStylesheet("/css/chunk-item.css")
         tryImportStylesheet("/css/marker-node.css")
         tryImportStylesheet("/css/scrolling-waveform.css")
+        tryImportStylesheet("/css/source-audio-missing.css")
 
         subscribe<ChunkingStepSelectedEvent> {
             viewModel.navigateStep(it.step)

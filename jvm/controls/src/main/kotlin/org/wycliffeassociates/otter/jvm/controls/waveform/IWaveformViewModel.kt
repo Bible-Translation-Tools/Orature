@@ -1,8 +1,8 @@
 package org.wycliffeassociates.otter.jvm.controls.waveform
 
-import javafx.animation.AnimationTimer
+import javafx.beans.property.DoubleProperty
+import javafx.beans.property.IntegerProperty
 import javafx.beans.property.ObjectProperty
-import javafx.beans.property.SimpleDoubleProperty
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import kotlin.math.max
@@ -10,9 +10,11 @@ import kotlin.math.max
 interface IWaveformViewModel {
     var sampleRate: Int
     var totalFrames: Int
+    val totalFramesProperty: IntegerProperty
     val waveformAudioPlayerProperty: ObjectProperty<IAudioPlayer>
-    val positionProperty: SimpleDoubleProperty
-    var imageWidthProperty: SimpleDoubleProperty
+    val positionProperty: DoubleProperty
+    val imageWidthProperty: DoubleProperty
+    val audioPositionProperty: IntegerProperty
 
     fun pixelsInHighlight(controlWidth: Double): Double {
         if (sampleRate == 0 || totalFrames == 0) {
@@ -34,9 +36,8 @@ interface IWaveformViewModel {
 
     fun computeImageWidth(width: Int, secondsOnScreen: Int = SECONDS_ON_SCREEN): Double {
         val samplesPerScreenWidth = sampleRate * secondsOnScreen
-        val samplesPerPixel = samplesPerScreenWidth / width
-        val pixelsInDuration = waveformAudioPlayerProperty.value.getDurationInFrames() / samplesPerPixel
-        return pixelsInDuration.toDouble()
+        val samplesPerPixel = samplesPerScreenWidth / width.toDouble()
+        return waveformAudioPlayerProperty.value.getDurationInFrames() / samplesPerPixel
     }
 
     fun calculatePosition() {
@@ -46,6 +47,7 @@ interface IWaveformViewModel {
             val percentPlayed = current / duration
             val pos = percentPlayed * imageWidthProperty.value
             positionProperty.set(pos)
+            audioPositionProperty.set(current)
         }
     }
 }

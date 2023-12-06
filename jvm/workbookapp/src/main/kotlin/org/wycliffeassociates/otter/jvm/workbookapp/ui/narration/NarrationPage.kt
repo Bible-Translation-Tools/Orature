@@ -3,7 +3,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 import com.github.thomasnield.rxkotlinfx.toLazyBinding
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
-import javafx.scene.paint.Color
 import javafx.util.Duration
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ColorTheme
@@ -63,25 +62,25 @@ class NarrationPage : View() {
 
     override val root = stackpane {
         addClass(ColorTheme.LIGHT.styleClass)
+        val narrationRoot = this
 
         createSnackBar()
 
-        narrationHeader = find()
-        audioWorkspaceView = find()
-        narrationToolbar = find()
-        teleprompterView = find()
-
-        borderpane {
-            top = narrationHeader.root
-            center = borderpane {
-                style {
-                    padding = box(0.px, 0.px, 1.px, 0.px)
-                    backgroundColor += Color.WHITE
-                }
-                center = audioWorkspaceView.root
-                bottom = narrationToolbar.root
+        vbox {
+            add<NarrationHeader>() {
+                narrationHeader = this
             }
-            bottom = teleprompterView.root
+            add<AudioWorkspaceView> {
+                audioWorkspaceView = this
+                this.root.maxHeightProperty().bind(narrationRoot.heightProperty().multiply(1.0 / 3.0))
+                this.root.minHeightProperty().bind(this.root.maxHeightProperty())
+            }
+            add<NarrationToolBar>() {
+                narrationToolbar = this
+            }
+            add<TeleprompterView>() {
+                teleprompterView = this
+            }
         }
     }
 

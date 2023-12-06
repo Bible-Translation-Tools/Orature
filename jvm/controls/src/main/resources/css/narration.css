@@ -18,7 +18,7 @@
  */
 .narration__header {
     -fx-alignment: center;
-    -fx-pref-height: 80px;
+    -fx-min-height: 80px;
     -fx-padding: 0 16px;
     -fx-background-color: -wa-foreground;
 }
@@ -53,6 +53,7 @@
 .narration-toolbar {
     -fx-background-color: -wa-foreground;
     -fx-border: 0px 0px 1px 0px;
+    -fx-border-color: -wa-border-light;
 }
 
 .narration-toolbar__play-controls {
@@ -95,6 +96,7 @@
 
 .narration__list {
     -fx-background-color: -wa-foreground;
+    -fx-background-insets: 0;
 }
 
 .narration-list__verse-item {
@@ -145,20 +147,12 @@
 
 .narration__selected-verse {
     -fx-background-color: -wa-foreground;
-    -fx-alignment: center;
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: -wa-border-light;
+    -fx-alignment: center-left;
     -fx-max-height: 80px;
     -fx-effect: -wa-bottom-shadow;
-}
-
-.narration__selected-verse-controls {
-    -fx-max-width: 800px;
-    -fx-alignment: center;
-}
-
-.narration__selected-verse-controls .label {
-    -fx-text-fill: -wa-regular-text;
-    -fx-font-size: 20px;
-    -fx-font-weight: 600;
+    -fx-padding: 12 16;
 }
 
 .narration__recording .list-view {

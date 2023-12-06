@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.dev
 
 import org.wycliffeassociates.otter.common.data.primitives.Language
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.LanguageSelectedEvent
+import org.wycliffeassociates.otter.jvm.controls.event.LanguageSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview.languageTableView
 import tornadofx.*

@@ -6,12 +6,10 @@ import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import javafx.animation.AnimationTimer
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
-import javafx.scene.control.Slider
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
@@ -26,9 +24,7 @@ import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import tornadofx.ViewModel
-import tornadofx.observableListOf
-import tornadofx.sizeProperty
+import tornadofx.*
 import java.io.File
 import javax.inject.Inject
 
@@ -53,15 +49,17 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
     override val currentMarkerNumberProperty = SimpleIntegerProperty(-1)
     override var resumeAfterScroll: Boolean = false
 
-    /** This property must be initialized before calling dock() */
     override var audioController: AudioPlayerController? = null
     override val waveformAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     override var sampleRate: Int = 0 // beware of divided by 0
-    override var totalFrames: Int = 0 // beware of divided by 0
+    override val totalFramesProperty = SimpleIntegerProperty(0)
+    override var totalFrames: Int by totalFramesProperty // beware of divided by 0
     override val positionProperty = SimpleDoubleProperty(0.0)
     override var imageWidthProperty = SimpleDoubleProperty(0.0)
 
+    override val audioPositionProperty = SimpleIntegerProperty()
     val compositeDisposable = CompositeDisposable()
+
     val isPlayingProperty = SimpleBooleanProperty(false)
 
     private val builder = ObservableWaveformBuilder()
@@ -126,6 +124,7 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
     }
 
     fun cleanup() {
+        audioConnectionFactory.releasePlayer()
         builder.cancel()
         compositeDisposable.clear()
         markerModel = null
@@ -138,10 +137,11 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
         player.getAudioReader()?.let {
             sampleRate = it.sampleRate
             totalFrames = it.totalFrames
+            totalFramesProperty.set(totalFrames)
         }
 
         waveformAudioPlayerProperty.set(player)
-        audioController?.let {
+        audioController = AudioPlayerController().also {
             it.load(player)
             isPlayingProperty.bind(it.isPlayingProperty)
         }

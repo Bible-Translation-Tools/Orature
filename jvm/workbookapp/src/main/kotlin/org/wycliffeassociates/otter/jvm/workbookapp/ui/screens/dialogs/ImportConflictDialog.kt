@@ -91,10 +91,12 @@ class ImportConflictDialog : OtterDialog() {
             region { hgrow = Priority.ALWAYS }
             button(messages["cancelImport"]) {
                 addClass("btn", "btn--secondary")
+                graphic = FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE)
                 onActionProperty().bind(onCloseActionProperty)
             }
             button(messages["submit"]) {
                 addClass("btn", "btn--primary")
+                graphic = FontIcon(MaterialDesign.MDI_CHECK_CIRCLE)
                 onActionProperty().bind(onSubmitActionProperty)
             }
         }

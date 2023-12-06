@@ -40,7 +40,7 @@ import org.wycliffeassociates.otter.jvm.controls.dialog.ProgressDialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AddFilesViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ImportProjectViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 import java.io.File
@@ -49,11 +49,10 @@ import java.text.MessageFormat
 class AddFilesView : View() {
     private val logger = LoggerFactory.getLogger(AddFilesView::class.java)
 
-    private val viewModel: AddFilesViewModel by inject()
+    private val viewModel: ImportProjectViewModel by inject()
     private val settingsViewModel: SettingsViewModel by inject()
 
     private lateinit var closeButton: Button
-    private lateinit var importConflictDialog: OtterDialog
 
     override val root = vbox {
         addClass("app-drawer__content")

@@ -74,6 +74,10 @@
     -fx-background-color: -wa-btn-icon-background-hover;
 }
 
+.btn--icon:active:hover {
+    -fx-background-color: #001533;
+}
+
 .btn--icon:pressed {
     -fx-background-color: -wa-btn-icon-background-pressed;
 }
@@ -103,6 +107,7 @@
     -fx-text-fill: -wa-primary-btn-text-fill;
     -fx-font-size: 20px;
     -fx-underline: false;
+    -fx-graphic-text-gap: 8px;
 }
 
 .btn--primary .ikonli-font-icon {
@@ -174,6 +179,7 @@
     -fx-text-fill: -wa-secondary-btn-text-fill;
     -fx-font-size: 1.4em;
     -jfx-disable-visual-focus: true;
+    -fx-graphic-text-gap: 8px;
 }
 .btn--secondary .ikonli-font-icon {
     -fx-font-size: 1.9em;
