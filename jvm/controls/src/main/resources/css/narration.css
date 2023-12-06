@@ -150,7 +150,7 @@
     -fx-border-width: 0 0 1 0;
     -fx-border-color: -wa-border-light;
     -fx-alignment: center-left;
-    -fx-min-height: 80px;
+    -fx-max-height: 80px;
     -fx-effect: -wa-bottom-shadow;
     -fx-padding: 12 16;
 }

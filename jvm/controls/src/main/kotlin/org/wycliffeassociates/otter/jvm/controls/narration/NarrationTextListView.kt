@@ -38,7 +38,7 @@ class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(i
 
     val firstVerseToResumeProperty = SimpleObjectProperty<T>()
     private val listeners = mutableListOf<ListenerDisposer>()
-    private var scrollHandlerDelay: PauseTransition = PauseTransition(Duration.seconds(0.1))
+    private var scrollHandlerDelay: PauseTransition = PauseTransition(Duration.seconds(0.2))
 
     init {
         addClass("wa-list-view")

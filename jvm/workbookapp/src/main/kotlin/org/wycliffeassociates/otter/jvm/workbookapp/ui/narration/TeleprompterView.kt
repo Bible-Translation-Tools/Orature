@@ -1,5 +1,8 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
+import javafx.animation.ParallelTransition
+import javafx.animation.ScaleTransition
+import javafx.animation.TranslateTransition
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
@@ -200,6 +203,10 @@ class TeleprompterView : View() {
 
             visibleWhen { viewModel.showStickyVerseProperty.and(viewModel.stickyVerseProperty.isNotNull) }
             managedWhen(visibleProperty())
+
+            visibleProperty().onChange {
+                animateStickyVerse(it)
+            }
         }
 
         narrationTextListview(viewModel.chunks) {
@@ -222,6 +229,24 @@ class TeleprompterView : View() {
             }
 
             runLater { customizeScrollbarSkin() }
+        }
+    }
+
+    private fun StickyVerse.animateStickyVerse(showing: Boolean) {
+        if (showing) {
+            opacity = 1.0
+            val scaleTransition = ScaleTransition(Duration.seconds(0.6), this).apply {
+                fromY = 0.2
+                toY = 1.0
+            }
+            val tt1 = TranslateTransition(Duration.seconds(0.6), this).apply {
+                fromY = -maxHeight / 2
+                toY = 0.0
+            }
+            val animation = ParallelTransition(scaleTransition, tt1)
+            animation.play()
+        } else {
+            opacity = 0.0
         }
     }
 }
