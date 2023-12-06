@@ -45,14 +45,14 @@ class ChapterSelectorPopupSkin(
     private val root = VBox().apply {
         addClass("chapter-selector-popup")
 
-        add(
-            ScrollPane(chapterGrid).apply {
-                addClass("chapter-selector-popup__scroll-pane")
-                isFitToWidth = true
+        scrollpane {
+            addClass("chapter-selector-popup__scroll-pane")
+            isFitToWidth = true
 
-                runLater { customizeScrollbarSkin() }
-            }
-        )
+            add(chapterGrid)
+
+            runLater { customizeScrollbarSkin() }
+        }
     }
 
     override fun getSkinnable(): ChapterSelectorPopup {
