@@ -35,7 +35,6 @@ class ChapterGrid(val list: List<ChapterGridItemData>) : GridPane() {
                         "btn", "btn--secondary", "btn--borderless", "chapter-grid__btn"
                     )
                     togglePseudoClass("selected", chapter.selected)
-                    useMaxWidth = true
                     setOnAction {
                         selectChapter(chapter.number)
                     }
