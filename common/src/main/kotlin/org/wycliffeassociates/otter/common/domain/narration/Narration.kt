@@ -498,7 +498,7 @@ class Narration @AssistedInject constructor(
         seekLoc?.let {
             logger.info("Seeking to previous: ${it.formattedLabel}")
             seek(it.location)
-        } ?: {
+        } ?: run {
             logger.info("Previous marker not found, seeking to 0")
             seek(0)
         }
