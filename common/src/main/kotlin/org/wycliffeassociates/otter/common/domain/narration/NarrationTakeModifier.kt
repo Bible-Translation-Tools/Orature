@@ -15,7 +15,7 @@ class NarrationTakeModifier(take: Take) {
     lateinit var audioFile : OratureAudioFile
 
     init {
-        audioFile = OratureAudioFile(take.file, DEFAULT_CHANNELS, DEFAULT_SAMPLE_RATE, DEFAULT_BITS_PER_SAMPLE)
+        audioFile = OratureAudioFile(take.file)
     }
 
     fun modifyAudioData() {
