@@ -24,7 +24,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.popup.ChapterG
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationOpenInPluginEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationRedoEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationUndoEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.narrationMenu
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.narrationMenuButton
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
@@ -69,12 +69,10 @@ class NarrationHeader : View() {
                 }
                 enableWhen(viewModel.hasRedoProperty.and(viewModel.chapterTakeBusyProperty.not()))
             }
-            narrationMenu {
-                hasUndoProperty.bind(viewModel.hasUndoProperty)
-                hasRedoProperty.bind(viewModel.hasRedoProperty)
-                hasChapterTakeProperty.bind(viewModel.hasChapterTakeProperty)
-                hasVersesProperty.bind(viewModel.hasVersesProperty)
-
+            narrationMenuButton(
+                viewModel.hasChapterTakeProperty,
+                viewModel.hasVersesProperty
+            ) {
                 enableWhen(viewModel.chapterTakeBusyProperty.not())
             }
             chapterSelector {

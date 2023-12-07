@@ -27,6 +27,7 @@ class NarrationToolBar : View() {
         button {
             addClass("btn", "btn--secondary")
             addPseudoClass("active")
+            tooltip { textProperty().bind(this@button.textProperty()) }
 
             viewModel.isPlayingProperty.onChangeAndDoNow {
                 it?.let { playing ->
@@ -54,6 +55,7 @@ class NarrationToolBar : View() {
         }
         button {
             addClass("btn", "btn--secondary")
+            tooltip(messages["previousVerse"])
             graphic = FontIcon(MaterialDesign.MDI_SKIP_PREVIOUS)
             setOnAction {
                 viewModel.seekToPrevious()
@@ -64,6 +66,7 @@ class NarrationToolBar : View() {
         }
         button {
             addClass("btn", "btn--secondary")
+            tooltip(messages["nextVerse"])
             graphic = FontIcon(MaterialDesign.MDI_SKIP_NEXT)
             setOnAction {
                 viewModel.seekToNext()

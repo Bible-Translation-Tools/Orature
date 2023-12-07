@@ -23,17 +23,6 @@
     -fx-background-color: -wa-foreground;
 }
 
-.narration__header .btn {
-    -fx-pref-width: 56px;
-    -fx-pref-height: 48px;
-    -fx-background-color: -wa-foreground;
-    -fx-background-radius: 16px;
-}
-
-.narration__header .btn .ikonli-font-icon {
-    -fx-fill: -wa-regular-text;
-}
-
 .narration__header .chapter-selector {
     -fx-pref-height: 48px;
     -fx-max-height: 48px;
@@ -101,8 +90,9 @@
 
 .narration-list__verse-item {
     -fx-background-color: -wa-foreground;
-    -fx-spacing: 5px;
+    -fx-spacing: 16;
     -fx-alignment: center;
+    -fx-padding: 16 0;
 }
 
 .narration-list__verse-item:disabled {
@@ -118,7 +108,7 @@
 
 .narration-list__verse-item-text {
     -fx-text-fill: -wa-regular-text;
-    -fx-font-size: 24px;
+    -fx-font-size: 1.6em;
 }
 
 .narration-list__verse-item-text__title {
@@ -145,14 +135,17 @@
     -fx-alignment: top-left;
 }
 
-.narration__selected-verse {
+.narration__resume-to-verse {
     -fx-background-color: -wa-foreground;
     -fx-border-width: 0 0 1 0;
     -fx-border-color: -wa-border-light;
-    -fx-alignment: center-left;
-    -fx-max-height: 80px;
-    -fx-effect: -wa-bottom-shadow;
+    -fx-alignment: center;
+    -fx-max-height: 72;
     -fx-padding: 12 16;
+}
+
+.narration__resume-to-verse__spacer {
+    -fx-max-width: 800;
 }
 
 .narration__recording .list-view {
@@ -205,7 +198,6 @@
     -fx-max-height: 67px;
 }
 
-.narration__header-controls .btn,
 .narration-record__verse-controls .btn {
     -fx-pref-width: 56px;
     -fx-pref-height: 48px;
@@ -246,18 +238,6 @@
 
 .narration-record__verse-text.playing .ikonli-font-icon {
     -fx-fill: -wa-white;
-}
-
-.narration__header-controls .wa-menu-button,
-.narration-record__verse-controls .wa-menu-button {
-    -fx-padding: 0;
-}
-
-.narration__header-controls .wa-menu-button .arrow-button,
-.narration__header-controls .wa-menu-button .arrow-button .arrow,
-.narration-record__verse-controls .wa-menu-button .arrow-button,
-.narration-record__verse-controls .wa-menu-button .arrow-button .arrow {
-    -fx-padding: 0;
 }
 
 .narration-record__volume-bar {

@@ -28,6 +28,7 @@ import javafx.event.EventTarget
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Button
+import javafx.scene.control.Tooltip
 import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
@@ -36,6 +37,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterItemState
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
+import tornadofx.FX.Companion.messages
 
 class NarrationTextItem : VBox() {
     private val logger = LoggerFactory.getLogger(NarrationTextItem::class.java)
@@ -77,7 +79,6 @@ class NarrationTextItem : VBox() {
     val isPlaying by isPlayingProperty
 
     init {
-        styleClass.setAll("narration-list__verse-item")
         hbox {
             styleClass.setAll("narration-list__verse-item")
             borderpane {
@@ -85,6 +86,7 @@ class NarrationTextItem : VBox() {
                     button {
                         addClass("btn", "btn--secondary")
                         graphic = FontIcon(MaterialDesign.MDI_PLAY)
+                        tooltip(messages["play"])
                         disableWhen {
                             hasRecordingProperty.not()
                         }
@@ -97,6 +99,7 @@ class NarrationTextItem : VBox() {
                     button {
                         addClass("btn", "btn--secondary")
                         graphic = FontIcon(MaterialDesign.MDI_PAUSE)
+                        tooltip(messages["pause"])
                         disableWhen {
                             hasRecordingProperty.not()
                         }
@@ -131,7 +134,7 @@ class NarrationTextItem : VBox() {
                         prefWidth = 316.0
                         styleClass.clear()
                         addClass("btn", "btn--primary")
-                        text = FX.messages["record"]
+                        text = messages["record"]
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                         onActionProperty().bind(onBeginRecordingAction)
                     }
@@ -145,7 +148,7 @@ class NarrationTextItem : VBox() {
                         prefWidth = 316.0
                         styleClass.clear()
                         addClass("btn", "btn--primary")
-                        text = FX.messages["record"]
+                        text = messages["record"]
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                         onActionProperty().bind(onRecordActionProperty)
                     }
@@ -159,7 +162,7 @@ class NarrationTextItem : VBox() {
                         prefWidth = 150.0
                         addClass("btn", "btn--secondary")
                         addPseudoClass("active")
-                        text = FX.messages["pause"]
+                        text = messages["pause"]
                         graphic = FontIcon(MaterialDesign.MDI_PAUSE)
                         onActionProperty().bind(onPauseRecordingAction)
                     }
@@ -183,10 +186,10 @@ class NarrationTextItem : VBox() {
 
                         textProperty().bind(stringBinding(isLastVerseProperty) {
                             if (isLastVerseProperty.value) {
-                                FX.messages["save"]
+                                messages["save"]
 
                             } else {
-                                FX.messages["next"]
+                                messages["next"]
                             }
                         })
 
@@ -207,7 +210,7 @@ class NarrationTextItem : VBox() {
                     narration_button {
                         prefWidth = 150.0
                         addClass("btn", "btn--primary")
-                        text = FX.messages["resume"]
+                        text = messages["resume"]
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                         onActionProperty().bind(onResumeRecordingAction)
                     }
@@ -231,10 +234,10 @@ class NarrationTextItem : VBox() {
 
                         textProperty().bind(stringBinding(isLastVerseProperty) {
                             if (isLastVerseProperty.value) {
-                                FX.messages["save"]
+                                messages["save"]
 
                             } else {
-                                FX.messages["next"]
+                                messages["next"]
                             }
                         })
 
@@ -257,7 +260,7 @@ class NarrationTextItem : VBox() {
                         styleClass.clear()
                         addClass("btn", "btn--secondary")
                         addPseudoClass("inactive")
-                        text = FX.messages["record"]
+                        text = messages["record"]
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                         setDisabled(true)
                     }
@@ -271,7 +274,7 @@ class NarrationTextItem : VBox() {
                         prefWidth = 316.0
                         styleClass.clear()
                         addClass("btn", "btn--secondary")
-                        text = FX.messages["reRecord"]
+                        text = messages["reRecord"]
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                         onActionProperty().bind(onRecordAgainActionProperty)
                     }
@@ -286,7 +289,7 @@ class NarrationTextItem : VBox() {
                         styleClass.clear()
                         addClass("btn", "btn--secondary")
                         addPseudoClass("inactive")
-                        text = FX.messages["reRecord"]
+                        text = messages["reRecord"]
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                         onActionProperty().bind(onRecordAgainActionProperty)
                     }
@@ -299,14 +302,14 @@ class NarrationTextItem : VBox() {
                     narration_button {
                         addClass("btn", "btn--secondary")
                         addPseudoClass("active")
-                        text = FX.messages["pause"]
+                        text = messages["pause"]
                         graphic = FontIcon(MaterialDesign.MDI_PAUSE)
                         onActionProperty().bind(onPauseRecordAgainAction)
                     }
                     narration_button {
                         prefWidth = 150.0
                         addClass("btn", "btn--primary")
-                        text = FX.messages["save"]
+                        text = messages["save"]
                         graphic = FontIcon(MaterialDesign.MDI_CHECKBOX_MARKED_CIRCLE)
                         onActionProperty().bind(onSaveRecordingActionProperty)
                     }
@@ -318,14 +321,14 @@ class NarrationTextItem : VBox() {
                     spacing = 16.0
                     narration_button {
                         addClass("btn", "btn--secondary")
-                        text = FX.messages["resume"]
+                        text = messages["resume"]
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                         onActionProperty().bind(onResumeRecordingAgainAction)
                     }
                     narration_button {
                         prefWidth = 150.0
                         addClass("btn", "btn--primary")
-                        text = FX.messages["save"]
+                        text = messages["save"]
                         graphic = FontIcon(MaterialDesign.MDI_CHECKBOX_MARKED_CIRCLE)
                         onActionProperty().bind(onSaveRecordingActionProperty)
                     }
@@ -356,6 +359,10 @@ class NarrationTextItem : VBox() {
                 )
             }
             if (graphic != null) it.graphic = graphic
+            it.tooltip = Tooltip().apply {
+                addClass("tooltip-text")
+                textProperty().bind(it.textProperty())
+            }
         }
     }
 }

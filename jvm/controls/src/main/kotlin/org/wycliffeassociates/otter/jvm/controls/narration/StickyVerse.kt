@@ -31,13 +31,14 @@ class StickyVerse : HBox() {
     val resumeTextProperty = SimpleStringProperty()
 
     init {
-        addClass("narration__selected-verse")
+        addClass("narration__resume-to-verse")
         hgrow = Priority.ALWAYS
 
         label(verseLabelProperty) {
             addClass("h4")
         }
         region {
+            addClass("narration__resume-to-verse__spacer")
             hgrow = Priority.ALWAYS
         }
         button(resumeTextProperty) {
