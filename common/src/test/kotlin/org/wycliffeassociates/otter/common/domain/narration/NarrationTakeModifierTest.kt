@@ -97,7 +97,7 @@ class NarrationTakeModifierTest {
 
     @Test
     fun `modifyMetadata with same amount of markers, same labels, and with different locations`() {
-        val takeModifier = NarrationTakeModifier(chapterTake)
+        val takeModifier = NarrationTakeAudioModifier(chapterTake)
         val secondsOfAudio = 10
 
         val originalAudioMarkers = listOf<AudioMarker>(
