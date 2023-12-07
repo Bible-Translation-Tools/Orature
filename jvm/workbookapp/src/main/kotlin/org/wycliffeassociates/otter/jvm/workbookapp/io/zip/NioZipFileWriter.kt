@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.io.zip
 import org.wycliffeassociates.otter.common.io.zip.IFileWriter
 import java.io.BufferedWriter
 import java.io.File
+import java.io.OutputStream
 import java.nio.file.FileSystem
 import java.nio.file.FileSystems
 import java.nio.file.Files
@@ -41,6 +42,12 @@ class NioZipFileWriter(
         val path = fileSystem.getPath(filepath)
         path.createParentDirectories()
         return Files.newBufferedWriter(path)
+    }
+
+    override fun outputStream(filepath: String): OutputStream {
+        val path = fileSystem.getPath(filepath)
+        path.createParentDirectories()
+        return Files.newOutputStream(path)
     }
 
     override fun copyDirectory(source: File, destination: String, filter: (String) -> Boolean) {

@@ -55,6 +55,7 @@ import org.wycliffeassociates.otter.common.domain.project.TakeCheckingStatusMap
 import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
+import org.wycliffeassociates.otter.common.domain.narration.ChapterRepresentation
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.usfm.getText
 import org.wycliffeassociates.usfmtools.USFMParser
 import org.wycliffeassociates.usfmtools.models.markers.CMarker
@@ -272,6 +273,39 @@ class ProjectFilesAccessor(
             .use {
                 it.write()
             }
+    }
+
+    fun trimChapterRepresentationFiles(workbook: Workbook, fileWriter: IFileWriter) {
+        val chapterCount = workbook.target.chapters.count().blockingGet()
+        val chapterFormat = if (chapterCount > 99) "%03d" else "%02d"
+
+        workbook.target.chapters.blockingSubscribe { chapter ->
+            val chapterNum = chapterFormat.format(chapter.title.toIntOrNull() ?: chapter.sort)
+            val chapterDirName = "c$chapterNum"
+
+            val chapterRepresentationFile = projectDir.resolve(
+                RcConstants.CHAPTER_REPRESENTATION_FILE.format(chapterDirName)
+            )
+
+            if (chapterRepresentationFile.exists()) {
+                val chapterRepresentation = ChapterRepresentation(workbook, chapter)
+                chapterRepresentation.loadFromSerializedVerses()
+
+                if (chapterRepresentation.totalFrames > 0) {
+                    fileWriter.outputStream(RcConstants.CHAPTER_REPRESENTATION_FILE.format(chapterDirName)).use { writer ->
+                        chapterRepresentation.getAudioFileReader().use { reader ->
+                            reader.open()
+                            reader.seek(0)
+                            val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                            while (reader.hasRemaining()) {
+                                val read = reader.getPcmBuffer(buffer)
+                                writer.write(buffer, 0, read)
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     fun createSelectedTakesFile() {
