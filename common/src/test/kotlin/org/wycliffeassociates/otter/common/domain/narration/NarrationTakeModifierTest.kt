@@ -6,6 +6,8 @@ import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
+import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.BookMarker
@@ -31,7 +33,11 @@ class NarrationTakeModifierTest {
     private fun mockTake() : Take {
         return mockk<Take> {
             every { format } returns MimeType.WAV
-            every { file } returns chapterTakeAudioFile
+            every { file } returns OratureAudioFile(
+                chapterTakeAudioFile,
+                DEFAULT_CHANNELS,
+                DEFAULT_SAMPLE_RATE,
+                DEFAULT_BITS_PER_SAMPLE).file
         }
     }
 
@@ -114,10 +120,10 @@ class NarrationTakeModifierTest {
             originalAudioMarkers
         )
 
-        // Verifies that we have the expected amount of audio data
+        // Verify that we have the expected amount of audio data
         Assert.assertEquals(takeModifier.audioFile.totalFrames, secondsOfAudio * DEFAULT_SAMPLE_RATE)
 
-        // Verifies that we have the expected cues specified by originalAudioMarkers
+        // Verify that we have the expected cues specified by originalAudioMarkers
         takeModifier.audioFile.getCues().forEachIndexed { idx, cue ->
             Assert.assertEquals(originalAudioMarkers[idx].toCue(), cue)
         }
@@ -132,7 +138,54 @@ class NarrationTakeModifierTest {
 
         takeModifier.modifyMetaData(newAudioMarkers)
 
-        // Verifies that we have the expected cues specified by newAudioMarkers
+        // Verify that we have the expected amount of cues / Markers in the Wav file
+        Assert.assertEquals(newAudioMarkers.size, takeModifier.audioFile.getCues().size)
+
+        // Verify that we have the expected cues specified by newAudioMarkers
+        takeModifier.audioFile.getCues().forEachIndexed { idx, cue ->
+            Assert.assertEquals(newAudioMarkers[idx].toCue(), cue)
+        }
+    }
+
+    @Test
+    fun `modifyMetadata with different amount of markers, same labels, and with different locations`() {
+        val takeModifier = NarrationTakeAudioModifier(chapterTake)
+        val secondsOfAudio = 10
+
+        val originalAudioMarkers = listOf<AudioMarker>(
+            BookMarker("gen", 0),
+            ChapterMarker(1, 44100),
+            VerseMarker(1, 1, 88200),
+            VerseMarker(2, 2, 132300),
+            VerseMarker(3, 3, 176400)
+        )
+
+        makeTestChapterTakeRecording(
+            takeModifier.audioFile,
+            secondsOfAudio,
+            originalAudioMarkers
+        )
+
+        // Verify that we have the expected amount of audio data
+        Assert.assertEquals(takeModifier.audioFile.totalFrames, secondsOfAudio * DEFAULT_SAMPLE_RATE)
+
+        // Verify that we have the expected cues specified by originalAudioMarkers
+        takeModifier.audioFile.getCues().forEachIndexed { idx, cue ->
+            Assert.assertEquals(originalAudioMarkers[idx].toCue(), cue)
+        }
+
+        val newAudioMarkers = listOf<AudioMarker>(
+            BookMarker("gen", 100),
+            ChapterMarker(1, 44200),
+            VerseMarker(1, 1, 88300),
+        )
+
+        takeModifier.modifyMetaData(newAudioMarkers)
+
+        // Verify that we have the expected amount of cues / Markers in the Wav file
+        Assert.assertEquals(newAudioMarkers.size, takeModifier.audioFile.getCues().size)
+
+        // Verify that we have the expected cues specified by newAudioMarkers
         takeModifier.audioFile.getCues().forEachIndexed { idx, cue ->
             Assert.assertEquals(newAudioMarkers[idx].toCue(), cue)
         }
