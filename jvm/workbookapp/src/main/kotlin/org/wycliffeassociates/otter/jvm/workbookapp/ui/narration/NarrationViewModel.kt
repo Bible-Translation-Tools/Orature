@@ -7,6 +7,7 @@ import com.sun.glass.ui.Screen
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
@@ -127,6 +128,7 @@ class NarrationViewModel : ViewModel() {
         get() = recordedVerses.size == chunksList.size
 
     private val disposables = CompositeDisposable()
+    private val chapterDisposable = CompositeDisposable()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -204,6 +206,7 @@ class NarrationViewModel : ViewModel() {
 
     fun onUndock() {
         disposables.clear()
+        chapterDisposable.clear()
         closeNarrationAudio()
         narration.close()
         renderer.close()
@@ -226,6 +229,7 @@ class NarrationViewModel : ViewModel() {
             }
         }
         volumeBar = VolumeBar(narration.getRecorderAudioStream())
+        subscribeChapterSelectedTake(chapter)
         subscribeActiveVersesChanged()
         updateRecordingState()
         rendererAudioReader = narration.audioReader
@@ -278,6 +282,7 @@ class NarrationViewModel : ViewModel() {
         recordedVerses.clear()
         chunksList.clear()
         narratableList.clear()
+        chapterDisposable.clear()
 
         recordStartProperty.set(false)
         recordPauseProperty.set(false)
@@ -306,7 +311,6 @@ class NarrationViewModel : ViewModel() {
             }
             .subscribe(
                 {
-                    chapterTakeProperty.set(it)
                     logger.info("Created a chapter take for ${chapterTitleProperty.value}")
                 }, { e ->
                     logger.error(
@@ -325,7 +329,7 @@ class NarrationViewModel : ViewModel() {
             }
     }
 
-    fun loadChapter(chapter: Chapter) {
+    private fun loadChapter(chapter: Chapter) {
         resetState()
 
         chapterTitleProperty.set(
@@ -343,7 +347,6 @@ class NarrationViewModel : ViewModel() {
         loadChunks(chapter)
 
         setHasNextAndPreviousChapter(chapter)
-        chapterTakeProperty.set(chapter.getSelectedTake())
     }
 
     private fun loadChunks(chapter: Chapter) {
@@ -678,6 +681,14 @@ class NarrationViewModel : ViewModel() {
                 }
                 FX.eventbus.fire(PluginClosedEvent(pluginType))
             }
+    }
+
+    private fun subscribeChapterSelectedTake(chapter: Chapter) {
+        chapter.audio.selected
+            .observeOnFx()
+            .subscribe {
+                chapterTakeProperty.set(it.value)
+            }.addTo(chapterDisposable)
     }
 
     private fun subscribeActiveVersesChanged() {
