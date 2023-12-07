@@ -110,7 +110,6 @@ class NarrationViewModel : ViewModel() {
     val hasPreviousChapter = SimpleBooleanProperty()
     val chapterTakeBusyProperty = SimpleBooleanProperty()
 
-    val chunkTotalProperty = SimpleIntegerProperty(0)
     val chunksList: ObservableList<Chunk> = observableListOf()
     val narratableList: ObservableList<NarrationTextItemData> = observableListOf()
 
@@ -120,12 +119,12 @@ class NarrationViewModel : ViewModel() {
     val audioPositionProperty = SimpleIntegerProperty()
     val totalAudioSizeProperty = SimpleIntegerProperty()
 
-    val potentiallyFinishedProperty = chunkTotalProperty.eq(recordedVerses.sizeProperty)
-    val potentiallyFinished by potentiallyFinishedProperty
-
     val pluginContextProperty = SimpleObjectProperty(PluginType.EDITOR)
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
+
+    private val chapterCompleted: Boolean
+        get() = recordedVerses.size == chunksList.size
 
     private val disposables = CompositeDisposable()
 
@@ -297,27 +296,25 @@ class NarrationViewModel : ViewModel() {
     }
 
     private fun createPotentiallyFinishedChapterTake() {
-        if (potentiallyFinished) {
-            chapterTakeBusyProperty.set(true)
-            logger.info("Chapter is potentially finished, creating a chapter take")
-            narration
-                .createChapterTake()
-                .subscribeOn(Schedulers.io())
-                .doFinally {
-                    chapterTakeBusyProperty.set(false)
+        chapterTakeBusyProperty.set(true)
+        logger.info("Chapter is potentially finished, creating a chapter take")
+        narration
+            .createChapterTake()
+            .subscribeOn(Schedulers.io())
+            .doFinally {
+                chapterTakeBusyProperty.set(false)
+            }
+            .subscribe(
+                {
+                    chapterTakeProperty.set(it)
+                    logger.info("Created a chapter take for ${chapterTitleProperty.value}")
+                }, { e ->
+                    logger.error(
+                        "Error in creating a chapter take for ${chapterTitleProperty.value}",
+                        e
+                    )
                 }
-                .subscribe(
-                    {
-                        chapterTakeProperty.set(it)
-                        logger.info("Created a chapter take for ${chapterTitleProperty.value}")
-                    }, { e ->
-                        logger.error(
-                            "Error in creating a chapter take for ${chapterTitleProperty.value}",
-                            e
-                        )
-                    }
-                ).let { disposables.add(it) }
-        }
+            ).let { disposables.add(it) }
     }
 
     fun loadChapter(chapterNumber: Int) {
@@ -338,14 +335,6 @@ class NarrationViewModel : ViewModel() {
                 chapter.title
             )
         )
-
-        chapter
-            .chunkCount
-            .toObservable()
-            .observeOnFx()
-            .subscribe {
-                chunkTotalProperty.set(it)
-            }
 
         workbookDataStore.activeChapterProperty.set(chapter)
         initializeNarration(chapter)
@@ -682,6 +671,9 @@ class NarrationViewModel : ViewModel() {
 
                     else -> {
                         narration.onEditVerse(verseIndex, file)
+                        if (chapterCompleted) {
+                            createPotentiallyFinishedChapterTake()
+                        }
                     }
                 }
                 FX.eventbus.fire(PluginClosedEvent(pluginType))
@@ -719,7 +711,9 @@ class NarrationViewModel : ViewModel() {
                     recordStart = recordedVerses.isEmpty()
                     recordResume = recordedVerses.isNotEmpty()
 
-                    createPotentiallyFinishedChapterTake()
+                    if (chapterCompleted) {
+                        createPotentiallyFinishedChapterTake()
+                    }
                 },
                 { e ->
                     logger.error("Error in active verses subscription", e)
