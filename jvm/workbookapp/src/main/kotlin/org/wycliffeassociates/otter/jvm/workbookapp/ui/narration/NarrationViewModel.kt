@@ -120,6 +120,7 @@ class NarrationViewModel : ViewModel() {
     val potentiallyFinishedProperty = chunkTotalProperty
         .eq(recordedVerses.sizeProperty.minus(numberOfTitlesProperty))
         .and(!isRecording)
+        .and(chapterTakeProperty.isNotNull)
     val potentiallyFinished by potentiallyFinishedProperty
 
     val pluginContextProperty = SimpleObjectProperty(PluginType.EDITOR)
