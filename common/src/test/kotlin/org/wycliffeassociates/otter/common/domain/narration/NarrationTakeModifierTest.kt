@@ -130,10 +130,10 @@ class NarrationTakeModifierTest {
 
         val newAudioMarkers = listOf<AudioMarker>(
             BookMarker("gen", 100),
-            ChapterMarker(1, 44200),
-            VerseMarker(1, 1, 88300),
-            VerseMarker(2, 2, 132400),
-            VerseMarker(3, 3, 176500)
+            ChapterMarker(1, 44500),
+            VerseMarker(1, 1, 88600),
+            VerseMarker(2, 2, 132700),
+            VerseMarker(3, 3, 176800)
         )
 
         takeModifier.modifyMetaData(newAudioMarkers)
