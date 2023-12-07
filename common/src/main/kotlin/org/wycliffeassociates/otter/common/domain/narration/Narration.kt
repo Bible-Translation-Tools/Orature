@@ -93,6 +93,11 @@ class Narration @AssistedInject constructor(
 
     private var lockedVerseIndex: Int? = null
 
+    private val hasChapterTake: Boolean
+        get() {
+            return chapter.getSelectedTake() != null
+        }
+
     init {
         val writer = initializeWavWriter()
 
@@ -230,6 +235,11 @@ class Narration @AssistedInject constructor(
     fun onVerseMarkerMoved(verseIndex: Int, delta: Int) {
         val action = MoveMarkerAction(verseIndex, delta)
         execute(action)
+
+        if(hasChapterTake) {
+            val takeAudioModifier = NarrationTakeAudioModifier(chapter.getSelectedTake()!!)
+            takeAudioModifier.modifyMetaData(activeVerses)
+        }
     }
 
     fun onEditVerse(verseIndex: Int, editedFile: File) {
