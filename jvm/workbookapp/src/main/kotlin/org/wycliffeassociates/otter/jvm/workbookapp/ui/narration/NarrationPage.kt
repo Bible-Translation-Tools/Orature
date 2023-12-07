@@ -88,6 +88,7 @@ class NarrationPage : View() {
         super.onDock()
         subscribeToEvents()
         if (viewModel.pluginOpenedProperty.value) {
+            // avoid resetting content, undo history, etc. when coming back from plugin
             viewModel.pluginOpenedProperty.set(false)
             return
         }
@@ -101,6 +102,7 @@ class NarrationPage : View() {
         super.onUndock()
         unsubscribeFromEvents()
         if (viewModel.pluginOpenedProperty.value) {
+            // avoid resetting content, undo history, etc. when coming back from plugin
             return
         }
         viewModel.onUndock()
