@@ -11,6 +11,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.layout.Priority
 import javafx.util.Duration
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterItemState
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.narration.*
@@ -109,7 +110,13 @@ class TeleprompterViewModel : ViewModel() {
 
     fun updateStickyVerse() {
         val verse = narrationViewModel.narratableList
-                .firstOrNull { !it.hasRecording }
+                .firstOrNull {
+                    it.state == TeleprompterItemState.RECORD_ACTIVE ||
+                    it.state == TeleprompterItemState.RECORD_AGAIN_ACTIVE ||
+                    it.state == TeleprompterItemState.RECORDING_PAUSED ||
+                    it.state == TeleprompterItemState.RECORD_AGAIN_PAUSED ||
+                    !it.hasRecording 
+                }
 
         stickyVerseProperty.set(verse)
     }
