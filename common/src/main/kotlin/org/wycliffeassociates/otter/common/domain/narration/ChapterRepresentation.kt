@@ -140,7 +140,6 @@ internal class ChapterRepresentation(
     private fun serializeVerses() {
         val jsonStr = activeVersesMapper.writeValueAsString(activeVerses)
         serializedVersesFile.writeText(jsonStr)
-        logger.warn(jsonStr)
     }
 
     private fun publishActiveVerses() {
