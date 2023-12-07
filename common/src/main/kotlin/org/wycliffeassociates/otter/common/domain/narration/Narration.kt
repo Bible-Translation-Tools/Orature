@@ -230,6 +230,10 @@ class Narration @AssistedInject constructor(
         writer?.pause()
         uncommittedRecordedFrames.set(0)
         isRecording.set(false)
+
+        if(hasChapterTake) {
+            bounceAudio(chapter.getSelectedTake()!!.file)
+        }
     }
 
     fun onVerseMarkerMoved(verseIndex: Int, delta: Int) {
