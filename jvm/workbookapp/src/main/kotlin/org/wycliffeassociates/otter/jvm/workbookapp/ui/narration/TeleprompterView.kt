@@ -111,11 +111,13 @@ class TeleprompterViewModel : ViewModel() {
     fun updateStickyVerse() {
         val verse = narrationViewModel.narratableList
                 .firstOrNull {
-                    it.state == TeleprompterItemState.RECORD_ACTIVE ||
-                    it.state == TeleprompterItemState.RECORD_AGAIN_ACTIVE ||
-                    it.state == TeleprompterItemState.RECORDING_PAUSED ||
-                    it.state == TeleprompterItemState.RECORD_AGAIN_PAUSED ||
-                    !it.hasRecording 
+                    val activeStates = listOf(
+                        TeleprompterItemState.RECORD_ACTIVE,
+                        TeleprompterItemState.RECORD_AGAIN_ACTIVE,
+                        TeleprompterItemState.RECORDING_PAUSED,
+                        TeleprompterItemState.RECORD_AGAIN_PAUSED
+                    )
+                    it.state in activeStates || !it.hasRecording
                 }
 
         stickyVerseProperty.set(verse)
