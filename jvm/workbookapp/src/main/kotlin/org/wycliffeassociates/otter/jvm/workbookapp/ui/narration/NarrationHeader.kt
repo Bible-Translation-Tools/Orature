@@ -20,7 +20,7 @@ import org.wycliffeassociates.otter.jvm.controls.event.OpenChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.popup.ChapterGridMenu
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.popup.ChapterSelectorPopup
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationOpenInPluginEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationRedoEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationUndoEvent
@@ -33,11 +33,15 @@ import java.text.MessageFormat
 class NarrationHeader : View() {
     private val viewModel by inject<NarrationHeaderViewModel>()
 
-    private val popupMenu = ChapterGridMenu()
+    private val popupMenu = ChapterSelectorPopup()
 
     init {
         subscribe<NarrationOpenInPluginEvent> {
             viewModel.processWithPlugin(it.plugin)
+        }
+
+        subscribe<OpenChapterEvent> {
+            popupMenu.hide()
         }
     }
 
@@ -168,10 +172,12 @@ class NarrationHeaderViewModel : ViewModel() {
     }
 
     fun selectPreviousChapter() {
+        logger.info("Selecting previous chapter")
         stepToChapter(StepDirection.BACKWARD)
     }
 
     fun selectNextChapter() {
+        logger.info("Selecting next chapter")
         stepToChapter(StepDirection.FORWARD)
     }
 
@@ -216,7 +222,9 @@ class NarrationHeaderViewModel : ViewModel() {
                     }
                     .onErrorReturn { PluginActions.Result.NO_PLUGIN }
                     .subscribe { result: PluginActions.Result ->
+                        logger.info("Returned from plugin with result: $result")
                         FX.eventbus.fire(PluginClosedEvent(pluginType))
+
                         when (result) {
                             PluginActions.Result.NO_PLUGIN -> FX.eventbus.fire(SnackBarEvent(messages["noEditor"]))
                             else -> {

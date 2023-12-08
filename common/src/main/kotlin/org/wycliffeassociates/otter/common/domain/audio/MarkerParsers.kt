@@ -10,7 +10,9 @@ internal object OratureCueParser {
 
     private val parsers = listOf(
         VerseMarkerParser(),
-        ChunkMarkerParser()
+        ChunkMarkerParser(),
+        ChapterMarkerParser(),
+        BookMarkerParser()
     )
 
     fun parse(metadata: AudioMetadata): OratureMarkers {
@@ -166,6 +168,36 @@ internal class ChunkMarkerParser : MarkerParser {
         if (matcher.matches()) {
             start = matcher.group(1).toInt()
             return ChunkMarker(start, cue.location)
+        }
+        return null
+    }
+}
+
+internal class ChapterMarkerParser : MarkerParser {
+    override val cueType = OratureCueType.CHAPTER_TITLE
+
+    override val pattern: Pattern = Pattern.compile("^orature-chapter-(\\d+)\$")
+
+    override fun match(cue: AudioCue): AudioMarker? {
+        val matcher = pattern.matcher(cue.label)
+        if (matcher.matches()) {
+            val chapter = matcher.group(1).toInt()
+            return ChapterMarker(chapter, cue.location)
+        }
+        return null
+    }
+}
+
+internal class BookMarkerParser : MarkerParser {
+    override val cueType = OratureCueType.BOOK_TITLE
+
+    override val pattern: Pattern = Pattern.compile("^orature-book-(.+)\$")
+
+    override fun match(cue: AudioCue): AudioMarker? {
+        val matcher = pattern.matcher(cue.label)
+        if (matcher.matches()) {
+            val book = matcher.group(1)
+            return BookMarker(book, cue.location)
         }
         return null
     }

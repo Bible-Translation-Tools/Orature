@@ -8,6 +8,8 @@ import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
 import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
+import org.wycliffeassociates.otter.common.data.audio.BookMarker
+import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.audio.OratureCueType
 import org.wycliffeassociates.otter.common.data.audio.UnknownMarker
@@ -70,6 +72,8 @@ class OratureAudioFile : AudioFile {
             UnknownMarker::class -> OratureCueType.UNKNOWN
             VerseMarker::class -> OratureCueType.VERSE
             ChunkMarker::class -> OratureCueType.CHUNK
+            ChapterMarker::class -> OratureCueType.CHAPTER_TITLE
+            BookMarker::class -> OratureCueType.BOOK_TITLE
             else -> OratureCueType.UNKNOWN
         }
     }

@@ -14,7 +14,6 @@ import org.wycliffeassociates.otter.common.data.audio.BookMarker
 import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
-import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.device.AudioFileReaderProvider
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
@@ -114,6 +113,7 @@ internal class ChapterRepresentation(
 
         try {
             val nodes = activeVersesMapper.readValue(json, reference)
+            logger.info("Loading ${nodes.size} audio markers from serialized data")
             totalVerses.forEach { it.clear() }
             totalVerses.forEachIndexed { idx, _ ->
                 nodes.getOrNull(idx)?.let { totalVerses[idx] = it }
@@ -140,14 +140,12 @@ internal class ChapterRepresentation(
     private fun serializeVerses() {
         val jsonStr = activeVersesMapper.writeValueAsString(activeVerses)
         serializedVersesFile.writeText(jsonStr)
-        logger.warn(jsonStr)
     }
 
     private fun publishActiveVerses() {
         val updatedVerses = if (activeVerses.isNotEmpty()) {
             activeVerses.map {
                 val newLoc = audioLocationToLocationInChapter(it.firstFrame())
-                logger.info("Verse ${it.marker.label} absolute loc is ${it.firstFrame()} relative is ${newLoc}")
                 it.copyMarker(location = newLoc)
             }
         } else listOf()
