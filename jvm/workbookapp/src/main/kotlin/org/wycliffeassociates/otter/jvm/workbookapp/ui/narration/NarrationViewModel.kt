@@ -308,7 +308,7 @@ class NarrationViewModel : ViewModel() {
             }
             .subscribe(
                 {
-                    logger.info("Created a chapter take for ${chapterTitleProperty.value}")
+                    logger.info("Created a chapter take for ${chapterTitleProperty.value}: ${it.name}")
                     chapterTakeProperty.set(it)
                 }, { e ->
                     logger.error(
