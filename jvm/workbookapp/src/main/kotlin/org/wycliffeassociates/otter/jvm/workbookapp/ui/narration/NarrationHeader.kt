@@ -218,7 +218,9 @@ class NarrationHeaderViewModel : ViewModel() {
                     }
                     .onErrorReturn { PluginActions.Result.NO_PLUGIN }
                     .subscribe { result: PluginActions.Result ->
+                        logger.info("Returned from plugin with result: $result")
                         FX.eventbus.fire(PluginClosedEvent(pluginType))
+
                         when (result) {
                             PluginActions.Result.NO_PLUGIN -> FX.eventbus.fire(SnackBarEvent(messages["noEditor"]))
                             else -> {
