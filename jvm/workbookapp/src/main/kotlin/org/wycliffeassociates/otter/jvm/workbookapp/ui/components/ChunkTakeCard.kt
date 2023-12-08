@@ -1,8 +1,10 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
+import javafx.animation.FadeTransition
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
+import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.TakeSelectionAnimationMediator
@@ -37,7 +39,14 @@ class ChunkTakeCard(take: TakeCardModel) : HBox() {
             graphic = FontIcon(MaterialDesign.MDI_DELETE)
 
             action {
-                FX.eventbus.fire(ChunkTakeEvent(take.take, TakeAction.DELETE))
+                val fadeTransition = FadeTransition(Duration.millis(600.0), this@ChunkTakeCard).apply {
+                    fromValue = 1.0
+                    toValue = 0.0
+                }
+                fadeTransition.setOnFinished {
+                    FX.eventbus.fire(ChunkTakeEvent(take.take, TakeAction.DELETE))
+                }
+                fadeTransition.play()
             }
         }
         button {
