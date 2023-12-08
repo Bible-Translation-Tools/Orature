@@ -13,7 +13,7 @@ import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 
 class NarrationTakeAudioModifier(val take: Take, createNewAudioFile: Boolean = false) {
 
-    private var audioFile: OratureAudioFile = if (createNewAudioFile) {
+    val audioFile: OratureAudioFile = if (createNewAudioFile) {
         OratureAudioFile(
             take.file,
             DEFAULT_CHANNELS,
