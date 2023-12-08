@@ -35,6 +35,7 @@ class ProjectWizardViewModel : ViewModel() {
     private val filteredTargetLanguage = FilteredList(targetLanguages)
     val sortedSourceLanguages = SortedList(filteredSourceLanguages)
     val sortedTargetLanguages = SortedList(filteredTargetLanguage)
+    val existingLanguagePairs = observableListOf<Pair<Language, Language>>()
 
     val selectedModeProperty = SimpleObjectProperty<ProjectMode>(null)
     val selectedSourceLanguageProperty = SimpleObjectProperty<Language>(null)
@@ -91,6 +92,7 @@ class ProjectWizardViewModel : ViewModel() {
             }
             .subscribe { collections ->
                 sourceLanguages.setAll(collections.map { it.language })
+                updateExistingLanguagePairs()
             }
     }
 
@@ -118,6 +120,7 @@ class ProjectWizardViewModel : ViewModel() {
                 )
                 .observeOnFx()
                 .subscribe {
+                    existingLanguagePairs.add(Pair(sourceLanguage, language))
                     reset()
                     onNavigateBack()
                 }
@@ -158,5 +161,13 @@ class ProjectWizardViewModel : ViewModel() {
         selectedTargetLanguageProperty.set(null)
         sourceLanguageSearchQueryProperty.set("")
         targetLanguageSearchQueryProperty.set("")
+    }
+
+    private fun updateExistingLanguagePairs() {
+        val homePageViewModel = find<HomePageViewModel2>()
+        val languagePairs = homePageViewModel.projectGroups.map {
+            Pair(it.sourceLanguage, it.targetLanguage)
+        }
+        existingLanguagePairs.setAll(languagePairs)
     }
 }

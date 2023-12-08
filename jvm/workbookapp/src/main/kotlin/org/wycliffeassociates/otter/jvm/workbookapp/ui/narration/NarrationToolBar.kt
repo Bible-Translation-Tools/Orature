@@ -21,63 +21,59 @@ import java.text.MessageFormat
 class NarrationToolBar : View() {
     private val viewModel by inject<NarrationViewModel>()
 
-    override val root = borderpane {
-        addClass("narration-toolbar")
-        left = hbox {
-            alignment = Pos.CENTER_LEFT
-            addClass("narration-toolbar__play-controls")
-            button {
-                addClass("btn", "btn--secondary")
-                addPseudoClass("active")
+    override val root = hbox {
+        addClass("narration-toolbar", "narration-toolbar__play-controls")
+        alignment = Pos.CENTER_LEFT
+        button {
+            addClass("btn", "btn--secondary")
+            addPseudoClass("active")
+            tooltip { textProperty().bind(this@button.textProperty()) }
 
-                viewModel.isPlayingProperty.onChangeAndDoNow {
-                    it?.let { playing ->
-                        runLater {
-                            if (!playing) {
-                                graphic = FontIcon(MaterialDesign.MDI_PLAY)
-                                text = messages["playAll"]
-                                togglePseudoClass("active", false)
-                            } else {
-                                graphic = FontIcon(MaterialDesign.MDI_PAUSE)
-                                text = messages["pause"]
-                                togglePseudoClass("active", true)
-                            }
+            viewModel.isPlayingProperty.onChangeAndDoNow {
+                it?.let { playing ->
+                    runLater {
+                        if (!playing) {
+                            graphic = FontIcon(MaterialDesign.MDI_PLAY)
+                            text = messages["playAll"]
+                            togglePseudoClass("active", false)
+                        } else {
+                            graphic = FontIcon(MaterialDesign.MDI_PAUSE)
+                            text = messages["pause"]
+                            togglePseudoClass("active", true)
                         }
                     }
                 }
+            }
 
-                setOnAction {
-                    if (viewModel.isPlayingProperty.value) {
-                        viewModel.pausePlayback()
-                    } else {
-                        viewModel.playAll()
-                    }
-                }
-            }
-            button {
-                addClass("btn", "btn--secondary")
-                graphic = FontIcon(MaterialDesign.MDI_SKIP_PREVIOUS)
-                setOnAction {
-                    viewModel.seekToPrevious()
-                }
-                disableWhen {
-                    viewModel.isPlayingProperty.or(viewModel.isRecordingProperty)
-                }
-            }
-            button {
-                addClass("btn", "btn--secondary")
-                graphic = FontIcon(MaterialDesign.MDI_SKIP_NEXT)
-                setOnAction {
-                    viewModel.seekToNext()
-                }
-                disableWhen {
-                    viewModel.isPlayingProperty.or(viewModel.isRecordingProperty)
+            setOnAction {
+                if (viewModel.isPlayingProperty.value) {
+                    viewModel.pausePlayback()
+                } else {
+                    viewModel.playAll()
                 }
             }
         }
-        bottom = separator {
-            addClass("narration-toolbar__separator")
-            minHeight = Region.USE_PREF_SIZE
+        button {
+            addClass("btn", "btn--secondary")
+            tooltip(messages["previousVerse"])
+            graphic = FontIcon(MaterialDesign.MDI_SKIP_PREVIOUS)
+            setOnAction {
+                viewModel.seekToPrevious()
+            }
+            disableWhen {
+                viewModel.isPlayingProperty.or(viewModel.isRecordingProperty)
+            }
+        }
+        button {
+            addClass("btn", "btn--secondary")
+            tooltip(messages["nextVerse"])
+            graphic = FontIcon(MaterialDesign.MDI_SKIP_NEXT)
+            setOnAction {
+                viewModel.seekToNext()
+            }
+            disableWhen {
+                viewModel.isPlayingProperty.or(viewModel.isRecordingProperty)
+            }
         }
     }
 }

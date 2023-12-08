@@ -28,17 +28,7 @@ import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterItemState
-import org.wycliffeassociates.otter.jvm.controls.event.BeginRecordingEvent
-import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
-import org.wycliffeassociates.otter.jvm.controls.event.PauseEvent
-import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordAgainEvent
-import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordingEvent
-import org.wycliffeassociates.otter.jvm.controls.event.PlayVerseEvent
-import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
-import org.wycliffeassociates.otter.jvm.controls.event.RecordVerseEvent
-import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingAgainEvent
-import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingEvent
-import org.wycliffeassociates.otter.jvm.controls.event.SaveRecordingEvent
+import org.wycliffeassociates.otter.jvm.controls.event.*
 import org.wycliffeassociates.otter.jvm.controls.narration.NarrationTextItem
 import tornadofx.FX
 import tornadofx.addClass
@@ -111,7 +101,6 @@ class NarrationTextCell(
                 listView.apply {
 
                     try {
-                        logger.info("Selecting Index: $index in onNextVerseAction property")
                         selectionModel.selectIndices(index)
                         selectionModel.selectNext()
 
@@ -128,7 +117,8 @@ class NarrationTextCell(
                     val nextVerse = items.getOrNull(nextVerseIndex)
                     nextVerse?.let {
                         FX.eventbus.fire(NextVerseEvent(nextVerseIndex, nextVerse.chunk))
-                    } ?: logger.error("Tried to select an invalid next verse! Tried to select: $nextVerseIndex from index $index")
+                    }
+                        ?: logger.error("Tried to select an invalid next verse! Tried to select: $nextVerseIndex from index $index")
                 }
             })
 

@@ -25,11 +25,7 @@ import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
-import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
-import org.wycliffeassociates.otter.common.data.workbook.Chapter
-import org.wycliffeassociates.otter.common.data.workbook.Chunk
-import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.common.data.workbook.TextItem
+import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
@@ -329,6 +325,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun loadChapter(chapter: Chapter) {
+        logger.info("Loading chapter: ${chapter.sort}")
         resetState()
 
         chapterTitleProperty.set(
@@ -487,6 +484,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun playAll() {
+        logger.info("Playing all")
         playingVerseIndex.set(-1)
         renderer.clearActiveRecordingData()
         audioPlayer.pause()
@@ -496,6 +494,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun pausePlayback() {
+        logger.info("Pausing playback")
         audioPlayer.pause()
     }
 
@@ -514,6 +513,8 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun saveRecording(verseIndex: Int) {
+        logger.info("Saving recording for: ${narration.totalVerses[verseIndex].formattedLabel}")
+
         stopPlayer()
 
         narration.onSaveRecording(verseIndex)
@@ -563,7 +564,6 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun moveMarker(index: Int, delta: Int) {
-        logger.info("Moving marker ${index} by $delta frames")
         narration.onVerseMarkerMoved(index, delta)
     }
 
@@ -605,6 +605,8 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun pauseRecording(index: Int) {
+        logger.info("Pausing recording for: ${narration.totalVerses[index].formattedLabel}")
+
         isRecording = false
         recordPause = true
 
@@ -617,6 +619,8 @@ class NarrationViewModel : ViewModel() {
 
 
     fun pauseRecordAgain(index: Int) {
+        logger.info("Pausing record again for: ${narration.totalVerses[index].formattedLabel}")
+
         isRecording = false
         recordPause = true
 
@@ -626,6 +630,8 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun resumeRecordingAgain() {
+        logger.info("Resuming record again for: ${narration.totalVerses[recordingVerseIndex.value].formattedLabel}")
+
         stopPlayer()
 
         narration.resumeRecordingAgain()
@@ -636,6 +642,8 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun resumeRecording() {
+        logger.info("Resuming record ${narration.totalVerses[recordingVerseIndex.value].formattedLabel}")
+
         stopPlayer()
 
         narration.resumeRecording()
@@ -675,6 +683,8 @@ class NarrationViewModel : ViewModel() {
             }
             .onErrorReturn { PluginActions.Result.NO_PLUGIN }
             .subscribe { result ->
+                logger.info("Returned from plugin with result: $result")
+
                 when (result) {
                     PluginActions.Result.NO_PLUGIN -> {
                         FX.eventbus.fire(SnackBarEvent(messages["noEditor"]))

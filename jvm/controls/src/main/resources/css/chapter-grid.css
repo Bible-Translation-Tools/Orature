@@ -1,9 +1,6 @@
 .chapter-grid {
-    -fx-padding: 12 16;
+    -fx-padding: 4;
     -fx-background-color: -wa-foreground;
-    -fx-effect: -wa-level2;
-    -fx-background-radius: 10;
-    -fx-alignment: top-right;
     -fx-faint-focus-color: transparent;
 }
 
@@ -29,12 +26,14 @@
     -fx-icon-color: -wa-primary;
 }
 
-.chapter-grid-context-menu {
-    -fx-faint-focus-color: transparent;
+.chapter-selector-popup {
+    -fx-padding: 12;
     -fx-background-radius: 8px;
-    -fx-background-color: none;
+    -fx-background-color: -wa-foreground;
+    -fx-background-radius: 10;
+    -fx-effect: -wa-level1;
 }
 
-.chapter-grid-context-menu-item {
-    -fx-background-color: transparent;
+.chapter-selector-popup__scroll-pane {
+    -fx-max-height: 350;
 }

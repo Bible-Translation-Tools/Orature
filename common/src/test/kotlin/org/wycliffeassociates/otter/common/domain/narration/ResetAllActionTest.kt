@@ -1,16 +1,25 @@
 package org.wycliffeassociates.otter.common.domain.narration
 
+import com.nhaarman.mockitokotlin2.anyOrNull
+import com.nhaarman.mockitokotlin2.doAnswer
+import com.nhaarman.mockitokotlin2.doReturn
+import com.nhaarman.mockitokotlin2.mock
 import io.mockk.mockk
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 
 class ResetAllActionTest {
     private val totalVerses: MutableList<VerseNode> = mutableListOf()
     lateinit var workingAudioFile: AudioFile
     val numTestVerses = 31
+    private val mockAssociatedAudio = mock<AssociatedAudio> {
+        on { getSelectedTake() } doReturn (null)
+        on { selectTake(anyOrNull()) } doAnswer { }
+    }
 
     @Before
     fun setup() {
@@ -43,7 +52,7 @@ class ResetAllActionTest {
         Assert.assertTrue(checkIfAnySectorsExists(totalVerses))
         Assert.assertTrue(checkIfAllVerseNodesArePlaced(totalVerses))
 
-        val resetAllAction = ResetAllAction()
+        val resetAllAction = ResetAllAction(mockAssociatedAudio)
 
         resetAllAction.execute(totalVerses, workingAudioFile)
 
@@ -72,7 +81,7 @@ class ResetAllActionTest {
         Assert.assertTrue(checkIfAnySectorsExists(totalVerses))
         Assert.assertTrue(checkIfAllVerseNodesArePlaced(totalVerses))
 
-        val resetAllAction = ResetAllAction()
+        val resetAllAction = ResetAllAction(mockAssociatedAudio)
 
         resetAllAction.execute(totalVerses, workingAudioFile)
 
@@ -93,7 +102,7 @@ class ResetAllActionTest {
         Assert.assertTrue(checkIfAnySectorsExists(totalVerses))
         Assert.assertTrue(checkIfAllVerseNodesArePlaced(totalVerses))
 
-        val resetAllAction = ResetAllAction()
+        val resetAllAction = ResetAllAction(mockAssociatedAudio)
 
         resetAllAction.execute(totalVerses, workingAudioFile)
 

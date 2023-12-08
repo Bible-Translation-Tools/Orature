@@ -20,39 +20,35 @@ package org.wycliffeassociates.otter.jvm.controls.narration
 
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.EventTarget
+import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
-import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import tornadofx.*
 
-class StickyVerse : VBox() {
+class StickyVerse : HBox() {
     val verseLabelProperty = SimpleStringProperty()
     val resumeTextProperty = SimpleStringProperty()
 
     init {
-        addClass("narration__selected-verse")
+        addClass("narration__resume-to-verse")
+        hgrow = Priority.ALWAYS
 
-        hbox {
-            addClass("narration__selected-verse-controls")
+        label(verseLabelProperty) {
+            addClass("h4")
+        }
+        region {
+            addClass("narration__resume-to-verse__spacer")
+            hgrow = Priority.ALWAYS
+        }
+        button(resumeTextProperty) {
+            addClass("btn", "btn--primary")
+            graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
 
-            label {
-                textProperty().bind(verseLabelProperty)
-            }
-            region {
-                hgrow = Priority.ALWAYS
-            }
-            button(resumeTextProperty) {
-                addClass("btn", "btn--primary")
-                graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
-
-                action {
-                    FX.eventbus.fire(ResumeVerseEvent())
-                }
+            action {
+                FX.eventbus.fire(ResumeVerseEvent())
             }
         }
-
-        managedProperty().bind(visibleProperty())
     }
 }
 
@@ -60,4 +56,4 @@ class ResumeVerseEvent: FXEvent()
 
 fun EventTarget.stickyVerse(op: StickyVerse.() -> Unit = {}) =
     StickyVerse().attachTo(this, op) {
-    }
+}

@@ -13,7 +13,7 @@ import org.wycliffeassociates.otter.jvm.controls.event.GoToPreviousChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.popup.ChapterGridMenu
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.popup.ChapterSelectorPopup
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
@@ -26,7 +26,7 @@ class TranslationHeader : HBox() {
     val canGoNextProperty = SimpleBooleanProperty(false)
     val canGoPreviousProperty = SimpleBooleanProperty(false)
     val chapterList = observableListOf<ChapterGridItemData>()
-    private val popupMenu = ChapterGridMenu()
+    private val popupMenu = ChapterSelectorPopup()
 
     init {
         addClass("top-navigation-pane")
