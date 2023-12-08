@@ -280,6 +280,7 @@ class NarrationViewModel : ViewModel() {
         narratableList.clear()
         chapterDisposable.clear()
 
+        chapterTakeProperty.set(null)
         recordStartProperty.set(false)
         recordPauseProperty.set(false)
         recordResumeProperty.set(false)
