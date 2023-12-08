@@ -4,6 +4,7 @@ import javafx.scene.layout.GridPane
 import javafx.scene.layout.StackPane
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.event.OpenChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
 import tornadofx.*
@@ -11,6 +12,7 @@ import tornadofx.*
 private const val GRID_COLUMNS = 5
 
 class ChapterGrid(val list: List<ChapterGridItemData>) : GridPane() {
+    private val logger = LoggerFactory.getLogger(ChapterGrid::class.java)
 
     init {
         addClass("chapter-grid")
@@ -18,6 +20,7 @@ class ChapterGrid(val list: List<ChapterGridItemData>) : GridPane() {
     }
 
     private fun selectChapter(chapterIndex: Int) {
+        logger.info("Selecting chapter ${chapterIndex}")
         FX.eventbus.fire(OpenChapterEvent(chapterIndex))
     }
 

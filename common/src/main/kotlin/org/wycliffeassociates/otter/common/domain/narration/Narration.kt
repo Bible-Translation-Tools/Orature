@@ -16,7 +16,6 @@ import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.common.audio.wav.WavOutputStream
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
-import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
@@ -295,7 +294,7 @@ class Narration @AssistedInject constructor(
             player.load(chapterReaderConnection)
             audioLoaded = true
         }
-        logger.info("Loading verse ${verse.label} into player")
+        logger.info("Loading ${verse.formattedLabel} into player")
         val range: IntRange? = chapterRepresentation.getRangeOfMarker(verse)
         logger.info("Playback range is ${range?.start}-${range?.last}")
         range?.let {
@@ -498,8 +497,12 @@ class Narration @AssistedInject constructor(
         lockToVerse(null)
         val seekLoc = activeVerses.lastOrNull() { it.location < loc }
         seekLoc?.let {
+            logger.info("Seeking to previous: ${it.formattedLabel}")
             seek(it.location)
-        } ?: seek(0)
+        } ?: run {
+            logger.info("Previous marker not found, seeking to 0")
+            seek(0)
+        }
     }
 
     fun seekToNext() {
@@ -508,8 +511,10 @@ class Narration @AssistedInject constructor(
         lockToVerse(null)
         val seekLoc = activeVerses.firstOrNull { it.location > loc }
         seekLoc?.let {
+            logger.info("Seeking to next: ${it.formattedLabel}")
             seek(it.location)
         } ?: chapterRepresentation.apply {
+            logger.info("Next marker not found, seeking to end of audio")
             val lastFrame = audioLocationToLocationInChapter(activeVerses.last().lastFrame())
             seek(lastFrame)
         }

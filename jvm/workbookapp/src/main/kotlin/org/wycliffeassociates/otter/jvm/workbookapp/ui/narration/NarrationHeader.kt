@@ -168,10 +168,12 @@ class NarrationHeaderViewModel : ViewModel() {
     }
 
     fun selectPreviousChapter() {
+        logger.info("Selecting previous chapter")
         stepToChapter(StepDirection.BACKWARD)
     }
 
     fun selectNextChapter() {
+        logger.info("Selecting next chapter")
         stepToChapter(StepDirection.FORWARD)
     }
 
