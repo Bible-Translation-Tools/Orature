@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.common.domain.narration
 
+import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.BookMarker
 import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
@@ -7,16 +8,16 @@ import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 
-class NarrationTakeAudioModifier(take: Take) {
+class NarrationTakeAudioModifier(val take: Take) {
 
-    lateinit var audioFile : OratureAudioFile
+    private var audioFile: OratureAudioFile = OratureAudioFile(take.file)
 
-    init {
-        audioFile = OratureAudioFile(take.file)
-    }
-
-    fun modifyAudioData() {
-        // TODO: finish
+    fun modifyAudioData(reader: AudioFileReader, markers: List<AudioMarker>) {
+        bounceAudio(
+            audioFile.file,
+            reader,
+            markers
+        )
     }
 
     fun modifyMetaData(markers: List<AudioMarker>) {
