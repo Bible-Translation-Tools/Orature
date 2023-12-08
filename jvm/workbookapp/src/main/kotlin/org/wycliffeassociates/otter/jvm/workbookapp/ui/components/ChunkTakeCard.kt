@@ -1,14 +1,12 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
 import javafx.beans.property.SimpleObjectProperty
-import javafx.geometry.Side
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.TakeSelectionAnimationMediator
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.popup.TakeOptionMenu
 import org.wycliffeassociates.otter.jvm.controls.event.ChunkTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.event.TakeAction
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
@@ -34,26 +32,12 @@ class ChunkTakeCard(take: TakeCardModel) : HBox() {
             sideTextProperty.bind(remainingTimeProperty)
         }
         button {
-            addClass("btn", "btn--icon", "btn--borderless")
-            tooltip(messages["options"])
-            graphic = FontIcon(MaterialDesign.MDI_DOTS_VERTICAL)
+            addClass("btn", "btn--icon")
+            tooltip(messages["delete"])
+            graphic = FontIcon(MaterialDesign.MDI_DELETE)
 
-            val menu = TakeOptionMenu(take.take).apply {
-                setOnShowing {
-                    this@button.addPseudoClass("active")
-                }
-                setOnHidden {
-                    this@button.removePseudoClass("active")
-                }
-            }
-            setOnAction {
-                val bound = this.boundsInLocal
-                val screenBound = this.localToScreen(bound)
-                menu.show(
-                    FX.primaryStage
-                )
-                menu.x = screenBound.minX - menu.width + this.width
-                menu.y = screenBound.centerY
+            action {
+                FX.eventbus.fire(ChunkTakeEvent(take.take, TakeAction.DELETE))
             }
         }
         button {
