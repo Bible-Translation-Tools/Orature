@@ -121,7 +121,7 @@ class NarrationViewModel : ViewModel() {
         .eq(recordedVerses.sizeProperty.minus(numberOfTitlesProperty))
         .and(isRecordingProperty.not())
         .and(isRecordingAgainProperty.not())
-        .and(chapterTakeProperty.isNotNull)
+        .and(chapterTakeProperty.isNull)
     val potentiallyFinished by potentiallyFinishedProperty
 
     val pluginContextProperty = SimpleObjectProperty(PluginType.EDITOR)
