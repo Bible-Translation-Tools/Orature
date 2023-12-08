@@ -231,8 +231,12 @@ class Narration @AssistedInject constructor(
         uncommittedRecordedFrames.set(0)
         isRecording.set(false)
 
-        if(hasChapterTake) {
-            bounceAudio(chapter.getSelectedTake()!!.file)
+        if (hasChapterTake) {
+            bounceAudio(
+                chapter.getSelectedTake()!!.file,
+                chapterRepresentation.getAudioFileReader(),
+                activeVerses
+            )
         }
     }
 
@@ -240,7 +244,7 @@ class Narration @AssistedInject constructor(
         val action = MoveMarkerAction(verseIndex, delta)
         execute(action)
 
-        if(hasChapterTake) {
+        if (hasChapterTake) {
             val takeAudioModifier = NarrationTakeAudioModifier(chapter.getSelectedTake()!!)
             takeAudioModifier.modifyMetaData(activeVerses)
         }
@@ -425,35 +429,13 @@ class Narration @AssistedInject constructor(
                 take
             }
             .map { take ->
-                bounceAudio(take.file)
+                bounceAudio(
+                    take.file,
+                    chapterRepresentation.getAudioFileReader(),
+                    activeVerses
+                )
                 take
             }
-    }
-
-    private fun bounceAudio(boundedAudio: File) {
-        val bytes = ByteArray(DEFAULT_BUFFER_SIZE)
-
-        chapterRepresentation.getAudioFileReader().use { reader ->
-            reader.open()
-            reader.seek(0)
-
-            if (boundedAudio.exists() && boundedAudio.length() > 0) {
-                boundedAudio.delete()
-            }
-            val wav = WavFile(boundedAudio, 1, 44100, 16)
-            WavOutputStream(wav).use { out ->
-                while (reader.hasRemaining()) {
-                    val read = reader.getPcmBuffer(bytes)
-                    out.write(bytes, 0, read)
-                }
-            }
-            wav.update()
-            val oaf = OratureAudioFile(boundedAudio)
-            for (verse in activeVerses) {
-                oaf.addMarker<AudioMarker>(verse.clone())
-            }
-            oaf.update()
-        }
     }
 
     fun scrollAudio(delta: Int) {
