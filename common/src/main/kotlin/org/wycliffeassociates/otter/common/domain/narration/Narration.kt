@@ -407,11 +407,11 @@ class Narration @AssistedInject constructor(
                 val parentDir = workbook.projectFilesAccessor.getChapterAudioDir(workbook, chapter)
                 val takeFile = File(parentDir, takeName)
                 val take = Take(takeFile.name, takeFile, takeNumber, MimeType.WAV, LocalDate.now())
-                chapter.audio.insertTake(take)
                 take
             }
             .map { take ->
                 bounceAudio(take.file)
+                chapter.audio.insertTake(take)
                 take
             }
     }

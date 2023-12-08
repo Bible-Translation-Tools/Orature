@@ -309,6 +309,7 @@ class NarrationViewModel : ViewModel() {
             .subscribe(
                 {
                     logger.info("Created a chapter take for ${chapterTitleProperty.value}")
+                    chapterTakeProperty.set(it)
                 }, { e ->
                     logger.error(
                         "Error in creating a chapter take for ${chapterTitleProperty.value}",
@@ -512,6 +513,9 @@ class NarrationViewModel : ViewModel() {
 
         narration.onSaveRecording(verseIndex)
 
+        if (chapterCompleted) {
+            createPotentiallyFinishedChapterTake()
+        }
         recordAgainVerseIndex = null
         recordingVerseIndex.set(verseIndex)
         isRecording = false
@@ -732,10 +736,6 @@ class NarrationViewModel : ViewModel() {
 
                     recordStart = recordedVerses.isEmpty()
                     recordResume = recordedVerses.isNotEmpty()
-
-                    if (chapterCompleted) {
-                        createPotentiallyFinishedChapterTake()
-                    }
                 },
                 { e ->
                     logger.error("Error in active verses subscription", e)
