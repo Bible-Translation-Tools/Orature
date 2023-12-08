@@ -232,8 +232,9 @@ class Narration @AssistedInject constructor(
         isRecording.set(false)
 
         if (hasChapterTake) {
-            bounceAudio(
-                chapter.getSelectedTake()!!.file,
+            val takeAudioModifier = NarrationTakeAudioModifier(chapter.getSelectedTake()!!)
+
+            takeAudioModifier.modifyAudioData(
                 chapterRepresentation.getAudioFileReader(),
                 activeVerses
             )
