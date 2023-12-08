@@ -24,6 +24,10 @@ class ChapterGrid(val list: List<ChapterGridItemData>) : GridPane() {
         FX.eventbus.fire(OpenChapterEvent(chapterIndex))
     }
 
+    fun focusOnSelectedChapter() {
+        lookupAll(":selected").firstOrNull()?.requestFocus()
+    }
+
     fun updateChapterGridNodes() {
         children.clear()
         columnConstraints.clear()
@@ -38,7 +42,6 @@ class ChapterGrid(val list: List<ChapterGridItemData>) : GridPane() {
                         "btn", "btn--secondary", "btn--borderless", "chapter-grid__btn"
                     )
                     togglePseudoClass("selected", chapter.selected)
-                    useMaxWidth = true
                     setOnAction {
                         selectChapter(chapter.number)
                     }
