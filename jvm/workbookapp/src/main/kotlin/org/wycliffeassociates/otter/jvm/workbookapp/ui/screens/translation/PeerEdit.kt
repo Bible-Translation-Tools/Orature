@@ -145,6 +145,9 @@ open class PeerEdit : View() {
                 val final = Utils.clamp(0, curFrames - deltaFrames, duration)
                 viewModel.seek(final)
             }
+            setOnRewind(viewModel::rewind)
+            setOnFastForward(viewModel::fastForward)
+            setOnToggleMedia(viewModel::toggleAudio)
 
             viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
             viewModel.cleanUpWaveform = ::freeImages
