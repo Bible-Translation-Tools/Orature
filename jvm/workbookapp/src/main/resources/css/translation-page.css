@@ -123,10 +123,6 @@
     -fx-alignment: center-left;
 }
 
-.waveform--focusable {
-    -fx-focus-traversable: true;
-}
-
 .waveform--focusable:active {
     -fx-border-width: 4px 0;
     -fx-border-color: -wa-button-border;
