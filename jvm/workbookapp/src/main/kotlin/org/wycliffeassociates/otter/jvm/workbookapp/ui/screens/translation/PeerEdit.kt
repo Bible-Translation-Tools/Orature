@@ -130,6 +130,7 @@ open class PeerEdit : View() {
 
     private fun createPlaybackWaveform(container: VBox): MarkerWaveform {
         return MarkerWaveform().apply {
+            addClass("waveform--focusable")
             vgrow = Priority.ALWAYS
             themeProperty.bind(settingsViewModel.appColorMode)
             positionProperty.bind(viewModel.positionProperty)

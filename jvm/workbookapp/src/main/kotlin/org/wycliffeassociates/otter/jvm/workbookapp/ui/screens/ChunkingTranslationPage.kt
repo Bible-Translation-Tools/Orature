@@ -88,8 +88,8 @@ class ChunkingTranslationPage : View() {
     init {
         tryImportStylesheet("/css/chapter-selector.css")
         tryImportStylesheet("/css/chapter-grid.css")
+        tryImportStylesheet("/css/translation-page.css")
         tryImportStylesheet("/css/consume-page.css")
-        tryImportStylesheet("/css/chunking-page.css")
         tryImportStylesheet("/css/blind-draft-page.css")
         tryImportStylesheet("/css/audio-player.css")
         tryImportStylesheet("/css/source-content.css")

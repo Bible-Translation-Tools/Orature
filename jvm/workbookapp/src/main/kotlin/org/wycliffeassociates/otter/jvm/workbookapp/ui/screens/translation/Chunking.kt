@@ -48,7 +48,7 @@ class Chunking : View() {
             center = VBox().apply {
                 MarkerWaveform().apply {
                     waveform = this
-                    addClass("consume__scrolling-waveform")
+                    addClass("waveform--focusable")
                     vgrow = Priority.ALWAYS
                     clip = Rectangle().apply {
                         widthProperty().bind(this@vbox.widthProperty())

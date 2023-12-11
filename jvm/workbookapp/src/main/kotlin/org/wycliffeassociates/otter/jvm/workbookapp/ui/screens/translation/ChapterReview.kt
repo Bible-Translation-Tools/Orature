@@ -57,6 +57,7 @@ class ChapterReview : View() {
         center = vbox {
             val container = this
             waveform = MarkerWaveform().apply {
+                addClass("waveform--focusable")
                 vgrow = Priority.ALWAYS
                 themeProperty.bind(settingsViewModel.appColorMode)
                 positionProperty.bind(viewModel.positionProperty)
