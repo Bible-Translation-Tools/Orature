@@ -87,28 +87,35 @@ class NarrationPage : View() {
     override fun onDock() {
         super.onDock()
         subscribeToEvents()
-        if (viewModel.pluginOpenedProperty.value) {
-            // avoid resetting content, undo history, etc. when coming back from plugin
-            viewModel.pluginOpenedProperty.set(false)
-            return
+        // avoid resetting ViewModel states & action history when coming back from plugin
+        when (viewModel.pluginOpenedProperty.value) {
+            true -> { // navigate back from plugin
+                viewModel.pluginOpenedProperty.set(false)
+            }
+            false -> { // regular navigation
+                viewModel.onDock()
+                narrationHeader.onDock()
+                audioWorkspaceView.onDock()
+                teleprompterView.onDock()
+            }
         }
-        viewModel.onDock()
-        narrationHeader.onDock()
-        audioWorkspaceView.onDock()
-        teleprompterView.onDock()
     }
 
     override fun onUndock() {
         super.onUndock()
         unsubscribeFromEvents()
-        if (viewModel.pluginOpenedProperty.value) {
-            // avoid resetting content, undo history, etc. when coming back from plugin
-            return
+        // avoid resetting ViewModel states & action history when coming back from plugin
+        when (viewModel.pluginOpenedProperty.value) {
+            true -> {
+                /* no-op, opening plugin */
+            }
+            false -> { // regular navigation
+                viewModel.onUndock()
+                narrationHeader.onUndock()
+                audioWorkspaceView.onUndock()
+                teleprompterView.onUndock()
+            }
         }
-        viewModel.onUndock()
-        narrationHeader.onUndock()
-        audioWorkspaceView.onUndock()
-        teleprompterView.onUndock()
     }
 
     private fun subscribeToEvents() {
