@@ -33,7 +33,7 @@ class NarrationToolBar : View() {
 
 
             disableWhen {
-                viewModel.isRecordingProperty.or(not(viewModel.hasVersesProperty))
+                viewModel.isRecordingProperty.or(viewModel.hasVersesProperty.not())
             }
 
             viewModel.isPlayingProperty.onChangeAndDoNow {
@@ -68,7 +68,7 @@ class NarrationToolBar : View() {
                 viewModel.seekToPrevious()
             }
             disableWhen {
-                viewModel.isPlayingProperty.or(viewModel.isRecordingProperty).or(not(viewModel.hasVersesProperty))
+                viewModel.isPlayingProperty.or(viewModel.isRecordingProperty).or(viewModel.hasVersesProperty.not())
             }
         }
         button {
@@ -79,7 +79,7 @@ class NarrationToolBar : View() {
                 viewModel.seekToNext()
             }
             disableWhen {
-                viewModel.isPlayingProperty.or(viewModel.isRecordingProperty).or(not(viewModel.hasVersesProperty))
+                viewModel.isPlayingProperty.or(viewModel.isRecordingProperty).or(viewModel.hasVersesProperty.not())
             }
         }
     }
