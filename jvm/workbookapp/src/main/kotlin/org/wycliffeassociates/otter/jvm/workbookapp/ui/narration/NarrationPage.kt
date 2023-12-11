@@ -104,7 +104,7 @@ class NarrationPage : View() {
     override fun onUndock() {
         super.onUndock()
         unsubscribeFromEvents()
-        // avoid resetting ViewModel states & action history when coming back from plugin
+        // avoid resetting ViewModel states & action history when opening plugin
         when (viewModel.pluginOpenedProperty.value) {
             true -> {
                 /* no-op, opening plugin */
