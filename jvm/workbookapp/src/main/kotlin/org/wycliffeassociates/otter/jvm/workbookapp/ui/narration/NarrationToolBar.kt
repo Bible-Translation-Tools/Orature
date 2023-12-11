@@ -78,7 +78,7 @@ class NarrationToolBar : View() {
                 viewModel.seekToNext()
             }
             disableWhen {
-                viewModel.isPlayingProperty.or(viewModel.isRecordingProperty)
+                viewModel.isPlayingProperty.or(viewModel.isRecordingProperty).or(!viewModel.hasVersesProperty)
             }
         }
     }
