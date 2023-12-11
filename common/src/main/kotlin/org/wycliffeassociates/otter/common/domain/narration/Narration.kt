@@ -509,17 +509,20 @@ class Narration @AssistedInject constructor(
         player.pause()
         val loc = getLocationInChapter()
         lockToVerse(null)
-        val seekLoc = activeVerses.firstOrNull { it.location > loc }
-        seekLoc?.let {
-            logger.info("Seeking to next: ${it.formattedLabel}")
-            seek(it.location)
-        } ?: chapterRepresentation.apply {
-            if(activeVerses.isNotEmpty()) {
-                logger.info("Next marker not found, seeking to end of audio")
-                val lastFrame = audioLocationToLocationInChapter(activeVerses.last().lastFrame())
-                seek(lastFrame)
+
+        activeVerses
+            .firstOrNull { it.location > loc }
+            ?.let {
+                logger.info("Seeking to next: ${it.formattedLabel}")
+                seek(it.location)
             }
-        }
+            ?: chapterRepresentation.apply {
+                if (activeVerses.isNotEmpty()) {
+                    logger.info("Next marker not found, seeking to end of audio")
+                    val lastFrame = audioLocationToLocationInChapter(activeVerses.last().lastFrame())
+                    seek(lastFrame)
+                }
+            }
     }
 }
 
