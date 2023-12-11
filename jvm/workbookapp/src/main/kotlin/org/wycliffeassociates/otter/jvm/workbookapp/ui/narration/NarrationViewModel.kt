@@ -201,9 +201,10 @@ class NarrationViewModel : ViewModel() {
 
     fun onUndock() {
         disposables.clear()
+
         closeNarrationAudio()
-        narration.close()
         renderer.close()
+        narration.close()
     }
 
     private fun initializeNarration(chapter: Chapter) {
@@ -268,8 +269,8 @@ class NarrationViewModel : ViewModel() {
     private fun resetState() {
         if (::narration.isInitialized) {
             closeNarrationAudio()
-            narration.close()
             renderer.close()
+            narration.close()
         }
 
         recordedVerses.clear()

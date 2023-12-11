@@ -76,7 +76,6 @@ class BackupProjectExporter @Inject constructor(
                     ) {
                         takesFilter(it, options)
                     }
-                    projectAccessor.trimChapterRepresentationFiles(workbook, fileWriter)
                     callback?.onNotifyProgress(70.0, messageKey = "copyingSource")
 
                     val linkedResource = workbook.source.linkedResources
