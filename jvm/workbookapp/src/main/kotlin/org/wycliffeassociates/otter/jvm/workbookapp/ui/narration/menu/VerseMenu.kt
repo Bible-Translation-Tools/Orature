@@ -1,11 +1,17 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu
 
+import javafx.beans.property.BooleanProperty
+import javafx.beans.property.IntegerProperty
+import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.EventTarget
+import javafx.scene.control.Button
+import javafx.scene.control.ContextMenu
 import javafx.scene.control.MenuButton
+import javafx.scene.control.MenuItem
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
@@ -16,22 +22,20 @@ import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
-class VerseMenu : MenuButton() {
-    val playVerseTextProperty = SimpleStringProperty(messages["play"])
-    val recordAgainTextProperty = SimpleStringProperty(messages["recordAgain"])
-    val importVerseTextProperty = SimpleStringProperty(messages["importVerse"])
-    val editVerseTextProperty = SimpleStringProperty(messages["openIn"])
+class VerseMenu : ContextMenu() {
 
     val verseProperty = SimpleObjectProperty<AudioMarker>()
     val verseIndexProperty = SimpleIntegerProperty()
     val isRecordingProperty = SimpleBooleanProperty()
 
     init {
-        addClass("btn", "btn--secondary", "btn--borderless", "wa-menu-button", "wa-context-menu")
-        graphic = FontIcon(MaterialDesign.MDI_DOTS_VERTICAL)
+        addClass("wa-context-menu")
 
-        item(playVerseTextProperty.value) {
-            graphic = FontIcon(MaterialDesign.MDI_PLAY)
+        val playOpt = MenuItem().apply {
+            graphic = label(messages["play"]) {
+                graphic = FontIcon(MaterialDesign.MDI_PLAY)
+                tooltip(text)
+            }
             action {
                 FX.eventbus.fire(PlayVerseEvent(verseProperty.value))
             }
@@ -39,8 +43,11 @@ class VerseMenu : MenuButton() {
                 isRecordingProperty
             }
         }
-        item(recordAgainTextProperty.value) {
-            graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
+        val recordAgainOpt = MenuItem().apply {
+            graphic = label(messages["recordAgain"]) {
+                graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
+                tooltip(text)
+            }
             action {
                 FX.eventbus.fire(RecordAgainEvent(verseIndexProperty.value))
             }
@@ -57,8 +64,11 @@ class VerseMenu : MenuButton() {
 //                isRecordingProperty
 //            }
 //        }
-        item(editVerseTextProperty.value) {
-            graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
+        val editVerseOpt = MenuItem().apply {
+            graphic = label(messages["openIn"]) {
+                graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
+                tooltip(text)
+            }
             action {
                 FX.eventbus.fire(OpenInAudioPluginEvent(verseIndexProperty.value))
             }
@@ -66,7 +76,7 @@ class VerseMenu : MenuButton() {
                 isRecordingProperty
             }
         }
+
+        items.setAll(playOpt, recordAgainOpt, editVerseOpt)
     }
 }
-
-fun EventTarget.verseMenu(op: VerseMenu.() -> Unit = {}) = VerseMenu().attachTo(this, op)

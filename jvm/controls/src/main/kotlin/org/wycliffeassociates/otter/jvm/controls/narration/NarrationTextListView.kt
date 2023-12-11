@@ -18,51 +18,50 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.narration
 
+import javafx.animation.PauseTransition
+import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.value.ObservableValue
 import javafx.collections.ObservableList
 import javafx.event.EventTarget
 import javafx.geometry.Orientation
 import javafx.scene.control.ListView
 import javafx.scene.control.ScrollBar
+import javafx.util.Duration
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.findChildren
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.utils.virtualFlow
 import tornadofx.*
 
 class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(items) {
+
+    val firstVerseToResumeProperty = SimpleObjectProperty<T>()
     private val listeners = mutableListOf<ListenerDisposer>()
+    private var scrollHandlerDelay: PauseTransition = PauseTransition(Duration.seconds(0.2))
 
     init {
         addClass("wa-list-view")
     }
 
     fun addListeners() {
-        skinProperty().onChangeWithDisposer {
+        skinProperty().onChangeAndDoNowWithDisposer {
             it?.let {
                 try {
                     val scrollBar = virtualFlow().findChildren<ScrollBar>(true).singleOrNull { node ->
                         node.orientation == Orientation.VERTICAL
                     }
                     scrollBar?.valueProperty()?.onChangeWithDisposer {
-                        val current = selectionModel.selectedIndex
-                        val first = virtualFlow().firstVisibleCell?.index ?: 0
-                        val last = virtualFlow().lastVisibleCell?.index ?: 0
-
-                        if (current !in (first..last)) {
-                            FX.eventbus.fire(StickyVerseChangedEvent(selectionModel.selectedItem))
-                        } else {
-                            FX.eventbus.fire(StickyVerseChangedEvent(null))
+                        scrollHandlerDelay.stop()
+                        scrollHandlerDelay.setOnFinished {
+                            scrollValueChanged()
                         }
+                        scrollHandlerDelay.play()
                     }?.also(listeners::add)
                 } catch (e: NullPointerException) {
                     e.printStackTrace()
                 }
             }
-        }.also(listeners::add)
-
-        selectionModel.selectedItemProperty().onChangeWithDisposer {
-            FX.eventbus.fire(StickyVerseChangedEvent(null))
         }.also(listeners::add)
     }
 
@@ -70,9 +69,21 @@ class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(i
         listeners.forEach(ListenerDisposer::dispose)
         listeners.clear()
     }
+
+    private fun scrollValueChanged() {
+        val current = items.indexOf(firstVerseToResumeProperty.value)
+        val first = virtualFlow().firstVisibleCell?.index ?: 0
+        val last = virtualFlow().lastVisibleCell?.index ?: 0
+
+        if (current !in (first..last)) {
+            FX.eventbus.fire(StickyVerseChangedEvent(true))
+        } else {
+            FX.eventbus.fire(StickyVerseChangedEvent(false))
+        }
+    }
 }
 
-class StickyVerseChangedEvent<T>(val data: T?) : FXEvent()
+class StickyVerseChangedEvent(val showBanner: Boolean) : FXEvent()
 
 fun <T> EventTarget.narrationTextListview(
     values: ObservableList<T>?,

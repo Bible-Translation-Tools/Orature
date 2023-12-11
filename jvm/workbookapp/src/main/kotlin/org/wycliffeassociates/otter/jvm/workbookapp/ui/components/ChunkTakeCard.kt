@@ -1,14 +1,14 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
+import javafx.animation.FadeTransition
 import javafx.beans.property.SimpleObjectProperty
-import javafx.geometry.Side
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
+import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.TakeSelectionAnimationMediator
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.popup.TakeOptionMenu
 import org.wycliffeassociates.otter.jvm.controls.event.ChunkTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.event.TakeAction
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
@@ -34,26 +34,19 @@ class ChunkTakeCard(take: TakeCardModel) : HBox() {
             sideTextProperty.bind(remainingTimeProperty)
         }
         button {
-            addClass("btn", "btn--icon", "btn--borderless")
-            tooltip(messages["options"])
-            graphic = FontIcon(MaterialDesign.MDI_DOTS_VERTICAL)
+            addClass("btn", "btn--icon")
+            tooltip(messages["delete"])
+            graphic = FontIcon(MaterialDesign.MDI_DELETE)
 
-            val menu = TakeOptionMenu(take.take).apply {
-                setOnShowing {
-                    this@button.addPseudoClass("active")
+            action {
+                val fadeTransition = FadeTransition(Duration.millis(600.0), this@ChunkTakeCard).apply {
+                    fromValue = 1.0
+                    toValue = 0.0
                 }
-                setOnHidden {
-                    this@button.removePseudoClass("active")
+                fadeTransition.setOnFinished {
+                    FX.eventbus.fire(ChunkTakeEvent(take.take, TakeAction.DELETE))
                 }
-            }
-            setOnAction {
-                val bound = this.boundsInLocal
-                val screenBound = this.localToScreen(bound)
-                menu.show(
-                    FX.primaryStage
-                )
-                menu.x = screenBound.minX - menu.width + this.width
-                menu.y = screenBound.centerY
+                fadeTransition.play()
             }
         }
         button {

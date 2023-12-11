@@ -83,9 +83,9 @@ class ChunkingStepNode(
                 label {
                     addClass("chunking-step__title")
                     graphicProperty().bind(createGraphicBinding(step))
-                    visibleWhen { isCollapsedProperty }
-                    managedWhen(visibleProperty())
                 }
+                visibleWhen { isCollapsedProperty }
+                managedWhen(visibleProperty())
             }
         }
 

@@ -59,6 +59,7 @@ class HomePageViewModel2 : ViewModel() {
     private val workbookDS: WorkbookDataStore by inject()
     private val navigator: NavigationMediator by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
+    private val projectWizardViewModel: ProjectWizardViewModel by inject()
 
     val projectGroups = observableListOf<ProjectGroupCardModel>()
     val bookList = observableListOf<WorkbookDescriptor>()
@@ -172,6 +173,9 @@ class HomePageViewModel2 : ViewModel() {
                 .observeOnFx()
                 .doOnComplete {
                     logger.info("Deleted project group: ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
+                    projectWizardViewModel.existingLanguagePairs.remove(
+                        Pair(cardModel.sourceLanguage, cardModel.targetLanguage)
+                    )
                     emitter.onComplete()
                 }
                 .subscribe()

@@ -44,7 +44,11 @@ class Chunk(
     override val title
         get() = if (start != end) "${start}-${end}" else "$start"
 
-    fun hasSelectedAudio() = audio.selected.value?.value != null
+    fun hasSelectedAudio(): Boolean {
+        return audio.selected.value?.value?.let { take ->
+            !take.isDeleted()
+        } ?: false
+    }
 
     fun checkingStatus(): CheckingStatus {
         return audio.getSelectedTake()?.let { take ->
