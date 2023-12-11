@@ -164,10 +164,9 @@ internal class ChapterRepresentation(
 
     private fun trimScratchAudio() {
         val chapterDir = workbook.projectFilesAccessor.getChapterAudioDir(workbook, chapter)
-        val newScratchAudioFile = chapterDir.resolve("new_$CHAPTER_NARRATION_FILE_NAME")
-        val newScratchAudio = OratureAudioFile(newScratchAudioFile)
+        val newScratchAudio = chapterDir.resolve("new_$CHAPTER_NARRATION_FILE_NAME")
 
-        newScratchAudio.writer().use { writer ->
+        newScratchAudio.outputStream().use { writer ->
             getAudioFileReader().use { reader ->
                 reader.open()
                 reader.seek(0)
@@ -180,7 +179,7 @@ internal class ChapterRepresentation(
         }
 
         scratchAudio.file.delete()
-        newScratchAudioFile.renameTo(scratchAudio.file)
+        newScratchAudio.renameTo(scratchAudio.file)
     }
 
     private fun trimActiveVerses() {
