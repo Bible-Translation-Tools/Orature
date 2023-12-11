@@ -119,7 +119,8 @@ class NarrationViewModel : ViewModel() {
     var numberOfTitlesProperty = SimpleIntegerProperty(0)
     val potentiallyFinishedProperty = chunkTotalProperty
         .eq(recordedVerses.sizeProperty.minus(numberOfTitlesProperty))
-        .and(!isRecording)
+        .and(isRecordingProperty.not())
+        .and(isRecordingAgainProperty.not())
     val potentiallyFinished by potentiallyFinishedProperty
 
     val pluginContextProperty = SimpleObjectProperty(PluginType.EDITOR)
@@ -721,6 +722,7 @@ class NarrationViewModel : ViewModel() {
 
                     recordStart = recordedVerses.isEmpty()
                     recordResume = recordedVerses.isNotEmpty()
+                    createPotentiallyFinishedChapterTake()
                 },
                 { e ->
                     logger.error("Error in active verses subscription", e)
