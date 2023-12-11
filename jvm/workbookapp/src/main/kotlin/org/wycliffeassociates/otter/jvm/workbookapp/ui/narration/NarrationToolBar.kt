@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
+import javafx.beans.binding.Bindings.not
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -30,11 +31,11 @@ class NarrationToolBar : View() {
             addPseudoClass("active")
             tooltip { textProperty().bind(this@button.textProperty()) }
 
-            
+
             disableWhen {
-                viewModel.isRecordingProperty.or(!viewModel.hasVersesProperty)
+                viewModel.isRecordingProperty.or(not(viewModel.hasVersesProperty))
             }
-                
+
             viewModel.isPlayingProperty.onChangeAndDoNow {
                 it?.let { playing ->
                     runLater {
@@ -67,7 +68,7 @@ class NarrationToolBar : View() {
                 viewModel.seekToPrevious()
             }
             disableWhen {
-                viewModel.isPlayingProperty.or(viewModel.isRecordingProperty).or(!viewModel.hasVersesProperty)
+                viewModel.isPlayingProperty.or(viewModel.isRecordingProperty).or(not(viewModel.hasVersesProperty))
             }
         }
         button {
@@ -78,7 +79,7 @@ class NarrationToolBar : View() {
                 viewModel.seekToNext()
             }
             disableWhen {
-                viewModel.isPlayingProperty.or(viewModel.isRecordingProperty).or(!viewModel.hasVersesProperty)
+                viewModel.isPlayingProperty.or(viewModel.isRecordingProperty).or(not(viewModel.hasVersesProperty))
             }
         }
     }
