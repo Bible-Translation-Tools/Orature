@@ -259,6 +259,14 @@ class Narration @AssistedInject constructor(
 
         val action = EditVerseAction(verseIndex, start, end)
         execute(action)
+
+        if (hasChapterTake) {
+            val takeAudioModifier = NarrationTakeAudioModifier(chapter.getSelectedTake()!!)
+            takeAudioModifier.modifyAudioData(
+                chapterRepresentation.getAudioFileReader(),
+                activeVerses
+            )
+        }
     }
 
     fun onResetAll() {
@@ -267,9 +275,15 @@ class Narration @AssistedInject constructor(
     }
 
     private fun onChapterEdited(newVerses: List<VerseNode>) {
-        // TODO adjust for not having an end location
         val action = ChapterEditedAction(newVerses)
         execute(action)
+
+        if (hasChapterTake) {
+            val takeAudioModifier = NarrationTakeAudioModifier(chapter.getSelectedTake()!!)
+            takeAudioModifier.modifyMetaData(
+                activeVerses
+            )
+        }
     }
 
     fun pauseRecording() {
