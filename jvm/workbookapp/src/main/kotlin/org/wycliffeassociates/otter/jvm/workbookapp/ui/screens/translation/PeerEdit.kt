@@ -13,6 +13,7 @@ import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
@@ -201,6 +202,8 @@ open class PeerEdit : View() {
     }
 
     private fun subscribeEvents() {
+        addShortcut()
+
         viewModel.currentChunkProperty.onChangeWithDisposer { selectedChunk ->
             // clears recording screen if another chunk is selected
             if (selectedChunk != null && mainSectionProperty.value == recordingView) {
@@ -221,6 +224,7 @@ open class PeerEdit : View() {
     private fun unsubscribeEvents() {
         eventSubscriptions.forEach { it.unsubscribe() }
         eventSubscriptions.clear()
+        removeShortcut()
     }
 
     private fun subscribeOnWaveformImages() {
@@ -230,5 +234,17 @@ open class PeerEdit : View() {
                 waveform.addWaveformImage(it)
             }
             .addTo(viewModel.disposable)
+    }
+
+    private fun addShortcut() {
+        workspace.shortcut(Shortcut.PLAY_SOURCE.value) {
+            viewModel.sourcePlayerProperty.value?.toggle()
+        }
+        workspace.shortcut(Shortcut.PLAY_TARGET.value, viewModel::toggleAudio)
+    }
+
+    private fun removeShortcut() {
+        workspace.accelerators.remove(Shortcut.PLAY_SOURCE.value)
+        workspace.accelerators.remove(Shortcut.PLAY_TARGET.value)
     }
 }

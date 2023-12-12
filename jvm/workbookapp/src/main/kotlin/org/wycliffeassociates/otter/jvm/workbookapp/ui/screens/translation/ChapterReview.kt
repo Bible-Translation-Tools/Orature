@@ -11,6 +11,7 @@ import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
 import org.wycliffeassociates.otter.jvm.controls.event.GoToNextChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
@@ -170,6 +171,8 @@ class ChapterReview : View() {
     }
 
     private fun subscribeEvents() {
+        addShortcut()
+
         subscribe<MarkerDeletedEvent> {
             viewModel.deleteMarker(it.markerId)
         }.also { eventSubscriptions.add(it) }
@@ -190,6 +193,19 @@ class ChapterReview : View() {
     private fun unsubscribeEvents() {
         eventSubscriptions.forEach { it.unsubscribe() }
         eventSubscriptions.clear()
+        removeShortcut()
+    }
+
+    private fun addShortcut() {
+        workspace.shortcut(Shortcut.PLAY_SOURCE.value) {
+            viewModel.sourcePlayerProperty.value?.toggle()
+        }
+        workspace.shortcut(Shortcut.PLAY_TARGET.value, viewModel::mediaToggle)
+    }
+
+    private fun removeShortcut() {
+        workspace.accelerators.remove(Shortcut.PLAY_SOURCE.value)
+        workspace.accelerators.remove(Shortcut.PLAY_TARGET.value)
     }
 
     private fun subscribeOnWaveformImages() {
