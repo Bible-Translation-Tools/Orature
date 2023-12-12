@@ -9,7 +9,7 @@
     -fx-background-color: -wa-foreground-hover;
 }
 
-.translation-card-button:focused {
+.translation-card-button:focus-visible {
     -fx-border-width: 4px;
     -fx-border-color: -wa-button-border;
     -fx-border-insets: -2;
