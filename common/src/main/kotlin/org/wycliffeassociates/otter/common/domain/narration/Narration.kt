@@ -97,6 +97,7 @@ class Narration @AssistedInject constructor(
         get() {
             return chapter.getSelectedTake() != null
         }
+    private var takeAudioModifier: NarrationTakeAudioModifier? = null
 
     init {
         val writer = initializeWavWriter()
@@ -110,6 +111,11 @@ class Narration @AssistedInject constructor(
             resetUncommittedFramesOnUpdatedVerses(),
         )
         loadChapterIntoPlayer()
+        takeAudioModifier = if (chapter.getSelectedTake() != null) {
+            NarrationTakeAudioModifier(chapter.getSelectedTake()!!)
+        } else {
+            null
+        }
     }
 
     fun lockToVerse(verseIndex: Int?) {
@@ -231,24 +237,14 @@ class Narration @AssistedInject constructor(
         uncommittedRecordedFrames.set(0)
         isRecording.set(false)
 
-        if (hasChapterTake) {
-            val takeAudioModifier = NarrationTakeAudioModifier(chapter.getSelectedTake()!!)
-
-            takeAudioModifier.modifyAudioData(
-                chapterRepresentation.getAudioFileReader(),
-                activeVerses
-            )
-        }
+        takeAudioModifier?.modifyAudioData(chapterRepresentation.getAudioFileReader(), activeVerses)
     }
 
     fun onVerseMarkerMoved(verseIndex: Int, delta: Int) {
         val action = MoveMarkerAction(verseIndex, delta)
         execute(action)
 
-        if (hasChapterTake) {
-            val takeAudioModifier = NarrationTakeAudioModifier(chapter.getSelectedTake()!!)
-            takeAudioModifier.modifyMetaData(activeVerses)
-        }
+        takeAudioModifier?.modifyMetaData(activeVerses)
     }
 
     fun onEditVerse(verseIndex: Int, editedFile: File) {
@@ -260,13 +256,7 @@ class Narration @AssistedInject constructor(
         val action = EditVerseAction(verseIndex, start, end)
         execute(action)
 
-        if (hasChapterTake) {
-            val takeAudioModifier = NarrationTakeAudioModifier(chapter.getSelectedTake()!!)
-            takeAudioModifier.modifyAudioData(
-                chapterRepresentation.getAudioFileReader(),
-                activeVerses
-            )
-        }
+        takeAudioModifier?.modifyAudioData(chapterRepresentation.getAudioFileReader(), activeVerses)
     }
 
     fun onResetAll() {
@@ -442,6 +432,7 @@ class Narration @AssistedInject constructor(
                     chapterRepresentation.getAudioFileReader(),
                     activeVerses
                 )
+                takeAudioModifier = NarrationTakeAudioModifier(take)
                 take
             }
     }
