@@ -9,10 +9,8 @@ import org.junit.Test
 import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
 import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
-import org.wycliffeassociates.otter.common.data.audio.AudioMarker
-import org.wycliffeassociates.otter.common.data.audio.BookMarker
-import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
-import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.common.data.audio.*
+import org.wycliffeassociates.otter.common.data.primitives.Marker
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
@@ -28,20 +26,21 @@ val chapterTakeAudioFile = File(testDirWithAudio, "testChapterTake.wav")
 val tempAudioFile = File(testDirWithAudio, "tempAudio.pcm")
 
 class NarrationTakeModifierTest {
-    lateinit var chapterTake : Take
+    lateinit var chapterTake: Take
 
-    private fun mockTake() : Take {
+    private fun mockTake(): Take {
         return mockk<Take> {
             every { format } returns MimeType.WAV
             every { file } returns OratureAudioFile(
                 chapterTakeAudioFile,
                 DEFAULT_CHANNELS,
                 DEFAULT_SAMPLE_RATE,
-                DEFAULT_BITS_PER_SAMPLE).file
+                DEFAULT_BITS_PER_SAMPLE
+            ).file
         }
     }
 
-    private fun mockDirectoryProvider() : IDirectoryProvider {
+    private fun mockDirectoryProvider(): IDirectoryProvider {
         return mockk<IDirectoryProvider> {}
     }
 
@@ -87,18 +86,21 @@ class NarrationTakeModifierTest {
         }
     }
 
-    private fun makeTestChapterTakeRecording(audioFile: OratureAudioFile, secondsOfAudio: Int, markers: List<AudioMarker>) {
+    private fun makeTestChapterTakeRecording(
+        audioFile: OratureAudioFile,
+        secondsOfAudio: Int,
+        markers: List<AudioMarker>
+    ) {
         addBytesToFile(tempAudioFile, DEFAULT_SAMPLE_RATE * 2 * secondsOfAudio)
         val audioFileUtils = AudioFileUtils(mockDirectoryProvider())
         audioFileUtils.appendFile(audioFile, tempAudioFile)
 
         audioFile.clearCues()
         markers.forEach { marker ->
-            audioFile.addMarker(marker)
+            audioFile.addMarker(audioFile.getMarkerTypeFromClass(marker::class), marker)
         }
         audioFile.update()
     }
-
 
 
     @Test
@@ -125,7 +127,7 @@ class NarrationTakeModifierTest {
 
         // Verify that we have the expected cues specified by originalAudioMarkers
         takeModifier.audioFile.getCues().forEachIndexed { idx, cue ->
-            Assert.assertEquals(originalAudioMarkers[idx].toCue(), cue)
+            Assert.assertTrue(originalAudioMarkers.map { it.toCue() }.contains(cue))
         }
 
         val newAudioMarkers = listOf<AudioMarker>(
@@ -143,7 +145,7 @@ class NarrationTakeModifierTest {
 
         // Verify that we have the expected cues specified by newAudioMarkers
         takeModifier.audioFile.getCues().forEachIndexed { idx, cue ->
-            Assert.assertEquals(newAudioMarkers[idx].toCue(), cue)
+            Assert.assertTrue(newAudioMarkers.map { it.toCue() }.contains(cue))
         }
     }
 
@@ -171,7 +173,7 @@ class NarrationTakeModifierTest {
 
         // Verify that we have the expected cues specified by originalAudioMarkers
         takeModifier.audioFile.getCues().forEachIndexed { idx, cue ->
-            Assert.assertEquals(originalAudioMarkers[idx].toCue(), cue)
+            Assert.assertTrue(originalAudioMarkers.map { it.toCue() }.contains(cue))
         }
 
         val newAudioMarkers = listOf<AudioMarker>(
@@ -187,7 +189,59 @@ class NarrationTakeModifierTest {
 
         // Verify that we have the expected cues specified by newAudioMarkers
         takeModifier.audioFile.getCues().forEachIndexed { idx, cue ->
-            Assert.assertEquals(newAudioMarkers[idx].toCue(), cue)
+            Assert.assertTrue(newAudioMarkers.map { it.toCue() }.contains(cue))
+        }
+    }
+
+    @Test
+    fun `modifyMetadata multiple times with same markers`() {
+        val takeModifier = NarrationTakeAudioModifier(chapterTake)
+        val secondsOfAudio = 10
+
+        val originalAudioMarkers = listOf(
+            BookMarker("gen", 0),
+            ChapterMarker(1, 44100),
+            VerseMarker(1, 1, 88200),
+            VerseMarker(2, 2, 132300),
+            VerseMarker(3, 3, 176400)
+        )
+
+        // Initializes audio and adds markers
+        makeTestChapterTakeRecording(
+            takeModifier.audioFile,
+            secondsOfAudio,
+            originalAudioMarkers
+        )
+
+        // Verify that we have the expected cues specified by originalAudioMarkers
+        takeModifier.audioFile.getCues().forEachIndexed { idx, cue ->
+            Assert.assertTrue(originalAudioMarkers.map { it.toCue() }.contains(cue))
+        }
+
+        // Re-inserts markers
+        var newAudioMarkers = originalAudioMarkers.map { it }
+
+        takeModifier.modifyMetaData(newAudioMarkers)
+
+        // Verify that we have the expected amount of cues / Markers in the Wav file
+        Assert.assertEquals(newAudioMarkers.size, takeModifier.audioFile.getCues().size)
+
+        // Verify that we have the expected cues specified by newAudioMarkers
+        takeModifier.audioFile.getCues().forEachIndexed { idx, cue ->
+            Assert.assertTrue(newAudioMarkers.map { it.toCue() }.contains(cue))
+        }
+
+        // Re-inserts markers
+        newAudioMarkers = originalAudioMarkers.map { it }
+
+        takeModifier.modifyMetaData(newAudioMarkers)
+
+        // Verify that we have the expected amount of cues / Markers in the Wav file
+        Assert.assertEquals(newAudioMarkers.size, takeModifier.audioFile.getCues().size)
+
+        // Verify that we have the expected cues specified by newAudioMarkers
+        takeModifier.audioFile.getCues().forEachIndexed { idx, cue ->
+            Assert.assertTrue(newAudioMarkers.map { it.toCue() }.contains(cue))
         }
     }
 }

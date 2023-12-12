@@ -4,10 +4,7 @@ import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
 import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
-import org.wycliffeassociates.otter.common.data.audio.AudioMarker
-import org.wycliffeassociates.otter.common.data.audio.BookMarker
-import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
-import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.common.data.audio.*
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 
@@ -46,7 +43,7 @@ class NarrationTakeAudioModifier(val take: Take, createNewAudioFile: Boolean = f
 
     private fun addNarrationMarkers(markers: List<AudioMarker>) {
         markers.forEach { marker ->
-            audioFile.addMarker(marker)
+            audioFile.addMarker(audioFile.getMarkerTypeFromClass(marker::class), marker)
         }
     }
 }
