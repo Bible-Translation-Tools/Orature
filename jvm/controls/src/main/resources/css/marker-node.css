@@ -15,7 +15,7 @@
     -fx-focus-traversable: false;
 }
 
-.marker-node:focused .marker-node__drag-button {
+.marker-node:focus-visible .marker-node__drag-button {
     -fx-border-width: 4px;
     -fx-border-color: -wa-button-border;
     -fx-border-insets: 0;
