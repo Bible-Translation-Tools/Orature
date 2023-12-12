@@ -109,17 +109,22 @@ class NarrationViewModel : ViewModel() {
     val chunkTotalProperty = SimpleIntegerProperty(0)
     val chunksList: ObservableList<Chunk> = observableListOf()
     val narratableList: ObservableList<NarrationTextItemData> = observableListOf()
-
     val recordedVerses = observableListOf<AudioMarker>()
     val hasVersesProperty = SimpleBooleanProperty()
     val lastRecordedVerseProperty = SimpleIntegerProperty()
     val audioPositionProperty = SimpleIntegerProperty()
     val totalAudioSizeProperty = SimpleIntegerProperty()
 
-    val potentiallyFinishedProperty = chunkTotalProperty.eq(recordedVerses.sizeProperty)
+    //FIXME: Refactor this if and when Chunk entries are officially added for Titles in the Workbook
+    var numberOfTitlesProperty = SimpleIntegerProperty(0)
+    val potentiallyFinishedProperty = chunkTotalProperty
+        .eq(recordedVerses.sizeProperty.minus(numberOfTitlesProperty))
+        .and(isRecordingProperty.not())
+        .and(isRecordingAgainProperty.not())
     val potentiallyFinished by potentiallyFinishedProperty
 
     val pluginContextProperty = SimpleObjectProperty(PluginType.EDITOR)
+    val pluginOpenedProperty = SimpleBooleanProperty(false)
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
@@ -386,6 +391,7 @@ class NarrationViewModel : ViewModel() {
     private fun insertTitles(chapter: Chapter, chunks: List<Chunk>): List<Chunk> {
         val chunksWithTitles = chunks.toMutableList()
         val chapterTitle = chapterTitleProperty.value
+        var numberOfTitles = 1
         chunksWithTitles.add(
             0,
             Chunk(
@@ -401,7 +407,6 @@ class NarrationViewModel : ViewModel() {
                 ContentType.TITLE
             )
         )
-
         val addBookTitle = chapter.sort == 1
         if (addBookTitle) {
             val book = workbookDataStore.workbook.source
@@ -420,7 +425,9 @@ class NarrationViewModel : ViewModel() {
                     ContentType.TITLE
                 )
             )
+            numberOfTitles = 2
         }
+        numberOfTitlesProperty.set(numberOfTitles)
         return chunksWithTitles
     }
 
@@ -529,6 +536,8 @@ class NarrationViewModel : ViewModel() {
         renderer.clearActiveRecordingData()
 
         refreshTeleprompter()
+
+        createPotentiallyFinishedChapterTake()
     }
 
     fun openInAudioPlugin(index: Int) {
@@ -674,6 +683,7 @@ class NarrationViewModel : ViewModel() {
                 logger.error("Error in processing take with plugin type: $pluginType, ${e.message}")
             }
             .flatMapSingle { plugin ->
+                pluginOpenedProperty.set(true)
                 workbookDataStore.activeTakeNumberProperty.set(1)
                 FX.eventbus.fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
                 audioPluginViewModel.edit(file)
@@ -729,7 +739,6 @@ class NarrationViewModel : ViewModel() {
 
                     recordStart = recordedVerses.isEmpty()
                     recordResume = recordedVerses.isNotEmpty()
-
                     createPotentiallyFinishedChapterTake()
                 },
                 { e ->

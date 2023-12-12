@@ -67,11 +67,16 @@
 }
 
 .chunking-step__header-section,
+.chunking-step-drawer__header-section,
 .source-text-drawer__header-section {
     -fx-alignment: center;
     -fx-padding: 16;
     -fx-border-width: 1;
     -fx-border-color: transparent transparent -wa-border-light transparent;
+}
+
+.chunking-step__header-section:hover {
+    -fx-background-color: -wa-secondary-btn-background-hover;
 }
 
 .chunking-step__header-section .chunking-step__title {

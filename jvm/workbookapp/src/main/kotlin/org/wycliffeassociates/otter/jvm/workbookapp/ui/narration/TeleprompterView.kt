@@ -11,6 +11,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.layout.Priority
 import javafx.util.Duration
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterItemState
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.narration.*
@@ -70,15 +71,20 @@ class TeleprompterViewModel : ViewModel() {
     fun currentVerseTextBinding(): StringBinding {
         return Bindings.createStringBinding(
             {
-                val title = messages["currentVerseTitle"]
-                val verseTitle = messages["verse"]
-                val stickyVerseLabel = stickyVerseProperty.value?.chunk?.title
-
-                MessageFormat.format(
-                    title,
-                    verseTitle,
-                    stickyVerseLabel
-                )
+                stickyVerseProperty.value?.let { itemData ->
+                    if (itemData.chunk.label == "verse") {
+                        MessageFormat.format(
+                            messages["currentVerseTitle"],
+                            messages["verse"],
+                            itemData.chunk.title
+                        )
+                    } else {
+                        MessageFormat.format(
+                            messages["currentTitle"],
+                            itemData.chunk.textItem.text
+                        )
+                    }
+                }
             },
             stickyVerseProperty
         )
@@ -104,7 +110,15 @@ class TeleprompterViewModel : ViewModel() {
 
     fun updateStickyVerse() {
         val verse = narrationViewModel.narratableList
-                .firstOrNull { !it.hasRecording }
+                .firstOrNull {
+                    val activeStates = listOf(
+                        TeleprompterItemState.RECORD_ACTIVE,
+                        TeleprompterItemState.RECORD_AGAIN_ACTIVE,
+                        TeleprompterItemState.RECORDING_PAUSED,
+                        TeleprompterItemState.RECORD_AGAIN_PAUSED
+                    )
+                    it.state in activeStates || !it.hasRecording
+                }
 
         stickyVerseProperty.set(verse)
     }

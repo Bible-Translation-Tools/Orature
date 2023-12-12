@@ -356,6 +356,8 @@ class NarrationTextItem : VBox() {
                                 stateProperty.isNotEqualTo(TeleprompterItemState.RECORDING_PAUSED)
                             )
                     )
+                ).or(
+                    stateProperty.isEqualTo(TeleprompterItemState.RECORD_AGAIN_DISABLED)
                 )
             }
             if (graphic != null) it.graphic = graphic

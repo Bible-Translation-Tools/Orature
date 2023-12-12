@@ -25,7 +25,7 @@ class ChunkingStepsDrawer(
     init {
         addClass("chunking-step-drawer")
         hbox {
-            addClass("chunking-step__header-section")
+            addClass("chunking-step-drawer__header-section")
             label(messages["steps"]) {
                 addClass("h3", "h3--80")
                 visibleWhen { isCollapsedProperty.not() }

@@ -175,11 +175,17 @@ class SourceAudioMissing : View() {
 
             button {
                 addClass("btn", "btn--secondary")
-                text = MessageFormat.format(
-                    messages["begin_narrating_book"],
-                    viewModel.bookTitleProperty.value
-                )
-                tooltip(text)
+                textProperty().bind(viewModel.bookTitleProperty.stringBinding {
+                    it?.let { bookTitle ->
+                        MessageFormat.format(
+                            messages["begin_narrating_book"],
+                            bookTitle
+                        )
+                    }
+                })
+                tooltip {
+                    textProperty().bind(this@button.textProperty())
+                }
                 graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
                 prefWidthProperty().bind(this@hbox.widthProperty().divide(2))
 
