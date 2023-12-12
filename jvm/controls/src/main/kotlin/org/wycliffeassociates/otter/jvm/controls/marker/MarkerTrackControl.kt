@@ -305,6 +305,10 @@ open class MarkerTrackControl : Region() {
                 percent + MOVE_MARKER_INTERVAL
             }
             updateValue(marker.markerIndexProperty.value, moveTo)
+            // notify changes for model's undo/redo history update
+            val start = pixelsToFrames(position)
+            val end = pixelsToFrames(marker.markerPositionProperty.value)
+            FX.eventbus.fire(MarkerMovedEvent(marker.markerIdProperty.value, start, end))
         }
     }
 
