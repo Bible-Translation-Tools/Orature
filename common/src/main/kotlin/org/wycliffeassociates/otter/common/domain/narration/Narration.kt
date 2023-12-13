@@ -13,17 +13,13 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
-import org.wycliffeassociates.otter.common.audio.wav.WavFile
-import org.wycliffeassociates.otter.common.audio.wav.WavOutputStream
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
-import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
-import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
 import org.wycliffeassociates.otter.common.recorder.WavFileWriter
 import java.io.File
@@ -98,6 +94,7 @@ class Narration @AssistedInject constructor(
             return chapter.getSelectedTake() != null
         }
     private var takeAudioModifier: NarrationTakeAudioModifier? = null
+    private lateinit var audioBouncer: AudioBouncer
 
     init {
         val writer = initializeWavWriter()
@@ -116,6 +113,8 @@ class Narration @AssistedInject constructor(
         } else {
             null
         }
+
+        audioBouncer = AudioBouncer()
     }
 
     fun lockToVerse(verseIndex: Int?) {
@@ -182,6 +181,9 @@ class Narration @AssistedInject constructor(
         seek(getLocationInChapter(), true)
         history.undo(chapterRepresentation.totalVerses)
         chapterRepresentation.onVersesUpdated()
+        // TODO: note, this works, but is slow.
+//        takeAudioModifier?.modifyAudioData(chapterRepresentation.getAudioFileReader(), activeVerses)
+        audioBouncer.bounce(activeVerses)
     }
 
     fun redo() {
@@ -189,6 +191,10 @@ class Narration @AssistedInject constructor(
         seek(getLocationInChapter(), true)
         history.redo(chapterRepresentation.totalVerses)
         chapterRepresentation.onVersesUpdated()
+        // TODO: note, this works, but is slow.
+//        takeAudioModifier?.modifyAudioData(chapterRepresentation.getAudioFileReader(), activeVerses)
+        audioBouncer.bounce(activeVerses)
+
     }
 
     fun finalizeVerse(verseIndex: Int) {
