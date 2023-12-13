@@ -35,7 +35,7 @@
     -fx-alignment: center;
 }
 
-.chunk-marker:focused .chunk-marker__container {
+.chunk-marker:focus-visible .chunk-marker__container {
     -fx-border-width: 4px;
     -fx-border-color: -wa-button-border;
     -fx-border-radius: 0 4px 4px 0;
