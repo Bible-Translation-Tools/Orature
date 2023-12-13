@@ -74,6 +74,7 @@ class ChapterReview : View() {
                     val final = Utils.clamp(0, curFrames - deltaFrames, duration)
                     viewModel.seek(final)
                 }
+                setOnSeek(viewModel::seek)
                 setOnRewind(viewModel::rewind)
                 setOnFastForward(viewModel::fastForward)
                 setOnToggleMedia(viewModel::mediaToggle)

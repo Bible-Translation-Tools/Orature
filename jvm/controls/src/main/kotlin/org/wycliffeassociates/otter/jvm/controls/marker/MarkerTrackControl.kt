@@ -49,6 +49,7 @@ open class MarkerTrackControl : Region() {
     val onPositionChangedProperty = SimpleObjectProperty<(Int, Double) -> Unit>()
     val onSeekPreviousProperty = SimpleObjectProperty<() -> Unit>()
     val onSeekNextProperty = SimpleObjectProperty<() -> Unit>()
+    val onSeekProperty = SimpleObjectProperty<(Int) -> Unit>()
     val onLocationRequestProperty = SimpleObjectProperty<() -> Int>()
 
     fun setOnPositionChanged(op: (Int, Double) -> Unit) {
@@ -184,8 +185,13 @@ open class MarkerTrackControl : Region() {
                 }
             }
 
-            focusedProperty().onChange {
-                if (it) focusedMarkerProperty.set(this)
+            focusVisibleProperty().onChange {
+                if (it) {
+                    // seeks to focused marker (focus-visible)
+                    val markerFrame = pixelsToFrames(markerPositionProperty.value)
+                    onSeekProperty.value?.invoke(markerFrame)
+                    focusedMarkerProperty.set(this)
+                }
             }
         }
     }
@@ -273,13 +279,6 @@ open class MarkerTrackControl : Region() {
                     if (e.isControlDown) {
                         // Ctrl + Tab should move the focus out of the markers area and into the next node
                         NodeHelper.traverse(this, Direction.NEXT_IN_LINE, TraversalMethod.KEY)
-                    }
-                    else if (e.isShiftDown) {
-                        onSeekPreviousProperty.value?.invoke()
-                        focusMarker(e)
-                    } else {
-                        onSeekNextProperty.value?.invoke()
-                        focusMarker(e)
                     }
                 }
 
