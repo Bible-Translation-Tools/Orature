@@ -22,12 +22,17 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
 import javafx.animation.AnimationTimer
+import javafx.scene.Parent
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyCodeCombination
+import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ConsumeViewModel
@@ -60,6 +65,7 @@ class Consume : View() {
         viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
         viewModel.onDockConsume()
         waveform.markers.bind(viewModel.markers) { it }
+        addShortcut()
     }
 
     override fun onUndock() {
@@ -68,6 +74,7 @@ class Consume : View() {
         timer?.stop()
         cleanUpWaveform()
         viewModel.onUndockConsume()
+        removeShortcut()
     }
 
     private fun subscribeOnWaveformImages() {
@@ -86,7 +93,7 @@ class Consume : View() {
             center = VBox().apply {
                 MarkerWaveform().apply {
                     waveform = this
-                    addClass("consume__scrolling-waveform")
+                    addClass("waveform--focusable")
                     vgrow = Priority.ALWAYS
                     clip = Rectangle().apply {
                         widthProperty().bind(this@vbox.widthProperty())
@@ -149,5 +156,13 @@ class Consume : View() {
             setOnToggleMedia(viewModel::mediaToggle)
             setOnResumeMedia(viewModel::resumeMedia)
         }
+    }
+
+    private fun addShortcut() {
+        workspace.shortcut(Shortcut.PLAY_SOURCE.value, viewModel::mediaToggle)
+    }
+
+    private fun removeShortcut() {
+        workspace.accelerators.remove(Shortcut.PLAY_SOURCE.value)
     }
 }

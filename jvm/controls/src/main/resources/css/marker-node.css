@@ -1,3 +1,7 @@
+.marker-node {
+    -fx-focus-traversable: true;
+}
+
 .marker-node .title-section {
     -fx-pref-height: 80;
     -fx-alignment: center-left;
@@ -5,4 +9,14 @@
     -fx-border-color: -wa-border-light;
     -fx-spacing: 10;
     -fx-padding: 0 2 0 16;
+}
+
+.marker-node__drag-button {
+    -fx-focus-traversable: false;
+}
+
+.marker-node:focus-visible .marker-node__drag-button {
+    -fx-border-width: 4px;
+    -fx-border-color: -wa-button-border;
+    -fx-border-insets: 0;
 }

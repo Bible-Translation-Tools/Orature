@@ -18,6 +18,9 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.marker
 
+import com.sun.javafx.scene.NodeHelper
+import com.sun.javafx.scene.traversal.Direction
+import com.sun.javafx.scene.traversal.TraversalMethod
 import com.sun.javafx.util.Utils
 import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
@@ -267,12 +270,17 @@ open class MarkerTrackControl : Region() {
                     e.consume()
                 }
                 KeyCode.TAB -> {
-                    if (e.isShiftDown) {
+                    if (e.isControlDown) {
+                        // Ctrl + Tab should move the focus out of the markers area and into the next node
+                        NodeHelper.traverse(this, Direction.NEXT_IN_LINE, TraversalMethod.KEY)
+                    }
+                    else if (e.isShiftDown) {
                         onSeekPreviousProperty.value?.invoke()
+                        focusMarker(e)
                     } else {
                         onSeekNextProperty.value?.invoke()
+                        focusMarker(e)
                     }
-                    focusMarker(e)
                 }
 
                 else -> {}
@@ -297,6 +305,10 @@ open class MarkerTrackControl : Region() {
                 percent + MOVE_MARKER_INTERVAL
             }
             updateValue(marker.markerIndexProperty.value, moveTo)
+            // notify changes for model's undo/redo history update
+            val start = pixelsToFrames(position)
+            val end = pixelsToFrames(marker.markerPositionProperty.value)
+            FX.eventbus.fire(MarkerMovedEvent(marker.markerIdProperty.value, start, end))
         }
     }
 

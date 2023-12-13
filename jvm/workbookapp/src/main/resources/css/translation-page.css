@@ -122,3 +122,9 @@
     -fx-min-height: 16;
     -fx-alignment: center-left;
 }
+
+.waveform--focusable:active {
+    -fx-border-width: 4px 0;
+    -fx-border-color: -wa-button-border;
+    -fx-border-insets: 0;
+}

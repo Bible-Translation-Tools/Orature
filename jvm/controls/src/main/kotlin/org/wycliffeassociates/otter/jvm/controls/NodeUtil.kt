@@ -9,6 +9,7 @@ import javafx.scene.layout.StackPane
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import tornadofx.*
+import kotlin.math.min
 
 /**
  * Calls this method from a scrollable component such as a ScrollPane
@@ -37,9 +38,9 @@ fun Parent.customizeScrollbarSkin() {
 }
 
 /** The distance of scroll bar increment/decrement measured in audio frames */
-const val SCROLL_INCREMENT_UNIT = 20_000.0
+const val SCROLL_INCREMENT_UNIT = 10_000.0
 /** The distance of scroll bar jump measured in audio frames */
-const val SCROLL_JUMP_UNIT = 400_000.0
+const val SCROLL_JUMP_UNIT = 100_000.0
 
 /**
  * Constructs a custom horizontal scroll bar for the audio waveform.
@@ -59,17 +60,20 @@ fun createAudioScrollBar(
         orientation = Orientation.HORIZONTAL
         disableWhen { isPlayingProperty }
 
-        unitIncrement = SCROLL_INCREMENT_UNIT
-        blockIncrement = SCROLL_JUMP_UNIT
-
         valueProperty().onChange { value ->
             if (!isPlayingProperty.value) {
                 onScroll(value.toInt())
             }
         }
         valueProperty().bindBidirectional(audioPositionProperty) // sync when audio played
-
         maxProperty().bind(totalFramesProperty)
+
+        unitIncrement = SCROLL_INCREMENT_UNIT
+        blockIncrementProperty().bind(maxProperty().doubleBinding {
+            it?.let { maxValue ->
+                maxValue.toDouble() / 10
+            } ?: SCROLL_JUMP_UNIT
+        })
 
         runLater {
             customizeScrollbarSkin()

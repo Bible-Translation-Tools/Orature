@@ -27,6 +27,7 @@ import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.math.min
 
 class AudioWorkspaceView : View() {
     private val userIsDraggingProperty = SimpleBooleanProperty(false)
@@ -86,7 +87,11 @@ class AudioWorkspaceView : View() {
         }
 
         unitIncrement = SCROLL_INCREMENT_UNIT
-        blockIncrement = SCROLL_JUMP_UNIT
+        blockIncrementProperty().bind(maxProperty().doubleBinding {
+            it?.let { maxValue ->
+                maxValue.toDouble() / 10
+            } ?: SCROLL_JUMP_UNIT
+        })
 
         valueProperty().onChange { pos ->
             if (pos.toInt() != viewModel.audioPositionProperty.value) {

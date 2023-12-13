@@ -9,6 +9,7 @@ import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.TakeSelectionAnimationMediator
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
@@ -166,6 +167,8 @@ class BlindDraft : View() {
     }
 
     private fun subscribeEvents() {
+        addShortcut()
+
         viewModel.currentChunkProperty.onChangeWithDisposer { selectedChunk ->
             // clears recording screen if another chunk is selected
             if (selectedChunk != null && mainSectionProperty.value == recordingView) {
@@ -198,5 +201,16 @@ class BlindDraft : View() {
         eventSubscriptions.clear()
         listenerDisposers.forEach { it.dispose() }
         listenerDisposers.clear()
+        removeShortcut()
+    }
+
+    private fun addShortcut() {
+        workspace.shortcut(Shortcut.PLAY_SOURCE.value) {
+            viewModel.sourcePlayerProperty.value?.toggle()
+        }
+    }
+
+    private fun removeShortcut() {
+        workspace.accelerators.remove(Shortcut.PLAY_SOURCE.value)
     }
 }
