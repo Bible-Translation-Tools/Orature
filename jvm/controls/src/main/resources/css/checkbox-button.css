@@ -42,7 +42,7 @@
     -fx-text-fill: -wa-primary;
 }
 
-.checkbox-button:focused {
+.checkbox-button:focus-visible {
     -fx-border-width: 4px;
     -fx-border-color: -wa-button-border;
     -fx-border-radius: 6px;

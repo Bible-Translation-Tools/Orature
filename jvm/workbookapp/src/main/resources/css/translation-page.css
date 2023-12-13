@@ -39,7 +39,7 @@
     -fx-background-color: #E5E8EB;
 }
 
-.chunking-step:focused .chunking-step__header-section {
+.chunking-step:focus-visible .chunking-step__header-section {
     -fx-border-width: 2;
     -fx-border-color: -wa-button-border;
 }

@@ -76,7 +76,7 @@
     -fx-border-width: 1px;
 }
 
-.vm-play-controls__btn--rounded:focused {
+.vm-play-controls__btn--rounded:focus-visible {
     -fx-border-width: 4px;
     -fx-border-color: -wa-button-border;
 }

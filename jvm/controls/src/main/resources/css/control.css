@@ -32,7 +32,7 @@
     -fx-cursor: hand;
 }
 
-.btn:focused {
+.btn:focus-visible {
     -fx-border-width: 4px;
     -fx-border-color: -wa-button-border;
     -fx-border-insets: -2;
@@ -347,7 +347,7 @@
     -fx-background-color: -wa-foreground-pressed;
 }
 
-.wa-toggle-btn-group .custom-toggle-btn:focused {
+.wa-toggle-btn-group .custom-toggle-btn:focus-visible {
     -fx-border-width: 4px !important;
     -fx-border-color: -wa-button-border;
     -fx-border-insets: -2;
@@ -455,7 +455,7 @@
     -fx-cursor: hand;
 }
 
-.wa-combobox:focused {
+.wa-combobox:focus-visible {
     -fx-border-width: 4px;
     -fx-border-color: -wa-button-border;
     -fx-border-insets: -2;
@@ -573,7 +573,7 @@
     -fx-background-insets: -2, 0;
 }
 
-.wa-radio:focused {
+.wa-radio:focus-visible {
     -fx-border-width: 4px;
     -fx-border-color: -wa-button-border;
     -fx-border-radius: 6px;
@@ -601,7 +601,7 @@
     -fx-background-color: -wa-black-10;
 }
 
-.wa-radio--bordered:focused {
+.wa-radio--bordered:focus-visible {
     -fx-border-width: 4px;
     -fx-border-color: -wa-button-border;
     -fx-border-radius: 6px;
@@ -661,7 +661,7 @@
     -fx-pref-height: 20px;
 }
 
-.wa-slider:focused .thumb {
+.wa-slider:focus-visible .thumb {
     -fx-border-color: -wa-button-border;
     -fx-border-width: 4px;
 }
@@ -684,7 +684,7 @@
     -fx-arc-height: 10;
 }
 
-.wa-audio-slider:focused .wa-audio-slider-thumb {
+.wa-audio-slider:focus-visible .wa-audio-slider-thumb {
     -fx-stroke-width: 4;
     -fx-stroke: -wa-button-border;
 }
@@ -711,7 +711,7 @@
     -fx-cursor: hand;
 }
 
-.wa-menu-button:focused {
+.wa-menu-button:focus-visible {
     -fx-border-width: 4px;
     -fx-border-color: -wa-button-border;
     -fx-border-radius: 6px;
@@ -805,7 +805,7 @@
 
 /* ------------------- Hyperlink --------------- */
 
-.hyperlink:focused {
+.hyperlink:focus-visible {
     -fx-border-width: 4px;
     -fx-border-color: -wa-button-border;
     -fx-border-style: solid;
@@ -839,7 +839,7 @@
     -fx-border-width: 0 0 3 0;
 }
 
-.wa-tab-pane:focused .tab {
+.wa-tab-pane:focus-visible .tab {
     -fx-border-color: transparent;
 }
 
@@ -855,7 +855,7 @@
     -fx-border-color: transparent;
 }
 
-.wa-tab-pane:focused .tab:selected .focus-indicator {
+.wa-tab-pane:focus-visible .tab:selected .focus-indicator {
     -fx-border-color: -wa-button-border -wa-button-border -wa-selected-tab-line -wa-button-border;
     -fx-border-width: 3px;
 }

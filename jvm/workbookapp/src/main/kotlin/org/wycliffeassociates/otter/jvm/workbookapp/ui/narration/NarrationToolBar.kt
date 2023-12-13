@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
+import javafx.beans.binding.Bindings.not
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -21,6 +22,7 @@ import java.text.MessageFormat
 class NarrationToolBar : View() {
     private val viewModel by inject<NarrationViewModel>()
 
+
     override val root = hbox {
         addClass("narration-toolbar", "narration-toolbar__play-controls")
         alignment = Pos.CENTER_LEFT
@@ -28,6 +30,11 @@ class NarrationToolBar : View() {
             addClass("btn", "btn--secondary")
             addPseudoClass("active")
             tooltip { textProperty().bind(this@button.textProperty()) }
+
+
+            disableWhen {
+                viewModel.isRecordingProperty.or(viewModel.hasVersesProperty.not())
+            }
 
             viewModel.isPlayingProperty.onChangeAndDoNow {
                 it?.let { playing ->
@@ -61,7 +68,7 @@ class NarrationToolBar : View() {
                 viewModel.seekToPrevious()
             }
             disableWhen {
-                viewModel.isPlayingProperty.or(viewModel.isRecordingProperty)
+                viewModel.isPlayingProperty.or(viewModel.isRecordingProperty).or(viewModel.hasVersesProperty.not())
             }
         }
         button {
@@ -72,7 +79,7 @@ class NarrationToolBar : View() {
                 viewModel.seekToNext()
             }
             disableWhen {
-                viewModel.isPlayingProperty.or(viewModel.isRecordingProperty)
+                viewModel.isPlayingProperty.or(viewModel.isRecordingProperty).or(viewModel.hasVersesProperty.not())
             }
         }
     }

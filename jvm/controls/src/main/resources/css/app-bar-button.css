@@ -46,7 +46,7 @@
     -fx-border-width: 0px;
 }
 
-.app-bar-button:focused {
+.app-bar-button:focus-visible {
     -fx-border-width: 4px;
     -fx-border-color: -wa-button-border;
 }

@@ -48,7 +48,7 @@
     -fx-focus-traversable: true
 }
 
-.breadcrumb__content:focused {
+.breadcrumb__content:focus-visible {
     -fx-border-width: 4px;
     -fx-border-insets: -3;
 }
