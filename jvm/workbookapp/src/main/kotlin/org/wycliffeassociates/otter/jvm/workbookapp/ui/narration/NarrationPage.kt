@@ -203,7 +203,7 @@ class NarrationPage : View() {
         }.let { eventSubscriptions.add(it) }
 
         subscribe<OpenChapterEvent> {
-            viewModel.loadChapter(it.chapterNumber)
+            viewModel.onChapterSelected(it.chapterNumber)
         }.let { eventSubscriptions.add(it) }
     }
 

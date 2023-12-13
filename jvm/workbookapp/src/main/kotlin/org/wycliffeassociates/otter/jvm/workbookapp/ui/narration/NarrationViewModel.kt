@@ -210,6 +210,7 @@ class NarrationViewModel : ViewModel() {
         closeNarrationAudio()
         renderer.close()
         narration.close()
+        narration.trimChapterRepresentation()
     }
 
     private fun initializeNarration(chapter: Chapter) {
@@ -320,6 +321,11 @@ class NarrationViewModel : ViewModel() {
                     }
                 ).let { disposables.add(it) }
         }
+    }
+
+    fun onChapterSelected(chapterNumber: Int) {
+        narration.trimChapterRepresentation()
+        loadChapter(chapterNumber)
     }
 
     fun loadChapter(chapterNumber: Int) {

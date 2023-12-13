@@ -6,7 +6,6 @@ import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.reactivex.Maybe
@@ -301,9 +300,17 @@ class OngoingProjectImporter @Inject constructor(
             projectFilesAccessor
         )
 
+        projectFilesAccessor.copyInProgressChapterFiles(fileReader, manifestProject)
+            .doOnError { e ->
+                logger.error("Error in importInProgressFiles, project: $derivedProject, manifestProject: $manifestProject")
+                logger.error("metadata: $metadata, sourceMetadata: ${sourceCollection.resourceContainer}")
+                logger.error("sourceCollection: $sourceCollection", e)
+            }
+            .blockingSubscribe()
+
         translation.modifiedTs = LocalDateTime.now()
         languageRepository.updateTranslation(translation).subscribe()
-        resetChaptersWithoutTakes(fileReader, derivedProject)
+        resetChaptersWithoutTakes(fileReader, derivedProject, mode)
 
         callback?.onNotifyProgress(localizeKey = "finishingUp", percent = 100.0)
 
@@ -364,7 +371,11 @@ class OngoingProjectImporter @Inject constructor(
         }
     }
 
-    private fun resetChaptersWithoutTakes(fileReader: IFileReader, derivedProject: Collection) {
+    private fun resetChaptersWithoutTakes(fileReader: IFileReader, derivedProject: Collection, mode: ProjectMode) {
+        if (mode != ProjectMode.TRANSLATION) {
+            return
+        }
+
         val chunkFileExists = fileReader.exists(RcConstants.CHUNKS_FILE)
         val chapterStarted = if (!chunkFileExists) {
             listOf()
@@ -434,7 +445,7 @@ class OngoingProjectImporter @Inject constructor(
                 logger.error("metadata: $metadata, sourceMetadata: $sourceMetadata")
                 logger.error("sourceCollection: $sourceCollection", e)
             }
-            .subscribe { newTakeFile ->
+            .blockingSubscribe { newTakeFile ->
                 insertTake(
                     newTakeFile,
                     projectFilesAccessor.audioDir,

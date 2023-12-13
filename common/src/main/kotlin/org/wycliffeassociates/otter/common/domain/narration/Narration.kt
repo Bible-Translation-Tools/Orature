@@ -488,6 +488,9 @@ class Narration @AssistedInject constructor(
         player.close()
         recorder.stop()
         chapterRepresentation.closeConnections()
+    }
+
+    fun trimChapterRepresentation() {
         chapterRepresentation.trim()
     }
 

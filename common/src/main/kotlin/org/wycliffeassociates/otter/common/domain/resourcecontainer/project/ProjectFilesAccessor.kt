@@ -47,6 +47,7 @@ import kotlin.io.path.createTempDirectory
 import kotlin.io.path.outputStream
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.AudioMetadataFileFormat
+import org.wycliffeassociates.otter.common.audio.InProgressChapterFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.*
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.workbook.Book
@@ -400,6 +401,20 @@ class ProjectFilesAccessor(
         }
     }
 
+    fun copyInProgressChapterFiles(
+        fileReader: IFileReader,
+        manifestProject: Project
+    ): Observable<String> {
+        return Observable.just(RcConstants.TAKE_DIR, manifestProject.path)
+            .filter(fileReader::exists)
+            .flatMap { audioDirInRc ->
+                val normalized = File(audioDirInRc).normalize().path
+                fileReader.copyDirectory(normalized, audioDir) {
+                    isInProgressChapterFile(it)
+                }
+            }
+    }
+
     fun getContributorInfo(): List<Contributor> {
         return ResourceContainer.load(projectDir).use { rc ->
             rc.manifest.dublinCore.contributor.map { Contributor(it) }
@@ -720,8 +735,12 @@ class ProjectFilesAccessor(
 
     private fun isAudioFile(file: String) = isAudioFile(File(file))
 
-    private fun isAudioFile(file: File) =
-        file.extension.lowercase().let { it == "wav" || it == "mp3" }
+    private fun isAudioFile(file: File) = AudioFileFormat.isSupported(file.extension)
+
+    private fun isInProgressChapterFile(file: String) = isInProgressChapterFile(File(file))
+
+    private fun isInProgressChapterFile(file: File) =
+        InProgressChapterFileFormat.isSupported(file.extension)
 
     fun getChunkFile(): File {
         return projectDir.resolve(RcConstants.CHUNKS_FILE)
