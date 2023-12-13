@@ -182,6 +182,7 @@ class TestBackupProjectExporter {
     private fun buildProjectFile(): File {
         return ResourceContainerBuilder
             .setUpEmptyProjectBuilder()
+            .setOngoingProject(true)
             .setContributors(contributors)
             .addTake(1, ContentType.META, 1, true)
             .addTake(2, ContentType.META, 1, true)

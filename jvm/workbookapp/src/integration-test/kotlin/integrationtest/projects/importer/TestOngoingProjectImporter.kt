@@ -63,6 +63,7 @@ class TestOngoingProjectImporter {
         imp
     }
     private val projectFile: File by lazy { setupRC() }
+    private val narrationBackupFile: File by lazy { setupNarrationBackup() }
     private val takesInProject = 6
     private val takesPerChapter = 2
     private val chaptersSelected = listOf(1, 2)
@@ -111,16 +112,40 @@ class TestOngoingProjectImporter {
         Assert.assertEquals(0, bookCountBefore)
         Assert.assertEquals(0, workbookRepository.getProjects().blockingGet().size)
 
-        importOngoingProject(null)
+        importOngoingProject(callback = null)
 
         val bookCountAfter = db.db.workbookDescriptorDao.fetchAll().size
         Assert.assertEquals(66, bookCountAfter)
         Assert.assertEquals(66, workbookRepository.getProjects().blockingGet().size)
     }
 
-    private fun importOngoingProject(callback: ProjectImporterCallback?) {
+    @Test
+    fun testImportNarrationBackupPopulatesProjects() {
+        val bookCountBefore = db.db.workbookDescriptorDao.fetchAll().size
+        Assert.assertEquals(0, bookCountBefore)
+        Assert.assertEquals(0, workbookRepository.getProjects().blockingGet().size)
+
+        importOngoingProject(narrationBackupFile, null)
+
+        val bookCountAfter = db.db.workbookDescriptorDao.fetchAll().size
+        Assert.assertEquals(66, bookCountAfter)
+        Assert.assertEquals(66, workbookRepository.getProjects().blockingGet().size)
+    }
+
+    @Test
+    fun testImportNarrationBackupNoCreatedTakes() {
+        val beforeTakes = db.db.takeDao.fetchAll()
+
+        importOngoingProject(narrationBackupFile, null)
+
+        val afterTakes = db.db.takeDao.fetchAll()
+
+        Assert.assertEquals(beforeTakes.size, afterTakes.size)
+    }
+
+    private fun importOngoingProject(file: File = projectFile, callback: ProjectImporterCallback?) {
         importer
-            .import(projectFile, callback)
+            .import(file, callback)
             .blockingGet()
             .let {
                 Assert.assertEquals(ImportResult.SUCCESS, it)
@@ -130,12 +155,21 @@ class TestOngoingProjectImporter {
     private fun setupRC(): File {
         return ResourceContainerBuilder
             .setUpEmptyProjectBuilder()
+            .setOngoingProject(true)
             .addTake(1, ContentType.META, 1, true)
             .addTake(2, ContentType.META, 1, true)
             .addTake(3, ContentType.META, 1, true)
             .addTake(1, ContentType.TEXT, 1, true, chapter = 1, start = 1, end = 1)
             .addTake(2, ContentType.TEXT, 1, true, chapter = 2, start = 1, end = 1)
             .addTake(3, ContentType.TEXT, 1, true, chapter = 3, start = 1, end = 1)
+            .buildFile()
+    }
+
+    private fun setupNarrationBackup(): File {
+        return ResourceContainerBuilder
+            .setUpEmptyProjectBuilder()
+            .setOngoingProject(true)
+            .addInProgressChapter(1)
             .buildFile()
     }
 }

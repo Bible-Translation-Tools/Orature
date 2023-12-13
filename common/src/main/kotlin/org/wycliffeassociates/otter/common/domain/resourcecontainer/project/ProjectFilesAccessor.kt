@@ -735,7 +735,8 @@ class ProjectFilesAccessor(
 
     private fun isAudioFile(file: String) = isAudioFile(File(file))
 
-    private fun isAudioFile(file: File) = AudioFileFormat.isSupported(file.extension)
+    private fun isAudioFile(file: File) =
+        file.extension.lowercase().let { it == "wav" || it == "mp3" }
 
     private fun isInProgressChapterFile(file: String) = isInProgressChapterFile(File(file))
 
