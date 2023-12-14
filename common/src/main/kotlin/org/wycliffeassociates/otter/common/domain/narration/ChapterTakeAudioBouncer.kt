@@ -43,8 +43,12 @@ class ChapterTakeAudioBouncer : Runnable {
 
                 mostRecentBounceState?.let {
                     logger.info("Bouncing audio")
-                    file?.let { it1 -> reader?.let { it2 -> bounceAudio(it1, it2, mostRecentBounceState) } }
-                    logger.info("Finished bouncing audio")
+                    if (file != null && reader != null) {
+                        bounceAudio(file!!, reader!!, mostRecentBounceState)
+                        logger.info("Finished bouncing audio")
+                    } else {
+                        logger.error("Could not bounce audio. Invalid file or file reader")
+                    }
                     lastBounceTime = System.currentTimeMillis()
                 }
             }
