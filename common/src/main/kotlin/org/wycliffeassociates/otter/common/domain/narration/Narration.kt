@@ -94,7 +94,6 @@ class Narration @AssistedInject constructor(
             return chapter.getSelectedTake() != null
         }
     private var takeAudioModifier: NarrationTakeAudioModifier? = null
-    private lateinit var audioBouncer: AudioBouncer
 
     init {
         val writer = initializeWavWriter()
@@ -114,7 +113,6 @@ class Narration @AssistedInject constructor(
             null
         }
 
-        audioBouncer = AudioBouncer()
     }
 
     fun lockToVerse(verseIndex: Int?) {
@@ -181,9 +179,7 @@ class Narration @AssistedInject constructor(
         seek(getLocationInChapter(), true)
         history.undo(chapterRepresentation.totalVerses)
         chapterRepresentation.onVersesUpdated()
-        // TODO: note, this works, but is slow.
-//        takeAudioModifier?.modifyAudioData(chapterRepresentation.getAudioFileReader(), activeVerses)
-        audioBouncer.bounce(activeVerses)
+        takeAudioModifier?.modifyAudioData(chapterRepresentation.getAudioFileReader(), activeVerses)
     }
 
     fun redo() {
@@ -191,9 +187,7 @@ class Narration @AssistedInject constructor(
         seek(getLocationInChapter(), true)
         history.redo(chapterRepresentation.totalVerses)
         chapterRepresentation.onVersesUpdated()
-        // TODO: note, this works, but is slow.
-//        takeAudioModifier?.modifyAudioData(chapterRepresentation.getAudioFileReader(), activeVerses)
-        audioBouncer.bounce(activeVerses)
+        takeAudioModifier?.modifyAudioData(chapterRepresentation.getAudioFileReader(), activeVerses)
 
     }
 
