@@ -80,7 +80,7 @@ class BlindDraftViewModel : ViewModel() {
             actionHistory.clear()
         }.also { disposableListeners.add(it) }
 
-        translationViewModel.stepsBusyProperty.set(false)
+        translationViewModel.loadingStepProperty.set(false)
     }
 
     fun undockBlindDraft() {

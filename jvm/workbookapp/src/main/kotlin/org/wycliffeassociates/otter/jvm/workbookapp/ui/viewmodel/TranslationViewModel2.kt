@@ -51,7 +51,7 @@ class TranslationViewModel2 : ViewModel() {
     val chunkList = observableListOf<ChunkViewData>()
     val chunkListProperty = SimpleListProperty<ChunkViewData>(chunkList)
     val selectedChunkBinding = workbookDataStore.activeChunkProperty.integerBinding { it?.sort ?: -1 }
-    val stepsBusyProperty = SimpleBooleanProperty(false)
+    val loadingStepProperty = SimpleBooleanProperty(false)
 
     private val compositeDisposable = CompositeDisposable()
 
@@ -100,8 +100,8 @@ class TranslationViewModel2 : ViewModel() {
     }
 
     fun navigateStep(target: ChunkingStep) {
-        if (!stepsBusyProperty.value) {
-            stepsBusyProperty.set(true)
+        if (!loadingStepProperty.value) {
+            loadingStepProperty.set(true)
             runLater {
                 selectedStepProperty.set(target)
             }
