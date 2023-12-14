@@ -194,7 +194,11 @@ class AudioWorkspaceViewModel : ViewModel() {
     val scrollBarPositionProperty = SimpleDoubleProperty()
 
     fun drawWaveform(context: GraphicsContext, canvas: Canvas, markerNodes: ObservableList<VerseMarkerControl>) {
-        narrationViewModel.drawWaveform(context, canvas, markerNodes)
+        with(narrationViewModel) {
+            if (shouldReRenderProperty.value || isRecordingProperty.value || isPlayingProperty.value) {
+                narrationViewModel.drawWaveform(context, canvas, markerNodes)
+            }
+        }
     }
 
     fun drawVolumeBar(context: GraphicsContext, canvas: Canvas) {

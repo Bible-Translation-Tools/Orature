@@ -81,6 +81,7 @@ class NarrationViewModel : ViewModel() {
     var recordPause by recordPauseProperty
     val recordResumeProperty = SimpleBooleanProperty()
     var recordResume by recordResumeProperty
+    val shouldReRenderProperty = SimpleBooleanProperty(true)
     val isRecordingProperty = SimpleBooleanProperty()
     var isRecording by isRecordingProperty
     val isRecordingAgainProperty = SimpleBooleanProperty()
@@ -140,6 +141,9 @@ class NarrationViewModel : ViewModel() {
             logger.info("Received close event request")
             onUndock()
         }
+
+        isRecordingProperty.onChange { shouldReRenderProperty.set(true) }
+        isPlayingProperty.onChange { shouldReRenderProperty.set(true) }
 
         narratableList.bind(chunksList) { chunk ->
 
@@ -357,6 +361,7 @@ class NarrationViewModel : ViewModel() {
 
         setHasNextAndPreviousChapter(chapter)
         chapterTakeProperty.set(chapter.getSelectedTake())
+        shouldReRenderProperty.set(true)
     }
 
     private fun loadChunks(chapter: Chapter) {
@@ -533,6 +538,7 @@ class NarrationViewModel : ViewModel() {
         recordPause = false
 
         renderer.clearActiveRecordingData()
+        shouldReRenderProperty.set(true)
 
         refreshTeleprompter()
 
@@ -574,9 +580,11 @@ class NarrationViewModel : ViewModel() {
 
     fun moveMarker(index: Int, delta: Int) {
         narration.onVerseMarkerMoved(index, delta)
+        shouldReRenderProperty.set(true)
     }
 
     fun resetChapter() {
+        shouldReRenderProperty.set(true)
         narration.onResetAll()
         teleprompterStateMachine.initialize(narration.versesWithRecordings())
         recordStart = true
@@ -592,6 +600,7 @@ class NarrationViewModel : ViewModel() {
         recordPause = false
 
         resetTeleprompter()
+        shouldReRenderProperty.set(true)
     }
 
     fun redo() {
@@ -600,6 +609,7 @@ class NarrationViewModel : ViewModel() {
         recordPause = false
 
         resetTeleprompter()
+        shouldReRenderProperty.set(true)
     }
 
     fun record(index: Int) {
@@ -785,6 +795,7 @@ class NarrationViewModel : ViewModel() {
                 logger.error("", e)
             }
         }
+        shouldReRenderProperty.set(false)
     }
 
     fun drawVolumebar(context: GraphicsContext, canvas: Canvas) {
@@ -840,22 +851,27 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun seekTo(frame: Int) {
+        shouldReRenderProperty.set(true)
         val wasPlaying = audioPlayer.isPlaying()
         audioPlayer.pause()
         narration.seek(frame, true)
         if (wasPlaying) audioPlayer.play()
+        shouldReRenderProperty.set(true)
     }
 
     fun seekPercent(percent: Double) {
         narration.seek(floor(narration.getDurationInFrames() * percent).toInt(), true)
+        shouldReRenderProperty.set(true)
     }
 
     fun seekToNext() {
         narration.seekToNext()
+        shouldReRenderProperty.set(true)
     }
 
     fun seekToPrevious() {
         narration.seekToPrevious()
+        shouldReRenderProperty.set(true)
     }
 
     private fun refreshTeleprompter() {
