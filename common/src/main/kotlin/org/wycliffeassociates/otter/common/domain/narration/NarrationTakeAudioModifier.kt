@@ -21,12 +21,10 @@ class NarrationTakeAudioModifier(val take: Take, createNewAudioFile: Boolean = f
         OratureAudioFile(take.file)
     }
 
+    private val audioBouncer = ChapterTakeAudioBouncer()
+
     fun modifyAudioData(reader: AudioFileReader, markers: List<AudioMarker>) {
-        bounceAudio(
-            audioFile.file,
-            reader,
-            markers
-        )
+        audioBouncer.bounce(audioFile.file, reader, markers)
     }
 
     fun modifyMetaData(markers: List<AudioMarker>) {
