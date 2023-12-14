@@ -79,6 +79,8 @@ class BlindDraftViewModel : ViewModel() {
             }
             actionHistory.clear()
         }.also { disposableListeners.add(it) }
+
+        translationViewModel.stepsBusyProperty.set(false)
     }
 
     fun undockBlindDraft() {

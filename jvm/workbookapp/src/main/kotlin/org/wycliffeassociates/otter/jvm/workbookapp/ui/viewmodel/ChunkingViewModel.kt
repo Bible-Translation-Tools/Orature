@@ -118,6 +118,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
                 createWaveformImages(audio)
                 loadChunkMarkers(audio)
                 subscribeOnWaveformImages()
+                translationViewModel.stepsBusyProperty.set(false)
             }
     }
 

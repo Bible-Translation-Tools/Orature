@@ -198,6 +198,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                 loadVerseMarkers(audio)
                 createWaveformImages(audio)
                 subscribeOnWaveformImages()
+                translationViewModel.stepsBusyProperty.set(false)
             }
     }
 

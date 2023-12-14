@@ -91,6 +91,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         }.also { disposableListeners.add(it) }
 
         sourcePlayerProperty.bind(audioDataStore.sourceAudioPlayerProperty)
+        translationViewModel.stepsBusyProperty.set(false)
     }
 
     fun undock() {
