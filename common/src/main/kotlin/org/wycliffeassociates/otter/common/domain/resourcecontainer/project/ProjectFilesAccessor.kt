@@ -415,6 +415,15 @@ class ProjectFilesAccessor(
             }
     }
 
+    fun copyInProgressChapterFiles(
+        fileWriter: IFileWriter,
+        filter: (String) -> Boolean = { true }
+    ) {
+        fileWriter.copyDirectory(audioDir, RcConstants.TAKE_DIR) {
+            filter(it)
+        }
+    }
+
     fun getContributorInfo(): List<Contributor> {
         return ResourceContainer.load(projectDir).use { rc ->
             rc.manifest.dublinCore.contributor.map { Contributor(it) }

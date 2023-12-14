@@ -23,6 +23,7 @@ import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.inProgressChapterPattern
 import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.takeFilenamePattern
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOptions
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
@@ -76,6 +77,10 @@ class BackupProjectExporter @Inject constructor(
                     ) {
                         takesFilter(it, options)
                     }
+
+                    projectAccessor.copyInProgressChapterFiles(fileWriter) {
+                        inProgressChapterFilter(it, options)
+                    }
                     callback?.onNotifyProgress(70.0, messageKey = "copyingSource")
 
                     val linkedResource = workbook.source.linkedResources
@@ -119,6 +124,22 @@ class BackupProjectExporter @Inject constructor(
 
         return try {
             takeFilenamePattern
+                .matcher(path)
+                .apply { find() }
+                .group(1)
+                .toInt() in exportOptions.chapters
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun inProgressChapterFilter(path: String, exportOptions: ExportOptions?): Boolean {
+        if (exportOptions == null) {
+            return true
+        }
+
+        return try {
+            inProgressChapterPattern
                 .matcher(path)
                 .apply { find() }
                 .group(1)
