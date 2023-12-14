@@ -10,7 +10,7 @@ repositories {
         metadataSources { artifact() }
     }
     ivy {
-        url 'https://td.unfoldingword.org/exports/'
+        url 'https://langnames.bibleineverylanguage.org/'
         patternLayout {
             artifact '[artifact].[ext]'
         }
@@ -39,12 +39,12 @@ configurations {
 dependencies {
     content 'bible-translation-tools:en_art_wa:2.0.0@zip'
     content 'bible-translation-tools:en_art_sp:2.0.0@zip'
-    content 'wa-catalog:en_ulb:V21-05@zip'
-    content 'unfoldingword:langnames@json'
     content 'bible-translation-tools:bible_artwork@zip'
-    implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlinVer"
-    implementation project(":common")
+    content 'wa-catalog:en_ulb:V21-05@zip'
+    content 'bibleineverylanguage:langnames@json'
 
+    implementation project(":common")
+    implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlinVer"
     implementation "org.slf4j:slf4j-api:$slf4jApiVer"
     implementation "com.google.dagger:dagger:$daggerVer"
 }

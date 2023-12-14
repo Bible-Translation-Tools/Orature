@@ -123,6 +123,7 @@ class LanguageDao(
                         entity.gateway,
                         entity.region
                     )
+                    .onConflictDoNothing()
                     .execute()
             }
             // Implicit commit
