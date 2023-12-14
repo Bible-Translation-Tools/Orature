@@ -31,10 +31,12 @@ import org.junit.Before
 import org.junit.Test
 import org.wycliffeassociates.otter.common.ResourceContainerBuilder
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
+import org.wycliffeassociates.otter.common.audio.InProgressChapterFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.inProgressChapterPattern
 import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.takeFilenamePattern
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
 import org.wycliffeassociates.otter.common.domain.project.TakeCheckingStatusMap
@@ -45,6 +47,7 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
+import java.util.regex.Pattern
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.io.path.createTempDirectory
@@ -72,15 +75,18 @@ class TestBackupProjectExporter {
 
     private val db = dbEnvProvider.get() // bootstrap the db
     private val takesPerChapter = 2
+    private val narrationChapter = 7
     private val contributors = listOf("user1", "user2")
     private val verseChecking = TakeCheckingState(CheckingStatus.VERSE, "test-checksum")
     private val seedProject = buildProjectFile()
+    private val narrationBackup = buildNarrationBackup()
     private lateinit var workbook: Workbook
     private lateinit var outputDir: File
 
     @Before
     fun setUp() {
         importer.get().import(seedProject).blockingGet()
+        importer.get().import(narrationBackup).blockingGet()
         workbook = workbookRepository.getProjects().blockingGet()
             .find { it.target.slug == ResourceContainerBuilder.defaultProjectSlug }!!
         outputDir = createTempDirectory("orature-export-test").toFile()
@@ -179,6 +185,54 @@ class TestBackupProjectExporter {
         }
     }
 
+    @Test
+    fun exportNarrationBackup() {
+        val result = exportBackupUseCase.get()
+            .export(
+                outputDir,
+                workbook,
+                callback = null,
+                options = null
+            )
+            .blockingGet()
+
+        Assert.assertEquals(ExportResult.SUCCESS, result)
+
+        val file = outputDir.listFiles().singleOrNull()
+
+        Assert.assertNotNull(file)
+
+        val chapterToNarrationFiles = mutableMapOf<Int, MutableList<String>>()
+
+        ResourceContainer.load(file!!).use { rc ->
+            val extensionFilter = InProgressChapterFileFormat.values().map { it.extension }
+            val fileStreamMap = rc.accessor.getInputStreams(".", extensionFilter)
+            try {
+                fileStreamMap.keys.forEach { name ->
+                    val chapterNumber = parseChapter(name, inProgressChapterPattern)
+                    if (chapterNumber !in chapterToNarrationFiles) {
+                        chapterToNarrationFiles[chapterNumber] = mutableListOf()
+                    }
+                    chapterToNarrationFiles[chapterNumber]?.add(name)
+                }
+            } catch (_: Exception) {
+            } finally {
+                fileStreamMap.values.forEach { it.close() }
+            }
+        }
+
+        Assert.assertEquals(true, narrationChapter in chapterToNarrationFiles)
+        Assert.assertEquals(2, chapterToNarrationFiles[narrationChapter]?.size)
+    }
+
+    private fun parseChapter(path: String, pattern: Pattern): Int {
+        return pattern
+            .matcher(path)
+            .apply { find() }
+            .group(1)
+            .toInt()
+    }
+
     private fun buildProjectFile(): File {
         return ResourceContainerBuilder
             .setUpEmptyProjectBuilder()
@@ -194,23 +248,24 @@ class TestBackupProjectExporter {
             .buildFile()
     }
 
+    private fun buildNarrationBackup(): File {
+        return ResourceContainerBuilder
+            .setUpEmptyProjectBuilder()
+            .setOngoingProject(true)
+            .setContributors(contributors)
+            .addInProgressChapter(narrationChapter)
+            .buildFile()
+    }
+
     private fun getTakesByChapterFromProject(file: File): Map<Int, Int> {
         val chapterToTakeCount = mutableMapOf<Int, Int>()
-
-        val parseChapter: (String) -> Int = { name: String ->
-            takeFilenamePattern
-                .matcher(name)
-                .apply { find() }
-                .group(1)
-                .toInt()
-        }
 
         ResourceContainer.load(file).use { rc ->
             val extensionFilter = AudioFileFormat.values().map { it.extension }
             val fileStreamMap = rc.accessor.getInputStreams(".", extensionFilter)
             try {
                 fileStreamMap.keys.forEach { name ->
-                    val chapterNumber = parseChapter(name)
+                    val chapterNumber = parseChapter(name, takeFilenamePattern)
                     chapterToTakeCount[chapterNumber] = 1 + chapterToTakeCount.getOrPut(chapterNumber) { 0 }
                 }
             } finally {
