@@ -47,7 +47,7 @@ import kotlin.io.path.createTempDirectory
 import kotlin.io.path.outputStream
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.AudioMetadataFileFormat
-import org.wycliffeassociates.otter.common.audio.InProgressChapterFileFormat
+import org.wycliffeassociates.otter.common.domain.project.InProgressNarrationFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.*
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.workbook.Book
@@ -750,7 +750,7 @@ class ProjectFilesAccessor(
     private fun isInProgressChapterFile(file: String) = isInProgressChapterFile(File(file))
 
     private fun isInProgressChapterFile(file: File) =
-        InProgressChapterFileFormat.isSupported(file.extension)
+        InProgressNarrationFileFormat.isSupported(file.extension)
 
     fun getChunkFile(): File {
         return projectDir.resolve(RcConstants.CHUNKS_FILE)

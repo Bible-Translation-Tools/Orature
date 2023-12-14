@@ -16,9 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.common.audio
+package org.wycliffeassociates.otter.common.domain.project
 
-enum class InProgressChapterFileFormat(val extension: String) {
+enum class InProgressNarrationFileFormat(val extension: String) {
     PCM("pcm"),
     JSON("json");
 

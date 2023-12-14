@@ -31,7 +31,7 @@ import org.junit.Before
 import org.junit.Test
 import org.wycliffeassociates.otter.common.ResourceContainerBuilder
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
-import org.wycliffeassociates.otter.common.audio.InProgressChapterFileFormat
+import org.wycliffeassociates.otter.common.domain.project.InProgressNarrationFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
@@ -205,7 +205,7 @@ class TestBackupProjectExporter {
         val chapterToNarrationFiles = mutableMapOf<Int, MutableList<String>>()
 
         ResourceContainer.load(file!!).use { rc ->
-            val extensionFilter = InProgressChapterFileFormat.values().map { it.extension }
+            val extensionFilter = InProgressNarrationFileFormat.values().map { it.extension }
             val fileStreamMap = rc.accessor.getInputStreams(".", extensionFilter)
             try {
                 fileStreamMap.keys.forEach { name ->
