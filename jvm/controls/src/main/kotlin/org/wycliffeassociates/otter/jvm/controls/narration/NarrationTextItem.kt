@@ -351,9 +351,10 @@ class NarrationTextItem : VBox() {
             )
             btn.disableWhen {
                 booleanBinding(stateProperty, isPlayingProperty, isRecordingProperty) {
+                    val differentItemRecording = isRecordingProperty.value && state !in recordingStates
                     when {
                         isPlayingProperty.value -> true
-                        isRecordingProperty.value && state !in recordingStates -> true
+                        differentItemRecording -> true
                         stateProperty.value == TeleprompterItemState.RECORD_DISABLED -> true
                         stateProperty.value == TeleprompterItemState.RECORD_AGAIN_DISABLED -> true
                         else -> false
