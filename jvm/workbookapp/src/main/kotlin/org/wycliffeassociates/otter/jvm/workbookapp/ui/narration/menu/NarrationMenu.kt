@@ -47,7 +47,7 @@ class NarrationMenu : ContextMenu() {
                 tooltip(text)
             }
             action {
-                FX.eventbus.fire(NarrationResetChapterEvent())
+                FX.eventbus.fire(NarrationRestartChapterEvent())
             }
             enableWhen(hasVersesProperty)
         }

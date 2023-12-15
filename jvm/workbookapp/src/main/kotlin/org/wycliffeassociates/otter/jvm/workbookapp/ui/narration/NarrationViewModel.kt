@@ -270,13 +270,12 @@ class NarrationViewModel : ViewModel() {
             }
     }
 
-    private fun resetState() {
-        if (::narration.isInitialized) {
-            closeNarrationAudio()
-            narration.close()
-            renderer.close()
-        }
 
+    /**
+     * Resets the properties and state of the ViewModel to prevent dirty state when moving to other chapters or
+     * another narration project.
+     */
+    private fun resetState() {
         recordedVerses.clear()
         chunksList.clear()
         narratableList.clear()
@@ -319,6 +318,24 @@ class NarrationViewModel : ViewModel() {
                     }
                 ).let { disposables.add(it) }
         }
+    }
+
+    /**
+     * Called when changing the chapter from the chapter selector.
+     *
+     * This means that we are in a chapter, and moving to another chapter, so undock was not called in between.
+     * Normally, undock would trim the audio, so we want to make sure that the audio is trimmed before moving to
+     * the next chapter.
+     *
+     * @param chapterNumber the chapter to move to
+     */
+    fun navigateChapter(chapterNumber: Int) {
+        if (::narration.isInitialized) {
+            closeNarrationAudio()
+            narration.close()
+            renderer.close()
+        }
+        loadChapter(chapterNumber)
     }
 
     fun loadChapter(chapterNumber: Int) {
@@ -576,7 +593,11 @@ class NarrationViewModel : ViewModel() {
         narration.onVerseMarkerMoved(index, delta)
     }
 
-    fun resetChapter() {
+    /**
+     * Clears the chapter to start over, resetting the teleprompter so that all verses are cleared and the first verse
+     * is restored to the begin recording state.
+     */
+    fun restartChapter() {
         narration.onResetAll()
         teleprompterStateMachine.initialize(narration.versesWithRecordings())
         recordStart = true

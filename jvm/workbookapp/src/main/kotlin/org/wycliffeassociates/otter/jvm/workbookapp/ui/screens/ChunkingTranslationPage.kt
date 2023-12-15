@@ -8,7 +8,7 @@ import org.wycliffeassociates.otter.jvm.controls.event.ChunkSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.GoToNextChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.GoToPreviousChapterEvent
-import org.wycliffeassociates.otter.jvm.controls.event.OpenChapterEvent
+import org.wycliffeassociates.otter.jvm.controls.event.NavigateChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.BlindDraft
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.Chunking
@@ -110,7 +110,7 @@ class ChunkingTranslationPage : View() {
         subscribe<GoToPreviousChapterEvent> {
             viewModel.previousChapter()
         }
-        subscribe<OpenChapterEvent> {
+        subscribe<NavigateChapterEvent> {
             viewModel.navigateChapter(it.chapterNumber)
         }
     }
