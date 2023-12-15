@@ -17,10 +17,8 @@
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
 .app-bar {
-    -fx-padding: 20px 4px 4px 4px;
-    -fx-background-color: -wa-primary-dark;
+    -fx-background-color: #013C8E;
     -fx-alignment: top-center;
-    -fx-spacing: 4px;
 }
 
 .app-bar__logo {
