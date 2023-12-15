@@ -5,7 +5,6 @@ import com.jfoenix.controls.JFXSnackbar
 import javafx.event.EventHandler
 import javafx.scene.input.DragEvent
 import javafx.scene.input.TransferMode
-import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
@@ -17,7 +16,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.jvm.controls.dialog.ProgressDialog
-import org.wycliffeassociates.otter.jvm.controls.event.OpenChapterEvent
+import org.wycliffeassociates.otter.jvm.controls.event.NavigateChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ProjectImportFinishEvent
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
@@ -327,6 +326,6 @@ class SourceAudioMissing : View() {
     private fun refresh() {
         val chapter = workbookDataStore.chapter.sort
         workbookDataStore.activeChapterProperty.set(null)
-        FX.eventbus.fire(OpenChapterEvent(chapter))
+        FX.eventbus.fire(NavigateChapterEvent(chapter))
     }
 }
