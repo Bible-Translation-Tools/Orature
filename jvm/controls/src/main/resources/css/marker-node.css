@@ -9,6 +9,7 @@
     -fx-border-color: -wa-border-light;
     -fx-spacing: 10;
     -fx-padding: 0 2 0 16;
+    -fx-background-color: linear-gradient(to right, -wa-white-80, -wa-white-70, -wa-white-10);
 }
 
 .marker-node__drag-button {
