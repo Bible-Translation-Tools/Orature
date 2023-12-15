@@ -59,11 +59,14 @@
 
 .app-bar-button-container {
     -fx-alignment: center;
+    -fx-padding: 4;
 }
 
 .app-bar-button__title {
     -fx-text-fill: -wa-app-bar-btn-text;
     -fx-font-size: 1.1em;
+    -fx-text-alignment: center;
+    -fx-wrap-text: true;
 }
 
 .app-bar-button:selected .app-bar-button__title {
