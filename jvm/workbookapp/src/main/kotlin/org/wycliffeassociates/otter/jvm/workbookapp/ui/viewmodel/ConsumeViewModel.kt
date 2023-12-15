@@ -22,6 +22,7 @@ import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
+import org.wycliffeassociates.otter.jvm.controls.waveform.WAVEFORM_MAX_HEIGHT
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
@@ -64,7 +65,7 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
 
     private val builder = ObservableWaveformBuilder()
     private val width = Screen.getMainScreen().platformWidth
-    private val height = Integer.min(Screen.getMainScreen().platformHeight, 500)
+    private val height = Integer.min(Screen.getMainScreen().platformHeight, WAVEFORM_MAX_HEIGHT.toInt())
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)

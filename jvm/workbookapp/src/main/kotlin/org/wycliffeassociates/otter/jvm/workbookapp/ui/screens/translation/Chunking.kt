@@ -195,9 +195,11 @@ class Chunking : View() {
 
     private fun addShortcut() {
         workspace.shortcut(Shortcut.PLAY_SOURCE.value, viewModel::mediaToggle)
+        workspace.shortcut(Shortcut.ADD_MARKER.value, viewModel::placeMarker)
     }
 
     private fun removeShortcut() {
         workspace.accelerators.remove(Shortcut.PLAY_SOURCE.value)
+        workspace.accelerators.remove(Shortcut.ADD_MARKER.value)
     }
 }
