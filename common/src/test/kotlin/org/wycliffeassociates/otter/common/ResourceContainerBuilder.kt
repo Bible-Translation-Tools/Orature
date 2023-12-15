@@ -93,11 +93,12 @@ class ResourceContainerBuilder(baseRC: File? = null) {
 
     fun setOngoingProject(isOngoing: Boolean): ResourceContainerBuilder {
         if (isOngoing) {
-            val tempFile = tempDir.resolve("selected.txt").apply {
+            val pathInRC = RcConstants.SELECTED_TAKES_FILE
+            val selectedFile = File(pathInRC).name
+            val tempFile = tempDir.resolve(selectedFile).apply {
                 createNewFile(); deleteOnExit()
             }
 
-            val pathInRC = RcConstants.SELECTED_TAKES_FILE
             ResourceContainer.load(rcFile).use {
                 it.addFileToContainer(tempFile, pathInRC)
             }
