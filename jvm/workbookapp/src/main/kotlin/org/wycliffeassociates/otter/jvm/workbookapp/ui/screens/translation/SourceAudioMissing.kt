@@ -5,7 +5,6 @@ import com.jfoenix.controls.JFXSnackbar
 import javafx.event.EventHandler
 import javafx.scene.input.DragEvent
 import javafx.scene.input.TransferMode
-import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
@@ -23,7 +22,7 @@ import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
 import org.wycliffeassociates.otter.jvm.controls.popup.NotificationSnackBar
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ImportProjectViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.NOTIFICATION_DURATION_SEC
+import org.wycliffeassociates.otter.jvm.workbookapp.NOTIFICATION_DURATION_SEC
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore

@@ -21,6 +21,12 @@ package org.wycliffeassociates.otter.jvm.workbookapp
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
 import javafx.scene.layout.Pane
+import javafx.util.Duration
+import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
+import org.wycliffeassociates.otter.jvm.controls.popup.NotificationSnackBar
+import tornadofx.*
+
+const val NOTIFICATION_DURATION_SEC = 500.0
 
 object SnackbarHandler {
 
@@ -46,5 +52,21 @@ object SnackbarHandler {
         if (snackbar.popupContainer != null) {
             snackbar.enqueue(JFXSnackbar.SnackbarEvent(JFXSnackbarLayout(message)))
         }
+    }
+
+    fun enqueue(notification: NotificationViewData) {
+        val graphic = NotificationSnackBar(notification).apply {
+            setOnDismiss { snackbar.close() }
+            setOnMainAction {
+                notification.actionCallback()
+                snackbar.close()
+            }
+        }
+        snackbar.enqueue(
+            JFXSnackbar.SnackbarEvent(
+                graphic,
+                Duration.seconds(NOTIFICATION_DURATION_SEC)
+            )
+        )
     }
 }

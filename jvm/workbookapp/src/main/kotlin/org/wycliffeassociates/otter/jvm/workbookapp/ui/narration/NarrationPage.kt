@@ -1,9 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import com.github.thomasnield.rxkotlinfx.toLazyBinding
-import com.jfoenix.controls.JFXSnackbar
-import com.jfoenix.controls.JFXSnackbarLayout
-import javafx.util.Duration
+import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
@@ -22,6 +20,8 @@ import org.wycliffeassociates.otter.jvm.controls.event.RecordVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingAgainEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.SaveRecordingEvent
+import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
+import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
@@ -33,7 +33,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
-import java.util.*
 
 class NarrationPage : View() {
     private val logger = LoggerFactory.getLogger(NarrationPage::class.java)
@@ -56,6 +55,7 @@ class NarrationPage : View() {
         tryImportStylesheet(resources["/css/narration.css"])
         tryImportStylesheet(resources["/css/chapter-selector.css"])
         tryImportStylesheet("/css/chapter-grid.css")
+        tryImportStylesheet("/css/add-plugin-dialog.css")
 
         pluginOpenedPage = createPluginOpenedPage()
     }
@@ -219,18 +219,16 @@ class NarrationPage : View() {
                 logger.error("Error in creating no plugin snackbar", e)
             }
             .subscribe { pluginErrorMessage ->
-                SnackbarHandler.enqueue(
-                    JFXSnackbar.SnackbarEvent(
-                        JFXSnackbarLayout(
-                            pluginErrorMessage,
-                            messages["addApp"].uppercase(Locale.getDefault())
-                        ) {
-                            audioPluginViewModel.addPlugin(record = true, edit = false)
-                        },
-                        Duration.millis(5000.0),
-                        null
-                    )
-                )
+                val notification = NotificationViewData(
+                    title = messages["noPlugins"],
+                    message = pluginErrorMessage,
+                    statusType = NotificationStatusType.WARNING,
+                    actionIcon = MaterialDesign.MDI_PLUS,
+                    actionText = messages["addApp"]
+                ) {
+                    audioPluginViewModel.addPlugin(record = true, edit = false)
+                }
+                SnackbarHandler.enqueue(notification)
             }
     }
 
