@@ -16,6 +16,7 @@ import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import tornadofx.FX.Companion.messages
+import tornadofx.FX.Companion.primaryStage
 
 class NotificationSnackBar(notification: NotificationViewData): HBox() {
 
@@ -30,6 +31,8 @@ class NotificationSnackBar(notification: NotificationViewData): HBox() {
 
     init {
         addClass("wa-snack-bar")
+
+        maxWidthProperty().bind(primaryStage.widthProperty().multiply(9.0/10.0))
 
         button {
             addClass("btn", "btn--icon", "btn--borderless", "success-btn-icon")
@@ -70,6 +73,7 @@ class NotificationSnackBar(notification: NotificationViewData): HBox() {
         region { hgrow = Priority.ALWAYS }
         button {
             addClass("btn", "btn--secondary")
+            minWidth = USE_PREF_SIZE
             textProperty().bind(actionTextProperty)
             tooltip { textProperty().bind(actionTextProperty) }
             graphicProperty().bind(actionIconProperty.objectBinding { it ->

@@ -1,6 +1,6 @@
 .wa-snack-bar {
-    -fx-pref-width: 720px;
-    -fx-pref-height: 80px;
+    -fx-pref-width: 800px;
+    -fx-min-height: 80px;
     -fx-alignment: center-left;
     -fx-spacing: 16;
     -fx-padding: 12 16;
@@ -20,6 +20,7 @@
 
 .wa-snack-bar .notification-subtitle {
     -fx-text-fill: -wa-regular-text-80;
+    -fx-wrap-text: true;
 }
 
 .wa-snack-bar .active-icon,
