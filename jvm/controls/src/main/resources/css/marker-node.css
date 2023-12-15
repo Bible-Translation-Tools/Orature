@@ -9,7 +9,7 @@
     -fx-border-color: -wa-primary;
 }
 
-.marker-node:dragging .ikonli-font-icon {
+.marker-node:dragging .marker-node__drag-button .ikonli-font-icon {
     -fx-icon-color: -wa-primary;
 }
 
