@@ -168,7 +168,7 @@ internal class ChapterRepresentation(
      * Remove old audio data from chapter representation file and update serialized verses file
      */
     fun trim() {
-        closeConnections()
+        logger.info("Trimming chapter representation file")
         trimScratchAudio()
         trimActiveVerses()
     }

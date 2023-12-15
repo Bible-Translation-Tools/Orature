@@ -488,10 +488,11 @@ class Narration @AssistedInject constructor(
         player.close()
         recorder.stop()
         chapterRepresentation.closeConnections()
-    }
 
-    fun trimChapterRepresentation() {
-        chapterRepresentation.trim()
+        if (history.hasRedo() || history.hasUndo()) {
+            chapterRepresentation.trim()
+        }
+        history.clear()
     }
 
     fun seekToPrevious() {
