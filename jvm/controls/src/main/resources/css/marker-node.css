@@ -1,12 +1,21 @@
 .marker-node {
     -fx-focus-traversable: true;
+    -fx-border-width: 0 0 0 1;
+    -fx-border-color: -wa-border-light;
+}
+
+.marker-node:focus-visible,
+.marker-node:dragging {
+    -fx-border-color: -wa-primary;
+}
+
+.marker-node:dragging .ikonli-font-icon {
+    -fx-icon-color: -wa-primary;
 }
 
 .marker-node .title-section {
     -fx-pref-height: 80;
     -fx-alignment: center-left;
-    -fx-border-width: 0 0 0 1;
-    -fx-border-color: -wa-border-light;
     -fx-spacing: 10;
     -fx-padding: 0 2 0 16;
     -fx-background-color: linear-gradient(to right, -wa-white-80, -wa-white-70, -wa-white-10);
@@ -14,6 +23,10 @@
 
 .marker-node__drag-button {
     -fx-focus-traversable: false;
+}
+
+.marker-node__drag-button:pressed {
+    -fx-border-color: -wa-primary;
 }
 
 .marker-node:focus-visible .marker-node__drag-button {
