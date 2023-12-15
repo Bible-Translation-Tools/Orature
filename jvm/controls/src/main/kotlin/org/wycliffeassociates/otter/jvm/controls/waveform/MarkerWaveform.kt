@@ -127,7 +127,7 @@ class MarkerWaveform : StackPane() {
             onSeekPreviousProperty.bind(onSeekPrevious)
             onSeekNextProperty.bind(onSeekNext)
 
-            focusedProperty().onChange {
+            focusVisibleProperty().onChange {
                 this@MarkerWaveform.togglePseudoClass("active", it)
             }
         }

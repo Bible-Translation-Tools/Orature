@@ -133,8 +133,19 @@ internal class ChapterRepresentation(
     }
 
     fun onVersesUpdated() {
+        updateTotalVerses()
         serializeVerses()
         publishActiveVerses()
+    }
+
+    private fun updateTotalVerses() {
+        activeVerses.forEachIndexed { idx, verseNode ->
+            val newLoc = audioLocationToLocationInChapter(verseNode.firstFrame())
+            val updatedMarker = verseNode.copyMarker(location = newLoc)
+            totalVerses[idx] = VerseNode(
+                true, updatedMarker, totalVerses[idx].sectors
+            )
+        }
     }
 
     private fun serializeVerses() {

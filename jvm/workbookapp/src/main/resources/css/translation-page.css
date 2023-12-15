@@ -39,7 +39,7 @@
     -fx-background-color: #E5E8EB;
 }
 
-.chunking-step:focused .chunking-step__header-section {
+.chunking-step:focus-visible .chunking-step__header-section {
     -fx-border-width: 2;
     -fx-border-color: -wa-button-border;
 }
@@ -121,4 +121,10 @@
 .audio-scroll-bar__track {
     -fx-min-height: 16;
     -fx-alignment: center-left;
+}
+
+.waveform--focusable:active {
+    -fx-border-width: 4px 0;
+    -fx-border-color: -wa-button-border;
+    -fx-border-insets: 0;
 }

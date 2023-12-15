@@ -13,6 +13,12 @@ enum class TakeAction {
     DELETE
 }
 class MarkerDeletedEvent(val markerId: Int): FXEvent()
+
+/**
+ * @param markerId the id (not index) of the marker
+ * @param start starting frame position of the movement
+ * @param end ending frame position of the movement
+ */
 class MarkerMovedEvent(val markerId: Int, val start: Int, val end: Int): FXEvent()
 class UndoChunkingPageEvent: FXEvent()
 class RedoChunkingPageEvent: FXEvent()

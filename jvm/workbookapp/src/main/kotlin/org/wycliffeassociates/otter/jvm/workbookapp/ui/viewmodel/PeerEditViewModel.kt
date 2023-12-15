@@ -20,6 +20,7 @@ import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.translation.TranslationTakeApproveAction
 import org.wycliffeassociates.otter.common.domain.model.UndoableActionHistory
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
+import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import org.wycliffeassociates.otter.jvm.controls.waveform.IWaveformViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
@@ -125,6 +126,18 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
 
     fun seek(location: Int) {
         audioController?.seek(location)
+    }
+
+    fun rewind(speed: ScrollSpeed) {
+        if (!isPlayingProperty.value) {
+            audioController?.rewind(speed)
+        }
+    }
+
+    fun fastForward(speed: ScrollSpeed) {
+        if (!isPlayingProperty.value) {
+            audioController?.fastForward(speed)
+        }
     }
 
     fun confirmChunk() {

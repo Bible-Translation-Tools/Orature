@@ -66,15 +66,19 @@ class MarkerNodeSkin(val control: MarkerNode) : SkinBase<MarkerNode>(control) {
                 vgrow = Priority.ALWAYS
             }
             button {
-                addClass("btn", "btn--icon")
+                addClass("btn", "btn--icon", "marker-node__drag-button")
                 graphic = FontIcon(Material.DRAG_HANDLE).apply { rotate = 90.0 }
                 tooltip(messages["move_chunk"])
                 translateXProperty().bind(widthProperty().divide(2).negate())
 
                 visibleWhen { control.canBeMovedProperty }
                 managedWhen(visibleProperty())
+
                 // delegates the mouse drag events to the "drag" button
-                onMousePressedProperty().bind(control.onDragStartProperty)
+                setOnMousePressed {
+                    control.requestFocus()
+                    control.onDragStartProperty.value?.handle(it)
+                }
                 onMouseDraggedProperty().bind(control.onDragProperty)
                 onMouseReleasedProperty().bind(control.onDragFinishProperty)
             }

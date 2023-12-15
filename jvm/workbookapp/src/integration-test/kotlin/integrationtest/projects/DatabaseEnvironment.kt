@@ -20,22 +20,19 @@ package integrationtest.projects
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonPropertyOrder
-import io.reactivex.Single
 import jooq.Tables.CONTENT_DERIVATIVE
 import org.junit.Assert
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
-import org.wycliffeassociates.otter.common.domain.project.importer.ImportCallbackParameter
-import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
-import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
 import org.wycliffeassociates.otter.common.domain.project.importer.RCImporterFactory
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.CollectionDao
+import java.io.ByteArrayInputStream
 import java.io.File
+import java.io.InputStream
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -154,10 +151,29 @@ class DatabaseEnvironment @Inject constructor(
         return this
     }
 
-    private fun setUpDatabase() {
+    private fun loadLanguages(): InputStream {
         val langNames = ClassLoader.getSystemResourceAsStream("content/langnames.json")!!
+        val langNamesString = langNames.reader().readText()
+        val langNamesWithAdditions = injectTestLanguages(langNamesString)
+        return ByteArrayInputStream(langNamesWithAdditions.toByteArray(Charsets.UTF_8))
+    }
+
+    /**
+     * Injects additional languages into langnames.json that are used for tests
+     *
+     * This is primarily done due to test RCs using the language en-x-demo1 which was included in an older version
+     * of langnames.json from translationDatabase, which no longer exists in the langnames.json from BibleInEveryLanguage
+     */
+    private fun injectTestLanguages(langNames: String): String {
+        val languagesToInject = listOf(
+            """{"gw": false,"ld": "ltr","ang": "","lc": "en-x-demo1","cc": [],"ln": "English demo1","lr": "","pk": 7508,"hc": "","alt":[]}"""
+        ).joinToString(",", prefix = "[", postfix = ",")
+        return langNames.replaceFirst("[",languagesToInject)
+    }
+
+    private fun setUpDatabase() {
         importLanguagesProvider.get()
-            .import(langNames)
+            .import(loadLanguages())
             .onErrorComplete()
             .blockingAwait()
     }
