@@ -85,6 +85,7 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
                 createWaveformImages(audio)
                 subscribeOnWaveformImages()
                 loadSourceMarkers(audio)
+                translationViewModel.loadingStepProperty.set(false)
             }
 
         translationViewModel.currentMarkerProperty.bind(currentMarkerNumberProperty)

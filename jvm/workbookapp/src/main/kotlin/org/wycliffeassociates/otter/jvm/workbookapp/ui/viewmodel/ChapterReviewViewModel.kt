@@ -7,14 +7,12 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import javafx.animation.AnimationTimer
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.scene.control.Slider
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
@@ -198,6 +196,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                 loadVerseMarkers(audio)
                 createWaveformImages(audio)
                 subscribeOnWaveformImages()
+                translationViewModel.loadingStepProperty.set(false)
             }
     }
 
