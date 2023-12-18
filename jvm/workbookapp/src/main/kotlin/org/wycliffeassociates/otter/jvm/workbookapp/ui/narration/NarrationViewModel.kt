@@ -262,9 +262,7 @@ class NarrationViewModel : ViewModel() {
             .map { list ->
                 val chapterToResume = list.firstOrNull { !it.hasSelectedAudio() } ?: list.first()
                 val activeChapter = workbookDataStore.activeChapterProperty.value ?: chapterToResume
-                runLater {
-                    workbookDataStore.activeChapterProperty.set(activeChapter)
-                }
+                workbookDataStore.activeChapterProperty.set(activeChapter)
                 chapterList.setAll(list)
                 activeChapter
             }
