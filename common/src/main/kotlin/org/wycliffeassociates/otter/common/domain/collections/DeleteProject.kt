@@ -96,7 +96,6 @@ class DeleteProject @Inject constructor(
             .timer(timeoutMillis.toLong(), TimeUnit.MILLISECONDS)
             .andThen {
                 deleteQueue.put(books)
-                println("---------- added to delete queue: ${books.hashCode()}")
                 processDeleteQueue()
                 it.onComplete()
             }
@@ -110,7 +109,6 @@ class DeleteProject @Inject constructor(
     private fun processDeleteQueue() {
         while (deleteQueue.peek() != null) {
             val booksToDelete = deleteQueue.peek()
-            println(">>> processing delete... ${booksToDelete.hashCode()}")
             deleteProjects(booksToDelete).blockingAwait()
             deleteQueue.poll()
         }

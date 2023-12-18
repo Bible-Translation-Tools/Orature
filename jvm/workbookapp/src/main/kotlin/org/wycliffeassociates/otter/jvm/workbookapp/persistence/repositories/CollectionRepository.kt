@@ -124,7 +124,7 @@ class CollectionRepository @Inject constructor(
                             }
                         }
                     } catch (e: Exception) {
-                        log.info("Delete project - Manifest doesn't exist, no changes committed for project: ${project.slug}")
+                        log.info("Delete project - Manifest doesn't exist, no changes committed for ${project.slug}")
                     }
                 }
             }
@@ -494,6 +494,10 @@ class CollectionRepository @Inject constructor(
             }
             .doOnError { e ->
                 log.error("Error in deriveProject for source collection: $sourceCollection, language: $language")
+                log.error("With:")
+                sourceMetadatas.forEach {
+                    log.error("Metadata: $it")
+                }
                 log.error("End Metadata", e)
             }
             .subscribeOn(Schedulers.io())

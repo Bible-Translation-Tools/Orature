@@ -167,10 +167,7 @@ class ProjectWizardViewModel : ViewModel() {
 
     private fun waitForProjectDeletionFinishes(): Completable {
         return Observable.interval(100, TimeUnit.MILLISECONDS)
-            .takeWhile {
-                println("waiting for deletion...")
-                projectDeletingCount.get() > 0
-            }
+            .takeWhile { projectDeletingCount.get() > 0 }
             .subscribeOn(Schedulers.io())
             .ignoreElements()
     }
