@@ -89,11 +89,7 @@ class Narration @AssistedInject constructor(
 
     private var lockedVerseIndex: Int? = null
 
-    private val hasChapterTake: Boolean
-        get() {
-            return chapter.getSelectedTake() != null
-        }
-    private var takeAudioModifier: NarrationTakeAudioModifier? = null
+    var takeAudioModifier: NarrationTakeAudioModifier? = null
 
     init {
         val writer = initializeWavWriter()
@@ -427,12 +423,8 @@ class Narration @AssistedInject constructor(
                 take
             }
             .map { take ->
-                bounceAudio(
-                    take.file,
-                    chapterRepresentation.getAudioFileReader(),
-                    activeVerses
-                )
-                takeAudioModifier = NarrationTakeAudioModifier(take)
+                takeAudioModifier = NarrationTakeAudioModifier(take, true)
+                takeAudioModifier?.modifyAudioData(chapterRepresentation.getAudioFileReader(), activeVerses)
                 take
             }
     }
@@ -484,6 +476,7 @@ class Narration @AssistedInject constructor(
         player.close()
         recorder.stop()
         chapterRepresentation.closeConnections()
+        takeAudioModifier?.close()
     }
 
     fun seekToPrevious() {
