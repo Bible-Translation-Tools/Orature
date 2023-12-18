@@ -169,7 +169,7 @@ class TestOngoingProjectImporter {
         return ResourceContainerBuilder
             .setUpEmptyProjectBuilder()
             .setOngoingProject(true)
-            .addInProgressChapter(1)
+            .addInProgressNarration(1)
             .buildFile()
     }
 }

@@ -164,7 +164,7 @@ class ResourceContainerBuilder(baseRC: File? = null) {
         return this
     }
 
-    fun addInProgressChapter(sort: Int): ResourceContainerBuilder {
+    fun addInProgressNarration(sort: Int): ResourceContainerBuilder {
         val inProgressFiles = createTestChapterRepresentationFiles(tempDir)
         val chapterDirTokens = "c${sort.toString().padStart(2, '0')}"
         ResourceContainer.load(rcFile).use {

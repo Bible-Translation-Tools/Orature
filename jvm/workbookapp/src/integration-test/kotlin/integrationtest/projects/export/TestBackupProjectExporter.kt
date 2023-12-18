@@ -36,7 +36,7 @@ import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.inProgressChapterPattern
+import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.inProgressNarrationPattern
 import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.takeFilenamePattern
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
 import org.wycliffeassociates.otter.common.domain.project.TakeCheckingStatusMap
@@ -209,7 +209,7 @@ class TestBackupProjectExporter {
             val fileStreamMap = rc.accessor.getInputStreams(".", extensionFilter)
             try {
                 fileStreamMap.keys.forEach { name ->
-                    val chapterNumber = parseChapter(name, inProgressChapterPattern)
+                    val chapterNumber = parseChapter(name, inProgressNarrationPattern)
                     if (chapterNumber !in chapterToNarrationFiles) {
                         chapterToNarrationFiles[chapterNumber] = mutableListOf()
                     }
@@ -253,7 +253,7 @@ class TestBackupProjectExporter {
             .setUpEmptyProjectBuilder()
             .setOngoingProject(true)
             .setContributors(contributors)
-            .addInProgressChapter(narrationChapter)
+            .addInProgressNarration(narrationChapter)
             .buildFile()
     }
 

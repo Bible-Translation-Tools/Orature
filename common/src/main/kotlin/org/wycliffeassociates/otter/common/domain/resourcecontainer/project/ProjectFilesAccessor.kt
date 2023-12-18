@@ -401,7 +401,7 @@ class ProjectFilesAccessor(
         }
     }
 
-    fun copyInProgressChapterFiles(
+    fun copyInProgressNarrationFiles(
         fileReader: IFileReader,
         manifestProject: Project
     ): Observable<String> {
@@ -410,12 +410,12 @@ class ProjectFilesAccessor(
             .flatMap { audioDirInRc ->
                 val normalized = File(audioDirInRc).normalize().path
                 fileReader.copyDirectory(normalized, audioDir) {
-                    isInProgressChapterFile(it)
+                    isInProgressNarrationFile(it)
                 }
             }
     }
 
-    fun copyInProgressChapterFiles(
+    fun copyInProgressNarrationFiles(
         fileWriter: IFileWriter,
         filter: (String) -> Boolean = { true }
     ) {
@@ -747,9 +747,9 @@ class ProjectFilesAccessor(
     private fun isAudioFile(file: File) =
         file.extension.lowercase().let { it == "wav" || it == "mp3" }
 
-    private fun isInProgressChapterFile(file: String) = isInProgressChapterFile(File(file))
+    private fun isInProgressNarrationFile(file: String) = isInProgressNarrationFile(File(file))
 
-    private fun isInProgressChapterFile(file: File) =
+    private fun isInProgressNarrationFile(file: File) =
         InProgressNarrationFileFormat.isSupported(file.extension)
 
     fun getChunkFile(): File {

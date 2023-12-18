@@ -300,7 +300,7 @@ class OngoingProjectImporter @Inject constructor(
             projectFilesAccessor
         )
 
-        projectFilesAccessor.copyInProgressChapterFiles(fileReader, manifestProject)
+        projectFilesAccessor.copyInProgressNarrationFiles(fileReader, manifestProject)
             .doOnError { e ->
                 logger.error("Error in importInProgressFiles, project: $derivedProject, manifestProject: $manifestProject")
                 logger.error("metadata: $metadata, sourceMetadata: ${sourceCollection.resourceContainer}")
