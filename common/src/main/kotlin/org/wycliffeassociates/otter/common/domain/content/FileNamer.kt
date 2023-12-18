@@ -107,9 +107,8 @@ class FileNamer(
         }
         val inProgressNarrationPattern: Pattern = run {
             val chapter = """c(\d+)/"""
-            val chapterNarration = """(chapter_narration.pcm|"""
-            val activeVerses = """active_verses.json)"""
-            Pattern.compile(chapter + chapterNarration + activeVerses)
+            val fileName = "(chapter_narration.pcm|active_verses.json)"
+            Pattern.compile(chapter + fileName)
         }
     }
 }

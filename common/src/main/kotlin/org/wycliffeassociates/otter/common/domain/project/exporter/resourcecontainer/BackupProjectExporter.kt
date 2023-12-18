@@ -32,6 +32,7 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import java.io.File
 import java.lang.Exception
+import java.util.regex.Pattern
 import javax.inject.Inject
 
 class BackupProjectExporter @Inject constructor(
@@ -75,11 +76,11 @@ class BackupProjectExporter @Inject constructor(
                         workbookRepository,
                         isBook = true
                     ) {
-                        takesFilter(it, options)
+                        takesFilter(it, takeFilenamePattern, options)
                     }
 
                     projectAccessor.copyInProgressNarrationFiles(fileWriter) {
-                        inProgressNarrationFilter(it, options)
+                        takesFilter(it, inProgressNarrationPattern, options)
                     }
                     callback?.onNotifyProgress(70.0, messageKey = "copyingSource")
 
@@ -96,12 +97,12 @@ class BackupProjectExporter @Inject constructor(
                         workbook,
                         isBook = true
                     ) { takeName ->
-                        takesFilter(takeName, options)
+                        takesFilter(takeName, takeFilenamePattern, options)
                     }
                     projectAccessor.writeChunksFile(fileWriter)
                     projectAccessor.copyProjectModeFile(fileWriter)
                     projectAccessor.writeTakeCheckingStatus(fileWriter, workbook) { path ->
-                        takesFilter(path, options)
+                        takesFilter(path, takeFilenamePattern, options)
                     }.blockingAwait()
                 }
 
@@ -117,29 +118,13 @@ class BackupProjectExporter @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
-    private fun takesFilter(path: String, exportOptions: ExportOptions?): Boolean {
+    private fun takesFilter(path: String, pattern: Pattern, exportOptions: ExportOptions?): Boolean {
         if (exportOptions == null) {
             return true
         }
 
         return try {
-            takeFilenamePattern
-                .matcher(path)
-                .apply { find() }
-                .group(1)
-                .toInt() in exportOptions.chapters
-        } catch (e: Exception) {
-            false
-        }
-    }
-
-    private fun inProgressNarrationFilter(path: String, exportOptions: ExportOptions?): Boolean {
-        if (exportOptions == null) {
-            return true
-        }
-
-        return try {
-            inProgressNarrationPattern
+            pattern
                 .matcher(path)
                 .apply { find() }
                 .group(1)

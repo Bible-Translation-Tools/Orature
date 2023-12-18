@@ -117,11 +117,53 @@ fun createTestChapterRepresentationFiles(dir: File): List<File> {
     val jsonFile = dir.resolve(ACTIVE_VERSES_FILE_NAME)
         .apply { createNewFile(); deleteOnExit() }
 
-    val jsonData = "[{\"placed\":true,\"marker\":{\"type\":\"BookMarker\",\"bookSlug\":\"jhn\",\"location\":0}" +
-            ",\"sectors\":[{\"start\":0,\"end\":2}]},{\"placed\":true,\"marker\":{\"type\":\"ChapterMarker\"," +
-            "\"chapterNumber\":1,\"location\":0},\"sectors\":[{\"start\":3,\"end\":6}]},{\"placed\":true" +
-            ",\"marker\":{\"type\":\"VerseMarker\",\"start\":1,\"end\":1,\"location\":0}" +
-            ",\"sectors\":[{\"start\":7,\"end\":10}]}]"
+    val jsonData = """
+        [
+          {
+            "placed": true,
+            "marker": {
+              "type": "BookMarker",
+              "bookSlug": "jhn",
+              "location": 0
+            },
+            "sectors": [
+              {
+                "start": 0,
+                "end": 2
+              }
+            ]
+          },
+          {
+            "placed": true,
+            "marker": {
+              "type": "ChapterMarker",
+              "chapterNumber": 1,
+              "location": 0
+            },
+            "sectors": [
+              {
+                "start": 3,
+                "end": 6
+              }
+            ]
+          },
+          {
+            "placed": true,
+            "marker": {
+              "type": "VerseMarker",
+              "start": 1,
+              "end": 1,
+              "location": 0
+            },
+            "sectors": [
+              {
+                "start": 7,
+                "end": 10
+              }
+            ]
+          }
+        ]
+    """.trimIndent()
 
     jsonFile.bufferedWriter().use {
         it.write(jsonData)
