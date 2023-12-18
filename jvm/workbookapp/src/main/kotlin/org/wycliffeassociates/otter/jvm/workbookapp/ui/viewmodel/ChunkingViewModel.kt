@@ -50,6 +50,7 @@ import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuil
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
+import org.wycliffeassociates.otter.jvm.controls.waveform.WAVEFORM_MAX_HEIGHT
 import tornadofx.*
 
 const val WAV_COLOR = "#66768B"
@@ -96,7 +97,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     lateinit var audio: OratureAudioFile
     lateinit var waveform: Observable<Image>
     private val width = Screen.getMainScreen().platformWidth
-    private val height = Integer.min(Screen.getMainScreen().platformHeight, 500)
+    private val height = Integer.min(Screen.getMainScreen().platformHeight, WAVEFORM_MAX_HEIGHT.toInt())
     private val builder = ObservableWaveformBuilder()
 
     var subscribeOnWaveformImages: () -> Unit = {}
@@ -118,6 +119,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
                 createWaveformImages(audio)
                 loadChunkMarkers(audio)
                 subscribeOnWaveformImages()
+                translationViewModel.loadingStepProperty.set(false)
             }
     }
 

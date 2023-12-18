@@ -45,6 +45,7 @@ import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseFinishe
 import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
+import org.wycliffeassociates.otter.jvm.controls.waveform.WAVEFORM_MAX_HEIGHT
 
 private const val WAV_COLOR = "#0A337390"
 private const val BACKGROUND_COLOR = "#FFFFFF"
@@ -54,7 +55,7 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
     private val logger = LoggerFactory.getLogger(VerseMarkerViewModel::class.java)
 
     private val width = Screen.getMainScreen().platformWidth
-    private val height = min(Screen.getMainScreen().platformHeight, 500)
+    private val height = min(Screen.getMainScreen().platformHeight, WAVEFORM_MAX_HEIGHT.toInt())
 
     val themeColorProperty = SimpleObjectProperty(ColorTheme.LIGHT)
 

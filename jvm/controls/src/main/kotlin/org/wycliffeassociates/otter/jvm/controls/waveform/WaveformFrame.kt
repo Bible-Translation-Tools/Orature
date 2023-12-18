@@ -37,6 +37,9 @@ import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import org.wycliffeassociates.otter.jvm.controls.marker.MarkerTrackControl
 
 import tornadofx.*
+import kotlin.math.min
+
+const val WAVEFORM_MAX_HEIGHT = 500.0
 
 class WaveformFrame(
     topTrack: Node? = null,
@@ -130,6 +133,7 @@ class WaveformFrame(
                      * 2. The width of the marker track will not extend to the end of the waveform for longer recordings
                      */
                     hbox {
+                        addClass("scrolling-waveform-frame__image-container")
                         alignment = Pos.CENTER
                         imageHolder = this@hbox
                     }
@@ -247,7 +251,11 @@ class WaveformFrame(
                 this.effect = waveformColorEffect
                 // This is to adjust the height of the image to fit within the tracks
                 if (uiVersionProperty.value == UIVersion.THREE) {
-                    fitHeightProperty().bind(imageRegion.heightProperty())
+                    fitHeightProperty().bind(
+                        imageRegion.heightProperty().doubleBinding {
+                            it?.let { min(WAVEFORM_MAX_HEIGHT, it.toDouble()) } ?: image.height
+                        }
+                    )
                 } else {
                     fitHeightProperty()
                         .bind(

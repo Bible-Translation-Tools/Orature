@@ -141,6 +141,7 @@ open class MarkerTrackControl : Region() {
                     preDragThumbPos[i] = clampedValue / trackWidth
                     me.consume()
                 }
+                togglePseudoClass("dragging", true)
                 this.requestFocus()
             }
 
@@ -176,6 +177,7 @@ open class MarkerTrackControl : Region() {
                         FX.eventbus.fire(MarkerMovedEvent(markerIdProperty.value, start, end))
                     }
                 }
+                togglePseudoClass("dragging", false)
             }
 
             markerPositionProperty.onChangeAndDoNow {

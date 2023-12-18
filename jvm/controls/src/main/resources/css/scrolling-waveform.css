@@ -62,6 +62,10 @@
     -fx-stroke: -wa-playback-line;
 }
 
+.scrolling-waveform-frame__image-container {
+    -fx-background-color: white;
+}
+
 .scrolling-waveform-frame__top-track {
     -fx-pref-height: 40px;
     -fx-background-color: -wa-marker-track-background;

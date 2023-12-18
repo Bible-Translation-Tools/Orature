@@ -37,9 +37,14 @@ configurations {
 }
 
 dependencies {
-    content 'bible-translation-tools:en_art_wa:2.0.0@zip'
-    content 'bible-translation-tools:en_art_sp:2.0.0@zip'
-    content 'bible-translation-tools:bible_artwork@zip'
+
+    /**
+     * Commented out Bible artwork to reduce file size as new design doesn't use it
+     */
+    // content 'bible-translation-tools:en_art_wa:2.0.0@zip'
+    // content 'bible-translation-tools:en_art_sp:2.0.0@zip'
+    // content 'bible-translation-tools:bible_artwork@zip'
+
     content 'wa-catalog:en_ulb:V21-05@zip'
     content 'bibleineverylanguage:langnames@json'
 
