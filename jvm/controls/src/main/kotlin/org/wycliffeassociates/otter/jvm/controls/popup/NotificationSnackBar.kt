@@ -4,7 +4,6 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
-import javafx.scene.control.Tooltip
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
@@ -17,6 +16,8 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 import tornadofx.FX.Companion.primaryStage
+
+private const val SNACK_BAR_TO_SCREEN_RATIO = 9.0/10.0
 
 class NotificationSnackBar(notification: NotificationViewData): HBox() {
 
@@ -32,7 +33,7 @@ class NotificationSnackBar(notification: NotificationViewData): HBox() {
     init {
         addClass("wa-snack-bar")
 
-        maxWidthProperty().bind(primaryStage.widthProperty().multiply(9.0/10.0))
+        maxWidthProperty().bind(primaryStage.widthProperty().multiply(SNACK_BAR_TO_SCREEN_RATIO))
 
         button {
             addClass("btn", "btn--icon", "btn--borderless", "success-btn-icon")
