@@ -10,7 +10,7 @@ import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.event.BeginRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ChapterReturnFromPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
-import org.wycliffeassociates.otter.jvm.controls.event.OpenChapterEvent
+import org.wycliffeassociates.otter.jvm.controls.event.NavigateChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.OpenInAudioPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PauseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordAgainEvent
@@ -27,7 +27,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.NarrationMarkerChangedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationRedoEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationResetChapterEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationRestartChapterEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationUndoEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
@@ -129,8 +129,8 @@ class NarrationPage : View() {
             viewModel.snackBarMessage(it.message)
         }.let { eventSubscriptions.add(it) }
 
-        subscribe<NarrationResetChapterEvent> {
-            viewModel.resetChapter()
+        subscribe<NarrationRestartChapterEvent> {
+            viewModel.restartChapter()
         }.let { eventSubscriptions.add(it) }
 
         subscribe<NarrationUndoEvent> {
@@ -202,8 +202,8 @@ class NarrationPage : View() {
             viewModel.onChapterReturnFromPlugin()
         }.let { eventSubscriptions.add(it) }
 
-        subscribe<OpenChapterEvent> {
-            viewModel.loadChapter(it.chapterNumber)
+        subscribe<NavigateChapterEvent> {
+            viewModel.navigateChapter(it.chapterNumber)
         }.let { eventSubscriptions.add(it) }
     }
 

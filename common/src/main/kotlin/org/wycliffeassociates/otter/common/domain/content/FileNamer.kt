@@ -105,5 +105,10 @@ class FileNamer(
             val extensionDelim = """\."""
             Pattern.compile(chapter + verse + sort + type + take + extensionDelim)
         }
+        val inProgressNarrationPattern: Pattern = run {
+            val chapter = """c(\d+)/"""
+            val fileName = "(chapter_narration.pcm|active_verses.json)"
+            Pattern.compile(chapter + fileName)
+        }
     }
 }

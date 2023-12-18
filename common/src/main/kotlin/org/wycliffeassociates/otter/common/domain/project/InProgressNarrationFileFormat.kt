@@ -16,12 +16,21 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.controls.event
+package org.wycliffeassociates.otter.common.domain.project
 
-import tornadofx.FXEvent
-import tornadofx.View
+enum class InProgressNarrationFileFormat(val extension: String) {
+    PCM("pcm"),
+    JSON("json");
 
-class NavigationRequestEvent(val view: View) : FXEvent()
-class NavigateChapterEvent(val chapterNumber: Int) : FXEvent()
+    companion object {
+        private val extensionList: List<String> = values().map { it.extension }
+        private val map = values().associateBy { it.extension.lowercase() }
 
-object AppCloseRequestEvent : FXEvent()
+        /** @throws IllegalArgumentException */
+        fun of(extension: String) =
+            map[extension.lowercase()]
+                ?: throw IllegalArgumentException("File meta extension $extension not supported")
+
+        fun isSupported(extension: String) = extension.lowercase() in extensionList
+    }
+}

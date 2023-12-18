@@ -75,12 +75,12 @@ internal class ChapterRepresentation(
         private set
 
     init {
-        totalVerses = initalizeActiveVerses()
+        totalVerses = initializeActiveVerses()
         initializeWorkingAudioFile()
         initializeSerializedVersesFile()
     }
 
-    private fun initalizeActiveVerses(): MutableList<VerseNode> {
+    private fun initializeActiveVerses(): MutableList<VerseNode> {
         return chapter
             .chunks
             .take(1)
@@ -162,6 +162,51 @@ internal class ChapterRepresentation(
         } else listOf()
 
         onActiveVersesUpdated.onNext(updatedVerses)
+    }
+
+    /**
+     * Remove old audio data from chapter representation file and update serialized verses file
+     */
+    fun trim() {
+        logger.info("Trimming chapter representation file")
+        trimScratchAudio()
+        trimActiveVerses()
+    }
+
+    private fun trimScratchAudio() {
+        val chapterDir = workbook.projectFilesAccessor.getChapterAudioDir(workbook, chapter)
+        val newScratchAudio = chapterDir.resolve("new_$CHAPTER_NARRATION_FILE_NAME")
+
+        newScratchAudio.outputStream().use { writer ->
+            getAudioFileReader().use { reader ->
+                reader.open()
+                reader.seek(0)
+                val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                while (reader.hasRemaining()) {
+                    val read = reader.getPcmBuffer(buffer)
+                    writer.write(buffer, 0, read)
+                }
+            }
+        }
+
+        scratchAudio.file.delete()
+        newScratchAudio.renameTo(scratchAudio.file)
+    }
+
+    private fun trimActiveVerses() {
+        var start = 0
+        activeVerses.forEach { verse ->
+            val sectors = mutableListOf<IntRange>()
+
+            val end = start + verse.length - 1
+            sectors.add(IntRange(start, end))
+            start = end + 1
+
+            verse.sectors.clear()
+            verse.sectors.addAll(sectors)
+        }
+
+        serializeVerses()
     }
 
     fun versesWithRecordings(): List<Boolean> {

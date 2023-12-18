@@ -23,6 +23,7 @@ import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.inProgressNarrationPattern
 import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.takeFilenamePattern
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOptions
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
@@ -31,6 +32,7 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import java.io.File
 import java.lang.Exception
+import java.util.regex.Pattern
 import javax.inject.Inject
 
 class BackupProjectExporter @Inject constructor(
@@ -74,7 +76,11 @@ class BackupProjectExporter @Inject constructor(
                         workbookRepository,
                         isBook = true
                     ) {
-                        takesFilter(it, options)
+                        takesFilter(it, takeFilenamePattern, options)
+                    }
+
+                    projectAccessor.copyInProgressNarrationFiles(fileWriter) {
+                        takesFilter(it, inProgressNarrationPattern, options)
                     }
                     callback?.onNotifyProgress(70.0, messageKey = "copyingSource")
 
@@ -91,12 +97,12 @@ class BackupProjectExporter @Inject constructor(
                         workbook,
                         isBook = true
                     ) { takeName ->
-                        takesFilter(takeName, options)
+                        takesFilter(takeName, takeFilenamePattern, options)
                     }
                     projectAccessor.writeChunksFile(fileWriter)
                     projectAccessor.copyProjectModeFile(fileWriter)
                     projectAccessor.writeTakeCheckingStatus(fileWriter, workbook) { path ->
-                        takesFilter(path, options)
+                        takesFilter(path, takeFilenamePattern, options)
                     }.blockingAwait()
                 }
 
@@ -112,13 +118,13 @@ class BackupProjectExporter @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
-    private fun takesFilter(path: String, exportOptions: ExportOptions?): Boolean {
+    private fun takesFilter(path: String, pattern: Pattern, exportOptions: ExportOptions?): Boolean {
         if (exportOptions == null) {
             return true
         }
 
         return try {
-            takeFilenamePattern
+            pattern
                 .matcher(path)
                 .apply { find() }
                 .group(1)

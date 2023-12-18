@@ -47,6 +47,7 @@ import kotlin.io.path.createTempDirectory
 import kotlin.io.path.outputStream
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.AudioMetadataFileFormat
+import org.wycliffeassociates.otter.common.domain.project.InProgressNarrationFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.*
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.workbook.Book
@@ -400,6 +401,29 @@ class ProjectFilesAccessor(
         }
     }
 
+    fun copyInProgressNarrationFiles(
+        fileReader: IFileReader,
+        manifestProject: Project
+    ): Observable<String> {
+        return Observable.just(RcConstants.TAKE_DIR, manifestProject.path)
+            .filter(fileReader::exists)
+            .flatMap { audioDirInRc ->
+                val normalized = File(audioDirInRc).normalize().path
+                fileReader.copyDirectory(normalized, audioDir) {
+                    isInProgressNarrationFile(it)
+                }
+            }
+    }
+
+    fun copyInProgressNarrationFiles(
+        fileWriter: IFileWriter,
+        filter: (String) -> Boolean = { true }
+    ) {
+        fileWriter.copyDirectory(audioDir, RcConstants.TAKE_DIR) {
+            filter(it)
+        }
+    }
+
     fun getContributorInfo(): List<Contributor> {
         return ResourceContainer.load(projectDir).use { rc ->
             rc.manifest.dublinCore.contributor.map { Contributor(it) }
@@ -722,6 +746,11 @@ class ProjectFilesAccessor(
 
     private fun isAudioFile(file: File) =
         file.extension.lowercase().let { it == "wav" || it == "mp3" }
+
+    private fun isInProgressNarrationFile(file: String) = isInProgressNarrationFile(File(file))
+
+    private fun isInProgressNarrationFile(file: File) =
+        InProgressNarrationFileFormat.isSupported(file.extension)
 
     fun getChunkFile(): File {
         return projectDir.resolve(RcConstants.CHUNKS_FILE)

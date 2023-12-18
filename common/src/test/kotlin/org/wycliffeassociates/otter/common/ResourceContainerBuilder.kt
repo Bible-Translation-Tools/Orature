@@ -19,6 +19,9 @@ import java.io.File
 import kotlin.io.path.createTempDirectory
 import org.wycliffeassociates.resourcecontainer.entity.Language as RCLanguage
 
+internal const val ACTIVE_VERSES_FILE_NAME = "active_verses.json"
+internal const val CHAPTER_NARRATION_FILE_NAME = "chapter_narration.pcm"
+
 class ResourceContainerBuilder(baseRC: File? = null) {
 
     private val tempDir = createTempDirectory("orature-test")
@@ -88,6 +91,21 @@ class ResourceContainerBuilder(baseRC: File? = null) {
         return this
     }
 
+    fun setOngoingProject(isOngoing: Boolean): ResourceContainerBuilder {
+        if (isOngoing) {
+            val pathInRC = RcConstants.SELECTED_TAKES_FILE
+            val selectedFile = File(pathInRC).name
+            val tempFile = tempDir.resolve(selectedFile).apply {
+                createNewFile(); deleteOnExit()
+            }
+
+            ResourceContainer.load(rcFile).use {
+                it.addFileToContainer(tempFile, pathInRC)
+            }
+        }
+        return this
+    }
+
     /**
      * Inserts a take to the current resource container.
      * If a take is selected, it will be added to the list of selected takes.
@@ -141,6 +159,20 @@ class ResourceContainerBuilder(baseRC: File? = null) {
         }
         if (checking != null) {
             takeCheckingMap[relativePath] = checking
+        }
+
+        return this
+    }
+
+    fun addInProgressNarration(sort: Int): ResourceContainerBuilder {
+        val inProgressFiles = createTestChapterRepresentationFiles(tempDir)
+        val chapterDirTokens = "c${sort.toString().padStart(2, '0')}"
+        ResourceContainer.load(rcFile).use {
+            inProgressFiles.forEach { file ->
+                val relativePath = "$chapterDirTokens/${file.name}"
+                val pathInRC = "${RcConstants.TAKE_DIR}/$relativePath"
+                it.addFileToContainer(file, pathInRC)
+            }
         }
 
         return this

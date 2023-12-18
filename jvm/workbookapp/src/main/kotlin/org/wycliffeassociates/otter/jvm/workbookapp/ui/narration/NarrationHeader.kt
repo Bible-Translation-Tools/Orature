@@ -16,7 +16,7 @@ import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.chapterselector.chapterSelector
 import org.wycliffeassociates.otter.jvm.controls.event.ChapterReturnFromPluginEvent
-import org.wycliffeassociates.otter.jvm.controls.event.OpenChapterEvent
+import org.wycliffeassociates.otter.jvm.controls.event.NavigateChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
@@ -40,7 +40,7 @@ class NarrationHeader : View() {
             viewModel.processWithPlugin(it.plugin)
         }
 
-        subscribe<OpenChapterEvent> {
+        subscribe<NavigateChapterEvent> {
             popupMenu.hide()
         }
     }
@@ -192,7 +192,7 @@ class NarrationHeaderViewModel : ViewModel() {
         narrationViewModel.chapterList
             .elementAtOrNull(nextIndex)
             ?.let {
-                fire(OpenChapterEvent(it.sort))
+                fire(NavigateChapterEvent(it.sort))
             }
     }
 
