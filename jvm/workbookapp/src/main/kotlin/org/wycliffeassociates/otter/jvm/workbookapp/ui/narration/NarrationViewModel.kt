@@ -102,7 +102,6 @@ class NarrationViewModel : ViewModel() {
     val chapterTakeProperty = SimpleObjectProperty<Take>()
     val hasNextChapter = SimpleBooleanProperty()
     val hasPreviousChapter = SimpleBooleanProperty()
-    val chapterTakeBusyProperty = SimpleBooleanProperty()
     val isModifyingTakeAudio = SimpleBooleanProperty()
 
     val chunkTotalProperty = SimpleIntegerProperty(0)
@@ -205,6 +204,11 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun onUndock() {
+        if (isModifyingTakeAudio.value) {
+            // TODO: Possibly show the user a progress bar and message stating that the changes need to be saved
+            //  before navigating to a new chapter
+            logger.error("Undocking NarrationViewModel before chapter take modification is complete")
+        }
         disposables.clear()
         closeNarrationAudio()
         narration.close()
@@ -300,20 +304,12 @@ class NarrationViewModel : ViewModel() {
 
     private fun createPotentiallyFinishedChapterTake() {
         if (potentiallyFinished) {
-            // FIXME: this logic needs to be updated since we are bouncing the audio in a background thread.
-            //  chapterTakeBusy is not longer useful when set in this way
-            chapterTakeBusyProperty.set(true)
-            logger.info("Chapter is potentially finished, creating a chapter take")
             narration
                 .createChapterTake()
                 .subscribeOn(Schedulers.io())
-                .doFinally {
-                    chapterTakeBusyProperty.set(false)
-                }
                 .subscribe(
                     {
                         chapterTakeProperty.set(it)
-                        logger.info("Created a chapter take for ${chapterTitleProperty.value}")
                     }, { e ->
                         logger.error(
                             "Error in creating a chapter take for ${chapterTitleProperty.value}",
