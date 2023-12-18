@@ -197,9 +197,11 @@ internal class ChapterRepresentation(
         var start = 0
         activeVerses.forEach { verse ->
             val sectors = mutableListOf<IntRange>()
-            val length = verse.length - 1
-            sectors.add(IntRange(start, length + start))
-            start += length + 1
+
+            val end = start + verse.length - 1
+            sectors.add(IntRange(start, end))
+            start = end + 1
+
             verse.sectors.clear()
             verse.sectors.addAll(sectors)
         }
