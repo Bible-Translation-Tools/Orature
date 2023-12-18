@@ -51,7 +51,7 @@ class ProjectWizardViewModel : ViewModel() {
 
     val sourceLanguageSearchQueryProperty = SimpleStringProperty("")
     val targetLanguageSearchQueryProperty = SimpleStringProperty("")
-    val projectDeletingCount = AtomicInteger(0)
+    val projectDeleteCounter = AtomicInteger(0)
 
     private val disposableListeners = mutableListOf<ListenerDisposer>()
 
@@ -166,8 +166,9 @@ class ProjectWizardViewModel : ViewModel() {
     }
 
     private fun waitForProjectDeletionFinishes(): Completable {
-        return Observable.interval(100, TimeUnit.MILLISECONDS)
-            .takeWhile { projectDeletingCount.get() > 0 }
+        val waitIntervalMillis = 100L
+        return Observable.interval(waitIntervalMillis, TimeUnit.MILLISECONDS)
+            .takeWhile { projectDeleteCounter.get() > 0 }
             .subscribeOn(Schedulers.io())
             .ignoreElements()
     }

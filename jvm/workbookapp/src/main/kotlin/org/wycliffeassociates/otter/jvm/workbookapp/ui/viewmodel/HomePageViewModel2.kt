@@ -164,7 +164,7 @@ class HomePageViewModel2 : ViewModel() {
      */
     fun deleteProjectGroupWithTimer(cardModel: ProjectGroupCardModel): Disposable {
         val timeoutMillis = NOTIFICATION_DURATION_SEC * 1000
-        projectWizardViewModel.projectDeletingCount.incrementAndGet()
+        projectWizardViewModel.projectDeleteCounter.incrementAndGet()
 
         val completable: Completable = Completable.create { emitter ->
             val timerDisposable = deleteProjectUseCase
@@ -178,7 +178,7 @@ class HomePageViewModel2 : ViewModel() {
                     emitter.onComplete()
                 }
                 .doFinally {
-                    projectWizardViewModel.projectDeletingCount.decrementAndGet()
+                    projectWizardViewModel.projectDeleteCounter.decrementAndGet()
                 }
                 .subscribe()
 
