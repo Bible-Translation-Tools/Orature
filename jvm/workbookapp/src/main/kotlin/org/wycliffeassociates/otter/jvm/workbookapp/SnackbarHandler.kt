@@ -26,7 +26,7 @@ import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
 import org.wycliffeassociates.otter.jvm.controls.popup.NotificationSnackBar
 import tornadofx.*
 
-const val NOTIFICATION_DURATION_SEC = 500.0
+const val NOTIFICATION_DURATION_SEC = 5.0
 
 object SnackbarHandler {
 
