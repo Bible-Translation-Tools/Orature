@@ -12,6 +12,8 @@ class MarkerNode : MarkerControl() {
     init {
         addClass("marker-node")
         isPickOnBounds = false
+
+        focusTraversableProperty().bind(canBeMovedProperty)
         visibleProperty().bind(isPlacedProperty)
     }
 

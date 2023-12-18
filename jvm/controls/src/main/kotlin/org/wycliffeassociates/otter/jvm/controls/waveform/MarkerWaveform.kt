@@ -40,6 +40,11 @@ class MarkerWaveform : StackPane() {
         onSeekNext.set(op)
     }
 
+    private val onSeek = SimpleObjectProperty<(Int) -> Unit>()
+    fun setOnSeek(op: (Int) -> Unit) {
+        onSeek.set(op)
+    }
+
     private val onPlaceMarker = SimpleObjectProperty<EventHandler<ActionEvent>>()
     fun setOnPlaceMarker(op: () -> Unit) {
         onPlaceMarker.set(EventHandler { op.invoke() })
@@ -126,6 +131,7 @@ class MarkerWaveform : StackPane() {
             onResumeMediaProperty.bind(onResumeMedia)
             onSeekPreviousProperty.bind(onSeekPrevious)
             onSeekNextProperty.bind(onSeekNext)
+            onSeekProperty.bind(onSeek)
 
             focusVisibleProperty().onChange {
                 this@MarkerWaveform.togglePseudoClass("active", it)

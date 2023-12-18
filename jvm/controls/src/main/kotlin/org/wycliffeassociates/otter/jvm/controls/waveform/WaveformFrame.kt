@@ -57,6 +57,7 @@ class WaveformFrame(
     val onResumeMediaProperty = SimpleObjectProperty<() -> Unit>()
     val onSeekPreviousProperty = SimpleObjectProperty<() -> Unit>()
     val onSeekNextProperty = SimpleObjectProperty<() -> Unit>()
+    val onSeekProperty = SimpleObjectProperty<(Int) -> Unit>()
 
     val themeProperty = SimpleObjectProperty<ColorTheme>()
     val framePositionProperty = SimpleDoubleProperty(0.0)
@@ -164,6 +165,7 @@ class WaveformFrame(
                             val me = (it as MarkerTrackControl)
                             me.onSeekPreviousProperty.bind(this@WaveformFrame.onSeekPreviousProperty)
                             me.onSeekNextProperty.bind(this@WaveformFrame.onSeekNextProperty)
+                            me.onSeekProperty.bind(this@WaveformFrame.onSeekProperty)
                         })
                     }
                 }

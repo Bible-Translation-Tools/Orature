@@ -93,10 +93,9 @@
     -fx-border-width: 3px;
     -fx-border-radius: 6px;
     -fx-border-color: transparent;
-    -fx-padding: 5;
 }
 
-.source-content__chunk-list:focused {
+.source-content__chunk-list:focus-visible {
     -fx-border-color: -wa-card-border;
 }
 

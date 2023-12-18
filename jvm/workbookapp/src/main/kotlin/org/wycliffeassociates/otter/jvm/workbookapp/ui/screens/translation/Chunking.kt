@@ -176,6 +176,7 @@ class Chunking : View() {
 
     private fun setUpWaveformActionHandlers() {
         waveform.apply {
+            setOnSeek { viewModel.seek(it) }
             setOnSeekNext { viewModel.seekNext() }
             setOnSeekPrevious { viewModel.seekPrevious() }
             setOnWaveformClicked { viewModel.pause() }

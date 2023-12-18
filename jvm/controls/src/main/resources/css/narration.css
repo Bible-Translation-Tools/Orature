@@ -88,6 +88,12 @@
     -fx-background-insets: 0;
 }
 
+.narration__list:focus-visible {
+    -fx-border-width: 3px;
+    -fx-border-color: -wa-card-border;
+    -fx-border-radius: 6px;
+}
+
 .narration-list__verse-item {
     -fx-background-color: -wa-foreground;
     -fx-spacing: 16;
