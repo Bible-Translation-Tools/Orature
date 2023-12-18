@@ -16,6 +16,7 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
+import net.bytebuddy.build.Plugin.Factory.Simple
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
@@ -29,10 +30,7 @@ import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
-import org.wycliffeassociates.otter.common.domain.narration.AudioScene
-import org.wycliffeassociates.otter.common.domain.narration.Narration
-import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
-import org.wycliffeassociates.otter.common.domain.narration.framesToPixels
+import org.wycliffeassociates.otter.common.domain.narration.*
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterItemState
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterStateMachine
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterStateTransition
@@ -105,6 +103,7 @@ class NarrationViewModel : ViewModel() {
     val hasNextChapter = SimpleBooleanProperty()
     val hasPreviousChapter = SimpleBooleanProperty()
     val chapterTakeBusyProperty = SimpleBooleanProperty()
+    val isModifyingTakeAudio = SimpleBooleanProperty()
 
     val chunkTotalProperty = SimpleIntegerProperty(0)
     val chunksList: ObservableList<Chunk> = observableListOf()
@@ -230,6 +229,7 @@ class NarrationViewModel : ViewModel() {
         }
         volumeBar = VolumeBar(narration.getRecorderAudioStream())
         subscribeActiveVersesChanged()
+        subscribeNarrationAudioTaskRunnerBusyChange()
         updateRecordingState()
         rendererAudioReader = narration.audioReader
         rendererAudioReader.open()
@@ -300,6 +300,8 @@ class NarrationViewModel : ViewModel() {
 
     private fun createPotentiallyFinishedChapterTake() {
         if (potentiallyFinished) {
+            // FIXME: this logic needs to be updated since we are bouncing the audio in a background thread.
+            //  chapterTakeBusy is not longer useful when set in this way
             chapterTakeBusyProperty.set(true)
             logger.info("Chapter is potentially finished, creating a chapter take")
             narration
@@ -331,6 +333,12 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun loadChapter(chapter: Chapter) {
+        if (isModifyingTakeAudio.value) {
+            // TODO: Possibly show the user a progress bar and message stating that the changes need to be saved
+            //  before navigating to a new chapter
+            logger.error("TRYING TO NAVIGATE CHAPTER BEFORE TAKE MODIFICATION IS COMPLETE")
+        }
+
         logger.info("Loading chapter: ${chapter.sort}")
         resetState()
 
@@ -746,6 +754,16 @@ class NarrationViewModel : ViewModel() {
                 }
             )
             .let(disposables::add)
+    }
+
+    fun subscribeNarrationAudioTaskRunnerBusyChange() {
+        NarrationAudioBouncerTaskRunner.busy.subscribe {
+            it?.let {
+                isModifyingTakeAudio.set(it)
+            } ?: apply {
+                isModifyingTakeAudio.set(false)
+            }
+        }.let(disposables::add)
     }
 
     fun drawWaveform(

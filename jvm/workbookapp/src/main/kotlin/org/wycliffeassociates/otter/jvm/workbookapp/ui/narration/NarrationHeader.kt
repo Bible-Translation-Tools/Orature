@@ -159,7 +159,7 @@ class NarrationHeaderViewModel : ViewModel() {
         chapterTitleProperty.bind(narrationViewModel.chapterTitleProperty)
         hasNextChapter.bind(narrationViewModel.hasNextChapter)
         hasPreviousChapter.bind(narrationViewModel.hasPreviousChapter)
-        chapterTakeBusyProperty.bind(narrationViewModel.chapterTakeBusyProperty)
+        chapterTakeBusyProperty.bind(narrationViewModel.isModifyingTakeAudio)
 
         hasUndoProperty.bind(narrationViewModel.hasUndoProperty)
         hasRedoProperty.bind(narrationViewModel.hasRedoProperty)
