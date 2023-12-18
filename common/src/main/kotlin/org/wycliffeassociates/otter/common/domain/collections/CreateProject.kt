@@ -100,6 +100,7 @@ class CreateProject @Inject constructor(
             }
             .firstOrError()
             .flatMap { rootCollection ->
+                println("--> creating project")
                 collectionRepo
                     .deriveProjects(
                         rootCollection,

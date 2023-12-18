@@ -1,6 +1,9 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Completable
+import io.reactivex.Observable
+import io.reactivex.schedulers.Schedulers
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.ObservableValue
@@ -10,12 +13,15 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
+import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.function.Predicate
 import javax.inject.Inject
 
@@ -24,6 +30,8 @@ class ProjectWizardViewModel : ViewModel() {
 
     @Inject
     lateinit var creationUseCase: CreateProject
+    @Inject
+    lateinit var deleteProjectUseCase: DeleteProject
     @Inject
     lateinit var languageRepo: ILanguageRepository
     @Inject
@@ -43,6 +51,7 @@ class ProjectWizardViewModel : ViewModel() {
 
     val sourceLanguageSearchQueryProperty = SimpleStringProperty("")
     val targetLanguageSearchQueryProperty = SimpleStringProperty("")
+    val projectDeletingCount = AtomicInteger(0)
 
     private val disposableListeners = mutableListOf<ListenerDisposer>()
 
@@ -118,6 +127,7 @@ class ProjectWizardViewModel : ViewModel() {
                     language,
                     selectedModeProperty.value
                 )
+                .startWith(waitForProjectDeletionFinishes())
                 .observeOnFx()
                 .subscribe {
                     existingLanguagePairs.add(Pair(sourceLanguage, language))
@@ -153,6 +163,16 @@ class ProjectWizardViewModel : ViewModel() {
         reset()
         disposableListeners.forEach { it.dispose() }
         disposableListeners.clear()
+    }
+
+    private fun waitForProjectDeletionFinishes(): Completable {
+        return Observable.interval(100, TimeUnit.MILLISECONDS)
+            .takeWhile {
+                println("waiting for deletion...")
+                projectDeletingCount.get() > 0
+            }
+            .subscribeOn(Schedulers.io())
+            .ignoreElements()
     }
 
     private fun reset() {

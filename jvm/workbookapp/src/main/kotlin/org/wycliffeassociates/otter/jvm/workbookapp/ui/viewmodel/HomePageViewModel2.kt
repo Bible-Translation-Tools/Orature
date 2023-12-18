@@ -32,7 +32,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.NarrationPage
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
 import java.time.LocalDateTime
-import java.util.concurrent.TimeUnit
 import java.util.function.Predicate
 import javax.inject.Inject
 
@@ -165,11 +164,11 @@ class HomePageViewModel2 : ViewModel() {
      */
     fun deleteProjectGroupWithTimer(cardModel: ProjectGroupCardModel): Disposable {
         val timeoutMillis = NOTIFICATION_DURATION_SEC * 1000
+        projectWizardViewModel.projectDeletingCount.incrementAndGet()
 
         val completable: Completable = Completable.create { emitter ->
-            val timerDisposable = Completable
-                .timer(timeoutMillis.toLong(), TimeUnit.MILLISECONDS)
-                .andThen(deleteProjectUseCase.deleteProjects(cardModel.books))
+            val timerDisposable = deleteProjectUseCase
+                .deleteProjectsWithTimer(cardModel.books, timeoutMillis.toInt())
                 .observeOnFx()
                 .doOnComplete {
                     logger.info("Deleted project group: ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
@@ -177,6 +176,9 @@ class HomePageViewModel2 : ViewModel() {
                         Pair(cardModel.sourceLanguage, cardModel.targetLanguage)
                     )
                     emitter.onComplete()
+                }
+                .doFinally {
+                    projectWizardViewModel.projectDeletingCount.decrementAndGet()
                 }
                 .subscribe()
 

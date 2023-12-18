@@ -29,6 +29,9 @@ import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
+import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class DeleteProject @Inject constructor(
@@ -88,6 +91,31 @@ class DeleteProject @Inject constructor(
             .andThen(workbookDescriptorRepo.delete(list))
     }
 
+    fun deleteProjectsWithTimer(books: List<WorkbookDescriptor>, timeoutMillis: Int): Completable {
+        return Completable
+            .timer(timeoutMillis.toLong(), TimeUnit.MILLISECONDS)
+            .andThen {
+                deleteQueue.put(books)
+                println("---------- added to delete queue: ${books.hashCode()}")
+                processDeleteQueue()
+                it.onComplete()
+            }
+    }
+
+    fun isDeleting(): Boolean {
+        return deleteQueue.isNotEmpty()
+    }
+
+    @Synchronized
+    private fun processDeleteQueue() {
+        while (deleteQueue.peek() != null) {
+            val booksToDelete = deleteQueue.peek()
+            println(">>> processing delete... ${booksToDelete.hashCode()}")
+            deleteProjects(booksToDelete).blockingAwait()
+            deleteQueue.poll()
+        }
+    }
+
     private fun recreateWorkbookDescriptor(workbookDescriptor: WorkbookDescriptor): Completable {
         val sourceMetadata = workbookDescriptor.sourceCollection.resourceContainer!!
         return collectionRepository
@@ -130,5 +158,9 @@ class DeleteProject @Inject constructor(
         } else {
             Completable.complete()
         }
+    }
+
+    companion object {
+        private val deleteQueue = LinkedBlockingQueue<List<WorkbookDescriptor>>()
     }
 }
