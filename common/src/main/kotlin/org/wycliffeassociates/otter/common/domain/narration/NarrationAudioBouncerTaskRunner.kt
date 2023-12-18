@@ -18,11 +18,6 @@ object NarrationAudioBouncerTaskRunner {
 
     private val audioBouncer = AudioBouncer()
 
-    private fun startThreadPool() {
-        pool = ThreadPoolExecutor(1, 1, 1, TimeUnit.MINUTES, queue)
-        pool.prestartCoreThread()
-    }
-
     fun bounce(file: File, reader: AudioFileReader, markers: List<AudioMarker>) {
         audioBouncer.interrupt()
 
@@ -39,6 +34,7 @@ object NarrationAudioBouncerTaskRunner {
     }
 
     fun start() {
-        startThreadPool()
+        pool = ThreadPoolExecutor(1, 1, 1, TimeUnit.MINUTES, queue)
+        pool.prestartCoreThread()
     }
 }
