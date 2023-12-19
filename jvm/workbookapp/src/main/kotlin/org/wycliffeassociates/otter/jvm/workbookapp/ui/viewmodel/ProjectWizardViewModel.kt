@@ -165,6 +165,9 @@ class ProjectWizardViewModel : ViewModel() {
         disposableListeners.clear()
     }
 
+    /**
+     * Blocks the execution of project creation until projects delete queue completes.
+     */
     private fun waitForProjectDeletionFinishes(): Completable {
         val waitIntervalMillis = 100L
         return Observable.interval(waitIntervalMillis, TimeUnit.MILLISECONDS)
