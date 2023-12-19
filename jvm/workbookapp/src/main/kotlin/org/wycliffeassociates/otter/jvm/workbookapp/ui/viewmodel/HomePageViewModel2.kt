@@ -32,6 +32,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.NarrationPage
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
 import java.time.LocalDateTime
+import java.util.concurrent.ConcurrentHashMap
 import java.util.function.Predicate
 import javax.inject.Inject
 
@@ -63,6 +64,7 @@ class HomePageViewModel2 : ViewModel() {
     val projectGroups = observableListOf<ProjectGroupCardModel>()
     val bookList = observableListOf<WorkbookDescriptor>()
     private val filteredBooks = FilteredList<WorkbookDescriptor>(bookList)
+    private val projectsWithDeleteTimer = ConcurrentHashMap<ProjectGroupCardModel, Disposable>()
     private val disposableListeners = mutableListOf<ListenerDisposer>()
 
     val sortedBooks = SortedList<WorkbookDescriptor>(filteredBooks)
@@ -179,11 +181,27 @@ class HomePageViewModel2 : ViewModel() {
                 logger.info("Undo deleting project group ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
             }
             .doFinally {
+                projectsWithDeleteTimer.remove(cardModel)
                 projectWizardViewModel.projectDeleteCounter.decrementAndGet()
             }
             .subscribe()
 
+        projectsWithDeleteTimer[cardModel] = timerDisposable
+
         return timerDisposable
+    }
+
+    fun forceDeleteProjectsWithTimer() {
+        projectsWithDeleteTimer.forEach {
+            it.value.dispose()
+            deleteProjectUseCase.deleteProjects(it.key.books)
+                .doOnComplete {
+                    logger.info("Deleted project group: ${it.key.sourceLanguage.name} -> ${it.key.targetLanguage.name}.")
+                }
+                .subscribeOn(Schedulers.io())
+                .blockingAwait()
+        }
+        projectsWithDeleteTimer.clear()
     }
 
     fun deleteBook(workbookDescriptor: WorkbookDescriptor): Completable {
@@ -292,6 +310,7 @@ class HomePageViewModel2 : ViewModel() {
     }
 
     private fun openWorkbook(workbook: Workbook, mode: ProjectMode) {
+        forceDeleteProjectsWithTimer()
         workbookDS.activeWorkbookProperty.set(workbook)
         initializeProjectFiles(workbook)
         updateWorkbookModifiedDate(workbook)
