@@ -123,6 +123,17 @@ class ProjectFilesAccessor(
         return chapterDir
     }
 
+    fun getInProgressNarrationFiles(workbook: Workbook, chapter: Chapter): List<File> {
+        val chapterDir = getChapterAudioDir(workbook, chapter)
+        val chapterNarrationPath = RcConstants.CHAPTER_NARRATION_FILE.format(chapterDir.name)
+        val activeVersesPath = RcConstants.ACTIVE_VERSES_FILE.format(chapterDir.name)
+
+        val chapterNarrationFile = projectDir.resolve(chapterNarrationPath)
+        val activeVersesFile = projectDir.resolve(activeVersesPath)
+
+        return listOf(chapterNarrationFile, activeVersesFile)
+    }
+
     fun isInitialized(): Boolean {
         return try {
             ResourceContainer.load(projectDir).close()

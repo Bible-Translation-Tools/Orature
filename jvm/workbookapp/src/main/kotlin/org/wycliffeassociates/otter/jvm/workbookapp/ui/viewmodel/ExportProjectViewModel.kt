@@ -8,6 +8,8 @@ import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ProgressStatus
 import org.wycliffeassociates.otter.common.data.primitives.Collection
+import org.wycliffeassociates.otter.common.data.workbook.Chapter
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterDescriptor
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.project.exporter.AudioProjectExporter
@@ -53,12 +55,20 @@ class ExportProjectViewModel : ViewModel() {
                 workbookRepo.get(workbookDescriptor.sourceCollection, workbookDescriptor.targetCollection)
             }
             .flatMapObservable { workbook ->
+                // This is a workaround!
+                // Here to trigger getting chapter count.
+                // Without it, getting chapter count while we iterate through target chapters doesn't work
+                workbook.target.chapters.count().blockingGet()
+
                 workbook.target.chapters
                     .map { chapter ->
                         val chunkCount = chapter.chunkCount.blockingGet()
 
                         val progress = when {
                             chapter.hasSelectedAudio() -> 1.0
+                            // This narration progress does not reflect real progress
+                            // It's here just to enable this chapter in the export dialog
+                            hasInProgressNarration(workbook, chapter) -> 0.01
                             chunkCount != 0 -> {
                                 // collect chunks from the relay as soon as it starts emitting (blocking)
                                 val chunkWithAudio = chapter.chunks
@@ -140,5 +150,10 @@ class ExportProjectViewModel : ViewModel() {
                 )
             }
         }
+    }
+
+    private fun hasInProgressNarration(workbook: Workbook, chapter: Chapter): Boolean {
+        val files = workbook.projectFilesAccessor.getInProgressNarrationFiles(workbook, chapter)
+        return files.all { it.exists() }
     }
 }
