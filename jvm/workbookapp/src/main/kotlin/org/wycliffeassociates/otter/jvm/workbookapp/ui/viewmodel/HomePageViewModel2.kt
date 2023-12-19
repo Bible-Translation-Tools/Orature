@@ -166,26 +166,24 @@ class HomePageViewModel2 : ViewModel() {
         val timeoutMillis = NOTIFICATION_DURATION_SEC * 1000
         projectWizardViewModel.projectDeleteCounter.incrementAndGet()
 
-        val completable: Completable = Completable.create { emitter ->
-            val timerDisposable = deleteProjectUseCase
-                .deleteProjectsWithTimer(cardModel.books, timeoutMillis.toInt())
-                .observeOnFx()
-                .doOnComplete {
-                    logger.info("Deleted project group: ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
-                    projectWizardViewModel.existingLanguagePairs.remove(
-                        Pair(cardModel.sourceLanguage, cardModel.targetLanguage)
-                    )
-                    emitter.onComplete()
-                }
-                .doFinally {
-                    projectWizardViewModel.projectDeleteCounter.decrementAndGet()
-                }
-                .subscribe()
+        val timerDisposable = deleteProjectUseCase
+            .deleteProjectsWithTimer(cardModel.books, timeoutMillis.toInt())
+            .observeOnFx()
+            .doOnComplete {
+                logger.info("Deleted project group: ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
+                projectWizardViewModel.existingLanguagePairs.remove(
+                    Pair(cardModel.sourceLanguage, cardModel.targetLanguage)
+                )
+            }
+            .doOnDispose {
+                logger.info("Undo deleting project group ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
+            }
+            .doFinally {
+                projectWizardViewModel.projectDeleteCounter.decrementAndGet()
+            }
+            .subscribe()
 
-            emitter.setDisposable(timerDisposable)
-        }
-
-        return completable.subscribe()
+        return timerDisposable
     }
 
     fun deleteBook(workbookDescriptor: WorkbookDescriptor): Completable {
