@@ -213,7 +213,7 @@ internal class ChapterRepresentation(
         val recorded = activeVerses.filter { it.length > 0 }
         val versesWithRecordings = totalVerses.map { false }.toMutableList()
         for (verse in recorded) {
-            val index = totalVerses.indexOfFirst { it.marker.label == verse.marker.label }
+            val index = totalVerses.indexOfFirst { it.marker.formattedLabel == verse.marker.formattedLabel }
             versesWithRecordings[index] = true
         }
         return versesWithRecordings
