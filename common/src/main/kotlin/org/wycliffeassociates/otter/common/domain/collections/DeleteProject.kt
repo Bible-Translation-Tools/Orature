@@ -30,7 +30,6 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -95,22 +94,18 @@ class DeleteProject @Inject constructor(
         return Completable
             .timer(timeoutMillis.toLong(), TimeUnit.MILLISECONDS)
             .andThen {
-                deleteQueue.put(books)
+                deleteQueue.offer(books)
                 processDeleteQueue()
                 it.onComplete()
             }
-    }
-
-    fun isDeleting(): Boolean {
-        return deleteQueue.isNotEmpty()
+            .subscribeOn(Schedulers.io())
     }
 
     @Synchronized
     private fun processDeleteQueue() {
-        while (deleteQueue.peek() != null) {
-            val booksToDelete = deleteQueue.peek()
-            deleteProjects(booksToDelete).blockingAwait()
-            deleteQueue.poll()
+        while (deleteQueue.isNotEmpty()) {
+            val itemToDelete = deleteQueue.poll()
+            deleteProjects(itemToDelete).blockingAwait()
         }
     }
 
@@ -159,6 +154,6 @@ class DeleteProject @Inject constructor(
     }
 
     companion object {
-        private val deleteQueue = LinkedBlockingQueue<List<WorkbookDescriptor>>()
+        private val deleteQueue = ConcurrentLinkedQueue<List<WorkbookDescriptor>>()
     }
 }
