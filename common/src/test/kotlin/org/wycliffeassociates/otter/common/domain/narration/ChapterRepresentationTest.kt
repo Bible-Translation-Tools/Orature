@@ -101,7 +101,7 @@ class ChapterRepresentationTest {
     // Initializes each verse with placed equal to true and with one sector that holds one second worth of frames.
     // where the start of each added sector is offset by "paddingLength" number of frames
     val framesPerVerse = 44100
-    private fun initializeVerseNodeList(verseNodeList: MutableList<VerseNode>, paddingLength: Int = 0) {
+    private fun initializeVerseMarkersWithSectors(verseNodeList: MutableList<VerseNode>, paddingLength: Int = 0) {
         var start = -1
         val numTitles = getNumberOfTitles(verseNodeList)
         for (i in 0 until numTestVerses) {
@@ -172,10 +172,12 @@ class ChapterRepresentationTest {
     @Test
     fun `totalFrames with initialized totalVerses list`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
 
         Assert.assertEquals(44100 * numTestVerses, chapterRepresentation.totalFrames)
     }
+
+    // TODO: add test for versesWithRecording
 
     @Test
     fun `audioLocationToLocationInChapter with empty activeVerses`() {
@@ -188,7 +190,7 @@ class ChapterRepresentationTest {
     @Test
     fun `audioLocationToLocationInChapter with non-empty activeVerses and absoluteFrame not in activeVerses`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
 
         val relativePosition = chapterRepresentation.audioLocationToLocationInChapter(-5)
         Assert.assertEquals(0, relativePosition)
@@ -197,7 +199,7 @@ class ChapterRepresentationTest {
     @Test
     fun `audioLocationToLocationInChapter with activeVerses, sequential sectors, and non-null verse`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
 
         val relativePosition = chapterRepresentation.audioLocationToLocationInChapter(176400)
 
@@ -208,7 +210,7 @@ class ChapterRepresentationTest {
     @Test
     fun `audioLocationToLocationInChapter with activeVerses, sequential sectors with padding between each verseNode, and non-null verse`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses, 44100)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses, 44100)
 
         val relativePosition = chapterRepresentation.audioLocationToLocationInChapter(88200)
 
@@ -220,7 +222,7 @@ class ChapterRepresentationTest {
     @Test
     fun `audioLocationToLocationInChapter with activeVerses, non-sequential sectors, padding between sectors, and non-null verse`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses, 44100)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses, 44100)
         addSectorsToEnd(chapterRepresentation.totalVerses, 44100, 0)
 
         val relativePosition = chapterRepresentation.audioLocationToLocationInChapter(2690100)
@@ -234,7 +236,7 @@ class ChapterRepresentationTest {
     fun `relativeChapterToAbsolute with relativeIdx at the start of the first node`() {
         val relativePosition = 500
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
 
         val absolutePositionFromRelativePosition = chapterRepresentation.relativeChapterToAbsolute(relativePosition)
 
@@ -245,7 +247,7 @@ class ChapterRepresentationTest {
     fun `relativeChapterToAbsolute with relativeIdx at the end of the first node`() {
         val relativePosition = 44099
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
 
         val absolutePositionFromRelativePosition = chapterRepresentation.relativeChapterToAbsolute(relativePosition)
 
@@ -255,7 +257,7 @@ class ChapterRepresentationTest {
     @Test
     fun `relativeChapterToAbsolute with relativeIdx at the start of the second node`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
 
         val secondNodesStart = 44100
         val absolutePositionFromRelativePosition = chapterRepresentation.relativeChapterToAbsolute(secondNodesStart)
@@ -266,7 +268,7 @@ class ChapterRepresentationTest {
     @Test
     fun `relativeChapterToAbsolute with relativeIdx in the second node`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
 
         val secondNodesStart = 44100 * 2 + 31
         val absolutePositionFromRelativePosition = chapterRepresentation.relativeChapterToAbsolute(secondNodesStart)
@@ -277,7 +279,7 @@ class ChapterRepresentationTest {
     @Test
     fun `relativeChapterToAbsolute with relativeIdx at the end of the second node`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
 
         val secondNodesStart = 44100 * 2 - 1
         val absolutePositionFromRelativePosition = chapterRepresentation.relativeChapterToAbsolute(secondNodesStart)
@@ -288,7 +290,7 @@ class ChapterRepresentationTest {
     @Test
     fun `relativeChapterToAbsolute with relativeIdx in range of first node, with non-sequential sectors, and no unused frames`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
 
         addSectorsToEnd(chapterRepresentation.totalVerses, 44100, 0)
 
@@ -304,7 +306,7 @@ class ChapterRepresentationTest {
     @Test
     fun `relativeChapterToAbsolute with relativeIdx at the start of the second node, with non-sequential sectors and no unused frames`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
 
         addSectorsToEnd(chapterRepresentation.totalVerses, 44100, 0)
 
@@ -319,7 +321,7 @@ class ChapterRepresentationTest {
     @Test
     fun `relativeChapterToAbsolute with relativeIdx at the end of the second node, with non-sequential sectors and no unused frames`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
 
         addSectorsToEnd(chapterRepresentation.totalVerses, 44100, 0)
 
@@ -333,7 +335,7 @@ class ChapterRepresentationTest {
     @Test
     fun `relativeChapterToAbsolute with relativeIdx in range of 7th node, with non-sequential sectors, and no unused frames`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
 
         addSectorsToEnd(chapterRepresentation.totalVerses, 44100, 0)
 
@@ -348,7 +350,7 @@ class ChapterRepresentationTest {
     @Test
     fun `relativeChapterToAbsolute with relativeIdx at the end of the second node, with non-sequential sectors, and unused frames`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
 
         // 44100 frames are added between newly added sectors, as specified by the value for spaceBetweenSectors
         val spaceBetweenSectors = 44100
@@ -365,7 +367,7 @@ class ChapterRepresentationTest {
     @Test
     fun `relativeChapterToAbsolute with relativeIdx in range of 7th node, with non-sequential sectors, and unused frames`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
 
         // 44100 frames are added between newly added sectors, as specified by the value for spaceBetweenSectors
         val spaceBetweenSectors = 44100
@@ -391,7 +393,7 @@ class ChapterRepresentationTest {
     @Test
     fun `getRangeOfMarker with no matching verseMarker label`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
 
         val markerRange = chapterRepresentation.getRangeOfMarker(VerseMarker(-1, 1, 0))
 
@@ -401,7 +403,7 @@ class ChapterRepresentationTest {
     @Test
     fun `getRangeOfMarker with matching verseMarker label and sequential sectors`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
 
         val verseNumber = 7
         val markerRange = chapterRepresentation.getRangeOfMarker(VerseMarker(verseNumber, verseNumber, 0))
@@ -448,7 +450,7 @@ class ChapterRepresentationTest {
     @Test
     fun `absoluteToRelativeVerse with absoluteFrame in range of verse`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
         val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null)
 
         val verseIndex = 3
@@ -464,7 +466,7 @@ class ChapterRepresentationTest {
     @Test
     fun `absoluteToRelativeVerse with absoluteFrame not in range of verse`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
         val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null)
 
         val verseIndex = 3
@@ -482,7 +484,7 @@ class ChapterRepresentationTest {
     fun `absoluteToRelative with lockToVerse equal to CHAPTER_UNLOCKED and padding between verse sectors`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         val paddingBetweenVerses = 1000
-        initializeVerseNodeList(chapterRepresentation.totalVerses, paddingBetweenVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses, paddingBetweenVerses)
         val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null)
 
         // Sets the absolute frame to the beginning of verse specified by verseIndex
@@ -498,7 +500,7 @@ class ChapterRepresentationTest {
     fun `absoluteToRelative with lockToVerse not equal to CHAPTER_UNLOCKED and padding between verse sectors`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
         val paddingBetweenVerses = 1000
-        initializeVerseNodeList(chapterRepresentation.totalVerses, paddingBetweenVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses, paddingBetweenVerses)
         val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null)
 
         // Sets the absolute frame to the beginning of verse specified by verseIndex
@@ -526,7 +528,7 @@ class ChapterRepresentationTest {
     @Test
     fun `ChapterRepresentationConnection's hasRemaining with null start and end, no scratchAudio recorded, and non-empty activeVerses`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
 
         val hasRemaining = chapterRepresentation.ChapterRepresentationConnection(end = null).apply {
             open()
@@ -546,7 +548,7 @@ class ChapterRepresentationTest {
     fun `ChapterRepresentationConnection's hasRemaining with working audio, lockToVerse not equal to CHAPTER_UNLOCKED, and framePosition in locked verseNode`() {
         val verseIndexToLockTo = 5
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
         val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null).apply {
             open()
         }
@@ -595,7 +597,7 @@ class ChapterRepresentationTest {
     @Test
     fun `ChapterRepresentationConnection's lockToVerse with index in range of activeVerses and position not in range of node`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
         val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null)
 
         // Check if the initial frame position is correct
@@ -619,7 +621,7 @@ class ChapterRepresentationTest {
     @Test
     fun `ChapterRepresentationConnection's relativeVerseToRelativeChapter`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
         val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null)
 
         // Specifies what verse and what frame from the start of that verse to test
@@ -640,7 +642,7 @@ class ChapterRepresentationTest {
     @Test
     fun `ChapterRepresentationConnection's seek with sample in range of relative chapter space and sequential sectors`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
         val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null)
 
         // Check if the initial frame positions is correct
@@ -660,7 +662,7 @@ class ChapterRepresentationTest {
     @Test
     fun `ChapterRepresentationConnection's seek with sample in range of relative chapter space, empty spaces, and non-sequential sectors`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses, 44100)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses, 44100)
         addSectorsToEnd(chapterRepresentation.totalVerses, 44100, 0)
         val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null)
 
@@ -686,7 +688,7 @@ class ChapterRepresentationTest {
     @Test
     fun `ChapterRepresentationConnection's seek, locking to verse, with sample in relative verse space, and sequential sectors`() {
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
         val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null)
 
         // Check if the initial frame positions is correct
@@ -734,7 +736,7 @@ class ChapterRepresentationTest {
         writeByteBufferToPCMFile(testAudioDataBuffer, workingAudioFileWithAudio)
 
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
         val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null).apply {
             open()
         }
@@ -761,7 +763,7 @@ class ChapterRepresentationTest {
         writeByteBufferToPCMFile(testAudioDataBuffer, workingAudioFileWithAudio)
 
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
         val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null).apply {
             open()
         }
@@ -798,7 +800,7 @@ class ChapterRepresentationTest {
         writeByteBufferToPCMFile(buffer, workingAudioFileWithAudio)
 
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses, 44100)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses, 44100)
         val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null).apply {
             open()
         }
@@ -837,7 +839,7 @@ class ChapterRepresentationTest {
         writeByteBufferToPCMFile(buffer, workingAudioFileWithAudio)
 
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
         val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null).apply {
             open()
         }
@@ -875,7 +877,7 @@ class ChapterRepresentationTest {
         writeByteBufferToPCMFile(testAudioDataBuffer, workingAudioFileWithAudio)
 
         val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
-        initializeVerseNodeList(chapterRepresentation.totalVerses)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
         val chapterRepresentationConnection = chapterRepresentation.ChapterRepresentationConnection(end = null).apply {
             open()
         }
