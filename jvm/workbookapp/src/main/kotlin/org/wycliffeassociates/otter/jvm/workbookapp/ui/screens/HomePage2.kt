@@ -553,6 +553,7 @@ class HomePage2 : View() {
         ) {
             // undo deletion by cancelling the task
             cancellable.dispose()
+            viewModel.projectsWithDeleteTimer.remove(cardModel)
             // reinsert the project group
             viewModel.projectGroups.add(cardModel)
             if (viewModel.projectGroups.size == 1) {

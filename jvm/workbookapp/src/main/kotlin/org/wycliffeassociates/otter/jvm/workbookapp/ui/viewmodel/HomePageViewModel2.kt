@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.disposables.Disposable
@@ -64,13 +65,13 @@ class HomePageViewModel2 : ViewModel() {
     val projectGroups = observableListOf<ProjectGroupCardModel>()
     val bookList = observableListOf<WorkbookDescriptor>()
     private val filteredBooks = FilteredList<WorkbookDescriptor>(bookList)
-    private val projectsWithDeleteTimer = ConcurrentHashMap<ProjectGroupCardModel, Disposable>()
     private val disposableListeners = mutableListOf<ListenerDisposer>()
-
     val sortedBooks = SortedList<WorkbookDescriptor>(filteredBooks)
+
     val selectedProjectGroupProperty = SimpleObjectProperty<ProjectGroupKey>()
     val bookSearchQueryProperty = SimpleStringProperty("")
     val isLoadingProperty = SimpleBooleanProperty(false)
+    val projectsWithDeleteTimer = ConcurrentHashMap<ProjectGroupCardModel, Disposable>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -176,12 +177,12 @@ class HomePageViewModel2 : ViewModel() {
                 projectWizardViewModel.existingLanguagePairs.remove(
                     Pair(cardModel.sourceLanguage, cardModel.targetLanguage)
                 )
+                projectsWithDeleteTimer.remove(cardModel)
             }
             .doOnDispose {
                 logger.info("Undo deleting project group ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
             }
             .doFinally {
-                projectsWithDeleteTimer.remove(cardModel)
                 projectWizardViewModel.projectDeleteCounter.decrementAndGet()
             }
             .subscribe()
@@ -191,17 +192,27 @@ class HomePageViewModel2 : ViewModel() {
         return timerDisposable
     }
 
-    fun forceDeleteProjectsWithTimer() {
-        projectsWithDeleteTimer.forEach {
-            it.value.dispose()
-            deleteProjectUseCase.deleteProjects(it.key.books)
-                .doOnComplete {
-                    logger.info("Deleted project group: ${it.key.sourceLanguage.name} -> ${it.key.targetLanguage.name}.")
-                }
-                .subscribeOn(Schedulers.io())
-                .blockingAwait()
-        }
-        projectsWithDeleteTimer.clear()
+    /**
+     * Trigger instant delete on project(s) timed for deletion, given that the
+     * timer has not gone off. This method mitigates the problem of loading
+     * projects while deleting concurrently. For instance, deleting a project,
+     * then opening a book and returning home.
+     */
+    private fun forceDeleteProjectsWithTimer() {
+        projectsWithDeleteTimer.forEach { (_, disposable) -> disposable.dispose() }
+
+        Observable.fromIterable(projectsWithDeleteTimer.keys)
+            .concatMapCompletable { cardModel ->
+                deleteProjectUseCase.deleteProjects(cardModel.books)
+                    .doOnComplete {
+                        logger.info("Force-deleted project group: ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
+                    }
+            }
+            .subscribeOn(Schedulers.io())
+            .doFinally {
+                projectsWithDeleteTimer.clear()
+            }
+            .blockingAwait() // blocking is necessary to avoid concurrent delete/get from database
     }
 
     fun deleteBook(workbookDescriptor: WorkbookDescriptor): Completable {
@@ -310,10 +321,12 @@ class HomePageViewModel2 : ViewModel() {
     }
 
     private fun openWorkbook(workbook: Workbook, mode: ProjectMode) {
-        forceDeleteProjectsWithTimer()
         workbookDS.activeWorkbookProperty.set(workbook)
         initializeProjectFiles(workbook)
         updateWorkbookModifiedDate(workbook)
+        if (projectsWithDeleteTimer.isNotEmpty()) {
+            forceDeleteProjectsWithTimer()
+        }
         when(mode) {
             ProjectMode.TRANSLATION -> navigator.dock<ChunkingTranslationPage>()
             ProjectMode.NARRATION, ProjectMode.DIALECT -> navigator.dock<NarrationPage>()
