@@ -179,7 +179,7 @@ class HomePageViewModel2 : ViewModel() {
                 projectsWithDeleteTimer.remove(cardModel)
             }
             .doOnDispose {
-                logger.info("Undo deleting project group ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
+                logger.info("Cancelled deleting project group ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
             }
             .doFinally {
                 projectWizardViewModel.projectDeleteCounter.decrementAndGet()
