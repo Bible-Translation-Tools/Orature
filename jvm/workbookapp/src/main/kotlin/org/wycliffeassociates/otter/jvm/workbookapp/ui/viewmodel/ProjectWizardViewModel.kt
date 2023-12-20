@@ -130,6 +130,7 @@ class ProjectWizardViewModel : ViewModel() {
                 .startWith(waitForProjectDeletionFinishes())
                 .observeOnFx()
                 .subscribe {
+                    logger.info("Project group created: ${sourceLanguage.name} - ${language.name}")
                     existingLanguagePairs.add(Pair(sourceLanguage, language))
                     reset()
                     onNavigateBack()

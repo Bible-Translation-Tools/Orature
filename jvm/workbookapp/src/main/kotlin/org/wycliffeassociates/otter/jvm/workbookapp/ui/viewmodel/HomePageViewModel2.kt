@@ -71,7 +71,8 @@ class HomePageViewModel2 : ViewModel() {
     val selectedProjectGroupProperty = SimpleObjectProperty<ProjectGroupKey>()
     val bookSearchQueryProperty = SimpleStringProperty("")
     val isLoadingProperty = SimpleBooleanProperty(false)
-    val projectsWithDeleteTimer = ConcurrentHashMap<ProjectGroupCardModel, Disposable>()
+
+    private val projectsWithDeleteTimer = ConcurrentHashMap<ProjectGroupCardModel, Disposable>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -160,12 +161,10 @@ class HomePageViewModel2 : ViewModel() {
 
     /**
      * Deletes the project group after a specified timeout. During this time,
-     * the user can choose to cancel (undo) the action by calling dispose()
-     * from the disposable.
-     *
-     * @return the disposable (cancellable) subscription to the deletion task.
+     * the user can choose to cancel (undo) the action which disposes the
+     * delete task
      */
-    fun deleteProjectGroupWithTimer(cardModel: ProjectGroupCardModel): Disposable {
+    fun deleteProjectGroupWithTimer(cardModel: ProjectGroupCardModel) {
         val timeoutMillis = NOTIFICATION_DURATION_SEC * 1000
         projectWizardViewModel.projectDeleteCounter.incrementAndGet()
 
@@ -188,31 +187,18 @@ class HomePageViewModel2 : ViewModel() {
             .subscribe()
 
         projectsWithDeleteTimer[cardModel] = timerDisposable
-
-        return timerDisposable
     }
 
-    /**
-     * Trigger instant delete on project(s) timed for deletion, given that the
-     * timer has not gone off. This method mitigates the problem of loading
-     * projects while deleting concurrently. For instance, deleting a project,
-     * then opening a book and returning home.
-     */
-    private fun forceDeleteProjectsWithTimer() {
-        projectsWithDeleteTimer.forEach { (_, disposable) -> disposable.dispose() }
+    fun undoDeleteProjectGroup(cardModel: ProjectGroupCardModel) {
+        projectsWithDeleteTimer[cardModel]?.dispose() // cancel the delete task
+        projectsWithDeleteTimer.remove(cardModel)
 
-        Observable.fromIterable(projectsWithDeleteTimer.keys)
-            .concatMapCompletable { cardModel ->
-                deleteProjectUseCase.deleteProjects(cardModel.books)
-                    .doOnComplete {
-                        logger.info("Force-deleted project group: ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
-                    }
-            }
-            .subscribeOn(Schedulers.io())
-            .doFinally {
-                projectsWithDeleteTimer.clear()
-            }
-            .blockingAwait() // blocking is necessary to avoid concurrent delete/get from database
+        // reinsert the project group
+        projectGroups.add(cardModel)
+        if (projectGroups.size == 1) {
+            bookList.setAll(cardModel.books)
+            selectedProjectGroupProperty.set(cardModel.getKey())
+        }
     }
 
     fun deleteBook(workbookDescriptor: WorkbookDescriptor): Completable {
@@ -235,6 +221,29 @@ class HomePageViewModel2 : ViewModel() {
             .doOnError { logger.error("Error while loading contributor info.", it) }
             .subscribeOn(Schedulers.io())
             .observeOnFx()
+    }
+
+    /**
+     * Trigger instant delete on project(s) timed for deletion, given that the
+     * timer has not gone off. This method mitigates the problem of loading
+     * projects while deleting concurrently. For instance, deleting a project,
+     * then opening a book and returning home.
+     */
+    private fun forceDeleteProjectsWithTimer() {
+        projectsWithDeleteTimer.forEach { (_, disposable) -> disposable.dispose() }
+
+        Observable.fromIterable(projectsWithDeleteTimer.keys)
+            .concatMapCompletable { cardModel ->
+                deleteProjectUseCase.deleteProjects(cardModel.books)
+                    .doOnComplete {
+                        logger.info("Force-deleted project group: ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
+                    }
+            }
+            .subscribeOn(Schedulers.io())
+            .doFinally {
+                projectsWithDeleteTimer.clear()
+            }
+            .blockingAwait() // blocking is necessary to avoid concurrent delete/get from database when docking home
     }
 
     private fun loadContributorsFromDerivedMetadata(
