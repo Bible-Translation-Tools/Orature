@@ -114,6 +114,24 @@ class ChapterRepresentationTest {
         }
     }
 
+    private fun initializeTitlesWithSectors(verseNodeList: MutableList<VerseNode>, paddingLength: Int = 0) {
+        val titles = getTitleMarkers(verseNodeList)
+
+        var start = verseNodeList.last().lastFrame() + 1
+        titles.forEach {
+            it.sectors.add(start..(start + framesPerVerse))
+            start += framesPerVerse + 1
+            it.placed = true
+        }
+    }
+
+    private fun getTitleMarkers(verseNodeList: MutableList<VerseNode>): List<VerseNode> {
+        val regex = """orature-vm-\d+""".toRegex()
+        return verseNodeList.filter {
+            !regex.containsMatchIn(it.marker.formattedLabel)
+        }
+    }
+
     // Simulates re-recording each verse for some number of frames (sectorLength), with some amount of "dead-space"
     // (spaceBetweenSectors) between each newly added sector
     private fun addSectorsToEnd(verseNodeList: MutableList<VerseNode>, sectorLength: Int, spaceBetweenSectors: Int) {
@@ -177,7 +195,101 @@ class ChapterRepresentationTest {
         Assert.assertEquals(44100 * numTestVerses, chapterRepresentation.totalFrames)
     }
 
-    // TODO: add test for versesWithRecording
+    @Test
+    fun `versesWithRecordings with no markers recorded`() {
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
+
+        val verses = chapterRepresentation.versesWithRecordings()
+
+        // Verify that verses is of the correct length
+        Assert.assertEquals(verses.size, chapterRepresentation.totalVerses.size)
+
+        // Verify that no verses have recordings
+        Assert.assertFalse(verses.contains(true))
+    }
+
+    @Test
+    fun `versesWithRecordings with all markers recorded`() {
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
+        initializeTitlesWithSectors(chapterRepresentation.totalVerses)
+
+        val verses = chapterRepresentation.versesWithRecordings()
+
+        // Verify that verses is of the correct length
+        Assert.assertEquals(verses.size, chapterRepresentation.totalVerses.size)
+
+        // Verify that all markers have some recordings
+        Assert.assertFalse(verses.contains(false))
+    }
+
+    @Test
+    fun `versesWithRecordings with only titles recorded`() {
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
+        initializeTitlesWithSectors(chapterRepresentation.totalVerses)
+
+        val verses = chapterRepresentation.versesWithRecordings()
+
+        val titles = getTitleMarkers(chapterRepresentation.totalVerses)
+
+        // Verify that only title markers have recordings
+        chapterRepresentation.totalVerses.forEachIndexed { idx, verseNode ->
+            if (titles.contains(verseNode)) {
+                Assert.assertTrue(verses[idx])
+            } else {
+                Assert.assertFalse(verses[idx])
+            }
+        }
+    }
+
+    @Test
+    fun `versesWithRecordings all titles recorded and some verses recorded`() {
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
+        initializeTitlesWithSectors(chapterRepresentation.totalVerses)
+
+        // Removes recording data from the end of the verse node list
+        val numVersesToRemove = 3
+        chapterRepresentation.apply {
+            for (i in totalVerses.size - numVersesToRemove until totalVerses.size) {
+                totalVerses[i].apply {
+                    sectors.clear()
+                    placed = false
+                }
+            }
+        }
+
+        val verses = chapterRepresentation.versesWithRecordings()
+
+        // Verify that we have numTestVerses - versesToRemove verses recorded
+        val numTitles = getTitleMarkers(chapterRepresentation.totalVerses).size
+        val (recorded, notRecorded) = verses.partition { it }
+        Assert.assertEquals(recorded.size, numTestVerses - numVersesToRemove + numTitles)
+        Assert.assertEquals(notRecorded.size, numVersesToRemove)
+    }
+
+    @Test
+    fun `versesWithRecordings with markers that have recordings, but are not placed`() {
+        val chapterRepresentation = ChapterRepresentation(workbookWithAudio, chapter)
+        initializeVerseMarkersWithSectors(chapterRepresentation.totalVerses)
+        initializeTitlesWithSectors(chapterRepresentation.totalVerses)
+
+        // Sets placed to false for the last numVersesToRemove verses
+        val numVersesToRemove = 3
+        chapterRepresentation.apply {
+            for (i in totalVerses.size - numVersesToRemove until totalVerses.size) {
+                totalVerses[i].apply {
+                    placed = false
+                }
+            }
+        }
+
+        val verses = chapterRepresentation.versesWithRecordings()
+        val numTitles = getTitleMarkers(chapterRepresentation.totalVerses).size
+        val (recorded, notRecorded) = verses.partition { it }
+        Assert.assertEquals(recorded.size, numTestVerses - numVersesToRemove + numTitles)
+        Assert.assertEquals(notRecorded.size, numVersesToRemove)
+    }
 
     @Test
     fun `audioLocationToLocationInChapter with empty activeVerses`() {
