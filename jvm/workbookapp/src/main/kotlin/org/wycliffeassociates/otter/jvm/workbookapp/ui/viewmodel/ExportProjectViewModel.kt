@@ -12,6 +12,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterDescriptor
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
+import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
 import org.wycliffeassociates.otter.common.domain.project.exporter.AudioProjectExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOptions
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
@@ -43,6 +44,9 @@ class ExportProjectViewModel : ViewModel() {
     @Inject
     lateinit var exportAudioUseCase: AudioProjectExporter
 
+    @Inject
+    lateinit var narrationFactory: NarrationFactory
+
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
     }
@@ -66,9 +70,16 @@ class ExportProjectViewModel : ViewModel() {
 
                         val progress = when {
                             chapter.hasSelectedAudio() -> 1.0
-                            // This narration progress does not reflect real progress
-                            // It's here just to enable this chapter in the export dialog
-                            hasInProgressNarration(workbook, chapter) -> 0.01
+                            hasInProgressNarration(workbook, chapter) -> {
+                                val narration = narrationFactory.create(workbook, chapter)
+
+                                val totalVerses = narration.totalVerses.size
+                                val activeVerses = narration.activeVerses.size
+
+                                if (totalVerses > 0) {
+                                    activeVerses / totalVerses.toDouble()
+                                } else 0.0
+                            }
                             chunkCount != 0 -> {
                                 // collect chunks from the relay as soon as it starts emitting (blocking)
                                 val chunkWithAudio = chapter.chunks
