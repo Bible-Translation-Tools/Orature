@@ -341,6 +341,7 @@ class HomePage2 : View() {
             themeProperty.set(settingsViewModel.appColorMode.value)
             viewModel.isLoadingProperty.onChangeWithDisposer {
                 if (it == true) {
+                    messageProperty.set(messages["loadingProjectWait"])
                     open()
                 } else {
                     close()

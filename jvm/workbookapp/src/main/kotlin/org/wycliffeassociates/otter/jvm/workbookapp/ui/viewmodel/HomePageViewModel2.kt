@@ -22,6 +22,7 @@ import org.wycliffeassociates.otter.common.domain.collections.UpdateProject
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
+import org.wycliffeassociates.otter.jvm.controls.dialog.LoadingModal
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupKey
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupCardModel
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
@@ -61,6 +62,7 @@ class HomePageViewModel2 : ViewModel() {
     private val navigator: NavigationMediator by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
     private val projectWizardViewModel: ProjectWizardViewModel by inject()
+    private val settingsViewModel: SettingsViewModel by inject()
 
     val projectGroups = observableListOf<ProjectGroupCardModel>()
     val bookList = observableListOf<WorkbookDescriptor>()
@@ -230,6 +232,12 @@ class HomePageViewModel2 : ViewModel() {
      * then opening a book and returning home.
      */
     private fun forceDeleteProjectsWithTimer() {
+        val loadingDialog = find<LoadingModal>().apply {
+            messageProperty.set(messages["loadingBook"])
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
+        }
+        loadingDialog.open()
         projectsWithDeleteTimer.forEach { (_, disposable) -> disposable.dispose() }
 
         Observable.fromIterable(projectsWithDeleteTimer.keys)
@@ -239,11 +247,14 @@ class HomePageViewModel2 : ViewModel() {
                         logger.info("Force-deleted project group: ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
                     }
             }
+            .doOnError { logger.error("Error while flushing pending delete projects", it) }
             .subscribeOn(Schedulers.io())
+            .observeOnFx()
             .doFinally {
                 projectsWithDeleteTimer.clear()
+                loadingDialog.close()
             }
-            .blockingAwait() // blocking is necessary to avoid concurrent delete/get from database when docking home
+            .subscribe()
     }
 
     private fun loadContributorsFromDerivedMetadata(
@@ -333,12 +344,12 @@ class HomePageViewModel2 : ViewModel() {
         workbookDS.activeWorkbookProperty.set(workbook)
         initializeProjectFiles(workbook)
         updateWorkbookModifiedDate(workbook)
-        if (projectsWithDeleteTimer.isNotEmpty()) {
-            forceDeleteProjectsWithTimer()
-        }
         when(mode) {
             ProjectMode.TRANSLATION -> navigator.dock<ChunkingTranslationPage>()
             ProjectMode.NARRATION, ProjectMode.DIALECT -> navigator.dock<NarrationPage>()
+        }
+        if (projectsWithDeleteTimer.isNotEmpty()) {
+            forceDeleteProjectsWithTimer()
         }
     }
 
