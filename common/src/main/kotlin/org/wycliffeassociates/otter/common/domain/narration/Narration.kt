@@ -476,7 +476,6 @@ class Narration @AssistedInject constructor(
         player.close()
         recorder.stop()
         chapterRepresentation.closeConnections()
-        takeAudioModifier?.close()
     }
 
     fun seekToPrevious() {

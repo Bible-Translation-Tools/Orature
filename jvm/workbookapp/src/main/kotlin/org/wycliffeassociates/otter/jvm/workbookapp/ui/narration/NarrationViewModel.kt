@@ -233,7 +233,6 @@ class NarrationViewModel : ViewModel() {
         }
         volumeBar = VolumeBar(narration.getRecorderAudioStream())
         subscribeActiveVersesChanged()
-        subscribeNarrationAudioTaskRunnerBusyChange()
         updateRecordingState()
         rendererAudioReader = narration.audioReader
         rendererAudioReader.open()
@@ -750,16 +749,6 @@ class NarrationViewModel : ViewModel() {
                 }
             )
             .let(disposables::add)
-    }
-
-    fun subscribeNarrationAudioTaskRunnerBusyChange() {
-        NarrationAudioBouncerTaskRunner.busy.subscribe {
-            it?.let {
-                isModifyingTakeAudio.set(it)
-            } ?: apply {
-                isModifyingTakeAudio.set(false)
-            }
-        }.let(disposables::add)
     }
 
     fun drawWaveform(
