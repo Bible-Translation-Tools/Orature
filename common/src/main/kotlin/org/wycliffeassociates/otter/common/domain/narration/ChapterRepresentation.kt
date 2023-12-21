@@ -219,6 +219,15 @@ internal class ChapterRepresentation(
         return versesWithRecordings
     }
 
+    fun getCompletionProgress(): Double {
+        val totalVerses = totalVerses.size
+        val activeVerses = activeVerses.size
+
+        return if (totalVerses > 0) {
+            activeVerses / totalVerses.toDouble()
+        } else 0.0
+    }
+
     private fun initializeSerializedVersesFile() {
         val projectChapterDir = workbook.projectFilesAccessor.getChapterAudioDir(workbook, chapter)
         serializedVersesFile = File(projectChapterDir, ACTIVE_VERSES_FILE_NAME).also {

@@ -139,12 +139,7 @@ class ProjectFilesAccessor(
         val chapterRepresentation = ChapterRepresentation(workbook, chapter)
         chapterRepresentation.loadFromSerializedVerses()
 
-        val totalVerses = chapterRepresentation.totalVerses.size
-        val activeVerses = chapterRepresentation.activeVerses.size
-
-        return if (totalVerses > 0) {
-            activeVerses / totalVerses.toDouble()
-        } else 0.0
+        return chapterRepresentation.getCompletionProgress()
     }
 
     fun isInitialized(): Boolean {
