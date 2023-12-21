@@ -227,12 +227,13 @@ class HomePageViewModel2 : ViewModel() {
 
     /**
      * Trigger instant delete on project(s) timed for deletion, given that the
-     * timer has not gone off. This method mitigates the problem of loading
-     * projects while deleting concurrently. For instance, deleting a project,
-     * then opening a book and returning home.
+     * timer has not gone off. This method addresses the issue with navigating home
+     * while the delete task is executing. For instance, deleting a project,
+     * then opening a book and returning home will trigger the concurrent get & delete.
      */
     private fun forceDeleteProjectsWithTimer() {
         val loadingDialog = find<LoadingModal>().apply {
+            // show loading modal while flushing the delete queue to prevent navigating home
             messageProperty.set(messages["loadingBook"])
             orientationProperty.set(settingsViewModel.orientationProperty.value)
             themeProperty.set(settingsViewModel.appColorMode.value)
@@ -247,7 +248,7 @@ class HomePageViewModel2 : ViewModel() {
                         logger.info("Force-deleted project group: ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
                     }
             }
-            .doOnError { logger.error("Error while flushing pending delete projects", it) }
+            .doOnError { logger.error("Error while force-deleting projects in queue.", it) }
             .subscribeOn(Schedulers.io())
             .observeOnFx()
             .doFinally {
