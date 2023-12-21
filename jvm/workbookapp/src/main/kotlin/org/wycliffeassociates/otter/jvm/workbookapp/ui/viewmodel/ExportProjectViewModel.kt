@@ -71,16 +71,7 @@ class ExportProjectViewModel : ViewModel() {
                         val progress = when {
                             chapter.hasSelectedAudio() -> 1.0
                             hasInProgressNarration(workbook, chapter) -> {
-                                val narration = narrationFactory.create(workbook, chapter)
-
-                                val totalVerses = narration.totalVerses.size
-                                val activeVerses = narration.activeVerses.size
-
-                                narration.close()
-
-                                if (totalVerses > 0) {
-                                    activeVerses / totalVerses.toDouble()
-                                } else 0.0
+                                workbook.projectFilesAccessor.getNarrationProgress(workbook, chapter)
                             }
                             chunkCount != 0 -> {
                                 // collect chunks from the relay as soon as it starts emitting (blocking)

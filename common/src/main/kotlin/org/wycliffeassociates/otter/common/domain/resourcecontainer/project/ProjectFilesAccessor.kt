@@ -56,6 +56,7 @@ import org.wycliffeassociates.otter.common.domain.project.TakeCheckingStatusMap
 import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
+import org.wycliffeassociates.otter.common.domain.narration.ChapterRepresentation
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.usfm.getText
 import org.wycliffeassociates.usfmtools.USFMParser
 import org.wycliffeassociates.usfmtools.models.markers.CMarker
@@ -132,6 +133,18 @@ class ProjectFilesAccessor(
         val activeVersesFile = projectDir.resolve(activeVersesPath)
 
         return listOf(chapterNarrationFile, activeVersesFile)
+    }
+
+    fun getNarrationProgress(workbook: Workbook, chapter: Chapter): Double {
+        val chapterRepresentation = ChapterRepresentation(workbook, chapter)
+        chapterRepresentation.loadFromSerializedVerses()
+
+        val totalVerses = chapterRepresentation.totalVerses.size
+        val activeVerses = chapterRepresentation.activeVerses.size
+
+        return if (totalVerses > 0) {
+            activeVerses / totalVerses.toDouble()
+        } else 0.0
     }
 
     fun isInitialized(): Boolean {
