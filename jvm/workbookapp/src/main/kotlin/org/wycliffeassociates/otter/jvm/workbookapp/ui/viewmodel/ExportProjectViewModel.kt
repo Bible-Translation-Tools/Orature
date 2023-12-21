@@ -76,6 +76,8 @@ class ExportProjectViewModel : ViewModel() {
                                 val totalVerses = narration.totalVerses.size
                                 val activeVerses = narration.activeVerses.size
 
+                                narration.close()
+
                                 if (totalVerses > 0) {
                                     activeVerses / totalVerses.toDouble()
                                 } else 0.0
