@@ -73,7 +73,7 @@ class ExportProjectViewModel : ViewModel() {
                             else -> 0.0
                         }
 
-                        ChapterDescriptor(chapter.sort, progress)
+                        ChapterDescriptor(chapter.sort, progress, progress > 0)
                     }
             }
             .toList()

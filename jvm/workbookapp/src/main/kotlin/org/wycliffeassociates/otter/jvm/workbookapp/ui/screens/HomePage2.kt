@@ -295,11 +295,14 @@ class HomePage2 : View() {
                 themeProperty.set(settingsViewModel.appColorMode.value)
                 workbookDescriptorProperty.set(workbookDescriptor)
 
+                open()
+
                 exportProjectViewModel.loadChapters(workbookDescriptor)
                     .observeOnFx()
                     .subscribe { chapters ->
                         this.chapters.setAll(chapters)
-                        open()
+                        this.selectedChapters.clear()
+                        this.selectedChapters.addAll(chapters.filter { it.selectable })
                     }
 
                 setOnCloseAction { this.close() }
