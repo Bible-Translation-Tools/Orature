@@ -63,12 +63,12 @@ class ExportProjectViewModel : ViewModel() {
                 workbookRepo.get(workbookDescriptor.sourceCollection, workbookDescriptor.targetCollection)
             }
             .flatMapObservable { workbook ->
-                // This is a workaround!
-                // Here to trigger getting chapter count.
-                // Without it, getting chapter count while we iterate through target chapters doesn't work
-                workbook.target.chapters.count().blockingGet()
+
+                /** A workaround to access all items in the Observable.cache() where Chapter is constructed */
+                val chapterCount = workbook.target.chapters.count().blockingGet()
 
                 workbook.target.chapters
+                    .take(chapterCount)
                     .map { chapter ->
                         val progress = when {
                             chapter.hasSelectedAudio() -> 1.0
