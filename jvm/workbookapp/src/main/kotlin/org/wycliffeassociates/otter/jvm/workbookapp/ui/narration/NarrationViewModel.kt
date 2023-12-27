@@ -781,14 +781,7 @@ class NarrationViewModel : ViewModel() {
                 var nextVerseLoc: Int? = null
                 if (isRecordingAgain) {
                     val reRecordingIndex = recordingVerseIndex.value
-                    val nextChunk = chunksList.getOrNull(reRecordingIndex + 1)
-                    if (nextChunk != null) {
-                        val next = recordedVerses.firstOrNull { it.label == nextChunk.title }
-                        if (next != null) {
-                            nextVerseLoc = next.location
-                        }
-                    }
-
+                    nextVerseLoc = recordedVerses.getOrNull(reRecordingIndex + 1)?.location
                     reRecordLoc = recordedVerses[reRecordingIndex].location
                 }
 
