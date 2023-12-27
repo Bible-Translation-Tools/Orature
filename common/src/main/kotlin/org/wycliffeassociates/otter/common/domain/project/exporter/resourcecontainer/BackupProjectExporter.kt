@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.common.domain.project.exporter.resourcecont
 
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import org.apache.commons.io.FileUtils
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
@@ -28,11 +29,13 @@ import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.ta
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOptions
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import org.wycliffeassociates.otter.common.domain.project.exporter.ProjectExporterCallback
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import java.io.File
 import java.lang.Exception
 import java.util.regex.Pattern
+import java.util.zip.ZipFile
 import javax.inject.Inject
 
 class BackupProjectExporter @Inject constructor(
@@ -116,6 +119,48 @@ class BackupProjectExporter @Inject constructor(
             }
             .onErrorReturnItem(ExportResult.FAILURE)
             .subscribeOn(Schedulers.io())
+    }
+
+    fun estimateExportSize(
+        workbook: Workbook,
+        chapterFilter: List<Int>
+    ): Long {
+        val projectAccessor = workbook.projectFilesAccessor
+        var size = 0L
+        val chapterRegex = Regex("""c(\d+)""")
+        val takeDir = projectAccessor.projectDir.resolve(RcConstants.TAKE_DIR)
+        val chapterDirs = takeDir
+            .listFiles()
+            ?.filter {
+                val chapter = chapterRegex.find(it.name)?.groupValues?.get(1)?.toIntOrNull()
+                chapter in chapterFilter && it.isDirectory
+            }
+
+        chapterDirs?.forEach {
+            size += FileUtils.sizeOfDirectory(it)
+        }
+        size += FileUtils.sizeOfDirectory(projectAccessor.sourceAudioDir)
+        size += estimateSourceSize(workbook)
+
+        return size
+    }
+
+    private fun estimateSourceSize(workbook: Workbook): Long {
+        val project = workbook.source.slug
+        val file = workbook.source.resourceMetadata.path
+        var size = 0L
+
+        ZipFile(file).use { zip ->
+            zip.entries()
+            .asIterator()
+            .forEach {
+                if (it.name.contains("${RcConstants.SOURCE_MEDIA_DIR}/${project}")) {
+                    size += it.compressedSize
+                }
+            }
+        }
+
+        return size
     }
 
     private fun takesFilter(path: String, pattern: Pattern, exportOptions: ExportOptions?): Boolean {
