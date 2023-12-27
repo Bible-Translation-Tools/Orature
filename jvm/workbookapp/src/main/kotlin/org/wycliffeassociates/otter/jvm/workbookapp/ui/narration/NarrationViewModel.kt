@@ -331,7 +331,7 @@ class NarrationViewModel : ViewModel() {
         if (isModifyingTakeAudio.value) {
             // TODO: Possibly show the user a progress bar and message stating that the changes need to be saved
             //  before navigating to a new chapter
-            logger.error("TRYING TO NAVIGATE CHAPTER BEFORE TAKE MODIFICATION IS COMPLETE")
+            logger.error("Trying to navigate chapter before take modification is complete")
         }
 
         logger.info("Loading chapter: ${chapter.sort}")

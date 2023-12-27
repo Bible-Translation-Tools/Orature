@@ -103,11 +103,7 @@ class Narration @AssistedInject constructor(
             resetUncommittedFramesOnUpdatedVerses(),
         )
         loadChapterIntoPlayer()
-        takeAudioModifier = if (chapter.getSelectedTake() != null) {
-            NarrationTakeAudioModifier(chapter.getSelectedTake()!!)
-        } else {
-            null
-        }
+        takeAudioModifier = chapter.getSelectedTake()?.let { NarrationTakeAudioModifier(it) }
 
     }
 
