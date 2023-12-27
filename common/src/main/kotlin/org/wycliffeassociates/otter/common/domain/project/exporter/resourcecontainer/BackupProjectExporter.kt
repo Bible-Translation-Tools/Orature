@@ -121,10 +121,7 @@ class BackupProjectExporter @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
-    fun estimateExportSize(
-        workbook: Workbook,
-        chapterFilter: List<Int>
-    ): Long {
+    override fun estimateExportSize(workbook: Workbook,chapterFilter: List<Int>): Long {
         var size = 0L
         val projectAccessor = workbook.projectFilesAccessor
         val chapterRegex = Regex("""c(\d+)""")
@@ -145,6 +142,9 @@ class BackupProjectExporter @Inject constructor(
         return size
     }
 
+    /**
+     * Estimates the size source audio of the corresponding project (book).
+     */
     private fun estimateSourceSize(workbook: Workbook): Long {
         val project = workbook.source.slug
         val file = workbook.source.resourceMetadata.path

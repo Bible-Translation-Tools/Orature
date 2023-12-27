@@ -85,10 +85,7 @@ class SourceProjectExporter @Inject constructor(
             )
     }
 
-    fun estimateExportSize(
-        workbook: Workbook,
-        chapterFilter: List<Int>
-    ): Long {
+    override fun estimateExportSize(workbook: Workbook,chapterFilter: List<Int>): Long {
         return workbook.target.chapters
             .filter { it.sort in chapterFilter }
             .mapNotNull {it.getSelectedTake()?.file }
