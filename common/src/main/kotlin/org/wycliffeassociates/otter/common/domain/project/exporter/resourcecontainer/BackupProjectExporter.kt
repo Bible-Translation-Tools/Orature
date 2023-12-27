@@ -125,8 +125,8 @@ class BackupProjectExporter @Inject constructor(
         workbook: Workbook,
         chapterFilter: List<Int>
     ): Long {
-        val projectAccessor = workbook.projectFilesAccessor
         var size = 0L
+        val projectAccessor = workbook.projectFilesAccessor
         val chapterRegex = Regex("""c(\d+)""")
         val takeDir = projectAccessor.projectDir.resolve(RcConstants.TAKE_DIR)
         val chapterDirs = takeDir
