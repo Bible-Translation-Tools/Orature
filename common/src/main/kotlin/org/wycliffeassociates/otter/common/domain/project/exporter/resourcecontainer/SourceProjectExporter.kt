@@ -33,9 +33,11 @@ import org.wycliffeassociates.otter.common.domain.audio.AudioExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOptions
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import org.wycliffeassociates.otter.common.domain.project.exporter.ProjectExporterCallback
+import org.wycliffeassociates.otter.common.domain.audio.WAV_TO_MP3_COMPRESSED_RATE
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.otter.common.io.zip.IFileWriter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.utils.mapNotNull
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Media
 import org.wycliffeassociates.resourcecontainer.entity.MediaManifest
@@ -81,6 +83,23 @@ class SourceProjectExporter @Inject constructor(
             .andThen(
                 export(targetZip, workbook, contributors, callback, options)
             )
+    }
+
+    fun estimateExportSize(
+        workbook: Workbook,
+        chapterFilter: List<Int>
+    ): Long {
+        return workbook.target.chapters
+            .filter { it.sort in chapterFilter }
+            .mapNotNull {it.getSelectedTake()?.file }
+            .reduce(0L) { size, nextFile ->
+                when (AudioFileFormat.of(nextFile.extension)) {
+                    AudioFileFormat.MP3 -> size + nextFile.length()
+                    AudioFileFormat.WAV -> size + nextFile.length() / WAV_TO_MP3_COMPRESSED_RATE
+                    else -> size
+                }
+            }
+            .blockingGet()
     }
 
     private fun export(

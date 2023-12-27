@@ -124,8 +124,10 @@ class ExportProjectViewModel : ViewModel() {
     ): Long {
         val workbook = workbookRepo.get(workbookDescriptor.sourceCollection, workbookDescriptor.targetCollection)
         return when(exportType) {
-            ExportType.LISTEN -> exportAudioUseCase.estimateExportSize(workbook, chapters)
             ExportType.BACKUP -> exportBackupUseCase.estimateExportSize(workbook, chapters)
+            ExportType.LISTEN -> exportAudioUseCase.estimateExportSize(workbook, chapters)
+            ExportType.SOURCE_AUDIO,
+            ExportType.PUBLISH -> exportSourceUseCase.estimateExportSize(workbook, chapters)
             else -> 0L
         }
     }
