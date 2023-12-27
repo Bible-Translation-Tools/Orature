@@ -8,9 +8,9 @@ import org.wycliffeassociates.otter.common.data.audio.*
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 
-class NarrationTakeAudioModifier(val take: Take, createNewAudioFile: Boolean = false) {
+class NarrationTakeAudioModifier(val take: Take) {
 
-    val audioFile: OratureAudioFile = if (createNewAudioFile) {
+    val audioFile: OratureAudioFile = if (!take.file.exists()) {
         OratureAudioFile(
             take.file,
             DEFAULT_CHANNELS,

@@ -419,7 +419,7 @@ class Narration @AssistedInject constructor(
                 take
             }
             .map { take ->
-                takeAudioModifier = NarrationTakeAudioModifier(take, true)
+                takeAudioModifier = NarrationTakeAudioModifier(take)
                 takeAudioModifier?.modifyAudioData(chapterRepresentation.getAudioFileReader(), activeVerses)
                 take
             }
