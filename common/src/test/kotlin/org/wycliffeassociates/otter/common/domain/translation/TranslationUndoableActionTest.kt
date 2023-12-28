@@ -1,10 +1,8 @@
 package org.wycliffeassociates.otter.common.domain.translation
 
 import com.jakewharton.rxrelay2.BehaviorRelay
-import com.nhaarman.mockitokotlin2.spy
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.spyk
 import io.mockk.verify
 import org.junit.Before
 import org.junit.Test
