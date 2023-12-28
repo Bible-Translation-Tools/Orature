@@ -8,10 +8,12 @@ import io.mockk.spyk
 import io.mockk.verify
 import org.junit.Before
 import org.junit.Test
+import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import java.io.File
 
 class TranslationUndoableActionTest {
@@ -83,5 +85,46 @@ class TranslationUndoableActionTest {
         deleteAction.redo()
 
         verify(exactly = 3) { deleteTimestampRelay.accept(any()) }
+    }
+
+    @Test
+    fun testSelectAction() {
+        val oldSelectedTake = mockk<Take>()
+        val selectAction = TranslationTakeSelectAction(chunk, take, oldSelectedTake)
+
+        selectAction.execute()
+
+        verify(exactly = 1) { audio.selectTake(take) }
+
+        selectAction.undo()
+
+        verify(exactly = 1) { audio.selectTake(oldSelectedTake) }
+
+        selectAction.redo()
+
+        verify(exactly = 2) { audio.selectTake(take) }
+    }
+
+    @Test
+    fun testApproveAction() {
+        val checkingRelay = mockk<BehaviorRelay<TakeCheckingState>>()
+        every { checkingRelay.accept(any()) } returns Unit
+        every { take.checkingState } returns checkingRelay
+        every { take.checksum() } returns ""
+
+        val oldChecking = mockk<TakeCheckingState>()
+        val approveAction = TranslationTakeApproveAction(take, CheckingStatus.PEER_EDIT, oldChecking)
+
+        approveAction.execute()
+
+        verify(exactly = 1) { checkingRelay.accept(any()) }
+
+        approveAction.undo()
+
+        verify(exactly = 1) { checkingRelay.accept(oldChecking) }
+
+        approveAction.redo()
+
+        verify(exactly = 3) { checkingRelay.accept(any()) }
     }
 }
