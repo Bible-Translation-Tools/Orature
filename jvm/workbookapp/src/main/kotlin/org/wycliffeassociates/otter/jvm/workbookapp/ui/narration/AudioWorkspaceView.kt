@@ -157,7 +157,8 @@ class AudioWorkspaceView : View() {
         viewModel.onDock()
         markerNodes.bind(viewModel.recordedVerses) { marker ->
             VerseMarkerControl().apply {
-                val markerLabel = when(marker) {
+                visibleProperty().set(false)
+                val markerLabel = when (marker) {
                     is ChapterMarker -> "c${marker.label}"
                     else -> marker.label
                 }
