@@ -121,7 +121,7 @@ class BackupProjectExporter @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
-    override fun estimateExportSize(workbook: Workbook,chapterFilter: List<Int>): Long {
+    override fun estimateExportSize(workbook: Workbook, chapterFilter: List<Int>): Long {
         var size = 0L
         val projectAccessor = workbook.projectFilesAccessor
         val chapterRegex = Regex("""c(\d+)""")
