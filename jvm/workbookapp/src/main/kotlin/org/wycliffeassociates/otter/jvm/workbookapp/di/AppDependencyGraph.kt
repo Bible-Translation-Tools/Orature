@@ -37,7 +37,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BookWizardViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterPageViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ExportChapterViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SplashScreenViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioDataStore
@@ -60,7 +59,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.PeerEditViewMod
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectWizardViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 
 @Component(
@@ -80,7 +78,6 @@ interface AppDependencyGraph {
 
     fun inject(viewModel: RootViewModel)
     fun inject(viewModel: SplashScreenViewModel)
-    fun inject(viewModel: HomePageViewModel)
     fun inject(viewModel: HomePageViewModel2)
     fun inject(viewModel: AddPluginViewModel)
     fun inject(dataStore: AudioDataStore)
@@ -89,7 +86,6 @@ interface AppDependencyGraph {
     fun inject(viewModel: WorkbookPageViewModel)
     fun inject(viewModel: SettingsViewModel)
     fun inject(viewModel: ImportProjectViewModel)
-    fun inject(viewModel: TranslationViewModel)
     fun inject(viewModel: TranslationViewModel2)
     fun inject(viewModel: BookWizardViewModel)
     fun inject(viewModel: ProjectWizardViewModel)

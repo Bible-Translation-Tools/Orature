@@ -208,7 +208,7 @@ class WorkbookPageViewModel : ViewModel() {
             .subscribe(
                 {
                     showDeleteSuccessDialogProperty.set(true)
-                    preferencesRepository.setResumeProjectId(NO_RESUMABLE_PROJECT).subscribe()
+                    preferencesRepository.setResumeProjectId(-1).subscribe()
                 },
                 {
                     showDeleteFailDialogProperty.set(true)
