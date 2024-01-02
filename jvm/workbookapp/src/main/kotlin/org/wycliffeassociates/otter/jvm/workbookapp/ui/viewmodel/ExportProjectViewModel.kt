@@ -62,26 +62,26 @@ class ExportProjectViewModel : ViewModel() {
             .fromCallable {
                 workbookRepo.get(workbookDescriptor.sourceCollection, workbookDescriptor.targetCollection)
             }
-            .flatMapObservable { workbook ->
+            .map { workbook ->
+                workbook
+                    .target
+                    .chapters
+                    .toList()
+                    .map { chapters ->
+                        chapters.map { chapter ->
+                            val progress = when {
+                                chapter.hasSelectedAudio() -> 1.0
+                                hasInProgressNarration(workbook, chapter) -> {
+                                    projectCompletionStatus.getChapterNarrationProgress(workbook, chapter)
+                                }
 
-                /** A workaround to access all items in the Observable.cache() where Chapter is constructed */
-                val chapterCount = workbook.target.chapters.count().blockingGet()
-
-                workbook.target.chapters
-                    .take(chapterCount)
-                    .map { chapter ->
-                        val progress = when {
-                            chapter.hasSelectedAudio() -> 1.0
-                            hasInProgressNarration(workbook, chapter) -> {
-                                projectCompletionStatus.getChapterNarrationProgress(workbook, chapter)
+                                else -> projectCompletionStatus.getChapterTranslationProgress(chapter)
                             }
-                            else -> projectCompletionStatus.getChapterTranslationProgress(chapter)
-                        }
 
-                        ChapterDescriptor(chapter.sort, progress)
-                    }
+                            ChapterDescriptor(chapter.sort, progress)
+                        }
+                    }.blockingGet() // blocking get is required for the .cache() observable to emit
             }
-            .toList()
             .subscribeOn(Schedulers.io())
             .doOnError { logger.error("Error retrieving chapters to export.", it) }
     }
