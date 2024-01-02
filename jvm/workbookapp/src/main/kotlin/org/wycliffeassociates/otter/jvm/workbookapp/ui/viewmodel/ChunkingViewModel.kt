@@ -183,6 +183,10 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         translationViewModel.reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
     }
 
+    fun pause() {
+        audioController?.pause()
+    }
+
     private fun loadAudio(audioFile: File): OratureAudioFile {
         val player = audioConnectionFactory.getPlayer()
         val audio = OratureAudioFile(audioFile)
@@ -204,17 +208,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         markers.clear()
         val totalMarkers = 500
         audio.clearCues()
-        var chunkMarkers = audio.getMarker<ChunkMarker>().map {
-            ChunkMarkerModel(AudioCue(it.location, it.label))
-        }
-        if (chunkMarkers.isEmpty() && workbookDataStore.chapter.chunks.value?.isNotEmpty() == true) {
-            val wb = workbookDataStore.workbook
-            wb.sourceAudioAccessor.getChapter(workbookDataStore.chapter.sort, wb.target)
-                ?.let { sa ->
-                    val vms = OratureAudioFile(sa.file).getMarker<VerseMarker>()
-                    chunkMarkers = vms.map { ChunkMarkerModel(AudioCue(it.location, it.start.toString())) }
-                }
-        }
+        val chunkMarkers = getChunkMarkersFromAudio(audio)
         markers.setAll(chunkMarkers)
         markerModel = VerseMarkerModel(
             audio,
@@ -225,14 +219,43 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         }
     }
 
-    fun cleanup() {
+    /**
+     * Returns the chunk markers found from the existing audio file. This will assume verse-by-verse
+     * chunking and return the verse markers from source audio if no chunk marker is found but
+     * the chapter contains derived chunks.
+     */
+    private fun getChunkMarkersFromAudio(audio: OratureAudioFile): List<ChunkMarkerModel> {
+        val chunkMarkers = audio.getMarker<ChunkMarker>().map {
+            ChunkMarkerModel(AudioCue(it.location, it.label))
+        }
+        if (chunkMarkers.isNotEmpty()) {
+            return chunkMarkers
+        }
+        // project migrated from Orature 1 with verse-by-verse
+        val chapterHasChunks = workbookDataStore.chapter.chunks.value?.isNotEmpty() == true
+        return if (chapterHasChunks) {
+            val wb = workbookDataStore.workbook
+            wb.sourceAudioAccessor.getChapter(workbookDataStore.chapter.sort, wb.target)
+                ?.let { sa ->
+                    OratureAudioFile(sa.file)
+                        .getMarker<VerseMarker>()
+                        .map {
+                            ChunkMarkerModel(AudioCue(it.location, it.start.toString()))
+                        }
+                } ?: listOf()
+        } else {
+            listOf()
+        }
+    }
+
+    private fun cleanup() {
         audioConnectionFactory.releasePlayer()
         builder.cancel()
         compositeDisposable.clear()
         markerModel = null
     }
 
-    fun saveChanges() {
+    private fun saveChanges() {
         compositeDisposable.clear()
         audioConnectionFactory.clearPlayerConnections()
         waveformAudioPlayerProperty.value.close()
@@ -254,10 +277,6 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
                 completable.onComplete()
             }
             .subscribe()
-    }
-
-    fun pause() {
-        audioController?.pause()
     }
 
     private fun createWaveformImages(audio: OratureAudioFile) {
