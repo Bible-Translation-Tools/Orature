@@ -51,7 +51,7 @@ class ProjectWizardViewModel : ViewModel() {
 
     val sourceLanguageSearchQueryProperty = SimpleStringProperty("")
     val targetLanguageSearchQueryProperty = SimpleStringProperty("")
-    val projectDeleteCounter = AtomicInteger(0)
+    private val projectDeleteCounter = AtomicInteger(0)
 
     private val disposableListeners = mutableListOf<ListenerDisposer>()
 
@@ -165,6 +165,9 @@ class ProjectWizardViewModel : ViewModel() {
         disposableListeners.forEach { it.dispose() }
         disposableListeners.clear()
     }
+
+    fun increaseProjectDeleteCounter() { projectDeleteCounter.incrementAndGet() }
+    fun decreaseProjectDeleteCounter() { projectDeleteCounter.decrementAndGet() }
 
     /**
      * Blocks the execution of project creation until projects delete queue completes.

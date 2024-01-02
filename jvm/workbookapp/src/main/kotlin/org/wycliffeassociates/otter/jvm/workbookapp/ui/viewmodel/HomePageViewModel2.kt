@@ -168,7 +168,7 @@ class HomePageViewModel2 : ViewModel() {
      */
     fun deleteProjectGroupWithTimer(cardModel: ProjectGroupCardModel) {
         val timeoutMillis = NOTIFICATION_DURATION_SEC * 1000
-        projectWizardViewModel.projectDeleteCounter.incrementAndGet()
+        projectWizardViewModel.increaseProjectDeleteCounter()
 
         val timerDisposable = deleteProjectUseCase
             .deleteProjectsWithTimer(cardModel.books, timeoutMillis.toInt())
@@ -184,7 +184,7 @@ class HomePageViewModel2 : ViewModel() {
                 logger.info("Cancelled deleting project group ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
             }
             .doFinally {
-                projectWizardViewModel.projectDeleteCounter.decrementAndGet()
+                projectWizardViewModel.decreaseProjectDeleteCounter()
             }
             .subscribe()
 
