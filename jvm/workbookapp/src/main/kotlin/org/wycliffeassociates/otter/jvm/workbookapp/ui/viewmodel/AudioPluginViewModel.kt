@@ -182,6 +182,7 @@ class AudioPluginViewModel : ViewModel() {
 
     fun addPlugin(record: Boolean, edit: Boolean) {
         find<AddPluginDialog>().apply {
+            themeProperty.set(settingsViewModel.appColorMode.value)
             orientationProperty.set(settingsViewModel.orientationProperty.value)
             open()
         }
