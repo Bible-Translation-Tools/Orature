@@ -88,25 +88,13 @@ class DeleteProject @Inject constructor(
                     }
             }
             .andThen(workbookDescriptorRepo.delete(list))
+            .subscribeOn(Schedulers.single()) // sequential execution of delete to avoid db transaction error
     }
 
     fun deleteProjectsWithTimer(books: List<WorkbookDescriptor>, timeoutMillis: Int): Completable {
         return Completable
             .timer(timeoutMillis.toLong(), TimeUnit.MILLISECONDS)
-            .andThen {
-                deleteQueue.offer(books)
-                processDeleteQueue()
-                it.onComplete()
-            }
-            .subscribeOn(Schedulers.io())
-    }
-
-    @Synchronized
-    private fun processDeleteQueue() {
-        while (deleteQueue.isNotEmpty()) {
-            val itemToDelete = deleteQueue.poll()
-            deleteProjects(itemToDelete).blockingAwait()
-        }
+            .andThen(deleteProjects(books))
     }
 
     private fun recreateWorkbookDescriptor(workbookDescriptor: WorkbookDescriptor): Completable {
@@ -151,9 +139,5 @@ class DeleteProject @Inject constructor(
         } else {
             Completable.complete()
         }
-    }
-
-    companion object {
-        private val deleteQueue = ConcurrentLinkedQueue<List<WorkbookDescriptor>>()
     }
 }
