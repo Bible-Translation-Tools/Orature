@@ -33,6 +33,7 @@ import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import javax.inject.Inject
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -203,8 +204,16 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         markers.clear()
         val totalMarkers = 500
         audio.clearCues()
-        val chunkMarkers = audio.getMarker<ChunkMarker>().map {
+        var chunkMarkers = audio.getMarker<ChunkMarker>().map {
             ChunkMarkerModel(AudioCue(it.location, it.label))
+        }
+        if (chunkMarkers.isEmpty() && workbookDataStore.chapter.chunks.value?.isNotEmpty() == true) {
+            val wb = workbookDataStore.workbook
+            wb.sourceAudioAccessor.getChapter(workbookDataStore.chapter.sort, wb.target)
+                ?.let { sa ->
+                    val vms = OratureAudioFile(sa.file).getMarker<VerseMarker>()
+                    chunkMarkers = vms.map { ChunkMarkerModel(AudioCue(it.location, it.start.toString())) }
+                }
         }
         markers.setAll(chunkMarkers)
         markerModel = VerseMarkerModel(
