@@ -33,7 +33,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.NarrationPage
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
 import java.time.LocalDateTime
-import java.util.concurrent.TimeUnit
 import java.util.function.Predicate
 import javax.inject.Inject
 
@@ -164,25 +163,26 @@ class HomePageViewModel2 : ViewModel() {
      */
     fun deleteProjectGroupWithTimer(cardModel: ProjectGroupCardModel): Disposable {
         val timeoutMillis = NOTIFICATION_DURATION_SEC * 1000
+        projectWizardViewModel.increaseProjectDeleteCounter()
 
-        val completable: Completable = Completable.create { emitter ->
-            val timerDisposable = Completable
-                .timer(timeoutMillis.toLong(), TimeUnit.MILLISECONDS)
-                .andThen(deleteProjectUseCase.deleteProjects(cardModel.books))
-                .observeOnFx()
-                .doOnComplete {
-                    logger.info("Deleted project group: ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
-                    projectWizardViewModel.existingLanguagePairs.remove(
-                        Pair(cardModel.sourceLanguage, cardModel.targetLanguage)
-                    )
-                    emitter.onComplete()
-                }
-                .subscribe()
+        val timerDisposable = deleteProjectUseCase
+            .deleteProjectsWithTimer(cardModel.books, timeoutMillis.toInt())
+            .observeOnFx()
+            .doOnComplete {
+                logger.info("Deleted project group: ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
+                projectWizardViewModel.existingLanguagePairs.remove(
+                    Pair(cardModel.sourceLanguage, cardModel.targetLanguage)
+                )
+            }
+            .doOnDispose {
+                logger.info("Undo deleting project group ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
+            }
+            .doFinally {
+                projectWizardViewModel.decreaseProjectDeleteCounter()
+            }
+            .subscribe()
 
-            emitter.setDisposable(timerDisposable)
-        }
-
-        return completable.subscribe()
+        return timerDisposable
     }
 
     fun deleteBook(workbookDescriptor: WorkbookDescriptor): Completable {
