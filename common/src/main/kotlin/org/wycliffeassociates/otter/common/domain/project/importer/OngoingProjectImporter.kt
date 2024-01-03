@@ -232,7 +232,7 @@ class OngoingProjectImporter @Inject constructor(
 
                     val derived = importResumableProject(fileReader, metadata, manifestProject, sourceCollection, callback)
                     val workbookDescriptor = workbookDescriptorRepository.getAll().blockingGet().firstOrNull {
-                        it.targetCollection == derived && it.sourceCollection == sourceCollection
+                        it.targetCollection.id == derived.id && it.sourceCollection.id == sourceCollection.id
                     }
                     callback?.onNotifySuccess(
                         manifest.dublinCore.language.title,

@@ -77,7 +77,6 @@ class ExportProjectViewModel : ViewModel() {
 
                                 else -> projectCompletionStatus.getChapterTranslationProgress(chapter)
                             }
-
                             ChapterDescriptor(chapter.sort, progress)
                         }
                     }.blockingGet() // blocking get is required for the .cache() observable to emit
@@ -119,6 +118,21 @@ class ExportProjectViewModel : ViewModel() {
                         callback.onError(workbook.target.toCollection())
                     }
                 }
+        }
+    }
+
+    fun getEstimateExportSize(
+        workbookDescriptor: WorkbookDescriptor,
+        chapters: List<Int>,
+        exportType: ExportType
+    ): Long {
+        val workbook = workbookRepo.get(workbookDescriptor.sourceCollection, workbookDescriptor.targetCollection)
+        return when(exportType) {
+            ExportType.BACKUP -> exportBackupUseCase.estimateExportSize(workbook, chapters)
+            ExportType.LISTEN -> exportAudioUseCase.estimateExportSize(workbook, chapters)
+            ExportType.SOURCE_AUDIO,
+            ExportType.PUBLISH -> exportSourceUseCase.estimateExportSize(workbook, chapters)
+            else -> 0L
         }
     }
 

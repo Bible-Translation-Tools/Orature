@@ -225,6 +225,27 @@ class TestBackupProjectExporter {
         Assert.assertEquals(2, chapterToNarrationFiles[narrationChapter]?.size)
     }
 
+    @Test
+    fun testEstimateExportSize() {
+        var expectedSize = 192L
+        var computedSize = exportBackupUseCase.get()
+            .estimateExportSize(workbook, listOf(1, 2))
+
+        Assert.assertEquals("Estimated backup size should be $expectedSize bytes", expectedSize, computedSize)
+
+        expectedSize = 288L
+        computedSize = exportBackupUseCase.get()
+            .estimateExportSize(workbook, listOf(1, 2, 3))
+
+        Assert.assertEquals("Estimated backup size should be $expectedSize bytes", expectedSize, computedSize)
+
+        expectedSize = 0L
+        computedSize = exportBackupUseCase.get()
+            .estimateExportSize(workbook, listOf())
+
+        Assert.assertEquals("Estimated backup size should be $expectedSize bytes", expectedSize, computedSize)
+    }
+
     private fun parseChapter(path: String, pattern: Pattern): Int {
         return pattern
             .matcher(path)
