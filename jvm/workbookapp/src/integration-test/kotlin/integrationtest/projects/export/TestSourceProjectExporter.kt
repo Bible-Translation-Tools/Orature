@@ -24,6 +24,7 @@ import integrationtest.enUlbTestMetadata
 import integrationtest.projects.DatabaseEnvironment
 import integrationtest.projects.RowCount
 import org.junit.After
+import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -159,6 +160,23 @@ class TestSourceProjectExporter {
             val filePaths = getExportedFiles(rc)
             assertEquals(0, filePaths.size)
         }
+    }
+
+    @Test
+    fun testEstimateExportSize() {
+        prepareTakeForExport()
+
+        var expectedSize = 12L
+        var computedSize = exportSourceProvider.get()
+            .estimateExportSize(workbook, listOf(1))
+
+        Assert.assertEquals("Estimated export size should be $expectedSize bytes", expectedSize, computedSize)
+
+        expectedSize = 0L
+        computedSize = exportSourceProvider.get()
+            .estimateExportSize(workbook, listOf())
+
+        Assert.assertEquals("Estimated export size should be $expectedSize bytes", expectedSize, computedSize)
     }
 
 //    @Test

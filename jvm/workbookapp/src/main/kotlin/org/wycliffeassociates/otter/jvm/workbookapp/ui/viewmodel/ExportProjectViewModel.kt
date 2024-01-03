@@ -73,7 +73,7 @@ class ExportProjectViewModel : ViewModel() {
                             else -> 0.0
                         }
 
-                        ChapterDescriptor(chapter.sort, progress)
+                        ChapterDescriptor(chapter.sort, progress, progress > 0)
                     }
             }
             .toList()
@@ -114,6 +114,21 @@ class ExportProjectViewModel : ViewModel() {
                         callback.onError(workbook.target.toCollection())
                     }
                 }
+        }
+    }
+
+    fun getEstimateExportSize(
+        workbookDescriptor: WorkbookDescriptor,
+        chapters: List<Int>,
+        exportType: ExportType
+    ): Long {
+        val workbook = workbookRepo.get(workbookDescriptor.sourceCollection, workbookDescriptor.targetCollection)
+        return when(exportType) {
+            ExportType.BACKUP -> exportBackupUseCase.estimateExportSize(workbook, chapters)
+            ExportType.LISTEN -> exportAudioUseCase.estimateExportSize(workbook, chapters)
+            ExportType.SOURCE_AUDIO,
+            ExportType.PUBLISH -> exportSourceUseCase.estimateExportSize(workbook, chapters)
+            else -> 0L
         }
     }
 
