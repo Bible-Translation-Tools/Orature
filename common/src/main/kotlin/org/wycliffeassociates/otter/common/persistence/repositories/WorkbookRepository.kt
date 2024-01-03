@@ -292,7 +292,7 @@ class WorkbookRepository(
         body: Content?,
         identifier: String,
         disposables: MutableList<Disposable>,
-    ): Resource? {
+    ): Resource {
         val bodyComponent =
             body?.let {
                 Resource.Component(

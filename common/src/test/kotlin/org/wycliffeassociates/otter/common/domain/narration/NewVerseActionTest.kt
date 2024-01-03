@@ -51,7 +51,7 @@ class NewVerseActionTest {
 
         // verify that NewVerseAction.node is valid
         Assert.assertEquals(0..0, newVerseAction.node?.sectors?.last())
-        Assert.assertEquals(true, newVerseAction?.node?.placed)
+        Assert.assertEquals(true, newVerseAction.node?.placed)
 
         // verify that totalVerses[verseIndex] is valid
         Assert.assertEquals(0..0, totalVerses[verseIndex].sectors.last())
@@ -74,7 +74,7 @@ class NewVerseActionTest {
 
         // verify that NewVerseAction.node is valid
         Assert.assertEquals(totalFramesInTestAudio + 1..totalFramesInTestAudio + 1, newVerseAction.node?.sectors?.last())
-        Assert.assertEquals(true, newVerseAction?.node?.placed)
+        Assert.assertEquals(true, newVerseAction.node?.placed)
 
         // verify that totalVerses[verseIndex] is valid
         Assert.assertEquals(totalFramesInTestAudio + 1..totalFramesInTestAudio + 1, totalVerses[verseIndex].sectors.last())

@@ -19,7 +19,6 @@
 package integrationtest.projects
 
 import integrationtest.di.DaggerTestPersistenceComponent
-import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -27,7 +26,6 @@ import org.wycliffeassociates.otter.common.ResourceContainerBuilder
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
-import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.ContentType.META
 import org.wycliffeassociates.otter.common.data.primitives.ContentType.TEXT
 import org.wycliffeassociates.otter.common.data.primitives.Language
@@ -154,9 +152,9 @@ class TestProjectImport {
                 ),
             )
 
-        Assert.assertEquals(true, ulbProjectDir.resolve("manifest.yaml").exists())
-        Assert.assertEquals(true, ulbSourceDir.resolve("en_ulb.zip").exists())
-        Assert.assertEquals(
+        assertEquals(true, ulbProjectDir.resolve("manifest.yaml").exists())
+        assertEquals(true, ulbSourceDir.resolve("en_ulb.zip").exists())
+        assertEquals(
             true,
             ulbAudioDir.walkTopDown()
                 .filter { it.extension == "wav" }
@@ -179,9 +177,9 @@ class TestProjectImport {
                 ),
             )
 
-        Assert.assertEquals(true, ulbProjectDir.resolve("manifest.yaml").exists())
-        Assert.assertEquals(true, ulbSourceDir.resolve("en_ulb.zip").exists())
-        Assert.assertEquals(
+        assertEquals(true, ulbProjectDir.resolve("manifest.yaml").exists())
+        assertEquals(true, ulbSourceDir.resolve("en_ulb.zip").exists())
+        assertEquals(
             true,
             ulbAudioDir.walkTopDown()
                 .filter { it.extension == "wav" }
@@ -220,13 +218,13 @@ class TestProjectImport {
                 .import(projectToImport)
                 .blockingGet()
 
-        Assert.assertEquals(ImportResult.SUCCESS, result)
+        assertEquals(ImportResult.SUCCESS, result)
         val takes =
             db.db
                 .takeDao
                 .fetchAll()
 
-        Assert.assertTrue(takes.size >= 3)
+        assertTrue(takes.size >= 3)
 
         val checkedTakes =
             takes
@@ -236,7 +234,7 @@ class TestProjectImport {
                 .filter { it == CheckingStatus.PEER_EDIT }
                 .size
 
-        Assert.assertEquals(2, checkedTakes)
+        assertEquals(2, checkedTakes)
     }
 
     private fun createProjectWithCheckedChunks(
@@ -248,9 +246,9 @@ class TestProjectImport {
                 javaClass.classLoader.getResource("resource-containers/$projectFileName").path,
             )
         return ResourceContainerBuilder(file)
-            .addTake(1, ContentType.TEXT, 1, true, chapter = 1, start = 1, end = 1)
-            .addTake(2, ContentType.TEXT, 1, true, chapter = 2, start = 1, end = 1, checking = TakeCheckingState(checking, "test"))
-            .addTake(3, ContentType.TEXT, 1, true, chapter = 3, start = 1, end = 1, checking = TakeCheckingState(checking, "test"))
+            .addTake(1, TEXT, 1, true, chapter = 1, start = 1, end = 1)
+            .addTake(2, TEXT, 1, true, chapter = 2, start = 1, end = 1, checking = TakeCheckingState(checking, "test"))
+            .addTake(3, TEXT, 1, true, chapter = 3, start = 1, end = 1, checking = TakeCheckingState(checking, "test"))
             .buildFile()
     }
 }

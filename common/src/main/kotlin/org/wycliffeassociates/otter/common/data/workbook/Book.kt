@@ -71,9 +71,7 @@ class Book(
         other as Book
 
         if (slug != other.slug) return false
-        if (collectionId != other.collectionId) return false
-
-        return true
+        return collectionId == other.collectionId
     }
 
     override fun toString(): String {

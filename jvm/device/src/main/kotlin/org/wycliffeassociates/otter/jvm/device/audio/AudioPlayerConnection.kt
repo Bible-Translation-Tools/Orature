@@ -33,9 +33,9 @@ internal class AudioPlayerConnection(
     private var state = AudioPlayerConnectionState(id)
 
     override val frameStart: Int
-        get() = state?.begin ?: 0
+        get() = state.begin ?: 0
     override val frameEnd: Int
-        get() = state?.end ?: 0
+        get() = state.end ?: 0
 
     fun addListeners() {
         connectionFactory.currentConnection?.id?.let {

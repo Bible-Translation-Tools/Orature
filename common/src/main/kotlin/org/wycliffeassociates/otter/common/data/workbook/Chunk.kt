@@ -79,9 +79,7 @@ class Chunk(
         if (textItem != other.textItem) return false
         if (start != other.start) return false
         if (end != other.end) return false
-        if (draftNumber != other.draftNumber) return false
-
-        return true
+        return draftNumber == other.draftNumber
     }
 
     override fun toString(): String {

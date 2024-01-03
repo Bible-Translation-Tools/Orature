@@ -351,7 +351,7 @@ class TeleprompterStateMachineTest {
         // Saves
         newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.SAVE, numMarkers - 1)
 
-        for (i in newContext?.indices!!) {
+        for (i in newContext.indices!!) {
             Assert.assertEquals(TeleprompterItemState.RECORD_AGAIN, newContext[i])
         }
     }

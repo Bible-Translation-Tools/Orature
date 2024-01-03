@@ -273,7 +273,7 @@ class StatusIndicator : Control() {
         private val STYLEABLES: MutableList<CssMetaData<out Styleable, *>> = mutableListOf()
 
         object Obj {
-            var styleables: MutableList<CssMetaData<out Styleable, *>> = Control.getClassCssMetaData()
+            var styleables: MutableList<CssMetaData<out Styleable, *>> = getClassCssMetaData()
 
             init {
                 styleables.add(PRIMARY_FILL)

@@ -23,7 +23,6 @@ import integrationtest.di.DaggerTestPersistenceComponent
 import integrationtest.enUlbTestMetadata
 import integrationtest.projects.DatabaseEnvironment
 import org.junit.After
-import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -178,14 +177,14 @@ class TestSourceProjectExporter {
             exportSourceProvider.get()
                 .estimateExportSize(workbook, listOf(1))
 
-        Assert.assertEquals("Estimated export size should be $expectedSize bytes", expectedSize, computedSize)
+        assertEquals("Estimated export size should be $expectedSize bytes", expectedSize, computedSize)
 
         expectedSize = 0L
         computedSize =
             exportSourceProvider.get()
                 .estimateExportSize(workbook, listOf())
 
-        Assert.assertEquals("Estimated export size should be $expectedSize bytes", expectedSize, computedSize)
+        assertEquals("Estimated export size should be $expectedSize bytes", expectedSize, computedSize)
     }
 
 //    @Test

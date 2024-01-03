@@ -312,7 +312,7 @@ class BookWizardViewModel : ViewModel() {
                         it.target.slug == translation.targetLanguage.slug
                 }
             }.flatMapCompletable { t ->
-                t!!.modifiedTs = LocalDateTime.now()
+                t.modifiedTs = LocalDateTime.now()
                 updateTranslationUseCase.update(t)
             }
     }

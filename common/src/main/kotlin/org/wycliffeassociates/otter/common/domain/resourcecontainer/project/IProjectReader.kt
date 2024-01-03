@@ -48,7 +48,7 @@ interface IProjectReader {
         fun build(
             format: String,
             isHelp: Boolean,
-        ): IProjectReader? =
+        ): IProjectReader =
             when (MimeType.of(format)) {
                 MimeType.USFM -> {
                     if (isHelp) throw ImportException(ImportResult.INVALID_RC)
@@ -72,7 +72,7 @@ interface IProjectReader {
         ): OtterTree<CollectionOrContent> {
             val projectReader =
                 try {
-                    IProjectReader.build(
+                    build(
                         format = container.manifest.dublinCore.format,
                         isHelp = ContainerType.of(container.manifest.dublinCore.type) == ContainerType.Help,
                     )

@@ -76,8 +76,6 @@ class Workbook(
         other as Workbook
 
         if (source != other.source) return false
-        if (target != other.target) return false
-
-        return true
+        return target == other.target
     }
 }

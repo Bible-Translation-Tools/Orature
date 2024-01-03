@@ -87,7 +87,7 @@ class ObservableWaveformBuilder {
                     }
                     img
                 } else {
-                    WritableImage(1, 1) as Image
+                    WritableImage(1, 1)
                 }
             }
             .doOnError { e ->

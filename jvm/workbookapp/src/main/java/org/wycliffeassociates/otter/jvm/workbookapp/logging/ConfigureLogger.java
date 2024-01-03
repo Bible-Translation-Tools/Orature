@@ -34,9 +34,9 @@ public class ConfigureLogger {
     private static final String LOG_FILE_NAME = OratureInfo.SUITE_NAME.toLowerCase();
     private static final String LOG_EXT = ".log";
 
-    private File logDir;
-    private ConfigurationBuilder<BuiltConfiguration> builder = ConfigurationBuilderFactory.newConfigurationBuilder();
-    private LayoutComponentBuilder layout = builder.newLayout("PatternLayout");
+    private final File logDir;
+    private final ConfigurationBuilder<BuiltConfiguration> builder = ConfigurationBuilderFactory.newConfigurationBuilder();
+    private final LayoutComponentBuilder layout = builder.newLayout("PatternLayout");
 
     public ConfigureLogger(File logDir) {
         this.logDir = logDir;
@@ -54,19 +54,15 @@ public class ConfigureLogger {
                 .addComponent(builder.newComponent("SizeBasedTriggeringPolicy")
                 .addAttribute("size", "128K"));
 
-        String filename = new StringBuilder()
-                .append(logDir.getAbsolutePath())
-                .append("/")
-                .append(LOG_FILE_NAME)
-                .append(LOG_EXT)
-                .toString();
+        String filename = logDir.getAbsolutePath() +
+                "/" +
+                LOG_FILE_NAME +
+                LOG_EXT;
 
-        String rolloverPattern = new StringBuilder()
-                .append(logDir.getAbsolutePath())
-                .append("/")
-                .append(LOG_FILE_NAME)
-                .append("-%i.zip")
-                .toString();
+        String rolloverPattern = logDir.getAbsolutePath() +
+                "/" +
+                LOG_FILE_NAME +
+                "-%i.zip";
 
         fileAppender.addAttribute("fileName", filename);
         fileAppender.addAttribute("filePattern", rolloverPattern);

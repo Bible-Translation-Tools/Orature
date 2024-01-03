@@ -51,15 +51,15 @@ object MergeTextContent {
         if (fromManifest == null || toManifest == null) {
             return
         } else {
-            val toMap = toRC.manifest!!.projects.associateBy { it.identifier } as MutableMap
-            val fromMap = fromRC.manifest!!.projects.associateBy { it.identifier }
+            val toMap = toRC.manifest.projects.associateBy { it.identifier } as MutableMap
+            val fromMap = fromRC.manifest.projects.associateBy { it.identifier }
 
             val notInTo = fromMap.minus(toMap.keys).toMutableMap()
             val inBoth = fromMap.minus(notInTo.keys).toMutableMap()
 
             toMap.putAll(notInTo)
             mergeMatchingProjects(inBoth, toMap)
-            toRC.manifest!!.projects = toMap.values.toList()
+            toRC.manifest.projects = toMap.values.toList()
         }
         toRC.write()
     }
@@ -82,7 +82,7 @@ object MergeTextContent {
         val _fromManifest = fromRC.manifest
         val filesToMerge = mutableMapOf<String, File>()
         try {
-            _fromManifest?.let { fromManifest ->
+            _fromManifest.let { fromManifest ->
                 fromManifest.projects.forEach { project ->
                     val streams = manifestFilePermutations(fromRC, project)
                     filesToMerge.putAll(getMediaFilesToMerge(streams))

@@ -427,7 +427,7 @@ class ResourceContainerRepository
                             return@transaction
                         }
 
-                        else -> metadataEntity!!
+                        else -> metadataEntity
                     }
 
                     // delete entities with foreign keys refer to rc first

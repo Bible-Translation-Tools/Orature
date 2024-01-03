@@ -138,7 +138,7 @@ class ChunkItem : VBox() {
     }
 
     private fun createTakeViews() {
-        hasSelectedProperty.set(takes.any { it.selected } ?: false)
+        hasSelectedProperty.set(takes.any { it.selected })
         val animationMediator = ListAnimationMediator<TakeItem>()
         takeViews.setAll(
             takes.map { takeModel ->

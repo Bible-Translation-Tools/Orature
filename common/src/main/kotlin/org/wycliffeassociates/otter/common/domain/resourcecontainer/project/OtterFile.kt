@@ -28,7 +28,7 @@ sealed class OtterFile {
 
     companion object {
         fun otterFileF(f: File): OtterFile {
-            return OtterFile.F(f)
+            return F(f)
         }
     }
 
@@ -63,7 +63,7 @@ sealed class OtterFile {
     val parentFile: OtterFile?
         get() =
             when (this) {
-                is F -> OtterFile.F(f.parentFile)
+                is F -> F(f.parentFile)
                 is Z -> z.parentFile
             }
 

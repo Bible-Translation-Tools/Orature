@@ -203,7 +203,7 @@ class VerseMarkerModel(
         }
         handleUnmatched(map, unmatched)
         val nonNullMap = map.filterValues { it != null }
-        val sanitized = nonNullMap.values.map { AudioCue(it!!.location, it!!.label) }
+        val sanitized = nonNullMap.values.map { AudioCue(it!!.location, it.label) }
         return sanitized
     }
 

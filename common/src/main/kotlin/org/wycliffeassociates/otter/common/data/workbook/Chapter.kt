@@ -70,7 +70,7 @@ class Chapter(
     }
 
     private fun textItem(): TextItem {
-        return TextItem(text, MimeType.USFM!!)
+        return TextItem(text, MimeType.USFM)
     }
 
     private fun verseLabel(
@@ -102,9 +102,7 @@ class Chapter(
         if (sort != other.sort) return false
         if (title != other.title) return false
         if (label != other.label) return false
-        if (contentType != other.contentType) return false
-
-        return true
+        return contentType == other.contentType
     }
 
     override fun toString(): String {

@@ -209,8 +209,8 @@ class SimpleAudioPlayer(
                 var playText = playTextProperty.value
 
                 if (hideButtonText) {
-                    pauseText = pauseText ?: FX.messages["pause"]
-                    playText = playText ?: FX.messages["play"]
+                    pauseText = pauseText ?: messages["pause"]
+                    playText = playText ?: messages["play"]
                 }
 
                 if (isPlaying) pauseText else playText
@@ -231,14 +231,14 @@ class SimpleAudioPlayer(
                     hbox {
                         alignment = Pos.CENTER
                         label {
-                            text = FX.messages["playbackSpeed"]
+                            text = messages["playbackSpeed"]
                         }
                         region {
                             hgrow = Priority.ALWAYS
                         }
                         button {
                             addClass("btn", "btn--secondary", "btn--borderless", "wa-menu-button__btn-util")
-                            text = FX.messages["custom"]
+                            text = messages["custom"]
                             action {
                                 menuItems.setAll(createCustomRateMenu())
                                 menuButton.show()
@@ -280,14 +280,14 @@ class SimpleAudioPlayer(
                     hbox {
                         alignment = Pos.CENTER
                         label {
-                            text = FX.messages["custom"]
+                            text = messages["custom"]
                         }
                         region {
                             hgrow = Priority.ALWAYS
                         }
                         button {
                             addClass("btn", "btn--secondary", "btn--borderless", "wa-menu-button__btn-util")
-                            text = FX.messages["cancel"]
+                            text = messages["cancel"]
                             action {
                                 menuItems.setAll(createPlaybackRateMenu())
                                 menuButton.show()
@@ -329,7 +329,7 @@ class SimpleAudioPlayer(
                         addClass("btn", "btn--secondary")
                         hgrow = Priority.ALWAYS
                         alignment = Pos.CENTER
-                        text = FX.messages["setCustom"]
+                        text = messages["setCustom"]
                         action {
                             customRateProperty.set(rateSlider.value)
                             audioPlaybackRateProperty.set(rateSlider.value)
@@ -367,8 +367,8 @@ class SimpleAudioPlayer(
             val title =
                 if (isCustom) {
                     MessageFormat.format(
-                        FX.messages["customSpeedRate"],
-                        FX.messages["custom"],
+                        messages["customSpeedRate"],
+                        messages["custom"],
                         formattedValue,
                     )
                 } else {

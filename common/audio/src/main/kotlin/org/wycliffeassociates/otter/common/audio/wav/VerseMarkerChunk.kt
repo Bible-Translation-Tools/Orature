@@ -73,7 +73,7 @@ class VerseMarkerChunk : CueChunk() {
                 .filter { numberRegex.containsMatchIn(it.label) }
                 .map {
                     val match = numberRegex.find(it.label)
-                    val label = match!!.groupValues.first()!!
+                    val label = match!!.groupValues.first()
                     AudioCue(it.location, label)
                 }
 
@@ -99,9 +99,9 @@ class VerseMarkerChunk : CueChunk() {
                 val groups = match!!.groupValues
                 val label =
                     if (groups.size > 1) {
-                        match!!.groupValues.get(1)!!
+                        match.groupValues.get(1)
                     } else {
-                        match!!.groupValues.first()!!
+                        match.groupValues.first()
                     }
                 AudioCue(it.location, label)
             }

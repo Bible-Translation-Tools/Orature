@@ -3,7 +3,6 @@ package org.wycliffeassociates.otter.common.domain
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
-import io.mockk.verify
 import io.reactivex.Completable
 import org.junit.Assert
 import org.junit.Before
@@ -34,9 +33,10 @@ class DeleteProjectTest {
         val deleteSpy = spyk(deleteUseCase)
         val bookList = listOf(mockk<WorkbookDescriptor>())
         val deleteCounter = AtomicInteger(0)
-        val deleteObservable = Completable
-            .complete()
-            .doOnSubscribe { deleteCounter.incrementAndGet() }
+        val deleteObservable =
+            Completable
+                .complete()
+                .doOnSubscribe { deleteCounter.incrementAndGet() }
 
         every { deleteSpy.deleteProjects(bookList) } returns deleteObservable
 
@@ -62,9 +62,10 @@ class DeleteProjectTest {
         val deleteSpy = spyk(deleteUseCase)
         val bookList = listOf(mockk<WorkbookDescriptor>())
         val deleteCounter = AtomicInteger(0)
-        val deleteObservable = Completable
-            .complete()
-            .doOnSubscribe { deleteCounter.incrementAndGet() }
+        val deleteObservable =
+            Completable
+                .complete()
+                .doOnSubscribe { deleteCounter.incrementAndGet() }
 
         every { deleteSpy.deleteProjects(bookList) } returns deleteObservable
 

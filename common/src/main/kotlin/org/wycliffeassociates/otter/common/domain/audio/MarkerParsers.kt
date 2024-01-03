@@ -130,7 +130,7 @@ internal class VerseMarkerParser : MarkerParser {
                 .filter { numberRegex.containsMatchIn(it.label) }
                 .map {
                     val match = numberRegex.find(it.label)
-                    val label = match!!.groupValues.first()!!
+                    val label = match!!.groupValues.first()
                     AudioCue(it.location, label)
                 }
 

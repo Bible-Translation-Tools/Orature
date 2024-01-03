@@ -740,7 +740,7 @@ class OngoingProjectImporter
             sig: ContentSignature,
             project: Collection,
             metadata: ResourceMetadata,
-        ): Content? {
+        ): Content {
             return contentCache.computeIfAbsent(sig) { (chapter, verse, sort, type) ->
                 val collection: Observable<Collection> =
                     collectionRepository

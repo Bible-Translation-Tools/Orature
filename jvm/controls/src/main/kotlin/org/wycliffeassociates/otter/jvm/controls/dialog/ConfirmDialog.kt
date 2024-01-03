@@ -194,7 +194,7 @@ class ConfirmDialog : OtterDialog() {
                         colorInput,
                     )
 
-                blend as Effect
+                blend
             },
             widthProperty,
             heightProperty,

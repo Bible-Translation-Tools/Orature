@@ -97,7 +97,7 @@ class GithubReporter(
      * Generates the environment block
      * @return
      */
-    private fun getEnvironmentBlock(environment: Environment): String? {
+    private fun getEnvironmentBlock(environment: Environment): String {
         val environmentBuf = StringBuffer()
         environmentBuf.append("\nEnvironment\n======\n")
         environmentBuf.append("Environment Key | Value" + "\n")
@@ -114,7 +114,7 @@ class GithubReporter(
      * @param stacktrace the stacktrace text
      * @return
      */
-    private fun getStacktraceBlock(stacktrace: String?): String? {
+    private fun getStacktraceBlock(stacktrace: String?): String {
         val stacktraceBuf = StringBuffer()
         if (stacktrace != null && !stacktrace.isEmpty()) {
             stacktraceBuf.append("\nStack trace\n======\n")
@@ -130,7 +130,7 @@ class GithubReporter(
      * @param log
      * @return
      */
-    private fun getLogBlock(log: String?): String? {
+    private fun getLogBlock(log: String?): String {
         val logBuf = StringBuffer()
         if (log != null && log.isNotEmpty()) {
             logBuf.append("\nLog history\n======\n")
