@@ -2,7 +2,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.jfoenix.controls.JFXSnackbar
-import io.reactivex.disposables.Disposable
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.EventHandler
 import javafx.scene.Node
@@ -254,9 +253,8 @@ class HomePage2 : View() {
                 ?: return@subscribe
 
             viewModel.removeProjectFromList(cardModel)
-
-            val cancellable = viewModel.deleteProjectGroupWithTimer(cardModel)
-            val notification = createProjectGroupDeleteNotification(cardModel, cancellable)
+            viewModel.deleteProjectGroupWithTimer(cardModel)
+            val notification = createProjectGroupDeleteNotification(cardModel)
             showNotification(notification)
         }
 
@@ -343,6 +341,7 @@ class HomePage2 : View() {
             themeProperty.set(settingsViewModel.appColorMode.value)
             viewModel.isLoadingProperty.onChangeWithDisposer {
                 if (it == true) {
+                    messageProperty.set(messages["loadingProjectWait"])
                     open()
                 } else {
                     close()
@@ -536,8 +535,7 @@ class HomePage2 : View() {
     }
 
     private fun createProjectGroupDeleteNotification(
-        cardModel: ProjectGroupCardModel,
-        cancellable: Disposable
+        cardModel: ProjectGroupCardModel
     ): NotificationViewData {
         return NotificationViewData(
             title = messages["projectDeleted"],
@@ -551,14 +549,7 @@ class HomePage2 : View() {
             actionText = messages["undo"],
             actionIcon = MaterialDesign.MDI_UNDO
         ) {
-            // undo deletion by cancelling the task
-            cancellable.dispose()
-            // reinsert the project group
-            viewModel.projectGroups.add(cardModel)
-            if (viewModel.projectGroups.size == 1) {
-                viewModel.bookList.setAll(cardModel.books)
-                viewModel.selectedProjectGroupProperty.set(cardModel.getKey())
-            }
+            viewModel.undoDeleteProjectGroup(cardModel)
         }
     }
 
