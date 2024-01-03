@@ -170,7 +170,7 @@ class BackupProjectExporter @Inject constructor(
 
         return try {
             pattern
-                .matcher(path)
+                .matcher(File(path).invariantSeparatorsPath)
                 .apply { find() }
                 .group(1)
                 .toInt() in exportOptions.chapters

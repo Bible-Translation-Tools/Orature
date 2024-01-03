@@ -26,8 +26,12 @@ import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ProgressStatus
 import org.wycliffeassociates.otter.common.data.primitives.Collection
+import org.wycliffeassociates.otter.common.data.workbook.Chapter
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterDescriptor
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
+import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
+import org.wycliffeassociates.otter.common.domain.project.ProjectCompletionStatus
 import org.wycliffeassociates.otter.common.domain.project.exporter.AudioProjectExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOptions
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
@@ -59,6 +63,12 @@ class ExportProjectViewModel : ViewModel() {
     @Inject
     lateinit var exportAudioUseCase: AudioProjectExporter
 
+    @Inject
+    lateinit var narrationFactory: NarrationFactory
+
+    @Inject
+    lateinit var projectCompletionStatus: ProjectCompletionStatus
+
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
     }
@@ -70,31 +80,25 @@ class ExportProjectViewModel : ViewModel() {
             .fromCallable {
                 workbookRepo.get(workbookDescriptor.sourceCollection, workbookDescriptor.targetCollection)
             }
-            .flatMapObservable { workbook ->
-                workbook.target.chapters
-                    .map { chapter ->
-                        val chunkCount = chapter.chunkCount.blockingGet()
+            .map { workbook ->
+                workbook
+                    .target
+                    .chapters
+                    .toList()
+                    .map { chapters ->
+                        chapters.map { chapter ->
+                            val progress = when {
+                                chapter.hasSelectedAudio() -> 1.0
+                                hasInProgressNarration(workbook, chapter) -> {
+                                    projectCompletionStatus.getChapterNarrationProgress(workbook, chapter)
+                                }
 
-                        val progress = when {
-                            chapter.hasSelectedAudio() -> 1.0
-                            chunkCount != 0 -> {
-                                // collect chunks from the relay as soon as it starts emitting (blocking)
-                                val chunkWithAudio = chapter.chunks
-                                    .take(1)
-                                    .map {
-                                        it.count { it.hasSelectedAudio() }
-                                    }
-                                    .blockingFirst()
-
-                                chunkWithAudio.toDouble() / chunkCount
+                                else -> projectCompletionStatus.getChapterTranslationProgress(chapter)
                             }
-                            else -> 0.0
+                            ChapterDescriptor(chapter.sort, progress)
                         }
-
-                        ChapterDescriptor(chapter.sort, progress, progress > 0)
-                    }
+                    }.blockingGet() // blocking get is required for the .cache() observable to emit
             }
-            .toList()
             .subscribeOn(Schedulers.io())
             .doOnError { logger.error("Error retrieving chapters to export.", it) }
     }
@@ -173,5 +177,10 @@ class ExportProjectViewModel : ViewModel() {
                 )
             }
         }
+    }
+
+    private fun hasInProgressNarration(workbook: Workbook, chapter: Chapter): Boolean {
+        val files = workbook.projectFilesAccessor.getInProgressNarrationFiles(workbook, chapter)
+        return files.all { it.exists() }
     }
 }
