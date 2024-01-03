@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.disposables.Disposable
@@ -21,6 +22,7 @@ import org.wycliffeassociates.otter.common.domain.collections.UpdateProject
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
+import org.wycliffeassociates.otter.jvm.controls.dialog.LoadingModal
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupKey
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupCardModel
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
@@ -33,7 +35,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.NarrationPage
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
 import java.time.LocalDateTime
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.ConcurrentHashMap
 import java.util.function.Predicate
 import javax.inject.Inject
 
@@ -59,16 +61,19 @@ class HomePageViewModel2 : ViewModel() {
     private val navigator: NavigationMediator by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
     private val projectWizardViewModel: ProjectWizardViewModel by inject()
+    private val settingsViewModel: SettingsViewModel by inject()
 
     val projectGroups = observableListOf<ProjectGroupCardModel>()
     val bookList = observableListOf<WorkbookDescriptor>()
     private val filteredBooks = FilteredList<WorkbookDescriptor>(bookList)
     private val disposableListeners = mutableListOf<ListenerDisposer>()
-
     val sortedBooks = SortedList<WorkbookDescriptor>(filteredBooks)
+
     val selectedProjectGroupProperty = SimpleObjectProperty<ProjectGroupKey>()
     val bookSearchQueryProperty = SimpleStringProperty("")
     val isLoadingProperty = SimpleBooleanProperty(false)
+
+    private val projectsWithDeleteTimer = ConcurrentHashMap<ProjectGroupCardModel, Disposable>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -157,32 +162,44 @@ class HomePageViewModel2 : ViewModel() {
 
     /**
      * Deletes the project group after a specified timeout. During this time,
-     * the user can choose to cancel (undo) the action by calling dispose()
-     * from the disposable.
-     *
-     * @return the disposable (cancellable) subscription to the deletion task.
+     * the user can choose to cancel (undo) the action which disposes the
+     * delete task
      */
-    fun deleteProjectGroupWithTimer(cardModel: ProjectGroupCardModel): Disposable {
+    fun deleteProjectGroupWithTimer(cardModel: ProjectGroupCardModel) {
         val timeoutMillis = NOTIFICATION_DURATION_SEC * 1000
+        projectWizardViewModel.increaseProjectDeleteCounter()
 
-        val completable: Completable = Completable.create { emitter ->
-            val timerDisposable = Completable
-                .timer(timeoutMillis.toLong(), TimeUnit.MILLISECONDS)
-                .andThen(deleteProjectUseCase.deleteProjects(cardModel.books))
-                .observeOnFx()
-                .doOnComplete {
-                    logger.info("Deleted project group: ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
-                    projectWizardViewModel.existingLanguagePairs.remove(
-                        Pair(cardModel.sourceLanguage, cardModel.targetLanguage)
-                    )
-                    emitter.onComplete()
-                }
-                .subscribe()
+        val timerDisposable = deleteProjectUseCase
+            .deleteProjectsWithTimer(cardModel.books, timeoutMillis.toInt())
+            .observeOnFx()
+            .doOnComplete {
+                logger.info("Deleted project group: ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
+                projectWizardViewModel.existingLanguagePairs.remove(
+                    Pair(cardModel.sourceLanguage, cardModel.targetLanguage)
+                )
+                projectsWithDeleteTimer.remove(cardModel)
+            }
+            .doOnDispose {
+                logger.info("Cancelled deleting project group ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
+            }
+            .doFinally {
+                projectWizardViewModel.decreaseProjectDeleteCounter()
+            }
+            .subscribe()
 
-            emitter.setDisposable(timerDisposable)
+        projectsWithDeleteTimer[cardModel] = timerDisposable
+    }
+
+    fun undoDeleteProjectGroup(cardModel: ProjectGroupCardModel) {
+        projectsWithDeleteTimer[cardModel]?.dispose() // cancel the delete task
+        projectsWithDeleteTimer.remove(cardModel)
+
+        // reinsert the project group
+        projectGroups.add(cardModel)
+        if (projectGroups.size == 1) {
+            bookList.setAll(cardModel.books)
+            selectedProjectGroupProperty.set(cardModel.getKey())
         }
-
-        return completable.subscribe()
     }
 
     fun deleteBook(workbookDescriptor: WorkbookDescriptor): Completable {
@@ -205,6 +222,39 @@ class HomePageViewModel2 : ViewModel() {
             .doOnError { logger.error("Error while loading contributor info.", it) }
             .subscribeOn(Schedulers.io())
             .observeOnFx()
+    }
+
+    /**
+     * Trigger instant delete on project(s) timed for deletion, given that the
+     * timer has not gone off. This method addresses the issue with navigating home
+     * while the delete task is executing. For instance, deleting a project,
+     * then opening a book and returning home will trigger the concurrent get & delete.
+     */
+    private fun forceDeleteProjectsWithTimer() {
+        val loadingDialog = find<LoadingModal>().apply {
+            // show loading modal while flushing the delete queue to prevent navigating home
+            messageProperty.set(messages["loadingBook"])
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
+        }
+        loadingDialog.open()
+        projectsWithDeleteTimer.forEach { (_, disposable) -> disposable.dispose() }
+
+        Observable.fromIterable(projectsWithDeleteTimer.keys)
+            .concatMapCompletable { cardModel ->
+                deleteProjectUseCase.deleteProjects(cardModel.books)
+                    .doOnComplete {
+                        logger.info("Force-deleted project group: ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
+                    }
+            }
+            .doOnError { logger.error("Error while force-deleting projects in queue.", it) }
+            .subscribeOn(Schedulers.io())
+            .observeOnFx()
+            .doFinally {
+                projectsWithDeleteTimer.clear()
+                loadingDialog.close()
+            }
+            .subscribe()
     }
 
     private fun loadContributorsFromDerivedMetadata(
@@ -297,6 +347,9 @@ class HomePageViewModel2 : ViewModel() {
         when(mode) {
             ProjectMode.TRANSLATION -> navigator.dock<ChunkingTranslationPage>()
             ProjectMode.NARRATION, ProjectMode.DIALECT -> navigator.dock<NarrationPage>()
+        }
+        if (projectsWithDeleteTimer.isNotEmpty()) {
+            forceDeleteProjectsWithTimer()
         }
     }
 

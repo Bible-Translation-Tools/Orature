@@ -124,7 +124,7 @@ class CollectionRepository @Inject constructor(
                             }
                         }
                     } catch (e: Exception) {
-                        log.info("Manifest doesn't exist, so no changes needed. Project : $project.")
+                        log.info("Delete project - Manifest doesn't exist, no changes committed for ${project.slug}")
                     }
                 }
             }

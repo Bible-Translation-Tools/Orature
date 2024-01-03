@@ -30,7 +30,6 @@ class ExportProjectDialog : OtterDialog() {
     val selectedChapters = observableSetOf<ChapterDescriptor>()
     val workbookDescriptorProperty = SimpleObjectProperty<WorkbookDescriptor>()
     val onEstimateSizeAction = SimpleObjectProperty<(WorkbookDescriptor, List<Int>, ExportType) -> Long>()
-
     private val exportTypeProperty = SimpleObjectProperty<ExportType>(ExportType.BACKUP)
     private val estimatedSizeProperty = SimpleDoubleProperty(0.0)
     private val onCloseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
