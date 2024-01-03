@@ -198,7 +198,7 @@ class NarrationTakeModifierTest {
 
     // Test that Wav file metadata is updated properly when using a different amount of markers with different locations
     @Test
-    fun `testMoveThenDeleteMarkers`() {
+    fun testMoveThenDeleteMarkers() {
         val takeModifier = NarrationTakeAudioModifier(chapterTake)
         val secondsOfAudio = 10
 
