@@ -14,6 +14,7 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
+import java.util.concurrent.atomic.AtomicInteger
 
 class DeleteProjectTest {
     private lateinit var deleteUseCase: DeleteProject
@@ -32,7 +33,12 @@ class DeleteProjectTest {
     fun testDeleteWithTimer() {
         val deleteSpy = spyk(deleteUseCase)
         val bookList = listOf(mockk<WorkbookDescriptor>())
-        every { deleteSpy.deleteProjects(bookList) } returns Completable.complete()
+        val deleteCounter = AtomicInteger(0)
+        val deleteObservable = Completable
+            .complete()
+            .doOnSubscribe { deleteCounter.incrementAndGet() }
+
+        every { deleteSpy.deleteProjects(bookList) } returns deleteObservable
 
         val normalDelete1 =
             deleteSpy
@@ -44,18 +50,23 @@ class DeleteProjectTest {
                 .deleteProjectsWithTimer(bookList, timeoutMillis = 500)
                 .subscribe()
 
-        verify(exactly = 0) { deleteSpy.deleteProjects(bookList) }
+        Assert.assertEquals(0, deleteCounter.get())
 
-        Thread.sleep(1000) // wait until finishes
+        Thread.sleep(700) // wait until finishes
 
-        verify(exactly = 2) { deleteSpy.deleteProjects(bookList) }
+        Assert.assertEquals(2, deleteCounter.get())
     }
 
     @Test
     fun testCancelDeleteBeforeTimeout() {
         val deleteSpy = spyk(deleteUseCase)
         val bookList = listOf(mockk<WorkbookDescriptor>())
-        every { deleteSpy.deleteProjects(bookList) } returns Completable.complete()
+        val deleteCounter = AtomicInteger(0)
+        val deleteObservable = Completable
+            .complete()
+            .doOnSubscribe { deleteCounter.incrementAndGet() }
+
+        every { deleteSpy.deleteProjects(bookList) } returns deleteObservable
 
         val cancellingDelete =
             deleteSpy
@@ -67,15 +78,15 @@ class DeleteProjectTest {
                 .deleteProjectsWithTimer(bookList, timeoutMillis = 500)
                 .subscribe()
 
-        verify(exactly = 0) { deleteSpy.deleteProjects(bookList) }
+        Assert.assertEquals(0, deleteCounter.get())
 
         cancellingDelete.dispose() // cancel before timeout
 
         Assert.assertTrue(cancellingDelete.isDisposed)
         Assert.assertFalse(normalDelete.isDisposed)
 
-        Thread.sleep(600)
+        Thread.sleep(700)
 
-        verify(exactly = 1) { deleteSpy.deleteProjects(bookList) }
+        Assert.assertEquals(1, deleteCounter.get())
     }
 }
