@@ -143,7 +143,7 @@ class BackupProjectExporter @Inject constructor(
     }
 
     /**
-     * Estimates the size source audio of the corresponding project (book).
+     * Estimates the size of source media included in the export file.
      */
     private fun estimateSourceSize(workbook: Workbook): Long {
         val project = workbook.source.slug
