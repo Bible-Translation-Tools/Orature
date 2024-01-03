@@ -84,25 +84,25 @@ class MarkerPlacementWaveform : StackPane() {
 
     var onRewind = SimpleObjectProperty<((ScrollSpeed) -> Unit)> {}
 
-    fun setOnRewind(op: (ScrollSpeed) -> Unit)  {
+    fun setOnRewind(op: (ScrollSpeed) -> Unit) {
         onRewind.set(op)
     }
 
     var onFastForward = SimpleObjectProperty<((ScrollSpeed) -> Unit)> {}
 
-    fun setOnFastForward(op: (ScrollSpeed) -> Unit)  {
+    fun setOnFastForward(op: (ScrollSpeed) -> Unit) {
         onFastForward.set(op)
     }
 
     var onToggleMedia = SimpleObjectProperty<(() -> Unit)> {}
 
-    fun setOnToggleMedia(op: () -> Unit)  {
+    fun setOnToggleMedia(op: () -> Unit) {
         onToggleMedia.set(op)
     }
 
     var onResumeMedia = SimpleObjectProperty<(() -> Unit)> {}
 
-    fun setOnResumeMedia(op: () -> Unit)  {
+    fun setOnResumeMedia(op: () -> Unit) {
         onResumeMedia.set(op)
     }
 

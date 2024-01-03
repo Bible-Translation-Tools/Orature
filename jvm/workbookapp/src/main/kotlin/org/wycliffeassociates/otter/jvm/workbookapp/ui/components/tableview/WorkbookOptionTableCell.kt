@@ -62,11 +62,10 @@ class WorkbookOptionTableCell(
 
     init {
         selectedIndexProperty.onChange {
-            if (item != null && !isEmpty && it == index)
-                {
-                    actionButton.onAction.handle(ActionEvent())
-                    selectedIndexProperty.set(-1) // resets to allow subsequent invocations
-                }
+            if (item != null && !isEmpty && it == index) {
+                actionButton.onAction.handle(ActionEvent())
+                selectedIndexProperty.set(-1) // resets to allow subsequent invocations
+            }
         }
     }
 

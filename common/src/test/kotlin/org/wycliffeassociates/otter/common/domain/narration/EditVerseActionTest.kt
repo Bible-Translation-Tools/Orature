@@ -9,7 +9,6 @@ import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 
 class EditVerseActionTest {
-
     private val totalVerses: MutableList<VerseNode> = mutableListOf()
     lateinit var workingAudioFile: AudioFile
     val numTestVerses = 31
