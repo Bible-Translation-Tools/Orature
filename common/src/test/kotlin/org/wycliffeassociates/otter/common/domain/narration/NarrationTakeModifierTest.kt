@@ -162,7 +162,7 @@ class NarrationTakeModifierTest {
 
     // Test that Wav file metadata is updated properly when keeping the same markers, but changing their location
     @Test
-    fun `modifyMetadata with same amount of markers, same labels, and with different locations`() {
+    fun testMoveMarkers() {
         val takeModifier = NarrationTakeAudioModifier(chapterTake)
         val secondsOfAudio = 10
 
@@ -198,7 +198,7 @@ class NarrationTakeModifierTest {
 
     // Test that Wav file metadata is updated properly when using a different amount of markers with different locations
     @Test
-    fun `modifyMetadata with different amount of markers, same labels, and with different locations`() {
+    fun `testMoveThenDeleteMarkers`() {
         val takeModifier = NarrationTakeAudioModifier(chapterTake)
         val secondsOfAudio = 10
 
@@ -233,11 +233,12 @@ class NarrationTakeModifierTest {
         }
     }
 
+    // Test that the modifying the metadata multiple times with the same data does not cause unexpected changes
     @Test
-    fun `modifyMetadata multiple times with same markers`() {
+    fun testMoveMarkerToSamePosition() {
         val takeModifier = NarrationTakeAudioModifier(chapterTake)
         val secondsOfAudio = 10
-
+        val numberOfModifications = 5
         val originalAudioMarkers = makeAudioMarkers(1, 5)
 
         // Initializes audio and adds markers
@@ -252,30 +253,20 @@ class NarrationTakeModifierTest {
             Assert.assertTrue(originalAudioMarkers.map { it.toCue() }.contains(cue))
         }
 
-        // Re-inserts markers
-        var newAudioMarkers = originalAudioMarkers.map { it }
 
-        takeModifier.modifyMetaData(newAudioMarkers)
+        for (i in 0 until numberOfModifications) {
+            // Re-inserts markers
+            val newAudioMarkers = originalAudioMarkers.map { it }
 
-        // Verify that we have the expected amount of cues / Markers in the Wav file
-        Assert.assertEquals(newAudioMarkers.size, takeModifier.audioFile.getCues().size)
+            takeModifier.modifyMetaData(newAudioMarkers)
 
-        // Verify that we have the expected cues specified by newAudioMarkers
-        takeModifier.audioFile.getCues().forEachIndexed { idx, cue ->
-            Assert.assertTrue(newAudioMarkers.map { it.toCue() }.contains(cue))
-        }
+            // Verify that we have the expected amount of cues / Markers in the Wav file
+            Assert.assertEquals(newAudioMarkers.size, takeModifier.audioFile.getCues().size)
 
-        // Re-inserts markers
-        newAudioMarkers = originalAudioMarkers.map { it }
-
-        takeModifier.modifyMetaData(newAudioMarkers)
-
-        // Verify that we have the expected amount of cues / Markers in the Wav file
-        Assert.assertEquals(newAudioMarkers.size, takeModifier.audioFile.getCues().size)
-
-        // Verify that we have the expected cues specified by newAudioMarkers
-        takeModifier.audioFile.getCues().forEachIndexed { idx, cue ->
-            Assert.assertTrue(newAudioMarkers.map { it.toCue() }.contains(cue))
+            // Verify that we have the expected cues specified by newAudioMarkers
+            takeModifier.audioFile.getCues().forEachIndexed { idx, cue ->
+                Assert.assertTrue(newAudioMarkers.map { it.toCue() }.contains(cue))
+            }
         }
     }
 }
