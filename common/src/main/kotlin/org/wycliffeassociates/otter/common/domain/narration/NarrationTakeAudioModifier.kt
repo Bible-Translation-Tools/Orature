@@ -10,36 +10,38 @@ import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 
 class NarrationTakeAudioModifier(val take: Take) {
 
-    val audioFile: OratureAudioFile = if (!take.file.exists()) {
-        OratureAudioFile(
-            take.file,
-            DEFAULT_CHANNELS,
-            DEFAULT_SAMPLE_RATE,
-            DEFAULT_BITS_PER_SAMPLE
-        )
-    } else {
-        OratureAudioFile(take.file)
+    init {
+        if (!take.file.exists()) {
+            OratureAudioFile(
+                take.file,
+                DEFAULT_CHANNELS,
+                DEFAULT_SAMPLE_RATE,
+                DEFAULT_BITS_PER_SAMPLE
+            )
+        }
     }
 
     private val audioBounceTaskRunner = NarrationAudioBouncerTaskRunner
 
     fun modifyAudioData(reader: AudioFileReader, markers: List<AudioMarker>) {
-        audioBounceTaskRunner.bounce(audioFile.file, reader, markers)
+        val oaf = OratureAudioFile(take.file)
+        audioBounceTaskRunner.bounce(oaf.file, reader, markers)
     }
 
     fun modifyMetaData(markers: List<AudioMarker>) {
-        clearNarrationMarkers()
-        addNarrationMarkers(markers)
-        audioFile.update()
+        val oaf = OratureAudioFile(take.file)
+        clearNarrationMarkers(oaf)
+        addNarrationMarkers(oaf, markers)
+        oaf.update()
     }
 
-    private fun clearNarrationMarkers() {
+    private fun clearNarrationMarkers(audioFile: OratureAudioFile) {
         audioFile.clearMarkersOfType<VerseMarker>()
         audioFile.clearMarkersOfType<ChapterMarker>()
         audioFile.clearMarkersOfType<BookMarker>()
     }
 
-    private fun addNarrationMarkers(markers: List<AudioMarker>) {
+    private fun addNarrationMarkers(audioFile: OratureAudioFile, markers: List<AudioMarker>) {
         markers.forEach { marker ->
             audioFile.addMarker(audioFile.getMarkerTypeFromClass(marker::class), marker)
         }
