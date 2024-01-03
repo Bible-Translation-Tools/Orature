@@ -8,14 +8,14 @@ import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
+import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.chunkingStep
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
-import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
-import tornadofx.FX.Companion.messages
 import tornadofx.*
+import tornadofx.FX.Companion.messages
 
 class ChunkingStepsDrawer(
-    selectedStepProperty: SimpleObjectProperty<ChunkingStep>
+    selectedStepProperty: SimpleObjectProperty<ChunkingStep>,
 ) : VBox() {
     val chunksProperty = SimpleListProperty<ChunkViewData>()
     val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.BLIND_DRAFT)
@@ -34,17 +34,21 @@ class ChunkingStepsDrawer(
             region { hgrow = Priority.ALWAYS }
             button {
                 addClass("btn", "btn--icon")
-                graphicProperty().bind(isCollapsedProperty.objectBinding {
-                    if (it == true) {
-                        FontIcon(MaterialDesign.MDI_CHEVRON_RIGHT)
-                    } else {
-                        FontIcon(MaterialDesign.MDI_CHEVRON_LEFT)
-                    }
-                })
+                graphicProperty().bind(
+                    isCollapsedProperty.objectBinding {
+                        if (it == true) {
+                            FontIcon(MaterialDesign.MDI_CHEVRON_RIGHT)
+                        } else {
+                            FontIcon(MaterialDesign.MDI_CHEVRON_LEFT)
+                        }
+                    },
+                )
                 tooltip {
-                    textProperty().bind(isCollapsedProperty.stringBinding {
-                        if (it == true) messages["expand"] else messages["collapse"]
-                    })
+                    textProperty().bind(
+                        isCollapsedProperty.stringBinding {
+                            if (it == true) messages["expand"] else messages["collapse"]
+                        },
+                    )
                 }
                 action {
                     val collapsed = isCollapsedProperty.value
@@ -52,13 +56,12 @@ class ChunkingStepsDrawer(
                     isCollapsedProperty.set(!isCollapsedProperty.value)
                 }
             }
-
         }
         scrollpane {
             vgrow = Priority.ALWAYS
             isFitToWidth = true
             vbox {
-                chunkingStep(ChunkingStep.CONSUME_AND_VERBALIZE,selectedStepProperty,reachableStepProperty, isCollapsedProperty)
+                chunkingStep(ChunkingStep.CONSUME_AND_VERBALIZE, selectedStepProperty, reachableStepProperty, isCollapsedProperty)
                 chunkingStep(ChunkingStep.CHUNKING, selectedStepProperty, reachableStepProperty, isCollapsedProperty)
                 chunkingStep(ChunkingStep.BLIND_DRAFT, selectedStepProperty, reachableStepProperty, isCollapsedProperty) {
                     chunkListProperty.bind(chunksProperty)

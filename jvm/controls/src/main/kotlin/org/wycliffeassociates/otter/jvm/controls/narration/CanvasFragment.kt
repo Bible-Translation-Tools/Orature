@@ -18,15 +18,11 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.narration
 
-import javafx.animation.AnimationTimer
-import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Pos
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.layout.StackPane
 import org.wycliffeassociates.otter.jvm.controls.canvas.ResizableCanvas
-import org.wycliffeassociates.otter.jvm.controls.waveform.Drawable
 import tornadofx.*
 
 class CanvasFragment : StackPane() {

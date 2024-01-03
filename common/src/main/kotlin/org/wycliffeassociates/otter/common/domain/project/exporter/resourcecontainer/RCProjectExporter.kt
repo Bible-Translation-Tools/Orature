@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 abstract class RCProjectExporter(
-    protected val directoryProvider:IDirectoryProvider
+    protected val directoryProvider: IDirectoryProvider,
 ) : IProjectExporter {
     @Inject
     lateinit var concatenateAudio: ConcatenateAudio
@@ -56,33 +56,40 @@ abstract class RCProjectExporter(
     private val logger = LoggerFactory.getLogger(this.javaClass)
     private val compositeDisposable = CompositeDisposable()
 
-    protected fun makeExportFilename(workbook: Workbook, metadata: ResourceMetadata): String {
+    protected fun makeExportFilename(
+        workbook: Workbook,
+        metadata: ResourceMetadata,
+    ): String {
         val lang = workbook.target.language.slug
-        val resource = if (workbook.source.language.slug == workbook.target.language.slug) {
-            metadata.identifier
-        } else {
-            FileNamer.DEFAULT_RC_SLUG
-        }
+        val resource =
+            if (workbook.source.language.slug == workbook.target.language.slug) {
+                metadata.identifier
+            } else {
+                FileNamer.DEFAULT_RC_SLUG
+            }
         val project = workbook.target.slug
         val timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"))
         return "$lang-$resource-$project-$timestamp.zip"
     }
 
-    protected fun restoreFileExtension(file: File, extension: String): File {
+    protected fun restoreFileExtension(
+        file: File,
+        extension: String,
+    ): File {
         val fileName = file.nameWithoutExtension + ".$extension"
         val target = file.parentFile.resolve(fileName)
         // using nio Files.move() instead of file.rename() for platform independent
         Files.move(
             file.toPath(),
             target.toPath(),
-            StandardCopyOption.REPLACE_EXISTING
+            StandardCopyOption.REPLACE_EXISTING,
         )
         return target
     }
 
     protected fun setContributorInfo(
         contributors: List<Contributor>,
-        projectFile: File
+        projectFile: File,
     ) {
         ResourceContainer.load(projectFile).use { rc ->
             rc.manifest.dublinCore.apply {
@@ -95,7 +102,7 @@ abstract class RCProjectExporter(
     protected fun compileCompletedChapters(
         workbook: Workbook,
         resourceMetadata: ResourceMetadata,
-        projectFilesAccessor: ProjectFilesAccessor
+        projectFilesAccessor: ProjectFilesAccessor,
     ): Completable {
         return filterChaptersReadyToCompile(workbook.target.chapters)
             .flatMapCompletable { chapter ->
@@ -112,9 +119,9 @@ abstract class RCProjectExporter(
                             chapter.audio,
                             projectFilesAccessor.audioDir,
                             createFileNamer(workbook, chapter, resourceMetadata.identifier),
-                            compiledTake
+                            compiledTake,
                         ).andThen(
-                            subscribeToSelectedChapter(chapter)
+                            subscribeToSelectedChapter(chapter),
                         )
                     }
             }
@@ -127,45 +134,43 @@ abstract class RCProjectExporter(
             .subscribeOn(Schedulers.io())
     }
 
-    private fun filterChaptersReadyToCompile(
-        chapters: Observable<Chapter>
-    ): Observable<Chapter> {
+    private fun filterChaptersReadyToCompile(chapters: Observable<Chapter>): Observable<Chapter> {
         return chapters
             .filter { chapter ->
                 // filter chapter without selected take
                 !chapter.hasSelectedAudio()
             }
             .filter { chapter ->
-                val chunks = if (chapter.chunks.hasValue()) {
-                    chapter.chunks.value!!
-                } else {
-                    return@filter false
-                }
+                val chunks =
+                    if (chapter.chunks.hasValue()) {
+                        chapter.chunks.value!!
+                    } else {
+                        return@filter false
+                    }
 
                 // filter chapter where all its content are ready to compile
-                chunks.isNotEmpty() && chunks.all { chunk ->
-                    chunk.hasSelectedAudio()
-                }
+                chunks.isNotEmpty() &&
+                    chunks.all { chunk ->
+                        chunk.hasSelectedAudio()
+                    }
             }
     }
 
     private fun createFileNamer(
         wb: Workbook,
         chapter: Chapter,
-        rcSlug: String
+        rcSlug: String,
     ): FileNamer {
         return WorkbookFileNamerBuilder.createFileNamer(
             workbook = wb,
             chapter = chapter,
             chunk = null,
             recordable = chapter,
-            rcSlug = rcSlug
+            rcSlug = rcSlug,
         )
     }
 
-    private fun subscribeToSelectedChapter(
-        chapter: Chapter
-    ): Completable {
+    private fun subscribeToSelectedChapter(chapter: Chapter): Completable {
         return Completable
             .create { emitter ->
                 chapter.audio.selected.subscribe {

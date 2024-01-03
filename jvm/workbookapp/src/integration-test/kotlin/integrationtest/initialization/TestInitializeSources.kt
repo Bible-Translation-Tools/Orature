@@ -28,9 +28,9 @@ import io.reactivex.observers.TestObserver
 import org.junit.Assert
 import org.junit.Test
 import org.wycliffeassociates.otter.assets.initialization.InitializeSources
+import org.wycliffeassociates.otter.common.data.ProgressStatus
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.data.ProgressStatus
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import java.io.File
@@ -64,14 +64,16 @@ class TestInitializeSources {
         prepareSource()
 
         Assert.assertEquals(
-            0, resourceMetadataRepository.getAllSources().blockingGet().size
+            0,
+            resourceMetadataRepository.getAllSources().blockingGet().size,
         )
 
         val testSub = TestObserver<Completable>()
         val init = initSourcesProvider.get()
-        val mockProgressEmitter = mock<ObservableEmitter<ProgressStatus>>{
-            on { onNext(any()) } doAnswer { }
-        }
+        val mockProgressEmitter =
+            mock<ObservableEmitter<ProgressStatus>> {
+                on { onNext(any()) } doAnswer { }
+            }
 
         init
             .exec(mockProgressEmitter)
@@ -82,7 +84,8 @@ class TestInitializeSources {
 
         Assert.assertEquals(init.version, database.installedEntityDao.fetchVersion(init))
         Assert.assertEquals(
-            1, resourceMetadataRepository.getAllSources().blockingGet().size
+            1,
+            resourceMetadataRepository.getAllSources().blockingGet().size,
         )
     }
 

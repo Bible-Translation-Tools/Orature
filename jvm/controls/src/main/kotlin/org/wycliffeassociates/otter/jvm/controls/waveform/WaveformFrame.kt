@@ -35,7 +35,6 @@ import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.UIVersion
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import org.wycliffeassociates.otter.jvm.controls.marker.MarkerTrackControl
-
 import tornadofx.*
 import kotlin.math.min
 
@@ -43,7 +42,7 @@ const val WAVEFORM_MAX_HEIGHT = 500.0
 
 class WaveformFrame(
     topTrack: Node? = null,
-    bottomTrack: Node? = null
+    bottomTrack: Node? = null,
 ) : StackPane() {
     /**
      * Flag to determine if this reusable component follows the old or new design.
@@ -161,12 +160,14 @@ class WaveformFrame(
                     }
 
                     topTrack?.let {
-                        add(it.apply {
-                            val me = (it as MarkerTrackControl)
-                            me.onSeekPreviousProperty.bind(this@WaveformFrame.onSeekPreviousProperty)
-                            me.onSeekNextProperty.bind(this@WaveformFrame.onSeekNextProperty)
-                            me.onSeekProperty.bind(this@WaveformFrame.onSeekProperty)
-                        })
+                        add(
+                            it.apply {
+                                val me = (it as MarkerTrackControl)
+                                me.onSeekPreviousProperty.bind(this@WaveformFrame.onSeekPreviousProperty)
+                                me.onSeekNextProperty.bind(this@WaveformFrame.onSeekNextProperty)
+                                me.onSeekProperty.bind(this@WaveformFrame.onSeekProperty)
+                            },
+                        )
                     }
                 }
             }
@@ -241,8 +242,8 @@ class WaveformFrame(
             framePositionProperty
                 .negate()
                 .plus(
-                    this@WaveformFrame.widthProperty().divide(2.0)
-                )
+                    this@WaveformFrame.widthProperty().divide(2.0),
+                ),
         )
     }
 
@@ -256,17 +257,17 @@ class WaveformFrame(
                     fitHeightProperty().bind(
                         imageRegion.heightProperty().doubleBinding {
                             it?.let { min(WAVEFORM_MAX_HEIGHT, it.toDouble()) } ?: image.height
-                        }
+                        },
                     )
                 } else {
                     fitHeightProperty()
                         .bind(
                             imageRegion.heightProperty()
                                 .minus(topTrackRegion.heightProperty())
-                                .minus(bottomTrackRegion.heightProperty())
+                                .minus(bottomTrackRegion.heightProperty()),
                         )
                 }
-            }
+            },
         )
     }
 

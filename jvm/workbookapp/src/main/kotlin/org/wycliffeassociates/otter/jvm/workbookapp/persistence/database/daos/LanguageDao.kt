@@ -26,9 +26,8 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.Inserti
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.LanguageEntity
 
 class LanguageDao(
-    private val instanceDsl: DSLContext
+    private val instanceDsl: DSLContext,
 ) {
-
     fun fetchGateway(dsl: DSLContext = instanceDsl): List<LanguageEntity> {
         return dsl
             .select()
@@ -49,7 +48,10 @@ class LanguageDao(
             }
     }
 
-    fun fetchBySlug(slug: String, dsl: DSLContext = instanceDsl): LanguageEntity? {
+    fun fetchBySlug(
+        slug: String,
+        dsl: DSLContext = instanceDsl,
+    ): LanguageEntity? {
         return dsl
             .select()
             .from(LANGUAGE_ENTITY)
@@ -60,7 +62,10 @@ class LanguageDao(
     }
 
     @Synchronized
-    fun insert(entity: LanguageEntity, dsl: DSLContext = instanceDsl): Int {
+    fun insert(
+        entity: LanguageEntity,
+        dsl: DSLContext = instanceDsl,
+    ): Int {
         if (entity.id != 0) throw InsertionException("Entity ID is not 0")
 
         // Insert the language entity
@@ -72,7 +77,7 @@ class LanguageDao(
                 LANGUAGE_ENTITY.ANGLICIZED,
                 LANGUAGE_ENTITY.DIRECTION,
                 LANGUAGE_ENTITY.GATEWAY,
-                LANGUAGE_ENTITY.REGION
+                LANGUAGE_ENTITY.REGION,
             )
             .values(
                 entity.slug,
@@ -80,7 +85,7 @@ class LanguageDao(
                 entity.anglicizedName,
                 entity.direction,
                 entity.gateway,
-                entity.region
+                entity.region,
             )
             .execute()
 
@@ -94,13 +99,17 @@ class LanguageDao(
     }
 
     @Synchronized
-    fun insertAll(entities: List<LanguageEntity>, dsl: DSLContext = instanceDsl): List<Int> {
-        val initialLargest = dsl
-            .select(max(LANGUAGE_ENTITY.ID))
-            .from(LANGUAGE_ENTITY)
-            .fetchOne {
-                it.getValue(max(LANGUAGE_ENTITY.ID))
-            } ?: 0
+    fun insertAll(
+        entities: List<LanguageEntity>,
+        dsl: DSLContext = instanceDsl,
+    ): List<Int> {
+        val initialLargest =
+            dsl
+                .select(max(LANGUAGE_ENTITY.ID))
+                .from(LANGUAGE_ENTITY)
+                .fetchOne {
+                    it.getValue(max(LANGUAGE_ENTITY.ID))
+                } ?: 0
         dsl.transaction { config ->
             val transactionDsl = DSL.using(config)
             entities.forEach { entity ->
@@ -113,7 +122,7 @@ class LanguageDao(
                         LANGUAGE_ENTITY.ANGLICIZED,
                         LANGUAGE_ENTITY.DIRECTION,
                         LANGUAGE_ENTITY.GATEWAY,
-                        LANGUAGE_ENTITY.REGION
+                        LANGUAGE_ENTITY.REGION,
                     )
                     .values(
                         entity.slug,
@@ -121,26 +130,30 @@ class LanguageDao(
                         entity.anglicizedName,
                         entity.direction,
                         entity.gateway,
-                        entity.region
+                        entity.region,
                     )
                     .onConflictDoNothing()
                     .execute()
             }
             // Implicit commit
         }
-        val finalLargest = dsl
-            .select(max(LANGUAGE_ENTITY.ID))
-            .from(LANGUAGE_ENTITY)
-            .fetchOne {
-                it.getValue(max(LANGUAGE_ENTITY.ID))
-            }!!
+        val finalLargest =
+            dsl
+                .select(max(LANGUAGE_ENTITY.ID))
+                .from(LANGUAGE_ENTITY)
+                .fetchOne {
+                    it.getValue(max(LANGUAGE_ENTITY.ID))
+                }!!
 
         // Return the ids
         return ((initialLargest + 1)..finalLargest).toList()
     }
 
     @Synchronized
-    fun updateRegions(entities: List<LanguageEntity>, dsl: DSLContext = instanceDsl) {
+    fun updateRegions(
+        entities: List<LanguageEntity>,
+        dsl: DSLContext = instanceDsl,
+    ) {
         dsl.transaction { config ->
             val transactionDsl = DSL.using(config)
             entities.forEach { entity ->
@@ -154,7 +167,10 @@ class LanguageDao(
         }
     }
 
-    fun fetchById(id: Int, dsl: DSLContext = instanceDsl): LanguageEntity? {
+    fun fetchById(
+        id: Int,
+        dsl: DSLContext = instanceDsl,
+    ): LanguageEntity? {
         return dsl
             .select()
             .from(LANGUAGE_ENTITY)
@@ -173,7 +189,10 @@ class LanguageDao(
             }
     }
 
-    fun update(entity: LanguageEntity, dsl: DSLContext = instanceDsl) {
+    fun update(
+        entity: LanguageEntity,
+        dsl: DSLContext = instanceDsl,
+    ) {
         dsl
             .update(LANGUAGE_ENTITY)
             .set(LANGUAGE_ENTITY.SLUG, entity.slug)
@@ -187,7 +206,10 @@ class LanguageDao(
     }
 
     @Synchronized
-    fun updateAll(entities: List<LanguageEntity>, dsl: DSLContext = instanceDsl) {
+    fun updateAll(
+        entities: List<LanguageEntity>,
+        dsl: DSLContext = instanceDsl,
+    ) {
         val dbRecords = fetchAll(dsl)
 
         val dbSlugs = dbRecords.map { it.slug }.toSet()
@@ -212,7 +234,10 @@ class LanguageDao(
         insertAll(entitiesToInsert, dsl)
     }
 
-    fun delete(entity: LanguageEntity, dsl: DSLContext = instanceDsl) {
+    fun delete(
+        entity: LanguageEntity,
+        dsl: DSLContext = instanceDsl,
+    ) {
         dsl
             .deleteFrom(LANGUAGE_ENTITY)
             .where(LANGUAGE_ENTITY.ID.eq(entity.id))

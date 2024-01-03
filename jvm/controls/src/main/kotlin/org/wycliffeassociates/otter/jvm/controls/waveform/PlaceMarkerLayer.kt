@@ -23,13 +23,11 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.geometry.Pos
-import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import tornadofx.*
 
 class PlaceMarkerLayer : VBox() {
-
     val onPlaceMarkerActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     fun onPlaceMarkerAction(op: () -> Unit) {
@@ -47,10 +45,10 @@ class PlaceMarkerLayer : VBox() {
                         "btn",
                         "btn--cta",
                         "scrolling-waveform-play-controls__btn--rounded",
-                        "scrolling-waveform-play-controls__add-marker-btn"
+                        "scrolling-waveform-play-controls__add-marker-btn",
                     )
                     onActionProperty().bind(onPlaceMarkerActionProperty)
-                }
+                },
             )
             style {
                 styleClass.addAll("scrolling-waveform-play-controls__add-marker-container")

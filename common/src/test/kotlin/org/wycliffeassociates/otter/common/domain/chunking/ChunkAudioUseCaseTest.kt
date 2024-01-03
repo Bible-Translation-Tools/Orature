@@ -17,15 +17,18 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.Proj
 import org.wycliffeassociates.otter.common.domain.translation.ChunkAudioUseCase
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDatabaseAccessors
-import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 
 class ChunkAudioUseCaseTest {
+    @JvmField @Rule
+    val tempDir = TemporaryFolder()
 
-    @JvmField @Rule val tempDir = TemporaryFolder()
-    @JvmField @Rule val directoryProviderTempDir = TemporaryFolder()
-    @JvmField @Rule val projectDir = TemporaryFolder()
+    @JvmField @Rule
+    val directoryProviderTempDir = TemporaryFolder()
+
+    @JvmField @Rule
+    val projectDir = TemporaryFolder()
 
     private var autoincrement: Int = 1
         get() = field++
@@ -43,11 +46,12 @@ class ChunkAudioUseCaseTest {
     private val mockedDirectoryProvider = mock<IDirectoryProvider>()
     private val mockedDb = mock<IWorkbookDatabaseAccessors>()
 
-    private val cues = listOf(
-        AudioCue(0, "1"),
-        AudioCue(1, "2"),
-        AudioCue(2, "3")
-    )
+    private val cues =
+        listOf(
+            AudioCue(0, "1"),
+            AudioCue(1, "2"),
+            AudioCue(2, "3"),
+        )
 
     private val dublinCore = getDublinCore(rcSource)
 
@@ -59,27 +63,28 @@ class ChunkAudioUseCaseTest {
     fun setup() {
         mockedDb.apply {
             whenever(
-                getTranslation(any(), any())
+                getTranslation(any(), any()),
             ).thenReturn(
                 Single.just(
                     Translation(
                         english,
                         spanish,
-                        null
-                    )
-                )
+                        null,
+                    ),
+                ),
             )
         }
         mockedDirectoryProvider.apply {
             whenever(this.tempDirectory).thenReturn(directoryProviderTempDir.root)
             whenever(getProjectDirectory(rcSource, rcTarget, collTarget)).thenReturn(projectDir.root)
         }
-        projectFilesAccessor = ProjectFilesAccessor(
-            mockedDirectoryProvider,
-            rcSource,
-            rcTarget,
-            collTarget
-        )
+        projectFilesAccessor =
+            ProjectFilesAccessor(
+                mockedDirectoryProvider,
+                rcSource,
+                rcTarget,
+                collTarget,
+            )
         sourceFile = createWavFile(tempDir.root, "source.wav", "123456".toByteArray())
         rc = createTestRc(projectDir.root, dublinCore)
 
@@ -91,7 +96,7 @@ class ChunkAudioUseCaseTest {
     fun sourceAudioFileCopiedToResourceContainer() {
         Assert.assertEquals(
             rc.accessor.fileExists(".apps/orature/source/audio/${sourceFile.name}"),
-            true
+            true,
         )
     }
 
@@ -99,7 +104,7 @@ class ChunkAudioUseCaseTest {
     fun sourceCueFileCopiedToResourceContainer() {
         Assert.assertEquals(
             rc.accessor.fileExists(".apps/orature/source/audio/${sourceFile.nameWithoutExtension}.cue"),
-            true
+            true,
         )
     }
 

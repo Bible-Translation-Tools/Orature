@@ -4,7 +4,8 @@ enum class CheckingStatus {
     UNCHECKED,
     PEER_EDIT,
     KEYWORD,
-    VERSE;
+    VERSE,
+    ;
 
     companion object {
         fun get(name: String): CheckingStatus? {

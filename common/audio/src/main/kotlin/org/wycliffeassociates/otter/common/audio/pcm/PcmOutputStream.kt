@@ -28,55 +28,56 @@ import java.io.OutputStream
 /**
  * Created by sarabiaj on 10/4/2016.
  */
-class PcmOutputStream @Throws(FileNotFoundException::class)
-@JvmOverloads constructor(
-    private val pcm: PcmFile,
-    private val append: Boolean = true,
-    private val buffered: Boolean = false
-) : OutputStream(), Closeable, AutoCloseable {
+class PcmOutputStream
+    @Throws(FileNotFoundException::class)
+    @JvmOverloads
+    constructor(
+        private val pcm: PcmFile,
+        private val append: Boolean = true,
+        private val buffered: Boolean = false,
+    ) : OutputStream(), Closeable, AutoCloseable {
+        private val outputStream: OutputStream
+        private lateinit var bos: BufferedOutputStream
 
-    private val outputStream: OutputStream
-    private lateinit var bos: BufferedOutputStream
+        init {
+            outputStream = FileOutputStream(pcm.file, append)
+            if (buffered) {
+                bos = BufferedOutputStream(outputStream)
+            }
+        }
 
-    init {
-        outputStream = FileOutputStream(pcm.file, append)
-        if (buffered) {
-            bos = BufferedOutputStream(outputStream)
+        @Throws(IOException::class)
+        override fun write(oneByte: Int) {
+            if (buffered) {
+                bos.write(oneByte)
+            } else {
+                outputStream.write(oneByte)
+            }
+        }
+
+        @Throws(IOException::class)
+        override fun flush() {
+            if (buffered) {
+                bos.flush()
+            }
+            outputStream.flush()
+        }
+
+        @Throws(IOException::class)
+        override fun write(bytes: ByteArray) {
+            if (buffered) {
+                bos.write(bytes)
+            } else {
+                outputStream.write(bytes)
+            }
+        }
+
+        @Throws(IOException::class)
+        override fun close() {
+            if (buffered) {
+                bos.flush()
+            }
+            outputStream.flush()
+            outputStream.close()
         }
     }
-
-    @Throws(IOException::class)
-    override fun write(oneByte: Int) {
-        if (buffered) {
-            bos.write(oneByte)
-        } else {
-            outputStream.write(oneByte)
-        }
-    }
-
-    @Throws(IOException::class)
-    override fun flush() {
-        if (buffered) {
-            bos.flush()
-        }
-        outputStream.flush()
-    }
-
-    @Throws(IOException::class)
-    override fun write(bytes: ByteArray) {
-        if (buffered) {
-            bos.write(bytes)
-        } else {
-            outputStream.write(bytes)
-        }
-    }
-
-    @Throws(IOException::class)
-    override fun close() {
-        if (buffered) {
-            bos.flush()
-        }
-        outputStream.flush()
-        outputStream.close()
-    }
-}

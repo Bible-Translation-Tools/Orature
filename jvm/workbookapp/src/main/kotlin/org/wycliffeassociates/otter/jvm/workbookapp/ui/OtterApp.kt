@@ -46,12 +46,14 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
     var shouldBlockWindowCloseRequest = false
 
     @Inject lateinit var localeLanguage: LocaleLanguage
+
     @Inject lateinit var directoryProvider: IDirectoryProvider
+
     @Inject lateinit var audioConnectionFactory: AudioConnectionFactory
 
     init {
         DatabaseInitializer(
-            DirectoryProvider(OratureInfo.SUITE_NAME)
+            DirectoryProvider(OratureInfo.SUITE_NAME),
         ).initialize()
         dependencyGraph.inject(this)
         directoryProvider.cleanTempDirectory()
@@ -62,7 +64,7 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
 
     fun initializeLogger(directoryProvider: IDirectoryProvider) {
         ConfigureLogger(
-            directoryProvider.logsDirectory
+            directoryProvider.logsDirectory,
         ).configure()
     }
 

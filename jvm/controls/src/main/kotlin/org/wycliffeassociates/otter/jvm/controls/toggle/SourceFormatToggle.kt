@@ -24,10 +24,9 @@ import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.jvm.controls.skins.media.SourceFormatToggleSkin
 
 class SourceFormatToggle : Control() {
-
     enum class SourceFormat {
         AUDIO,
-        TEXT
+        TEXT,
     }
 
     private val USER_AGENT_STYLESHEET = javaClass.getResource("/css/source-format-toggle.css").toExternalForm()

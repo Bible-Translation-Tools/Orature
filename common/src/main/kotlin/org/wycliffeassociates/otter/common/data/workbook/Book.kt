@@ -20,9 +20,9 @@ package org.wycliffeassociates.otter.common.data.workbook
 
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.cast
+import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
-import org.wycliffeassociates.otter.common.data.primitives.Collection
 import java.time.LocalDateTime
 import java.util.*
 
@@ -36,24 +36,23 @@ class Book(
     val resourceMetadata: ResourceMetadata,
     val linkedResources: List<ResourceMetadata>,
     val modifiedTs: LocalDateTime?,
-
-    override val subtreeResources: List<ResourceMetadata>
-
+    override val subtreeResources: List<ResourceMetadata>,
 ) : BookElementContainer {
     val language: Language
         get() = resourceMetadata.language
 
     override val children: Observable<BookElement> = chapters.cast()
 
-    fun toCollection(): Collection = Collection(
-        sort,
-        slug,
-        label,
-        title,
-        resourceMetadata,
-        modifiedTs,
-        collectionId
-    )
+    fun toCollection(): Collection =
+        Collection(
+            sort,
+            slug,
+            label,
+            title,
+            resourceMetadata,
+            modifiedTs,
+            collectionId,
+        )
 
     override fun hashCode(): Int {
         return Objects.hash(
@@ -61,7 +60,7 @@ class Book(
             sort,
             slug,
             title,
-            label
+            label,
         )
     }
 

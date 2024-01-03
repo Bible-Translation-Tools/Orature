@@ -29,7 +29,7 @@ data class CardData(
     val bodyText: String,
     val sort: Int,
     val chunkSource: Chunk? = null,
-    val chapterSource: Chapter? = null
+    val chapterSource: Chapter? = null,
 ) {
     val takes = observableListOf<TakeModel>()
 
@@ -42,7 +42,7 @@ data class CardData(
         dataType = CardDataType.CONTENT.value,
         bodyText = chunk.title,
         sort = chunk.sort,
-        chunkSource = chunk
+        chunkSource = chunk,
     )
 
     constructor(chapter: Chapter) : this(
@@ -50,6 +50,6 @@ data class CardData(
         dataType = CardDataType.COLLECTION.value,
         bodyText = chapter.title,
         sort = chapter.sort,
-        chapterSource = chapter
+        chapterSource = chapter,
     )
 }

@@ -26,16 +26,39 @@ import org.wycliffeassociates.resourcecontainer.ResourceContainer
 
 interface IResourceMetadataRepository : IRepository<ResourceMetadata> {
     fun exists(metadata: ResourceMetadata): Single<Boolean>
+
     fun exists(predicate: (ResourceMetadata) -> Boolean): Single<Boolean>
+
     fun get(metadata: ResourceMetadata): Single<ResourceMetadata>
+
     fun insert(metadata: ResourceMetadata): Single<Int>
-    fun update(metadata: ResourceMetadata, rc: ResourceContainer): Completable
-    fun updateSource(metadata: ResourceMetadata, source: ResourceMetadata?): Completable
+
+    fun update(
+        metadata: ResourceMetadata,
+        rc: ResourceContainer,
+    ): Completable
+
+    fun updateSource(
+        metadata: ResourceMetadata,
+        source: ResourceMetadata?,
+    ): Completable
+
     fun getSource(metadata: ResourceMetadata): Maybe<ResourceMetadata>
+
     fun getAllSources(): Single<List<ResourceMetadata>>
+
     fun getAllDerivatives(metadata: ResourceMetadata): Single<List<ResourceMetadata>>
+
     // These functions are commutative
-    fun addLink(firstMetadata: ResourceMetadata, secondMetadata: ResourceMetadata): Completable
-    fun removeLink(firstMetadata: ResourceMetadata, secondMetadata: ResourceMetadata): Completable
+    fun addLink(
+        firstMetadata: ResourceMetadata,
+        secondMetadata: ResourceMetadata,
+    ): Completable
+
+    fun removeLink(
+        firstMetadata: ResourceMetadata,
+        secondMetadata: ResourceMetadata,
+    ): Completable
+
     fun getLinked(metadata: ResourceMetadata): Single<List<ResourceMetadata>>
 }

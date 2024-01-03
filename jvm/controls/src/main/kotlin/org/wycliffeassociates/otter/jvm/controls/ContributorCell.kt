@@ -27,7 +27,6 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
-import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.model.ContributorCellData
 import tornadofx.*
 import tornadofx.FX.Companion.messages
@@ -54,12 +53,12 @@ class ContributorCell : HBox() {
                         onEditContributorActionProperty.value?.handle(
                             ActionEvent(
                                 ContributorCellData(indexProperty.value, nameProperty.value),
-                                null
-                            )
+                                null,
+                            ),
                         )
                     }
                 }
-            }
+            },
         )
 
         button {
@@ -67,16 +66,17 @@ class ContributorCell : HBox() {
             graphic = FontIcon(Material.DELETE).addClass("delete-icon")
             tooltip(messages["remove"])
             setOnAction {
-                val index = if (indexProperty.value < 0) {
-                    // when an item is deleted, its index will no longer be valid (-1)
-                    // uses the last modified will track the latest item changed, allows deleting the correct one
-                    lastModifiedIndexProperty.value
-                } else {
-                    indexProperty.value
-                }
+                val index =
+                    if (indexProperty.value < 0) {
+                        // when an item is deleted, its index will no longer be valid (-1)
+                        // uses the last modified will track the latest item changed, allows deleting the correct one
+                        lastModifiedIndexProperty.value
+                    } else {
+                        indexProperty.value
+                    }
 
                 onRemoveContributorActionProperty.value?.handle(
-                    ActionEvent(index, this@ContributorCell)
+                    ActionEvent(index, this@ContributorCell),
                 )
             }
         }

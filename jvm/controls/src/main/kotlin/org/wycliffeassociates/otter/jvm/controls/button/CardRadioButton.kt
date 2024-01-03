@@ -16,7 +16,6 @@ import javafx.scene.layout.Region
 import tornadofx.*
 
 class CardRadioButton(tg: ToggleGroup) : ToggleButton() {
-
     val titleProperty = SimpleStringProperty("")
     val subTitleProperty = SimpleStringProperty("")
     private val radioActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
@@ -45,34 +44,35 @@ class CardRadioButton(tg: ToggleGroup) : ToggleButton() {
 class CardRadioButtonSkin(button: CardRadioButton) : SkinBase<CardRadioButton>(button) {
     private val behavior = ButtonBehavior(button)
 
-    private val graphic = HBox().apply {
-        addClass("radio-button-card")
-        vbox {
-            addClass("radio-button-card__labels")
-            label {
-                addClass("h4", "radio__label-text")
-                textProperty().bind(button.titleProperty)
-                minHeight = Region.USE_PREF_SIZE
-            }
-            label {
-                addClass("h5", "radio__label-text")
-                textProperty().bind(button.subTitleProperty)
-                /* extends the label text vertically to avoid ellipsis when overflow */
-                minHeight = Region.USE_PREF_SIZE
+    private val graphic =
+        HBox().apply {
+            addClass("radio-button-card")
+            vbox {
+                addClass("radio-button-card__labels")
+                label {
+                    addClass("h4", "radio__label-text")
+                    textProperty().bind(button.titleProperty)
+                    minHeight = Region.USE_PREF_SIZE
+                }
+                label {
+                    addClass("h5", "radio__label-text")
+                    textProperty().bind(button.subTitleProperty)
+                    // extends the label text vertically to avoid ellipsis when overflow
+                    minHeight = Region.USE_PREF_SIZE
 
-                visibleWhen { button.subTitleProperty.isNotEmpty }
-                managedWhen(visibleProperty())
+                    visibleWhen { button.subTitleProperty.isNotEmpty }
+                    managedWhen(visibleProperty())
+                }
+            }
+            region { hgrow = Priority.ALWAYS }
+            radiobutton {
+                addClass("wa-radio")
+                isFocusTraversable = false
+                isMouseTransparent = true
+
+                selectedProperty().bind(button.selectedProperty())
             }
         }
-        region { hgrow = Priority.ALWAYS }
-        radiobutton {
-            addClass("wa-radio")
-            isFocusTraversable = false
-            isMouseTransparent = true
-
-            selectedProperty().bind(button.selectedProperty())
-        }
-    }
 
     init {
         children.setAll(graphic)
@@ -84,4 +84,7 @@ class CardRadioButtonSkin(button: CardRadioButton) : SkinBase<CardRadioButton>(b
     }
 }
 
-fun EventTarget.cardRadioButton(tg: ToggleGroup, op: CardRadioButton.() -> Unit = {}) = CardRadioButton(tg).attachTo(this, op)
+fun EventTarget.cardRadioButton(
+    tg: ToggleGroup,
+    op: CardRadioButton.() -> Unit = {},
+) = CardRadioButton(tg).attachTo(this, op)

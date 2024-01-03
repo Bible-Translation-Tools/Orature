@@ -15,9 +15,8 @@ import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class LanguageTableView(
-    languages: ObservableList<Language>
+    languages: ObservableList<Language>,
 ) : TableView<Language>(languages) {
-
     val disabledLanguages = observableListOf<Language>()
 
     init {
@@ -29,10 +28,11 @@ class LanguageTableView(
         column(messages["language"], String::class) {
             setCellValueFactory { it.value.name.toProperty() }
             cellFormat {
-                graphic = label(item) {
-                    addClass("h4", "h4--80")
-                    tooltip(text)
-                }
+                graphic =
+                    label(item) {
+                        addClass("h4", "h4--80")
+                        tooltip(text)
+                    }
             }
             isReorderable = false
             isSortable = true
@@ -42,10 +42,11 @@ class LanguageTableView(
         column(messages["anglicized"], String::class) {
             setCellValueFactory { it.value.anglicizedName.toProperty() }
             cellFormat {
-                graphic = label(item) {
-                    addClass("normal-text")
-                    tooltip(text)
-                }
+                graphic =
+                    label(item) {
+                        addClass("normal-text")
+                        tooltip(text)
+                    }
             }
             isReorderable = false
             isSortable = true
@@ -55,9 +56,10 @@ class LanguageTableView(
         column(messages["code"], String::class) {
             setCellValueFactory { it.value.slug.toProperty() }
             cellFormat {
-                graphic = label(item) {
-                    addClass("normal-text")
-                }
+                graphic =
+                    label(item) {
+                        addClass("normal-text")
+                    }
             }
             isReorderable = false
             isSortable = true
@@ -67,10 +69,11 @@ class LanguageTableView(
         column(messages["gateway"], Boolean::class) {
             setCellValueFactory { it.value.isGateway.toProperty() }
             cellFormat {
-                graphic = label {
-                    text = if (item) messages["yes"] else messages["no"]
-                    addClass("normal-text")
-                }
+                graphic =
+                    label {
+                        text = if (item) messages["yes"] else messages["no"]
+                        addClass("normal-text")
+                    }
             }
             isReorderable = false
             isSortable = true
@@ -81,7 +84,7 @@ class LanguageTableView(
         sortPolicy = CUSTOM_SORT_POLICY as (Callback<TableView<Language>, Boolean>)
         setRowFactory { LanguageTableRow(disabledLanguages) }
 
-        /* accessibility */
+        // accessibility
         focusedProperty().onChange {
             if (it && selectionModel.selectedIndex < 0) {
                 selectionModel.select(0)
@@ -89,7 +92,7 @@ class LanguageTableView(
             }
         }
 
-        /* accessibility */
+        // accessibility
         addEventFilter(KeyEvent.KEY_PRESSED) { keyEvent ->
             if (keyEvent.code == KeyCode.SPACE || keyEvent.code == KeyCode.ENTER) {
                 selectedItem?.let { language ->
@@ -111,5 +114,5 @@ class LanguageTableView(
  */
 fun EventTarget.languageTableView(
     values: ObservableList<Language>,
-    op: LanguageTableView.() -> Unit = {}
+    op: LanguageTableView.() -> Unit = {},
 ) = LanguageTableView(values).attachTo(this, op)

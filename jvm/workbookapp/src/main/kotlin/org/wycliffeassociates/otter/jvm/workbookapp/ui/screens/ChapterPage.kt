@@ -21,7 +21,9 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 import com.github.thomasnield.rxkotlinfx.toLazyBinding
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.geometry.Pos
 import javafx.scene.control.Label
 import javafx.scene.control.ListView
 import javafx.scene.input.KeyCode
@@ -54,13 +56,11 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChunkCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChunkItem
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ExportChapterDialog
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.*
 import tornadofx.*
 import java.text.MessageFormat
 import java.util.*
-import javafx.beans.property.SimpleBooleanProperty
-import javafx.geometry.Pos
 import kotlin.math.max
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.*
 
 class ChapterPage : View() {
     private val logger = LoggerFactory.getLogger(ChapterPage::class.java)
@@ -81,23 +81,24 @@ class ChapterPage : View() {
 
     private val showDeleteChunksDialogProperty = SimpleBooleanProperty(false)
 
-    private val breadCrumb = BreadCrumb().apply {
-        titleProperty.bind(
-            workbookDataStore.activeChapterProperty.stringBinding {
-                it?.let {
-                    MessageFormat.format(
-                        messages["chapterTitle"],
-                        messages["chapter"],
-                        it.sort
-                    )
-                } ?: messages["chapter"]
+    private val breadCrumb =
+        BreadCrumb().apply {
+            titleProperty.bind(
+                workbookDataStore.activeChapterProperty.stringBinding {
+                    it?.let {
+                        MessageFormat.format(
+                            messages["chapterTitle"],
+                            messages["chapter"],
+                            it.sort,
+                        )
+                    } ?: messages["chapter"]
+                },
+            )
+            iconProperty.set(FontIcon(MaterialDesign.MDI_FILE))
+            setOnAction {
+                fire(NavigationRequestEvent(this@ChapterPage))
             }
-        )
-        iconProperty.set(FontIcon(MaterialDesign.MDI_FILE))
-        setOnAction {
-            fire(NavigationRequestEvent(this@ChapterPage))
         }
-    }
 
     override fun onDock() {
         super.onDock()
@@ -155,336 +156,342 @@ class ChapterPage : View() {
         }
         chunkingScope = buildChunkingScope()
     }
+
     private fun buildChunkingScope(): Scope {
         val settingsViewModel = find<SettingsViewModel>()
         return Scope(workspace, viewModel, workbookDataStore, settingsViewModel, navigator)
     }
 
-    override val root = hbox {
-        addClass("chapter-page")
+    override val root =
+        hbox {
+            addClass("chapter-page")
 
-        createSnackBar()
-
-        vbox {
-            addClass("chapter-page__chapter-info")
-            vgrow = Priority.ALWAYS
+            createSnackBar()
 
             vbox {
-                addClass("chapter-page__chapter-box")
+                addClass("chapter-page__chapter-info")
                 vgrow = Priority.ALWAYS
 
-                label {
-                    addClass("chapter-page__chapter-title")
-                    textProperty().bind(viewModel.chapterCardProperty.stringBinding {
-                        MessageFormat.format(
-                            FX.messages["chapterTitle"],
-                            FX.messages["chapter"].capitalizeString(),
-                            it?.bodyText
-                        )
-                    })
-                }
-
-                hbox {
-                    addClass("chapter-page__chapter-audio")
+                vbox {
+                    addClass("chapter-page__chapter-box")
                     vgrow = Priority.ALWAYS
 
-                    simpleaudioplayer {
-                        hgrow = Priority.ALWAYS
-                        playerProperty.bind(audioDataStore.selectedChapterPlayerProperty)
-                        visibleWhen(playerProperty.isNotNull)
-                        managedProperty().bind(visibleProperty())
+                    label {
+                        addClass("chapter-page__chapter-title")
+                        textProperty().bind(
+                            viewModel.chapterCardProperty.stringBinding {
+                                MessageFormat.format(
+                                    FX.messages["chapterTitle"],
+                                    FX.messages["chapter"].capitalizeString(),
+                                    it?.bodyText,
+                                )
+                            },
+                        )
                     }
 
                     hbox {
-                        hgrow = Priority.ALWAYS
-                        addClass("chapter-page__not-started")
+                        addClass("chapter-page__chapter-audio")
+                        vgrow = Priority.ALWAYS
 
-                        label(messages["draftingNotStarted"])
-
-                        visibleWhen(audioDataStore.selectedChapterPlayerProperty.isNull)
-                        managedProperty().bind(visibleProperty())
-                    }
-                }
-
-                hbox {
-                    addClass("chapter-page__chapter-actions")
-                    button {
-                        addClass("btn", "btn--secondary")
-                        text = messages["recordChapter"]
-                        tooltip(text)
-                        graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
-                        action {
-                            viewModel.recordChapter()
+                        simpleaudioplayer {
+                            hgrow = Priority.ALWAYS
+                            playerProperty.bind(audioDataStore.selectedChapterPlayerProperty)
+                            visibleWhen(playerProperty.isNotNull)
+                            managedProperty().bind(visibleProperty())
                         }
-                        shortcut(Shortcut.RECORD.value)
-                    }
-                    button {
-                        addClass("btn", "btn--secondary")
-                        text = messages["exportChapter"]
-                        tooltip(text)
-                        graphic = FontIcon(Material.UPLOAD_FILE)
-                        action {
-                            find<ExportChapterDialog>().apply {
-                                orientationProperty.set(settingsViewModel.orientationProperty.value)
-                            }.open()
-                        }
-                        disableProperty().bind(viewModel.selectedChapterTakeProperty.isNull)
-                    }
-                }
-            }
 
-            vbox {
-                addClass("chapter-page__actions")
-                vgrow = Priority.ALWAYS
+                        hbox {
+                            hgrow = Priority.ALWAYS
+                            addClass("chapter-page__not-started")
 
-                button {
-                    addClass("btn", "btn--primary")
-                    text = messages["editChapter"]
-                    tooltip(text)
-                    graphic = FontIcon(MaterialDesign.MDI_PENCIL)
-                    enableWhen(viewModel.selectedChapterTakeProperty.isNotNull)
-                    action {
-                        viewModel.processTakeWithPlugin(PluginType.EDITOR)
-                    }
-                }
-                button {
-                    addClass("btn", "btn--primary")
-                    text = messages["markAction"]
-                    tooltip(text)
-                    graphic = FontIcon(MaterialDesign.MDI_BOOKMARK)
-                    enableWhen(viewModel.selectedChapterTakeProperty.isNotNull)
-                    action {
-                        viewModel.processTakeWithPlugin(PluginType.MARKER)
-                    }
-                }
-                button {
-                    addClass("btn", "btn--primary")
-                    text = messages["viewTakes"]
-                    tooltip(text)
-                    graphic = FontIcon(MaterialDesign.MDI_LIBRARY_MUSIC)
-                    action {
-                        viewModel.chapterCardProperty.value?.let {
-                            viewModel.onCardSelection(it)
-                            navigator.dock<RecordScripturePage>()
+                            label(messages["draftingNotStarted"])
+
+                            visibleWhen(audioDataStore.selectedChapterPlayerProperty.isNull)
+                            managedProperty().bind(visibleProperty())
                         }
                     }
-                }
-            }
-        }
 
-        stackpane {
-            vbox {
-                addClass("chapter-page__chunks")
-                vgrow = Priority.ALWAYS
-
-                hbox {
-                    addClass("chapter-page__chunks-header")
-                    button(messages["delete"]) {
-                        addClass("btn", "btn--secondary", "btn--secondary-light")
-                        tooltip(text)
-                        graphic = FontIcon(MaterialDesign.MDI_DELETE)
-                        action {
-                            showDeleteChunksDialog()
-                        }
-                    }
-                    button {
-                        addClass("btn", "btn--secondary", "btn--secondary-light")
-                        text = messages["compile"]
-                        tooltip(text)
-                        graphic = FontIcon(MaterialDesign.MDI_LAYERS)
-                        enableWhen(viewModel.canCompileProperty.and(viewModel.isCompilingProperty.not()))
-                        action {
-                            viewModel.compile()
-                        }
-                    }
-                    button {
-                        addClass("btn", "btn--cta")
-                        textProperty().bind(viewModel.noTakesProperty.stringBinding {
-                            when (it) {
-                                true -> messages["beginTranslation"]
-                                else -> messages["continueTranslation"]
+                    hbox {
+                        addClass("chapter-page__chapter-actions")
+                        button {
+                            addClass("btn", "btn--secondary")
+                            text = messages["recordChapter"]
+                            tooltip(text)
+                            graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
+                            action {
+                                viewModel.recordChapter()
                             }
-                        })
-                        tooltip { textProperty().bind(this@button.textProperty()) }
-                        graphic = FontIcon(MaterialDesign.MDI_VOICE)
+                            shortcut(Shortcut.RECORD.value)
+                        }
+                        button {
+                            addClass("btn", "btn--secondary")
+                            text = messages["exportChapter"]
+                            tooltip(text)
+                            graphic = FontIcon(Material.UPLOAD_FILE)
+                            action {
+                                find<ExportChapterDialog>().apply {
+                                    orientationProperty.set(settingsViewModel.orientationProperty.value)
+                                }.open()
+                            }
+                            disableProperty().bind(viewModel.selectedChapterTakeProperty.isNull)
+                        }
+                    }
+                }
+
+                vbox {
+                    addClass("chapter-page__actions")
+                    vgrow = Priority.ALWAYS
+
+                    button {
+                        addClass("btn", "btn--primary")
+                        text = messages["editChapter"]
+                        tooltip(text)
+                        graphic = FontIcon(MaterialDesign.MDI_PENCIL)
+                        enableWhen(viewModel.selectedChapterTakeProperty.isNotNull)
                         action {
-                            viewModel.workChunkProperty.value?.let {
+                            viewModel.processTakeWithPlugin(PluginType.EDITOR)
+                        }
+                    }
+                    button {
+                        addClass("btn", "btn--primary")
+                        text = messages["markAction"]
+                        tooltip(text)
+                        graphic = FontIcon(MaterialDesign.MDI_BOOKMARK)
+                        enableWhen(viewModel.selectedChapterTakeProperty.isNotNull)
+                        action {
+                            viewModel.processTakeWithPlugin(PluginType.MARKER)
+                        }
+                    }
+                    button {
+                        addClass("btn", "btn--primary")
+                        text = messages["viewTakes"]
+                        tooltip(text)
+                        graphic = FontIcon(MaterialDesign.MDI_LIBRARY_MUSIC)
+                        action {
+                            viewModel.chapterCardProperty.value?.let {
                                 viewModel.onCardSelection(it)
                                 navigator.dock<RecordScripturePage>()
                             }
                         }
                     }
                 }
+            }
 
-                listview(viewModel.filteredContent) {
-                    addClass("wa-list-view")
-                    chunkListView = this
-                    fitToParentHeight()
+            stackpane {
+                vbox {
+                    addClass("chapter-page__chunks")
+                    vgrow = Priority.ALWAYS
 
-                    val focusedChunkProperty = SimpleObjectProperty<ChunkItem>()
-
-                    setCellFactory {
-                        ChunkCell(
-                            settingsViewModel.orientationScaleProperty.value,
-                            focusedChunkProperty
-                        )
+                    hbox {
+                        addClass("chapter-page__chunks-header")
+                        button(messages["delete"]) {
+                            addClass("btn", "btn--secondary", "btn--secondary-light")
+                            tooltip(text)
+                            graphic = FontIcon(MaterialDesign.MDI_DELETE)
+                            action {
+                                showDeleteChunksDialog()
+                            }
+                        }
+                        button {
+                            addClass("btn", "btn--secondary", "btn--secondary-light")
+                            text = messages["compile"]
+                            tooltip(text)
+                            graphic = FontIcon(MaterialDesign.MDI_LAYERS)
+                            enableWhen(viewModel.canCompileProperty.and(viewModel.isCompilingProperty.not()))
+                            action {
+                                viewModel.compile()
+                            }
+                        }
+                        button {
+                            addClass("btn", "btn--cta")
+                            textProperty().bind(
+                                viewModel.noTakesProperty.stringBinding {
+                                    when (it) {
+                                        true -> messages["beginTranslation"]
+                                        else -> messages["continueTranslation"]
+                                    }
+                                },
+                            )
+                            tooltip { textProperty().bind(this@button.textProperty()) }
+                            graphic = FontIcon(MaterialDesign.MDI_VOICE)
+                            action {
+                                viewModel.workChunkProperty.value?.let {
+                                    viewModel.onCardSelection(it)
+                                    navigator.dock<RecordScripturePage>()
+                                }
+                            }
+                        }
                     }
 
-                    addEventFilter(KeyEvent.KEY_PRESSED) {
-                        when (it.code) {
-                            KeyCode.TAB, KeyCode.DOWN, KeyCode.UP -> {
-                                val delta = if (it.isShiftDown || it.code == KeyCode.UP) -1 else 1
-                                scrollListTo(delta)
-                            }
+                    listview(viewModel.filteredContent) {
+                        addClass("wa-list-view")
+                        chunkListView = this
+                        fitToParentHeight()
 
-                            else -> {}
+                        val focusedChunkProperty = SimpleObjectProperty<ChunkItem>()
+
+                        setCellFactory {
+                            ChunkCell(
+                                settingsViewModel.orientationScaleProperty.value,
+                                focusedChunkProperty,
+                            )
+                        }
+
+                        addEventFilter(KeyEvent.KEY_PRESSED) {
+                            when (it.code) {
+                                KeyCode.TAB, KeyCode.DOWN, KeyCode.UP -> {
+                                    val delta = if (it.isShiftDown || it.code == KeyCode.UP) -1 else 1
+                                    scrollListTo(delta)
+                                }
+
+                                else -> {}
+                            }
                         }
                     }
                 }
-            }
-            vbox {
-                addClass("chapter-page__chunks")
-                vgrow = Priority.ALWAYS
-
-                visibleProperty().bind(viewModel.filteredContent.sizeProperty.lessThan(1))
-
-                var textBlock1: Label? = null
-                var textBlock2: Label? = null
-
-                hbox {
-                    addClass("chunk-mode")
+                vbox {
+                    addClass("chapter-page__chunks")
                     vgrow = Priority.ALWAYS
-                    hgrow = Priority.ALWAYS
 
-                    vbox {
-                        addClass("chunk-mode__selection-card")
+                    visibleProperty().bind(viewModel.filteredContent.sizeProperty.lessThan(1))
+
+                    var textBlock1: Label? = null
+                    var textBlock2: Label? = null
+
+                    hbox {
+                        addClass("chunk-mode")
                         vgrow = Priority.ALWAYS
-                        prefWidthProperty().bind(this@hbox.widthProperty().divide(2))
+                        hgrow = Priority.ALWAYS
 
                         vbox {
-                            add(
-                                FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE).apply {
-                                    addClass("chunk-mode__icon")
+                            addClass("chunk-mode__selection-card")
+                            vgrow = Priority.ALWAYS
+                            prefWidthProperty().bind(this@hbox.widthProperty().divide(2))
+
+                            vbox {
+                                add(
+                                    FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE).apply {
+                                        addClass("chunk-mode__icon")
+                                    },
+                                )
+                                label("Verse by Verse") {
+                                    addClass("chunk-mode__selection__title")
                                 }
-                            )
-                            label("Verse by Verse") {
-                                addClass("chunk-mode__selection__title")
+                                label("Start a new translation with the default verse structure.") {
+                                    addClass("chunk-mode__selection__text")
+                                    textBlock1 = this
+                                }
                             }
-                            label("Start a new translation with the default verse structure.") {
-                                addClass("chunk-mode__selection__text")
-                                textBlock1 = this
-                            }
-                        }
 
-                        button("Select") {
-                            addClass("btn", "btn--secondary", "chunk-mode__selection-btn")
-                            graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
+                            button("Select") {
+                                addClass("btn", "btn--secondary", "chunk-mode__selection-btn")
+                                graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
 
-                            setOnAction {
-                                viewModel.createChunksFromVerses()
+                                setOnAction {
+                                    viewModel.createChunksFromVerses()
+                                }
                             }
                         }
-                    }
-
-                    vbox {
-                        addClass("chunk-mode__selection-card")
-                        vgrow = Priority.ALWAYS
-                        prefWidthProperty().bind(this@hbox.widthProperty().divide(2))
 
                         vbox {
-                            add(
-                                FontIcon(MaterialDesign.MDI_FLAG).apply {
-                                    addClass("chunk-mode__icon")
+                            addClass("chunk-mode__selection-card")
+                            vgrow = Priority.ALWAYS
+                            prefWidthProperty().bind(this@hbox.widthProperty().divide(2))
+
+                            vbox {
+                                add(
+                                    FontIcon(MaterialDesign.MDI_FLAG).apply {
+                                        addClass("chunk-mode__icon")
+                                    },
+                                )
+                                label("Chunks") {
+                                    addClass("chunk-mode__selection__title")
                                 }
-                            )
-                            label("Chunks") {
-                                addClass("chunk-mode__selection__title")
+                                label("Start a new translation with custom chunk markers.") {
+                                    addClass("chunk-mode__selection__text")
+                                    textBlock2 = this
+                                }
                             }
-                            label("Start a new translation with custom chunk markers.") {
-                                addClass("chunk-mode__selection__text")
-                                textBlock2 = this
-                            }
-                        }
 
-                        button("Select") {
-                            addClass("btn", "btn--secondary", "chunk-mode__selection-btn")
-                            graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
+                            button("Select") {
+                                addClass("btn", "btn--secondary", "chunk-mode__selection-btn")
+                                graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
 
-                            setOnAction {
+                                setOnAction {
 //                                workspace.dock<ChunkingWizard>(chunkingScope)
+                                }
+
+                                enableWhen(audioDataStore.sourceAudioAvailableProperty)
                             }
-
-                            enableWhen(audioDataStore.sourceAudioAvailableProperty)
                         }
-                    }
 
-                    textBlock1?.let { text1 ->
-                        textBlock2?.let { text2 ->
-                            // bind height to the tallest block's height by text size (it wraps)
-                            if (text1.text.length > text2.text.length) {
-                                text2.prefHeightProperty().bind(text1.heightProperty())
-                            } else {
-                                text1.prefHeightProperty().bind(text2.heightProperty())
+                        textBlock1?.let { text1 ->
+                            textBlock2?.let { text2 ->
+                                // bind height to the tallest block's height by text size (it wraps)
+                                if (text1.text.length > text2.text.length) {
+                                    text2.prefHeightProperty().bind(text1.heightProperty())
+                                } else {
+                                    text1.prefHeightProperty().bind(text2.heightProperty())
+                                }
                             }
                         }
                     }
                 }
-            }
-            vbox {
-                addClass("chapter-page__chunks")
-
-                visibleProperty().bind(showDeleteChunksDialogProperty)
                 vbox {
-                    addClass("chapter-page__delete-warning")
-                    vgrow = Priority.ALWAYS
-                    alignment = Pos.CENTER
+                    addClass("chapter-page__chunks")
 
-                    add(
-                        FontIcon(MaterialDesign.MDI_ALERT).apply {
-                            addClass("chunk-mode__icon", "chunk-mode__icon--delete")
+                    visibleProperty().bind(showDeleteChunksDialogProperty)
+                    vbox {
+                        addClass("chapter-page__delete-warning")
+                        vgrow = Priority.ALWAYS
+                        alignment = Pos.CENTER
+
+                        add(
+                            FontIcon(MaterialDesign.MDI_ALERT).apply {
+                                addClass("chunk-mode__icon", "chunk-mode__icon--delete")
+                            },
+                        )
+
+                        label(messages["warning"]) {
+                            addClass(
+                                "chunk-mode__selection__title",
+                                "chunk-mode__selection__title--delete",
+                            )
                         }
-                    )
-
-                    label(messages["warning"]) {
-                        addClass(
-                            "chunk-mode__selection__title",
-                            "chunk-mode__selection__title--delete"
-                        )
-                    }
-                    label(messages["deleteTranslationInfo"]) {
-                        addClass(
-                            "chunk-mode__selection__text",
-                            "chunk-mode__selection__text--delete"
-                        )
-                    }
-                }
-
-                vbox {
-                    alignment = Pos.CENTER
-                    style {
-                        spacing = 16.px
-                        prefHeight = 176.px
-                        padding = box(16.px)
-                    }
-                    button(messages["keepTranslation"]) {
-                        addClass("btn", "btn--primary", "chunk-mode__selection-btn")
-                        graphic = FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE)
-                        action {
-                            showDeleteChunksDialogProperty.set(false)
+                        label(messages["deleteTranslationInfo"]) {
+                            addClass(
+                                "chunk-mode__selection__text",
+                                "chunk-mode__selection__text--delete",
+                            )
                         }
                     }
-                    button(messages["deleteTranslation"]) {
-                        addClass("btn", "btn--secondary", "chunk-mode__selection-btn--delete")
-                        graphic = FontIcon(MaterialDesign.MDI_DELETE)
-                        action {
-                            viewModel.resetChapter()
-                            showDeleteChunksDialogProperty.set(false)
+
+                    vbox {
+                        alignment = Pos.CENTER
+                        style {
+                            spacing = 16.px
+                            prefHeight = 176.px
+                            padding = box(16.px)
+                        }
+                        button(messages["keepTranslation"]) {
+                            addClass("btn", "btn--primary", "chunk-mode__selection-btn")
+                            graphic = FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE)
+                            action {
+                                showDeleteChunksDialogProperty.set(false)
+                            }
+                        }
+                        button(messages["deleteTranslation"]) {
+                            addClass("btn", "btn--secondary", "chunk-mode__selection-btn--delete")
+                            graphic = FontIcon(MaterialDesign.MDI_DELETE)
+                            action {
+                                viewModel.resetChapter()
+                                showDeleteChunksDialogProperty.set(false)
+                            }
                         }
                     }
                 }
             }
         }
-    }
 
     private fun showDeleteChunksDialog() {
         showDeleteChunksDialogProperty.set(true)
@@ -514,16 +521,16 @@ class ChapterPage : View() {
             sourceSpeedRateProperty.bind(
                 workbookDataStore.activeWorkbookProperty.select {
                     it.translation.sourceRate.toLazyBinding()
-                }
+                },
             )
 
             targetSpeedRateProperty.bind(
                 workbookDataStore.activeWorkbookProperty.select {
                     it.translation.targetRate.toLazyBinding()
-                }
+                },
             )
             sourceTextZoomRateProperty.bind(
-                viewModel.sourceTextZoomRateProperty
+                viewModel.sourceTextZoomRateProperty,
             )
         }
     }
@@ -539,13 +546,13 @@ class ChapterPage : View() {
                     JFXSnackbar.SnackbarEvent(
                         JFXSnackbarLayout(
                             pluginErrorMessage,
-                            messages["addApp"].uppercase(Locale.getDefault())
+                            messages["addApp"].uppercase(Locale.getDefault()),
                         ) {
                             audioPluginViewModel.addPlugin(true, false)
                         },
                         Duration.millis(5000.0),
-                        null
-                    )
+                        null,
+                    ),
                 )
             }
     }
@@ -572,15 +579,15 @@ class ChapterPage : View() {
                             messages["exportChapterTitle"],
                             messages["export"],
                             messages[chapter.label],
-                            chapter.title
-                        )
+                            chapter.title,
+                        ),
                     )
                 }
                 progressDialog.messageTextProperty.set(
                     MessageFormat.format(
                         messages["exportProjectMessage"],
-                        messages["chapter"]
-                    )
+                        messages["chapter"],
+                    ),
                 )
                 progressDialog.open()
             } else {
@@ -593,17 +600,19 @@ class ChapterPage : View() {
         viewModel.isCompilingProperty.onChangeWithDisposer {
             if (it == true) {
                 workbookDataStore.activeChapterProperty.value?.let { chapter ->
-                    val title = MessageFormat.format(
-                        messages["exportChapterTitle"],
-                        messages["compile"],
-                        messages[chapter.label],
-                        chapter.title
-                    )
-                    val msg = MessageFormat.format(
-                        messages["compileChapterMessage"],
-                        messages[chapter.label],
-                        chapter.title
-                    )
+                    val title =
+                        MessageFormat.format(
+                            messages["exportChapterTitle"],
+                            messages["compile"],
+                            messages[chapter.label],
+                            chapter.title,
+                        )
+                    val msg =
+                        MessageFormat.format(
+                            messages["compileChapterMessage"],
+                            messages[chapter.label],
+                            chapter.title,
+                        )
 
                     progressDialog.titleTextProperty.set(title)
                     progressDialog.messageTextProperty.set(msg)

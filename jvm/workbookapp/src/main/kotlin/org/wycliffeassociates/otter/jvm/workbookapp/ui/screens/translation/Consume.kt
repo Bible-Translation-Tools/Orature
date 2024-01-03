@@ -22,10 +22,6 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import io.reactivex.rxkotlin.addTo
 import javafx.animation.AnimationTimer
-import javafx.scene.Parent
-import javafx.scene.input.KeyCode
-import javafx.scene.input.KeyCodeCombination
-import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.scene.shape.Rectangle
@@ -35,9 +31,9 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ConsumeViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
 import org.wycliffeassociates.otter.jvm.controls.waveform.startAnimationTimer
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ConsumeViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 
@@ -48,12 +44,13 @@ class Consume : View() {
     val settingsViewModel: SettingsViewModel by inject()
 
     private lateinit var waveform: MarkerWaveform
-    private val audioScrollBar = createAudioScrollBar(
-        viewModel.audioPositionProperty,
-        viewModel.totalFramesProperty,
-        viewModel.isPlayingProperty,
-        viewModel::seek
-    )
+    private val audioScrollBar =
+        createAudioScrollBar(
+            viewModel.audioPositionProperty,
+            viewModel.totalFramesProperty,
+            viewModel.isPlayingProperty,
+            viewModel::seek,
+        )
 
     private var cleanUpWaveform: () -> Unit = {}
     private var timer: AnimationTimer? = null
@@ -86,58 +83,64 @@ class Consume : View() {
             .addTo(viewModel.compositeDisposable)
     }
 
-    override val root = vbox {
-        borderpane {
-            vgrow = Priority.ALWAYS
+    override val root =
+        vbox {
+            borderpane {
+                vgrow = Priority.ALWAYS
 
-            center = VBox().apply {
-                MarkerWaveform().apply {
-                    waveform = this
-                    addClass("waveform--focusable")
-                    vgrow = Priority.ALWAYS
-                    clip = Rectangle().apply {
-                        widthProperty().bind(this@vbox.widthProperty())
-                        heightProperty().bind(this@vbox.heightProperty())
-                    }
-                    themeProperty.bind(settingsViewModel.appColorMode)
-                    positionProperty.bind(viewModel.positionProperty)
-                    canMoveMarkerProperty.set(false)
-                    canDeleteMarkerProperty.set(false)
+                center =
+                    VBox().apply {
+                        MarkerWaveform().apply {
+                            waveform = this
+                            addClass("waveform--focusable")
+                            vgrow = Priority.ALWAYS
+                            clip =
+                                Rectangle().apply {
+                                    widthProperty().bind(this@vbox.widthProperty())
+                                    heightProperty().bind(this@vbox.heightProperty())
+                                }
+                            themeProperty.bind(settingsViewModel.appColorMode)
+                            positionProperty.bind(viewModel.positionProperty)
+                            canMoveMarkerProperty.set(false)
+                            canDeleteMarkerProperty.set(false)
 
-                    setUpWaveformActionHandlers()
-                    cleanUpWaveform = ::freeImages
+                            setUpWaveformActionHandlers()
+                            cleanUpWaveform = ::freeImages
 
-                    // Marker stuff
-                    this.markers.bind(viewModel.markers) { it }
-                }
-                add(waveform)
-                audioScrollBar
-                add(audioScrollBar)
-            }
-            bottom = hbox {
-                addClass("consume__bottom")
-                button {
-                    addClass("btn", "btn--primary", "consume__btn")
-                    val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
-                    val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
-                    textProperty().bind(viewModel.isPlayingProperty.stringBinding {
-                        togglePseudoClass("active", it == true)
-                        if (it == true) {
-                            graphic = pauseIcon
-                            messages["pause"]
-                        } else {
-                            graphic = playIcon
-                            messages["playSource"]
+                            // Marker stuff
+                            this.markers.bind(viewModel.markers) { it }
                         }
-                    })
-
-                    action {
-                        viewModel.mediaToggle()
+                        add(waveform)
+                        audioScrollBar
+                        add(audioScrollBar)
                     }
-                }
+                bottom =
+                    hbox {
+                        addClass("consume__bottom")
+                        button {
+                            addClass("btn", "btn--primary", "consume__btn")
+                            val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
+                            val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
+                            textProperty().bind(
+                                viewModel.isPlayingProperty.stringBinding {
+                                    togglePseudoClass("active", it == true)
+                                    if (it == true) {
+                                        graphic = pauseIcon
+                                        messages["pause"]
+                                    } else {
+                                        graphic = playIcon
+                                        messages["playSource"]
+                                    }
+                                },
+                            )
+
+                            action {
+                                viewModel.mediaToggle()
+                            }
+                        }
+                    }
             }
         }
-    }
 
     private fun setUpWaveformActionHandlers() {
         waveform.apply {

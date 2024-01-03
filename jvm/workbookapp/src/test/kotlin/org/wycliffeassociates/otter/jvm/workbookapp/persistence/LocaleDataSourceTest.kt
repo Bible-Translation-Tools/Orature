@@ -24,7 +24,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.domain.LocaleDataSource
 import java.util.*
 
 class LocaleDataSourceTest {
-
     var localeDataSource = LocaleDataSource()
 
     @Test

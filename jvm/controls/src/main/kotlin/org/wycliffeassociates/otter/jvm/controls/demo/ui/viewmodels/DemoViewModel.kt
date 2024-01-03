@@ -77,17 +77,20 @@ internal class DemoViewModel : ViewModel() {
         println("Recording verse ${chunk.title}")
     }
 
-    inline fun <reified T: UIComponent> showContent() {
+    inline fun <reified T : UIComponent> showContent() {
         val fragment = find<T>()
         shownFragment.set(fragment)
     }
 
     private fun bindSystemTheme() {
-        appColorMode.bind(isOSDarkMode.objectBinding {
-            if (it == true)
-                ColorTheme.DARK
-            else
-                ColorTheme.LIGHT
-        })
+        appColorMode.bind(
+            isOSDarkMode.objectBinding {
+                if (it == true) {
+                    ColorTheme.DARK
+                } else {
+                    ColorTheme.LIGHT
+                }
+            },
+        )
     }
 }

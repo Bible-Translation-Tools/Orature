@@ -38,16 +38,17 @@ import kotlin.math.max
 import kotlin.math.min
 
 class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
-
-    private val thumb = Rectangle(1.0, 1.0).apply {
-        addClass("wa-audio-slider-thumb")
-        arcHeight = 10.0
-        arcWidth = 10.0
-    }
-    private val playbackLine = Line(0.0, 0.0, 0.0, 1.0).apply {
-        stroke = Color.BLACK
-        strokeWidth = 2.0
-    }
+    private val thumb =
+        Rectangle(1.0, 1.0).apply {
+            addClass("wa-audio-slider-thumb")
+            arcHeight = 10.0
+            arcWidth = 10.0
+        }
+    private val playbackLine =
+        Line(0.0, 0.0, 0.0, 1.0).apply {
+            stroke = Color.BLACK
+            strokeWidth = 2.0
+        }
     private val markersHolder = Region()
     private val root = Region()
     private val waveformColorEffect = ColorAdjust()
@@ -59,11 +60,12 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
 
         control.waveformImageProperty.onChangeAndDoNow { newImage ->
             newImage?.let {
-                val imageView = ImageView(it).apply {
-                    fitHeightProperty().bind(root.heightProperty())
-                    fitWidthProperty().bind(root.widthProperty())
-                    effect = waveformColorEffect
-                }
+                val imageView =
+                    ImageView(it).apply {
+                        fitHeightProperty().bind(root.heightProperty())
+                        fitWidthProperty().bind(root.widthProperty())
+                        effect = waveformColorEffect
+                    }
                 imageViewDisposable = imageView
                 root.getChildList()?.clear()
                 root.add(imageView)
@@ -95,10 +97,10 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
         thumb.layoutY = control.padding.top
         playbackLine.layoutY = control.padding.top
         thumb.heightProperty().bind(
-            root.heightProperty() - control.padding.top - control.padding.bottom
+            root.heightProperty() - control.padding.top - control.padding.bottom,
         )
         playbackLine.endYProperty().bind(
-            root.heightProperty() - control.padding.top - control.padding.bottom
+            root.heightProperty() - control.padding.top - control.padding.bottom,
         )
 
         control.valueProperty().onChangeAndDoNow { moveThumb() }
@@ -126,7 +128,10 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
         }
     }
 
-    fun updateMarker(id: Int, position: Double) {
+    fun updateMarker(
+        id: Int,
+        position: Double,
+    ) {
         val location = position * control.max
 
         val min = getMin(id)
@@ -164,14 +169,15 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
         var xFinal = min(pos, controlWidth)
         xFinal = max(xFinal, 0.0)
 
-        val line = Line(0.0, 0.0, 0.0, 1.0).apply {
-            stroke = Color.BLACK
-            strokeWidth = 1.0
-        }
+        val line =
+            Line(0.0, 0.0, 0.0, 1.0).apply {
+                stroke = Color.BLACK
+                strokeWidth = 1.0
+            }
         line.layoutX = xFinal
         line.layoutY = control.padding.top
         line.endYProperty().bind(
-            root.heightProperty() - control.padding.top - control.padding.bottom
+            root.heightProperty() - control.padding.top - control.padding.bottom,
         )
         line.tooltip {
             text = cue.label
@@ -181,21 +187,23 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
 
     private fun getMin(id: Int): Double {
         val placedMarkers = control.markers
-        val previousMaker = if (id > 0) {
-            placedMarkers[id - 1]
-        } else {
-            null
-        }
+        val previousMaker =
+            if (id > 0) {
+                placedMarkers[id - 1]
+            } else {
+                null
+            }
         return previousMaker?.location?.toDouble() ?: 0.0
     }
 
     private fun getMax(id: Int): Double {
         val placedMarkers = control.markers
-        val previousMaker = if (id < placedMarkers.size - 1) {
-            placedMarkers[id + 1]
-        } else {
-            null
-        }
+        val previousMaker =
+            if (id < placedMarkers.size - 1) {
+                placedMarkers[id + 1]
+            } else {
+                null
+            }
         return previousMaker?.location?.toDouble() ?: control.max
     }
 }

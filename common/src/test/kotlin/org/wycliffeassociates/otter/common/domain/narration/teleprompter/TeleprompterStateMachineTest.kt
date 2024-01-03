@@ -6,7 +6,6 @@ import org.junit.Test
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 
 class TeleprompterStateMachineTest {
-
     fun mockAudioMarker(): AudioMarker {
         return mockk<AudioMarker> {}
     }
@@ -43,7 +42,6 @@ class TeleprompterStateMachineTest {
         val activeVerses = List(10) { false }
 
         teleprompterStateMachine.initialize(activeVerses)
-
 
         val index = 0
         var newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD, index)
@@ -120,7 +118,6 @@ class TeleprompterStateMachineTest {
         }
     }
 
-
     @Test
     fun `transition from RECORD, RECORDING_PAUSED, RESUME_RECORDING, then NEXT with none previously active`() {
         val audioMarkers = makeAudioMarkerLists(10)
@@ -153,7 +150,6 @@ class TeleprompterStateMachineTest {
             }
         }
     }
-
 
     @Test
     fun `transition from RECORD, RECORDING_PAUSED, RESUME_RECORDING, with none previously active and resuming recording of verse 3`() {
@@ -188,7 +184,6 @@ class TeleprompterStateMachineTest {
             }
         }
     }
-
 
     @Test
     fun `transition from RECORD, RECORDING_PAUSED, then NEXT with none previously active`() {
@@ -316,7 +311,6 @@ class TeleprompterStateMachineTest {
         // Resume recording
         val newContext = teleprompterStateMachine.transition(TeleprompterStateTransition.RESUME_RECORD_AGAIN, index)
 
-
         for (i in newContext.indices) {
             if (i == index) {
                 Assert.assertEquals(TeleprompterItemState.RECORD_AGAIN_ACTIVE, newContext[i])
@@ -361,5 +355,4 @@ class TeleprompterStateMachineTest {
             Assert.assertEquals(TeleprompterItemState.RECORD_AGAIN, newContext[i])
         }
     }
-
 }

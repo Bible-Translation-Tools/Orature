@@ -63,7 +63,6 @@ import java.util.function.Predicate
 import javax.inject.Inject
 
 class BookWizardViewModel : ViewModel() {
-
     private val logger = LoggerFactory.getLogger(BookWizardViewModel::class.java)
 
     @Inject
@@ -170,21 +169,23 @@ class BookWizardViewModel : ViewModel() {
                 logger.error("Error in loading children", e)
             }
             .subscribe { retrieved ->
-                val bookViewDataList = retrieved
-                    .map { collection ->
-                        val artwork = retrieveArtworkAsync(collection)
-                        BookCardData(collection, artwork)
-                    }
+                val bookViewDataList =
+                    retrieved
+                        .map { collection ->
+                            val artwork = retrieveArtworkAsync(collection)
+                            BookCardData(collection, artwork)
+                        }
                 books.setAll(bookViewDataList)
             }
     }
 
     fun loadExistingProjects() {
-        val translation = Translation(
-            translationProperty.value.sourceLanguage,
-            translationProperty.value.targetLanguage,
-            translationProperty.value.modifiedTs
-        )
+        val translation =
+            Translation(
+                translationProperty.value.sourceLanguage,
+                translationProperty.value.targetLanguage,
+                translationProperty.value.modifiedTs,
+            )
         workbookRepo
             .getProjects(translation)
             .doOnError { e ->
@@ -207,14 +208,15 @@ class BookWizardViewModel : ViewModel() {
 
     private fun bindFilterProperties() {
         searchQueryProperty.onChangeWithDisposer { query ->
-            queryPredicate = if (query.isNullOrBlank()) {
-                Predicate { true }
-            } else {
-                Predicate { viewData ->
-                    viewData.collection.slug.contains(query, true)
-                        .or(viewData.collection.titleKey.contains(query, true))
+            queryPredicate =
+                if (query.isNullOrBlank()) {
+                    Predicate { true }
+                } else {
+                    Predicate { viewData ->
+                        viewData.collection.slug.contains(query, true)
+                            .or(viewData.collection.titleKey.contains(query, true))
+                    }
                 }
-            }
             filteredBooks.predicate = queryPredicate
         }.apply { disposableListeners.add(this) }
 
@@ -234,14 +236,15 @@ class BookWizardViewModel : ViewModel() {
         translationProperty.value?.let { translation ->
             showProgressProperty.set(true)
 
-            val artworkAccessor = ArtworkAccessor(
-                directoryProvider,
-                collection.resourceContainer!!,
-                collection.slug
-            )
+            val artworkAccessor =
+                ArtworkAccessor(
+                    directoryProvider,
+                    collection.resourceContainer!!,
+                    collection.slug,
+                )
             activeProjectTitleProperty.set(collection.titleKey)
             activeProjectCoverProperty.set(
-                artworkAccessor.getArtwork(ImageRatio.FOUR_BY_ONE)?.file
+                artworkAccessor.getArtwork(ImageRatio.FOUR_BY_ONE)?.file,
             )
 
             creationUseCase
@@ -250,12 +253,13 @@ class BookWizardViewModel : ViewModel() {
                     logger.error("Error in creating a project for collection: $collection", e)
                 }
                 .subscribe { derivedProject ->
-                    val projectFilesAccessor = ProjectFilesAccessor(
-                        directoryProvider,
-                        collection.resourceContainer!!,
-                        derivedProject.resourceContainer!!,
-                        derivedProject
-                    )
+                    val projectFilesAccessor =
+                        ProjectFilesAccessor(
+                            directoryProvider,
+                            collection.resourceContainer!!,
+                            derivedProject.resourceContainer!!,
+                            derivedProject,
+                        )
 
                     projectFilesAccessor.initializeResourceContainerInDir()
                     projectFilesAccessor.copySourceFiles(excludeMedia = true)
@@ -284,7 +288,7 @@ class BookWizardViewModel : ViewModel() {
                     ArtworkAccessor(
                         directoryProvider,
                         project.resourceContainer!!,
-                        project.slug
+                        project.slug,
                     ).getArtwork(ImageRatio.TWO_BY_ONE)?.let { art ->
                         artwork.onNext(art)
                     }
@@ -300,14 +304,12 @@ class BookWizardViewModel : ViewModel() {
         return artwork
     }
 
-    private fun updateTranslationModifiedDate(
-        translation: TranslationCardModel
-    ): Completable {
+    private fun updateTranslationModifiedDate(translation: TranslationCardModel): Completable {
         return languageRepository.getAllTranslations()
             .map { translations ->
                 translations.singleOrNull {
                     it.source.slug == translation.sourceLanguage.slug &&
-                            it.target.slug == translation.targetLanguage.slug
+                        it.target.slug == translation.targetLanguage.slug
                 }
             }.flatMapCompletable { t ->
                 t!!.modifiedTs = LocalDateTime.now()
@@ -317,12 +319,13 @@ class BookWizardViewModel : ViewModel() {
 
     fun loadResourceSelections() {
         sourceCollections.onChangeWithDisposer {
-            val data = it.list.mapIndexed { index, resource ->
-                val isFirst = index == 0
-                ToggleButtonData(resource.slug.uppercase(), isFirst) {
-                    selectedSourceProperty.set(resource)
+            val data =
+                it.list.mapIndexed { index, resource ->
+                    val isFirst = index == 0
+                    ToggleButtonData(resource.slug.uppercase(), isFirst) {
+                        selectedSourceProperty.set(resource)
+                    }
                 }
-            }
             resourceToggleGroup.setAll(data)
         }.apply {
             disposableListeners.add(this)
@@ -335,12 +338,12 @@ class BookWizardViewModel : ViewModel() {
         items.add(
             createRadioMenuItem(messages["bookOrder"], true, sortByToggleGroup) { selected ->
                 if (selected) sortByProperty.set(BookSortBy.BOOK_ORDER)
-            }
+            },
         )
         items.add(
             createRadioMenuItem(messages["alphabetical"], false, sortByToggleGroup) { selected ->
                 if (selected) sortByProperty.set(BookSortBy.ALPHABETICAL)
-            }
+            },
         )
 
         menuItems.setAll(items)
@@ -358,18 +361,19 @@ class BookWizardViewModel : ViewModel() {
         label: String,
         preSelected: Boolean,
         group: ToggleGroup,
-        onSelected: (Boolean) -> Unit
+        onSelected: (Boolean) -> Unit,
     ): MenuItem {
         return CustomMenuItem().apply {
-            content = SelectButton().apply {
-                text = label
-                tooltip(label)
-                selectedProperty().onChangeWithDisposer {
-                    onSelected(it ?: false)
-                }.apply { disposableListeners.add(this) }
-                toggleGroup = group
-                isSelected = preSelected
-            }
+            content =
+                SelectButton().apply {
+                    text = label
+                    tooltip(label)
+                    selectedProperty().onChangeWithDisposer {
+                        onSelected(it ?: false)
+                    }.apply { disposableListeners.add(this) }
+                    toggleGroup = group
+                    isSelected = preSelected
+                }
             isHideOnClick = false
         }
     }

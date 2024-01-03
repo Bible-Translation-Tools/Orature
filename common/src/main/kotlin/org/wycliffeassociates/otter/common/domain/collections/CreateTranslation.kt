@@ -25,17 +25,19 @@ import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRep
 import java.time.LocalDateTime
 import javax.inject.Inject
 
-class CreateTranslation @Inject constructor(
-    private val languageRepo: ILanguageRepository
-) {
-    /**
-     * Create translation based on source and target languages
-     */
-    fun create(
-        sourceLanguage: Language,
-        targetLanguage: Language
-    ): Single<Int> {
-        val translation = Translation(sourceLanguage, targetLanguage, LocalDateTime.now())
-        return languageRepo.insertTranslation(translation)
+class CreateTranslation
+    @Inject
+    constructor(
+        private val languageRepo: ILanguageRepository,
+    ) {
+        /**
+         * Create translation based on source and target languages
+         */
+        fun create(
+            sourceLanguage: Language,
+            targetLanguage: Language,
+        ): Single<Int> {
+            val translation = Translation(sourceLanguage, targetLanguage, LocalDateTime.now())
+            return languageRepo.insertTranslation(translation)
+        }
     }
-}

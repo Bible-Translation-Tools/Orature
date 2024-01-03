@@ -18,9 +18,9 @@
  */
 package org.wycliffeassociates.otter.common.audio.wav
 
+import org.wycliffeassociates.otter.common.audio.AudioCue
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import org.wycliffeassociates.otter.common.audio.AudioCue
 
 internal const val CUE_LABEL = "cue "
 internal const val DATA_LABEL = "data"
@@ -77,7 +77,6 @@ internal const val DONT_CARE_CUE_DATA_SIZE = 16
  * _ - text of the label (should be word aligned, but technically we double word align
  */
 open class CueChunk : RiffChunk {
-
     val cues: List<AudioCue> = mutableListOf()
 
     val cueChunkSize: Int
@@ -92,7 +91,9 @@ open class CueChunk : RiffChunk {
                 val totalLabelChunk =
                     ((CHUNK_LABEL_SIZE + CHUNK_HEADER_SIZE) * (cues.size + 1)) + computeTextSize(cues)
                 return totalCueChunk + totalLabelChunk
-            } else 0
+            } else {
+                0
+            }
         }
 
     fun addCue(cue: AudioCue) {
@@ -132,7 +133,10 @@ open class CueChunk : RiffChunk {
         return combinedBuffer.array()
     }
 
-    protected fun createCueData(cueNumber: Int, cue: AudioCue): ByteArray {
+    protected fun createCueData(
+        cueNumber: Int,
+        cue: AudioCue,
+    ): ByteArray {
         val buffer = ByteBuffer.allocate(CUE_DATA_SIZE)
         buffer.order(ByteOrder.LITTLE_ENDIAN)
         buffer.putInt(cueNumber)
@@ -169,8 +173,7 @@ open class CueChunk : RiffChunk {
             .sum()
     }
 
-    private fun getWordAlignedLength(length: Int) =
-        if (length % DWORD_SIZE != 0) length + DWORD_SIZE - (length % DWORD_SIZE) else length
+    private fun getWordAlignedLength(length: Int) = if (length % DWORD_SIZE != 0) length + DWORD_SIZE - (length % DWORD_SIZE) else length
 
     private fun wordAlignedLabel(cue: AudioCue): ByteArray {
         val label = cue.label
@@ -194,7 +197,8 @@ open class CueChunk : RiffChunk {
             if (chunk.remaining() < subchunkSize) {
                 throw InvalidWavFileException(
                     """Chunk $subchunkLabel is of size: $subchunkSize 
-                        |but remaining chunk size is ${chunk.remaining()}""".trimMargin()
+                        |but remaining chunk size is ${chunk.remaining()}
+                    """.trimMargin(),
                 )
             }
 
@@ -238,7 +242,10 @@ open class CueChunk : RiffChunk {
      *
      * @param chunk
      */
-    private fun parseCue(chunk: ByteBuffer, cueListBuilder: CueListBuilder) {
+    private fun parseCue(
+        chunk: ByteBuffer,
+        cueListBuilder: CueListBuilder,
+    ) {
         chunk.order(ByteOrder.LITTLE_ENDIAN)
         if (!chunk.hasRemaining()) {
             return
@@ -264,7 +271,10 @@ open class CueChunk : RiffChunk {
         }
     }
 
-    private fun parseLabels(chunk: ByteBuffer, cueListBuilder: CueListBuilder) {
+    private fun parseLabels(
+        chunk: ByteBuffer,
+        cueListBuilder: CueListBuilder,
+    ) {
         chunk.order(ByteOrder.LITTLE_ENDIAN)
 
         // Skip List Chunks that are not subtype "adtl"
@@ -296,18 +306,23 @@ open class CueChunk : RiffChunk {
 }
 
 internal class CueListBuilder {
-
     private data class TempCue(var location: Int?, var label: String?)
 
     private val map = mutableMapOf<Int, TempCue>()
 
-    fun addLocation(id: Int, location: Int?) {
+    fun addLocation(
+        id: Int,
+        location: Int?,
+    ) {
         map[id]?.let {
             it.location = location
         } ?: map.put(id, TempCue(location, null))
     }
 
-    fun addLabel(id: Int, label: String) {
+    fun addLabel(
+        id: Int,
+        label: String,
+    ) {
         map[id]?.let {
             it.label = label
         } ?: map.put(id, TempCue(null, label))

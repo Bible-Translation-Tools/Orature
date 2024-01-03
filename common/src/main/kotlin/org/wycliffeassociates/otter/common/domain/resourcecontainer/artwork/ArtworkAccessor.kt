@@ -25,12 +25,13 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 class ArtworkAccessor(
     val directoryProvider: IDirectoryProvider,
     val metadata: ResourceMetadata,
-    val projectSlug: String
+    val projectSlug: String,
 ) {
-    private val artworkDataSources = listOf<ArtworkDataSource>(
-        ResourceContainerArtworkDataSource(directoryProvider),
-        BibleArtworkDataSource(directoryProvider)
-    )
+    private val artworkDataSources =
+        listOf<ArtworkDataSource>(
+            ResourceContainerArtworkDataSource(directoryProvider),
+            BibleArtworkDataSource(directoryProvider),
+        )
 
     /**
      *  Retrieves the most relevant artwork based on the given parameters.

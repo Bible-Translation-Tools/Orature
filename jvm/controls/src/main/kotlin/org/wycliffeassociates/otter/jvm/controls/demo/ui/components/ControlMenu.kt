@@ -23,10 +23,9 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.combobox.ComboboxItem
 import org.wycliffeassociates.otter.jvm.controls.combobox.IconComboBoxCell
-import org.wycliffeassociates.otter.jvm.controls.demo.ui.viewmodels.DemoViewModel
 import org.wycliffeassociates.otter.jvm.controls.demo.ui.fragments.ButtonFragment
 import org.wycliffeassociates.otter.jvm.controls.demo.ui.fragments.ComboBoxFragment
-import org.wycliffeassociates.otter.jvm.controls.demo.ui.fragments.TextFieldFragment
+import org.wycliffeassociates.otter.jvm.controls.demo.ui.viewmodels.DemoViewModel
 import org.wycliffeassociates.otter.jvm.utils.overrideDefaultKeyEventHandler
 import tornadofx.*
 
@@ -46,14 +45,16 @@ class ControlMenu : View() {
 
                 cellFormat {
                     val view = ComboboxItem()
-                    graphic = view.apply {
-                        topTextProperty.set(it.titleKey)
-                    }
+                    graphic =
+                        view.apply {
+                            topTextProperty.set(it.titleKey)
+                        }
                 }
 
-                buttonCell = IconComboBoxCell(FontIcon(MaterialDesign.MDI_BRIGHTNESS_6)) {
-                    it?.titleKey ?: ""
-                }
+                buttonCell =
+                    IconComboBoxCell(FontIcon(MaterialDesign.MDI_BRIGHTNESS_6)) {
+                        it?.titleKey ?: ""
+                    }
                 overrideDefaultKeyEventHandler {
                     viewModel.updateTheme(it)
                 }

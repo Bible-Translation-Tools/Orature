@@ -19,13 +19,12 @@
 package org.wycliffeassociates.otter.jvm.device.audio
 
 import com.jakewharton.rxrelay2.PublishRelay
-import javax.sound.sampled.TargetDataLine
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
+import javax.sound.sampled.TargetDataLine
 
 internal class AudioRecorderConnectionFactory(
-    private val errorRelay: PublishRelay<AudioError> = PublishRelay.create()
+    private val errorRelay: PublishRelay<AudioError> = PublishRelay.create(),
 ) {
-
     private var inputLine: TargetDataLine? = null
 
     @Synchronized

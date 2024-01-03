@@ -122,7 +122,7 @@ class AudioDataStore : Component(), ScopedInstance {
                     targetAudioProperty.set(null)
                 }
             }
-            chapter != null -> { /* no-op */
+            chapter != null -> { // no-op
             } // preserve targetAudio for clean up
             else -> {
                 selectedChapterPlayerProperty.set(null)
@@ -134,10 +134,11 @@ class AudioDataStore : Component(), ScopedInstance {
     private fun updateTargetAudio(file: File) {
         cleanUpTargetAudio()
 
-        val tempFile = directoryProvider.createTempFile(
-            file.nameWithoutExtension,
-            ".${file.extension}"
-        )
+        val tempFile =
+            directoryProvider.createTempFile(
+                file.nameWithoutExtension,
+                ".${file.extension}",
+            )
         file.copyTo(tempFile, true)
 
         val audioPlayer = getNewAudioPlayer()
@@ -182,7 +183,7 @@ class AudioDataStore : Component(), ScopedInstance {
                 chapter.sort,
                 _chunk.sort,
                 _chunk.start,
-                meta
+                meta,
             )
         } ?: run {
             sourceAudio.getChapter(chapter.sort, meta)

@@ -20,18 +20,17 @@ package org.wycliffeassociates.otter.jvm.workbookapp.di.modules
 
 import dagger.Module
 import dagger.Provides
-import javax.inject.Singleton
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
-import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.jvm.device.audio.DEFAULT_AUDIO_FORMAT
 import org.wycliffeassociates.otter.jvm.workbookapp.io.wav.WaveFileCreator
+import javax.inject.Singleton
 
 @Module
 class AudioModule {
-
     companion object {
         val audioConnectionFactory = AudioConnectionFactory()
     }

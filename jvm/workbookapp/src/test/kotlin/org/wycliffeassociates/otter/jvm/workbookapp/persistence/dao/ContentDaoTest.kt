@@ -33,9 +33,11 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.map
 import java.io.File
 
 class ContentDaoTest {
-    private val testDatabaseFile = File.createTempFile(
-        "test-content-dao", ".sqlite"
-    ).also(File::deleteOnExit)
+    private val testDatabaseFile =
+        File.createTempFile(
+            "test-content-dao",
+            ".sqlite",
+        ).also(File::deleteOnExit)
     private lateinit var database: AppDatabase
     private val dao by lazy { database.contentDao }
 
@@ -47,13 +49,14 @@ class ContentDaoTest {
         database = AppDatabase(testDatabaseFile)
         database.dsl.execute("PRAGMA foreign_keys = OFF;")
 
-        defaultEntity = ContentMapper(database.contentTypeDao)
-            .mapToEntity(TestDataStore.content.first())
-            .copy(
-                id = 0,
-                collectionFk = defaultCollectionId,
-                selectedTakeFk = null
-            )
+        defaultEntity =
+            ContentMapper(database.contentTypeDao)
+                .mapToEntity(TestDataStore.content.first())
+                .copy(
+                    id = 0,
+                    collectionFk = defaultCollectionId,
+                    selectedTakeFk = null,
+                )
     }
 
     @After
@@ -80,12 +83,14 @@ class ContentDaoTest {
         try {
             dao.insert(defaultEntity.copy(id = 1))
             Assert.fail("Insert entity must have zero id")
-        } catch (e: InsertionException) { }
+        } catch (e: InsertionException) {
+        }
 
         try {
             dao.insertNoReturn(defaultEntity.copy(id = 1))
             Assert.fail("Insert entity must have zero id")
-        } catch (e: InsertionException) { }
+        } catch (e: InsertionException) {
+        }
     }
 
     @Test
@@ -105,12 +110,12 @@ class ContentDaoTest {
         Assert.assertEquals(
             "There should be one matching result with the given id and type.",
             1,
-            result.size
+            result.size,
         )
         Assert.assertEquals(
             "There should be no match for the given id and type.",
             0,
-            emptyResult.size
+            emptyResult.size,
         )
     }
 
@@ -132,7 +137,7 @@ class ContentDaoTest {
         Assert.assertEquals(
             "After updating sources, there should be one record.",
             1,
-            result.size
+            result.size,
         )
         Assert.assertEquals(chapter, result.first())
     }
@@ -140,39 +145,42 @@ class ContentDaoTest {
     @Test
     fun testFetchContentByProjectSlug() {
         val projectSlug = CollectionDaoTest.defaultCollection.slug
-        val projectId = database.collectionDao.insert(
-            CollectionDaoTest.defaultCollection
-        )
-        val chapterCollectionId = database.collectionDao
-            .insert(
-                CollectionDaoTest.defaultCollection
-                    .copy(
-                        slug = "chapter-test",
-                        title = "chapter-test",
-                        label = "chapter-test",
-                        sort = 2,
-                        parentFk = projectId
-                    )
+        val projectId =
+            database.collectionDao.insert(
+                CollectionDaoTest.defaultCollection,
             )
+        val chapterCollectionId =
+            database.collectionDao
+                .insert(
+                    CollectionDaoTest.defaultCollection
+                        .copy(
+                            slug = "chapter-test",
+                            title = "chapter-test",
+                            label = "chapter-test",
+                            sort = 2,
+                            parentFk = projectId,
+                        ),
+                )
         dao.insert(
             defaultEntity.copy(
-                collectionFk = chapterCollectionId
-            )
+                collectionFk = chapterCollectionId,
+            ),
         )
 
-        val contents = dao.fetchContentByProjectSlug(projectSlug).fetch {
-            RecordMappers.mapToContentEntity(it)
-        }
+        val contents =
+            dao.fetchContentByProjectSlug(projectSlug).fetch {
+                RecordMappers.mapToContentEntity(it)
+            }
 
         Assert.assertEquals(
             "There should be one content record for the project: $projectSlug",
             1,
-            contents.size
+            contents.size,
         )
         Assert.assertEquals(
             "Fetched collection FK should match the given chapter collection id",
             chapterCollectionId,
-            contents.first().collectionFk
+            contents.first().collectionFk,
         )
     }
 
@@ -188,18 +196,19 @@ class ContentDaoTest {
     fun testDeleteForCollection() {
         insertAllSamples()
 
-        val newCollectionId = database.collectionDao
-            .insert(
-                CollectionDaoTest.defaultCollection
-                    .copy(
-                        slug = "second-collection"
-                    )
-            )
+        val newCollectionId =
+            database.collectionDao
+                .insert(
+                    CollectionDaoTest.defaultCollection
+                        .copy(
+                            slug = "second-collection",
+                        ),
+                )
         dao.insert(
             defaultEntity.copy(
                 id = 0,
-                collectionFk = newCollectionId
-            )
+                collectionFk = newCollectionId,
+            ),
         )
 
         Assert.assertEquals(4, dao.fetchAll().size)
@@ -210,7 +219,7 @@ class ContentDaoTest {
         Assert.assertEquals(
             "After deleting content for collection, the remaining total should decrease by 1.",
             3,
-            dao.fetchAll().size
+            dao.fetchAll().size,
         )
     }
 
@@ -222,12 +231,13 @@ class ContentDaoTest {
         val mapper = ContentMapper(database.contentTypeDao)
 
         TestDataStore.content.forEach {
-            val contentEntity = mapper.mapToEntity(it)
-                .copy(
-                    id = 0,
-                    collectionFk = 9999,
-                    selectedTakeFk = null
-                )
+            val contentEntity =
+                mapper.mapToEntity(it)
+                    .copy(
+                        id = 0,
+                        collectionFk = 9999,
+                        selectedTakeFk = null,
+                    )
             dao.insert(contentEntity)
         }
     }

@@ -22,7 +22,8 @@ import tornadofx.*
 import kotlin.reflect.KClass
 
 class DrawerEvent<T : UIComponent>(val type: KClass<T>, val action: DrawerEventAction) : FXEvent()
+
 enum class DrawerEventAction {
     OPEN,
-    CLOSE
+    CLOSE,
 }

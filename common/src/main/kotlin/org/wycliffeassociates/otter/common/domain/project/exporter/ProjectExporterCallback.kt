@@ -10,7 +10,10 @@ interface ProjectExporterCallback {
      * @param project the project that was exported
      * @param file the file or directory of the exported content
      */
-    fun onNotifySuccess(project: Collection, file: File)
+    fun onNotifySuccess(
+        project: Collection,
+        file: File,
+    )
 
     /**
      * Pushes an error notification to the listeners/handlers of this callback.
@@ -19,5 +22,8 @@ interface ProjectExporterCallback {
      */
     fun onError(project: Collection)
 
-    fun onNotifyProgress(percent: Double, messageKey: String? = null)
+    fun onNotifyProgress(
+        percent: Double,
+        messageKey: String? = null,
+    )
 }

@@ -38,23 +38,27 @@ class SourceTextDrawer : VBox() {
             region { hgrow = Priority.ALWAYS }
             button {
                 addClass("btn", "btn--secondary")
-                graphicProperty().bind(isCollapsedProperty.objectBinding {
-                    if (it == true) {
-                        VBox(
-                            FontIcon(MaterialDesign.MDI_CHEVRON_LEFT),
-                            FontIcon(MaterialDesign.MDI_BOOK)
-                        ).addClass("drawer-graphic-container")
-                    } else {
-                        HBox(
-                            FontIcon(MaterialDesign.MDI_CHEVRON_RIGHT),
-                            FontIcon(MaterialDesign.MDI_BOOK)
-                        ).addClass("drawer-graphic-container")
-                    }
-                })
+                graphicProperty().bind(
+                    isCollapsedProperty.objectBinding {
+                        if (it == true) {
+                            VBox(
+                                FontIcon(MaterialDesign.MDI_CHEVRON_LEFT),
+                                FontIcon(MaterialDesign.MDI_BOOK),
+                            ).addClass("drawer-graphic-container")
+                        } else {
+                            HBox(
+                                FontIcon(MaterialDesign.MDI_CHEVRON_RIGHT),
+                                FontIcon(MaterialDesign.MDI_BOOK),
+                            ).addClass("drawer-graphic-container")
+                        }
+                    },
+                )
                 tooltip {
-                    textProperty().bind(isCollapsedProperty.stringBinding {
-                        if (it == true) messages["expand"] else messages["collapse"]
-                    })
+                    textProperty().bind(
+                        isCollapsedProperty.stringBinding {
+                            if (it == true) messages["expand"] else messages["collapse"]
+                        },
+                    )
                 }
                 action {
                     this@SourceTextDrawer.togglePseudoClass("collapsed", !isCollapsedProperty.value)
@@ -66,11 +70,13 @@ class SourceTextDrawer : VBox() {
             sourceTextContent = this
             sourceTitleProperty.bind(sourceInfoProperty)
             sourceTextProperty.bind(textProperty)
-            licenseTextProperty.bind(licenseProperty.stringBinding {
-                it?.let {
-                    MessageFormat.format(messages["licenseStatement"], it)
-                } ?: ""
-            })
+            licenseTextProperty.bind(
+                licenseProperty.stringBinding {
+                    it?.let {
+                        MessageFormat.format(messages["licenseStatement"], it)
+                    } ?: ""
+                },
+            )
             this.orientationProperty.bind(this@SourceTextDrawer.orientationProperty)
 
             visibleWhen { isCollapsedProperty.not() }

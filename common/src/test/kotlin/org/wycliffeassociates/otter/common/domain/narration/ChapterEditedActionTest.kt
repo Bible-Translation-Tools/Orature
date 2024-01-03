@@ -8,7 +8,6 @@ import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 
 class ChapterEditedActionTest {
-
     private val totalVerses: MutableList<VerseNode> = mutableListOf()
     lateinit var workingAudioFile: AudioFile
     val numTestVerses = 31
@@ -23,16 +22,18 @@ class ChapterEditedActionTest {
         return mockk<AudioFile> {}
     }
 
-
     // Initializes each verse with placed equal to true and with one sector that holds one second worth of frames.
     // where the start of each added sector is offset by "paddingLength" number of frames
-    private fun initializeVerseNodeList(verseNodeList : MutableList<VerseNode>, paddingLength: Int = 0) {
+    private fun initializeVerseNodeList(
+        verseNodeList: MutableList<VerseNode>,
+        paddingLength: Int = 0,
+    ) {
         var start = -1
         for (i in 0 until numTestVerses) {
             val verseMarker = VerseMarker((i + 1), (i + 1), 0)
             val sectors = mutableListOf<IntRange>()
             val verseNode = VerseNode(true, verseMarker, sectors)
-            sectors.add(start + 1 .. start + 44100)
+            sectors.add(start + 1..start + 44100)
             start += 44100 + paddingLength
             verseNodeList.add(verseNode)
         }
@@ -53,8 +54,6 @@ class ChapterEditedActionTest {
         return newVerseList
     }
 
-
-
     @Test
     fun `execute with empty newList`() {
         val emptyVerseList: MutableList<VerseNode> = mutableListOf()
@@ -74,8 +73,6 @@ class ChapterEditedActionTest {
         chapterEditedAction.execute(totalVerses, workingAudioFile)
         Assert.assertEquals(10, totalVerses.size)
     }
-
-
 
     @Test
     fun `undo after execute with empty newList`() {
@@ -102,8 +99,6 @@ class ChapterEditedActionTest {
         chapterEditedAction.undo(totalVerses)
         Assert.assertEquals(numTestVerses, totalVerses.size)
     }
-
-
 
     @Test
     fun `redo after undo after execute with empty newList`() {

@@ -67,7 +67,7 @@ class SelectButtonSkin(private val button: SelectButton) : SkinBase<SelectButton
         }
         spacer.managedProperty().bind(
             btnLabel.textProperty().booleanBinding { it?.isNotEmpty() ?: false }
-                .or(btnIcon.graphicProperty().booleanBinding { it != null })
+                .or(btnIcon.graphicProperty().booleanBinding { it != null }),
         )
     }
 

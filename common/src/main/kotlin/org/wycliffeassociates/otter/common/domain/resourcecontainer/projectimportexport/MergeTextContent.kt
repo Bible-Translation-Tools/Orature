@@ -19,8 +19,6 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
 
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
-import org.wycliffeassociates.resourcecontainer.entity.Media
-import org.wycliffeassociates.resourcecontainer.entity.MediaProject
 import org.wycliffeassociates.resourcecontainer.entity.Project
 import java.io.File
 import java.io.InputStream
@@ -30,7 +28,10 @@ import java.io.InputStream
  * This will overwrite media files with matching names.
  */
 object MergeTextContent {
-    fun merge(fromRC: ResourceContainer, toRC: ResourceContainer) {
+    fun merge(
+        fromRC: ResourceContainer,
+        toRC: ResourceContainer,
+    ) {
         try {
             mergeManifest(fromRC, toRC)
             mergeTextFiles(fromRC, toRC)
@@ -40,7 +41,10 @@ object MergeTextContent {
         }
     }
 
-    private fun mergeManifest(fromRC: ResourceContainer, toRC: ResourceContainer) {
+    private fun mergeManifest(
+        fromRC: ResourceContainer,
+        toRC: ResourceContainer,
+    ) {
         val fromManifest = fromRC.manifest
         val toManifest = toRC.manifest
 
@@ -62,7 +66,7 @@ object MergeTextContent {
 
     private fun mergeMatchingProjects(
         from: MutableMap<String, Project>,
-        to: MutableMap<String, Project>
+        to: MutableMap<String, Project>,
     ) {
         val notInTo = from.minus(to.keys)
         val matching = from.minus(notInTo.keys)
@@ -71,7 +75,10 @@ object MergeTextContent {
         to.putAll(notInTo)
     }
 
-    private fun mergeTextFiles(fromRC: ResourceContainer, toRC: ResourceContainer) {
+    private fun mergeTextFiles(
+        fromRC: ResourceContainer,
+        toRC: ResourceContainer,
+    ) {
         val _fromManifest = fromRC.manifest
         val filesToMerge = mutableMapOf<String, File>()
         try {
@@ -89,16 +96,20 @@ object MergeTextContent {
         }
     }
 
-    private fun manifestFilePermutations(fromRc: ResourceContainer, project: Project): Map<String, InputStream> {
+    private fun manifestFilePermutations(
+        fromRc: ResourceContainer,
+        project: Project,
+    ): Map<String, InputStream> {
         // TODO: get input streams of all files under a project directory for non-bundle RCs
-        //val content = fromRc.getProjectContent(project.identifier, fromRc.manifest.dublinCore.format)
+        // val content = fromRc.getProjectContent(project.identifier, fromRc.manifest.dublinCore.format)
         if (fromRc.manifest.dublinCore.type == "bundle") {
             // TODO: ./ breaks file access, this should be fixed in the RC library
-            val path = if (project.path.startsWith("./")) {
-                project.path.substringAfter("./")
-            } else {
-                project.path
-            }
+            val path =
+                if (project.path.startsWith("./")) {
+                    project.path.substringAfter("./")
+                } else {
+                    project.path
+                }
             if (fromRc.accessor.fileExists(path)) {
                 return mapOf(path to fromRc.accessor.getInputStream(path))
             }
@@ -106,9 +117,7 @@ object MergeTextContent {
         return mapOf()
     }
 
-    private fun getMediaFilesToMerge(
-        files: Map<String, InputStream>
-    ): Map<String, File> {
+    private fun getMediaFilesToMerge(files: Map<String, InputStream>): Map<String, File> {
         val filesToMerge = mutableMapOf<String, File>()
         files.forEach { (path, stream) ->
             stream.use { ifs ->

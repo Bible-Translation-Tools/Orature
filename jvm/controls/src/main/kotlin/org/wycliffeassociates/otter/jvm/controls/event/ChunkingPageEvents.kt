@@ -5,22 +5,30 @@ import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import tornadofx.FXEvent
 
 class ChunkingStepSelectedEvent(val step: ChunkingStep) : FXEvent()
-class ChunkSelectedEvent(val chunkNumber: Int): FXEvent()
-class ChunkTakeEvent(val take: Take, val action: TakeAction): FXEvent()
+
+class ChunkSelectedEvent(val chunkNumber: Int) : FXEvent()
+
+class ChunkTakeEvent(val take: Take, val action: TakeAction) : FXEvent()
+
 enum class TakeAction {
     SELECT,
     EDIT,
-    DELETE
+    DELETE,
 }
-class MarkerDeletedEvent(val markerId: Int): FXEvent()
+
+class MarkerDeletedEvent(val markerId: Int) : FXEvent()
 
 /**
  * @param markerId the id (not index) of the marker
  * @param start starting frame position of the movement
  * @param end ending frame position of the movement
  */
-class MarkerMovedEvent(val markerId: Int, val start: Int, val end: Int): FXEvent()
-class UndoChunkingPageEvent: FXEvent()
-class RedoChunkingPageEvent: FXEvent()
-class GoToNextChapterEvent: FXEvent()
-class GoToPreviousChapterEvent: FXEvent()
+class MarkerMovedEvent(val markerId: Int, val start: Int, val end: Int) : FXEvent()
+
+class UndoChunkingPageEvent : FXEvent()
+
+class RedoChunkingPageEvent : FXEvent()
+
+class GoToNextChapterEvent : FXEvent()
+
+class GoToPreviousChapterEvent : FXEvent()

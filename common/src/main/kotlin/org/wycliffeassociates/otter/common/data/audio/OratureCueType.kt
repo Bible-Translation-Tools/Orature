@@ -6,5 +6,5 @@ enum class OratureCueType {
     VERSE,
     CHAPTER_TITLE,
     BOOK_TITLE,
-    LICENSE
+    LICENSE,
 }

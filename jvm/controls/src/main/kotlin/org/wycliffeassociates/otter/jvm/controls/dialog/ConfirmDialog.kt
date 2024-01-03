@@ -47,7 +47,6 @@ import java.io.File
 import java.util.concurrent.Callable
 
 class ConfirmDialog : OtterDialog() {
-
     val titleTextProperty = SimpleStringProperty()
     val messageTextProperty = SimpleStringProperty()
     val backgroundImageFileProperty = SimpleObjectProperty<File>()
@@ -60,95 +59,96 @@ class ConfirmDialog : OtterDialog() {
     private val onCancelActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     private val onConfirmActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
-    private val content = vbox {
-        addClass("confirm-dialog")
-
-        stackpane {
-            addClass("confirm-dialog__header")
-            vgrow = Priority.ALWAYS
-
-            hbox {
-                effectProperty().bind(
-                    backgroundEffectBinding(
-                        this.widthProperty(),
-                        this.heightProperty()
-                    )
-                )
-                backgroundProperty().bind(backgroundBinding())
-            }
-
-            hbox {
-                addClass("confirm-dialog__title-bar")
-
-                label(titleTextProperty).apply {
-                    addClass("confirm-dialog__title")
-                }
-                region {
-                    hgrow = Priority.ALWAYS
-                }
-                button {
-                    addClass("btn", "btn--secondary", "confirm-dialog__btn--close")
-                    tooltip(messages["close"])
-                    graphic = FontIcon("gmi-close")
-                    onActionProperty().bind(onCloseActionProperty())
-                    visibleProperty().bind(onCloseActionProperty().isNotNull)
-                }
-            }
-        }
-        hbox {
-            addClass("confirm-dialog__body")
-            vgrow = Priority.ALWAYS
-
-            label(messageTextProperty) {
-                addClass("confirm-dialog__message")
-            }
-        }
+    private val content =
         vbox {
-            addClass("confirm-dialog__progress")
-            add(
-                JFXProgressBar().apply {
-                    prefWidthProperty().bind(this@vbox.widthProperty())
+            addClass("confirm-dialog")
+
+            stackpane {
+                addClass("confirm-dialog__header")
+                vgrow = Priority.ALWAYS
+
+                hbox {
+                    effectProperty().bind(
+                        backgroundEffectBinding(
+                            this.widthProperty(),
+                            this.heightProperty(),
+                        ),
+                    )
+                    backgroundProperty().bind(backgroundBinding())
                 }
-            )
-            label(progressTitleProperty).apply {
-                addClass("confirm-dialog__progress-title")
-            }
-            visibleProperty().bind(showProgressBarProperty)
-            managedProperty().bind(visibleProperty())
-        }
-        hbox {
-            addClass("confirm-dialog__footer")
 
-            button(cancelButtonTextProperty) {
-                addClass("btn", "btn--primary")
-                tooltip { textProperty().bind(this@button.textProperty()) }
-                graphic = FontIcon("gmi-close")
-                onActionProperty().bind(onCancelActionProperty())
-                visibleProperty().bind(onCancelActionProperty.isNotNull)
+                hbox {
+                    addClass("confirm-dialog__title-bar")
+
+                    label(titleTextProperty).apply {
+                        addClass("confirm-dialog__title")
+                    }
+                    region {
+                        hgrow = Priority.ALWAYS
+                    }
+                    button {
+                        addClass("btn", "btn--secondary", "confirm-dialog__btn--close")
+                        tooltip(messages["close"])
+                        graphic = FontIcon("gmi-close")
+                        onActionProperty().bind(onCloseActionProperty())
+                        visibleProperty().bind(onCloseActionProperty().isNotNull)
+                    }
+                }
+            }
+            hbox {
+                addClass("confirm-dialog__body")
+                vgrow = Priority.ALWAYS
+
+                label(messageTextProperty) {
+                    addClass("confirm-dialog__message")
+                }
+            }
+            vbox {
+                addClass("confirm-dialog__progress")
+                add(
+                    JFXProgressBar().apply {
+                        prefWidthProperty().bind(this@vbox.widthProperty())
+                    },
+                )
+                label(progressTitleProperty).apply {
+                    addClass("confirm-dialog__progress-title")
+                }
+                visibleProperty().bind(showProgressBarProperty)
                 managedProperty().bind(visibleProperty())
             }
+            hbox {
+                addClass("confirm-dialog__footer")
 
-            region {
-                addClass("confirm-dialog__footer-spacer")
-                hgrow = Priority.ALWAYS
-                managedProperty().bind(onCancelActionProperty.isNotNull)
-            }
+                button(cancelButtonTextProperty) {
+                    addClass("btn", "btn--primary")
+                    tooltip { textProperty().bind(this@button.textProperty()) }
+                    graphic = FontIcon("gmi-close")
+                    onActionProperty().bind(onCancelActionProperty())
+                    visibleProperty().bind(onCancelActionProperty.isNotNull)
+                    managedProperty().bind(visibleProperty())
+                }
 
-            button(confirmButtonTextProperty) {
-                addClass("btn", "btn--secondary", "btn--borderless")
-                tooltip { textProperty().bind(this@button.textProperty()) }
-                graphic = FontIcon("gmi-remove")
-                onActionProperty().bind(onConfirmActionProperty())
-                visibleProperty().bind(onConfirmActionProperty.isNotNull)
+                region {
+                    addClass("confirm-dialog__footer-spacer")
+                    hgrow = Priority.ALWAYS
+                    managedProperty().bind(onCancelActionProperty.isNotNull)
+                }
+
+                button(confirmButtonTextProperty) {
+                    addClass("btn", "btn--secondary", "btn--borderless")
+                    tooltip { textProperty().bind(this@button.textProperty()) }
+                    graphic = FontIcon("gmi-remove")
+                    onActionProperty().bind(onConfirmActionProperty())
+                    visibleProperty().bind(onConfirmActionProperty.isNotNull)
+                    managedProperty().bind(visibleProperty())
+                }
+
+                visibleProperty().bind(
+                    onCancelActionProperty.isNotNull.or(onConfirmActionProperty.isNotNull),
+                )
                 managedProperty().bind(visibleProperty())
             }
-
-            visibleProperty().bind(
-                onCancelActionProperty.isNotNull.or(onConfirmActionProperty.isNotNull)
-            )
-            managedProperty().bind(visibleProperty())
         }
-    }
 
     init {
         setContent(content)
@@ -163,57 +163,61 @@ class ConfirmDialog : OtterDialog() {
                 }
                 background
             },
-            backgroundImageFileProperty
+            backgroundImageFileProperty,
         )
     }
 
     private fun backgroundEffectBinding(
         widthProperty: ReadOnlyDoubleProperty,
-        heightProperty: ReadOnlyDoubleProperty
+        heightProperty: ReadOnlyDoubleProperty,
     ): ObjectBinding<Effect> {
         return Bindings.createObjectBinding(
             Callable {
-                val colorAdjust = ColorAdjust().apply {
-                    saturation = -1.0
-                }
+                val colorAdjust =
+                    ColorAdjust().apply {
+                        saturation = -1.0
+                    }
 
-                val colorInput = ColorInput().apply {
-                    x = 0.0
-                    y = 0.0
-                    widthProperty().bind(widthProperty)
-                    heightProperty().bind(heightProperty)
-                    paint = Color.valueOf("#1067c4")
-                }
+                val colorInput =
+                    ColorInput().apply {
+                        x = 0.0
+                        y = 0.0
+                        widthProperty().bind(widthProperty)
+                        heightProperty().bind(heightProperty)
+                        paint = Color.valueOf("#1067c4")
+                    }
 
-                val blend = Blend(
-                    BlendMode.MULTIPLY,
-                    colorAdjust,
-                    colorInput
-                )
+                val blend =
+                    Blend(
+                        BlendMode.MULTIPLY,
+                        colorAdjust,
+                        colorInput,
+                    )
 
                 blend as Effect
             },
             widthProperty,
-            heightProperty
+            heightProperty,
         )
     }
 
     private fun backgroundImage(file: File): BackgroundImage {
         val image = Image(file.inputStream())
-        val backgroundSize = BackgroundSize(
-            1.0,
-            1.0,
-            true,
-            true,
-            true,
-            false
-        )
+        val backgroundSize =
+            BackgroundSize(
+                1.0,
+                1.0,
+                true,
+                true,
+                true,
+                false,
+            )
         return BackgroundImage(
             image,
             BackgroundRepeat.NO_REPEAT,
             BackgroundRepeat.NO_REPEAT,
             BackgroundPosition.CENTER,
-            backgroundSize
+            backgroundSize,
         )
     }
 

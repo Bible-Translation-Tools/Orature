@@ -29,7 +29,7 @@ class RecordMappers {
         fun mapToPreferencesEntity(record: Record): PreferenceEntity {
             return PreferenceEntity(
                 record.getValue(PREFERENCES.KEY),
-                record.getValue(PREFERENCES.VALUE)
+                record.getValue(PREFERENCES.VALUE),
             )
         }
 
@@ -41,7 +41,7 @@ class RecordMappers {
                 record.getValue(LANGUAGE_ENTITY.ANGLICIZED),
                 record.getValue(LANGUAGE_ENTITY.DIRECTION),
                 record.getValue(LANGUAGE_ENTITY.GATEWAY),
-                record.getValue(LANGUAGE_ENTITY.REGION)
+                record.getValue(LANGUAGE_ENTITY.REGION),
             )
         }
 
@@ -63,7 +63,7 @@ class RecordMappers {
                 record.getValue(DUBLIN_CORE_ENTITY.VERSION),
                 record.getValue(DUBLIN_CORE_ENTITY.LICENSE),
                 record.getValue(DUBLIN_CORE_ENTITY.PATH),
-                record.getValue(DUBLIN_CORE_ENTITY.DERIVEDFROM_FK)
+                record.getValue(DUBLIN_CORE_ENTITY.DERIVEDFROM_FK),
             )
         }
 
@@ -77,11 +77,14 @@ class RecordMappers {
                 record.getValue(COLLECTION_ENTITY.SLUG),
                 record.getValue(COLLECTION_ENTITY.SORT),
                 record.getValue(COLLECTION_ENTITY.DUBLIN_CORE_FK),
-                record.getValue(COLLECTION_ENTITY.MODIFIED_TS)
+                record.getValue(COLLECTION_ENTITY.MODIFIED_TS),
             )
         }
 
-        fun mapToContentEntity(record: Record, table: ContentEntityTable = CONTENT_ENTITY): ContentEntity {
+        fun mapToContentEntity(
+            record: Record,
+            table: ContentEntityTable = CONTENT_ENTITY,
+        ): ContentEntity {
             return ContentEntity(
                 record.getValue(table.ID),
                 record.getValue(table.SORT),
@@ -94,7 +97,7 @@ class RecordMappers {
                 record.getValue(table.FORMAT),
                 record.getValue(table.TYPE_FK),
                 record.getValue(table.DRAFT_NUMBER),
-                record.getValue(table.BRIDGED) == 1
+                record.getValue(table.BRIDGED) == 1,
             )
         }
 
@@ -104,7 +107,7 @@ class RecordMappers {
                 record.getValue(RESOURCE_LINK.RESOURCE_CONTENT_FK),
                 record.getValue(RESOURCE_LINK.CONTENT_FK),
                 record.getValue(RESOURCE_LINK.COLLECTION_FK),
-                record.getValue(RESOURCE_LINK.DUBLIN_CORE_FK)
+                record.getValue(RESOURCE_LINK.DUBLIN_CORE_FK),
             )
         }
 
@@ -129,7 +132,7 @@ class RecordMappers {
                 record.getValue(MARKER_ENTITY.TAKE_FK),
                 record.getValue(MARKER_ENTITY.NUMBER),
                 record.getValue(MARKER_ENTITY.POSITION),
-                record.getValue(MARKER_ENTITY.LABEL)
+                record.getValue(MARKER_ENTITY.LABEL),
             )
         }
 
@@ -143,7 +146,7 @@ class RecordMappers {
                 record.getValue(AUDIO_PLUGIN_ENTITY.EDIT),
                 record.getValue(AUDIO_PLUGIN_ENTITY.RECORD),
                 record.getValue(AUDIO_PLUGIN_ENTITY.MARK),
-                record.getValue(AUDIO_PLUGIN_ENTITY.PATH)
+                record.getValue(AUDIO_PLUGIN_ENTITY.PATH),
             )
         }
 
@@ -154,7 +157,7 @@ class RecordMappers {
                 record.getValue(TRANSLATION_ENTITY.TARGET_FK),
                 record.getValue(TRANSLATION_ENTITY.MODIFIED_TS),
                 record.getValue(TRANSLATION_ENTITY.SOURCE_RATE),
-                record.getValue(TRANSLATION_ENTITY.TARGET_RATE)
+                record.getValue(TRANSLATION_ENTITY.TARGET_RATE),
             )
         }
 
@@ -163,7 +166,7 @@ class RecordMappers {
                 record.getValue(WORKBOOK_DESCRIPTOR_ENTITY.ID),
                 record.getValue(WORKBOOK_DESCRIPTOR_ENTITY.SOURCE_FK),
                 record.getValue(WORKBOOK_DESCRIPTOR_ENTITY.TARGET_FK),
-                record.getValue(WORKBOOK_DESCRIPTOR_ENTITY.TYPE_FK)
+                record.getValue(WORKBOOK_DESCRIPTOR_ENTITY.TYPE_FK),
             )
         }
     }

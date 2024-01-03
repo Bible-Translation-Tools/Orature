@@ -20,21 +20,19 @@ package org.wycliffeassociates.otter.jvm.workbookapp.updater.install4j
 
 import com.install4j.api.launcher.ApplicationLauncher
 import com.install4j.api.update.UpdateChecker
-import kotlin.concurrent.thread
 import org.slf4j.LoggerFactory
+import kotlin.concurrent.thread
 
 class UpdateLauncher(private val listener: UpdateProgressListener? = null) : ApplicationLauncher.Callback {
-
     private val logger = LoggerFactory.getLogger(UpdateLauncher::class.java)
 
     fun update(onComplete: () -> Unit) {
-
         logger.info("Launching update application...")
         ApplicationLauncher.launchApplication(
             "474",
             arrayOf("-Dinstall4j.debug=true", "-Dinstall4j.logToStderr=true"),
             false,
-            this
+            this,
         )
 
         thread {
@@ -46,11 +44,11 @@ class UpdateLauncher(private val listener: UpdateProgressListener? = null) : App
     }
 
     override fun exited(exitValue: Int) {
-        /* no-op */
+        // no-op
     }
 
     override fun prepareShutdown() {
-        /* no-op */
+        // no-op
     }
 
     override fun createProgressListener(): ApplicationLauncher.ProgressListener? {

@@ -23,5 +23,5 @@ enum class AudioPlayerEvent {
     PLAY,
     PAUSE,
     STOP,
-    COMPLETE
+    COMPLETE,
 }

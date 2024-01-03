@@ -6,7 +6,6 @@ import tornadofx.add
 import tornadofx.addClass
 
 class CanvasFragment : StackPane() {
-
     private val drawables = arrayListOf<IDrawable>()
 
     private val cvs = ResizableCanvas()
@@ -28,7 +27,9 @@ class CanvasFragment : StackPane() {
         drawables.add(drawable)
     }
 
-    fun clearDrawables() { drawables.clear() }
+    fun clearDrawables() {
+        drawables.clear()
+    }
 
     fun draw() {
         ctx.clearRect(0.0, 0.0, cvs.width, cvs.height)

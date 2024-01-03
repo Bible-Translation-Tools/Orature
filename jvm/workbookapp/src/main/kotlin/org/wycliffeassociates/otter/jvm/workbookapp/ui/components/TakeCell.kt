@@ -21,15 +21,19 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 import javafx.scene.control.ListCell
 
 class TakeCell : ListCell<TakeItem>() {
-    override fun updateItem(item: TakeItem?, empty: Boolean) {
+    override fun updateItem(
+        item: TakeItem?,
+        empty: Boolean,
+    ) {
         super.updateItem(item, empty)
 
         if (empty || item == null) {
             graphic = null
             return
         }
-        graphic = item.apply {
-            animationMediatorProperty.value?.listView = listView
-        }
+        graphic =
+            item.apply {
+                animationMediatorProperty.value?.listView = listView
+            }
     }
 }

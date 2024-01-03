@@ -34,13 +34,15 @@ class DeleteProjectTest {
         val bookList = listOf(mockk<WorkbookDescriptor>())
         every { deleteSpy.deleteProjects(bookList) } returns Completable.complete()
 
-        val normalDelete1 = deleteSpy
-            .deleteProjectsWithTimer(bookList, timeoutMillis = 500)
-            .subscribe()
+        val normalDelete1 =
+            deleteSpy
+                .deleteProjectsWithTimer(bookList, timeoutMillis = 500)
+                .subscribe()
 
-        val normalDelete2 = deleteSpy
-            .deleteProjectsWithTimer(bookList, timeoutMillis = 500)
-            .subscribe()
+        val normalDelete2 =
+            deleteSpy
+                .deleteProjectsWithTimer(bookList, timeoutMillis = 500)
+                .subscribe()
 
         verify(exactly = 0) { deleteSpy.deleteProjects(bookList) }
 
@@ -55,13 +57,15 @@ class DeleteProjectTest {
         val bookList = listOf(mockk<WorkbookDescriptor>())
         every { deleteSpy.deleteProjects(bookList) } returns Completable.complete()
 
-        val cancellingDelete = deleteSpy
-            .deleteProjectsWithTimer(bookList, timeoutMillis = 500)
-            .subscribe()
+        val cancellingDelete =
+            deleteSpy
+                .deleteProjectsWithTimer(bookList, timeoutMillis = 500)
+                .subscribe()
 
-        val normalDelete = deleteSpy
-            .deleteProjectsWithTimer(bookList, timeoutMillis = 500)
-            .subscribe()
+        val normalDelete =
+            deleteSpy
+                .deleteProjectsWithTimer(bookList, timeoutMillis = 500)
+                .subscribe()
 
         verify(exactly = 0) { deleteSpy.deleteProjects(bookList) }
 

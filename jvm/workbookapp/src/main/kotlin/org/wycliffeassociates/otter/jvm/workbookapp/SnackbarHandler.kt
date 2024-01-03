@@ -29,7 +29,6 @@ import tornadofx.*
 const val NOTIFICATION_DURATION_SEC = 5.0
 
 object SnackbarHandler {
-
     private val snackbar = JFXSnackbar()
 
     fun setWindowRoot(pane: Pane) {
@@ -55,18 +54,19 @@ object SnackbarHandler {
     }
 
     fun enqueue(notification: NotificationViewData) {
-        val graphic = NotificationSnackBar(notification).apply {
-            setOnDismiss { snackbar.close() }
-            setOnMainAction {
-                notification.actionCallback()
-                snackbar.close()
+        val graphic =
+            NotificationSnackBar(notification).apply {
+                setOnDismiss { snackbar.close() }
+                setOnMainAction {
+                    notification.actionCallback()
+                    snackbar.close()
+                }
             }
-        }
         snackbar.enqueue(
             JFXSnackbar.SnackbarEvent(
                 graphic,
-                Duration.seconds(NOTIFICATION_DURATION_SEC)
-            )
+                Duration.seconds(NOTIFICATION_DURATION_SEC),
+            ),
         )
     }
 }

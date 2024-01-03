@@ -25,7 +25,6 @@ import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.*
 
 class CheckboxButton : CheckBox() {
-
     init {
         tryImportStylesheet(javaClass.getResource("/css/checkbox-button.css").toExternalForm())
         styleClass.setAll("checkbox-button")

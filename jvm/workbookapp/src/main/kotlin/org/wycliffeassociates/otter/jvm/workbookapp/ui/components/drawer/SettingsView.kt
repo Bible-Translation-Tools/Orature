@@ -29,13 +29,13 @@ import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.button.SelectButton
+import org.wycliffeassociates.otter.jvm.controls.combobox.ComboboxItem
+import org.wycliffeassociates.otter.jvm.controls.combobox.IconComboBoxCell
+import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.utils.overrideDefaultKeyEventHandler
-import org.wycliffeassociates.otter.jvm.controls.combobox.ComboboxItem
-import org.wycliffeassociates.otter.jvm.controls.combobox.IconComboBoxCell
-import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.AddPluginDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
@@ -43,9 +43,10 @@ import tornadofx.*
 class SettingsView : View() {
     private val viewModel: SettingsViewModel by inject()
 
-    private val addPluginDialog: AddPluginDialog = find<AddPluginDialog>().apply {
-        orientationProperty.set(viewModel.orientationProperty.value)
-    }
+    private val addPluginDialog: AddPluginDialog =
+        find<AddPluginDialog>().apply {
+            orientationProperty.set(viewModel.orientationProperty.value)
+        }
 
     private lateinit var closeButton: Button
 
@@ -53,42 +54,43 @@ class SettingsView : View() {
 
     private val drawerTextStyleClass = "app-drawer__text"
 
-    override val root = vbox {
-        addClass("app-drawer__content")
-        runLater { customizeScrollbarSkin() }
+    override val root =
+        vbox {
+            addClass("app-drawer__content")
+            runLater { customizeScrollbarSkin() }
 
-        DrawerTraversalEngine(this)
+            DrawerTraversalEngine(this)
 
-        scrollpane {
-            addClass("app-drawer__scroll-pane")
-
-            vbox {
-                isFitToWidth = true
-
-                addClass("app-drawer-container")
-
-                hbox {
-                    label(messages["settings"]).apply {
-                        addClass("app-drawer__title")
-                    }
-                    region { hgrow = Priority.ALWAYS }
-                    button {
-                        addClass("btn", "btn--secondary")
-                        graphic = FontIcon(MaterialDesign.MDI_CLOSE)
-                        tooltip(messages["close"])
-                        action { collapse() }
-                        closeButton = this
-                    }
-                }
-
-                label(messages["interfaceSettings"]).apply {
-                    addClass("app-drawer__subtitle")
-                }
+            scrollpane {
+                addClass("app-drawer__scroll-pane")
 
                 vbox {
-                    addClass("app-drawer__section")
+                    isFitToWidth = true
 
-                    // TODO: show theme color options when dark mode is ready
+                    addClass("app-drawer-container")
+
+                    hbox {
+                        label(messages["settings"]).apply {
+                            addClass("app-drawer__title")
+                        }
+                        region { hgrow = Priority.ALWAYS }
+                        button {
+                            addClass("btn", "btn--secondary")
+                            graphic = FontIcon(MaterialDesign.MDI_CLOSE)
+                            tooltip(messages["close"])
+                            action { collapse() }
+                            closeButton = this
+                        }
+                    }
+
+                    label(messages["interfaceSettings"]).apply {
+                        addClass("app-drawer__subtitle")
+                    }
+
+                    vbox {
+                        addClass("app-drawer__section")
+
+                        // TODO: show theme color options when dark mode is ready
 //                    label(messages["colorTheme"]).apply {
 //                        addClass("app-drawer__subtitle--small")
 //                    }
@@ -112,299 +114,305 @@ class SettingsView : View() {
 //                        }
 //                    }
 
-                    label(messages["language"]).apply {
-                        addClass("app-drawer__subtitle--small")
-                    }
-
-                    combobox(viewModel.selectedLocaleLanguageProperty, viewModel.supportedLocaleLanguages) {
-                        addClass("wa-combobox")
-                        fitToParentWidth()
-
-                        tooltip {
-                            textProperty().bind(
-                                this@combobox.selectionModel.selectedItemProperty().stringBinding { it?.name }
-                            )
-                        }
-
-                        visibleRowCount = 5
-
-                        cellFormat {
-                            val view = ComboboxItem()
-                            graphic = view.apply {
-                                topTextProperty.set(it.name)
-                                bottomTextProperty.set(it.anglicizedName)
-                            }
-                        }
-
-                        buttonCell = IconComboBoxCell(FontIcon(MaterialDesign.MDI_WEB)) { it?.name ?: "" }
-                        overrideDefaultKeyEventHandler {
-                            viewModel.updateLanguage(it)
-                        }
-                    }
-                }
-
-                label(messages["audioSettings"]).apply {
-                    addClass("app-drawer__subtitle")
-                }
-
-                vbox {
-                    addClass("app-drawer__section")
-
-                    label(messages["playbackSettings"]).apply {
-                        addClass("app-drawer__subtitle--small")
-                    }
-
-                    combobox(viewModel.selectedOutputDeviceProperty, viewModel.outputDevices) {
-                        addClass("wa-combobox")
-                        fitToParentWidth()
-
-                        tooltip {
-                            textProperty().bind(this@combobox.selectionModel.selectedItemProperty())
-                        }
-
-                        cellFormat {
-                            val view = ComboboxItem()
-                            graphic = view.apply {
-                                topTextProperty.set(it)
-                            }
-                        }
-
-                        buttonCell = IconComboBoxCell(FontIcon(MaterialDesign.MDI_VOLUME_HIGH))
-                        overrideDefaultKeyEventHandler {
-                            viewModel.updateOutputDevice(it)
-                        }
-                    }
-
-                    label(messages["recordSettings"]).apply {
-                        addClass("app-drawer__subtitle--small")
-                    }
-                    combobox(viewModel.selectedInputDeviceProperty, viewModel.inputDevices) {
-                        addClass("wa-combobox")
-                        fitToParentWidth()
-
-                        tooltip {
-                            textProperty().bind(this@combobox.selectionModel.selectedItemProperty())
-                        }
-
-                        cellFormat {
-                            val view = ComboboxItem()
-                            graphic = view.apply {
-                                topTextProperty.set(it)
-                            }
-                        }
-
-                        buttonCell = IconComboBoxCell(FontIcon(MaterialDesign.MDI_MICROPHONE))
-                        overrideDefaultKeyEventHandler {
-                            viewModel.updateInputDevice(it)
-                        }
-                    }
-                }
-
-                label(messages["languageSettings"]).apply {
-                    addClass("app-drawer__subtitle")
-                }
-
-                vbox {
-                    addClass("app-drawer__section")
-
-                    label(messages["useInternetWarning"]).apply {
-                        fitToParentWidth()
-                        addClass(drawerTextStyleClass)
-                    }
-
-                    vbox {
-                        spacing = 10.0
-                        label(messages["location"]).apply {
+                        label(messages["language"]).apply {
                             addClass("app-drawer__subtitle--small")
                         }
-                        textfield(viewModel.languageNamesUrlProperty) {
-                            addClass("txt-input")
-                            focusedProperty().onChange {
-                                if (!it) viewModel.updateLanguageNamesUrl()
-                            }
-                            disableProperty().bind(viewModel.languageNamesImportingProperty)
 
-                            viewModel.updateLanguagesSuccessProperty.onChangeAndDoNow { result ->
-                                updateLanguageStatusStyle(
-                                    styleClass,
-                                    "txt-input-success",
-                                    "txt-input-error",
-                                    result
+                        combobox(viewModel.selectedLocaleLanguageProperty, viewModel.supportedLocaleLanguages) {
+                            addClass("wa-combobox")
+                            fitToParentWidth()
+
+                            tooltip {
+                                textProperty().bind(
+                                    this@combobox.selectionModel.selectedItemProperty().stringBinding { it?.name },
                                 )
                             }
-                        }
-                        label {
-                            addClass(drawerTextStyleClass)
-                            textProperty().bind(viewModel.updateLanguagesResultProperty)
-                            viewModel.updateLanguagesSuccessProperty.onChangeAndDoNow { result ->
-                                updateLanguageStatusStyle(
-                                    styleClass,
-                                    "app-drawer-success",
-                                    "app-drawer-error",
-                                    result)
+
+                            visibleRowCount = 5
+
+                            cellFormat {
+                                val view = ComboboxItem()
+                                graphic =
+                                    view.apply {
+                                        topTextProperty.set(it.name)
+                                        bottomTextProperty.set(it.anglicizedName)
+                                    }
                             }
-                        }
-                        hbox {
-                            spacing = 10.0
-                            button(messages["checkForUpdates"]) {
-                                addClass("btn", "btn--primary")
-                                hgrow = Priority.ALWAYS
-                                maxWidth = Double.MAX_VALUE
-                                tooltip {
-                                    textProperty().bind(this@button.textProperty())
-                                }
-                                action {
-                                    resetUpdateLanguagesStatus()
-                                    viewModel.updateLanguages()
-                                }
-                                visibleProperty().bind(viewModel.languageNamesImportingProperty.not())
-                                managedProperty().bind(visibleProperty())
-                                whenVisible { requestFocus() }
-                            }
-                            stackpane {
-                                addClass("app-drawer-progress-bar")
-                                hgrow = Priority.ALWAYS
-                                add(JFXProgressBar().apply {
-                                    progressBar = this
-                                    hgrow = Priority.ALWAYS
-                                    addClass("app-drawer-progress")
-                                })
-                                label(messages["updatingWait"]) {
-                                    addClass("app-drawer-progress-text")
-                                    prefWidthProperty().bind(progressBar.widthProperty().minus(10.0))
-                                }
-                                visibleProperty().bind(viewModel.languageNamesImportingProperty)
-                                managedProperty().bind(visibleProperty())
-                            }
-                            button(messages["reset"]) {
-                                addClass("btn", "btn--secondary", "btn--borderless")
-                                tooltip {
-                                    textProperty().bind(this@button.textProperty())
-                                }
-                                action {
-                                    resetUpdateLanguagesStatus()
-                                    viewModel.resetLanguageNamesLocation()
-                                }
-                                visibleProperty().bind(
-                                    viewModel.defaultLanguageNamesUrlProperty.isNotEqualTo(
-                                        viewModel.languageNamesUrlProperty
-                                    ).and(viewModel.languageNamesImportingProperty.not())
-                                )
-                                managedProperty().bind(visibleProperty())
+
+                            buttonCell = IconComboBoxCell(FontIcon(MaterialDesign.MDI_WEB)) { it?.name ?: "" }
+                            overrideDefaultKeyEventHandler {
+                                viewModel.updateLanguage(it)
                             }
                         }
                     }
-                }
 
-                label(messages["appSettings"]).apply {
-                    addClass("app-drawer__subtitle")
-                }
-
-                vbox {
-                    addClass("app-drawer__section")
-
-                    hbox {
-                        addClass("app-drawer__plugin-header")
-
-                        label(messages["applicationName"]).apply {
-                            addClass(drawerTextStyleClass)
-                            hgrow = Priority.ALWAYS
-                        }
-
-                        region { hgrow = Priority.ALWAYS }
-
-                        label {
-                            addClass("app-drawer__plugin-header__icon")
-                            graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
-                            tooltip(messages["record"])
-                        }
-
-                        label {
-                            addClass("app-drawer__plugin-header__icon")
-                            graphic = FontIcon(MaterialDesign.MDI_PENCIL)
-                            tooltip(messages["edit"])
-                        }
+                    label(messages["audioSettings"]).apply {
+                        addClass("app-drawer__subtitle")
                     }
 
                     vbox {
-                        addClass("app-drawer__plugin-list")
+                        addClass("app-drawer__section")
 
-                        val recorderToggleGroup = ToggleGroup()
-                        val editorToggleGroup = ToggleGroup()
+                        label(messages["playbackSettings"]).apply {
+                            addClass("app-drawer__subtitle--small")
+                        }
 
-                        bindChildren(viewModel.audioPlugins) { pluginData ->
+                        combobox(viewModel.selectedOutputDeviceProperty, viewModel.outputDevices) {
+                            addClass("wa-combobox")
+                            fitToParentWidth()
+
+                            tooltip {
+                                textProperty().bind(this@combobox.selectionModel.selectedItemProperty())
+                            }
+
+                            cellFormat {
+                                val view = ComboboxItem()
+                                graphic =
+                                    view.apply {
+                                        topTextProperty.set(it)
+                                    }
+                            }
+
+                            buttonCell = IconComboBoxCell(FontIcon(MaterialDesign.MDI_VOLUME_HIGH))
+                            overrideDefaultKeyEventHandler {
+                                viewModel.updateOutputDevice(it)
+                            }
+                        }
+
+                        label(messages["recordSettings"]).apply {
+                            addClass("app-drawer__subtitle--small")
+                        }
+                        combobox(viewModel.selectedInputDeviceProperty, viewModel.inputDevices) {
+                            addClass("wa-combobox")
+                            fitToParentWidth()
+
+                            tooltip {
+                                textProperty().bind(this@combobox.selectionModel.selectedItemProperty())
+                            }
+
+                            cellFormat {
+                                val view = ComboboxItem()
+                                graphic =
+                                    view.apply {
+                                        topTextProperty.set(it)
+                                    }
+                            }
+
+                            buttonCell = IconComboBoxCell(FontIcon(MaterialDesign.MDI_MICROPHONE))
+                            overrideDefaultKeyEventHandler {
+                                viewModel.updateInputDevice(it)
+                            }
+                        }
+                    }
+
+                    label(messages["languageSettings"]).apply {
+                        addClass("app-drawer__subtitle")
+                    }
+
+                    vbox {
+                        addClass("app-drawer__section")
+
+                        label(messages["useInternetWarning"]).apply {
+                            fitToParentWidth()
+                            addClass(drawerTextStyleClass)
+                        }
+
+                        vbox {
+                            spacing = 10.0
+                            label(messages["location"]).apply {
+                                addClass("app-drawer__subtitle--small")
+                            }
+                            textfield(viewModel.languageNamesUrlProperty) {
+                                addClass("txt-input")
+                                focusedProperty().onChange {
+                                    if (!it) viewModel.updateLanguageNamesUrl()
+                                }
+                                disableProperty().bind(viewModel.languageNamesImportingProperty)
+
+                                viewModel.updateLanguagesSuccessProperty.onChangeAndDoNow { result ->
+                                    updateLanguageStatusStyle(
+                                        styleClass,
+                                        "txt-input-success",
+                                        "txt-input-error",
+                                        result,
+                                    )
+                                }
+                            }
+                            label {
+                                addClass(drawerTextStyleClass)
+                                textProperty().bind(viewModel.updateLanguagesResultProperty)
+                                viewModel.updateLanguagesSuccessProperty.onChangeAndDoNow { result ->
+                                    updateLanguageStatusStyle(
+                                        styleClass,
+                                        "app-drawer-success",
+                                        "app-drawer-error",
+                                        result,
+                                    )
+                                }
+                            }
                             hbox {
-                                addClass("app-drawer__plugin")
-
-                                label(pluginData.name).apply {
-                                    addClass(drawerTextStyleClass)
+                                spacing = 10.0
+                                button(messages["checkForUpdates"]) {
+                                    addClass("btn", "btn--primary")
                                     hgrow = Priority.ALWAYS
+                                    maxWidth = Double.MAX_VALUE
+                                    tooltip {
+                                        textProperty().bind(this@button.textProperty())
+                                    }
+                                    action {
+                                        resetUpdateLanguagesStatus()
+                                        viewModel.updateLanguages()
+                                    }
+                                    visibleProperty().bind(viewModel.languageNamesImportingProperty.not())
+                                    managedProperty().bind(visibleProperty())
+                                    whenVisible { requestFocus() }
                                 }
-
-                                region { hgrow = Priority.ALWAYS }
-
-                                hbox {
-                                    addClass("app-drawer__plugin__radio-btn-wrapper")
+                                stackpane {
+                                    addClass("app-drawer-progress-bar")
+                                    hgrow = Priority.ALWAYS
                                     add(
-                                        SelectButton().apply {
-                                            isDisable = !pluginData.canRecord
-                                            viewModel.selectedRecorderProperty.onChangeAndDoNow { selectedData ->
-                                                isSelected = selectedData == pluginData
-                                            }
-                                            selectedProperty().onChange { selected ->
-                                                if (selected) viewModel.selectRecorder(pluginData)
-                                            }
-                                            toggleGroup = recorderToggleGroup
-                                        }
+                                        JFXProgressBar().apply {
+                                            progressBar = this
+                                            hgrow = Priority.ALWAYS
+                                            addClass("app-drawer-progress")
+                                        },
                                     )
+                                    label(messages["updatingWait"]) {
+                                        addClass("app-drawer-progress-text")
+                                        prefWidthProperty().bind(progressBar.widthProperty().minus(10.0))
+                                    }
+                                    visibleProperty().bind(viewModel.languageNamesImportingProperty)
+                                    managedProperty().bind(visibleProperty())
                                 }
-
-                                hbox {
-                                    addClass("app-drawer__plugin__radio-btn-wrapper")
-                                    add(
-                                        SelectButton().apply {
-                                            isDisable = !pluginData.canEdit
-                                            viewModel.selectedEditorProperty.onChangeAndDoNow { selectedData ->
-                                                isSelected = selectedData == pluginData
-                                            }
-                                            selectedProperty().onChange { selected ->
-                                                if (selected) viewModel.selectEditor(pluginData)
-                                            }
-                                            toggleGroup = editorToggleGroup
-                                        }
+                                button(messages["reset"]) {
+                                    addClass("btn", "btn--secondary", "btn--borderless")
+                                    tooltip {
+                                        textProperty().bind(this@button.textProperty())
+                                    }
+                                    action {
+                                        resetUpdateLanguagesStatus()
+                                        viewModel.resetLanguageNamesLocation()
+                                    }
+                                    visibleProperty().bind(
+                                        viewModel.defaultLanguageNamesUrlProperty.isNotEqualTo(
+                                            viewModel.languageNamesUrlProperty,
+                                        ).and(viewModel.languageNamesImportingProperty.not()),
                                     )
+                                    managedProperty().bind(visibleProperty())
                                 }
                             }
                         }
                     }
 
-                    hyperlink {
-                        addClass("wa-text--hyperlink", "app-drawer__text--link")
+                    label(messages["appSettings"]).apply {
+                        addClass("app-drawer__subtitle")
+                    }
 
-                        text = messages["addApp"]
-                        graphic = FontIcon(MaterialDesign.MDI_PLUS)
-                        tooltip {
-                            textProperty().bind(this@hyperlink.textProperty())
+                    vbox {
+                        addClass("app-drawer__section")
+
+                        hbox {
+                            addClass("app-drawer__plugin-header")
+
+                            label(messages["applicationName"]).apply {
+                                addClass(drawerTextStyleClass)
+                                hgrow = Priority.ALWAYS
+                            }
+
+                            region { hgrow = Priority.ALWAYS }
+
+                            label {
+                                addClass("app-drawer__plugin-header__icon")
+                                graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
+                                tooltip(messages["record"])
+                            }
+
+                            label {
+                                addClass("app-drawer__plugin-header__icon")
+                                graphic = FontIcon(MaterialDesign.MDI_PENCIL)
+                                tooltip(messages["edit"])
+                            }
                         }
 
-                        action {
-                            addPluginDialog.open()
+                        vbox {
+                            addClass("app-drawer__plugin-list")
+
+                            val recorderToggleGroup = ToggleGroup()
+                            val editorToggleGroup = ToggleGroup()
+
+                            bindChildren(viewModel.audioPlugins) { pluginData ->
+                                hbox {
+                                    addClass("app-drawer__plugin")
+
+                                    label(pluginData.name).apply {
+                                        addClass(drawerTextStyleClass)
+                                        hgrow = Priority.ALWAYS
+                                    }
+
+                                    region { hgrow = Priority.ALWAYS }
+
+                                    hbox {
+                                        addClass("app-drawer__plugin__radio-btn-wrapper")
+                                        add(
+                                            SelectButton().apply {
+                                                isDisable = !pluginData.canRecord
+                                                viewModel.selectedRecorderProperty.onChangeAndDoNow { selectedData ->
+                                                    isSelected = selectedData == pluginData
+                                                }
+                                                selectedProperty().onChange { selected ->
+                                                    if (selected) viewModel.selectRecorder(pluginData)
+                                                }
+                                                toggleGroup = recorderToggleGroup
+                                            },
+                                        )
+                                    }
+
+                                    hbox {
+                                        addClass("app-drawer__plugin__radio-btn-wrapper")
+                                        add(
+                                            SelectButton().apply {
+                                                isDisable = !pluginData.canEdit
+                                                viewModel.selectedEditorProperty.onChangeAndDoNow { selectedData ->
+                                                    isSelected = selectedData == pluginData
+                                                }
+                                                selectedProperty().onChange { selected ->
+                                                    if (selected) viewModel.selectEditor(pluginData)
+                                                }
+                                                toggleGroup = editorToggleGroup
+                                            },
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        hyperlink {
+                            addClass("wa-text--hyperlink", "app-drawer__text--link")
+
+                            text = messages["addApp"]
+                            graphic = FontIcon(MaterialDesign.MDI_PLUS)
+                            tooltip {
+                                textProperty().bind(this@hyperlink.textProperty())
+                            }
+
+                            action {
+                                addPluginDialog.open()
+                            }
                         }
                     }
-                }
 
-                label(messages["keyboardShortcutsSettings"]).apply {
-                    addClass("app-drawer__subtitle")
-                }
+                    label(messages["keyboardShortcutsSettings"]).apply {
+                        addClass("app-drawer__subtitle")
+                    }
 
-                add(KeyboardShortcuts())
+                    add(KeyboardShortcuts())
+                }
+            }
+
+            setOnKeyReleased {
+                if (it.code == KeyCode.ESCAPE) collapse()
             }
         }
-
-        setOnKeyReleased {
-            if (it.code == KeyCode.ESCAPE) collapse()
-        }
-    }
 
     init {
         tryImportStylesheet(resources["/css/app-drawer.css"])
@@ -446,7 +454,7 @@ class SettingsView : View() {
         style: ObservableList<String>,
         successClass: String,
         errorClass: String,
-        result: Boolean?
+        result: Boolean?,
     ) {
         when (result) {
             true -> {
@@ -469,16 +477,17 @@ class SettingsView : View() {
     }
 
     private fun initChangeLanguageDialog() {
-        val successDialog = confirmdialog {
-            titleTextProperty.set(messages["settings"])
-            messageTextProperty.set(messages["changeLanguageSuccessMessage"])
-            orientationProperty.set(viewModel.orientationProperty.value)
-            themeProperty.set(viewModel.appColorMode.value)
+        val successDialog =
+            confirmdialog {
+                titleTextProperty.set(messages["settings"])
+                messageTextProperty.set(messages["changeLanguageSuccessMessage"])
+                orientationProperty.set(viewModel.orientationProperty.value)
+                themeProperty.set(viewModel.appColorMode.value)
 
-            cancelButtonTextProperty.set(messages["close"])
-            onCloseAction { viewModel.showChangeLanguageSuccessDialogProperty.set(false) }
-            onCancelAction { viewModel.showChangeLanguageSuccessDialogProperty.set(false) }
-        }
+                cancelButtonTextProperty.set(messages["close"])
+                onCloseAction { viewModel.showChangeLanguageSuccessDialogProperty.set(false) }
+                onCancelAction { viewModel.showChangeLanguageSuccessDialogProperty.set(false) }
+            }
 
         viewModel.showChangeLanguageSuccessDialogProperty.onChange {
             Platform.runLater { if (it) successDialog.open() else successDialog.close() }

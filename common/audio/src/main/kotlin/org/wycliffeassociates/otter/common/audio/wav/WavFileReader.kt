@@ -30,7 +30,6 @@ import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 
 internal class WavFileReader(val wav: WavFile, start: Int? = null, end: Int? = null) : AudioFileReader {
-
     private val logger = LoggerFactory.getLogger(WavFileReader::class.java)
 
     override val totalFrames: Int
@@ -56,7 +55,7 @@ internal class WavFileReader(val wav: WavFile, start: Int? = null, end: Int? = n
                 channel!!.map(
                     FileChannel.MapMode.READ_ONLY,
                     begin.toLong(),
-                    (end - begin).toLong()
+                    (end - begin).toLong(),
                 )
             }
     }
@@ -72,7 +71,6 @@ internal class WavFileReader(val wav: WavFile, start: Int? = null, end: Int? = n
         val totalFrames = wav.totalFrames
         var begin = min(max(0, start), totalFrames)
         var end = min(max(begin, end), totalFrames)
-
 
         // Convert from frames to array index
         begin *= wav.frameSizeInBytes

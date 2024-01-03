@@ -24,12 +24,14 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.Ch
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.TakeEntity
 import java.io.File
 import java.time.LocalDate
-import javax.inject.Inject
 
 class TakeMapper(
-    private val checkingStatusDao: CheckingStatusDao
+    private val checkingStatusDao: CheckingStatusDao,
 ) {
-    fun mapFromEntity(entity: TakeEntity, markers: List<Marker>): Take {
+    fun mapFromEntity(
+        entity: TakeEntity,
+        markers: List<Marker>,
+    ): Take {
         return Take(
             filename = entity.filename,
             path = File(entity.filepath),
@@ -40,11 +42,14 @@ class TakeMapper(
             markers = markers,
             checkingStatus = checkingStatusDao.fetchById(entity.checkingFk)!!,
             checksum = entity.checksum,
-            id = entity.id
+            id = entity.id,
         )
     }
 
-    fun mapToEntity(obj: Take, contentFk: Int = -1): TakeEntity {
+    fun mapToEntity(
+        obj: Take,
+        contentFk: Int = -1,
+    ): TakeEntity {
         return TakeEntity(
             id = obj.id,
             contentFk = contentFk,
@@ -55,7 +60,7 @@ class TakeMapper(
             deletedTs = obj.deleted?.toString(),
             played = if (obj.played) 1 else 0,
             checkingFk = checkingStatusDao.fetchId(obj.checkingStatus),
-            checksum = obj.checksum
+            checksum = obj.checksum,
         )
     }
 }

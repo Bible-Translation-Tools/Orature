@@ -32,7 +32,6 @@ import org.wycliffeassociates.otter.common.persistence.ILocaleDataSource
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 
 class LocaleLanguageTest {
-
     private val english = Language("en", "", "", "", true, "")
     private val spanish = Language("es", "", "", "", true, "")
     private val french = Language("fr", "", "", "", true, "")

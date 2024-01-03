@@ -18,7 +18,6 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.updater.install4j.ui.viewmodel
 
-import java.io.FileNotFoundException
 import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
@@ -28,9 +27,9 @@ import org.wycliffeassociates.otter.jvm.workbookapp.updater.install4j.AppUpdater
 import org.wycliffeassociates.otter.jvm.workbookapp.updater.install4j.UpdateLauncher
 import org.wycliffeassociates.otter.jvm.workbookapp.updater.install4j.UpdateProgressListener
 import tornadofx.ViewModel
+import java.io.FileNotFoundException
 
 class AppUpdaterViewModel : ViewModel() {
-
     private val logger = LoggerFactory.getLogger(AppUpdaterViewModel::class.java)
 
     val showOffline = SimpleBooleanProperty(false)
@@ -49,11 +48,12 @@ class AppUpdaterViewModel : ViewModel() {
     val updateSize = SimpleStringProperty()
     val updateVersion = SimpleStringProperty()
 
-    val progressListener = UpdateProgressListener(
-        percentCompletedProperty = percentCompleteProperty,
-        statusMessageProperty = statusMessageProperty,
-        detailMessageProperty = detailedMessageProperty
-    )
+    val progressListener =
+        UpdateProgressListener(
+            percentCompletedProperty = percentCompleteProperty,
+            statusMessageProperty = statusMessageProperty,
+            detailMessageProperty = detailedMessageProperty,
+        )
     val updater = AppUpdater()
     val launcher = UpdateLauncher(progressListener)
 

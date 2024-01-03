@@ -28,21 +28,21 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ConflictResolution
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.ProgressStatus
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportCallbackParameter
 import org.wycliffeassociates.otter.common.domain.project.importer.ImportOptions
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.jvm.controls.event.ProjectImportFinishEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.AddFilesView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.DrawerEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.DrawerEventAction
-import org.wycliffeassociates.otter.jvm.controls.event.ProjectImportFinishEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ConflictResolution
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ImportConflictDialog
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
@@ -51,13 +51,13 @@ import javax.inject.Inject
 import javax.inject.Provider
 
 class ImportProjectViewModel : ViewModel() {
-
     private val logger = LoggerFactory.getLogger(ImportProjectViewModel::class.java)
 
     val settingsViewModel: SettingsViewModel by inject()
 
     @Inject lateinit var directoryProvider: IDirectoryProvider
-    @Inject lateinit var importProjectProvider : Provider<ImportProjectUseCase>
+
+    @Inject lateinit var importProjectProvider: Provider<ImportProjectUseCase>
 
     val showImportSuccessDialogProperty = SimpleBooleanProperty(false)
     val showImportErrorDialogProperty = SimpleBooleanProperty(false)
@@ -98,9 +98,7 @@ class ImportProjectViewModel : ViewModel() {
 
     fun isSourceAudioProject(file: File) = importProjectProvider.get().isSourceAudioProject(file)
 
-    private fun setupImportCallback(
-        emitter: ObservableEmitter<ProgressStatus>
-    ): ProjectImporterCallback {
+    private fun setupImportCallback(emitter: ObservableEmitter<ProgressStatus>): ProjectImporterCallback {
         return object : ProjectImporterCallback {
             override fun onRequestUserInput(): Single<ImportOptions> {
                 return Single.just(ImportOptions(confirmed = true))
@@ -110,18 +108,18 @@ class ImportProjectViewModel : ViewModel() {
                 availableChapters.setAll(parameter.options)
                 return Single.create { emitter ->
                     find<ImportConflictDialog> {
-
                         projectNameProperty.set(parameter.name)
                         chaptersProperty.set(parameter.options.size)
 
                         setOnSubmitAction { resolution ->
-                            val importOption = if (resolution == ConflictResolution.OVERRIDE) {
-                                // proceed with override
-                                ImportOptions(availableChapters)
-                            } else {
-                                // aborted
-                                ImportOptions(chapters = null)
-                            }
+                            val importOption =
+                                if (resolution == ConflictResolution.OVERRIDE) {
+                                    // proceed with override
+                                    ImportOptions(availableChapters)
+                                } else {
+                                    // aborted
+                                    ImportOptions(chapters = null)
+                                }
                             emitter.onSuccess(importOption)
                             runLater { close() }
                         }
@@ -139,26 +137,34 @@ class ImportProjectViewModel : ViewModel() {
                 }
             }
 
-            override fun onNotifySuccess(language: String?, project: String?, workbookDescriptor: WorkbookDescriptor?) {
+            override fun onNotifySuccess(
+                language: String?,
+                project: String?,
+                workbookDescriptor: WorkbookDescriptor?,
+            ) {
                 FX.eventbus.fire(
                     ProjectImportFinishEvent(
                         ImportResult.SUCCESS,
                         language = language,
                         project = project,
-                        workbookDescriptor = workbookDescriptor
-                    )
+                        workbookDescriptor = workbookDescriptor,
+                    ),
                 )
             }
 
             override fun onError(filePath: String) {
                 FX.eventbus.fire(
-                    ProjectImportFinishEvent(ImportResult.FAILED, filePath = filePath)
+                    ProjectImportFinishEvent(ImportResult.FAILED, filePath = filePath),
                 )
             }
 
-            override fun onNotifyProgress(localizeKey: String?, message: String?, percent: Double?) {
+            override fun onNotifyProgress(
+                localizeKey: String?,
+                message: String?,
+                percent: Double?,
+            ) {
                 emitter.onNext(
-                    ProgressStatus(titleKey = localizeKey, titleMessage = message, percent = percent)
+                    ProgressStatus(titleKey = localizeKey, titleMessage = message, percent = percent),
                 )
             }
         }
@@ -169,21 +175,21 @@ class ImportProjectViewModel : ViewModel() {
             files.size > 1 -> {
                 snackBarObservable.onNext(messages["importMultipleError"])
                 logger.error(
-                    "(Drag-Drop) Multi-files import is not supported. Input files: $files"
+                    "(Drag-Drop) Multi-files import is not supported. Input files: $files",
                 )
                 false
             }
             files.first().isDirectory -> {
                 snackBarObservable.onNext(messages["importDirectoryError"])
                 logger.error(
-                    "(Drag-Drop) Directory import is not supported. Input path: ${files.first()}"
+                    "(Drag-Drop) Directory import is not supported. Input path: ${files.first()}",
                 )
                 false
             }
             files.first().extension !in OratureFileFormat.extensionList -> {
                 snackBarObservable.onNext(messages["importInvalidFileError"])
                 logger.error(
-                    "(Drag-Drop) Invalid import file extension. Input files: ${files.first()}"
+                    "(Drag-Drop) Invalid import file extension. Input files: ${files.first()}",
                 )
                 false
             }
@@ -200,12 +206,13 @@ class ImportProjectViewModel : ViewModel() {
      */
     fun setProjectInfo(rc: File) {
         try {
-            val project = ResourceContainer.load(rc, true).use {
-                if (it.manifest.projects.size != 1) {
-                    return@use null
+            val project =
+                ResourceContainer.load(rc, true).use {
+                    if (it.manifest.projects.size != 1) {
+                        return@use null
+                    }
+                    it.project()
                 }
-                it.project()
-            }
             project?.let {
                 importProjectProvider.get()
                     .getSourceMetadata(rc)
@@ -217,7 +224,7 @@ class ImportProjectViewModel : ViewModel() {
                         resourceMetadata?.let {
                             importedProjectTitleProperty.set(project.title)
 
-                            /* cover art graphic can be reused later by uncommenting */
+                            // cover art graphic can be reused later by uncommenting
                             //  val coverArtAccessor = ArtworkAccessor(directoryProvider, it, project.identifier)
                             //  importedProjectCoverProperty.set(
                             //      coverArtAccessor.getArtwork(ImageRatio.FOUR_BY_ONE)?.file

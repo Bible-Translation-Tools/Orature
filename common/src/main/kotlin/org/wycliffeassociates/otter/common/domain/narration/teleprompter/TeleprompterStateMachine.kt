@@ -4,7 +4,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 
 class TeleprompterStateMachine(
-    val total: List<AudioMarker>
+    val total: List<AudioMarker>,
 ) {
     private val logger = LoggerFactory.getLogger(TeleprompterStateMachine::class.java)
     private var contexts: MutableList<TeleprompterStateContext>
@@ -21,7 +21,10 @@ class TeleprompterStateMachine(
         contexts.firstOrNull { it.state.type == TeleprompterItemState.RECORD_DISABLED }?.state = RecordState
     }
 
-    fun transition(request: TeleprompterStateTransition, requestIndex: Int): List<TeleprompterItemState> {
+    fun transition(
+        request: TeleprompterStateTransition,
+        requestIndex: Int,
+    ): List<TeleprompterItemState> {
         try {
             when (request) {
                 TeleprompterStateTransition.RECORD -> RecordAction.apply(contexts, requestIndex)
@@ -51,7 +54,7 @@ class TeleprompterStateMachine(
      * state to re-record and enabling recording of the next verse.
      */
     private fun completePausedRecording() {
-        val pausedRecordingIndex = contexts.indexOfFirst { it.state.type == TeleprompterItemState.RECORDING_PAUSED}
+        val pausedRecordingIndex = contexts.indexOfFirst { it.state.type == TeleprompterItemState.RECORDING_PAUSED }
         if (pausedRecordingIndex < 0) return
 
         contexts[pausedRecordingIndex].changeState(TeleprompterItemState.RECORD_AGAIN)

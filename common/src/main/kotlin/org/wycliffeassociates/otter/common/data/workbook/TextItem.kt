@@ -22,5 +22,5 @@ import org.wycliffeassociates.otter.common.data.primitives.MimeType
 
 data class TextItem(
     val text: String,
-    val format: MimeType
+    val format: MimeType,
 )

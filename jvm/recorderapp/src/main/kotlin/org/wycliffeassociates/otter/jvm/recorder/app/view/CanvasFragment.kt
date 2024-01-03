@@ -20,12 +20,11 @@ package org.wycliffeassociates.otter.jvm.recorder.app.view
 
 import javafx.geometry.Pos
 import javafx.scene.layout.StackPane
-import org.wycliffeassociates.otter.jvm.controls.waveform.Drawable
 import org.wycliffeassociates.otter.jvm.controls.canvas.ResizableCanvas
+import org.wycliffeassociates.otter.jvm.controls.waveform.Drawable
 import tornadofx.*
 
 class CanvasFragment : StackPane() {
-
     private val drawables = arrayListOf<Drawable>()
 
     private val cvs = ResizableCanvas()

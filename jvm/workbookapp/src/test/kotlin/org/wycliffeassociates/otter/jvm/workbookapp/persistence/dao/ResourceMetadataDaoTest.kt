@@ -32,9 +32,11 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.map
 import java.io.File
 
 class ResourceMetadataDaoTest {
-    private val testDatabaseFile = File.createTempFile(
-        "test-resource-metadata-dao", ".sqlite"
-    ).also(File::deleteOnExit)
+    private val testDatabaseFile =
+        File.createTempFile(
+            "test-resource-metadata-dao",
+            ".sqlite",
+        ).also(File::deleteOnExit)
     private lateinit var database: AppDatabase
     private val dao by lazy { database.resourceMetadataDao }
 
@@ -42,9 +44,10 @@ class ResourceMetadataDaoTest {
         val sampleEntities = getTestSampleEntities()
 
         fun getTestSampleEntities(): List<ResourceMetadataEntity> {
-            val file = File(
-                javaClass.classLoader.getResource("resource-metadata-entity-samples.json").file
-            )
+            val file =
+                File(
+                    javaClass.classLoader.getResource("resource-metadata-entity-samples.json").file,
+                )
 
             return jacksonObjectMapper()
                 .readValue(file.readText())
@@ -74,12 +77,13 @@ class ResourceMetadataDaoTest {
         sampleEntities.forEach {
             dao.insert(it)
 
-            val entity = dao.fetch(
-                languageId = it.languageFk,
-                identifier = it.identifier,
-                version = it.version,
-                creator = it.creator
-            )
+            val entity =
+                dao.fetch(
+                    languageId = it.languageFk,
+                    identifier = it.identifier,
+                    version = it.version,
+                    creator = it.creator,
+                )
             Assert.assertNotNull(entity)
         }
     }
@@ -97,28 +101,31 @@ class ResourceMetadataDaoTest {
             dao.insert(it)
         }
 
-        var entity = dao.fetchLatestVersion(
-            languageSlug = "en",
-            identifier = "ulb"
-        )
+        var entity =
+            dao.fetchLatestVersion(
+                languageSlug = "en",
+                identifier = "ulb",
+            )
         Assert.assertNotNull(entity)
 
-        entity = dao.fetchLatestVersion(
-            languageSlug = "en",
-            identifier = "ulb",
-            creator = "non existing",
-            derivedFromFk = null,
-            relaxCreatorIfNoMatch = true
-        )
+        entity =
+            dao.fetchLatestVersion(
+                languageSlug = "en",
+                identifier = "ulb",
+                creator = "non existing",
+                derivedFromFk = null,
+                relaxCreatorIfNoMatch = true,
+            )
         Assert.assertNotNull(entity)
 
-        entity = dao.fetchLatestVersion(
-            languageSlug = "en",
-            identifier = "ulb",
-            creator = "non existing",
-            derivedFromFk = null,
-            relaxCreatorIfNoMatch = false
-        )
+        entity =
+            dao.fetchLatestVersion(
+                languageSlug = "en",
+                identifier = "ulb",
+                creator = "non existing",
+                derivedFromFk = null,
+                relaxCreatorIfNoMatch = false,
+            )
         Assert.assertNull(entity)
     }
 
@@ -128,7 +135,7 @@ class ResourceMetadataDaoTest {
             dao.insert(it)
         }
 
-        dao.addLink(1,2)
+        dao.addLink(1, 2)
         var links = dao.fetchLinks(1)
 
         Assert.assertEquals(1, links.size)
@@ -147,7 +154,7 @@ class ResourceMetadataDaoTest {
             dao.insert(it)
         }
 
-        dao.addLink(1,2)
+        dao.addLink(1, 2)
         var links = dao.fetchLinks(1)
 
         Assert.assertEquals(1, links.size)
@@ -168,25 +175,26 @@ class ResourceMetadataDaoTest {
         }
 
         val entity = dao.fetchById(1)!!
-        val updatedEntity = ResourceMetadataEntity(
-            conformsTo = "test",
-            creator = "test",
-            description = "test",
-            format = "test",
-            identifier = "test",
-            issued = "test",
-            languageFk = 1,
-            modified = "test",
-            publisher = "test",
-            subject = "test",
-            type = "test",
-            title = "test",
-            version = "test",
-            license = "test",
-            path = "test",
-            derivedFromFk = null,
-            id = entity.id
-        )
+        val updatedEntity =
+            ResourceMetadataEntity(
+                conformsTo = "test",
+                creator = "test",
+                description = "test",
+                format = "test",
+                identifier = "test",
+                issued = "test",
+                languageFk = 1,
+                modified = "test",
+                publisher = "test",
+                subject = "test",
+                type = "test",
+                title = "test",
+                version = "test",
+                license = "test",
+                path = "test",
+                derivedFromFk = null,
+                id = entity.id,
+            )
 
         dao.update(updatedEntity)
         val result = dao.fetchById(entity.id)
@@ -217,7 +225,7 @@ class ResourceMetadataDaoTest {
         Assert.assertEquals(
             "After deleting, the total number should decrease by 1.",
             sampleEntities.size - 1,
-            dao.fetchAll().size
+            dao.fetchAll().size,
         )
     }
 
@@ -226,7 +234,7 @@ class ResourceMetadataDaoTest {
             .insertAll(
                 TestDataStore.languages.map {
                     LanguageMapper().mapToEntity(it)
-                }
+                },
             )
     }
 }

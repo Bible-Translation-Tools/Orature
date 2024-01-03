@@ -29,9 +29,10 @@ class TestDirectoryProviderModule {
     private val root = createTempDir("orature-test").also(File::deleteOnExit)
 
     @Provides
-    fun providesDirectoryProvider(): IDirectoryProvider = DirectoryProvider(
-        appName = "Orature",
-        userHome = root.resolve("user").apply { mkdirs() }.path,
-        windowsAppData = root.resolve("workbookapp").apply { mkdirs() }.path
-    )
+    fun providesDirectoryProvider(): IDirectoryProvider =
+        DirectoryProvider(
+            appName = "Orature",
+            userHome = root.resolve("user").apply { mkdirs() }.path,
+            windowsAppData = root.resolve("workbookapp").apply { mkdirs() }.path,
+        )
 }

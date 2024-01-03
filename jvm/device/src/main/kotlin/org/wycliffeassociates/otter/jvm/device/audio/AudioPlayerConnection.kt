@@ -18,19 +18,18 @@
  */
 package org.wycliffeassociates.otter.jvm.device.audio
 
-import java.io.File
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.device.AudioFileReaderProvider
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFileReaderProvider
+import java.io.File
 
 internal class AudioPlayerConnection(
     val id: Int,
-    private val connectionFactory: AudioPlayerConnectionFactory
+    private val connectionFactory: AudioPlayerConnectionFactory,
 ) : IAudioPlayer {
-
     private var state = AudioPlayerConnectionState(id)
 
     override val frameStart: Int
@@ -59,7 +58,7 @@ internal class AudioPlayerConnection(
                 override fun onEvent(event: AudioPlayerEvent) {
                     onEvent(event)
                 }
-            }
+            },
         )
         addListeners()
     }
@@ -80,7 +79,11 @@ internal class AudioPlayerConnection(
         load(OratureAudioFileReaderProvider(file))
     }
 
-    override fun loadSection(reader: AudioFileReader, frameStart: Int, frameEnd: Int) {
+    override fun loadSection(
+        reader: AudioFileReader,
+        frameStart: Int,
+        frameEnd: Int,
+    ) {
         state.reader = reader
         state.begin = frameStart
         state.end = frameEnd
@@ -88,11 +91,19 @@ internal class AudioPlayerConnection(
         connectionFactory.load(state)
     }
 
-    override fun loadSection(readerProvider: AudioFileReaderProvider, frameStart: Int, frameEnd: Int) {
+    override fun loadSection(
+        readerProvider: AudioFileReaderProvider,
+        frameStart: Int,
+        frameEnd: Int,
+    ) {
         loadSection(readerProvider.getAudioFileReader(frameStart, frameEnd), frameStart, frameEnd)
     }
 
-    override fun loadSection(file: File, frameStart: Int, frameEnd: Int) {
+    override fun loadSection(
+        file: File,
+        frameStart: Int,
+        frameEnd: Int,
+    ) {
         loadSection(OratureAudioFileReaderProvider(file), frameStart, frameEnd)
     }
 

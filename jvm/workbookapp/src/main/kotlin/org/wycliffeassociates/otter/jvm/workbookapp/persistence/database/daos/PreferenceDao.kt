@@ -24,10 +24,12 @@ import org.jooq.exception.DataAccessException
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.PreferenceEntity
 
 class PreferenceDao(
-    private val instanceDsl: DSLContext
+    private val instanceDsl: DSLContext,
 ) {
-
-    fun fetchByKey(key: String, dsl: DSLContext = instanceDsl): PreferenceEntity? {
+    fun fetchByKey(
+        key: String,
+        dsl: DSLContext = instanceDsl,
+    ): PreferenceEntity? {
         return dsl
             .select()
             .from(PREFERENCES)
@@ -38,22 +40,28 @@ class PreferenceDao(
     }
 
     @Synchronized
-    fun insert(entity: PreferenceEntity, dsl: DSLContext = instanceDsl) {
+    fun insert(
+        entity: PreferenceEntity,
+        dsl: DSLContext = instanceDsl,
+    ) {
         // Insert the language entity
         dsl
             .insertInto(
                 PREFERENCES,
                 PREFERENCES.KEY,
-                PREFERENCES.VALUE
+                PREFERENCES.VALUE,
             )
             .values(
                 entity.key,
-                entity.value
+                entity.value,
             )
             .execute()
     }
 
-    fun update(entity: PreferenceEntity, dsl: DSLContext = instanceDsl) {
+    fun update(
+        entity: PreferenceEntity,
+        dsl: DSLContext = instanceDsl,
+    ) {
         dsl
             .update(PREFERENCES)
             .set(PREFERENCES.VALUE, entity.value)
@@ -61,7 +69,10 @@ class PreferenceDao(
             .execute()
     }
 
-    fun upsert(entity: PreferenceEntity, dsl: DSLContext = instanceDsl) {
+    fun upsert(
+        entity: PreferenceEntity,
+        dsl: DSLContext = instanceDsl,
+    ) {
         try {
             insert(entity, dsl)
         } catch (e: DataAccessException) {
@@ -69,7 +80,10 @@ class PreferenceDao(
         }
     }
 
-    fun delete(entity: PreferenceEntity, dsl: DSLContext = instanceDsl) {
+    fun delete(
+        entity: PreferenceEntity,
+        dsl: DSLContext = instanceDsl,
+    ) {
         dsl
             .deleteFrom(PREFERENCES)
             .where(PREFERENCES.KEY.eq(entity.key))

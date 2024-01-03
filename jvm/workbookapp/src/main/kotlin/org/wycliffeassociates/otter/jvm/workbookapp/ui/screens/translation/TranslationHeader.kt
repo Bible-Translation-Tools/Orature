@@ -18,7 +18,6 @@ import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class TranslationHeader : HBox() {
-
     val titleProperty = SimpleStringProperty()
     val chapterTitleProperty = SimpleStringProperty()
     val canUndoProperty = SimpleBooleanProperty(false)

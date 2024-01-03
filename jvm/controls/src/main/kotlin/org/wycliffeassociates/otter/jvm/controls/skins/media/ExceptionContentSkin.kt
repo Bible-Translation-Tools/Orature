@@ -34,7 +34,6 @@ import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.*
 
 class ExceptionContentSkin(private var content: ExceptionContent) : SkinBase<ExceptionContent>(content) {
-
     @FXML
     private lateinit var titleLabel: Label
 
@@ -86,13 +85,13 @@ class ExceptionContentSkin(private var content: ExceptionContent) : SkinBase<Exc
             textProperty().bind(
                 Bindings.`when`(content.showMoreProperty())
                     .then(content.showLessTextProperty())
-                    .otherwise(content.showMoreTextProperty())
+                    .otherwise(content.showMoreTextProperty()),
             )
             tooltip { textProperty().bind(this@apply.textProperty()) }
             graphicProperty().bind(
                 Bindings.`when`(content.showMoreProperty())
                     .then(showLessIcon)
-                    .otherwise(showMoreIcon)
+                    .otherwise(showMoreIcon),
             )
         }
         closeButton.apply {

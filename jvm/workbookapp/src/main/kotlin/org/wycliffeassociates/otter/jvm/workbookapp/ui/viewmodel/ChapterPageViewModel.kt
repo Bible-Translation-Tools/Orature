@@ -19,7 +19,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -32,13 +31,14 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.content.*
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -52,11 +52,8 @@ import tornadofx.*
 import java.io.File
 import java.util.concurrent.Callable
 import javax.inject.Inject
-import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-
 
 class ChapterPageViewModel : ViewModel() {
-
     private val logger = LoggerFactory.getLogger(ChapterPageViewModel::class.java)
 
     val workbookDataStore: WorkbookDataStore by inject()
@@ -164,9 +161,10 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     fun checkCanCompile() {
-        val hasUnselected = filteredContent.any { chunk ->
-            chunk.chunkSource?.audio?.selected?.value?.value == null
-        }.or(filteredContent.isEmpty())
+        val hasUnselected =
+            filteredContent.any { chunk ->
+                chunk.chunkSource?.audio?.selected?.value?.value == null
+            }.or(filteredContent.isEmpty())
 
         canCompileProperty.set(hasUnselected.not())
     }
@@ -176,16 +174,18 @@ class ChapterPageViewModel : ViewModel() {
             return
         }
 
-        val hasTakes = filteredContent.any { chunk ->
-            chunk.chunkSource?.audio?.getAllTakes()
-                ?.any { it.deletedTimestamp.value?.value == null } ?: false
-        }
+        val hasTakes =
+            filteredContent.any { chunk ->
+                chunk.chunkSource?.audio?.getAllTakes()
+                    ?.any { it.deletedTimestamp.value?.value == null } ?: false
+            }
 
         if (hasTakes) {
-            val notSelected = filteredContent
-                .firstOrNull { chunk ->
-                    chunk.chunkSource?.audio?.selected?.value?.value == null
-                } ?: filteredContent.last()
+            val notSelected =
+                filteredContent
+                    .firstOrNull { chunk ->
+                        chunk.chunkSource?.audio?.selected?.value?.value == null
+                    } ?: filteredContent.last()
             noTakesProperty.set(false)
             workChunkProperty.set(notSelected)
         } else {
@@ -228,7 +228,7 @@ class ChapterPageViewModel : ViewModel() {
                         }
 
                         PluginActions.Result.NO_AUDIO -> {
-                            /* no-op */
+                            // no-op
                         }
                     }
                 }
@@ -266,7 +266,7 @@ class ChapterPageViewModel : ViewModel() {
                         else -> {
                             when (pluginType) {
                                 PluginType.EDITOR, PluginType.MARKER -> {
-                                    /* no-op */
+                                    // no-op
                                 }
 
                                 else -> {}
@@ -284,9 +284,10 @@ class ChapterPageViewModel : ViewModel() {
             isCompilingProperty.set(true)
 
             val chapter = chapterCardProperty.value!!.chapterSource!!
-            val takes = filteredContent.mapNotNull { chunk ->
-                chunk.chunkSource?.audio?.selected?.value?.value?.file
-            }
+            val takes =
+                filteredContent.mapNotNull { chunk ->
+                    chunk.chunkSource?.audio?.selected?.value?.value?.file
+                }
 
             var compiled: File? = null
 
@@ -319,11 +320,11 @@ class ChapterPageViewModel : ViewModel() {
                 String.format(
                     messages["sourceDialogTitle"],
                     workbookDataStore.activeTakeNumberProperty.value,
-                    audioPluginViewModel.pluginNameProperty.value
+                    audioPluginViewModel.pluginNameProperty.value,
                 )
             },
             audioPluginViewModel.pluginNameProperty,
-            workbookDataStore.activeTakeNumberProperty
+            workbookDataStore.activeTakeNumberProperty,
         )
     }
 
@@ -334,11 +335,11 @@ class ChapterPageViewModel : ViewModel() {
                     messages["sourceDialogMessage"],
                     workbookDataStore.activeTakeNumberProperty.value,
                     audioPluginViewModel.pluginNameProperty.value,
-                    audioPluginViewModel.pluginNameProperty.value
+                    audioPluginViewModel.pluginNameProperty.value,
                 )
             },
             audioPluginViewModel.pluginNameProperty,
-            workbookDataStore.activeTakeNumberProperty
+            workbookDataStore.activeTakeNumberProperty,
         )
     }
 
@@ -364,7 +365,7 @@ class ChapterPageViewModel : ViewModel() {
             contextProperty,
             audioPluginViewModel.selectedRecorderProperty,
             audioPluginViewModel.selectedEditorProperty,
-            audioPluginViewModel.selectedMarkerProperty
+            audioPluginViewModel.selectedMarkerProperty,
         )
     }
 
@@ -439,7 +440,10 @@ class ChapterPageViewModel : ViewModel() {
         navigator.dock<RecordScripturePage>()
     }
 
-    private fun onTakeSelected(chunk: CardData, take: TakeModel) {
+    private fun onTakeSelected(
+        chunk: CardData,
+        take: TakeModel,
+    ) {
         chunk.chunkSource?.audio?.selectTake(take.take)
         val workbook = workbookDataStore.workbook
         workbook.projectFilesAccessor.updateSelectedTakesFile(workbook).subscribe()
@@ -465,7 +469,10 @@ class ChapterPageViewModel : ViewModel() {
         }
     }
 
-    private fun setMarker(marker: VerseMarker, take: Take) {
+    private fun setMarker(
+        marker: VerseMarker,
+        take: Take,
+    ) {
         OratureAudioFile(take.file).apply {
             if (getCues().isEmpty()) {
                 addMarker<VerseMarker>(marker)

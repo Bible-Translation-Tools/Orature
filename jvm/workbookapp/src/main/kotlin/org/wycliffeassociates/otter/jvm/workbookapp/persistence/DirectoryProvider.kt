@@ -30,7 +30,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.io.zip.NioZipFileWriter
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.io.FileNotFoundException
-import java.io.IOError
 import java.io.IOException
 import java.nio.file.FileSystems
 
@@ -39,7 +38,7 @@ class DirectoryProvider(
     pathSeparator: String? = null,
     userHome: String? = null,
     windowsAppData: String? = null,
-    osName: String? = null
+    osName: String? = null,
 ) : IDirectoryProvider {
     private val pathSeparator = pathSeparator ?: FileSystems.getDefault().separator
     private val userHome = userHome ?: System.getProperty("user.home")
@@ -90,28 +89,30 @@ class DirectoryProvider(
     override fun getProjectDirectory(
         source: ResourceMetadata,
         target: ResourceMetadata?,
-        book: Collection
+        book: Collection,
     ) = getProjectDirectory(source, target, book.slug)
 
     override fun getProjectDirectory(
         source: ResourceMetadata,
         target: ResourceMetadata?,
-        bookSlug: String
+        bookSlug: String,
     ): File {
         // Audio is being stored in the source creator directory for resources
-        val targetCreator = when {
-            target?.type == ContainerType.Help -> source.creator
-            target?.creator != null -> target.creator
-            else -> "."
-        }
-        val appendedPath = listOf(
-            targetCreator,
-            source.creator,
-            "${source.language.slug}_${source.identifier}",
-            "v${target?.version ?: "-none"}",
-            target?.language?.slug ?: "no_language",
-            bookSlug
-        ).joinToString(pathSeparator)
+        val targetCreator =
+            when {
+                target?.type == ContainerType.Help -> source.creator
+                target?.creator != null -> target.creator
+                else -> "."
+            }
+        val appendedPath =
+            listOf(
+                targetCreator,
+                source.creator,
+                "${source.language.slug}_${source.identifier}",
+                "v${target?.version ?: "-none"}",
+                target?.language?.slug ?: "no_language",
+                bookSlug,
+            ).joinToString(pathSeparator)
         val path = getUserDataDirectory(appendedPath)
         path.mkdirs()
         return path
@@ -120,18 +121,19 @@ class DirectoryProvider(
     override fun getProjectAudioDirectory(
         source: ResourceMetadata,
         target: ResourceMetadata?,
-        book: Collection
+        book: Collection,
     ) = getProjectAudioDirectory(source, target, book.slug)
 
     override fun getProjectAudioDirectory(
         source: ResourceMetadata,
         target: ResourceMetadata?,
-        bookSlug: String
+        bookSlug: String,
     ): File {
-        val path = getProjectDirectory(source, target, bookSlug)
-            .resolve(".apps")
-            .resolve("orature")
-            .resolve("takes")
+        val path =
+            getProjectDirectory(source, target, bookSlug)
+                .resolve(".apps")
+                .resolve("orature")
+                .resolve("takes")
         path.mkdirs()
         return path
     }
@@ -139,18 +141,19 @@ class DirectoryProvider(
     override fun getProjectSourceDirectory(
         source: ResourceMetadata,
         target: ResourceMetadata?,
-        book: Collection
+        book: Collection,
     ) = getProjectSourceDirectory(source, target, book.slug)
 
     override fun getProjectSourceDirectory(
         source: ResourceMetadata,
         target: ResourceMetadata?,
-        bookSlug: String
+        bookSlug: String,
     ): File {
-        val path = getProjectDirectory(source, target, bookSlug)
-            .resolve(".apps")
-            .resolve("orature")
-            .resolve("source")
+        val path =
+            getProjectDirectory(source, target, bookSlug)
+                .resolve(".apps")
+                .resolve("orature")
+                .resolve("source")
         path.mkdirs()
         return path
     }
@@ -158,10 +161,11 @@ class DirectoryProvider(
     override fun getProjectSourceAudioDirectory(
         source: ResourceMetadata,
         target: ResourceMetadata?,
-        bookSlug: String
+        bookSlug: String,
     ): File {
-        val path = getProjectSourceDirectory(source, target, bookSlug)
-            .resolve("audio")
+        val path =
+            getProjectSourceDirectory(source, target, bookSlug)
+                .resolve("audio")
         path.mkdirs()
         return path
     }
@@ -169,11 +173,12 @@ class DirectoryProvider(
     override fun getSourceContainerDirectory(container: ResourceContainer): File {
         val dublinCore = container.manifest.dublinCore
         container.close()
-        val appendedPath = listOf(
-            dublinCore.creator,
-            "${dublinCore.language.identifier}_${dublinCore.identifier}",
-            "v${dublinCore.version}"
-        ).joinToString(pathSeparator)
+        val appendedPath =
+            listOf(
+                dublinCore.creator,
+                "${dublinCore.language.identifier}_${dublinCore.identifier}",
+                "v${dublinCore.version}",
+            ).joinToString(pathSeparator)
         val path = internalSourceRCDirectory.resolve(appendedPath)
         path.mkdirs()
         return path
@@ -183,21 +188,25 @@ class DirectoryProvider(
         return listOf(
             metadata.creator,
             "${metadata.language.slug}_${metadata.identifier}",
-            "v${metadata.version}"
+            "v${metadata.version}",
         )
             .fold(internalSourceRCDirectory, File::resolve)
             .apply { mkdirs() }
     }
 
-    override fun getDerivedContainerDirectory(metadata: ResourceMetadata, source: ResourceMetadata): File {
-        val appendedPath = listOf(
-            "der",
-            metadata.creator,
-            source.creator,
-            "${source.language.slug}_${source.identifier}",
-            "v${metadata.version}",
-            metadata.language.slug
-        ).joinToString(pathSeparator)
+    override fun getDerivedContainerDirectory(
+        metadata: ResourceMetadata,
+        source: ResourceMetadata,
+    ): File {
+        val appendedPath =
+            listOf(
+                "der",
+                metadata.creator,
+                source.creator,
+                "${source.language.slug}_${source.identifier}",
+                "v${metadata.version}",
+                metadata.language.slug,
+            ).joinToString(pathSeparator)
         val path = resourceContainerDirectory.resolve(appendedPath)
         path.mkdirs()
         return path
@@ -232,12 +241,13 @@ class DirectoryProvider(
             try {
                 val bytes = ByteArray(4)
                 file.inputStream().read(bytes)
-                val numberMatches = booleanArrayOf(
-                    bytes[0] == 'P'.code.toByte(),
-                    bytes[1] == 'K'.code.toByte(),
-                    bytes[2].toInt() == 0b0011,
-                    bytes[3].toInt() == 0b0100
-                ).all { it }
+                val numberMatches =
+                    booleanArrayOf(
+                        bytes[0] == 'P'.code.toByte(),
+                        bytes[1] == 'K'.code.toByte(),
+                        bytes[2].toInt() == 0b0011,
+                        bytes[3].toInt() == 0b0100,
+                    ).all { it }
                 return numberMatches
             } catch (e: IOException) {
                 return false
@@ -247,7 +257,10 @@ class DirectoryProvider(
         }
     }
 
-    override fun createTempFile(prefix: String, suffix: String?): File {
+    override fun createTempFile(
+        prefix: String,
+        suffix: String?,
+    ): File {
         return File.createTempFile(prefix, suffix, tempDirectory)
     }
 

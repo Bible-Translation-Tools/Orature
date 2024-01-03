@@ -23,5 +23,5 @@ data class MarkerEntity(
     var takeFk: Int?,
     var number: Int,
     var position: Int,
-    var label: String
+    var label: String,
 )

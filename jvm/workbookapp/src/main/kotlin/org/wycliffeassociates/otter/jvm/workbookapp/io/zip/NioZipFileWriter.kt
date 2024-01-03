@@ -27,14 +27,14 @@ import java.nio.file.FileSystems
 import java.nio.file.Files
 
 class NioZipFileWriter(
-    zipFile: File
+    zipFile: File,
 ) : IFileWriter {
-
     // useTempFile set to true to reduce memory usage when writing large zip files
-    private val fileSystem: FileSystem = FileSystems.newFileSystem(
-        zipFile.jarUri(),
-        mapOf("create" to "true", "useTempFile" to true)
-    )
+    private val fileSystem: FileSystem =
+        FileSystems.newFileSystem(
+            zipFile.jarUri(),
+            mapOf("create" to "true", "useTempFile" to true),
+        )
 
     override fun close() = fileSystem.close()
 
@@ -50,13 +50,20 @@ class NioZipFileWriter(
         return Files.newOutputStream(path)
     }
 
-    override fun copyDirectory(source: File, destination: String, filter: (String) -> Boolean) {
+    override fun copyDirectory(
+        source: File,
+        destination: String,
+        filter: (String) -> Boolean,
+    ) {
         val sourcePath = source.toPath()
         val destPath = fileSystem.getPath(destination)
         sourcePath.copyDirectoryTo(destPath, filter)
     }
 
-    override fun copyFile(source: File, destination: String) {
+    override fun copyFile(
+        source: File,
+        destination: String,
+    ) {
         val sourcePath = source.toPath()
         val destPath = fileSystem.getPath(destination)
         if (Files.isRegularFile(sourcePath)) {

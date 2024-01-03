@@ -26,36 +26,38 @@ import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import javax.inject.Inject
 
-class DeleteResourceContainer @Inject constructor(
-    private val directoryProvider: IDirectoryProvider,
-    private val resourceContainerRepository: IResourceContainerRepository
-) {
-    private val logger = LoggerFactory.getLogger(DeleteResourceContainer::class.java)
+class DeleteResourceContainer
+    @Inject
+    constructor(
+        private val directoryProvider: IDirectoryProvider,
+        private val resourceContainerRepository: IResourceContainerRepository,
+    ) {
+        private val logger = LoggerFactory.getLogger(DeleteResourceContainer::class.java)
 
-    fun delete(resourceContainer: ResourceContainer): Single<DeleteResult> {
-        return resourceContainerRepository
-            .removeResourceContainer(resourceContainer)
-            .doOnError {
-                logger.error("Error when trying to delete rc: ${resourceContainer.file}.")
-            }
-            .doOnSuccess {
-                if (it == DeleteResult.SUCCESS) {
-                    val file = directoryProvider.getSourceContainerDirectory(resourceContainer)
-                    logger.info("Deleting RC: $file")
-                    if (file.deleteRecursively()) {
-                        logger.info("RC deleted successfully!")
-                    } else {
-                        logger.error("RC partially deleted: $file")
+        fun delete(resourceContainer: ResourceContainer): Single<DeleteResult> {
+            return resourceContainerRepository
+                .removeResourceContainer(resourceContainer)
+                .doOnError {
+                    logger.error("Error when trying to delete rc: ${resourceContainer.file}.")
+                }
+                .doOnSuccess {
+                    if (it == DeleteResult.SUCCESS) {
+                        val file = directoryProvider.getSourceContainerDirectory(resourceContainer)
+                        logger.info("Deleting RC: $file")
+                        if (file.deleteRecursively()) {
+                            logger.info("RC deleted successfully!")
+                        } else {
+                            logger.error("RC partially deleted: $file")
+                        }
                     }
                 }
-            }
-    }
-
-    fun delete(rcFile: File): Single<DeleteResult> {
-        ResourceContainer.load(rcFile).use {
-            return delete(it)
         }
-    }
 
-    fun deleteSync(rcFile: File) = delete(rcFile).blockingGet()
-}
+        fun delete(rcFile: File): Single<DeleteResult> {
+            ResourceContainer.load(rcFile).use {
+                return delete(it)
+            }
+        }
+
+        fun deleteSync(rcFile: File) = delete(rcFile).blockingGet()
+    }

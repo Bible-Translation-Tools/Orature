@@ -19,28 +19,29 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupKey
-import java.text.MessageFormat
 import tornadofx.*
 import tornadofx.FX.Companion.messages
+import java.text.MessageFormat
 
 // TODO: remove number "2" suffix after deleting the original control. Same for css named translation-card-2.css
 class TranslationCard2(
     private val sourceLanguage: Language,
     private val targetLanguage: Language,
     private val mode: ProjectMode,
-    selectedProjectGroupProperty: ObservableValue<ProjectGroupKey>
+    selectedProjectGroupProperty: ObservableValue<ProjectGroupKey>,
 ) : ButtonBase() {
-
-    val cardTitleProperty = SimpleStringProperty(
-        MessageFormat.format(messages["translationMode"], messages[mode.titleKey])
-    )
+    val cardTitleProperty =
+        SimpleStringProperty(
+            MessageFormat.format(messages["translationMode"], messages[mode.titleKey]),
+        )
     val sourceLanguageProperty = SimpleObjectProperty(sourceLanguage)
     val targetLanguageProperty = SimpleObjectProperty(targetLanguage)
-    val cardInfo: String = when (mode) {
-        ProjectMode.TRANSLATION -> messages["oralTranslationDesc"]
-        ProjectMode.NARRATION -> messages["narrationDesc"]
-        ProjectMode.DIALECT -> messages["dialectDesc"]
-    }
+    val cardInfo: String =
+        when (mode) {
+            ProjectMode.TRANSLATION -> messages["oralTranslationDesc"]
+            ProjectMode.NARRATION -> messages["narrationDesc"]
+            ProjectMode.DIALECT -> messages["dialectDesc"]
+        }
 
     init {
         addClass("translation-card-button")
@@ -55,7 +56,7 @@ class TranslationCard2(
                     isFocusTraversable = true
                     TranslationCardSkin2(this)
                 }
-            }
+            },
         )
     }
 
@@ -78,34 +79,35 @@ class TranslationCardSkin2(card: TranslationCard2) : SkinBase<TranslationCard2>(
     private val sourceLanguageProperty = SimpleStringProperty()
     private val targetLanguageProperty = SimpleStringProperty()
 
-    private val graphic = VBox().apply {
-        addClass("translation-card", "translation-card--selectable")
+    private val graphic =
+        VBox().apply {
+            addClass("translation-card", "translation-card--selectable")
 
-        hbox {
-            addClass("translation-card__header")
-            label(card.cardTitleProperty) {
-                addClass("h5", "translation-card__header__text")
-            }
-        }
-        hbox {
-            addClass("translation-card__body")
-
-            label(sourceLanguageProperty) {
-                addClass("translation-card__language")
-            }
             hbox {
-                hgrow = Priority.ALWAYS
-                alignment = Pos.CENTER
-                label {
-                    addClass("translation-card__divider")
-                    graphic = FontIcon(MaterialDesign.MDI_CHEVRON_DOUBLE_RIGHT)
+                addClass("translation-card__header")
+                label(card.cardTitleProperty) {
+                    addClass("h5", "translation-card__header__text")
                 }
             }
-            label(targetLanguageProperty) {
-                addClass("translation-card__language")
+            hbox {
+                addClass("translation-card__body")
+
+                label(sourceLanguageProperty) {
+                    addClass("translation-card__language")
+                }
+                hbox {
+                    hgrow = Priority.ALWAYS
+                    alignment = Pos.CENTER
+                    label {
+                        addClass("translation-card__divider")
+                        graphic = FontIcon(MaterialDesign.MDI_CHEVRON_DOUBLE_RIGHT)
+                    }
+                }
+                label(targetLanguageProperty) {
+                    addClass("translation-card__language")
+                }
             }
         }
-    }
 
     init {
         sourceLanguageProperty.bind(card.sourceLanguageProperty.stringBinding { it?.slug })
@@ -121,40 +123,40 @@ class TranslationCardSkin2(card: TranslationCard2) : SkinBase<TranslationCard2>(
 }
 
 class ActiveTranslationCardSkin(card: TranslationCard2) : SkinBase<TranslationCard2>(card) {
-
     private val sourceLanguageProperty = SimpleStringProperty()
     private val targetLanguageProperty = SimpleStringProperty()
 
-    private val graphic = VBox().apply {
-        addClass("translation-card", "translation-card--active")
+    private val graphic =
+        VBox().apply {
+            addClass("translation-card", "translation-card--active")
 
-        hbox {
-            addClass("translation-card__header")
-            label(card.cardTitleProperty) {
-                addClass("h5", "translation-card__header__text")
+            hbox {
+                addClass("translation-card__header")
+                label(card.cardTitleProperty) {
+                    addClass("h5", "translation-card__header__text")
+                }
+                region { hgrow = Priority.ALWAYS }
+                label {
+                    graphic = FontIcon(MaterialDesign.MDI_INFORMATION_OUTLINE)
+                    tooltip(card.cardInfo)
+                }
             }
-            region { hgrow = Priority.ALWAYS }
-            label {
-                graphic = FontIcon(MaterialDesign.MDI_INFORMATION_OUTLINE)
-                tooltip(card.cardInfo)
+            vbox {
+                addClass("translation-card__body")
+                label(sourceLanguageProperty) {
+                    addClass("translation-card__language")
+                    graphic = FontIcon(Material.HEARING)
+                }
+                label {
+                    addClass("translation-card__divider")
+                    graphic = FontIcon(MaterialDesign.MDI_CHEVRON_DOUBLE_DOWN)
+                }
+                label(targetLanguageProperty) {
+                    addClass("translation-card__language")
+                    graphic = FontIcon(MaterialDesign.MDI_VOICE)
+                }
             }
         }
-        vbox {
-            addClass("translation-card__body")
-            label(sourceLanguageProperty) {
-                addClass("translation-card__language")
-                graphic = FontIcon(Material.HEARING)
-            }
-            label {
-                addClass("translation-card__divider")
-                graphic = FontIcon(MaterialDesign.MDI_CHEVRON_DOUBLE_DOWN)
-            }
-            label(targetLanguageProperty) {
-                addClass("translation-card__language")
-                graphic = FontIcon(MaterialDesign.MDI_VOICE)
-            }
-        }
-    }
 
     init {
         sourceLanguageProperty.bind(card.sourceLanguageProperty.stringBinding { it?.name })
@@ -169,5 +171,5 @@ fun EventTarget.translationCard(
     targetLanguage: Language,
     mode: ProjectMode,
     selectedCardProperty: ObjectProperty<ProjectGroupKey> = SimpleObjectProperty(),
-    op: TranslationCard2.() -> Unit = {}
+    op: TranslationCard2.() -> Unit = {},
 ) = TranslationCard2(sourceLanguage, targetLanguage, mode, selectedCardProperty).attachTo(this, op)

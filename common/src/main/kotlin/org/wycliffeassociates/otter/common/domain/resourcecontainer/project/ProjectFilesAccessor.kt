@@ -30,8 +30,20 @@ import io.reactivex.rxkotlin.toMap
 import io.reactivex.rxkotlin.toObservable
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.AudioFileFormat
+import org.wycliffeassociates.otter.common.audio.AudioMetadataFileFormat
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
+import org.wycliffeassociates.otter.common.data.primitives.*
+import org.wycliffeassociates.otter.common.data.primitives.Collection
+import org.wycliffeassociates.otter.common.data.workbook.*
+import org.wycliffeassociates.otter.common.data.workbook.Book
+import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
+import org.wycliffeassociates.otter.common.domain.content.FileNamer
+import org.wycliffeassociates.otter.common.domain.project.InProgressNarrationFileFormat
+import org.wycliffeassociates.otter.common.domain.project.TakeCheckingStatusMap
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.usfm.getText
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.buildManifest
 import org.wycliffeassociates.otter.common.io.zip.IFileReader
 import org.wycliffeassociates.otter.common.io.zip.IFileWriter
@@ -41,85 +53,82 @@ import org.wycliffeassociates.otter.common.utils.mapNotNull
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.ZipAccessor
 import org.wycliffeassociates.resourcecontainer.entity.Project
+import org.wycliffeassociates.usfmtools.USFMParser
+import org.wycliffeassociates.usfmtools.models.markers.CMarker
+import org.wycliffeassociates.usfmtools.models.markers.VMarker
 import java.io.File
 import java.io.OutputStream
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.outputStream
-import org.wycliffeassociates.otter.common.audio.AudioFileFormat
-import org.wycliffeassociates.otter.common.audio.AudioMetadataFileFormat
-import org.wycliffeassociates.otter.common.domain.project.InProgressNarrationFileFormat
-import org.wycliffeassociates.otter.common.data.primitives.*
-import org.wycliffeassociates.otter.common.data.primitives.Collection
-import org.wycliffeassociates.otter.common.data.workbook.Book
-import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
-import org.wycliffeassociates.otter.common.domain.project.TakeCheckingStatusMap
-import org.wycliffeassociates.otter.common.data.workbook.*
-import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.common.domain.content.FileNamer
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.usfm.getText
-import org.wycliffeassociates.usfmtools.USFMParser
-import org.wycliffeassociates.usfmtools.models.markers.CMarker
-import org.wycliffeassociates.usfmtools.models.markers.VMarker
 
 class ProjectFilesAccessor(
     directoryProvider: IDirectoryProvider,
     private val sourceMetadata: ResourceMetadata,
     private val targetMetadata: ResourceMetadata,
-    private val project: Collection
+    private val project: Collection,
 ) {
-
     constructor(
         directoryProvider: IDirectoryProvider,
         sourceMetadata: ResourceMetadata,
         targetMetadata: ResourceMetadata,
-        project: Book
+        project: Book,
     ) : this(directoryProvider, sourceMetadata, targetMetadata, project.toCollection())
 
     private val log = LoggerFactory.getLogger(ProjectFilesAccessor::class.java)
 
-    val projectDir = directoryProvider.getProjectDirectory(
-        sourceMetadata,
-        targetMetadata,
-        project
-    )
-
-    val sourceDir = directoryProvider.getProjectSourceDirectory(
-        sourceMetadata,
-        targetMetadata,
-        project
-    )
-
-    val sourceAudioDir = directoryProvider.getProjectSourceAudioDirectory(
-        sourceMetadata,
-        targetMetadata,
-        project.slug
-    )
-
-    val audioDir = directoryProvider.getProjectAudioDirectory(
-        sourceMetadata,
-        targetMetadata,
-        project
-    )
-
-    fun getChapterAudioDir(workbook: Workbook, chapter: Chapter): File {
-        val namer = FileNamer(
-            bookSlug = workbook.target.slug,
-            languageSlug = workbook.target.language.slug,
-            chapterCount = workbook.target.chapters.count().blockingGet(),
-            chapterTitle = chapter.title,
-            chapterSort = chapter.sort,
-            chunkCount = chapter.chunkCount.blockingGet().toLong(),
-            contentType = ContentType.TEXT,
-            rcSlug = if (workbook.source.language.slug == workbook.target.language.slug) {
-                workbook.sourceMetadataSlug
-            } else {
-                FileNamer.DEFAULT_RC_SLUG
-            }
+    val projectDir =
+        directoryProvider.getProjectDirectory(
+            sourceMetadata,
+            targetMetadata,
+            project,
         )
+
+    val sourceDir =
+        directoryProvider.getProjectSourceDirectory(
+            sourceMetadata,
+            targetMetadata,
+            project,
+        )
+
+    val sourceAudioDir =
+        directoryProvider.getProjectSourceAudioDirectory(
+            sourceMetadata,
+            targetMetadata,
+            project.slug,
+        )
+
+    val audioDir =
+        directoryProvider.getProjectAudioDirectory(
+            sourceMetadata,
+            targetMetadata,
+            project,
+        )
+
+    fun getChapterAudioDir(
+        workbook: Workbook,
+        chapter: Chapter,
+    ): File {
+        val namer =
+            FileNamer(
+                bookSlug = workbook.target.slug,
+                languageSlug = workbook.target.language.slug,
+                chapterCount = workbook.target.chapters.count().blockingGet(),
+                chapterTitle = chapter.title,
+                chapterSort = chapter.sort,
+                chunkCount = chapter.chunkCount.blockingGet().toLong(),
+                contentType = ContentType.TEXT,
+                rcSlug =
+                    if (workbook.source.language.slug == workbook.target.language.slug) {
+                        workbook.sourceMetadataSlug
+                    } else {
+                        FileNamer.DEFAULT_RC_SLUG
+                    },
+            )
         val formattedChapterName = namer.formatChapterNumber()
-        val chapterDir = audioDir.resolve(formattedChapterName).also {
-            if (!it.exists()) it.mkdirs()
-        }
+        val chapterDir =
+            audioDir.resolve(formattedChapterName).also {
+                if (!it.exists()) it.mkdirs()
+            }
         return chapterDir
     }
 
@@ -134,7 +143,7 @@ class ProjectFilesAccessor(
 
     fun copySourceFiles(
         linkedResource: ResourceMetadata? = null,
-        excludeMedia: Boolean = true
+        excludeMedia: Boolean = true,
     ) {
         val target = sourceDir.resolve(sourceMetadata.path.nameWithoutExtension + ".zip")
         if (!target.exists()) {
@@ -160,22 +169,24 @@ class ProjectFilesAccessor(
             if (!fileReader.exists(dir)) {
                 continue
             }
-            val sourceFiles: Sequence<String> = fileReader
-                .list(dir)
-                .filter {
-                    val ext = it.substringAfterLast(".")
-                    when (dir) {
-                        RcConstants.SOURCE_DIR -> OratureFileFormat.isSupported(ext)
-                        RcConstants.SOURCE_AUDIO_DIR -> AudioFileFormat.isSupported (ext) || AudioMetadataFileFormat.isSupported(ext)
-                        else -> false
+            val sourceFiles: Sequence<String> =
+                fileReader
+                    .list(dir)
+                    .filter {
+                        val ext = it.substringAfterLast(".")
+                        when (dir) {
+                            RcConstants.SOURCE_DIR -> OratureFileFormat.isSupported(ext)
+                            RcConstants.SOURCE_AUDIO_DIR -> AudioFileFormat.isSupported(ext) || AudioMetadataFileFormat.isSupported(ext)
+                            else -> false
+                        }
                     }
-                }
 
-            val outDir = when (dir) {
-                RcConstants.SOURCE_DIR -> sourceDir
-                RcConstants.SOURCE_AUDIO_DIR -> sourceAudioDir
-                else -> continue
-            }
+            val outDir =
+                when (dir) {
+                    RcConstants.SOURCE_DIR -> sourceDir
+                    RcConstants.SOURCE_AUDIO_DIR -> sourceAudioDir
+                    else -> continue
+                }
             sourceFiles.forEach { path ->
                 val inFile = File(path)
                 val outFile = outDir.resolve(inFile.name)
@@ -188,7 +199,10 @@ class ProjectFilesAccessor(
         }
     }
 
-    fun copySourceFiles(fileWriter: IFileWriter, linkedResource: ResourceMetadata? = null) {
+    fun copySourceFiles(
+        fileWriter: IFileWriter,
+        linkedResource: ResourceMetadata? = null,
+    ) {
         if (sourceAudioDir.exists()) {
             sourceAudioDir.listFiles()?.forEach {
                 fileWriter.copyFile(it, RcConstants.SOURCE_AUDIO_DIR)
@@ -216,7 +230,7 @@ class ProjectFilesAccessor(
     fun copySourceFilesWithRelatedMedia(
         fileWriter: IFileWriter,
         tempDir: File,
-        linkedResource: ResourceMetadata? = null
+        linkedResource: ResourceMetadata? = null,
     ) {
         val sources = listOfNotNull(sourceMetadata, linkedResource)
         /* generate a sub-temp directory to avoid dirty file
@@ -259,7 +273,10 @@ class ProjectFilesAccessor(
             }
     }
 
-    fun initializeResourceContainerInFile(workbook: Workbook, container: File) {
+    fun initializeResourceContainerInFile(
+        workbook: Workbook,
+        container: File,
+    ) {
         ResourceContainer
             .create(container) {
                 val projectPath = "./${RcConstants.MEDIA_DIR}"
@@ -300,7 +317,10 @@ class ProjectFilesAccessor(
             .subscribeOn(Schedulers.io())
     }
 
-    fun writeSelectedTakesFile(workbook: Workbook, isBook: Boolean) {
+    fun writeSelectedTakesFile(
+        workbook: Workbook,
+        isBook: Boolean,
+    ) {
         val selectedTakes = projectDir.resolve(RcConstants.SELECTED_TAKES_FILE)
         selectedTakes.outputStream().use { stream ->
             fetchSelectedTakes(workbook, isBook)
@@ -318,7 +338,7 @@ class ProjectFilesAccessor(
         fileWriter: IFileWriter,
         workbook: Workbook,
         isBook: Boolean,
-        takeFilter: (String) -> Boolean = { true }
+        takeFilter: (String) -> Boolean = { true },
     ) {
         fileWriter.bufferedWriter(RcConstants.SELECTED_TAKES_FILE).use { _fileWriter ->
             fetchSelectedTakes(workbook, isBook, filter = takeFilter)
@@ -347,16 +367,17 @@ class ProjectFilesAccessor(
     fun writeTakeCheckingStatus(
         fileWriter: IFileWriter,
         workbook: Workbook,
-        takeFilter: (String) -> Boolean =  { true }
+        takeFilter: (String) -> Boolean = { true },
     ): Completable {
         return fetchTakes(workbook)
             .filter { takeFilter(it.name) }
             .map { take ->
                 val path = relativeTakePath(take)
-                val checking = TakeCheckingState(
-                    take.checkingState.value!!.status,
-                    take.getSavedChecksum()
-                )
+                val checking =
+                    TakeCheckingState(
+                        take.checkingState.value!!.status,
+                        take.getSavedChecksum(),
+                    )
                 Pair(path, checking)
             }
             .toMap()
@@ -369,7 +390,7 @@ class ProjectFilesAccessor(
     fun copyTakeFiles(
         fileReader: IFileReader,
         manifestProject: Project,
-        filter: (String) -> Boolean = { true }
+        filter: (String) -> Boolean = { true },
     ): Observable<String> {
         return Observable.just(RcConstants.TAKE_DIR, manifestProject.path)
             .filter(fileReader::exists)
@@ -386,14 +407,14 @@ class ProjectFilesAccessor(
         workbook: Workbook,
         workbookRepository: IWorkbookRepository,
         isBook: Boolean,
-        filter: (String) -> Boolean = { true }
+        filter: (String) -> Boolean = { true },
     ) {
         val selectedChapters = selectedChapterFilePaths(workbook, isBook)
         val deletedTakes = deletedTakeFilePaths(workbook, workbookRepository)
         fileWriter.copyDirectory(audioDir, RcConstants.TAKE_DIR) {
             val normalized = File(it).invariantSeparatorsPath
-            !selectedChapters.contains(normalized) && !deletedTakes.contains(normalized)
-                    && filter(it)
+            !selectedChapters.contains(normalized) && !deletedTakes.contains(normalized) &&
+                filter(it)
         }
         fileWriter.copyDirectory(audioDir, RcConstants.MEDIA_DIR) {
             val normalized = File(it).invariantSeparatorsPath
@@ -403,7 +424,7 @@ class ProjectFilesAccessor(
 
     fun copyInProgressNarrationFiles(
         fileReader: IFileReader,
-        manifestProject: Project
+        manifestProject: Project,
     ): Observable<String> {
         return Observable.just(RcConstants.TAKE_DIR, manifestProject.path)
             .filter(fileReader::exists)
@@ -417,7 +438,7 @@ class ProjectFilesAccessor(
 
     fun copyInProgressNarrationFiles(
         fileWriter: IFileWriter,
-        filter: (String) -> Boolean = { true }
+        filter: (String) -> Boolean = { true },
     ) {
         fileWriter.copyDirectory(audioDir, RcConstants.TAKE_DIR) {
             filter(it)
@@ -437,7 +458,11 @@ class ProjectFilesAccessor(
         }
     }
 
-    fun getChapterContent(projectSlug: String, chapterNumber: Int, showVerseNumber: Boolean = true): List<Content> {
+    fun getChapterContent(
+        projectSlug: String,
+        chapterNumber: Int,
+        showVerseNumber: Boolean = true,
+    ): List<Content> {
         val chapterContent = arrayListOf<Content>()
 
         ResourceContainer.load(sourceMetadata.path).use { rc ->
@@ -450,25 +475,27 @@ class ProjectFilesAccessor(
                 val chap = chapters.find { it.number == chapterNumber }
                 chap?.let {
                     it.getChildMarkers(VMarker::class.java).forEachIndexed { idx, vm ->
-                        val text = when (showVerseNumber) {
-                            true -> "${vm.verseNumber}. ${vm.getText()}"
-                            false -> vm.getText()
-                        }
-                        val content = Content(
-                            sort = chapterContent.size,
-                            labelKey = ContentLabel.VERSE.value,
-                            start = vm.startingVerse,
-                            end = vm.endingVerse,
-                            text = text,
-                            bridged = false,
-                            type = ContentType.TEXT,
-                            format = "usfm",
-                            draftNumber = 0
-                        )
+                        val text =
+                            when (showVerseNumber) {
+                                true -> "${vm.verseNumber}. ${vm.getText()}"
+                                false -> vm.getText()
+                            }
+                        val content =
+                            Content(
+                                sort = chapterContent.size,
+                                labelKey = ContentLabel.VERSE.value,
+                                start = vm.startingVerse,
+                                end = vm.endingVerse,
+                                text = text,
+                                bridged = false,
+                                type = ContentType.TEXT,
+                                format = "usfm",
+                                draftNumber = 0,
+                            )
                         chapterContent.add(content)
 
                         // the rest of bridged verses should be marked bridged
-                        for (i in vm.startingVerse+1..vm.endingVerse) {
+                        for (i in vm.startingVerse + 1..vm.endingVerse) {
                             chapterContent.add(
                                 Content(
                                     sort = chapterContent.size,
@@ -479,8 +506,8 @@ class ProjectFilesAccessor(
                                     bridged = true,
                                     type = ContentType.TEXT,
                                     format = "usfm",
-                                    draftNumber = 0
-                                )
+                                    draftNumber = 0,
+                                ),
                             )
                         }
                     }
@@ -491,7 +518,11 @@ class ProjectFilesAccessor(
         return chapterContent
     }
 
-    fun getChapterText(projectSlug: String, chapterNumber: Int, showVerseNumber: Boolean = true): List<String> {
+    fun getChapterText(
+        projectSlug: String,
+        chapterNumber: Int,
+        showVerseNumber: Boolean = true,
+    ): List<String> {
         val chapterText = arrayListOf<String>()
 
         ResourceContainer.load(sourceMetadata.path).use { rc ->
@@ -520,7 +551,7 @@ class ProjectFilesAccessor(
         projectSlug: String,
         chapterNumber: Int,
         startVerse: Int,
-        endVerse: Int
+        endVerse: Int,
     ): List<String> {
         val chunkText = arrayListOf<String>()
 
@@ -546,9 +577,7 @@ class ProjectFilesAccessor(
         return chunkText
     }
 
-    private fun fetchTakes(
-        workbook: Workbook
-    ): Observable<Take> {
+    private fun fetchTakes(workbook: Workbook): Observable<Take> {
         val chapters = workbook.target.chapters
         return chapters
             .flatMap { chapter ->
@@ -565,34 +594,40 @@ class ProjectFilesAccessor(
 
     private fun writeTakeChecking(
         fileWriter: IFileWriter,
-        takeCheckingMap: TakeCheckingStatusMap
+        takeCheckingMap: TakeCheckingStatusMap,
     ) {
         fileWriter.bufferedWriter(RcConstants.CHECKING_STATUS_FILE).use { writer ->
-            val mapper = ObjectMapper(JsonFactory())
-                .registerKotlinModule()
-                .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+            val mapper =
+                ObjectMapper(JsonFactory())
+                    .registerKotlinModule()
+                    .setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
             mapper.writeValue(writer, takeCheckingMap)
         }
     }
 
-    private fun copySourceWithoutMedia(source: File, target: File) {
+    private fun copySourceWithoutMedia(
+        source: File,
+        target: File,
+    ) {
         if (!OratureFileFormat.isSupported(source.extension)) {
             return
         }
 
         val targetZip = ZipAccessor(target)
         ResourceContainer.load(source).use {
-            val inMap = it.accessor.getInputStreams(".", listOf())
-                .filterKeys {
-                    File(it).extension !in ignoredSourceMediaExtensions
+            val inMap =
+                it.accessor.getInputStreams(".", listOf())
+                    .filterKeys {
+                        File(it).extension !in ignoredSourceMediaExtensions
+                    }
+            val filesToWrite =
+                inMap.mapValues {
+                    { output: OutputStream ->
+                        it.value.copyTo(output)
+                        Unit
+                    }
                 }
-            val filesToWrite = inMap.mapValues {
-                { output: OutputStream ->
-                    it.value.copyTo(output)
-                    Unit
-                }
-            }
             try {
                 targetZip.write(filesToWrite)
             } catch (e: Exception) {
@@ -612,26 +647,28 @@ class ProjectFilesAccessor(
      */
     private fun filterSourceFileToContainProjectRelatedMedia(
         source: File,
-        tempDir: File
+        tempDir: File,
     ): File {
         val newSourceFile = tempDir.resolve(source.nameWithoutExtension + ".zip")
         val newSourceZip = ZipAccessor(newSourceFile)
 
         ResourceContainer.load(source).use {
-            val inMap = it.accessor.getInputStreams(".", listOf())
-                .filterKeys { path ->
-                    if (path.contains("${RcConstants.SOURCE_MEDIA_DIR}/")) {
-                        path.contains("${RcConstants.SOURCE_MEDIA_DIR}/${project.slug}")
-                    } else {
-                        true
+            val inMap =
+                it.accessor.getInputStreams(".", listOf())
+                    .filterKeys { path ->
+                        if (path.contains("${RcConstants.SOURCE_MEDIA_DIR}/")) {
+                            path.contains("${RcConstants.SOURCE_MEDIA_DIR}/${project.slug}")
+                        } else {
+                            true
+                        }
+                    }
+            val filesToWrite =
+                inMap.mapValues {
+                    { output: OutputStream ->
+                        it.value.copyTo(output)
+                        Unit
                     }
                 }
-            val filesToWrite = inMap.mapValues {
-                { output: OutputStream ->
-                    it.value.copyTo(output)
-                    Unit
-                }
-            }
             try {
                 newSourceZip.write(filesToWrite)
             } catch (e: Exception) {
@@ -643,9 +680,10 @@ class ProjectFilesAccessor(
 
         // filter media projects that are not related to the current project
         ResourceContainer.load(newSourceFile).use { rc ->
-            val singleProjectList = listOfNotNull(
-                rc.media?.projects?.find { it.identifier == project.slug }
-            )
+            val singleProjectList =
+                listOfNotNull(
+                    rc.media?.projects?.find { it.identifier == project.slug },
+                )
             rc.media?.projects = singleProjectList
             rc.writeMedia()
         }
@@ -653,7 +691,10 @@ class ProjectFilesAccessor(
         return newSourceFile
     }
 
-    fun selectedChapterFilePaths(workbook: Workbook, isBook: Boolean): Set<String> {
+    fun selectedChapterFilePaths(
+        workbook: Workbook,
+        isBook: Boolean,
+    ): Set<String> {
         return fetchSelectedTakes(workbook, isBook, true)
             .map(this::relativeTakePath)
             .collectInto(hashSetOf<String>(), { set, path -> set.add(path) })
@@ -664,18 +705,20 @@ class ProjectFilesAccessor(
         workbook: Workbook,
         isBook: Boolean,
         chaptersOnly: Boolean = false,
-        filter: (String) -> Boolean = { true }
+        filter: (String) -> Boolean = { true },
     ): Observable<Take> {
-        val chapters = when {
-            isBook -> workbook.target.chapters
-            // Work around a quirk that records resource takes to the source tree
-            else -> Observable.concat(workbook.source.chapters, workbook.target.chapters)
-        }
+        val chapters =
+            when {
+                isBook -> workbook.target.chapters
+                // Work around a quirk that records resource takes to the source tree
+                else -> Observable.concat(workbook.source.chapters, workbook.target.chapters)
+            }
 
-        val bookElements: Observable<BookElement> = when {
-            chaptersOnly -> chapters.cast()
-            else -> chapters.concatMap { chapter -> chapter.children.startWith(chapter) }
-        }
+        val bookElements: Observable<BookElement> =
+            when {
+                chaptersOnly -> chapters.cast()
+                else -> chapters.concatMap { chapter -> chapter.children.startWith(chapter) }
+            }
 
         return bookElements
             .flatMap { getAudioForCurrentResource(it, isBook) }
@@ -688,27 +731,33 @@ class ProjectFilesAccessor(
             }
     }
 
-    private fun deletedTakeFilePaths(workbook: Workbook, workbookRepository: IWorkbookRepository): List<String> {
-        val deletedTakes = workbookRepository
-            .getSoftDeletedTakes(workbook.source)
-            .blockingGet()
-            .map { relativeTakePath(it.path) }
-        val targetTakes = workbookRepository
-            .getSoftDeletedTakes(workbook.target)
-            .blockingGet()
-            .map { relativeTakePath(it.path) }
+    private fun deletedTakeFilePaths(
+        workbook: Workbook,
+        workbookRepository: IWorkbookRepository,
+    ): List<String> {
+        val deletedTakes =
+            workbookRepository
+                .getSoftDeletedTakes(workbook.source)
+                .blockingGet()
+                .map { relativeTakePath(it.path) }
+        val targetTakes =
+            workbookRepository
+                .getSoftDeletedTakes(workbook.target)
+                .blockingGet()
+                .map { relativeTakePath(it.path) }
         return deletedTakes + targetTakes
     }
 
     private fun getAudioForCurrentResource(
         bookElement: BookElement,
-        isBook: Boolean
+        isBook: Boolean,
     ): Observable<AssociatedAudio> {
         return when (isBook) {
             true -> Observable.just(bookElement.audio)
             false -> {
-                val resourceGroup = bookElement.resources
-                    .firstOrNull { it.metadata.identifier == targetMetadata.identifier }
+                val resourceGroup =
+                    bookElement.resources
+                        .firstOrNull { it.metadata.identifier == targetMetadata.identifier }
 
                 resourceGroup?.let { _resourceGroup ->
                     _resourceGroup.resources.flatMapIterable { resource ->
@@ -744,13 +793,11 @@ class ProjectFilesAccessor(
 
     private fun isAudioFile(file: String) = isAudioFile(File(file))
 
-    private fun isAudioFile(file: File) =
-        file.extension.lowercase().let { it == "wav" || it == "mp3" }
+    private fun isAudioFile(file: File) = file.extension.lowercase().let { it == "wav" || it == "mp3" }
 
     private fun isInProgressNarrationFile(file: String) = isInProgressNarrationFile(File(file))
 
-    private fun isInProgressNarrationFile(file: File) =
-        InProgressNarrationFileFormat.isSupported(file.extension)
+    private fun isInProgressNarrationFile(file: File) = InProgressNarrationFileFormat.isSupported(file.extension)
 
     fun getChunkFile(): File {
         return projectDir.resolve(RcConstants.CHUNKS_FILE)

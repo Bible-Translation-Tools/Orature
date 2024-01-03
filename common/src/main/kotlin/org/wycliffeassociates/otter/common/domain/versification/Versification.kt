@@ -4,7 +4,6 @@ import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.workbook.Book
 
 interface Versification {
-
     fun getChaptersInBook(bookSlug: String): Int
 
     fun getChaptersInBook(book: Book): Int {
@@ -15,13 +14,22 @@ interface Versification {
         return getChaptersInBook(book.slug)
     }
 
-    fun getVersesInChapter(bookSlug: String, chapterNumber: Int): Int
+    fun getVersesInChapter(
+        bookSlug: String,
+        chapterNumber: Int,
+    ): Int
 
-    fun getVersesInChapter(book: Collection, chapterNumber: Int): Int {
+    fun getVersesInChapter(
+        book: Collection,
+        chapterNumber: Int,
+    ): Int {
         return getVersesInChapter(book.slug, chapterNumber)
     }
 
-    fun getVersesInChapter(book: Book, chapterNumber: Int): Int {
+    fun getVersesInChapter(
+        book: Book,
+        chapterNumber: Int,
+    ): Int {
         return getVersesInChapter(book.slug, chapterNumber)
     }
 

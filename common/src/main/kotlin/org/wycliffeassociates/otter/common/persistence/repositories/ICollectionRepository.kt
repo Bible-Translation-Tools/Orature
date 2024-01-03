@@ -28,28 +28,49 @@ import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 
 interface ICollectionRepository : IRepository<Collection> {
     fun insert(collection: Collection): Single<Int>
+
     fun getProject(id: Int): Maybe<Collection>
+
     fun getDerivedProject(sourceProject: Collection): Maybe<Collection>
+
     fun getDerivedProjects(): Single<List<Collection>>
+
     fun getSourceProjects(): Single<List<Collection>>
+
     fun getRootSources(): Single<List<Collection>>
+
     fun getSource(project: Collection): Maybe<Collection>
+
     fun getChildren(collection: Collection): Single<List<Collection>>
-    fun getProjectBySlugAndMetadata(slug: String, metadata: ResourceMetadata): Single<Collection>
-    fun updateSource(collection: Collection, newSource: Collection): Completable
-    fun updateParent(collection: Collection, newParent: Collection): Completable
+
+    fun getProjectBySlugAndMetadata(
+        slug: String,
+        metadata: ResourceMetadata,
+    ): Single<Collection>
+
+    fun updateSource(
+        collection: Collection,
+        newSource: Collection,
+    ): Completable
+
+    fun updateParent(
+        collection: Collection,
+        newParent: Collection,
+    ): Completable
+
     fun deriveProject(
         sourceMetadatas: List<ResourceMetadata>,
         sourceCollection: Collection,
         language: Language,
         verseByVerse: Boolean,
-        mode: ProjectMode
+        mode: ProjectMode,
     ): Single<Collection>
+
     fun deriveProjects(
         rootCollection: Collection,
         language: Language,
         verseByVerse: Boolean,
-        mode: ProjectMode
+        mode: ProjectMode,
     ): Single<List<Collection>>
 
     /**
@@ -60,7 +81,10 @@ interface ICollectionRepository : IRepository<Collection> {
      * @param project the Collection corresponding to the project (Book) being deleted
      * @param deleteAudio flag for if take files referenced by Take entries should be removed from the filesystem
      */
-    fun deleteProject(project: Collection, deleteAudio: Boolean): Completable
+    fun deleteProject(
+        project: Collection,
+        deleteAudio: Boolean,
+    ): Completable
 
     /**
      * Deletes a derived project's resources. This should remove all associated takes.
@@ -70,7 +94,10 @@ interface ICollectionRepository : IRepository<Collection> {
      * @param project the Collection corresponding to the project (Book) being deleted (Note: this is NOT the resource!)
      * @param deleteAudio flag for if take files referenced by Take entries should be removed from the filesystem
      */
-    fun deleteResources(project: Collection, deleteAudio: Boolean): Completable
+    fun deleteResources(
+        project: Collection,
+        deleteAudio: Boolean,
+    ): Completable
 
     fun collectionsWithoutTakes(project: Collection): Single<List<Collection>>
 }

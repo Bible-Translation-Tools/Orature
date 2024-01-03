@@ -30,7 +30,6 @@ import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class MarkerNodeSkin(val control: MarkerNode) : SkinBase<MarkerNode>(control) {
-
     init {
         val root = buildMarkerSkin()
         children.add(root)

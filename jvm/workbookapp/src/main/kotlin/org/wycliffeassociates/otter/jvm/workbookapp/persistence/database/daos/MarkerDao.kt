@@ -25,9 +25,12 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.Inserti
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.MarkerEntity
 
 class MarkerDao(
-    private val instanceDsl: DSLContext
+    private val instanceDsl: DSLContext,
 ) {
-    fun fetchByTakeId(id: Int, dsl: DSLContext = instanceDsl): List<MarkerEntity> {
+    fun fetchByTakeId(
+        id: Int,
+        dsl: DSLContext = instanceDsl,
+    ): List<MarkerEntity> {
         return dsl
             .select()
             .from(MARKER_ENTITY)
@@ -38,7 +41,10 @@ class MarkerDao(
     }
 
     @Synchronized
-    fun insert(entity: MarkerEntity, dsl: DSLContext = instanceDsl): Int {
+    fun insert(
+        entity: MarkerEntity,
+        dsl: DSLContext = instanceDsl,
+    ): Int {
         if (entity.id != 0) throw InsertionException("Entity ID is not 0")
 
         // Insert the marker entity
@@ -48,13 +54,13 @@ class MarkerDao(
                 MARKER_ENTITY.TAKE_FK,
                 MARKER_ENTITY.NUMBER,
                 MARKER_ENTITY.POSITION,
-                MARKER_ENTITY.LABEL
+                MARKER_ENTITY.LABEL,
             )
             .values(
                 entity.takeFk,
                 entity.number,
                 entity.position,
-                entity.label
+                entity.label,
             )
             .execute()
 
@@ -67,7 +73,10 @@ class MarkerDao(
             }!!
     }
 
-    fun fetchById(id: Int, dsl: DSLContext = instanceDsl): MarkerEntity {
+    fun fetchById(
+        id: Int,
+        dsl: DSLContext = instanceDsl,
+    ): MarkerEntity {
         return dsl
             .select()
             .from(MARKER_ENTITY)
@@ -86,7 +95,10 @@ class MarkerDao(
             }
     }
 
-    fun update(entity: MarkerEntity, dsl: DSLContext = instanceDsl) {
+    fun update(
+        entity: MarkerEntity,
+        dsl: DSLContext = instanceDsl,
+    ) {
         dsl
             .update(MARKER_ENTITY)
             .set(MARKER_ENTITY.TAKE_FK, entity.takeFk)
@@ -97,7 +109,10 @@ class MarkerDao(
             .execute()
     }
 
-    fun delete(entity: MarkerEntity, dsl: DSLContext = instanceDsl) {
+    fun delete(
+        entity: MarkerEntity,
+        dsl: DSLContext = instanceDsl,
+    ) {
         dsl
             .deleteFrom(MARKER_ENTITY)
             .where(MARKER_ENTITY.ID.eq(entity.id))

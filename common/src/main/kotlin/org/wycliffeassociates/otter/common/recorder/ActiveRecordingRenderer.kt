@@ -22,12 +22,12 @@ import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.collections.FloatRingBuffer
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import java.util.concurrent.atomic.AtomicBoolean
-import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
 
 private const val DEFAULT_BUFFER_SIZE = 1024
 
@@ -35,7 +35,7 @@ class ActiveRecordingRenderer(
     stream: Observable<ByteArray>,
     recordingStatus: Observable<Boolean>,
     width: Int,
-    secondsOnScreen: Int
+    secondsOnScreen: Int,
 ) {
     private val logger = LoggerFactory.getLogger(ActiveRecordingRenderer::class.java)
 
@@ -63,25 +63,29 @@ class ActiveRecordingRenderer(
         bb.order(ByteOrder.LITTLE_ENDIAN)
     }
 
-    val activeRenderer = stream
-        .subscribeOn(Schedulers.io())
-        .doOnError { e ->
-            logger.error("Error in active renderer stream", e)
-        }
-        .subscribe {
-            bb.put(it)
-            bb.position(0)
-            while (bb.hasRemaining()) {
-                val short = bb.short
-                if (isActive.get()) {
-                    pcmCompressor.add(short.toFloat())
-                }
+    val activeRenderer =
+        stream
+            .subscribeOn(Schedulers.io())
+            .doOnError { e ->
+                logger.error("Error in active renderer stream", e)
             }
-            bb.clear()
-        }
-        .also { compositeDisposable.add(it) }
+            .subscribe {
+                bb.put(it)
+                bb.position(0)
+                while (bb.hasRemaining()) {
+                    val short = bb.short
+                    if (isActive.get()) {
+                        pcmCompressor.add(short.toFloat())
+                    }
+                }
+                bb.clear()
+            }
+            .also { compositeDisposable.add(it) }
 
-    private fun samplesToCompress(width: Int, secondsOnScreen: Int): Int {
+    private fun samplesToCompress(
+        width: Int,
+        secondsOnScreen: Int,
+    ): Int {
         // TODO: get samplerate from wav file, don't assume 44.1khz
         return (DEFAULT_SAMPLE_RATE * secondsOnScreen) / width
     }

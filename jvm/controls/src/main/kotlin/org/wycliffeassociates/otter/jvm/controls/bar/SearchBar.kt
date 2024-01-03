@@ -2,7 +2,6 @@ package org.wycliffeassociates.otter.jvm.controls.bar
 
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.ObjectBinding
-import javafx.beans.property.SimpleStringProperty
 import javafx.event.EventTarget
 import javafx.scene.Node
 import javafx.scene.control.Button
@@ -12,12 +11,12 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import tornadofx.*
 
 class SearchBar : CustomTextField() {
-
     private val searchIcon = FontIcon(MaterialDesign.MDI_MAGNIFY)
-    private val clearBtn = Button().apply {
-        addClass("btn", "btn--borderless", "text-field-button")
-        graphic = FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE)
-    }
+    private val clearBtn =
+        Button().apply {
+            addClass("btn", "btn--borderless", "text-field-button")
+            graphic = FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE)
+        }
 
     init {
         addClass("txt-input", "filtered-search-bar__input")
@@ -38,7 +37,7 @@ class SearchBar : CustomTextField() {
                     clearBtn
                 }
             },
-            textProperty()
+            textProperty(),
         )
     }
 }

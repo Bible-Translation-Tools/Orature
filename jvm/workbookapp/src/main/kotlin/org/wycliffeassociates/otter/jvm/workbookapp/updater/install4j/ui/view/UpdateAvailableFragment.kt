@@ -22,55 +22,55 @@ import org.wycliffeassociates.otter.jvm.workbookapp.updater.install4j.ui.viewmod
 import tornadofx.*
 
 class UpdateAvailableFragment : Fragment() {
-
     val vm: AppUpdaterViewModel by inject()
 
-    override val root = vbox {
+    override val root =
+        vbox {
 
-        fitToParentWidth()
+            fitToParentWidth()
 
-        visibleProperty().bind(vm.showUpdateAvailable)
-        managedProperty().bind(visibleProperty())
+            visibleProperty().bind(vm.showUpdateAvailable)
+            managedProperty().bind(visibleProperty())
 
-        styleClass.add("app-drawer__section")
-
-        label(messages["updateAvailable"]).apply {
-            styleClass.add("app-drawer__subtitle")
-        }
-
-        hbox {
             styleClass.add("app-drawer__section")
-            label(messages["updateVersion"]).apply {
-                styleClass.add("app-drawer__text")
-            }
-            label {
-                textProperty().bind(vm.updateVersion)
-                styleClass.add("app-drawer__text")
-            }
-        }
 
-        hbox {
-            styleClass.add("app-drawer__section")
-            label(messages["updateSize"]).apply {
-                styleClass.add("app-drawer__text")
+            label(messages["updateAvailable"]).apply {
+                styleClass.add("app-drawer__subtitle")
             }
-            label {
-                styleClass.add("app-drawer__text")
-                textProperty().bind(vm.updateSize)
-            }
-        }
 
-        label(messages["updateUrl"]).apply {
-            styleClass.add("app-drawer__subtitle")
-        }
-
-        hyperlink {
-            styleClass.add("wa-text--hyperlink")
-            textProperty().bind(vm.updateUrlText)
-            action {
-                hostServices.showDocument(textProperty().value)
+            hbox {
+                styleClass.add("app-drawer__section")
+                label(messages["updateVersion"]).apply {
+                    styleClass.add("app-drawer__text")
+                }
+                label {
+                    textProperty().bind(vm.updateVersion)
+                    styleClass.add("app-drawer__text")
+                }
             }
-        }
+
+            hbox {
+                styleClass.add("app-drawer__section")
+                label(messages["updateSize"]).apply {
+                    styleClass.add("app-drawer__text")
+                }
+                label {
+                    styleClass.add("app-drawer__text")
+                    textProperty().bind(vm.updateSize)
+                }
+            }
+
+            label(messages["updateUrl"]).apply {
+                styleClass.add("app-drawer__subtitle")
+            }
+
+            hyperlink {
+                styleClass.add("wa-text--hyperlink")
+                textProperty().bind(vm.updateUrlText)
+                action {
+                    hostServices.showDocument(textProperty().value)
+                }
+            }
 
 /** currently does not work on Windows/Linux **/
 //        add(
@@ -82,5 +82,5 @@ class UpdateAvailableFragment : Fragment() {
 //                }
 //            }
 //        )
-    }
+        }
 }

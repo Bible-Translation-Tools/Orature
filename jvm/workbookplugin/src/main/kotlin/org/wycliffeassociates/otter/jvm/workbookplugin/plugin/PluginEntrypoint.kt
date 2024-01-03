@@ -24,4 +24,5 @@ import tornadofx.Fragment
 abstract class PluginEntrypoint : Fragment()
 
 object PluginCloseRequestEvent : FXEvent()
+
 object PluginCloseFinishedEvent : FXEvent()

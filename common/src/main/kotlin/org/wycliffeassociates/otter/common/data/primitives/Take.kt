@@ -31,5 +31,5 @@ data class Take(
     var checkingStatus: CheckingStatus,
     var checksum: String?,
     var markers: List<Marker>,
-    var id: Int = 0
+    var id: Int = 0,
 )

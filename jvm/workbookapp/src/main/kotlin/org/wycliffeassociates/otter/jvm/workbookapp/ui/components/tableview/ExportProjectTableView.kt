@@ -19,12 +19,12 @@ import tornadofx.FX.Companion.messages
 
 class ExportProjectTableView(
     chapters: ObservableList<ChapterDescriptor>,
-    selectedChapters: ObservableSet<ChapterDescriptor>
+    selectedChapters: ObservableSet<ChapterDescriptor>,
 ) : TableView<ChapterDescriptor>(chapters) {
-
-    private val isSelectedAllProperty = booleanBinding(selectedChapters) {
-        selectedChapters.size == chapters.filter { it.selectable }.size
-    }
+    private val isSelectedAllProperty =
+        booleanBinding(selectedChapters) {
+            selectedChapters.size == chapters.filter { it.selectable }.size
+        }
 
     init {
         addClass("wa-table-view")
@@ -35,17 +35,18 @@ class ExportProjectTableView(
 
         column("", ChapterDescriptor::class) {
             addClass("table-view__column-header-row")
-            graphic = checkbox {
-                addClass("wa-checkbox")
-                isSelectedAllProperty.onChangeAndDoNow { isSelected = it == true }
-                action {
-                    if (isSelected) {
-                        selectedChapters.addAll(chapters.filter { it.selectable })
-                    } else {
-                        selectedChapters.clear()
+            graphic =
+                checkbox {
+                    addClass("wa-checkbox")
+                    isSelectedAllProperty.onChangeAndDoNow { isSelected = it == true }
+                    action {
+                        if (isSelected) {
+                            selectedChapters.addAll(chapters.filter { it.selectable })
+                        } else {
+                            selectedChapters.clear()
+                        }
                     }
                 }
-            }
             setCellValueFactory { SimpleObjectProperty(it.value) }
             setCellFactory {
                 ExportProjectTableActionCell(selectedChapters)
@@ -59,10 +60,11 @@ class ExportProjectTableView(
             addClass("table-view__column-header-row")
             setCellValueFactory { SimpleObjectProperty(it.value) }
             cellFormat {
-                graphic = label(item.number.toString()) {
-                    addClass("h4")
-                    isDisable = !item.selectable
-                }
+                graphic =
+                    label(item.number.toString()) {
+                        addClass("h4")
+                        isDisable = !item.selectable
+                    }
             }
             isReorderable = false
             isSortable = true
@@ -71,10 +73,11 @@ class ExportProjectTableView(
             setCellValueFactory { it.value.progress.toProperty() }
             cellFormat {
                 val percent = item.toDouble()
-                graphic = progressbar(percent) {
-                    toggleClass("full", percent == 1.0)
-                    fitToParentWidth()
-                }
+                graphic =
+                    progressbar(percent) {
+                        toggleClass("full", percent == 1.0)
+                        fitToParentWidth()
+                    }
             }
             isReorderable = false
             isSortable = true
@@ -84,14 +87,14 @@ class ExportProjectTableView(
             ExportProjectTableRow(selectedChapters)
         }
 
-        /* accessibility */
+        // accessibility
         focusedProperty().onChange {
             if (it && selectionModel.selectedIndex < 0) {
                 selectionModel.select(0)
                 focusModel.focus(0)
             }
         }
-        /* handle selection with SPACE and ENTER */
+        // handle selection with SPACE and ENTER
         addEventFilter(KeyEvent.KEY_PRESSED) { event ->
             if (event.code == KeyCode.ENTER || event.code == KeyCode.SPACE) {
                 if (selectedItem in selectedChapters) {
@@ -107,10 +110,12 @@ class ExportProjectTableView(
 }
 
 class ExportProjectTableRow(
-    private val selectedChapters: ObservableSet<ChapterDescriptor>
+    private val selectedChapters: ObservableSet<ChapterDescriptor>,
 ) : TableRow<ChapterDescriptor>() {
-
-    override fun updateItem(item: ChapterDescriptor?, empty: Boolean) {
+    override fun updateItem(
+        item: ChapterDescriptor?,
+        empty: Boolean,
+    ) {
         super.updateItem(item, empty)
         if (item == null || isEmpty || !item.selectable) {
             isMouseTransparent = true
@@ -134,5 +139,5 @@ class ExportProjectTableRow(
 fun EventTarget.exportProjectTableView(
     chapters: ObservableList<ChapterDescriptor>,
     selectedChapters: ObservableSet<ChapterDescriptor>,
-    op: ExportProjectTableView.() -> Unit = {}
+    op: ExportProjectTableView.() -> Unit = {},
 ) = ExportProjectTableView(chapters, selectedChapters).attachTo(this, op)

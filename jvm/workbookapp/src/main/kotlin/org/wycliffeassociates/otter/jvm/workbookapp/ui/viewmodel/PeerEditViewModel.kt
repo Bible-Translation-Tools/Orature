@@ -17,18 +17,18 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.IUndoable
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
-import org.wycliffeassociates.otter.common.domain.translation.TranslationTakeApproveAction
 import org.wycliffeassociates.otter.common.domain.model.UndoableActionHistory
+import org.wycliffeassociates.otter.common.domain.translation.TranslationTakeApproveAction
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
+import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import org.wycliffeassociates.otter.jvm.controls.waveform.IWaveformViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
+import org.wycliffeassociates.otter.jvm.controls.waveform.WAVEFORM_MAX_HEIGHT
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
-import org.wycliffeassociates.otter.jvm.controls.waveform.WAVEFORM_MAX_HEIGHT
 import tornadofx.*
 import javax.inject.Inject
 
@@ -145,19 +145,21 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     fun confirmChunk() {
         currentChunkProperty.value?.let { chunk ->
             chunkConfirmed.set(true)
-            val checkingStatus = checkingStatusFromStep(
-                translationViewModel.selectedStepProperty.value
-            )
+            val checkingStatus =
+                checkingStatusFromStep(
+                    translationViewModel.selectedStepProperty.value,
+                )
             val take = chunk.audio.getSelectedTake()!!
             take.checkingState
                 .take(1)
                 .observeOnFx()
                 .subscribe { currentChecking ->
-                    val op = TranslationTakeApproveAction(
-                        take,
-                        checkingStatus,
-                        currentChecking
-                    )
+                    val op =
+                        TranslationTakeApproveAction(
+                            take,
+                            checkingStatus,
+                            currentChecking,
+                        )
                     actionHistory.execute(op)
                     onUndoableAction()
                     refreshChunkList()
@@ -231,10 +233,11 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
             totalFrames = it.totalFrames
         }
         waveformAudioPlayerProperty.set(audioPlayer)
-        audioController = AudioPlayerController().also { controller ->
-            controller.load(audioPlayer)
-            isPlayingProperty.bind(controller.isPlayingProperty)
-        }
+        audioController =
+            AudioPlayerController().also { controller ->
+                controller.load(audioPlayer)
+                isPlayingProperty.bind(controller.isPlayingProperty)
+            }
 
         val audio = OratureAudioFile(take.file)
         createWaveformImages(audio)
@@ -246,13 +249,14 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         imageWidthProperty.set(computeImageWidth(width))
 
         builder.cancel()
-        waveform = builder.buildAsync(
-            audio.reader(),
-            width = imageWidthProperty.value.toInt(),
-            height = height,
-            wavColor = Color.web(WAV_COLOR),
-            background = Color.web(BACKGROUND_COLOR)
-        )
+        waveform =
+            builder.buildAsync(
+                audio.reader(),
+                width = imageWidthProperty.value.toInt(),
+                height = height,
+                wavColor = Color.web(WAV_COLOR),
+                background = Color.web(BACKGROUND_COLOR),
+            )
     }
 
     private fun onUndoableAction() {

@@ -24,8 +24,10 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookOpenEvent
 import tornadofx.FX
 
 class WorkbookTableRow : TableRow<WorkbookDescriptor>() {
-
-    override fun updateItem(item: WorkbookDescriptor?, empty: Boolean) {
+    override fun updateItem(
+        item: WorkbookDescriptor?,
+        empty: Boolean,
+    ) {
         super.updateItem(item, empty)
 
         if (item == null || isEmpty) {

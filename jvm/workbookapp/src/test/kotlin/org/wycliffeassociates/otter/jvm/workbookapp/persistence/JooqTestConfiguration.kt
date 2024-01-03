@@ -37,7 +37,10 @@ object JooqTestConfiguration {
         return config
     }
 
-    fun createDatabase(databasePath: String, schemaFile: File): Configuration {
+    fun createDatabase(
+        databasePath: String,
+        schemaFile: File,
+    ): Configuration {
         println("Creating $databasePath")
         val config = getConfig(databasePath)
         val sql = StringBuffer()

@@ -21,29 +21,42 @@ package org.wycliffeassociates.otter.common.persistence.repositories
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
-import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.Collection
+import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 
 interface IContentRepository : IRepository<Content> {
     // Insert for a collection
-    fun insertForCollection(contentList: List<Content>, collection: Collection): Single<List<Content>>
+    fun insertForCollection(
+        contentList: List<Content>,
+        collection: Collection,
+    ): Single<List<Content>>
+
     // Get all the chunks for a collection
     fun getByCollection(collection: Collection): Single<List<Content>>
+
     fun getByCollectionWithPersistentConnection(collection: Collection): Observable<List<Content>>
+
     // Get the collection meta-chunk
     fun getCollectionMetaContent(collection: Collection): Single<Content>
+
     // Get sources this content is derived from
     fun getSources(content: Content): Single<List<Content>>
+
     // Update the sources for a content
-    fun updateSources(content: Content, sourceContents: List<Content>): Completable
+    fun updateSources(
+        content: Content,
+        sourceContents: List<Content>,
+    ): Completable
+
     fun deleteForCollection(
         chapterCollection: Collection,
-        typeFilter: ContentType? = null
+        typeFilter: ContentType? = null,
     ): Completable
+
     fun linkDerivedToSource(
         derivedContents: List<Content>,
-        sourceContents: List<Content>
+        sourceContents: List<Content>,
     ): Completable
 
     fun updateAll(content: List<Content>): Completable

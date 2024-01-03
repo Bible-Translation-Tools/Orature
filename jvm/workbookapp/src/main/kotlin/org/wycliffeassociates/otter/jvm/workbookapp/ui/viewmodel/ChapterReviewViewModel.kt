@@ -25,8 +25,8 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
-import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.content.ChapterTranslationBuilder
+import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
@@ -89,12 +89,12 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     val markerProgressCounterProperty = SimpleStringProperty()
     val totalMarkersProperty = SimpleIntegerProperty(0)
     val markersPlacedCountProperty = SimpleIntegerProperty(0)
-    val canGoNextChapterProperty: BooleanBinding = translationViewModel.isLastChapterProperty.not().and(
-        markersPlacedCountProperty.isEqualTo(totalMarkersProperty)
-    )
+    val canGoNextChapterProperty: BooleanBinding =
+        translationViewModel.isLastChapterProperty.not().and(
+            markersPlacedCountProperty.isEqualTo(totalMarkersProperty),
+        )
     val isPlayingProperty = SimpleBooleanProperty(false)
     val compositeDisposable = CompositeDisposable()
-
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -119,9 +119,9 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                 MessageFormat.format(
                     messages["marker_placed_ratio"],
                     markersPlacedCountProperty.value ?: 0,
-                    totalMarkersProperty.value ?: 0
+                    totalMarkersProperty.value ?: 0,
                 )
-            }
+            },
         )
 
         loadChapterTake()
@@ -150,7 +150,11 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
         onUndoableAction()
     }
 
-    override fun moveMarker(id: Int, start: Int, end: Int) {
+    override fun moveMarker(
+        id: Int,
+        start: Int,
+        end: Int,
+    ) {
         super.moveMarker(id, start, end)
         onUndoableAction()
     }
@@ -176,7 +180,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
             .getSelectedTake()
             ?.let {
                 it.checkingState.accept(
-                    TakeCheckingState(CheckingStatus.UNCHECKED, null)
+                    TakeCheckingState(CheckingStatus.UNCHECKED, null),
                 )
                 it.deletedTimestamp.accept(DateHolder.now())
             }
@@ -186,7 +190,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
         chapterTranslationBuilder
             .getOrCompile(
                 workbookDataStore.workbook,
-                workbookDataStore.chapter
+                workbookDataStore.chapter,
             )
             .flatMap { take ->
                 loadTargetAudio(take)
@@ -201,7 +205,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
             }
     }
 
-    private fun loadTargetAudio(take: Take) : Single<OratureAudioFile> {
+    private fun loadTargetAudio(take: Take): Single<OratureAudioFile> {
         return Single
             .fromCallable {
                 val audioPlayer: IAudioPlayer = audioConnectionFactory.getPlayer()
@@ -210,10 +214,11 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
                     sampleRate = it.sampleRate
                     totalFrames = it.totalFrames
                 }
-                audioController = AudioPlayerController().also { controller ->
-                    controller.load(audioPlayer)
-                    isPlayingProperty.bind(controller.isPlayingProperty)
-                }
+                audioController =
+                    AudioPlayerController().also { controller ->
+                        controller.load(audioPlayer)
+                        isPlayingProperty.bind(controller.isPlayingProperty)
+                    }
                 waveformAudioPlayerProperty.set(audioPlayer)
                 OratureAudioFile(take.file)
             }
@@ -224,18 +229,20 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
         markers.clear()
         val sourceAudio = OratureAudioFile(sourceAudio.file)
         val sourceMarkers = sourceAudio.getMarker<VerseMarker>()
-        val markerList = audio.getMarker<VerseMarker>().map {
-            ChunkMarkerModel(AudioCue(it.location, it.label))
-        }
+        val markerList =
+            audio.getMarker<VerseMarker>().map {
+                ChunkMarkerModel(AudioCue(it.location, it.label))
+            }
 
         totalMarkersProperty.set(sourceMarkers.size)
-        markerModel = VerseMarkerModel(
-            audio,
-            sourceMarkers.size,
-            sourceMarkers.map { it.label }
-        ).also {
-            it.loadMarkers(markerList)
-        }
+        markerModel =
+            VerseMarkerModel(
+                audio,
+                sourceMarkers.size,
+                sourceMarkers.map { it.label },
+            ).also {
+                it.loadMarkers(markerList)
+            }
         markers.setAll(markerList)
         markers.sortBy { it.frame }
     }
@@ -249,13 +256,14 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     private fun createWaveformImages(audio: OratureAudioFile) {
         imageWidthProperty.set(computeImageWidth(width, SECONDS_ON_SCREEN))
 
-        waveform = builder.buildAsync(
-            audio.reader(),
-            width = imageWidthProperty.value.toInt(),
-            height = height,
-            wavColor = Color.web(WAV_COLOR),
-            background = Color.web(BACKGROUND_COLOR)
-        )
+        waveform =
+            builder.buildAsync(
+                audio.reader(),
+                width = imageWidthProperty.value.toInt(),
+                height = height,
+                wavColor = Color.web(WAV_COLOR),
+                background = Color.web(BACKGROUND_COLOR),
+            )
     }
 
     private fun onUndoableAction() {

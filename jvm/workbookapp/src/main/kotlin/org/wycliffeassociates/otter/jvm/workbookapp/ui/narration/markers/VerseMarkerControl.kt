@@ -18,12 +18,10 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.VerseMenu
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
-
 const val MARKER_AREA_WIDTH = 24.0
 internal const val MARKER_WIDTH = 2.0
 
 class VerseMarkerControl : BorderPane() {
-
     val verseProperty = SimpleObjectProperty<AudioMarker>()
     val verseIndexProperty = SimpleIntegerProperty()
     val labelProperty = SimpleStringProperty()
@@ -40,76 +38,80 @@ class VerseMarkerControl : BorderPane() {
     init {
         addClass("verse-marker")
 
-        left = stackpane {
-            addClass("verse-marker__drag-area")
-            minWidth = MARKER_AREA_WIDTH
-            maxWidth = MARKER_AREA_WIDTH
+        left =
+            stackpane {
+                addClass("verse-marker__drag-area")
+                minWidth = MARKER_AREA_WIDTH
+                maxWidth = MARKER_AREA_WIDTH
 
-            dragAreaProperty.set(this)
+                dragAreaProperty.set(this)
 
-            region {
-                line {
-                    addClass("verse-marker__line")
+                region {
+                    line {
+                        addClass("verse-marker__line")
 
-                    startXProperty().bind(this@region.layoutXProperty().plus(MARKER_AREA_WIDTH / 2))
-                    startYProperty().bind(this@region.layoutYProperty())
-                    endXProperty().bind(this@region.widthProperty().minus(MARKER_AREA_WIDTH / 2))
-                    endYProperty().bind(this@VerseMarkerControl.prefHeightProperty())
-                    strokeWidth = MARKER_WIDTH
+                        startXProperty().bind(this@region.layoutXProperty().plus(MARKER_AREA_WIDTH / 2))
+                        startYProperty().bind(this@region.layoutYProperty())
+                        endXProperty().bind(this@region.widthProperty().minus(MARKER_AREA_WIDTH / 2))
+                        endYProperty().bind(this@VerseMarkerControl.prefHeightProperty())
+                        strokeWidth = MARKER_WIDTH
+                    }
+                }
+
+                label {
+                    addClass("verse-marker__icon")
+                    graphicProperty().bind(markerIconProperty)
+                }
+
+                setOnMouseEntered {
+                    if (canBeMovedProperty.value) {
+                        cursor = Cursor.H_RESIZE
+                        markerIconProperty.set(normalMarker)
+
+                        addPseudoClass("movable")
+                    }
+                    it.consume()
+                }
+
+                setOnMouseExited {
+                    cursor = Cursor.DEFAULT
+                    markerIconProperty.set(outlinedMarker)
+
+                    removePseudoClass("movable")
+                    it.consume()
                 }
             }
 
-            label {
-                addClass("verse-marker__icon")
-                graphicProperty().bind(markerIconProperty)
-            }
-
-            setOnMouseEntered {
-                if (canBeMovedProperty.value) {
-                    cursor = Cursor.H_RESIZE
-                    markerIconProperty.set(normalMarker)
-
-                    addPseudoClass("movable")
-                }
-                it.consume()
-            }
-
-            setOnMouseExited {
-                cursor = Cursor.DEFAULT
-                markerIconProperty.set(outlinedMarker)
-
-                removePseudoClass("movable")
-                it.consume()
-            }
-        }
-
-        center = label(labelProperty) {
+        center =
+            label(labelProperty) {
                 minWidth = Region.USE_PREF_SIZE
                 addClass("verse-marker__title")
                 setAlignment(this, Pos.BOTTOM_LEFT)
             }
 
-        right = Button().apply {
-            addClass("btn", "btn--icon", "verse-marker__menu")
-            setAlignment(this, Pos.BOTTOM_LEFT)
-            graphic = FontIcon(MaterialDesign.MDI_DOTS_VERTICAL)
-            tooltip(messages["options"])
+        right =
+            Button().apply {
+                addClass("btn", "btn--icon", "verse-marker__menu")
+                setAlignment(this, Pos.BOTTOM_LEFT)
+                graphic = FontIcon(MaterialDesign.MDI_DOTS_VERTICAL)
+                tooltip(messages["options"])
 
-            val menu = VerseMenu().apply {
-                isRecordingProperty.bind(this@VerseMarkerControl.isRecordingProperty)
-                verseProperty.bind(this@VerseMarkerControl.verseProperty)
-                verseIndexProperty.bind(this@VerseMarkerControl.verseIndexProperty)
+                val menu =
+                    VerseMenu().apply {
+                        isRecordingProperty.bind(this@VerseMarkerControl.isRecordingProperty)
+                        verseProperty.bind(this@VerseMarkerControl.verseProperty)
+                        verseIndexProperty.bind(this@VerseMarkerControl.verseIndexProperty)
+                    }
+
+                menu.setOnShowing { addPseudoClass("active") }
+                menu.setOnHidden { removePseudoClass("active") }
+
+                action {
+                    val screenBound = localToScreen(boundsInLocal)
+                    menu.show(FX.primaryStage)
+                    menu.x = screenBound.centerX - (menu.width / 2)
+                    menu.y = screenBound.centerY - menu.height
+                }
             }
-
-            menu.setOnShowing { addPseudoClass("active") }
-            menu.setOnHidden { removePseudoClass("active") }
-
-            action {
-                val screenBound = localToScreen(boundsInLocal)
-                menu.show(FX.primaryStage)
-                menu.x = screenBound.centerX - (menu.width / 2)
-                menu.y = screenBound.centerY - menu.height
-            }
-        }
     }
 }

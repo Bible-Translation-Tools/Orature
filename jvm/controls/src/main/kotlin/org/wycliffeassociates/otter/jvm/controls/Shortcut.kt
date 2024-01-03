@@ -28,5 +28,5 @@ enum class Shortcut(val value: KeyCodeCombination) {
     PLAY_TARGET(KeyCodeCombination(KeyCode.SPACE, KeyCodeCombination.SHORTCUT_DOWN, KeyCodeCombination.SHIFT_DOWN)),
     GO_BACK(KeyCodeCombination(KeyCode.OPEN_BRACKET, KeyCodeCombination.SHORTCUT_DOWN)),
     UNDO(KeyCodeCombination(KeyCode.Z, KeyCodeCombination.SHORTCUT_DOWN)),
-    REDO(KeyCodeCombination(KeyCode.Z, KeyCodeCombination.SHORTCUT_DOWN, KeyCodeCombination.SHIFT_DOWN))
+    REDO(KeyCodeCombination(KeyCode.Z, KeyCodeCombination.SHORTCUT_DOWN, KeyCodeCombination.SHIFT_DOWN)),
 }

@@ -23,10 +23,12 @@ import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import javax.inject.Inject
 
-class UpdateTranslation @Inject constructor(
-    private val languageRepo: ILanguageRepository
-) {
-    fun update(translation: Translation): Completable {
-        return languageRepo.updateTranslation(translation)
+class UpdateTranslation
+    @Inject
+    constructor(
+        private val languageRepo: ILanguageRepository,
+    ) {
+        fun update(translation: Translation): Completable {
+            return languageRepo.updateTranslation(translation)
+        }
     }
-}

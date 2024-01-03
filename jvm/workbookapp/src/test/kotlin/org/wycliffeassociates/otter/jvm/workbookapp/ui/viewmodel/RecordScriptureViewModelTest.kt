@@ -59,7 +59,6 @@ import org.wycliffeassociates.otter.jvm.device.ConfigureAudioSystem
 import org.wycliffeassociates.otter.jvm.workbookapp.utils.writeWavFile
 import tornadofx.*
 import java.io.File
-import java.lang.Thread.sleep
 import java.time.LocalDate
 
 class RecordScriptureViewModelTest {
@@ -83,42 +82,48 @@ class RecordScriptureViewModelTest {
         private var chunk1 = createChunk()
         private var chapter = createChapter()
 
-        private val english = Language(
-            "en",
-            "English",
-            "English",
-            "ltr",
-            true,
-            "Europe"
-        )
+        private val english =
+            Language(
+                "en",
+                "English",
+                "English",
+                "ltr",
+                true,
+                "Europe",
+            )
 
-        private val resourceMetadata = mock<ResourceMetadata> {
-            on { identifier } doReturn "ulb"
-        }
+        private val resourceMetadata =
+            mock<ResourceMetadata> {
+                on { identifier } doReturn "ulb"
+            }
 
-        private val book = mock<Book> {
-            on { resourceMetadata } doReturn resourceMetadata
-            on { chapters } doReturn Observable.fromIterable(listOf(chapter))
-            on { language } doReturn english
-            on { slug } doReturn "gen"
-            on { title } doReturn "Genesis"
-        }
+        private val book =
+            mock<Book> {
+                on { resourceMetadata } doReturn resourceMetadata
+                on { chapters } doReturn Observable.fromIterable(listOf(chapter))
+                on { language } doReturn english
+                on { slug } doReturn "gen"
+                on { title } doReturn "Genesis"
+            }
 
-        private val sourceAudioAccessor = mock<SourceAudioAccessor> {
-            on { getChapter(any(), eq(null)) } doReturn SourceAudio(sourceTakeFile, 0, 1)
-        }
+        private val sourceAudioAccessor =
+            mock<SourceAudioAccessor> {
+                on { getChapter(any(), eq(null)) } doReturn SourceAudio(sourceTakeFile, 0, 1)
+            }
 
-        private val projectFilesAccessor = mock<ProjectFilesAccessor> {
-            on { audioDir } doReturn tempDir
-            on { updateSelectedTakesFile(any()) } doReturn Completable.complete()
-        }
+        private val projectFilesAccessor =
+            mock<ProjectFilesAccessor> {
+                on { audioDir } doReturn tempDir
+                on { updateSelectedTakesFile(any()) } doReturn Completable.complete()
+            }
 
-        private val workbook = mock<Workbook> {
-            on { source } doReturn book
-            on { target } doReturn book
-            on { sourceAudioAccessor } doReturn sourceAudioAccessor
-            on { projectFilesAccessor } doReturn projectFilesAccessor
-        }
+        private val workbook =
+            mock<Workbook> {
+                on { source } doReturn book
+                on { target } doReturn book
+                on { sourceAudioAccessor } doReturn sourceAudioAccessor
+                on { projectFilesAccessor } doReturn projectFilesAccessor
+            }
 
         private fun createAssociatedAudio() = AssociatedAudio(ReplayRelay.create())
 
@@ -138,7 +143,7 @@ class RecordScriptureViewModelTest {
                 contentType = ContentType.TEXT,
                 resources = listOf(),
                 label = "Chunk",
-                draftNumber = 1
+                draftNumber = 1,
             )
         }
 
@@ -156,25 +161,28 @@ class RecordScriptureViewModelTest {
                 lazy { chunks },
                 Single.just(1),
                 { Completable.complete() },
-                { Completable.complete() }
+                { Completable.complete() },
             )
         }
 
-        private val audioPlugin = mock<IAudioPlugin> {
-            on { isNativePlugin() } doReturn true
-            on { launch(any(), any()) } doReturn Completable.complete()
-        }
+        private val audioPlugin =
+            mock<IAudioPlugin> {
+                on { isNativePlugin() } doReturn true
+                on { launch(any(), any()) } doReturn Completable.complete()
+            }
 
-        private val pluginActions = mock<PluginActions> {
-            on { record(any(), any(), any(), any()) } doReturn Single.just(PluginActions.Result.SUCCESS)
-            on { mark(any(), any(), any()) } doReturn Single.just(PluginActions.Result.SUCCESS)
-            on { edit(any(), any(), any()) } doReturn Single.just(PluginActions.Result.SUCCESS)
-            on { import(any(), any(), any(), any()) } doReturn Completable.complete()
-        }
+        private val pluginActions =
+            mock<PluginActions> {
+                on { record(any(), any(), any(), any()) } doReturn Single.just(PluginActions.Result.SUCCESS)
+                on { mark(any(), any(), any()) } doReturn Single.just(PluginActions.Result.SUCCESS)
+                on { edit(any(), any(), any()) } doReturn Single.just(PluginActions.Result.SUCCESS)
+                on { import(any(), any(), any(), any()) } doReturn Completable.complete()
+            }
 
-        private val pluginRepository = mock<IAudioPluginRepository> {
-            on { getPlugin(any()) } doReturn Maybe.just(audioPlugin)
-        }
+        private val pluginRepository =
+            mock<IAudioPluginRepository> {
+                on { getPlugin(any()) } doReturn Maybe.just(audioPlugin)
+            }
 
         @BeforeClass
         @JvmStatic
@@ -184,11 +192,12 @@ class RecordScriptureViewModelTest {
 
             writeWavFile(sourceTakeFile)
 
-            val configureAudio = ConfigureAudioSystem(
-                testApp.dependencyGraph.injectConnectionFactory(),
-                testApp.dependencyGraph.injectAudioDeviceProvider(),
-                testApp.dependencyGraph.injectAppPreferencesRepository()
-            )
+            val configureAudio =
+                ConfigureAudioSystem(
+                    testApp.dependencyGraph.injectConnectionFactory(),
+                    testApp.dependencyGraph.injectAudioDeviceProvider(),
+                    testApp.dependencyGraph.injectAppPreferencesRepository(),
+                )
             configureAudio.configure()
 
             workbookDataStore = find()
@@ -243,14 +252,16 @@ class RecordScriptureViewModelTest {
 
     @Test
     fun `record new take with recorder plugin`() {
-        contextListener = createChangeListener {
-            Assert.assertEquals(PluginType.RECORDER, it)
-        }
+        contextListener =
+            createChangeListener {
+                Assert.assertEquals(PluginType.RECORDER, it)
+            }
         recordScriptureViewModel.contextProperty.addListener(contextListener)
 
-        activeTakeNumberListener = createChangeListener {
-            Assert.assertEquals(1, it)
-        }
+        activeTakeNumberListener =
+            createChangeListener {
+                Assert.assertEquals(1, it)
+            }
         workbookDataStore.activeTakeNumberProperty.addListener(activeTakeNumberListener)
 
         recordScriptureViewModel.recordNewTake()
@@ -258,14 +269,16 @@ class RecordScriptureViewModelTest {
 
     @Test
     fun `process take with editor plugin`() {
-        contextListener = createChangeListener {
-            Assert.assertEquals(PluginType.EDITOR, it)
-        }
+        contextListener =
+            createChangeListener {
+                Assert.assertEquals(PluginType.EDITOR, it)
+            }
         recordScriptureViewModel.contextProperty.addListener(contextListener)
 
-        activeTakeNumberListener = createChangeListener {
-            Assert.assertEquals(1, it)
-        }
+        activeTakeNumberListener =
+            createChangeListener {
+                Assert.assertEquals(1, it)
+            }
         workbookDataStore.activeTakeNumberProperty.addListener(activeTakeNumberListener)
 
         val take = Take("take1", take1File, 1, MimeType.USFM, LocalDate.now())
@@ -276,14 +289,16 @@ class RecordScriptureViewModelTest {
 
     @Test
     fun `process take with marker plugin`() {
-        contextListener = createChangeListener {
-            Assert.assertEquals(PluginType.MARKER, it)
-        }
+        contextListener =
+            createChangeListener {
+                Assert.assertEquals(PluginType.MARKER, it)
+            }
         recordScriptureViewModel.contextProperty.addListener(contextListener)
 
-        activeTakeNumberListener = createChangeListener {
-            Assert.assertEquals(1, it)
-        }
+        activeTakeNumberListener =
+            createChangeListener {
+                Assert.assertEquals(1, it)
+            }
         workbookDataStore.activeTakeNumberProperty.addListener(activeTakeNumberListener)
 
         val take = Take("take1", take1File, 1, MimeType.USFM, LocalDate.now())
@@ -304,7 +319,6 @@ class RecordScriptureViewModelTest {
                 Assert.assertNotEquals(take.file.lastModified(), initialLastModified)
                 Assert.assertEquals(recordScriptureViewModel.recordable?.audio?.selected?.value?.value, take)
             }
-
     }
 
     @Test
@@ -312,13 +326,14 @@ class RecordScriptureViewModelTest {
         val takes = listOf(take1File)
 
         var counter = 1
-        showImportProgressListener = createChangeListener {
-            when (counter) {
-                1 -> Assert.assertEquals(true, it)
-                2 -> Assert.assertEquals(false, it)
+        showImportProgressListener =
+            createChangeListener {
+                when (counter) {
+                    1 -> Assert.assertEquals(true, it)
+                    2 -> Assert.assertEquals(false, it)
+                }
+                counter++
             }
-            counter++
-        }
         recordScriptureViewModel.showImportProgressDialogProperty.addListener(showImportProgressListener)
 
         recordScriptureViewModel.importTakes(takes)

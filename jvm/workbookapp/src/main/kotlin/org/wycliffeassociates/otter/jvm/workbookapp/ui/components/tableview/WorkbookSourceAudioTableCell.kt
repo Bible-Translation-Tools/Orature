@@ -8,23 +8,27 @@ import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import tornadofx.*
 
 class WorkbookSourceAudioTableCell : TableCell<WorkbookDescriptor, Boolean>() {
+    private val graphicContent =
+        hbox {
+            alignment = Pos.CENTER
+            add(
+                FontIcon(MaterialDesign.MDI_VOLUME_HIGH).apply {
+                    addClass("active-icon")
+                },
+            )
+        }
 
-    private val graphicContent = hbox {
-        alignment = Pos.CENTER
-        add(
-            FontIcon(MaterialDesign.MDI_VOLUME_HIGH).apply {
-                addClass("active-icon")
-            }
-        )
-    }
-
-    override fun updateItem(item: Boolean?, empty: Boolean) {
+    override fun updateItem(
+        item: Boolean?,
+        empty: Boolean,
+    ) {
         super.updateItem(item, empty)
 
-        graphic = if (item == true) {
-            graphicContent
-        } else {
-            null
-        }
+        graphic =
+            if (item == true) {
+                graphicContent
+            } else {
+                null
+            }
     }
 }

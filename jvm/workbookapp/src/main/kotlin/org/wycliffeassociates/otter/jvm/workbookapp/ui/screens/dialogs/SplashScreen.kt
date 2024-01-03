@@ -33,29 +33,30 @@ class SplashScreen : View() {
     private val settingsViewModel: SettingsViewModel by inject()
     private val navigator: NavigationMediator by inject()
 
-    override val root = stackpane {
-        addClass("splash__root")
-        add(resources.imageview("/orature_splash.png"))
-        vbox {
-            addClass("splash__status")
-            alignment = Pos.BOTTOM_CENTER
-
-            progressbar(viewModel.progressProperty) {
-                addClass("splash__progress")
-                fitToParentWidth()
-            }
+    override val root =
+        stackpane {
+            addClass("splash__root")
+            add(resources.imageview("/orature_splash.png"))
             vbox {
-                addClass("splash__text-block")
-                alignment = Pos.CENTER
-                label(viewModel.progressTitleProperty) {
-                    addClass("splash__status-title")
+                addClass("splash__status")
+                alignment = Pos.BOTTOM_CENTER
+
+                progressbar(viewModel.progressProperty) {
+                    addClass("splash__progress")
+                    fitToParentWidth()
                 }
-                label(viewModel.progressBodyProperty) {
-                    addClass("splash__status-text")
+                vbox {
+                    addClass("splash__text-block")
+                    alignment = Pos.CENTER
+                    label(viewModel.progressTitleProperty) {
+                        addClass("splash__status-title")
+                    }
+                    label(viewModel.progressBodyProperty) {
+                        addClass("splash__status-text")
+                    }
                 }
             }
         }
-    }
 
     init {
         tryImportStylesheet(resources["/css/common.css"])
@@ -65,7 +66,7 @@ class SplashScreen : View() {
             .initApp()
             .subscribe(
                 { finish() },
-                { finish() }
+                { finish() },
             )
     }
 

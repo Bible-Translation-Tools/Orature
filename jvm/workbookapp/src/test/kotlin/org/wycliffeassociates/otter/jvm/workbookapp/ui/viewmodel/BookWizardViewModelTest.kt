@@ -24,12 +24,12 @@ import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.BeforeClass
 import org.junit.Test
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.testfx.api.FxToolkit
 import org.testfx.util.WaitForAsyncUtils
 import org.wycliffeassociates.otter.common.data.primitives.Collection
@@ -48,27 +48,29 @@ class BookWizardViewModelTest {
         private val mockCollectionRepo = mock(ICollectionRepository::class.java)
         private val mockWorkbookRepo = mock(IWorkbookRepository::class.java)
 
-        private val simpleResource = Collection(
-            1,
-            "ulb",
-            "test-label",
-            "test-key",
-            null,
-            null,
-            1
-        )
-
-        private val simpleBooks = listOf(
+        private val simpleResource =
             Collection(
                 1,
-                "gen",
-                "Genesis-test-label",
-                "Genesis-test-title",
+                "ulb",
+                "test-label",
+                "test-key",
                 null,
                 null,
-                1
+                1,
             )
-        )
+
+        private val simpleBooks =
+            listOf(
+                Collection(
+                    1,
+                    "gen",
+                    "Genesis-test-label",
+                    "Genesis-test-title",
+                    null,
+                    null,
+                    1,
+                ),
+            )
 
         @BeforeClass
         @JvmStatic fun setup() {
@@ -102,25 +104,27 @@ class BookWizardViewModelTest {
         verify(mockCollectionRepo).getChildren(simpleResource)
     }
 
-    private val sourceLanguage = Language(
-        "en-test",
-        "English-test",
-        "English-test",
-        "ltr",
-        true,
-        "NA",
-        1
-    )
+    private val sourceLanguage =
+        Language(
+            "en-test",
+            "English-test",
+            "English-test",
+            "ltr",
+            true,
+            "NA",
+            1,
+        )
 
-    private val targetLanguage = Language(
-        "ar",
-        "عربي",
-        "Arabic-test",
-        "rtl",
-        true,
-        "AS",
-        2
-    )
+    private val targetLanguage =
+        Language(
+            "ar",
+            "عربي",
+            "Arabic-test",
+            "rtl",
+            true,
+            "AS",
+            2,
+        )
 
     private fun setUpMocks_loadExistingProject() {
         val mockTranslationModel = mock(TranslationCardModel::class.java)
@@ -151,26 +155,27 @@ class BookWizardViewModelTest {
         verify(mockWorkbookRepo).getProjects(any())
     }
 
-    private val rootSources = listOf(
-        Collection(
-            1,
-            "ulb",
-            "test",
-            "test",
-            mock(ResourceMetadata::class.java),
-            null,
-            10
-        ),
-        Collection(
-            2,
-            "obs",
-            "test",
-            "test",
-            mock(ResourceMetadata::class.java),
-            null,
-            20
+    private val rootSources =
+        listOf(
+            Collection(
+                1,
+                "ulb",
+                "test",
+                "test",
+                mock(ResourceMetadata::class.java),
+                null,
+                10,
+            ),
+            Collection(
+                2,
+                "obs",
+                "test",
+                "test",
+                mock(ResourceMetadata::class.java),
+                null,
+                20,
+            ),
         )
-    )
 
     private fun setUpMock_loadResources() {
         `when`(rootSources[0].resourceContainer!!.language)
@@ -201,7 +206,7 @@ class BookWizardViewModelTest {
         assertEquals(
             "There should be only 1 resource matching $sourceLanguage.",
             1,
-            spyVM.sourceCollections.size
+            spyVM.sourceCollections.size,
         )
 
         verify(mockTranslationModel, atLeastOnce()).sourceLanguage

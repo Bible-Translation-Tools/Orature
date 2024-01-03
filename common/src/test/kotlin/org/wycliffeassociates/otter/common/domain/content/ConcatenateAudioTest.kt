@@ -24,11 +24,11 @@ import io.reactivex.observers.TestObserver
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
 import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
 
@@ -48,9 +48,10 @@ class ConcatenateAudioTest {
 
         outputFile = createWavFile("output", byteArrayOf())
 
-        mockDirectoryProvider = mock<IDirectoryProvider>().apply {
-            whenever(this.createTempFile("output", ".wav")).thenReturn(outputFile)
-        }
+        mockDirectoryProvider =
+            mock<IDirectoryProvider>().apply {
+                whenever(this.createTempFile("output", ".wav")).thenReturn(outputFile)
+            }
 
         inputFiles.add(file1)
         inputFiles.add(file2)
@@ -122,10 +123,11 @@ class ConcatenateAudioTest {
             val oratureAudioFile = OratureAudioFile(file)
             val cues = oratureAudioFile.getCues()
 
-            cues.size == 3 && cues.all {
-                it.location == cues.indexOf(it)
-                it.label == "orature-vm-${cues.indexOf(it) + 1}"
-            }
+            cues.size == 3 &&
+                cues.all {
+                    it.location == cues.indexOf(it)
+                    it.label == "orature-vm-${cues.indexOf(it) + 1}"
+                }
         }
     }
 
@@ -156,7 +158,10 @@ class ConcatenateAudioTest {
         }
     }
 
-    private fun createWavFile(name: String, data: ByteArray): File {
+    private fun createWavFile(
+        name: String,
+        data: ByteArray,
+    ): File {
         val file = File.createTempFile(name, ".wav")
         val oratureAudioFile = OratureAudioFile(file, DEFAULT_CHANNELS, DEFAULT_SAMPLE_RATE, DEFAULT_BITS_PER_SAMPLE)
         oratureAudioFile.writer().use { os ->

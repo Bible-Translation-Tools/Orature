@@ -29,7 +29,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppData
 import java.io.File
 
 class TestInstalledEntityDao {
-
     private val testDatabaseFile = File.createTempFile("test-db", ".sqlite").also(File::deleteOnExit)
     private val database = AppDatabase(testDatabaseFile)
     private val dao = database.installedEntityDao

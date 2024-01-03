@@ -27,7 +27,7 @@ class AppInfo : Environment() {
             Pair("os name", System.getProperty("os.name")),
             Pair("os version", System.getProperty("os.version")),
             Pair("os architecture", System.getProperty("os.arch")),
-            Pair("java version", System.getProperty("java.version"))
+            Pair("java version", System.getProperty("java.version")),
         )
     }
 

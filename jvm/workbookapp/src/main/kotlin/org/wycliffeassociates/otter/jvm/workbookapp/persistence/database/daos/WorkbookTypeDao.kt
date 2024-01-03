@@ -29,7 +29,10 @@ class WorkbookTypeDao(instanceDsl: DSLContext) {
         return enumMap
     }
 
-    private fun insert(mode: ProjectMode, dsl: DSLContext): Int {
+    private fun insert(
+        mode: ProjectMode,
+        dsl: DSLContext,
+    ): Int {
         return dsl
             .insertInto(WORKBOOK_TYPE, WORKBOOK_TYPE.NAME)
             .values(mode.name)

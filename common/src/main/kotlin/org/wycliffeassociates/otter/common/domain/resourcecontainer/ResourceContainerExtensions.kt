@@ -24,11 +24,11 @@ import org.wycliffeassociates.resourcecontainer.entity.Project
 
 fun ResourceContainer.toCollection(): Collection {
     return Collection(
-            0,
-            manifest.dublinCore.identifier,
-            manifest.dublinCore.type,
-            manifest.dublinCore.title,
-            null
+        0,
+        manifest.dublinCore.identifier,
+        manifest.dublinCore.type,
+        manifest.dublinCore.title,
+        null,
     )
 }
 

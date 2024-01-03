@@ -25,6 +25,7 @@ import tornadofx.*
 class ComboboxItem : VBox() {
     val topTextProperty = SimpleStringProperty()
     val bottomTextProperty = SimpleStringProperty()
+
     init {
         addClass("wa-combobox-item")
         label(topTextProperty).apply {

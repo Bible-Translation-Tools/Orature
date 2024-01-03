@@ -33,77 +33,85 @@ import org.wycliffeassociates.otter.common.utils.mapNotNull
 import java.io.File
 import javax.inject.Inject
 
-class AudioProjectExporter @Inject constructor(
-    private val directoryProvider: IDirectoryProvider
-) : IDirectoryExporter {
-
+class AudioProjectExporter
     @Inject
-    lateinit var audioExporter: AudioExporter
+    constructor(
+        private val directoryProvider: IDirectoryProvider,
+    ) : IDirectoryExporter {
+        @Inject
+        lateinit var audioExporter: AudioExporter
 
-    private val logger = LoggerFactory.getLogger(this.javaClass)
+        private val logger = LoggerFactory.getLogger(this.javaClass)
 
-    override fun export(
-        outputDirectory: File,
-        workbook: Workbook,
-        callback: ProjectExporterCallback?,
-        options: ExportOptions?
-    ): Single<ExportResult> {
-        val projectAccessor = ProjectFilesAccessor(
-            directoryProvider,
-            workbook.source.resourceMetadata,
-            workbook.target.resourceMetadata,
-            workbook.target.toCollection()
-        )
-        logger.info("Exporting project as mp3: ${workbook.target.slug}")
-        return exportBookMp3(outputDirectory, workbook, projectAccessor, callback, options)
-    }
+        override fun export(
+            outputDirectory: File,
+            workbook: Workbook,
+            callback: ProjectExporterCallback?,
+            options: ExportOptions?,
+        ): Single<ExportResult> {
+            val projectAccessor =
+                ProjectFilesAccessor(
+                    directoryProvider,
+                    workbook.source.resourceMetadata,
+                    workbook.target.resourceMetadata,
+                    workbook.target.toCollection(),
+                )
+            logger.info("Exporting project as mp3: ${workbook.target.slug}")
+            return exportBookMp3(outputDirectory, workbook, projectAccessor, callback, options)
+        }
 
-    override fun estimateExportSize(workbook: Workbook, chapterFilter: List<Int>): Long {
-        return workbook.target.chapters
-            .filter { it.sort in chapterFilter }
-            .mapNotNull {it.getSelectedTake()?.file }
-            .reduce(0L) { size, nextFile ->
-                when (AudioFileFormat.of(nextFile.extension)) {
-                    AudioFileFormat.MP3 -> size + nextFile.length()
-                    AudioFileFormat.WAV -> size + nextFile.length() / WAV_TO_MP3_COMPRESSED_RATE
-                    else -> size
+        override fun estimateExportSize(
+            workbook: Workbook,
+            chapterFilter: List<Int>,
+        ): Long {
+            return workbook.target.chapters
+                .filter { it.sort in chapterFilter }
+                .mapNotNull { it.getSelectedTake()?.file }
+                .reduce(0L) { size, nextFile ->
+                    when (AudioFileFormat.of(nextFile.extension)) {
+                        AudioFileFormat.MP3 -> size + nextFile.length()
+                        AudioFileFormat.WAV -> size + nextFile.length() / WAV_TO_MP3_COMPRESSED_RATE
+                        else -> size
+                    }
                 }
-            }
-            .blockingGet()
-    }
+                .blockingGet()
+        }
 
-    private fun exportBookMp3(
-        directory: File,
-        workbook: Workbook,
-        projectFilesAccessor: ProjectFilesAccessor,
-        callback: ProjectExporterCallback?,
-        options: ExportOptions?
-    ): Single<ExportResult> {
-        callback?.onNotifyProgress(25.0, messageKey = "exportingTakes")
-        val outputProjectDir = directory.resolve(workbook.target.slug).apply { mkdirs() }
-        val contributors = projectFilesAccessor.getContributorInfo()
-        val license = License.get(workbook.target.resourceMetadata.license)
+        private fun exportBookMp3(
+            directory: File,
+            workbook: Workbook,
+            projectFilesAccessor: ProjectFilesAccessor,
+            callback: ProjectExporterCallback?,
+            options: ExportOptions?,
+        ): Single<ExportResult> {
+            callback?.onNotifyProgress(25.0, messageKey = "exportingTakes")
+            val outputProjectDir = directory.resolve(workbook.target.slug).apply { mkdirs() }
+            val contributors = projectFilesAccessor.getContributorInfo()
+            val license = License.get(workbook.target.resourceMetadata.license)
 
-        return workbook.target.chapters
-            .filter { chapterFilter(it, options) }
-            .flatMapCompletable { chapter ->
-                chapter.audio.selected.value!!.value!!.let {
-                    val outputFile = outputProjectDir.resolve("chapter-${chapter.sort}.mp3")
-                    val metadata = AudioExporter.ExportMetadata(license, contributors)
-                    audioExporter.exportMp3(it.file, outputFile, metadata)
+            return workbook.target.chapters
+                .filter { chapterFilter(it, options) }
+                .flatMapCompletable { chapter ->
+                    chapter.audio.selected.value!!.value!!.let {
+                        val outputFile = outputProjectDir.resolve("chapter-${chapter.sort}.mp3")
+                        val metadata = AudioExporter.ExportMetadata(license, contributors)
+                        audioExporter.exportMp3(it.file, outputFile, metadata)
+                    }
                 }
-            }
-            .toSingle {
-                callback?.onNotifyProgress(100.0)
-                callback?.onNotifySuccess(workbook.target.toCollection(), outputProjectDir)
-                ExportResult.SUCCESS
-            }
-            .onErrorReturnItem(ExportResult.FAILURE)
-            .subscribeOn(Schedulers.io())
-    }
+                .toSingle {
+                    callback?.onNotifyProgress(100.0)
+                    callback?.onNotifySuccess(workbook.target.toCollection(), outputProjectDir)
+                    ExportResult.SUCCESS
+                }
+                .onErrorReturnItem(ExportResult.FAILURE)
+                .subscribeOn(Schedulers.io())
+        }
 
-    private fun chapterFilter(chapter: Chapter, options: ExportOptions?): Boolean {
-        val included = options?.chapters?.contains(chapter.sort) ?: true
-        return included && chapter.hasSelectedAudio()
+        private fun chapterFilter(
+            chapter: Chapter,
+            options: ExportOptions?,
+        ): Boolean {
+            val included = options?.chapters?.contains(chapter.sort) ?: true
+            return included && chapter.hasSelectedAudio()
+        }
     }
-}

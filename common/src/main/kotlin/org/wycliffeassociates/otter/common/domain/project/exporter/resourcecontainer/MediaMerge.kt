@@ -29,7 +29,11 @@ import java.io.File
  * This will overwrite media files with matching names.
  */
 object MediaMerge {
-    fun merge(fromRC: ResourceContainer, toRC: ResourceContainer, callback: ProjectImporterCallback? = null) {
+    fun merge(
+        fromRC: ResourceContainer,
+        toRC: ResourceContainer,
+        callback: ProjectImporterCallback? = null,
+    ) {
         try {
             if (fromRC.media != null) {
                 mergeManifest(fromRC, toRC)
@@ -42,7 +46,10 @@ object MediaMerge {
         }
     }
 
-    private fun mergeManifest(fromRC: ResourceContainer, toRC: ResourceContainer) {
+    private fun mergeManifest(
+        fromRC: ResourceContainer,
+        toRC: ResourceContainer,
+    ) {
         val fromMedia = fromRC.media
         val toMedia = toRC.media
 
@@ -52,7 +59,6 @@ object MediaMerge {
         if (toMedia == null) {
             toRC.media = fromMedia.copy()
         } else {
-
             // TODO: media could be null if file doesn't exist
             val toMap = toRC.media!!.projects.associateBy { it.identifier } as MutableMap
             val fromMap = fromRC.media!!.projects.associateBy { it.identifier }
@@ -69,7 +75,7 @@ object MediaMerge {
 
     private fun mergeMatchingProjects(
         from: MutableMap<String, MediaProject>,
-        to: MutableMap<String, MediaProject>
+        to: MutableMap<String, MediaProject>,
     ) {
         from.forEach { (key, value) ->
             val fromMediaMap = value.media.associateBy { it.identifier } as MutableMap
@@ -84,7 +90,10 @@ object MediaMerge {
         }
     }
 
-    private fun mergeMediaFiles(fromRC: ResourceContainer, toRC: ResourceContainer) {
+    private fun mergeMediaFiles(
+        fromRC: ResourceContainer,
+        toRC: ResourceContainer,
+    ) {
         val _fromMedia = fromRC.media
         val filesToMerge = mutableMapOf<String, File>()
         try {
@@ -114,7 +123,11 @@ object MediaMerge {
         return list
     }
 
-    private fun insertVariables(list: MutableList<String>, variable: String, options: List<String>) {
+    private fun insertVariables(
+        list: MutableList<String>,
+        variable: String,
+        options: List<String>,
+    ) {
         if (options.isNotEmpty()) {
             val toAdd = mutableListOf<String>()
             list.forEach { unqualified ->
@@ -142,7 +155,7 @@ object MediaMerge {
 
     private fun getMediaFilesToMerge(
         files: List<String>,
-        fromRC: ResourceContainer
+        fromRC: ResourceContainer,
     ): Map<String, File> {
         val filtered = files.filter { !it.isURL() }
         val filesToMerge = mutableMapOf<String, File>()

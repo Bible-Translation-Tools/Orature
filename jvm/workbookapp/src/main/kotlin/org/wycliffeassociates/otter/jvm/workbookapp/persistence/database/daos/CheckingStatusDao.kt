@@ -1,10 +1,10 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos
 
-import jooq.tables.CheckingStatus as checkingStatusTable
 import org.jooq.DSLContext
+import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import java.lang.IllegalStateException
 import java.util.*
-import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
+import jooq.tables.CheckingStatus as checkingStatusTable
 
 class CheckingStatusDao(instanceDsl: DSLContext) {
     private val mapToId: Map<CheckingStatus, Int> by lazy { loadToDatabase(instanceDsl) }
@@ -29,11 +29,14 @@ class CheckingStatusDao(instanceDsl: DSLContext) {
         return enumMap
     }
 
-    private fun insert(checkingStatus: CheckingStatus, dsl: DSLContext): Int {
+    private fun insert(
+        checkingStatus: CheckingStatus,
+        dsl: DSLContext,
+    ): Int {
         return dsl
             .insertInto(
                 checkingStatusTable.CHECKING_STATUS,
-                checkingStatusTable.CHECKING_STATUS.NAME
+                checkingStatusTable.CHECKING_STATUS.NAME,
             )
             .values(checkingStatus.name)
             .returning(checkingStatusTable.CHECKING_STATUS.ID)

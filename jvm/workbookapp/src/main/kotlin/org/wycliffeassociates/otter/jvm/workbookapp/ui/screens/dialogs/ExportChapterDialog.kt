@@ -26,8 +26,8 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
-import org.wycliffeassociates.otter.jvm.controls.dialog.OtterDialog
 import org.wycliffeassociates.otter.jvm.controls.ContributorInfo
+import org.wycliffeassociates.otter.jvm.controls.dialog.OtterDialog
 import org.wycliffeassociates.otter.jvm.controls.model.ContributorCellData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ExportChapterViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
@@ -39,66 +39,67 @@ class ExportChapterDialog : OtterDialog() {
 
     private val settingsViewModel: SettingsViewModel by inject()
 
-    private val content = VBox().apply {
-        addClass("contributor-dialog")
+    private val content =
+        VBox().apply {
+            addClass("contributor-dialog")
 
-        vbox {
+            vbox {
+                hbox {
+                    addClass("contributor-dialog__header")
+                    label(messages["exportChapter"]) {
+                        addClass("h3")
+                    }
+                    region { hgrow = Priority.ALWAYS }
+                    button {
+                        addClass("btn", "btn--secondary")
+                        graphic = FontIcon(MaterialDesign.MDI_CLOSE)
+                        tooltip(messages["close"])
+                        action { close() }
+                    }
+                }
+                add(createContributorSection(contributors))
+            }
             hbox {
-                addClass("contributor-dialog__header")
-                label (messages["exportChapter"]) {
-                    addClass("h3")
-                }
-                region { hgrow = Priority.ALWAYS }
-                button {
-                    addClass("btn", "btn--secondary")
-                    graphic = FontIcon(MaterialDesign.MDI_CLOSE)
-                    tooltip(messages["close"])
-                    action { close() }
-                }
-            }
-            add(createContributorSection(contributors))
-        }
-        hbox {
-            hgrow = Priority.ALWAYS
-            addClass("contributor-dialog__action")
-
-            button (messages["exportChapter"]) {
-                addClass("btn", "btn--primary", "btn--borderless", "contributor-dialog__export-btn")
-                graphic = FontIcon(Material.UPLOAD_FILE)
                 hgrow = Priority.ALWAYS
-                tooltip(this.text)
+                addClass("contributor-dialog__action")
 
-                action {
-                    export()
-                    close()
+                button(messages["exportChapter"]) {
+                    addClass("btn", "btn--primary", "btn--borderless", "contributor-dialog__export-btn")
+                    graphic = FontIcon(Material.UPLOAD_FILE)
+                    hgrow = Priority.ALWAYS
+                    tooltip(this.text)
+
+                    action {
+                        export()
+                        close()
+                    }
+                }
+                button(messages["cancel"]) {
+                    addClass("btn", "btn--secondary")
+                    graphic = FontIcon("gmi-close")
+                    hgrow = Priority.SOMETIMES
+                    tooltip(this.text)
+
+                    action {
+                        close()
+                    }
                 }
             }
-            button (messages["cancel"]) {
-                addClass("btn", "btn--secondary")
-                graphic = FontIcon("gmi-close")
-                hgrow = Priority.SOMETIMES
-                tooltip(this.text)
 
-                action {
-                    close()
+            textflow {
+                text(messages["exportLicenseDescription"]) {
+                    addClass("contributor__section-text")
+                }
+                hyperlink(messages["licenseCCBYSA"]) {
+                    addClass("wa-text--hyperlink", "contributor__license-link")
+                    val url = "https://creativecommons.org/licenses/by-sa/4.0/"
+                    tooltip(url)
+                    action {
+                        FX.application.hostServices.showDocument(url)
+                    }
                 }
             }
         }
-
-        textflow {
-            text(messages["exportLicenseDescription"]) {
-                addClass("contributor__section-text")
-            }
-            hyperlink(messages["licenseCCBYSA"]) {
-                addClass("wa-text--hyperlink", "contributor__license-link")
-                val url = "https://creativecommons.org/licenses/by-sa/4.0/"
-                tooltip(url)
-                action {
-                    FX.application.hostServices.showDocument(url)
-                }
-            }
-        }
-    }
 
     init {
         setContent(content)
@@ -110,20 +111,20 @@ class ExportChapterDialog : OtterDialog() {
                 addContributorCallbackProperty.set(
                     EventHandler {
                         viewModel.addContributor(it.source as String)
-                    }
+                    },
                 )
                 removeContributorCallbackProperty.set(
                     EventHandler {
                         val indexToRemove = it.source as Int
                         viewModel.removeContributor(indexToRemove)
-                    }
+                    },
                 )
                 editContributorCallbackProperty.set(
                     EventHandler {
                         val data = it.source as ContributorCellData
                         viewModel.editContributor(data)
                         lastModifiedIndex.set(data.index)
-                    }
+                    },
                 )
             }
     }

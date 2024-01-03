@@ -19,7 +19,6 @@ import java.util.regex.Pattern
 import kotlin.reflect.KClass
 
 class OratureAudioFile : AudioFile {
-
     val logger = LoggerFactory.getLogger(OratureAudioFile::class.java)
 
     private val markers = OratureMarkers()
@@ -44,7 +43,7 @@ class OratureAudioFile : AudioFile {
         file: File,
         channels: Int = DEFAULT_CHANNELS,
         sampleRate: Int = DEFAULT_SAMPLE_RATE,
-        bitsPerSample: Int = DEFAULT_BITS_PER_SAMPLE
+        bitsPerSample: Int = DEFAULT_BITS_PER_SAMPLE,
     ) : super(file, channels, sampleRate, bitsPerSample) {
         initializeCues()
     }
@@ -54,7 +53,7 @@ class OratureAudioFile : AudioFile {
         channels: Int = DEFAULT_CHANNELS,
         sampleRate: Int = DEFAULT_SAMPLE_RATE,
         bitsPerSample: Int = DEFAULT_BITS_PER_SAMPLE,
-        metadata: AudioMetadata
+        metadata: AudioMetadata,
     ) : super(file, channels, sampleRate, bitsPerSample, metadata) {
         initializeCues()
     }
@@ -78,7 +77,7 @@ class OratureAudioFile : AudioFile {
         }
     }
 
-    inline fun <reified T: AudioMarker> getMarker(): List<T> {
+    inline fun <reified T : AudioMarker> getMarker(): List<T> {
         val type = T::class
         val enum = getMarkerTypeFromClass(type)
         return getMarker(enum).map { it as T }
@@ -89,12 +88,15 @@ class OratureAudioFile : AudioFile {
         markers.import(OratureCueParser.parse(cues))
     }
 
-    inline fun <reified T: AudioMarker> addMarker(marker: T) {
+    inline fun <reified T : AudioMarker> addMarker(marker: T) {
         val enum = getMarkerTypeFromClass(T::class)
         addMarker(enum, marker)
     }
 
-    fun addMarker(type: OratureCueType, marker: AudioMarker) {
+    fun addMarker(
+        type: OratureCueType,
+        marker: AudioMarker,
+    ) {
         markers.addMarker(type, marker)
     }
 
@@ -107,12 +109,18 @@ class OratureAudioFile : AudioFile {
     }
 
     @Deprecated("Markers should be added to OtterAudioFile using typed addMarker methods")
-    override fun addCue(location: Int, label: String) {
+    override fun addCue(
+        location: Int,
+        label: String,
+    ) {
         markers.import(OratureCueParser.parse(listOf(AudioCue(location, label))))
     }
 
     @Synchronized
-    fun addVerseMarker(location: Int, label: String) {
+    fun addVerseMarker(
+        location: Int,
+        label: String,
+    ) {
         val regex = Pattern.compile("^(\\d+)(?:-(\\d+))?$")
         val match = regex.matcher(label.trim())
         if (match.matches()) {
@@ -123,7 +131,7 @@ class OratureAudioFile : AudioFile {
         }
     }
 
-    inline fun <reified T: AudioMarker> clearMarkersOfType() {
+    inline fun <reified T : AudioMarker> clearMarkersOfType() {
         val enum = getMarkerTypeFromClass(T::class)
         clearCuesFromMap(enum)
     }
@@ -152,13 +160,14 @@ class OratureAudioFile : AudioFile {
 }
 
 internal class OratureMarkers {
-    private val cueMap: MutableMap<OratureCueType, MutableList<AudioMarker>> = mutableMapOf(
-        OratureCueType.CHUNK to mutableListOf(),
-        OratureCueType.VERSE to mutableListOf(),
-        OratureCueType.CHAPTER_TITLE to mutableListOf(),
-        OratureCueType.BOOK_TITLE to mutableListOf(),
-        OratureCueType.LICENSE to mutableListOf(),
-    )
+    private val cueMap: MutableMap<OratureCueType, MutableList<AudioMarker>> =
+        mutableMapOf(
+            OratureCueType.CHUNK to mutableListOf(),
+            OratureCueType.VERSE to mutableListOf(),
+            OratureCueType.CHAPTER_TITLE to mutableListOf(),
+            OratureCueType.BOOK_TITLE to mutableListOf(),
+            OratureCueType.LICENSE to mutableListOf(),
+        )
 
     fun getCues(): List<AudioCue> {
         return cueMap.values.flatMap { it.map { it.toCue() } }
@@ -170,12 +179,18 @@ internal class OratureMarkers {
         return cueMap[type]!!
     }
 
-    fun addMarkers(type: OratureCueType, markers: List<AudioMarker>) {
+    fun addMarkers(
+        type: OratureCueType,
+        markers: List<AudioMarker>,
+    ) {
         if (!cueMap.containsKey(type)) cueMap[type] = mutableListOf()
         cueMap[type]!!.addAll(markers)
     }
 
-    fun addMarker(type: OratureCueType, marker: AudioMarker) {
+    fun addMarker(
+        type: OratureCueType,
+        marker: AudioMarker,
+    ) {
         if (!cueMap.containsKey(type)) cueMap[type] = mutableListOf()
         cueMap[type]!!.add(marker)
     }

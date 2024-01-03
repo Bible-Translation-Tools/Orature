@@ -26,7 +26,6 @@ import javafx.scene.shape.Rectangle
 import tornadofx.*
 
 class WaveformOverlay : StackPane() {
-
     val playbackPositionProperty = SimpleDoubleProperty(0.0)
 
     init {
@@ -43,9 +42,9 @@ class WaveformOverlay : StackPane() {
 
                 translateYProperty().set(40.0)
                 translateXProperty().bind(
-                    this@WaveformOverlay.widthProperty().divide(2).minus(playbackPositionProperty)
+                    this@WaveformOverlay.widthProperty().divide(2).minus(playbackPositionProperty),
                 )
-            }
+            },
         )
         add(
             Line(0.0, 40.0, 0.0, 0.0).apply {
@@ -54,7 +53,7 @@ class WaveformOverlay : StackPane() {
                 endXProperty().bind(this@WaveformOverlay.widthProperty().divide(2))
                 endYProperty().bind(this@WaveformOverlay.heightProperty())
                 styleClass.add("scrolling-waveform__playback-line")
-            }
+            },
         )
     }
 }

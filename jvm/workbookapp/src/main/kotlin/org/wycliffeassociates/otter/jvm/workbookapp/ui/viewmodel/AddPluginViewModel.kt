@@ -18,7 +18,6 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
-import java.io.File
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
 import org.slf4j.LoggerFactory
@@ -27,10 +26,10 @@ import org.wycliffeassociates.otter.common.domain.plugins.CreatePlugin
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
+import java.io.File
 import javax.inject.Inject
 
 class AddPluginViewModel : ViewModel() {
-
     private val logger = LoggerFactory.getLogger(AddPluginViewModel::class.java)
 
     @Inject lateinit var pluginRepository: IAudioPluginRepository
@@ -54,7 +53,7 @@ class AddPluginViewModel : ViewModel() {
         validProperty.bind(
             nameProperty.isNotEmpty
                 .and(pathProperty.isNotEmpty)
-                .and(canRecordProperty.or(canEditProperty))
+                .and(canRecordProperty.or(canEditProperty)),
         )
     }
 
@@ -62,17 +61,18 @@ class AddPluginViewModel : ViewModel() {
         // Create the audio plugin
         if (!validProperty.value) return
 
-        val pluginData = AudioPluginData(
-            0,
-            name,
-            "1.0.0",
-            canEdit,
-            canRecord,
-            false,
-            path,
-            listOf(),
-            null
-        )
+        val pluginData =
+            AudioPluginData(
+                0,
+                name,
+                "1.0.0",
+                canEdit,
+                canRecord,
+                false,
+                path,
+                listOf(),
+                null,
+            )
         CreatePlugin(pluginRepository)
             .create(pluginData)
             .doOnSuccess {

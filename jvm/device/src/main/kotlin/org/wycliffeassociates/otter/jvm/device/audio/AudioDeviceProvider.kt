@@ -28,7 +28,6 @@ import javax.sound.sampled.SourceDataLine
 import javax.sound.sampled.TargetDataLine
 
 class AudioDeviceProvider(private val audioFormat: AudioFormat) {
-
     val activeInputDevice: Observable<Mixer.Info> = PublishSubject.create()
     val activeOutputDevice: Observable<Mixer.Info> = PublishSubject.create()
 
@@ -62,14 +61,15 @@ class AudioDeviceProvider(private val audioFormat: AudioFormat) {
     }
 
     private fun getInputDevices(): List<Mixer.Info> {
-        val mixers = AudioSystem
-            .getMixerInfo()
-            .filter { mixerInfo ->
-                val mixer = AudioSystem.getMixer(mixerInfo)
-                val info = DataLine.Info(TargetDataLine::class.java, audioFormat)
-                val lines = if (info.isFormatSupported(audioFormat)) mixer.getTargetLineInfo(info) else arrayOf()
-                lines.isNotEmpty()
-            }.toList().map { it }
+        val mixers =
+            AudioSystem
+                .getMixerInfo()
+                .filter { mixerInfo ->
+                    val mixer = AudioSystem.getMixer(mixerInfo)
+                    val info = DataLine.Info(TargetDataLine::class.java, audioFormat)
+                    val lines = if (info.isFormatSupported(audioFormat)) mixer.getTargetLineInfo(info) else arrayOf()
+                    lines.isNotEmpty()
+                }.toList().map { it }
         return mixers
     }
 

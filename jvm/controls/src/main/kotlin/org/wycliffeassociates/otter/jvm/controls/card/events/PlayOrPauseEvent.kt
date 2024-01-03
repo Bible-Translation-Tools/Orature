@@ -22,12 +22,12 @@ import javafx.event.Event
 import javafx.event.EventType
 
 sealed class PlayOrPauseEvent(type: EventType<PlayOrPauseEvent>) : Event(type) {
-
     class PlayEvent : PlayOrPauseEvent(
-        PLAY
+        PLAY,
     )
+
     class PauseEvent : PlayOrPauseEvent(
-        PAUSE
+        PAUSE,
     )
 
     companion object {

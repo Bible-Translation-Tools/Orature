@@ -36,5 +36,6 @@ class UndoableActionHistory<T : IUndoable> {
     }
 
     fun canUndo() = undoStack.isNotEmpty()
+
     fun canRedo() = redoStack.isNotEmpty()
 }

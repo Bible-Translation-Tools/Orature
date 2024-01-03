@@ -26,7 +26,6 @@ import tornadofx.*
 import java.util.concurrent.Callable
 
 class BreadcrumbBar : HBox() {
-
     private val items = observableListOf<BreadCrumb>()
 
     val orientationScaleProperty = SimpleDoubleProperty()
@@ -40,8 +39,8 @@ class BreadcrumbBar : HBox() {
             breadcrumb.isActiveProperty.bind(
                 Bindings.createBooleanBinding(
                     Callable { items.last() == breadcrumb },
-                    items
-                )
+                    items,
+                ),
             )
             breadcrumb
         }

@@ -9,15 +9,14 @@ import org.wycliffeassociates.otter.common.domain.IUndoable
 
 abstract class TranslationTakeAction(
     protected val chunk: Chunk,
-    protected val take: Take
+    protected val take: Take,
 ) : IUndoable
 
 class TranslationTakeRecordAction(
     chunk: Chunk,
     take: Take,
-    private val previouslySelectedTake: Take? = null
+    private val previouslySelectedTake: Take? = null,
 ) : TranslationTakeAction(chunk, take) {
-
     override fun execute() {
         chunk.audio.insertTake(take)
     }
@@ -45,9 +44,8 @@ class TranslationTakeDeleteAction(
     chunk: Chunk,
     take: Take,
     private val isTakeSelected: Boolean,
-    private val postDeleteCallback: (Take, Boolean) -> Unit
+    private val postDeleteCallback: (Take, Boolean) -> Unit,
 ) : TranslationTakeAction(chunk, take) {
-
     override fun execute() {
         take.deletedTimestamp.accept(DateHolder.now())
         postDeleteCallback(take, isTakeSelected)
@@ -69,7 +67,7 @@ class TranslationTakeDeleteAction(
 class TranslationTakeSelectAction(
     chunk: Chunk,
     take: Take,
-    private val previouslySelectedTake: Take? = null
+    private val previouslySelectedTake: Take? = null,
 ) : TranslationTakeAction(chunk, take) {
     override fun execute() {
         take.file.setLastModified(System.currentTimeMillis())
@@ -88,7 +86,7 @@ class TranslationTakeSelectAction(
 class TranslationTakeApproveAction(
     private val take: Take,
     private val checking: CheckingStatus,
-    private val oldCheckingStage: TakeCheckingState
+    private val oldCheckingStage: TakeCheckingState,
 ) : IUndoable {
     override fun execute() {
         take.checkingState.accept(TakeCheckingState(checking, take.checksum()))

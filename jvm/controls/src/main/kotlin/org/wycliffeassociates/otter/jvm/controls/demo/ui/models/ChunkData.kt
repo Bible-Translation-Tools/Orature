@@ -27,6 +27,6 @@ internal class ChunkData(val sort: Int, val title: String, val text: String) {
     constructor(chunk: Chunk) : this(
         sort = chunk.sort,
         title = chunk.title,
-        text = chunk.textItem.text
+        text = chunk.textItem.text,
     )
 }

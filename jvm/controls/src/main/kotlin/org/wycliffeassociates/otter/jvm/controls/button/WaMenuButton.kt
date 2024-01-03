@@ -41,21 +41,22 @@ class WaMenuButton : Button() {
     init {
         addClass("wa-menu-button")
 
-        graphic = HBox().apply {
-            addClass("wa-menu-button__content")
+        graphic =
+            HBox().apply {
+                addClass("wa-menu-button__content")
 
-            label {
-                addClass("wa-menu-button__icon")
-                graphic = FontIcon(MaterialDesign.MDI_SPEEDOMETER)
+                label {
+                    addClass("wa-menu-button__icon")
+                    graphic = FontIcon(MaterialDesign.MDI_SPEEDOMETER)
+                }
+                label {
+                    textProperty().bind(buttonTextProperty)
+                }
+                label {
+                    addClass("wa-menu-button__arrow")
+                    graphic = FontIcon(MaterialDesign.MDI_TRIANGLE)
+                }
             }
-            label {
-                textProperty().bind(buttonTextProperty)
-            }
-            label {
-                addClass("wa-menu-button__arrow")
-                graphic = FontIcon(MaterialDesign.MDI_TRIANGLE)
-            }
-        }
 
         action {
             toggle()

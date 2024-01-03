@@ -32,36 +32,41 @@ import java.io.File
 import java.time.LocalDate
 import java.util.*
 
-
-val enUlbTestMetadata = ResourceMetadata(
-    "rc0.2",
-    "Door43 World Missions Community",
-    "",
-    "text/usfm",
-    "ulb",
-    LocalDate.now(),
-    Language("en", "", "", "", true, ""),
-    LocalDate.now(),
-    "",
-    "",
-    ContainerType.Book,
-    "",
-    "12",
-    "",
-    File(".")
-)
+val enUlbTestMetadata =
+    ResourceMetadata(
+        "rc0.2",
+        "Door43 World Missions Community",
+        "",
+        "text/usfm",
+        "ulb",
+        LocalDate.now(),
+        Language("en", "", "", "", true, ""),
+        LocalDate.now(),
+        "",
+        "",
+        ContainerType.Book,
+        "",
+        "12",
+        "",
+        File("."),
+    )
 
 fun createTestWavFile(dir: File): File {
-    val testFile = dir.resolve("test-take-${Date().time}.wav")
-        .apply { createNewFile(); deleteOnExit() }
+    val testFile =
+        dir.resolve("test-take-${Date().time}.wav")
+            .apply {
+                createNewFile()
+                deleteOnExit()
+            }
 
-    val wav = WavFile(
-        testFile,
-        DEFAULT_CHANNELS,
-        DEFAULT_SAMPLE_RATE,
-        DEFAULT_BITS_PER_SAMPLE,
-        WavMetadata(listOf(CueChunk()))
-    )
+    val wav =
+        WavFile(
+            testFile,
+            DEFAULT_CHANNELS,
+            DEFAULT_SAMPLE_RATE,
+            DEFAULT_BITS_PER_SAMPLE,
+            WavMetadata(listOf(CueChunk())),
+        )
     WavOutputStream(wav).use {
         for (i in 0 until 4) {
             it.write(i)

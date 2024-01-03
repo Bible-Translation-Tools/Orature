@@ -25,17 +25,21 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.Inserti
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.AudioPluginEntity
 
 class AudioPluginDao(
-    private val instanceDsl: DSLContext
+    private val instanceDsl: DSLContext,
 ) {
     @Synchronized
-    fun insert(entity: AudioPluginEntity, dsl: DSLContext = instanceDsl): Int {
+    fun insert(
+        entity: AudioPluginEntity,
+        dsl: DSLContext = instanceDsl,
+    ): Int {
         if (entity.id != 0) throw InsertionException("Entity ID is not 0")
 
         // find an existing plugin matching the name, in which we'll update
-        val existing = dsl.select(AUDIO_PLUGIN_ENTITY.ID)
-            .from(AUDIO_PLUGIN_ENTITY)
-            .where(AUDIO_PLUGIN_ENTITY.NAME.eq(entity.name))
-            .fetchOne()
+        val existing =
+            dsl.select(AUDIO_PLUGIN_ENTITY.ID)
+                .from(AUDIO_PLUGIN_ENTITY)
+                .where(AUDIO_PLUGIN_ENTITY.NAME.eq(entity.name))
+                .fetchOne()
 
         if (existing != null) {
             val id = existing.getValue(AUDIO_PLUGIN_ENTITY.ID)
@@ -63,7 +67,7 @@ class AudioPluginDao(
                     AUDIO_PLUGIN_ENTITY.EDIT,
                     AUDIO_PLUGIN_ENTITY.RECORD,
                     AUDIO_PLUGIN_ENTITY.MARK,
-                    AUDIO_PLUGIN_ENTITY.PATH
+                    AUDIO_PLUGIN_ENTITY.PATH,
                 )
                 .values(
                     entity.name,
@@ -73,7 +77,7 @@ class AudioPluginDao(
                     entity.edit,
                     entity.record,
                     entity.mark,
-                    entity.path
+                    entity.path,
                 )
                 .execute()
         }
@@ -87,7 +91,10 @@ class AudioPluginDao(
             }!!
     }
 
-    fun fetchById(id: Int, dsl: DSLContext = instanceDsl): AudioPluginEntity? {
+    fun fetchById(
+        id: Int,
+        dsl: DSLContext = instanceDsl,
+    ): AudioPluginEntity? {
         return dsl
             .select()
             .from(AUDIO_PLUGIN_ENTITY)
@@ -106,7 +113,10 @@ class AudioPluginDao(
             }
     }
 
-    fun update(entity: AudioPluginEntity, dsl: DSLContext = instanceDsl) {
+    fun update(
+        entity: AudioPluginEntity,
+        dsl: DSLContext = instanceDsl,
+    ) {
         dsl
             .update(AUDIO_PLUGIN_ENTITY)
             .set(AUDIO_PLUGIN_ENTITY.NAME, entity.name)
@@ -121,7 +131,10 @@ class AudioPluginDao(
             .execute()
     }
 
-    fun delete(entity: AudioPluginEntity, dsl: DSLContext = instanceDsl) {
+    fun delete(
+        entity: AudioPluginEntity,
+        dsl: DSLContext = instanceDsl,
+    ) {
         dsl
             .deleteFrom(AUDIO_PLUGIN_ENTITY)
             .where(AUDIO_PLUGIN_ENTITY.ID.eq(entity.id))

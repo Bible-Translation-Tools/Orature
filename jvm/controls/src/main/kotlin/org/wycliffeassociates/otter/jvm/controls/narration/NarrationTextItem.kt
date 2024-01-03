@@ -67,7 +67,7 @@ class NarrationTextItem : VBox() {
     val onPauseRecordingAction = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onPauseRecordAgainAction = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onResumeRecordingAction = SimpleObjectProperty<EventHandler<ActionEvent>>()
-    val onResumeRecordingAgainAction= SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val onResumeRecordingAgainAction = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onRecordActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onRecordAgainActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onSaveRecordingActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
@@ -82,34 +82,35 @@ class NarrationTextItem : VBox() {
         hbox {
             styleClass.setAll("narration-list__verse-item")
             borderpane {
-                center = stackpane {
-                    button {
-                        addClass("btn", "btn--secondary")
-                        graphic = FontIcon(MaterialDesign.MDI_PLAY)
-                        tooltip(messages["play"])
-                        disableWhen {
-                            hasRecordingProperty.not()
+                center =
+                    stackpane {
+                        button {
+                            addClass("btn", "btn--secondary")
+                            graphic = FontIcon(MaterialDesign.MDI_PLAY)
+                            tooltip(messages["play"])
+                            disableWhen {
+                                hasRecordingProperty.not()
+                            }
+                            disabledProperty().onChangeAndDoNow {
+                                togglePseudoClass("inactive", it!!)
+                            }
+                            onActionProperty().bind(onPlayActionProperty)
+                            visibleProperty().bind(isPlayingProperty.not())
                         }
-                        disabledProperty().onChangeAndDoNow {
-                            togglePseudoClass("inactive", it!!)
+                        button {
+                            addClass("btn", "btn--secondary")
+                            graphic = FontIcon(MaterialDesign.MDI_PAUSE)
+                            tooltip(messages["pause"])
+                            disableWhen {
+                                hasRecordingProperty.not()
+                            }
+                            disabledProperty().onChangeAndDoNow {
+                                togglePseudoClass("inactive", it!!)
+                            }
+                            onActionProperty().bind(onPauseActionProperty)
+                            visibleProperty().bind(isPlayingProperty.and(playingVerseIndexProperty.eq(indexProperty)))
                         }
-                        onActionProperty().bind(onPlayActionProperty)
-                        visibleProperty().bind(isPlayingProperty.not())
                     }
-                    button {
-                        addClass("btn", "btn--secondary")
-                        graphic = FontIcon(MaterialDesign.MDI_PAUSE)
-                        tooltip(messages["pause"])
-                        disableWhen {
-                            hasRecordingProperty.not()
-                        }
-                        disabledProperty().onChangeAndDoNow {
-                            togglePseudoClass("inactive", it!!)
-                        }
-                        onActionProperty().bind(onPauseActionProperty)
-                        visibleProperty().bind(isPlayingProperty.and(playingVerseIndexProperty.eq(indexProperty)))
-                    }
-                }
             }
             hbox {
                 addClass("narration-list__verse-block")
@@ -174,32 +175,35 @@ class NarrationTextItem : VBox() {
                             objectBinding(
                                 isLastVerseProperty,
                                 onSaveRecordingActionProperty,
-                                onNextVerseActionProperty
+                                onNextVerseActionProperty,
                             ) {
                                 if (isLastVerseProperty.value) {
                                     onSaveRecordingActionProperty.value
                                 } else {
                                     onNextVerseActionProperty.value
                                 }
-                            }
+                            },
                         )
 
-                        textProperty().bind(stringBinding(isLastVerseProperty) {
-                            if (isLastVerseProperty.value) {
-                                messages["save"]
+                        textProperty().bind(
+                            stringBinding(isLastVerseProperty) {
+                                if (isLastVerseProperty.value) {
+                                    messages["save"]
+                                } else {
+                                    messages["next"]
+                                }
+                            },
+                        )
 
-                            } else {
-                                messages["next"]
-                            }
-                        })
-
-                        graphicProperty().bind(objectBinding(isLastVerseProperty) {
-                            if (isLastVerseProperty.value) {
-                                FontIcon(MaterialDesign.MDI_CHECKBOX_MARKED_CIRCLE_OUTLINE)
-                            } else {
-                                FontIcon(MaterialDesign.MDI_ARROW_DOWN)
-                            }
-                        })
+                        graphicProperty().bind(
+                            objectBinding(isLastVerseProperty) {
+                                if (isLastVerseProperty.value) {
+                                    FontIcon(MaterialDesign.MDI_CHECKBOX_MARKED_CIRCLE_OUTLINE)
+                                } else {
+                                    FontIcon(MaterialDesign.MDI_ARROW_DOWN)
+                                }
+                            },
+                        )
                     }
                     visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.RECORD_ACTIVE))
                 }
@@ -222,32 +226,35 @@ class NarrationTextItem : VBox() {
                             objectBinding(
                                 isLastVerseProperty,
                                 onSaveRecordingActionProperty,
-                                onNextVerseActionProperty
+                                onNextVerseActionProperty,
                             ) {
                                 if (isLastVerseProperty.value) {
                                     onSaveRecordingActionProperty.value
                                 } else {
                                     onNextVerseActionProperty.value
                                 }
-                            }
+                            },
                         )
 
-                        textProperty().bind(stringBinding(isLastVerseProperty) {
-                            if (isLastVerseProperty.value) {
-                                messages["save"]
+                        textProperty().bind(
+                            stringBinding(isLastVerseProperty) {
+                                if (isLastVerseProperty.value) {
+                                    messages["save"]
+                                } else {
+                                    messages["next"]
+                                }
+                            },
+                        )
 
-                            } else {
-                                messages["next"]
-                            }
-                        })
-
-                        graphicProperty().bind(objectBinding(isLastVerseProperty) {
-                            if (isLastVerseProperty.value) {
-                                FontIcon(MaterialDesign.MDI_CHECKBOX_MARKED_CIRCLE_OUTLINE)
-                            } else {
-                                FontIcon(MaterialDesign.MDI_ARROW_DOWN)
-                            }
-                        })
+                        graphicProperty().bind(
+                            objectBinding(isLastVerseProperty) {
+                                if (isLastVerseProperty.value) {
+                                    FontIcon(MaterialDesign.MDI_CHECKBOX_MARKED_CIRCLE_OUTLINE)
+                                } else {
+                                    FontIcon(MaterialDesign.MDI_ARROW_DOWN)
+                                }
+                            },
+                        )
                     }
                     visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.RECORDING_PAUSED))
                 }
@@ -340,15 +347,16 @@ class NarrationTextItem : VBox() {
     private fun EventTarget.narration_button(
         text: String = "",
         graphic: Node? = null,
-        op: Button.() -> Unit = {}
+        op: Button.() -> Unit = {},
     ): Button {
         return Button(text).attachTo(this, op) { btn ->
-            val recordingStates = listOf(
-                TeleprompterItemState.RECORD_ACTIVE,
-                TeleprompterItemState.RECORD_AGAIN_ACTIVE,
-                TeleprompterItemState.RECORD_AGAIN_PAUSED,
-                TeleprompterItemState.RECORDING_PAUSED,
-            )
+            val recordingStates =
+                listOf(
+                    TeleprompterItemState.RECORD_ACTIVE,
+                    TeleprompterItemState.RECORD_AGAIN_ACTIVE,
+                    TeleprompterItemState.RECORD_AGAIN_PAUSED,
+                    TeleprompterItemState.RECORDING_PAUSED,
+                )
             btn.disableWhen {
                 booleanBinding(stateProperty, isPlayingProperty, isRecordingProperty) {
                     val differentItemRecording = isRecordingProperty.value && state !in recordingStates
@@ -362,10 +370,11 @@ class NarrationTextItem : VBox() {
                 }
             }
             if (graphic != null) btn.graphic = graphic
-            btn.tooltip = Tooltip().apply {
-                addClass("tooltip-text")
-                textProperty().bind(btn.textProperty())
-            }
+            btn.tooltip =
+                Tooltip().apply {
+                    addClass("tooltip-text")
+                    textProperty().bind(btn.textProperty())
+                }
         }
     }
 }

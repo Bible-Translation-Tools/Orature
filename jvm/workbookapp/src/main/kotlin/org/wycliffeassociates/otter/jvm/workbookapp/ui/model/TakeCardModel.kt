@@ -24,5 +24,5 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 data class TakeCardModel(
     val take: Take,
     var selected: Boolean,
-    val audioPlayer: IAudioPlayer
+    val audioPlayer: IAudioPlayer,
 )

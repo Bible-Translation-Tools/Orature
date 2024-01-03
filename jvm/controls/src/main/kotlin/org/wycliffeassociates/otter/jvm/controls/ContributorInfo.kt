@@ -38,7 +38,7 @@ import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class ContributorInfo(
-    private val contributors: ObservableList<Contributor>
+    private val contributors: ObservableList<Contributor>,
 ) : VBox() {
     var contributorField: TextField by singleAssign()
 
@@ -101,8 +101,8 @@ class ContributorInfo(
                                 {
                                     contributors.indexOf(contributor)
                                 },
-                                contributors
-                            )
+                                contributors,
+                            ),
                         )
                         lastModifiedIndexProperty.bind(lastModifiedIndex)
                         onRemoveContributorActionProperty.bind(removeContributorCallbackProperty)
@@ -121,7 +121,7 @@ class ContributorInfo(
         }
 
         addContributorCallbackProperty.value?.handle(
-            ActionEvent(contributorField.text, null)
+            ActionEvent(contributorField.text, null),
         )
         contributorField.clear()
     }

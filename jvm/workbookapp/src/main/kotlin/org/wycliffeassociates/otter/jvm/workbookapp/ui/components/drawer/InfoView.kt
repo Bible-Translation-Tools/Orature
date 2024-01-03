@@ -39,132 +39,135 @@ class InfoView : View() {
 
     private lateinit var closeButton: Button
 
-    override val root = vbox {
-        addClass("app-drawer__content")
+    override val root =
+        vbox {
+            addClass("app-drawer__content")
 
-        DrawerTraversalEngine(this)
+            DrawerTraversalEngine(this)
 
-        scrollpane {
-            addClass("app-drawer__scroll-pane")
-
-            vbox {
-                isFitToWidth = true
-
-                addClass("app-drawer-container")
-
-                hbox {
-                    label(messages["information"]).apply {
-                        addClass("app-drawer__title")
-                    }
-                    region { hgrow = Priority.ALWAYS }
-                    button {
-                        addClass("btn", "btn--secondary")
-                        graphic = FontIcon(MaterialDesign.MDI_CLOSE)
-                        tooltip(messages["close"])
-                        action { collapse() }
-                        closeButton = this
-                    }
-                }
+            scrollpane {
+                addClass("app-drawer__scroll-pane")
 
                 vbox {
-                    addClass("app-drawer__section")
+                    isFitToWidth = true
 
-                    label(messages["aboutOrature"]).apply {
-                        addClass("app-drawer__subtitle")
-                    }
-                    label(messages["aboutOratureDescription"]).apply {
-                        fitToParentWidth()
-                        addClass("app-drawer__text")
-                    }
-                }
+                    addClass("app-drawer-container")
 
-                vbox {
-                    addClass("app-drawer__section--filled")
-
-                    label(messages["currentVersion"]).apply {
-                        addClass("app-drawer__subtitle--small")
-                    }
-                    label(info.getVersion() ?: messages["na"]).apply {
-                        addClass("app-drawer__text")
-                    }
-                }
-
-                add<UpdaterView>()
-
-                vbox {
-                    addClass("app-drawer__section")
-
-                    label(messages["applicationLogs"]).apply {
-                        addClass("app-drawer__subtitle")
-                    }
-                    add(
-                        JFXButton(messages["viewLogs"]).apply {
-                            styleClass.addAll("btn", "btn--secondary")
-
-                            tooltip {
-                                textProperty().bind(this@apply.textProperty())
-                            }
-
-                            setOnAction {
-                                viewModel.browseApplicationLog()
-                            }
+                    hbox {
+                        label(messages["information"]).apply {
+                            addClass("app-drawer__title")
                         }
-                    )
-                }
-
-                vbox {
-                    addClass("app-drawer__section")
-
-                    label(messages["errorReport"]).apply {
-                        addClass("app-drawer__subtitle")
-                    }
-                    label(messages["errorReportDescription"]).apply {
-                        fitToParentWidth()
-                        addClass("app-drawer__text")
-                    }
-
-                    label(messages["description"]).apply {
-                        addClass("app-drawer__subtitle--small")
-                    }
-                    textarea {
-                        addClass("app-drawer__report-message")
-                        textProperty().bindBidirectional(viewModel.errorDescription)
-                        overrideDefaultKeyEventHandler {
-                            viewModel.submitErrorReport()
+                        region { hgrow = Priority.ALWAYS }
+                        button {
+                            addClass("btn", "btn--secondary")
+                            graphic = FontIcon(MaterialDesign.MDI_CLOSE)
+                            tooltip(messages["close"])
+                            action { collapse() }
+                            closeButton = this
                         }
                     }
-                    label {
-                        addClass("app-drawer__report-status")
-                        visibleWhen(viewModel.reportTimeStamp.isNotNull)
-                        managedWhen(visibleProperty())
-                        textProperty().bind(viewModel.reportTimeStamp.stringBinding {
-                            MessageFormat.format(messages["errorReportSent"], it)
-                        })
+
+                    vbox {
+                        addClass("app-drawer__section")
+
+                        label(messages["aboutOrature"]).apply {
+                            addClass("app-drawer__subtitle")
+                        }
+                        label(messages["aboutOratureDescription"]).apply {
+                            fitToParentWidth()
+                            addClass("app-drawer__text")
+                        }
                     }
-                    add(
-                        JFXButton(messages["sendErrorReport"]).apply {
-                            styleClass.addAll("btn", "btn--secondary")
-                            disableProperty().bind(viewModel.errorDescription.isEmpty)
 
-                            tooltip {
-                                textProperty().bind(this@apply.textProperty())
-                            }
+                    vbox {
+                        addClass("app-drawer__section--filled")
 
-                            setOnAction {
+                        label(messages["currentVersion"]).apply {
+                            addClass("app-drawer__subtitle--small")
+                        }
+                        label(info.getVersion() ?: messages["na"]).apply {
+                            addClass("app-drawer__text")
+                        }
+                    }
+
+                    add<UpdaterView>()
+
+                    vbox {
+                        addClass("app-drawer__section")
+
+                        label(messages["applicationLogs"]).apply {
+                            addClass("app-drawer__subtitle")
+                        }
+                        add(
+                            JFXButton(messages["viewLogs"]).apply {
+                                styleClass.addAll("btn", "btn--secondary")
+
+                                tooltip {
+                                    textProperty().bind(this@apply.textProperty())
+                                }
+
+                                setOnAction {
+                                    viewModel.browseApplicationLog()
+                                }
+                            },
+                        )
+                    }
+
+                    vbox {
+                        addClass("app-drawer__section")
+
+                        label(messages["errorReport"]).apply {
+                            addClass("app-drawer__subtitle")
+                        }
+                        label(messages["errorReportDescription"]).apply {
+                            fitToParentWidth()
+                            addClass("app-drawer__text")
+                        }
+
+                        label(messages["description"]).apply {
+                            addClass("app-drawer__subtitle--small")
+                        }
+                        textarea {
+                            addClass("app-drawer__report-message")
+                            textProperty().bindBidirectional(viewModel.errorDescription)
+                            overrideDefaultKeyEventHandler {
                                 viewModel.submitErrorReport()
                             }
                         }
-                    )
+                        label {
+                            addClass("app-drawer__report-status")
+                            visibleWhen(viewModel.reportTimeStamp.isNotNull)
+                            managedWhen(visibleProperty())
+                            textProperty().bind(
+                                viewModel.reportTimeStamp.stringBinding {
+                                    MessageFormat.format(messages["errorReportSent"], it)
+                                },
+                            )
+                        }
+                        add(
+                            JFXButton(messages["sendErrorReport"]).apply {
+                                styleClass.addAll("btn", "btn--secondary")
+                                disableProperty().bind(viewModel.errorDescription.isEmpty)
+
+                                tooltip {
+                                    textProperty().bind(this@apply.textProperty())
+                                }
+
+                                setOnAction {
+                                    viewModel.submitErrorReport()
+                                }
+                            },
+                        )
+                    }
                 }
+
+                runLater { customizeScrollbarSkin() }
             }
 
-            runLater { customizeScrollbarSkin() }
+            setOnKeyReleased {
+                if (it.code == KeyCode.ESCAPE) collapse()
+            }
         }
-
-        setOnKeyReleased {
-            if (it.code == KeyCode.ESCAPE) collapse()
-        }
-    }
 
     init {
         tryImportStylesheet(resources["/css/app-drawer.css"])

@@ -27,7 +27,6 @@ import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.media.ExceptionContent
 
 class ExceptionDialog : OtterDialog() {
-
     val titleTextProperty = SimpleStringProperty()
     val headerTextProperty = SimpleStringProperty()
     val showMoreTextProperty = SimpleStringProperty()
@@ -40,19 +39,20 @@ class ExceptionDialog : OtterDialog() {
 
     private val onCloseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
-    private val exceptionContent = ExceptionContent().apply {
-        titleTextProperty().bind(titleTextProperty)
-        headerTextProperty().bind(headerTextProperty)
-        showMoreTextProperty().bind(showMoreTextProperty)
-        showLessTextProperty().bind(showLessTextProperty)
-        sendReportTextProperty().bind(sendReportTextProperty)
-        sendingReportProperty().bind(sendingReportProperty)
-        stackTraceProperty().bind(stackTraceProperty)
-        closeTextProperty().bind(closeTextProperty)
-        onCloseActionProperty().bind(onCloseActionProperty)
+    private val exceptionContent =
+        ExceptionContent().apply {
+            titleTextProperty().bind(titleTextProperty)
+            headerTextProperty().bind(headerTextProperty)
+            showMoreTextProperty().bind(showMoreTextProperty)
+            showLessTextProperty().bind(showLessTextProperty)
+            sendReportTextProperty().bind(sendReportTextProperty)
+            sendingReportProperty().bind(sendingReportProperty)
+            stackTraceProperty().bind(stackTraceProperty)
+            closeTextProperty().bind(closeTextProperty)
+            onCloseActionProperty().bind(onCloseActionProperty)
 
-        sendReportProperty.bind(sendReportProperty())
-    }
+            sendReportProperty.bind(sendReportProperty())
+        }
 
     init {
         setContent(exceptionContent)

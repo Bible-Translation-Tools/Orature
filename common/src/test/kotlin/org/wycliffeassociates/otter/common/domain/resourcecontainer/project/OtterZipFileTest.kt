@@ -25,43 +25,45 @@ import org.mockito.Mockito
 import java.util.zip.ZipFile
 
 class OtterZipFileTest {
-
     private val mockZipFile = Mockito.mock(ZipFile::class.java)
     private val mockParentFile = Mockito.mock(OtterFile::class.java)
     private val sep = "/"
     private val basePath = "dir1/dir2/"
 
-    private val testNameCases = listOf(
-        "file.md" to "file.md",
-        "test1/file.md" to "file.md",
-        "test1/test2/file.md" to "file.md",
-        "test1/file/" to "file",
-        "test1/file" to "file",
-        "test1/test2/file/" to "file",
-        "test1/test2/file" to "file"
-    )
+    private val testNameCases =
+        listOf(
+            "file.md" to "file.md",
+            "test1/file.md" to "file.md",
+            "test1/test2/file.md" to "file.md",
+            "test1/file/" to "file",
+            "test1/file" to "file",
+            "test1/test2/file/" to "file",
+            "test1/test2/file" to "file",
+        )
 
-    private val testNameWithoutExtensionCases = listOf(
-        "file.md" to "file",
-        "test1/file.md" to "file",
-        "test1/test2/file.md" to "file",
-        "test1" to "test1",
-        "test1/" to "test1",
-        "test1/test2" to "test2",
-        "test1/test2/" to "test2"
-    )
+    private val testNameWithoutExtensionCases =
+        listOf(
+            "file.md" to "file",
+            "test1/file.md" to "file",
+            "test1/test2/file.md" to "file",
+            "test1" to "test1",
+            "test1/" to "test1",
+            "test1/test2" to "test2",
+            "test1/test2/" to "test2",
+        )
 
-    private val testToRelativeStringCases = listOf(
-        "./test1/test2/" to "test1/test2",
-        ".test1/test2/" to ".test1/test2",
-        "test1/test2/" to "test1/test2",
-        "./test1/test2" to "test1/test2",
-        ".test1/test2" to ".test1/test2",
-        "test1/test2" to "test1/test2",
-        "test1/test2/file.md" to "test1/test2/file.md",
-        "test1/file.md" to "test1/file.md",
-        "file.md" to "file.md"
-    )
+    private val testToRelativeStringCases =
+        listOf(
+            "./test1/test2/" to "test1/test2",
+            ".test1/test2/" to ".test1/test2",
+            "test1/test2/" to "test1/test2",
+            "./test1/test2" to "test1/test2",
+            ".test1/test2" to ".test1/test2",
+            "test1/test2" to "test1/test2",
+            "test1/test2/file.md" to "test1/test2/file.md",
+            "test1/file.md" to "test1/file.md",
+            "file.md" to "file.md",
+        )
 
     @Before
     fun setup() {
@@ -69,7 +71,11 @@ class OtterZipFileTest {
             .thenReturn(basePath)
     }
 
-    private fun checkStringResult(absPath: String, output: String, expected: String) {
+    private fun checkStringResult(
+        absPath: String,
+        output: String,
+        expected: String,
+    ) {
         try {
             assertEquals(expected, output)
         } catch (e: AssertionError) {

@@ -15,20 +15,21 @@ import tornadofx.*
  *
  * @see javafx.scene.control.TableView.DEFAULT_SORT_POLICY
  */
-internal val CUSTOM_SORT_POLICY: Callback<TableView<Any>, Boolean> = Callback { table ->
-    try {
-        val itemsList = table.items
-        if (itemsList is SortedList<Any> || itemsList == null || itemsList.isEmpty()) {
-            return@Callback true
-        } else {
-            val comparator = table.comparator ?: return@Callback true
-            FXCollections.sort(itemsList, comparator)
-            return@Callback true
+internal val CUSTOM_SORT_POLICY: Callback<TableView<Any>, Boolean> =
+    Callback { table ->
+        try {
+            val itemsList = table.items
+            if (itemsList is SortedList<Any> || itemsList == null || itemsList.isEmpty()) {
+                return@Callback true
+            } else {
+                val comparator = table.comparator ?: return@Callback true
+                FXCollections.sort(itemsList, comparator)
+                return@Callback true
+            }
+        } catch (e: UnsupportedOperationException) {
+            return@Callback false
         }
-    } catch (e: UnsupportedOperationException) {
-        return@Callback false
     }
-}
 
 /**
  * Updates the sort comparator when the user toggles between sorting types on the column.

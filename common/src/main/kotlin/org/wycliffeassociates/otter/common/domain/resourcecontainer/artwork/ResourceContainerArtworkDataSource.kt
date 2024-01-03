@@ -22,24 +22,24 @@ import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.utils.filePathWithSuffix
-import org.wycliffeassociates.resourcecontainer.entity.Media
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
+import org.wycliffeassociates.resourcecontainer.entity.Media
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
 class ResourceContainerArtworkDataSource(
-    private val directoryProvider: IDirectoryProvider
+    private val directoryProvider: IDirectoryProvider,
 ) : ArtworkDataSource {
-
-    private val cacheDir = File(
-        directoryProvider.cacheDirectory,
-        "bible-images-custom"
-    ).apply { mkdirs() }
+    private val cacheDir =
+        File(
+            directoryProvider.cacheDirectory,
+            "bible-images-custom",
+        ).apply { mkdirs() }
 
     override fun getArtwork(
         metadata: ResourceMetadata,
         projectSlug: String,
-        imageRatio: ImageRatio
+        imageRatio: ImageRatio,
     ): Artwork? {
         val ratioString = imageRatio.getImageSuffix()
 
@@ -47,13 +47,14 @@ class ResourceContainerArtworkDataSource(
             metadata.language.slug,
             metadata.identifier,
             projectSlug,
-            ratioString
+            ratioString,
         )?.let { return it }
 
         ResourceContainer.load(metadata.path).use { rc ->
             val project = rc.media?.projects?.find { it.identifier == projectSlug }
-            val mediaList = project?.media
-                ?: return null
+            val mediaList =
+                project?.media
+                    ?: return null
 
             mediaTypes.forEach { type ->
                 val media = mediaList.find { it.identifier == type }
@@ -68,7 +69,7 @@ class ResourceContainerArtworkDataSource(
                             metadata.language.slug,
                             metadata.identifier,
                             projectSlug,
-                            ratioString
+                            ratioString,
                         )
                         return artwork
                     }
@@ -83,19 +84,20 @@ class ResourceContainerArtworkDataSource(
         media: Media,
         rc: ResourceContainer,
         project: String,
-        imageRatio: ImageRatio
+        imageRatio: ImageRatio,
     ): File? {
         val paths = mutableListOf<String>()
         paths.add(
-            filePathWithSuffix(media.url, imageRatio.getImageSuffix())
+            filePathWithSuffix(media.url, imageRatio.getImageSuffix()),
         )
 
         media.quality.forEach { quality ->
-            val urlWithParameters = media.url
-                .replace("{quality}", quality)
-                .replace("{version}", media.version)
+            val urlWithParameters =
+                media.url
+                    .replace("{quality}", quality)
+                    .replace("{version}", media.version)
             paths.add(
-                filePathWithSuffix(urlWithParameters, imageRatio.getImageSuffix())
+                filePathWithSuffix(urlWithParameters, imageRatio.getImageSuffix()),
             )
             paths.add(urlWithParameters) // if image ratio is not found
         }
@@ -108,8 +110,9 @@ class ResourceContainerArtworkDataSource(
             if (rc.accessor.fileExists(path)) {
                 val fileName = "${language}_${resourceId}_${project}_${File(path).name}"
 
-                val image = cacheDir.resolve(fileName)
-                    .apply { createNewFile() }
+                val image =
+                    cacheDir.resolve(fileName)
+                        .apply { createNewFile() }
 
                 image.deleteOnExit()
                 // copy image to cache dir
@@ -128,6 +131,7 @@ class ResourceContainerArtworkDataSource(
 
     companion object {
         private val mediaTypes = listOf("jpg", "jpeg", "png")
+
         // {languageSlug}-{resourceId}-{projectSlug}{ratio}
         private const val cacheKeyTemplate = "%s-%s-%s%s"
         private val artworkCache = ConcurrentHashMap<String, Artwork>()
@@ -136,11 +140,15 @@ class ResourceContainerArtworkDataSource(
             languageSlug: String,
             resourceId: String,
             project: String,
-            ratio: String
+            ratio: String,
         ): Artwork? {
-            val key = cacheKeyTemplate.format(
-                languageSlug, resourceId, project, ratio
-            )
+            val key =
+                cacheKeyTemplate.format(
+                    languageSlug,
+                    resourceId,
+                    project,
+                    ratio,
+                )
             return artworkCache[key]
         }
 
@@ -149,11 +157,15 @@ class ResourceContainerArtworkDataSource(
             languageSlug: String,
             resourceId: String,
             project: String,
-            ratio: String
+            ratio: String,
         ) {
-            val key = cacheKeyTemplate.format(
-                languageSlug, resourceId, project, ratio
-            )
+            val key =
+                cacheKeyTemplate.format(
+                    languageSlug,
+                    resourceId,
+                    project,
+                    ratio,
+                )
             artworkCache[key] = artwork
         }
     }

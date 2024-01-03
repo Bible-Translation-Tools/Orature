@@ -24,53 +24,56 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ProgressStatus
 import javax.inject.Inject
 
-class InitializeApp @Inject constructor(
-    private val initializeVersification: InitializeVersification,
-    private val initializeSources: InitializeSources,
-    private val initializeLanguages: InitializeLanguages,
-    private val initializeUlb: InitializeUlb,
-    private val initializeRecorder: InitializeRecorder,
-    private val initializeMarker: InitializeMarker,
-    private val initializePlugins: InitializePlugins,
-    private val initializeTakeRepository: InitializeTakeRepository,
-    private val initializeProjects: InitializeProjects,
-    private val initializeTranslations: InitializeTranslations
-) {
+class InitializeApp
+    @Inject
+    constructor(
+        private val initializeVersification: InitializeVersification,
+        private val initializeSources: InitializeSources,
+        private val initializeLanguages: InitializeLanguages,
+        private val initializeUlb: InitializeUlb,
+        private val initializeRecorder: InitializeRecorder,
+        private val initializeMarker: InitializeMarker,
+        private val initializePlugins: InitializePlugins,
+        private val initializeTakeRepository: InitializeTakeRepository,
+        private val initializeProjects: InitializeProjects,
+        private val initializeTranslations: InitializeTranslations,
+    ) {
+        private val logger = LoggerFactory.getLogger(InitializeApp::class.java)
 
-    private val logger = LoggerFactory.getLogger(InitializeApp::class.java)
+        fun initApp(): Observable<ProgressStatus> {
+            val progressObservable =
+                Observable
+                    .create<ProgressStatus> { progressStatusEmitter ->
+                        val initializers =
+                            listOf(
+                                initializeVersification,
+                                initializeLanguages,
+                                initializeSources,
+                                initializeUlb,
+                                initializeRecorder,
+                                initializeMarker,
+                                initializePlugins,
+                                initializeTakeRepository,
+                                initializeProjects,
+                                initializeTranslations,
+                            )
 
-    fun initApp(): Observable<ProgressStatus> {
-        val progressObservable = Observable
-            .create<ProgressStatus> { progressStatusEmitter ->
-                val initializers = listOf(
-                    initializeVersification,
-                    initializeLanguages,
-                    initializeSources,
-                    initializeUlb,
-                    initializeRecorder,
-                    initializeMarker,
-                    initializePlugins,
-                    initializeTakeRepository,
-                    initializeProjects,
-                    initializeTranslations
-                )
+                        var total = 0.0
+                        val increment = (1.0).div(initializers.size)
+                        initializers.forEach {
+                            total += increment
+                            progressStatusEmitter.onNext(
+                                ProgressStatus(percent = total),
+                            )
+                            it.exec(progressStatusEmitter).blockingAwait()
+                        }
+                        progressStatusEmitter.onComplete()
+                    }
+                    .doOnError { e ->
+                        logger.error("Error in initApp", e)
+                    }
+                    .subscribeOn(Schedulers.io())
 
-                var total = 0.0
-                val increment = (1.0).div(initializers.size)
-                initializers.forEach {
-                    total += increment
-                    progressStatusEmitter.onNext(
-                        ProgressStatus(percent = total)
-                    )
-                    it.exec(progressStatusEmitter).blockingAwait()
-                }
-                progressStatusEmitter.onComplete()
-            }
-            .doOnError { e ->
-                logger.error("Error in initApp", e)
-            }
-            .subscribeOn(Schedulers.io())
-
-        return progressObservable
+            return progressObservable
+        }
     }
-}

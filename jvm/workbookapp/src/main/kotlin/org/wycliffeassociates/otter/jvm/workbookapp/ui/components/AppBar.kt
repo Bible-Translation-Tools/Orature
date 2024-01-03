@@ -36,69 +36,72 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
 import tornadofx.*
 
 class AppBar : Fragment() {
-
     private val rootViewModel: RootViewModel by inject()
 
     override val root = VBox()
 
     private val buttonsToggleGroup = ToggleGroup()
 
-    private val homeButton = AppBarButton().apply {
-        addClass("bottom-border")
-        textProperty().set(messages["home"])
-        graphicProperty().set(FontIcon(MaterialDesign.MDI_HOME))
+    private val homeButton =
+        AppBarButton().apply {
+            addClass("bottom-border")
+            textProperty().set(messages["home"])
+            graphicProperty().set(FontIcon(MaterialDesign.MDI_HOME))
 
-        toggleGroup = buttonsToggleGroup
-        selectedProperty().onChange { removePseudoClass("selected") }
-        setOnMouseClicked {
-            val homePage = find<HomePage2>()
-            fire(NavigationRequestEvent(homePage))
-        }
-    }
-
-    private val addButton = AppBarButton().apply {
-        textProperty().set(messages["import"])
-        graphicProperty().set(FontIcon(MaterialDesign.MDI_DOWNLOAD))
-        toggleGroup = buttonsToggleGroup
-        selectedProperty().onChange {
-            toggleOpen<AddFilesView>(it)
-        }
-        subscribe<DrawerEvent<UIComponent>> {
-            if (it.type == AddFilesView::class) {
-                selectedProperty().set(it.action == DrawerEventAction.OPEN)
+            toggleGroup = buttonsToggleGroup
+            selectedProperty().onChange { removePseudoClass("selected") }
+            setOnMouseClicked {
+                val homePage = find<HomePage2>()
+                fire(NavigationRequestEvent(homePage))
             }
         }
-    }
 
-    private val settingsButton = AppBarButton().apply {
-        addClass("top-border")
-        textProperty().set(messages["settings"])
-        graphicProperty().set(FontIcon(MaterialDesign.MDI_SETTINGS))
-        toggleGroup = buttonsToggleGroup
-        selectedProperty().onChange {
-            toggleOpen<SettingsView>(it)
-        }
-        subscribe<DrawerEvent<UIComponent>> {
-            if (it.type == SettingsView::class) {
-                selectedProperty().set(it.action == DrawerEventAction.OPEN)
+    private val addButton =
+        AppBarButton().apply {
+            textProperty().set(messages["import"])
+            graphicProperty().set(FontIcon(MaterialDesign.MDI_DOWNLOAD))
+            toggleGroup = buttonsToggleGroup
+            selectedProperty().onChange {
+                toggleOpen<AddFilesView>(it)
+            }
+            subscribe<DrawerEvent<UIComponent>> {
+                if (it.type == AddFilesView::class) {
+                    selectedProperty().set(it.action == DrawerEventAction.OPEN)
+                }
             }
         }
-    }
 
-    private val infoButton = AppBarButton().apply {
-        addClass("top-border")
-        textProperty().set(messages["info"])
-        graphicProperty().set(FontIcon(MaterialDesign.MDI_INFORMATION))
-        toggleGroup = buttonsToggleGroup
-        selectedProperty().onChange {
-            toggleOpen<InfoView>(it)
-        }
-        subscribe<DrawerEvent<UIComponent>> {
-            if (it.type == InfoView::class) {
-                selectedProperty().set(it.action == DrawerEventAction.OPEN)
+    private val settingsButton =
+        AppBarButton().apply {
+            addClass("top-border")
+            textProperty().set(messages["settings"])
+            graphicProperty().set(FontIcon(MaterialDesign.MDI_SETTINGS))
+            toggleGroup = buttonsToggleGroup
+            selectedProperty().onChange {
+                toggleOpen<SettingsView>(it)
+            }
+            subscribe<DrawerEvent<UIComponent>> {
+                if (it.type == SettingsView::class) {
+                    selectedProperty().set(it.action == DrawerEventAction.OPEN)
+                }
             }
         }
-    }
+
+    private val infoButton =
+        AppBarButton().apply {
+            addClass("top-border")
+            textProperty().set(messages["info"])
+            graphicProperty().set(FontIcon(MaterialDesign.MDI_INFORMATION))
+            toggleGroup = buttonsToggleGroup
+            selectedProperty().onChange {
+                toggleOpen<InfoView>(it)
+            }
+            subscribe<DrawerEvent<UIComponent>> {
+                if (it.type == InfoView::class) {
+                    selectedProperty().set(it.action == DrawerEventAction.OPEN)
+                }
+            }
+        }
 
     init {
         tryImportStylesheet(resources["/css/app-bar.css"])
@@ -123,7 +126,9 @@ class AppBar : Fragment() {
                         SettingsView::class -> settingsButton.requestFocus()
                         InfoView::class -> infoButton.requestFocus()
                         // If the drawer is closed from something other than the toggle buttons, deselect them all
-                        else -> { buttonsToggleGroup.toggles.forEach { it.isSelected = false } }
+                        else -> {
+                            buttonsToggleGroup.toggles.forEach { it.isSelected = false }
+                        }
                     }
                 }
             }

@@ -18,10 +18,6 @@
  */
 package org.wycliffeassociates.otter.common.audio.mp3
 
-import java.io.File
-import java.io.IOException
-import java.lang.Integer.max
-import java.lang.Integer.min
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.audio.AudioFormatStrategy
@@ -29,8 +25,12 @@ import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
 import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.yellowcouch.javazoom.RandomAccessDecoder
+import java.io.File
+import java.io.IOException
 import java.io.OutputStream
 import java.lang.IllegalStateException
+import java.lang.Integer.max
+import java.lang.Integer.min
 
 // arbitrary size, though setting this too small results in choppy playback
 private const val MP3_BUFFER_SIZE = 24576
@@ -38,9 +38,8 @@ private const val MP3_BUFFER_SIZE = 24576
 class MP3FileReader(
     val file: File,
     start: Int? = null,
-    end: Int? = null
+    end: Int? = null,
 ) : AudioFormatStrategy, AudioFileReader {
-
     private var decoder: RandomAccessDecoder? = RandomAccessDecoder(file.absolutePath)
 
     val start = start ?: 0
@@ -57,14 +56,18 @@ class MP3FileReader(
         get() = end - start
     override val bitsPerSample = DEFAULT_BITS_PER_SAMPLE
 
-    override val metadata = Mp3Metadata(
-        mp3File = file,
-        cueFile = File(file.parent, "${file.nameWithoutExtension}.cue")
-    )
+    override val metadata =
+        Mp3Metadata(
+            mp3File = file,
+            cueFile = File(file.parent, "${file.nameWithoutExtension}.cue"),
+        )
 
     private val buff = ShortArray(MP3_BUFFER_SIZE * 2)
 
-    override fun addCue(location: Int, label: String) {
+    override fun addCue(
+        location: Int,
+        label: String,
+    ) {
         metadata.addCue(location, label)
     }
 
@@ -77,15 +80,24 @@ class MP3FileReader(
         metadata.write()
     }
 
-    override fun reader(start: Int?, end: Int?): AudioFileReader {
+    override fun reader(
+        start: Int?,
+        end: Int?,
+    ): AudioFileReader {
         return MP3FileReader(file, start, end)
     }
 
-    override fun writer(append: Boolean, buffered: Boolean): OutputStream {
+    override fun writer(
+        append: Boolean,
+        buffered: Boolean,
+    ): OutputStream {
         TODO("Not yet implemented")
     }
 
-    private fun getPCMData(outBuff: ByteArray, pos: Int) {
+    private fun getPCMData(
+        outBuff: ByteArray,
+        pos: Int,
+    ) {
         fillBuffers(pos, buff)
         val n = buff.size
         var j = 0
@@ -96,7 +108,10 @@ class MP3FileReader(
         }
     }
 
-    private fun fillBuffers(pos: Int, leftRight: ShortArray) {
+    private fun fillBuffers(
+        pos: Int,
+        leftRight: ShortArray,
+    ) {
         decoder?.let { _decoder ->
             val sourceAudio = _decoder.audioShorts
             var sourceIdx = 0

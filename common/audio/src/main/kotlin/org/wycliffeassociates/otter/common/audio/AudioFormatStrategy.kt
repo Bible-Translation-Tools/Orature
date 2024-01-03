@@ -27,9 +27,22 @@ interface AudioFormatStrategy {
     val totalFrames: Int
     val metadata: AudioMetadata
 
-    fun addCue(location: Int, label: String)
+    fun addCue(
+        location: Int,
+        label: String,
+    )
+
     fun getCues(): List<AudioCue>
+
     fun update()
-    fun reader(start: Int? = null, end: Int? = null): AudioFileReader
-    fun writer(append: Boolean = false, buffered: Boolean = true): OutputStream
+
+    fun reader(
+        start: Int? = null,
+        end: Int? = null,
+    ): AudioFileReader
+
+    fun writer(
+        append: Boolean = false,
+        buffered: Boolean = true,
+    ): OutputStream
 }

@@ -27,7 +27,7 @@ import javafx.scene.control.Skin
 class DragTarget private constructor(val dragBinding: BooleanBinding) : Control() {
     constructor(
         dragBinding: BooleanBinding,
-        skinFactory: (DragTarget) -> Skin<DragTarget>
+        skinFactory: (DragTarget) -> Skin<DragTarget>,
     ) : this(dragBinding) {
         this.skin = skinFactory(this)
     }

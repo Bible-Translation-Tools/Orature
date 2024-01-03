@@ -18,160 +18,158 @@
  */
 package org.wycliffeassociates.otter.common.audio.wav
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.io.File
 import org.wycliffeassociates.otter.common.audio.AudioCue
+import java.io.File
 
 class TestData(val initial: List<AudioCue>, val result: List<AudioCue>)
 
 class VerseMarkerChunkTest {
-
-    val testEnv = listOf(
-        TestData(
-            listOf(
-                AudioCue(1, "1"),
-                AudioCue(2, "2"),
-                AudioCue(3, "3")
+    val testEnv =
+        listOf(
+            TestData(
+                listOf(
+                    AudioCue(1, "1"),
+                    AudioCue(2, "2"),
+                    AudioCue(3, "3"),
+                ),
+                listOf(
+                    AudioCue(1, "1"),
+                    AudioCue(2, "2"),
+                    AudioCue(3, "3"),
+                    AudioCue(1, "orature-vm-1"),
+                    AudioCue(2, "orature-vm-2"),
+                    AudioCue(3, "orature-vm-3"),
+                ),
             ),
-            listOf(
-                AudioCue(1, "1"),
-                AudioCue(2, "2"),
-                AudioCue(3, "3"),
-                AudioCue(1, "orature-vm-1"),
-                AudioCue(2, "orature-vm-2"),
-                AudioCue(3, "orature-vm-3")
-            )
-        ),
-        // locations out of order
-        TestData(
-            listOf(
-                AudioCue(2, "2"),
-                AudioCue(1, "1"),
-                AudioCue(3, "3")
+            // locations out of order
+            TestData(
+                listOf(
+                    AudioCue(2, "2"),
+                    AudioCue(1, "1"),
+                    AudioCue(3, "3"),
+                ),
+                listOf(
+                    AudioCue(2, "2"),
+                    AudioCue(1, "1"),
+                    AudioCue(3, "3"),
+                    AudioCue(2, "orature-vm-2"),
+                    AudioCue(1, "orature-vm-1"),
+                    AudioCue(3, "orature-vm-3"),
+                ),
             ),
-            listOf(
-                AudioCue(2, "2"),
-                AudioCue(1, "1"),
-                AudioCue(3, "3"),
-                AudioCue(2, "orature-vm-2"),
-                AudioCue(1, "orature-vm-1"),
-                AudioCue(3, "orature-vm-3")
-            )
-        ),
-        // requiring padding to get to double word aligned
-        TestData(
-            listOf(
-                AudioCue(2, "1"),
-                AudioCue(1, "12"),
-                AudioCue(3, "123"),
-                AudioCue(4, "1234")
+            // requiring padding to get to double word aligned
+            TestData(
+                listOf(
+                    AudioCue(2, "1"),
+                    AudioCue(1, "12"),
+                    AudioCue(3, "123"),
+                    AudioCue(4, "1234"),
+                ),
+                listOf(
+                    AudioCue(2, "1"),
+                    AudioCue(1, "12"),
+                    AudioCue(3, "123"),
+                    AudioCue(4, "1234"),
+                    AudioCue(2, "orature-vm-1"),
+                    AudioCue(1, "orature-vm-12"),
+                    AudioCue(3, "orature-vm-123"),
+                    AudioCue(4, "orature-vm-1234"),
+                ),
             ),
-            listOf(
-                AudioCue(2, "1"),
-                AudioCue(1, "12"),
-                AudioCue(3, "123"),
-                AudioCue(4, "1234"),
-                AudioCue(2, "orature-vm-1"),
-                AudioCue(1, "orature-vm-12"),
-                AudioCue(3, "orature-vm-123"),
-                AudioCue(4, "orature-vm-1234")
-            )
-        ),
-        TestData(
-            listOf(
-                AudioCue(0, "    "),
-                AudioCue(2, "Verse 2"),
-                AudioCue(3, "Marker 3   "),
-                AudioCue(4, "   Verse 4"),
-                AudioCue(Int.MAX_VALUE, " stuff5 ")
+            TestData(
+                listOf(
+                    AudioCue(0, "    "),
+                    AudioCue(2, "Verse 2"),
+                    AudioCue(3, "Marker 3   "),
+                    AudioCue(4, "   Verse 4"),
+                    AudioCue(Int.MAX_VALUE, " stuff5 "),
+                ),
+                listOf(
+                    AudioCue(0, "    "),
+                    AudioCue(2, "Verse 2"),
+                    AudioCue(3, "Marker 3   "),
+                    AudioCue(4, "   Verse 4"),
+                    AudioCue(Int.MAX_VALUE, " stuff5 "),
+                    AudioCue(2, "orature-vm-2"),
+                    AudioCue(3, "orature-vm-3"),
+                    AudioCue(4, "orature-vm-4"),
+                    AudioCue(Int.MAX_VALUE, "orature-vm-5"),
+                ),
             ),
-            listOf(
-                AudioCue(0, "    "),
-                AudioCue(2, "Verse 2"),
-                AudioCue(3, "Marker 3   "),
-                AudioCue(4, "   Verse 4"),
-                AudioCue(Int.MAX_VALUE, " stuff5 "),
-                AudioCue(2, "orature-vm-2"),
-                AudioCue(3, "orature-vm-3"),
-                AudioCue(4, "orature-vm-4"),
-                AudioCue(Int.MAX_VALUE, "orature-vm-5")
-            )
-        ),
-        // Test that only orature-vm markers are interpreted as verse markers
-        TestData(
-            listOf(
-                AudioCue(0, "orature-vm-1"),
-                AudioCue(2, "Verse 2"),
-                AudioCue(3, "Marker 3   "),
-                AudioCue(4, "   Verse 4"),
-                AudioCue(Int.MAX_VALUE, " stuff5 ")
+            // Test that only orature-vm markers are interpreted as verse markers
+            TestData(
+                listOf(
+                    AudioCue(0, "orature-vm-1"),
+                    AudioCue(2, "Verse 2"),
+                    AudioCue(3, "Marker 3   "),
+                    AudioCue(4, "   Verse 4"),
+                    AudioCue(Int.MAX_VALUE, " stuff5 "),
+                ),
+                listOf(
+                    AudioCue(0, "orature-vm-1"),
+                    AudioCue(2, "Verse 2"),
+                    AudioCue(3, "Marker 3   "),
+                    AudioCue(4, "   Verse 4"),
+                    AudioCue(Int.MAX_VALUE, " stuff5 "),
+                ),
             ),
-            listOf(
-                AudioCue(0, "orature-vm-1"),
-                AudioCue(2, "Verse 2"),
-                AudioCue(3, "Marker 3   "),
-                AudioCue(4, "   Verse 4"),
-                AudioCue(Int.MAX_VALUE, " stuff5 "),
-            )
-        ),
-        // Test that only lone digits are interpreted as verse markers
-        TestData(
-            listOf(
-                AudioCue(0, "123"),
-                AudioCue(2, "Verse 2"),
-                AudioCue(3, "Marker 3   "),
-                AudioCue(4, "   Verse 4"),
-                AudioCue(Int.MAX_VALUE, " stuff5 ")
+            // Test that only lone digits are interpreted as verse markers
+            TestData(
+                listOf(
+                    AudioCue(0, "123"),
+                    AudioCue(2, "Verse 2"),
+                    AudioCue(3, "Marker 3   "),
+                    AudioCue(4, "   Verse 4"),
+                    AudioCue(Int.MAX_VALUE, " stuff5 "),
+                ),
+                listOf(
+                    AudioCue(0, "123"),
+                    AudioCue(0, "orature-vm-123"),
+                    AudioCue(2, "Verse 2"),
+                    AudioCue(3, "Marker 3   "),
+                    AudioCue(4, "   Verse 4"),
+                    AudioCue(Int.MAX_VALUE, " stuff5 "),
+                ),
             ),
-            listOf(
-                AudioCue(0, "123"),
-                AudioCue(0, "orature-vm-123"),
-                AudioCue(2, "Verse 2"),
-                AudioCue(3, "Marker 3   "),
-                AudioCue(4, "   Verse 4"),
-                AudioCue(Int.MAX_VALUE, " stuff5 "),
-            )
-        ),
-        TestData(
-            listOf(
-                AudioCue(0, "1"),
-                AudioCue(12, "2 "),
-                AudioCue(149, " 3"),
-                AudioCue(259, " 4 "),
-                AudioCue(1000, "\t5"),
-                AudioCue(2450, "6\n"),
-                AudioCue(3212, " 7\t"),
-                AudioCue(4112, " 8\t"),
-                AudioCue(5112, " 9\t\n"),
+            TestData(
+                listOf(
+                    AudioCue(0, "1"),
+                    AudioCue(12, "2 "),
+                    AudioCue(149, " 3"),
+                    AudioCue(259, " 4 "),
+                    AudioCue(1000, "\t5"),
+                    AudioCue(2450, "6\n"),
+                    AudioCue(3212, " 7\t"),
+                    AudioCue(4112, " 8\t"),
+                    AudioCue(5112, " 9\t\n"),
+                ),
+                listOf(
+                    AudioCue(0, "1"),
+                    AudioCue(12, "2 "),
+                    AudioCue(149, " 3"),
+                    AudioCue(259, " 4 "),
+                    AudioCue(1000, "\t5"),
+                    AudioCue(2450, "6\n"),
+                    AudioCue(3212, " 7\t"),
+                    AudioCue(4112, " 8\t"),
+                    AudioCue(5112, " 9\t\n"),
+                    AudioCue(0, "orature-vm-1"),
+                    AudioCue(12, "orature-vm-2"),
+                    AudioCue(149, "orature-vm-3"),
+                    AudioCue(259, "orature-vm-4"),
+                    AudioCue(1000, "orature-vm-5"),
+                    AudioCue(2450, "orature-vm-6"),
+                    AudioCue(3212, "orature-vm-7"),
+                    AudioCue(4112, "orature-vm-8"),
+                    AudioCue(5112, "orature-vm-9"),
+                ),
             ),
-            listOf(
-                AudioCue(0, "1"),
-                AudioCue(12, "2 "),
-                AudioCue(149, " 3"),
-                AudioCue(259, " 4 "),
-                AudioCue(1000, "\t5"),
-                AudioCue(2450, "6\n"),
-                AudioCue(3212, " 7\t"),
-                AudioCue(4112, " 8\t"),
-                AudioCue(5112, " 9\t\n"),
-                AudioCue(0, "orature-vm-1"),
-                AudioCue(12, "orature-vm-2"),
-                AudioCue(149, "orature-vm-3"),
-                AudioCue(259, "orature-vm-4"),
-                AudioCue(1000, "orature-vm-5"),
-                AudioCue(2450, "orature-vm-6"),
-                AudioCue(3212, "orature-vm-7"),
-                AudioCue(4112, "orature-vm-8"),
-                AudioCue(5112, "orature-vm-9"),
-            )
-        ),
-        TestData(
-            listOf(AudioCue(10, "verse 10")),
-            listOf(AudioCue(10, "verse 10"), AudioCue(10, "orature-vm-10"))
+            TestData(
+                listOf(AudioCue(10, "verse 10")),
+                listOf(AudioCue(10, "verse 10"), AudioCue(10, "orature-vm-10")),
+            ),
         )
-    )
 
     @Test
     fun writeCues() {

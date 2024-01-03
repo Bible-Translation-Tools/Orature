@@ -21,112 +21,113 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories
 import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.persistence.IAppPreferences
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
-import javax.inject.Inject
 import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
-import org.wycliffeassociates.otter.common.data.ColorTheme
+import javax.inject.Inject
 
-class AppPreferencesRepository @Inject constructor(
-    private val preferences: IAppPreferences,
-    private val audioDeviceProvider: AudioDeviceProvider,
-    private val languageRepository: ILanguageRepository
-) : IAppPreferencesRepository {
+class AppPreferencesRepository
+    @Inject
+    constructor(
+        private val preferences: IAppPreferences,
+        private val audioDeviceProvider: AudioDeviceProvider,
+        private val languageRepository: ILanguageRepository,
+    ) : IAppPreferencesRepository {
+        override fun resumeProjectId(): Single<Int> {
+            return preferences.resumeBookId()
+        }
 
-    override fun resumeProjectId(): Single<Int> {
-        return preferences.resumeBookId()
-    }
+        override fun setResumeProjectId(id: Int): Completable {
+            return preferences.setResumeBookId(id)
+        }
 
-    override fun setResumeProjectId(id: Int): Completable {
-        return preferences.setResumeBookId(id)
-    }
+        override fun lastResource(): Single<String> {
+            return preferences.lastResource()
+        }
 
-    override fun lastResource(): Single<String> {
-        return preferences.lastResource()
-    }
+        override fun setLastResource(resource: String): Completable {
+            return preferences.setLastResource(resource)
+        }
 
-    override fun setLastResource(resource: String): Completable {
-        return preferences.setLastResource(resource)
-    }
-
-    override fun getInputDevice(): Single<String> {
-        return preferences
-            .audioInputDevice()
-            .map {
-                audioDeviceProvider.getInputDevice(it)?.name ?: ""
-            }
-    }
-
-    override fun setInputDevice(mixer: String): Completable {
-        audioDeviceProvider.selectInputDevice(mixer)
-        return preferences.setAudioInputDevice(mixer)
-    }
-
-    override fun getOutputDevice(): Single<String> {
-        return preferences
-            .audioOutputDevice()
-            .map {
-                audioDeviceProvider.getOutputDevice(it)?.name ?: ""
-            }
-    }
-
-    override fun setOutputDevice(mixer: String): Completable {
-        audioDeviceProvider.selectOutputDevice(mixer)
-        return preferences.setAudioOutputDevice(mixer)
-    }
-
-    override fun localeLanguage(): Maybe<Language> {
-        return preferences
-            .localeLanguage()
-            .flatMapMaybe {
-                if (it.isNotEmpty()) {
-                    languageRepository
-                        .getBySlug(it)
-                        .toMaybe()
-                } else {
-                    null
+        override fun getInputDevice(): Single<String> {
+            return preferences
+                .audioInputDevice()
+                .map {
+                    audioDeviceProvider.getInputDevice(it)?.name ?: ""
                 }
-            }
-    }
+        }
 
-    override fun setLocaleLanguage(language: Language): Completable {
-        return preferences.setLocaleLanguage(language.slug)
-    }
+        override fun setInputDevice(mixer: String): Completable {
+            audioDeviceProvider.selectInputDevice(mixer)
+            return preferences.setAudioInputDevice(mixer)
+        }
 
-    override fun appTheme(): Single<ColorTheme> {
-        return preferences.appTheme()
-            .map {
-                ColorTheme.valueOf(it)
-            }
-    }
+        override fun getOutputDevice(): Single<String> {
+            return preferences
+                .audioOutputDevice()
+                .map {
+                    audioDeviceProvider.getOutputDevice(it)?.name ?: ""
+                }
+        }
 
-    override fun setAppTheme(theme: ColorTheme): Completable {
-        return preferences.setAppTheme(theme.name)
-    }
+        override fun setOutputDevice(mixer: String): Completable {
+            audioDeviceProvider.selectOutputDevice(mixer)
+            return preferences.setAudioOutputDevice(mixer)
+        }
 
-    override fun sourceTextZoomRate(): Single<Int> {
-        return preferences.sourceTextZoomRate()
-    }
+        override fun localeLanguage(): Maybe<Language> {
+            return preferences
+                .localeLanguage()
+                .flatMapMaybe {
+                    if (it.isNotEmpty()) {
+                        languageRepository
+                            .getBySlug(it)
+                            .toMaybe()
+                    } else {
+                        null
+                    }
+                }
+        }
 
-    override fun setSourceTextZoomRate(rate: Int): Completable {
-        return preferences.setSourceTextZoomRate(rate)
-    }
+        override fun setLocaleLanguage(language: Language): Completable {
+            return preferences.setLocaleLanguage(language.slug)
+        }
 
-    override fun languageNamesUrl(): Single<String> {
-        return preferences.languageNamesUrl()
-    }
+        override fun appTheme(): Single<ColorTheme> {
+            return preferences.appTheme()
+                .map {
+                    ColorTheme.valueOf(it)
+                }
+        }
 
-    override fun setLanguageNamesUrl(server: String): Completable {
-        return preferences.setLanguageNamesUrl(server)
-    }
+        override fun setAppTheme(theme: ColorTheme): Completable {
+            return preferences.setAppTheme(theme.name)
+        }
 
-    override fun defaultLanguageNamesUrl(): Single<String> {
-        return preferences.defaultLanguageNamesUrl()
-    }
+        override fun sourceTextZoomRate(): Single<Int> {
+            return preferences.sourceTextZoomRate()
+        }
 
-    override fun resetLanguageNamesUrl(): Single<String> {
-        return preferences.resetLanguageNamesUrl()
+        override fun setSourceTextZoomRate(rate: Int): Completable {
+            return preferences.setSourceTextZoomRate(rate)
+        }
+
+        override fun languageNamesUrl(): Single<String> {
+            return preferences.languageNamesUrl()
+        }
+
+        override fun setLanguageNamesUrl(server: String): Completable {
+            return preferences.setLanguageNamesUrl(server)
+        }
+
+        override fun defaultLanguageNamesUrl(): Single<String> {
+            return preferences.defaultLanguageNamesUrl()
+        }
+
+        override fun resetLanguageNamesUrl(): Single<String> {
+            return preferences.resetLanguageNamesUrl()
+        }
     }
-}

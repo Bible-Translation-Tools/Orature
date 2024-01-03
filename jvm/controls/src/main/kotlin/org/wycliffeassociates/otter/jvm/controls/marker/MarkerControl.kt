@@ -27,6 +27,7 @@ abstract class MarkerControl : Control() {
      * Delegates the drag start (on marker clicked) to whatever the actual drag control/button is.
      */
     open val onDragStartProperty: ObjectProperty<EventHandler<MouseEvent>> = SimpleObjectProperty()
+
     /**
      * Delegates the drag handler (on marker dragged) to whatever the actual drag control/button is.
      */

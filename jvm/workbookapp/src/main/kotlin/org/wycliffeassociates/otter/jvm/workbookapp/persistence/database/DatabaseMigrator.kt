@@ -59,7 +59,7 @@ class DatabaseMigrator {
                     dsl
                         .select()
                         .from(InstalledEntity.INSTALLED_ENTITY)
-                        .where(InstalledEntity.INSTALLED_ENTITY.NAME.eq(DATABASE_INSTALLABLE_NAME))
+                        .where(InstalledEntity.INSTALLED_ENTITY.NAME.eq(DATABASE_INSTALLABLE_NAME)),
                 )
         return if (databaseVersionExists) {
             dsl
@@ -67,10 +67,15 @@ class DatabaseMigrator {
                 .from(InstalledEntity.INSTALLED_ENTITY)
                 .where(InstalledEntity.INSTALLED_ENTITY.NAME.eq(DATABASE_INSTALLABLE_NAME))
                 .fetchSingle { record -> record.getValue(InstalledEntity.INSTALLED_ENTITY.VERSION) }
-        } else 0
+        } else {
+            0
+        }
     }
 
-    private fun updateDatabaseVersion(dsl: DSLContext, version: Int) {
+    private fun updateDatabaseVersion(
+        dsl: DSLContext,
+        version: Int,
+    ) {
         dsl
             .update(InstalledEntity.INSTALLED_ENTITY)
             .set(InstalledEntity.INSTALLED_ENTITY.VERSION, version)
@@ -83,19 +88,24 @@ class DatabaseMigrator {
      * introduces the database itself as an "installed entity" to store the version number
      * to facilitate future database migrations
      */
-    private fun migrate0to1(dsl: DSLContext, current: Int): Int {
+    private fun migrate0to1(
+        dsl: DSLContext,
+        current: Int,
+    ): Int {
         return if (current < 1) {
             dsl
                 .insertInto(
                     InstalledEntity.INSTALLED_ENTITY,
                     InstalledEntity.INSTALLED_ENTITY.NAME,
-                    InstalledEntity.INSTALLED_ENTITY.VERSION
+                    InstalledEntity.INSTALLED_ENTITY.VERSION,
                 )
                 .values(DATABASE_INSTALLABLE_NAME, 1)
                 .execute()
             logger.info("Updated database from version 0 to 1")
             return 1
-        } else current
+        } else {
+            current
+        }
     }
 
     /**
@@ -104,7 +114,10 @@ class DatabaseMigrator {
      *
      * The DataAccessException is caught in the event that the column already exists.
      */
-    private fun migrate1to2(dsl: DSLContext, current: Int): Int {
+    private fun migrate1to2(
+        dsl: DSLContext,
+        current: Int,
+    ): Int {
         return if (current < 2) {
             dsl
                 .alterTable(AudioPluginEntity.AUDIO_PLUGIN_ENTITY)
@@ -123,7 +136,10 @@ class DatabaseMigrator {
      *
      * The DataAccessException is caught in the event that the column already exists.
      */
-    private fun migrate2to3(dsl: DSLContext, current: Int): Int {
+    private fun migrate2to3(
+        dsl: DSLContext,
+        current: Int,
+    ): Int {
         return if (current < 3) {
             dsl
                 .alterTable(LanguageEntity.LANGUAGE_ENTITY)
@@ -140,11 +156,14 @@ class DatabaseMigrator {
      * Version 4
      * Create translation table
      */
-    private fun migrate3to4(dsl: DSLContext, current: Int): Int {
+    private fun migrate3to4(
+        dsl: DSLContext,
+        current: Int,
+    ): Int {
         return if (current < 4) {
             dsl
                 .createTableIfNotExists(
-                    TranslationEntity.TRANSLATION_ENTITY
+                    TranslationEntity.TRANSLATION_ENTITY,
                 )
                 .column(TranslationEntity.TRANSLATION_ENTITY.ID)
                 .column(TranslationEntity.TRANSLATION_ENTITY.SOURCE_FK)
@@ -153,17 +172,19 @@ class DatabaseMigrator {
                     DSL.primaryKey(TranslationEntity.TRANSLATION_ENTITY.ID),
                     DSL.unique(
                         TranslationEntity.TRANSLATION_ENTITY.SOURCE_FK,
-                        TranslationEntity.TRANSLATION_ENTITY.TARGET_FK
+                        TranslationEntity.TRANSLATION_ENTITY.TARGET_FK,
                     ),
                     DSL.foreignKey(TranslationEntity.TRANSLATION_ENTITY.SOURCE_FK)
                         .references(LanguageEntity.LANGUAGE_ENTITY),
                     DSL.foreignKey(TranslationEntity.TRANSLATION_ENTITY.TARGET_FK)
-                        .references(LanguageEntity.LANGUAGE_ENTITY)
+                        .references(LanguageEntity.LANGUAGE_ENTITY),
                 )
                 .execute()
             logger.info("Updated database from version 3 to 4")
             return 4
-        } else current
+        } else {
+            current
+        }
     }
 
     /**
@@ -172,7 +193,10 @@ class DatabaseMigrator {
      *
      * The DataAccessException is caught in the event that the column already exists.
      */
-    private fun migrate4to5(dsl: DSLContext, current: Int): Int {
+    private fun migrate4to5(
+        dsl: DSLContext,
+        current: Int,
+    ): Int {
         return if (current < 5) {
             dsl
                 .alterTable(DublinCoreEntity.DUBLIN_CORE_ENTITY)
@@ -191,7 +215,10 @@ class DatabaseMigrator {
      *
      * The DataAccessException is caught in the event that the column already exists.
      */
-    private fun migrate5to6(dsl: DSLContext, current: Int): Int {
+    private fun migrate5to6(
+        dsl: DSLContext,
+        current: Int,
+    ): Int {
         return if (current < 6) {
             dsl
                 .alterTable(TranslationEntity.TRANSLATION_ENTITY)
@@ -210,7 +237,10 @@ class DatabaseMigrator {
      *
      * The DataAccessException is caught in the event that the column already exists.
      */
-    private fun migrate6to7(dsl: DSLContext, current: Int): Int {
+    private fun migrate6to7(
+        dsl: DSLContext,
+        current: Int,
+    ): Int {
         return if (current < 7) {
             dsl
                 .alterTable(CollectionEntity.COLLECTION_ENTITY)
@@ -229,7 +259,10 @@ class DatabaseMigrator {
      *
      * The DataAccessException is caught in the event that the column already exists.
      */
-    private fun migrate7to8(dsl: DSLContext, current: Int): Int {
+    private fun migrate7to8(
+        dsl: DSLContext,
+        current: Int,
+    ): Int {
         return if (current < 8) {
             try {
                 dsl
@@ -258,7 +291,10 @@ class DatabaseMigrator {
      *
      * The DataAccessException is caught in the event that the column already exists.
      */
-    private fun migrate8to9(dsl: DSLContext, current: Int): Int {
+    private fun migrate8to9(
+        dsl: DSLContext,
+        current: Int,
+    ): Int {
         return if (current < 9) {
             try {
                 dsl
@@ -277,29 +313,34 @@ class DatabaseMigrator {
             current
         }
     }
-    
-     /**
+
+    /**
      * Version 10
      * Adds a table for Versification
      */
-    private fun migrate9to10(dsl: DSLContext, current: Int): Int {
-         return if (current < 10) {
-             dsl
-                 .createTableIfNotExists(
-                     VersificationEntity.VERSIFICATION_ENTITY
-                 )
-                 .column(VersificationEntity.VERSIFICATION_ENTITY.ID)
-                 .column(VersificationEntity.VERSIFICATION_ENTITY.SLUG)
-                 .column(VersificationEntity.VERSIFICATION_ENTITY.PATH)
-                 .constraints(
-                     DSL.primaryKey(VersificationEntity.VERSIFICATION_ENTITY.ID),
-                     DSL.unique(VersificationEntity.VERSIFICATION_ENTITY.SLUG)
-                 )
-                 .execute()
-             logger.info("Updated database from version 9 to 10")
-             return 10
-         } else current
-     }
+    private fun migrate9to10(
+        dsl: DSLContext,
+        current: Int,
+    ): Int {
+        return if (current < 10) {
+            dsl
+                .createTableIfNotExists(
+                    VersificationEntity.VERSIFICATION_ENTITY,
+                )
+                .column(VersificationEntity.VERSIFICATION_ENTITY.ID)
+                .column(VersificationEntity.VERSIFICATION_ENTITY.SLUG)
+                .column(VersificationEntity.VERSIFICATION_ENTITY.PATH)
+                .constraints(
+                    DSL.primaryKey(VersificationEntity.VERSIFICATION_ENTITY.ID),
+                    DSL.unique(VersificationEntity.VERSIFICATION_ENTITY.SLUG),
+                )
+                .execute()
+            logger.info("Updated database from version 9 to 10")
+            return 10
+        } else {
+            current
+        }
+    }
 
     /**
      * Version 11
@@ -312,7 +353,10 @@ class DatabaseMigrator {
      *
      * The DataAccessException is caught in the event that the column already exists.
      */
-    private fun migrate10to11(dsl: DSLContext, current: Int): Int {
+    private fun migrate10to11(
+        dsl: DSLContext,
+        current: Int,
+    ): Int {
         return if (current < 11) {
             try {
                 dsl
@@ -344,7 +388,10 @@ class DatabaseMigrator {
      * Version 12
      * Adds WorkbookDescriptor table and WorkbookType table
      */
-    private fun migrate11to12(dsl: DSLContext, current: Int): Int {
+    private fun migrate11to12(
+        dsl: DSLContext,
+        current: Int,
+    ): Int {
         return if (current < 12) {
             createWorkbookTypeTable(dsl)
             createWorkbookDescriptorTable(dsl)
@@ -359,7 +406,10 @@ class DatabaseMigrator {
      * Version 13
      * Adds Checking Status table and Take Entity's FK column reference.
      */
-    private fun migrate12to13(dsl: DSLContext, current: Int): Int {
+    private fun migrate12to13(
+        dsl: DSLContext,
+        current: Int,
+    ): Int {
         return if (current < 13) {
             dsl
                 .createTableIfNotExists(CheckingStatus.CHECKING_STATUS)
@@ -367,21 +417,22 @@ class DatabaseMigrator {
                 .column(CheckingStatus.CHECKING_STATUS.NAME)
                 .constraints(
                     DSL.primaryKey(CheckingStatus.CHECKING_STATUS.ID),
-                    DSL.unique(CheckingStatus.CHECKING_STATUS.NAME)
+                    DSL.unique(CheckingStatus.CHECKING_STATUS.NAME),
                 )
                 .execute()
 
             seedCheckingStatus(dsl)
 
             /** Default value for new column in Take Entity */
-            val uncheckedId = dsl.select(CheckingStatus.CHECKING_STATUS.ID)
-                .from(CheckingStatus.CHECKING_STATUS)
-                .where(
-                    CheckingStatus.CHECKING_STATUS.NAME
-                        .eq(CheckingStatusEnum.UNCHECKED.name)
-                )
-                .fetchOne()!!
-                .get(CheckingStatus.CHECKING_STATUS.ID)
+            val uncheckedId =
+                dsl.select(CheckingStatus.CHECKING_STATUS.ID)
+                    .from(CheckingStatus.CHECKING_STATUS)
+                    .where(
+                        CheckingStatus.CHECKING_STATUS.NAME
+                            .eq(CheckingStatusEnum.UNCHECKED.name),
+                    )
+                    .fetchOne()!!
+                    .get(CheckingStatus.CHECKING_STATUS.ID)
 
             try {
                 /**
@@ -405,7 +456,7 @@ class DatabaseMigrator {
                         DSL.primaryKey(TakeEntity.TAKE_ENTITY.ID),
                         DSL.constraint("fk_checking_status")
                             .foreignKey(TakeEntity.TAKE_ENTITY.CHECKING_FK)
-                            .references(CheckingStatus.CHECKING_STATUS)
+                            .references(CheckingStatus.CHECKING_STATUS),
                     )
                     .execute()
 
@@ -422,9 +473,9 @@ class DatabaseMigrator {
                                 TakeEntity.TAKE_ENTITY.DELETED_TS,
                                 TakeEntity.TAKE_ENTITY.PLAYED,
                                 DSL.inline(uncheckedId), // Default value for CHECKING_FK
-                                DSL.inline(null, TakeEntity.TAKE_ENTITY.CHECKSUM) // Default value for CHECKSUM
+                                DSL.inline(null, TakeEntity.TAKE_ENTITY.CHECKSUM), // Default value for CHECKSUM
                             )
-                            .from(TakeEntity.TAKE_ENTITY)
+                            .from(TakeEntity.TAKE_ENTITY),
                     )
                     .execute()
 
@@ -434,7 +485,6 @@ class DatabaseMigrator {
                 dsl.alterTable(DSL.table("take_entity_temp"))
                     .renameTo(TakeEntity.TAKE_ENTITY.name)
                     .execute()
-
             } catch (e: DataAccessException) {
                 // Exception is thrown because the column might already exist but an existence check cannot
                 // be performed in sqlite.
@@ -451,13 +501,13 @@ class DatabaseMigrator {
     private fun createWorkbookTypeTable(dsl: DSLContext) {
         dsl
             .createTableIfNotExists(
-                WorkbookType.WORKBOOK_TYPE
+                WorkbookType.WORKBOOK_TYPE,
             )
             .column(WorkbookType.WORKBOOK_TYPE.ID)
             .column(WorkbookType.WORKBOOK_TYPE.NAME)
             .constraints(
                 DSL.primaryKey(WorkbookType.WORKBOOK_TYPE.ID),
-                DSL.unique(WorkbookType.WORKBOOK_TYPE.NAME)
+                DSL.unique(WorkbookType.WORKBOOK_TYPE.NAME),
             )
             .execute()
     }
@@ -465,7 +515,7 @@ class DatabaseMigrator {
     private fun createWorkbookDescriptorTable(dsl: DSLContext) {
         dsl
             .createTableIfNotExists(
-                WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY
+                WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY,
             )
             .column(WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.ID)
             .column(WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.SOURCE_FK)
@@ -476,14 +526,14 @@ class DatabaseMigrator {
                 DSL.unique(
                     WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.SOURCE_FK,
                     WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.TARGET_FK,
-                    WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.TYPE_FK
+                    WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.TYPE_FK,
                 ),
                 DSL.foreignKey(WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.SOURCE_FK)
                     .references(CollectionEntity.COLLECTION_ENTITY).onDeleteCascade(),
                 DSL.foreignKey(WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.TARGET_FK)
                     .references(CollectionEntity.COLLECTION_ENTITY).onDeleteCascade(),
                 DSL.foreignKey(WorkbookDescriptorEntity.WORKBOOK_DESCRIPTOR_ENTITY.TYPE_FK)
-                    .references(WorkbookType.WORKBOOK_TYPE)
+                    .references(WorkbookType.WORKBOOK_TYPE),
             )
             .execute()
     }
@@ -492,7 +542,7 @@ class DatabaseMigrator {
         dsl
             .insertInto(
                 CheckingStatus.CHECKING_STATUS,
-                CheckingStatus.CHECKING_STATUS.NAME
+                CheckingStatus.CHECKING_STATUS.NAME,
             )
             .also { insert ->
                 CheckingStatusEnum.values().forEach { status ->

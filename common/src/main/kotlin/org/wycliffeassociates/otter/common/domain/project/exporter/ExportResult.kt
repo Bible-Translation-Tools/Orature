@@ -20,5 +20,5 @@ package org.wycliffeassociates.otter.common.domain.project.exporter
 
 enum class ExportResult {
     SUCCESS,
-    FAILURE
+    FAILURE,
 }

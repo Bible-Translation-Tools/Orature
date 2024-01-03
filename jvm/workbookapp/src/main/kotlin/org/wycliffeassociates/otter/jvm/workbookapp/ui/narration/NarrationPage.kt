@@ -7,8 +7,8 @@ import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.event.BeginRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ChapterReturnFromPluginEvent
-import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NavigateChapterEvent
+import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.OpenInAudioPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PauseEvent
 import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordAgainEvent
@@ -60,29 +60,30 @@ class NarrationPage : View() {
         pluginOpenedPage = createPluginOpenedPage()
     }
 
-    override val root = stackpane {
-        addClass(ColorTheme.LIGHT.styleClass)
-        val narrationRoot = this
+    override val root =
+        stackpane {
+            addClass(ColorTheme.LIGHT.styleClass)
+            val narrationRoot = this
 
-        createSnackBar()
+            createSnackBar()
 
-        vbox {
-            add<NarrationHeader>() {
-                narrationHeader = this
-            }
-            add<AudioWorkspaceView> {
-                audioWorkspaceView = this
-                this.root.maxHeightProperty().bind(narrationRoot.heightProperty().multiply(1.0 / 3.0))
-                this.root.minHeightProperty().bind(this.root.maxHeightProperty())
-            }
-            add<NarrationToolBar>() {
-                narrationToolbar = this
-            }
-            add<TeleprompterView>() {
-                teleprompterView = this
+            vbox {
+                add<NarrationHeader> {
+                    narrationHeader = this
+                }
+                add<AudioWorkspaceView> {
+                    audioWorkspaceView = this
+                    this.root.maxHeightProperty().bind(narrationRoot.heightProperty().multiply(1.0 / 3.0))
+                    this.root.minHeightProperty().bind(this.root.maxHeightProperty())
+                }
+                add<NarrationToolBar> {
+                    narrationToolbar = this
+                }
+                add<TeleprompterView> {
+                    teleprompterView = this
+                }
             }
         }
-    }
 
     override fun onDock() {
         super.onDock()
@@ -107,7 +108,7 @@ class NarrationPage : View() {
         // avoid resetting ViewModel states & action history when opening plugin
         when (viewModel.pluginOpenedProperty.value) {
             true -> {
-                /* no-op, opening plugin */
+                // no-op, opening plugin
             }
             false -> { // regular navigation
                 viewModel.onUndock()
@@ -219,15 +220,16 @@ class NarrationPage : View() {
                 logger.error("Error in creating no plugin snackbar", e)
             }
             .subscribe { pluginErrorMessage ->
-                val notification = NotificationViewData(
-                    title = messages["noPlugins"],
-                    message = pluginErrorMessage,
-                    statusType = NotificationStatusType.WARNING,
-                    actionIcon = MaterialDesign.MDI_PLUS,
-                    actionText = messages["addApp"]
-                ) {
-                    audioPluginViewModel.addPlugin(record = true, edit = false)
-                }
+                val notification =
+                    NotificationViewData(
+                        title = messages["noPlugins"],
+                        message = pluginErrorMessage,
+                        statusType = NotificationStatusType.WARNING,
+                        actionIcon = MaterialDesign.MDI_PLUS,
+                        actionText = messages["addApp"],
+                    ) {
+                        audioPluginViewModel.addPlugin(record = true, edit = false)
+                    }
                 SnackbarHandler.enqueue(notification)
             }
     }
@@ -244,13 +246,13 @@ class NarrationPage : View() {
             sourceSpeedRateProperty.bind(
                 workbookDataStore.activeWorkbookProperty.select {
                     it.translation.sourceRate.toLazyBinding()
-                }
+                },
             )
 
             targetSpeedRateProperty.bind(
                 workbookDataStore.activeWorkbookProperty.select {
                     it.translation.targetRate.toLazyBinding()
-                }
+                },
             )
         }
     }

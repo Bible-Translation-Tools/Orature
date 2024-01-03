@@ -29,7 +29,6 @@ import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class FilteredSearchBarSkin(private val bar: FilteredSearchBar) : SkinBase<FilteredSearchBar>(bar) {
-
     @FXML
     lateinit var searchField: CustomTextField
 

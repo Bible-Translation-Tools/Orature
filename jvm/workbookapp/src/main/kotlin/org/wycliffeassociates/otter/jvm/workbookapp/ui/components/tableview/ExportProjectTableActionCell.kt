@@ -7,16 +7,19 @@ import org.wycliffeassociates.otter.jvm.controls.model.ChapterDescriptor
 import tornadofx.*
 
 class ExportProjectTableActionCell(
-    private val selectedChapters: ObservableSet<ChapterDescriptor>
+    private val selectedChapters: ObservableSet<ChapterDescriptor>,
 ) : TableCell<ChapterDescriptor, ChapterDescriptor>() {
+    private val graphicNode =
+        CheckBox().apply {
+            addClass("wa-checkbox")
+            isMouseTransparent = true
+            isFocusTraversable = false
+        }
 
-    private val graphicNode = CheckBox().apply {
-        addClass("wa-checkbox")
-        isMouseTransparent = true
-        isFocusTraversable = false
-    }
-
-    override fun updateItem(item: ChapterDescriptor?, empty: Boolean) {
+    override fun updateItem(
+        item: ChapterDescriptor?,
+        empty: Boolean,
+    ) {
         super.updateItem(item, empty)
 
         if (item == null || empty) {
@@ -25,15 +28,16 @@ class ExportProjectTableActionCell(
             return
         }
 
-        graphic = graphicNode.apply {
-            isDisable = !item.selectable
-            isVisible = item.selectable
+        graphic =
+            graphicNode.apply {
+                isDisable = !item.selectable
+                isVisible = item.selectable
 
-            selectedProperty().bind(
-                booleanBinding(selectedChapters) {
-                    selectedChapters.contains(item)
-                }
-            )
-        }
+                selectedProperty().bind(
+                    booleanBinding(selectedChapters) {
+                        selectedChapters.contains(item)
+                    },
+                )
+            }
     }
 }

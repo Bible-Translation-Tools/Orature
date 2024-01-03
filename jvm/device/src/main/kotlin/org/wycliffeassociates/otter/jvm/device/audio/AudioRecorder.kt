@@ -22,18 +22,17 @@ import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
+import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import java.lang.IllegalArgumentException
 import javax.sound.sampled.LineUnavailableException
-import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import javax.sound.sampled.TargetDataLine
 
 private const val DEFAULT_BUFFER_SIZE = 1024
 
 class AudioRecorder(
     val line: TargetDataLine?,
-    private val errorRelay: PublishRelay<AudioError> = PublishRelay.create()
+    private val errorRelay: PublishRelay<AudioError> = PublishRelay.create(),
 ) : IAudioRecorder {
-
     private val monitor = Object()
 
     @Volatile
@@ -43,34 +42,35 @@ class AudioRecorder(
     private var pause = false
 
     private val audioByteObservable = PublishSubject.create<ByteArray>()
-    private val recordingStream = Observable
-        .fromCallable {
-            val byteArray = ByteArray(DEFAULT_BUFFER_SIZE)
-            var totalRead = 0
-            line?.let {
-                while (true) {
-                    if (line.isOpen || line.available() > 0) {
-                        totalRead += line.read(byteArray, 0, byteArray.size)
-                        audioByteObservable.onNext(byteArray)
-                    } else {
-                        try {
-                            synchronized(monitor) {
-                                monitor.wait()
+    private val recordingStream =
+        Observable
+            .fromCallable {
+                val byteArray = ByteArray(DEFAULT_BUFFER_SIZE)
+                var totalRead = 0
+                line?.let {
+                    while (true) {
+                        if (line.isOpen || line.available() > 0) {
+                            totalRead += line.read(byteArray, 0, byteArray.size)
+                            audioByteObservable.onNext(byteArray)
+                        } else {
+                            try {
+                                synchronized(monitor) {
+                                    monitor.wait()
+                                }
+                            } catch (e: InterruptedException) {
+                                stop()
                             }
-                        } catch (e: InterruptedException) {
-                            stop()
+                        }
+                        if (stop || pause) {
+                            line.close()
+                            if (stop) break
                         }
                     }
-                    if (stop || pause) {
-                        line.close()
-                        if (stop) break
-                    }
                 }
+                stop = false
             }
-            stop = false
-        }
-        .subscribeOn(Schedulers.io())
-        .subscribe()
+            .subscribeOn(Schedulers.io())
+            .subscribe()
 
     @Synchronized // Synchronized so as to not subscribe to multiple streams on quick multipress
     override fun start() {

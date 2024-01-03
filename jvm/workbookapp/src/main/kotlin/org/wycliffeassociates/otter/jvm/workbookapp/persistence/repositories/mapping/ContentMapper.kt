@@ -24,9 +24,12 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.Co
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ContentEntity
 
 class ContentMapper(
-    private val contentTypeDao: ContentTypeDao
+    private val contentTypeDao: ContentTypeDao,
 ) {
-    fun mapFromEntity(entity: ContentEntity, selectedTake: Take?): Content {
+    fun mapFromEntity(
+        entity: ContentEntity,
+        selectedTake: Take?,
+    ): Content {
         return Content(
             sort = entity.sort,
             labelKey = entity.labelKey,
@@ -38,11 +41,14 @@ class ContentMapper(
             type = contentTypeDao.fetchForId(entity.type_fk)!!,
             draftNumber = entity.draftNumber,
             id = entity.id,
-            bridged = entity.bridged
+            bridged = entity.bridged,
         )
     }
 
-    fun mapToEntity(obj: Content, collectionFk: Int = 0): ContentEntity {
+    fun mapToEntity(
+        obj: Content,
+        collectionFk: Int = 0,
+    ): ContentEntity {
         return ContentEntity(
             id = obj.id,
             sort = obj.sort,
@@ -55,7 +61,7 @@ class ContentMapper(
             format = obj.format,
             type_fk = contentTypeDao.fetchId(obj.type),
             draftNumber = obj.draftNumber,
-            bridged = obj.bridged
+            bridged = obj.bridged,
         )
     }
 }

@@ -36,7 +36,6 @@ import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTakeCard>(card) {
-
     @FXML
     lateinit var selectBtn: Button
 
@@ -79,18 +78,20 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
     private fun initController() {
         selectBtn.apply {
             tooltip(messages["select"])
-            graphicProperty().bind(card.selectedProperty.objectBinding {
-                when (it) {
-                    true -> {
-                        togglePseudoClass("selected", true)
-                        selectedIcon
+            graphicProperty().bind(
+                card.selectedProperty.objectBinding {
+                    when (it) {
+                        true -> {
+                            togglePseudoClass("selected", true)
+                            selectedIcon
+                        }
+                        else -> {
+                            togglePseudoClass("selected", false)
+                            promoteIcon
+                        }
                     }
-                    else -> {
-                        togglePseudoClass("selected", false)
-                        promoteIcon
-                    }
-                }
-            })
+                },
+            )
             focusTraversableProperty().bind(card.selectedProperty.not())
             setOnAction {
                 card.animationMediatorProperty.value?.let {
@@ -132,13 +133,17 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
         children.add(root)
     }
 
-    private fun fade(node: Node, callback: () -> Unit) {
+    private fun fade(
+        node: Node,
+        callback: () -> Unit,
+    ) {
         val ft = FadeTransition(Duration.millis(600.0), node)
         ft.fromValue = node.opacity
         ft.toValue = 0.0
-        ft.onFinished = EventHandler {
-            callback()
-        }
+        ft.onFinished =
+            EventHandler {
+                callback()
+            }
         ft.play()
     }
 }

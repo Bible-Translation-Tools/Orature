@@ -1,7 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home
 
 import javafx.animation.TranslateTransition
-import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -32,133 +31,136 @@ class ProjectWizardSection(
     targetLanguages: ObservableList<Language>,
     selectedModeProperty: SimpleObjectProperty<ProjectMode>,
     selectedSourceLanguageProperty: SimpleObjectProperty<Language>,
-    existingLanguagePairs: ObservableList<Pair<Language, Language>>
+    existingLanguagePairs: ObservableList<Pair<Language, Language>>,
 ) : StackPane() {
-    val sourceLanguageSearchQueryProperty =  SimpleStringProperty()
+    val sourceLanguageSearchQueryProperty = SimpleStringProperty()
     val targetLanguageSearchQueryProperty = SimpleStringProperty()
 
     private val steps: List<Node>
     private val currentStepProperty = SimpleIntegerProperty(0)
     private val onCancelActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
-    private val step1 = VBox().apply {
-        addClass("homepage__main-region")
+    private val step1 =
+        VBox().apply {
+            addClass("homepage__main-region")
 
-        hbox {
-            addClass("homepage__main-region__header-section")
-            button {
-                addClass("btn", "btn--icon")
-                tooltip(messages["goBack"])
-                graphic = FontIcon(MaterialDesign.MDI_ARROW_LEFT)
+            hbox {
+                addClass("homepage__main-region__header-section")
+                button {
+                    addClass("btn", "btn--icon")
+                    tooltip(messages["goBack"])
+                    graphic = FontIcon(MaterialDesign.MDI_ARROW_LEFT)
 
-                onActionProperty().bind(onCancelActionProperty)
-            }
-            label(messages["selectProjectTypeStep1"]) { addClass("h4") }
-        }
-
-        vbox {
-            addClass("homepage__main-region__body")
-            vgrow = Priority.ALWAYS
-
-            translationTypeCard("oralTranslation", "oralTranslationDesc") {
-                setOnSelectAction {
-                    selectedModeProperty.set(ProjectMode.TRANSLATION)
-                    nextStep()
+                    onActionProperty().bind(onCancelActionProperty)
                 }
+                label(messages["selectProjectTypeStep1"]) { addClass("h4") }
             }
-            translationTypeCard("narration", "narrationDesc") {
-                setOnSelectAction {
-                    selectedModeProperty.set(ProjectMode.NARRATION)
-                    nextStep()
+
+            vbox {
+                addClass("homepage__main-region__body")
+                vgrow = Priority.ALWAYS
+
+                translationTypeCard("oralTranslation", "oralTranslationDesc") {
+                    setOnSelectAction {
+                        selectedModeProperty.set(ProjectMode.TRANSLATION)
+                        nextStep()
+                    }
                 }
-            }
-            translationTypeCard("dialect", "dialectDesc") {
-                addPseudoClass("last")
-                setOnSelectAction {
-                    selectedModeProperty.set(ProjectMode.DIALECT)
-                    nextStep()
+                translationTypeCard("narration", "narrationDesc") {
+                    setOnSelectAction {
+                        selectedModeProperty.set(ProjectMode.NARRATION)
+                        nextStep()
+                    }
                 }
-            }
-        }
-
-        managedWhen(visibleProperty())
-    }
-
-    private val step2 = VBox().apply {
-        addClass("homepage__main-region")
-
-        hbox {
-            addClass("homepage__main-region__header-section")
-            button {
-                addClass("btn", "btn--icon")
-                tooltip(messages["goBack"])
-                graphic = FontIcon(MaterialDesign.MDI_ARROW_LEFT)
-
-                setOnAction {
-                    selectedModeProperty.set(null)
-                    previousStep()
-                }
-            }
-            label(messages["selectSourceLanguageStep2"]) { addClass("h4") }
-            region { hgrow = Priority.ALWAYS }
-            searchBar {
-                textProperty().bindBidirectional(sourceLanguageSearchQueryProperty)
-                promptText = messages["search"]
-            }
-        }
-
-        languageTableView(sourceLanguages) {
-            this@apply.visibleProperty().onChange {
-                if (it) customizeScrollbarSkin()
-            }
-        }
-        managedWhen(visibleProperty())
-    }
-
-    private val step3 = VBox().apply {
-        addClass("homepage__main-region")
-
-        hbox {
-            addClass("homepage__main-region__header-section")
-
-            button {
-                addClass("btn", "btn--icon")
-                tooltip(messages["goBack"])
-                graphic = FontIcon(MaterialDesign.MDI_ARROW_LEFT)
-
-                setOnAction {
-                    selectedSourceLanguageProperty.set(null)
-                    previousStep()
-                }
-            }
-            label(messages["selectTargetLanguageStep3"]) { addClass("h4") }
-            region { hgrow = Priority.ALWAYS }
-            searchBar {
-                textProperty().bindBidirectional(targetLanguageSearchQueryProperty)
-                promptText = messages["search"]
-            }
-        }
-
-        languageTableView(targetLanguages) {
-            selectedSourceLanguageProperty.onChange {
-                it?.let { src ->
-                    val duplicated = existingLanguagePairs
-                        .filter { it.first == src }
-                        .map { it.second }
-
-                    disabledLanguages.setAll(duplicated)
-                } ?: {
-                    disabledLanguages.clear()
+                translationTypeCard("dialect", "dialectDesc") {
+                    addPseudoClass("last")
+                    setOnSelectAction {
+                        selectedModeProperty.set(ProjectMode.DIALECT)
+                        nextStep()
+                    }
                 }
             }
 
-            this@apply.visibleProperty().onChange {
-                if (it) customizeScrollbarSkin()
-            }
+            managedWhen(visibleProperty())
         }
-        managedWhen(visibleProperty())
-    }
 
+    private val step2 =
+        VBox().apply {
+            addClass("homepage__main-region")
+
+            hbox {
+                addClass("homepage__main-region__header-section")
+                button {
+                    addClass("btn", "btn--icon")
+                    tooltip(messages["goBack"])
+                    graphic = FontIcon(MaterialDesign.MDI_ARROW_LEFT)
+
+                    setOnAction {
+                        selectedModeProperty.set(null)
+                        previousStep()
+                    }
+                }
+                label(messages["selectSourceLanguageStep2"]) { addClass("h4") }
+                region { hgrow = Priority.ALWAYS }
+                searchBar {
+                    textProperty().bindBidirectional(sourceLanguageSearchQueryProperty)
+                    promptText = messages["search"]
+                }
+            }
+
+            languageTableView(sourceLanguages) {
+                this@apply.visibleProperty().onChange {
+                    if (it) customizeScrollbarSkin()
+                }
+            }
+            managedWhen(visibleProperty())
+        }
+
+    private val step3 =
+        VBox().apply {
+            addClass("homepage__main-region")
+
+            hbox {
+                addClass("homepage__main-region__header-section")
+
+                button {
+                    addClass("btn", "btn--icon")
+                    tooltip(messages["goBack"])
+                    graphic = FontIcon(MaterialDesign.MDI_ARROW_LEFT)
+
+                    setOnAction {
+                        selectedSourceLanguageProperty.set(null)
+                        previousStep()
+                    }
+                }
+                label(messages["selectTargetLanguageStep3"]) { addClass("h4") }
+                region { hgrow = Priority.ALWAYS }
+                searchBar {
+                    textProperty().bindBidirectional(targetLanguageSearchQueryProperty)
+                    promptText = messages["search"]
+                }
+            }
+
+            languageTableView(targetLanguages) {
+                selectedSourceLanguageProperty.onChange {
+                    it?.let { src ->
+                        val duplicated =
+                            existingLanguagePairs
+                                .filter { it.first == src }
+                                .map { it.second }
+
+                        disabledLanguages.setAll(duplicated)
+                    } ?: {
+                        disabledLanguages.clear()
+                    }
+                }
+
+                this@apply.visibleProperty().onChange {
+                    if (it) customizeScrollbarSkin()
+                }
+            }
+            managedWhen(visibleProperty())
+        }
 
     init {
         vgrow = Priority.ALWAYS
@@ -207,10 +209,13 @@ class ProjectWizardSection(
      * @param step the ordinal of the step that needs to animate
      * @param direction specifies the direction the user is navigating to
      */
-    private fun renderStepTransition(step: Int, direction: StepDirection) {
+    private fun renderStepTransition(
+        step: Int,
+        direction: StepDirection,
+    ) {
         val nodeToAnimate = steps[step]
         val duration = Duration.seconds(TRANSITION_DURATION_SEC)
-        /* horizontal translation is automatically aligned with node orientation */
+        // horizontal translation is automatically aligned with node orientation
         if (direction == StepDirection.FORWARD) {
             steps[step].isVisible = true
 

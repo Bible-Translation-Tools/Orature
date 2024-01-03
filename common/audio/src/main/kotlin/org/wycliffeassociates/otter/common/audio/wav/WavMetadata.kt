@@ -24,7 +24,6 @@ import org.wycliffeassociates.otter.common.audio.AudioMetadata
 import java.io.OutputStream
 import java.nio.ByteBuffer
 
-
 /**
  * WavMetadata is a class for reading and writing metadata from wav files.
  * The wav file spec details various kinds of metadata chunks that can occur after
@@ -37,9 +36,7 @@ import java.nio.ByteBuffer
  * This allows users of the WavMetadata library to add custom parsers beyond what is officially supported.
  */
 class WavMetadata(parsableChunks: List<RiffChunk>? = null) : AudioMetadata {
-
     companion object {
-
         /**
          * Holds the chunk parsers used to parse Wav metadata
          */
@@ -97,7 +94,10 @@ class WavMetadata(parsableChunks: List<RiffChunk>? = null) : AudioMetadata {
         chunks.forEach { out.write(it.toByteArray()) }
     }
 
-    override fun addCue(location: Int, label: String) {
+    override fun addCue(
+        location: Int,
+        label: String,
+    ) {
         cueChunk.addCue(AudioCue(location, label))
     }
 

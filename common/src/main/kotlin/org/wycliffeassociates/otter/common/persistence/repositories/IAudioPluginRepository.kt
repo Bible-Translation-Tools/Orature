@@ -27,14 +27,22 @@ import org.wycliffeassociates.otter.common.domain.plugins.IAudioPlugin
 enum class PluginType {
     MARKER,
     RECORDER,
-    EDITOR
+    EDITOR,
 }
 
 interface IAudioPluginRepository : IRepository<AudioPluginData> {
     fun insert(data: AudioPluginData): Single<Int>
+
     fun getAllPlugins(): Single<List<IAudioPlugin>>
+
     fun getPlugin(type: PluginType): Maybe<IAudioPlugin>
+
     fun getPluginData(type: PluginType): Maybe<AudioPluginData>
-    fun setPluginData(type: PluginType, default: AudioPluginData): Completable
+
+    fun setPluginData(
+        type: PluginType,
+        default: AudioPluginData,
+    ): Completable
+
     fun initSelected(): Completable
 }

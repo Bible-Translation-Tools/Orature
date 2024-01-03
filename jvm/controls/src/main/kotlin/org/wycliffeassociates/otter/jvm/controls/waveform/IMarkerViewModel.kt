@@ -3,10 +3,10 @@ package org.wycliffeassociates.otter.jvm.controls.waveform
 import javafx.beans.binding.IntegerBinding
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.collections.ObservableList
-import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
-import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
+import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
+import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 
 interface IMarkerViewModel : IWaveformViewModel {
     var markerModel: VerseMarkerModel?
@@ -31,7 +31,11 @@ interface IMarkerViewModel : IWaveformViewModel {
         }
     }
 
-    fun moveMarker(id: Int, start: Int, end: Int) {
+    fun moveMarker(
+        id: Int,
+        start: Int,
+        end: Int,
+    ) {
         markerModel?.moveMarker(id, start, end)
     }
 
@@ -118,7 +122,7 @@ interface IMarkerViewModel : IWaveformViewModel {
 
     fun mediaToggle() {
         if (audioController?.isPlayingProperty?.value == false) {
-            /* trigger change to auto-scroll when it starts playing */
+            // trigger change to auto-scroll when it starts playing
             val currentMarkerIndex = currentMarkerNumberProperty.value
             currentMarkerNumberProperty.set(-1)
             currentMarkerNumberProperty.set(currentMarkerIndex)

@@ -7,13 +7,13 @@ import org.wycliffeassociates.otter.common.data.audio.*
 import java.util.regex.Pattern
 
 internal object OratureCueParser {
-
-    private val parsers = listOf(
-        VerseMarkerParser(),
-        ChunkMarkerParser(),
-        ChapterMarkerParser(),
-        BookMarkerParser()
-    )
+    private val parsers =
+        listOf(
+            VerseMarkerParser(),
+            ChunkMarkerParser(),
+            ChapterMarkerParser(),
+            BookMarkerParser(),
+        )
 
     fun parse(metadata: AudioMetadata): OratureMarkers {
         return parse(metadata.getCues())
@@ -39,6 +39,7 @@ internal object OratureCueParser {
 }
 
 internal class MarkerParseResult(val accepted: List<AudioMarker>, val rejected: List<AudioCue>)
+
 internal interface MarkerParser {
     val cueType: OratureCueType
     val pattern: Pattern
@@ -73,9 +74,12 @@ internal class VerseMarkerParser : MarkerParser {
         val matcher = pattern.matcher(cue.label)
         if (matcher.matches()) {
             start = matcher.group(1).toInt()
-            end = if (matcher.groupCount() > 1 && !matcher.group(2).isNullOrBlank()) {
-                matcher.group(2).toInt()
-            } else start
+            end =
+                if (matcher.groupCount() > 1 && !matcher.group(2).isNullOrBlank()) {
+                    matcher.group(2).toInt()
+                } else {
+                    start
+                }
             return VerseMarker(start, end, cue.location)
         }
         return null
@@ -110,7 +114,7 @@ internal class VerseMarkerParser : MarkerParser {
     private fun matchAlternativeCues(
         cues: List<AudioCue>,
         accepted: MutableList<AudioMarker>,
-        rejected: MutableList<AudioCue>
+        rejected: MutableList<AudioCue>,
     ) {
         val oratureRegex = Regex("^orature-vm-(\\d+)(?:-(\\d+))?\$")
 
@@ -120,14 +124,15 @@ internal class VerseMarkerParser : MarkerParser {
         val oratureCues = cues.filter { it.label.matches(oratureRegex) }
         val leftoverCues = cues.filter { !oratureCues.contains(it) }
         val loneDigits = leftoverCues.filter { it.label.trim().matches(loneDigitRegex) }
-        val potentialCues = leftoverCues
-            .filter { !loneDigits.contains(it) }
-            .filter { numberRegex.containsMatchIn(it.label) }
-            .map {
-                val match = numberRegex.find(it.label)
-                val label = match!!.groupValues.first()!!
-                AudioCue(it.location, label)
-            }
+        val potentialCues =
+            leftoverCues
+                .filter { !loneDigits.contains(it) }
+                .filter { numberRegex.containsMatchIn(it.label) }
+                .map {
+                    val match = numberRegex.find(it.label)
+                    val label = match!!.groupValues.first()!!
+                    AudioCue(it.location, label)
+                }
 
         if (oratureCues.isNotEmpty()) {
             addMatchingCues(oratureCues, oratureRegex.toPattern(), accepted)
@@ -135,7 +140,7 @@ internal class VerseMarkerParser : MarkerParser {
             addMatchingCues(
                 loneDigits.map { AudioCue(it.location, it.label.trim()) },
                 loneDigitRegex.toPattern(),
-                accepted
+                accepted,
             )
         } else if (potentialCues.isNotEmpty()) {
             addMatchingCues(potentialCues, numberRegex.toPattern(), accepted)
@@ -143,14 +148,21 @@ internal class VerseMarkerParser : MarkerParser {
         rejected.addAll(leftoverCues)
     }
 
-    private fun addMatchingCues(cues: List<AudioCue>, pattern: Pattern, accepted: MutableList<AudioMarker>) {
+    private fun addMatchingCues(
+        cues: List<AudioCue>,
+        pattern: Pattern,
+        accepted: MutableList<AudioMarker>,
+    ) {
         cues.forEach { cue ->
             val matcher = pattern.matcher(cue.label)
             if (matcher.matches()) {
                 val start = matcher.group(1).toInt()
-                val end = if (matcher.groupCount() > 1 && !matcher.group(2).isNullOrBlank()) {
-                    matcher.group(2).toInt()
-                } else start
+                val end =
+                    if (matcher.groupCount() > 1 && !matcher.group(2).isNullOrBlank()) {
+                        matcher.group(2).toInt()
+                    } else {
+                        start
+                    }
                 accepted.add(VerseMarker(start, end, cue.location))
             }
         }

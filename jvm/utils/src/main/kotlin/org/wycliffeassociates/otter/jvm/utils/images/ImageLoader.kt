@@ -29,11 +29,14 @@ class ImageLoader {
     enum class Format {
         SVG,
         PNG,
-        JPG
+        JPG,
     }
 
     companion object {
-        fun load(imageStream: InputStream, format: Format): Node {
+        fun load(
+            imageStream: InputStream,
+            format: Format,
+        ): Node {
             return when (format) {
                 Format.SVG -> SVGImage(SvgLoader().loadSvg(imageStream))
                 Format.PNG, Format.JPG -> ImageView(Image(imageStream))

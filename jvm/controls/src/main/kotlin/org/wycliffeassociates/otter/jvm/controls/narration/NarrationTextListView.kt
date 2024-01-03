@@ -36,7 +36,6 @@ import org.wycliffeassociates.otter.jvm.utils.virtualFlow
 import tornadofx.*
 
 class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(items) {
-
     val firstVerseToResumeProperty = SimpleObjectProperty<T>()
     private val listeners = mutableListOf<ListenerDisposer>()
     private var scrollHandlerDelay: PauseTransition = PauseTransition(Duration.seconds(0.2))
@@ -50,9 +49,10 @@ class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(i
         skinProperty().onChangeAndDoNowWithDisposer {
             it?.let {
                 try {
-                    val scrollBar = virtualFlow().findChildren<ScrollBar>(true).singleOrNull { node ->
-                        node.orientation == Orientation.VERTICAL
-                    }
+                    val scrollBar =
+                        virtualFlow().findChildren<ScrollBar>(true).singleOrNull { node ->
+                            node.orientation == Orientation.VERTICAL
+                        }
                     scrollBar?.valueProperty()?.onChangeWithDisposer {
                         scrollHandlerDelay.stop()
                         scrollHandlerDelay.setOnFinished {
@@ -89,22 +89,25 @@ class StickyVerseChangedEvent(val showBanner: Boolean) : FXEvent()
 
 fun <T> EventTarget.narrationTextListview(
     values: ObservableList<T>?,
-    op: NarrationTextListView<T>.() -> Unit = {}
+    op: NarrationTextListView<T>.() -> Unit = {},
 ) = NarrationTextListView<T>().attachTo(this, op) {
-        if (values is SortedFilteredList<T>) values.bindTo(it)
-        else it.items = values
+    if (values is SortedFilteredList<T>) {
+        values.bindTo(it)
+    } else {
+        it.items = values
     }
+}
 
 fun <T> EventTarget.narrationTextListview(
     values: ObservableValue<ObservableList<T>>?,
-    op: NarrationTextListView<T>.() -> Unit = {}
+    op: NarrationTextListView<T>.() -> Unit = {},
 ) = NarrationTextListView<T>().attachTo(this, op) {
-        fun rebinder() {
-            (it.items as? SortedFilteredList<T>)?.bindTo(it)
-        }
-        it.itemsProperty().bind(values)
-        rebinder()
-        it.itemsProperty().onChange {
-            rebinder()
-        }
+    fun rebinder() {
+        (it.items as? SortedFilteredList<T>)?.bindTo(it)
     }
+    it.itemsProperty().bind(values)
+    rebinder()
+    it.itemsProperty().onChange {
+        rebinder()
+    }
+}

@@ -14,7 +14,6 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import tornadofx.*
 
 class ProgressDialog : OtterDialog() {
-    
     val dialogTitleProperty = SimpleStringProperty()
     val dialogMessageProperty = SimpleStringProperty()
     val percentageProperty = SimpleDoubleProperty(0.0)
@@ -23,63 +22,66 @@ class ProgressDialog : OtterDialog() {
     val allowCloseProperty = SimpleBooleanProperty(true)
 
     private val onCloseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
-    
-    private val content = VBox().apply {
-        addClass("confirm-dialog", "progress-dialog")
 
-        hbox {
-            addClass("confirm-dialog__header")
-            label {
-                textProperty().bind(dialogTitleProperty)
-                addClass("h3")
-            }
-            region { hgrow = Priority.ALWAYS }
-            button {
-                addClass("btn", "btn--icon", "btn--borderless")
-                graphic = FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE)
-                tooltip(messages["close"])
-                visibleWhen { allowCloseProperty }
-                managedWhen(visibleProperty())
-                onActionProperty().bind(onCloseActionProperty)
-            }
-        }
-        vbox {
-            addClass("confirm-dialog__body")
-            vgrow = Priority.ALWAYS
-            label {
-                addClass("confirm-dialog__message")
-                textProperty().bind(dialogMessageProperty)
-            }
-            progressbar {
-                progressProperty().bind(percentageProperty.divide(100))
-                fitToParentWidth()
-            }
+    private val content =
+        VBox().apply {
+            addClass("confirm-dialog", "progress-dialog")
+
             hbox {
+                addClass("confirm-dialog__header")
                 label {
-                    addClass("h5")
-                    textProperty().bind(progressMessageProperty)
+                    textProperty().bind(dialogTitleProperty)
+                    addClass("h3")
                 }
                 region { hgrow = Priority.ALWAYS }
+                button {
+                    addClass("btn", "btn--icon", "btn--borderless")
+                    graphic = FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE)
+                    tooltip(messages["close"])
+                    visibleWhen { allowCloseProperty }
+                    managedWhen(visibleProperty())
+                    onActionProperty().bind(onCloseActionProperty)
+                }
+            }
+            vbox {
+                addClass("confirm-dialog__body")
+                vgrow = Priority.ALWAYS
                 label {
-                    addClass("normal-text")
-                    textProperty().bind(percentageProperty.stringBinding {
-                        String.format("%.0f%%", it ?: 0.0)
-                    })
+                    addClass("confirm-dialog__message")
+                    textProperty().bind(dialogMessageProperty)
+                }
+                progressbar {
+                    progressProperty().bind(percentageProperty.divide(100))
+                    fitToParentWidth()
+                }
+                hbox {
+                    label {
+                        addClass("h5")
+                        textProperty().bind(progressMessageProperty)
+                    }
+                    region { hgrow = Priority.ALWAYS }
+                    label {
+                        addClass("normal-text")
+                        textProperty().bind(
+                            percentageProperty.stringBinding {
+                                String.format("%.0f%%", it ?: 0.0)
+                            },
+                        )
+                    }
+                }
+            }
+            hbox {
+                addClass("confirm-dialog__footer")
+                region { hgrow = Priority.ALWAYS }
+                button(cancelMessageProperty) {
+                    addClass("btn", "btn--secondary")
+                    tooltip { textProperty().bind(cancelMessageProperty) }
+                    onActionProperty().bind(onCloseActionProperty)
+                    visibleWhen { cancelMessageProperty.isNotNull }
+                    managedWhen(visibleProperty())
                 }
             }
         }
-        hbox {
-            addClass("confirm-dialog__footer")
-            region { hgrow = Priority.ALWAYS }
-            button(cancelMessageProperty) {
-                addClass("btn", "btn--secondary")
-                tooltip { textProperty().bind(cancelMessageProperty) }
-                onActionProperty().bind(onCloseActionProperty)
-                visibleWhen { cancelMessageProperty.isNotNull }
-                managedWhen(visibleProperty())
-            }
-        }
-    }
 
     init {
         setContent(content)

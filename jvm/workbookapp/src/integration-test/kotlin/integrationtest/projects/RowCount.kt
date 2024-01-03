@@ -24,5 +24,5 @@ data class RowCount(
     val collections: Int? = null,
     val links: Int? = null,
     val derivatives: Int? = null,
-    val contents: Map<ContentType, Int>? = null
+    val contents: Map<ContentType, Int>? = null,
 )

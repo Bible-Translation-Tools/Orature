@@ -25,13 +25,20 @@ import org.wycliffeassociates.otter.common.data.primitives.Take
 import org.wycliffeassociates.otter.common.data.workbook.Book
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 
 interface IWorkbookRepository {
-    fun get(source: Collection, target: Collection): Workbook
+    fun get(
+        source: Collection,
+        target: Collection,
+    ): Workbook
+
     fun getSoftDeletedTakes(book: Book): Single<List<Take>>
+
     fun getProjects(): Single<List<Workbook>>
+
     fun getProjects(translation: Translation): Single<List<Workbook>>
+
     fun getWorkbook(project: Collection): Maybe<Workbook>
+
     fun closeWorkbook(workbook: Workbook)
 }

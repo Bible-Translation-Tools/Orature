@@ -37,12 +37,13 @@ open class PeerEdit : View() {
     val recorderViewModel: RecorderViewModel by inject()
 
     private lateinit var waveform: MarkerWaveform
-    private val audioScrollBar = createAudioScrollBar(
-        viewModel.audioPositionProperty,
-        viewModel.totalFramesProperty,
-        viewModel.isPlayingProperty,
-        viewModel::seek
-    )
+    private val audioScrollBar =
+        createAudioScrollBar(
+            viewModel.audioPositionProperty,
+            viewModel.totalFramesProperty,
+            viewModel.isPlayingProperty,
+            viewModel::seek,
+        )
     private var timer: AnimationTimer? = null
 
     private val mainSectionProperty = SimpleObjectProperty<Node>(null)
@@ -51,83 +52,88 @@ open class PeerEdit : View() {
     private val eventSubscriptions = mutableListOf<EventRegistration>()
     private val listenerDisposers = mutableListOf<ListenerDisposer>()
 
-    override val root = borderpane {
-        top = vbox {
-            addClass("blind-draft-section")
-            label(viewModel.chunkTitleProperty).addClass("h4", "h4--80")
-            simpleaudioplayer {
-                playerProperty.bind(viewModel.sourcePlayerProperty)
-                enablePlaybackRateProperty.set(true)
-                sideTextProperty.set(messages["sourceAudio"])
-                menuSideProperty.set(Side.BOTTOM)
-            }
+    override val root =
+        borderpane {
+            top =
+                vbox {
+                    addClass("blind-draft-section")
+                    label(viewModel.chunkTitleProperty).addClass("h4", "h4--80")
+                    simpleaudioplayer {
+                        playerProperty.bind(viewModel.sourcePlayerProperty)
+                        enablePlaybackRateProperty.set(true)
+                        sideTextProperty.set(messages["sourceAudio"])
+                        menuSideProperty.set(Side.BOTTOM)
+                    }
+                }
+            centerProperty().bind(mainSectionProperty)
         }
-        centerProperty().bind(mainSectionProperty)
-    }
 
     init {
         tryImportStylesheet("/css/recording-screen.css")
     }
 
-    private fun createPlaybackView() = VBox().apply {
-        val container = this
-        waveform = createPlaybackWaveform(container)
-        add(waveform)
-        add(audioScrollBar)
+    private fun createPlaybackView() =
+        VBox().apply {
+            val container = this
+            waveform = createPlaybackWaveform(container)
+            add(waveform)
+            add(audioScrollBar)
 
-        hbox {
-            addClass("consume__bottom", "recording__bottom-section")
-            button {
-                addClass("btn", "btn--primary", "consume__btn")
-                val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
-                val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
-                textProperty().bind(viewModel.isPlayingProperty.stringBinding {
-                    togglePseudoClass("active", it == true)
-                    if (it == true) {
-                        graphic = pauseIcon
-                        messages["pause"]
-                    } else {
-                        graphic = playIcon
-                        messages["play"]
+            hbox {
+                addClass("consume__bottom", "recording__bottom-section")
+                button {
+                    addClass("btn", "btn--primary", "consume__btn")
+                    val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
+                    val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
+                    textProperty().bind(
+                        viewModel.isPlayingProperty.stringBinding {
+                            togglePseudoClass("active", it == true)
+                            if (it == true) {
+                                graphic = pauseIcon
+                                messages["pause"]
+                            } else {
+                                graphic = playIcon
+                                messages["play"]
+                            }
+                        },
+                    )
+                    tooltip {
+                        textProperty().bind(this@button.textProperty())
                     }
-                })
-                tooltip {
-                    textProperty().bind(this@button.textProperty())
+
+                    action {
+                        viewModel.toggleAudio()
+                    }
                 }
+                button(messages["confirm"]) {
+                    addClass("btn", "btn--secondary")
+                    graphic = FontIcon(MaterialDesign.MDI_CHECK_CIRCLE)
+                    tooltip(text)
 
-                action {
-                    viewModel.toggleAudio()
+                    visibleWhen { viewModel.isPlayingProperty.not() }
+                    disableWhen { viewModel.chunkConfirmed }
+
+                    action {
+                        viewModel.confirmChunk()
+                    }
                 }
-            }
-            button(messages["confirm"]) {
-                addClass("btn", "btn--secondary")
-                graphic = FontIcon(MaterialDesign.MDI_CHECK_CIRCLE)
-                tooltip(text)
+                region { hgrow = Priority.ALWAYS }
+                button(messages["record"]) {
+                    addClass("btn", "btn--secondary")
+                    graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
+                    tooltip(text)
 
-                visibleWhen { viewModel.isPlayingProperty.not() }
-                disableWhen { viewModel.chunkConfirmed }
+                    disableWhen { viewModel.isPlayingProperty }
 
-                action {
-                    viewModel.confirmChunk()
-                }
-            }
-            region { hgrow = Priority.ALWAYS }
-            button(messages["record"]) {
-                addClass("btn", "btn--secondary")
-                graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
-                tooltip(text)
-
-                disableWhen { viewModel.isPlayingProperty }
-
-                action {
-                    viewModel.onRecordNew()
-                    mainSectionProperty.set(recordingView)
-                    recorderViewModel.onViewReady(container.width.toInt()) // use the width of the existing component
-                    recorderViewModel.toggle()
+                    action {
+                        viewModel.onRecordNew()
+                        mainSectionProperty.set(recordingView)
+                        recorderViewModel.onViewReady(container.width.toInt()) // use the width of the existing component
+                        recorderViewModel.toggle()
+                    }
                 }
             }
         }
-    }
 
     private fun createPlaybackWaveform(container: VBox): MarkerWaveform {
         return MarkerWaveform().apply {
@@ -135,10 +141,11 @@ open class PeerEdit : View() {
             vgrow = Priority.ALWAYS
             themeProperty.bind(settingsViewModel.appColorMode)
             positionProperty.bind(viewModel.positionProperty)
-            clip = Rectangle().apply {
-                widthProperty().bind(container.widthProperty())
-                heightProperty().bind(container.heightProperty())
-            }
+            clip =
+                Rectangle().apply {
+                    widthProperty().bind(container.widthProperty())
+                    heightProperty().bind(container.heightProperty())
+                }
             setOnWaveformClicked { viewModel.pause() }
             setOnWaveformDragReleased { deltaPos ->
                 val deltaFrames = pixelsToFrames(deltaPos)

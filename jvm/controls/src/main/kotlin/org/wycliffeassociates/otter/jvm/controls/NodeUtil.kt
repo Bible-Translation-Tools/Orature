@@ -9,7 +9,6 @@ import javafx.scene.layout.StackPane
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import tornadofx.*
-import kotlin.math.min
 
 /**
  * Calls this method from a scrollable component such as a ScrollPane
@@ -30,7 +29,7 @@ fun Parent.customizeScrollbarSkin() {
                         FontIcon(Material.DRAG_INDICATOR).apply {
                             addClass("thumb-icon")
                             if (bar.orientation == Orientation.HORIZONTAL) rotate = 90.0
-                        }
+                        },
                     )
                 }
             }
@@ -39,6 +38,7 @@ fun Parent.customizeScrollbarSkin() {
 
 /** The distance of scroll bar increment/decrement measured in audio frames */
 const val SCROLL_INCREMENT_UNIT = 10_000.0
+
 /** The distance of scroll bar jump measured in audio frames */
 const val SCROLL_JUMP_UNIT = 100_000.0
 
@@ -54,7 +54,7 @@ fun createAudioScrollBar(
     audioPositionProperty: IntegerProperty,
     totalFramesProperty: IntegerProperty,
     isPlayingProperty: BooleanProperty,
-    onScroll: (Int) -> Unit = {}
+    onScroll: (Int) -> Unit = {},
 ): ScrollBar {
     return ScrollBar().apply {
         orientation = Orientation.HORIZONTAL
@@ -69,11 +69,13 @@ fun createAudioScrollBar(
         maxProperty().bind(totalFramesProperty)
 
         unitIncrement = SCROLL_INCREMENT_UNIT
-        blockIncrementProperty().bind(maxProperty().doubleBinding {
-            it?.let { maxValue ->
-                maxValue.toDouble() / 10
-            } ?: SCROLL_JUMP_UNIT
-        })
+        blockIncrementProperty().bind(
+            maxProperty().doubleBinding {
+                it?.let { maxValue ->
+                    maxValue.toDouble() / 10
+                } ?: SCROLL_JUMP_UNIT
+            },
+        )
 
         runLater {
             customizeScrollbarSkin()

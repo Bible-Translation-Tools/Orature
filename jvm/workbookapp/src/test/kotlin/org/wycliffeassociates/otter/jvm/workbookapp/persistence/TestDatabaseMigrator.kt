@@ -34,7 +34,6 @@ import java.io.File
 import java.lang.Exception
 
 class TestDatabaseMigrator {
-
     var dsl: DSLContext? = null
     val dbFile = File.createTempFile("database", ".sqlite").apply { deleteOnExit() }
     val schemaFile = File.createTempFile("schema0", ".sql").apply { deleteOnExit() }
@@ -47,12 +46,13 @@ class TestDatabaseMigrator {
             .copyTo(schemaFile.outputStream())
         dsl = JooqTestConfiguration.createDatabase(dbFile.absolutePath, schemaFile).dsl()
         // Make sure the database file has the tables we need
-        val sqlStatements = schemaFile
-            .bufferedReader()
-            .readText()
-            .split(";")
-            .filter { it.isNotBlank() }
-            .map { "$it;" }
+        val sqlStatements =
+            schemaFile
+                .bufferedReader()
+                .readText()
+                .split(";")
+                .filter { it.isNotBlank() }
+                .map { "$it;" }
 
         // Execute each SQL statement
         sqlStatements.forEach {
@@ -78,7 +78,7 @@ class TestDatabaseMigrator {
                     Tables.AUDIO_PLUGIN_ENTITY.ARGS,
                     Tables.AUDIO_PLUGIN_ENTITY.EDIT,
                     Tables.AUDIO_PLUGIN_ENTITY.RECORD,
-                    Tables.AUDIO_PLUGIN_ENTITY.PATH
+                    Tables.AUDIO_PLUGIN_ENTITY.PATH,
                 )
                 .values(
                     "test plugin",
@@ -87,7 +87,7 @@ class TestDatabaseMigrator {
                     "",
                     1,
                     1,
-                    "path"
+                    "path",
                 )
                 .execute()
 
@@ -99,13 +99,13 @@ class TestDatabaseMigrator {
             } catch (e: Exception) {
                 Assert.assertTrue(
                     "Exception thrown that mark column does not exist",
-                    e.message!!.contains("no such column: audio_plugin_entity.mark")
+                    e.message!!.contains("no such column: audio_plugin_entity.mark"),
                 )
                 exceptionThrown = true
             }
             Assert.assertTrue(
                 "Mark field exception thrown to verify marker column does not exist",
-                exceptionThrown
+                exceptionThrown,
             )
 
             try {
@@ -117,7 +117,7 @@ class TestDatabaseMigrator {
             val pluginRecord = _dsl.select().from(AudioPluginEntity.AUDIO_PLUGIN_ENTITY).fetchOne()!!
             Assert.assertEquals(
                 true,
-                pluginRecord.fields().contains(AudioPluginEntity.AUDIO_PLUGIN_ENTITY.MARK)
+                pluginRecord.fields().contains(AudioPluginEntity.AUDIO_PLUGIN_ENTITY.MARK),
             )
             val canMark = pluginRecord.getValue(AudioPluginEntity.AUDIO_PLUGIN_ENTITY.MARK)
             Assert.assertEquals(canMark, 0)
@@ -134,14 +134,14 @@ class TestDatabaseMigrator {
                     Tables.LANGUAGE_ENTITY.NAME,
                     Tables.LANGUAGE_ENTITY.GATEWAY,
                     Tables.LANGUAGE_ENTITY.ANGLICIZED,
-                    Tables.LANGUAGE_ENTITY.DIRECTION
+                    Tables.LANGUAGE_ENTITY.DIRECTION,
                 )
                 .values(
                     "en",
                     "english",
                     1,
                     "english",
-                    "ltr"
+                    "ltr",
                 )
                 .execute()
 
@@ -153,13 +153,13 @@ class TestDatabaseMigrator {
             } catch (e: Exception) {
                 Assert.assertTrue(
                     "Exception thrown that region column does not exist",
-                    e.message!!.contains("no such column: language_entity.region")
+                    e.message!!.contains("no such column: language_entity.region"),
                 )
                 exceptionThrown = true
             }
             Assert.assertTrue(
                 "Mark field exception thrown to verify region column does not exist",
-                exceptionThrown
+                exceptionThrown,
             )
 
             try {
@@ -171,7 +171,7 @@ class TestDatabaseMigrator {
             val languageRecord = _dsl.select().from(LanguageEntity.LANGUAGE_ENTITY).fetchOne()!!
             Assert.assertEquals(
                 true,
-                languageRecord.fields().contains(LanguageEntity.LANGUAGE_ENTITY.REGION)
+                languageRecord.fields().contains(LanguageEntity.LANGUAGE_ENTITY.REGION),
             )
             val region = languageRecord.getValue(LanguageEntity.LANGUAGE_ENTITY.REGION)
             Assert.assertEquals(region, null)
@@ -187,11 +187,12 @@ class TestDatabaseMigrator {
             }
 
             // Test that database version is latest version
-            val databaseVersionRecord = _dsl
-                .select()
-                .from(InstalledEntity.INSTALLED_ENTITY)
-                .where(InstalledEntity.INSTALLED_ENTITY.NAME.eq(DATABASE_INSTALLABLE_NAME))
-                .fetchSingle()
+            val databaseVersionRecord =
+                _dsl
+                    .select()
+                    .from(InstalledEntity.INSTALLED_ENTITY)
+                    .where(InstalledEntity.INSTALLED_ENTITY.NAME.eq(DATABASE_INSTALLABLE_NAME))
+                    .fetchSingle()
 
             Assert.assertNotNull(databaseVersionRecord)
             val version = databaseVersionRecord.getValue(InstalledEntity.INSTALLED_ENTITY.VERSION)

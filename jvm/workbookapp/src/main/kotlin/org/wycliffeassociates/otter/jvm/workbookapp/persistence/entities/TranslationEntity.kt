@@ -24,5 +24,5 @@ data class TranslationEntity(
     var targetFk: Int,
     var modifiedTs: String?,
     var sourceRate: Double,
-    var targetRate: Double
+    var targetRate: Double,
 )

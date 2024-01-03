@@ -47,7 +47,6 @@ import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import javax.inject.Inject
 
 class MergeMediaTest {
-
     @Inject
     lateinit var directoryProvider: IDirectoryProvider
 

@@ -19,7 +19,6 @@
 package integrationtest.projects
 
 import integrationtest.di.DaggerTestPersistenceComponent
-import org.junit.Test
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import javax.inject.Inject
@@ -33,6 +32,7 @@ class TestProjectCreate {
 
     @Inject
     lateinit var collectionRepo: ICollectionRepository
+
     @Inject
     lateinit var languageRepo: ILanguageRepository
 
@@ -81,6 +81,5 @@ class TestProjectCreate {
     private fun DatabaseEnvironment.getHebrewsSourceBook() =
         collectionRepo.getSourceProjects().map { it.single { it.slug == "heb" } }.cache()
 
-    private fun DatabaseEnvironment.getHebrewLanguage() =
-        languageRepo.getBySlug("hbo").cache()
+    private fun DatabaseEnvironment.getHebrewLanguage() = languageRepo.getBySlug("hbo").cache()
 }

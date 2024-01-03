@@ -1,7 +1,6 @@
 package org.wycliffeassociates.otter.common.domain.project.importer
 
 import io.reactivex.Single
-import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 
 /**
@@ -16,6 +15,7 @@ interface ProjectImporterCallback {
      * @return the user's input
      */
     fun onRequestUserInput(): Single<ImportOptions>
+
     /**
      * Requests for user input with the parameter provided.
      *
@@ -31,7 +31,11 @@ interface ProjectImporterCallback {
      * @param localizeKey the identifier for localization string
      * @param message the value to be formatted with the given key
      */
-    fun onNotifyProgress(localizeKey: String? = null, message: String? = null, percent: Double? = null)
+    fun onNotifyProgress(
+        localizeKey: String? = null,
+        message: String? = null,
+        percent: Double? = null,
+    )
 
     /**
      * Pushes a success message notification to the listeners/handlers of this callback.
@@ -42,7 +46,7 @@ interface ProjectImporterCallback {
     fun onNotifySuccess(
         language: String? = null,
         project: String? = null,
-        workbookDescriptor: WorkbookDescriptor? = null
+        workbookDescriptor: WorkbookDescriptor? = null,
     )
 
     /**

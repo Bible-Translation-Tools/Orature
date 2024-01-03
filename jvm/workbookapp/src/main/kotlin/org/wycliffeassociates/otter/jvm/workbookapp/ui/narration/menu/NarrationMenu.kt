@@ -13,7 +13,6 @@ import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class NarrationMenu : ContextMenu() {
-
     val hasChapterTakeProperty = SimpleBooleanProperty()
     val hasVersesProperty = SimpleBooleanProperty()
 
@@ -21,36 +20,42 @@ class NarrationMenu : ContextMenu() {
         addClass("wa-context-menu")
         isAutoHide = true
 
-        val openChapterOpt = MenuItem().apply {
-            graphic = label(messages["openChapterIn"]) {
-                graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
-                tooltip(text)
+        val openChapterOpt =
+            MenuItem().apply {
+                graphic =
+                    label(messages["openChapterIn"]) {
+                        graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
+                        tooltip(text)
+                    }
+                action {
+                    FX.eventbus.fire(NarrationOpenInPluginEvent(PluginType.EDITOR))
+                }
+                enableWhen(hasChapterTakeProperty)
             }
-            action {
-                FX.eventbus.fire(NarrationOpenInPluginEvent(PluginType.EDITOR))
+        val verseMarkerOpt =
+            MenuItem().apply {
+                graphic =
+                    label(messages["editVerseMarkers"]) {
+                        graphic = FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE)
+                        tooltip(text)
+                    }
+                action {
+                    FX.eventbus.fire(NarrationOpenInPluginEvent(PluginType.MARKER))
+                }
+                enableWhen(hasChapterTakeProperty)
             }
-            enableWhen(hasChapterTakeProperty)
-        }
-        val verseMarkerOpt = MenuItem().apply {
-            graphic = label(messages["editVerseMarkers"]) {
-                graphic = FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE)
-                tooltip(text)
+        val restartChapterOpt =
+            MenuItem().apply {
+                graphic =
+                    label(messages["restartChapter"]) {
+                        graphic = FontIcon(MaterialDesign.MDI_DELETE)
+                        tooltip(text)
+                    }
+                action {
+                    FX.eventbus.fire(NarrationRestartChapterEvent())
+                }
+                enableWhen(hasVersesProperty)
             }
-            action {
-                FX.eventbus.fire(NarrationOpenInPluginEvent(PluginType.MARKER))
-            }
-            enableWhen(hasChapterTakeProperty)
-        }
-        val restartChapterOpt = MenuItem().apply {
-            graphic = label(messages["restartChapter"]) {
-                graphic = FontIcon(MaterialDesign.MDI_DELETE)
-                tooltip(text)
-            }
-            action {
-                FX.eventbus.fire(NarrationRestartChapterEvent())
-            }
-            enableWhen(hasVersesProperty)
-        }
 
         items.setAll(openChapterOpt, verseMarkerOpt, restartChapterOpt)
     }
@@ -59,17 +64,18 @@ class NarrationMenu : ContextMenu() {
 fun EventTarget.narrationMenuButton(
     hasChapterTakeBinding: ObservableBooleanValue,
     hasVersesBinding: ObservableBooleanValue,
-    op: Button.() -> Unit = {}
+    op: Button.() -> Unit = {},
 ): Button {
     return Button().attachTo(this).apply {
         addClass("btn", "btn--icon")
         graphic = FontIcon(MaterialDesign.MDI_DOTS_VERTICAL)
         tooltip(messages["options"])
 
-        val menu = NarrationMenu().apply {
-            this.hasChapterTakeProperty.bind(hasChapterTakeBinding)
-            this.hasVersesProperty.bind(hasVersesBinding)
-        }
+        val menu =
+            NarrationMenu().apply {
+                this.hasChapterTakeProperty.bind(hasChapterTakeBinding)
+                this.hasVersesProperty.bind(hasVersesBinding)
+            }
 
         menu.setOnShowing { addPseudoClass("active") }
         menu.setOnHidden { removePseudoClass("active") }

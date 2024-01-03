@@ -27,12 +27,14 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.Inserti
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.CollectionEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ContentEntity
 
-
 class ContentDao(
     private val instanceDsl: DSLContext,
-    private val contentTypeDao: ContentTypeDao
+    private val contentTypeDao: ContentTypeDao,
 ) {
-    fun fetchByCollectionId(collectionId: Int, dsl: DSLContext = instanceDsl): List<ContentEntity> {
+    fun fetchByCollectionId(
+        collectionId: Int,
+        dsl: DSLContext = instanceDsl,
+    ): List<ContentEntity> {
         return dsl
             .select()
             .from(CONTENT_ENTITY)
@@ -45,7 +47,7 @@ class ContentDao(
         collectionId: Int,
         start: Int,
         types: Collection<ContentType>,
-        dsl: DSLContext = instanceDsl
+        dsl: DSLContext = instanceDsl,
     ): List<ContentEntity> {
         val typeIds = types.map(contentTypeDao::fetchId)
         return dsl
@@ -61,7 +63,7 @@ class ContentDao(
     fun fetchByCollectionIdAndType(
         collectionId: Int,
         type: ContentType,
-        dsl: DSLContext = instanceDsl
+        dsl: DSLContext = instanceDsl,
     ): List<ContentEntity> {
         val typeId = contentTypeDao.fetchId(type)
         return dsl
@@ -77,7 +79,7 @@ class ContentDao(
         collectionId: Int,
         start: Int,
         vararg extraFields: SelectFieldOrAsterisk,
-        dsl: DSLContext = instanceDsl
+        dsl: DSLContext = instanceDsl,
     ): Select<Record> {
         val textTypeId = contentTypeDao.fetchId(ContentType.TEXT)
         return dsl
@@ -99,7 +101,7 @@ class ContentDao(
         helpTypes: Collection<ContentType>,
         parentCollectionId: Int,
         vararg extraFields: SelectFieldOrAsterisk,
-        dsl: DSLContext = instanceDsl
+        dsl: DSLContext = instanceDsl,
     ): Select<Record> {
         val mainTypeIds = mainTypes.map(contentTypeDao::fetchId)
         val helpTypeIds = helpTypes.map(contentTypeDao::fetchId)
@@ -130,7 +132,7 @@ class ContentDao(
         helpTypes: Collection<ContentType>,
         collectionId: Int,
         vararg extraFields: SelectFieldOrAsterisk,
-        dsl: DSLContext = instanceDsl
+        dsl: DSLContext = instanceDsl,
     ): Select<Record> {
         val helpTypeIds = helpTypes.map(contentTypeDao::fetchId)
 
@@ -151,14 +153,18 @@ class ContentDao(
             .and(help.ID.notIn(existingLinkSubquery))
     }
 
-    fun fetchSources(entity: ContentEntity, dsl: DSLContext = instanceDsl): List<ContentEntity> {
-        val sourceIds = dsl
-            .select(CONTENT_DERIVATIVE.SOURCE_FK)
-            .from(CONTENT_DERIVATIVE)
-            .where(CONTENT_DERIVATIVE.CONTENT_FK.eq(entity.id))
-            .fetch {
-                it.getValue(CONTENT_DERIVATIVE.SOURCE_FK)
-            }
+    fun fetchSources(
+        entity: ContentEntity,
+        dsl: DSLContext = instanceDsl,
+    ): List<ContentEntity> {
+        val sourceIds =
+            dsl
+                .select(CONTENT_DERIVATIVE.SOURCE_FK)
+                .from(CONTENT_DERIVATIVE)
+                .where(CONTENT_DERIVATIVE.CONTENT_FK.eq(entity.id))
+                .fetch {
+                    it.getValue(CONTENT_DERIVATIVE.SOURCE_FK)
+                }
 
         return dsl
             .select()
@@ -170,7 +176,7 @@ class ContentDao(
 
     fun fetchContentByProjectSlug(
         projectSlug: String,
-        dsl: DSLContext = instanceDsl
+        dsl: DSLContext = instanceDsl,
     ): SelectConditionStep<Record> {
         return dsl.select(CONTENT_ENTITY.asterisk())
             .from(CONTENT_ENTITY)
@@ -189,15 +195,19 @@ class ContentDao(
                                         // just use the slug. It will result in derived results
                                         // in addition to source, but resources aren't attached
                                         // to the derived anyway
-                                        COLLECTION_ENTITY.SLUG.eq(projectSlug)
-                                    )
-                            )
-                        )
-                )
+                                        COLLECTION_ENTITY.SLUG.eq(projectSlug),
+                                    ),
+                            ),
+                        ),
+                ),
             )
     }
 
-    fun updateSources(entity: ContentEntity, sources: List<ContentEntity>, dsl: DSLContext = instanceDsl) {
+    fun updateSources(
+        entity: ContentEntity,
+        sources: List<ContentEntity>,
+        dsl: DSLContext = instanceDsl,
+    ) {
         // Delete the existing sources
         dsl
             .deleteFrom(CONTENT_DERIVATIVE)
@@ -214,7 +224,10 @@ class ContentDao(
     }
 
     @Synchronized
-    fun insert(entity: ContentEntity, dsl: DSLContext = instanceDsl): Int {
+    fun insert(
+        entity: ContentEntity,
+        dsl: DSLContext = instanceDsl,
+    ): Int {
         if (entity.id != 0) throw InsertionException("Entity ID was not 0")
 
         // Insert the new content entity
@@ -231,7 +244,7 @@ class ContentDao(
                 CONTENT_ENTITY.FORMAT,
                 CONTENT_ENTITY.TYPE_FK,
                 CONTENT_ENTITY.DRAFT_NUMBER,
-                CONTENT_ENTITY.BRIDGED
+                CONTENT_ENTITY.BRIDGED,
             )
             .values(
                 entity.collectionFk,
@@ -244,7 +257,7 @@ class ContentDao(
                 entity.format,
                 entity.type_fk,
                 entity.draftNumber,
-                if (entity.bridged) 1 else 0
+                if (entity.bridged) 1 else 0,
             )
             .execute()
 
@@ -258,42 +271,50 @@ class ContentDao(
     }
 
     @Synchronized
-    fun insertNoReturn(vararg entities: ContentEntity, dsl: DSLContext = instanceDsl) {
-        val bareInsert = dsl
-            .insertInto(
-                CONTENT_ENTITY,
-                CONTENT_ENTITY.COLLECTION_FK,
-                CONTENT_ENTITY.SORT,
-                CONTENT_ENTITY.START,
-                CONTENT_ENTITY.V_END,
-                CONTENT_ENTITY.LABEL,
-                CONTENT_ENTITY.SELECTED_TAKE_FK,
-                CONTENT_ENTITY.TEXT,
-                CONTENT_ENTITY.FORMAT,
-                CONTENT_ENTITY.TYPE_FK,
-                CONTENT_ENTITY.DRAFT_NUMBER,
-                CONTENT_ENTITY.BRIDGED
-            )
-        val insertWithValues = entities.fold(bareInsert) { q, e ->
-            if (e.id != 0) throw InsertionException("Entity ID was not 0")
-            q.values(
-                e.collectionFk,
-                e.sort,
-                e.start,
-                e.end,
-                e.labelKey,
-                e.selectedTakeFk,
-                e.text,
-                e.format,
-                e.type_fk,
-                e.draftNumber,
-                if (e.bridged) 1 else 0
-            )
-        }
+    fun insertNoReturn(
+        vararg entities: ContentEntity,
+        dsl: DSLContext = instanceDsl,
+    ) {
+        val bareInsert =
+            dsl
+                .insertInto(
+                    CONTENT_ENTITY,
+                    CONTENT_ENTITY.COLLECTION_FK,
+                    CONTENT_ENTITY.SORT,
+                    CONTENT_ENTITY.START,
+                    CONTENT_ENTITY.V_END,
+                    CONTENT_ENTITY.LABEL,
+                    CONTENT_ENTITY.SELECTED_TAKE_FK,
+                    CONTENT_ENTITY.TEXT,
+                    CONTENT_ENTITY.FORMAT,
+                    CONTENT_ENTITY.TYPE_FK,
+                    CONTENT_ENTITY.DRAFT_NUMBER,
+                    CONTENT_ENTITY.BRIDGED,
+                )
+        val insertWithValues =
+            entities.fold(bareInsert) { q, e ->
+                if (e.id != 0) throw InsertionException("Entity ID was not 0")
+                q.values(
+                    e.collectionFk,
+                    e.sort,
+                    e.start,
+                    e.end,
+                    e.labelKey,
+                    e.selectedTakeFk,
+                    e.text,
+                    e.format,
+                    e.type_fk,
+                    e.draftNumber,
+                    if (e.bridged) 1 else 0,
+                )
+            }
         insertWithValues.execute()
     }
 
-    fun fetchById(id: Int, dsl: DSLContext = instanceDsl): ContentEntity {
+    fun fetchById(
+        id: Int,
+        dsl: DSLContext = instanceDsl,
+    ): ContentEntity {
         return dsl
             .select()
             .from(CONTENT_ENTITY)
@@ -316,7 +337,10 @@ class ContentDao(
      * Updates all content in the list.
      * Updates will not update the ID or collection foreign key.
      */
-    fun updateAll(entities: List<ContentEntity>, dsl: DSLContext = instanceDsl) {
+    fun updateAll(
+        entities: List<ContentEntity>,
+        dsl: DSLContext = instanceDsl,
+    ) {
         dsl.transaction { config ->
             entities.forEach { entity ->
                 config.dsl().update(CONTENT_ENTITY)
@@ -336,7 +360,10 @@ class ContentDao(
         }
     }
 
-    fun update(entity: ContentEntity, dsl: DSLContext = instanceDsl) {
+    fun update(
+        entity: ContentEntity,
+        dsl: DSLContext = instanceDsl,
+    ) {
         dsl
             .update(CONTENT_ENTITY)
             .set(CONTENT_ENTITY.SORT, entity.sort)
@@ -353,7 +380,10 @@ class ContentDao(
             .execute()
     }
 
-    fun delete(entity: ContentEntity, dsl: DSLContext = instanceDsl) {
+    fun delete(
+        entity: ContentEntity,
+        dsl: DSLContext = instanceDsl,
+    ) {
         dsl
             .deleteFrom(CONTENT_ENTITY)
             .where(CONTENT_ENTITY.ID.eq(entity.id))
@@ -363,12 +393,12 @@ class ContentDao(
     fun deleteForCollection(
         chapterCollection: CollectionEntity,
         contentTypeId: Int? = null,
-        dsl: DSLContext = instanceDsl
+        dsl: DSLContext = instanceDsl,
     ) {
         dsl.deleteFrom(CONTENT_ENTITY)
             .where(
                 CONTENT_ENTITY.COLLECTION_FK.eq(chapterCollection.id)
-                    .and((CONTENT_ENTITY.TYPE_FK).eq(contentTypeId ?: 1))
+                    .and((CONTENT_ENTITY.TYPE_FK).eq(contentTypeId ?: 1)),
             )
             .execute()
     }
@@ -376,13 +406,13 @@ class ContentDao(
     fun linkDerivative(
         contentId: Int,
         sourceContentId: Int,
-        dsl: DSLContext = instanceDsl
+        dsl: DSLContext = instanceDsl,
     ) {
         dsl
             .insertInto(
                 ContentDerivative.CONTENT_DERIVATIVE,
                 ContentDerivative.CONTENT_DERIVATIVE.CONTENT_FK,
-                ContentDerivative.CONTENT_DERIVATIVE.SOURCE_FK
+                ContentDerivative.CONTENT_DERIVATIVE.SOURCE_FK,
             )
             .values(contentId, sourceContentId)
             .execute()

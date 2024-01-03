@@ -18,7 +18,6 @@
  */
 package integrationtest.di
 
-import dagger.Provides
 import dagger.Binds
 import dagger.Module
 import org.wycliffeassociates.otter.common.domain.languages.LanguageDataSource
@@ -35,97 +34,65 @@ import javax.inject.Singleton
 abstract class TestRepositoriesModule {
     @Binds
     @Singleton
-    abstract fun providesLanguageRepo(
-        repository: LanguageRepository
-    ): ILanguageRepository
+    abstract fun providesLanguageRepo(repository: LanguageRepository): ILanguageRepository
 
     @Binds
     @Singleton
-    abstract fun providesCollectionRepo(
-        repository: CollectionRepository
-    ): ICollectionRepository
+    abstract fun providesCollectionRepo(repository: CollectionRepository): ICollectionRepository
 
     @Binds
     @Singleton
-    abstract fun providesContentRepository(
-        repository: ContentRepository
-    ): IContentRepository
+    abstract fun providesContentRepository(repository: ContentRepository): IContentRepository
 
     @Binds
     @Singleton
-    abstract fun providesResourceRepository(
-        repository: ResourceRepository
-    ): IResourceRepository
+    abstract fun providesResourceRepository(repository: ResourceRepository): IResourceRepository
 
     @Binds
     @Singleton
-    abstract fun providesResourceContainerRepository(
-        repository: ResourceContainerRepository
-    ): IResourceContainerRepository
+    abstract fun providesResourceContainerRepository(repository: ResourceContainerRepository): IResourceContainerRepository
 
     @Binds
     @Singleton
-    abstract fun providesResourceMetadataRepository(
-        repository: ResourceMetadataRepository
-    ): IResourceMetadataRepository
+    abstract fun providesResourceMetadataRepository(repository: ResourceMetadataRepository): IResourceMetadataRepository
 
     @Binds
     @Singleton
-    abstract fun providesTakeRepository(
-        repository: TakeRepository
-    ): ITakeRepository
+    abstract fun providesTakeRepository(repository: TakeRepository): ITakeRepository
 
     @Binds
     @Singleton
-    abstract fun providesPluginRepository(
-        repository: AudioPluginRepository
-    ): IAudioPluginRepository
+    abstract fun providesPluginRepository(repository: AudioPluginRepository): IAudioPluginRepository
 
     @Binds
     @Singleton
-    abstract fun providesWorkbookRepository(
-        repository: WorkbookRepository
-    ): IWorkbookRepository
+    abstract fun providesWorkbookRepository(repository: WorkbookRepository): IWorkbookRepository
 
     @Binds
     @Singleton
-    abstract fun providesWorkbookDescriptorRepository(
-        repository: WorkbookDescriptorRepository
-    ): IWorkbookDescriptorRepository
+    abstract fun providesWorkbookDescriptorRepository(repository: WorkbookDescriptorRepository): IWorkbookDescriptorRepository
 
     @Binds
     @Singleton
-    abstract fun providesInstalledEntityRepository(
-        repository: InstalledEntityRepository
-    ): IInstalledEntityRepository
+    abstract fun providesInstalledEntityRepository(repository: InstalledEntityRepository): IInstalledEntityRepository
 
     @Binds
     @Singleton
-    abstract fun providesRegistrar(
-        registrar: AudioPluginRegistrar
-    ): IAudioPluginRegistrar
+    abstract fun providesRegistrar(registrar: AudioPluginRegistrar): IAudioPluginRegistrar
 
     @Binds
     @Singleton
-    abstract fun providesAppPreferencesRepository(
-        repository: AppPreferencesRepository
-    ): IAppPreferencesRepository
+    abstract fun providesAppPreferencesRepository(repository: AppPreferencesRepository): IAppPreferencesRepository
 
     @Binds
     @Singleton
-    abstract fun providesVersificationRepository(
-        repository: TestVersificationRepository
-    ): IVersificationRepository
+    abstract fun providesVersificationRepository(repository: TestVersificationRepository): IVersificationRepository
 
     @Binds
     @Singleton
-    abstract fun providesLocaleDataSource(
-        dataSource: LocaleDataSource
-    ): ILocaleDataSource
+    abstract fun providesLocaleDataSource(dataSource: LocaleDataSource): ILocaleDataSource
 
     @Binds
     @Singleton
-    abstract fun providesLanguageDataSource(
-        dataSource: LanguageDataSource
-    ): ILanguageDataSource
+    abstract fun providesLanguageDataSource(dataSource: LanguageDataSource): ILanguageDataSource
 }

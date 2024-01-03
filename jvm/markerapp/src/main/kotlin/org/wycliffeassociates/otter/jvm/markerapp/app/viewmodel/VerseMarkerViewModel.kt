@@ -23,35 +23,34 @@ import com.sun.glass.ui.Screen
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
+import javafx.animation.AnimationTimer
+import javafx.beans.binding.Bindings
 import javafx.beans.property.*
 import javafx.scene.control.Slider
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
-import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
-import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
-import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
-import tornadofx.*
-import java.io.File
-import java.lang.Integer.min
-import javafx.animation.AnimationTimer
-import javafx.beans.binding.Bindings
-import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
-import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseFinishedEvent
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
+import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
+import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
 import org.wycliffeassociates.otter.jvm.controls.waveform.WAVEFORM_MAX_HEIGHT
+import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
+import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
+import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseFinishedEvent
+import tornadofx.*
+import java.io.File
+import java.lang.Integer.min
 
 private const val WAV_COLOR = "#0A337390"
 private const val BACKGROUND_COLOR = "#FFFFFF"
 
 class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
-
     private val logger = LoggerFactory.getLogger(VerseMarkerViewModel::class.java)
 
     private val width = Screen.getMainScreen().platformWidth
@@ -86,11 +85,12 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
 
     override var resumeAfterScroll = false
 
-    private var timer: AnimationTimer? = object : AnimationTimer() {
-        override fun handle(currentNanoTime: Long) {
-            calculatePosition()
+    private var timer: AnimationTimer? =
+        object : AnimationTimer() {
+            override fun handle(currentNanoTime: Long) {
+                calculatePosition()
+            }
         }
-    }
 
     fun onDock(op: () -> Unit) {
         timer?.start()
@@ -110,8 +110,8 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
                         ColorTheme.LIGHT
                     }
                 },
-                primaryStage.scene.root.styleClass
-            )
+                primaryStage.scene.root.styleClass,
+            ),
         )
     }
 
@@ -139,8 +139,8 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
         markerRatioProperty.bind(
             Bindings.createStringBinding(
                 { "${markerCountProperty.value}/$totalMarkers" },
-                markerCountProperty
-            )
+                markerCountProperty,
+            ),
         )
         markerModel?.let { markerModel ->
             markers.setAll(markerModel.markers)
@@ -200,13 +200,14 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
     private fun createWaveformImages(audio: OratureAudioFile) {
         imageWidthProperty.set(computeImageWidth(SECONDS_ON_SCREEN))
 
-        waveform = asyncBuilder.buildAsync(
-            audio.reader(),
-            width = imageWidthProperty.value.toInt(),
-            height = Screen.getMainScreen().platformHeight,
-            wavColor = Color.web(WAV_COLOR),
-            background = Color.web(BACKGROUND_COLOR)
-        )
+        waveform =
+            asyncBuilder.buildAsync(
+                audio.reader(),
+                width = imageWidthProperty.value.toInt(),
+                height = Screen.getMainScreen().platformHeight,
+                wavColor = Color.web(WAV_COLOR),
+                background = Color.web(BACKGROUND_COLOR),
+            )
 
         asyncBuilder
             .build(
@@ -214,7 +215,7 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
                 width = Screen.getMainScreen().platformWidth,
                 height = 50,
                 wavColor = Color.web(WAV_COLOR),
-                background = Color.web(BACKGROUND_COLOR)
+                background = Color.web(BACKGROUND_COLOR),
             )
             .observeOnFx()
             .map { image ->

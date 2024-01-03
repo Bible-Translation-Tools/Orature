@@ -27,8 +27,6 @@ import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
-import java.io.File
-import java.time.LocalDate
 import org.junit.Assert
 import org.junit.Test
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
@@ -46,86 +44,93 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.TakeHolder
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import java.io.File
+import java.time.LocalDate
 
 class TestWorkbookRepository {
     /** When a unique ID is needed, just use this. */
     private var autoincrement: Int = 1
         get() = field++
 
-    private val english = Language(
-        "en",
-        "English",
-        "English",
-        "ltr",
-        isGateway = true,
-        region = "Europe",
-        id = autoincrement
-    )
-    private val latin = Language(
-        "la",
-        "Latin",
-        "Latin",
-        "ltr",
-        isGateway = false,
-        region = "Europe",
-        id = autoincrement
-    )
+    private val english =
+        Language(
+            "en",
+            "English",
+            "English",
+            "ltr",
+            isGateway = true,
+            region = "Europe",
+            id = autoincrement,
+        )
+    private val latin =
+        Language(
+            "la",
+            "Latin",
+            "Latin",
+            "ltr",
+            isGateway = false,
+            region = "Europe",
+            id = autoincrement,
+        )
 
-    private val rcBase = ResourceMetadata(
-        conformsTo = "rc0.2",
-        creator = "Door43 World Missions Community",
-        description = "Description",
-        format = "text/usfm",
-        identifier = "ulb",
-        issued = LocalDate.now(),
-        language = english,
-        modified = LocalDate.now(),
-        publisher = "unfoldingWord",
-        subject = "Bible",
-        type = ContainerType.Bundle,
-        title = "Unlocked Literal Bible",
-        version = "1",
-        license = "",
-        path = File(".")
-    )
+    private val rcBase =
+        ResourceMetadata(
+            conformsTo = "rc0.2",
+            creator = "Door43 World Missions Community",
+            description = "Description",
+            format = "text/usfm",
+            identifier = "ulb",
+            issued = LocalDate.now(),
+            language = english,
+            modified = LocalDate.now(),
+            publisher = "unfoldingWord",
+            subject = "Bible",
+            type = ContainerType.Bundle,
+            title = "Unlocked Literal Bible",
+            version = "1",
+            license = "",
+            path = File("."),
+        )
     private val rcSource = rcBase.copy(id = autoincrement, language = english)
     private val rcTarget = rcBase.copy(id = autoincrement, language = latin)
 
-    private val resourceMetadataTn = ResourceMetadata(
-        conformsTo = "rc0.2",
-        creator = "Door43 World Missions Community",
-        description = "Description",
-        format = "text/markdown",
-        identifier = "tn",
-        issued = LocalDate.now(),
-        language = english,
-        modified = LocalDate.now(),
-        publisher = "unfoldingWord",
-        subject = "Translator Notes",
-        type = ContainerType.Help,
-        title = "translationNotes",
-        version = "1",
-        license = "",
-        path = File(".")
-    )
+    private val resourceMetadataTn =
+        ResourceMetadata(
+            conformsTo = "rc0.2",
+            creator = "Door43 World Missions Community",
+            description = "Description",
+            format = "text/markdown",
+            identifier = "tn",
+            issued = LocalDate.now(),
+            language = english,
+            modified = LocalDate.now(),
+            publisher = "unfoldingWord",
+            subject = "Translator Notes",
+            type = ContainerType.Help,
+            title = "translationNotes",
+            version = "1",
+            license = "",
+            path = File("."),
+        )
 
-    private val collectionBase = Collection(
-        sort = 1,
-        slug = "gen",
-        labelKey = "project",
-        titleKey = "Genesis",
-        resourceContainer = null
-    )
+    private val collectionBase =
+        Collection(
+            sort = 1,
+            slug = "gen",
+            labelKey = "project",
+            titleKey = "Genesis",
+            resourceContainer = null,
+        )
     private val collSource = collectionBase.copy(resourceContainer = rcSource, id = autoincrement)
     private val collTarget = collectionBase.copy(resourceContainer = rcTarget, id = autoincrement)
 
     private fun buildWorkbook(
         db: IWorkbookDatabaseAccessors,
         source: Collection = collSource,
-        target: Collection = collTarget
+        target: Collection = collTarget,
     ) = WorkbookRepository(
         mock(),
-        db
+        db,
     ).get(source, target)
 
     private fun resourceSlugArray(resourceMetadatas: List<ResourceMetadata>) =
@@ -134,8 +139,7 @@ class TestWorkbookRepository {
             .sorted()
             .toTypedArray()
 
-    private fun resourceSlugArray(resourceGroups: Iterable<ResourceGroup>) =
-        resourceSlugArray(resourceGroups.map { it.metadata })
+    private fun resourceSlugArray(resourceGroups: Iterable<ResourceGroup>) = resourceSlugArray(resourceGroups.map { it.metadata })
 
     private fun buildBasicTestDb(): IWorkbookDatabaseAccessors = mock()
 
@@ -146,7 +150,7 @@ class TestWorkbookRepository {
 
     private fun buildBasicTestWorkbook(mockedDb: IWorkbookDatabaseAccessors = buildBasicTestDb()): Workbook {
         whenever(
-            mockedDb.getChildren(any())
+            mockedDb.getChildren(any()),
         ).thenAnswer { invocation ->
             val collection = invocation.getArgument<Collection>(0)!!
             Single.just(
@@ -159,17 +163,17 @@ class TestWorkbookRepository {
                                 id = autoincrement,
                                 resourceContainer = collection.resourceContainer,
                                 titleKey = chapter.toString(),
-                                labelKey = ContentLabel.CHAPTER.value
+                                labelKey = ContentLabel.CHAPTER.value,
                             )
                         }
                     }
                     else -> emptyList()
-                }
+                },
             )
         }
 
         whenever(
-            mockedDb.getChunkCount(any())
+            mockedDb.getChunkCount(any()),
         ).thenAnswer { invocation ->
             val collection = invocation.getArgument<Collection>(0)!!
             when (collection.slug.count { it == '_' }) {
@@ -183,7 +187,7 @@ class TestWorkbookRepository {
         }
 
         whenever(
-            mockedDb.getContentByCollection(any())
+            mockedDb.getContentByCollection(any()),
         ).thenAnswer { invocation ->
             val collection = invocation.getArgument<Collection>(0)!!
             val format = if (collection.resourceContainer == rcTarget) "audio/wav" else "text/usfm"
@@ -201,17 +205,17 @@ class TestWorkbookRepository {
                                 format = format,
                                 text = "/v $verse but test everything; hold fast what is good.",
                                 selectedTake = null,
-                                draftNumber = 1
+                                draftNumber = 1,
                             )
                         }
                     }
                     else -> emptyList()
-                }
+                },
             )
         }
 
         whenever(
-            mockedDb.getContentByCollectionActiveConnection(any())
+            mockedDb.getContentByCollectionActiveConnection(any()),
         ).thenAnswer { invocation ->
             val collection = invocation.getArgument<Collection>(0)!!
             val format = if (collection.resourceContainer == rcTarget) "audio/wav" else "text/usfm"
@@ -230,7 +234,7 @@ class TestWorkbookRepository {
                             format = format,
                             text = "/v $verse but test everything; hold fast what is good.",
                             selectedTake = null,
-                            draftNumber = 1
+                            draftNumber = 1,
                         )
                     }.let {
                         relay.accept(it)
@@ -242,7 +246,7 @@ class TestWorkbookRepository {
         }
 
         whenever(
-            mockedDb.getCollectionMetaContent(any())
+            mockedDb.getCollectionMetaContent(any()),
         ).thenReturn(
             Single.just(
                 Content(
@@ -255,13 +259,13 @@ class TestWorkbookRepository {
                     format = "WAV",
                     type = ContentType.META,
                     id = autoincrement,
-                    draftNumber = 1
-                )
-            )
+                    draftNumber = 1,
+                ),
+            ),
         )
 
         whenever(
-            mockedDb.getSubtreeResourceMetadata(any())
+            mockedDb.getSubtreeResourceMetadata(any()),
         ).thenAnswer { invocation ->
             val collection = invocation.getArgument<Collection>(0)!!
             when (rcSource.id) {
@@ -271,19 +275,19 @@ class TestWorkbookRepository {
         }
 
         whenever(
-            mockedDb.getResourceMetadata(any<Collection>())
+            mockedDb.getResourceMetadata(any<Collection>()),
         ).thenReturn(
-            listOf(resourceMetadataTn)
+            listOf(resourceMetadataTn),
         )
 
         whenever(
-            mockedDb.getResourceMetadata(any<Content>())
+            mockedDb.getResourceMetadata(any<Content>()),
         ).thenReturn(
-            listOf(resourceMetadataTn)
+            listOf(resourceMetadataTn),
         )
 
         whenever(
-            mockedDb.getResources(any<Content>(), any())
+            mockedDb.getResources(any<Content>(), any()),
         ).thenAnswer { invocation ->
             val content = invocation.getArgument<Content>(0)!!
             val metadata = invocation.getArgument<ResourceMetadata>(1)!!
@@ -299,7 +303,7 @@ class TestWorkbookRepository {
                         format = "text/markdown",
                         text = "but test everything; hold fast what is good.",
                         selectedTake = null,
-                        draftNumber = 1
+                        draftNumber = 1,
                     ),
                     Content(
                         id = autoincrement,
@@ -311,8 +315,8 @@ class TestWorkbookRepository {
                         format = "text/markdown",
                         text = "The original author may not have had TDD in mind.",
                         selectedTake = null,
-                        draftNumber = 1
-                    )
+                        draftNumber = 1,
+                    ),
                 )
             } else {
                 Observable.empty()
@@ -320,7 +324,7 @@ class TestWorkbookRepository {
         }
 
         whenever(
-            mockedDb.getResources(any<Collection>(), any())
+            mockedDb.getResources(any<Collection>(), any()),
         ).thenAnswer { invocation ->
             val collection = invocation.getArgument<Collection>(0)!!
             val metadata = invocation.getArgument<ResourceMetadata>(1)!!
@@ -336,7 +340,7 @@ class TestWorkbookRepository {
                         format = "text/markdown",
                         text = "Chapter 2 notes",
                         selectedTake = null,
-                        draftNumber = 1
+                        draftNumber = 1,
                     ),
                     Content(
                         id = autoincrement,
@@ -348,8 +352,8 @@ class TestWorkbookRepository {
                         format = "text/markdown",
                         text = "Chapter 2 is a fine chapter. Here are the notes.",
                         selectedTake = null,
-                        draftNumber = 1
-                    )
+                        draftNumber = 1,
+                    ),
                 )
             } else {
                 Observable.empty()
@@ -357,69 +361,70 @@ class TestWorkbookRepository {
         }
 
         whenever(
-            mockedDb.getTakeByContent(any())
+            mockedDb.getTakeByContent(any()),
         ).thenAnswer { invocation ->
             val content = invocation.getArgument<Content>(0)!!
-            val take = if (content.format == "audio/wav" && content.start == 3) {
-                val id = autoincrement
-                org.wycliffeassociates.otter.common.data.primitives.Take(
-                    number = id,
-                    id = id,
-                    path = File("."),
-                    filename = ".",
-                    markers = listOf(),
-                    played = false,
-                    created = LocalDate.now(),
-                    deleted = null,
-                    checkingStatus = CheckingStatus.UNCHECKED,
-                    checksum = null
-                )
-            } else {
-                null
-            }
+            val take =
+                if (content.format == "audio/wav" && content.start == 3) {
+                    val id = autoincrement
+                    org.wycliffeassociates.otter.common.data.primitives.Take(
+                        number = id,
+                        id = id,
+                        path = File("."),
+                        filename = ".",
+                        markers = listOf(),
+                        played = false,
+                        created = LocalDate.now(),
+                        deleted = null,
+                        checkingStatus = CheckingStatus.UNCHECKED,
+                        checksum = null,
+                    )
+                } else {
+                    null
+                }
             Single.just(listOfNotNull(take))
         }
 
         whenever(
-            mockedDb.addContentForCollection(any(), any())
+            mockedDb.addContentForCollection(any(), any()),
         ).thenReturn(
-            Completable.complete()
+            Completable.complete(),
         )
 
         whenever(
-            mockedDb.insertTakeForContent(any(), any())
+            mockedDb.insertTakeForContent(any(), any()),
         ).thenReturn(
-            Single.just(autoincrement)
+            Single.just(autoincrement),
         )
 
         whenever(
-            mockedDb.deleteTake(any(), any())
+            mockedDb.deleteTake(any(), any()),
         ).thenReturn(
-            Completable.complete()
+            Completable.complete(),
         )
 
         whenever(
-            mockedDb.updateContent(any())
+            mockedDb.updateContent(any()),
         ).thenReturn(
-            Completable.complete()
+            Completable.complete(),
         )
 
         whenever(
-            mockedDb.getTranslation(any(), any())
+            mockedDb.getTranslation(any(), any()),
         ).thenReturn(
             Single.just(
                 Translation(
                     english,
                     latin,
-                    null
-                )
-            )
+                    null,
+                ),
+            ),
         )
 
         whenever(
-            mockedDb.updateTranslation(any())
+            mockedDb.updateTranslation(any()),
         ).thenReturn(
-            Completable.complete()
+            Completable.complete(),
         )
 
         return buildWorkbook(mockedDb)
@@ -471,7 +476,7 @@ class TestWorkbookRepository {
 
         Assert.assertArrayEquals(
             workbook.source.chapters.blockingIterable().toList().toTypedArray(),
-            workbook.source.children.blockingIterable().toList().toTypedArray()
+            workbook.source.children.blockingIterable().toList().toTypedArray(),
         )
     }
 
@@ -520,7 +525,7 @@ class TestWorkbookRepository {
 
         Assert.assertArrayEquals(
             chapter.children.blockingIterable().sortedBy { it.sort }.toTypedArray(),
-            chapter.chunks.value!!.sortedBy { it.sort }.toTypedArray()
+            chapter.chunks.value!!.sortedBy { it.sort }.toTypedArray(),
         )
     }
 
@@ -600,13 +605,14 @@ class TestWorkbookRepository {
         verify(mockedDb, times(0)).insertTakeForContent(any(), any())
 
         // Push a new take, and verify the DB is called
-        val take = Take(
-            name = "TakeName",
-            file = File("."),
-            number = autoincrement,
-            format = MimeType.WAV,
-            createdTimestamp = LocalDate.now()
-        )
+        val take =
+            Take(
+                name = "TakeName",
+                file = File("."),
+                number = autoincrement,
+                format = MimeType.WAV,
+                createdTimestamp = LocalDate.now(),
+            )
         takes.accept(take)
         verify(mockedDb, times(1)).insertTakeForContent(any(), any())
     }
@@ -677,12 +683,12 @@ class TestWorkbookRepository {
         Assert.assertArrayEquals(
             "Expected chunk titles",
             (1..BasicTestParams.chunksPerChapter).map(Int::toString).toTypedArray(),
-            chunks.map { it.title }.toTypedArray()
+            chunks.map { it.title }.toTypedArray(),
         )
         chunks.forEach {
             Assert.assertTrue(
                 "Chunk text expected",
-                it.textItem.text.startsWith("/v ${it.title}")
+                it.textItem.text.startsWith("/v ${it.title}"),
             )
         }
     }

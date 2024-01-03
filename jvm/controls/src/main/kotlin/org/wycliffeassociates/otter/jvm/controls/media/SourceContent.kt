@@ -124,9 +124,11 @@ class SourceContent : StackPane() {
                     label {
                         addClass("source-content__zoom-rate-text")
 
-                        textProperty().bind(zoomRateProperty.stringBinding {
-                            String.format("%d%%", it)
-                        })
+                        textProperty().bind(
+                            zoomRateProperty.stringBinding {
+                                String.format("%d%%", it)
+                            },
+                        )
                     }
 
                     button {
@@ -198,14 +200,17 @@ class SourceContent : StackPane() {
 
                             setCellFactory {
                                 object : ListCell<Label>() {
-                                    override fun updateItem(item: Label?, empty: Boolean) {
+                                    override fun updateItem(
+                                        item: Label?,
+                                        empty: Boolean,
+                                    ) {
                                         super.updateItem(item, empty)
 
                                         /*
                                         allows the list cell width to be overridden to listview.width - insets,
                                         without this the cell width will extend beyond the listview boundary causing
                                         a horizontal scroll bar and no word wrapping on the label elements.
-                                        */
+                                         */
                                         prefWidthProperty().set(0.0)
 
                                         if (item == null) {
@@ -314,7 +319,7 @@ class SourceContent : StackPane() {
                                 val bound = this.boundsInLocal
                                 val screenBound = this.localToScreen(bound)
                                 sourceTextPopup.show(
-                                    FX.primaryStage
+                                    FX.primaryStage,
                                 )
                                 sourceTextPopup.x = screenBound.centerX - sourceTextPopup.width + this.width
                                 sourceTextPopup.y = screenBound.minY - sourceTextPopup.height
@@ -367,9 +372,10 @@ class SourceContent : StackPane() {
 
     private fun initializeSourceContentListeners() {
         sourceTextChunks.onChangeAndDoNowWithDisposer {
-            val textNodes = it.mapIndexed { index, chunkText ->
-                buildChunkText(chunkText, index)
-            }.toMutableList()
+            val textNodes =
+                it.mapIndexed { index, chunkText ->
+                    buildChunkText(chunkText, index)
+                }.toMutableList()
 
             textNodes.add(buildLicenseText()) // append license at bottom of the list
             sourceTextChunksContainer.items.setAll(textNodes)
@@ -406,7 +412,7 @@ class SourceContent : StackPane() {
 
         licenseProperty.onChangeAndDoNowWithDisposer {
             licenseTextProperty.set(
-                MessageFormat.format(FX.messages["licenseStatement"], it)
+                MessageFormat.format(FX.messages["licenseStatement"], it),
             )
         }.let(listeners::add)
 
@@ -432,7 +438,7 @@ class SourceContent : StackPane() {
                 FX.primaryStage.sceneProperty().onChange {
                     it?.let { scene ->
                         maxHeightProperty().bind(
-                            scene.heightProperty().multiply(2.0 / 3)
+                            scene.heightProperty().multiply(2.0 / 3),
                         )
                     }
                 }
@@ -471,7 +477,7 @@ class SourceContent : StackPane() {
             return
         }
         zoomRateProperty.set(zoomTo)
-        /* notify listeners to save zoom preference */
+        // notify listeners to save zoom preference
         FX.eventbus.fire(SourceTextZoomRateChangedEvent(zoomTo))
     }
 
@@ -487,7 +493,10 @@ class SourceContent : StackPane() {
         }
     }
 
-    private fun buildChunkText(textContent: String, index: Int): Label {
+    private fun buildChunkText(
+        textContent: String,
+        index: Int,
+    ): Label {
         return Label(textContent).apply {
             addClass("source-content__text")
             minHeight = Region.USE_PREF_SIZE // avoid ellipsis
@@ -507,12 +516,14 @@ class SourceContent : StackPane() {
             addClass("source-content__license-text")
 
             textProperty().bind(licenseTextProperty)
-            styleProperty().bind(orientationProperty.objectBinding {
-                when (it) {
-                    NodeOrientation.LEFT_TO_RIGHT -> "-fx-font-style: italic;"
-                    else -> ""
-                }
-            })
+            styleProperty().bind(
+                orientationProperty.objectBinding {
+                    when (it) {
+                        NodeOrientation.LEFT_TO_RIGHT -> "-fx-font-style: italic;"
+                        else -> ""
+                    }
+                },
+            )
         }
     }
 
@@ -531,8 +542,9 @@ class SourceContent : StackPane() {
                     skinProperty().select {
                         getScrollBar(Orientation.VERTICAL)?.visibleProperty()
                             ?: visibleProperty()
-                    }
-                ))
+                    },
+                ),
+            )
         }
     }
 

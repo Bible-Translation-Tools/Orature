@@ -43,6 +43,6 @@ interface ArtworkDataSource {
     fun getArtwork(
         metadata: ResourceMetadata,
         projectSlug: String,
-        imageRatio: ImageRatio = ImageRatio.DEFAULT
+        imageRatio: ImageRatio = ImageRatio.DEFAULT,
     ): Artwork?
 }

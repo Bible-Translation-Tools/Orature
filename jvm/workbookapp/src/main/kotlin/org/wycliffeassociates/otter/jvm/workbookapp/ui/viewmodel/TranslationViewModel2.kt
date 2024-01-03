@@ -17,15 +17,14 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
 import tornadofx.*
 import javax.inject.Inject
 
 class TranslationViewModel2 : ViewModel() {
-
     @Inject
     lateinit var creationUseCase: CreateProject
 
@@ -33,9 +32,10 @@ class TranslationViewModel2 : ViewModel() {
     val audioDataStore: AudioDataStore by inject()
     private val navigator: NavigationMediator by inject()
 
-    val bookTitleProperty = workbookDataStore.activeWorkbookProperty.stringBinding {
-        it?.target?.title
-    }
+    val bookTitleProperty =
+        workbookDataStore.activeWorkbookProperty.stringBinding {
+            it?.target?.title
+        }
     val canUndoProperty = SimpleBooleanProperty(false)
     val canRedoProperty = SimpleBooleanProperty(false)
     val isFirstChapterProperty = SimpleBooleanProperty(false)
@@ -60,10 +60,11 @@ class TranslationViewModel2 : ViewModel() {
     }
 
     fun dockPage() {
-        val recentChapter = workbookDataStore.workbookRecentChapterMap.getOrDefault(
-            workbookDataStore.workbook.hashCode(),
-            1
-        )
+        val recentChapter =
+            workbookDataStore.workbookRecentChapterMap.getOrDefault(
+                workbookDataStore.workbook.hashCode(),
+                1,
+            )
         navigateChapter(recentChapter)
     }
 
@@ -128,20 +129,22 @@ class TranslationViewModel2 : ViewModel() {
     }
 
     fun loadChunks(chunks: List<Chunk>) {
-        val chunkViewData = chunks.map { chunk ->
-            val completed = when(selectedStepProperty.value) {
-                ChunkingStep.BLIND_DRAFT -> chunk.hasSelectedAudio()
-                ChunkingStep.PEER_EDIT -> chunk.checkingStatus().ordinal >= CheckingStatus.PEER_EDIT.ordinal
-                ChunkingStep.KEYWORD_CHECK -> chunk.checkingStatus().ordinal >= CheckingStatus.KEYWORD.ordinal
-                ChunkingStep.VERSE_CHECK -> chunk.checkingStatus().ordinal >= CheckingStatus.VERSE.ordinal
-                else -> false
+        val chunkViewData =
+            chunks.map { chunk ->
+                val completed =
+                    when (selectedStepProperty.value) {
+                        ChunkingStep.BLIND_DRAFT -> chunk.hasSelectedAudio()
+                        ChunkingStep.PEER_EDIT -> chunk.checkingStatus().ordinal >= CheckingStatus.PEER_EDIT.ordinal
+                        ChunkingStep.KEYWORD_CHECK -> chunk.checkingStatus().ordinal >= CheckingStatus.KEYWORD.ordinal
+                        ChunkingStep.VERSE_CHECK -> chunk.checkingStatus().ordinal >= CheckingStatus.VERSE.ordinal
+                        else -> false
+                    }
+                ChunkViewData(
+                    chunk.sort,
+                    completed,
+                    selectedChunkBinding,
+                )
             }
-            ChunkViewData(
-                chunk.sort,
-                completed,
-                selectedChunkBinding
-            )
-        }
         chunkList.setAll(chunkViewData)
 
         updateStep()
@@ -178,7 +181,7 @@ class TranslationViewModel2 : ViewModel() {
             }.addTo(compositeDisposable)
     }
 
-    fun updateSourceText() : Completable {
+    fun updateSourceText(): Completable {
         sourceTextProperty.set(null)
         return workbookDataStore.getSourceText()
             .subscribeOn(Schedulers.io())
@@ -195,7 +198,7 @@ class TranslationViewModel2 : ViewModel() {
             .createAllBooks(
                 workbookDataStore.workbook.source.language,
                 workbookDataStore.workbook.source.language,
-                ProjectMode.NARRATION
+                ProjectMode.NARRATION,
             )
             .subscribe {
                 runLater {
@@ -257,9 +260,9 @@ class TranslationViewModel2 : ViewModel() {
                         ChapterGridItemData(
                             it.sort,
                             it.hasSelectedAudio(),
-                            chapter == it.sort
+                            chapter == it.sort,
                         )
-                    }
+                    },
                 )
             }
     }

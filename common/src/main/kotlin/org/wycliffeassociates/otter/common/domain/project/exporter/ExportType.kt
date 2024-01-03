@@ -22,5 +22,5 @@ enum class ExportType(val titleKey: String) {
     LISTEN("listen"),
     SOURCE_AUDIO("sourceAudio"),
     BACKUP("backup"),
-    PUBLISH("publish")
+    PUBLISH("publish"),
 }

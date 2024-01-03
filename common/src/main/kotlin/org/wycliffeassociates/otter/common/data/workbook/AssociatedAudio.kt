@@ -28,12 +28,11 @@ class AssociatedAudio(
      *  The UX may push new items here for propagation, and the persistence layer should respond by storing them.
      */
     val takes: ReplayRelay<Take>,
-
     /**
      *  This will cache and emit the latest value.
      *  The UX may push updates here for propagation, and the persistence layer should respond by storing them.
      */
-    val selected: BehaviorRelay<TakeHolder> = BehaviorRelay.createDefault(TakeHolder.empty)
+    val selected: BehaviorRelay<TakeHolder> = BehaviorRelay.createDefault(TakeHolder.empty),
 ) {
     fun insertTake(take: Take) = takes.accept(take)
 
@@ -47,7 +46,7 @@ class AssociatedAudio(
                 .maxByOrNull { it.number }
                 ?.number
                 ?.plus(1)
-                ?: 1
+                ?: 1,
         )
 
     fun getSelectedTake() = selected.value?.value

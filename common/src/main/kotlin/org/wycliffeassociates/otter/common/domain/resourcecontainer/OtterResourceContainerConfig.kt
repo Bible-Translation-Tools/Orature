@@ -34,9 +34,10 @@ class OtterResourceContainerConfig : Config {
     override fun read(reader: Reader): Config {
         val mapper = ObjectMapper(YAMLFactory())
         mapper.registerKotlinModule()
-        config = reader.use {
-            mapper.readValue(it, OtterConfig::class.java)
-        }
+        config =
+            reader.use {
+                mapper.readValue(it, OtterConfig::class.java)
+            }
         config?.let {
             extendedDublinCore = it.extendedDublinCore
         }
@@ -53,16 +54,16 @@ class OtterResourceContainerConfig : Config {
 
 class OtterConfig(
     @JsonProperty("extended_dublin_core")
-    var extendedDublinCore: ExtendedDublinCore
+    var extendedDublinCore: ExtendedDublinCore,
 )
 
 class ExtendedDublinCore(
-    var categories: List<Category>
+    var categories: List<Category>,
 )
 
 data class Category(
     val identifier: String,
     val title: String,
     val type: String,
-    val sort: Int
+    val sort: Int,
 )

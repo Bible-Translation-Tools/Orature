@@ -24,7 +24,17 @@ import java.io.OutputStream
 
 interface IFileWriter : AutoCloseable {
     fun bufferedWriter(filepath: String): BufferedWriter
+
     fun outputStream(filepath: String): OutputStream
-    fun copyDirectory(source: File, destination: String, filter: (String) -> Boolean = { _ -> true })
-    fun copyFile(source: File, destination: String)
+
+    fun copyDirectory(
+        source: File,
+        destination: String,
+        filter: (String) -> Boolean = { _ -> true },
+    )
+
+    fun copyFile(
+        source: File,
+        destination: String,
+    )
 }

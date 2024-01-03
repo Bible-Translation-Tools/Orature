@@ -10,7 +10,8 @@ class TextFieldFragment : Fragment() {
         tryImportStylesheet("/css/filtered-search-bar.css")
     }
 
-    override val root = vbox {
-        searchBar()
-    }
+    override val root =
+        vbox {
+            searchBar()
+        }
 }

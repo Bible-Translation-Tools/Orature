@@ -25,6 +25,6 @@ interface IZipEntryTreeBuilder {
     fun buildOtterFileTree(
         zipFile: ZipFile,
         projectPath: String,
-        rootPathWithinZip: String?
+        rootPathWithinZip: String?,
     ): OtterTree<OtterFile>
 }

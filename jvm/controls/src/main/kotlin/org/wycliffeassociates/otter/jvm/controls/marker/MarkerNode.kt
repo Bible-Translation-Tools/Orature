@@ -6,7 +6,6 @@ import org.wycliffeassociates.otter.jvm.controls.skins.MarkerNodeSkin
 import tornadofx.*
 
 class MarkerNode : MarkerControl() {
-
     override val markerNumberProperty = SimpleStringProperty("1")
 
     init {

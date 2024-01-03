@@ -8,9 +8,9 @@ import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.TakeSelectionAnimationMediator
-import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.controls.event.ChunkTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.event.TakeAction
+import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import tornadofx.*
 import tornadofx.FX.Companion.messages
@@ -27,8 +27,8 @@ class ChunkTakeCard(take: TakeCardModel) : HBox() {
                 MessageFormat.format(
                     messages["takeTitle"],
                     messages["take"],
-                    take.take.number
-                )
+                    take.take.number,
+                ),
             )
             enablePlaybackRateProperty.set(false)
             sideTextProperty.bind(remainingTimeProperty)
@@ -39,10 +39,11 @@ class ChunkTakeCard(take: TakeCardModel) : HBox() {
             graphic = FontIcon(MaterialDesign.MDI_DELETE)
 
             action {
-                val fadeTransition = FadeTransition(Duration.millis(600.0), this@ChunkTakeCard).apply {
-                    fromValue = 1.0
-                    toValue = 0.0
-                }
+                val fadeTransition =
+                    FadeTransition(Duration.millis(600.0), this@ChunkTakeCard).apply {
+                        fromValue = 1.0
+                        toValue = 0.0
+                    }
                 fadeTransition.setOnFinished {
                     FX.eventbus.fire(ChunkTakeEvent(take.take, TakeAction.DELETE))
                 }
@@ -54,11 +55,12 @@ class ChunkTakeCard(take: TakeCardModel) : HBox() {
             tooltip(messages["select"])
             togglePseudoClass("active", take.selected)
 
-            graphic = if (take.selected) {
-                FontIcon(MaterialDesign.MDI_STAR)
-            } else {
-                FontIcon(MaterialDesign.MDI_STAR_OUTLINE)
-            }
+            graphic =
+                if (take.selected) {
+                    FontIcon(MaterialDesign.MDI_STAR)
+                } else {
+                    FontIcon(MaterialDesign.MDI_STAR_OUTLINE)
+                }
             isMouseTransparent = take.selected
             isFocusTraversable = !take.selected
 

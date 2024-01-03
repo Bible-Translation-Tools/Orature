@@ -20,7 +20,7 @@ class ChapterGrid(val list: List<ChapterGridItemData>) : GridPane() {
     }
 
     private fun selectChapter(chapterIndex: Int) {
-        logger.info("Selecting chapter ${chapterIndex}")
+        logger.info("Selecting chapter $chapterIndex")
         FX.eventbus.fire(NavigateChapterEvent(chapterIndex))
     }
 
@@ -36,27 +36,31 @@ class ChapterGrid(val list: List<ChapterGridItemData>) : GridPane() {
 
     private fun addChaptersToGrid() {
         list.forEachIndexed { index, chapter ->
-            val node = StackPane().apply {
-                button(chapter.number.toString()) {
-                    addClass(
-                        "btn", "btn--secondary", "btn--borderless", "chapter-grid__btn"
-                    )
-                    togglePseudoClass("selected", chapter.selected)
-                    setOnAction {
-                        selectChapter(chapter.number)
+            val node =
+                StackPane().apply {
+                    button(chapter.number.toString()) {
+                        addClass(
+                            "btn",
+                            "btn--secondary",
+                            "btn--borderless",
+                            "chapter-grid__btn",
+                        )
+                        togglePseudoClass("selected", chapter.selected)
+                        setOnAction {
+                            selectChapter(chapter.number)
+                        }
+                    }
+                    hbox {
+                        addClass("chapter-grid__icon-alignment-box")
+                        add(
+                            FontIcon(MaterialDesign.MDI_CHECK_CIRCLE).apply { addClass("complete-icon") },
+                        )
+                        isMouseTransparent = true
+                        isPickOnBounds = false
+                        visibleProperty().set(chapter.completed)
+                        managedProperty().set(chapter.completed)
                     }
                 }
-                hbox {
-                    addClass("chapter-grid__icon-alignment-box")
-                    add(
-                        FontIcon(MaterialDesign.MDI_CHECK_CIRCLE).apply { addClass("complete-icon") }
-                    )
-                    isMouseTransparent = true
-                    isPickOnBounds = false
-                    visibleProperty().set(chapter.completed)
-                    managedProperty().set(chapter.completed)
-                }
-            }
             this.add(node, index % GRID_COLUMNS, index / GRID_COLUMNS)
         }
     }

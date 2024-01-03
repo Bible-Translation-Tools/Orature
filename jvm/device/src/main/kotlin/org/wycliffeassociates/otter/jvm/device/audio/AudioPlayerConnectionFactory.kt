@@ -19,16 +19,15 @@
 package org.wycliffeassociates.otter.jvm.device.audio
 
 import com.jakewharton.rxrelay2.PublishRelay
+import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import javax.sound.sampled.LineUnavailableException
 import javax.sound.sampled.SourceDataLine
-import org.wycliffeassociates.otter.common.device.IAudioPlayer
 
 internal class AudioPlayerConnectionFactory(
-    private val errorRelay: PublishRelay<AudioError> = PublishRelay.create()
+    private val errorRelay: PublishRelay<AudioError> = PublishRelay.create(),
 ) {
-
     var outputLine: SourceDataLine? = null
 
     internal lateinit var player: AudioBufferPlayer

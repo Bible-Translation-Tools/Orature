@@ -34,7 +34,7 @@ import tornadofx.vgrow
 import tornadofx.whenSelected
 
 class ToggleButtonGroup(
-    val items: ObservableList<ToggleButtonData> = observableListOf()
+    val items: ObservableList<ToggleButtonData> = observableListOf(),
 ) : HBox() {
     val tg = ToggleGroup()
 
@@ -64,7 +64,6 @@ class ToggleButtonGroup(
 }
 
 private class RadioToggleButton(text: String = "") : ToggleButton(text) {
-
     init {
         addClass("btn", "btn--borderless", "custom-toggle-btn")
     }
@@ -77,12 +76,17 @@ private class RadioToggleButton(text: String = "") : ToggleButton(text) {
     }
 }
 
-fun EventTarget.togglebuttongroup(values: ObservableList<ToggleButtonData>? = null, spacing: Double? = null, op: HBox.() -> Unit): HBox {
-    val toggleBtnGroup = if (values != null) {
-        ToggleButtonGroup(values)
-    } else {
-        ToggleButtonGroup()
-    }
+fun EventTarget.togglebuttongroup(
+    values: ObservableList<ToggleButtonData>? = null,
+    spacing: Double? = null,
+    op: HBox.() -> Unit,
+): HBox {
+    val toggleBtnGroup =
+        if (values != null) {
+            ToggleButtonGroup(values)
+        } else {
+            ToggleButtonGroup()
+        }
     if (spacing != null) toggleBtnGroup.spacing = spacing
     return opcr(this, toggleBtnGroup, op)
 }

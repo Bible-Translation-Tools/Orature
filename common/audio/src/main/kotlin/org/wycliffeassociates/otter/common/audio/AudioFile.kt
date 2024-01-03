@@ -19,18 +19,17 @@
 package org.wycliffeassociates.otter.common.audio
 
 import org.wycliffeassociates.otter.common.audio.mp3.MP3FileReader
-import java.io.File
-import java.io.OutputStream
 import org.wycliffeassociates.otter.common.audio.pcm.PcmFile
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.common.audio.wav.WavMetadata
+import java.io.File
+import java.io.OutputStream
 
 const val DEFAULT_SAMPLE_RATE = 44100
 const val DEFAULT_CHANNELS = 1
 const val DEFAULT_BITS_PER_SAMPLE = 16
 
 open class AudioFile protected constructor() {
-
     lateinit var file: File
         private set
 
@@ -53,7 +52,7 @@ open class AudioFile protected constructor() {
         file: File,
         channels: Int = DEFAULT_CHANNELS,
         sampleRate: Int = DEFAULT_SAMPLE_RATE,
-        bitsPerSample: Int = DEFAULT_BITS_PER_SAMPLE
+        bitsPerSample: Int = DEFAULT_BITS_PER_SAMPLE,
     ) : this() {
         this.file = file
         strategy = strategySelector(file, channels, sampleRate, bitsPerSample)
@@ -64,7 +63,7 @@ open class AudioFile protected constructor() {
         channels: Int = DEFAULT_CHANNELS,
         sampleRate: Int = DEFAULT_SAMPLE_RATE,
         bitsPerSample: Int = DEFAULT_BITS_PER_SAMPLE,
-        metadata: AudioMetadata
+        metadata: AudioMetadata,
     ) : this() {
         this.file = file
         strategy = strategySelector(file, channels, sampleRate, bitsPerSample, metadata)
@@ -73,34 +72,24 @@ open class AudioFile protected constructor() {
     open fun strategySelector(file: File): AudioFormatStrategy {
         return when (AudioFileFormat.of(file.extension)) {
             AudioFileFormat.WAV -> WavFile(file)
-            AudioFileFormat.MP3 -> MP3FileReader(file).apply {
-                release()
-            }
-            AudioFileFormat.PCM -> PcmFile(file)
-        }
-    }
-
-    open fun strategySelector(file: File, metadata: AudioMetadata): AudioFormatStrategy {
-        return when (AudioFileFormat.of(file.extension)) {
-            AudioFileFormat.WAV -> WavFile(file, metadata as WavMetadata)
-            AudioFileFormat.MP3 -> MP3FileReader(file).apply {
-                release() // clean up resource after parsing the metadata
-            }
+            AudioFileFormat.MP3 ->
+                MP3FileReader(file).apply {
+                    release()
+                }
             AudioFileFormat.PCM -> PcmFile(file)
         }
     }
 
     open fun strategySelector(
         file: File,
-        channels: Int = DEFAULT_CHANNELS,
-        sampleRate: Int = DEFAULT_SAMPLE_RATE,
-        bitsPerSample: Int = DEFAULT_BITS_PER_SAMPLE
+        metadata: AudioMetadata,
     ): AudioFormatStrategy {
         return when (AudioFileFormat.of(file.extension)) {
-            AudioFileFormat.WAV -> WavFile(file, channels, sampleRate, bitsPerSample)
-            AudioFileFormat.MP3 -> MP3FileReader(file).apply {
-                release()
-            }
+            AudioFileFormat.WAV -> WavFile(file, metadata as WavMetadata)
+            AudioFileFormat.MP3 ->
+                MP3FileReader(file).apply {
+                    release() // clean up resource after parsing the metadata
+                }
             AudioFileFormat.PCM -> PcmFile(file)
         }
     }
@@ -110,13 +99,30 @@ open class AudioFile protected constructor() {
         channels: Int = DEFAULT_CHANNELS,
         sampleRate: Int = DEFAULT_SAMPLE_RATE,
         bitsPerSample: Int = DEFAULT_BITS_PER_SAMPLE,
-        metadata: AudioMetadata
+    ): AudioFormatStrategy {
+        return when (AudioFileFormat.of(file.extension)) {
+            AudioFileFormat.WAV -> WavFile(file, channels, sampleRate, bitsPerSample)
+            AudioFileFormat.MP3 ->
+                MP3FileReader(file).apply {
+                    release()
+                }
+            AudioFileFormat.PCM -> PcmFile(file)
+        }
+    }
+
+    open fun strategySelector(
+        file: File,
+        channels: Int = DEFAULT_CHANNELS,
+        sampleRate: Int = DEFAULT_SAMPLE_RATE,
+        bitsPerSample: Int = DEFAULT_BITS_PER_SAMPLE,
+        metadata: AudioMetadata,
     ): AudioFormatStrategy {
         return when (AudioFileFormat.of(file.extension)) {
             AudioFileFormat.WAV -> WavFile(file, channels, sampleRate, bitsPerSample, metadata as WavMetadata)
-            AudioFileFormat.MP3 -> MP3FileReader(file).apply {
-                release()
-            }
+            AudioFileFormat.MP3 ->
+                MP3FileReader(file).apply {
+                    release()
+                }
             AudioFileFormat.PCM -> PcmFile(file)
         }
     }
@@ -140,7 +146,10 @@ open class AudioFile protected constructor() {
         strategy.update()
     }
 
-    open fun addCue(location: Int, label: String) {
+    open fun addCue(
+        location: Int,
+        label: String,
+    ) {
         metadata.addCue(location, label)
     }
 
@@ -152,11 +161,17 @@ open class AudioFile protected constructor() {
         metadata.clearMarkers()
     }
 
-    fun reader(start: Int? = null, end: Int? = null): AudioFileReader {
+    fun reader(
+        start: Int? = null,
+        end: Int? = null,
+    ): AudioFileReader {
         return strategy.reader(start, end)
     }
 
-    fun writer(append: Boolean = false, buffered: Boolean = true): OutputStream {
+    fun writer(
+        append: Boolean = false,
+        buffered: Boolean = true,
+    ): OutputStream {
         return strategy.writer(append, buffered)
     }
 }

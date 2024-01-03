@@ -6,7 +6,7 @@ import javafx.util.Duration
 import tornadofx.*
 import kotlin.math.abs
 
-class TakeSelectionAnimationMediator<T: Node> {
+class TakeSelectionAnimationMediator<T : Node> {
     var node: T? = null
     var nodeList = observableListOf<Node>()
     var selectedNode: T? = null
@@ -38,7 +38,10 @@ class TakeSelectionAnimationMediator<T: Node> {
         }
     }
 
-    private fun Node.moveUp(distance: Double, callback: () -> Unit = {}) {
+    private fun Node.moveUp(
+        distance: Double,
+        callback: () -> Unit = {},
+    ) {
         val up = TranslateTransition(Duration.millis(500.0), this)
         up.byY = distance
         up.setOnFinished {
@@ -61,16 +64,20 @@ class TakeSelectionAnimationMediator<T: Node> {
 
     private fun Node.revertAnimation(onFinishCallback: () -> Unit = { }) {
         val distance = translateY
-        val ttRevertY = TranslateTransition(Duration.millis(1.0), node).apply {
-            byY = -distance
-            setOnFinished {
-                onFinishCallback()
+        val ttRevertY =
+            TranslateTransition(Duration.millis(1.0), node).apply {
+                byY = -distance
+                setOnFinished {
+                    onFinishCallback()
+                }
             }
-        }
         ttRevertY.play()
     }
 
-    private fun verticalDistance(node1: Node, node2: Node): Double {
+    private fun verticalDistance(
+        node1: Node,
+        node2: Node,
+    ): Double {
         val minY1 = node1.localToScene(node1.boundsInLocal).minY
         val minY2 = node2.localToScene(node2.boundsInLocal).minY
 

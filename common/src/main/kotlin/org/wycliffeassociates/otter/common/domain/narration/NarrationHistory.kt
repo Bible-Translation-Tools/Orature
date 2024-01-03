@@ -10,7 +10,7 @@ internal class NarrationHistory {
     fun execute(
         action: NarrationAction,
         totalVerses: MutableList<VerseNode>,
-        workingAudio: AudioFile
+        workingAudio: AudioFile,
     ) {
         action.execute(totalVerses, workingAudio)
         undoStack.addLast(action)
@@ -48,7 +48,10 @@ internal class NarrationHistory {
         redoStack.clear()
     }
 
-    fun finalizeVerse(end: Int, totalVerses: MutableList<VerseNode>) {
+    fun finalizeVerse(
+        end: Int,
+        totalVerses: MutableList<VerseNode>,
+    ) {
         when (val lastAction = undoStack.last) {
             is NewVerseAction -> lastAction.finalize(end, totalVerses)
             is RecordAgainAction -> lastAction.finalize(end, totalVerses)

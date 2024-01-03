@@ -33,128 +33,134 @@ class ChapterReview : View() {
     val settingsViewModel: SettingsViewModel by inject()
 
     private lateinit var waveform: MarkerWaveform
-    private val audioScrollBar = createAudioScrollBar(
-        viewModel.audioPositionProperty,
-        viewModel.totalFramesProperty,
-        viewModel.isPlayingProperty,
-        viewModel::seek
-    )
+    private val audioScrollBar =
+        createAudioScrollBar(
+            viewModel.audioPositionProperty,
+            viewModel.totalFramesProperty,
+            viewModel.isPlayingProperty,
+            viewModel::seek,
+        )
     private var timer: AnimationTimer? = null
     private var cleanUpWaveform: () -> Unit = {}
 
     private val eventSubscriptions = mutableListOf<EventRegistration>()
 
-    override val root = borderpane {
-        top = vbox {
-            addClass("blind-draft-section")
-            label(viewModel.chapterTitleProperty).addClass("h4", "h4--80")
-            simpleaudioplayer {
-                playerProperty.bind(viewModel.sourcePlayerProperty)
-                enablePlaybackRateProperty.set(true)
-                sideTextProperty.set(messages["sourceAudio"])
-                menuSideProperty.set(Side.BOTTOM)
-            }
-        }
-        center = vbox {
-            val container = this
-            waveform = MarkerWaveform().apply {
-                addClass("waveform--focusable")
-                vgrow = Priority.ALWAYS
-                themeProperty.bind(settingsViewModel.appColorMode)
-                positionProperty.bind(viewModel.positionProperty)
-                clip = Rectangle().apply {
-                    widthProperty().bind(container.widthProperty())
-                    heightProperty().bind(container.heightProperty())
-                }
-                setOnWaveformClicked { viewModel.pauseAudio() }
-                setOnWaveformDragReleased { deltaPos ->
-                    val deltaFrames = pixelsToFrames(deltaPos)
-                    val curFrames = viewModel.getLocationInFrames()
-                    val duration = viewModel.getDurationInFrames()
-                    val final = Utils.clamp(0, curFrames - deltaFrames, duration)
-                    viewModel.seek(final)
-                }
-                setOnSeek(viewModel::seek)
-                setOnRewind(viewModel::rewind)
-                setOnFastForward(viewModel::fastForward)
-                setOnToggleMedia(viewModel::mediaToggle)
-
-                viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
-                cleanUpWaveform = ::freeImages
-
-                markers.bind(viewModel.markers) { it }
-            }
-            add(waveform)
-            add(audioScrollBar)
-
-            hbox {
-                addClass("consume__bottom", "chunking-bottom__media-btn-group")
-                button(messages["addVerse"]) {
-                    addClass("btn", "btn--primary", "consume__btn")
-                    tooltip(text)
-                    graphic = FontIcon(MaterialDesign.MDI_PLUS)
-                    disableWhen {
-                        viewModel.markersPlacedCountProperty.isEqualTo(viewModel.totalMarkersProperty)
-                    }
-
-                    action {
-                        viewModel.placeMarker()
+    override val root =
+        borderpane {
+            top =
+                vbox {
+                    addClass("blind-draft-section")
+                    label(viewModel.chapterTitleProperty).addClass("h4", "h4--80")
+                    simpleaudioplayer {
+                        playerProperty.bind(viewModel.sourcePlayerProperty)
+                        enablePlaybackRateProperty.set(true)
+                        sideTextProperty.set(messages["sourceAudio"])
+                        menuSideProperty.set(Side.BOTTOM)
                     }
                 }
-                label(viewModel.markerProgressCounterProperty) {
-                    addClass("normal-text")
-                }
-                region { hgrow = Priority.ALWAYS }
-                hbox {
-                    addClass("chunking-bottom__media-btn-group")
+            center =
+                vbox {
+                    val container = this
+                    waveform =
+                        MarkerWaveform().apply {
+                            addClass("waveform--focusable")
+                            vgrow = Priority.ALWAYS
+                            themeProperty.bind(settingsViewModel.appColorMode)
+                            positionProperty.bind(viewModel.positionProperty)
+                            clip =
+                                Rectangle().apply {
+                                    widthProperty().bind(container.widthProperty())
+                                    heightProperty().bind(container.heightProperty())
+                                }
+                            setOnWaveformClicked { viewModel.pauseAudio() }
+                            setOnWaveformDragReleased { deltaPos ->
+                                val deltaFrames = pixelsToFrames(deltaPos)
+                                val curFrames = viewModel.getLocationInFrames()
+                                val duration = viewModel.getDurationInFrames()
+                                val final = Utils.clamp(0, curFrames - deltaFrames, duration)
+                                viewModel.seek(final)
+                            }
+                            setOnSeek(viewModel::seek)
+                            setOnRewind(viewModel::rewind)
+                            setOnFastForward(viewModel::fastForward)
+                            setOnToggleMedia(viewModel::mediaToggle)
 
-                    button {
-                        addClass("btn", "btn--icon")
-                        graphic = FontIcon(MaterialDesign.MDI_SKIP_PREVIOUS)
-                        tooltip(messages["previousChunk"])
+                            viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
+                            cleanUpWaveform = ::freeImages
 
-                        action { viewModel.seekPrevious() }
-                    }
-                    button {
-                        addClass("btn", "btn--icon")
-                        val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
-                        val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
-                        tooltipProperty().bind(
-                            viewModel.isPlayingProperty.objectBinding {
-                                togglePseudoClass("active", it == true)
-                                if (it == true) {
-                                    graphic = pauseIcon
-                                    Tooltip(messages["pause"])
-                                } else {
-                                    graphic = playIcon
-                                    Tooltip(messages["play"])
+                            markers.bind(viewModel.markers) { it }
+                        }
+                    add(waveform)
+                    add(audioScrollBar)
+
+                    hbox {
+                        addClass("consume__bottom", "chunking-bottom__media-btn-group")
+                        button(messages["addVerse"]) {
+                            addClass("btn", "btn--primary", "consume__btn")
+                            tooltip(text)
+                            graphic = FontIcon(MaterialDesign.MDI_PLUS)
+                            disableWhen {
+                                viewModel.markersPlacedCountProperty.isEqualTo(viewModel.totalMarkersProperty)
+                            }
+
+                            action {
+                                viewModel.placeMarker()
+                            }
+                        }
+                        label(viewModel.markerProgressCounterProperty) {
+                            addClass("normal-text")
+                        }
+                        region { hgrow = Priority.ALWAYS }
+                        hbox {
+                            addClass("chunking-bottom__media-btn-group")
+
+                            button {
+                                addClass("btn", "btn--icon")
+                                graphic = FontIcon(MaterialDesign.MDI_SKIP_PREVIOUS)
+                                tooltip(messages["previousChunk"])
+
+                                action { viewModel.seekPrevious() }
+                            }
+                            button {
+                                addClass("btn", "btn--icon")
+                                val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
+                                val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
+                                tooltipProperty().bind(
+                                    viewModel.isPlayingProperty.objectBinding {
+                                        togglePseudoClass("active", it == true)
+                                        if (it == true) {
+                                            graphic = pauseIcon
+                                            Tooltip(messages["pause"])
+                                        } else {
+                                            graphic = playIcon
+                                            Tooltip(messages["play"])
+                                        }
+                                    },
+                                )
+
+                                action { viewModel.mediaToggle() }
+                            }
+                            button {
+                                addClass("btn", "btn--icon")
+                                graphic = FontIcon(MaterialDesign.MDI_SKIP_NEXT)
+                                tooltip(messages["nextChunk"])
+
+                                action { viewModel.seekNext() }
+                            }
+                            button(messages["nextChapter"]) {
+                                addClass("btn", "btn--primary", "consume__btn")
+                                graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
+                                enableWhen { viewModel.canGoNextChapterProperty }
+                                tooltip(text)
+
+                                setOnAction {
+                                    FX.eventbus.fire(GoToNextChapterEvent())
                                 }
                             }
-                        )
-
-                        action { viewModel.mediaToggle() }
-                    }
-                    button {
-                        addClass("btn", "btn--icon")
-                        graphic = FontIcon(MaterialDesign.MDI_SKIP_NEXT)
-                        tooltip(messages["nextChunk"])
-
-                        action { viewModel.seekNext() }
-                    }
-                    button(messages["nextChapter"]) {
-                        addClass("btn", "btn--primary", "consume__btn")
-                        graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
-                        enableWhen { viewModel.canGoNextChapterProperty }
-                        tooltip(text)
-
-                        setOnAction {
-                            FX.eventbus.fire(GoToNextChapterEvent())
                         }
                     }
                 }
-            }
         }
-    }
 
     override fun onDock() {
         logger.info("Final Review docked.")

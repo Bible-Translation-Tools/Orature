@@ -24,19 +24,18 @@ import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import org.junit.After
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
 import org.testfx.api.FxToolkit
 import org.wycliffeassociates.otter.common.data.workbook.*
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
-import tornadofx.*
-import org.junit.After
-import org.junit.Before
 import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
+import tornadofx.*
 
 class ChapterPageViewModelTest2 {
-
     private lateinit var testApp: TestApp
 
     @Before
@@ -55,22 +54,26 @@ class ChapterPageViewModelTest2 {
 
     @Test
     fun `select chapter card on card selection`() {
-        val chunk = mock<Chunk> {
-            on { sort } doReturn 3
-        }
-        val chapter = mock<Chapter> {
-            on { sort } doReturn 5
-        }
-        val chapterCard = mock<CardData>() {
-            on { chapterSource } doReturn chapter
-        }
+        val chunk =
+            mock<Chunk> {
+                on { sort } doReturn 3
+            }
+        val chapter =
+            mock<Chapter> {
+                on { sort } doReturn 5
+            }
+        val chapterCard =
+            mock<CardData> {
+                on { chapterSource } doReturn chapter
+            }
 
         val chapProp = SimpleObjectProperty<Chapter>()
         val chunkProp = SimpleObjectProperty<Chunk>(chunk)
-        val workbookDataStore = mock<WorkbookDataStore> {
-            on { activeChapterProperty } doReturn chapProp
-            on { activeChunkProperty } doReturn chunkProp
-        }
+        val workbookDataStore =
+            mock<WorkbookDataStore> {
+                on { activeChapterProperty } doReturn chapProp
+                on { activeChunkProperty } doReturn chunkProp
+            }
 
         FX.getComponents()[WorkbookDataStore::class] = workbookDataStore
 
@@ -93,26 +96,31 @@ class ChapterPageViewModelTest2 {
 
     @Test
     fun `select chunk card on card selection`() {
-        val oldChunk = mock<Chunk> {
-            on { sort } doReturn 1
-        }
-        val chunk = mock<Chunk> {
-            on { sort } doReturn 3
-        }
-        val chapter = mock<Chapter> {
-            on { sort } doReturn 5
-        }
-        val chunkCard = mock<CardData>() {
-            on { chapterSource } doReturn chapter
-            on { chunkSource } doReturn chunk
-        }
+        val oldChunk =
+            mock<Chunk> {
+                on { sort } doReturn 1
+            }
+        val chunk =
+            mock<Chunk> {
+                on { sort } doReturn 3
+            }
+        val chapter =
+            mock<Chapter> {
+                on { sort } doReturn 5
+            }
+        val chunkCard =
+            mock<CardData> {
+                on { chapterSource } doReturn chapter
+                on { chunkSource } doReturn chunk
+            }
 
         val chapProp = SimpleObjectProperty<Chapter>(chapter)
         val chunkProp = SimpleObjectProperty<Chunk>(oldChunk)
-        val workbookDataStore = mock<WorkbookDataStore> {
-            on { activeChapterProperty } doReturn chapProp
-            on { activeChunkProperty } doReturn chunkProp
-        }
+        val workbookDataStore =
+            mock<WorkbookDataStore> {
+                on { activeChapterProperty } doReturn chapProp
+                on { activeChunkProperty } doReturn chunkProp
+            }
 
         FX.getComponents()[WorkbookDataStore::class] = workbookDataStore
 
@@ -179,14 +187,16 @@ class ChapterPageViewModelTest2 {
         val takeRelay = ReplayRelay.create<Take>()
         val mockedAudio = mock<AssociatedAudio> { on { takes } doReturn takeRelay }
         val mockedChunk = mock<Chunk> { on { audio } doReturn mockedAudio }
-        val cardData = mock<CardData> {
-            on { chunkSource } doReturn mockedChunk
-            on { sort } doReturn 42
-        }
-        val cardData2 = mock<CardData> {
-            on { chunkSource } doReturn mockedChunk
-            on { sort } doReturn 100
-        }
+        val cardData =
+            mock<CardData> {
+                on { chunkSource } doReturn mockedChunk
+                on { sort } doReturn 42
+            }
+        val cardData2 =
+            mock<CardData> {
+                on { chunkSource } doReturn mockedChunk
+                on { sort } doReturn 100
+            }
 
         chapterPageViewModel.filteredContent.setAll(cardData, cardData2)
         chapterPageViewModel.setWorkChunk()
@@ -202,26 +212,30 @@ class ChapterPageViewModelTest2 {
         Assert.assertFalse(chapterPageViewModel.noTakesProperty.value)
         Assert.assertNull(chapterPageViewModel.workChunkProperty.value)
 
-        val mockedTake = mock<Take> {
-            on {deletedTimestamp } doReturn mock()
-        }
+        val mockedTake =
+            mock<Take> {
+                on { deletedTimestamp } doReturn mock()
+            }
         val selectedMock = BehaviorRelay.createDefault(TakeHolder(mockedTake))
-        val mockedAudio = mock<AssociatedAudio> {
-            on { getAllTakes() } doReturn arrayOf(mockedTake)
-            on { selected } doReturn selectedMock
-        }
+        val mockedAudio =
+            mock<AssociatedAudio> {
+                on { getAllTakes() } doReturn arrayOf(mockedTake)
+                on { selected } doReturn selectedMock
+            }
         val mockedChunk = mock<Chunk> { on { audio } doReturn mockedAudio }
-        val cardData = mock<CardData> {
-            on { chunkSource } doReturn mockedChunk
-            on { sort } doReturn 42
-        }
+        val cardData =
+            mock<CardData> {
+                on { chunkSource } doReturn mockedChunk
+                on { sort } doReturn 42
+            }
         val takeRelay2 = ReplayRelay.create<Take>()
         val mockedAudio2 = mock<AssociatedAudio> { on { takes } doReturn takeRelay2 }
         val mockedChunk2 = mock<Chunk> { on { audio } doReturn mockedAudio2 }
-        val cardData2 = mock<CardData> {
-            on { chunkSource } doReturn mockedChunk2
-            on { sort } doReturn 100
-        }
+        val cardData2 =
+            mock<CardData> {
+                on { chunkSource } doReturn mockedChunk2
+                on { sort } doReturn 100
+            }
 
         chapterPageViewModel.filteredContent.setAll(cardData, cardData2)
         chapterPageViewModel.setWorkChunk()
@@ -288,7 +302,6 @@ class ChapterPageViewModelTest2 {
 //        chapterPageViewModel.exportChapter()
 //    }
 
-
     @Test
     fun `dialogTextBinding for audio plugin text`() {
         val stringProperty = SimpleStringProperty()
@@ -296,31 +309,36 @@ class ChapterPageViewModelTest2 {
         val settingsViewModel = find<SettingsViewModel>()
         val workbookDataStore = find<WorkbookDataStore>()
 
-
         stringProperty.bind(chapterPageViewModel.dialogTextBinding())
 
-        val recorderMock = mock<AudioPluginData>() {
-            on { name } doReturn "testRecorder"
-        }
+        val recorderMock =
+            mock<AudioPluginData> {
+                on { name } doReturn "testRecorder"
+            }
 
-        val editorMock = mock<AudioPluginData>() {
-            on { name } doReturn "testEditor"
-        }
-        val markerMock = mock<AudioPluginData>() {
-            on { name } doReturn "testMarker"
-        }
+        val editorMock =
+            mock<AudioPluginData> {
+                on { name } doReturn "testEditor"
+            }
+        val markerMock =
+            mock<AudioPluginData> {
+                on { name } doReturn "testMarker"
+            }
 
         settingsViewModel.selectedRecorderProperty.set(recorderMock)
         chapterPageViewModel.contextProperty.set(PluginType.RECORDER)
         workbookDataStore.activeTakeNumberProperty.set(1)
 
-        val recorderExpected = "Orature will be unavailable while take 01 is open in testRecorder. " +
+        val recorderExpected =
+            "Orature will be unavailable while take 01 is open in testRecorder. " +
                 "Finish your work in testRecorder to continue using Orature."
 
-        val editorExpected = "Orature will be unavailable while take 01 is open in testEditor. " +
+        val editorExpected =
+            "Orature will be unavailable while take 01 is open in testEditor. " +
                 "Finish your work in testEditor to continue using Orature."
 
-        val markerExpected = "Orature will be unavailable while take 01 is open in testMarker. " +
+        val markerExpected =
+            "Orature will be unavailable while take 01 is open in testMarker. " +
                 "Finish your work in testMarker to continue using Orature."
 
         Assert.assertEquals(recorderExpected, stringProperty.value)

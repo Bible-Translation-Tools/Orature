@@ -4,16 +4,16 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
-import io.reactivex.schedulers.Schedulers
 import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.transformation.FilteredList
 import javafx.collections.transformation.SortedList
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
+import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
@@ -23,15 +23,15 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.controls.dialog.LoadingModal
-import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupKey
 import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupCardModel
+import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupKey
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.NOTIFICATION_DURATION_SEC
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChunkingTranslationPage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.NarrationPage
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChunkingTranslationPage
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
 import java.time.LocalDateTime
@@ -108,14 +108,15 @@ class HomePageViewModel2 : ViewModel() {
     private fun setupBookSearchListener() {
         bookSearchQueryProperty.onChangeWithDisposer { q ->
             val query = q?.trim() ?: ""
-            filteredBooks.predicate = if (query.isEmpty()) {
-                Predicate { true }
-            } else {
-                Predicate { book ->
-                    book.slug.contains(query, true)
-                        .or(book.title.contains(query, true))
+            filteredBooks.predicate =
+                if (query.isEmpty()) {
+                    Predicate { true }
+                } else {
+                    Predicate { book ->
+                        book.slug.contains(query, true)
+                            .or(book.title.contains(query, true))
+                    }
                 }
-            }
         }.apply { disposableListeners.add(this) }
     }
 
@@ -124,9 +125,10 @@ class HomePageViewModel2 : ViewModel() {
             isLoadingProperty.set(true)
         }
         // reset sort to default book order
-        sortedBooks.comparator = Comparator { wb1, wb2 ->
-            wb1.sort.compareTo(wb2.sort)
-        }
+        sortedBooks.comparator =
+            Comparator { wb1, wb2 ->
+                wb1.sort.compareTo(wb2.sort)
+            }
         workbookDescriptorRepo.getAll()
             .observeOnFx()
             .subscribe { books ->
@@ -142,10 +144,11 @@ class HomePageViewModel2 : ViewModel() {
         val projectGroup = selectedProjectGroupProperty.value
         workbookDS.currentModeProperty.set(projectGroup.mode)
 
-        val workbook = workbookRepo.get(
-            workbookDescriptor.sourceCollection,
-            workbookDescriptor.targetCollection
-        )
+        val workbook =
+            workbookRepo.get(
+                workbookDescriptor.sourceCollection,
+                workbookDescriptor.targetCollection,
+            )
         openWorkbook(workbook, projectGroup.mode)
     }
 
@@ -169,23 +172,24 @@ class HomePageViewModel2 : ViewModel() {
         val timeoutMillis = NOTIFICATION_DURATION_SEC * 1000
         projectWizardViewModel.increaseProjectDeleteCounter()
 
-        val timerDisposable = deleteProjectUseCase
-            .deleteProjectsWithTimer(cardModel.books, timeoutMillis.toInt())
-            .observeOnFx()
-            .doOnComplete {
-                logger.info("Deleted project group: ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
-                projectWizardViewModel.existingLanguagePairs.remove(
-                    Pair(cardModel.sourceLanguage, cardModel.targetLanguage)
-                )
-                projectsWithDeleteTimer.remove(cardModel)
-            }
-            .doOnDispose {
-                logger.info("Cancelled deleting project group ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
-            }
-            .doFinally {
-                projectWizardViewModel.decreaseProjectDeleteCounter()
-            }
-            .subscribe()
+        val timerDisposable =
+            deleteProjectUseCase
+                .deleteProjectsWithTimer(cardModel.books, timeoutMillis.toInt())
+                .observeOnFx()
+                .doOnComplete {
+                    logger.info("Deleted project group: ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
+                    projectWizardViewModel.existingLanguagePairs.remove(
+                        Pair(cardModel.sourceLanguage, cardModel.targetLanguage),
+                    )
+                    projectsWithDeleteTimer.remove(cardModel)
+                }
+                .doOnDispose {
+                    logger.info("Cancelled deleting project group ${cardModel.sourceLanguage.name} -> ${cardModel.targetLanguage.name}.")
+                }
+                .doFinally {
+                    projectWizardViewModel.decreaseProjectDeleteCounter()
+                }
+                .subscribe()
 
         projectsWithDeleteTimer[cardModel] = timerDisposable
     }
@@ -216,7 +220,7 @@ class HomePageViewModel2 : ViewModel() {
             .fromCallable {
                 loadContributorsFromDerivedMetadata(
                     sourceMetadata = workbookDescriptor.sourceCollection.resourceContainer!!,
-                    targetMetadata = workbookDescriptor.targetCollection.resourceContainer!!
+                    targetMetadata = workbookDescriptor.targetCollection.resourceContainer!!,
                 )
             }
             .doOnError { logger.error("Error while loading contributor info.", it) }
@@ -231,12 +235,13 @@ class HomePageViewModel2 : ViewModel() {
      * then opening a book and returning home will trigger the concurrent get & delete.
      */
     private fun forceDeleteProjectsWithTimer() {
-        val loadingDialog = find<LoadingModal>().apply {
-            // show loading modal while flushing the delete queue to prevent navigating home
-            messageProperty.set(messages["loadingBook"])
-            orientationProperty.set(settingsViewModel.orientationProperty.value)
-            themeProperty.set(settingsViewModel.appColorMode.value)
-        }
+        val loadingDialog =
+            find<LoadingModal>().apply {
+                // show loading modal while flushing the delete queue to prevent navigating home
+                messageProperty.set(messages["loadingBook"])
+                orientationProperty.set(settingsViewModel.orientationProperty.value)
+                themeProperty.set(settingsViewModel.appColorMode.value)
+            }
         loadingDialog.open()
         projectsWithDeleteTimer.forEach { (_, disposable) -> disposable.dispose() }
 
@@ -259,7 +264,7 @@ class HomePageViewModel2 : ViewModel() {
 
     private fun loadContributorsFromDerivedMetadata(
         sourceMetadata: ResourceMetadata,
-        targetMetadata: ResourceMetadata
+        targetMetadata: ResourceMetadata,
     ): List<Contributor> {
         val der = directoryProvider.getDerivedContainerDirectory(targetMetadata, sourceMetadata)
         return ResourceContainer.load(der).use { rc ->
@@ -267,13 +272,17 @@ class HomePageViewModel2 : ViewModel() {
         }
     }
 
-    fun saveContributors(contributors: List<Contributor>, workbookDescriptor: WorkbookDescriptor) {
+    fun saveContributors(
+        contributors: List<Contributor>,
+        workbookDescriptor: WorkbookDescriptor,
+    ) {
         Completable
             .fromAction {
-                val der = directoryProvider.getDerivedContainerDirectory(
-                    workbookDescriptor.targetCollection.resourceContainer!!,
-                    workbookDescriptor.sourceCollection.resourceContainer!!
-                )
+                val der =
+                    directoryProvider.getDerivedContainerDirectory(
+                        workbookDescriptor.targetCollection.resourceContainer!!,
+                        workbookDescriptor.sourceCollection.resourceContainer!!,
+                    )
                 ResourceContainer.load(der).use { rc ->
                     rc.manifest.dublinCore.contributor = contributors.map { it.name }.toMutableList()
                     rc.writeManifest()
@@ -294,10 +303,11 @@ class HomePageViewModel2 : ViewModel() {
     fun mergeContributorFromImport(workbookDescriptor: WorkbookDescriptor) {
         val workbook = workbookRepo.get(workbookDescriptor.sourceCollection, workbookDescriptor.targetCollection)
         if (workbook.projectFilesAccessor.isInitialized()) {
-            val set = loadContributorsFromDerivedMetadata(
-                sourceMetadata = workbook.source.resourceMetadata,
-                targetMetadata = workbook.target.resourceMetadata
-            ).toMutableSet()
+            val set =
+                loadContributorsFromDerivedMetadata(
+                    sourceMetadata = workbook.source.resourceMetadata,
+                    targetMetadata = workbook.target.resourceMetadata,
+                ).toMutableSet()
             val contributors = workbook.projectFilesAccessor.getContributorInfo()
             set.addAll(contributors)
             saveContributors(set.toList(), workbookDescriptor)
@@ -311,23 +321,25 @@ class HomePageViewModel2 : ViewModel() {
             return
         }
 
-        val projectGroups = books.groupBy {
-            ProjectGroupKey(it.sourceLanguage.slug, it.targetLanguage.slug, it.mode)
-        }
+        val projectGroups =
+            books.groupBy {
+                ProjectGroupKey(it.sourceLanguage.slug, it.targetLanguage.slug, it.mode)
+            }
         projectGroups
             .map { entry ->
                 val bookList = entry.value
                 val book = bookList.first()
-                val mostRecentBook = bookList
-                    .filter { it.lastModified != null }
-                    .maxByOrNull { it.lastModified!! }
+                val mostRecentBook =
+                    bookList
+                        .filter { it.lastModified != null }
+                        .maxByOrNull { it.lastModified!! }
 
                 ProjectGroupCardModel(
                     book.sourceLanguage,
                     book.targetLanguage,
                     book.mode,
                     mostRecentBook?.lastModified,
-                    bookList.toObservable()
+                    bookList.toObservable(),
                 )
             }
             .sortedByDescending { it.modifiedTs }
@@ -340,11 +352,14 @@ class HomePageViewModel2 : ViewModel() {
             }
     }
 
-    private fun openWorkbook(workbook: Workbook, mode: ProjectMode) {
+    private fun openWorkbook(
+        workbook: Workbook,
+        mode: ProjectMode,
+    ) {
         workbookDS.activeWorkbookProperty.set(workbook)
         initializeProjectFiles(workbook)
         updateWorkbookModifiedDate(workbook)
-        when(mode) {
+        when (mode) {
             ProjectMode.TRANSLATION -> navigator.dock<ChunkingTranslationPage>()
             ProjectMode.NARRATION, ProjectMode.DIALECT -> navigator.dock<NarrationPage>()
         }
@@ -354,15 +369,17 @@ class HomePageViewModel2 : ViewModel() {
     }
 
     private fun initializeProjectFiles(workbook: Workbook) {
-        val linkedResource = workbook
-            .source
-            .linkedResources
-            .firstOrNull { it.identifier == workbook.source.resourceMetadata.identifier }
+        val linkedResource =
+            workbook
+                .source
+                .linkedResources
+                .firstOrNull { it.identifier == workbook.source.resourceMetadata.identifier }
 
-        val contributors = loadContributorsFromDerivedMetadata(
-            sourceMetadata = workbook.source.resourceMetadata,
-            targetMetadata = workbook.target.resourceMetadata
-        )
+        val contributors =
+            loadContributorsFromDerivedMetadata(
+                sourceMetadata = workbook.source.resourceMetadata,
+                targetMetadata = workbook.target.resourceMetadata,
+            )
 
         workbook.projectFilesAccessor.initializeResourceContainerInDir(false)
         workbook.projectFilesAccessor.copySourceFiles(linkedResource)

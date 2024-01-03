@@ -22,16 +22,18 @@ class MoveMarkerActionTest {
         return mockk<AudioFile> {}
     }
 
-
     // Initializes each verse with placed equal to true and with one sector that holds one second worth of frames.
     // where the start of each added sector is offset by "paddingLength" number of frames
-    private fun initializeVerseNodeList(verseNodeList : MutableList<VerseNode>, paddingLength: Int = 0) {
+    private fun initializeVerseNodeList(
+        verseNodeList: MutableList<VerseNode>,
+        paddingLength: Int = 0,
+    ) {
         var start = -1
         for (i in 0 until numTestVerses) {
             val verseMarker = VerseMarker((i + 1), (i + 1), 0)
             val sectors = mutableListOf<IntRange>()
             val verseNode = VerseNode(true, verseMarker, sectors)
-            sectors.add(start + 1 .. start + 44100)
+            sectors.add(start + 1..start + 44100)
             start += 44100 + paddingLength
             verseNodeList.add(verseNode)
         }
@@ -50,7 +52,6 @@ class MoveMarkerActionTest {
         }
     }
 
-
     @Test
     fun `execute with markerMovedBetweenVerses true and positive delta`() {
         val verseIndex = 1
@@ -61,7 +62,7 @@ class MoveMarkerActionTest {
         Assert.assertEquals(1, totalVerses[verseIndex].sectors.size)
         Assert.assertEquals(
             44100 * (verseIndex) until 44100 * (verseIndex + 1),
-            totalVerses[verseIndex].sectors.first()
+            totalVerses[verseIndex].sectors.first(),
         )
 
         println(totalVerses)
@@ -69,7 +70,7 @@ class MoveMarkerActionTest {
         Assert.assertEquals(1, totalVerses[verseIndex - 1].sectors.size)
         Assert.assertEquals(
             44100 * (verseIndex - 1) until 44100 * (verseIndex),
-            totalVerses[verseIndex - 1].sectors.first()
+            totalVerses[verseIndex - 1].sectors.first(),
         )
 
         verseMarkerAction.execute(totalVerses, workingAudioFile)
@@ -77,14 +78,12 @@ class MoveMarkerActionTest {
         // Verify that the verse being moved has been updated correctly
         Assert.assertEquals(
             (44100 * (verseIndex) + delta) until (44100 * (verseIndex + 1)),
-            totalVerses[verseIndex].sectors.last()
+            totalVerses[verseIndex].sectors.last(),
         )
 
         // Verify that the verse before the verse being moved is updated correctly
         Assert.assertEquals(44100..44599, totalVerses[verseIndex - 1].sectors.last()) // TODO: don't hardcode this
-
     }
-
 
     @Test
     fun `execute with markerMovedBetweenVerses true and negative delta`() {
@@ -96,33 +95,32 @@ class MoveMarkerActionTest {
         Assert.assertEquals(1, totalVerses[verseIndex].sectors.size)
         Assert.assertEquals(
             44100 * (verseIndex) until 44100 * (verseIndex + 1),
-            totalVerses[verseIndex].sectors.first()
+            totalVerses[verseIndex].sectors.first(),
         )
 
         // Verify that the verse before the verse being moved has correct initial values
         Assert.assertEquals(1, totalVerses[verseIndex - 1].sectors.size)
         Assert.assertEquals(
             44100 * (verseIndex - 1) until 44100 * (verseIndex),
-            totalVerses[verseIndex - 1].sectors.first()
+            totalVerses[verseIndex - 1].sectors.first(),
         )
 
         verseMarkerAction.execute(totalVerses, workingAudioFile)
 
         Assert.assertEquals(
             (44100 * verseIndex + delta) until (44100 * (verseIndex)),
-            totalVerses[verseIndex].sectors.first()
+            totalVerses[verseIndex].sectors.first(),
         )
         Assert.assertEquals(
             (44100 * verseIndex) until (44100 * (verseIndex + 1)),
-            totalVerses[verseIndex].sectors.last()
+            totalVerses[verseIndex].sectors.last(),
         )
 
         // Verify that the verse before the verse being moved is updated correctly
         Assert.assertEquals(
             (44100 * (verseIndex - 1)) until 44100 * (verseIndex) + delta,
-            totalVerses[verseIndex - 1].sectors.last()
+            totalVerses[verseIndex - 1].sectors.last(),
         )
-
     }
 
     @Test
@@ -140,14 +138,14 @@ class MoveMarkerActionTest {
         Assert.assertEquals(1, totalVerses[verseIndex].sectors.size)
         Assert.assertEquals(
             44100 * (verseIndex) until 44100 * (verseIndex + 1),
-            totalVerses[verseIndex].sectors.first()
+            totalVerses[verseIndex].sectors.first(),
         )
 
         // Verify that the verse before the verse being moved has correct initial values
         Assert.assertEquals(1, totalVerses[verseIndex - 1].sectors.size)
         Assert.assertEquals(
             44100 * (verseIndex - 1) until 44100 * (verseIndex),
-            totalVerses[verseIndex - 1].sectors.first()
+            totalVerses[verseIndex - 1].sectors.first(),
         )
 
         verseMarkerAction.execute(totalVerses, workingAudioFile)
@@ -158,16 +156,15 @@ class MoveMarkerActionTest {
         Assert.assertEquals(1, totalVerses[verseIndex].sectors.size)
         Assert.assertEquals(
             44100 * (verseIndex) until 44100 * (verseIndex + 1),
-            totalVerses[verseIndex].sectors.first()
+            totalVerses[verseIndex].sectors.first(),
         )
 
         // Verify that the verse before the verse being moved has been restored to initial values
         Assert.assertEquals(1, totalVerses[verseIndex - 1].sectors.size)
         Assert.assertEquals(
             44100 * (verseIndex - 1) until 44100 * (verseIndex),
-            totalVerses[verseIndex - 1].sectors.first()
+            totalVerses[verseIndex - 1].sectors.first(),
         )
-
     }
 
     @Test
@@ -180,14 +177,14 @@ class MoveMarkerActionTest {
         Assert.assertEquals(1, totalVerses[verseIndex].sectors.size)
         Assert.assertEquals(
             44100 * (verseIndex) until 44100 * (verseIndex + 1),
-            totalVerses[verseIndex].sectors.first()
+            totalVerses[verseIndex].sectors.first(),
         )
 
         // Verify that the verse before the verse being moved has correct initial values
         Assert.assertEquals(1, totalVerses[verseIndex - 1].sectors.size)
         Assert.assertEquals(
             44100 * (verseIndex - 1) until 44100 * (verseIndex),
-            totalVerses[verseIndex - 1].sectors.first()
+            totalVerses[verseIndex - 1].sectors.first(),
         )
 
         verseMarkerAction.execute(totalVerses, workingAudioFile)
@@ -198,17 +195,16 @@ class MoveMarkerActionTest {
         Assert.assertEquals(1, totalVerses[verseIndex].sectors.size)
         Assert.assertEquals(
             44100 * (verseIndex) until 44100 * (verseIndex + 1),
-            totalVerses[verseIndex].sectors.first()
+            totalVerses[verseIndex].sectors.first(),
         )
 
         // Verify that the verse before the verse being moved has been restored to initial values
         Assert.assertEquals(1, totalVerses[verseIndex - 1].sectors.size)
         Assert.assertEquals(
             44100 * (verseIndex - 1) until 44100 * (verseIndex),
-            totalVerses[verseIndex - 1].sectors.first()
+            totalVerses[verseIndex - 1].sectors.first(),
         )
     }
-
 
     @Test
     fun `redo after undo after execute with markerMovedBetweenVerses true and positive delta`() {
@@ -220,14 +216,14 @@ class MoveMarkerActionTest {
         Assert.assertEquals(1, totalVerses[verseIndex].sectors.size)
         Assert.assertEquals(
             44100 * (verseIndex) until 44100 * (verseIndex + 1),
-            totalVerses[verseIndex].sectors.first()
+            totalVerses[verseIndex].sectors.first(),
         )
 
         // Verify that the verse before the verse being moved has correct initial values
         Assert.assertEquals(1, totalVerses[verseIndex - 1].sectors.size)
         Assert.assertEquals(
             44100 * (verseIndex - 1) until 44100 * (verseIndex),
-            totalVerses[verseIndex - 1].sectors.first()
+            totalVerses[verseIndex - 1].sectors.first(),
         )
 
         verseMarkerAction.execute(totalVerses, workingAudioFile)
@@ -239,7 +235,7 @@ class MoveMarkerActionTest {
         // Verify that the verse being moved has been updated to its moved position correctly
         Assert.assertEquals(
             (44100 * (verseIndex) + delta) until (44100 * (verseIndex + 1)),
-            totalVerses[verseIndex].sectors.last()
+            totalVerses[verseIndex].sectors.last(),
         )
 
         // Verify that the verse before the verse being moved is updated to its moved position correctly
@@ -256,14 +252,14 @@ class MoveMarkerActionTest {
         Assert.assertEquals(1, totalVerses[verseIndex].sectors.size)
         Assert.assertEquals(
             44100 * (verseIndex) until 44100 * (verseIndex + 1),
-            totalVerses[verseIndex].sectors.first()
+            totalVerses[verseIndex].sectors.first(),
         )
 
         // Verify that the verse before the verse being moved has correct initial values
         Assert.assertEquals(1, totalVerses[verseIndex - 1].sectors.size)
         Assert.assertEquals(
             44100 * (verseIndex - 1) until 44100 * (verseIndex),
-            totalVerses[verseIndex - 1].sectors.first()
+            totalVerses[verseIndex - 1].sectors.first(),
         )
 
         verseMarkerAction.execute(totalVerses, workingAudioFile)
@@ -274,17 +270,17 @@ class MoveMarkerActionTest {
 
         Assert.assertEquals(
             (44100 * verseIndex + delta) until (44100 * (verseIndex)),
-            totalVerses[verseIndex].sectors.first()
+            totalVerses[verseIndex].sectors.first(),
         )
         Assert.assertEquals(
             (44100 * verseIndex) until (44100 * (verseIndex + 1)),
-            totalVerses[verseIndex].sectors.last()
+            totalVerses[verseIndex].sectors.last(),
         )
 
         // Verify that the verse before the verse being moved is updated correctly
         Assert.assertEquals(
             (44100 * (verseIndex - 1)) until 44100 * (verseIndex) + delta,
-            totalVerses[verseIndex - 1].sectors.last()
+            totalVerses[verseIndex - 1].sectors.last(),
         )
     }
 }

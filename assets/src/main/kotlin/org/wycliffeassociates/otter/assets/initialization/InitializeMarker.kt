@@ -33,60 +33,61 @@ import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
 
-class InitializeMarker @Inject constructor(
-    val directoryProvider: IDirectoryProvider,
-    val pluginRepository: IAudioPluginRepository,
-    val installedEntityRepo: IInstalledEntityRepository,
-    val preferences: IAppPreferences
-) : Installable {
+class InitializeMarker
+    @Inject
+    constructor(
+        val directoryProvider: IDirectoryProvider,
+        val pluginRepository: IAudioPluginRepository,
+        val installedEntityRepo: IInstalledEntityRepository,
+        val preferences: IAppPreferences,
+    ) : Installable {
+        override val name = "MARKER"
+        override val version = 32
+        private val log = LoggerFactory.getLogger(InitializeMarker::class.java)
 
-    override val name = "MARKER"
-    override val version = 32
-    private val log = LoggerFactory.getLogger(InitializeMarker::class.java)
+        override fun exec(progressEmitter: ObservableEmitter<ProgressStatus>): Completable {
+            return Completable
+                .fromCallable {
+                    var installedVersion = installedEntityRepo.getInstalledVersion(this) ?: 0
+                    migrate(installedVersion)
+                    log.info("Initializing $name version: $version...")
 
-    override fun exec(progressEmitter: ObservableEmitter<ProgressStatus>): Completable {
-        return Completable
-            .fromCallable {
-                var installedVersion = installedEntityRepo.getInstalledVersion(this) ?: 0
-                migrate(installedVersion)
-                log.info("Initializing $name version: $version...")
+                    importOtterMarker()
+                        .doOnComplete {
+                            installedEntityRepo.install(this)
+                            log.info("Marker imported!")
+                            log.info("$name version: $version installed!")
+                        }
+                        .doOnError { e ->
+                            log.error("Error importing marker.", e)
+                        }
+                        .blockingAwait()
+                }
+        }
 
-                importOtterMarker()
-                    .doOnComplete {
-                        installedEntityRepo.install(this)
-                        log.info("Marker imported!")
-                        log.info("$name version: $version installed!")
-                    }
-                    .doOnError { e ->
-                        log.error("Error importing marker.", e)
-                    }
-                    .blockingAwait()
-            }
+        private fun importOtterMarker(): Completable {
+            val pluginsDir = directoryProvider.audioPluginDirectory
+            val jar = File(pluginsDir, "OratureMarker.jar")
+            ClassLoader.getSystemResourceAsStream("plugins/jars/markerapp")
+                ?.transferTo(FileOutputStream(jar))
+            return pluginRepository.insert(
+                AudioPluginData(
+                    0,
+                    "OratureMarker",
+                    "$version.0.0",
+                    canEdit = false,
+                    canRecord = false,
+                    canMark = true,
+                    executable = jar.absolutePath,
+                    args = listOf(),
+                    pluginFile = null,
+                ),
+            ).doAfterSuccess { id: Int ->
+                preferences.setPluginId(PluginType.MARKER, id).blockingGet()
+            }.ignoreElement()
+        }
+
+        private fun migrate(version: Int) {
+            // no-op
+        }
     }
-
-    private fun importOtterMarker(): Completable {
-        val pluginsDir = directoryProvider.audioPluginDirectory
-        val jar = File(pluginsDir, "OratureMarker.jar")
-        ClassLoader.getSystemResourceAsStream("plugins/jars/markerapp")
-            ?.transferTo(FileOutputStream(jar))
-        return pluginRepository.insert(
-            AudioPluginData(
-                0,
-                "OratureMarker",
-                "$version.0.0",
-                canEdit = false,
-                canRecord = false,
-                canMark = true,
-                executable = jar.absolutePath,
-                args = listOf(),
-                pluginFile = null
-            )
-        ).doAfterSuccess { id: Int ->
-            preferences.setPluginId(PluginType.MARKER, id).blockingGet()
-        }.ignoreElement()
-    }
-
-    private fun migrate(version: Int) {
-        /* no-op */
-    }
-}

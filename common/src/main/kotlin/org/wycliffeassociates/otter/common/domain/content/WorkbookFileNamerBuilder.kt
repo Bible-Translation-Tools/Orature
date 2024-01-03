@@ -27,7 +27,7 @@ object WorkbookFileNamerBuilder {
         chapter: Chapter,
         chunk: Chunk?,
         recordable: Recordable,
-        rcSlug: String
+        rcSlug: String,
     ) = FileNamer(
         bookSlug = workbook.target.slug,
         languageSlug = workbook.target.language.slug,
@@ -39,10 +39,11 @@ object WorkbookFileNamerBuilder {
         end = chunk?.end,
         contentType = recordable.contentType,
         sort = recordable.sort,
-        rcSlug = if (workbook.source.language.slug == workbook.target.language.slug) {
-            rcSlug
-        } else {
-            DEFAULT_RC_SLUG
-        }
+        rcSlug =
+            if (workbook.source.language.slug == workbook.target.language.slug) {
+                rcSlug
+            } else {
+                DEFAULT_RC_SLUG
+            },
     )
 }

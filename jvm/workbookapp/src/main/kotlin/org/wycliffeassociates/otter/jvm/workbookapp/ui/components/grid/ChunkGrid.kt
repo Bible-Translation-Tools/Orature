@@ -13,7 +13,6 @@ import tornadofx.*
 private const val GRID_COLUMNS = 3
 
 class ChunkGrid(list: List<ChunkViewData>) : GridPane() {
-
     init {
         hgrow = Priority.ALWAYS
 
@@ -36,17 +35,20 @@ class ChunkGrid(list: List<ChunkViewData>) : GridPane() {
                     this.togglePseudoClass("selected", selected)
                     this.togglePseudoClass("completed", chunk.isCompleted)
                     when {
-                        chunk.isCompleted -> FontIcon(MaterialDesign.MDI_CHECK_CIRCLE).apply {
-                            addClass("chunk-item__icon")
-                        }
-                        selected -> FontIcon(MaterialDesign.MDI_BOOKMARK).apply {
-                            addClass("chunk-item__icon")
-                        }
-                        else -> FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE).apply {
-                            addClass("chunk-item__icon")
-                        }
+                        chunk.isCompleted ->
+                            FontIcon(MaterialDesign.MDI_CHECK_CIRCLE).apply {
+                                addClass("chunk-item__icon")
+                            }
+                        selected ->
+                            FontIcon(MaterialDesign.MDI_BOOKMARK).apply {
+                                addClass("chunk-item__icon")
+                            }
+                        else ->
+                            FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE).apply {
+                                addClass("chunk-item__icon")
+                            }
                     }
-                }
+                },
             )
 
             action {
@@ -58,5 +60,5 @@ class ChunkGrid(list: List<ChunkViewData>) : GridPane() {
 
 fun EventTarget.chunkGrid(
     list: List<ChunkViewData>,
-    op: ChunkGrid.() -> Unit = {}
+    op: ChunkGrid.() -> Unit = {},
 ) = ChunkGrid(list).attachTo(this, op)

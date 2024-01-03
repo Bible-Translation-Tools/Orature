@@ -42,12 +42,13 @@ import java.util.*
 
 class OtterExceptionHandler(
     val directoryProvider: IDirectoryProvider,
-    val localeLanguage: LocaleLanguage
+    val localeLanguage: LocaleLanguage,
 ) : Thread.UncaughtExceptionHandler {
     val logger = LoggerFactory.getLogger(DefaultErrorHandler::class.java)
 
     class ErrorEvent(val thread: Thread, val error: Throwable) {
         internal var consumed = false
+
         fun consume() {
             consumed = true
         }
@@ -87,7 +88,10 @@ class OtterExceptionHandler(
         }
     }
 
-    override fun uncaughtException(t: Thread, error: Throwable) {
+    override fun uncaughtException(
+        t: Thread,
+        error: Throwable,
+    ) {
         if (isListViewScrollBug(error)) return
 
         if (isCycle(error)) {
@@ -127,18 +131,22 @@ class OtterExceptionHandler(
         return if (stackTrace.contains("findOwnerCell(VirtualFlow.java:695)")) {
             logger.warn("Error with scrolling in the listview caught, silencing exception.", error)
             true
-        } else false
+        } else {
+            false
+        }
     }
 
-    private fun isCycle(error: Throwable) = error.stackTrace.any {
-        it.className.startsWith("${javaClass.name}\$uncaughtException$")
-    }
+    private fun isCycle(error: Throwable) =
+        error.stackTrace.any {
+            it.className.startsWith("${javaClass.name}\$uncaughtException$")
+        }
 
     private fun showErrorDialog(error: Throwable) {
-        val orientation = when (localeLanguage.preferredLanguage?.direction) {
-            "rtl" -> NodeOrientation.RIGHT_TO_LEFT
-            else -> NodeOrientation.LEFT_TO_RIGHT
-        }
+        val orientation =
+            when (localeLanguage.preferredLanguage?.direction) {
+                "rtl" -> NodeOrientation.RIGHT_TO_LEFT
+                else -> NodeOrientation.LEFT_TO_RIGHT
+            }
         ExceptionDialog().apply {
             titleTextProperty.set(FX.messages["needsRestart"])
             headerTextProperty.set(FX.messages["yourWorkSaved"])
@@ -189,21 +197,21 @@ class OtterExceptionHandler(
                 logger.error("Error sending report to Sentry.", it)
             }
             .onErrorComplete()
-
     }
 
     private fun sendGithubReport(error: Throwable) {
         val props = githubProperties()
         if (props?.getProperty("repo-url") != null && props.getProperty("oauth-token") != null) {
-            val githubReporter = GithubReporter(
-                props.getProperty("repo-url"),
-                props.getProperty("oauth-token")
-            )
+            val githubReporter =
+                GithubReporter(
+                    props.getProperty("repo-url"),
+                    props.getProperty("oauth-token"),
+                )
             githubReporter.reportCrash(
                 getEnvironment(),
                 stringFromError(error),
                 getLog(),
-                error.message
+                error.message,
             )
         }
     }
@@ -228,12 +236,13 @@ class OtterExceptionHandler(
     private fun getLog(): String? {
         val logFileName = OratureInfo.SUITE_NAME.lowercase()
         val logExt = ".log"
-        val logFile = StringBuilder()
-            .append(directoryProvider.logsDirectory.absolutePath)
-            .append("/")
-            .append(logFileName)
-            .append(logExt)
-            .toString()
+        val logFile =
+            StringBuilder()
+                .append(directoryProvider.logsDirectory.absolutePath)
+                .append("/")
+                .append(logFileName)
+                .append(logExt)
+                .toString()
 
         return try {
             File(logFile).inputStream().readBytes().toString(Charsets.UTF_8)

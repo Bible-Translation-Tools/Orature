@@ -30,10 +30,13 @@ class ProjectWizardViewModel : ViewModel() {
 
     @Inject
     lateinit var creationUseCase: CreateProject
+
     @Inject
     lateinit var deleteProjectUseCase: DeleteProject
+
     @Inject
     lateinit var languageRepo: ILanguageRepository
+
     @Inject
     lateinit var collectionRepo: ICollectionRepository
 
@@ -64,7 +67,7 @@ class ProjectWizardViewModel : ViewModel() {
     private fun setupLanguageSearchListener(
         queryStringProperty: ObservableValue<String>,
         filteredList: FilteredList<Language>,
-        sortedList: SortedList<Language>
+        sortedList: SortedList<Language>,
     ) {
         queryStringProperty.onChange { q ->
             val query = q?.trim()
@@ -73,16 +76,18 @@ class ProjectWizardViewModel : ViewModel() {
                 filteredList.predicate = Predicate { true }
                 sortedList.comparator = compareBy<Language> { language -> language.slug }
             } else {
-                filteredList.predicate = Predicate { language ->
-                    language.slug.contains(query, true)
-                        .or(language.name.contains(query, true))
-                        .or(language.anglicizedName.contains(query, true))
-                }
+                filteredList.predicate =
+                    Predicate { language ->
+                        language.slug.contains(query, true)
+                            .or(language.name.contains(query, true))
+                            .or(language.anglicizedName.contains(query, true))
+                    }
 
                 val lowerQuery = query.lowercase()
-                sortedList.comparator = compareByDescending<Language> { language -> language.slug == lowerQuery }
-                    .thenByDescending { language -> language.name.lowercase() == lowerQuery }
-                    .thenByDescending { language -> language.anglicizedName.lowercase() == lowerQuery }
+                sortedList.comparator =
+                    compareByDescending<Language> { language -> language.slug == lowerQuery }
+                        .thenByDescending { language -> language.name.lowercase() == lowerQuery }
+                        .thenByDescending { language -> language.anglicizedName.lowercase() == lowerQuery }
             }
         }
     }
@@ -117,7 +122,10 @@ class ProjectWizardViewModel : ViewModel() {
             }
     }
 
-    fun onLanguageSelected(language: Language, onNavigateBack: () -> Unit) {
+    fun onLanguageSelected(
+        language: Language,
+        onNavigateBack: () -> Unit,
+    ) {
         val sourceLanguage = selectedSourceLanguageProperty.value
         if (sourceLanguage != null) {
             logger.info("Creating project group: ${sourceLanguage.name} - ${language.name}")
@@ -125,7 +133,7 @@ class ProjectWizardViewModel : ViewModel() {
                 .createAllBooks(
                     sourceLanguage,
                     language,
-                    selectedModeProperty.value
+                    selectedModeProperty.value,
                 )
                 .startWith(waitForProjectDeletionFinishes())
                 .observeOnFx()
@@ -135,8 +143,7 @@ class ProjectWizardViewModel : ViewModel() {
                     reset()
                     onNavigateBack()
                 }
-        }
-        else {
+        } else {
             // source language selected
             selectedSourceLanguageProperty.set(language)
         }
@@ -166,8 +173,13 @@ class ProjectWizardViewModel : ViewModel() {
         disposableListeners.clear()
     }
 
-    fun increaseProjectDeleteCounter() { projectDeleteCounter.incrementAndGet() }
-    fun decreaseProjectDeleteCounter() { projectDeleteCounter.decrementAndGet() }
+    fun increaseProjectDeleteCounter() {
+        projectDeleteCounter.incrementAndGet()
+    }
+
+    fun decreaseProjectDeleteCounter() {
+        projectDeleteCounter.decrementAndGet()
+    }
 
     /**
      * Blocks the execution of project creation until projects delete queue completes.
@@ -190,9 +202,10 @@ class ProjectWizardViewModel : ViewModel() {
 
     private fun updateExistingLanguagePairs() {
         val homePageViewModel = find<HomePageViewModel2>()
-        val languagePairs = homePageViewModel.projectGroups.map {
-            Pair(it.sourceLanguage, it.targetLanguage)
-        }
+        val languagePairs =
+            homePageViewModel.projectGroups.map {
+                Pair(it.sourceLanguage, it.targetLanguage)
+            }
         existingLanguagePairs.setAll(languagePairs)
     }
 }

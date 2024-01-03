@@ -2,7 +2,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.popup
 
 import javafx.scene.Node
 import javafx.scene.control.PopupControl
-import javafx.scene.control.ScrollPane
 import javafx.scene.control.Skin
 import javafx.scene.layout.VBox
 import javafx.stage.Window
@@ -12,7 +11,6 @@ import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
 import tornadofx.*
 
 class ChapterSelectorPopup : PopupControl() {
-
     val chapterGridItemList: MutableList<ChapterGridItemData> = mutableListOf()
     private val chapterGrid = ChapterGrid(chapterGridItemList)
 
@@ -34,26 +32,25 @@ class ChapterSelectorPopup : PopupControl() {
         chapterGridItemList.addAll(newChapterList)
         chapterGrid.updateChapterGridNodes()
     }
-
 }
 
 class ChapterSelectorPopupSkin(
     val control: ChapterSelectorPopup,
-    chapterGrid: ChapterGrid
+    chapterGrid: ChapterGrid,
 ) : Skin<ChapterSelectorPopup> {
+    private val root =
+        VBox().apply {
+            addClass("chapter-selector-popup")
 
-    private val root = VBox().apply {
-        addClass("chapter-selector-popup")
+            scrollpane {
+                addClass("chapter-selector-popup__scroll-pane")
+                isFitToWidth = true
 
-        scrollpane {
-            addClass("chapter-selector-popup__scroll-pane")
-            isFitToWidth = true
+                add(chapterGrid)
 
-            add(chapterGrid)
-
-            runLater { customizeScrollbarSkin() }
+                runLater { customizeScrollbarSkin() }
+            }
         }
-    }
 
     override fun getSkinnable(): ChapterSelectorPopup {
         return control
@@ -64,6 +61,5 @@ class ChapterSelectorPopupSkin(
     }
 
     override fun dispose() {
-
     }
 }

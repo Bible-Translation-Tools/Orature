@@ -19,25 +19,28 @@ import java.text.MessageFormat
 
 class BookSection(
     books: ObservableList<WorkbookDescriptor>,
-    filteredBooks: ObservableList<WorkbookDescriptor>
+    filteredBooks: ObservableList<WorkbookDescriptor>,
 ) : StackPane() {
     val bookSearchQueryProperty = SimpleStringProperty()
     private lateinit var bookTable: WorkBookTableView
     private val projectsOptionMenu = ProjectGroupOptionMenu()
-    private val titleProperty = SimpleStringProperty().apply {
-        bind(filteredBooks.stringBinding {
-            if (it.isNotEmpty()) {
-                val book = it.first()
-                MessageFormat.format(
-                    messages["projectGroupTitle"],
-                    book.targetLanguage.name,
-                    messages[book.mode.titleKey]
-                )
-            } else {
-                ""
-            }
-        })
-    }
+    private val titleProperty =
+        SimpleStringProperty().apply {
+            bind(
+                filteredBooks.stringBinding {
+                    if (it.isNotEmpty()) {
+                        val book = it.first()
+                        MessageFormat.format(
+                            messages["projectGroupTitle"],
+                            book.targetLanguage.name,
+                            messages[book.mode.titleKey],
+                        )
+                    } else {
+                        ""
+                    }
+                },
+            )
+        }
 
     init {
         vbox {
@@ -63,7 +66,7 @@ class BookSection(
                         val screenBound = this.localToScreen(bound)
                         projectsOptionMenu.books.setAll(books)
                         projectsOptionMenu.show(
-                            FX.primaryStage
+                            FX.primaryStage,
                         )
                         projectsOptionMenu.x = screenBound.minX
                         projectsOptionMenu.y = screenBound.centerY

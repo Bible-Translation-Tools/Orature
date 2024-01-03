@@ -18,27 +18,26 @@
  */
 package org.wycliffeassociates.otter.common.audio.wav
 
-import java.io.File
-import java.io.OutputStream
-import java.io.FileOutputStream
-import java.io.IOException
-import java.lang.Exception
-import java.nio.ByteBuffer
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.*
-
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.OutputStream
+import java.lang.Exception
+import java.nio.ByteBuffer
 
 enum class WavType {
     NORMAL_WAV,
-    WAV_WITH_EXTENSION
+    WAV_WITH_EXTENSION,
 }
+
 class InvalidWavFileException(message: String? = null) : Exception(message)
 
 /**
  * Wraps a file for the purposes of reading wav header metadata
  */
 class WavFile private constructor() : AudioFormatStrategy {
-
     val logger = LoggerFactory.getLogger(WavFile::class.java)
 
     internal lateinit var file: File
@@ -62,7 +61,10 @@ class WavFile private constructor() : AudioFormatStrategy {
     val headerSize
         get() = header.totalHeaderSize
 
-    override fun addCue(location: Int, label: String) {
+    override fun addCue(
+        location: Int,
+        label: String,
+    ) {
         metadata.addCue(location, label)
     }
 
@@ -125,7 +127,7 @@ class WavFile private constructor() : AudioFormatStrategy {
         channels: Int = DEFAULT_CHANNELS,
         sampleRate: Int = DEFAULT_SAMPLE_RATE,
         bitsPerSample: Int = DEFAULT_BITS_PER_SAMPLE,
-        wavMetadata: WavMetadata = WavMetadata()
+        wavMetadata: WavMetadata = WavMetadata(),
     ) : this() {
         this.file = file
         this.metadata = wavMetadata
@@ -185,15 +187,21 @@ class WavFile private constructor() : AudioFormatStrategy {
         WavOutputStream(
             this,
             append = true,
-            buffered = true
+            buffered = true,
         ).use {}
     }
 
-    override fun reader(start: Int?, end: Int?): AudioFileReader {
+    override fun reader(
+        start: Int?,
+        end: Int?,
+    ): AudioFileReader {
         return WavFileReader(this, start, end)
     }
 
-    override fun writer(append: Boolean, buffered: Boolean): OutputStream {
+    override fun writer(
+        append: Boolean,
+        buffered: Boolean,
+    ): OutputStream {
         return WavOutputStream(this, append, buffered)
     }
 }

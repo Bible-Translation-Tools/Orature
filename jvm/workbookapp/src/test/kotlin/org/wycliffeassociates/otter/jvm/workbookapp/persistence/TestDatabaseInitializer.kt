@@ -48,17 +48,20 @@ class TestDatabaseInitializer {
     private val oldDbFile = oldDatabaseDir.resolve(OLD_DB_FILE_NAME)
 
     private val TEST_DB_VERSION = 8 // use a fixed version with its corresponding sql schema file
-    private val schemaFile = File(
-        javaClass.classLoader.getResource("sql/AppDatabaseSchema_v$TEST_DB_VERSION.sql").file
-    )
-    private val oldSchemaFile = File(
-        javaClass.classLoader.getResource("sql/AppDatabaseSchema0.sql").file
-    )
+    private val schemaFile =
+        File(
+            javaClass.classLoader.getResource("sql/AppDatabaseSchema_v$TEST_DB_VERSION.sql").file,
+        )
+    private val oldSchemaFile =
+        File(
+            javaClass.classLoader.getResource("sql/AppDatabaseSchema0.sql").file,
+        )
 
-    private val directoryProviderMock = mock<IDirectoryProvider> {
-        on { databaseDirectory } doReturn databaseDir
-        on { getAppDataDirectory(any()) } doReturn oldDatabaseDir
-    }
+    private val directoryProviderMock =
+        mock<IDirectoryProvider> {
+            on { databaseDirectory } doReturn databaseDir
+            on { getAppDataDirectory(any()) } doReturn oldDatabaseDir
+        }
 
     private val dbInitializer = DatabaseInitializer(directoryProviderMock)
 
@@ -87,7 +90,7 @@ class TestDatabaseInitializer {
         Assert.assertTrue(databaseFile.exists() && databaseFile.length() > 0)
         Assert.assertEquals(
             TEST_DB_VERSION,
-            AppDatabase.getDatabaseVersion(databaseFile)
+            AppDatabase.getDatabaseVersion(databaseFile),
         )
 
         Assert.assertTrue(oldDbFile.exists() && oldDbFile.length() > 0)
@@ -129,7 +132,7 @@ class TestDatabaseInitializer {
 
         Assert.assertEquals(
             Int.MAX_VALUE,
-            AppDatabase.getDatabaseVersion(databaseFile)
+            AppDatabase.getDatabaseVersion(databaseFile),
         )
         Assert.assertTrue(databaseArchiveDir.list().isEmpty())
 
@@ -139,7 +142,10 @@ class TestDatabaseInitializer {
         Assert.assertTrue(databaseArchiveDir.list().isNotEmpty())
     }
 
-    private fun setDatabaseVersion(version: Int, dbFile: File) {
+    private fun setDatabaseVersion(
+        version: Int,
+        dbFile: File,
+    ) {
         val sqLiteDataSource = SQLiteDataSource()
         sqLiteDataSource.url = "jdbc:sqlite:${dbFile.path}"
         sqLiteDataSource.config.toProperties().setProperty("foreign_keys", "true")
@@ -149,7 +155,7 @@ class TestDatabaseInitializer {
             .update(InstalledEntity.INSTALLED_ENTITY)
             .set(
                 InstalledEntity.INSTALLED_ENTITY.VERSION,
-                version
+                version,
             )
             .where(InstalledEntity.INSTALLED_ENTITY.NAME.eq(DATABASE_INSTALLABLE_NAME))
             .execute()

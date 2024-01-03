@@ -8,7 +8,6 @@ import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ProgressStatus
 import org.wycliffeassociates.otter.common.data.primitives.Collection
-import org.wycliffeassociates.otter.jvm.controls.model.ChapterDescriptor
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.domain.project.exporter.AudioProjectExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOptions
@@ -19,14 +18,14 @@ import org.wycliffeassociates.otter.common.domain.project.exporter.ProjectExport
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.BackupProjectExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.SourceProjectExporter
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportFinishEvent
+import org.wycliffeassociates.otter.jvm.controls.model.ChapterDescriptor
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportFinishEvent
 import tornadofx.*
 import java.io.File
 import javax.inject.Inject
 
 class ExportProjectViewModel : ViewModel() {
-
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Inject
@@ -45,9 +44,7 @@ class ExportProjectViewModel : ViewModel() {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
     }
 
-    fun loadChapters(
-        workbookDescriptor: WorkbookDescriptor
-    ): Single<List<ChapterDescriptor>> {
+    fun loadChapters(workbookDescriptor: WorkbookDescriptor): Single<List<ChapterDescriptor>> {
         return Single
             .fromCallable {
                 workbookRepo.get(workbookDescriptor.sourceCollection, workbookDescriptor.targetCollection)
@@ -57,21 +54,23 @@ class ExportProjectViewModel : ViewModel() {
                     .map { chapter ->
                         val chunkCount = chapter.chunkCount.blockingGet()
 
-                        val progress = when {
-                            chapter.hasSelectedAudio() -> 1.0
-                            chunkCount != 0 -> {
-                                // collect chunks from the relay as soon as it starts emitting (blocking)
-                                val chunkWithAudio = chapter.chunks
-                                    .take(1)
-                                    .map {
-                                        it.count { it.hasSelectedAudio() }
-                                    }
-                                    .blockingFirst()
+                        val progress =
+                            when {
+                                chapter.hasSelectedAudio() -> 1.0
+                                chunkCount != 0 -> {
+                                    // collect chunks from the relay as soon as it starts emitting (blocking)
+                                    val chunkWithAudio =
+                                        chapter.chunks
+                                            .take(1)
+                                            .map {
+                                                it.count { it.hasSelectedAudio() }
+                                            }
+                                            .blockingFirst()
 
-                                chunkWithAudio.toDouble() / chunkCount
+                                    chunkWithAudio.toDouble() / chunkCount
+                                }
+                                else -> 0.0
                             }
-                            else -> 0.0
-                        }
 
                         ChapterDescriptor(chapter.sort, progress, progress > 0)
                     }
@@ -85,14 +84,15 @@ class ExportProjectViewModel : ViewModel() {
         workbookDescriptor: WorkbookDescriptor,
         directory: File,
         type: ExportType,
-        chapters: List<Int>?
+        chapters: List<Int>?,
     ): Observable<ProgressStatus> {
         val workbook = workbookRepo.get(workbookDescriptor.sourceCollection, workbookDescriptor.targetCollection)
-        val exporter: IProjectExporter = when (type) {
-            ExportType.LISTEN -> exportAudioUseCase
-            ExportType.SOURCE_AUDIO, ExportType.PUBLISH -> exportSourceUseCase
-            ExportType.BACKUP -> exportBackupUseCase
-        }
+        val exporter: IProjectExporter =
+            when (type) {
+                ExportType.LISTEN -> exportAudioUseCase
+                ExportType.SOURCE_AUDIO, ExportType.PUBLISH -> exportSourceUseCase
+                ExportType.BACKUP -> exportBackupUseCase
+            }
         return Observable.create<ProgressStatus> { emitter ->
             val callback = setUpCallback(emitter)
             exporter
@@ -100,7 +100,7 @@ class ExportProjectViewModel : ViewModel() {
                     directory,
                     workbook,
                     callback,
-                    chapters?.let { ExportOptions(it) }
+                    chapters?.let { ExportOptions(it) },
                 )
                 .observeOnFx()
                 .doOnError { e ->
@@ -120,38 +120,49 @@ class ExportProjectViewModel : ViewModel() {
     fun getEstimateExportSize(
         workbookDescriptor: WorkbookDescriptor,
         chapters: List<Int>,
-        exportType: ExportType
+        exportType: ExportType,
     ): Long {
         val workbook = workbookRepo.get(workbookDescriptor.sourceCollection, workbookDescriptor.targetCollection)
-        return when(exportType) {
+        return when (exportType) {
             ExportType.BACKUP -> exportBackupUseCase.estimateExportSize(workbook, chapters)
             ExportType.LISTEN -> exportAudioUseCase.estimateExportSize(workbook, chapters)
             ExportType.SOURCE_AUDIO,
-            ExportType.PUBLISH -> exportSourceUseCase.estimateExportSize(workbook, chapters)
+            ExportType.PUBLISH,
+            -> exportSourceUseCase.estimateExportSize(workbook, chapters)
             else -> 0L
         }
     }
 
     private fun setUpCallback(emitter: ObservableEmitter<ProgressStatus>): ProjectExporterCallback {
         return object : ProjectExporterCallback {
-            override fun onNotifySuccess(project: Collection, file: File) {
+            override fun onNotifySuccess(
+                project: Collection,
+                file: File,
+            ) {
                 FX.eventbus.fire(
                     WorkbookExportFinishEvent(
-                        ExportResult.SUCCESS, project, file
-                    )
-                )
-            }
-            override fun onError(project: Collection) {
-                FX.eventbus.fire(
-                    WorkbookExportFinishEvent(
-                        ExportResult.FAILURE, project
-                    )
+                        ExportResult.SUCCESS,
+                        project,
+                        file,
+                    ),
                 )
             }
 
-            override fun onNotifyProgress(percent: Double, message: String?) {
+            override fun onError(project: Collection) {
+                FX.eventbus.fire(
+                    WorkbookExportFinishEvent(
+                        ExportResult.FAILURE,
+                        project,
+                    ),
+                )
+            }
+
+            override fun onNotifyProgress(
+                percent: Double,
+                message: String?,
+            ) {
                 emitter.onNext(
-                    ProgressStatus(percent = percent, titleKey = message)
+                    ProgressStatus(percent = percent, titleKey = message),
                 )
             }
         }

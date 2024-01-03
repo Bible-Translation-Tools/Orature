@@ -33,22 +33,24 @@ class LanguageSelectionViewModelTest {
         private lateinit var vm: LanguageSelectionViewModel
         private val languages = initLanguages()
 
-        private val queryFilterTestCases = mapOf(
-            "" to 4,
-            "test" to 3,
-            "en" to 2,
-            "ar" to 1,
-            "x" to 0
-        )
+        private val queryFilterTestCases =
+            mapOf(
+                "" to 4,
+                "test" to 3,
+                "en" to 2,
+                "ar" to 1,
+                "x" to 0,
+            )
 
-        private val regionFilterTestCases = mapOf(
-            listOf<String>() to 4,
-            listOf("NA", "AS") to 4,
-            listOf("NA") to 2,
-            listOf("AS") to 2,
-            listOf("EU", "AS") to 2,
-            listOf("EU") to 0
-        )
+        private val regionFilterTestCases =
+            mapOf(
+                listOf<String>() to 4,
+                listOf("NA", "AS") to 4,
+                listOf("NA") to 2,
+                listOf("AS") to 2,
+                listOf("EU", "AS") to 2,
+                listOf("EU") to 0,
+            )
 
         fun initLanguages(): List<Language> {
             return listOf(
@@ -59,7 +61,7 @@ class LanguageSelectionViewModelTest {
                     "ltr",
                     true,
                     "NA",
-                    0
+                    0,
                 ),
                 Language(
                     "en-test",
@@ -68,7 +70,7 @@ class LanguageSelectionViewModelTest {
                     "ltr",
                     true,
                     "NA",
-                    1
+                    1,
                 ),
                 Language(
                     "ar-test",
@@ -77,7 +79,7 @@ class LanguageSelectionViewModelTest {
                     "rtl",
                     true,
                     "AS",
-                    2
+                    2,
                 ),
                 Language(
                     "vi-test",
@@ -86,8 +88,8 @@ class LanguageSelectionViewModelTest {
                     "ltr",
                     true,
                     "AS",
-                    3
-                )
+                    3,
+                ),
             )
         }
 
@@ -114,7 +116,7 @@ class LanguageSelectionViewModelTest {
             assertEquals(
                 "Search query: \"$key\".",
                 value,
-                vm.filteredLanguages.size
+                vm.filteredLanguages.size,
             )
         }
     }
@@ -126,7 +128,7 @@ class LanguageSelectionViewModelTest {
             assertEquals(
                 "Selected region(s): \"$key\".",
                 value,
-                vm.filteredLanguages.size
+                vm.filteredLanguages.size,
             )
         }
     }
@@ -149,7 +151,7 @@ class LanguageSelectionViewModelTest {
         vm.setFilterMenu()
         assertEquals(defaultItemCount, vm.menuItems.size)
 
-        val regions = languages.distinctBy { l -> l.region }.map{ l -> l.region }
+        val regions = languages.distinctBy { l -> l.region }.map { l -> l.region }
         vm.regions.setAll(regions)
         vm.setFilterMenu()
         val menuItemCount = defaultItemCount + regions.size

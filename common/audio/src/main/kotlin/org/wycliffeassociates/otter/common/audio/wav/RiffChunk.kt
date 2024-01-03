@@ -32,6 +32,8 @@ internal fun wordAlign(subchunkSize: Int) = subchunkSize + if (subchunkSize % 2 
 
 interface RiffChunk {
     fun parse(chunk: ByteBuffer)
+
     fun toByteArray(): ByteArray
+
     val totalSize: Int
 }

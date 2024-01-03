@@ -33,7 +33,7 @@ interface IFileReader : AutoCloseable {
     fun copyDirectory(
         source: String,
         destinationDirectory: File,
-        filter: (String) -> Boolean = { _ -> true }
+        filter: (String) -> Boolean = { _ -> true },
     ): Observable<String>
 
     fun list(directory: String): Sequence<String>

@@ -34,7 +34,6 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class ResumeBookBanner : Control() {
-
     val backgroundArtworkProperty = SimpleObjectProperty<Artwork>()
     val attributionTextProperty = SimpleStringProperty()
     val bookTitleProperty = SimpleStringProperty()
@@ -52,8 +51,8 @@ class ResumeBookBanner : Control() {
                     it.attributionText(
                         FX.messages["artworkLicense"],
                         FX.messages["artworkAttributionTitle"],
-                        FX.messages["license"]
-                    )
+                        FX.messages["license"],
+                    ),
                 )
             } ?: attributionTextProperty.set(null)
         }
@@ -72,7 +71,7 @@ class ResumeBookBanner : Control() {
                     }
                 }
             },
-            backgroundArtworkProperty
+            backgroundArtworkProperty,
         )
     }
 

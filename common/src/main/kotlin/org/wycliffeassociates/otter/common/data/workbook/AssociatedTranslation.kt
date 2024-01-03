@@ -22,7 +22,7 @@ import com.jakewharton.rxrelay2.Relay
 
 class AssociatedTranslation(
     val sourceRate: Relay<Double>,
-    val targetRate: Relay<Double>
+    val targetRate: Relay<Double>,
 ) {
     fun updateSourceRate(rate: Double) = sourceRate.accept(rate)
 

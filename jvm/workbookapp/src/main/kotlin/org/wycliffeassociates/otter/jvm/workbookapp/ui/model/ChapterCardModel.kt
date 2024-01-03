@@ -28,7 +28,7 @@ class ChapterCardModel(
     val dataType: String,
     val bodyText: String,
     val source: BookElement?,
-    val onClick: (chapter: BookElement) -> Unit
+    val onClick: (chapter: BookElement) -> Unit,
 ) {
     constructor(title: String, chapter: Chapter, onClick: (chapter: BookElement) -> Unit) : this(
         sort = chapter.sort,
@@ -37,6 +37,6 @@ class ChapterCardModel(
         dataType = CardDataType.COLLECTION.value,
         bodyText = chapter.title,
         source = chapter,
-        onClick = onClick
+        onClick = onClick,
     )
 }

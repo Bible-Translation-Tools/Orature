@@ -9,13 +9,13 @@ import org.wycliffeassociates.otter.common.audio.AudioCue
     use = JsonTypeInfo.Id.NAME,
     include = JsonTypeInfo.As.PROPERTY,
     property = "type",
-    defaultImpl = VerseMarker::class
+    defaultImpl = VerseMarker::class,
 )
 @JsonSubTypes(
     JsonSubTypes.Type(value = VerseMarker::class, name = "verse_marker"),
     JsonSubTypes.Type(value = ChapterMarker::class, name = "chapter_marker"),
     JsonSubTypes.Type(value = BookMarker::class, name = "book_marker"),
-    JsonSubTypes.Type(value = UnknownMarker::class, name = "unknown_marker")
+    JsonSubTypes.Type(value = UnknownMarker::class, name = "unknown_marker"),
 )
 interface AudioMarker {
     /**
@@ -58,7 +58,7 @@ data class BookMarker(val bookSlug: String, override val location: Int) : AudioM
 
     override val formattedLabel
         @JsonIgnore
-        get() = "orature-book-${label}"
+        get() = "orature-book-$label"
 
     override fun toString(): String {
         return formattedLabel
@@ -76,7 +76,7 @@ data class ChapterMarker(val chapterNumber: Int, override val location: Int) : A
 
     override val formattedLabel
         @JsonIgnore
-        get() = "orature-chapter-${label}"
+        get() = "orature-chapter-$label"
 
     override fun toString(): String {
         return formattedLabel
@@ -88,14 +88,13 @@ data class ChapterMarker(val chapterNumber: Int, override val location: Int) : A
 }
 
 data class VerseMarker(val start: Int, val end: Int, override val location: Int) : AudioMarker {
-
     override val label: String
         @JsonIgnore
         get() = if (end != start) "$start-$end" else "$start"
 
     override val formattedLabel
         @JsonIgnore
-        get() = "orature-vm-${label}"
+        get() = "orature-vm-$label"
 
     override fun toString(): String {
         return formattedLabel
@@ -109,7 +108,7 @@ data class VerseMarker(val start: Int, val end: Int, override val location: Int)
 data class ChunkMarker(val chunk: Int, override val location: Int) : AudioMarker {
     override val label = "$chunk"
     override val formattedLabel
-        get() = "orature-chunk-${label}"
+        get() = "orature-chunk-$label"
 
     override fun toString(): String {
         return formattedLabel

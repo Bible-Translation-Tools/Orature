@@ -25,8 +25,6 @@ import javafx.event.EventHandler
 import javafx.scene.control.ListCell
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
-import org.wycliffeassociates.otter.common.data.audio.VerseMarker
-import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterItemState
 import org.wycliffeassociates.otter.jvm.controls.event.*
@@ -39,7 +37,7 @@ class NarrationTextItemData(
     var marker: AudioMarker?,
     var hasRecording: Boolean = false,
     var previousChunksRecorded: Boolean = false,
-    var state: TeleprompterItemState = TeleprompterItemState.RECORD_DISABLED
+    var state: TeleprompterItemState = TeleprompterItemState.RECORD_DISABLED,
 ) {
     override fun toString(): String {
         return "${chunk.sort}, $hasRecording, $previousChunksRecorded"
@@ -53,9 +51,8 @@ class NarrationTextCell(
     private val isRecordingAgainProperty: ObservableValue<Boolean>,
     private val isPlayingProperty: ObservableValue<Boolean>,
     private val recordingIndexProperty: IntegerProperty,
-    private val playingVerseProperty: IntegerProperty
+    private val playingVerseProperty: IntegerProperty,
 ) : ListCell<NarrationTextItemData>() {
-
     private val logger = LoggerFactory.getLogger(NarrationTextCell::class.java)
 
     private val view = NarrationTextItem()
@@ -64,7 +61,10 @@ class NarrationTextCell(
         addClass("narration-list__verse-cell")
     }
 
-    override fun updateItem(item: NarrationTextItemData?, empty: Boolean) {
+    override fun updateItem(
+        item: NarrationTextItemData?,
+        empty: Boolean,
+    ) {
         super.updateItem(item, empty)
 
         if (empty || item == null) {
@@ -77,94 +77,115 @@ class NarrationTextCell(
         view.isSelectedProperty.set(isSelected)
         view.isLastVerseProperty.set(isLast)
 
-        graphic = view.apply {
+        graphic =
+            view.apply {
+                val title = if (item.chunk.label == "verse") item.chunk.title else ""
 
-            val title = if (item.chunk.label == "verse") item.chunk.title else ""
+                verseLabelProperty.set(title)
 
-            verseLabelProperty.set(title)
+                verseTextProperty.set(item.chunk.textItem.text)
 
-            verseTextProperty.set(item.chunk.textItem.text)
+                hasRecordingProperty.set(item.hasRecording)
+                recordButtonTextProperty.bind(this@NarrationTextCell.recordButtonTextProperty)
+                isRecordingProperty.bind(this@NarrationTextCell.isRecordingProperty)
+                isRecordingAgainProperty.bind(this@NarrationTextCell.isRecordingAgainProperty)
+                isPlayingProperty.bind(this@NarrationTextCell.isPlayingProperty)
+                playingVerseIndexProperty.bind(this@NarrationTextCell.playingVerseProperty)
+                indexProperty.set(index)
+                nextChunkTextProperty.set(nextChunkText)
 
-            hasRecordingProperty.set(item.hasRecording)
-            recordButtonTextProperty.bind(this@NarrationTextCell.recordButtonTextProperty)
-            isRecordingProperty.bind(this@NarrationTextCell.isRecordingProperty)
-            isRecordingAgainProperty.bind(this@NarrationTextCell.isRecordingAgainProperty)
-            isPlayingProperty.bind(this@NarrationTextCell.isPlayingProperty)
-            playingVerseIndexProperty.bind(this@NarrationTextCell.playingVerseProperty)
-            indexProperty.set(index)
-            nextChunkTextProperty.set(nextChunkText)
+                onRecordActionProperty.set(
+                    DebouncedEventHandler {
+                        FX.eventbus.fire(RecordVerseEvent(index, item.chunk))
+                    },
+                )
 
-            onRecordActionProperty.set(DebouncedEventHandler {
-                FX.eventbus.fire(RecordVerseEvent(index, item.chunk))
-            })
+                onNextVerseActionProperty.set(
+                    DebouncedEventHandler {
+                        listView.apply {
+                            try {
+                                selectionModel.selectIndices(index)
+                                selectionModel.selectNext()
 
-            onNextVerseActionProperty.set(DebouncedEventHandler {
-                listView.apply {
+                                // Scroll to the previous verse because scrolling to the active verse will cause
+                                // the active verse to move slightly above the viewport. Scrolling -1 will mean that
+                                // the active verse won't be on the top and is unpredictably placed, but is still better
+                                // than the text needed to actively be narrated being off the screen.
+                                scrollTo(selectionModel.selectedIndex - 1)
+                            } catch (e: Exception) {
+                                logger.error("Error in selecting and scrolling to a Teleprompter item", e)
+                            }
 
-                    try {
-                        selectionModel.selectIndices(index)
-                        selectionModel.selectNext()
+                            val nextVerseIndex = index + 1
+                            val nextVerse = items.getOrNull(nextVerseIndex)
+                            nextVerse?.let {
+                                FX.eventbus.fire(NextVerseEvent(nextVerseIndex, nextVerse.chunk))
+                            }
+                                ?: logger.error("Tried to select an invalid next verse! Tried to select: $nextVerseIndex from index $index")
+                        }
+                    },
+                )
 
-                        // Scroll to the previous verse because scrolling to the active verse will cause
-                        // the active verse to move slightly above the viewport. Scrolling -1 will mean that
-                        // the active verse won't be on the top and is unpredictably placed, but is still better
-                        // than the text needed to actively be narrated being off the screen.
-                        scrollTo(selectionModel.selectedIndex - 1)
-                    } catch (e: Exception) {
-                        logger.error("Error in selecting and scrolling to a Teleprompter item", e)
-                    }
+                onRecordAgainActionProperty.set(
+                    DebouncedEventHandler {
+                        FX.eventbus.fire(RecordAgainEvent(index))
+                    },
+                )
 
-                    val nextVerseIndex = index + 1
-                    val nextVerse = items.getOrNull(nextVerseIndex)
-                    nextVerse?.let {
-                        FX.eventbus.fire(NextVerseEvent(nextVerseIndex, nextVerse.chunk))
-                    }
-                        ?: logger.error("Tried to select an invalid next verse! Tried to select: $nextVerseIndex from index $index")
-                }
-            })
+                onPlayActionProperty.set(
+                    DebouncedEventHandler {
+                        item.marker?.let {
+                            FX.eventbus.fire(PlayVerseEvent(it))
+                        }
+                    },
+                )
 
-            onRecordAgainActionProperty.set(DebouncedEventHandler {
-                FX.eventbus.fire(RecordAgainEvent(index))
-            })
+                onPauseActionProperty.set(
+                    DebouncedEventHandler {
+                        item.marker?.let {
+                            FX.eventbus.fire(PauseEvent())
+                        }
+                    },
+                )
 
-            onPlayActionProperty.set(DebouncedEventHandler {
-                item.marker?.let {
-                    FX.eventbus.fire(PlayVerseEvent(it))
-                }
-            })
+                onSaveRecordingActionProperty.set(
+                    DebouncedEventHandler {
+                        FX.eventbus.fire(SaveRecordingEvent(index))
+                    },
+                )
 
-            onPauseActionProperty.set(DebouncedEventHandler {
-                item.marker?.let {
-                    FX.eventbus.fire(PauseEvent())
-                }
-            })
+                onBeginRecordingAction.set(
+                    DebouncedEventHandler {
+                        FX.eventbus.fire(BeginRecordingEvent(index, item.chunk))
+                    },
+                )
 
-            onSaveRecordingActionProperty.set(DebouncedEventHandler {
-                FX.eventbus.fire(SaveRecordingEvent(index))
-            })
+                onPauseRecordingAction.set(
+                    DebouncedEventHandler {
+                        FX.eventbus.fire(PauseRecordingEvent(index, item.chunk))
+                    },
+                )
 
-            onBeginRecordingAction.set(DebouncedEventHandler {
-                FX.eventbus.fire(BeginRecordingEvent(index, item.chunk))
-            })
+                onPauseRecordAgainAction.set(
+                    DebouncedEventHandler {
+                        FX.eventbus.fire(PauseRecordAgainEvent(index, item.chunk))
+                    },
+                )
 
-            onPauseRecordingAction.set(DebouncedEventHandler {
-                FX.eventbus.fire(PauseRecordingEvent(index, item.chunk))
-            })
+                onResumeRecordingAction.set(
+                    DebouncedEventHandler {
+                        FX.eventbus.fire(ResumeRecordingEvent(index, item.chunk))
+                    },
+                )
 
-            onPauseRecordAgainAction.set(DebouncedEventHandler {
-                FX.eventbus.fire(PauseRecordAgainEvent(index, item.chunk))
-            })
+                onResumeRecordingAgainAction.set(
+                    DebouncedEventHandler {
+                        FX.eventbus.fire(ResumeRecordingAgainEvent(index, item.chunk))
+                    },
+                )
 
-            onResumeRecordingAction.set(DebouncedEventHandler {
-                FX.eventbus.fire(ResumeRecordingEvent(index, item.chunk))
-            })
-
-            onResumeRecordingAgainAction.set(DebouncedEventHandler {
-                FX.eventbus.fire(ResumeRecordingAgainEvent(index, item.chunk))
-            })
-
-            stateProperty.set(item.state)
-        }
+                stateProperty.set(item.state)
+            }
     }
 
     private inline fun <T : Event> DebouncedEventHandler(crossinline op: () -> Unit): EventHandler<T> {

@@ -20,15 +20,14 @@ package org.wycliffeassociates.otter.jvm.device.audio
 
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
-import javax.sound.sampled.SourceDataLine
-import javax.sound.sampled.TargetDataLine
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
+import javax.sound.sampled.SourceDataLine
+import javax.sound.sampled.TargetDataLine
 
 class AudioConnectionFactory(
-    private val errorRelay: PublishRelay<AudioError> = PublishRelay.create()
+    private val errorRelay: PublishRelay<AudioError> = PublishRelay.create(),
 ) {
-
     private val playerConnectionFactory = AudioPlayerConnectionFactory(errorRelay)
     private val recorderConnectionFactory = AudioRecorderConnectionFactory(errorRelay)
 

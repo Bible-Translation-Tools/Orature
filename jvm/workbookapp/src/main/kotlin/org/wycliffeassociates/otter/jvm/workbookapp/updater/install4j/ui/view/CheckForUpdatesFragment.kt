@@ -24,34 +24,34 @@ import org.wycliffeassociates.otter.jvm.workbookapp.updater.install4j.ui.viewmod
 import tornadofx.*
 
 class CheckForUpdatesFragment : Fragment() {
-
     val vm: AppUpdaterViewModel by inject()
     val info = AppInfo()
 
-    override val root = vbox {
-        fitToParentSize()
-
-        visibleProperty().bind(vm.showCheckForUpdate)
-        managedProperty().bind(visibleProperty())
-
+    override val root =
         vbox {
-            styleClass.addAll("app-drawer__version", "app-drawer__section")
+            fitToParentSize()
 
-            label(messages["updateFailedNoInternet"]) {
-                styleClass.addAll("app-drawer__text", "app-drawer__text--error")
-                visibleProperty().bind(vm.showOffline)
-                managedProperty().bind(visibleProperty())
-            }
-        }
+            visibleProperty().bind(vm.showCheckForUpdate)
+            managedProperty().bind(visibleProperty())
 
-        add(
-            JFXButton(messages["checkForUpdates"]).apply {
-                styleClass.addAll("btn", "btn--secondary")
-                tooltip(text)
-                setOnAction {
-                    vm.checkForUpdates()
+            vbox {
+                styleClass.addAll("app-drawer__version", "app-drawer__section")
+
+                label(messages["updateFailedNoInternet"]) {
+                    styleClass.addAll("app-drawer__text", "app-drawer__text--error")
+                    visibleProperty().bind(vm.showOffline)
+                    managedProperty().bind(visibleProperty())
                 }
             }
-        )
-    }
+
+            add(
+                JFXButton(messages["checkForUpdates"]).apply {
+                    styleClass.addAll("btn", "btn--secondary")
+                    tooltip(text)
+                    setOnAction {
+                        vm.checkForUpdates()
+                    }
+                },
+            )
+        }
 }

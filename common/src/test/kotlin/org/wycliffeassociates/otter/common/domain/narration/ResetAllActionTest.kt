@@ -16,10 +16,11 @@ class ResetAllActionTest {
     private val totalVerses: MutableList<VerseNode> = mutableListOf()
     lateinit var workingAudioFile: AudioFile
     val numTestVerses = 31
-    private val mockAssociatedAudio = mock<AssociatedAudio> {
-        on { getSelectedTake() } doReturn (null)
-        on { selectTake(anyOrNull()) } doAnswer { }
-    }
+    private val mockAssociatedAudio =
+        mock<AssociatedAudio> {
+            on { getSelectedTake() } doReturn (null)
+            on { selectTake(anyOrNull()) } doAnswer { }
+        }
 
     @Before
     fun setup() {
@@ -33,13 +34,16 @@ class ResetAllActionTest {
 
     // Initializes each verse with placed equal to true and with one sector that holds one second worth of frames.
     // where the start of each added sector is offset by "paddingLength" number of frames
-    private fun initializeVerseNodeList(verseNodeList : MutableList<VerseNode>, paddingLength: Int = 0) {
+    private fun initializeVerseNodeList(
+        verseNodeList: MutableList<VerseNode>,
+        paddingLength: Int = 0,
+    ) {
         var start = -1
         for (i in 0 until numTestVerses) {
             val verseMarker = VerseMarker((i + 1), (i + 1), 0)
             val sectors = mutableListOf<IntRange>()
             val verseNode = VerseNode(true, verseMarker, sectors)
-            sectors.add(start + 1 .. start + 44100)
+            sectors.add(start + 1..start + 44100)
             start += 44100 + paddingLength
             verseNodeList.add(verseNode)
         }
@@ -47,7 +51,6 @@ class ResetAllActionTest {
 
     @Test
     fun `execute with placed verses and sectors`() {
-
         // verify that the data has been set up properly
         Assert.assertTrue(checkIfAnySectorsExists(totalVerses))
         Assert.assertTrue(checkIfAllVerseNodesArePlaced(totalVerses))
@@ -61,15 +64,15 @@ class ResetAllActionTest {
         Assert.assertFalse(checkIfAllVerseNodesArePlaced(totalVerses))
     }
 
-    private fun checkIfAllVerseNodesArePlaced(verseNodes : MutableList<VerseNode>) : Boolean {
-        for(verseNode in verseNodes) {
+    private fun checkIfAllVerseNodesArePlaced(verseNodes: MutableList<VerseNode>): Boolean {
+        for (verseNode in verseNodes) {
             if (!verseNode.placed) return false
         }
         return true
     }
 
-    private fun checkIfAnySectorsExists(verseNodes : MutableList<VerseNode>) : Boolean {
-        for(verseNode in verseNodes) {
+    private fun checkIfAnySectorsExists(verseNodes: MutableList<VerseNode>): Boolean {
+        for (verseNode in verseNodes) {
             if (verseNode.sectors.size != 0) return true
         }
         return false

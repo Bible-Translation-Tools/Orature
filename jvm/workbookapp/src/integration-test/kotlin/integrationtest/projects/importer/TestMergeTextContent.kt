@@ -31,91 +31,97 @@ const val LEVITICUS_FILE_PATH = "./03-LEV.txt"
 
 class TestMergeTextContent {
     companion object {
-        val sampleGenesis = File.createTempFile("01-GEN", ".txt")
-            .apply {
-                writer().use {
-                    it.write("In the beginning God created the heavens and the earth.")
+        val sampleGenesis =
+            File.createTempFile("01-GEN", ".txt")
+                .apply {
+                    writer().use {
+                        it.write("In the beginning God created the heavens and the earth.")
+                    }
+                    deleteOnExit()
                 }
-                deleteOnExit()
-            }
 
-        val sampleExodus = File.createTempFile("02-EXO", ".txt")
-            .apply {
-                writer().use {
-                    it.write("Sample text for Exodus")
+        val sampleExodus =
+            File.createTempFile("02-EXO", ".txt")
+                .apply {
+                    writer().use {
+                        it.write("Sample text for Exodus")
+                    }
+                    deleteOnExit()
                 }
-                deleteOnExit()
-            }
 
-        val sampleLeviticus = File.createTempFile("03-LEV", ".txt")
-            .apply {
-                writer().use {
-                    it.write("Sample text for Leviticus")
+        val sampleLeviticus =
+            File.createTempFile("03-LEV", ".txt")
+                .apply {
+                    writer().use {
+                        it.write("Sample text for Leviticus")
+                    }
+                    deleteOnExit()
                 }
-                deleteOnExit()
-            }
 
-        val overwriteGenesis = File.createTempFile("01-GEN", ".txt")
-            .apply {
-                writer().use {
-                    it.write("overwritten text for Genesis")
+        val overwriteGenesis =
+            File.createTempFile("01-GEN", ".txt")
+                .apply {
+                    writer().use {
+                        it.write("overwritten text for Genesis")
+                    }
+                    deleteOnExit()
                 }
-                deleteOnExit()
-            }
 
-        val toRc = ResourceContainerBuilder()
-            .setProjectManifest(
-                listOf(
-                    Project(
-                        "Genesis",
-                        "ufw",
-                        "gen",
-                        1,
-                        GENESIS_FILE_PATH,
-                        listOf("bible-ot")
+        val toRc =
+            ResourceContainerBuilder()
+                .setProjectManifest(
+                    listOf(
+                        Project(
+                            "Genesis",
+                            "ufw",
+                            "gen",
+                            1,
+                            GENESIS_FILE_PATH,
+                            listOf("bible-ot"),
+                        ),
+                        Project(
+                            "Exodus",
+                            "ufw",
+                            "exo",
+                            2,
+                            EXODUS_FILE_PATH,
+                            listOf("bible-ot"),
+                        ),
                     ),
-                    Project(
-                        "Exodus",
-                        "ufw",
-                        "exo",
-                        2,
-                        EXODUS_FILE_PATH,
-                        listOf("bible-ot")
-                    )
                 )
-            )
-            .build()
-            .apply {
-                addFileToContainer(sampleGenesis, GENESIS_FILE_PATH)
-                addFileToContainer(sampleExodus, EXODUS_FILE_PATH)
-            }
+                .build()
+                .apply {
+                    addFileToContainer(sampleGenesis, GENESIS_FILE_PATH)
+                    addFileToContainer(sampleExodus, EXODUS_FILE_PATH)
+                }
 
-        val fromRc = ResourceContainerBuilder()
-            .setProjectManifest(
-                listOf(
-                    Project(
-                        "Genesis",
-                        "ufw",
-                        "gen",
-                        1,
-                        GENESIS_FILE_PATH,
-                        listOf("bible-ot")
+        val fromRc =
+            ResourceContainerBuilder()
+                .setProjectManifest(
+                    listOf(
+                        Project(
+                            "Genesis",
+                            "ufw",
+                            "gen",
+                            1,
+                            GENESIS_FILE_PATH,
+                            listOf("bible-ot"),
+                        ),
+                        Project(
+                            "Leviticus",
+                            "ufw",
+                            "lev",
+                            3,
+                            LEVITICUS_FILE_PATH,
+                            listOf("bible-ot"),
+                        ),
                     ),
-                    Project(
-                        "Leviticus",
-                        "ufw",
-                        "lev",
-                        3,
-                        LEVITICUS_FILE_PATH,
-                        listOf("bible-ot")
-                    )
                 )
-            )
-            .build()
-            .apply {
-                addFileToContainer(overwriteGenesis, GENESIS_FILE_PATH)
-                addFileToContainer(sampleLeviticus, LEVITICUS_FILE_PATH)
-            }
+                .build()
+                .apply {
+                    addFileToContainer(overwriteGenesis, GENESIS_FILE_PATH)
+                    addFileToContainer(sampleLeviticus, LEVITICUS_FILE_PATH)
+                }
 
         @BeforeClass
         @JvmStatic

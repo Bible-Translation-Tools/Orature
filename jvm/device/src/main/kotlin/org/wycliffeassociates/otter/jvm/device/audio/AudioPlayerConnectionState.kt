@@ -20,9 +20,7 @@ package org.wycliffeassociates.otter.jvm.device.audio
 
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.device.AudioFileReaderProvider
-import java.io.File
 import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
-import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFileReaderProvider
 
 internal class AudioPlayerConnectionState(
     val id: Int,
@@ -34,7 +32,7 @@ internal class AudioPlayerConnectionState(
     var durationInMs: Int = 0,
     var locationInFrames: Int = 0,
     var locationInMs: Int = 0,
-    val listeners: MutableList<IAudioPlayerListener> = mutableListOf()
+    val listeners: MutableList<IAudioPlayerListener> = mutableListOf(),
 ) {
     var readerProvider: AudioFileReaderProvider? = null
 

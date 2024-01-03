@@ -25,5 +25,5 @@ data class TakeModel(
     val take: Take,
     val selected: Boolean,
     var loaded: Boolean,
-    val audioPlayer: IAudioPlayer
+    val audioPlayer: IAudioPlayer,
 )

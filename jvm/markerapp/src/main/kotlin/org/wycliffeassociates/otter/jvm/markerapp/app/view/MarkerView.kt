@@ -47,7 +47,7 @@ class MarkerView : PluginEntrypoint() {
         super.onDock()
         viewModel.onDock {
             viewModel.compositeDisposable.add(
-                viewModel.waveform.observeOnFx().subscribe { waveform.addWaveformImage(it) }
+                viewModel.waveform.observeOnFx().subscribe { waveform.addWaveformImage(it) },
             )
         }
         slider?.let {
@@ -71,58 +71,62 @@ class MarkerView : PluginEntrypoint() {
         }
     }
 
-    override val root = splitpane(Orientation.HORIZONTAL) {
-        setDividerPositions(0.33)
-        addClass("vm-split-container")
+    override val root =
+        splitpane(Orientation.HORIZONTAL) {
+            setDividerPositions(0.33)
+            addClass("vm-split-container")
 
-        vbox {
-            add(
-                SourceTextFragment().apply {
-                    highlightedChunkNumberProperty.bind(viewModel.currentMarkerNumberProperty)
-                }
-            )
+            vbox {
+                add(
+                    SourceTextFragment().apply {
+                        highlightedChunkNumberProperty.bind(viewModel.currentMarkerNumberProperty)
+                    },
+                )
+            }
+
+            borderpane {
+                top =
+                    vbox {
+                        add<TitleFragment>()
+                        add<MinimapFragment> {
+                            this@MarkerView.minimap = this
+                            this@MarkerView.slider = slider
+                        }
+                    }
+                center =
+                    waveform.apply {
+                        addClass("vm-marker-waveform")
+                        themeProperty.bind(viewModel.themeColorProperty)
+                        positionProperty.bind(viewModel.positionProperty)
+
+                        setOnSeekNext { viewModel.seekNext() }
+                        setOnSeekPrevious { viewModel.seekPrevious() }
+                        setOnPlaceMarker { viewModel.placeMarker() }
+                        setOnWaveformClicked { viewModel.pause() }
+                        setOnWaveformDragReleased { deltaPos ->
+                            val deltaFrames = pixelsToFrames(deltaPos)
+                            val curFrames = viewModel.getLocationInFrames()
+                            val duration = viewModel.getDurationInFrames()
+                            val final = Utils.clamp(0, curFrames - deltaFrames, duration)
+                            viewModel.seek(final)
+                        }
+                        setOnRewind(viewModel::rewind)
+                        setOnFastForward(viewModel::fastForward)
+                        setOnToggleMedia(viewModel::mediaToggle)
+                        setOnResumeMedia(viewModel::resumeMedia)
+
+                        // Marker stuff
+                        imageWidthProperty.bind(viewModel.imageWidthProperty)
+
+                        setOnPositionChanged { id, position -> slider!!.updateMarker(id, position) }
+                        setOnLocationRequest { viewModel.requestAudioLocation() }
+                    }
+                bottom =
+                    vbox {
+                        add<PlaybackControlsFragment>()
+                    }
+                shortcut(Shortcut.ADD_MARKER.value, viewModel::placeMarker)
+                shortcut(Shortcut.GO_BACK.value, viewModel::saveAndQuit)
+            }
         }
-
-        borderpane {
-            top = vbox {
-                add<TitleFragment>()
-                add<MinimapFragment> {
-                    this@MarkerView.minimap = this
-                    this@MarkerView.slider = slider
-                }
-            }
-            center = waveform.apply {
-                addClass("vm-marker-waveform")
-                themeProperty.bind(viewModel.themeColorProperty)
-                positionProperty.bind(viewModel.positionProperty)
-
-                setOnSeekNext { viewModel.seekNext() }
-                setOnSeekPrevious { viewModel.seekPrevious() }
-                setOnPlaceMarker { viewModel.placeMarker() }
-                setOnWaveformClicked { viewModel.pause() }
-                setOnWaveformDragReleased { deltaPos ->
-                    val deltaFrames = pixelsToFrames(deltaPos)
-                    val curFrames = viewModel.getLocationInFrames()
-                    val duration = viewModel.getDurationInFrames()
-                    val final = Utils.clamp(0, curFrames - deltaFrames, duration)
-                    viewModel.seek(final)
-                }
-                setOnRewind(viewModel::rewind)
-                setOnFastForward(viewModel::fastForward)
-                setOnToggleMedia(viewModel::mediaToggle)
-                setOnResumeMedia(viewModel::resumeMedia)
-
-                // Marker stuff
-                imageWidthProperty.bind(viewModel.imageWidthProperty)
-
-                setOnPositionChanged { id, position -> slider!!.updateMarker(id, position) }
-                setOnLocationRequest { viewModel.requestAudioLocation() }
-            }
-            bottom = vbox {
-                add<PlaybackControlsFragment>()
-            }
-            shortcut(Shortcut.ADD_MARKER.value, viewModel::placeMarker)
-            shortcut(Shortcut.GO_BACK.value, viewModel::saveAndQuit)
-        }
-    }
 }

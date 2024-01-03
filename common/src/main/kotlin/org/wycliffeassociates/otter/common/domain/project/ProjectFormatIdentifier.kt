@@ -9,14 +9,11 @@ import java.lang.IllegalArgumentException
 import kotlin.jvm.Throws
 
 object ProjectFormatIdentifier {
-
     @Throws(
         IllegalArgumentException::class,
-        InvalidResourceContainerException::class
+        InvalidResourceContainerException::class,
     )
-    fun getProjectFormat(
-        file: File
-    ): ProjectFormat {
+    fun getProjectFormat(file: File): ProjectFormat {
         return when {
             OratureFileFormat.isSupported(file.extension) || file.isDirectory -> {
                 validateOratureFile(file)
@@ -38,5 +35,5 @@ object ProjectFormatIdentifier {
 }
 
 class InvalidResourceContainerException(
-    override val message: String
+    override val message: String,
 ) : InvalidObjectException(message)

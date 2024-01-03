@@ -6,16 +6,16 @@ import io.reactivex.ObservableEmitter
 import io.reactivex.Single
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.util.concurrent.atomic.AtomicBoolean
 import javafx.scene.image.Image
 import javafx.scene.image.WritableImage
 import javafx.scene.paint.Color
-import kotlin.math.absoluteValue
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.math.absoluteValue
 
 const val SIGNED_SHORT_MAX = 32767
 
@@ -72,7 +72,7 @@ class ObservableWaveformBuilder {
         width: Int = Screen.getMainScreen().platformWidth,
         height: Int = Screen.getMainScreen().platformHeight,
         wavColor: Color = Color.BLACK,
-        background: Color = Color.TRANSPARENT
+        background: Color = Color.TRANSPARENT,
     ): Single<Image> {
         this.wavColor = wavColor
         this.background = background
@@ -101,7 +101,7 @@ class ObservableWaveformBuilder {
         width: Int,
         height: Int,
         wavColor: Color = Color.BLACK,
-        background: Color = Color.TRANSPARENT
+        background: Color = Color.TRANSPARENT,
     ): Observable<Image> {
         this.reader = reader
         this.width = width
@@ -121,7 +121,7 @@ class ObservableWaveformBuilder {
                     override fun isDisposed(): Boolean {
                         return disposed.get()
                     }
-                }
+                },
             )
             synchronized(this@ObservableWaveformBuilder) {
                 for (image in images) {
@@ -137,7 +137,7 @@ class ObservableWaveformBuilder {
         reader: AudioFileReader,
         width: Int,
         height: Int,
-        subscribers: List<ObservableEmitter<Image>>
+        subscribers: List<ObservableEmitter<Image>>,
     ) {
         val framesPerPixel = reader.totalFrames / width
         var img = WritableImage(partialImageWidth, height)
@@ -175,13 +175,14 @@ class ObservableWaveformBuilder {
 
         // render final image with exact width
         if (lastImageWidth != 0 && !cancelled.get()) {
-            img = WritableImage(
-                img.pixelReader,
-                0,
-                0,
-                lastImageWidth,
-                height
-            )
+            img =
+                WritableImage(
+                    img.pixelReader,
+                    0,
+                    0,
+                    lastImageWidth,
+                    height,
+                )
             renderImage(img, reader, lastImageWidth, height, framesPerPixel)
             if (!cancelled.get()) {
                 synchronized(this@ObservableWaveformBuilder) {
@@ -202,7 +203,10 @@ class ObservableWaveformBuilder {
         }
     }
 
-    private fun scaleToHeight(value: Int, height: Int): Int {
+    private fun scaleToHeight(
+        value: Int,
+        height: Int,
+    ): Int {
         return ((value) / (SIGNED_SHORT_MAX * 2).toDouble() * height).toInt()
     }
 
@@ -211,18 +215,19 @@ class ObservableWaveformBuilder {
         reader: AudioFileReader,
         width: Int,
         height: Int,
-        framesPerPixel: Int
+        framesPerPixel: Int,
     ) {
         val shortsArray = ShortArray(framesPerPixel)
         val bytes = ByteArray(framesPerPixel * 2)
 
         for (i in 0 until width) {
-            val range = computeWaveRange(
-                reader,
-                height,
-                shortsArray,
-                bytes
-            )
+            val range =
+                computeWaveRange(
+                    reader,
+                    height,
+                    shortsArray,
+                    bytes,
+                )
 
             for (j in 0 until height) {
                 img.pixelWriter.setColor(i, j, background)
@@ -237,7 +242,7 @@ class ObservableWaveformBuilder {
         reader: AudioFileReader,
         height: Int,
         shortsArray: ShortArray,
-        bytes: ByteArray
+        bytes: ByteArray,
     ): IntRange {
         reader.getPcmBuffer(bytes)
         val bb = ByteBuffer.wrap(bytes)

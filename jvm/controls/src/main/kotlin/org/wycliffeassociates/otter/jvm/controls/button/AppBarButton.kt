@@ -24,7 +24,6 @@ import org.wycliffeassociates.otter.jvm.controls.skins.button.AppBarButtonSkin
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 
 class AppBarButton : ToggleButton() {
-
     init {
         tryImportStylesheet(javaClass.getResource("/css/app-bar-button.css").toExternalForm())
         styleClass.setAll("app-bar-button")

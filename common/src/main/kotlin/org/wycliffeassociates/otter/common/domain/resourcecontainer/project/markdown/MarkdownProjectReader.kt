@@ -37,8 +37,8 @@ import org.wycliffeassociates.resourcecontainer.entity.Project
 import java.io.Closeable
 import java.io.File
 import java.nio.file.Path
-import java.util.zip.ZipFile
 import java.util.ArrayDeque
+import java.util.zip.ZipFile
 
 private val extensions = Regex(".+\\.(md|mkdn?|mdown|markdown)$", RegexOption.IGNORE_CASE)
 
@@ -53,7 +53,7 @@ class MarkdownProjectReader(private val isHelp: Boolean) : IProjectReader {
     private data class ProjectFileTree(
         val tree: OtterTree<OtterFile>,
         val projectRoot: OtterFile,
-        private val onClose: () -> Unit = {}
+        private val onClose: () -> Unit = {},
     ) : Closeable {
         override fun close() = onClose()
     }
@@ -62,7 +62,7 @@ class MarkdownProjectReader(private val isHelp: Boolean) : IProjectReader {
     override fun constructProjectTree(
         container: ResourceContainer,
         project: Project,
-        zipEntryTreeBuilder: IZipEntryTreeBuilder
+        zipEntryTreeBuilder: IZipEntryTreeBuilder,
     ): OtterTree<CollectionOrContent> {
         return buildProjectFileTree(container, project, zipEntryTreeBuilder)
             .use { (tree, projectRoot) ->
@@ -71,7 +71,7 @@ class MarkdownProjectReader(private val isHelp: Boolean) : IProjectReader {
                     .map { f ->
                         Contents(
                             collection(file = f, projectRoot = projectRoot, project = project),
-                            if (f.isFile) f.readContents() else null
+                            if (f.isFile) f.readContents() else null,
                         )
                     }
                     .apply {
@@ -87,14 +87,15 @@ class MarkdownProjectReader(private val isHelp: Boolean) : IProjectReader {
     private fun buildProjectFileTree(
         container: ResourceContainer,
         project: Project,
-        zipEntryTreeBuilder: IZipEntryTreeBuilder
+        zipEntryTreeBuilder: IZipEntryTreeBuilder,
     ) = if (container.file.extension == "zip") {
         val projectPathPrefixes = listOfNotNull(container.accessor.root, project.path)
-        val projectRoot = projectPathPrefixes
-            .fold(container.file.toPath(), Path::resolve)
-            .normalize()
-            .toFile()
-            .let(::otterFileF)
+        val projectRoot =
+            projectPathPrefixes
+                .fold(container.file.toPath(), Path::resolve)
+                .normalize()
+                .toFile()
+                .let(::otterFileF)
 
         val zip = ZipFile(container.file)
         val tree = zipEntryTreeBuilder.buildOtterFileTree(zip, project.path, container.accessor.root)
@@ -104,40 +105,41 @@ class MarkdownProjectReader(private val isHelp: Boolean) : IProjectReader {
         ProjectFileTree(file.buildFileTree(), otterFileF(file))
     }
 
-    private fun fileToIndex(f: OtterFile): Int =
-        f.nameWithoutExtension.toIntOrNull() ?: 0
+    private fun fileToIndex(f: OtterFile): Int = f.nameWithoutExtension.toIntOrNull() ?: 0
 
     private fun fileToSlug(
         file: OtterFile,
         projectRoot: OtterFile,
-        project: Project
+        project: Project,
     ): String {
-        val fileParts = file
-            .toRelativeString(projectRoot)
-            .substringBeforeLast('.')
-            .split('/', '\\')
-            .asSequence()
+        val fileParts =
+            file
+                .toRelativeString(projectRoot)
+                .substringBeforeLast('.')
+                .split('/', '\\')
+                .asSequence()
         val withSlug = sequenceOf(project.identifier) + fileParts.drop(1)
         return withSlug.joinToString("_", transform = this::simplifyTitle)
     }
 
-    private fun fileToSort(file: OtterFile) = when (file.nameWithoutExtension) {
-        "back" -> 9999
-        else -> fileToIndex(file)
-    }
+    private fun fileToSort(file: OtterFile) =
+        when (file.nameWithoutExtension) {
+            "back" -> 9999
+            else -> fileToIndex(file)
+        }
 
     private fun simplifyTitle(s: String) = s.toIntOrNull()?.toString() ?: s
 
     private fun collection(
         file: OtterFile,
         projectRoot: OtterFile,
-        project: Project
+        project: Project,
     ) = Collection(
         sort = fileToSort(file),
         slug = fileToSlug(file = file, projectRoot = projectRoot, project = project),
         labelKey = SECONDARY_COLLECTION_KEY,
         titleKey = simplifyTitle(file.nameWithoutExtension),
-        resourceContainer = null
+        resourceContainer = null,
     )
 
     private fun content(
@@ -146,7 +148,7 @@ class MarkdownProjectReader(private val isHelp: Boolean) : IProjectReader {
         sort: Int? = null,
         text: String? = null,
         start: Int? = null,
-        end: Int? = null
+        end: Int? = null,
     ) = Content(
         sort = sort ?: index,
         labelKey = ContentLabel.of(type).value,
@@ -156,7 +158,7 @@ class MarkdownProjectReader(private val isHelp: Boolean) : IProjectReader {
         text = text,
         format = MimeType.MARKDOWN.norm,
         type = type,
-        draftNumber = 1
+        draftNumber = 1,
     )
 
     /**
@@ -166,33 +168,37 @@ class MarkdownProjectReader(private val isHelp: Boolean) : IProjectReader {
     private fun OtterFile.readContents(): List<Content> {
         val fileId = fileToIndex(this)
         var sort = 1
-        val contents = if (isHelp) {
-            this.bufferedReader()
-                .use { ParseMd.parseHelp(it) }
-                .flatMap { helpResource ->
-                    listOf(
-                        content(ContentType.TITLE, fileId, sort++, helpResource.title),
-                        content(ContentType.BODY, fileId, sort++, helpResource.body)
-                    )
-                }
-        } else {
-            this.bufferedReader()
-                .use { ParseMd.parse(it) }
-                .map {
-                    val index = if (collectionForEachFile) sort else fileId
-                    content(ContentType.TEXT, index, sort++, it)
-                }
-        }
+        val contents =
+            if (isHelp) {
+                this.bufferedReader()
+                    .use { ParseMd.parseHelp(it) }
+                    .flatMap { helpResource ->
+                        listOf(
+                            content(ContentType.TITLE, fileId, sort++, helpResource.title),
+                            content(ContentType.BODY, fileId, sort++, helpResource.body),
+                        )
+                    }
+            } else {
+                this.bufferedReader()
+                    .use { ParseMd.parse(it) }
+                    .map {
+                        val index = if (collectionForEachFile) sort else fileId
+                        content(ContentType.TEXT, index, sort++, it)
+                    }
+            }
         return contents.filterNot { it.text.isNullOrEmpty() }
     }
 
     private fun OtterTree<OtterFile>.filterMarkdownFiles(): OtterTree<OtterFile> {
-        val filtered = this.filterPreserveParents {
-            it.isFile && extensions.matches(it.name)
-        }
+        val filtered =
+            this.filterPreserveParents {
+                it.isFile && extensions.matches(it.name)
+            }
         if (filtered != null) {
             return filtered
-        } else throw ImportException(ImportResult.LOAD_RC_ERROR) // No markdown found
+        } else {
+            throw ImportException(ImportResult.LOAD_RC_ERROR) // No markdown found
+        }
     }
 
     /** Expand any list values to be individual tree nodes. */
@@ -203,10 +209,11 @@ class MarkdownProjectReader(private val isHelp: Boolean) : IProjectReader {
                 if (child.list != null) {
                     // Add nodes from content list
                     val addTo =
-                        if (collectionForEachFile)
+                        if (collectionForEachFile) {
                             OtterTree<CollectionOrContent>(child.collection).also(newRoot::addChild)
-                        else
+                        } else {
                             newRoot
+                        }
                     addTo.addAll(child.list.map { OtterTreeNode(it) })
                 } else if (c is OtterTree<Contents>) {
                     // Add node from child
@@ -225,17 +232,15 @@ class MarkdownProjectReader(private val isHelp: Boolean) : IProjectReader {
         }
     }
 
-    private fun chapterMetaNode(
-        collection: OtterTree<CollectionOrContent>
-    ): OtterTree<CollectionOrContent> {
+    private fun chapterMetaNode(collection: OtterTree<CollectionOrContent>): OtterTree<CollectionOrContent> {
         val contents = collection.children.mapNotNull { it.value as? Content }
         return OtterTree(
             content(
                 type = ContentType.META,
                 index = 0,
                 start = contents.map { it.start }.minOrNull() ?: 0,
-                end = contents.map { it.end }.maxOrNull() ?: 0
-            )
+                end = contents.map { it.end }.maxOrNull() ?: 0,
+            ),
         )
     }
 }

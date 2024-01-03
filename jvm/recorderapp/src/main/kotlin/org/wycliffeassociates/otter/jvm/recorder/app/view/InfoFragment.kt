@@ -23,7 +23,6 @@ import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
 
 class InfoFragment : Fragment() {
-
     val languageIcon = FontIcon("gmi-favorite")
     val bookIcon = FontIcon("fas-book")
     val chapterIcon = FontIcon("gmi-book")
@@ -31,16 +30,16 @@ class InfoFragment : Fragment() {
     val fileIcon = FontIcon("gmi-insert-drive-file")
     val resourceIcon = FontIcon("gmi-forum")
 
-    override val root = hbox {
-        addClass("info")
-    }
+    override val root =
+        hbox {
+            addClass("info")
+        }
 
     init {
         addRecordingInfoFromParams()
     }
 
     private fun addRecordingInfoFromParams() {
-
         if (scope is ParameterizedScope) {
             val parameters = (scope as? ParameterizedScope)?.parameters
 

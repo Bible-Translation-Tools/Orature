@@ -12,13 +12,13 @@ class ActiveRecordingDrawable(
     private val secondsOnScreen: Int,
     private val recordingSampleRate: Int,
 ) {
-
-    private val activeRenderer = ActiveRecordingRenderer(
-        incomingAudioStream,
-        recordingActive,
-        width,
-        secondsOnScreen
-    )
+    private val activeRenderer =
+        ActiveRecordingRenderer(
+            incomingAudioStream,
+            recordingActive,
+            width,
+            secondsOnScreen,
+        )
 
     private val waveformDrawable = FloatArray(width * 2)
 

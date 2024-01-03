@@ -30,7 +30,6 @@ import org.wycliffeassociates.otter.jvm.controls.skins.breadcrumb.BreadCrumbSkin
 import tornadofx.*
 
 class BreadCrumb : ButtonBase() {
-
     val iconProperty = SimpleObjectProperty<FontIcon>()
     val titleProperty = SimpleStringProperty()
     val isActiveProperty = SimpleBooleanProperty(false)

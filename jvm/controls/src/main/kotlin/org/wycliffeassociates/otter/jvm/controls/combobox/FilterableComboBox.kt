@@ -39,12 +39,13 @@ class FilterableComboBox<T> : ComboBox<T>() {
     init {
         /** Set up filterable comboBox based on the incoming data to select from */
         isEditable = true
-        skin = FilterableComboBoxSkin(this) { input ->
-            filterItems
-                .filter { it.filterText.joinToString("&").contains(input, true) }
-                .sortedBy { it.filterText.joinToString("&").indexOf(input, ignoreCase = true) }
-                .map { it.item }
-        }
+        skin =
+            FilterableComboBoxSkin(this) { input ->
+                filterItems
+                    .filter { it.filterText.joinToString("&").contains(input, true) }
+                    .sortedBy { it.filterText.joinToString("&").indexOf(input, ignoreCase = true) }
+                    .map { it.item }
+            }
 
         itemsProperty().addListener { _ ->
             items.onChange { _ ->
@@ -79,8 +80,9 @@ class FilterableComboBoxSkin<T>(comboBox: ComboBox<T>, autoCompleteFilter: ((Str
 fun <T> EventTarget.filterablecombobox(
     property: Property<T>? = null,
     values: List<T>? = null,
-    init: FilterableComboBox<T>.() -> Unit = {}
-): FilterableComboBox<T> = FilterableComboBox<T>().also {
-    if (values != null) it.items = (values as? ObservableList<T>) ?: values.asObservable()
-    if (property != null) it.bind(property)
-}.attachTo(this, init)
+    init: FilterableComboBox<T>.() -> Unit = {},
+): FilterableComboBox<T> =
+    FilterableComboBox<T>().also {
+        if (values != null) it.items = (values as? ObservableList<T>) ?: values.asObservable()
+        if (property != null) it.bind(property)
+    }.attachTo(this, init)

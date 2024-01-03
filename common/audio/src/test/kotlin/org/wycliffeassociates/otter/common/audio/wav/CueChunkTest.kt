@@ -21,40 +21,40 @@ package org.wycliffeassociates.otter.common.audio.wav
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.wycliffeassociates.otter.common.audio.AudioCue
 import java.io.File
 import java.nio.ByteBuffer
-import org.wycliffeassociates.otter.common.audio.AudioCue
 
 class CueChunkTest {
-
-    val testEnv = listOf(
+    val testEnv =
         listOf(
-            AudioCue(1, "1"),
-            AudioCue(2, "2"),
-            AudioCue(3, "3")
-        ),
-        // locations out of order
-        listOf(
-            AudioCue(2, "2"),
-            AudioCue(1, "1"),
-            AudioCue(3, "3")
-        ),
-        // requiring padding to get to double word aligned
-        listOf(
-            AudioCue(2, "1"),
-            AudioCue(1, "12"),
-            AudioCue(3, "123"),
-            AudioCue(4, "1234")
-        ),
-        // labels have various whitespace, location range from 0 to max
-        listOf(
-            AudioCue(0, "    "),
-            AudioCue(2, "Verse 1"),
-            AudioCue(3, "Verse 1   "),
-            AudioCue(4, "   Verse 1"),
-            AudioCue(Int.MAX_VALUE, "         ")
+            listOf(
+                AudioCue(1, "1"),
+                AudioCue(2, "2"),
+                AudioCue(3, "3"),
+            ),
+            // locations out of order
+            listOf(
+                AudioCue(2, "2"),
+                AudioCue(1, "1"),
+                AudioCue(3, "3"),
+            ),
+            // requiring padding to get to double word aligned
+            listOf(
+                AudioCue(2, "1"),
+                AudioCue(1, "12"),
+                AudioCue(3, "123"),
+                AudioCue(4, "1234"),
+            ),
+            // labels have various whitespace, location range from 0 to max
+            listOf(
+                AudioCue(0, "    "),
+                AudioCue(2, "Verse 1"),
+                AudioCue(3, "Verse 1   "),
+                AudioCue(4, "   Verse 1"),
+                AudioCue(Int.MAX_VALUE, "         "),
+            ),
         )
-    )
 
     @Test
     fun testCreateCues() {

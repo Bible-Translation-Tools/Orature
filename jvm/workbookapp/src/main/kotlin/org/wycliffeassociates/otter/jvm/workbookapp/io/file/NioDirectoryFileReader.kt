@@ -30,7 +30,7 @@ import java.nio.file.Path
 import kotlin.streams.asSequence
 
 class NioDirectoryFileReader(
-    private val dir: File
+    private val dir: File,
 ) : IFileReader {
     private val fileSystem: FileSystem = FileSystems.getDefault()
 
@@ -43,7 +43,7 @@ class NioDirectoryFileReader(
     override fun copyDirectory(
         source: String,
         destinationDirectory: File,
-        filter: (String) -> Boolean
+        filter: (String) -> Boolean,
     ): Observable<String> {
         val sourcePath = getAbsolutePath(source)
         val destPath = destinationDirectory.toPath()

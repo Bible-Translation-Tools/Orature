@@ -27,21 +27,23 @@ import javafx.scene.control.SkinBase
 import javafx.scene.control.Slider
 import javafx.scene.layout.HBox
 import org.kordamp.ikonli.javafx.FontIcon
-import org.wycliffeassociates.otter.jvm.controls.media.AudioPlayerNode
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
+import org.wycliffeassociates.otter.jvm.controls.media.AudioPlayerNode
 import tornadofx.*
 
 class AudioPlayerSkin(private val playerNode: AudioPlayerNode) : SkinBase<AudioPlayerNode>(playerNode) {
-
     private val PLAY_ICON = FontIcon("fa-play")
     private val PAUSE_ICON = FontIcon("fa-pause")
 
     @FXML
     lateinit var playBtn: Button
+
     @FXML
     lateinit var sourceMissing: HBox
+
     @FXML
     lateinit var audioPlayer: HBox
+
     @FXML
     lateinit var audioSlider: Slider
 
@@ -66,8 +68,8 @@ class AudioPlayerSkin(private val playerNode: AudioPlayerNode) : SkinBase<AudioP
                             false -> PLAY_ICON
                         }
                     },
-                    audioController.isPlayingProperty
-                )
+                    audioController.isPlayingProperty,
+                ),
             )
         }
         playerNode.audioPlayerProperty.onChange { player ->

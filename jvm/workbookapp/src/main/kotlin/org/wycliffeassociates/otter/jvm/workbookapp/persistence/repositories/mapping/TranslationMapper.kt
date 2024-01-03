@@ -24,25 +24,30 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.Transla
 import java.time.LocalDateTime
 import javax.inject.Inject
 
-class TranslationMapper @Inject constructor() {
-    fun mapFromEntity(type: TranslationEntity, source: Language, target: Language) =
-        Translation(
+class TranslationMapper
+    @Inject
+    constructor() {
+        fun mapFromEntity(
+            type: TranslationEntity,
+            source: Language,
+            target: Language,
+        ) = Translation(
             source,
             target,
             type.modifiedTs?.let(LocalDateTime::parse),
             type.sourceRate,
             type.targetRate,
-            type.id
+            type.id,
         )
 
-    fun mapToEntity(type: Translation): TranslationEntity {
-        return TranslationEntity(
-            type.id,
-            type.source.id,
-            type.target.id,
-            type.modifiedTs?.toString(),
-            type.sourceRate,
-            type.targetRate
-        )
+        fun mapToEntity(type: Translation): TranslationEntity {
+            return TranslationEntity(
+                type.id,
+                type.source.id,
+                type.target.id,
+                type.modifiedTs?.toString(),
+                type.sourceRate,
+                type.targetRate,
+            )
+        }
     }
-}

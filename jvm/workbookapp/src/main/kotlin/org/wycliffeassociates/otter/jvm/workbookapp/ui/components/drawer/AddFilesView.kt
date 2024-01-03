@@ -35,7 +35,6 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
-import org.wycliffeassociates.otter.jvm.controls.dialog.OtterDialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.ProgressDialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
@@ -54,108 +53,109 @@ class AddFilesView : View() {
 
     private lateinit var closeButton: Button
 
-    override val root = vbox {
-        addClass("app-drawer__content")
+    override val root =
+        vbox {
+            addClass("app-drawer__content")
 
-        DrawerTraversalEngine(this)
+            DrawerTraversalEngine(this)
 
-        scrollpane {
-            addClass("app-drawer__scroll-pane")
-            fitToParentHeight()
-
-            vbox {
-                isFitToWidth = true
-                isFitToHeight = true
-
-                addClass("app-drawer-container")
-
-                hbox {
-                    label(messages["importFiles"]).apply {
-                        addClass("app-drawer__title")
-                    }
-                    region { hgrow = Priority.ALWAYS }
-                    button {
-                        addClass("btn", "btn--secondary")
-                        graphic = FontIcon(MaterialDesign.MDI_CLOSE)
-                        tooltip(messages["close"])
-                        action { collapse() }
-                        closeButton = this
-                    }
-                }
+            scrollpane {
+                addClass("app-drawer__scroll-pane")
+                fitToParentHeight()
 
                 vbox {
-                    addClass("app-drawer__section")
-                    label(messages["dragAndDrop"]).apply {
-                        addClass("app-drawer__subtitle")
+                    isFitToWidth = true
+                    isFitToHeight = true
+
+                    addClass("app-drawer-container")
+
+                    hbox {
+                        label(messages["importFiles"]).apply {
+                            addClass("app-drawer__title")
+                        }
+                        region { hgrow = Priority.ALWAYS }
+                        button {
+                            addClass("btn", "btn--secondary")
+                            graphic = FontIcon(MaterialDesign.MDI_CLOSE)
+                            tooltip(messages["close"])
+                            action { collapse() }
+                            closeButton = this
+                        }
                     }
 
-                    textflow {
-                        text(messages["dragAndDropDescription"]).apply {
-                            addClass("app-drawer__text")
+                    vbox {
+                        addClass("app-drawer__section")
+                        label(messages["dragAndDrop"]).apply {
+                            addClass("app-drawer__subtitle")
                         }
-                        hyperlink("audio.bibleineverylanguage.org").apply {
-                            addClass("wa-text--hyperlink", "app-drawer__text--link")
+
+                        textflow {
+                            text(messages["dragAndDropDescription"]).apply {
+                                addClass("app-drawer__text")
+                            }
+                            hyperlink("audio.bibleineverylanguage.org").apply {
+                                addClass("wa-text--hyperlink", "app-drawer__text--link")
+                                tooltip {
+                                    text = "audio.bibleineverylanguage.org/gl"
+                                }
+                                action {
+                                    hostServices.showDocument("https://audio.bibleineverylanguage.org/gl")
+                                }
+                            }
+                        }
+                    }
+
+                    vbox {
+                        addClass("app-drawer__drag-drop-area")
+
+                        vgrow = Priority.ALWAYS
+
+                        label {
+                            addClass("app-drawer__drag-drop-area__icon")
+                            graphic = FontIcon(MaterialDesign.MDI_FILE_MULTIPLE)
+                        }
+
+                        label(messages["dragToImport"]) {
+                            fitToParentWidth()
+                            addClass("app-drawer__text--centered")
+                        }
+
+                        button(messages["browseFiles"]) {
+                            addClass(
+                                "btn",
+                                "btn--primary",
+                            )
                             tooltip {
-                                text = "audio.bibleineverylanguage.org/gl"
+                                textProperty().bind(this@button.textProperty())
                             }
+                            graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
                             action {
-                                hostServices.showDocument("https://audio.bibleineverylanguage.org/gl")
+                                chooseFile(
+                                    FX.messages["importResourceFromZip"],
+                                    arrayOf(
+                                        FileChooser.ExtensionFilter(
+                                            messages["oratureFileTypes"],
+                                            *OratureFileFormat.extensionList.map { "*.$it" }.toTypedArray(),
+                                        ),
+                                    ),
+                                    mode = FileChooserMode.Single,
+                                    owner = currentWindow,
+                                ).firstOrNull()?.let { importFile(it) }
                             }
                         }
+
+                        onDragOver = onDragOverHandler()
+                        onDragDropped = onDragDroppedHandler()
                     }
-                }
-
-                vbox {
-                    addClass("app-drawer__drag-drop-area")
-
-                    vgrow = Priority.ALWAYS
-
-                    label {
-                        addClass("app-drawer__drag-drop-area__icon")
-                        graphic = FontIcon(MaterialDesign.MDI_FILE_MULTIPLE)
-                    }
-
-                    label(messages["dragToImport"]) {
-                        fitToParentWidth()
-                        addClass("app-drawer__text--centered")
-                    }
-
-                    button(messages["browseFiles"]) {
-                        addClass(
-                            "btn",
-                            "btn--primary"
-                        )
-                        tooltip {
-                            textProperty().bind(this@button.textProperty())
-                        }
-                        graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
-                        action {
-                            chooseFile(
-                                FX.messages["importResourceFromZip"],
-                                arrayOf(
-                                    FileChooser.ExtensionFilter(
-                                        messages["oratureFileTypes"],
-                                        *OratureFileFormat.extensionList.map { "*.$it" }.toTypedArray()
-                                    )
-                                ),
-                                mode = FileChooserMode.Single,
-                                owner = currentWindow
-                            ).firstOrNull()?.let { importFile(it) }
-                        }
-                    }
-
-                    onDragOver = onDragOverHandler()
-                    onDragDropped = onDragDroppedHandler()
                 }
             }
-        }
 
-        setOnKeyReleased {
-            if (it.code == KeyCode.ESCAPE) collapse()
-        }
+            setOnKeyReleased {
+                if (it.code == KeyCode.ESCAPE) collapse()
+            }
 
-        runLater { customizeScrollbarSkin() }
-    }
+            runLater { customizeScrollbarSkin() }
+        }
 
     init {
         tryImportStylesheet(resources["/css/app-drawer.css"])
@@ -180,27 +180,28 @@ class AddFilesView : View() {
     }
 
     private fun initSuccessDialog() {
-        val successDialog = confirmdialog {
-            titleTextProperty.bind(
-                viewModel.importedProjectTitleProperty.stringBinding {
-                    it?.let {
-                        MessageFormat.format(
-                            messages["importProjectTitle"],
-                            messages["import"],
-                            it
-                        )
-                    } ?: messages["importResource"]
-                }
-            )
-            messageTextProperty.set(messages["importResourceSuccessMessage"])
-            backgroundImageFileProperty.bind(viewModel.importedProjectCoverProperty)
-            orientationProperty.set(settingsViewModel.orientationProperty.value)
-            themeProperty.set(settingsViewModel.appColorMode.value)
+        val successDialog =
+            confirmdialog {
+                titleTextProperty.bind(
+                    viewModel.importedProjectTitleProperty.stringBinding {
+                        it?.let {
+                            MessageFormat.format(
+                                messages["importProjectTitle"],
+                                messages["import"],
+                                it,
+                            )
+                        } ?: messages["importResource"]
+                    },
+                )
+                messageTextProperty.set(messages["importResourceSuccessMessage"])
+                backgroundImageFileProperty.bind(viewModel.importedProjectCoverProperty)
+                orientationProperty.set(settingsViewModel.orientationProperty.value)
+                themeProperty.set(settingsViewModel.appColorMode.value)
 
-            cancelButtonTextProperty.set(messages["close"])
-            onCloseAction { viewModel.showImportSuccessDialogProperty.set(false) }
-            onCancelAction { viewModel.showImportSuccessDialogProperty.set(false) }
-        }
+                cancelButtonTextProperty.set(messages["close"])
+                onCloseAction { viewModel.showImportSuccessDialogProperty.set(false) }
+                onCancelAction { viewModel.showImportSuccessDialogProperty.set(false) }
+            }
 
         viewModel.showImportSuccessDialogProperty.onChange {
             Platform.runLater { if (it) successDialog.open() else successDialog.close() }
@@ -208,29 +209,32 @@ class AddFilesView : View() {
     }
 
     private fun initErrorDialog() {
-        val errorDialog = confirmdialog {
-            titleTextProperty.bind(
-                viewModel.importedProjectTitleProperty.stringBinding {
-                    it?.let {
-                        MessageFormat.format(
-                            messages["importProjectTitle"],
-                            messages["import"],
-                            it
-                        )
-                    } ?: messages["importResource"]
-                }
-            )
-            messageTextProperty.bind(viewModel.importErrorMessage.stringBinding {
-                it ?: messages["importResourceFailMessage"]
-            })
-            backgroundImageFileProperty.bind(viewModel.importedProjectCoverProperty)
-            orientationProperty.set(settingsViewModel.orientationProperty.value)
-            themeProperty.set(settingsViewModel.appColorMode.value)
+        val errorDialog =
+            confirmdialog {
+                titleTextProperty.bind(
+                    viewModel.importedProjectTitleProperty.stringBinding {
+                        it?.let {
+                            MessageFormat.format(
+                                messages["importProjectTitle"],
+                                messages["import"],
+                                it,
+                            )
+                        } ?: messages["importResource"]
+                    },
+                )
+                messageTextProperty.bind(
+                    viewModel.importErrorMessage.stringBinding {
+                        it ?: messages["importResourceFailMessage"]
+                    },
+                )
+                backgroundImageFileProperty.bind(viewModel.importedProjectCoverProperty)
+                orientationProperty.set(settingsViewModel.orientationProperty.value)
+                themeProperty.set(settingsViewModel.appColorMode.value)
 
-            cancelButtonTextProperty.set(messages["close"])
-            onCloseAction { viewModel.showImportErrorDialogProperty.set(false) }
-            onCancelAction { viewModel.showImportErrorDialogProperty.set(false) }
-        }
+                cancelButtonTextProperty.set(messages["close"])
+                onCloseAction { viewModel.showImportErrorDialogProperty.set(false) }
+                onCancelAction { viewModel.showImportErrorDialogProperty.set(false) }
+            }
 
         viewModel.showImportErrorDialogProperty.onChange {
             Platform.runLater { if (it) errorDialog.open() else errorDialog.close() }
@@ -269,24 +273,27 @@ class AddFilesView : View() {
     private fun importFile(file: File) {
         viewModel.setProjectInfo(file)
 
-        val dialog = find<ProgressDialog> {
-            orientationProperty.set(settingsViewModel.orientationProperty.value)
-            themeProperty.set(settingsViewModel.appColorMode.value)
-            cancelMessageProperty.set(null)
-            dialogTitleProperty.bind(viewModel.importedProjectTitleProperty.stringBinding {
-                it?.let {
-                    MessageFormat.format(
-                        messages["importProjectTitle"],
-                        messages["import"],
-                        it
-                    )
-                } ?: messages["importResource"]
-            })
+        val dialog =
+            find<ProgressDialog> {
+                orientationProperty.set(settingsViewModel.orientationProperty.value)
+                themeProperty.set(settingsViewModel.appColorMode.value)
+                cancelMessageProperty.set(null)
+                dialogTitleProperty.bind(
+                    viewModel.importedProjectTitleProperty.stringBinding {
+                        it?.let {
+                            MessageFormat.format(
+                                messages["importProjectTitle"],
+                                messages["import"],
+                                it,
+                            )
+                        } ?: messages["importResource"]
+                    },
+                )
 
-            setOnCloseAction { close() }
+                setOnCloseAction { close() }
 
-            open()
-        }
+                open()
+            }
 
         viewModel.importProject(file)
             .observeOnFx()
@@ -319,8 +326,8 @@ class AddFilesView : View() {
                     JFXSnackbar.SnackbarEvent(
                         JFXSnackbarLayout(pluginErrorMessage),
                         Duration.millis(5000.0),
-                        null
-                    )
+                        null,
+                    ),
                 )
             }
     }

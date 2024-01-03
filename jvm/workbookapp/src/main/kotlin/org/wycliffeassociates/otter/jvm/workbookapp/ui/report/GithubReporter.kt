@@ -29,7 +29,7 @@ private const val DEFAULT_CRASH_TITLE = "crash report"
 
 class GithubReporter(
     private val repositoryUrl: String,
-    private val githubOauth2Token: String
+    private val githubOauth2Token: String,
 ) {
     /**
      * Creates a crash issue on github.
@@ -40,7 +40,7 @@ class GithubReporter(
         environment: Environment,
         stacktrace: String?,
         log: String?,
-        title: String?
+        title: String?,
     ) {
         val reportTitle = title ?: DEFAULT_CRASH_TITLE
         val bodyBuf = StringBuffer()
@@ -61,7 +61,7 @@ class GithubReporter(
     private fun generatePayload(
         title: String,
         body: String,
-        labels: Array<String>
+        labels: Array<String>,
     ): JSONObject {
         val json = JSONObject()
         try {

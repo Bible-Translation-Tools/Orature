@@ -23,17 +23,18 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEn
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import javax.inject.Inject
 
-class InstalledEntityRepository @Inject constructor(
-    private val database: AppDatabase
-) : IInstalledEntityRepository {
+class InstalledEntityRepository
+    @Inject
+    constructor(
+        private val database: AppDatabase,
+    ) : IInstalledEntityRepository {
+        private val installedEntityDao = database.installedEntityDao
 
-    private val installedEntityDao = database.installedEntityDao
+        override fun install(entity: Installable) {
+            installedEntityDao.upsert(entity)
+        }
 
-    override fun install(entity: Installable) {
-        installedEntityDao.upsert(entity)
+        override fun getInstalledVersion(entity: Installable): Int? {
+            return installedEntityDao.fetchVersion(entity)
+        }
     }
-
-    override fun getInstalledVersion(entity: Installable): Int? {
-        return installedEntityDao.fetchVersion(entity)
-    }
-}

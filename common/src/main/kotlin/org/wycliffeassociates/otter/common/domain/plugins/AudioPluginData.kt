@@ -29,5 +29,5 @@ data class AudioPluginData(
     var canMark: Boolean,
     var executable: String,
     var args: List<String>,
-    var pluginFile: File?
+    var pluginFile: File?,
 )

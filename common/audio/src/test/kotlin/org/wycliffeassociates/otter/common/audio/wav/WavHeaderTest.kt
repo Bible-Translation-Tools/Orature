@@ -9,7 +9,6 @@ import java.nio.ByteOrder
 import kotlin.random.Random
 
 class WavHeaderTest {
-
     @Test
     fun `test normal wav without metadata chunks has 44 byte header`() {
         val testEnv = writeWav(0, 0, 0)
@@ -106,13 +105,13 @@ class WavHeaderTest {
 
 class AudioTestEnv(
     val file: File,
-    val dataSize: Int
+    val dataSize: Int,
 )
 
 fun writeWav(
     preFmtChunks: Int,
     postFmtChunks: Int,
-    postDataChunks: Int
+    postDataChunks: Int,
 ): AudioTestEnv {
     val testFile = File.createTempFile("test", ".wav").apply { deleteOnExit() }
 
@@ -141,7 +140,10 @@ fun writeWav(
     return AudioTestEnv(testFile, dataSize)
 }
 
-fun writeArbitraryChunks(outputStream: OutputStream, label: String): Int {
+fun writeArbitraryChunks(
+    outputStream: OutputStream,
+    label: String,
+): Int {
     var dataSize = Random(System.currentTimeMillis()).nextInt(8, 500)
     if (label == "data" && dataSize % 2 == 1) { // data chunks of 16 bit audio must be even
         dataSize++

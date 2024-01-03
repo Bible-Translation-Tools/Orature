@@ -20,7 +20,7 @@ package org.wycliffeassociates.otter.common.audio
 
 import java.io.Closeable
 
-interface AudioFileReader: Closeable, AutoCloseable {
+interface AudioFileReader : Closeable, AutoCloseable {
     /**
      * Gives the sample rate of the audio in bits (bitrate)
      */
@@ -46,9 +46,13 @@ interface AudioFileReader: Closeable, AutoCloseable {
      * the buffer beyond this value are invalid.
      */
     fun getPcmBuffer(bytes: ByteArray): Int
+
     fun seek(sample: Int)
+
     fun open()
+
     fun release()
+
     fun supportsTimeShifting(): Boolean {
         return true
     }

@@ -19,52 +19,54 @@
 package org.wycliffeassociates.otter.jvm.controls.waveform
 
 import javafx.beans.property.SimpleDoubleProperty
+import javafx.beans.property.SimpleObjectProperty
+import javafx.event.ActionEvent
+import javafx.event.EventHandler
 import javafx.geometry.NodeOrientation
 import javafx.scene.image.Image
 import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
-import javafx.beans.property.SimpleObjectProperty
-import javafx.event.ActionEvent
-import javafx.event.EventHandler
-import javafx.scene.Node
-import javafx.scene.layout.Region
-import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import tornadofx.*
 
 open class ScrollingWaveform : StackPane() {
-
     val positionProperty = SimpleDoubleProperty(0.0)
     val themeProperty = SimpleObjectProperty(ColorTheme.LIGHT)
 
     val onWaveformClicked = SimpleObjectProperty<EventHandler<ActionEvent>>()
+
     fun setOnWaveformClicked(op: () -> Unit) {
         onWaveformClicked.set((EventHandler { op.invoke() }))
     }
 
     val onWaveformDragReleased = SimpleObjectProperty<(Double) -> Unit> {}
+
     fun setOnWaveformDragReleased(op: (Double) -> Unit) {
         onWaveformDragReleased.set(op)
     }
 
     var onRewind = SimpleObjectProperty<((ScrollSpeed) -> Unit)> {}
-    fun setOnRewind(op: (ScrollSpeed) -> Unit){
+
+    fun setOnRewind(op: (ScrollSpeed) -> Unit)  {
         onRewind.set(op)
     }
 
     var onFastForward = SimpleObjectProperty<((ScrollSpeed) -> Unit)> {}
-    fun setOnFastForward(op: (ScrollSpeed) -> Unit){
+
+    fun setOnFastForward(op: (ScrollSpeed) -> Unit)  {
         onFastForward.set(op)
     }
 
     var onToggleMedia = SimpleObjectProperty<(() -> Unit)> {}
-    fun setOnToggleMedia(op: () -> Unit){
+
+    fun setOnToggleMedia(op: () -> Unit)  {
         onToggleMedia.set(op)
     }
 
     var onResumeMedia = SimpleObjectProperty<(() -> Unit)> {}
-    fun setOnResumeMedia(op: () -> Unit){
+
+    fun setOnResumeMedia(op: () -> Unit)  {
         onResumeMedia.set(op)
     }
 
@@ -76,20 +78,21 @@ open class ScrollingWaveform : StackPane() {
 
         nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
         add(MarkerViewBackground())
-        waveformFrame = WaveformFrame().apply {
-            themeProperty.bind(this@ScrollingWaveform.themeProperty)
-            framePositionProperty.bind(positionProperty)
-            onWaveformClickedProperty.bind(onWaveformClicked)
-            onWaveformDragReleasedProperty.bind(onWaveformDragReleased)
-            onRewindProperty.bind(onRewind)
-            onFastForwardProperty.bind(onFastForward)
-            onToggleMediaProperty.bind(onToggleMedia)
-            onResumeMediaProperty.bind(onResumeMedia)
+        waveformFrame =
+            WaveformFrame().apply {
+                themeProperty.bind(this@ScrollingWaveform.themeProperty)
+                framePositionProperty.bind(positionProperty)
+                onWaveformClickedProperty.bind(onWaveformClicked)
+                onWaveformDragReleasedProperty.bind(onWaveformDragReleased)
+                onRewindProperty.bind(onRewind)
+                onFastForwardProperty.bind(onFastForward)
+                onToggleMediaProperty.bind(onToggleMedia)
+                onResumeMediaProperty.bind(onResumeMedia)
 
-            focusedProperty().onChange {
-                this@ScrollingWaveform.togglePseudoClass("active", it)
+                focusedProperty().onChange {
+                    this@ScrollingWaveform.togglePseudoClass("active", it)
+                }
             }
-        }
         add(waveformFrame)
         add(WaveformOverlay().apply { playbackPositionProperty.bind(positionProperty) })
     }

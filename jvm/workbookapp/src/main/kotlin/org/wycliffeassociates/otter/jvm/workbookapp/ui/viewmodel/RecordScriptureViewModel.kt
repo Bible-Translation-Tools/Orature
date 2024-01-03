@@ -37,22 +37,22 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.scene.control.ButtonType
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.common.data.audio.VerseMarker
-import org.wycliffeassociates.otter.common.domain.content.Recordable
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
+import org.wycliffeassociates.otter.common.domain.content.Recordable
+import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.ListAnimationMediator
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.controls.model.StepDirection
-import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -67,7 +67,6 @@ import io.reactivex.rxkotlin.toObservable as toRxObservable
 private const val NO_HIGHLIGHT_INDEX = -1
 
 class RecordScriptureViewModel : ViewModel() {
-
     private val logger = LoggerFactory.getLogger(RecordScriptureViewModel::class.java)
 
     private val workbookDataStore: WorkbookDataStore by inject()
@@ -144,22 +143,23 @@ class RecordScriptureViewModel : ViewModel() {
                         val projectAccessor = workbookDataStore.workbook.projectFilesAccessor
                         projectAccessor.getChapterText(
                             workbookDataStore.workbook.target.slug,
-                            workbookDataStore.chapter.sort
+                            workbookDataStore.chapter.sort,
                         ).size
                     }
                 },
-                workbookDataStore.activeChunkProperty
-            )
+                workbookDataStore.activeChunkProperty,
+            ),
         )
 
         workbookDataStore.activeChapterProperty.onChangeAndDoNowWithDisposer { chapter ->
             setHasNextAndPreviousChapter()
             chapter?.let {
-                val chunks = if (chapter.chunks.value?.all { c -> c.draftNumber > 0 } == true) {
-                    chapter.chunks.value!!
-                } else {
-                    listOf()
-                }
+                val chunks =
+                    if (chapter.chunks.value?.all { c -> c.draftNumber > 0 } == true) {
+                        chapter.chunks.value!!
+                    } else {
+                        listOf()
+                    }
                 getChunkList(chunks)
                 recordable = it
             }
@@ -200,8 +200,8 @@ class RecordScriptureViewModel : ViewModel() {
                             VerseMarkerModel(
                                 OratureAudioFile(takeCardModel.take.file),
                                 verseCountProperty.value,
-                                listOf()
-                            )
+                                listOf(),
+                            ),
                         )
                         onChunkPlaybackUpdated = { chunkNumber -> highlightedChunkProperty.set(chunkNumber) }
                         selectedProperty.set(takeCardModel.selected)
@@ -209,8 +209,8 @@ class RecordScriptureViewModel : ViewModel() {
                             MessageFormat.format(
                                 FX.messages["takeTitle"],
                                 FX.messages["take"],
-                                takeCardModel.take.number
-                            )
+                                takeCardModel.take.number,
+                            ),
                         )
                         setOnTakeDelete {
                             error(
@@ -218,7 +218,7 @@ class RecordScriptureViewModel : ViewModel() {
                                 messages["cannotBeUndone"],
                                 ButtonType.YES,
                                 ButtonType.NO,
-                                title = messages["deleteTakePrompt"]
+                                title = messages["deleteTakePrompt"],
                             ) { button: ButtonType ->
                                 if (button == ButtonType.YES) {
                                     deletedProperty.set(true)
@@ -231,16 +231,16 @@ class RecordScriptureViewModel : ViewModel() {
                         }
                         setOnTakeEdit {
                             fireEvent(
-                                TakeEvent(takeCardModel.take, {}, TakeEvent.EDIT_TAKE)
+                                TakeEvent(takeCardModel.take, {}, TakeEvent.EDIT_TAKE),
                             )
                         }
                         setOnTakeSelected {
                             fireEvent(
-                                TakeEvent(takeCardModel.take, {}, TakeEvent.SELECT_TAKE)
+                                TakeEvent(takeCardModel.take, {}, TakeEvent.SELECT_TAKE),
                             )
                         }
                     }
-                }
+                },
             )
         }.let(listeners::add)
     }
@@ -307,11 +307,12 @@ class RecordScriptureViewModel : ViewModel() {
     }
 
     private fun setTitle(chunk: Chunk) {
-        title = MessageFormat.format(
-            messages["chunkTitle"],
-            messages[chunk.label],
-            chunk.sort
-        )
+        title =
+            MessageFormat.format(
+                messages["chunkTitle"],
+                messages[chunk.label],
+                chunk.sort,
+            )
     }
 
     private fun getChapterList(chapters: Observable<Chapter>) {
@@ -333,10 +334,11 @@ class RecordScriptureViewModel : ViewModel() {
     }
 
     private fun stepToChapter(direction: StepDirection) {
-        val amount = when (direction) {
-            StepDirection.FORWARD -> 1
-            StepDirection.BACKWARD -> -1
-        }
+        val amount =
+            when (direction) {
+                StepDirection.FORWARD -> 1
+                StepDirection.BACKWARD -> -1
+            }
         val nextIndex = chapterList.indexOf(workbookDataStore.chapter) + amount
         chapterList.elementAtOrNull(nextIndex)?.let {
             workbookDataStore.activeChapterProperty.set(it)
@@ -345,10 +347,11 @@ class RecordScriptureViewModel : ViewModel() {
     }
 
     private fun stepToChunk(direction: StepDirection) {
-        val amount = when (direction) {
-            StepDirection.FORWARD -> 1
-            StepDirection.BACKWARD -> -1
-        }
+        val amount =
+            when (direction) {
+                StepDirection.FORWARD -> 1
+                StepDirection.BACKWARD -> -1
+            }
 
         val currentChunks = chunkList.filter { it.draftNumber > 0 }
         currentChunks
@@ -399,7 +402,10 @@ class RecordScriptureViewModel : ViewModel() {
         } ?: throw IllegalStateException("Recordable is null")
     }
 
-    fun processTakeWithPlugin(takeEvent: TakeEvent, pluginType: PluginType) {
+    fun processTakeWithPlugin(
+        takeEvent: TakeEvent,
+        pluginType: PluginType,
+    ) {
         closePlayers()
         contextProperty.set(pluginType)
         workbookDataStore.activeTakeNumberProperty.set(takeEvent.take.number)
@@ -469,7 +475,7 @@ class RecordScriptureViewModel : ViewModel() {
                     },
                     {
                         showImportFailDialogProperty.set(true)
-                    }
+                    },
                 )
         }
     }
@@ -487,11 +493,11 @@ class RecordScriptureViewModel : ViewModel() {
                 String.format(
                     messages["sourceDialogTitle"],
                     workbookDataStore.activeTakeNumberProperty.value,
-                    audioPluginViewModel.pluginNameProperty.value
+                    audioPluginViewModel.pluginNameProperty.value,
                 )
             },
             audioPluginViewModel.pluginNameProperty,
-            workbookDataStore.activeTakeNumberProperty
+            workbookDataStore.activeTakeNumberProperty,
         )
     }
 
@@ -502,11 +508,11 @@ class RecordScriptureViewModel : ViewModel() {
                     messages["sourceDialogMessage"],
                     workbookDataStore.activeTakeNumberProperty.value,
                     audioPluginViewModel.pluginNameProperty.value,
-                    audioPluginViewModel.pluginNameProperty.value
+                    audioPluginViewModel.pluginNameProperty.value,
                 )
             },
             audioPluginViewModel.pluginNameProperty,
-            workbookDataStore.activeTakeNumberProperty
+            workbookDataStore.activeTakeNumberProperty,
         )
     }
 
@@ -532,7 +538,7 @@ class RecordScriptureViewModel : ViewModel() {
             contextProperty,
             audioPluginViewModel.selectedRecorderProperty,
             audioPluginViewModel.selectedEditorProperty,
-            audioPluginViewModel.selectedMarkerProperty
+            audioPluginViewModel.selectedMarkerProperty,
         )
     }
 
@@ -547,15 +553,16 @@ class RecordScriptureViewModel : ViewModel() {
             // selectedTakeProperty may not have been updated yet so ask for the current selected take
             val selected = audio.selected.value?.value
 
-            val takes = audio.getAllTakes()
-                .filter { it.isNotDeleted() }
-                .map { take ->
-                    take.mapToCardModel(take == selected)
-                }
-                .sortedWith(
-                    compareByDescending<TakeCardModel> { it.selected }
-                        .thenByDescending { it.take.file.lastModified() }
-                )
+            val takes =
+                audio.getAllTakes()
+                    .filter { it.isNotDeleted() }
+                    .map { take ->
+                        take.mapToCardModel(take == selected)
+                    }
+                    .sortedWith(
+                        compareByDescending<TakeCardModel> { it.selected }
+                            .thenByDescending { it.take.file.lastModified() },
+                    )
 
             takeCardModels.setAll(takes)
         }
@@ -579,7 +586,10 @@ class RecordScriptureViewModel : ViewModel() {
         }
     }
 
-    private fun removeOnDeleted(take: Take, isTakeSelected: Boolean = false) {
+    private fun removeOnDeleted(
+        take: Take,
+        isTakeSelected: Boolean = false,
+    ) {
         take.deletedTimestamp
             .filter { dateHolder -> dateHolder.value != null }
             .doOnError { e ->
@@ -591,7 +601,10 @@ class RecordScriptureViewModel : ViewModel() {
             .let { disposables.add(it) }
     }
 
-    private fun removeFromTakes(take: Take, autoSelect: Boolean = false) {
+    private fun removeFromTakes(
+        take: Take,
+        autoSelect: Boolean = false,
+    ) {
         Platform.runLater {
             takeCardModels.removeAll { it.take == take }
             if (autoSelect) {
@@ -647,7 +660,7 @@ class RecordScriptureViewModel : ViewModel() {
         return TakeCardModel(
             this,
             selected,
-            ap
+            ap,
         )
     }
 }

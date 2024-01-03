@@ -34,15 +34,19 @@ import org.wycliffeassociates.otter.common.audio.wav.WavOutputStream
 import java.io.File
 
 class AudioConverterTest {
-
-    private fun writeWavFile(file: File, samplesToWrite: Int, cues: List<AudioCue>): WavFile {
-        val wav = WavFile(
-            file,
-            DEFAULT_CHANNELS,
-            DEFAULT_SAMPLE_RATE,
-            DEFAULT_BITS_PER_SAMPLE,
-            WavMetadata(listOf(CueChunk()))
-        )
+    private fun writeWavFile(
+        file: File,
+        samplesToWrite: Int,
+        cues: List<AudioCue>,
+    ): WavFile {
+        val wav =
+            WavFile(
+                file,
+                DEFAULT_CHANNELS,
+                DEFAULT_SAMPLE_RATE,
+                DEFAULT_BITS_PER_SAMPLE,
+                WavMetadata(listOf(CueChunk())),
+            )
         for (cue in cues) {
             wav.metadata.addCue(cue.location, cue.label)
         }
@@ -55,7 +59,10 @@ class AudioConverterTest {
         return wav
     }
 
-    private fun writePcmFile(file: File, samplesToWrite: Int): PcmFile {
+    private fun writePcmFile(
+        file: File,
+        samplesToWrite: Int,
+    ): PcmFile {
         val pcm = PcmFile(file)
         PcmOutputStream(pcm).use {
             for (i in 0 until samplesToWrite) {
@@ -82,7 +89,7 @@ class AudioConverterTest {
             // It returns different number of total frames than in wav file
             // Though if to check mp3 file in ocenaudio it shows total frames like in wav file
 
-            //Assert.assertEquals(wav.totalAudioLength, mp3File.totalFrames)
+            // Assert.assertEquals(wav.totalAudioLength, mp3File.totalFrames)
         }
     }
 

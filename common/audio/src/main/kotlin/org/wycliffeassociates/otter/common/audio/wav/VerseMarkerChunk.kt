@@ -18,9 +18,9 @@
  */
 package org.wycliffeassociates.otter.common.audio.wav
 
+import org.wycliffeassociates.otter.common.audio.AudioCue
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import org.wycliffeassociates.otter.common.audio.AudioCue
 
 class VerseMarkerChunk : CueChunk() {
     private val extraCues: List<AudioCue> = mutableListOf()
@@ -67,14 +67,15 @@ class VerseMarkerChunk : CueChunk() {
         val oratureCues = allCues.filter { it.label.matches(oratureRegex) }
         val leftoverCues = allCues.filter { !oratureCues.contains(it) }
         val loneDigits = leftoverCues.filter { it.label.trim().matches(loneDigitRegex) }
-        val potentialCues = leftoverCues
-            .filter { !loneDigits.contains(it) }
-            .filter { numberRegex.containsMatchIn(it.label) }
-            .map {
-                val match = numberRegex.find(it.label)
-                val label = match!!.groupValues.first()!!
-                AudioCue(it.location, label)
-            }
+        val potentialCues =
+            leftoverCues
+                .filter { !loneDigits.contains(it) }
+                .filter { numberRegex.containsMatchIn(it.label) }
+                .map {
+                    val match = numberRegex.find(it.label)
+                    val label = match!!.groupValues.first()!!
+                    AudioCue(it.location, label)
+                }
 
         if (oratureCues.isNotEmpty()) {
             addMatchingCues(oratureCues, oratureRegex)
@@ -87,18 +88,23 @@ class VerseMarkerChunk : CueChunk() {
         extraCues.addAll(leftoverCues)
     }
 
-    fun addMatchingCues(baseCueList: List<AudioCue>, regex: Regex) {
+    fun addMatchingCues(
+        baseCueList: List<AudioCue>,
+        regex: Regex,
+    ) {
         cues as MutableList
-        val mapped = baseCueList.map {
-            val match = regex.find(it.label)
-            val groups = match!!.groupValues
-            val label = if (groups.size > 1) {
-                match!!.groupValues.get(1)!!
-            } else {
-                match!!.groupValues.first()!!
+        val mapped =
+            baseCueList.map {
+                val match = regex.find(it.label)
+                val groups = match!!.groupValues
+                val label =
+                    if (groups.size > 1) {
+                        match!!.groupValues.get(1)!!
+                    } else {
+                        match!!.groupValues.first()!!
+                    }
+                AudioCue(it.location, label)
             }
-            AudioCue(it.location, label)
-        }
         cues.addAll(mapped)
     }
 }

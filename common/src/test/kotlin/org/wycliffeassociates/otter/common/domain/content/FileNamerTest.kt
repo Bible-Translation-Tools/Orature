@@ -1,4 +1,4 @@
-///**
+// /**
 // * Copyright (C) 2020-2022 Wycliffe Associates
 // *
 // * This file is part of Orature.
@@ -16,13 +16,13 @@
 // * You should have received a copy of the GNU General Public License
 // * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
 // */
-//package org.wycliffeassociates.otter.common.domain.content
+// package org.wycliffeassociates.otter.common.domain.content
 //
-//import org.junit.Test
-//import org.wycliffeassociates.otter.common.assertEqualsForEach
-//import org.wycliffeassociates.otter.common.data.primitives.ContentType
+// import org.junit.Test
+// import org.wycliffeassociates.otter.common.assertEqualsForEach
+// import org.wycliffeassociates.otter.common.data.primitives.ContentType
 //
-//class FileNamerTest {
+// class FileNamerTest {
 //    private fun createFileNamer(chapterCount: Long, chapterTitle: String, chapterSort: Int) = FileNamer(
 //        chapterCount = chapterCount,
 //        chapterTitle = chapterTitle,
@@ -118,4 +118,4 @@
 //            fileNamer.formatVerseNumber()
 //        }
 //    }
-//}
+// }

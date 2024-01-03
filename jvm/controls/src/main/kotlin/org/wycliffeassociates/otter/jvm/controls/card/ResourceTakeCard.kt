@@ -26,7 +26,6 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.skins.cards.ResourceTakeCardSkin
 
 class ResourceTakeCard : Control() {
-
     private val takeProperty = SimpleObjectProperty<Take>()
     private val audioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     private val takeNumberProperty = SimpleStringProperty("Take 01")

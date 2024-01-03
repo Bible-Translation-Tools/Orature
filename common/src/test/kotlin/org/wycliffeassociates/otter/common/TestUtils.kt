@@ -67,13 +67,17 @@ fun <T, V> Map<T, V>.assertEqualsForEach(transform: (T) -> V) {
     }
     if (!allPassed) throw AssertionError()
 }
+
 /**
  * Wrapper function for [org.junit.Assert.assertEquals] that catches any thrown [AssertionError].
  * If an error is caught, the expected output and actual output will be printed
  *
  * @return The boolean result of the comparison
  */
-fun <T> doAssertEquals(expected: T, output: T): Boolean {
+fun <T> doAssertEquals(
+    expected: T,
+    output: T,
+): Boolean {
     return try {
         Assert.assertEquals(expected, output)
         true
@@ -84,16 +88,21 @@ fun <T> doAssertEquals(expected: T, output: T): Boolean {
 }
 
 fun createTestWavFile(dir: File): File {
-    val testFile = dir.resolve("test-take-${Date().time}.wav")
-        .apply { createNewFile(); deleteOnExit() }
+    val testFile =
+        dir.resolve("test-take-${Date().time}.wav")
+            .apply {
+                createNewFile()
+                deleteOnExit()
+            }
 
-    val wav = WavFile(
-        testFile,
-        DEFAULT_CHANNELS,
-        DEFAULT_SAMPLE_RATE,
-        DEFAULT_BITS_PER_SAMPLE,
-        WavMetadata(listOf(CueChunk()))
-    )
+    val wav =
+        WavFile(
+            testFile,
+            DEFAULT_CHANNELS,
+            DEFAULT_SAMPLE_RATE,
+            DEFAULT_BITS_PER_SAMPLE,
+            WavMetadata(listOf(CueChunk())),
+        )
     WavOutputStream(wav).use {
         for (i in 0 until 4) {
             it.write(i)
@@ -104,20 +113,29 @@ fun createTestWavFile(dir: File): File {
 }
 
 fun createTestChapterRepresentationFiles(dir: File): List<File> {
-    val pcmFile = dir.resolve(CHAPTER_NARRATION_FILE_NAME)
-        .apply { createNewFile(); deleteOnExit() }
+    val pcmFile =
+        dir.resolve(CHAPTER_NARRATION_FILE_NAME)
+            .apply {
+                createNewFile()
+                deleteOnExit()
+            }
 
     val pcm = PcmFile(pcmFile)
     PcmOutputStream(pcm).use {
-        for (i in 0 .. 10) {
+        for (i in 0..10) {
             it.write(i)
         }
     }
 
-    val jsonFile = dir.resolve(ACTIVE_VERSES_FILE_NAME)
-        .apply { createNewFile(); deleteOnExit() }
+    val jsonFile =
+        dir.resolve(ACTIVE_VERSES_FILE_NAME)
+            .apply {
+                createNewFile()
+                deleteOnExit()
+            }
 
-    val jsonData = """
+    val jsonData =
+        """
         [
           {
             "placed": true,
@@ -163,7 +181,7 @@ fun createTestChapterRepresentationFiles(dir: File): List<File> {
             ]
           }
         ]
-    """.trimIndent()
+        """.trimIndent()
 
     jsonFile.bufferedWriter().use {
         it.write(jsonData)
@@ -172,11 +190,19 @@ fun createTestChapterRepresentationFiles(dir: File): List<File> {
     return listOf(pcmFile, jsonFile)
 }
 
-fun createTestActiveVersesFile(dir: File, fileName: String = ACTIVE_VERSES_FILE_NAME): File {
-    val testFile = dir.resolve(fileName)
-        .apply { createNewFile(); deleteOnExit() }
+fun createTestActiveVersesFile(
+    dir: File,
+    fileName: String = ACTIVE_VERSES_FILE_NAME,
+): File {
+    val testFile =
+        dir.resolve(fileName)
+            .apply {
+                createNewFile()
+                deleteOnExit()
+            }
 
-    val testData = "[{\"placed\":true,\"marker\":{\"type\":\"BookMarker\",\"bookSlug\":\"jhn\",\"location\":0}" +
+    val testData =
+        "[{\"placed\":true,\"marker\":{\"type\":\"BookMarker\",\"bookSlug\":\"jhn\",\"location\":0}" +
             ",\"sectors\":[{\"start\":0,\"end\":2}]},{\"placed\":true,\"marker\":{\"type\":\"ChapterMarker\"," +
             "\"chapterNumber\":1,\"location\":0},\"sectors\":[{\"start\":3,\"end\":6}]},{\"placed\":true" +
             ",\"marker\":{\"type\":\"VerseMarker\",\"start\":1,\"end\":1,\"location\":0}" +
@@ -194,11 +220,12 @@ fun getDublinCore(resource: ResourceMetadata): DublinCore {
         identifier = resource.identifier
         issued = LocalDate.now().toString()
         modified = LocalDate.now().toString()
-        language = language {
-            identifier = resource.language.slug
-            direction = resource.language.direction
-            title = resource.language.name
-        }
+        language =
+            language {
+                identifier = resource.language.slug
+                direction = resource.language.direction
+                title = resource.language.name
+            }
         creator = "Orature"
         version = resource.version
         rights = resource.license
@@ -225,7 +252,7 @@ fun getResourceMetadata(language: Language): ResourceMetadata {
         title = "Unlocked Literal Bible",
         version = "1",
         license = "",
-        path = File(".")
+        path = File("."),
     )
 }
 
@@ -237,7 +264,7 @@ fun getEnglishLanguage(id: Int): Language {
         "ltr",
         isGateway = true,
         region = "Europe",
-        id = id
+        id = id,
     )
 }
 
@@ -249,7 +276,7 @@ fun getSpanishLanguage(id: Int = 0): Language {
         "ltr",
         isGateway = false,
         region = "Europe",
-        id = id
+        id = id,
     )
 }
 
@@ -259,7 +286,7 @@ fun getGenesisCollection(): Collection {
         slug = "gen",
         labelKey = "project",
         titleKey = "Genesis",
-        resourceContainer = null
+        resourceContainer = null,
     )
 }
 
@@ -267,13 +294,17 @@ fun buildWorkbook(
     directoryProvider: IDirectoryProvider,
     db: IWorkbookDatabaseAccessors,
     source: Collection,
-    target: Collection
+    target: Collection,
 ) = WorkbookRepository(
     directoryProvider,
-    db
+    db,
 ).get(source, target)
 
-fun createWavFile(dir: File, name: String, data: ByteArray): File {
+fun createWavFile(
+    dir: File,
+    name: String,
+    data: ByteArray,
+): File {
     val file = File(dir, name)
     val oratureAudioFile = OratureAudioFile(file, DEFAULT_CHANNELS, DEFAULT_SAMPLE_RATE, DEFAULT_BITS_PER_SAMPLE)
     oratureAudioFile.writer().use { os ->
@@ -282,7 +313,10 @@ fun createWavFile(dir: File, name: String, data: ByteArray): File {
     return file
 }
 
-fun readTextFromAudioFile(oratureAudioFile: OratureAudioFile, bufferSize: Int): String {
+fun readTextFromAudioFile(
+    oratureAudioFile: OratureAudioFile,
+    bufferSize: Int,
+): String {
     val reader = oratureAudioFile.reader()
     val buffer = ByteArray(bufferSize)
     reader.open()
@@ -299,7 +333,7 @@ fun templateAudioFileName(
     resource: String,
     project: String,
     chapterLabel: String,
-    extension: String? = null
+    extension: String? = null,
 ): String {
     val ext = extension ?: ""
     return "${language}_${resource}_${project}_c${chapterLabel}$ext"
@@ -308,7 +342,7 @@ fun templateAudioFileName(
 fun createTestRc(
     dir: File,
     dublinCore: DublinCore,
-    sourceFiles: List<File> = listOf()
+    sourceFiles: List<File> = listOf(),
 ): ResourceContainer {
     return ResourceContainer.create(dir) {
         manifest = Manifest(dublinCore, listOf(), Checking())

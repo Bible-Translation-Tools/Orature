@@ -3,7 +3,6 @@ package org.wycliffeassociates.otter.jvm.controls.canvas
 import javafx.scene.canvas.Canvas
 
 class ResizableCanvas : Canvas() {
-
     override fun isResizable(): Boolean {
         return true
     }
@@ -24,7 +23,10 @@ class ResizableCanvas : Canvas() {
         return 0.0
     }
 
-    override fun resize(width: Double, height: Double) {
+    override fun resize(
+        width: Double,
+        height: Double,
+    ) {
         this.width = width
         this.height = height
     }

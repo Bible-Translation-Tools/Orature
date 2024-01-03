@@ -50,22 +50,22 @@ import org.wycliffeassociates.otter.common.data.workbook.TextItem
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.collections.UpdateTranslation
-import java.util.WeakHashMap
-import java.util.Collections.synchronizedMap
-import javax.inject.Inject
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import java.util.Collections.synchronizedMap
+import java.util.WeakHashMap
 import java.util.concurrent.ConcurrentHashMap
+import javax.inject.Inject
 
 private typealias WorkbookTake = org.wycliffeassociates.otter.common.data.workbook.Take
 
 enum class PlaybackRateType {
     SOURCE,
-    TARGET
+    TARGET,
 }
 
 class WorkbookRepository(
     private val directoryProvider: IDirectoryProvider,
-    private val db: IWorkbookDatabaseAccessors
+    private val db: IWorkbookDatabaseAccessors,
 ) : IWorkbookRepository {
     private val logger = LoggerFactory.getLogger(WorkbookRepository::class.java)
 
@@ -78,7 +78,7 @@ class WorkbookRepository(
         resourceMetadataRepo: IResourceMetadataRepository,
         takeRepository: ITakeRepository,
         languageRepository: ILanguageRepository,
-        updateTranslationUseCase: UpdateTranslation
+        updateTranslationUseCase: UpdateTranslation,
     ) : this(
         directoryProvider,
         WorkbookDatabaseAccessor(
@@ -88,14 +88,17 @@ class WorkbookRepository(
             resourceMetadataRepo,
             takeRepository,
             languageRepository,
-            updateTranslationUseCase
-        )
+            updateTranslationUseCase,
+        ),
     )
 
     /** Disposers for Relays in the current workbook. */
     private val connections = ConcurrentHashMap<Workbook, CompositeDisposable>()
 
-    override fun get(source: Collection, target: Collection): Workbook {
+    override fun get(
+        source: Collection,
+        target: Collection,
+    ): Workbook {
         val existing = getExistingWorkbookIfExists(source, target)
         if (existing != null) {
             return existing
@@ -104,25 +107,31 @@ class WorkbookRepository(
         // Clear database connections and dispose observables for the
         // previous Workbook if a new one was requested.
         val disposables = mutableListOf<Disposable>()
-        val sourceResourceMetadata = source.resourceContainer
-            ?: throw IllegalStateException("Book collection with id=${source.id} has null resource container")
-        val targetResourceMetadata = target.resourceContainer
-            ?: throw IllegalStateException("Book collection with id=${source.id} has null resource container")
-        val workbook = Workbook(
-            directoryProvider,
-            book(source, disposables),
-            book(target, disposables),
-            constructAssociatedTranslation(
-                sourceResourceMetadata.language,
-                targetResourceMetadata.language,
-                disposables
+        val sourceResourceMetadata =
+            source.resourceContainer
+                ?: throw IllegalStateException("Book collection with id=${source.id} has null resource container")
+        val targetResourceMetadata =
+            target.resourceContainer
+                ?: throw IllegalStateException("Book collection with id=${source.id} has null resource container")
+        val workbook =
+            Workbook(
+                directoryProvider,
+                book(source, disposables),
+                book(target, disposables),
+                constructAssociatedTranslation(
+                    sourceResourceMetadata.language,
+                    targetResourceMetadata.language,
+                    disposables,
+                ),
             )
-        )
         connections[workbook] = CompositeDisposable(disposables)
         return workbook
     }
 
-    private fun getExistingWorkbookIfExists(source: Collection, target: Collection): Workbook? {
+    private fun getExistingWorkbookIfExists(
+        source: Collection,
+        target: Collection,
+    ): Workbook? {
         return connections.keys.find { it.source.collectionId == source.id && it.target.collectionId == target.id }
     }
 
@@ -172,9 +181,13 @@ class WorkbookRepository(
             }
     }
 
-    private fun book(bookCollection: Collection, disposables: MutableList<Disposable>): Book {
-        val resourceMetadata = bookCollection.resourceContainer
-            ?: throw IllegalStateException("Book collection with id=${bookCollection.id} has null resource container")
+    private fun book(
+        bookCollection: Collection,
+        disposables: MutableList<Disposable>,
+    ): Book {
+        val resourceMetadata =
+            bookCollection.resourceContainer
+                ?: throw IllegalStateException("Book collection with id=${bookCollection.id} has null resource container")
 
         return Book(
             collectionId = bookCollection.id,
@@ -186,13 +199,13 @@ class WorkbookRepository(
             resourceMetadata = resourceMetadata,
             linkedResources = db.getLinkedResourceMetadata(resourceMetadata),
             subtreeResources = db.getSubtreeResourceMetadata(bookCollection),
-            modifiedTs = bookCollection.modifiedTs
+            modifiedTs = bookCollection.modifiedTs,
         )
     }
 
     private fun constructBookChapters(
         bookCollection: Collection,
-        disposables: MutableList<Disposable>
+        disposables: MutableList<Disposable>,
     ): Observable<Chapter> {
         return Observable.defer {
             db.getChildren(bookCollection)
@@ -203,7 +216,7 @@ class WorkbookRepository(
 
     private fun constructChapter(
         chapterCollection: Collection,
-        disposables: MutableList<Disposable>
+        disposables: MutableList<Disposable>,
     ): Single<Chapter> {
         return db.getCollectionMetaContent(chapterCollection)
             .map { metaContent ->
@@ -221,21 +234,22 @@ class WorkbookRepository(
                     },
                     reset = {
                         db.clearContentForCollection(chapterCollection, ContentType.TEXT).ignoreElement()
-                    }
+                    },
                 ).also { it.text = metaContent.text ?: "" }
             }
     }
 
     private fun constructChunks(
         chapterCollection: Collection,
-        disposables: MutableList<Disposable>
+        disposables: MutableList<Disposable>,
     ): BehaviorRelay<List<Chunk>> {
         val relay = BehaviorRelay.create<List<Chunk>>()
         db.getContentByCollectionActiveConnection(chapterCollection)
             .subscribe { contents ->
-                val chunks = contents
-                    .filter { it.type == ContentType.TEXT }
-                    .map { chunk(it, disposables) }
+                val chunks =
+                    contents
+                        .filter { it.type == ContentType.TEXT }
+                        .map { chunk(it, disposables) }
 
                 relay.accept(chunks)
             }
@@ -247,7 +261,10 @@ class WorkbookRepository(
         return relay
     }
 
-    private fun chunk(content: Content, disposables: MutableList<Disposable>): Chunk {
+    private fun chunk(
+        content: Content,
+        disposables: MutableList<Disposable>,
+    ): Chunk {
         return Chunk(
             sort = content.sort,
             label = content.labelKey,
@@ -258,7 +275,7 @@ class WorkbookRepository(
             end = content.end,
             contentType = content.type,
             draftNumber = content.draftNumber,
-            bridged = content.bridged
+            bridged = content.bridged,
         )
     }
 
@@ -274,61 +291,63 @@ class WorkbookRepository(
         title: Content,
         body: Content?,
         identifier: String,
-        disposables: MutableList<Disposable>
+        disposables: MutableList<Disposable>,
     ): Resource? {
+        val bodyComponent =
+            body?.let {
+                Resource.Component(
+                    sort = it.sort,
+                    textItem = textItem(it),
+                    audio = constructAssociatedAudio(it, disposables),
+                    contentType = ContentType.BODY,
+                    label = resourceLabel(ContentType.BODY, identifier),
+                )
+            }
 
-        val bodyComponent = body?.let {
+        val titleComponent =
             Resource.Component(
-                sort = it.sort,
-                textItem = textItem(it),
-                audio = constructAssociatedAudio(it, disposables),
-                contentType = ContentType.BODY,
-                label = resourceLabel(ContentType.BODY, identifier)
+                sort = title.sort,
+                textItem = textItem(title),
+                audio = constructAssociatedAudio(title, disposables),
+                contentType = ContentType.TITLE,
+                label = resourceLabel(ContentType.TITLE, identifier),
             )
-        }
-
-        val titleComponent = Resource.Component(
-            sort = title.sort,
-            textItem = textItem(title),
-            audio = constructAssociatedAudio(title, disposables),
-            contentType = ContentType.TITLE,
-            label = resourceLabel(ContentType.TITLE, identifier)
-        )
 
         return Resource(
             title = titleComponent,
-            body = bodyComponent
+            body = bodyComponent,
         )
     }
 
     private fun constructResourceGroups(
         content: Content,
-        disposables: MutableList<Disposable>
+        disposables: MutableList<Disposable>,
     ) = constructResourceGroups(
         resourceMetadataList = db.getResourceMetadata(content),
         getResourceContents = { db.getResources(content, it) },
-        disposables = disposables
+        disposables = disposables,
     )
 
     private fun constructResourceGroups(
         collection: Collection,
-        disposables: MutableList<Disposable>
+        disposables: MutableList<Disposable>,
     ) = constructResourceGroups(
         resourceMetadataList = db.getResourceMetadata(collection),
         getResourceContents = { db.getResources(collection, it) },
-        disposables = disposables
+        disposables = disposables,
     )
 
     private fun constructResourceGroups(
         resourceMetadataList: List<ResourceMetadata>,
         getResourceContents: (ResourceMetadata) -> Observable<Content>,
-        disposables: MutableList<Disposable>
+        disposables: MutableList<Disposable>,
     ): List<ResourceGroup> {
         return resourceMetadataList.map {
-            val resources = Observable.defer {
-                getResourceContents(it)
-                    .contentsToResources(it.identifier, disposables)
-            }.cache()
+            val resources =
+                Observable.defer {
+                    getResourceContents(it)
+                        .contentsToResources(it.identifier, disposables)
+                }.cache()
 
             ResourceGroup(it, resources)
         }
@@ -336,7 +355,7 @@ class WorkbookRepository(
 
     private fun Observable<Content>.contentsToResources(
         identifier: String,
-        disposables: MutableList<Disposable>
+        disposables: MutableList<Disposable>,
     ): Observable<Resource> {
         return this
             .buffer(2, 1) // create a rolling window of size 2
@@ -355,14 +374,14 @@ class WorkbookRepository(
 
                         // Else, we have a title/body pair, so use it.
                         else -> constructResource(a, b, identifier, disposables)
-                    }
+                    },
                 )
             }
     }
 
     private fun deselectUponDelete(
         take: WorkbookTake,
-        selectedTakeRelay: BehaviorRelay<TakeHolder>
+        selectedTakeRelay: BehaviorRelay<TakeHolder>,
     ): Disposable {
         return take.deletedTimestamp
             .filter { dateHolder -> dateHolder.value != null }
@@ -374,7 +393,10 @@ class WorkbookRepository(
             .subscribe(selectedTakeRelay)
     }
 
-    private fun deleteFromDbUponDelete(take: WorkbookTake, modelTake: ModelTake): Disposable {
+    private fun deleteFromDbUponDelete(
+        take: WorkbookTake,
+        modelTake: ModelTake,
+    ): Disposable {
         return take.deletedTimestamp
             .filter { dateHolder -> dateHolder.value != null }
             .doOnError { e ->
@@ -387,11 +409,14 @@ class WorkbookRepository(
             }
     }
 
-    private fun subscribeToCheckingStatus(take: WorkbookTake, modelTake: ModelTake): Disposable {
+    private fun subscribeToCheckingStatus(
+        take: WorkbookTake,
+        modelTake: ModelTake,
+    ): Disposable {
         return take.checkingState
             .flatMapCompletable {
                 db.updateTake(
-                    modelTake.copy(checkingStatus =  it.status, checksum = it.checksum)
+                    modelTake.copy(checkingStatus = it.status, checksum = it.checksum),
                 )
             }
             .subscribeOn(Schedulers.io())
@@ -407,13 +432,17 @@ class WorkbookRepository(
             format = MimeType.WAV, // TODO
             createdTimestamp = modelTake.created,
             deletedTimestamp = BehaviorRelay.createDefault(DateHolder(modelTake.deleted)),
-            checkingState = BehaviorRelay.createDefault(
-                TakeCheckingState(modelTake.checkingStatus, modelTake.checksum)
-            )
+            checkingState =
+                BehaviorRelay.createDefault(
+                    TakeCheckingState(modelTake.checkingStatus, modelTake.checksum),
+                ),
         )
     }
 
-    private fun modelTake(workbookTake: WorkbookTake, markers: List<Marker> = listOf()): ModelTake {
+    private fun modelTake(
+        workbookTake: WorkbookTake,
+        markers: List<Marker> = listOf(),
+    ): ModelTake {
         return ModelTake(
             filename = workbookTake.file.name,
             path = workbookTake.file,
@@ -423,40 +452,43 @@ class WorkbookRepository(
             played = false,
             checkingStatus = workbookTake.checkingState.value?.status ?: CheckingStatus.UNCHECKED,
             checksum = workbookTake.getSavedChecksum(),
-            markers = markers
+            markers = markers,
         )
     }
 
     private fun constructAssociatedTranslation(
         sourceLanguage: Language,
         targetLanguage: Language,
-        disposables: MutableList<Disposable>
+        disposables: MutableList<Disposable>,
     ): AssociatedTranslation {
         val sourceRateRelay = BehaviorRelay.createDefault(1.0)
         val targetRateRelay = BehaviorRelay.createDefault(1.0)
 
         val translation = db.getTranslation(sourceLanguage, targetLanguage)
 
-        val translationSubscription = translation
-            .doOnError { e ->
-                logger.error("Error in getTranslation, source: $sourceLanguage, target: $targetLanguage", e)
-            }
-            .subscribe { _translation ->
-                sourceRateRelay.accept(_translation.sourceRate)
-                targetRateRelay.accept(_translation.targetRate)
-            }
+        val translationSubscription =
+            translation
+                .doOnError { e ->
+                    logger.error("Error in getTranslation, source: $sourceLanguage, target: $targetLanguage", e)
+                }
+                .subscribe { _translation ->
+                    sourceRateRelay.accept(_translation.sourceRate)
+                    targetRateRelay.accept(_translation.targetRate)
+                }
 
-        val sourceRateRelaySubscription = subscribePlaybackRateRelay(
-            sourceRateRelay,
-            translation,
-            PlaybackRateType.SOURCE
-        )
+        val sourceRateRelaySubscription =
+            subscribePlaybackRateRelay(
+                sourceRateRelay,
+                translation,
+                PlaybackRateType.SOURCE,
+            )
 
-        val targetRateRelaySubscription = subscribePlaybackRateRelay(
-            targetRateRelay,
-            translation,
-            PlaybackRateType.TARGET
-        )
+        val targetRateRelaySubscription =
+            subscribePlaybackRateRelay(
+                targetRateRelay,
+                translation,
+                PlaybackRateType.TARGET,
+            )
 
         synchronized(disposables) {
             disposables.add(sourceRateRelaySubscription)
@@ -470,7 +502,7 @@ class WorkbookRepository(
     private fun subscribePlaybackRateRelay(
         relay: BehaviorRelay<Double>,
         translation: Single<Translation>,
-        playbackRateType: PlaybackRateType
+        playbackRateType: PlaybackRateType,
     ): Disposable {
         return relay
             .distinctUntilChanged()
@@ -492,7 +524,7 @@ class WorkbookRepository(
 
     private fun constructAssociatedAudio(
         content: Content,
-        disposables: MutableList<Disposable>
+        disposables: MutableList<Disposable>,
     ): AssociatedAudio {
         /** Map to recover model.Take objects from workbook.Take objects. */
         val takeMap = synchronizedMap(WeakHashMap<WorkbookTake, ModelTake>())
@@ -504,29 +536,32 @@ class WorkbookRepository(
         val selectedTakeRelay = BehaviorRelay.createDefault(TakeHolder(initialSelectedTake))
 
         // When we receive an update, write it to the DB.
-        val selectedTakeRelaySubscription = selectedTakeRelay
-            .distinctUntilChanged() // Don't write unless changed
-            .skip(1) // Don't write the value we just loaded from the DB
-            .doOnError { e ->
-                logger.error("Error in selectedTakesRelay, content: $content", e)
-            }
-            .subscribe {
-                content.selectedTake = it.value?.let { wbTake -> takeMap[wbTake] }
-                db.updateContent(content)
-                    .doOnError { e -> logger.error("Error in updating content for content: $content", e) }
-                    .subscribe()
-            }
+        val selectedTakeRelaySubscription =
+            selectedTakeRelay
+                .distinctUntilChanged() // Don't write unless changed
+                .skip(1) // Don't write the value we just loaded from the DB
+                .doOnError { e ->
+                    logger.error("Error in selectedTakesRelay, content: $content", e)
+                }
+                .subscribe {
+                    content.selectedTake = it.value?.let { wbTake -> takeMap[wbTake] }
+                    db.updateContent(content)
+                        .doOnError { e -> logger.error("Error in updating content for content: $content", e) }
+                        .subscribe()
+                }
 
         /** Initial Takes read from the DB. */
-        val takesFromDb = db.getTakeByContent(content)
-            .flattenAsObservable { list: List<ModelTake> -> list.sortedBy { it.number } }
-            .map { modelTake ->
-                val wbTake = when (modelTake) {
-                    content.selectedTake -> initialSelectedTake
-                    else -> workbookTake(modelTake)
+        val takesFromDb =
+            db.getTakeByContent(content)
+                .flattenAsObservable { list: List<ModelTake> -> list.sortedBy { it.number } }
+                .map { modelTake ->
+                    val wbTake =
+                        when (modelTake) {
+                            content.selectedTake -> initialSelectedTake
+                            else -> workbookTake(modelTake)
+                        }
+                    wbTake to modelTake
                 }
-                wbTake to modelTake
-            }
 
         /** Relay to send Takes out to consumers, but also receive new Takes from UI. */
         val takesRelay = ReplayRelay.create<WorkbookTake>()
@@ -545,40 +580,38 @@ class WorkbookRepository(
             .doOnError { e -> logger.error("Error in takesRelay, content: $content", e) }
             .subscribe(takesRelay)
 
-        val takesRelaySubscription = takesRelay
-            .filter { it.deletedTimestamp.value?.value == null }
-            .map { it to (takeMap[it] ?: modelTake(it)) }
-            .doOnNext { (wbTake, modelTake) ->
-                // When the selected take becomes deleted, deselect it.
-                deselectUponDelete(wbTake, selectedTakeRelay)
-                // When a take becomes deleted, delete it from the database
-                deleteFromDbUponDelete(wbTake, modelTake)
-            }
+        val takesRelaySubscription =
+            takesRelay
+                .filter { it.deletedTimestamp.value?.value == null }
+                .map { it to (takeMap[it] ?: modelTake(it)) }
+                .doOnNext { (wbTake, modelTake) ->
+                    // When the selected take becomes deleted, deselect it.
+                    deselectUponDelete(wbTake, selectedTakeRelay)
+                    // When a take becomes deleted, delete it from the database
+                    deleteFromDbUponDelete(wbTake, modelTake)
+                }
+                // These are new takes
+                .filter { (wbTake, _) -> !takeMap.contains(wbTake) }
+                // Keep the takeMap current
+                .doOnNext { (wbTake, modelTake) ->
+                    takeMap[wbTake] = modelTake
+                }
+                .doOnError { e ->
+                    logger.error("Error constructing associated audio for content: $content", e)
+                }
+                // Insert the new take into the DB. (We already filtered existing takes out.)
+                .subscribe { (wbTake, modelTake) ->
+                    db.insertTakeForContent(modelTake, content)
+                        .doOnError { e -> logger.error("Error inserting take: $modelTake for content: $content", e) }
+                        .subscribe { insertionId ->
+                            modelTake.id = insertionId
+                            selectedTakeRelay.accept(TakeHolder(wbTake))
 
-            // These are new takes
-            .filter { (wbTake, _) -> !takeMap.contains(wbTake) }
-
-            // Keep the takeMap current
-            .doOnNext { (wbTake, modelTake) ->
-                takeMap[wbTake] = modelTake
-            }
-            .doOnError { e ->
-                logger.error("Error constructing associated audio for content: $content", e)
-            }
-
-            // Insert the new take into the DB. (We already filtered existing takes out.)
-            .subscribe { (wbTake, modelTake) ->
-                db.insertTakeForContent(modelTake, content)
-                    .doOnError { e -> logger.error("Error inserting take: $modelTake for content: $content", e) }
-                    .subscribe { insertionId ->
-                        modelTake.id = insertionId
-                        selectedTakeRelay.accept(TakeHolder(wbTake))
-
-                        if (content.type == ContentType.TEXT) {
-                            subscribeToCheckingStatus(wbTake, modelTake) // subscribe to takes from UI
+                            if (content.type == ContentType.TEXT) {
+                                subscribeToCheckingStatus(wbTake, modelTake) // subscribe to takes from UI
+                            }
                         }
-                    }
-            }
+                }
 
         synchronized(disposables) {
             disposables.add(takesRelaySubscription)
@@ -588,7 +621,10 @@ class WorkbookRepository(
         return AssociatedAudio(takesRelay, selectedTakeRelay)
     }
 
-    private fun resourceLabel(contentType: ContentType, identifier: String): String {
+    private fun resourceLabel(
+        contentType: ContentType,
+        identifier: String,
+    ): String {
         return when (identifier) {
             "tn" -> {
                 when (contentType) {

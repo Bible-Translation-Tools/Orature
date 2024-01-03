@@ -1,6 +1,5 @@
 package org.wycliffeassociates.otter.common.domain.translation
 
-import java.io.File
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
@@ -8,9 +7,13 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants.
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
+import java.io.File
 
 class ChunkAudioUseCase(val directoryProvider: IDirectoryProvider, val projectFilesAccessor: ProjectFilesAccessor) {
-    fun createChunkedSourceAudio(source: File, cues: List<AudioCue>) {
+    fun createChunkedSourceAudio(
+        source: File,
+        cues: List<AudioCue>,
+    ) {
         val temp = File(directoryProvider.tempDirectory, source.name).apply { createNewFile() }
         val tempCue = File(temp.parent, "${temp.nameWithoutExtension}.cue").apply { createNewFile() }
 

@@ -28,9 +28,10 @@ class InfoItem(major: String, minor: String? = null, icon: Node) : HBox() {
 
         label(major) {
             addClass("info__item__major")
-            graphic = icon.apply {
-                addClass("info__item__major__icon")
-            }
+            graphic =
+                icon.apply {
+                    addClass("info__item__major__icon")
+                }
         }
         minor?.let {
             label(it) {

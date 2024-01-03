@@ -44,14 +44,18 @@ import tornadofx.*
 import javax.inject.Inject
 
 class SettingsViewModel : ViewModel() {
-
     private val logger = LoggerFactory.getLogger(SettingsViewModel::class.java)
 
     @Inject lateinit var audioDeviceProvider: AudioDeviceProvider
+
     @Inject lateinit var appPrefRepository: IAppPreferencesRepository
+
     @Inject lateinit var pluginRepository: IAudioPluginRepository
+
     @Inject lateinit var localeLanguage: LocaleLanguage
+
     @Inject lateinit var theme: AppTheme
+
     @Inject lateinit var importLanguages: ImportLanguages
 
     private val audioPluginViewModel: AudioPluginViewModel by inject()
@@ -82,18 +86,20 @@ class SettingsViewModel : ViewModel() {
     private val isOSDarkMode = SimpleBooleanProperty(osThemeDetector.isDark)
 
     val orientationProperty = SimpleObjectProperty<NodeOrientation>()
-    val orientationScaleProperty = orientationProperty.doubleBinding {
-        when (it) {
-            NodeOrientation.RIGHT_TO_LEFT -> -1.0
-            else -> 1.0
+    val orientationScaleProperty =
+        orientationProperty.doubleBinding {
+            when (it) {
+                NodeOrientation.RIGHT_TO_LEFT -> -1.0
+                else -> 1.0
+            }
         }
-    }
-    val sourceOrientationProperty = workbookDataStore.activeWorkbookProperty.objectBinding {
-        when (it?.source?.language?.direction) {
-            "rtl" -> NodeOrientation.RIGHT_TO_LEFT
-            else -> NodeOrientation.LEFT_TO_RIGHT
+    val sourceOrientationProperty =
+        workbookDataStore.activeWorkbookProperty.objectBinding {
+            when (it?.source?.language?.direction) {
+                "rtl" -> NodeOrientation.RIGHT_TO_LEFT
+                else -> NodeOrientation.LEFT_TO_RIGHT
+            }
         }
-    }
 
     val languageNamesUrlProperty = SimpleStringProperty()
     val defaultLanguageNamesUrlProperty = SimpleStringProperty()
@@ -143,7 +149,7 @@ class SettingsViewModel : ViewModel() {
             .observeOnFx()
             .doOnSuccess { plugins ->
                 audioPlugins.setAll(
-                    plugins.filter { it.canEdit || it.canRecord }
+                    plugins.filter { it.canEdit || it.canRecord },
                 )
             }
             .observeOn(Schedulers.io())
@@ -270,7 +276,7 @@ class SettingsViewModel : ViewModel() {
             when (localeLanguage.preferredLanguage?.direction) {
                 "rtl" -> NodeOrientation.RIGHT_TO_LEFT
                 else -> NodeOrientation.LEFT_TO_RIGHT
-            }
+            },
         )
     }
 
@@ -317,7 +323,7 @@ class SettingsViewModel : ViewModel() {
                     languageNamesImportingProperty.set(false)
                     updateLanguagesSuccessProperty.set(false)
                     updateLanguagesResultProperty.set(messages["languagesImportError"])
-                }
+                },
             )
     }
 
@@ -330,11 +336,14 @@ class SettingsViewModel : ViewModel() {
     }
 
     private fun bindSystemTheme() {
-        appColorMode.bind(isOSDarkMode.objectBinding {
-            if (it == true)
-                ColorTheme.DARK
-            else
-                ColorTheme.LIGHT
-        })
+        appColorMode.bind(
+            isOSDarkMode.objectBinding {
+                if (it == true) {
+                    ColorTheme.DARK
+                } else {
+                    ColorTheme.LIGHT
+                }
+            },
+        )
     }
 }

@@ -23,121 +23,130 @@ import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
-import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
-import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-class DeleteProject @Inject constructor(
-    private val collectionRepository: ICollectionRepository,
-    private val directoryProvider: IDirectoryProvider,
-    private val workbookRepository: IWorkbookRepository,
-    private val workbookDescriptorRepo: IWorkbookDescriptorRepository
-) {
+class DeleteProject
+    @Inject
+    constructor(
+        private val collectionRepository: ICollectionRepository,
+        private val directoryProvider: IDirectoryProvider,
+        private val workbookRepository: IWorkbookRepository,
+        private val workbookDescriptorRepo: IWorkbookDescriptorRepository,
+    ) {
+        private val logger = LoggerFactory.getLogger(javaClass)
 
-    private val logger = LoggerFactory.getLogger(javaClass)
+        fun delete(
+            workbook: Workbook,
+            deleteFiles: Boolean,
+        ): Completable {
+            // Order matters here, files won't remove anything from the database
+            // delete resources will only remove take entries, but needs derived RCs and links intact
+            // delete project may remove derived RCs and links, and thus needs to be last
+            val targetProject = workbook.target.toCollection()
+            return deleteFiles(workbook, deleteFiles)
+                .andThen(collectionRepository.deleteResources(targetProject, deleteFiles))
+                .andThen(collectionRepository.deleteProject(targetProject, deleteFiles))
+        }
 
-    fun delete(workbook: Workbook, deleteFiles: Boolean): Completable {
-        // Order matters here, files won't remove anything from the database
-        // delete resources will only remove take entries, but needs derived RCs and links intact
-        // delete project may remove derived RCs and links, and thus needs to be last
-        val targetProject = workbook.target.toCollection()
-        return deleteFiles(workbook, deleteFiles)
-            .andThen(collectionRepository.deleteResources(targetProject, deleteFiles))
-            .andThen(collectionRepository.deleteProject(targetProject, deleteFiles))
-    }
+        /**
+         * Delete the project's content (files & data). This resets the project
+         * to its initial state by deleting and re-inserting the project to its group.
+         */
+        fun delete(workbookDescriptor: WorkbookDescriptor): Completable {
+            return Observable
+                .fromCallable {
+                    workbookRepository.get(
+                        workbookDescriptor.sourceCollection,
+                        workbookDescriptor.targetCollection,
+                    )
+                }
+                .flatMapCompletable { workbook ->
+                    delete(workbook, deleteFiles = true)
+                }
+                .doOnError {
+                    logger.error("Error while deleting workbook.", it)
+                }
+                .andThen(
+                    recreateWorkbookDescriptor(workbookDescriptor),
+                )
+                .subscribeOn(Schedulers.io())
+        }
 
-    /**
-     * Delete the project's content (files & data). This resets the project
-     * to its initial state by deleting and re-inserting the project to its group.
-     */
-    fun delete(workbookDescriptor: WorkbookDescriptor): Completable {
-        return Observable
-            .fromCallable {
-                workbookRepository.get(
+        /**
+         * Deletes all the projects/workbooks including the derived collections & content.
+         */
+        fun deleteProjects(list: List<WorkbookDescriptor>): Completable {
+            return Completable
+                .fromAction {
+                    list.map { workbookRepository.get(it.sourceCollection, it.targetCollection) }
+                        .forEach {
+                            delete(it, true).blockingAwait() // avoid concurrent accesses to the same file
+                        }
+                }
+                .andThen(workbookDescriptorRepo.delete(list))
+                .subscribeOn(Schedulers.single()) // sequential execution of delete to avoid db transaction error
+        }
+
+        fun deleteProjectsWithTimer(
+            books: List<WorkbookDescriptor>,
+            timeoutMillis: Int,
+        ): Completable {
+            return Completable
+                .timer(timeoutMillis.toLong(), TimeUnit.MILLISECONDS)
+                .andThen(deleteProjects(books))
+        }
+
+        private fun recreateWorkbookDescriptor(workbookDescriptor: WorkbookDescriptor): Completable {
+            val sourceMetadata = workbookDescriptor.sourceCollection.resourceContainer!!
+            return collectionRepository
+                .deriveProject(
+                    listOf(sourceMetadata),
                     workbookDescriptor.sourceCollection,
-                    workbookDescriptor.targetCollection
+                    workbookDescriptor.targetLanguage,
+                    workbookDescriptor.mode != ProjectMode.TRANSLATION,
+                    workbookDescriptor.mode,
                 )
-            }
-            .flatMapCompletable { workbook ->
-                delete(workbook, deleteFiles = true)
-            }
-            .doOnError {
-                logger.error("Error while deleting workbook.", it)
-            }
-            .andThen(
-                recreateWorkbookDescriptor(workbookDescriptor)
-            )
-            .subscribeOn(Schedulers.io())
-    }
+                .doOnError {
+                    logger.error("Error while recreating workbook descriptor.", it)
+                }
+                .ignoreElement()
+        }
 
-    /**
-     * Deletes all the projects/workbooks including the derived collections & content.
-     */
-    fun deleteProjects(list: List<WorkbookDescriptor>): Completable {
-        return Completable
-            .fromAction {
-                list.map { workbookRepository.get(it.sourceCollection, it.targetCollection) }
-                    .forEach {
-                        delete(it, true).blockingAwait() // avoid concurrent accesses to the same file
-                    }
-            }
-            .andThen(workbookDescriptorRepo.delete(list))
-            .subscribeOn(Schedulers.single()) // sequential execution of delete to avoid db transaction error
-    }
+        private fun deleteFiles(
+            workbook: Workbook,
+            deleteFiles: Boolean,
+        ): Completable {
+            return if (deleteFiles) {
+                Completable.fromCallable {
+                    val source = workbook.source
+                    val target = workbook.target
 
-    fun deleteProjectsWithTimer(books: List<WorkbookDescriptor>, timeoutMillis: Int): Completable {
-        return Completable
-            .timer(timeoutMillis.toLong(), TimeUnit.MILLISECONDS)
-            .andThen(deleteProjects(books))
-    }
-
-    private fun recreateWorkbookDescriptor(workbookDescriptor: WorkbookDescriptor): Completable {
-        val sourceMetadata = workbookDescriptor.sourceCollection.resourceContainer!!
-        return collectionRepository
-            .deriveProject(
-                listOf(sourceMetadata),
-                workbookDescriptor.sourceCollection,
-                workbookDescriptor.targetLanguage,
-                workbookDescriptor.mode != ProjectMode.TRANSLATION,
-                workbookDescriptor.mode
-            )
-            .doOnError {
-                logger.error("Error while recreating workbook descriptor.", it)
-            }
-            .ignoreElement()
-    }
-
-    private fun deleteFiles(workbook: Workbook, deleteFiles: Boolean): Completable {
-        return if (deleteFiles) {
-            Completable.fromCallable {
-                val source = workbook.source
-                val target = workbook.target
-
-                directoryProvider.getProjectDirectory(
-                    source = source.resourceMetadata,
-                    target = target.resourceMetadata,
-                    bookSlug = target.slug
-                )
-                    .deleteRecursively()
-
-                // delete linked resources project files
-                target.linkedResources.forEach {
                     directoryProvider.getProjectDirectory(
                         source = source.resourceMetadata,
-                        target = it,
-                        bookSlug = target.slug
+                        target = target.resourceMetadata,
+                        bookSlug = target.slug,
                     )
                         .deleteRecursively()
+
+                    // delete linked resources project files
+                    target.linkedResources.forEach {
+                        directoryProvider.getProjectDirectory(
+                            source = source.resourceMetadata,
+                            target = it,
+                            bookSlug = target.slug,
+                        )
+                            .deleteRecursively()
+                    }
                 }
+            } else {
+                Completable.complete()
             }
-        } else {
-            Completable.complete()
         }
     }
-}

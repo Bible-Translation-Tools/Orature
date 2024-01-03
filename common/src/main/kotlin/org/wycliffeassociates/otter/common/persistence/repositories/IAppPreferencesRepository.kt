@@ -26,22 +26,38 @@ import org.wycliffeassociates.otter.common.data.primitives.Language
 
 interface IAppPreferencesRepository {
     fun resumeProjectId(): Single<Int>
-    fun setResumeProjectId(id: Int): Completable
-    fun lastResource(): Single<String>
-    fun setLastResource(resource: String): Completable
-    fun getOutputDevice(): Single<String>
-    fun setOutputDevice(mixer: String): Completable
-    fun getInputDevice(): Single<String>
-    fun setInputDevice(mixer: String): Completable
-    fun localeLanguage(): Maybe<Language>
-    fun setLocaleLanguage(language: Language): Completable
-    fun appTheme(): Single<ColorTheme>
-    fun setAppTheme(theme: ColorTheme): Completable
-    fun sourceTextZoomRate(): Single<Int>
-    fun setSourceTextZoomRate(rate: Int): Completable
-    fun languageNamesUrl(): Single<String>
-    fun setLanguageNamesUrl(server: String): Completable
-    fun defaultLanguageNamesUrl(): Single<String>
-    fun resetLanguageNamesUrl(): Single<String>
 
+    fun setResumeProjectId(id: Int): Completable
+
+    fun lastResource(): Single<String>
+
+    fun setLastResource(resource: String): Completable
+
+    fun getOutputDevice(): Single<String>
+
+    fun setOutputDevice(mixer: String): Completable
+
+    fun getInputDevice(): Single<String>
+
+    fun setInputDevice(mixer: String): Completable
+
+    fun localeLanguage(): Maybe<Language>
+
+    fun setLocaleLanguage(language: Language): Completable
+
+    fun appTheme(): Single<ColorTheme>
+
+    fun setAppTheme(theme: ColorTheme): Completable
+
+    fun sourceTextZoomRate(): Single<Int>
+
+    fun setSourceTextZoomRate(rate: Int): Completable
+
+    fun languageNamesUrl(): Single<String>
+
+    fun setLanguageNamesUrl(server: String): Completable
+
+    fun defaultLanguageNamesUrl(): Single<String>
+
+    fun resetLanguageNamesUrl(): Single<String>
 }

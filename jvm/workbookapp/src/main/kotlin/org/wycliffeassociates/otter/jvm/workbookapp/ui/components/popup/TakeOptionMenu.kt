@@ -16,23 +16,27 @@ class TakeOptionMenu(take: Take) : ContextMenu() {
         addClass("wa-context-menu")
         isAutoHide = true
 
-        val editOption = MenuItem().apply {
-            graphic = Label(messages["open_in_something"]).apply {
-                this.graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
+        val editOption =
+            MenuItem().apply {
+                graphic =
+                    Label(messages["open_in_something"]).apply {
+                        this.graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
+                    }
+                action {
+                    FX.eventbus.fire(ChunkTakeEvent(take, TakeAction.EDIT))
+                }
             }
-            action {
-                FX.eventbus.fire(ChunkTakeEvent(take, TakeAction.EDIT))
+        val deleteOption =
+            MenuItem().apply {
+                addClass("danger")
+                graphic =
+                    Label(messages["delete"]).apply {
+                        this.graphic = FontIcon(MaterialDesign.MDI_DELETE)
+                    }
+                action {
+                    FX.eventbus.fire(ChunkTakeEvent(take, TakeAction.DELETE))
+                }
             }
-        }
-        val deleteOption = MenuItem().apply {
-            addClass("danger")
-            graphic = Label(messages["delete"]).apply {
-                this.graphic = FontIcon(MaterialDesign.MDI_DELETE)
-            }
-            action {
-                FX.eventbus.fire(ChunkTakeEvent(take, TakeAction.DELETE))
-            }
-        }
 
         items.setAll(editOption, deleteOption)
     }

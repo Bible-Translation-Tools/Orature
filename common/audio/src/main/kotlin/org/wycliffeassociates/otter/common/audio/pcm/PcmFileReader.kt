@@ -29,7 +29,7 @@ import java.nio.channels.FileChannel
 internal class PcmFileReader(
     val pcm: PcmFile,
     start: Int? = null,
-    end: Int? = null
+    end: Int? = null,
 ) : AudioFileReader {
     override val sampleRate: Int = pcm.sampleRate
     override val channels: Int = pcm.channels
@@ -78,7 +78,7 @@ internal class PcmFileReader(
                 channel!!.map(
                     FileChannel.MapMode.READ_ONLY,
                     begin.toLong(),
-                    (end - begin).toLong()
+                    (end - begin).toLong(),
                 )
             }
     }
@@ -95,7 +95,6 @@ internal class PcmFileReader(
                 val invokeCleaner = unsafeClass.getMethod("invokeCleaner", ByteBuffer::class.java)
                 invokeCleaner.invoke(unsafe, mappedFile)
             } catch (e: Exception) {
-
             }
             channel?.close()
             mappedFile = null
@@ -118,5 +117,4 @@ internal class PcmFileReader(
 
         return Pair(begin, end)
     }
-
 }

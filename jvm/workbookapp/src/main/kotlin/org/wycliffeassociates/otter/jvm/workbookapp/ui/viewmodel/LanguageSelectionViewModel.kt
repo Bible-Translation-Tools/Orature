@@ -32,7 +32,6 @@ import tornadofx.*
 import java.util.function.Predicate
 
 class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() {
-
     val searchQueryProperty = SimpleStringProperty("")
     val regions = observableListOf<String>()
     val selectedRegions = observableListOf<String>()
@@ -48,34 +47,37 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
 
     init {
         selectedRegions.onChange {
-            regionPredicate = if (it.list.isEmpty()) {
-                Predicate { true }
-            } else {
-                Predicate { language -> selectedRegions.contains(language.region) }
-            }
+            regionPredicate =
+                if (it.list.isEmpty()) {
+                    Predicate { true }
+                } else {
+                    Predicate { language -> selectedRegions.contains(language.region) }
+                }
             filteredLanguages.predicate = regionPredicate.and(queryPredicate)
         }
 
         searchQueryProperty.onChange { q ->
             val query = q?.trim()
-            
-            queryPredicate = if (query.isNullOrBlank()) {
-                Predicate { true }
-            } else {
-                Predicate { language ->
-                    language.slug.contains(query, true)
-                        .or(language.name.contains(query, true))
-                        .or(language.anglicizedName.contains(query, true))
+
+            queryPredicate =
+                if (query.isNullOrBlank()) {
+                    Predicate { true }
+                } else {
+                    Predicate { language ->
+                        language.slug.contains(query, true)
+                            .or(language.name.contains(query, true))
+                            .or(language.anglicizedName.contains(query, true))
+                    }
                 }
-            }
 
             filteredLanguages.predicate = regionPredicate.and(queryPredicate)
 
             if (!query.isNullOrEmpty()) {
                 val lowerQuery = query.lowercase()
-                val comparator = compareByDescending<Language> { language -> language.slug == lowerQuery }
-                    .thenByDescending { language -> language.name.lowercase() == lowerQuery }
-                    .thenByDescending { language -> language.anglicizedName.lowercase() == lowerQuery }
+                val comparator =
+                    compareByDescending<Language> { language -> language.slug == lowerQuery }
+                        .thenByDescending { language -> language.name.lowercase() == lowerQuery }
+                        .thenByDescending { language -> language.anglicizedName.lowercase() == lowerQuery }
 
                 sortedLanguages.comparator = comparator
             }
@@ -103,13 +105,13 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
                         else -> selectedRegions.remove(it)
                     }
                 }
-            }
+            },
         )
         items.add(createMenuSeparator(messages["display"]))
         items.add(
             createMenuItem(messages["anglicized"], false) { selected ->
                 anglicizedProperty.set(selected)
-            }
+            },
         )
         menuItems.setAll(items)
     }
@@ -125,16 +127,17 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
     private fun createMenuItem(
         label: String,
         preSelected: Boolean,
-        onChecked: (Boolean) -> Unit
+        onChecked: (Boolean) -> Unit,
     ): MenuItem {
         return CustomMenuItem().apply {
-            content = CheckboxButton().apply {
-                text = label
-                selectedProperty().onChange {
-                    onChecked(it)
+            content =
+                CheckboxButton().apply {
+                    text = label
+                    selectedProperty().onChange {
+                        onChecked(it)
+                    }
+                    isSelected = preSelected
                 }
-                isSelected = preSelected
-            }
             isHideOnClick = false
         }
     }

@@ -25,10 +25,12 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterCardModel
 import tornadofx.*
 
 class ChapterCell : ListCell<ChapterCardModel>() {
-
     private val chapterCard = ChapterCard()
 
-    override fun updateItem(item: ChapterCardModel?, empty: Boolean) {
+    override fun updateItem(
+        item: ChapterCardModel?,
+        empty: Boolean,
+    ) {
         super.updateItem(item, empty)
 
         if (empty || item == null) {
@@ -36,29 +38,30 @@ class ChapterCell : ListCell<ChapterCardModel>() {
             return
         }
 
-        graphic = chapterCard.apply {
-            titleProperty.set(item.title)
-            notStartedTextProperty.set(FX.messages["notStarted"])
+        graphic =
+            chapterCard.apply {
+                titleProperty.set(item.title)
+                notStartedTextProperty.set(FX.messages["notStarted"])
 
-            if (isSelected) {
-                listView.setOnKeyPressed {
-                    when (it.code) {
-                        KeyCode.ENTER, KeyCode.SPACE -> {
-                            item.source?.let { chapter ->
-                                item.onClick(chapter)
+                if (isSelected) {
+                    listView.setOnKeyPressed {
+                        when (it.code) {
+                            KeyCode.ENTER, KeyCode.SPACE -> {
+                                item.source?.let { chapter ->
+                                    item.onClick(chapter)
+                                }
                             }
-                        }
 
-                        else -> {}
+                            else -> {}
+                        }
+                    }
+                }
+
+                setOnAction {
+                    item.source?.let { chapter ->
+                        item.onClick(chapter)
                     }
                 }
             }
-
-            setOnAction {
-                item.source?.let { chapter ->
-                    item.onClick(chapter)
-                }
-            }
-        }
     }
 }

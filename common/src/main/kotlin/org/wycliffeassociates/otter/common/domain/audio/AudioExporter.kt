@@ -29,57 +29,60 @@ import javax.inject.Inject
 
 const val WAV_TO_MP3_COMPRESSED_RATE = 10 // converting from wav to mp3 yields ~10x smaller file size
 
-class AudioExporter @Inject constructor() {
+class AudioExporter
     @Inject
-    lateinit var audioConverter: AudioConverter
+    constructor() {
+        @Inject
+        lateinit var audioConverter: AudioConverter
 
-    private val logger = LoggerFactory.getLogger(javaClass)
+        private val logger = LoggerFactory.getLogger(javaClass)
 
-    /**
-     * Exports the given wav file to mp3 file
-     * including the relevant metadata.
-     * @param wavAudio the input wav file
-     * @param outputPath either a directory or a complete file path
-     */
-    fun exportMp3(
-        wavAudio: File,
-        outputPath: File,
-        metadata: ExportMetadata
-    ): Completable {
-        val mp3File = if (outputPath.isDirectory) {
-            File(outputPath, wavAudio.nameWithoutExtension + ".mp3")
-        } else {
-            outputPath
+        /**
+         * Exports the given wav file to mp3 file
+         * including the relevant metadata.
+         * @param wavAudio the input wav file
+         * @param outputPath either a directory or a complete file path
+         */
+        fun exportMp3(
+            wavAudio: File,
+            outputPath: File,
+            metadata: ExportMetadata,
+        ): Completable {
+            val mp3File =
+                if (outputPath.isDirectory) {
+                    File(outputPath, wavAudio.nameWithoutExtension + ".mp3")
+                } else {
+                    outputPath
+                }
+
+            return audioConverter.wavToMp3(wavAudio, mp3File)
+                .subscribeOn(Schedulers.io())
+                .andThen(updateMetadata(mp3File, metadata))
         }
 
-        return audioConverter.wavToMp3(wavAudio, mp3File)
-            .subscribeOn(Schedulers.io())
-            .andThen(updateMetadata(mp3File, metadata))
-    }
-
-    private fun updateMetadata(
-        file: File,
-        metadata: ExportMetadata
-    ): Completable {
-        return Completable
-            .fromAction {
-                val oratureAudioFile = OratureAudioFile(file)
-                oratureAudioFile.metadata.setArtists(metadata.contributors.map { it.name })
-                metadata.license?.url?.let {
-                    oratureAudioFile.metadata.setLegalInformationUrl(it)
+        private fun updateMetadata(
+            file: File,
+            metadata: ExportMetadata,
+        ): Completable {
+            return Completable
+                .fromAction {
+                    val oratureAudioFile = OratureAudioFile(file)
+                    oratureAudioFile.metadata.setArtists(metadata.contributors.map { it.name })
+                    metadata.license?.url?.let {
+                        oratureAudioFile.metadata.setLegalInformationUrl(it)
+                    }
+                    oratureAudioFile.importCues(metadata.markers)
+                    oratureAudioFile.update()
                 }
-                oratureAudioFile.importCues(metadata.markers)
-                oratureAudioFile.update()
-            }
-            .subscribeOn(Schedulers.io())
-            .doOnError {
-                logger.error("Error while updating output file metadata.", it)
-            }
-    }
+                .subscribeOn(Schedulers.io())
+                .doOnError {
+                    logger.error("Error while updating output file metadata.", it)
+                }
+        }
 
-    data class ExportMetadata(
-        val license: License?,
-        val contributors: List<Contributor> = listOf(),
-        val markers: List<AudioCue> = listOf()
-    )
-}
+        data class ExportMetadata(
+            val license: License?,
+            val contributors: List<Contributor> = listOf(),
+            val markers: List<AudioCue> = listOf(),
+        )
+    }

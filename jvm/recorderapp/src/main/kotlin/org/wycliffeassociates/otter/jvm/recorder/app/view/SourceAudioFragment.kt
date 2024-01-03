@@ -22,21 +22,20 @@ import javafx.geometry.NodeOrientation
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
+import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
+import org.wycliffeassociates.otter.jvm.recorder.app.viewmodel.RecorderViewModel
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
 import java.io.File
 import java.lang.Exception
 import java.text.MessageFormat
-import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
-import org.wycliffeassociates.otter.jvm.recorder.app.viewmodel.RecorderViewModel
 
 class SourceAudioFragment : Fragment() {
-
     private val vm: RecorderViewModel by inject()
 
     override val root = initializeSourceContent()
-    private fun initializeSourceContent(): SourceContent {
 
+    private fun initializeSourceContent(): SourceContent {
         var sourceText: String? = null
         var sourceTextZoom: Int? = null
         var sourceContentTitle: String? = null
@@ -58,11 +57,12 @@ class SourceAudioFragment : Fragment() {
                 sourceRate = parameters.named["source_rate"]?.toDouble()
                 targetRate = parameters.named["target_rate"]?.toDouble()
 
-                sourceContentTitle = getSourceContentTitle(
-                    parameters.named["book"],
-                    parameters.named["chapter_number"],
-                    parameters.named["unit_title"]
-                )
+                sourceContentTitle =
+                    getSourceContentTitle(
+                        parameters.named["book"],
+                        parameters.named["chapter_number"],
+                        parameters.named["unit_title"],
+                    )
             }
         }
 
@@ -83,13 +83,13 @@ class SourceAudioFragment : Fragment() {
                 when (direction) {
                     "rtl" -> NodeOrientation.RIGHT_TO_LEFT
                     else -> NodeOrientation.LEFT_TO_RIGHT
-                }
+                },
             )
             sourceOrientationProperty.set(
                 when (sourceDirection) {
                     "rtl" -> NodeOrientation.RIGHT_TO_LEFT
                     else -> NodeOrientation.LEFT_TO_RIGHT
-                }
+                },
             )
 
             sourceSpeedRateProperty.set(sourceRate ?: 1.0)
@@ -140,7 +140,11 @@ class SourceAudioFragment : Fragment() {
         root.targetAudioPlayerProperty.set(null)
     }
 
-    private fun initializeAudioPlayer(file: File, start: Int? = null, end: Int? = null): IAudioPlayer? {
+    private fun initializeAudioPlayer(
+        file: File,
+        start: Int? = null,
+        end: Int? = null,
+    ): IAudioPlayer? {
         val connectionFactory = workspace.params["audioConnectionFactory"] as AudioConnectionFactory
         val player = connectionFactory.getPlayer()
         return try {
@@ -155,20 +159,24 @@ class SourceAudioFragment : Fragment() {
         }
     }
 
-    private fun getSourceContentTitle(book: String?, chapter: String?, chunk: String?): String? {
+    private fun getSourceContentTitle(
+        book: String?,
+        chapter: String?,
+        chunk: String?,
+    ): String? {
         return if (book != null && chapter != null) {
             if (chunk != null) {
                 MessageFormat.format(
                     messages["bookChapterChunkTitle"],
                     book,
                     chapter,
-                    chunk
+                    chunk,
                 )
             } else {
                 MessageFormat.format(
                     messages["bookChapterTitle"],
                     book,
-                    chapter
+                    chapter,
                 )
             }
         } else {

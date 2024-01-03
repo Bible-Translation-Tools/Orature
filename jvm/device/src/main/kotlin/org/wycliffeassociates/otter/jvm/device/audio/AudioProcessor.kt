@@ -24,19 +24,19 @@ import be.tarsos.dsp.io.TarsosDSPAudioFloatConverter
 import be.tarsos.dsp.io.TarsosDSPAudioFormat
 
 class AudioProcessor {
-
     val monitor = Object()
 
     val processorFormat = TarsosDSPAudioFormat(44100f, 16, 1, true, false)
     val event = AudioEvent(processorFormat)
     var playbackRate = 1.0
 
-    var wsola = WaveformSimilarityBasedOverlapAdd(
-        WaveformSimilarityBasedOverlapAdd.Parameters.speechDefaults(
-            playbackRate,
-            processorFormat.sampleRate.toDouble()
+    var wsola =
+        WaveformSimilarityBasedOverlapAdd(
+            WaveformSimilarityBasedOverlapAdd.Parameters.speechDefaults(
+                playbackRate,
+                processorFormat.sampleRate.toDouble(),
+            ),
         )
-    )
 
     val overlap: Int
         get() = synchronized(monitor) { wsola.overlap }
@@ -47,12 +47,13 @@ class AudioProcessor {
     fun updatePlaybackRate(rate: Double) {
         playbackRate = rate
         synchronized(monitor) {
-            wsola = WaveformSimilarityBasedOverlapAdd(
-                WaveformSimilarityBasedOverlapAdd.Parameters.speechDefaults(
-                    playbackRate,
-                    processorFormat.sampleRate.toDouble()
+            wsola =
+                WaveformSimilarityBasedOverlapAdd(
+                    WaveformSimilarityBasedOverlapAdd.Parameters.speechDefaults(
+                        playbackRate,
+                        processorFormat.sampleRate.toDouble(),
+                    ),
                 )
-            )
         }
     }
 
@@ -60,7 +61,7 @@ class AudioProcessor {
         val floats = FloatArray(bytes.size / 2)
         TarsosDSPAudioFloatConverter.getConverter(processorFormat).toFloatArray(
             bytes,
-            floats
+            floats,
         )
         event.floatBuffer = floats
         synchronized(monitor) {

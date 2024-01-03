@@ -43,7 +43,6 @@ import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Book
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
-import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.TextItem
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
@@ -70,56 +69,63 @@ class WorkbookDataStoreTest {
         private var sourceChapter = createChapter(sourceChunk)
         private var targetChapter = createChapter(targetChunk)
 
-        private val english = Language(
-            "en",
-            "English",
-            "English",
-            "ltr",
-            true,
-            "Europe"
-        )
+        private val english =
+            Language(
+                "en",
+                "English",
+                "English",
+                "ltr",
+                true,
+                "Europe",
+            )
 
-        private val resourceMetadata = mock<ResourceMetadata> {
-            on { identifier } doReturn "ulb"
-        }
+        private val resourceMetadata =
+            mock<ResourceMetadata> {
+                on { identifier } doReturn "ulb"
+            }
 
-        private val collection = mock<Collection> {
-            on { slug } doReturn "gen"
-            on { titleKey } doReturn "gen"
-        }
+        private val collection =
+            mock<Collection> {
+                on { slug } doReturn "gen"
+                on { titleKey } doReturn "gen"
+            }
 
-        private val sourceBook = mock<Book> {
-            on { resourceMetadata } doReturn resourceMetadata
-            on { chapters } doReturn Observable.fromIterable(listOf(sourceChapter))
-            on { language } doReturn english
-            on { slug } doReturn "gen"
-            on { label } doReturn "Genesis"
-            on { title } doReturn "Genesis"
-            on { modifiedTs } doReturn LocalDateTime.now()
-            on { toCollection() } doReturn collection
-        }
+        private val sourceBook =
+            mock<Book> {
+                on { resourceMetadata } doReturn resourceMetadata
+                on { chapters } doReturn Observable.fromIterable(listOf(sourceChapter))
+                on { language } doReturn english
+                on { slug } doReturn "gen"
+                on { label } doReturn "Genesis"
+                on { title } doReturn "Genesis"
+                on { modifiedTs } doReturn LocalDateTime.now()
+                on { toCollection() } doReturn collection
+            }
 
-        private val targetBook = mock<Book> {
-            on { resourceMetadata } doReturn resourceMetadata
-            on { chapters } doReturn Observable.fromIterable(listOf(targetChapter))
-            on { language } doReturn english
-            on { slug } doReturn "gen"
-            on { label } doReturn "Genesis"
-            on { title } doReturn "Genesis"
-            on { modifiedTs } doReturn LocalDateTime.now()
-            on { toCollection() } doReturn collection
-        }
+        private val targetBook =
+            mock<Book> {
+                on { resourceMetadata } doReturn resourceMetadata
+                on { chapters } doReturn Observable.fromIterable(listOf(targetChapter))
+                on { language } doReturn english
+                on { slug } doReturn "gen"
+                on { label } doReturn "Genesis"
+                on { title } doReturn "Genesis"
+                on { modifiedTs } doReturn LocalDateTime.now()
+                on { toCollection() } doReturn collection
+            }
 
-        private val sourceAudioAccessor = mock<SourceAudioAccessor> {
-            on { getChapter(any(), any()) } doReturn SourceAudio(sourceTakeFile, 0, 10)
-            on { getChunk(any(), any(), any(), any()) } doReturn SourceAudio(sourceTakeFile, 0, 1)
-        }
+        private val sourceAudioAccessor =
+            mock<SourceAudioAccessor> {
+                on { getChapter(any(), any()) } doReturn SourceAudio(sourceTakeFile, 0, 10)
+                on { getChunk(any(), any(), any(), any()) } doReturn SourceAudio(sourceTakeFile, 0, 1)
+            }
 
-        private val workbook = mock<Workbook> {
-            on { source } doReturn sourceBook
-            on { target } doReturn targetBook
-            on { sourceAudioAccessor } doReturn sourceAudioAccessor
-        }
+        private val workbook =
+            mock<Workbook> {
+                on { source } doReturn sourceBook
+                on { target } doReturn targetBook
+                on { sourceAudioAccessor } doReturn sourceAudioAccessor
+            }
 
         private fun createAssociatedAudio() = AssociatedAudio(ReplayRelay.create())
 
@@ -133,7 +139,7 @@ class WorkbookDataStoreTest {
                 contentType = ContentType.TEXT,
                 resources = listOf(),
                 label = "chunk",
-                draftNumber = 1
+                draftNumber = 1,
             )
         }
 
@@ -150,7 +156,7 @@ class WorkbookDataStoreTest {
                 lazy { chunks },
                 Single.just(1),
                 { Completable.complete() },
-                { Completable.complete() }
+                { Completable.complete() },
             )
         }
 
@@ -162,11 +168,12 @@ class WorkbookDataStoreTest {
 
             writeWavFile(sourceTakeFile)
 
-            val configureAudio = ConfigureAudioSystem(
-                testApp.dependencyGraph.injectConnectionFactory(),
-                testApp.dependencyGraph.injectAudioDeviceProvider(),
-                testApp.dependencyGraph.injectAppPreferencesRepository()
-            )
+            val configureAudio =
+                ConfigureAudioSystem(
+                    testApp.dependencyGraph.injectConnectionFactory(),
+                    testApp.dependencyGraph.injectAudioDeviceProvider(),
+                    testApp.dependencyGraph.injectAppPreferencesRepository(),
+                )
             configureAudio.configure()
 
             workbookDataStore = find()

@@ -17,7 +17,6 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import tornadofx.*
 
 class RollingSourceText : VBox() {
-
     val sourceTitleProperty = SimpleStringProperty()
     val sourceTextProperty = SimpleStringProperty()
     val licenseTextProperty = SimpleStringProperty()
@@ -42,14 +41,17 @@ class RollingSourceText : VBox() {
 
                 setCellFactory {
                     object : ListCell<Node>() {
-                        override fun updateItem(item: Node?, empty: Boolean) {
+                        override fun updateItem(
+                            item: Node?,
+                            empty: Boolean,
+                        ) {
                             super.updateItem(item, empty)
 
                             /*
                             allows the list cell width to be overridden to listview.width - insets,
                             without this the cell width will extend beyond the listview boundary causing
                             a horizontal scroll bar and no word wrapping on the label elements.
-                            */
+                             */
                             prefWidthProperty().set(0.0)
 
                             if (item == null) {
@@ -101,7 +103,7 @@ class RollingSourceText : VBox() {
         nodes.add(sourceTitle)
         for (i in 0 until markerLabels.size) {
             nodes.add(
-                buildChunkText(chunks[i], markerLabels[i])
+                buildChunkText(chunks[i], markerLabels[i]),
             )
         }
         nodes.add(licenseText)
@@ -117,7 +119,10 @@ class RollingSourceText : VBox() {
         }
     }
 
-    private fun buildChunkText(textContent: String, chunkLabel: String): HBox {
+    private fun buildChunkText(
+        textContent: String,
+        chunkLabel: String,
+    ): HBox {
         return HBox().apply {
             addClass("source-content__chunk")
             label(chunkLabel) {
@@ -136,12 +141,14 @@ class RollingSourceText : VBox() {
             addClass("source-content__license-text")
 
             textProperty().bind(licenseTextProperty)
-            styleProperty().bind(orientationProperty.objectBinding {
-                when (it) {
-                    NodeOrientation.LEFT_TO_RIGHT -> "-fx-font-style: italic;"
-                    else -> ""
-                }
-            })
+            styleProperty().bind(
+                orientationProperty.objectBinding {
+                    when (it) {
+                        NodeOrientation.LEFT_TO_RIGHT -> "-fx-font-style: italic;"
+                        else -> ""
+                    }
+                },
+            )
         }
     }
 }

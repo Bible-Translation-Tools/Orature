@@ -7,9 +7,12 @@ import org.wycliffeassociates.otter.jvm.controls.event.LanguageSelectedEvent
 import tornadofx.*
 
 class LanguageTableRow(
-    private val unavailableLanguages: ObservableList<Language>
+    private val unavailableLanguages: ObservableList<Language>,
 ) : TableRow<Language>() {
-    override fun updateItem(item: Language?, empty: Boolean) {
+    override fun updateItem(
+        item: Language?,
+        empty: Boolean,
+    ) {
         super.updateItem(item, empty)
 
         if (item == null || isEmpty) {

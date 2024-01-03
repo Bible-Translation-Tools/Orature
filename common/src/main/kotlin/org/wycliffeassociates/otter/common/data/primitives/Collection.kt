@@ -27,5 +27,5 @@ data class Collection(
     var titleKey: String,
     var resourceContainer: ResourceMetadata?,
     var modifiedTs: LocalDateTime? = null,
-    var id: Int = 0
+    var id: Int = 0,
 ) : CollectionOrContent

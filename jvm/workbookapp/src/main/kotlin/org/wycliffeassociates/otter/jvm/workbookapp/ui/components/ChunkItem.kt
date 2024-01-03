@@ -79,12 +79,14 @@ class ChunkItem : VBox() {
                 }
                 label {
                     addClass("chunk-item__show-takes")
-                    graphicProperty().bind(showTakesProperty.objectBinding {
-                        when (it) {
-                            true -> upIcon
-                            else -> downIcon
-                        }
-                    })
+                    graphicProperty().bind(
+                        showTakesProperty.objectBinding {
+                            when (it) {
+                                true -> upIcon
+                                else -> downIcon
+                            }
+                        },
+                    )
                 }
             }
         }
@@ -97,9 +99,10 @@ class ChunkItem : VBox() {
                 addClass("btn", "btn--secondary")
                 text = FX.messages["openVerse"]
                 tooltip(text)
-                graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT).apply {
-                    scaleXProperty().bind(orientationScaleProperty)
-                }
+                graphic =
+                    FontIcon(MaterialDesign.MDI_ARROW_RIGHT).apply {
+                        scaleXProperty().bind(orientationScaleProperty)
+                    }
                 onActionProperty().bind(onChunkOpenActionProperty)
             }
 
@@ -118,9 +121,11 @@ class ChunkItem : VBox() {
     }
 
     fun setOnChunkOpen(op: () -> Unit) {
-        onChunkOpenActionProperty.set(EventHandler {
-            op.invoke()
-        })
+        onChunkOpenActionProperty.set(
+            EventHandler {
+                op.invoke()
+            },
+        )
     }
 
     fun setOnTakeSelected(op: (take: TakeModel) -> Unit) {
@@ -128,7 +133,7 @@ class ChunkItem : VBox() {
             EventHandler {
                 op.invoke(it.source as TakeModel)
                 createTakeViews()
-            }
+            },
         )
     }
 
@@ -148,11 +153,11 @@ class ChunkItem : VBox() {
 
                     setOnTakeSelected {
                         onTakeSelectedActionProperty.value?.handle(
-                            ActionEvent(takeModel, null)
+                            ActionEvent(takeModel, null),
                         )
                     }
                 }
-            }
+            },
         )
     }
 

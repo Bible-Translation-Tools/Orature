@@ -21,5 +21,5 @@ package org.wycliffeassociates.otter.common.data
 enum class ColorTheme(val titleKey: String, val styleClass: String = "") {
     LIGHT("light", "light-theme"),
     DARK("dark", "dark-theme"),
-    SYSTEM("system");
+    SYSTEM("system"),
 }

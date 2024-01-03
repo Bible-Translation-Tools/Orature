@@ -25,7 +25,6 @@ import javafx.scene.control.ListView
 import javafx.util.Duration
 
 class ListAnimationMediator<T : Node> {
-
     var listView: ListView<T>? = null
     var node: T? = null
     var isAnimating = false
@@ -43,13 +42,14 @@ class ListAnimationMediator<T : Node> {
                 // move selected node to top of the list
                 val ttUp = TranslateTransition(Duration.millis(600.0), _node)
                 ttUp.toY = -parentY
-                ttUp.onFinished = EventHandler {
-                    revertAnimation(_node) {
-                        _node.styleClass.remove("selected")
-                        isAnimating = false
-                        callback()
+                ttUp.onFinished =
+                    EventHandler {
+                        revertAnimation(_node) {
+                            _node.styleClass.remove("selected")
+                            isAnimating = false
+                            callback()
+                        }
                     }
-                }
                 ttUp.play()
             }
         }
@@ -72,19 +72,24 @@ class ListAnimationMediator<T : Node> {
         val distance = node.boundsInLocal.height + 5
         val tt = TranslateTransition(Duration.millis(600.0), node)
         tt.byY = distance
-        tt.onFinished = EventHandler {
-            revertAnimation(node)
-        }
+        tt.onFinished =
+            EventHandler {
+                revertAnimation(node)
+            }
         tt.play()
     }
 
-    private fun revertAnimation(node: Node, onFinish: () -> Unit = { }) {
+    private fun revertAnimation(
+        node: Node,
+        onFinish: () -> Unit = { },
+    ) {
         val distance = node.translateY
         val ttRevertY = TranslateTransition(Duration.millis(1.0), node)
         ttRevertY.byY = -distance
-        ttRevertY.onFinished = EventHandler {
-            onFinish()
-        }
+        ttRevertY.onFinished =
+            EventHandler {
+                onFinish()
+            }
         ttRevertY.play()
     }
 }

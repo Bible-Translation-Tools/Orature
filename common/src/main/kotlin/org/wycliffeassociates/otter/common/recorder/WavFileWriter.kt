@@ -22,15 +22,14 @@ import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import org.slf4j.LoggerFactory
-import java.util.concurrent.atomic.AtomicBoolean
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicBoolean
 
 class WavFileWriter(
     private val oratureAudioFile: OratureAudioFile,
     private val audioStream: Observable<ByteArray>,
     private val append: Boolean = false,
-    private val onComplete: () -> Unit
+    private val onComplete: () -> Unit,
 ) {
     private val logger = LoggerFactory.getLogger(WavFileWriter::class.java)
 
@@ -48,26 +47,27 @@ class WavFileWriter(
         writingSubject.onNext(false)
     }
 
-    val writer = Observable
-        .using(
-            {
-                oratureAudioFile.writer(append = append, buffered = true)
-            },
-            { writer ->
-                audioStream.map {
-                    if (record.get()) {
-                        writer.write(it)
-                        writer.flush()
+    val writer =
+        Observable
+            .using(
+                {
+                    oratureAudioFile.writer(append = append, buffered = true)
+                },
+                { writer ->
+                    audioStream.map {
+                        if (record.get()) {
+                            writer.write(it)
+                            writer.flush()
+                        }
                     }
-                }
-            },
-            { writer ->
-                writer.close()
-                writingSubject.onComplete()
-                onComplete()
-            }
-        )
-        .subscribeOn(Schedulers.io())
-        .doOnError { e -> logger.error("Error in WavFileWriter", e) }
-        .subscribe()
+                },
+                { writer ->
+                    writer.close()
+                    writingSubject.onComplete()
+                    onComplete()
+                },
+            )
+            .subscribeOn(Schedulers.io())
+            .doOnError { e -> logger.error("Error in WavFileWriter", e) }
+            .subscribe()
 }

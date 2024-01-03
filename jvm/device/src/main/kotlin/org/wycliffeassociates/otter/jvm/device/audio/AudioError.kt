@@ -22,7 +22,7 @@ import java.lang.Exception
 
 enum class AudioErrorType {
     PLAYBACK,
-    RECORDING
+    RECORDING,
 }
 
 class AudioError(val type: AudioErrorType, val exception: Exception)

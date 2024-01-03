@@ -23,7 +23,6 @@ import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.TestDataStore
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.InsertionException
@@ -32,9 +31,11 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.map
 import java.io.File
 
 class LanguageDaoTest {
-    private val testDatabaseFile = File.createTempFile(
-        "test-language-dao", ".sqlite"
-    ).also(File::deleteOnExit)
+    private val testDatabaseFile =
+        File.createTempFile(
+            "test-language-dao",
+            ".sqlite",
+        ).also(File::deleteOnExit)
     private lateinit var database: AppDatabase
     private val dao by lazy { database.languageDao }
 
@@ -44,7 +45,7 @@ class LanguageDaoTest {
     fun setup() {
         database = AppDatabase(testDatabaseFile)
         dao.insertAll(
-            TestDataStore.languages.map { LanguageMapper().mapToEntity(it) }
+            TestDataStore.languages.map { LanguageMapper().mapToEntity(it) },
         )
     }
 
@@ -65,8 +66,8 @@ class LanguageDaoTest {
                 anglicizedName = "test",
                 direction = "test",
                 gateway = 0,
-                region = "test"
-            )
+                region = "test",
+            ),
         )
         Assert.assertEquals(languages.size + 1, dao.fetchAll().size)
     }
@@ -77,11 +78,11 @@ class LanguageDaoTest {
             val nonZeroId = 1
             dao.insert(
                 LanguageMapper().mapToEntity(languages.first()).copy(
-                    id = nonZeroId
-                )
+                    id = nonZeroId,
+                ),
             )
             Assert.fail(
-                "An exception is expected to throw when inserting a non-zero id."
+                "An exception is expected to throw when inserting a non-zero id.",
             )
         } catch (e: InsertionException) {
             Assert.assertEquals("Entity ID is not 0", e.message)
@@ -90,15 +91,16 @@ class LanguageDaoTest {
         // insert duplicate (slug)
         try {
             dao.insert(
-                LanguageMapper().mapToEntity(languages.first())
+                LanguageMapper().mapToEntity(languages.first()),
             )
             dao.insert(
-                LanguageMapper().mapToEntity(languages.first())
+                LanguageMapper().mapToEntity(languages.first()),
             )
             Assert.fail(
-                "An exception is expected to throw when inserting duplicated slug."
+                "An exception is expected to throw when inserting duplicated slug.",
             )
-        } catch (e: DataAccessException) { }
+        } catch (e: DataAccessException) {
+        }
     }
 
     @Test
@@ -123,7 +125,7 @@ class LanguageDaoTest {
         Assert.assertNotNull(resultEntity)
         Assert.assertEquals(
             en.copy(id = resultEntity!!.id),
-            resultEntity
+            resultEntity,
         )
 
         Assert.assertNull(dao.fetchBySlug("slug-not-exist"))
@@ -138,14 +140,15 @@ class LanguageDaoTest {
     @Test
     fun testUpdateLanguage() {
         val old = dao.fetchBySlug("en")!!
-        val updated = old.copy(
-            slug = "new-en-slug",
-            name = "updated-name",
-            anglicizedName = "updated-anglicize-name",
-            direction = "rtl",
-            gateway = 0,
-            region = "New Region"
-        )
+        val updated =
+            old.copy(
+                slug = "new-en-slug",
+                name = "updated-name",
+                anglicizedName = "updated-anglicize-name",
+                direction = "rtl",
+                gateway = 0,
+                region = "New Region",
+            )
 
         dao.update(updated)
         val result = dao.fetchById(old.id)
@@ -158,14 +161,16 @@ class LanguageDaoTest {
         val aa = languages.find { it.slug == "ar" }!!
         val entity = dao.fetchBySlug("en")!!
 
-        val duplicated = entity.copy(
-            slug = aa.slug
-        )
+        val duplicated =
+            entity.copy(
+                slug = aa.slug,
+            )
 
         try {
             dao.update(duplicated)
             Assert.fail("An exception is expected to throw when setting a duplicated language slug. ")
-        } catch (e: DataAccessException) { }
+        } catch (e: DataAccessException) {
+        }
     }
 
     @Test

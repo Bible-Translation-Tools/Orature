@@ -18,9 +18,8 @@ private const val APP_BAR_WIDTH = 88
 // Set up the canvas for the Waveform and Volume bar
 class NarrationWaveformRenderer(
     // val renderer: NarrationAudioScene
-    val renderer: AudioScene
+    val renderer: AudioScene,
 ) {
-
     val heightProperty = SimpleDoubleProperty(1.0)
     val widthProperty = SimpleDoubleProperty()
     val isRecordingProperty = SimpleBooleanProperty(false)
@@ -42,11 +41,11 @@ class NarrationWaveformRenderer(
         canvas: Canvas,
         location: Int,
         reRecordLocation: Int? = null,
-        nextVerseLocation: Int? = null
+        nextVerseLocation: Int? = null,
     ): List<IntRange> {
         heightProperty.set(canvas.height)
 
-        //val buffer = renderer.getFrameData()
+        // val buffer = renderer.getFrameData()
         val (buffer, viewports) = renderer.getNarrationDrawable(location, reRecordLocation, nextVerseLocation)
 
         fillImageDataWithDefaultColor()
@@ -58,9 +57,9 @@ class NarrationWaveformRenderer(
                 writableImage,
                 0.0,
                 0.0,
-                //DEFAULT_SCREEN_WIDTH.toDouble(),
+                // DEFAULT_SCREEN_WIDTH.toDouble(),
                 canvas.width + ((APP_BAR_WIDTH + VOLUME_BAR_WIDTH) * (canvas.width / DEFAULT_SCREEN_WIDTH.toDouble())),
-                DEFAULT_SCREEN_HEIGHT.toDouble()
+                DEFAULT_SCREEN_HEIGHT.toDouble(),
             )
 
             context.stroke = javafx.scene.paint.Color.RED
@@ -71,7 +70,10 @@ class NarrationWaveformRenderer(
         return viewports
     }
 
-    private fun scaleAmplitude(sample: Double, height: Double): Double {
+    private fun scaleAmplitude(
+        sample: Double,
+        height: Double,
+    ): Double {
         return height / (Short.MAX_VALUE * 2) * (sample + Short.MAX_VALUE)
     }
 
@@ -109,18 +111,21 @@ class NarrationWaveformRenderer(
             pixelFormat,
             imageData,
             0,
-            DEFAULT_SCREEN_WIDTH * 3
+            DEFAULT_SCREEN_WIDTH * 3,
         )
     }
 
-    fun drawImageToCanvas(context: GraphicsContext, canvas: Canvas) {
+    fun drawImageToCanvas(
+        context: GraphicsContext,
+        canvas: Canvas,
+    ) {
         var startingXPosition = (0.0 + minOf(widthProperty.value - DEFAULT_SCREEN_WIDTH, 0.0))
         context.drawImage(
             writableImage,
             startingXPosition,
             0.0,
             DEFAULT_SCREEN_WIDTH.toDouble(),
-            DEFAULT_SCREEN_HEIGHT.toDouble()
+            DEFAULT_SCREEN_HEIGHT.toDouble(),
         )
     }
 

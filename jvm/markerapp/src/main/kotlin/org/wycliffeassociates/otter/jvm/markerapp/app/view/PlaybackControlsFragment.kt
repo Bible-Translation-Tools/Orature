@@ -21,8 +21,6 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 import com.jfoenix.controls.JFXButton
 import javafx.beans.binding.Bindings
 import javafx.geometry.Pos
-import javafx.scene.control.Button
-import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import org.kordamp.ikonli.javafx.FontIcon
 import org.slf4j.LoggerFactory
@@ -31,7 +29,6 @@ import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseRequest
 import tornadofx.*
 
 class PlaybackControlsFragment : Fragment() {
-
     private val logger = LoggerFactory.getLogger(PlaybackControlsFragment::class.java)
 
     var refreshViewProperty = {}
@@ -52,93 +49,103 @@ class PlaybackControlsFragment : Fragment() {
 
     private lateinit var leftControls: Region
 
-    private val playBtn = JFXButton().apply {
-        styleClass.addAll(
-            playButtonStyle,
-            roundedButtonStyle
-        )
-        graphicProperty().bind(
-            Bindings.createObjectBinding(
-                {
-                    when (viewModel.isPlayingProperty.value) {
-                        true -> pauseIcon
-                        false -> playIcon
-                    }
-                },
-                viewModel.isPlayingProperty
+    private val playBtn =
+        JFXButton().apply {
+            styleClass.addAll(
+                playButtonStyle,
+                roundedButtonStyle,
             )
-        )
-        setOnAction { viewModel.mediaToggle() }
-    }
-
-    private val nextBtn = JFXButton().apply {
-        styleClass.addAll(
-            seekButtonStyle,
-            roundedButtonStyle
-        )
-        graphic = nextIcon
-        setOnAction { viewModel.seekNext() }
-    }
-
-    private val previousBtn = JFXButton().apply {
-        styleClass.addAll(
-            seekButtonStyle,
-            roundedButtonStyle
-        )
-        graphic = previousIcon
-        setOnAction { viewModel.seekPrevious() }
-    }
-
-    private val undoBtn = JFXButton().apply {
-        text = messages["undo"]
-        addClass("btn", "btn--secondary", "btn--white-on-dark")
-
-        setOnAction {
-            viewModel.undoMarker()
-            refreshViewProperty.invoke()
+            graphicProperty().bind(
+                Bindings.createObjectBinding(
+                    {
+                        when (viewModel.isPlayingProperty.value) {
+                            true -> pauseIcon
+                            false -> playIcon
+                        }
+                    },
+                    viewModel.isPlayingProperty,
+                ),
+            )
+            setOnAction { viewModel.mediaToggle() }
         }
-    }
 
-    private val redoBtn = JFXButton().apply {
-        text = messages["redo"]
-        addClass("btn", "btn--secondary", "btn--white-on-dark")
-
-        setOnAction {
-            viewModel.redoMarker()
-            refreshViewProperty.invoke()
+    private val nextBtn =
+        JFXButton().apply {
+            styleClass.addAll(
+                seekButtonStyle,
+                roundedButtonStyle,
+            )
+            graphic = nextIcon
+            setOnAction { viewModel.seekNext() }
         }
-    }
 
-    private val closeBtn = JFXButton().apply {
-        text = messages["continue"]
-        graphic = continueIcon
-        styleClass.addAll("btn", "btn--primary", "btn--borderless", continueButtonStyle)
-
-        disableProperty().bind(viewModel.isLoadingProperty)
-        setOnAction {
-            fire(PluginCloseRequestEvent)
+    private val previousBtn =
+        JFXButton().apply {
+            styleClass.addAll(
+                seekButtonStyle,
+                roundedButtonStyle,
+            )
+            graphic = previousIcon
+            setOnAction { viewModel.seekPrevious() }
         }
-    }
 
-    override val root = borderpane {
-        styleClass.add(rootStyles)
-        left = region {
-            leftControls = this
+    private val undoBtn =
+        JFXButton().apply {
+            text = messages["undo"]
+            addClass("btn", "btn--secondary", "btn--white-on-dark")
+
+            setOnAction {
+                viewModel.undoMarker()
+                refreshViewProperty.invoke()
+            }
         }
-        center = hbox {
+
+    private val redoBtn =
+        JFXButton().apply {
+            text = messages["redo"]
+            addClass("btn", "btn--secondary", "btn--white-on-dark")
+
+            setOnAction {
+                viewModel.redoMarker()
+                refreshViewProperty.invoke()
+            }
+        }
+
+    private val closeBtn =
+        JFXButton().apply {
+            text = messages["continue"]
+            graphic = continueIcon
+            styleClass.addAll("btn", "btn--primary", "btn--borderless", continueButtonStyle)
+
+            disableProperty().bind(viewModel.isLoadingProperty)
+            setOnAction {
+                fire(PluginCloseRequestEvent)
+            }
+        }
+
+    override val root =
+        borderpane {
             styleClass.add(rootStyles)
-            alignment = Pos.CENTER
-            add(previousBtn)
-            add(playBtn)
-            add(nextBtn)
+            left =
+                region {
+                    leftControls = this
+                }
+            center =
+                hbox {
+                    styleClass.add(rootStyles)
+                    alignment = Pos.CENTER
+                    add(previousBtn)
+                    add(playBtn)
+                    add(nextBtn)
+                }
+            right =
+                hbox {
+                    leftControls.prefWidthProperty().bind(this.widthProperty())
+                    alignment = Pos.CENTER_RIGHT
+                    spacing = 10.0
+                    add(undoBtn)
+                    add(redoBtn)
+                    add(closeBtn)
+                }
         }
-        right = hbox {
-            leftControls.prefWidthProperty().bind(this.widthProperty())
-            alignment = Pos.CENTER_RIGHT
-            spacing = 10.0
-            add(undoBtn)
-            add(redoBtn)
-            add(closeBtn)
-        }
-    }
 }

@@ -30,7 +30,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.TakeEnt
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.TakeRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.CollectionMapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.MarkerMapper
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.TakeMapper
 import java.io.File
 import java.time.LocalDate
 
@@ -39,12 +38,13 @@ class TestTakeDao {
     private val database = AppDatabase(testDatabaseFile)
     private val dao = database.takeDao
 
-    private val files = listOf(
-        File("take1.wav"),
-        File("take2.wav"),
-        File("take3.wav"),
-        File("take4.wav")
-    )
+    private val files =
+        listOf(
+            File("take1.wav"),
+            File("take2.wav"),
+            File("take3.wav"),
+            File("take4.wav"),
+        )
 
     @Before
     fun setup() {
@@ -92,19 +92,20 @@ class TestTakeDao {
         val contentFkToDelete = 0
         val takes = dao.fetchAll()
         takes.forEach { if (it.contentFk % 2 == 0) dao.softDeleteTake(it) }
-        val deletedTakes = dao.fetchSoftDeletedTakes(
-            CollectionEntity(
-                contentFkToDelete,
-                null,
-                null,
-                "",
-                "",
-                "",
-                0,
-                null,
-                null
+        val deletedTakes =
+            dao.fetchSoftDeletedTakes(
+                CollectionEntity(
+                    contentFkToDelete,
+                    null,
+                    null,
+                    "",
+                    "",
+                    "",
+                    0,
+                    null,
+                    null,
+                ),
             )
-        )
         deletedTakes.forEach {
             assertTrue("Soft deleted take matches content fk", it.contentFk == contentFkToDelete)
         }
@@ -133,7 +134,10 @@ class TestTakeDao {
         }
     }
 
-    private fun TakeDao.softDeleteTake(take: TakeEntity, expiry: LocalDate = LocalDate.now()) {
+    private fun TakeDao.softDeleteTake(
+        take: TakeEntity,
+        expiry: LocalDate = LocalDate.now(),
+    ) {
         update(take.apply { deletedTs = expiry.toString() })
     }
 }

@@ -26,13 +26,15 @@ import javafx.scene.control.Label
 import javafx.scene.layout.VBox
 
 class ChapterBanner() : VBox() {
-
     @FXML
     lateinit var bookTitle: Label
+
     @FXML
     lateinit var chapterCount: Label
+
     @FXML
     lateinit var chunkCount: Label
+
     @FXML
     lateinit var openButton: Button
 

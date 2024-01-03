@@ -34,7 +34,7 @@ class Github(private val apiUrl: String) {
     fun postRequest(
         apiMethod: String,
         headers: List<Pair<String?, String?>>?,
-        payload: String?
+        payload: String?,
     ): String? {
         val urlString = if (apiMethod.isEmpty()) apiUrl else "$apiUrl/$apiMethod"
         val url = URL(urlString)

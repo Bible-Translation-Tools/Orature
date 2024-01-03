@@ -21,7 +21,7 @@ package org.wycliffeassociates.otter.common.data.primitives
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 
-@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class Language(
     @JsonProperty("lc")
     var slug: String,
@@ -35,5 +35,5 @@ data class Language(
     var isGateway: Boolean,
     @JsonProperty("lr")
     var region: String,
-    var id: Int = 0
+    var id: Int = 0,
 )

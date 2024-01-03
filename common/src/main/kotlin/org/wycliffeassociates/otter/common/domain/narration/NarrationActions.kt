@@ -15,8 +15,13 @@ import kotlin.math.absoluteValue
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 internal interface NarrationAction {
-    fun execute(totalVerses: MutableList<VerseNode>, workingAudio: AudioFile)
+    fun execute(
+        totalVerses: MutableList<VerseNode>,
+        workingAudio: AudioFile,
+    )
+
     fun undo(totalVerses: MutableList<VerseNode>)
+
     fun redo(totalVerses: MutableList<VerseNode>)
 }
 
@@ -25,26 +30,28 @@ internal interface NarrationAction {
  * It doesn't track the end position of the verse. It should be updated when recording is paused.
  */
 internal class NewVerseAction(
-    private val verseIndex: Int
+    private val verseIndex: Int,
 ) : NarrationAction {
     private val logger = LoggerFactory.getLogger(NarrationAction::class.java)
 
     internal var node: VerseNode? = null
 
     override fun execute(
-        totalVerses: MutableList<VerseNode>, workingAudio: AudioFile
+        totalVerses: MutableList<VerseNode>,
+        workingAudio: AudioFile,
     ) {
         logger.info("New marker added: ${totalVerses[verseIndex].marker.formattedLabel}")
 
         val start = if (workingAudio.totalFrames == 0) 0 else workingAudio.totalFrames + 1
         val end = start
 
-        node = VerseNode(
-            placed = true, totalVerses[verseIndex].marker.clone()
-        ).also {
-            it.addStart(start)
-            totalVerses[verseIndex] = it.copy()
-        }
+        node =
+            VerseNode(
+                placed = true, totalVerses[verseIndex].marker.clone(),
+            ).also {
+                it.addStart(start)
+                totalVerses[verseIndex] = it.copy()
+            }
     }
 
     override fun undo(totalVerses: MutableList<VerseNode>) {
@@ -59,7 +66,10 @@ internal class NewVerseAction(
         }
     }
 
-    fun finalize(end: Int, totalVerses: MutableList<VerseNode>) {
+    fun finalize(
+        end: Int,
+        totalVerses: MutableList<VerseNode>,
+    ) {
         node?.let { node ->
             node.finalize(end)
             totalVerses[verseIndex] = node.copy()
@@ -72,7 +82,7 @@ internal class NewVerseAction(
  * It doesn't track the end position of the verse. It should be updated when recording is stopped.
  */
 internal class RecordAgainAction(
-    private val verseIndex: Int
+    private val verseIndex: Int,
 ) : NarrationAction {
     private val logger = LoggerFactory.getLogger(RecordAgainAction::class.java)
 
@@ -80,7 +90,8 @@ internal class RecordAgainAction(
     internal var previous: VerseNode? = null
 
     override fun execute(
-        totalVerses: MutableList<VerseNode>, workingAudio: AudioFile
+        totalVerses: MutableList<VerseNode>,
+        workingAudio: AudioFile,
     ) {
         logger.info("Recording again for: ${totalVerses[verseIndex].marker.formattedLabel}")
         previous = totalVerses[verseIndex].copy()
@@ -88,13 +99,14 @@ internal class RecordAgainAction(
         val start = if (workingAudio.totalFrames == 0) 0 else workingAudio.totalFrames + 1
         val end = start
 
-        node = VerseNode(
-            placed = true,
-            totalVerses[verseIndex].marker.clone(),
-            mutableListOf(start..end)
-        ).also {
-            totalVerses[verseIndex] = it.copy()
-        }
+        node =
+            VerseNode(
+                placed = true,
+                totalVerses[verseIndex].marker.clone(),
+                mutableListOf(start..end),
+            ).also {
+                totalVerses[verseIndex] = it.copy()
+            }
     }
 
     override fun undo(totalVerses: MutableList<VerseNode>) {
@@ -111,7 +123,10 @@ internal class RecordAgainAction(
         }
     }
 
-    fun finalize(end: Int, totalVerses: MutableList<VerseNode>) {
+    fun finalize(
+        end: Int,
+        totalVerses: MutableList<VerseNode>,
+    ) {
         node?.let { node ->
             node.finalize(end)
             totalVerses[verseIndex] = node.copy()
@@ -127,7 +142,8 @@ internal class RecordAgainAction(
  * to the verse index and the previous verse.
  */
 internal class MoveMarkerAction(
-    private val verseIndex: Int, private val delta: Int
+    private val verseIndex: Int,
+    private val delta: Int,
 ) : NarrationAction {
     private val logger = LoggerFactory.getLogger(MoveMarkerAction::class.java)
 
@@ -139,9 +155,10 @@ internal class MoveMarkerAction(
 
     // Called when marker is set and mouse button is released
     override fun execute(
-        totalVerses: MutableList<VerseNode>, workingAudio: AudioFile
+        totalVerses: MutableList<VerseNode>,
+        workingAudio: AudioFile,
     ) {
-        logger.info("Moving marker: ${totalVerses[verseIndex].marker.formattedLabel} by ${delta} frames")
+        logger.info("Moving marker: ${totalVerses[verseIndex].marker.formattedLabel} by $delta frames")
         oldPrecedingVerse = totalVerses.getOrNull(verseIndex - 1)?.copy()
         oldVerse = totalVerses[verseIndex].copy()
 
@@ -210,25 +227,31 @@ internal class MoveMarkerAction(
  * with new recording from an external app.
  */
 internal class EditVerseAction(
-    private val verseIndex: Int, private val start: Int, private val end: Int
+    private val verseIndex: Int,
+    private val start: Int,
+    private val end: Int,
 ) : NarrationAction {
     private val logger = LoggerFactory.getLogger(EditVerseAction::class.java)
 
     var node: VerseNode? = null
     var previous: VerseNode? = null
 
-    override fun execute(totalVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
+    override fun execute(
+        totalVerses: MutableList<VerseNode>,
+        workingAudio: AudioFile,
+    ) {
         logger.info("Editing: ${totalVerses[verseIndex].marker.formattedLabel}")
         previous = totalVerses[verseIndex]
 
         val vm = totalVerses[verseIndex].marker.clone()
-        node = VerseNode(
-            placed = true,
-            vm,
-            mutableListOf(start..end)
-        ).also {
-            totalVerses[verseIndex] = it.copy()
-        }
+        node =
+            VerseNode(
+                placed = true,
+                vm,
+                mutableListOf(start..end),
+            ).also {
+                totalVerses[verseIndex] = it.copy()
+            }
     }
 
     override fun undo(totalVerses: MutableList<VerseNode>) {
@@ -254,7 +277,10 @@ internal class ResetAllAction(private val chapterAudio: AssociatedAudio) : Narra
     private val nodes = ArrayList<VerseNode>()
     private var recoverableTake: Take? = null
 
-    override fun execute(totalVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
+    override fun execute(
+        totalVerses: MutableList<VerseNode>,
+        workingAudio: AudioFile,
+    ) {
         logger.info("Reset all action: clearing all markers")
         // use copy to get nodes that won't share the same pointer otherwise clearing totalVerses will result in
         // erasing the state from nodes as well.
@@ -294,13 +320,16 @@ internal class ResetAllAction(private val chapterAudio: AssociatedAudio) : Narra
 }
 
 internal class ChapterEditedAction(
-    private val newList: List<VerseNode>
+    private val newList: List<VerseNode>,
 ) : NarrationAction {
     private val logger = LoggerFactory.getLogger(ChapterEditedAction::class.java)
 
     private val nodes = ArrayList<VerseNode>()
 
-    override fun execute(totalVerses: MutableList<VerseNode>, workingAudio: AudioFile) {
+    override fun execute(
+        totalVerses: MutableList<VerseNode>,
+        workingAudio: AudioFile,
+    ) {
         logger.info("Chapter edited action")
 
         nodes.addAll(totalVerses)

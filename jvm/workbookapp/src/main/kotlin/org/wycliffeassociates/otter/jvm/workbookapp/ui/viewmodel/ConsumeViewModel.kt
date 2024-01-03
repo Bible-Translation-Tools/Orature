@@ -15,11 +15,11 @@ import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
-import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
-import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
+import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
+import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
 import org.wycliffeassociates.otter.jvm.controls.waveform.WAVEFORM_MAX_HEIGHT
@@ -30,7 +30,6 @@ import java.io.File
 import javax.inject.Inject
 
 class ConsumeViewModel : ViewModel(), IMarkerViewModel {
-
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
     val translationViewModel: TranslationViewModel2 by inject()
@@ -112,17 +111,17 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
         }
     }
 
-
     private fun createWaveformImages(audio: OratureAudioFile) {
         imageWidthProperty.set(computeImageWidth(width, SECONDS_ON_SCREEN))
 
-        waveform = builder.buildAsync(
-            audio.reader(),
-            width = imageWidthProperty.value.toInt(),
-            height = height,
-            wavColor = Color.web(WAV_COLOR),
-            background = Color.web(BACKGROUND_COLOR)
-        )
+        waveform =
+            builder.buildAsync(
+                audio.reader(),
+                width = imageWidthProperty.value.toInt(),
+                height = height,
+                wavColor = Color.web(WAV_COLOR),
+                background = Color.web(BACKGROUND_COLOR),
+            )
     }
 
     fun cleanup() {
@@ -143,10 +142,11 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
         }
 
         waveformAudioPlayerProperty.set(player)
-        audioController = AudioPlayerController().also {
-            it.load(player)
-            isPlayingProperty.bind(it.isPlayingProperty)
-        }
+        audioController =
+            AudioPlayerController().also {
+                it.load(player)
+                isPlayingProperty.bind(it.isPlayingProperty)
+            }
 
         return audio
     }

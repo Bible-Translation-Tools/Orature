@@ -61,12 +61,14 @@ class TakeItem : HBox() {
         button {
             addClass("btn", "btn--icon")
             tooltip(messages["select"])
-            graphicProperty().bind(selectedProperty.objectBinding {
-                when (it) {
-                    true -> selectedIcon
-                    else -> promoteIcon
-                }
-            })
+            graphicProperty().bind(
+                selectedProperty.objectBinding {
+                    when (it) {
+                        true -> selectedIcon
+                        else -> promoteIcon
+                    }
+                },
+            )
             selectedProperty.onChange {
                 togglePseudoClass("selected", it)
             }

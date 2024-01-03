@@ -11,13 +11,16 @@ import kotlin.math.max
 import kotlin.math.min
 
 class AudioSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
-    private val thumb = Rectangle(10.0, 10.0).apply {
-        addClass("wa-audio-slider-thumb")
-    }
-    private val root = HBox().apply {
-        addClass("audio-scroll-bar__track")
-        add(thumb)
-    }
+    private val thumb =
+        Rectangle(10.0, 10.0).apply {
+            addClass("wa-audio-slider-thumb")
+        }
+    private val root =
+        HBox().apply {
+            addClass("audio-scroll-bar__track")
+            add(thumb)
+        }
+
     init {
         control.player.onChangeAndDoNow {
             resizeThumbWidth()

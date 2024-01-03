@@ -6,11 +6,10 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
 import javafx.geometry.Pos
-import javafx.scene.layout.Region
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
@@ -22,67 +21,66 @@ import java.text.MessageFormat
 class NarrationToolBar : View() {
     private val viewModel by inject<NarrationViewModel>()
 
+    override val root =
+        hbox {
+            addClass("narration-toolbar", "narration-toolbar__play-controls")
+            alignment = Pos.CENTER_LEFT
+            button {
+                addClass("btn", "btn--secondary")
+                addPseudoClass("active")
+                tooltip { textProperty().bind(this@button.textProperty()) }
 
-    override val root = hbox {
-        addClass("narration-toolbar", "narration-toolbar__play-controls")
-        alignment = Pos.CENTER_LEFT
-        button {
-            addClass("btn", "btn--secondary")
-            addPseudoClass("active")
-            tooltip { textProperty().bind(this@button.textProperty()) }
+                disableWhen {
+                    viewModel.isRecordingProperty.or(viewModel.hasVersesProperty.not())
+                }
 
-
-            disableWhen {
-                viewModel.isRecordingProperty.or(viewModel.hasVersesProperty.not())
-            }
-
-            viewModel.isPlayingProperty.onChangeAndDoNow {
-                it?.let { playing ->
-                    runLater {
-                        if (!playing) {
-                            graphic = FontIcon(MaterialDesign.MDI_PLAY)
-                            text = messages["playAll"]
-                            togglePseudoClass("active", false)
-                        } else {
-                            graphic = FontIcon(MaterialDesign.MDI_PAUSE)
-                            text = messages["pause"]
-                            togglePseudoClass("active", true)
+                viewModel.isPlayingProperty.onChangeAndDoNow {
+                    it?.let { playing ->
+                        runLater {
+                            if (!playing) {
+                                graphic = FontIcon(MaterialDesign.MDI_PLAY)
+                                text = messages["playAll"]
+                                togglePseudoClass("active", false)
+                            } else {
+                                graphic = FontIcon(MaterialDesign.MDI_PAUSE)
+                                text = messages["pause"]
+                                togglePseudoClass("active", true)
+                            }
                         }
                     }
                 }
-            }
 
-            setOnAction {
-                if (viewModel.isPlayingProperty.value) {
-                    viewModel.pausePlayback()
-                } else {
-                    viewModel.playAll()
+                setOnAction {
+                    if (viewModel.isPlayingProperty.value) {
+                        viewModel.pausePlayback()
+                    } else {
+                        viewModel.playAll()
+                    }
+                }
+            }
+            button {
+                addClass("btn", "btn--secondary")
+                tooltip(messages["previousVerse"])
+                graphic = FontIcon(MaterialDesign.MDI_SKIP_PREVIOUS)
+                setOnAction {
+                    viewModel.seekToPrevious()
+                }
+                disableWhen {
+                    viewModel.isPlayingProperty.or(viewModel.isRecordingProperty).or(viewModel.hasVersesProperty.not())
+                }
+            }
+            button {
+                addClass("btn", "btn--secondary")
+                tooltip(messages["nextVerse"])
+                graphic = FontIcon(MaterialDesign.MDI_SKIP_NEXT)
+                setOnAction {
+                    viewModel.seekToNext()
+                }
+                disableWhen {
+                    viewModel.isPlayingProperty.or(viewModel.isRecordingProperty).or(viewModel.hasVersesProperty.not())
                 }
             }
         }
-        button {
-            addClass("btn", "btn--secondary")
-            tooltip(messages["previousVerse"])
-            graphic = FontIcon(MaterialDesign.MDI_SKIP_PREVIOUS)
-            setOnAction {
-                viewModel.seekToPrevious()
-            }
-            disableWhen {
-                viewModel.isPlayingProperty.or(viewModel.isRecordingProperty).or(viewModel.hasVersesProperty.not())
-            }
-        }
-        button {
-            addClass("btn", "btn--secondary")
-            tooltip(messages["nextVerse"])
-            graphic = FontIcon(MaterialDesign.MDI_SKIP_NEXT)
-            setOnAction {
-                viewModel.seekToNext()
-            }
-            disableWhen {
-                viewModel.isPlayingProperty.or(viewModel.isRecordingProperty).or(viewModel.hasVersesProperty.not())
-            }
-        }
-    }
 }
 
 class NarrationToolbarViewModel : ViewModel() {
@@ -92,14 +90,15 @@ class NarrationToolbarViewModel : ViewModel() {
     private val narrationViewModel: NarrationViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
-    val titleProperty = workbookDataStore.activeWorkbookProperty.stringBinding {
-        it?.let {
-            MessageFormat.format(
-                messages["narrationTitle"],
-                it.target.title
-            )
-        } ?: ""
-    }
+    val titleProperty =
+        workbookDataStore.activeWorkbookProperty.stringBinding {
+            it?.let {
+                MessageFormat.format(
+                    messages["narrationTitle"],
+                    it.target.title,
+                )
+            } ?: ""
+        }
 
     val chapterTitleProperty = SimpleStringProperty()
 

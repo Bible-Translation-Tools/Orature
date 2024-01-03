@@ -24,11 +24,11 @@ import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleStringProperty
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.assets.initialization.InitializeApp
+import org.wycliffeassociates.otter.common.domain.theme.AppTheme
+import org.wycliffeassociates.otter.jvm.device.ConfigureAudioSystem
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
 import javax.inject.Inject
-import org.wycliffeassociates.otter.common.domain.theme.AppTheme
-import org.wycliffeassociates.otter.jvm.device.ConfigureAudioSystem
 
 class SplashScreenViewModel : ViewModel() {
     private val logger = LoggerFactory.getLogger(SplashScreenViewModel::class.java)

@@ -5,7 +5,10 @@ import javafx.scene.canvas.GraphicsContext
 import javafx.scene.paint.Paint
 
 class BaseWaveLine : IDrawable {
-    override fun draw(context: GraphicsContext, canvas: Canvas) {
+    override fun draw(
+        context: GraphicsContext,
+        canvas: Canvas,
+    ) {
         context.fill = Paint.valueOf("#1A1A1A")
         context.stroke = Paint.valueOf("#1A1A1A")
         context.lineWidth = 1.0

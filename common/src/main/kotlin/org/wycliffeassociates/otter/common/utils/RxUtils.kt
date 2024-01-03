@@ -28,5 +28,4 @@ import io.reactivex.Observable
  * nulls from ever appearing in an Observable, which would cause a crash in that
  * two-step map/filter example.
  */
-fun <T, R : Any> Observable<T>.mapNotNull(f: (T) -> R?): Observable<R> =
-    concatMapIterable { listOfNotNull(f(it)) }
+fun <T, R : Any> Observable<T>.mapNotNull(f: (T) -> R?): Observable<R> = concatMapIterable { listOfNotNull(f(it)) }

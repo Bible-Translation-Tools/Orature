@@ -33,26 +33,32 @@ class FileNamer(
     val chunkCount: Long,
     val chapterCount: Long,
     val chapterTitle: String,
-    val chapterSort: Int
+    val chapterSort: Int,
 ) {
     init {
         checkStartLessThanEnd()
     }
 
     private fun checkStartLessThanEnd() {
-        if (end != null && start == null)
+        if (end != null && start == null) {
             throw IllegalStateException("start should not be null if end is not null")
-        if (start != null && end == null)
+        }
+        if (start != null && end == null) {
             throw IllegalStateException("end should not be null if start is not null")
+        }
         start?.let { s ->
             end?.let { e ->
-                if (s > e)
+                if (s > e) {
                     throw IllegalStateException("start > end")
+                }
             }
         }
     }
 
-    fun generateName(takeNumber: Int, format: AudioFileFormat): String {
+    fun generateName(
+        takeNumber: Int,
+        format: AudioFileFormat,
+    ): String {
         return listOfNotNull(
             languageSlug,
             rcSlug,
@@ -61,7 +67,7 @@ class FileNamer(
             formatVerseNumber(),
             formatSort(),
             formatContentType(),
-            "t$takeNumber"
+            "t$takeNumber",
         ).joinToString("_", postfix = ".${format.extension}")
     }
 
@@ -73,10 +79,11 @@ class FileNamer(
 
     fun formatVerseNumber(): String? {
         val verseFormat = if (chunkCount > 99) "%03d" else "%02d"
-        val verseNum = when (start) {
-            null -> null
-            else -> verseFormat.format(sort)
-        }
+        val verseNum =
+            when (start) {
+                null -> null
+                else -> verseFormat.format(sort)
+            }
         return verseNum?.let { "v$it" }
     }
 
@@ -96,19 +103,21 @@ class FileNamer(
 
     companion object {
         const val DEFAULT_RC_SLUG = "reg"
-        val takeFilenamePattern: Pattern = run {
-            val chapter = """_c(\d+)"""
-            val verse = """(?:_v(\d+))?"""
-            val sort = """(?:_s(\d+))?"""
-            val type = """(?:_([A-Za-z]+))?"""
-            val take = """_t(\d+)"""
-            val extensionDelim = """\."""
-            Pattern.compile(chapter + verse + sort + type + take + extensionDelim)
-        }
-        val inProgressNarrationPattern: Pattern = run {
-            val chapter = """c(\d+)/"""
-            val fileName = "(chapter_narration.pcm|active_verses.json)"
-            Pattern.compile(chapter + fileName)
-        }
+        val takeFilenamePattern: Pattern =
+            run {
+                val chapter = """_c(\d+)"""
+                val verse = """(?:_v(\d+))?"""
+                val sort = """(?:_s(\d+))?"""
+                val type = """(?:_([A-Za-z]+))?"""
+                val take = """_t(\d+)"""
+                val extensionDelim = """\."""
+                Pattern.compile(chapter + verse + sort + type + take + extensionDelim)
+            }
+        val inProgressNarrationPattern: Pattern =
+            run {
+                val chapter = """c(\d+)/"""
+                val fileName = "(chapter_narration.pcm|active_verses.json)"
+                Pattern.compile(chapter + fileName)
+            }
     }
 }

@@ -18,30 +18,31 @@
  */
 package org.wycliffeassociates.otter.common.domain.audio
 
-import org.junit.Assert.assertTrue
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.wycliffeassociates.otter.common.createTestWavFile
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.License
 import java.io.File
 import kotlin.io.path.createTempDirectory
-import org.wycliffeassociates.otter.common.createTestWavFile
 
 class AudioExporterTest {
-
     @Test
     fun exportMp3() {
-
-        val inputFile = createTestWavFile(File("./"))
-            .apply { deleteOnExit() }
-        val outputDir = createTempDirectory().toFile()
-            .apply { deleteOnExit() }
+        val inputFile =
+            createTestWavFile(File("./"))
+                .apply { deleteOnExit() }
+        val outputDir =
+            createTempDirectory().toFile()
+                .apply { deleteOnExit() }
 
         val license = License.CCBYSA4_0
-        val contributors = listOf(
-            Contributor("Test User 1"),
-            Contributor("Test User 2")
-        )
+        val contributors =
+            listOf(
+                Contributor("Test User 1"),
+                Contributor("Test User 2"),
+            )
 
         AudioExporter()
             .apply {

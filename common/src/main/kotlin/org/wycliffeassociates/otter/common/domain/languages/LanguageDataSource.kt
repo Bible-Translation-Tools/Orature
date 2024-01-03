@@ -28,20 +28,23 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.jackson.JacksonConverterFactory
 import javax.inject.Inject
 
-class LanguageDataSource @Inject constructor() : ILanguageDataSource {
-    override fun fetchLanguageNames(url: String): Observable<List<Language>> {
-        // Using localhost as a base url is a workaround, because retrofit always requires base url to be set,
-        // even for full dynamic urls like in this case.
-        // When retrofit sees that base url and target url are different (scheme, domain),
-        // it will use the latter
+class LanguageDataSource
+    @Inject
+    constructor() : ILanguageDataSource {
+        override fun fetchLanguageNames(url: String): Observable<List<Language>> {
+            // Using localhost as a base url is a workaround, because retrofit always requires base url to be set,
+            // even for full dynamic urls like in this case.
+            // When retrofit sees that base url and target url are different (scheme, domain),
+            // it will use the latter
 
-        val request = Retrofit.Builder()
-            .baseUrl("http://localhost")
-            .addConverterFactory(JacksonConverterFactory.create(jacksonObjectMapper()))
-            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .build()
-            .create(LanguagesApi::class.java)
+            val request =
+                Retrofit.Builder()
+                    .baseUrl("http://localhost")
+                    .addConverterFactory(JacksonConverterFactory.create(jacksonObjectMapper()))
+                    .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                    .build()
+                    .create(LanguagesApi::class.java)
 
-        return request.fetchLanguages(url)
+            return request.fetchLanguages(url)
+        }
     }
-}

@@ -35,5 +35,5 @@ data class ResourceMetadataEntity(
     var version: String,
     var license: String,
     var path: String,
-    var derivedFromFk: Int?
+    var derivedFromFk: Int?,
 )

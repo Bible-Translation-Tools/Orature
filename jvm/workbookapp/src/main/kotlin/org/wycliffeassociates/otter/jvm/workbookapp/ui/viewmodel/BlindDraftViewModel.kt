@@ -18,14 +18,14 @@ import org.wycliffeassociates.otter.common.domain.IUndoable
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
+import org.wycliffeassociates.otter.common.domain.model.UndoableActionHistory
+import org.wycliffeassociates.otter.common.domain.translation.TranslationTakeDeleteAction
+import org.wycliffeassociates.otter.common.domain.translation.TranslationTakeRecordAction
+import org.wycliffeassociates.otter.common.domain.translation.TranslationTakeSelectAction
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.common.domain.translation.TranslationTakeDeleteAction
-import org.wycliffeassociates.otter.common.domain.translation.TranslationTakeRecordAction
-import org.wycliffeassociates.otter.common.domain.translation.TranslationTakeSelectAction
-import org.wycliffeassociates.otter.common.domain.model.UndoableActionHistory
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel.Result
 import tornadofx.*
@@ -38,6 +38,7 @@ class BlindDraftViewModel : ViewModel() {
 
     @Inject
     lateinit var waveFileCreator: IWaveFileCreator
+
     @Inject
     lateinit var audioConnectionFactory: AudioConnectionFactory
 
@@ -112,11 +113,12 @@ class BlindDraftViewModel : ViewModel() {
     fun onRecordFinish(result: Result) {
         if (result == Result.SUCCESS) {
             workbookDataStore.chunk?.let { chunk ->
-                val op = TranslationTakeRecordAction(
-                    chunk,
-                    recordedTakeProperty.value,
-                    chunk.audio.getSelectedTake()
-                )
+                val op =
+                    TranslationTakeRecordAction(
+                        chunk,
+                        recordedTakeProperty.value,
+                        chunk.audio.getSelectedTake(),
+                    )
                 actionHistory.execute(op)
                 onUndoableAction()
                 loadTakes(chunk)
@@ -146,12 +148,13 @@ class BlindDraftViewModel : ViewModel() {
         audioDataStore.stopPlayers()
 
         currentChunkProperty.value?.let { chunk ->
-            val op = TranslationTakeDeleteAction(
-                chunk,
-                take,
-                takes.any { it.take == take && it.selected },
-                ::handlePostDeleteTake
-            )
+            val op =
+                TranslationTakeDeleteAction(
+                    chunk,
+                    take,
+                    takes.any { it.take == take && it.selected },
+                    ::handlePostDeleteTake,
+                )
             actionHistory.execute(op)
             onUndoableAction()
         }
@@ -202,12 +205,13 @@ class BlindDraftViewModel : ViewModel() {
     private fun loadTakes(chunk: Chunk) {
         val selected = chunk.audio.selected.value?.value
 
-        val takeList = chunk.audio.getAllTakes()
-            .filter { !it.isDeleted() }
-            .map { take ->
-                take.mapToCardModel(take == selected)
-            }
-            .sortedByDescending { it.take.file.lastModified() }
+        val takeList =
+            chunk.audio.getAllTakes()
+                .filter { !it.isDeleted() }
+                .map { take ->
+                    take.mapToCardModel(take == selected)
+                }
+                .sortedByDescending { it.take.file.lastModified() }
 
         takes.setAll(takeList)
     }
@@ -234,9 +238,10 @@ class BlindDraftViewModel : ViewModel() {
         return workbookDataStore.chunk!!.let { chunk ->
             val namer = getFileNamer(chunk)
             val chapter = namer.formatChapterNumber()
-            val chapterAudioDir = workbookDataStore.workbook.projectFilesAccessor.audioDir
-                .resolve(chapter)
-                .apply { mkdirs() }
+            val chapterAudioDir =
+                workbookDataStore.workbook.projectFilesAccessor.audioDir
+                    .resolve(chapter)
+                    .apply { mkdirs() }
 
             chunk.audio.getNewTakeNumber()
                 .map { takeNumber ->
@@ -244,7 +249,7 @@ class BlindDraftViewModel : ViewModel() {
                         takeNumber,
                         namer.generateName(takeNumber, AudioFileFormat.WAV),
                         chapterAudioDir,
-                        true
+                        true,
                     )
                 }
         }
@@ -254,16 +259,17 @@ class BlindDraftViewModel : ViewModel() {
         newTakeNumber: Int,
         filename: String,
         audioDir: File,
-        createEmpty: Boolean
+        createEmpty: Boolean,
     ): Take {
         val takeFile = audioDir.resolve(File(filename))
-        val newTake = Take(
-            name = takeFile.name,
-            file = takeFile,
-            number = newTakeNumber,
-            format = MimeType.WAV,
-            createdTimestamp = LocalDate.now()
-        )
+        val newTake =
+            Take(
+                name = takeFile.name,
+                file = takeFile,
+                number = newTakeNumber,
+                format = MimeType.WAV,
+                createdTimestamp = LocalDate.now(),
+            )
         if (createEmpty) {
             newTake.file.createNewFile()
             waveFileCreator.createEmpty(newTake.file)
@@ -277,11 +283,14 @@ class BlindDraftViewModel : ViewModel() {
             chapter = workbookDataStore.chapter,
             chunk = workbookDataStore.chunk,
             recordable = recordable,
-            rcSlug = workbookDataStore.workbook.sourceMetadataSlug
+            rcSlug = workbookDataStore.workbook.sourceMetadataSlug,
         )
     }
 
-    private fun handlePostDeleteTake(take: Take, selectAnotherTake: Boolean) {
+    private fun handlePostDeleteTake(
+        take: Take,
+        selectAnotherTake: Boolean,
+    ) {
         Platform.runLater {
             takes.removeIf { it.take == take }
             // select the next take after deleting

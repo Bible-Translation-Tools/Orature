@@ -29,42 +29,49 @@ import tornadofx.addClass
 import tornadofx.get
 
 class ExportTypeListCell : ListCell<ExportType>() {
+    private fun associatedIcon(type: ExportType): FontIcon =
+        when (type) {
+            ExportType.BACKUP -> FontIcon(MaterialDesign.MDI_FOLDER_MULTIPLE_OUTLINE)
+            ExportType.LISTEN -> FontIcon(MaterialDesign.MDI_PLAY)
+            ExportType.SOURCE_AUDIO -> FontIcon(Material.HEARING)
+            ExportType.PUBLISH -> FontIcon(Material.CLOUD_UPLOAD)
+        }
 
-    private fun associatedIcon(type: ExportType): FontIcon = when (type) {
-        ExportType.BACKUP -> FontIcon(MaterialDesign.MDI_FOLDER_MULTIPLE_OUTLINE)
-        ExportType.LISTEN -> FontIcon(MaterialDesign.MDI_PLAY)
-        ExportType.SOURCE_AUDIO -> FontIcon(Material.HEARING)
-        ExportType.PUBLISH -> FontIcon(Material.CLOUD_UPLOAD)
-    }
-
-    override fun updateItem(item: ExportType?, empty: Boolean) {
+    override fun updateItem(
+        item: ExportType?,
+        empty: Boolean,
+    ) {
         super.updateItem(item, empty)
         if (item == null || empty) {
             return
         }
 
-        graphic = Button().apply {
-            addClass(
-                "btn", "btn--tertiary", "btn--borderless", "export-menu__option-btn"
-            )
-            text = messages[item.titleKey]
-            isMouseTransparent = true
-            graphic = associatedIcon(item)
-        }
+        graphic =
+            Button().apply {
+                addClass(
+                    "btn", "btn--tertiary", "btn--borderless", "export-menu__option-btn",
+                )
+                text = messages[item.titleKey]
+                isMouseTransparent = true
+                graphic = associatedIcon(item)
+            }
     }
 }
 
 class DummyExportComboBoxButton : ListCell<String>() {
-
-    override fun updateItem(item: String?, btl: Boolean) {
+    override fun updateItem(
+        item: String?,
+        btl: Boolean,
+    ) {
         super.updateItem(item, btl)
         if (item != null || !btl) {
-            graphic = Button(item).apply {
-                addClass(
-                    "btn", "btn--tertiary", "btn--borderless", "dummy-export-menu__btn"
-                )
-                graphic = FontIcon(MaterialDesign.MDI_FILE_EXPORT)
-            }
+            graphic =
+                Button(item).apply {
+                    addClass(
+                        "btn", "btn--tertiary", "btn--borderless", "dummy-export-menu__btn",
+                    )
+                    graphic = FontIcon(MaterialDesign.MDI_FILE_EXPORT)
+                }
         }
     }
 }

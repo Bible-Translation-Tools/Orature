@@ -33,10 +33,9 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
+import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
-import org.wycliffeassociates.otter.common.utils.capitalizeString
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -49,9 +48,8 @@ import java.util.concurrent.Callable
 import io.reactivex.rxkotlin.toObservable as toRxObservable
 
 open class RecordableViewModel(
-    private val audioPluginViewModel: AudioPluginViewModel
+    private val audioPluginViewModel: AudioPluginViewModel,
 ) : ViewModel() {
-
     private val logger = LoggerFactory.getLogger(RecordableViewModel::class.java)
 
     val workbookDataStore: WorkbookDataStore by inject()
@@ -111,14 +109,17 @@ open class RecordableViewModel(
                     when (result) {
                         PluginActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noRecorder"])
                         PluginActions.Result.SUCCESS, PluginActions.Result.NO_AUDIO -> {
-                            /* no-op */
+                            // no-op
                         }
                     }
                 }
         } ?: throw IllegalStateException("Recordable is null")
     }
 
-    fun processTakeWithPlugin(takeEvent: TakeEvent, pluginType: PluginType) {
+    fun processTakeWithPlugin(
+        takeEvent: TakeEvent,
+        pluginType: PluginType,
+    ) {
         closePlayers()
         contextProperty.set(pluginType)
         workbookDataStore.activeTakeNumberProperty.set(takeEvent.take.number)
@@ -177,15 +178,16 @@ open class RecordableViewModel(
                 }
                 .subscribe(
                     { showImportSuccessDialogProperty.set(true) },
-                    { showImportFailDialogProperty.set(true) }
+                    { showImportFailDialogProperty.set(true) },
                 )
         }
     }
 
     private fun setSelectedTake(take: Take) {
-        val found = takeCardModels.find {
-            take == it.take
-        }
+        val found =
+            takeCardModels.find {
+                take == it.take
+            }
         found?.let { takeModel ->
             recordable?.audio?.selectTake(takeModel.take) ?: throw IllegalStateException("Recordable is null")
             val workbook = workbookDataStore.workbook
@@ -206,11 +208,11 @@ open class RecordableViewModel(
                 String.format(
                     messages["sourceDialogTitle"],
                     workbookDataStore.activeTakeNumberProperty.value,
-                    audioPluginViewModel.pluginNameProperty.value
+                    audioPluginViewModel.pluginNameProperty.value,
                 )
             },
             audioPluginViewModel.pluginNameProperty,
-            workbookDataStore.activeTakeNumberProperty
+            workbookDataStore.activeTakeNumberProperty,
         )
     }
 
@@ -221,11 +223,11 @@ open class RecordableViewModel(
                     messages["sourceDialogMessage"],
                     workbookDataStore.activeTakeNumberProperty.value,
                     audioPluginViewModel.pluginNameProperty.value,
-                    audioPluginViewModel.pluginNameProperty.value
+                    audioPluginViewModel.pluginNameProperty.value,
                 )
             },
             audioPluginViewModel.pluginNameProperty,
-            workbookDataStore.activeTakeNumberProperty
+            workbookDataStore.activeTakeNumberProperty,
         )
     }
 
@@ -248,7 +250,7 @@ open class RecordableViewModel(
             contextProperty,
             audioPluginViewModel.selectedRecorderProperty,
             audioPluginViewModel.selectedEditorProperty,
-            audioPluginViewModel.selectedMarkerProperty
+            audioPluginViewModel.selectedMarkerProperty,
         )
     }
 
@@ -276,7 +278,7 @@ open class RecordableViewModel(
                     }
                     .sortedWith(
                         compareByDescending<TakeCardModel> { it.selected }
-                            .thenByDescending { it.take.file.lastModified() }
+                            .thenByDescending { it.take.file.lastModified() },
                     )
 
             val selectedModel = selected?.mapToCardModel(true)
@@ -301,7 +303,10 @@ open class RecordableViewModel(
             .let { disposables.add(it) }
     }
 
-    private fun removeFromTakes(take: Take, isSelected: Boolean = false) {
+    private fun removeFromTakes(
+        take: Take,
+        isSelected: Boolean = false,
+    ) {
         Platform.runLater {
             if (isSelected) {
                 selectedTakeProperty.set(null)
@@ -369,7 +374,7 @@ open class RecordableViewModel(
         return TakeCardModel(
             this,
             selected,
-            ap
+            ap,
         )
     }
 }

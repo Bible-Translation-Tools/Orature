@@ -7,10 +7,14 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.Inserti
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.WorkbookDescriptorEntity
 
 class WorkbookDescriptorDao(
-    private val instanceDsl: DSLContext
+    private val instanceDsl: DSLContext,
 ) {
-
-    fun fetch(sourceId: Int, targetId: Int, typeId: Int, dsl: DSLContext = instanceDsl): WorkbookDescriptorEntity? {
+    fun fetch(
+        sourceId: Int,
+        targetId: Int,
+        typeId: Int,
+        dsl: DSLContext = instanceDsl,
+    ): WorkbookDescriptorEntity? {
         return dsl
             .select()
             .from(WORKBOOK_DESCRIPTOR_ENTITY)
@@ -23,7 +27,10 @@ class WorkbookDescriptorDao(
             }
     }
 
-    fun fetchById(id: Int, dsl: DSLContext = instanceDsl): WorkbookDescriptorEntity? {
+    fun fetchById(
+        id: Int,
+        dsl: DSLContext = instanceDsl,
+    ): WorkbookDescriptorEntity? {
         return dsl
             .select()
             .from(WORKBOOK_DESCRIPTOR_ENTITY)
@@ -43,7 +50,10 @@ class WorkbookDescriptorDao(
     }
 
     @Synchronized
-    fun insert(entity: WorkbookDescriptorEntity, dsl: DSLContext = instanceDsl): Int {
+    fun insert(
+        entity: WorkbookDescriptorEntity,
+        dsl: DSLContext = instanceDsl,
+    ): Int {
         if (entity.id != 0) throw InsertionException("Entity ID must be 0. Found ${entity.id}")
 
         dsl
@@ -51,12 +61,12 @@ class WorkbookDescriptorDao(
                 WORKBOOK_DESCRIPTOR_ENTITY,
                 WORKBOOK_DESCRIPTOR_ENTITY.SOURCE_FK,
                 WORKBOOK_DESCRIPTOR_ENTITY.TARGET_FK,
-                WORKBOOK_DESCRIPTOR_ENTITY.TYPE_FK
+                WORKBOOK_DESCRIPTOR_ENTITY.TYPE_FK,
             )
             .values(
                 entity.sourceFk,
                 entity.targetFk,
-                entity.typeFk
+                entity.typeFk,
             )
             .execute()
 
@@ -68,7 +78,10 @@ class WorkbookDescriptorDao(
             }!!
     }
 
-    fun update(entity: WorkbookDescriptorEntity, dsl: DSLContext = instanceDsl) {
+    fun update(
+        entity: WorkbookDescriptorEntity,
+        dsl: DSLContext = instanceDsl,
+    ) {
         dsl
             .update(WORKBOOK_DESCRIPTOR_ENTITY)
             .set(WORKBOOK_DESCRIPTOR_ENTITY.SOURCE_FK, entity.sourceFk)
@@ -78,7 +91,10 @@ class WorkbookDescriptorDao(
             .execute()
     }
 
-    fun delete(entity: WorkbookDescriptorEntity, dsl: DSLContext = instanceDsl) {
+    fun delete(
+        entity: WorkbookDescriptorEntity,
+        dsl: DSLContext = instanceDsl,
+    ) {
         dsl
             .deleteFrom(WORKBOOK_DESCRIPTOR_ENTITY)
             .where(WORKBOOK_DESCRIPTOR_ENTITY.ID.eq(entity.id))

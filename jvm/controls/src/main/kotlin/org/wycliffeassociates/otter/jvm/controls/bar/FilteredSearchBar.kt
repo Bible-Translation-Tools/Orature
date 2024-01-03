@@ -31,7 +31,6 @@ import org.wycliffeassociates.otter.jvm.controls.skins.bar.FilteredSearchBarSkin
 import tornadofx.*
 
 class FilteredSearchBar : Control() {
-
     val textProperty = SimpleStringProperty()
     val leftIconProperty = SimpleObjectProperty<Node>()
     val rightIconProperty = SimpleObjectProperty<Node>(FontIcon(MaterialDesign.MDI_MAGNIFY))

@@ -37,9 +37,8 @@ import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class WorkBookTableView(
-    books: ObservableList<WorkbookDescriptor>
+    books: ObservableList<WorkbookDescriptor>,
 ) : TableView<WorkbookDescriptor>(books) {
-
     private val selectedIndexProperty = SimpleIntegerProperty(-1)
 
     init {
@@ -52,10 +51,11 @@ class WorkBookTableView(
             addClass("table-view__column-header-row")
             setCellValueFactory { it.value.title.toProperty() }
             cellFormat {
-                graphic = label(item) {
-                    addClass("h4", "h4--80")
-                    tooltip(item)
-                }
+                graphic =
+                    label(item) {
+                        addClass("h4", "h4--80")
+                        tooltip(item)
+                    }
             }
             prefWidthProperty().bind(this@WorkBookTableView.widthProperty().multiply(0.25))
             minWidth = 120.0 // this may not be replaced with css
@@ -80,10 +80,11 @@ class WorkBookTableView(
             addClass("table-view__column-header-row")
             setCellValueFactory { it.value.anthology.titleKey.toProperty() }
             cellFormat {
-                graphic = label {
-                    text = if (item.isEmpty()) "" else messages[item] // catch empty string for key
-                    addClass("h5")
-                }
+                graphic =
+                    label {
+                        text = if (item.isEmpty()) "" else messages[item] // catch empty string for key
+                        addClass("h5")
+                    }
             }
             isReorderable = false
             isSortable = true
@@ -94,10 +95,11 @@ class WorkBookTableView(
             setCellValueFactory { it.value.progress.toProperty() }
             cellFormat {
                 val percent = item.toDouble()
-                graphic = progressbar(percent) {
-                    if (percent == 1.0) addClass("full")
-                    fitToParentWidth()
-                }
+                graphic =
+                    progressbar(percent) {
+                        if (percent == 1.0) addClass("full")
+                        fitToParentWidth()
+                    }
             }
             isReorderable = false
             isSortable = true
@@ -130,7 +132,7 @@ class WorkBookTableView(
             WorkbookTableRow()
         }
 
-        /* accessibility */
+        // accessibility
         focusedProperty().onChange {
             if (it && selectionModel.selectedIndex < 0) {
                 selectionModel.select(0)
@@ -138,7 +140,7 @@ class WorkBookTableView(
             }
         }
 
-        /* accessibility */
+        // accessibility
         addEventFilter(KeyEvent.KEY_PRESSED) { keyEvent ->
             if (keyEvent.code == KeyCode.SPACE || keyEvent.code == KeyCode.ENTER) {
                 selectedIndexProperty.set(selectionModel.selectedIndex)
@@ -170,5 +172,5 @@ private fun WorkBookTableView.handleDefaultSortOrder() {
  */
 fun EventTarget.workbookTableView(
     values: ObservableList<WorkbookDescriptor>,
-    op: WorkBookTableView.() -> Unit = {}
+    op: WorkBookTableView.() -> Unit = {},
 ) = WorkBookTableView(values).attachTo(this, op)

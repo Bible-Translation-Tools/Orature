@@ -23,9 +23,9 @@ import io.reactivex.ObservableEmitter
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.ProgressStatus
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.config.Initializable
-import org.wycliffeassociates.otter.common.data.ProgressStatus
 import org.wycliffeassociates.otter.common.persistence.repositories.IVersificationRepository
 import java.io.File
 import javax.inject.Inject
@@ -34,46 +34,47 @@ private const val ULB_VERSIFICATION_FILE = "ulb.json"
 private const val UFW_VERSIFICATION_FILE = "ufw.json"
 private const val ULB_VERSIFICATION_RESOURCE_PATH = "versification/ulb_versification.json"
 
-class InitializeVersification @Inject constructor(
-    val directoryProvider: IDirectoryProvider,
-    val versificationRepository: IVersificationRepository
-) : Initializable {
+class InitializeVersification
+    @Inject
+    constructor(
+        val directoryProvider: IDirectoryProvider,
+        val versificationRepository: IVersificationRepository,
+    ) : Initializable {
+        private val logger = LoggerFactory.getLogger(this::class.java)
 
-    private val logger = LoggerFactory.getLogger(this::class.java)
+        override fun exec(progressEmitter: ObservableEmitter<ProgressStatus>): Completable {
+            return Single.fromCallable {
+                progressEmitter.onNext(ProgressStatus(titleKey = "initializingVersification"))
+                copyUlbVersification()
 
-    override fun exec(progressEmitter: ObservableEmitter<ProgressStatus>): Completable {
-        return Single.fromCallable {
-            progressEmitter.onNext(ProgressStatus(titleKey = "initializingVersification"))
-            copyUlbVersification()
-
-            directoryProvider.versificationDirectory.listFiles()?.forEach { file ->
-                if (file.extension == "json") {
-                    logger.info("Inserting versification: ${file.name}")
-                    versificationRepository.insertVersification(file.nameWithoutExtension, file).blockingAwait()
+                directoryProvider.versificationDirectory.listFiles()?.forEach { file ->
+                    if (file.extension == "json") {
+                        logger.info("Inserting versification: ${file.name}")
+                        versificationRepository.insertVersification(file.nameWithoutExtension, file).blockingAwait()
+                    }
                 }
-            }
-        }.subscribeOn(Schedulers.io())
-            .ignoreElement()
-    }
+            }.subscribeOn(Schedulers.io())
+                .ignoreElement()
+        }
 
-    private fun copyUlbVersification() {
-        if (!File(directoryProvider.versificationDirectory, ULB_VERSIFICATION_FILE).exists()) {
-            directoryProvider.versificationDirectory.mkdirs()
-            logger.info("Copying ulb versification")
-            ClassLoader.getSystemResourceAsStream(ULB_VERSIFICATION_RESOURCE_PATH)
-                .transferTo(
-                    File(
-                        directoryProvider.versificationDirectory.absolutePath,
-                        ULB_VERSIFICATION_FILE
-                    ).outputStream()
-                )
-            ClassLoader.getSystemResourceAsStream(ULB_VERSIFICATION_RESOURCE_PATH)
-                .transferTo(
-                    File(
-                        directoryProvider.versificationDirectory.absolutePath,
-                        UFW_VERSIFICATION_FILE
-                    ).outputStream()
-                )
+        private fun copyUlbVersification() {
+            if (!File(directoryProvider.versificationDirectory, ULB_VERSIFICATION_FILE).exists()) {
+                directoryProvider.versificationDirectory.mkdirs()
+                logger.info("Copying ulb versification")
+                ClassLoader.getSystemResourceAsStream(ULB_VERSIFICATION_RESOURCE_PATH)
+                    .transferTo(
+                        File(
+                            directoryProvider.versificationDirectory.absolutePath,
+                            ULB_VERSIFICATION_FILE,
+                        ).outputStream(),
+                    )
+                ClassLoader.getSystemResourceAsStream(ULB_VERSIFICATION_RESOURCE_PATH)
+                    .transferTo(
+                        File(
+                            directoryProvider.versificationDirectory.absolutePath,
+                            UFW_VERSIFICATION_FILE,
+                        ).outputStream(),
+                    )
+            }
         }
     }
-}

@@ -27,7 +27,6 @@ import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.persistence.ILanguageDataSource
 
 class LanguageDataSourceTest {
-
     private val languageDataSource = mock<ILanguageDataSource>()
 
     private val english = Language("en", "", "", "", true, "")
@@ -37,9 +36,10 @@ class LanguageDataSourceTest {
         Mockito.`when`(languageDataSource.fetchLanguageNames(any()))
             .thenReturn(Observable.just(listOf(english)))
 
-        val result = languageDataSource
-            .fetchLanguageNames("https://langnames.bibleineverylanguage.org/langnames.json")
-            .test()
+        val result =
+            languageDataSource
+                .fetchLanguageNames("https://langnames.bibleineverylanguage.org/langnames.json")
+                .test()
 
         result.assertComplete()
         result.assertNoErrors()
@@ -51,9 +51,10 @@ class LanguageDataSourceTest {
         Mockito.`when`(languageDataSource.fetchLanguageNames(any()))
             .thenReturn(Observable.error(Exception("Invalid Url")))
 
-        val result = languageDataSource
-            .fetchLanguageNames("https://invalid.url")
-            .test()
+        val result =
+            languageDataSource
+                .fetchLanguageNames("https://invalid.url")
+                .test()
 
         result.assertError(Exception::class.java)
         result.assertErrorMessage("Invalid Url")

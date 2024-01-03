@@ -29,24 +29,27 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.Collect
 import java.io.File
 
 class CollectionDaoTest {
-    private val testDatabaseFile = File.createTempFile(
-        "test-collection-dao", ".sqlite"
-    ).also(File::deleteOnExit)
+    private val testDatabaseFile =
+        File.createTempFile(
+            "test-collection-dao",
+            ".sqlite",
+        ).also(File::deleteOnExit)
     private lateinit var database: AppDatabase
     private val dao by lazy { database.collectionDao }
 
     companion object {
-        val defaultCollection = CollectionEntity(
-            id = 0,
-            parentFk = null,
-            sourceFk = null,
-            label = "test",
-            title = "test",
-            slug = "test",
-            sort = 1,
-            dublinCoreFk = 1,
-            modifiedTs = null
-        )
+        val defaultCollection =
+            CollectionEntity(
+                id = 0,
+                parentFk = null,
+                sourceFk = null,
+                label = "test",
+                title = "test",
+                slug = "test",
+                sort = 1,
+                dublinCoreFk = 1,
+                modifiedTs = null,
+            )
     }
 
     @Before
@@ -73,39 +76,43 @@ class CollectionDaoTest {
     fun testInsertThrowsException() {
         try {
             dao.insert(
-                defaultCollection.copy(dublinCoreFk = null)
+                defaultCollection.copy(dublinCoreFk = null),
             )
             Assert.fail("DublinCore FK must not be null.")
-        } catch (e: DataAccessException) { }
+        } catch (e: DataAccessException) {
+        }
 
         try {
             insertDefaultCollection()
             insertDefaultCollection()
             Assert.fail("Insert duplicated value for unique field should throw an exception.")
-        } catch (e: DataAccessException) { }
+        } catch (e: DataAccessException) {
+        }
 
         try {
             dao.insert(
-                defaultCollection.copy(id = 1)
+                defaultCollection.copy(id = 1),
             )
             Assert.fail("Insert nonzero id should throw an exception.")
-        } catch (e: InsertionException) { }
+        } catch (e: InsertionException) {
+        }
     }
 
     @Test
     fun testFetch() {
         insertDefaultCollection()
-        val result = dao.fetch(
-            defaultCollection.slug,
-            defaultCollection.dublinCoreFk!!,
-            defaultCollection.label
-        )
+        val result =
+            dao.fetch(
+                defaultCollection.slug,
+                defaultCollection.dublinCoreFk!!,
+                defaultCollection.label,
+            )
 
         Assert.assertNotNull(result)
         Assert.assertEquals(
             "Fetched record should match the given value",
             defaultCollection.copy(id = result!!.id),
-            result
+            result,
         )
     }
 
@@ -135,11 +142,11 @@ class CollectionDaoTest {
         val secondChild = children.find { it.slug == child2.slug }
         Assert.assertNotNull(
             "First child should be found in fetched result",
-            firstChild
+            firstChild,
         )
         Assert.assertNotNull(
             "Second child should be found in fetched result",
-            secondChild
+            secondChild,
         )
     }
 
@@ -159,17 +166,18 @@ class CollectionDaoTest {
     @Test
     fun testUpdate() {
         val entityId = insertDefaultCollection()
-        val updated = CollectionEntity(
-            parentFk = null,
-            sourceFk = null,
-            title = "updated",
-            label = "updated",
-            slug = "updated",
-            sort = 1,
-            modifiedTs = "updated",
-            dublinCoreFk = 1,
-            id = entityId
-        )
+        val updated =
+            CollectionEntity(
+                parentFk = null,
+                sourceFk = null,
+                title = "updated",
+                label = "updated",
+                slug = "updated",
+                sort = 1,
+                modifiedTs = "updated",
+                dublinCoreFk = 1,
+                id = entityId,
+            )
 
         dao.update(updated)
 
@@ -180,9 +188,12 @@ class CollectionDaoTest {
     fun testDelete() {
         insertDefaultCollection()
 
-        fun fetch() = dao.fetch(
-            defaultCollection.slug, defaultCollection.dublinCoreFk!!, defaultCollection.label
-        )
+        fun fetch() =
+            dao.fetch(
+                defaultCollection.slug,
+                defaultCollection.dublinCoreFk!!,
+                defaultCollection.label,
+            )
 
         var entity = fetch()
         Assert.assertNotNull(entity)
@@ -195,7 +206,7 @@ class CollectionDaoTest {
         Assert.assertEquals(
             "After delete, there should be 0 records.",
             0,
-            dao.fetchAll().size
+            dao.fetchAll().size,
         )
     }
 

@@ -31,10 +31,14 @@ class MarkdownProjectReaderTest {
     private val pwd = File(System.getProperty("user.dir"))
     private val fileTree: OtterTree<OtterFile> = pwd.buildFileTree()
 
-    private fun <T> dfs(tree: OtterTreeNode<T>, f: (T, List<T>) -> Boolean, acc: List<T> = listOf()): T? {
-        return if (f(tree.value, acc))
+    private fun <T> dfs(
+        tree: OtterTreeNode<T>,
+        f: (T, List<T>) -> Boolean,
+        acc: List<T> = listOf(),
+    ): T? {
+        return if (f(tree.value, acc)) {
             tree.value
-        else {
+        } else {
             var ret: T? = null
             (tree as? OtterTree)?.children?.find {
                 ret = dfs(it, f, acc + tree.value)

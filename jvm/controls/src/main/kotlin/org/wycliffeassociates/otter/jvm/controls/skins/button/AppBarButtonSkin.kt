@@ -29,7 +29,6 @@ import javafx.scene.layout.VBox
 import tornadofx.*
 
 class AppBarButtonSkin(private val button: ToggleButton) : SkinBase<ToggleButton>(button) {
-
     private val behavior = ButtonBehavior(button)
 
     @FXML

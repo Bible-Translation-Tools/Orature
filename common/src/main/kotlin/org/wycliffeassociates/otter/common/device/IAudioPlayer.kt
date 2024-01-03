@@ -24,32 +24,70 @@ import java.io.File
 interface IAudioPlayer {
     val frameStart: Int
     val frameEnd: Int
+
     fun addEventListener(listener: IAudioPlayerListener)
+
     fun addEventListener(onEvent: (event: AudioPlayerEvent) -> Unit) {
-        addEventListener(WeakAudioListener(object : IAudioPlayerListener {
-            override fun onEvent(event: AudioPlayerEvent) {
-                onEvent(event)
-            }
-        }))
+        addEventListener(
+            WeakAudioListener(
+                object : IAudioPlayerListener {
+                    override fun onEvent(event: AudioPlayerEvent) {
+                        onEvent(event)
+                    }
+                },
+            ),
+        )
     }
+
     fun load(reader: AudioFileReader)
+
     fun load(readerProvider: AudioFileReaderProvider)
+
     fun load(file: File)
-    fun loadSection(reader: AudioFileReader, frameStart: Int, frameEnd: Int)
-    fun loadSection(readerProvider: AudioFileReaderProvider, frameStart: Int, frameEnd: Int)
-    fun loadSection(file: File, frameStart: Int, frameEnd: Int)
+
+    fun loadSection(
+        reader: AudioFileReader,
+        frameStart: Int,
+        frameEnd: Int,
+    )
+
+    fun loadSection(
+        readerProvider: AudioFileReaderProvider,
+        frameStart: Int,
+        frameEnd: Int,
+    )
+
+    fun loadSection(
+        file: File,
+        frameStart: Int,
+        frameEnd: Int,
+    )
+
     fun getAudioReader(): AudioFileReader?
+
     fun changeRate(rate: Double)
+
     fun play()
+
     fun pause()
+
     fun toggle()
+
     fun stop()
+
     fun close()
+
     fun release()
+
     fun seek(position: Int)
+
     fun isPlaying(): Boolean
+
     fun getDurationInFrames(): Int
+
     fun getDurationMs(): Int
+
     fun getLocationInFrames(): Int
+
     fun getLocationMs(): Int
 }

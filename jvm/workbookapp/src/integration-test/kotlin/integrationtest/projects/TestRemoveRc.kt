@@ -58,20 +58,22 @@ class TestRemoveRc {
             .assertRowCounts(
                 RowCount(
                     collections = 1257,
-                    contents = mapOf(
-                        META to 1189,
-                        TEXT to 31104
-                    ),
-                    links = 0
+                    contents =
+                        mapOf(
+                            META to 1189,
+                            TEXT to 31104,
+                        ),
+                    links = 0,
                 ),
-                "Row count before delete doesn't match."
+                "Row count before delete doesn't match.",
             )
             .apply {
                 assertEquals(2, db.resourceMetadataDao.fetchAll().size)
 
-                val rc = ResourceContainer.load(
-                    getResource(enUlb)
-                )
+                val rc =
+                    ResourceContainer.load(
+                        getResource(enUlb),
+                    )
                 val result = removeUseCase.get().delete(rc).blockingGet()
 
                 assertEquals(DeleteResult.SUCCESS, result)
@@ -81,9 +83,9 @@ class TestRemoveRc {
                 RowCount(
                     collections = 1,
                     contents = mapOf(),
-                    links = 0
+                    links = 0,
                 ),
-                "Row count after delete doesn't match."
+                "Row count after delete doesn't match.",
             )
     }
 
@@ -95,13 +97,14 @@ class TestRemoveRc {
             .assertRowCounts(
                 RowCount(
                     collections = 1257,
-                    contents = mapOf(
-                        META to 1189,
-                        TEXT to 31104
-                    ),
-                    links = 0
+                    contents =
+                        mapOf(
+                            META to 1189,
+                            TEXT to 31104,
+                        ),
+                    links = 0,
                 ),
-                "Row count before delete doesn't match."
+                "Row count before delete doesn't match.",
             )
             .apply {
                 assertEquals(2, db.resourceMetadataDao.fetchAll().size)
@@ -111,11 +114,12 @@ class TestRemoveRc {
                     collectionRepo
                         .getRootSources().blockingGet()
                         .first { it.resourceContainer?.language == language },
-                    language
+                    language,
                 )
-                val rc = ResourceContainer.load(
-                    getResource(enUlb)
-                )
+                val rc =
+                    ResourceContainer.load(
+                        getResource(enUlb),
+                    )
                 val result = removeUseCase.get().delete(rc).blockingGet()
 
                 assertEquals(DeleteResult.DEPENDENCY_EXISTS, result)
@@ -123,17 +127,18 @@ class TestRemoveRc {
             .assertRowCounts(
                 RowCount(
                     collections = 1324,
-                    contents = mapOf(
-                        META to 1189,
-                        TEXT to 31104
-                    ),
-                    links = 0
-                )
+                    contents =
+                        mapOf(
+                            META to 1189,
+                            TEXT to 31104,
+                        ),
+                    links = 0,
+                ),
             )
     }
 
     private fun getResource(rcFile: String) =
         javaClass.classLoader.getResource(
-            "resource-containers/$rcFile"
+            "resource-containers/$rcFile",
         )!!.file.let { File(it) }
 }

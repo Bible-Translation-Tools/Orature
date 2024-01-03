@@ -26,29 +26,35 @@ import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import java.io.File
 import javax.inject.Inject
 
-class LaunchPlugin @Inject constructor(
-    private val pluginRepository: IAudioPluginRepository
-) {
-    enum class Result {
-        SUCCESS,
-        NO_PLUGIN
-    }
+class LaunchPlugin
+    @Inject
+    constructor(
+        private val pluginRepository: IAudioPluginRepository,
+    ) {
+        enum class Result {
+            SUCCESS,
+            NO_PLUGIN,
+        }
 
-    private val logger = LoggerFactory.getLogger(this.javaClass)
+        private val logger = LoggerFactory.getLogger(this.javaClass)
 
-    fun launchPlugin(type: PluginType, file: File, pluginParameters: PluginParameters): Single<Result> {
-        logger.info("Launching plugin: ${type.name}")
-        return pluginRepository
-            .getPlugin(type)
-            .flatMap {
-                it.launch(file, pluginParameters).andThen(Maybe.just(Result.SUCCESS))
-            }
-            .toSingle(Result.NO_PLUGIN)
-            .map {
-                if (it == Result.NO_PLUGIN) {
-                    logger.error("Plugin $type is unavailable")
+        fun launchPlugin(
+            type: PluginType,
+            file: File,
+            pluginParameters: PluginParameters,
+        ): Single<Result> {
+            logger.info("Launching plugin: ${type.name}")
+            return pluginRepository
+                .getPlugin(type)
+                .flatMap {
+                    it.launch(file, pluginParameters).andThen(Maybe.just(Result.SUCCESS))
                 }
-                it
-            }
+                .toSingle(Result.NO_PLUGIN)
+                .map {
+                    if (it == Result.NO_PLUGIN) {
+                        logger.error("Plugin $type is unavailable")
+                    }
+                    it
+                }
+        }
     }
-}

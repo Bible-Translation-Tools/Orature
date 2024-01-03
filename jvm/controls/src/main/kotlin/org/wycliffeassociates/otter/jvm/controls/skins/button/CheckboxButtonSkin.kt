@@ -28,7 +28,6 @@ import javafx.scene.control.SkinBase
 import javafx.scene.layout.HBox
 
 class CheckboxButtonSkin(private val checkbox: CheckBox) : SkinBase<CheckBox>(checkbox) {
-
     private val behavior = ButtonBehavior(checkbox)
 
     @FXML

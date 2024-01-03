@@ -22,23 +22,24 @@ import org.wycliffeassociates.otter.jvm.workbookapp.updater.install4j.ui.viewmod
 import tornadofx.*
 
 class UpdaterView : View() {
-
     val vm: AppUpdaterViewModel by inject()
 
     init {
         vm.applyScheduledUpdate()
     }
 
-    override val root = borderpane {
-        styleClass.add("app-drawer__section")
+    override val root =
+        borderpane {
+            styleClass.add("app-drawer__section")
 
-        center = stackpane {
-            add<NoUpdatesAvailable>()
-            add<UpdateWillCompleteLaterFragment>()
-            add<UpdateCompleteFragment>()
-            add<UpdateDownloadingFragment>()
-            add<UpdateAvailableFragment>()
-            add<CheckForUpdatesFragment>()
+            center =
+                stackpane {
+                    add<NoUpdatesAvailable>()
+                    add<UpdateWillCompleteLaterFragment>()
+                    add<UpdateCompleteFragment>()
+                    add<UpdateDownloadingFragment>()
+                    add<UpdateAvailableFragment>()
+                    add<CheckForUpdatesFragment>()
+                }
         }
-    }
 }

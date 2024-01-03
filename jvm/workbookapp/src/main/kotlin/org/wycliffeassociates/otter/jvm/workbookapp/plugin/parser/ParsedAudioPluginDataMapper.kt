@@ -29,7 +29,10 @@ class ParsedAudioPluginDataMapper(osName: String? = null) {
      * Map from Jackson parser class to an AudioPlugin. No need to map the other way.
      * @throw UnsupportedPlatformException if no executable was given for this platform
      */
-    fun mapToAudioPluginData(parsedAudioPlugin: ParsedAudioPluginData, sourceFile: File): AudioPluginData {
+    fun mapToAudioPluginData(
+        parsedAudioPlugin: ParsedAudioPluginData,
+        sourceFile: File,
+    ): AudioPluginData {
         // Get the executable for the system we are running on
         val executable = selectExecutable(parsedAudioPlugin)
 
@@ -42,18 +45,19 @@ class ParsedAudioPluginDataMapper(osName: String? = null) {
             parsedAudioPlugin.canMark,
             executable ?: throw UnsupportedPlatformException(),
             parsedAudioPlugin.args,
-            sourceFile
+            sourceFile,
         )
     }
 
     private fun selectExecutable(parsedAudioPlugin: ParsedAudioPluginData): String? {
-        val options = when {
-            osName.contains("WIN") -> parsedAudioPlugin.executable.windows
-            osName.contains("MAC") -> parsedAudioPlugin.executable.macos
-            else -> parsedAudioPlugin.executable.linux
-        }?.map {
-            insertArguments(it)
-        }
+        val options =
+            when {
+                osName.contains("WIN") -> parsedAudioPlugin.executable.windows
+                osName.contains("MAC") -> parsedAudioPlugin.executable.macos
+                else -> parsedAudioPlugin.executable.linux
+            }?.map {
+                insertArguments(it)
+            }
         return options?.let {
             selectValid(it)
         }

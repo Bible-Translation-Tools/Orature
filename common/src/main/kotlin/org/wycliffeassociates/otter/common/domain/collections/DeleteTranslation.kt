@@ -23,16 +23,18 @@ import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import javax.inject.Inject
 
-class DeleteTranslation @Inject constructor(
-    private val languageRepo: ILanguageRepository
-) {
-    fun delete(
-        sourceLanguage: Language,
-        targetLanguage: Language
-    ): Completable {
-        return languageRepo.getTranslation(sourceLanguage, targetLanguage)
-            .flatMapCompletable {
-                languageRepo.deleteTranslation(it)
-            }
+class DeleteTranslation
+    @Inject
+    constructor(
+        private val languageRepo: ILanguageRepository,
+    ) {
+        fun delete(
+            sourceLanguage: Language,
+            targetLanguage: Language,
+        ): Completable {
+            return languageRepo.getTranslation(sourceLanguage, targetLanguage)
+                .flatMapCompletable {
+                    languageRepo.deleteTranslation(it)
+                }
+        }
     }
-}

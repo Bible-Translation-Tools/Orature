@@ -24,30 +24,39 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.Collect
 import java.time.LocalDateTime
 import javax.inject.Inject
 
-class CollectionMapper @Inject constructor() {
-    fun mapFromEntity(entity: CollectionEntity, metadata: ResourceMetadata?): Collection {
-        return Collection(
-            sort = entity.sort,
-            slug = entity.slug,
-            labelKey = entity.label,
-            titleKey = entity.title,
-            resourceContainer = metadata,
-            modifiedTs = entity.modifiedTs?.let(LocalDateTime::parse),
-            id = entity.id
-        )
-    }
+class CollectionMapper
+    @Inject
+    constructor() {
+        fun mapFromEntity(
+            entity: CollectionEntity,
+            metadata: ResourceMetadata?,
+        ): Collection {
+            return Collection(
+                sort = entity.sort,
+                slug = entity.slug,
+                labelKey = entity.label,
+                titleKey = entity.title,
+                resourceContainer = metadata,
+                modifiedTs = entity.modifiedTs?.let(LocalDateTime::parse),
+                id = entity.id,
+            )
+        }
 
-    fun mapToEntity(obj: Collection, parentFk: Int? = null, sourceFk: Int? = null): CollectionEntity {
-        return CollectionEntity(
-            id = obj.id,
-            parentFk = parentFk,
-            sourceFk = sourceFk,
-            label = obj.labelKey,
-            title = obj.titleKey,
-            slug = obj.slug,
-            sort = obj.sort,
-            dublinCoreFk = obj.resourceContainer?.id,
-            modifiedTs = obj.modifiedTs?.toString()
-        )
+        fun mapToEntity(
+            obj: Collection,
+            parentFk: Int? = null,
+            sourceFk: Int? = null,
+        ): CollectionEntity {
+            return CollectionEntity(
+                id = obj.id,
+                parentFk = parentFk,
+                sourceFk = sourceFk,
+                label = obj.labelKey,
+                title = obj.titleKey,
+                slug = obj.slug,
+                sort = obj.sort,
+                dublinCoreFk = obj.resourceContainer?.id,
+                modifiedTs = obj.modifiedTs?.toString(),
+            )
+        }
     }
-}

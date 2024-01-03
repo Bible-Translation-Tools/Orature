@@ -15,16 +15,16 @@ import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import java.io.File
 
 class TranslationUndoableActionTest {
-
     private val chunk = mockk<Chunk>()
     private val audio = mockk<AssociatedAudio>()
     private val take = mockk<Take>()
 
     @Before
     fun setUp() {
-        every { take.file } returns mockk<File> {
-            every { setLastModified(any()) } returns true
-        }
+        every { take.file } returns
+            mockk<File> {
+                every { setLastModified(any()) } returns true
+            }
         every { audio.getAllTakes() } returns arrayOf(take)
         every { audio.selectTake(any()) } returns Unit
         every { audio.insertTake(any()) } returns Unit
@@ -61,9 +61,10 @@ class TranslationUndoableActionTest {
 
     @Test
     fun testDeleteAction() {
-        val deleteAction = TranslationTakeDeleteAction(chunk, take, true) { _, _ ->
-            /* mock callback */
-        }
+        val deleteAction =
+            TranslationTakeDeleteAction(chunk, take, true) { _, _ ->
+                // mock callback
+            }
         val deleteTimestampRelay = mockk<BehaviorRelay<DateHolder>>()
 
         every { deleteTimestampRelay.accept(any()) } returns Unit

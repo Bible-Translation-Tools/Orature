@@ -6,9 +6,7 @@ class TeleprompterStateContext {
 
     private var temporarilyDisabledState: TeleprompterState? = null
 
-    fun changeState(
-        request: TeleprompterItemState
-    ) {
+    fun changeState(request: TeleprompterItemState) {
         temporarilyDisabledState = null
         state = state.changeState(request)
     }

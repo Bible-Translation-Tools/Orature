@@ -37,14 +37,13 @@ class WaveFileCreator : IWaveFileCreator {
                         16,
                         1,
                         true,
-                        false
+                        false,
                     ),
-                    0
+                    0,
                 ),
                 AudioFileFormat.Type.WAVE,
-                path
+                path,
             )
-
         }
     }
 }

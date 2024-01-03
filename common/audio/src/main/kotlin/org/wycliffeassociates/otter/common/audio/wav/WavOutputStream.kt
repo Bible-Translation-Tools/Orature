@@ -31,100 +31,101 @@ import java.nio.ByteOrder
 /**
  * Created by sarabiaj on 10/4/2016.
  */
-class WavOutputStream @Throws(FileNotFoundException::class)
-@JvmOverloads constructor(
-    private val wav: WavFile,
-    append: Boolean = false,
-    private val buffered: Boolean = false
-) : OutputStream(), Closeable, AutoCloseable {
+class WavOutputStream
+    @Throws(FileNotFoundException::class)
+    @JvmOverloads
+    constructor(
+        private val wav: WavFile,
+        append: Boolean = false,
+        private val buffered: Boolean = false,
+    ) : OutputStream(), Closeable, AutoCloseable {
+        private val outputStream: OutputStream
+        private lateinit var bos: BufferedOutputStream
+        private var audioDataLength: Int = 0
 
-    private val outputStream: OutputStream
-    private lateinit var bos: BufferedOutputStream
-    private var audioDataLength: Int = 0
+        init {
+            if (wav.file.length().toInt() == 0) {
+                wav.initializeWavFile()
+            }
+            audioDataLength = wav.totalAudioLength
+            // Truncate the metadata for writing
+            // if appending, then truncate metadata following the audio length, otherwise truncate after the header
+            val whereToTruncate = if (append) audioDataLength else 0
+            try {
+                FileOutputStream(wav.file, true)
+                    .channel
+                    .truncate((whereToTruncate + wav.headerSize).toLong())
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
 
-    init {
-        if (wav.file.length().toInt() == 0) {
-            wav.initializeWavFile()
-        }
-        audioDataLength = wav.totalAudioLength
-        // Truncate the metadata for writing
-        // if appending, then truncate metadata following the audio length, otherwise truncate after the header
-        val whereToTruncate = if (append) audioDataLength else 0
-        try {
-            FileOutputStream(wav.file, true)
-                .channel
-                .truncate((whereToTruncate + wav.headerSize).toLong())
-        } catch (e: IOException) {
-            e.printStackTrace()
+            // always need to use append to continue writing after the header rather than overwriting it
+            outputStream = FileOutputStream(wav.file, true)
+            if (buffered) {
+                bos = BufferedOutputStream(outputStream)
+            }
         }
 
-        // always need to use append to continue writing after the header rather than overwriting it
-        outputStream = FileOutputStream(wav.file, true)
-        if (buffered) {
-            bos = BufferedOutputStream(outputStream)
+        @Throws(IOException::class)
+        override fun write(oneByte: Int) {
+            if (buffered) {
+                bos.write(oneByte)
+            } else {
+                outputStream.write(oneByte)
+            }
+            audioDataLength++
         }
-    }
 
-    @Throws(IOException::class)
-    override fun write(oneByte: Int) {
-        if (buffered) {
-            bos.write(oneByte)
-        } else {
-            outputStream.write(oneByte)
+        @Throws(IOException::class)
+        override fun flush() {
+            if (buffered) {
+                bos.flush()
+            }
+            outputStream.flush()
         }
-        audioDataLength++
-    }
 
-    @Throws(IOException::class)
-    override fun flush() {
-        if (buffered) {
-            bos.flush()
+        @Throws(IOException::class)
+        override fun write(bytes: ByteArray) {
+            if (buffered) {
+                bos.write(bytes)
+            } else {
+                outputStream.write(bytes)
+            }
+            audioDataLength += bytes.size
         }
-        outputStream.flush()
-    }
 
-    @Throws(IOException::class)
-    override fun write(bytes: ByteArray) {
-        if (buffered) {
-            bos.write(bytes)
-        } else {
-            outputStream.write(bytes)
+        @Throws(IOException::class)
+        override fun close() {
+            if (wav.hasMetadata) {
+                val os = if (buffered) bos else outputStream
+                wav.writeMetadata(os)
+            }
+            if (buffered) {
+                bos.flush()
+            }
+            outputStream.flush()
+            outputStream.close()
+            wav.finishWrite(audioDataLength)
+            updateHeader()
         }
-        audioDataLength += bytes.size
-    }
 
-    @Throws(IOException::class)
-    override fun close() {
-        if (wav.hasMetadata) {
-            val os = if (buffered) bos else outputStream
-            wav.writeMetadata(os)
-        }
-        if (buffered) {
-            bos.flush()
-        }
-        outputStream.flush()
-        outputStream.close()
-        wav.finishWrite(audioDataLength)
-        updateHeader()
-    }
-
-    @Throws(IOException::class)
-    internal fun updateHeader() {
-        // file size minus riff size chunks
-        val totalDataSize = wav.file.length() - CHUNK_HEADER_SIZE
-        val bb = ByteBuffer.allocate(DWORD_SIZE)
-        bb.order(ByteOrder.LITTLE_ENDIAN)
-        bb.putInt(totalDataSize.toInt())
-        RandomAccessFile(wav.file, "rw").use { raf ->
-            // move to total file size index
-            raf.seek(DWORD_SIZE.toLong())
-            raf.write(bb.array())
-            bb.clear()
+        @Throws(IOException::class)
+        internal fun updateHeader() {
+            // file size minus riff size chunks
+            val totalDataSize = wav.file.length() - CHUNK_HEADER_SIZE
+            val bb = ByteBuffer.allocate(DWORD_SIZE)
             bb.order(ByteOrder.LITTLE_ENDIAN)
-            bb.putInt(audioDataLength)
-            // move to audio size index
-            raf.seek((wav.headerSize - CHUNK_LABEL_SIZE).toLong())
-            raf.write(bb.array())
+            bb.putInt(totalDataSize.toInt())
+            RandomAccessFile(wav.file, "rw").use { raf ->
+                // move to total file size index
+                raf.seek(DWORD_SIZE.toLong())
+                raf.write(bb.array())
+                bb.clear()
+                bb.order(ByteOrder.LITTLE_ENDIAN)
+                bb.putInt(audioDataLength)
+                // move to audio size index
+                raf.seek((wav.headerSize - CHUNK_LABEL_SIZE).toLong())
+                raf.write(bb.array())
+            }
         }
     }
-}

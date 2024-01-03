@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
 import org.wycliffeassociates.otter.common.domain.plugins.IAudioPlugin
 import org.wycliffeassociates.otter.common.domain.plugins.PluginParameters
+import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*
@@ -38,13 +39,11 @@ import java.net.URLClassLoader
 import java.text.MessageFormat
 import kotlin.jvm.internal.Reflection
 import kotlin.reflect.KClass
-import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 
 class AudioPlugin(
     private val connectionFactory: AudioConnectionFactory,
-    private val pluginData: AudioPluginData
+    private val pluginData: AudioPluginData,
 ) : IAudioPlugin {
-
     private val logger = LoggerFactory.getLogger(AudioPlugin::class.java)
 
     private val monitor = Object()
@@ -54,7 +53,10 @@ class AudioPlugin(
         return pluginClass != null
     }
 
-    override fun launch(audioFile: File, pluginParameters: PluginParameters): Completable {
+    override fun launch(
+        audioFile: File,
+        pluginParameters: PluginParameters,
+    ): Completable {
         return when (File(pluginData.executable).extension) {
             "jar" -> launchJar(audioFile, pluginParameters)
             else -> launchBin(audioFile)
@@ -68,7 +70,10 @@ class AudioPlugin(
      * @param audioFile the file containing audio of which the plugin is to operate on
      * @param pluginParameters parameters to pass to the plugin
      */
-    private fun launchJar(audioFile: File, pluginParameters: PluginParameters): Completable {
+    private fun launchJar(
+        audioFile: File,
+        pluginParameters: PluginParameters,
+    ): Completable {
         val parameters = buildJarArguments(pluginData.args, audioFile.absolutePath, pluginParameters)
         return Completable
             .fromCallable {
@@ -77,12 +82,13 @@ class AudioPlugin(
                     runInOtterMainWindow(pluginClass, parameters)
                 } else {
                     runProcess(
-                        processArgs = listOf(
-                            "java",
-                            "-jar",
-                            pluginData.executable,
-                            *parameters.raw.toTypedArray()
-                        )
+                        processArgs =
+                            listOf(
+                                "java",
+                                "-jar",
+                                pluginData.executable,
+                                *parameters.raw.toTypedArray(),
+                            ),
                     )
                 }
             }
@@ -97,10 +103,11 @@ class AudioPlugin(
         return Completable
             .fromCallable {
                 runProcess(
-                    processArgs = listOf(
-                        pluginData.executable,
-                        *args
-                    )
+                    processArgs =
+                        listOf(
+                            pluginData.executable,
+                            *args,
+                        ),
                 )
             }
             .doOnError { e ->
@@ -112,7 +119,7 @@ class AudioPlugin(
     private fun buildJarArguments(
         requestedArgs: List<String>,
         audioFilePath: String,
-        pluginParameters: PluginParameters
+        pluginParameters: PluginParameters,
     ): Parameters {
         val insertedArgs =
             requestedArgs.map { arg ->
@@ -147,7 +154,7 @@ class AudioPlugin(
                         MessageFormat.format(
                             FX.messages["bookChapterTitle"],
                             pluginParameters.bookTitle,
-                            pluginParameters.chapterNumber
+                            pluginParameters.chapterNumber,
                         )
                     }",
                     "--license=${pluginParameters.license}",
@@ -156,13 +163,16 @@ class AudioPlugin(
                     "--source_rate=${pluginParameters.sourceRate}",
                     "--target_rate=${pluginParameters.targetRate}",
                     "--source_text_zoom=${pluginParameters.sourceTextZoom}",
-                    "--source_language=${pluginParameters.sourceLanguageName}"
+                    "--source_language=${pluginParameters.sourceLanguageName}",
                 )
             }
         return ParametersImpl(insertedArgs)
     }
 
-    private fun buildBinArguments(requestedArgs: List<String>, audioFilePath: String): Array<String> {
+    private fun buildBinArguments(
+        requestedArgs: List<String>,
+        audioFilePath: String,
+    ): Array<String> {
         return requestedArgs.map { arg ->
             when (arg) {
                 "\${wav}" -> "$audioFilePath"
@@ -211,15 +221,19 @@ class AudioPlugin(
         process.waitFor()
     }
 
-    private fun runInOtterMainWindow(pluginClass: KClass<PluginEntrypoint>, parameters: Parameters) {
+    private fun runInOtterMainWindow(
+        pluginClass: KClass<PluginEntrypoint>,
+        parameters: Parameters,
+    ) {
         logger.info("Preparing to launch plugin in window.")
         val appWorkspace: Workspace = find()
-        val scope = ParameterizedScope(parameters) {
-            synchronized(monitor) {
-                logger.info("Plugin closing, notifying the lock and navigating back.")
-                monitor.notify()
+        val scope =
+            ParameterizedScope(parameters) {
+                synchronized(monitor) {
+                    logger.info("Plugin closing, notifying the lock and navigating back.")
+                    monitor.notify()
+                }
             }
-        }
         val paramsMap = appWorkspace.params
         val oldEntries = paramsMap.entries.map { it.toPair() }.toTypedArray()
         val newEntries = mapOf(*oldEntries, Pair("audioConnectionFactory", connectionFactory))

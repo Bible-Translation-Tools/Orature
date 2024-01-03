@@ -13,7 +13,6 @@ import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class RecordingSection : BorderPane() {
-
     val isRecordingProperty = SimpleBooleanProperty(false)
     private val toggleRecordingProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     private val saveActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
@@ -28,67 +27,70 @@ class RecordingSection : BorderPane() {
     init {
         center = waveformCanvas
         right = volumeCanvas
-        bottom = hbox {
-            addClass("consume__bottom", "recording__bottom-section")
-            button {
-                addClass("btn", "btn--primary", "consume__btn")
-                textProperty().bind(isRecordingProperty.stringBinding {
-                    togglePseudoClass("active", it == true)
-                    if (it == true) {
-                        graphic = pauseIcon
-                        messages["pause"]
-                    } else {
-                        graphic = resumeIcon
-                        messages["resume"]
+        bottom =
+            hbox {
+                addClass("consume__bottom", "recording__bottom-section")
+                button {
+                    addClass("btn", "btn--primary", "consume__btn")
+                    textProperty().bind(
+                        isRecordingProperty.stringBinding {
+                            togglePseudoClass("active", it == true)
+                            if (it == true) {
+                                graphic = pauseIcon
+                                messages["pause"]
+                            } else {
+                                graphic = resumeIcon
+                                messages["resume"]
+                            }
+                        },
+                    )
+                    tooltip { textProperty().bind(this@button.textProperty()) }
+
+                    action {
+                        toggleRecordingProperty.value?.handle(ActionEvent())
                     }
-                })
-                tooltip { textProperty().bind(this@button.textProperty()) }
+                }
+                button(messages["save"]) {
+                    addClass("btn", "btn--secondary")
+                    graphic = FontIcon(MaterialDesign.MDI_CHECK_CIRCLE)
 
-                action {
-                    toggleRecordingProperty.value?.handle(ActionEvent())
+                    visibleWhen { isRecordingProperty.not() }
+                    managedWhen(visibleProperty())
+
+                    action {
+                        saveActionProperty.value?.handle(ActionEvent())
+                    }
+                }
+                region { hgrow = Priority.ALWAYS }
+                button(messages["cancel"]) {
+                    addClass("btn", "btn--secondary")
+                    graphic = FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE)
+
+                    visibleWhen { isRecordingProperty.not() }
+                    managedWhen(visibleProperty())
+
+                    action {
+                        cancelActionProperty.value?.handle(ActionEvent())
+                    }
                 }
             }
-            button(messages["save"]) {
-                addClass("btn", "btn--secondary")
-                graphic = FontIcon(MaterialDesign.MDI_CHECK_CIRCLE)
-
-                visibleWhen { isRecordingProperty.not() }
-                managedWhen(visibleProperty())
-
-                action {
-                    saveActionProperty.value?.handle(ActionEvent())
-                }
-            }
-            region { hgrow = Priority.ALWAYS }
-            button(messages["cancel"]) {
-                addClass("btn", "btn--secondary")
-                graphic = FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE)
-
-                visibleWhen { isRecordingProperty.not() }
-                managedWhen(visibleProperty())
-
-                action {
-                    cancelActionProperty.value?.handle(ActionEvent())
-                }
-            }
-        }
     }
 
     fun setToggleRecordingAction(op: () -> Unit) {
         toggleRecordingProperty.set(
-            EventHandler { op() }
+            EventHandler { op() },
         )
     }
 
     fun setSaveAction(op: () -> Unit) {
         saveActionProperty.set(
-            EventHandler { op() }
+            EventHandler { op() },
         )
     }
 
     fun setCancelAction(op: () -> Unit) {
         cancelActionProperty.set(
-            EventHandler { op() }
+            EventHandler { op() },
         )
     }
 }

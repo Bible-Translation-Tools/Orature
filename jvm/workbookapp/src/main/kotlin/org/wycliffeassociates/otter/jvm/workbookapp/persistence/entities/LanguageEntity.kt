@@ -25,5 +25,5 @@ data class LanguageEntity(
     var anglicizedName: String,
     var direction: String,
     var gateway: Int,
-    var region: String
+    var region: String,
 )

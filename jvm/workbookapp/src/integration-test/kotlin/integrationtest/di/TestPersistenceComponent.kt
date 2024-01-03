@@ -18,7 +18,6 @@
  */
 package integrationtest.di
 
-import integrationtest.projects.importer.MergeMediaTest
 import dagger.Component
 import integrationtest.initialization.TestInitializeProjects
 import integrationtest.initialization.TestInitializeSources
@@ -28,9 +27,10 @@ import integrationtest.projects.TestProjectImport
 import integrationtest.projects.TestRcImport
 import integrationtest.projects.TestRemoveRc
 import integrationtest.projects.export.TestBackupProjectExporter
-import integrationtest.projects.importer.TestExistingSourceImporter
 import integrationtest.projects.export.TestSourceProjectExporter
+import integrationtest.projects.importer.MergeMediaTest
 import integrationtest.projects.importer.TestAudioProjectExporter
+import integrationtest.projects.importer.TestExistingSourceImporter
 import integrationtest.projects.importer.TestOngoingProjectImporter
 import integrationtest.projects.importer.TestRCImporterFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.di.AppDependencyGraph
@@ -47,22 +47,35 @@ import javax.inject.Singleton
         TestDirectoryProviderModule::class,
         TestRepositoriesModule::class,
         ZipEntryTreeBuilderModule::class,
-    ]
+    ],
 )
 @Singleton
 interface TestPersistenceComponent : AppDependencyGraph {
     fun inject(test: TestInitializeSources)
+
     fun inject(test: TestInitializeUlb)
+
     fun inject(test: TestInitializeProjects)
+
     fun inject(test: TestProjectCreate)
+
     fun inject(test: TestRcImport)
+
     fun inject(test: TestProjectImport)
+
     fun inject(test: TestExistingSourceImporter)
+
     fun inject(test: TestOngoingProjectImporter)
+
     fun inject(test: TestRCImporterFactory)
+
     fun inject(test: TestRemoveRc)
+
     fun inject(test: TestSourceProjectExporter)
+
     fun inject(test: TestBackupProjectExporter)
+
     fun inject(test: TestAudioProjectExporter)
+
     fun inject(test: MergeMediaTest)
 }

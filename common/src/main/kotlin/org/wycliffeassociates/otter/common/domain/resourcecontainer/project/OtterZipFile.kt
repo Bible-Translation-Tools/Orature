@@ -29,7 +29,7 @@ class OtterZipFile(
     private val separator: String,
     val rootPathWithinZip: String?,
     val parentFile: OtterFile? = null,
-    private val zipEntry: ZipEntry? = null
+    private val zipEntry: ZipEntry? = null,
 ) {
     val isFile = !(zipEntry == null || zipEntry.isDirectory)
     val name: String = File(absolutePath).name
@@ -39,8 +39,9 @@ class OtterZipFile(
 
     fun toRelativeString(parent: OtterFile): String {
         val suffixTrimmed = absolutePath.removeSuffix(separator)
-        val prefixesToTrim = listOfNotNull(parent.absolutePath, rootPathWithinZip)
-            .flatMap { listOf(it, ".$separator", separator) }
+        val prefixesToTrim =
+            listOfNotNull(parent.absolutePath, rootPathWithinZip)
+                .flatMap { listOf(it, ".$separator", separator) }
         return prefixesToTrim.fold(suffixTrimmed, String::removePrefix)
     }
 
@@ -50,7 +51,7 @@ class OtterZipFile(
             rootZipFile: ZipFile,
             separator: String,
             rootPathWithinZip: String?,
-            parentFile: OtterFile? = null
+            parentFile: OtterFile? = null,
         ): OtterFile {
             val zipEntry = rootZipFile.getEntry(absolutePath)
             return OtterFile.Z(
@@ -60,8 +61,8 @@ class OtterZipFile(
                     separator = separator,
                     rootPathWithinZip = rootPathWithinZip,
                     parentFile = parentFile,
-                    zipEntry = zipEntry
-                )
+                    zipEntry = zipEntry,
+                ),
             )
         }
     }

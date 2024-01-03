@@ -27,26 +27,31 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.Collect
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.TakeEntity
 
 class TakeDao(
-    private val instanceDsl: DSLContext
+    private val instanceDsl: DSLContext,
 ) {
     fun fetchByContentId(
         id: Int,
         includeDeleted: Boolean = false,
-        dsl: DSLContext = instanceDsl
+        dsl: DSLContext = instanceDsl,
     ): List<TakeEntity> {
-        val baseQuery = dsl
-            .select()
-            .from(TAKE_ENTITY)
-            .where(TAKE_ENTITY.CONTENT_FK.eq(id))
-        val query = when {
-            includeDeleted -> baseQuery
-            else -> baseQuery.and(TAKE_ENTITY.DELETED_TS.isNull)
-        }
+        val baseQuery =
+            dsl
+                .select()
+                .from(TAKE_ENTITY)
+                .where(TAKE_ENTITY.CONTENT_FK.eq(id))
+        val query =
+            when {
+                includeDeleted -> baseQuery
+                else -> baseQuery.and(TAKE_ENTITY.DELETED_TS.isNull)
+            }
         return query.fetch(RecordMappers.Companion::mapToTakeEntity)
     }
 
     @Synchronized
-    fun insert(entity: TakeEntity, dsl: DSLContext = instanceDsl): Int {
+    fun insert(
+        entity: TakeEntity,
+        dsl: DSLContext = instanceDsl,
+    ): Int {
         if (entity.id != 0) throw InsertionException("Entity ID is not 0")
 
         // Insert the take entity
@@ -61,7 +66,7 @@ class TakeDao(
                 TAKE_ENTITY.DELETED_TS,
                 TAKE_ENTITY.PLAYED,
                 TAKE_ENTITY.CHECKING_FK,
-                TAKE_ENTITY.CHECKSUM
+                TAKE_ENTITY.CHECKSUM,
             )
             .values(
                 entity.contentFk,
@@ -72,7 +77,7 @@ class TakeDao(
                 entity.deletedTs,
                 entity.played,
                 entity.checkingFk,
-                entity.checksum
+                entity.checksum,
             )
             .execute()
 
@@ -85,7 +90,10 @@ class TakeDao(
             }!!
     }
 
-    fun fetchById(id: Int, dsl: DSLContext = instanceDsl): TakeEntity {
+    fun fetchById(
+        id: Int,
+        dsl: DSLContext = instanceDsl,
+    ): TakeEntity {
         return dsl
             .select()
             .from(TAKE_ENTITY)
@@ -104,7 +112,10 @@ class TakeDao(
             }
     }
 
-    fun update(entity: TakeEntity, dsl: DSLContext = instanceDsl) {
+    fun update(
+        entity: TakeEntity,
+        dsl: DSLContext = instanceDsl,
+    ) {
         dsl
             .update(TAKE_ENTITY)
             .set(TAKE_ENTITY.CONTENT_FK, entity.contentFk)
@@ -120,7 +131,10 @@ class TakeDao(
             .execute()
     }
 
-    fun delete(entity: TakeEntity, dsl: DSLContext = instanceDsl) {
+    fun delete(
+        entity: TakeEntity,
+        dsl: DSLContext = instanceDsl,
+    ) {
         dsl
             .deleteFrom(TAKE_ENTITY)
             .where(TAKE_ENTITY.ID.eq(entity.id))
@@ -134,7 +148,7 @@ class TakeDao(
      */
     fun fetchSoftDeletedTakes(
         collectionEntity: CollectionEntity,
-        dsl: DSLContext = instanceDsl
+        dsl: DSLContext = instanceDsl,
     ): List<TakeEntity> {
         return dsl
             .select()
@@ -147,12 +161,12 @@ class TakeDao(
                             CONTENT_ENTITY.COLLECTION_FK.`in`(
                                 select(COLLECTION_ENTITY.ID)
                                     .from(COLLECTION_ENTITY)
-                                    .where(COLLECTION_ENTITY.PARENT_FK.eq(collectionEntity.id))
-                            )
-                        )
+                                    .where(COLLECTION_ENTITY.PARENT_FK.eq(collectionEntity.id)),
+                            ),
+                        ),
                 ).and(
-                    TAKE_ENTITY.DELETED_TS.isNotNull
-                )
+                    TAKE_ENTITY.DELETED_TS.isNotNull,
+                ),
             )
             .fetch {
                 RecordMappers.mapToTakeEntity(it)
@@ -163,9 +177,7 @@ class TakeDao(
      * Fetches all takes listed for soft delete (but presumably haven't been deleted yet)
      *
      */
-    fun fetchSoftDeletedTakes(
-        dsl: DSLContext = instanceDsl
-    ): List<TakeEntity> {
+    fun fetchSoftDeletedTakes(dsl: DSLContext = instanceDsl): List<TakeEntity> {
         return dsl
             .select()
             .from(TAKE_ENTITY)
@@ -178,23 +190,25 @@ class TakeDao(
     fun fetchByCollectionId(
         id: Int,
         includeDeleted: Boolean = false,
-        dsl: DSLContext = instanceDsl
+        dsl: DSLContext = instanceDsl,
     ): List<TakeEntity> {
-        val baseQuery = dsl
-            .select()
-            .from(TAKE_ENTITY)
-            .where(
-                TAKE_ENTITY.CONTENT_FK.`in`(
-                    select(CONTENT_ENTITY.ID)
-                        .from(CONTENT_ENTITY)
-                        .where(CONTENT_ENTITY.COLLECTION_FK.eq(id))
+        val baseQuery =
+            dsl
+                .select()
+                .from(TAKE_ENTITY)
+                .where(
+                    TAKE_ENTITY.CONTENT_FK.`in`(
+                        select(CONTENT_ENTITY.ID)
+                            .from(CONTENT_ENTITY)
+                            .where(CONTENT_ENTITY.COLLECTION_FK.eq(id)),
+                    ),
                 )
-            )
-        
-        val query = when {
-            includeDeleted -> baseQuery
-            else -> baseQuery.and(TAKE_ENTITY.DELETED_TS.isNull)
-        }
+
+        val query =
+            when {
+                includeDeleted -> baseQuery
+                else -> baseQuery.and(TAKE_ENTITY.DELETED_TS.isNull)
+            }
         return query.fetch(RecordMappers.Companion::mapToTakeEntity)
     }
 }

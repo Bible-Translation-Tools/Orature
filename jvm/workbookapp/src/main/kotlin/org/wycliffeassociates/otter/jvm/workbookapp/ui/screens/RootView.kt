@@ -35,7 +35,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewMod
 import tornadofx.*
 
 class RootView : View() {
-
     private val viewModel: RootViewModel by inject()
     private val settingsViewModel: SettingsViewModel by inject()
     private val navigator: NavigationMediator by inject()
@@ -66,17 +65,18 @@ class RootView : View() {
         initAudioErrorDialog()
     }
 
-    override val root = stackpane {
-        prefWidth = 800.0
-        prefHeight = 600.0
+    override val root =
+        stackpane {
+            prefWidth = 800.0
+            prefHeight = 600.0
 
-        nodeOrientationProperty().bind(settingsViewModel.orientationProperty)
+            nodeOrientationProperty().bind(settingsViewModel.orientationProperty)
 
-        borderpane {
-            left<AppBar>()
-            center<AppContent>()
+            borderpane {
+                left<AppBar>()
+                center<AppContent>()
+            }
         }
-    }
 
     private fun initThemeStylesheets() {
         tryImportStylesheet(resources["/css/theme/light-theme.css"])
@@ -84,23 +84,24 @@ class RootView : View() {
     }
 
     private fun initAudioErrorDialog() {
-        val errorDialog = audioerrordialog {
-            titleTextProperty.set(messages["error"])
-            inputMessageTitleTextProperty.set(messages["unableToRecord"])
-            inputMessageTextProperty.set(messages["audioErrorMessage"])
+        val errorDialog =
+            audioerrordialog {
+                titleTextProperty.set(messages["error"])
+                inputMessageTitleTextProperty.set(messages["unableToRecord"])
+                inputMessageTextProperty.set(messages["audioErrorMessage"])
 
-            outputMessageTitleTextProperty.set(messages["unableToPlaySound"])
-            outputMessageTextProperty.set(messages["audioErrorMessage"])
+                outputMessageTitleTextProperty.set(messages["unableToPlaySound"])
+                outputMessageTextProperty.set(messages["audioErrorMessage"])
 
-            backgroundImageProperty.set(resources.image("/images/audio_error.png"))
-            cancelButtonTextProperty.set(messages["close"])
-            orientationProperty.bind(settingsViewModel.orientationProperty)
+                backgroundImageProperty.set(resources.image("/images/audio_error.png"))
+                cancelButtonTextProperty.set(messages["close"])
+                orientationProperty.bind(settingsViewModel.orientationProperty)
 
-            errorTypeProperty.bind(viewModel.audioErrorType)
+                errorTypeProperty.bind(viewModel.audioErrorType)
 
-            onCloseAction { viewModel.showAudioErrorDialogProperty.set(false) }
-            onCancelAction { viewModel.showAudioErrorDialogProperty.set(false) }
-        }
+                onCloseAction { viewModel.showAudioErrorDialogProperty.set(false) }
+                onCancelAction { viewModel.showAudioErrorDialogProperty.set(false) }
+            }
 
         viewModel.showAudioErrorDialogProperty.onChangeAndDoNow {
             Platform.runLater { if (it!!) errorDialog.open() else errorDialog.close() }

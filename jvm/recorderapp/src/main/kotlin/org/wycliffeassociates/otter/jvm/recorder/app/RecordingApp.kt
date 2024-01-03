@@ -24,7 +24,6 @@ import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
 
 class RecordingApp : App() {
-
     override val primaryView = RecorderView::class
 
     init {

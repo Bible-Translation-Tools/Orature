@@ -33,62 +33,63 @@ import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
 
-class InitializeRecorder @Inject constructor(
-    val directoryProvider: IDirectoryProvider,
-    val pluginRepository: IAudioPluginRepository,
-    val installedEntityRepo: IInstalledEntityRepository,
-    val preferences: IAppPreferences
-) : Installable {
+class InitializeRecorder
+    @Inject
+    constructor(
+        val directoryProvider: IDirectoryProvider,
+        val pluginRepository: IAudioPluginRepository,
+        val installedEntityRepo: IInstalledEntityRepository,
+        val preferences: IAppPreferences,
+    ) : Installable {
+        override val name = "RECORDER"
+        override val version = 32
 
-    override val name = "RECORDER"
-    override val version = 32
+        private val log = LoggerFactory.getLogger(InitializeRecorder::class.java)
 
-    private val log = LoggerFactory.getLogger(InitializeRecorder::class.java)
+        override fun exec(progressEmitter: ObservableEmitter<ProgressStatus>): Completable {
+            return Completable
+                .fromCallable {
+                    var installedVersion = installedEntityRepo.getInstalledVersion(this) ?: 0
 
-    override fun exec(progressEmitter: ObservableEmitter<ProgressStatus>): Completable {
-        return Completable
-            .fromCallable {
-                var installedVersion = installedEntityRepo.getInstalledVersion(this) ?: 0
+                    migrate(installedVersion)
 
-                migrate(installedVersion)
+                    log.info("Initializing $name version: $version...")
+                    importOtterRecorder()
+                        .doOnComplete {
+                            installedEntityRepo.install(this)
+                            log.info("Recorder imported!")
+                            log.info("$name version: $version installed!")
+                        }
+                        .doOnError { e ->
+                            log.error("Error importing recorder.", e)
+                        }
+                        .blockingAwait()
+                }
+        }
 
-                log.info("Initializing $name version: $version...")
-                importOtterRecorder()
-                    .doOnComplete {
-                        installedEntityRepo.install(this)
-                        log.info("Recorder imported!")
-                        log.info("$name version: $version installed!")
-                    }
-                    .doOnError { e ->
-                        log.error("Error importing recorder.", e)
-                    }
-                    .blockingAwait()
-            }
+        private fun importOtterRecorder(): Completable {
+            val pluginsDir = directoryProvider.audioPluginDirectory
+            val jar = File(pluginsDir, "OratureRecorder.jar")
+            ClassLoader.getSystemResourceAsStream("plugins/jars/recorderapp")
+                ?.transferTo(FileOutputStream(jar))
+            return pluginRepository.insert(
+                AudioPluginData(
+                    0,
+                    "OratureRecorder",
+                    "$version.0.0",
+                    canEdit = false,
+                    canRecord = true,
+                    canMark = false,
+                    executable = jar.absolutePath,
+                    args = listOf(),
+                    pluginFile = null,
+                ),
+            ).doAfterSuccess { id: Int ->
+                preferences.setPluginId(PluginType.RECORDER, id)
+            }.ignoreElement()
+        }
+
+        private fun migrate(version: Int) {
+            // no-op
+        }
     }
-
-    private fun importOtterRecorder(): Completable {
-        val pluginsDir = directoryProvider.audioPluginDirectory
-        val jar = File(pluginsDir, "OratureRecorder.jar")
-        ClassLoader.getSystemResourceAsStream("plugins/jars/recorderapp")
-            ?.transferTo(FileOutputStream(jar))
-        return pluginRepository.insert(
-            AudioPluginData(
-                0,
-                "OratureRecorder",
-                "$version.0.0",
-                canEdit = false,
-                canRecord = true,
-                canMark = false,
-                executable = jar.absolutePath,
-                args = listOf(),
-                pluginFile = null
-            )
-        ).doAfterSuccess { id: Int ->
-            preferences.setPluginId(PluginType.RECORDER, id)
-        }.ignoreElement()
-    }
-
-    private fun migrate(version: Int) {
-        /* no-op */
-    }
-}

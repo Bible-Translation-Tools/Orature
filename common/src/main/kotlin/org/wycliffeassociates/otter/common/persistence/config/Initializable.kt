@@ -20,7 +20,6 @@ package org.wycliffeassociates.otter.common.persistence.config
 
 import io.reactivex.Completable
 import io.reactivex.ObservableEmitter
-import io.reactivex.Observer
 import org.wycliffeassociates.otter.common.data.ProgressStatus
 
 /**

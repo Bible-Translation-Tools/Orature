@@ -7,5 +7,9 @@ import java.io.File
 
 interface IVersificationRepository {
     fun getVersification(slug: String): Maybe<Versification>
-    fun insertVersification(slug: String, path: File): Completable
+
+    fun insertVersification(
+        slug: String,
+        path: File,
+    ): Completable
 }

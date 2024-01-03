@@ -21,8 +21,8 @@ import org.wycliffeassociates.otter.jvm.controls.event.ProjectImportFinishEvent
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
 import org.wycliffeassociates.otter.jvm.controls.popup.NotificationSnackBar
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ImportProjectViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.NOTIFICATION_DURATION_SEC
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ImportProjectViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -31,7 +31,6 @@ import java.io.File
 import java.text.MessageFormat
 
 class SourceAudioMissing : View() {
-
     private val logger = LoggerFactory.getLogger(javaClass)
 
     private val viewModel: TranslationViewModel2 by inject()
@@ -39,161 +38,164 @@ class SourceAudioMissing : View() {
     private val settingsViewModel: SettingsViewModel by inject()
     private val importProjectViewModel: ImportProjectViewModel by inject()
 
-    override val root = VBox().apply {
-        addClass("audio-missing-view")
-        vgrow = Priority.ALWAYS
-        visibleWhen { viewModel.showAudioMissingViewProperty }
-        managedWhen(visibleProperty())
-
-        label {
-            addClass("audio-missing__title")
-            textProperty().bind(
-                workbookDataStore.activeChapterTitleBinding().stringBinding {
-                    MessageFormat.format(
-                        messages["source_audio_missing_for"],
-                        it
-                    )
-                }
-            )
-        }
-        label(messages["source_audio_missing_description"]) {
-            addClass("normal-text", "audio-missing__description")
-            minHeight = Region.USE_PREF_SIZE // avoids ellipsis
-        }
-
-        vbox {
-            addClass("audio-missing__drag-drop-area")
+    override val root =
+        VBox().apply {
+            addClass("audio-missing-view")
+            vgrow = Priority.ALWAYS
+            visibleWhen { viewModel.showAudioMissingViewProperty }
+            managedWhen(visibleProperty())
 
             label {
-                graphic = FontIcon(MaterialDesign.MDI_FOLDER_OUTLINE).addClass("big-icon")
-            }
-
-            textflow {
-                addClass("audio-missing__text-flow", "text-centered")
-
-                val textMessage = messages["drag_drop_or_browse_import__template"]
-                val prefixText = textMessage.substringBefore('{')
-                val suffixText = textMessage.substringAfter('}')
-
-                text(prefixText) {
-                    addClass("normal-text")
-                }
-                hyperlink(messages["choose_file"]).apply {
-                    addClass("wa-text--hyperlink", "audio-missing__link-text")
-                    tooltip(text)
-                    action {
-                        chooseFile(
-                            FX.messages["importResourceFromZip"],
-                            arrayOf(
-                                FileChooser.ExtensionFilter(
-                                    messages["oratureFileTypes"],
-                                    *OratureFileFormat.extensionList.map { "*.$it" }.toTypedArray()
-                                )
-                            ),
-                            mode = FileChooserMode.Single,
-                            owner = currentWindow
-                        ).firstOrNull()?.let { handleImportFile(it) }
-                    }
-                }
-                text(suffixText) {
-                    addClass("normal-text")
-                }
-            }
-            textflow {
-                addClass("audio-missing__text-flow", "text-centered")
-
-                val textMessage = messages["file_extension_supported"]
-                val prefixText = textMessage.substringBefore('{')
-                val suffixText = textMessage.substringAfter('}')
-
-                text(prefixText) {
-                    addClass("note-text")
-                }
-                text("orature") {
-                    addClass("h5", "bold-text")
-                }
-                text(suffixText) {
-                    addClass("note-text")
-                }
-            }
-
-            setOnDragOver {
-                if (it.dragboard.hasFiles()) {
-                    togglePseudoClass("drag-over", true)
-                }
-                onDragOverHandler().handle(it)
-            }
-            setOnDragExited {
-                togglePseudoClass("drag-over", false)
-            }
-            onDragDropped = onDragDroppedHandler()
-        }
-
-        stackpane {
-            addClass("audio-missing__separator-area")
-            separator { fitToParentWidth() }
-        }
-
-        label(messages["need_source_audio"]) {
-            addClass("h3")
-        }
-
-        textflow {
-            addClass("audio-missing__text-flow")
-
-            val textMessage = messages["source_audio_download_description__template"]
-            val prefixText = textMessage.substringBefore('{')
-            val suffixText = textMessage.substringAfter('}')
-            text(prefixText) {
-                addClass("normal-text")
-            }
-            hyperlink("audio.bibleineverylanguage.org").apply {
-                addClass("wa-text--hyperlink", "audio-missing__link-text")
-                tooltip("audio.bibleineverylanguage.org/gl")
-                action {
-                    hostServices.showDocument("https://audio.bibleineverylanguage.org/gl")
-                }
-            }
-            text(suffixText) {
-                addClass("normal-text")
-            }
-        }
-
-        hbox {
-            addClass("audio-missing__actions")
-
-            button(messages["check_online"]) {
-                addClass("btn", "btn--primary")
-                tooltip(text)
-                graphic = FontIcon(MaterialDesign.MDI_EXPORT)
-                prefWidthProperty().bind(this@hbox.widthProperty().divide(2))
-                action {
-                    hostServices.showDocument("https://audio.bibleineverylanguage.org/gl")
-                }
-            }
-
-            button {
-                addClass("btn", "btn--secondary")
-                textProperty().bind(viewModel.bookTitleProperty.stringBinding {
-                    it?.let { bookTitle ->
+                addClass("audio-missing__title")
+                textProperty().bind(
+                    workbookDataStore.activeChapterTitleBinding().stringBinding {
                         MessageFormat.format(
-                            messages["begin_narrating_book"],
-                            bookTitle
+                            messages["source_audio_missing_for"],
+                            it,
                         )
-                    }
-                })
-                tooltip {
-                    textProperty().bind(this@button.textProperty())
-                }
-                graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
-                prefWidthProperty().bind(this@hbox.widthProperty().divide(2))
+                    },
+                )
+            }
+            label(messages["source_audio_missing_description"]) {
+                addClass("normal-text", "audio-missing__description")
+                minHeight = Region.USE_PREF_SIZE // avoids ellipsis
+            }
 
-                action {
-                    viewModel.goToNarration()
+            vbox {
+                addClass("audio-missing__drag-drop-area")
+
+                label {
+                    graphic = FontIcon(MaterialDesign.MDI_FOLDER_OUTLINE).addClass("big-icon")
+                }
+
+                textflow {
+                    addClass("audio-missing__text-flow", "text-centered")
+
+                    val textMessage = messages["drag_drop_or_browse_import__template"]
+                    val prefixText = textMessage.substringBefore('{')
+                    val suffixText = textMessage.substringAfter('}')
+
+                    text(prefixText) {
+                        addClass("normal-text")
+                    }
+                    hyperlink(messages["choose_file"]).apply {
+                        addClass("wa-text--hyperlink", "audio-missing__link-text")
+                        tooltip(text)
+                        action {
+                            chooseFile(
+                                FX.messages["importResourceFromZip"],
+                                arrayOf(
+                                    FileChooser.ExtensionFilter(
+                                        messages["oratureFileTypes"],
+                                        *OratureFileFormat.extensionList.map { "*.$it" }.toTypedArray(),
+                                    ),
+                                ),
+                                mode = FileChooserMode.Single,
+                                owner = currentWindow,
+                            ).firstOrNull()?.let { handleImportFile(it) }
+                        }
+                    }
+                    text(suffixText) {
+                        addClass("normal-text")
+                    }
+                }
+                textflow {
+                    addClass("audio-missing__text-flow", "text-centered")
+
+                    val textMessage = messages["file_extension_supported"]
+                    val prefixText = textMessage.substringBefore('{')
+                    val suffixText = textMessage.substringAfter('}')
+
+                    text(prefixText) {
+                        addClass("note-text")
+                    }
+                    text("orature") {
+                        addClass("h5", "bold-text")
+                    }
+                    text(suffixText) {
+                        addClass("note-text")
+                    }
+                }
+
+                setOnDragOver {
+                    if (it.dragboard.hasFiles()) {
+                        togglePseudoClass("drag-over", true)
+                    }
+                    onDragOverHandler().handle(it)
+                }
+                setOnDragExited {
+                    togglePseudoClass("drag-over", false)
+                }
+                onDragDropped = onDragDroppedHandler()
+            }
+
+            stackpane {
+                addClass("audio-missing__separator-area")
+                separator { fitToParentWidth() }
+            }
+
+            label(messages["need_source_audio"]) {
+                addClass("h3")
+            }
+
+            textflow {
+                addClass("audio-missing__text-flow")
+
+                val textMessage = messages["source_audio_download_description__template"]
+                val prefixText = textMessage.substringBefore('{')
+                val suffixText = textMessage.substringAfter('}')
+                text(prefixText) {
+                    addClass("normal-text")
+                }
+                hyperlink("audio.bibleineverylanguage.org").apply {
+                    addClass("wa-text--hyperlink", "audio-missing__link-text")
+                    tooltip("audio.bibleineverylanguage.org/gl")
+                    action {
+                        hostServices.showDocument("https://audio.bibleineverylanguage.org/gl")
+                    }
+                }
+                text(suffixText) {
+                    addClass("normal-text")
+                }
+            }
+
+            hbox {
+                addClass("audio-missing__actions")
+
+                button(messages["check_online"]) {
+                    addClass("btn", "btn--primary")
+                    tooltip(text)
+                    graphic = FontIcon(MaterialDesign.MDI_EXPORT)
+                    prefWidthProperty().bind(this@hbox.widthProperty().divide(2))
+                    action {
+                        hostServices.showDocument("https://audio.bibleineverylanguage.org/gl")
+                    }
+                }
+
+                button {
+                    addClass("btn", "btn--secondary")
+                    textProperty().bind(
+                        viewModel.bookTitleProperty.stringBinding {
+                            it?.let { bookTitle ->
+                                MessageFormat.format(
+                                    messages["begin_narrating_book"],
+                                    bookTitle,
+                                )
+                            }
+                        },
+                    )
+                    tooltip {
+                        textProperty().bind(this@button.textProperty())
+                    }
+                    graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
+                    prefWidthProperty().bind(this@hbox.widthProperty().divide(2))
+
+                    action {
+                        viewModel.goToNarration()
+                    }
                 }
             }
         }
-    }
 
     init {
         subscribe<ProjectImportFinishEvent> { event ->
@@ -230,11 +232,12 @@ class SourceAudioMissing : View() {
                 logger.info("Drag-drop import: $fileToImport")
                 handleImportFile(fileToImport)
             } else {
-                val notSourceNotification = NotificationViewData(
-                    title = messages["importFailed"],
-                    message = messages["importErrorNotSourceAudio"],
-                    statusType = NotificationStatusType.FAILED
-                )
+                val notSourceNotification =
+                    NotificationViewData(
+                        title = messages["importFailed"],
+                        message = messages["importErrorNotSourceAudio"],
+                        statusType = NotificationStatusType.FAILED,
+                    )
                 showNotification(notSourceNotification)
             }
         }
@@ -266,40 +269,44 @@ class SourceAudioMissing : View() {
             }
     }
 
-    private fun setupProgressDialog() = find<ProgressDialog> {
-        orientationProperty.set(settingsViewModel.orientationProperty.value)
-        themeProperty.set(settingsViewModel.appColorMode.value)
-        allowCloseProperty.set(false)
-        cancelMessageProperty.set(null)
-        dialogTitleProperty.bind(importProjectViewModel.importedProjectTitleProperty.stringBinding {
-            it?.let {
-                MessageFormat.format(
-                    messages["importProjectTitle"],
-                    messages["import"],
-                    it
-                )
-            } ?: messages["importResource"]
-        })
+    private fun setupProgressDialog() =
+        find<ProgressDialog> {
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
+            allowCloseProperty.set(false)
+            cancelMessageProperty.set(null)
+            dialogTitleProperty.bind(
+                importProjectViewModel.importedProjectTitleProperty.stringBinding {
+                    it?.let {
+                        MessageFormat.format(
+                            messages["importProjectTitle"],
+                            messages["import"],
+                            it,
+                        )
+                    } ?: messages["importResource"]
+                },
+            )
 
-        setOnCloseAction { close() }
+            setOnCloseAction { close() }
 
-        open()
-    }
+            open()
+        }
 
     private fun createImportNotification(event: ProjectImportFinishEvent): NotificationViewData {
         if (event.result == ImportResult.FAILED) {
             return NotificationViewData(
                 title = messages["importFailed"],
                 message = MessageFormat.format(messages["importFailedMessage"], event.filePath),
-                statusType = NotificationStatusType.FAILED
+                statusType = NotificationStatusType.FAILED,
             )
         }
 
         // source import
-        val messageBody = MessageFormat.format(
-            messages["importSourceSuccessfulMessage"],
-            event.language
-        )
+        val messageBody =
+            MessageFormat.format(
+                messages["importSourceSuccessfulMessage"],
+                event.language,
+            )
         return NotificationViewData(
             title = messages["importSuccessful"],
             message = messageBody,
@@ -309,17 +316,18 @@ class SourceAudioMissing : View() {
 
     private fun showNotification(notification: NotificationViewData) {
         val snackBar = JFXSnackbar(root)
-        val graphic = NotificationSnackBar(notification).apply {
-            setOnDismiss {
-                snackBar.hide()
+        val graphic =
+            NotificationSnackBar(notification).apply {
+                setOnDismiss {
+                    snackBar.hide()
+                }
             }
-        }
 
         snackBar.enqueue(
             JFXSnackbar.SnackbarEvent(
                 graphic,
-                Duration.seconds(NOTIFICATION_DURATION_SEC)
-            )
+                Duration.seconds(NOTIFICATION_DURATION_SEC),
+            ),
         )
     }
 

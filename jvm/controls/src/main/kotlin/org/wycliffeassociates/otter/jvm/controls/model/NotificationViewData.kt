@@ -18,5 +18,5 @@ data class NotificationViewData(
     val statusType: NotificationStatusType,
     val actionText: String? = null,
     val actionIcon: Ikon? = null,
-    val actionCallback: () -> Unit = {}
+    val actionCallback: () -> Unit = {},
 )

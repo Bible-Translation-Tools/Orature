@@ -42,8 +42,8 @@ class BookCardData(val collection: Collection, artwork: Observable<Artwork>) {
                     it.attributionText(
                         FX.messages["artworkLicense"],
                         FX.messages["artworkAttributionTitle"],
-                        FX.messages["license"]
-                    )
+                        FX.messages["license"],
+                    ),
                 )
             }
     }

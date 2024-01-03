@@ -26,7 +26,7 @@ import tornadofx.tooltip
 
 class NewRecordingCard(
     val buttonText: String,
-    val action: () -> Unit
+    val action: () -> Unit,
 ) : VBox() {
     init {
         with(this) {
@@ -36,12 +36,12 @@ class NewRecordingCard(
                 Button(buttonText).apply {
                     styleClass.addAll(
                         "btn",
-                        "btn--cta"
+                        "btn--cta",
                     )
                     tooltip(buttonText)
                     graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                     setOnAction { action() }
-                }
+                },
             )
         }
     }

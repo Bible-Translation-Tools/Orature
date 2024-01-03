@@ -33,18 +33,17 @@ import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.wycliffeassociates.otter.assets.initialization.InitializeUlb
+import org.wycliffeassociates.otter.common.data.ProgressStatus
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
 import org.wycliffeassociates.otter.common.domain.project.importer.RCImporterFactory
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.data.ProgressStatus
 import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import javax.inject.Inject
 import javax.inject.Provider
 
 class TestInitializeUlb {
-
     @Inject
     lateinit var database: AppDatabase
 
@@ -73,9 +72,10 @@ class TestInitializeUlb {
     @Test
     fun testImportEnUlb() {
         val testSub = TestObserver<Completable>()
-        val mockProgressEmitter = mock<ObservableEmitter<ProgressStatus>>{
-            on { onNext(any()) } doAnswer { }
-        }
+        val mockProgressEmitter =
+            mock<ObservableEmitter<ProgressStatus>> {
+                on { onNext(any()) } doAnswer { }
+            }
 
         val init = initUlbProvider.get()
         init.exec(mockProgressEmitter)
@@ -91,17 +91,19 @@ class TestInitializeUlb {
     fun `test en_ulb import skipped when already imported`() {
         val importer = Mockito.mock(ImportProjectUseCase::class.java)
         val importerSpy = Mockito.spy(importer)
-        val mockProgressEmitter = mock<ObservableEmitter<ProgressStatus>>{
-            on { onNext(any()) } doAnswer { }
-        }
+        val mockProgressEmitter =
+            mock<ObservableEmitter<ProgressStatus>> {
+                on { onNext(any()) } doAnswer { }
+            }
 
         doReturn(true).`when`(importerSpy).isAlreadyImported(any())
 
-        val init = InitializeUlb(
-            directoryProvider,
-            installedEntityRepo,
-            importerSpy
-        )
+        val init =
+            InitializeUlb(
+                directoryProvider,
+                installedEntityRepo,
+                importerSpy,
+            )
         val testSub = TestObserver<Completable>()
 
         init.exec(mockProgressEmitter)

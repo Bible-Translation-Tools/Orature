@@ -18,39 +18,39 @@ import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.card.TranslationCard2
 import org.wycliffeassociates.otter.jvm.controls.card.newTranslationCard
 import org.wycliffeassociates.otter.jvm.controls.card.translationCreationCard
-import org.wycliffeassociates.otter.jvm.controls.dialog.LoadingModal
-import org.wycliffeassociates.otter.jvm.controls.dialog.ContributorDialog
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
+import org.wycliffeassociates.otter.jvm.controls.dialog.ContributorDialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.ImportProjectDialog
+import org.wycliffeassociates.otter.jvm.controls.dialog.LoadingModal
+import org.wycliffeassociates.otter.jvm.controls.dialog.ProgressDialog
 import org.wycliffeassociates.otter.jvm.controls.event.LanguageSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ProjectContributorsEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ProjectGroupDeleteEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportFinishEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ProjectImportEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ProjectImportFinishEvent
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
+import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupCardModel
 import org.wycliffeassociates.otter.jvm.controls.popup.NotificationSnackBar
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
-import org.wycliffeassociates.otter.jvm.utils.bindSingleChild
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
-import org.wycliffeassociates.otter.jvm.controls.event.ProjectImportFinishEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookDeleteEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ExportProjectDialog
-import org.wycliffeassociates.otter.jvm.controls.dialog.ProgressDialog
-import org.wycliffeassociates.otter.jvm.controls.event.ProjectImportEvent
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.bindSingleChild
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
-import org.wycliffeassociates.otter.jvm.controls.event.ProjectContributorsEvent
-import org.wycliffeassociates.otter.jvm.controls.model.ProjectGroupCardModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.BookSection
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.ProjectWizardSection
+import org.wycliffeassociates.otter.jvm.workbookapp.NOTIFICATION_DURATION_SEC
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookDeleteEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportDialogOpenEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportFinishEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookOpenEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookQuickBackupEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ImportProjectViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ExportProjectDialog
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.BookSection
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.home.ProjectWizardSection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ExportProjectViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel2
-import org.wycliffeassociates.otter.jvm.workbookapp.NOTIFICATION_DURATION_SEC
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ImportProjectViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectWizardViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
@@ -59,7 +59,6 @@ import java.lang.Exception
 import java.text.MessageFormat
 
 class HomePage2 : View() {
-
     private val logger = LoggerFactory.getLogger(HomePage2::class.java)
     private val listeners = mutableListOf<ListenerDisposer>()
 
@@ -72,23 +71,25 @@ class HomePage2 : View() {
     private val navigator: NavigationMediator by inject()
 
     private val mainSectionProperty = SimpleObjectProperty<Node>(null)
-    private val breadCrumb = BreadCrumb().apply {
-        titleProperty.set(messages["home"])
-        iconProperty.set(FontIcon(MaterialDesign.MDI_HOME))
-        setOnAction {
-            fire(NavigationRequestEvent(this@HomePage2))
+    private val breadCrumb =
+        BreadCrumb().apply {
+            titleProperty.set(messages["home"])
+            iconProperty.set(FontIcon(MaterialDesign.MDI_HOME))
+            setOnAction {
+                fire(NavigationRequestEvent(this@HomePage2))
+            }
         }
-    }
-    private val bookFragment = BookSection(viewModel.bookList, viewModel.sortedBooks).apply {
-        bookSearchQueryProperty.bindBidirectional(viewModel.bookSearchQueryProperty)
-    }
+    private val bookFragment =
+        BookSection(viewModel.bookList, viewModel.sortedBooks).apply {
+            bookSearchQueryProperty.bindBidirectional(viewModel.bookSearchQueryProperty)
+        }
     private val wizardFragment: ProjectWizardSection by lazy {
         ProjectWizardSection(
             projectWizardViewModel.sortedSourceLanguages,
             projectWizardViewModel.sortedTargetLanguages,
             projectWizardViewModel.selectedModeProperty,
             projectWizardViewModel.selectedSourceLanguageProperty,
-            projectWizardViewModel.existingLanguagePairs
+            projectWizardViewModel.existingLanguagePairs,
         ).apply {
 
             sourceLanguageSearchQueryProperty.bindBidirectional(projectWizardViewModel.sourceLanguageSearchQueryProperty)
@@ -118,86 +119,89 @@ class HomePage2 : View() {
         subscribeActionEvents()
     }
 
-    override val root = borderpane {
-        left = vbox {
-            addClass("homepage__left-pane")
-            label(messages["projects"]) {
-                addClass("h3", "h3--80", "homepage__left-header")
-            }
-            stackpane {
-                translationCreationCard {
-                    visibleWhen { mainSectionProperty.isNotEqualTo(wizardFragment) }
-                    managedWhen(visibleProperty())
-                    setOnAction {
-                        viewModel.selectedProjectGroupProperty.set(null)
-                        mainSectionProperty.set(wizardFragment)
-                        projectWizardViewModel.dock()
-                        wizardFragment.onSectionDocked()
+    override val root =
+        borderpane {
+            left =
+                vbox {
+                    addClass("homepage__left-pane")
+                    label(messages["projects"]) {
+                        addClass("h3", "h3--80", "homepage__left-header")
                     }
-                }
-                newTranslationCard(
-                    projectWizardViewModel.selectedSourceLanguageProperty,
-                    projectWizardViewModel.selectedTargetLanguageProperty,
-                    projectWizardViewModel.selectedModeProperty
-                ) {
-                    visibleWhen { mainSectionProperty.isEqualTo(wizardFragment) }
-                    managedWhen(visibleProperty())
-
-                    setOnCancelAction {
-                        exitWizard()
-                    }
-                }
-            }
-
-            scrollpane {
-                vgrow = Priority.ALWAYS
-                isFitToWidth = true
-
-                vbox { /* list of project groups */
-                    addClass("homepage__left-pane__project-groups")
-                    bindChildren(viewModel.projectGroups) { cardModel ->
-                        TranslationCard2(
-                            cardModel.sourceLanguage,
-                            cardModel.targetLanguage,
-                            cardModel.mode,
-                            viewModel.selectedProjectGroupProperty
-                        ).apply {
-
+                    stackpane {
+                        translationCreationCard {
+                            visibleWhen { mainSectionProperty.isNotEqualTo(wizardFragment) }
+                            managedWhen(visibleProperty())
                             setOnAction {
-                                viewModel.bookList.setAll(cardModel.books)
-                                viewModel.selectedProjectGroupProperty.set(cardModel.getKey())
-                                if (mainSectionProperty.value !is BookSection) {
-                                    exitWizard()
-                                }
+                                viewModel.selectedProjectGroupProperty.set(null)
+                                mainSectionProperty.set(wizardFragment)
+                                projectWizardViewModel.dock()
+                                wizardFragment.onSectionDocked()
+                            }
+                        }
+                        newTranslationCard(
+                            projectWizardViewModel.selectedSourceLanguageProperty,
+                            projectWizardViewModel.selectedTargetLanguageProperty,
+                            projectWizardViewModel.selectedModeProperty,
+                        ) {
+                            visibleWhen { mainSectionProperty.isEqualTo(wizardFragment) }
+                            managedWhen(visibleProperty())
+
+                            setOnCancelAction {
+                                exitWizard()
                             }
                         }
                     }
+
+                    scrollpane {
+                        vgrow = Priority.ALWAYS
+                        isFitToWidth = true
+
+                        vbox { // list of project groups
+                            addClass("homepage__left-pane__project-groups")
+                            bindChildren(viewModel.projectGroups) { cardModel ->
+                                TranslationCard2(
+                                    cardModel.sourceLanguage,
+                                    cardModel.targetLanguage,
+                                    cardModel.mode,
+                                    viewModel.selectedProjectGroupProperty,
+                                ).apply {
+
+                                    setOnAction {
+                                        viewModel.bookList.setAll(cardModel.books)
+                                        viewModel.selectedProjectGroupProperty.set(cardModel.getKey())
+                                        if (mainSectionProperty.value !is BookSection) {
+                                            exitWizard()
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        runLater { customizeScrollbarSkin() }
+                    }
+
+                    button(messages["import"]) {
+                        addClass("btn", "btn--secondary")
+                        tooltip(text)
+                        graphic = FontIcon(MaterialDesign.MDI_DOWNLOAD)
+                        useMaxWidth = true
+
+                        action {
+                            showImportModal()
+                        }
+                    }
+
+                    visibleWhen {
+                        // hide left pane when window size is reduced
+                        primaryStage.widthProperty().greaterThan(1000.0) ?: booleanProperty(true)
+                    }
+                    managedWhen(visibleProperty())
                 }
-
-                runLater { customizeScrollbarSkin() }
-            }
-
-            button(messages["import"]) {
-                addClass("btn", "btn--secondary")
-                tooltip(text)
-                graphic = FontIcon(MaterialDesign.MDI_DOWNLOAD)
-                useMaxWidth = true
-
-                action {
-                    showImportModal()
+            center =
+                stackpane {
+                    bindSingleChild(mainSectionProperty)
                 }
-            }
-
-            visibleWhen {
-                // hide left pane when window size is reduced
-                primaryStage.widthProperty().greaterThan(1000.0) ?: booleanProperty(true)
-            }
-            managedWhen(visibleProperty())
         }
-        center = stackpane {
-            bindSingleChild(mainSectionProperty)
-        }
-    }
 
     override fun onDock() {
         super.onDock()
@@ -230,27 +234,29 @@ class HomePage2 : View() {
 
         subscribe<ProjectContributorsEvent> {
             val books = it.books
-            val dialog = find<ContributorDialog>().apply {
-                themeProperty.set(settingsViewModel.appColorMode.value)
-                orientationProperty.set(settingsViewModel.orientationProperty.value)
-                viewModel.loadContributors(books.first())
-                    .subscribe { list ->
-                        contributors.setAll(list)
-                    }
+            val dialog =
+                find<ContributorDialog>().apply {
+                    themeProperty.set(settingsViewModel.appColorMode.value)
+                    orientationProperty.set(settingsViewModel.orientationProperty.value)
+                    viewModel.loadContributors(books.first())
+                        .subscribe { list ->
+                            contributors.setAll(list)
+                        }
 
-                saveContributorCallback.set(
-                    EventHandler {
-                        viewModel.saveContributors(contributors, books.first())
-                    }
-                )
-            }
+                    saveContributorCallback.set(
+                        EventHandler {
+                            viewModel.saveContributors(contributors, books.first())
+                        },
+                    )
+                }
             dialog.open()
         }
 
         subscribe<ProjectGroupDeleteEvent> {
-            val cardModel = viewModel.projectGroups
-                .find { gr -> gr.getKey() == viewModel.selectedProjectGroupProperty.value }
-                ?: return@subscribe
+            val cardModel =
+                viewModel.projectGroups
+                    .find { gr -> gr.getKey() == viewModel.selectedProjectGroupProperty.value }
+                    ?: return@subscribe
 
             viewModel.removeProjectFromList(cardModel)
             viewModel.deleteProjectGroupWithTimer(cardModel)
@@ -280,8 +286,8 @@ class HomePage2 : View() {
                         it.data,
                         ExportType.BACKUP,
                         dir,
-                        chapters = null
-                    )
+                        chapters = null,
+                    ),
                 )
             }
         }
@@ -362,30 +368,31 @@ class HomePage2 : View() {
     }
 
     private fun handleExportEvent(event: WorkbookExportEvent) {
-        val dialog = find<ProgressDialog> {
-            orientationProperty.set(settingsViewModel.orientationProperty.value)
-            themeProperty.set(settingsViewModel.appColorMode.value)
-            dialogTitleProperty.set(
-                MessageFormat.format(
-                    messages["exportProjectTitle"],
-                    messages["exporting"],
-                    event.workbook.title
+        val dialog =
+            find<ProgressDialog> {
+                orientationProperty.set(settingsViewModel.orientationProperty.value)
+                themeProperty.set(settingsViewModel.appColorMode.value)
+                dialogTitleProperty.set(
+                    MessageFormat.format(
+                        messages["exportProjectTitle"],
+                        messages["exporting"],
+                        event.workbook.title,
+                    ),
                 )
-            )
-            dialogMessageProperty.set(messages["exportProjectMessage"])
-            cancelMessageProperty.set(messages["cancelExport"])
+                dialogMessageProperty.set(messages["exportProjectMessage"])
+                cancelMessageProperty.set(messages["cancelExport"])
 
-            setOnCloseAction {
-                cancelMessageProperty.set(null)
-                close()
-            }
-        }.apply { open() }
+                setOnCloseAction {
+                    cancelMessageProperty.set(null)
+                    close()
+                }
+            }.apply { open() }
 
         exportProjectViewModel.exportWorkbook(
             event.workbook,
             event.outputDir,
             event.exportType,
-            event.chapters
+            event.chapters,
         )
             .observeOnFx()
             .doFinally {
@@ -428,60 +435,65 @@ class HomePage2 : View() {
             }
     }
 
-    private fun setupImportProgressDialog() = find<ProgressDialog> {
-        orientationProperty.set(settingsViewModel.orientationProperty.value)
-        themeProperty.set(settingsViewModel.appColorMode.value)
-        allowCloseProperty.set(false)
-        cancelMessageProperty.set(null)
-        dialogTitleProperty.bind(importProjectViewModel.importedProjectTitleProperty.stringBinding {
-            it?.let {
-                MessageFormat.format(
-                    messages["importProjectTitle"],
-                    messages["import"],
-                    it
-                )
-            } ?: messages["importResource"]
-        })
+    private fun setupImportProgressDialog() =
+        find<ProgressDialog> {
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
+            allowCloseProperty.set(false)
+            cancelMessageProperty.set(null)
+            dialogTitleProperty.bind(
+                importProjectViewModel.importedProjectTitleProperty.stringBinding {
+                    it?.let {
+                        MessageFormat.format(
+                            messages["importProjectTitle"],
+                            messages["import"],
+                            it,
+                        )
+                    } ?: messages["importResource"]
+                },
+            )
 
-        setOnCloseAction { close() }
+            setOnCloseAction { close() }
 
-        open()
-    }
+            open()
+        }
 
     private fun createImportNotification(event: ProjectImportFinishEvent): NotificationViewData {
         if (event.result == ImportResult.FAILED) {
             return NotificationViewData(
                 title = messages["importFailed"],
                 message = MessageFormat.format(messages["importFailedMessage"], event.filePath),
-                statusType = NotificationStatusType.FAILED
+                statusType = NotificationStatusType.FAILED,
             )
         }
 
         return if (event.project != null) {
             // single project import
-            val messageBody = MessageFormat.format(
-                messages["importProjectSuccessfulMessage"],
-                event.project,
-                event.language
-            )
+            val messageBody =
+                MessageFormat.format(
+                    messages["importProjectSuccessfulMessage"],
+                    event.project,
+                    event.language,
+                )
             NotificationViewData(
                 title = messages["importSuccessful"],
                 message = messageBody,
                 statusType = NotificationStatusType.SUCCESSFUL,
                 actionText = event.workbookDescriptor?.let { messages["openBook"] },
-                actionIcon = event.workbookDescriptor?.let { MaterialDesign.MDI_ARROW_RIGHT }
+                actionIcon = event.workbookDescriptor?.let { MaterialDesign.MDI_ARROW_RIGHT },
             ) {
-                /* open workbook callback */
+                // open workbook callback
                 event.workbookDescriptor?.let { it ->
                     viewModel.selectBook(it)
                 }
             }
         } else {
             // source import
-            val messageBody = MessageFormat.format(
-                messages["importSourceSuccessfulMessage"],
-                event.language
-            )
+            val messageBody =
+                MessageFormat.format(
+                    messages["importSourceSuccessfulMessage"],
+                    event.language,
+                )
             NotificationViewData(
                 title = messages["importSuccessful"],
                 message = messageBody,
@@ -491,68 +503,71 @@ class HomePage2 : View() {
     }
 
     private fun createExportNotification(event: WorkbookExportFinishEvent): NotificationViewData {
-        val notification = if (event.result == ExportResult.SUCCESS) {
-            val messageBody = MessageFormat.format(
-                messages["exportSuccessfulMessage"],
-                event.project.titleKey,
-                event.project.resourceContainer?.language?.name
-            )
-            NotificationViewData(
-                title = messages["exportSuccessful"],
-                message = messageBody,
-                statusType = NotificationStatusType.SUCCESSFUL,
-                actionText = messages["showLocation"],
-                actionIcon = MaterialDesign.MDI_OPEN_IN_NEW
-            ) {
-                val filePath = event.file
-                if (filePath?.exists() == true) {
-                    try {
-                        viewModel.openInFilesManager(filePath.path)
-                    } catch (e: Exception) {
-                        logger.error("Error while opening $filePath in file manager.")
+        val notification =
+            if (event.result == ExportResult.SUCCESS) {
+                val messageBody =
+                    MessageFormat.format(
+                        messages["exportSuccessfulMessage"],
+                        event.project.titleKey,
+                        event.project.resourceContainer?.language?.name,
+                    )
+                NotificationViewData(
+                    title = messages["exportSuccessful"],
+                    message = messageBody,
+                    statusType = NotificationStatusType.SUCCESSFUL,
+                    actionText = messages["showLocation"],
+                    actionIcon = MaterialDesign.MDI_OPEN_IN_NEW,
+                ) {
+                    val filePath = event.file
+                    if (filePath?.exists() == true) {
+                        try {
+                            viewModel.openInFilesManager(filePath.path)
+                        } catch (e: Exception) {
+                            logger.error("Error while opening $filePath in file manager.")
+                        }
                     }
                 }
+            } else {
+                NotificationViewData(
+                    title = messages["exportFailed"],
+                    message =
+                        MessageFormat.format(
+                            messages["exportFailedMessage"],
+                            event.project.titleKey,
+                            event.project.resourceContainer?.language?.name ?: "",
+                        ),
+                    statusType = NotificationStatusType.FAILED,
+                )
             }
-        } else {
-            NotificationViewData(
-                title = messages["exportFailed"],
-                message = MessageFormat.format(
-                    messages["exportFailedMessage"],
-                    event.project.titleKey,
-                    event.project.resourceContainer?.language?.name ?: ""
-                ),
-                statusType = NotificationStatusType.FAILED
-            )
-        }
         return notification
     }
 
     private fun createBookDeleteNotification(workbookDescriptor: WorkbookDescriptor): NotificationViewData {
         return NotificationViewData(
             title = messages["bookDeleted"],
-            message = MessageFormat.format(
-                messages["bookDeletedMessage"],
-                workbookDescriptor.targetCollection.titleKey,
-                workbookDescriptor.targetLanguage.name
-            ),
+            message =
+                MessageFormat.format(
+                    messages["bookDeletedMessage"],
+                    workbookDescriptor.targetCollection.titleKey,
+                    workbookDescriptor.targetLanguage.name,
+                ),
             statusType = NotificationStatusType.WARNING,
         )
     }
 
-    private fun createProjectGroupDeleteNotification(
-        cardModel: ProjectGroupCardModel
-    ): NotificationViewData {
+    private fun createProjectGroupDeleteNotification(cardModel: ProjectGroupCardModel): NotificationViewData {
         return NotificationViewData(
             title = messages["projectDeleted"],
-            message = MessageFormat.format(
-                messages["projectDeletedMessage"],
-                cardModel.sourceLanguage.name,
-                cardModel.targetLanguage.name,
-                messages[cardModel.mode.titleKey]
-            ),
+            message =
+                MessageFormat.format(
+                    messages["projectDeletedMessage"],
+                    cardModel.sourceLanguage.name,
+                    cardModel.targetLanguage.name,
+                    messages[cardModel.mode.titleKey],
+                ),
             statusType = NotificationStatusType.WARNING,
             actionText = messages["undo"],
-            actionIcon = MaterialDesign.MDI_UNDO
+            actionIcon = MaterialDesign.MDI_UNDO,
         ) {
             viewModel.undoDeleteProjectGroup(cardModel)
         }
@@ -560,21 +575,22 @@ class HomePage2 : View() {
 
     private fun showNotification(notification: NotificationViewData) {
         val snackBar = JFXSnackbar(root)
-        val graphic = NotificationSnackBar(notification).apply {
-            setOnDismiss {
-                snackBar.hide() /* avoid crashing if close() invoked before timeout */
+        val graphic =
+            NotificationSnackBar(notification).apply {
+                setOnDismiss {
+                    snackBar.hide() // avoid crashing if close() invoked before timeout
+                }
+                setOnMainAction {
+                    notification.actionCallback()
+                    snackBar.hide()
+                }
             }
-            setOnMainAction {
-                notification.actionCallback()
-                snackBar.hide()
-            }
-        }
 
         snackBar.enqueue(
             JFXSnackbar.SnackbarEvent(
                 graphic,
-                Duration.seconds(NOTIFICATION_DURATION_SEC)
-            )
+                Duration.seconds(NOTIFICATION_DURATION_SEC),
+            ),
         )
     }
 

@@ -19,17 +19,16 @@
 package integrationtest.projects.importer
 
 import integrationtest.di.DaggerTestPersistenceComponent
-import integrationtest.enUlbTestMetadata
 import integrationtest.projects.DatabaseEnvironment
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.wycliffeassociates.otter.common.ResourceContainerBuilder
-import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
 import org.wycliffeassociates.otter.common.domain.project.exporter.AudioProjectExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOptions
@@ -68,8 +67,9 @@ class TestAudioProjectExporter {
     @Before
     fun setUp() {
         importer.get().import(setUpProject()).blockingGet()
-        workbook = workbookRepository.getProjects().blockingGet()
-            .find { it.target.slug == ResourceContainerBuilder.defaultProjectSlug }!!
+        workbook =
+            workbookRepository.getProjects().blockingGet()
+                .find { it.target.slug == ResourceContainerBuilder.defaultProjectSlug }!!
         outputDir = createTempDirectory("orature-export-test").toFile()
     }
 
@@ -85,7 +85,7 @@ class TestAudioProjectExporter {
                 outputDir,
                 workbook,
                 callback = null,
-                options = null
+                options = null,
             )
             .blockingGet()
 
@@ -103,7 +103,7 @@ class TestAudioProjectExporter {
                 outputDir,
                 workbook,
                 callback = null,
-                ExportOptions(chapters = listOf(2))
+                ExportOptions(chapters = listOf(2)),
             )
             .blockingGet()
 
@@ -111,7 +111,7 @@ class TestAudioProjectExporter {
         Assert.assertEquals(
             "Export directory must only contain the chapter(s) specified in Options. Found: $takes",
             1,
-            takes.size
+            takes.size,
         )
     }
 
@@ -125,5 +125,4 @@ class TestAudioProjectExporter {
             .addTake(2, ContentType.META, 1, true)
             .buildFile()
     }
-
 }

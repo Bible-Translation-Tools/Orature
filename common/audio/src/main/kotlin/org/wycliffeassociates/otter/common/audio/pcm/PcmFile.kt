@@ -48,7 +48,10 @@ class PcmFile private constructor() : AudioFormatStrategy {
 
     fun sampleIndex(sample: Int) = sample * frameSizeInBytes
 
-    override fun addCue(location: Int, label: String) {
+    override fun addCue(
+        location: Int,
+        label: String,
+    ) {
     }
 
     override fun getCues(): List<AudioCue> {
@@ -58,11 +61,17 @@ class PcmFile private constructor() : AudioFormatStrategy {
     override fun update() {
     }
 
-    override fun reader(start: Int?, end: Int?): AudioFileReader {
+    override fun reader(
+        start: Int?,
+        end: Int?,
+    ): AudioFileReader {
         return PcmFileReader(this, start, end)
     }
 
-    override fun writer(append: Boolean, buffered: Boolean): OutputStream {
+    override fun writer(
+        append: Boolean,
+        buffered: Boolean,
+    ): OutputStream {
         return PcmOutputStream(this, append, buffered)
     }
 }

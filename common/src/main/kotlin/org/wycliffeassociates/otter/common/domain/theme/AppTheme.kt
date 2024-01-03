@@ -24,19 +24,21 @@ import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import javax.inject.Inject
 
-class AppTheme @Inject constructor(
-    private val appPrefRepo: IAppPreferencesRepository
-) {
-    val preferredTheme: Single<ColorTheme> = Single.just(ColorTheme.LIGHT)
+class AppTheme
+    @Inject
+    constructor(
+        private val appPrefRepo: IAppPreferencesRepository,
+    ) {
+        val preferredTheme: Single<ColorTheme> = Single.just(ColorTheme.LIGHT)
         /* TODO: uncomment the line below when dark mode is supported:
          * // get() = preferredTheme()
          */
 
-    private fun preferredTheme(): Single<ColorTheme> {
-        return appPrefRepo.appTheme()
-    }
+        private fun preferredTheme(): Single<ColorTheme> {
+            return appPrefRepo.appTheme()
+        }
 
-    fun setPreferredThem(theme: ColorTheme): Completable {
-        return appPrefRepo.setAppTheme(theme)
+        fun setPreferredThem(theme: ColorTheme): Completable {
+            return appPrefRepo.setAppTheme(theme)
+        }
     }
-}

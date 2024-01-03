@@ -29,7 +29,7 @@ interface IResourceContainerRepository {
     fun importResourceContainer(
         rc: ResourceContainer,
         rcTree: OtterTree<CollectionOrContent>,
-        languageSlug: String
+        languageSlug: String,
     ): Single<ImportResult>
 
     /**
@@ -42,7 +42,7 @@ interface IResourceContainerRepository {
      */
     fun updateContent(
         rc: ResourceContainer,
-        rcTree: OtterTree<CollectionOrContent>
+        rcTree: OtterTree<CollectionOrContent>,
     ): Single<ImportResult>
 
     /**
@@ -59,10 +59,8 @@ interface IResourceContainerRepository {
      */
     fun updateCollectionTitles(
         rc: ResourceContainer,
-        rcTree: OtterTree<CollectionOrContent>
+        rcTree: OtterTree<CollectionOrContent>,
     ): Single<ImportResult>
 
-    fun removeResourceContainer(
-        resourceContainer: ResourceContainer
-    ): Single<DeleteResult>
+    fun removeResourceContainer(resourceContainer: ResourceContainer): Single<DeleteResult>
 }

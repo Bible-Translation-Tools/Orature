@@ -13,7 +13,7 @@ data class WorkbookDescriptor(
     val targetCollection: Collection,
     val mode: ProjectMode,
     val progress: Double = 0.0,
-    val hasSourceAudio: Boolean = false
+    val hasSourceAudio: Boolean = false,
 ) {
     val slug: String = targetCollection.slug
     val title: String = targetCollection.titleKey
@@ -22,12 +22,14 @@ data class WorkbookDescriptor(
     val lastModified: LocalDateTime? = targetCollection.modifiedTs
 
     val sourceLanguage: Language
-        get() = sourceCollection.resourceContainer?.language
-            ?: throw NullPointerException("Source metadata must not be null")
+        get() =
+            sourceCollection.resourceContainer?.language
+                ?: throw NullPointerException("Source metadata must not be null")
 
     val targetLanguage: Language
-        get() = targetCollection.resourceContainer?.language
-            ?: throw NullPointerException("Target metadata must not be null")
+        get() =
+            targetCollection.resourceContainer?.language
+                ?: throw NullPointerException("Target metadata must not be null")
 
     val anthology = bookAnthology.getOrDefault(slug, Anthology.OTHER)
 }

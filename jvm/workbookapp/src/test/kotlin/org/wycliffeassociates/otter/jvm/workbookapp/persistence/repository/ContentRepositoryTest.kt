@@ -30,9 +30,9 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentCaptor
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
@@ -45,84 +45,88 @@ import kotlin.io.path.createTempDirectory
 
 class ContentRepositoryTest {
     private val databaseFile = createTempDirectory("otter-test").toFile().resolve("db.sqlite")
-    private val schemaFile = File(
-        javaClass.classLoader.getResource("sql/AppDatabaseSchema0.sql").file
-    )
+    private val schemaFile =
+        File(
+            javaClass.classLoader.getResource("sql/AppDatabaseSchema0.sql").file,
+        )
     private lateinit var db: AppDatabase
 
-    private val content = listOf(
-        Content(
-            1,
-            "chunk",
-            1,
-            2,
-            null,
-            null,
-            null,
-            ContentType.TEXT,
-            1,
-            id = 1
-        ),
-        Content(
-            2,
-            "chunk",
-            2,
-            3,
-            null,
-            null,
-            null,
-            ContentType.TEXT,
-            1,
-            id = 2
+    private val content =
+        listOf(
+            Content(
+                1,
+                "chunk",
+                1,
+                2,
+                null,
+                null,
+                null,
+                ContentType.TEXT,
+                1,
+                id = 1,
+            ),
+            Content(
+                2,
+                "chunk",
+                2,
+                3,
+                null,
+                null,
+                null,
+                ContentType.TEXT,
+                1,
+                id = 2,
+            ),
         )
-    )
 
-    private val sourceContents = listOf(
-        Content(
-            1,
-            "verse",
-            1,
-            1,
-            null,
-            null,
-            null,
-            ContentType.TEXT,
-            1,
-            id = 1
-        ),
-        Content(
-            2,
-            "verse",
-            2,
-            2,
-            null,
-            null,
-            null,
-            ContentType.TEXT,
-            1,
-            id = 2
-        ),
-        Content(
-            3,
-            "verse",
-            3,
-            3,
-            null,
-            null,
-            null,
-            ContentType.TEXT,
-            1,
-            id = 3
+    private val sourceContents =
+        listOf(
+            Content(
+                1,
+                "verse",
+                1,
+                1,
+                null,
+                null,
+                null,
+                ContentType.TEXT,
+                1,
+                id = 1,
+            ),
+            Content(
+                2,
+                "verse",
+                2,
+                2,
+                null,
+                null,
+                null,
+                ContentType.TEXT,
+                1,
+                id = 2,
+            ),
+            Content(
+                3,
+                "verse",
+                3,
+                3,
+                null,
+                null,
+                null,
+                ContentType.TEXT,
+                1,
+                id = 3,
+            ),
         )
-    )
 
     // (contentFK - sourceFK)
-    private val derivedToSourceLinks = listOf(
-        Pair(content[0].id, sourceContents[0].id),
-        Pair(content[0].id, sourceContents[1].id),
-        Pair(content[1].id, sourceContents[1].id),
-        Pair(content[1].id, sourceContents[2].id),
-    )
+    private val derivedToSourceLinks =
+        listOf(
+            Pair(content[0].id, sourceContents[0].id),
+            Pair(content[0].id, sourceContents[1].id),
+            Pair(content[1].id, sourceContents[1].id),
+            Pair(content[1].id, sourceContents[2].id),
+        )
 
     @After
     fun cleanUp() {
@@ -139,13 +143,14 @@ class ContentRepositoryTest {
     @Test
     fun testLinkDerivedToSource() {
         val mockDb = spy(db)
-        val mockContentDao = mock<ContentDao> {
-            on { linkDerivative(any(), any(), any()) } doAnswer {  }
-        }
+        val mockContentDao =
+            mock<ContentDao> {
+                on { linkDerivative(any(), any(), any()) } doAnswer { }
+            }
         `when`(mockDb.contentDao).doReturn(mockContentDao)
         val repository: IContentRepository = ContentRepository(mockDb)
 
-        verify(mockContentDao, never()).linkDerivative(any(),any(),any())
+        verify(mockContentDao, never()).linkDerivative(any(), any(), any())
 
         repository.linkDerivedToSource(content, sourceContents)
             .blockingAwait()

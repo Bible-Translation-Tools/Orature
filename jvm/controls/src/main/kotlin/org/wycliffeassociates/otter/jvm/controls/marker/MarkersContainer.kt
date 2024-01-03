@@ -3,7 +3,7 @@ package org.wycliffeassociates.otter.jvm.controls.marker
 import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
 import tornadofx.*
 
-class MarkersContainer: MarkerTrackControl() {
+class MarkersContainer : MarkerTrackControl() {
     override fun createMarker(): MarkerControl {
         return MarkerNode().apply {
             prefHeightProperty().bind(this@MarkersContainer.heightProperty())

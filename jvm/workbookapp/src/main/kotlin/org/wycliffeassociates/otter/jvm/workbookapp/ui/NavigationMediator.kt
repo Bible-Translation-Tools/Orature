@@ -38,43 +38,45 @@ import tornadofx.*
 import java.text.MessageFormat
 
 class NavigationMediator : Component(), ScopedInstance {
-
     val workbookDataStore: WorkbookDataStore by inject()
     val breadCrumbsBar = BreadcrumbBar()
     private val pluginOpenedProperty = SimpleBooleanProperty(false)
     private val returningView = SimpleObjectProperty<View>(null)
     private var appExitRequested = false
 
-    private val recorderBreadCrumb = BreadCrumb().apply {
-        titleProperty.bind(
-            workbookDataStore.activeTakeNumberProperty.stringBinding { take ->
-                MessageFormat.format(
-                    messages["takeTitle"],
-                    messages["take"],
-                    take
-                )
-            }
-        )
-        iconProperty.set(FontIcon(MaterialDesign.MDI_LIBRARY_MUSIC))
-    }
+    private val recorderBreadCrumb =
+        BreadCrumb().apply {
+            titleProperty.bind(
+                workbookDataStore.activeTakeNumberProperty.stringBinding { take ->
+                    MessageFormat.format(
+                        messages["takeTitle"],
+                        messages["take"],
+                        take,
+                    )
+                },
+            )
+            iconProperty.set(FontIcon(MaterialDesign.MDI_LIBRARY_MUSIC))
+        }
 
-    private val editorBreadCrumb = BreadCrumb().apply {
-        titleProperty.bind(
-            workbookDataStore.activeTakeNumberProperty.stringBinding { take ->
-                MessageFormat.format(
-                    messages["takeTitle"],
-                    messages["take"],
-                    take
-                )
-            }
-        )
-        iconProperty.set(FontIcon(MaterialDesign.MDI_LIBRARY_MUSIC))
-    }
+    private val editorBreadCrumb =
+        BreadCrumb().apply {
+            titleProperty.bind(
+                workbookDataStore.activeTakeNumberProperty.stringBinding { take ->
+                    MessageFormat.format(
+                        messages["takeTitle"],
+                        messages["take"],
+                        take,
+                    )
+                },
+            )
+            iconProperty.set(FontIcon(MaterialDesign.MDI_LIBRARY_MUSIC))
+        }
 
-    private val markerBreadCrumb = BreadCrumb().apply {
-        titleProperty.set(messages["addMarkers"])
-        iconProperty.set(FontIcon(MaterialDesign.MDI_BOOKMARK_PLUS_OUTLINE))
-    }
+    private val markerBreadCrumb =
+        BreadCrumb().apply {
+            titleProperty.set(messages["addMarkers"])
+            iconProperty.set(FontIcon(MaterialDesign.MDI_BOOKMARK_PLUS_OUTLINE))
+        }
 
     init {
         subscribe<PluginOpenedEvent> {
@@ -110,7 +112,7 @@ class NavigationMediator : Component(), ScopedInstance {
             if (appExitRequested) {
                 runLater {
                     Platform.exit()
-                    System.exit(0);
+                    System.exit(0)
                 }
             }
         }
@@ -125,7 +127,10 @@ class NavigationMediator : Component(), ScopedInstance {
         dock(view, breadCrumb)
     }
 
-    fun dock(view: UIComponent, breadCrumb: BreadCrumb? = null) {
+    fun dock(
+        view: UIComponent,
+        breadCrumb: BreadCrumb? = null,
+    ) {
         view.shortcut(Shortcut.GO_BACK.value, ::back)
         breadCrumb?.let {
             breadCrumbsBar.addItem(it)

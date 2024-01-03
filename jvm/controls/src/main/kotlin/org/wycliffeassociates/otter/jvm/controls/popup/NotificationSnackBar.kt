@@ -17,10 +17,9 @@ import tornadofx.*
 import tornadofx.FX.Companion.messages
 import tornadofx.FX.Companion.primaryStage
 
-private const val SNACK_BAR_TO_SCREEN_RATIO = 9.0/10.0
+private const val SNACK_BAR_TO_SCREEN_RATIO = 9.0 / 10.0
 
-class NotificationSnackBar(notification: NotificationViewData): HBox() {
-
+class NotificationSnackBar(notification: NotificationViewData) : HBox() {
     val titleProperty = SimpleStringProperty(notification.title)
     val messageProperty = SimpleStringProperty(notification.message)
     val statusTypeProperty = SimpleObjectProperty<NotificationStatusType>(notification.statusType)
@@ -37,24 +36,26 @@ class NotificationSnackBar(notification: NotificationViewData): HBox() {
 
         button {
             addClass("btn", "btn--icon", "btn--borderless", "success-btn-icon")
-            graphicProperty().bind(statusTypeProperty.objectBinding {
-                this.toggleClass("success-btn-icon", it == NotificationStatusType.SUCCESSFUL)
-                this.toggleClass("danger-btn-icon", it != NotificationStatusType.SUCCESSFUL)
+            graphicProperty().bind(
+                statusTypeProperty.objectBinding {
+                    this.toggleClass("success-btn-icon", it == NotificationStatusType.SUCCESSFUL)
+                    this.toggleClass("danger-btn-icon", it != NotificationStatusType.SUCCESSFUL)
 
-                return@objectBinding when (it) {
-                    NotificationStatusType.SUCCESSFUL -> {
-                        FontIcon(MaterialDesign.MDI_CHECK_CIRCLE).apply {
-                            addClass("active-icon")
+                    return@objectBinding when (it) {
+                        NotificationStatusType.SUCCESSFUL -> {
+                            FontIcon(MaterialDesign.MDI_CHECK_CIRCLE).apply {
+                                addClass("active-icon")
+                            }
                         }
-                    }
-                    NotificationStatusType.FAILED, NotificationStatusType.WARNING -> {
-                        FontIcon(MaterialDesign.MDI_ALERT).apply {
-                            addClass("danger-icon")
+                        NotificationStatusType.FAILED, NotificationStatusType.WARNING -> {
+                            FontIcon(MaterialDesign.MDI_ALERT).apply {
+                                addClass("danger-icon")
+                            }
                         }
+                        else -> Region()
                     }
-                    else -> Region()
-                }
-            })
+                },
+            )
             isFocusTraversable = false
             isMouseTransparent = true
         }
@@ -77,9 +78,11 @@ class NotificationSnackBar(notification: NotificationViewData): HBox() {
             minWidth = USE_PREF_SIZE
             textProperty().bind(actionTextProperty)
             tooltip { textProperty().bind(actionTextProperty) }
-            graphicProperty().bind(actionIconProperty.objectBinding { it ->
-                it?.let { FontIcon(it) }
-            })
+            graphicProperty().bind(
+                actionIconProperty.objectBinding { it ->
+                    it?.let { FontIcon(it) }
+                },
+            )
             onActionProperty().bind(mainActionProperty)
             visibleWhen { actionTextProperty.isNotNull }
             managedWhen(visibleProperty())
@@ -88,9 +91,10 @@ class NotificationSnackBar(notification: NotificationViewData): HBox() {
         button {
             addClass("btn", "btn--icon", "btn--borderless")
             tooltip(messages["dismiss"])
-            graphic = FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE).apply {
-                addClass("dismiss-icon")
-            }
+            graphic =
+                FontIcon(MaterialDesign.MDI_CLOSE_CIRCLE).apply {
+                    addClass("dismiss-icon")
+                }
             onActionProperty().bind(dismissActionProperty)
         }
     }

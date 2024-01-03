@@ -37,5 +37,5 @@ data class ResourceMetadata(
     val version: String,
     val license: String,
     val path: File,
-    val id: Int = 0
+    val id: Int = 0,
 )

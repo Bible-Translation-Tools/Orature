@@ -45,70 +45,71 @@ class NarrationHeader : View() {
         }
     }
 
-    override val root = hbox {
-
-        addClass("narration__header")
-
+    override val root =
         hbox {
-            narrationTitle(viewModel.titleProperty)
-            hgrow = Priority.SOMETIMES
+
+            addClass("narration__header")
+
+            hbox {
+                narrationTitle(viewModel.titleProperty)
+                hgrow = Priority.SOMETIMES
+            }
+            hbox {
+                addClass("narration__header-controls")
+                button {
+                    tooltip = tooltip(messages["undoAction"])
+                    addClass("btn", "btn--secondary")
+                    graphic = FontIcon(MaterialDesign.MDI_UNDO)
+                    setOnAction {
+                        FX.eventbus.fire(NarrationUndoEvent())
+                    }
+                    enableWhen(viewModel.hasUndoProperty.and(viewModel.chapterTakeBusyProperty.not()))
+                }
+                button {
+                    tooltip = tooltip(messages["redoAction"])
+                    addClass("btn", "btn--secondary")
+                    graphic = FontIcon(MaterialDesign.MDI_REDO)
+                    setOnAction {
+                        FX.eventbus.fire(NarrationRedoEvent())
+                    }
+                    enableWhen(viewModel.hasRedoProperty.and(viewModel.chapterTakeBusyProperty.not()))
+                }
+                narrationMenuButton(
+                    viewModel.hasChapterTakeProperty,
+                    viewModel.hasVersesProperty,
+                ) {
+                    enableWhen(viewModel.chapterTakeBusyProperty.not())
+                }
+                chapterSelector {
+                    chapterTitleProperty.bind(viewModel.chapterTitleProperty)
+
+                    setOnChapterSelectorOpenedProperty {
+
+                        popupMenu.updateChapterGrid(viewModel.chapterList)
+
+                        val bound = this.boundsInLocal
+                        val screenBound = this.localToScreen(bound)
+
+                        popupMenu.show(FX.primaryStage)
+
+                        popupMenu.x = screenBound.minX - popupMenu.width + this.width
+                        popupMenu.y = screenBound.maxY - 25
+                    }
+
+                    prevDisabledProperty.bind(viewModel.hasPreviousChapter.not())
+                    nextDisabledProperty.bind(viewModel.hasNextChapter.not())
+
+                    setOnPreviousChapter {
+                        viewModel.selectPreviousChapter()
+                    }
+                    setOnNextChapter {
+                        viewModel.selectNextChapter()
+                    }
+
+                    enableWhen(viewModel.chapterTakeBusyProperty.not())
+                }
+            }
         }
-        hbox {
-            addClass("narration__header-controls")
-            button {
-                tooltip = tooltip(messages["undoAction"])
-                addClass("btn", "btn--secondary")
-                graphic = FontIcon(MaterialDesign.MDI_UNDO)
-                setOnAction {
-                    FX.eventbus.fire(NarrationUndoEvent())
-                }
-                enableWhen(viewModel.hasUndoProperty.and(viewModel.chapterTakeBusyProperty.not()))
-            }
-            button {
-                tooltip = tooltip(messages["redoAction"])
-                addClass("btn", "btn--secondary")
-                graphic = FontIcon(MaterialDesign.MDI_REDO)
-                setOnAction {
-                    FX.eventbus.fire(NarrationRedoEvent())
-                }
-                enableWhen(viewModel.hasRedoProperty.and(viewModel.chapterTakeBusyProperty.not()))
-            }
-            narrationMenuButton(
-                viewModel.hasChapterTakeProperty,
-                viewModel.hasVersesProperty
-            ) {
-                enableWhen(viewModel.chapterTakeBusyProperty.not())
-            }
-            chapterSelector {
-                chapterTitleProperty.bind(viewModel.chapterTitleProperty)
-
-                setOnChapterSelectorOpenedProperty {
-
-                    popupMenu.updateChapterGrid(viewModel.chapterList)
-
-                    val bound = this.boundsInLocal
-                    val screenBound = this.localToScreen(bound)
-
-                    popupMenu.show(FX.primaryStage)
-
-                    popupMenu.x = screenBound.minX - popupMenu.width + this.width
-                    popupMenu.y = screenBound.maxY - 25
-                }
-
-                prevDisabledProperty.bind(viewModel.hasPreviousChapter.not())
-                nextDisabledProperty.bind(viewModel.hasNextChapter.not())
-
-                setOnPreviousChapter {
-                    viewModel.selectPreviousChapter()
-                }
-                setOnNextChapter {
-                    viewModel.selectNextChapter()
-                }
-
-                enableWhen(viewModel.chapterTakeBusyProperty.not())
-            }
-        }
-    }
 }
 
 class NarrationHeaderViewModel : ViewModel() {
@@ -118,14 +119,15 @@ class NarrationHeaderViewModel : ViewModel() {
     private val narrationViewModel: NarrationViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
-    val titleProperty = workbookDataStore.activeWorkbookProperty.stringBinding {
-        it?.let {
-            MessageFormat.format(
-                messages["narrationTitle"],
-                it.target.title
-            )
-        } ?: ""
-    }
+    val titleProperty =
+        workbookDataStore.activeWorkbookProperty.stringBinding {
+            it?.let {
+                MessageFormat.format(
+                    messages["narrationTitle"],
+                    it.target.title,
+                )
+            } ?: ""
+        }
 
     val chapterTitleProperty = SimpleStringProperty()
 
@@ -145,11 +147,12 @@ class NarrationHeaderViewModel : ViewModel() {
     val chapterList: List<ChapterGridItemData>
         get() {
             return narrationViewModel.chapterList.map {
-                val gridItem = ChapterGridItemData(
-                    it.sort,
-                    it.hasSelectedAudio(),
-                    workbookDataStore.activeChapterProperty.value?.sort == it.sort
-                )
+                val gridItem =
+                    ChapterGridItemData(
+                        it.sort,
+                        it.hasSelectedAudio(),
+                        workbookDataStore.activeChapterProperty.value?.sort == it.sort,
+                    )
                 gridItem
             }
         }
@@ -168,7 +171,7 @@ class NarrationHeaderViewModel : ViewModel() {
 
     private enum class StepDirection {
         FORWARD,
-        BACKWARD
+        BACKWARD,
     }
 
     fun selectPreviousChapter() {
@@ -182,10 +185,11 @@ class NarrationHeaderViewModel : ViewModel() {
     }
 
     private fun stepToChapter(direction: StepDirection) {
-        val step = when (direction) {
-            StepDirection.FORWARD -> 1
-            StepDirection.BACKWARD -> -1
-        }
+        val step =
+            when (direction) {
+                StepDirection.FORWARD -> 1
+                StepDirection.BACKWARD -> -1
+            }
         val nextIndex =
             narrationViewModel.chapterList.indexOf(workbookDataStore.chapter) + step
 
@@ -195,7 +199,6 @@ class NarrationHeaderViewModel : ViewModel() {
                 fire(NavigateChapterEvent(it.sort))
             }
     }
-
 
     fun processWithPlugin(pluginType: PluginType) {
         chapterTakeProperty.value?.let { take ->
@@ -235,7 +238,9 @@ class NarrationHeaderViewModel : ViewModel() {
                                     }
 
                                     else -> {
-                                        logger.error("Plugin returned with result $result, plugintype: $pluginType did not match a known plugin.")
+                                        logger.error(
+                                            "Plugin returned with result $result, plugintype: $pluginType did not match a known plugin.",
+                                        )
                                     }
                                 }
                             }
@@ -258,9 +263,11 @@ class NarrationTitle(val titleTextProperty: ObservableValue<String> = SimpleStri
 }
 
 fun EventTarget.narrationTitle(
-    titleTextProperty: ObservableValue<String>, op: NarrationTitle.() -> Unit = {}
+    titleTextProperty: ObservableValue<String>,
+    op: NarrationTitle.() -> Unit = {},
 ) = NarrationTitle(titleTextProperty).attachTo(this, op)
 
 fun EventTarget.narrationTitle(
-    titleText: String, op: NarrationTitle.() -> Unit = {}
+    titleText: String,
+    op: NarrationTitle.() -> Unit = {},
 ) = NarrationTitle(titleText).attachTo(this, op)

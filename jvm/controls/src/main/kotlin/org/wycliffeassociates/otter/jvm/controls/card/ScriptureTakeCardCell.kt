@@ -22,18 +22,23 @@ import javafx.scene.control.ListCell
 import tornadofx.*
 
 class ScriptureTakeCardCell : ListCell<ScriptureTakeCard>() {
-    override fun updateItem(item: ScriptureTakeCard?, empty: Boolean) {
+    override fun updateItem(
+        item: ScriptureTakeCard?,
+        empty: Boolean,
+    ) {
         super.updateItem(item, empty)
 
         if (item == null || empty) {
-            graphic = EmptyCardCell().apply {
-                addClass("card--scripture-take--empty")
-            }
+            graphic =
+                EmptyCardCell().apply {
+                    addClass("card--scripture-take--empty")
+                }
             return
         }
 
-        graphic = item.apply {
-            animationMediatorProperty.value?.listView = listView
-        }
+        graphic =
+            item.apply {
+                animationMediatorProperty.value?.listView = listView
+            }
     }
 }

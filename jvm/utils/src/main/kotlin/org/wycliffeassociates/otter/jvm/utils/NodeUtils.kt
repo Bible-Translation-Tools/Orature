@@ -34,19 +34,21 @@ import javafx.scene.input.MouseEvent
 import javafx.util.Duration
 import kotlin.reflect.KClass
 
-inline fun <reified T : Node> Node.findChild(includeInvisible: Boolean = false): Node? =
-    findChildren<T>(includeInvisible).firstOrNull()
+inline fun <reified T : Node> Node.findChild(includeInvisible: Boolean = false): Node? = findChildren<T>(includeInvisible).firstOrNull()
 
-inline fun <reified T : Node> Node.findChildren(includeInvisible: Boolean = false): List<T> =
-    findChildren(T::class, includeInvisible)
+inline fun <reified T : Node> Node.findChildren(includeInvisible: Boolean = false): List<T> = findChildren(T::class, includeInvisible)
 
-fun <T : Node> Node.findChildren(type: KClass<T>, includeInvisible: Boolean = false): List<T> {
+fun <T : Node> Node.findChildren(
+    type: KClass<T>,
+    includeInvisible: Boolean = false,
+): List<T> {
     if (this !is Parent) return listOf()
 
-    val list: MutableList<T> = this.childrenUnmodifiable
-        .filterIsInstance(type.java)
-        .filter { it.isVisible || includeInvisible }
-        .toMutableList()
+    val list: MutableList<T> =
+        this.childrenUnmodifiable
+            .filterIsInstance(type.java)
+            .filter { it.isVisible || includeInvisible }
+            .toMutableList()
 
     for (node: Node in this.childrenUnmodifiable) {
         (node as? Parent)?.findChildren(type)?.let {
@@ -62,7 +64,7 @@ fun Node.simulateKeyPress(
     shiftDown: Boolean = false,
     controlDown: Boolean = false,
     altDown: Boolean = false,
-    metaDown: Boolean = false
+    metaDown: Boolean = false,
 ) {
     fireEvent(
         KeyEvent(
@@ -73,8 +75,8 @@ fun Node.simulateKeyPress(
             shiftDown,
             controlDown,
             altDown,
-            metaDown
-        )
+            metaDown,
+        ),
     )
 }
 
@@ -158,11 +160,12 @@ fun <T> ComboBox<T>.overrideDefaultKeyEventHandler(action: (T) -> Unit = {}) {
 
 fun <T> ListView<T>.enableScrollByKey(
     smallDelta: Double = 20.0,
-    largeDelta: Double = 500.0
+    largeDelta: Double = 500.0,
 ) {
     addEventFilter(KeyEvent.KEY_PRESSED) { keyEvent ->
-        val flow = childrenUnmodifiable
-            .find { it is VirtualFlow<*> } as VirtualFlow<*>
+        val flow =
+            childrenUnmodifiable
+                .find { it is VirtualFlow<*> } as VirtualFlow<*>
 
         when (keyEvent.code) {
             KeyCode.UP -> {
@@ -228,7 +231,7 @@ fun TextArea.overrideDefaultKeyEventHandler(action: (String) -> Unit = {}) {
                     this.simulateKeyPress(
                         KeyCode.TAB,
                         controlDown = !it.isShiftDown,
-                        shiftDown = it.isShiftDown
+                        shiftDown = it.isShiftDown,
                     )
                 }
             }

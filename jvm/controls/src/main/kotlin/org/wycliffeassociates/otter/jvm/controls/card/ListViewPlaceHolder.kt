@@ -28,11 +28,15 @@ class ListViewPlaceHolder : ListView<Any?>() {
         items.add(null)
         setCellFactory {
             object : ListCell<Any?>() {
-                override fun updateItem(item: Any?, empty: Boolean) {
+                override fun updateItem(
+                    item: Any?,
+                    empty: Boolean,
+                ) {
                     super.updateItem(item, empty)
-                    graphic = EmptyCardCell().apply {
-                        addClass("card--scripture-take--empty")
-                    }
+                    graphic =
+                        EmptyCardCell().apply {
+                            addClass("card--scripture-take--empty")
+                        }
                 }
             }
         }

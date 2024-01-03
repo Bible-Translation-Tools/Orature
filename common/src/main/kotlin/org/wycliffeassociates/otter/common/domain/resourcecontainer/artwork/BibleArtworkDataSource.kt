@@ -28,18 +28,18 @@ import java.util.concurrent.ConcurrentHashMap
 
 class BibleArtworkDataSource(
     private val directoryProvider: IDirectoryProvider,
-    private val imagesContainerNames: List<String> = listOf("en_art_sp.zip", "en_art_wa.zip")
+    private val imagesContainerNames: List<String> = listOf("en_art_sp.zip", "en_art_wa.zip"),
 ) : ArtworkDataSource {
-
-    private val cacheDir = File(
-        directoryProvider.cacheDirectory,
-        "bible-images"
-    ).apply { mkdirs() }
+    private val cacheDir =
+        File(
+            directoryProvider.cacheDirectory,
+            "bible-images",
+        ).apply { mkdirs() }
 
     override fun getArtwork(
         metadata: ResourceMetadata,
         projectSlug: String,
-        imageRatio: ImageRatio
+        imageRatio: ImageRatio,
     ): Artwork? {
         // fetch and return from cache if any
         artworkCache[projectSlug + imageRatio.getImageSuffix()]
@@ -47,9 +47,10 @@ class BibleArtworkDataSource(
 
         var art: Artwork? = null
         for (container in imagesContainerNames) {
-            val imagesContainer = directoryProvider
-                .resourceContainerDirectory
-                .resolve(container)
+            val imagesContainer =
+                directoryProvider
+                    .resourceContainerDirectory
+                    .resolve(container)
             if (imagesContainer.exists()) {
                 val found = getArtworkFromRC(imagesContainer, projectSlug, imageRatio)
                 if (found != null) {
@@ -64,26 +65,28 @@ class BibleArtworkDataSource(
     private fun getArtworkFromRC(
         rcFile: File,
         projectSlug: String,
-        imageRatio: ImageRatio
+        imageRatio: ImageRatio,
     ): Artwork? {
-
         ResourceContainer.load(rcFile).use { rc ->
-            val contentPath = rc.manifest.projects.firstOrNull {
-                it.identifier == projectSlug
-            }?.path
+            val contentPath =
+                rc.manifest.projects.firstOrNull {
+                    it.identifier == projectSlug
+                }?.path
 
             if (contentPath != null) {
                 val pathWithRatio = filePathWithSuffix(contentPath, imageRatio.getImageSuffix())
-                val imagePath = if (rc.accessor.fileExists(pathWithRatio)) {
-                    pathWithRatio
-                } else if (rc.accessor.fileExists(contentPath)) {
-                    contentPath
-                } else {
-                    return null
-                }
+                val imagePath =
+                    if (rc.accessor.fileExists(pathWithRatio)) {
+                        pathWithRatio
+                    } else if (rc.accessor.fileExists(contentPath)) {
+                        contentPath
+                    } else {
+                        return null
+                    }
 
-                val image = cacheDir.resolve(File(imagePath).name)
-                    .apply { createNewFile() }
+                val image =
+                    cacheDir.resolve(File(imagePath).name)
+                        .apply { createNewFile() }
 
                 image.deleteOnExit()
                 image.outputStream().use { fos ->

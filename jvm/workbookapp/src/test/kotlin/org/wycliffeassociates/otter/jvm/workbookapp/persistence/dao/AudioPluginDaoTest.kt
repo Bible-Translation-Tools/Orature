@@ -29,23 +29,26 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.AudioPl
 import java.io.File
 
 class AudioPluginDaoTest {
-    private val testDatabaseFile = File.createTempFile(
-        "test-audio-plugin-dao", ".sqlite"
-    ).also(File::deleteOnExit)
+    private val testDatabaseFile =
+        File.createTempFile(
+            "test-audio-plugin-dao",
+            ".sqlite",
+        ).also(File::deleteOnExit)
     private lateinit var database: AppDatabase
     private val dao by lazy { database.audioPluginDao }
 
-    private val defaultEnity = AudioPluginEntity(
-        id = 0,
-        name = "test",
-        version = "test",
-        bin = "test-jar",
-        args = "test",
-        edit = 0,
-        record = 0,
-        mark = 0,
-        path = null
-    )
+    private val defaultEnity =
+        AudioPluginEntity(
+            id = 0,
+            name = "test",
+            version = "test",
+            bin = "test-jar",
+            args = "test",
+            edit = 0,
+            record = 0,
+            mark = 0,
+            path = null,
+        )
 
     @Before
     fun setup() {
@@ -69,7 +72,7 @@ class AudioPluginDaoTest {
         Assert.assertEquals(
             "Inserting a duplicate should update the existing record and not increase the total",
             1,
-            dao.fetchAll().size
+            dao.fetchAll().size,
         )
         Assert.assertEquals(id1, id2)
     }
@@ -79,7 +82,8 @@ class AudioPluginDaoTest {
         try {
             dao.insert(defaultEnity.copy(id = 1))
             Assert.fail("Inserting nonzero id should throw an exception")
-        } catch (e: InsertionException) { }
+        } catch (e: InsertionException) {
+        }
     }
 
     @Test
@@ -91,31 +95,32 @@ class AudioPluginDaoTest {
         Assert.assertEquals(
             "Fetched record should match the given object",
             defaultEnity.copy(id = insertedId),
-            entity
+            entity,
         )
     }
 
     @Test
     fun testUpdate() {
         val insertedId = dao.insert(defaultEnity)
-        val updated = AudioPluginEntity(
-            id = insertedId,
-            name = "updated",
-            version = "updated",
-            bin = "updated",
-            args = "updated",
-            edit = 1,
-            record = 1,
-            mark = 1,
-            path = "updated"
-        )
+        val updated =
+            AudioPluginEntity(
+                id = insertedId,
+                name = "updated",
+                version = "updated",
+                bin = "updated",
+                args = "updated",
+                edit = 1,
+                record = 1,
+                mark = 1,
+                path = "updated",
+            )
 
         dao.update(updated)
 
         Assert.assertEquals(
             "Updated record should match the given value",
             updated,
-            dao.fetchById(insertedId)
+            dao.fetchById(insertedId),
         )
     }
 
@@ -124,19 +129,20 @@ class AudioPluginDaoTest {
         val existingId = dao.insert(defaultEnity)
         val existingEntity = dao.fetchById(existingId)!!
 
-        val newId = dao.insert(
-            AudioPluginEntity(
-                id = 0,
-                name = "duplicate",
-                version = "duplicate",
-                bin = "duplicate",
-                args = "duplicate",
-                edit = 1,
-                record = 1,
-                mark = 1,
-                path = "duplicate"
+        val newId =
+            dao.insert(
+                AudioPluginEntity(
+                    id = 0,
+                    name = "duplicate",
+                    version = "duplicate",
+                    bin = "duplicate",
+                    args = "duplicate",
+                    edit = 1,
+                    record = 1,
+                    mark = 1,
+                    path = "duplicate",
+                ),
             )
-        )
         val newEntity = dao.fetchById(newId)!!
 
         Assert.assertEquals(2, dao.fetchAll().size)
@@ -146,13 +152,13 @@ class AudioPluginDaoTest {
             dao.update(
                 newEntity.copy(
                     name = existingEntity.name,
-                    version = existingEntity.version
-                )
+                    version = existingEntity.version,
+                ),
             )
 
             Assert.fail("Update to the existing values of name and version should throw an exception")
-        } catch (e: DataAccessException) { }
-
+        } catch (e: DataAccessException) {
+        }
     }
 
     @Test

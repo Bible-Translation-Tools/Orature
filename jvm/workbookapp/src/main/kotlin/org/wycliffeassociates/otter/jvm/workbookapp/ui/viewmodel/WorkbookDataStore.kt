@@ -18,7 +18,6 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
-import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.schedulers.Schedulers
 import javafx.beans.binding.Bindings
@@ -37,7 +36,6 @@ import java.text.MessageFormat
 import java.util.concurrent.Callable
 
 class WorkbookDataStore : Component(), ScopedInstance {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     val activeWorkbookProperty = SimpleObjectProperty<Workbook>()
@@ -74,8 +72,8 @@ class WorkbookDataStore : Component(), ScopedInstance {
                     MessageFormat.format(
                         messages["source_info_title"],
                         it.source.language.name,
-                        it.source.resourceMetadata.title
-                    )
+                        it.source.resourceMetadata.title,
+                    ),
                 )
             }
         }
@@ -83,14 +81,16 @@ class WorkbookDataStore : Component(), ScopedInstance {
 
     fun getSourceText(): Maybe<String> {
         return when {
-            activeResourceComponent != null -> Maybe.just(
-                activeResourceComponent.textItem.text
-            )
+            activeResourceComponent != null ->
+                Maybe.just(
+                    activeResourceComponent.textItem.text,
+                )
             chunk != null -> getChunkSourceText()
-            else -> getSourceChapter().map { _chapter ->
-                val verses = workbook.projectFilesAccessor.getChapterText(workbook.source.slug, _chapter.sort)
-                combineVerses(verses)
-            }
+            else ->
+                getSourceChapter().map { _chapter ->
+                    val verses = workbook.projectFilesAccessor.getChapterText(workbook.source.slug, _chapter.sort)
+                    combineVerses(verses)
+                }
         }
     }
 
@@ -98,12 +98,13 @@ class WorkbookDataStore : Component(), ScopedInstance {
         return Maybe
             .fromCallable {
                 chunk?.let { chunk ->
-                    val verses = workbook.projectFilesAccessor.getChunkText(
-                        workbook.source.slug,
-                        chapter.sort,
-                        chunk.start,
-                        chunk.end
-                    )
+                    val verses =
+                        workbook.projectFilesAccessor.getChunkText(
+                            workbook.source.slug,
+                            chapter.sort,
+                            chunk.start,
+                            chunk.end,
+                        )
                     val text = combineVerses(verses)
                     text
                 } ?: ""
@@ -124,7 +125,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
             },
             activeChapterProperty,
             activeChunkProperty,
-            activeResourceComponentProperty
+            activeResourceComponentProperty,
         )
     }
 
@@ -140,7 +141,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
                 }
             },
             activeWorkbookProperty,
-            activeChapterProperty
+            activeChapterProperty,
         )
     }
 
@@ -152,7 +153,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
                         MessageFormat.format(
                             messages["chunkTitle"],
                             messages[activeChunkProperty.value.label],
-                            activeChunkProperty.value.sort
+                            activeChunkProperty.value.sort,
                         )
                     } else {
                         null
@@ -163,7 +164,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
             },
             activeWorkbookProperty,
             activeChapterProperty,
-            activeChunkProperty
+            activeChunkProperty,
         )
     }
 
@@ -176,13 +177,13 @@ class WorkbookDataStore : Component(), ScopedInstance {
                             messages["bookChapterChunkTitle"],
                             activeWorkbookProperty.value.source.title,
                             activeChapterProperty.value.title,
-                            activeChunkProperty.value.title
+                            activeChunkProperty.value.title,
                         )
                     } else {
                         MessageFormat.format(
                             messages["bookChapterTitle"],
                             activeWorkbookProperty.value.source.title,
-                            activeChapterProperty.value.title
+                            activeChapterProperty.value.title,
                         )
                     }
                 } else {
@@ -191,7 +192,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
             },
             activeWorkbookProperty,
             activeChapterProperty,
-            activeChunkProperty
+            activeChunkProperty,
         )
     }
 

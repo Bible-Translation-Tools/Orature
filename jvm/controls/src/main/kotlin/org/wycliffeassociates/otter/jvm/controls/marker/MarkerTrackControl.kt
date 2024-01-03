@@ -24,25 +24,24 @@ import com.sun.javafx.scene.traversal.TraversalMethod
 import com.sun.javafx.util.Utils
 import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Point2D
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Region
 import javafx.scene.shape.Rectangle
+import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
+import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
+import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
+import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import java.util.concurrent.Callable
-import javafx.beans.property.SimpleObjectProperty
-import javafx.scene.input.KeyCode
-import javafx.scene.input.KeyEvent
-import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
-import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
-import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
-import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 
 const val MOVE_MARKER_INTERVAL = 0.001
 const val MARKER_COUNT = 500
 
 open class MarkerTrackControl : Region() {
-
     val markers = observableListOf<ChunkMarkerModel>()
     val canMoveMarkerProperty = SimpleBooleanProperty(true)
     val canDeleteMarkerProperty = SimpleBooleanProperty(true)
@@ -80,8 +79,8 @@ open class MarkerTrackControl : Region() {
             marker.isPlacedProperty.set(chunkMarker.placed)
             marker.markerPositionProperty.set(
                 framesToPixels(
-                    chunkMarker.frame
-                ).toDouble()
+                    chunkMarker.frame,
+                ).toDouble(),
             )
             marker.markerNumberProperty.set(chunkMarker.label)
             highlights[index].apply {
@@ -114,13 +113,17 @@ open class MarkerTrackControl : Region() {
 
     open fun createMarker(): MarkerControl = ChunkMarker()
 
-    protected fun createMarker(i: Int, mk: ChunkMarkerModel): MarkerControl {
+    protected fun createMarker(
+        i: Int,
+        mk: ChunkMarkerModel,
+    ): MarkerControl {
         val container = this
         var startPos = 0.0
         return createMarker().apply {
-            val pixel = framesToPixels(
-                mk.frame
-            ).toDouble()
+            val pixel =
+                framesToPixels(
+                    mk.frame,
+                ).toDouble()
 
             isPlacedProperty.set(mk.placed)
             markerIndexProperty.set(i)
@@ -133,11 +136,12 @@ open class MarkerTrackControl : Region() {
                 val trackWidth = container.width
                 if (trackWidth > 0) {
                     dragStart[i] = localToParent(me.x, me.y)
-                    val clampedValue: Double = Utils.clamp(
-                        0.0,
-                        markerPositionProperty.value,
-                        trackWidth
-                    )
+                    val clampedValue: Double =
+                        Utils.clamp(
+                            0.0,
+                            markerPositionProperty.value,
+                            trackWidth,
+                        )
                     startPos = clampedValue
                     preDragThumbPos[i] = clampedValue / trackWidth
                     me.consume()
@@ -155,11 +159,12 @@ open class MarkerTrackControl : Region() {
                         if (dragStart[i] == null) {
                             // we're getting dragged without getting a mouse press
                             dragStart[i] = pos
-                            val clampedValue: Double = Utils.clamp(
-                                0.0,
-                                markerPositionProperty.value,
-                                trackWidth
-                            )
+                            val clampedValue: Double =
+                                Utils.clamp(
+                                    0.0,
+                                    markerPositionProperty.value,
+                                    trackWidth,
+                                )
                             preDragThumbPos[i] = clampedValue / trackWidth
                         }
                         val dragPos = pos.x - dragStart[i]!!.x
@@ -198,7 +203,10 @@ open class MarkerTrackControl : Region() {
         }
     }
 
-    protected fun createHighlight(i: Int, mk: ChunkMarkerModel): Rectangle {
+    protected fun createHighlight(
+        i: Int,
+        mk: ChunkMarkerModel,
+    ): Rectangle {
         return Rectangle().apply {
             when (i % 2 == 0) {
                 true -> styleClass.setAll("scrolling-waveform__highlight--primary")
@@ -232,20 +240,21 @@ open class MarkerTrackControl : Region() {
                 highlights[i + 1].let { next ->
                     val nextVis = next.visibleProperty()
                     val nextPos = next.translateXProperty()
-                    val highlightWidth = Bindings.createDoubleBinding(
-                        Callable {
-                            return@Callable if (nextVis.value) {
-                                nextPos.value - rect.translateXProperty().value
-                            } else {
-                                endPos.value - rect.translateXProperty().value
-                            }
-                        },
-                        nextVis,
-                        nextPos,
-                        endPos,
-                        rect.translateXProperty(),
-                        next.translateXProperty()
-                    )
+                    val highlightWidth =
+                        Bindings.createDoubleBinding(
+                            Callable {
+                                return@Callable if (nextVis.value) {
+                                    nextPos.value - rect.translateXProperty().value
+                                } else {
+                                    endPos.value - rect.translateXProperty().value
+                                }
+                            },
+                            nextVis,
+                            nextPos,
+                            endPos,
+                            rect.translateXProperty(),
+                            next.translateXProperty(),
+                        )
                     rect.widthProperty().bind(highlightWidth)
                 }
             } else {
@@ -300,11 +309,12 @@ open class MarkerTrackControl : Region() {
         focusedMarkerProperty.value?.let { marker ->
             val position = marker.markerPositionProperty.value
             val percent = position / width
-            val moveTo = if (code == KeyCode.LEFT) {
-                percent - MOVE_MARKER_INTERVAL
-            } else {
-                percent + MOVE_MARKER_INTERVAL
-            }
+            val moveTo =
+                if (code == KeyCode.LEFT) {
+                    percent - MOVE_MARKER_INTERVAL
+                } else {
+                    percent + MOVE_MARKER_INTERVAL
+                }
             updateValue(marker.markerIndexProperty.value, moveTo)
             // notify changes for model's undo/redo history update
             val start = pixelsToFrames(position)
@@ -323,7 +333,10 @@ open class MarkerTrackControl : Region() {
         }
     }
 
-    fun updateValue(id: Int, position: Double) {
+    fun updateValue(
+        id: Int,
+        position: Double,
+    ) {
         val newValue: Double = position * width
         if (!newValue.isNaN()) {
             val min = getMin(id)
@@ -335,11 +348,12 @@ open class MarkerTrackControl : Region() {
 
     fun getMin(id: Int): Double {
         val placedMarkers = _markers.filter { it.isPlacedProperty.value }
-        val previousMaker = if (id > 0) {
-            placedMarkers.get(id - 1)
-        } else {
-            null
-        }
+        val previousMaker =
+            if (id > 0) {
+                placedMarkers.get(id - 1)
+            } else {
+                null
+            }
         return previousMaker?.let {
             it.markerPositionProperty.value.toInt() + it.width
         } ?: 0.0
@@ -347,11 +361,12 @@ open class MarkerTrackControl : Region() {
 
     fun getMax(id: Int): Double {
         val placedMarkers = _markers.filter { it.isPlacedProperty.value }
-        val previousMaker = if (id < placedMarkers.size - 1) {
-            placedMarkers.get(id + 1)
-        } else {
-            null
-        }
+        val previousMaker =
+            if (id < placedMarkers.size - 1) {
+                placedMarkers.get(id + 1)
+            } else {
+                null
+            }
         return previousMaker?.let {
             it.markerPositionProperty.value - it.width
         } ?: width

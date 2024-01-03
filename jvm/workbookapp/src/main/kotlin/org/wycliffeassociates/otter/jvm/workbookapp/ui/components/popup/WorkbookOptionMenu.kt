@@ -36,55 +36,62 @@ import tornadofx.get
 import tornadofx.tooltip
 
 class WorkbookOptionMenu : ContextMenu() {
-
     val workbookInfoProperty = SimpleObjectProperty<WorkbookDescriptor>(null)
 
     init {
-        val openOption = MenuItem().apply {
-            graphic = Label(FX.messages["openBook"]).apply {
-                this.graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
-                tooltip(text)
-            }
-            action {
-                workbookInfoProperty.value?.let {
-                    FX.eventbus.fire(WorkbookOpenEvent(it))
+        val openOption =
+            MenuItem().apply {
+                graphic =
+                    Label(FX.messages["openBook"]).apply {
+                        this.graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
+                        tooltip(text)
+                    }
+                action {
+                    workbookInfoProperty.value?.let {
+                        FX.eventbus.fire(WorkbookOpenEvent(it))
+                    }
                 }
             }
-        }
-        val backupOption = MenuItem().apply {
-            graphic = Label(FX.messages["backup"]).apply {
-                this.graphic = FontIcon(MaterialDesign.MDI_CONTENT_DUPLICATE)
-                tooltip(text)
-            }
-            action {
-                workbookInfoProperty.value?.let {
-                    FX.eventbus.fire(WorkbookQuickBackupEvent(it))
+        val backupOption =
+            MenuItem().apply {
+                graphic =
+                    Label(FX.messages["backup"]).apply {
+                        this.graphic = FontIcon(MaterialDesign.MDI_CONTENT_DUPLICATE)
+                        tooltip(text)
+                    }
+                action {
+                    workbookInfoProperty.value?.let {
+                        FX.eventbus.fire(WorkbookQuickBackupEvent(it))
+                    }
                 }
             }
-        }
-        val exportOption = MenuItem().apply {
-            graphic = Label(FX.messages["exportOptions"]).apply {
-                this.graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
-                tooltip(text)
-            }
-            action {
-                workbookInfoProperty.value?.let {
-                    FX.eventbus.fire(WorkbookExportDialogOpenEvent(it))
+        val exportOption =
+            MenuItem().apply {
+                graphic =
+                    Label(FX.messages["exportOptions"]).apply {
+                        this.graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
+                        tooltip(text)
+                    }
+                action {
+                    workbookInfoProperty.value?.let {
+                        FX.eventbus.fire(WorkbookExportDialogOpenEvent(it))
+                    }
                 }
             }
-        }
-        val deleteOption = MenuItem().apply {
-            addClass("danger")
-            graphic = Label(FX.messages["deleteBook"]).apply {
-                this.graphic = FontIcon(MaterialDesign.MDI_DELETE)
-                tooltip(text)
-            }
-            action {
-                workbookInfoProperty.value?.let {
-                    FX.eventbus.fire(WorkbookDeleteEvent(it))
+        val deleteOption =
+            MenuItem().apply {
+                addClass("danger")
+                graphic =
+                    Label(FX.messages["deleteBook"]).apply {
+                        this.graphic = FontIcon(MaterialDesign.MDI_DELETE)
+                        tooltip(text)
+                    }
+                action {
+                    workbookInfoProperty.value?.let {
+                        FX.eventbus.fire(WorkbookDeleteEvent(it))
+                    }
                 }
             }
-        }
         addClass("wa-context-menu")
         isAutoHide = true
         items.setAll(openOption, backupOption, exportOption, deleteOption)

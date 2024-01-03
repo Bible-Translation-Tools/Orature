@@ -21,7 +21,6 @@ package org.wycliffeassociates.otter.jvm.controls.controllers
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import io.reactivex.Observable
-import java.lang.ref.WeakReference
 import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
@@ -32,9 +31,9 @@ import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.SCROLL_INCREMENT_UNIT
-import org.wycliffeassociates.otter.jvm.controls.SCROLL_JUMP_UNIT
 import org.wycliffeassociates.otter.jvm.utils.simulateKeyPress
 import tornadofx.*
+import java.lang.ref.WeakReference
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
 import kotlin.math.min
@@ -46,12 +45,12 @@ const val FAST_SEEK_INTERVAL = 1.0
 
 enum class ScrollSpeed {
     NORMAL,
-    FAST
+    FAST,
 }
 
 class AudioPlayerController(
     var audioSlider: Slider? = null,
-    private var player: IAudioPlayer? = null
+    private var player: IAudioPlayer? = null,
 ) {
     private val logger = LoggerFactory.getLogger(AudioPlayerController::class.java)
 
@@ -139,14 +138,16 @@ class AudioPlayerController(
     }
 
     private fun subscribeToTimer() {
-        timerListener = object : ITimerListener {
-            override var isGarbageCollected: Boolean = false
-            override fun onTick() {
-                if (isPlayingProperty.value == true && audioSlider?.isValueChanging == false) {
-                    audioSlider?.value = playbackPosition().toDouble()
+        timerListener =
+            object : ITimerListener {
+                override var isGarbageCollected: Boolean = false
+
+                override fun onTick() {
+                    if (isPlayingProperty.value == true && audioSlider?.isValueChanging == false) {
+                        audioSlider?.value = playbackPosition().toDouble()
+                    }
                 }
-            }
-        }.also { SliderTimer.addListener(it) }
+            }.also { SliderTimer.addListener(it) }
     }
 
     private fun initializeSliderActions() {
@@ -252,18 +253,22 @@ class AudioPlayerController(
         return player?.getLocationInFrames() ?: 0
     }
 
-    private fun seekInterval(keyCode: KeyCode, speed: ScrollSpeed) {
+    private fun seekInterval(
+        keyCode: KeyCode,
+        speed: ScrollSpeed,
+    ) {
         player?.let {
             if (it.isPlaying()) {
                 resumeAfterDrag = true
                 toggle()
             }
 
-            val interval = if (speed == ScrollSpeed.FAST) {
-                SCROLL_INCREMENT_UNIT * 10
-            } else {
-                SCROLL_INCREMENT_UNIT
-            }.toInt()
+            val interval =
+                if (speed == ScrollSpeed.FAST) {
+                    SCROLL_INCREMENT_UNIT * 10
+                } else {
+                    SCROLL_INCREMENT_UNIT
+                }.toInt()
 
             var location = it.getLocationInFrames()
             when (keyCode) {
@@ -284,12 +289,16 @@ class AudioPlayerController(
     }
 }
 
-fun framesToTimecode(value: Double, sampleRate: Int = DEFAULT_SAMPLE_RATE): String {
-    val framesPerMs = if (sampleRate > 0) {
-        sampleRate / 1000
-    } else {
-        DEFAULT_SAMPLE_RATE / 1000
-    }
+fun framesToTimecode(
+    value: Double,
+    sampleRate: Int = DEFAULT_SAMPLE_RATE,
+): String {
+    val framesPerMs =
+        if (sampleRate > 0) {
+            sampleRate / 1000
+        } else {
+            DEFAULT_SAMPLE_RATE / 1000
+        }
     val durationMs = (value / framesPerMs).toLong()
     val min = TimeUnit.MILLISECONDS.toMinutes(durationMs)
     val sec = TimeUnit.MILLISECONDS.toSeconds(durationMs) % 60
@@ -299,13 +308,14 @@ fun framesToTimecode(value: Double, sampleRate: Int = DEFAULT_SAMPLE_RATE): Stri
 fun remainingTimecode(
     progressValue: Double,
     durationMs: Int,
-    sampleRate: Int = DEFAULT_SAMPLE_RATE
+    sampleRate: Int = DEFAULT_SAMPLE_RATE,
 ): String {
-    val framesPerMs = if (sampleRate > 0) {
-        sampleRate / 1000
-    } else {
-        DEFAULT_SAMPLE_RATE / 1000
-    }
+    val framesPerMs =
+        if (sampleRate > 0) {
+            sampleRate / 1000
+        } else {
+            DEFAULT_SAMPLE_RATE / 1000
+        }
     val remaining = durationMs - (progressValue / framesPerMs).toLong()
     val min = max(0, TimeUnit.MILLISECONDS.toMinutes(remaining))
     val sec = max(0, TimeUnit.MILLISECONDS.toSeconds(remaining) % 60)
@@ -314,6 +324,7 @@ fun remainingTimecode(
 
 private interface ITimerListener {
     var isGarbageCollected: Boolean
+
     fun onTick()
 }
 

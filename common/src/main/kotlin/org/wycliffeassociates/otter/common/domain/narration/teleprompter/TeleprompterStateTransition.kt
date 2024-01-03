@@ -8,11 +8,14 @@ enum class TeleprompterStateTransition {
     RECORD_AGAIN,
     RESUME_RECORD_AGAIN,
     PAUSE_RECORD_AGAIN,
-    SAVE
+    SAVE,
 }
 
 object RecordAction {
-    fun apply(contexts: MutableList<TeleprompterStateContext>, index: Int) {
+    fun apply(
+        contexts: MutableList<TeleprompterStateContext>,
+        index: Int,
+    ) {
         if (index !in contexts.indices) return
 
         for (i in 0 until index) {
@@ -34,7 +37,10 @@ object RecordAction {
 }
 
 object PauseRecordingAction {
-    fun apply(contexts: MutableList<TeleprompterStateContext>, index: Int) {
+    fun apply(
+        contexts: MutableList<TeleprompterStateContext>,
+        index: Int,
+    ) {
         if (index !in contexts.indices) return
 
         if (0 != index) {
@@ -51,7 +57,10 @@ object PauseRecordingAction {
 }
 
 object ResumeRecordAction {
-    fun apply(contexts: MutableList<TeleprompterStateContext>, index: Int) {
+    fun apply(
+        contexts: MutableList<TeleprompterStateContext>,
+        index: Int,
+    ) {
         if (index !in contexts.indices) return
 
         if (0 != index) {
@@ -73,7 +82,10 @@ object ResumeRecordAction {
 }
 
 object NextVerseAction {
-    fun apply(contexts: MutableList<TeleprompterStateContext>, index: Int) {
+    fun apply(
+        contexts: MutableList<TeleprompterStateContext>,
+        index: Int,
+    ) {
         val wasActive = contexts[index - 1].state.type == TeleprompterItemState.RECORD_ACTIVE
 
         if (wasActive) {
@@ -87,7 +99,10 @@ object NextVerseAction {
 }
 
 object RecordAgainAction {
-    fun apply(contexts: MutableList<TeleprompterStateContext>, index: Int) {
+    fun apply(
+        contexts: MutableList<TeleprompterStateContext>,
+        index: Int,
+    ) {
         if (index !in contexts.indices) return
 
         if (index != 0) {
@@ -107,13 +122,19 @@ object RecordAgainAction {
 }
 
 object PauseRecordAgainAction {
-    fun apply(contexts: MutableList<TeleprompterStateContext>, index: Int) {
+    fun apply(
+        contexts: MutableList<TeleprompterStateContext>,
+        index: Int,
+    ) {
         contexts[index].changeState(TeleprompterItemState.RECORD_AGAIN_PAUSED)
     }
 }
 
 object ResumeRecordAgainAction {
-    fun apply(contexts: MutableList<TeleprompterStateContext>, index: Int) {
+    fun apply(
+        contexts: MutableList<TeleprompterStateContext>,
+        index: Int,
+    ) {
         if (index !in contexts.indices) return
 
         if (0 != index) {
@@ -134,7 +155,10 @@ object ResumeRecordAgainAction {
 }
 
 object SaveRecordingAction {
-    fun apply(contexts: MutableList<TeleprompterStateContext>, index: Int) {
+    fun apply(
+        contexts: MutableList<TeleprompterStateContext>,
+        index: Int,
+    ) {
         if (index !in contexts.indices) return
 
         if (index != 0) {

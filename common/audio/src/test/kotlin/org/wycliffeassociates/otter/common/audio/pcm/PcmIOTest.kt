@@ -24,7 +24,6 @@ import java.io.File
 import java.io.FileInputStream
 
 class PcmIOTest {
-
     @Test
     fun `buffered pcm produces equivalent file`() {
         val temp = File.createTempFile("testpcm", ".pcm")
@@ -37,7 +36,7 @@ class PcmIOTest {
         PcmOutputStream(
             pcm,
             append = false,
-            buffered = false
+            buffered = false,
         ).use {
             for (i in 1..audioSamples) {
                 it.write(i)
@@ -46,7 +45,7 @@ class PcmIOTest {
         PcmOutputStream(
             pcm2,
             append = false,
-            buffered = true
+            buffered = true,
         ).use {
             for (i in 1..audioSamples) {
                 it.write(i)
@@ -83,14 +82,14 @@ class PcmIOTest {
         PcmOutputStream(
             pcm,
             append = false,
-            buffered = false
+            buffered = false,
         ).use {
             it.write(byteArray)
         }
         PcmOutputStream(
             pcm2,
             append = false,
-            buffered = true
+            buffered = true,
         ).use {
             it.write(byteArray)
         }

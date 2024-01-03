@@ -69,9 +69,10 @@ class TestOngoingProjectImporter {
     private val chaptersSelected = listOf(1, 2)
     private val takesAdded = takesPerChapter * chaptersSelected.size
 
-    private val callback = mock<ProjectImporterCallback> {
-        on { onRequestUserInput(any()) } doReturn (Single.just(ImportOptions(chaptersSelected)))
-    }
+    private val callback =
+        mock<ProjectImporterCallback> {
+            on { onRequestUserInput(any()) } doReturn (Single.just(ImportOptions(chaptersSelected)))
+        }
 
     @Test
     fun testImportDuplicatedProject() {
@@ -81,26 +82,27 @@ class TestOngoingProjectImporter {
         Assert.assertEquals(
             "There should be $takesInProject takes after the initial import.",
             takesInProject,
-            originalTakes.size
+            originalTakes.size,
         )
 
-        /* Import the same project with chapter selection provided from callback */
+        // Import the same project with chapter selection provided from callback
         importOngoingProject(callback = this.callback)
 
         val currentTakes = db.db.takeDao.fetchAll()
         val addedTakes = currentTakes.filter { it !in originalTakes }
         val contents = addedTakes.map { db.db.contentDao.fetchById(it.contentFk) }
         val chapterCollections = contents.map { db.db.collectionDao.fetchById(it.collectionFk) }
-        val chaptersImported = chapterCollections
-            .map { it.sort }
-            .sorted()
-            .distinct()
+        val chaptersImported =
+            chapterCollections
+                .map { it.sort }
+                .sorted()
+                .distinct()
 
         Assert.assertEquals(
             "There should be $takesInProject + $takesAdded takes " +
-                    "after importing chapter: $chaptersSelected",
+                "after importing chapter: $chaptersSelected",
             takesInProject + takesAdded,
-            currentTakes.size
+            currentTakes.size,
         )
         Assert.assertEquals(takesAdded, addedTakes.size)
         Assert.assertEquals(chaptersSelected, chaptersImported)
@@ -143,7 +145,10 @@ class TestOngoingProjectImporter {
         Assert.assertEquals(beforeTakes.size, afterTakes.size)
     }
 
-    private fun importOngoingProject(file: File = projectFile, callback: ProjectImporterCallback?) {
+    private fun importOngoingProject(
+        file: File = projectFile,
+        callback: ProjectImporterCallback?,
+    ) {
         importer
             .import(file, callback)
             .blockingGet()

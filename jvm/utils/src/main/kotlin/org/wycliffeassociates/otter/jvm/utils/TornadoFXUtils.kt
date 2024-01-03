@@ -29,9 +29,9 @@ import javafx.event.EventTarget
 import javafx.scene.Node
 import javafx.scene.control.Tab
 import javafx.scene.layout.Pane
+import tornadofx.*
 import tornadofx.onChange
 import java.lang.IllegalStateException
-import tornadofx.*
 
 interface ListenerDisposer {
     fun dispose()
@@ -67,7 +67,7 @@ fun <T> ObservableList<T>.onChangeAndDoNow(op: (List<T>) -> Unit) {
 fun <T> ObservableValue<T>.onChangeWithDisposer(op: (T?) -> Unit): ListenerDisposer {
     val listener = ChangeListener<T> { _, _, newValue -> op(newValue) }
     addListener(listener)
-    return object: ListenerDisposer {
+    return object : ListenerDisposer {
         override fun dispose() {
             removeListener(listener)
         }
@@ -82,7 +82,7 @@ fun <T> ObservableValue<T>.onChangeWithDisposer(op: (T?) -> Unit): ListenerDispo
 fun <T> ObservableList<T>.onChangeWithDisposer(op: (ListChangeListener.Change<out T>) -> Unit): ListenerDisposer {
     val listener = ListChangeListener<T> { op(it) }
     addListener(listener)
-    return object: ListenerDisposer {
+    return object : ListenerDisposer {
         override fun dispose() {
             removeListener(listener)
         }
@@ -99,7 +99,7 @@ fun <T> ObservableList<T>.onChangeAndDoNowWithDisposer(op: (List<T>) -> Unit): L
     op(this)
     val listener = ListChangeListener<T> { op(it.list) }
     addListener(listener)
-    return object: ListenerDisposer {
+    return object : ListenerDisposer {
         override fun dispose() {
             removeListener(listener)
         }
@@ -133,9 +133,12 @@ fun Tab.whenSelectedWithDisposer(op: () -> Unit): ListenerDisposer {
  * the given converter function. Changes to the source list will be reflected in the children list of this layout node.
  * @return ListenerDisposer
  */
-fun <T> EventTarget.bindChildrenWithDisposer(sourceList: ObservableList<T>, converter: (T) -> Node): ListenerDisposer {
+fun <T> EventTarget.bindChildrenWithDisposer(
+    sourceList: ObservableList<T>,
+    converter: (T) -> Node,
+): ListenerDisposer {
     val listener = this.bindChildren(sourceList, converter)
-    return object: ListenerDisposer {
+    return object : ListenerDisposer {
         override fun dispose() {
             sourceList.removeListener(listener)
         }
@@ -158,7 +161,7 @@ fun <T : Node> Pane.bindSingleChild(observableNode: ObservableValue<T>) {
             if (change.addedSubList.any { it != observableNode.value }) {
                 throw IllegalStateException(
                     "bindSingleChild() contract ensures that the only child that " +
-                            "can be added to this pane is the one specified by the contract"
+                        "can be added to this pane is the one specified by the contract",
                 )
             }
         }
@@ -190,4 +193,3 @@ private object IsFXInitialized {
         return true
     }
 }
-

@@ -27,7 +27,6 @@ import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*
 
 class RecorderView : PluginEntrypoint() {
-
     private val logger = LoggerFactory.getLogger(RecorderView::class.java)
 
     private var viewInflated = false
@@ -35,25 +34,27 @@ class RecorderView : PluginEntrypoint() {
     private var sourceAudioFragment: SourceAudioFragment? = null
     private val waveform = RecordingVisualizerFragment()
 
-    private val spacer = region().apply {
-        prefHeight = 2.0
-    }
+    private val spacer =
+        region().apply {
+            prefHeight = 2.0
+        }
 
     private val recorderViewModel: RecorderViewModel by inject()
 
-    override val root = vbox {
-        prefHeight = Screen.getPrimary().visualBounds.height - 50.0
-        prefWidth = Screen.getPrimary().visualBounds.width - 50.0
+    override val root =
+        vbox {
+            prefHeight = Screen.getPrimary().visualBounds.height - 50.0
+            prefWidth = Screen.getPrimary().visualBounds.width - 50.0
 
-        add<InfoFragment>()
-        add(spacer)
-        add(waveform)
-        if (!recorderViewModel.narrationMode) {
-            sourceAudioFragment = find()
-            add(sourceAudioFragment!!)
+            add<InfoFragment>()
+            add(spacer)
+            add(waveform)
+            if (!recorderViewModel.narrationMode) {
+                sourceAudioFragment = find()
+                add(sourceAudioFragment!!)
+            }
+            add<ControlFragment>()
         }
-        add<ControlFragment>()
-    }
 
     override fun onDock() {
         super.onDock()

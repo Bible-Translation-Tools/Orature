@@ -8,8 +8,10 @@ import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
 private const val USHORT_SIZE = 65535.0
 
 class WaveformLayer(private val renderer: ActiveRecordingRenderer) : IDrawable {
-
-    override fun draw(context: GraphicsContext, canvas: Canvas) {
+    override fun draw(
+        context: GraphicsContext,
+        canvas: Canvas,
+    ) {
         context.stroke = Paint.valueOf("#66768B")
         context.lineWidth = 1.0
 
@@ -21,7 +23,7 @@ class WaveformLayer(private val renderer: ActiveRecordingRenderer) : IDrawable {
                 x,
                 scaleAmplitude(buffer[i].toDouble(), canvas.height),
                 x,
-                scaleAmplitude(buffer[i + 1].toDouble(), canvas.height)
+                scaleAmplitude(buffer[i + 1].toDouble(), canvas.height),
             )
             i += 2
             x += 1
@@ -31,7 +33,10 @@ class WaveformLayer(private val renderer: ActiveRecordingRenderer) : IDrawable {
     // 16 bit audio range is -32,768 to 32,767, or 65535 (size of unsigned short)
     // This scales the sample to fit within the canvas height, and moves the
     // sample down (-y translate) by half the height
-    private fun scaleAmplitude(sample: Double, height: Double): Double {
+    private fun scaleAmplitude(
+        sample: Double,
+        height: Double,
+    ): Double {
         return height * (sample / USHORT_SIZE) + height / 2
     }
 }

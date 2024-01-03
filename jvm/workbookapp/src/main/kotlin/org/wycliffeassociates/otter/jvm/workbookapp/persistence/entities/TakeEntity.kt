@@ -28,5 +28,5 @@ data class TakeEntity(
     var deletedTs: String?,
     var played: Int,
     var checkingFk: Int,
-    var checksum: String?
+    var checksum: String?,
 )

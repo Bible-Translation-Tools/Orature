@@ -40,7 +40,6 @@ import org.wycliffeassociates.otter.jvm.controls.media.SimpleAudioPlayer
 import tornadofx.*
 
 class ResourceTakeCardSkin(val card: ResourceTakeCard) : SkinBase<ResourceTakeCard>(card) {
-
     lateinit var cardNode: Node
 
     private val dragDropContainer = StackPane()
@@ -89,11 +88,11 @@ class ResourceTakeCardSkin(val card: ResourceTakeCard) : SkinBase<ResourceTakeCa
                 FX.messages["cannotBeUndone"],
                 ButtonType.YES,
                 ButtonType.NO,
-                title = FX.messages["deleteTakePrompt"]
+                title = FX.messages["deleteTakePrompt"],
             ) { button: ButtonType ->
                 if (button == ButtonType.YES) {
                     skinnable.fireEvent(
-                        DeleteTakeEvent(card.takeProperty().value)
+                        DeleteTakeEvent(card.takeProperty().value),
                     )
                 }
             }
@@ -105,8 +104,8 @@ class ResourceTakeCardSkin(val card: ResourceTakeCard) : SkinBase<ResourceTakeCa
                     {
                         card.audioPlayerProperty().value.load(card.takeProperty().value.file)
                     },
-                    TakeEvent.EDIT_TAKE
-                )
+                    TakeEvent.EDIT_TAKE,
+                ),
             )
         }
         card.apply {

@@ -27,12 +27,19 @@ private const val EPSILON = 10
 private const val MS_IN_SECOND = 1000
 private const val SAMPLE_RATE = DEFAULT_SAMPLE_RATE
 
-fun pixelsInSecond(width: Double, durationMs: Int): Int {
+fun pixelsInSecond(
+    width: Double,
+    durationMs: Int,
+): Int {
     val msInPixels = durationMs / width
     return (MS_IN_SECOND / msInPixels + EPSILON).toInt()
 }
 
-fun positionToMs(x: Int, width: Double, durationMs: Int): Int {
+fun positionToMs(
+    x: Int,
+    width: Double,
+    durationMs: Int,
+): Int {
     val msInPixels = durationMs / width
     return (x * msInPixels).toInt()
 }
@@ -40,7 +47,7 @@ fun positionToMs(x: Int, width: Double, durationMs: Int): Int {
 fun pixelsToFrames(
     pixels: Double,
     width: Int = Screen.getMainScreen().platformWidth,
-    framesOnScreen: Int = SECONDS_ON_SCREEN * SAMPLE_RATE
+    framesOnScreen: Int = SECONDS_ON_SCREEN * SAMPLE_RATE,
 ): Int {
     val framesInPixel = framesOnScreen / width.toFloat()
     return (pixels * framesInPixel).toInt()
@@ -49,7 +56,7 @@ fun pixelsToFrames(
 fun framesToPixels(
     frames: Int,
     width: Int = Screen.getMainScreen().platformWidth,
-    framesOnScreen: Int = SECONDS_ON_SCREEN * SAMPLE_RATE
+    framesOnScreen: Int = SECONDS_ON_SCREEN * SAMPLE_RATE,
 ): Int {
     val framesInPixel = framesOnScreen / width.toFloat()
     return (frames / framesInPixel).toInt()

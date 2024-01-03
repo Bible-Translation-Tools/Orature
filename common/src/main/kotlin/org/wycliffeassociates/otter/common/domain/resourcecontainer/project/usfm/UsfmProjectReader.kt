@@ -18,8 +18,6 @@
  */
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.project.usfm
 
-import java.io.File
-import java.io.Reader
 import org.wycliffeassociates.otter.common.collections.OtterTree
 import org.wycliffeassociates.otter.common.collections.OtterTreeNode
 import org.wycliffeassociates.otter.common.data.primitives.Collection
@@ -41,6 +39,8 @@ import org.wycliffeassociates.usfmtools.models.markers.FMarker
 import org.wycliffeassociates.usfmtools.models.markers.TextBlock
 import org.wycliffeassociates.usfmtools.models.markers.VMarker
 import org.wycliffeassociates.usfmtools.models.markers.XMarker
+import java.io.File
+import java.io.Reader
 
 private const val FORMAT = "text/usfm"
 
@@ -51,7 +51,7 @@ class UsfmProjectReader : IProjectReader {
     override fun constructProjectTree(
         container: ResourceContainer,
         project: Project,
-        zipEntryTreeBuilder: IZipEntryTreeBuilder
+        zipEntryTreeBuilder: IZipEntryTreeBuilder,
     ): OtterTree<CollectionOrContent> {
         return when (container.file.extension) {
             "zip", "orature" -> constructTreeFromZip(container, project)
@@ -61,7 +61,7 @@ class UsfmProjectReader : IProjectReader {
 
     private fun constructTreeFromDirOrFile(
         container: ResourceContainer,
-        project: Project
+        project: Project,
     ): OtterTree<CollectionOrContent> {
         val projectTree = OtterTree<CollectionOrContent>(project.toCollection())
 
@@ -81,7 +81,7 @@ class UsfmProjectReader : IProjectReader {
 
     private fun constructTreeFromZip(
         container: ResourceContainer,
-        project: Project
+        project: Project,
     ): OtterTree<CollectionOrContent> {
         if (!project.path.endsWith(".usfm", ignoreCase = true)) {
             throw ImportException(ImportResult.UNSUPPORTED_CONTENT)
@@ -91,11 +91,12 @@ class UsfmProjectReader : IProjectReader {
                 val projectPath = currentDirectoryPrefix.replace(project.path, "")
                 rc.accessor.getReader(projectPath).use { reader ->
                     val projectTree = OtterTree<CollectionOrContent>(project.toCollection())
-                    val result = parseFromReader(
-                        reader,
-                        projectTree,
-                        project.identifier
-                    )
+                    val result =
+                        parseFromReader(
+                            reader,
+                            projectTree,
+                            project.identifier,
+                        )
                     if (result != ImportResult.SUCCESS) throw ImportException(result)
                     projectTree
                 }
@@ -109,7 +110,7 @@ class UsfmProjectReader : IProjectReader {
 private fun parseFileIntoProjectTree(
     file: File,
     root: OtterTree<CollectionOrContent>,
-    projectIdentifier: String
+    projectIdentifier: String,
 ): ImportResult {
     return when (file.extension) {
         "usfm", "USFM" -> parseFromReader(file.bufferedReader(), root, projectIdentifier)
@@ -120,7 +121,7 @@ private fun parseFileIntoProjectTree(
 private fun parseFromReader(
     reader: Reader,
     root: OtterTree<CollectionOrContent>,
-    projectIdentifier: String
+    projectIdentifier: String,
 ): ImportResult {
     return try {
         val chapters = parseUSFMToChapterTrees(reader, projectIdentifier)
@@ -131,7 +132,10 @@ private fun parseFromReader(
     }
 }
 
-private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<OtterTree<CollectionOrContent>> {
+private fun parseUSFMToChapterTrees(
+    reader: Reader,
+    projectSlug: String,
+): List<OtterTree<CollectionOrContent>> {
     val usfmText = reader.readText()
     val parser = USFMParser(arrayListOf("s5"))
     val doc = parser.parseFromString(usfmText)
@@ -141,44 +145,47 @@ private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<O
         val startVerse = verses.minByOrNull { it.startingVerse }?.startingVerse ?: 1
         val endVerse = verses.maxByOrNull { it.endingVerse }?.endingVerse ?: 1
         val chapterSlug = "${projectSlug}_${chapter.number}"
-        val chapterCollection = Collection(
-            sort = chapter.number,
-            slug = chapterSlug,
-            labelKey = ContentLabel.CHAPTER.value,
-            titleKey = chapter.number.toString(),
-            resourceContainer = null
-        )
+        val chapterCollection =
+            Collection(
+                sort = chapter.number,
+                slug = chapterSlug,
+                labelKey = ContentLabel.CHAPTER.value,
+                titleKey = chapter.number.toString(),
+                resourceContainer = null,
+            )
         val chapterTree = OtterTree<CollectionOrContent>(chapterCollection)
 
         val chapterText = mutableListOf<String>()
         // create a chunk for the whole chapter
-        val chapChunk = Content(
-            sort = 0,
-            labelKey = ContentLabel.CHAPTER.value,
-            start = startVerse,
-            end = endVerse,
-            selectedTake = null,
-            text = null,
-            format = FORMAT,
-            type = ContentType.META,
-            draftNumber = 1
-        )
+        val chapChunk =
+            Content(
+                sort = 0,
+                labelKey = ContentLabel.CHAPTER.value,
+                start = startVerse,
+                end = endVerse,
+                selectedTake = null,
+                text = null,
+                format = FORMAT,
+                type = ContentType.META,
+                draftNumber = 1,
+            )
         chapterTree.addChild(OtterTreeNode(chapChunk))
 
         verses.sortBy { it.startingVerse }
         // Create content for each verse
         for (verse in verses) {
-            val content = Content(
-                sort = verse.startingVerse,
-                labelKey = ContentLabel.VERSE.value,
-                start = verse.startingVerse,
-                end = verse.endingVerse,
-                selectedTake = null,
-                text = verse.getText(),
-                format = FORMAT,
-                type = ContentType.TEXT,
-                draftNumber = 1
-            )
+            val content =
+                Content(
+                    sort = verse.startingVerse,
+                    labelKey = ContentLabel.VERSE.value,
+                    start = verse.startingVerse,
+                    end = verse.endingVerse,
+                    selectedTake = null,
+                    text = verse.getText(),
+                    format = FORMAT,
+                    type = ContentType.TEXT,
+                    draftNumber = 1,
+                )
             chapterText.add("${verse.startingVerse}. ${verse.getText()}\n")
             chapterTree.addChild(OtterTreeNode(content))
         }

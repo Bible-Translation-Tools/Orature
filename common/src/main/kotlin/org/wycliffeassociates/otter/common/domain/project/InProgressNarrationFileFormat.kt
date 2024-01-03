@@ -20,7 +20,8 @@ package org.wycliffeassociates.otter.common.domain.project
 
 enum class InProgressNarrationFileFormat(val extension: String) {
     PCM("pcm"),
-    JSON("json");
+    JSON("json"),
+    ;
 
     companion object {
         private val extensionList: List<String> = values().map { it.extension }

@@ -15,15 +15,15 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.wycliffeassociates.otter.common.*
 import org.wycliffeassociates.otter.common.audio.AudioCue
-import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.data.primitives.*
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDatabaseAccessors
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
@@ -32,9 +32,9 @@ import java.io.File
 import java.time.LocalDate
 
 class ResetChunksTest {
-
     @JvmField @Rule
     val tempDir = TemporaryFolder()
+
     @JvmField @Rule
     val projectDir = TemporaryFolder()
 
@@ -75,18 +75,18 @@ class ResetChunksTest {
     fun setup() {
         mockedDb.apply {
             whenever(
-                getTranslation(any(), any())
+                getTranslation(any(), any()),
             ).thenReturn(
                 Single.just(
                     Translation(
                         english,
                         spanish,
-                        null
-                    )
-                )
+                        null,
+                    ),
+                ),
             )
             whenever(
-                getChildren(any())
+                getChildren(any()),
             ).thenAnswer { invocation ->
                 val collection = invocation.getArgument<Collection>(0)!!
                 Single.just(
@@ -99,16 +99,16 @@ class ResetChunksTest {
                                     id = autoincrement,
                                     resourceContainer = collection.resourceContainer,
                                     titleKey = chapter.toString(),
-                                    labelKey = ContentLabel.CHAPTER.value
+                                    labelKey = ContentLabel.CHAPTER.value,
                                 )
                             }
                         }
                         else -> emptyList()
-                    }
+                    },
                 )
             }
             whenever(
-                getCollectionMetaContent(any())
+                getCollectionMetaContent(any()),
             ).thenReturn(
                 Single.just(
                     Content(
@@ -121,35 +121,36 @@ class ResetChunksTest {
                         format = "WAV",
                         type = ContentType.META,
                         id = autoincrement,
-                        draftNumber = 1
-                    )
-                )
+                        draftNumber = 1,
+                    ),
+                ),
             )
             whenever(
-                getTakeByContent(any())
+                getTakeByContent(any()),
             ).thenAnswer { invocation ->
                 val content = invocation.getArgument<Content>(0)!!
-                val take = if (content.format == "audio/wav") {
-                    val id = autoincrement
-                    Take(
-                        id = id,
-                        number = id,
-                        path = File("."),
-                        filename = ".",
-                        markers = listOf(),
-                        played = false,
-                        created = LocalDate.now(),
-                        deleted = null,
-                        checkingStatus = CheckingStatus.UNCHECKED,
-                        checksum = null
-                    )
-                } else {
-                    null
-                }
+                val take =
+                    if (content.format == "audio/wav") {
+                        val id = autoincrement
+                        Take(
+                            id = id,
+                            number = id,
+                            path = File("."),
+                            filename = ".",
+                            markers = listOf(),
+                            played = false,
+                            created = LocalDate.now(),
+                            deleted = null,
+                            checkingStatus = CheckingStatus.UNCHECKED,
+                            checksum = null,
+                        )
+                    } else {
+                        null
+                    }
                 Single.just(listOfNotNull(take))
             }
             whenever(
-                getChunkCount(any())
+                getChunkCount(any()),
             ).thenAnswer { invocation ->
                 val collection = invocation.getArgument<Collection>(0)!!
                 when (collection.slug.count { it == '_' }) {
@@ -168,18 +169,19 @@ class ResetChunksTest {
                 val relay = BehaviorRelay.create<List<Content>>()
                 when (collection.slug.count { it == '_' }) {
                     1 -> {
-                        val content = Content(
-                            id = autoincrement,
-                            start = 1,
-                            end = 1,
-                            sort = 1,
-                            labelKey = ContentLabel.VERSE.value,
-                            type = ContentType.TEXT,
-                            format = format,
-                            text = "/v 1 but test everything; hold fast what is good.",
-                            selectedTake = null,
-                            draftNumber = 1
-                        )
+                        val content =
+                            Content(
+                                id = autoincrement,
+                                start = 1,
+                                end = 1,
+                                sort = 1,
+                                labelKey = ContentLabel.VERSE.value,
+                                type = ContentType.TEXT,
+                                format = format,
+                                text = "/v 1 but test everything; hold fast what is good.",
+                                selectedTake = null,
+                                draftNumber = 1,
+                            )
                         relay.accept(listOf(content))
                     }
                     else -> {}
@@ -230,36 +232,43 @@ class ResetChunksTest {
 
     @Test
     fun takesMarkedForDeletion() {
-        val takes = chapter.chunks.take(1).blockingFirst().map { chunk ->
-            chunk.audio.getAllTakes().filter { it.deletedTimestamp.value?.value == null }
-        }
+        val takes =
+            chapter.chunks.take(1).blockingFirst().map { chunk ->
+                chunk.audio.getAllTakes().filter { it.deletedTimestamp.value?.value == null }
+            }
         Assert.assertEquals(1, takes.size)
 
         ResetChunks().resetChapter(projectFilesAccessor, chapter).blockingAwait()
 
-        val deletedTakes = chapter.chunks.take(1).blockingFirst().map { chunk ->
-            chunk.audio.getAllTakes().filter { it.deletedTimestamp.value?.value != null }
-        }
+        val deletedTakes =
+            chapter.chunks.take(1).blockingFirst().map { chunk ->
+                chunk.audio.getAllTakes().filter { it.deletedTimestamp.value?.value != null }
+            }
         Assert.assertEquals(1, deletedTakes.size)
     }
 
     private fun createRcWithAudio(): ResourceContainer {
-        val fileName = templateAudioFileName(
-            rcSource.language.slug, rcSource.identifier, collSource.slug, "{chapter}"
-        )
+        val fileName =
+            templateAudioFileName(
+                rcSource.language.slug,
+                rcSource.identifier,
+                collSource.slug,
+                "{chapter}",
+            )
         val sourceFile = createWavFile(tempDir.root, "${fileName.replace("{chapter}", "1")}.wav", "123456".toByteArray())
         val sourceCueFile = File(tempDir.root, "${fileName.replace("{chapter}", "1")}.cue").apply { createNewFile() }
 
         val audio = OratureAudioFile(sourceFile)
         audio.clearCues()
         audio.update()
-        val sourceCues = listOf(
-            AudioCue(0, "1"),
-            AudioCue(10, "2"),
-            AudioCue(20, "3"),
-            AudioCue(30, "4"),
-            AudioCue(40, "5")
-        )
+        val sourceCues =
+            listOf(
+                AudioCue(0, "1"),
+                AudioCue(10, "2"),
+                AudioCue(20, "3"),
+                AudioCue(30, "4"),
+                AudioCue(40, "5"),
+            )
         audio.importCues(sourceCues)
         audio.update()
 

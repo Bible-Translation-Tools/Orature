@@ -25,5 +25,5 @@ data class ParsedAudioPluginData(
     var canRecord: Boolean,
     var canMark: Boolean,
     var executable: ParsedExecutable,
-    var args: List<String>
+    var args: List<String>,
 )

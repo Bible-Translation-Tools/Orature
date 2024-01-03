@@ -29,7 +29,6 @@ import javafx.scene.paint.*
 import tornadofx.*
 
 class StatusIndicatorSkin(control: StatusIndicator) : SkinBase<StatusIndicator>(control) {
-
     private var bar: StackPane
     private var track: StackPane
     private var barWidth: Double = 0.0
@@ -103,91 +102,107 @@ class StatusIndicatorSkin(control: StatusIndicator) : SkinBase<StatusIndicator>(
         trackBorderWidth.bind(control.trackBorderWidthProperty)
     }
 
-    fun updateBarFill(primaryFill: Color, accentFill: Color) {
+    fun updateBarFill(
+        primaryFill: Color,
+        accentFill: Color,
+    ) {
         val stops = listOf(Stop(0.0, primaryFill), Stop(1.0, accentFill))
-        bar.background = Background(
-            BackgroundFill(
-                LinearGradient(
-                    0.0,
-                    0.0,
-                    0.05,
-                    0.7,
-                    true,
-                    CycleMethod.REPEAT,
-                    stops
+        bar.background =
+            Background(
+                BackgroundFill(
+                    LinearGradient(
+                        0.0,
+                        0.0,
+                        0.05,
+                        0.7,
+                        true,
+                        CycleMethod.REPEAT,
+                        stops,
+                    ),
+                    CornerRadii(0.0),
+                    Insets(0.0),
                 ),
-                CornerRadii(0.0),
-                Insets(0.0)
             )
-        )
         skinnable.requestLayout()
     }
 
     @Suppress("UNUSED_PARAMETER")
-    fun updateStatusIndicator(width: Double, height: Double) {
+    fun updateStatusIndicator(
+        width: Double,
+        height: Double,
+    ) {
         val stops = listOf(Stop(0.0, skinPrimaryFill.value), Stop(1.0, skinAccentFill.value))
 
         children.remove(bar)
         children.remove(track)
 
         bar = StackPane()
-        bar.border = Border(
-            BorderStroke(
-                barBorderColor.value,
-                barBorderStyle.value,
-                CornerRadii(barBorderRadius.value),
-                BorderWidths(barBorderWidth.value)
+        bar.border =
+            Border(
+                BorderStroke(
+                    barBorderColor.value,
+                    barBorderStyle.value,
+                    CornerRadii(barBorderRadius.value),
+                    BorderWidths(barBorderWidth.value),
+                ),
             )
-        )
 
         val textLabel = Label("${((localProgressProperty.value * 100).toInt())}%")
         textLabel.textFill = textFill.value
         if (skinShowText.value) bar.add(textLabel)
 
         track = StackPane()
-        track.border = Border(
-            BorderStroke(
-                trackBorderColor.value,
-                trackBorderStyle.value,
-                CornerRadii(trackBorderRadius.value),
-                BorderWidths(trackBorderWidth.value)
+        track.border =
+            Border(
+                BorderStroke(
+                    trackBorderColor.value,
+                    trackBorderStyle.value,
+                    CornerRadii(trackBorderRadius.value),
+                    BorderWidths(trackBorderWidth.value),
+                ),
             )
-        )
 
         if (localProgressProperty.value <= 1.0000001) {
             barWidth =
                 ((localProgressProperty.value * width) - snappedLeftInset() - snappedRightInset()).toInt().toDouble()
         }
 
-        track.background = Background(
-            BackgroundFill(
-                skinTrackColor.value,
-                CornerRadii(indicatorRadius.value),
-                Insets(1.0)
-            )
-        )
-        bar.background = Background(
-            BackgroundFill(
-                LinearGradient(
-                    0.0,
-                    0.0,
-                    0.1,
-                    0.5,
-                    true,
-                    CycleMethod.REFLECT,
-                    stops
+        track.background =
+            Background(
+                BackgroundFill(
+                    skinTrackColor.value,
+                    CornerRadii(indicatorRadius.value),
+                    Insets(1.0),
                 ),
-                CornerRadii(indicatorRadius.value),
-                Insets(1.0)
             )
-        )
+        bar.background =
+            Background(
+                BackgroundFill(
+                    LinearGradient(
+                        0.0,
+                        0.0,
+                        0.1,
+                        0.5,
+                        true,
+                        CycleMethod.REFLECT,
+                        stops,
+                    ),
+                    CornerRadii(indicatorRadius.value),
+                    Insets(1.0),
+                ),
+            )
 
         bar.styleClass.setAll("indicator-bar")
         track.styleClass.setAll("indicator-track")
         children.setAll(track, bar)
     }
 
-    override fun layoutChildren(contentX: Double, contentY: Double, contentWidth: Double, contentHeight: Double) {
+    override fun layoutChildren(
+        contentX: Double,
+        contentY: Double,
+        contentWidth: Double,
+        contentHeight: Double,
+    ) {
         if (invalidBar) {
             updateStatusIndicator(contentWidth, contentHeight)
         }
@@ -203,7 +218,7 @@ class StatusIndicatorSkin(control: StatusIndicator) : SkinBase<StatusIndicator>(
                 barHeight.value,
                 -1.0,
                 HPos.CENTER,
-                VPos.CENTER
+                VPos.CENTER,
             )
 
             track.resizeRelocate(contentX, trackShift, contentWidth, trackHeight.value)
@@ -215,7 +230,7 @@ class StatusIndicatorSkin(control: StatusIndicator) : SkinBase<StatusIndicator>(
                 trackHeight.value,
                 -1.0,
                 HPos.CENTER,
-                VPos.TOP
+                VPos.TOP,
             )
         } else {
             bar.resizeRelocate(contentX, contentY, contentWidth, trackHeight.value)
@@ -227,7 +242,7 @@ class StatusIndicatorSkin(control: StatusIndicator) : SkinBase<StatusIndicator>(
                 trackHeight.value,
                 -1.0,
                 HPos.CENTER,
-                VPos.CENTER
+                VPos.CENTER,
             )
 
             track.resizeRelocate(contentX, contentY + barHeight.value / 3.0, contentWidth, trackHeight.value)
@@ -239,7 +254,7 @@ class StatusIndicatorSkin(control: StatusIndicator) : SkinBase<StatusIndicator>(
                 trackHeight.value,
                 -1.0,
                 HPos.CENTER,
-                VPos.TOP
+                VPos.TOP,
             )
         }
 
@@ -252,7 +267,7 @@ class StatusIndicatorSkin(control: StatusIndicator) : SkinBase<StatusIndicator>(
         topInset: Double,
         rightInset: Double,
         bottomInset: Double,
-        leftInset: Double
+        leftInset: Double,
     ): Double {
         return topInset + bottomInset + 10
     }
@@ -262,7 +277,7 @@ class StatusIndicatorSkin(control: StatusIndicator) : SkinBase<StatusIndicator>(
         topInset: Double,
         rightInset: Double,
         bottomInset: Double,
-        leftInset: Double
+        leftInset: Double,
     ): Double {
         return rightInset + leftInset + Int.MAX_VALUE
     }
@@ -272,7 +287,7 @@ class StatusIndicatorSkin(control: StatusIndicator) : SkinBase<StatusIndicator>(
         topInset: Double,
         rightInset: Double,
         bottomInset: Double,
-        leftInset: Double
+        leftInset: Double,
     ): Double {
         return 7.5 + topInset + bottomInset
     }
@@ -282,7 +297,7 @@ class StatusIndicatorSkin(control: StatusIndicator) : SkinBase<StatusIndicator>(
         topInset: Double,
         rightInset: Double,
         bottomInset: Double,
-        leftInset: Double
+        leftInset: Double,
     ): Double {
         return 7.5 + rightInset + leftInset
     }
@@ -292,7 +307,7 @@ class StatusIndicatorSkin(control: StatusIndicator) : SkinBase<StatusIndicator>(
         topInset: Double,
         rightInset: Double,
         bottomInset: Double,
-        leftInset: Double
+        leftInset: Double,
     ): Double {
         return computePrefHeight(width, topInset, rightInset, bottomInset, leftInset)
     }
@@ -302,7 +317,7 @@ class StatusIndicatorSkin(control: StatusIndicator) : SkinBase<StatusIndicator>(
         topInset: Double,
         rightInset: Double,
         bottomInset: Double,
-        leftInset: Double
+        leftInset: Double,
     ): Double {
         return computePrefWidth(height, topInset, rightInset, bottomInset, leftInset)
     }

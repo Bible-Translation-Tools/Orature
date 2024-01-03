@@ -26,15 +26,14 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.Inserti
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ResourceMetadataEntity
 
 class ResourceMetadataDao(
-    private val instanceDsl: DSLContext
+    private val instanceDsl: DSLContext,
 ) {
-
     fun exists(
         languageId: Int,
         identifier: String,
         version: String,
         creator: String,
-        dsl: DSLContext = instanceDsl
+        dsl: DSLContext = instanceDsl,
     ): Boolean {
         return dsl.selectCount()
             .from(DUBLIN_CORE_ENTITY)
@@ -42,7 +41,7 @@ class ResourceMetadataDao(
                 DUBLIN_CORE_ENTITY.LANGUAGE_FK.eq(languageId)
                     .and(DUBLIN_CORE_ENTITY.IDENTIFIER.eq(identifier))
                     .and(DUBLIN_CORE_ENTITY.VERSION.eq(version))
-                    .and(DUBLIN_CORE_ENTITY.CREATOR.eq(creator))
+                    .and(DUBLIN_CORE_ENTITY.CREATOR.eq(creator)),
             ).fetchOne {
                 it.value1() > 0
             }!!
@@ -53,7 +52,7 @@ class ResourceMetadataDao(
         identifier: String,
         version: String,
         creator: String,
-        dsl: DSLContext = instanceDsl
+        dsl: DSLContext = instanceDsl,
     ): ResourceMetadataEntity? {
         return dsl.select()
             .from(DUBLIN_CORE_ENTITY)
@@ -61,21 +60,25 @@ class ResourceMetadataDao(
                 DUBLIN_CORE_ENTITY.LANGUAGE_FK.eq(languageId)
                     .and(DUBLIN_CORE_ENTITY.IDENTIFIER.eq(identifier))
                     .and(DUBLIN_CORE_ENTITY.VERSION.eq(version))
-                    .and(DUBLIN_CORE_ENTITY.CREATOR.eq(creator))
+                    .and(DUBLIN_CORE_ENTITY.CREATOR.eq(creator)),
             ).fetchOne {
                 RecordMappers.mapToResourceMetadataEntity(it)
             }
     }
 
-    fun fetchLinks(entityId: Int, dsl: DSLContext = instanceDsl): List<ResourceMetadataEntity> {
-        val linkIds = dsl
-            .select()
-            .from(RC_LINK_ENTITY)
-            .where(RC_LINK_ENTITY.RC1_FK.eq(entityId).or(RC_LINK_ENTITY.RC2_FK.eq(entityId)))
-            .fetch {
-                val pair = Pair(it.getValue(RC_LINK_ENTITY.RC1_FK), it.getValue(RC_LINK_ENTITY.RC2_FK))
-                if (pair.first == entityId) pair.second else pair.first
-            }
+    fun fetchLinks(
+        entityId: Int,
+        dsl: DSLContext = instanceDsl,
+    ): List<ResourceMetadataEntity> {
+        val linkIds =
+            dsl
+                .select()
+                .from(RC_LINK_ENTITY)
+                .where(RC_LINK_ENTITY.RC1_FK.eq(entityId).or(RC_LINK_ENTITY.RC2_FK.eq(entityId)))
+                .fetch {
+                    val pair = Pair(it.getValue(RC_LINK_ENTITY.RC1_FK), it.getValue(RC_LINK_ENTITY.RC2_FK))
+                    if (pair.first == entityId) pair.second else pair.first
+                }
         return dsl
             .select()
             .from(DUBLIN_CORE_ENTITY)
@@ -86,7 +89,11 @@ class ResourceMetadataDao(
     }
 
     @Synchronized
-    fun addLink(entity1Id: Int, entity2Id: Int, dsl: DSLContext = instanceDsl) {
+    fun addLink(
+        entity1Id: Int,
+        entity2Id: Int,
+        dsl: DSLContext = instanceDsl,
+    ) {
         try {
             dsl
                 .insertInto(RC_LINK_ENTITY, RC_LINK_ENTITY.RC1_FK, RC_LINK_ENTITY.RC2_FK)
@@ -97,13 +104,17 @@ class ResourceMetadataDao(
         }
     }
 
-    fun removeLink(entity1Id: Int, entity2Id: Int, dsl: DSLContext = instanceDsl) {
+    fun removeLink(
+        entity1Id: Int,
+        entity2Id: Int,
+        dsl: DSLContext = instanceDsl,
+    ) {
         try {
             dsl
                 .deleteFrom(RC_LINK_ENTITY)
                 .where(
                     RC_LINK_ENTITY.RC1_FK.eq(kotlin.math.min(entity1Id, entity2Id))
-                        .and(RC_LINK_ENTITY.RC2_FK.eq(kotlin.math.max(entity1Id, entity2Id)))
+                        .and(RC_LINK_ENTITY.RC2_FK.eq(kotlin.math.max(entity1Id, entity2Id))),
                 )
                 .execute()
         } catch (e: DataAccessException) {
@@ -112,7 +123,10 @@ class ResourceMetadataDao(
     }
 
     @Synchronized
-    fun insert(entity: ResourceMetadataEntity, dsl: DSLContext = instanceDsl): Int {
+    fun insert(
+        entity: ResourceMetadataEntity,
+        dsl: DSLContext = instanceDsl,
+    ): Int {
         if (entity.id != 0) throw InsertionException("Entity ID is not 0")
 
         // Insert the resource metadata entity
@@ -134,7 +148,7 @@ class ResourceMetadataDao(
                 DUBLIN_CORE_ENTITY.VERSION,
                 DUBLIN_CORE_ENTITY.LICENSE,
                 DUBLIN_CORE_ENTITY.PATH,
-                DUBLIN_CORE_ENTITY.DERIVEDFROM_FK
+                DUBLIN_CORE_ENTITY.DERIVEDFROM_FK,
             )
             .values(
                 entity.conformsTo,
@@ -152,7 +166,7 @@ class ResourceMetadataDao(
                 entity.version,
                 entity.license,
                 entity.path,
-                entity.derivedFromFk
+                entity.derivedFromFk,
             )
             .execute()
 
@@ -165,7 +179,10 @@ class ResourceMetadataDao(
             }!!
     }
 
-    fun fetchById(id: Int, dsl: DSLContext = instanceDsl): ResourceMetadataEntity? {
+    fun fetchById(
+        id: Int,
+        dsl: DSLContext = instanceDsl,
+    ): ResourceMetadataEntity? {
         return dsl
             .select()
             .from(DUBLIN_CORE_ENTITY)
@@ -181,15 +198,16 @@ class ResourceMetadataDao(
         creator: String,
         derivedFromFk: Int?,
         relaxCreatorIfNoMatch: Boolean = true,
-        dsl: DSLContext = instanceDsl
+        dsl: DSLContext = instanceDsl,
     ): ResourceMetadataEntity? {
-        fun flv(_creator: String?) = fetchLatestVersion(
-            creator = _creator,
-            languageSlug = languageSlug,
-            identifier = identifier,
-            derivedFromFk = derivedFromFk,
-            dsl = dsl
-        )
+        fun flv(_creator: String?) =
+            fetchLatestVersion(
+                creator = _creator,
+                languageSlug = languageSlug,
+                identifier = identifier,
+                derivedFromFk = derivedFromFk,
+                dsl = dsl,
+            )
 
         return flv(creator)
             ?: if (relaxCreatorIfNoMatch) {
@@ -204,20 +222,20 @@ class ResourceMetadataDao(
         identifier: String,
         creator: String?,
         derivedFromFk: Int?,
-        dsl: DSLContext = instanceDsl
+        dsl: DSLContext = instanceDsl,
     ): ResourceMetadataEntity? {
         return dsl
             .select()
             .from(
                 DUBLIN_CORE_ENTITY.join(LANGUAGE_ENTITY)
-                    .on(DUBLIN_CORE_ENTITY.LANGUAGE_FK.eq(LANGUAGE_ENTITY.ID))
+                    .on(DUBLIN_CORE_ENTITY.LANGUAGE_FK.eq(LANGUAGE_ENTITY.ID)),
             )
             .where(LANGUAGE_ENTITY.SLUG.eq(languageSlug))
             .and(DUBLIN_CORE_ENTITY.IDENTIFIER.eq(identifier))
             .run { creator?.let { and(DUBLIN_CORE_ENTITY.CREATOR.eq(creator)) } ?: this }
             .and(
                 derivedFromFk?.let(DUBLIN_CORE_ENTITY.DERIVEDFROM_FK::eq)
-                    ?: DUBLIN_CORE_ENTITY.DERIVEDFROM_FK.isNull
+                    ?: DUBLIN_CORE_ENTITY.DERIVEDFROM_FK.isNull,
             )
             .orderBy(DUBLIN_CORE_ENTITY.VERSION.desc())
             .limit(1)
@@ -229,13 +247,13 @@ class ResourceMetadataDao(
     fun fetchLatestVersion(
         languageSlug: String,
         identifier: String,
-        dsl: DSLContext = instanceDsl
+        dsl: DSLContext = instanceDsl,
     ): ResourceMetadataEntity? {
         return dsl
             .select()
             .from(
                 DUBLIN_CORE_ENTITY.join(LANGUAGE_ENTITY)
-                    .on(DUBLIN_CORE_ENTITY.LANGUAGE_FK.eq(LANGUAGE_ENTITY.ID))
+                    .on(DUBLIN_CORE_ENTITY.LANGUAGE_FK.eq(LANGUAGE_ENTITY.ID)),
             )
             .where(LANGUAGE_ENTITY.SLUG.eq(languageSlug))
             .and(DUBLIN_CORE_ENTITY.IDENTIFIER.eq(identifier))
@@ -255,7 +273,10 @@ class ResourceMetadataDao(
             }
     }
 
-    fun update(entity: ResourceMetadataEntity, dsl: DSLContext = instanceDsl) {
+    fun update(
+        entity: ResourceMetadataEntity,
+        dsl: DSLContext = instanceDsl,
+    ) {
         dsl
             .update(DUBLIN_CORE_ENTITY)
             .set(DUBLIN_CORE_ENTITY.CONFORMSTO, entity.conformsTo)
@@ -278,7 +299,10 @@ class ResourceMetadataDao(
             .execute()
     }
 
-    fun delete(entity: ResourceMetadataEntity, dsl: DSLContext = instanceDsl) {
+    fun delete(
+        entity: ResourceMetadataEntity,
+        dsl: DSLContext = instanceDsl,
+    ) {
         dsl
             .deleteFrom(DUBLIN_CORE_ENTITY)
             .where(DUBLIN_CORE_ENTITY.ID.eq(entity.id))

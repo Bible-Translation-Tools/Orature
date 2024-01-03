@@ -5,7 +5,6 @@ import javafx.beans.value.ObservableValue
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.event.EventTarget
-import javafx.geometry.Pos
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
@@ -23,9 +22,8 @@ import java.text.MessageFormat
 class NewTranslationCard2(
     private val sourceLanguageProperty: ObservableValue<Language>,
     private val targetLanguageProperty: ObservableValue<Language>,
-    mode: ObservableValue<ProjectMode>
+    mode: ObservableValue<ProjectMode>,
 ) : VBox() {
-
     private var onCancelProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
@@ -39,7 +37,7 @@ class NewTranslationCard2(
                         it?.let {
                             MessageFormat.format(messages["newProjectWithMode"], messages[it.titleKey])
                         } ?: messages["newProject"]
-                    }
+                    },
                 )
                 addClass("h5", "translation-card__header__text")
             }
@@ -52,7 +50,7 @@ class NewTranslationCard2(
                     sourceLanguageProperty.stringBinding { source ->
                         togglePseudoClass("unset", source == null)
                         source?.name ?: "???"
-                    }
+                    },
                 )
                 graphic = FontIcon(Material.HEARING)
             }
@@ -69,7 +67,7 @@ class NewTranslationCard2(
                     targetLanguageProperty.stringBinding { target ->
                         togglePseudoClass("unset", target == null)
                         target?.name ?: "???"
-                    }
+                    },
                 )
                 graphic = FontIcon(MaterialDesign.MDI_VOICE)
             }
@@ -87,7 +85,6 @@ class NewTranslationCard2(
 }
 
 class TranslationCreationCard : HBox() {
-
     private var onCreateProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
@@ -120,10 +117,7 @@ fun EventTarget.newTranslationCard(
     sourceLanguage: ObservableValue<Language>,
     targetLanguage: ObservableValue<Language>,
     mode: ObservableValue<ProjectMode>,
-    op: NewTranslationCard2.() -> Unit = {}
+    op: NewTranslationCard2.() -> Unit = {},
 ) = NewTranslationCard2(sourceLanguage, targetLanguage, mode).attachTo(this, op)
 
-fun EventTarget.translationCreationCard(
-    op: TranslationCreationCard.() -> Unit = {}
-) = TranslationCreationCard().attachTo(this, op)
-
+fun EventTarget.translationCreationCard(op: TranslationCreationCard.() -> Unit = {}) = TranslationCreationCard().attachTo(this, op)

@@ -22,24 +22,24 @@ import org.wycliffeassociates.otter.jvm.workbookapp.updater.install4j.ui.viewmod
 import tornadofx.*
 
 class NoUpdatesAvailable : Fragment() {
-
     val vm: AppUpdaterViewModel by inject()
 
-    override val root = vbox {
+    override val root =
+        vbox {
 
-        fitToParentWidth()
+            fitToParentWidth()
 
-        visibleProperty().bind(vm.showNoUpdatesAvailable)
-        managedProperty().bind(visibleProperty())
+            visibleProperty().bind(vm.showNoUpdatesAvailable)
+            managedProperty().bind(visibleProperty())
 
-        styleClass.add("app-drawer__section")
+            styleClass.add("app-drawer__section")
 
-        label(messages["versionUpToDate"]) {
-            styleClass.add("app-drawer__subtitle")
+            label(messages["versionUpToDate"]) {
+                styleClass.add("app-drawer__subtitle")
+            }
+
+            label(messages["versionUpToDateLong"]) {
+                styleClass.add("app-drawer__text")
+            }
         }
-
-        label(messages["versionUpToDateLong"]) {
-            styleClass.add("app-drawer__text")
-        }
-    }
 }

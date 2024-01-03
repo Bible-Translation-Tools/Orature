@@ -30,7 +30,6 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class SourceFormatToggleSkin(private val toggle: SourceFormatToggle) : SkinBase<SourceFormatToggle>(toggle) {
-
     private val TOGGLE_SOURCE_ACTIVE = "source-format-toggle__mode--active"
     private val TOGGLE_SOURCE_ICON_ACTIVE = "source-format-toggle__icon--active"
 
@@ -62,7 +61,7 @@ class SourceFormatToggleSkin(private val toggle: SourceFormatToggle) : SkinBase<
                         SourceFormatToggle.SourceFormat.AUDIO -> SourceFormatToggle.SourceFormat.TEXT
                         SourceFormatToggle.SourceFormat.TEXT -> SourceFormatToggle.SourceFormat.AUDIO
                         else -> SourceFormatToggle.SourceFormat.AUDIO
-                    }
+                    },
                 )
             }
         }

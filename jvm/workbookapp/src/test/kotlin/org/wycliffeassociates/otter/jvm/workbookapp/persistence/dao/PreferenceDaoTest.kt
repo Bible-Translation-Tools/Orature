@@ -29,16 +29,19 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.Prefere
 import java.io.File
 
 class PreferenceDaoTest {
-    private val testDatabaseFile = File.createTempFile(
-        "test-preference-dao", ".sqlite"
-    ).also(File::deleteOnExit)
+    private val testDatabaseFile =
+        File.createTempFile(
+            "test-preference-dao",
+            ".sqlite",
+        ).also(File::deleteOnExit)
     private lateinit var database: AppDatabase
     private val dao by lazy { database.preferenceDao }
 
-    private val prefs = listOf(
-        PreferenceEntity("k1", "v1"),
-        PreferenceEntity("k2", "v2")
-    )
+    private val prefs =
+        listOf(
+            PreferenceEntity("k1", "v1"),
+            PreferenceEntity("k2", "v2"),
+        )
 
     @Before
     fun setup() {
@@ -68,19 +71,20 @@ class PreferenceDaoTest {
         Assert.assertEquals(
             "After inserting, the total number should increase by 1.",
             3,
-            count()
+            count(),
         )
         Assert.assertEquals(p, dao.fetchByKey(p.key))
 
         try {
             dao.insert(p)
             Assert.fail("An exception is expected to throw when inserting a duplicated preference")
-        } catch(e: DataAccessException) { }
+        } catch (e: DataAccessException) {
+        }
 
         Assert.assertEquals(
             "The total number of objects should not change after the insertion exception.",
             3,
-            count()
+            count(),
         )
     }
 
@@ -107,7 +111,7 @@ class PreferenceDaoTest {
         Assert.assertEquals(
             "The total number should increase by 1.",
             3,
-            count()
+            count(),
         )
 
         // update
@@ -120,7 +124,7 @@ class PreferenceDaoTest {
         Assert.assertEquals(
             "The total number should not change after updating.",
             3,
-            count()
+            count(),
         )
     }
 

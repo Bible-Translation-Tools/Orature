@@ -28,13 +28,11 @@ import java.lang.Exception
 import java.text.MessageFormat
 
 class SourceTextFragment : Fragment() {
-
     val highlightedChunkNumberProperty = SimpleIntegerProperty()
 
     override val root = initializeSourceContent()
 
     private fun initializeSourceContent(): SourceContent {
-
         var sourceText: String? = null
         var sourceContentTitle: String? = null
         var license: String? = null
@@ -51,11 +49,12 @@ class SourceTextFragment : Fragment() {
                 direction = parameters.named["direction"]
                 sourceDirection = parameters.named["source_direction"]
 
-                sourceContentTitle = getSourceContentTitle(
-                    parameters.named["book"],
-                    parameters.named["chapter_number"],
-                    parameters.named["unit_number"]
-                )
+                sourceContentTitle =
+                    getSourceContentTitle(
+                        parameters.named["book"],
+                        parameters.named["chapter_number"],
+                        parameters.named["unit_number"],
+                    )
                 sourceTextZoom = parameters.named["source_text_zoom"]
             }
         }
@@ -73,38 +72,42 @@ class SourceTextFragment : Fragment() {
                 when (direction) {
                     "rtl" -> NodeOrientation.RIGHT_TO_LEFT
                     else -> NodeOrientation.LEFT_TO_RIGHT
-                }
+                },
             )
             sourceOrientationProperty.set(
                 when (sourceDirection) {
                     "rtl" -> NodeOrientation.RIGHT_TO_LEFT
                     else -> NodeOrientation.LEFT_TO_RIGHT
-                }
+                },
             )
             zoomRateProperty.set(
                 try {
                     sourceTextZoom?.toInt() ?: 100
                 } catch (e: Exception) {
                     100
-                }
+                },
             )
         }
     }
 
-    private fun getSourceContentTitle(book: String?, chapter: String?, chunk: String?): String? {
+    private fun getSourceContentTitle(
+        book: String?,
+        chapter: String?,
+        chunk: String?,
+    ): String? {
         return if (book != null && chapter != null) {
             if (chunk != null) {
                 MessageFormat.format(
                     messages["bookChapterChunkTitle"],
                     book,
                     chapter,
-                    chunk
+                    chunk,
                 )
             } else {
                 MessageFormat.format(
                     messages["bookChapterTitle"],
                     book,
-                    chapter
+                    chapter,
                 )
             }
         } else {

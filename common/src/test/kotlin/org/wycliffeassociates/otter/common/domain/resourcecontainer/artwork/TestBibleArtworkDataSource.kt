@@ -25,8 +25,8 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
 import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -36,7 +36,6 @@ import kotlin.io.path.createTempDirectory
 import kotlin.jvm.Throws
 
 class TestBibleArtworkDataSource {
-
     private val testRCName = """bible_images_rc"""
     private lateinit var tempDir: File
     private val directoryProviderMock = mock(IDirectoryProvider::class.java)
@@ -57,7 +56,7 @@ class TestBibleArtworkDataSource {
             .thenReturn(tempDir)
         `when`(directoryProviderMock.cacheDirectory)
             .thenReturn(
-                tempDir.resolve("cache").apply { mkdirs() }
+                tempDir.resolve("cache").apply { mkdirs() },
             )
     }
 
@@ -73,7 +72,7 @@ class TestBibleArtworkDataSource {
 
         assertNotNull(
             "Could not get artwork image for $project",
-            image
+            image,
         )
     }
 
@@ -86,11 +85,11 @@ class TestBibleArtworkDataSource {
 
         assertNotNull(
             "Could not get artwork image ($ratioString) for $project",
-            image
+            image,
         )
         assertTrue(
             "Could not get image with ratio $ratioString for $project",
-            image!!.file.nameWithoutExtension.endsWith(ratioString)
+            image!!.file.nameWithoutExtension.endsWith(ratioString),
         )
     }
 
@@ -107,15 +106,15 @@ class TestBibleArtworkDataSource {
 
         assertNull(
             "Project '$genSlug' should not have image in data source",
-            notFoundImage
+            notFoundImage,
         )
         assertNull(
             "Project '$nonBibleProject' should not have image in data source",
-            nonBibleNotFoundImage
+            nonBibleNotFoundImage,
         )
         assertNull(
             "Project '$remoteContentProject' should not have image in data source",
-            remoteImageNotFound
+            remoteImageNotFound,
         )
     }
 
@@ -128,11 +127,11 @@ class TestBibleArtworkDataSource {
 
         assertNotNull(
             "Could not get default image ($ratioString) for $project",
-            image
+            image,
         )
         assertFalse(
             "Project $project should not have image with ratio $ratioString in data source",
-            image!!.file.nameWithoutExtension.endsWith(ratioString)
+            image!!.file.nameWithoutExtension.endsWith(ratioString),
         )
     }
 

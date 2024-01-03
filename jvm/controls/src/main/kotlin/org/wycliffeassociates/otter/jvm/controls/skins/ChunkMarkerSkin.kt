@@ -27,7 +27,6 @@ import org.wycliffeassociates.otter.jvm.controls.marker.ChunkMarker
 import tornadofx.*
 
 class ChunkMarkerSkin(val control: ChunkMarker) : SkinBase<ChunkMarker>(control) {
-
     val dragIcon = FontIcon("gmi-drag-handle")
     val placedBookmarkIcon = FontIcon("mdi-bookmark")
     val addBookmarkIcon = FontIcon("mdi-bookmark-plus-outline")
@@ -85,10 +84,10 @@ class ChunkMarkerSkin(val control: ChunkMarker) : SkinBase<ChunkMarker>(control)
                         text {
                             styleClass.add("chunk-marker__text")
                             textProperty().bind(control.markerNumberProperty)
-                        }
+                        },
                     )
                 }
-            }
+            },
         )
     }
 }

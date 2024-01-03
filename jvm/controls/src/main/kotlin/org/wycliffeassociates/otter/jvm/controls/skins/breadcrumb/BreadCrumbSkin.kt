@@ -45,9 +45,10 @@ class BreadCrumbSkin(private val button: BreadCrumb) : SkinBase<BreadCrumb>(butt
 
                 label {
                     addClass("breadcrumb__separator")
-                    graphic = FontIcon(MaterialDesign.MDI_MENU_RIGHT).apply {
-                        scaleXProperty().bind(button.orientationScaleProperty)
-                    }
+                    graphic =
+                        FontIcon(MaterialDesign.MDI_MENU_RIGHT).apply {
+                            scaleXProperty().bind(button.orientationScaleProperty)
+                        }
                     hiddenWhen(button.isActiveProperty)
                     managedWhen(visibleProperty())
                 }
@@ -57,7 +58,7 @@ class BreadCrumbSkin(private val button: BreadCrumb) : SkinBase<BreadCrumb>(butt
 
                     graphic = FontIcon(MaterialDesign.MDI_HELP_CIRCLE)
                     visibleWhen(
-                        Bindings.and(button.isActiveProperty, button.tooltipTextProperty.isNotEmpty)
+                        Bindings.and(button.isActiveProperty, button.tooltipTextProperty.isNotEmpty),
                     )
                     managedWhen(visibleProperty())
 
@@ -66,7 +67,7 @@ class BreadCrumbSkin(private val button: BreadCrumb) : SkinBase<BreadCrumb>(butt
                         prefWidth = 256.0
                     }
                 }
-            }
+            },
         )
     }
 

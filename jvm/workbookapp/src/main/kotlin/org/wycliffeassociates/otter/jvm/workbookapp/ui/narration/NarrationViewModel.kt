@@ -115,12 +115,13 @@ class NarrationViewModel : ViewModel() {
     val audioPositionProperty = SimpleIntegerProperty()
     val totalAudioSizeProperty = SimpleIntegerProperty()
 
-    //FIXME: Refactor this if and when Chunk entries are officially added for Titles in the Workbook
+    // FIXME: Refactor this if and when Chunk entries are officially added for Titles in the Workbook
     var numberOfTitlesProperty = SimpleIntegerProperty(0)
-    val potentiallyFinishedProperty = chunkTotalProperty
-        .eq(recordedVerses.sizeProperty.minus(numberOfTitlesProperty))
-        .and(isRecordingProperty.not())
-        .and(isRecordingAgainProperty.not())
+    val potentiallyFinishedProperty =
+        chunkTotalProperty
+            .eq(recordedVerses.sizeProperty.minus(numberOfTitlesProperty))
+            .and(isRecordingProperty.not())
+            .and(isRecordingAgainProperty.not())
     val potentiallyFinished by potentiallyFinishedProperty
 
     val pluginContextProperty = SimpleObjectProperty(PluginType.EDITOR)
@@ -143,42 +144,48 @@ class NarrationViewModel : ViewModel() {
 
         narratableList.bind(chunksList) { chunk ->
 
-            //FIXME: Refactor this if and when Chunk entries are officially added for Titles in the Workbook
-            val marker = when (chunk.sort) {
-                BOOK_TITLE_SORT -> recordedVerses.firstOrNull { it is BookMarker }
-                CHAPTER_TITLE_SORT -> recordedVerses.firstOrNull { it is ChapterMarker }
-                else -> recordedVerses.firstOrNull {
-                    it.label == chunk.title && it is VerseMarker
+            // FIXME: Refactor this if and when Chunk entries are officially added for Titles in the Workbook
+            val marker =
+                when (chunk.sort) {
+                    BOOK_TITLE_SORT -> recordedVerses.firstOrNull { it is BookMarker }
+                    CHAPTER_TITLE_SORT -> recordedVerses.firstOrNull { it is ChapterMarker }
+                    else ->
+                        recordedVerses.firstOrNull {
+                            it.label == chunk.title && it is VerseMarker
+                        }
                 }
-            }
-            val hasRecording = when (chunk.sort) {
-                BOOK_TITLE_SORT -> recordedVerses.any { it is BookMarker }
-                CHAPTER_TITLE_SORT -> recordedVerses.any { it is ChapterMarker }
-                else -> recordedVerses.any {
-                    it.label == chunk.title && it is VerseMarker
+            val hasRecording =
+                when (chunk.sort) {
+                    BOOK_TITLE_SORT -> recordedVerses.any { it is BookMarker }
+                    CHAPTER_TITLE_SORT -> recordedVerses.any { it is ChapterMarker }
+                    else ->
+                        recordedVerses.any {
+                            it.label == chunk.title && it is VerseMarker
+                        }
                 }
-            }
 
             NarrationTextItemData(
                 chunk,
                 marker,
                 hasRecording,
-                chunk.sort - 1 <= recordedVerses.size
+                chunk.sort - 1 <= recordedVerses.size,
             )
         }
 
         recordedVerses.onChange {
             narratableList.forEachIndexed { idx, chunk ->
 
-                //FIXME: Refactor this if and when Chunk entries are officially added for Titles in the Workbook
-                val hasRecording = when (chunk.chunk.sort) {
-                    BOOK_TITLE_SORT -> recordedVerses.any { it is BookMarker }
-                    CHAPTER_TITLE_SORT -> recordedVerses.any { it is ChapterMarker }
-                    else -> recordedVerses.any {
-                        val matchingChunk = chunk.chunk.title == it.label && it is VerseMarker
-                        matchingChunk
+                // FIXME: Refactor this if and when Chunk entries are officially added for Titles in the Workbook
+                val hasRecording =
+                    when (chunk.chunk.sort) {
+                        BOOK_TITLE_SORT -> recordedVerses.any { it is BookMarker }
+                        CHAPTER_TITLE_SORT -> recordedVerses.any { it is ChapterMarker }
+                        else ->
+                            recordedVerses.any {
+                                val matchingChunk = chunk.chunk.title == it.label && it is VerseMarker
+                                matchingChunk
+                            }
                     }
-                }
                 // how much to pad the sort value due to injecting book and chapter titles
                 // the first chapter will be the only chapter with a book title
                 val sortPadding = if (workbookDataStore.chapter.sort == 1) 2 else 1
@@ -197,9 +204,10 @@ class NarrationViewModel : ViewModel() {
             .subscribe(
                 { chapter ->
                     loadChapter(chapter)
-                }, { e ->
+                },
+                { e ->
                     logger.error("Error loading chapter list", e)
-                }
+                },
             )
             .let { disposables.add(it) }
     }
@@ -221,7 +229,8 @@ class NarrationViewModel : ViewModel() {
 
                     AudioPlayerEvent.COMPLETE,
                     AudioPlayerEvent.PAUSE,
-                    AudioPlayerEvent.STOP -> isPlayingProperty.set(false)
+                    AudioPlayerEvent.STOP,
+                    -> isPlayingProperty.set(false)
 
                     else -> {}
                 }
@@ -232,16 +241,17 @@ class NarrationViewModel : ViewModel() {
         updateRecordingState()
         rendererAudioReader = narration.audioReader
         rendererAudioReader.open()
-        renderer = NarrationWaveformRenderer(
-            AudioScene(
-                rendererAudioReader,
-                narration.getRecorderAudioStream(),
-                isRecordingProperty.toObservable(),
-                Screen.getMainScreen().width - 25 - 88,
-                10,
-                DEFAULT_SAMPLE_RATE
+        renderer =
+            NarrationWaveformRenderer(
+                AudioScene(
+                    rendererAudioReader,
+                    narration.getRecorderAudioStream(),
+                    isRecordingProperty.toObservable(),
+                    Screen.getMainScreen().width - 25 - 88,
+                    10,
+                    DEFAULT_SAMPLE_RATE,
+                ),
             )
-        )
         totalAudioSizeProperty.set(rendererAudioReader.totalFrames)
         teleprompterStateMachine = TeleprompterStateMachine(narration.totalVerses)
         teleprompterStateMachine.initialize(narration.versesWithRecordings())
@@ -267,7 +277,6 @@ class NarrationViewModel : ViewModel() {
                 activeChapter
             }
     }
-
 
     /**
      * Resets the properties and state of the ViewModel to prevent dirty state when moving to other chapters or
@@ -308,12 +317,13 @@ class NarrationViewModel : ViewModel() {
                     {
                         chapterTakeProperty.set(it)
                         logger.info("Created a chapter take for ${chapterTitleProperty.value}")
-                    }, { e ->
+                    },
+                    { e ->
                         logger.error(
                             "Error in creating a chapter take for ${chapterTitleProperty.value}",
-                            e
+                            e,
                         )
-                    }
+                    },
                 ).let { disposables.add(it) }
         }
     }
@@ -352,8 +362,8 @@ class NarrationViewModel : ViewModel() {
             MessageFormat.format(
                 messages["chapterTitle"],
                 messages["chapter"],
-                chapter.title
-            )
+                chapter.title,
+            ),
         )
 
         chapter
@@ -393,7 +403,7 @@ class NarrationViewModel : ViewModel() {
             .subscribe(
                 { chunksList.setAll(it) },
                 {},
-                { resetTeleprompter() }
+                { resetTeleprompter() },
             )
     }
 
@@ -402,7 +412,10 @@ class NarrationViewModel : ViewModel() {
      *
      * Inserts a Chunk for the Book and Chapter titles since the database and workbook do not have this data
      */
-    private fun insertTitles(chapter: Chapter, chunks: List<Chunk>): List<Chunk> {
+    private fun insertTitles(
+        chapter: Chapter,
+        chunks: List<Chunk>,
+    ): List<Chunk> {
         val chunksWithTitles = chunks.toMutableList()
         val chapterTitle = chapterTitleProperty.value
         var numberOfTitles = 1
@@ -418,8 +431,8 @@ class NarrationViewModel : ViewModel() {
                 chunks.size,
                 false,
                 1,
-                ContentType.TITLE
-            )
+                ContentType.TITLE,
+            ),
         )
         val addBookTitle = chapter.sort == 1
         if (addBookTitle) {
@@ -436,8 +449,8 @@ class NarrationViewModel : ViewModel() {
                     chunks.size,
                     false,
                     1,
-                    ContentType.TITLE
-                )
+                    ContentType.TITLE,
+                ),
             )
             numberOfTitles = 2
         }
@@ -488,7 +501,6 @@ class NarrationViewModel : ViewModel() {
             }
         }
     }
-
 
     fun snackBarMessage(message: String) {
         snackBarObservable.onNext(message)
@@ -587,7 +599,10 @@ class NarrationViewModel : ViewModel() {
         refreshTeleprompter()
     }
 
-    fun moveMarker(index: Int, delta: Int) {
+    fun moveMarker(
+        index: Int,
+        delta: Int,
+    ) {
         narration.onVerseMarkerMoved(index, delta)
     }
 
@@ -645,7 +660,6 @@ class NarrationViewModel : ViewModel() {
         refreshTeleprompter()
     }
 
-
     fun pauseRecordAgain(index: Int) {
         logger.info("Pausing record again for: ${narration.totalVerses[index].formattedLabel}")
 
@@ -692,7 +706,10 @@ class NarrationViewModel : ViewModel() {
         narration.closeChapterRepresentation()
     }
 
-    private fun processWithEditor(file: File, verseIndex: Int) {
+    private fun processWithEditor(
+        file: File,
+        verseIndex: Int,
+    ) {
         val pluginType = PluginType.EDITOR
         pluginContextProperty.set(pluginType)
 
@@ -761,7 +778,7 @@ class NarrationViewModel : ViewModel() {
                 },
                 { e ->
                     logger.error("Error in active verses subscription", e)
-                }
+                },
             )
             .let(disposables::add)
     }
@@ -769,7 +786,7 @@ class NarrationViewModel : ViewModel() {
     fun drawWaveform(
         context: GraphicsContext,
         canvas: Canvas,
-        markerNodes: ObservableList<VerseMarkerControl>
+        markerNodes: ObservableList<VerseMarkerControl>,
     ) {
         if (::renderer.isInitialized) {
             try {
@@ -785,13 +802,14 @@ class NarrationViewModel : ViewModel() {
                     reRecordLoc = recordedVerses[reRecordingIndex].location
                 }
 
-                val viewports = renderer.draw(
-                    context,
-                    canvas,
-                    position,
-                    reRecordLoc,
-                    nextVerseLoc
-                )
+                val viewports =
+                    renderer.draw(
+                        context,
+                        canvas,
+                        position,
+                        reRecordLoc,
+                        nextVerseLoc,
+                    )
                 adjustMarkers(markerNodes, viewports, canvas.width.toInt())
             } catch (e: Exception) {
                 logger.error("", e)
@@ -799,7 +817,10 @@ class NarrationViewModel : ViewModel() {
         }
     }
 
-    fun drawVolumebar(context: GraphicsContext, canvas: Canvas) {
+    fun drawVolumebar(
+        context: GraphicsContext,
+        canvas: Canvas,
+    ) {
         if (::renderer.isInitialized) {
             volumeBar.draw(context, canvas)
         }
@@ -808,7 +829,7 @@ class NarrationViewModel : ViewModel() {
     private fun adjustMarkers(
         markerNodes: ObservableList<VerseMarkerControl>,
         viewports: List<IntRange>,
-        width: Int
+        width: Int,
     ) {
         val checkpointRAVI = recordAgainVerseIndex
         val adjustedWidth = if (checkpointRAVI == null) width else width / viewports.size
@@ -829,11 +850,12 @@ class NarrationViewModel : ViewModel() {
 
                 if (verse.location in viewport) {
                     val viewportOffset = (width / viewports.size) * viewPortIndex
-                    val newPos = framesToPixels(
-                        verse.location - viewport.first,
-                        adjustedWidth,
-                        viewport.last - viewport.first
-                    ).toDouble() - (MARKER_AREA_WIDTH / 2) + viewportOffset
+                    val newPos =
+                        framesToPixels(
+                            verse.location - viewport.first,
+                            adjustedWidth,
+                            viewport.last - viewport.first,
+                        ).toDouble() - (MARKER_AREA_WIDTH / 2) + viewportOffset
                     runLater {
                         marker.visibleProperty().set(true)
                         if (marker.layoutX != newPos) {
@@ -875,57 +897,57 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun handleEvent(event: FXEvent) {
-        val list = when (event) {
-            is BeginRecordingEvent -> {
-                record(event.index)
-                teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD, event.index)
-            }
+        val list =
+            when (event) {
+                is BeginRecordingEvent -> {
+                    record(event.index)
+                    teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD, event.index)
+                }
 
-            is NextVerseEvent -> {
-                onNext(event.index)
-                teleprompterStateMachine.transition(TeleprompterStateTransition.NEXT, event.index)
-            }
+                is NextVerseEvent -> {
+                    onNext(event.index)
+                    teleprompterStateMachine.transition(TeleprompterStateTransition.NEXT, event.index)
+                }
 
-            is PauseRecordingEvent -> {
-                pauseRecording(event.index)
-                teleprompterStateMachine.transition(TeleprompterStateTransition.PAUSE_RECORDING, event.index)
-            }
+                is PauseRecordingEvent -> {
+                    pauseRecording(event.index)
+                    teleprompterStateMachine.transition(TeleprompterStateTransition.PAUSE_RECORDING, event.index)
+                }
 
+                is ResumeRecordingEvent -> {
+                    resumeRecording()
+                    teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD, event.index)
+                }
 
-            is ResumeRecordingEvent -> {
-                resumeRecording()
-                teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD, event.index)
-            }
+                is RecordVerseEvent -> {
+                    record(event.index)
+                    teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD, event.index)
+                }
 
-            is RecordVerseEvent -> {
-                record(event.index)
-                teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD, event.index)
-            }
+                is RecordAgainEvent -> {
+                    recordAgain(event.index)
+                    teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD_AGAIN, event.index)
+                }
 
-            is RecordAgainEvent -> {
-                recordAgain(event.index)
-                teleprompterStateMachine.transition(TeleprompterStateTransition.RECORD_AGAIN, event.index)
-            }
+                is PauseRecordAgainEvent -> {
+                    pauseRecordAgain(event.index)
+                    teleprompterStateMachine.transition(TeleprompterStateTransition.PAUSE_RECORD_AGAIN, event.index)
+                }
 
-            is PauseRecordAgainEvent -> {
-                pauseRecordAgain(event.index)
-                teleprompterStateMachine.transition(TeleprompterStateTransition.PAUSE_RECORD_AGAIN, event.index)
-            }
+                is ResumeRecordingAgainEvent -> {
+                    resumeRecordingAgain()
+                    teleprompterStateMachine.transition(TeleprompterStateTransition.RESUME_RECORD_AGAIN, event.index)
+                }
 
-            is ResumeRecordingAgainEvent -> {
-                resumeRecordingAgain()
-                teleprompterStateMachine.transition(TeleprompterStateTransition.RESUME_RECORD_AGAIN, event.index)
-            }
+                is SaveRecordingEvent -> {
+                    saveRecording(event.index)
+                    teleprompterStateMachine.transition(TeleprompterStateTransition.SAVE, event.index)
+                }
 
-            is SaveRecordingEvent -> {
-                saveRecording(event.index)
-                teleprompterStateMachine.transition(TeleprompterStateTransition.SAVE, event.index)
+                else -> {
+                    return
+                }
             }
-
-            else -> {
-                return
-            }
-        }
         val updated = narratableList.mapIndexed { idx, item -> item.apply { item.state = list[idx] } }
         narratableList.setAll(updated)
         refreshTeleprompter()

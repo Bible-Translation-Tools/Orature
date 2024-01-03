@@ -41,7 +41,6 @@ import javax.inject.Inject
 import javax.inject.Provider
 
 class TestProjectImport {
-
     @Inject
     lateinit var dbEnvProvider: Provider<DatabaseEnvironment>
 
@@ -51,80 +50,90 @@ class TestProjectImport {
 
     private val db = dbEnvProvider.get()
 
-    private val sourceMetadata = ResourceMetadata(
-        "rc0.2",
-        "Door43 World Missions Community",
-        "",
-        "",
-        "ulb",
-        LocalDate.now(),
-        Language("en", "", "", "", true, ""),
-        LocalDate.now(),
-        "",
-        "",
-        ContainerType.Book,
-        "",
-        "12",
-        "",
-        File(".")
-    )
+    private val sourceMetadata =
+        ResourceMetadata(
+            "rc0.2",
+            "Door43 World Missions Community",
+            "",
+            "",
+            "ulb",
+            LocalDate.now(),
+            Language("en", "", "", "", true, ""),
+            LocalDate.now(),
+            "",
+            "",
+            ContainerType.Book,
+            "",
+            "12",
+            "",
+            File("."),
+        )
 
-    private val ulbTargetMetadata = sourceMetadata.copy(
-        creator = "Orature",
-        language = Language("en-x-demo1", "", "", "", true, "Europe")
-    )
+    private val ulbTargetMetadata =
+        sourceMetadata.copy(
+            creator = "Orature",
+            language = Language("en-x-demo1", "", "", "", true, "Europe"),
+        )
 
-    private val tnTargetMetadata = sourceMetadata.copy(
-        creator = "Orature",
-        language = Language("en-x-demo1", "", "", "", true, "Europe"),
-        identifier = "tn",
-        version = sourceMetadata.version,
-        type = ContainerType.Help
-    )
+    private val tnTargetMetadata =
+        sourceMetadata.copy(
+            creator = "Orature",
+            language = Language("en-x-demo1", "", "", "", true, "Europe"),
+            identifier = "tn",
+            version = sourceMetadata.version,
+            type = ContainerType.Help,
+        )
 
-    private val project = Collection(
-        1,
-        "rev",
-        "rev",
-        "",
-        null
-    )
+    private val project =
+        Collection(
+            1,
+            "rev",
+            "rev",
+            "",
+            null,
+        )
 
-    private val ulbProjectDir = db.directoryProvider.getProjectDirectory(
-        sourceMetadata,
-        ulbTargetMetadata,
-        project
-    )
+    private val ulbProjectDir =
+        db.directoryProvider.getProjectDirectory(
+            sourceMetadata,
+            ulbTargetMetadata,
+            project,
+        )
 
-    private val ulbSourceDir = db.directoryProvider.getProjectSourceDirectory(
-        sourceMetadata,
-        ulbTargetMetadata,
-        project
-    )
+    private val ulbSourceDir =
+        db.directoryProvider.getProjectSourceDirectory(
+            sourceMetadata,
+            ulbTargetMetadata,
+            project,
+        )
 
-    private val ulbAudioDir = db.directoryProvider.getProjectAudioDirectory(
-        sourceMetadata,
-        ulbTargetMetadata,
-        project
-    )
+    private val ulbAudioDir =
+        db.directoryProvider.getProjectAudioDirectory(
+            sourceMetadata,
+            ulbTargetMetadata,
+            project,
+        )
 
-    private val tnProjectDir = db.directoryProvider.getProjectDirectory(
-        sourceMetadata,
-        tnTargetMetadata,
-        project
-    )
+    private val tnProjectDir =
+        db.directoryProvider.getProjectDirectory(
+            sourceMetadata,
+            tnTargetMetadata,
+            project,
+        )
 
-    private val tnSourceDir = db.directoryProvider.getProjectSourceDirectory(
-        sourceMetadata,
-        tnTargetMetadata,
-        project
-    )
+    private val tnSourceDir =
+        db.directoryProvider.getProjectSourceDirectory(
+            sourceMetadata,
+            tnTargetMetadata,
+            project,
+        )
 
-    private val tnAudioDir = db.directoryProvider.getProjectAudioDirectory(
-        sourceMetadata,
-        tnTargetMetadata,
-        project
-    )
+    private val tnAudioDir =
+        db.directoryProvider.getProjectAudioDirectory(
+            sourceMetadata,
+            tnTargetMetadata,
+            project,
+        )
 
     @Test
     fun ulb() {
@@ -135,13 +144,14 @@ class TestProjectImport {
         db.import("en-x-demo1-ulb-rev.zip")
             .assertRowCounts(
                 RowCount(
-                    contents = mapOf(
-                        META to 2378,
-                        TEXT to 31124
-                    ),
+                    contents =
+                        mapOf(
+                            META to 2378,
+                            TEXT to 31124,
+                        ),
                     collections = 2511,
-                    links = 0
-                )
+                    links = 0,
+                ),
             )
 
         Assert.assertEquals(true, ulbProjectDir.resolve("manifest.yaml").exists())
@@ -150,7 +160,7 @@ class TestProjectImport {
             true,
             ulbAudioDir.walkTopDown()
                 .filter { it.extension == "wav" }
-                .count() == 3
+                .count() == 3,
         )
     }
 
@@ -159,13 +169,14 @@ class TestProjectImport {
         db.import("en-x-demo1-ulb-rev.zip", unzip = true)
             .assertRowCounts(
                 RowCount(
-                    contents = mapOf(
-                        META to 2378,
-                        TEXT to 31124
-                    ),
+                    contents =
+                        mapOf(
+                            META to 2378,
+                            TEXT to 31124,
+                        ),
                     collections = 2511,
-                    links = 0
-                )
+                    links = 0,
+                ),
             )
 
         Assert.assertEquals(true, ulbProjectDir.resolve("manifest.yaml").exists())
@@ -174,7 +185,7 @@ class TestProjectImport {
             true,
             ulbAudioDir.walkTopDown()
                 .filter { it.extension == "wav" }
-                .count() == 3
+                .count() == 3,
         )
     }
 
@@ -193,9 +204,10 @@ class TestProjectImport {
         val projectManifest = ulbProjectDir.resolve("manifest.yaml")
         assertTrue(projectManifest.exists())
 
-        val projectContributors = ResourceContainer.load(ulbProjectDir).use {
-            it.manifest.dublinCore.contributor.toList()
-        }
+        val projectContributors =
+            ResourceContainer.load(ulbProjectDir).use {
+                it.manifest.dublinCore.contributor.toList()
+            }
 
         assertEquals(expectedContributors, projectContributors.size)
     }
@@ -203,31 +215,38 @@ class TestProjectImport {
     @Test
     fun importProjectWithCheckedChunks() {
         val projectToImport = createProjectWithCheckedChunks("en-x-demo1-ulb-rev.zip", CheckingStatus.PEER_EDIT)
-        val result = db.importer
-            .import(projectToImport)
-            .blockingGet()
+        val result =
+            db.importer
+                .import(projectToImport)
+                .blockingGet()
 
         Assert.assertEquals(ImportResult.SUCCESS, result)
-        val takes = db.db
-            .takeDao
-            .fetchAll()
+        val takes =
+            db.db
+                .takeDao
+                .fetchAll()
 
         Assert.assertTrue(takes.size >= 3)
 
-        val checkedTakes = takes
-            .map {
-                db.db.checkingStatusDao.fetchById(it.checkingFk)
-            }
-            .filter { it == CheckingStatus.PEER_EDIT }
-            .size
+        val checkedTakes =
+            takes
+                .map {
+                    db.db.checkingStatusDao.fetchById(it.checkingFk)
+                }
+                .filter { it == CheckingStatus.PEER_EDIT }
+                .size
 
         Assert.assertEquals(2, checkedTakes)
     }
 
-    private fun createProjectWithCheckedChunks(projectFileName: String, checking: CheckingStatus): File {
-        val file = File(
-            javaClass.classLoader.getResource("resource-containers/$projectFileName").path
-        )
+    private fun createProjectWithCheckedChunks(
+        projectFileName: String,
+        checking: CheckingStatus,
+    ): File {
+        val file =
+            File(
+                javaClass.classLoader.getResource("resource-containers/$projectFileName").path,
+            )
         return ResourceContainerBuilder(file)
             .addTake(1, ContentType.TEXT, 1, true, chapter = 1, start = 1, end = 1)
             .addTake(2, ContentType.TEXT, 1, true, chapter = 2, start = 1, end = 1, checking = TakeCheckingState(checking, "test"))

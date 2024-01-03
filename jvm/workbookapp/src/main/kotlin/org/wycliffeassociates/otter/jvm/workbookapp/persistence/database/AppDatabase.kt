@@ -33,7 +33,7 @@ import java.sql.Connection
 const val CREATION_SCRIPT = "sql/CreateAppDb.sql"
 
 class AppDatabase(
-    databaseFile: File
+    databaseFile: File,
 ) {
     val logger = LoggerFactory.getLogger(AppDatabase::class.java)
 
@@ -64,16 +64,18 @@ class AppDatabase(
 
     private fun setup() {
         // Setup the tables
-        val schemaFileStream = ClassLoader.getSystemResourceAsStream(CREATION_SCRIPT)
-            ?: throw IOException("Couldn't read database creation script $CREATION_SCRIPT")
+        val schemaFileStream =
+            ClassLoader.getSystemResourceAsStream(CREATION_SCRIPT)
+                ?: throw IOException("Couldn't read database creation script $CREATION_SCRIPT")
 
         // Make sure the database file has the tables we need
-        val sqlStatements = schemaFileStream
-            .bufferedReader()
-            .readText()
-            .split(";")
-            .filter { it.isNotBlank() }
-            .map { "$it;" }
+        val sqlStatements =
+            schemaFileStream
+                .bufferedReader()
+                .readText()
+                .split(";")
+                .filter { it.isNotBlank() }
+                .map { "$it;" }
 
         // Execute each SQL statement
         sqlStatements.forEach {
@@ -83,10 +85,10 @@ class AppDatabase(
         dsl.insertInto(
             InstalledEntity.INSTALLED_ENTITY,
             InstalledEntity.INSTALLED_ENTITY.NAME,
-            InstalledEntity.INSTALLED_ENTITY.VERSION
+            InstalledEntity.INSTALLED_ENTITY.VERSION,
         ).values(
             DATABASE_INSTALLABLE_NAME,
-            SCHEMA_VERSION
+            SCHEMA_VERSION,
         ).execute()
     }
 

@@ -30,7 +30,10 @@ import java.security.MessageDigest
  *  @param path the original file path.
  *  @param suffix the suffix to append to the file name excluding the extension.
  */
-fun filePathWithSuffix(path: String, suffix: String): String {
+fun filePathWithSuffix(
+    path: String,
+    suffix: String,
+): String {
     val file = File(path)
     return file
         .parentFile

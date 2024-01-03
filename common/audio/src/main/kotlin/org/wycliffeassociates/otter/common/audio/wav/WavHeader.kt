@@ -23,9 +23,7 @@ private const val PCM: Short = 1
 private const val DEFAULT_HEADER_SIZE = 44
 private const val BITS_IN_BYTE = 8
 
-
 class WavHeader {
-
     private var readHeadPosition = 0
     private var dataChunkStart = DEFAULT_HEADER_SIZE
 

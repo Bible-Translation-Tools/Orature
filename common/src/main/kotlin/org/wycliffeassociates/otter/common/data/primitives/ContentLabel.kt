@@ -22,20 +22,22 @@ package org.wycliffeassociates.otter.common.data.primitives
     """
         "Don't use this to figure out labels to use for UI, as text could be verse or chunk.
          Book elements already have a label field which should be used directly. This enum should be removed.
-"""
+""",
 )
 enum class ContentLabel(val value: String, val type: ContentType) {
     CHAPTER("chapter", ContentType.META),
     VERSE("verse", ContentType.TEXT),
     HELP_TITLE("title", ContentType.TITLE),
-    HELP_BODY("body", ContentType.BODY);
+    HELP_BODY("body", ContentType.BODY),
+    ;
 
     companion object {
-        fun of(contentType: ContentType) = when (contentType) {
-            ContentType.META -> CHAPTER
-            ContentType.TEXT -> VERSE
-            ContentType.TITLE -> HELP_TITLE
-            ContentType.BODY -> HELP_BODY
-        }
+        fun of(contentType: ContentType) =
+            when (contentType) {
+                ContentType.META -> CHAPTER
+                ContentType.TEXT -> VERSE
+                ContentType.TITLE -> HELP_TITLE
+                ContentType.BODY -> HELP_BODY
+            }
     }
 }

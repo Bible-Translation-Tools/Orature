@@ -27,7 +27,6 @@ import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.math.min
 
 class AudioWorkspaceView : View() {
     private val userIsDraggingProperty = SimpleBooleanProperty(false)
@@ -49,118 +48,125 @@ class AudioWorkspaceView : View() {
 
     val markerNodes = observableListOf<VerseMarkerControl>()
 
-    val runnable = Runnable {
-        if (finishedFrame.compareAndExchange(true, false)) {
-            try {
-                if (canvasInflatedProperty.value) {
-                    viewModel.drawWaveform(
-                        narrationWaveformLayer.getWaveformContext(),
-                        narrationWaveformLayer.getWaveformCanvas(),
-                        markerNodes
-                    )
-                    viewModel.drawVolumeBar(
-                        narrationWaveformLayer.getVolumeBarContext(),
-                        narrationWaveformLayer.getVolumeCanvas()
-                    )
+    val runnable =
+        Runnable {
+            if (finishedFrame.compareAndExchange(true, false)) {
+                try {
+                    if (canvasInflatedProperty.value) {
+                        viewModel.drawWaveform(
+                            narrationWaveformLayer.getWaveformContext(),
+                            narrationWaveformLayer.getWaveformCanvas(),
+                            markerNodes,
+                        )
+                        viewModel.drawVolumeBar(
+                            narrationWaveformLayer.getVolumeBarContext(),
+                            narrationWaveformLayer.getVolumeCanvas(),
+                        )
+                    }
+                } catch (e: Exception) {
+                    logger.error("Exception in render loop", e)
+                } finally {
+                    finishedFrame.set(true)
                 }
-            } catch (e: Exception) {
-                logger.error("Exception in render loop", e)
-            } finally {
-                finishedFrame.set(true)
-            }
-        }
-    }
-
-    val at = object : AnimationTimer() {
-        override fun handle(now: Long) {
-            executor.submit(runnable)
-        }
-    }
-
-    val scrollBar = ScrollBar().apply {
-        runLater {
-            customizeScrollbarSkin()
-        }
-
-        disableWhen {
-            viewModel.isRecordingProperty.or(viewModel.isPlayingProperty)
-        }
-
-        unitIncrement = SCROLL_INCREMENT_UNIT
-        blockIncrementProperty().bind(maxProperty().doubleBinding {
-            it?.let { maxValue ->
-                maxValue.toDouble() / 10
-            } ?: SCROLL_JUMP_UNIT
-        })
-
-        valueProperty().onChange { pos ->
-            if (pos.toInt() != viewModel.audioPositionProperty.value) {
-                viewModel.seekTo(pos.toInt())
             }
         }
 
-        viewModel.audioPositionProperty.onChange { pos ->
-            viewModel.scrollBarPositionProperty.set(pos.toDouble())
+    val at =
+        object : AnimationTimer() {
+            override fun handle(now: Long) {
+                executor.submit(runnable)
+            }
         }
 
-        valueProperty().bindBidirectional(viewModel.scrollBarPositionProperty)
-        maxProperty().bind(viewModel.totalAudioSizeProperty)
-    }
+    val scrollBar =
+        ScrollBar().apply {
+            runLater {
+                customizeScrollbarSkin()
+            }
+
+            disableWhen {
+                viewModel.isRecordingProperty.or(viewModel.isPlayingProperty)
+            }
+
+            unitIncrement = SCROLL_INCREMENT_UNIT
+            blockIncrementProperty().bind(
+                maxProperty().doubleBinding {
+                    it?.let { maxValue ->
+                        maxValue.toDouble() / 10
+                    } ?: SCROLL_JUMP_UNIT
+                },
+            )
+
+            valueProperty().onChange { pos ->
+                if (pos.toInt() != viewModel.audioPositionProperty.value) {
+                    viewModel.seekTo(pos.toInt())
+                }
+            }
+
+            viewModel.audioPositionProperty.onChange { pos ->
+                viewModel.scrollBarPositionProperty.set(pos.toDouble())
+            }
+
+            valueProperty().bindBidirectional(viewModel.scrollBarPositionProperty)
+            maxProperty().bind(viewModel.totalAudioSizeProperty)
+        }
 
     init {
         tryImportStylesheet("/css/verse-markers-layer.css")
     }
 
-    override val root = stackpane {
-        subscribe<AppCloseRequestEvent> {
-            at.stop()
-            jobQueue.clear()
-            executor.shutdownNow()
-        }
-
-        borderpane {
-            center = stackpane {
-                narration_waveform {
-                    narrationWaveformLayer = this
-
-                    canvasInflatedProperty.bind(
-                        widthProperty()
-                            .greaterThan(0)
-                            .and(heightProperty().greaterThan(0))
-                    )
-                }
-                verse_markers_layer {
-                    verseMarkersControls.bind(markerNodes) { it }
-
-                    var pos = 0
-
-                    setOnDragStarted {
-                        // caching current position on drag start
-                        // to add delta to it later on drag continue
-                        pos = viewModel.audioPositionProperty.value
-                    }
-
-                    setOnLayerScroll { delta ->
-                        // Keep position inside audio bounds
-                        val seekTo = Utils.clamp(0, pos + delta, viewModel.totalAudioSizeProperty.value)
-                        viewModel.seekTo(seekTo)
-                    }
-                }
+    override val root =
+        stackpane {
+            subscribe<AppCloseRequestEvent> {
+                at.stop()
+                jobQueue.clear()
+                executor.shutdownNow()
             }
-            bottom = scrollBar
-        }
-    }
 
+            borderpane {
+                center =
+                    stackpane {
+                        narration_waveform {
+                            narrationWaveformLayer = this
+
+                            canvasInflatedProperty.bind(
+                                widthProperty()
+                                    .greaterThan(0)
+                                    .and(heightProperty().greaterThan(0)),
+                            )
+                        }
+                        verse_markers_layer {
+                            verseMarkersControls.bind(markerNodes) { it }
+
+                            var pos = 0
+
+                            setOnDragStarted {
+                                // caching current position on drag start
+                                // to add delta to it later on drag continue
+                                pos = viewModel.audioPositionProperty.value
+                            }
+
+                            setOnLayerScroll { delta ->
+                                // Keep position inside audio bounds
+                                val seekTo = Utils.clamp(0, pos + delta, viewModel.totalAudioSizeProperty.value)
+                                viewModel.seekTo(seekTo)
+                            }
+                        }
+                    }
+                bottom = scrollBar
+            }
+        }
 
     override fun onDock() {
         super.onDock()
         viewModel.onDock()
         markerNodes.bind(viewModel.recordedVerses) { marker ->
             VerseMarkerControl().apply {
-                val markerLabel = when(marker) {
-                    is ChapterMarker -> "c${marker.label}"
-                    else -> marker.label
-                }
+                val markerLabel =
+                    when (marker) {
+                        is ChapterMarker -> "c${marker.label}"
+                        else -> marker.label
+                    }
 
                 verseProperty.set(marker)
                 verseIndexProperty.set(viewModel.recordedVerses.indexOf(marker))
@@ -193,11 +199,18 @@ class AudioWorkspaceViewModel : ViewModel() {
 
     val scrollBarPositionProperty = SimpleDoubleProperty()
 
-    fun drawWaveform(context: GraphicsContext, canvas: Canvas, markerNodes: ObservableList<VerseMarkerControl>) {
+    fun drawWaveform(
+        context: GraphicsContext,
+        canvas: Canvas,
+        markerNodes: ObservableList<VerseMarkerControl>,
+    ) {
         narrationViewModel.drawWaveform(context, canvas, markerNodes)
     }
 
-    fun drawVolumeBar(context: GraphicsContext, canvas: Canvas) {
+    fun drawVolumeBar(
+        context: GraphicsContext,
+        canvas: Canvas,
+    ) {
         narrationViewModel.drawVolumebar(context, canvas)
     }
 

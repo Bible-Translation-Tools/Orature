@@ -38,20 +38,26 @@ internal fun File.jarUri() = toURI().run { URI("jar:" + scheme, path, null) }
 internal fun Path.createParentDirectories() = parent?.let { Files.createDirectories(it) }
 
 /** Recursively copy a directory, possibly to another [java.nio.file.FileSystem], with per-file filter predicate. */
-internal fun Path.copyDirectoryTo(dest: Path, filter: (String) -> Boolean): Observable<String> {
+internal fun Path.copyDirectoryTo(
+    dest: Path,
+    filter: (String) -> Boolean,
+): Observable<String> {
     val sourceRoot = toAbsolutePath()
-    val pairsOfFilesToCopy = Files.walk(sourceRoot)
-        .asSequence()
-        .toObservable()
-        .filter { Files.isRegularFile(it) }
-        .mapNotNull { fromFile ->
-            val relativePath = sourceRoot.relativize(fromFile).toString()
-            if (filter(relativePath)) {
-                val toFile = dest.resolve(relativePath)
-                fromFile to toFile
-            } else null
-        }
-        .cache()
+    val pairsOfFilesToCopy =
+        Files.walk(sourceRoot)
+            .asSequence()
+            .toObservable()
+            .filter { Files.isRegularFile(it) }
+            .mapNotNull { fromFile ->
+                val relativePath = sourceRoot.relativize(fromFile).toString()
+                if (filter(relativePath)) {
+                    val toFile = dest.resolve(relativePath)
+                    fromFile to toFile
+                } else {
+                    null
+                }
+            }
+            .cache()
 
     pairsOfFilesToCopy.forEach { (fromFile, toFile) ->
         toFile.createParentDirectories()

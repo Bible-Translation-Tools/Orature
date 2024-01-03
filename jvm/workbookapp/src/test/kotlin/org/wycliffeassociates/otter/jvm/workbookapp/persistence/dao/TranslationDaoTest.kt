@@ -33,18 +33,26 @@ import java.io.File
 import java.time.LocalDateTime
 
 class TranslationDaoTest {
-    private val testDatabaseFile = File.createTempFile(
-        "test-translation-dao", ".sqlite"
-    ).also(File::deleteOnExit)
+    private val testDatabaseFile =
+        File.createTempFile(
+            "test-translation-dao",
+            ".sqlite",
+        ).also(File::deleteOnExit)
     private lateinit var database: AppDatabase
     private val dao by lazy { database.translationDao }
     private val languageDao by lazy { database.languageDao }
 
     private val firstId = 1
     private val secondId = 2
-    private val sampleTranslation = TranslationEntity(
-        0, firstId, secondId, null, 1.0, 1.0
-    )
+    private val sampleTranslation =
+        TranslationEntity(
+            0,
+            firstId,
+            secondId,
+            null,
+            1.0,
+            1.0,
+        )
 
     @Before
     fun setup() {
@@ -66,23 +74,23 @@ class TranslationDaoTest {
         assertEquals(0, dao.fetchAll().size)
 
         dao.insert(
-            sampleTranslation.copy(sourceFk = firstId, targetFk = secondId)
+            sampleTranslation.copy(sourceFk = firstId, targetFk = secondId),
         )
 
         assertEquals(
             "After inserting, the total number should increase by 1.",
             1,
-            dao.fetchAll().size
+            dao.fetchAll().size,
         )
 
         dao.insert(
-            sampleTranslation.copy(sourceFk = secondId, targetFk = secondId)
+            sampleTranslation.copy(sourceFk = secondId, targetFk = secondId),
         )
 
         assertEquals(
             "After inserting, the total number should increase by 1.",
             2,
-            dao.fetchAll().size
+            dao.fetchAll().size,
         )
     }
 
@@ -90,7 +98,7 @@ class TranslationDaoTest {
     fun testFetchTranslations() {
         insertDefault()
         assertNotNull(
-            dao.fetch(firstId, secondId)
+            dao.fetch(firstId, secondId),
         )
     }
 
@@ -107,10 +115,10 @@ class TranslationDaoTest {
         try {
             val nonZeroId = 1
             dao.insert(
-                sampleTranslation.copy(id = nonZeroId)
+                sampleTranslation.copy(id = nonZeroId),
             )
             fail(
-                "An exception is expected to throw when inserting a non-zero id field of translation entity."
+                "An exception is expected to throw when inserting a non-zero id field of translation entity.",
             )
         } catch (e: InsertionException) {
             assertEquals("Entity ID is not 0", e.message)
@@ -119,7 +127,7 @@ class TranslationDaoTest {
         assertEquals(
             "The total number should not change after the exception.",
             0,
-            dao.fetchAll().size
+            dao.fetchAll().size,
         )
     }
 
@@ -127,11 +135,12 @@ class TranslationDaoTest {
     fun testUpdateTranslation() {
         insertDefault()
         val original = dao.fetchAll().first()
-        val updated = original.copy(
-            sourceFk = firstId,
-            targetFk = firstId,
-            modifiedTs = LocalDateTime.now().toString()
-        )
+        val updated =
+            original.copy(
+                sourceFk = firstId,
+                targetFk = firstId,
+                modifiedTs = LocalDateTime.now().toString(),
+            )
 
         dao.update(updated)
         val resultTranslation = dao.fetchById(original.id)

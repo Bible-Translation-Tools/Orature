@@ -21,7 +21,6 @@ package org.wycliffeassociates.otter.common.recorder
 import org.wycliffeassociates.otter.common.collections.FloatRingBuffer
 
 class PCMCompressor(private val ringBuffer: FloatRingBuffer, samplesToCompress: Int) {
-
     // size is how small the waveform is being shrunk for visualization
     // arbitrary for now, could be based on number of seconds to show and resolution
     val accumulator = FloatArray(samplesToCompress)

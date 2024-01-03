@@ -30,12 +30,12 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class MinimapFragment : Fragment() {
-
     private val viewModel: VerseMarkerViewModel by inject()
 
-    val slider = AudioSlider().apply {
-        skin = WaveformSliderSkin(this)
-    }
+    val slider =
+        AudioSlider().apply {
+            skin = WaveformSliderSkin(this)
+        }
 
     override fun onDock() {
         super.onDock()
@@ -49,34 +49,35 @@ class MinimapFragment : Fragment() {
             viewModel.markers.onChangeAndDoNow {
                 markers.setAll(
                     viewModel.markers.filter { marker -> marker.placed }
-                        .map { marker -> marker.toAudioCue() }
+                        .map { marker -> marker.toAudioCue() },
                 )
             }
         }
     }
 
-    override val root = hbox {
-        alignment = Pos.CENTER_LEFT
-        styleClass.add("vm-minimap-container")
-        nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
-
+    override val root =
         hbox {
             alignment = Pos.CENTER_LEFT
-            spacing = 10.0
-            button {
-                graphic = FontIcon("gmi-bookmark")
-                styleClass.add("vm-marker-count__icon")
+            styleClass.add("vm-minimap-container")
+            nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
+
+            hbox {
+                alignment = Pos.CENTER_LEFT
+                spacing = 10.0
+                button {
+                    graphic = FontIcon("gmi-bookmark")
+                    styleClass.add("vm-marker-count__icon")
+                }
+                add(
+                    label().apply {
+                        textProperty().bind(viewModel.markerRatioProperty)
+                    },
+                )
             }
             add(
-                label().apply {
-                    textProperty().bind(viewModel.markerRatioProperty)
-                }
+                slider.apply {
+                    hgrow = Priority.ALWAYS
+                },
             )
         }
-        add(
-            slider.apply {
-                hgrow = Priority.ALWAYS
-            }
-        )
-    }
 }

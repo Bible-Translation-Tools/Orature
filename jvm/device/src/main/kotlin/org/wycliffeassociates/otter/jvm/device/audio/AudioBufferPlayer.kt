@@ -19,24 +19,23 @@
 package org.wycliffeassociates.otter.jvm.device.audio
 
 import com.jakewharton.rxrelay2.PublishRelay
-import java.io.File
-import java.util.concurrent.atomic.AtomicBoolean
-import javax.sound.sampled.LineUnavailableException
-import javax.sound.sampled.SourceDataLine
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.device.AudioFileReaderProvider
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFileReaderProvider
+import java.io.File
+import java.util.concurrent.atomic.AtomicBoolean
+import javax.sound.sampled.LineUnavailableException
+import javax.sound.sampled.SourceDataLine
 
 class AudioBufferPlayer(
     private val player: SourceDataLine?,
-    private val errorRelay: PublishRelay<AudioError> = PublishRelay.create()
+    private val errorRelay: PublishRelay<AudioError> = PublishRelay.create(),
 ) : IAudioPlayer {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     private val monitor = Object()
@@ -76,20 +75,21 @@ class AudioBufferPlayer(
                 override fun onEvent(event: AudioPlayerEvent) {
                     onEvent(event)
                 }
-            }
+            },
         )
     }
 
     override fun load(reader: AudioFileReader) {
         this.reader?.let { close() }
-        this.reader = reader.let{ _reader ->
-            begin = 0
-            end = _reader.totalFrames
-            bytes = ByteArray(processor.inputBufferSize * 2)
-            listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
-            _reader.open()
-            _reader
-        }
+        this.reader =
+            reader.let { _reader ->
+                begin = 0
+                end = _reader.totalFrames
+                bytes = ByteArray(processor.inputBufferSize * 2)
+                listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
+                _reader.open()
+                _reader
+            }
         if (player == null) {
             errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, LineUnavailableException()))
         }
@@ -97,14 +97,15 @@ class AudioBufferPlayer(
 
     override fun load(readerProvider: AudioFileReaderProvider) {
         reader?.let { close() }
-        reader = readerProvider.getAudioFileReader().let { _reader ->
-            begin = 0
-            end = _reader.totalFrames
-            bytes = ByteArray(processor.inputBufferSize * 2)
-            listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
-            _reader.open()
-            _reader
-        }
+        reader =
+            readerProvider.getAudioFileReader().let { _reader ->
+                begin = 0
+                end = _reader.totalFrames
+                bytes = ByteArray(processor.inputBufferSize * 2)
+                listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
+                _reader.open()
+                _reader
+            }
         if (player == null) {
             errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, LineUnavailableException()))
         }
@@ -112,62 +113,78 @@ class AudioBufferPlayer(
 
     override fun load(file: File) {
         reader?.let { close() }
-        reader = OratureAudioFile(file).reader().let { _reader ->
-            begin = 0
-            end = _reader.totalFrames
-            bytes = ByteArray(processor.inputBufferSize * 2)
-            listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
-            _reader.open()
-            _reader
-        }
+        reader =
+            OratureAudioFile(file).reader().let { _reader ->
+                begin = 0
+                end = _reader.totalFrames
+                bytes = ByteArray(processor.inputBufferSize * 2)
+                listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
+                _reader.open()
+                _reader
+            }
         if (player == null) {
             errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, LineUnavailableException()))
         }
     }
 
-    override fun loadSection(reader: AudioFileReader, frameStart: Int, frameEnd: Int) {
+    override fun loadSection(
+        reader: AudioFileReader,
+        frameStart: Int,
+        frameEnd: Int,
+    ) {
         this.reader?.let { close() }
         begin = frameStart
         end = frameEnd
-        this.reader = reader.let { _reader ->
-            bytes = ByteArray(processor.inputBufferSize * 2)
-            listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
-            _reader.open()
-            _reader
-        }
+        this.reader =
+            reader.let { _reader ->
+                bytes = ByteArray(processor.inputBufferSize * 2)
+                listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
+                _reader.open()
+                _reader
+            }
         if (player == null) {
             errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, LineUnavailableException()))
         }
     }
 
-    override fun loadSection(readerProvider: AudioFileReaderProvider, frameStart: Int, frameEnd: Int) {
+    override fun loadSection(
+        readerProvider: AudioFileReaderProvider,
+        frameStart: Int,
+        frameEnd: Int,
+    ) {
         reader?.let { close() }
         begin = frameStart
         end = frameEnd
-        reader = readerProvider.getAudioFileReader(frameStart, frameEnd).let { _reader ->
-            bytes = ByteArray(processor.inputBufferSize * 2)
-            listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
-            _reader.open()
-            _reader
-        }
+        reader =
+            readerProvider.getAudioFileReader(frameStart, frameEnd).let { _reader ->
+                bytes = ByteArray(processor.inputBufferSize * 2)
+                listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
+                _reader.open()
+                _reader
+            }
         if (player == null) {
             errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, LineUnavailableException()))
         }
     }
 
-    override fun loadSection(file: File, frameStart: Int, frameEnd: Int) {
+    override fun loadSection(
+        file: File,
+        frameStart: Int,
+        frameEnd: Int,
+    ) {
         val readerProvider = OratureAudioFileReaderProvider(file)
         loadSection(readerProvider = readerProvider, frameStart, frameEnd)
 
         reader?.let { close() }
         begin = frameStart
         end = frameEnd
-        reader = OratureAudioFile(file).reader(frameStart, frameEnd).let { _reader ->
-            bytes = ByteArray(processor.inputBufferSize * 2)
-            listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
-            _reader.open()
-            _reader
-        }
+        reader =
+            OratureAudioFile(file).reader(frameStart, frameEnd).let { _reader ->
+                bytes = ByteArray(processor.inputBufferSize * 2)
+                listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
+                _reader.open()
+                _reader
+            }
         if (player == null) {
             errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, LineUnavailableException()))
         }
@@ -185,38 +202,39 @@ class AudioBufferPlayer(
                     pause.set(false)
                     if (!_reader.hasRemaining()) _reader.seek(0)
                     startPosition = _reader.framePosition
-                    playbackThread = Thread {
-                        try {
-                            player.open()
-                            player.start()
-                            while (_reader.hasRemaining() && !pause.get() && !playbackThread.isInterrupted) {
-                                synchronized(monitor) {
-                                    if (_reader.supportsTimeShifting()) {
-                                        if (_reader.framePosition > bytes.size / 2) {
-                                            _reader.seek(_reader.framePosition - processor.overlap)
+                    playbackThread =
+                        Thread {
+                            try {
+                                player.open()
+                                player.start()
+                                while (_reader.hasRemaining() && !pause.get() && !playbackThread.isInterrupted) {
+                                    synchronized(monitor) {
+                                        if (_reader.supportsTimeShifting()) {
+                                            if (_reader.framePosition > bytes.size / 2) {
+                                                _reader.seek(_reader.framePosition - processor.overlap)
+                                            }
+                                            _reader.getPcmBuffer(bytes)
+                                            val output = processor.process(bytes)
+                                            player.write(output, 0, output.size)
+                                        } else {
+                                            _reader.getPcmBuffer(bytes)
+                                            player.write(bytes, 0, bytes.size)
                                         }
-                                        _reader.getPcmBuffer(bytes)
-                                        val output = processor.process(bytes)
-                                        player.write(output, 0, output.size)
-                                    } else {
-                                        _reader.getPcmBuffer(bytes)
-                                        player.write(bytes, 0, bytes.size)
                                     }
                                 }
+                                player.drain()
+                                if (!pause.get()) {
+                                    startPosition = _reader.totalFrames
+                                    listeners.forEach { it.onEvent(AudioPlayerEvent.COMPLETE) }
+                                    player.close()
+                                    seek(startPosition)
+                                }
+                            } catch (e: LineUnavailableException) {
+                                errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, e))
+                            } catch (e: IllegalArgumentException) {
+                                errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, e))
                             }
-                            player.drain()
-                            if (!pause.get()) {
-                                startPosition = _reader.totalFrames
-                                listeners.forEach { it.onEvent(AudioPlayerEvent.COMPLETE) }
-                                player.close()
-                                seek(startPosition)
-                            }
-                        } catch (e: LineUnavailableException) {
-                            errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, e))
-                        } catch (e: IllegalArgumentException) {
-                            errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, e))
                         }
-                    }
                     playbackThread.start()
                 }
             } ?: errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, LineUnavailableException()))

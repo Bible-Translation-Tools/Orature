@@ -30,13 +30,11 @@ import javax.inject.Singleton
 class AppDatabaseModule {
     @Provides
     @Singleton
-    fun providesAppDatabase(
-        directoryProvider: IDirectoryProvider
-    ): AppDatabase {
+    fun providesAppDatabase(directoryProvider: IDirectoryProvider): AppDatabase {
         return AppDatabase(
             directoryProvider
                 .databaseDirectory
-                .resolve(File(DB_FILE_NAME))
+                .resolve(File(DB_FILE_NAME)),
         )
     }
 }

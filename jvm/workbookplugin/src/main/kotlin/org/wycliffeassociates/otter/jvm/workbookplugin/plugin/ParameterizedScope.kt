@@ -23,7 +23,7 @@ import tornadofx.Scope
 
 class ParameterizedScope(
     val parameters: Application.Parameters,
-    private val onNavigateBackCallback: () -> Unit
+    private val onNavigateBackCallback: () -> Unit,
 ) : Scope() {
     fun navigateBack() {
         onNavigateBackCallback()

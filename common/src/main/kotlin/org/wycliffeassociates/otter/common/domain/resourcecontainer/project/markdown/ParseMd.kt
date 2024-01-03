@@ -24,7 +24,6 @@ import java.io.BufferedReader
 data class HelpResource(var title: String, var body: String)
 
 object ParseMd {
-
     private val isTitleRegex = Regex("^#+\\s*[^#\\s]+")
     private val titleTextRegex = Regex("^#+\\s*")
 

@@ -20,13 +20,13 @@ package org.wycliffeassociates.otter.common.domain.model
 
 import io.reactivex.Completable
 import io.reactivex.Single
-import java.util.*
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
-import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.domain.IUndoable
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
+import java.util.*
 import kotlin.math.absoluteValue
 
 private const val SEEK_EPSILON = 15_000
@@ -34,7 +34,7 @@ private const val SEEK_EPSILON = 15_000
 class VerseMarkerModel(
     private val audio: OratureAudioFile,
     private val markerTotal: Int,
-    private val markerLabels: List<String>
+    private val markerLabels: List<String>,
 ) {
     private val logger = LoggerFactory.getLogger(VerseMarkerModel::class.java)
 
@@ -87,7 +87,11 @@ class VerseMarkerModel(
         }
     }
 
-    fun moveMarker(id: Int, start: Int, end: Int) {
+    fun moveMarker(
+        id: Int,
+        start: Int,
+        end: Int,
+    ) {
         val op = Move(id, start, end)
         undoStack.push(op)
         op.execute()
@@ -142,6 +146,7 @@ class VerseMarkerModel(
     }
 
     fun hasDirtyMarkers() = undoStack.isNotEmpty()
+
     fun canRedo() = redoStack.isNotEmpty()
 
     private fun refreshMarkers() {
@@ -156,7 +161,7 @@ class VerseMarkerModel(
 
     private fun findMarkerPrecedingPosition(
         location: Int,
-        list: List<ChunkMarkerModel>
+        list: List<ChunkMarkerModel>,
     ): ChunkMarkerModel {
         list.forEachIndexed { idx, _ ->
             if (list.lastIndex == idx) return@forEachIndexed
@@ -183,7 +188,7 @@ class VerseMarkerModel(
 
     private fun sanitizeCues(
         audio: OratureAudioFile,
-        markerLabels: List<String>
+        markerLabels: List<String>,
     ): List<AudioCue> {
         val verses = audio.getMarker<VerseMarker>()
         val map = mutableMapOf<String, AudioMarker?>()
@@ -202,10 +207,9 @@ class VerseMarkerModel(
         return sanitized
     }
 
-
     private fun handleUnmatched(
         labelsToMarkers: MutableMap<String, AudioMarker?>,
-        unmatchedMarkers: List<AudioMarker>
+        unmatchedMarkers: List<AudioMarker>,
     ) {
         if (unmatchedMarkers.isEmpty()) return
 
@@ -235,7 +239,10 @@ class VerseMarkerModel(
         }
     }
 
-    private fun initializeMarkers(markerTotal: Int, cues: List<AudioCue>): List<ChunkMarkerModel> {
+    private fun initializeMarkers(
+        markerTotal: Int,
+        cues: List<AudioCue>,
+    ): List<ChunkMarkerModel> {
         cues as MutableList
         cues.sortBy { it.location }
 
@@ -251,7 +258,10 @@ class VerseMarkerModel(
         return markers
     }
 
-    fun mapCuesToMarkerLabels(cues: List<AudioCue>, markerLabels: List<String>): List<AudioCue> {
+    fun mapCuesToMarkerLabels(
+        cues: List<AudioCue>,
+        markerLabels: List<String>,
+    ): List<AudioCue> {
         val bridgesExist = labelsContainBridges(markerLabels)
         val mappedCues = mutableMapOf<String, AudioCue>()
         val labels = markerLabels.map { it }.toMutableList()
@@ -263,12 +273,14 @@ class VerseMarkerModel(
                 bridgeCue(cue, labels, mappedCues)
             }
             mappedCues[cue.label] = cue
-
         }
         return emptyList()
     }
 
-    fun cueInRange(cue: AudioCue, labels: List<String>): Boolean {
+    fun cueInRange(
+        cue: AudioCue,
+        labels: List<String>,
+    ): Boolean {
         val bridges = labels.filter { it.contains("-") }
         for (bridge in bridges) {
             val range = bridge.trim().split("-")
@@ -282,7 +294,7 @@ class VerseMarkerModel(
     fun bridgeCue(
         cue: AudioCue,
         labels: MutableList<String>,
-        mappedCues: MutableMap<String, AudioCue>
+        mappedCues: MutableMap<String, AudioCue>,
     ) {
         val label = labels.find { it.contains("-") }
         if (label != null) {
@@ -341,8 +353,8 @@ class VerseMarkerModel(
     private inner class Move(
         id: Int,
         val start: Int,
-        val end: Int
-    ): MarkerOperation(id) {
+        val end: Int,
+    ) : MarkerOperation(id) {
         var marker: ChunkMarkerModel? = null
 
         override fun execute() {
@@ -362,7 +374,7 @@ data class ChunkMarkerModel(
     var frame: Int,
     var label: String,
     var placed: Boolean,
-    var id: Int = idGen++
+    var id: Int = idGen++,
 ) {
     constructor(audioCue: AudioCue) : this(audioCue.location, audioCue.label, true)
 

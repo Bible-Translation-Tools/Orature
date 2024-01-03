@@ -22,7 +22,6 @@ import javafx.scene.layout.BorderPane
 import tornadofx.*
 
 class MarkerViewBackground : BorderPane() {
-
     init {
         with(this) {
             top {

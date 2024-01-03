@@ -25,12 +25,12 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.rxkotlin.cast
 import io.reactivex.schedulers.Schedulers
-import java.util.*
 import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.domain.content.Recordable
+import java.util.*
 
 class Chapter(
     override val sort: Int,
@@ -42,9 +42,8 @@ class Chapter(
     private val lazychunks: Lazy<BehaviorRelay<List<Chunk>>>,
     val chunkCount: Single<Int>,
     val addChunk: (List<Content>) -> Completable,
-    val reset: () -> Completable
+    val reset: () -> Completable,
 ) : BookElement, BookElementContainer, Recordable {
-
     override val contentType: ContentType = ContentType.META
     override val children: Observable<BookElement> by lazy { getDraft().cast() }
 
@@ -74,7 +73,10 @@ class Chapter(
         return TextItem(text, MimeType.USFM!!)
     }
 
-    private fun verseLabel(start: Int, end: Int): String {
+    private fun verseLabel(
+        start: Int,
+        end: Int,
+    ): String {
         return if (start != end) {
             "$start-$end"
         } else {
@@ -87,7 +89,7 @@ class Chapter(
             sort,
             title,
             label,
-            contentType
+            contentType,
         )
     }
 

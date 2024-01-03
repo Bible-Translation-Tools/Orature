@@ -13,7 +13,6 @@ import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class TranslationTypeCard(titleKey: String, descriptionKey: String) : HBox() {
-
     private var onSelectActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
@@ -52,5 +51,5 @@ class TranslationTypeCard(titleKey: String, descriptionKey: String) : HBox() {
 fun EventTarget.translationTypeCard(
     titleKey: String,
     descriptionKey: String,
-    op: TranslationTypeCard.() -> Unit = {}
+    op: TranslationTypeCard.() -> Unit = {},
 ) = TranslationTypeCard(titleKey, descriptionKey).attachTo(this, op)

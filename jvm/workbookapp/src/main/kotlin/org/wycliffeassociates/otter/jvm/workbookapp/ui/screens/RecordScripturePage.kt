@@ -53,7 +53,6 @@ import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
-import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.*
@@ -99,59 +98,63 @@ class RecordScripturePage : View() {
             sourceSpeedRateProperty.bind(
                 workbookDataStore.activeWorkbookProperty.select {
                     it.translation.sourceRate.toLazyBinding()
-                }
+                },
             )
 
             targetSpeedRateProperty.bind(
                 workbookDataStore.activeWorkbookProperty.select {
                     it.translation.targetRate.toLazyBinding()
-                }
+                },
             )
         }
 
-    private val breadCrumb = BreadCrumb().apply {
-        titleProperty.bind(
-            workbookDataStore.activeChunkProperty.stringBinding { chunk ->
-                chunk?.let {
-                    MessageFormat.format(
-                        messages["chunkTitle"],
-                        messages[chunk.label],
-                        chunk.title
-                    )
-                } ?: messages["chapter"]
+    private val breadCrumb =
+        BreadCrumb().apply {
+            titleProperty.bind(
+                workbookDataStore.activeChunkProperty.stringBinding { chunk ->
+                    chunk?.let {
+                        MessageFormat.format(
+                            messages["chunkTitle"],
+                            messages[chunk.label],
+                            chunk.title,
+                        )
+                    } ?: messages["chapter"]
+                },
+            )
+            iconProperty.set(FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE))
+            setOnAction {
+                fire(NavigationRequestEvent(this@RecordScripturePage))
             }
-        )
-        iconProperty.set(FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE))
-        setOnAction {
-            fire(NavigationRequestEvent(this@RecordScripturePage))
         }
-    }
 
-    override val root = anchorpane {
-        addButtonEventHandlers()
-        createSnackBar()
+    override val root =
+        anchorpane {
+            addButtonEventHandlers()
+            createSnackBar()
 
-        add(mainContainer
-            .apply {
-                anchorpaneConstraints {
-                    leftAnchor = 0.0
-                    rightAnchor = 0.0
-                    bottomAnchor = 0.0
-                    topAnchor = 0.0
-                }
-            }
-        )
-        add(fileDragTarget
-            .apply {
-                anchorpaneConstraints {
-                    leftAnchor = 0.0
-                    rightAnchor = 0.0
-                    bottomAnchor = 0.0
-                    topAnchor = 0.0
-                }
-            }
-        )
-    }
+            add(
+                mainContainer
+                    .apply {
+                        anchorpaneConstraints {
+                            leftAnchor = 0.0
+                            rightAnchor = 0.0
+                            bottomAnchor = 0.0
+                            topAnchor = 0.0
+                        }
+                    },
+            )
+            add(
+                fileDragTarget
+                    .apply {
+                        anchorpaneConstraints {
+                            leftAnchor = 0.0
+                            rightAnchor = 0.0
+                            bottomAnchor = 0.0
+                            topAnchor = 0.0
+                        }
+                    },
+            )
+        }
 
     init {
         tryImportStylesheet(resources["/css/record-scripture.css"])
@@ -199,114 +202,119 @@ class RecordScripturePage : View() {
 
             addClass("card--main-container")
 
-            val rightPane = ScrollPane().apply {
-                isFitToWidth = true
-                isFitToHeight = true
+            val rightPane =
+                ScrollPane().apply {
+                    isFitToWidth = true
+                    isFitToHeight = true
 
-                vbox {
-                    addClass("record-scripture__right")
+                    vbox {
+                        addClass("record-scripture__right")
 
-                    hbox {
-                        addClass("record-scripture__navigate-buttons")
+                        hbox {
+                            addClass("record-scripture__navigate-buttons")
 
-                        // previous verse button
-                        button(messages["previousVerse"]) {
-                            addClass("btn", "btn--secondary")
-                            tooltip(text)
-                            graphic = FontIcon(MaterialDesign.MDI_ARROW_LEFT).apply {
-                                scaleXProperty().bind(settingsViewModel.orientationScaleProperty)
+                            // previous verse button
+                            button(messages["previousVerse"]) {
+                                addClass("btn", "btn--secondary")
+                                tooltip(text)
+                                graphic =
+                                    FontIcon(MaterialDesign.MDI_ARROW_LEFT).apply {
+                                        scaleXProperty().bind(settingsViewModel.orientationScaleProperty)
+                                    }
+                                action {
+                                    recordScriptureViewModel.previousChunk()
+                                }
+                                enableWhen(recordScriptureViewModel.hasPreviousChunk)
+                                visibleWhen(recordScriptureViewModel.isChunk)
+                                managedWhen(visibleProperty())
                             }
-                            action {
-                                recordScriptureViewModel.previousChunk()
+
+                            // previous chapter button
+                            button(messages["previousChapter"]) {
+                                addClass("btn", "btn--secondary")
+                                tooltip(text)
+                                graphic =
+                                    FontIcon(MaterialDesign.MDI_ARROW_LEFT).apply {
+                                        scaleXProperty().bind(settingsViewModel.orientationScaleProperty)
+                                    }
+                                action {
+                                    recordScriptureViewModel.previousChapter()
+                                }
+                                enableWhen(recordScriptureViewModel.hasPreviousChapter)
+                                visibleWhen(recordScriptureViewModel.isChunk.not())
+                                managedWhen(visibleProperty())
                             }
-                            enableWhen(recordScriptureViewModel.hasPreviousChunk)
-                            visibleWhen(recordScriptureViewModel.isChunk)
-                            managedWhen(visibleProperty())
+
+                            vbox {
+                                addClass("record-scripture__book-info")
+                                hgrow = Priority.ALWAYS
+                                label {
+                                    addClass("record-scripture__book-title")
+                                    textProperty().bind(workbookDataStore.activeChapterTitleBinding())
+                                }
+                                label {
+                                    addClass("record-scripture__chunk-title")
+                                    textProperty().bind(workbookDataStore.activeChunkTitleBinding())
+                                    visibleProperty().bind(workbookDataStore.activeChunkTitleBinding().isNotNull)
+                                    managedProperty().bind(visibleProperty())
+                                }
+                            }
+
+                            // next verse button
+                            button(messages["nextVerse"]) {
+                                addClass("btn", "btn--secondary")
+                                tooltip(text)
+                                graphic =
+                                    FontIcon(MaterialDesign.MDI_ARROW_RIGHT).apply {
+                                        scaleXProperty().bind(settingsViewModel.orientationScaleProperty)
+                                    }
+                                action {
+                                    recordScriptureViewModel.nextChunk()
+                                }
+                                enableWhen(recordScriptureViewModel.hasNextChunk)
+                                visibleWhen(recordScriptureViewModel.isChunk)
+                                managedWhen(visibleProperty())
+                            }
+
+                            // next chapter button
+                            button(messages["nextChapter"]) {
+                                addClass("btn", "btn--secondary")
+                                tooltip(text)
+                                graphic =
+                                    FontIcon(MaterialDesign.MDI_ARROW_RIGHT).apply {
+                                        scaleXProperty().bind(settingsViewModel.orientationScaleProperty)
+                                    }
+                                action {
+                                    recordScriptureViewModel.nextChapter()
+                                }
+                                enableWhen(recordScriptureViewModel.hasNextChapter)
+                                visibleWhen(recordScriptureViewModel.isChunk.not())
+                                managedWhen(visibleProperty())
+                            }
                         }
 
-                        // previous chapter button
-                        button(messages["previousChapter"]) {
-                            addClass("btn", "btn--secondary")
-                            tooltip(text)
-                            graphic = FontIcon(MaterialDesign.MDI_ARROW_LEFT).apply {
-                                scaleXProperty().bind(settingsViewModel.orientationScaleProperty)
-                            }
-                            action {
-                                recordScriptureViewModel.previousChapter()
-                            }
-                            enableWhen(recordScriptureViewModel.hasPreviousChapter)
-                            visibleWhen(recordScriptureViewModel.isChunk.not())
-                            managedWhen(visibleProperty())
+                        add(
+                            NewRecordingCard(
+                                FX.messages["record"],
+                                recordScriptureViewModel::recordNewTake,
+                            ).apply {
+                                shortcut(Shortcut.RECORD.value, action)
+                            },
+                        )
+
+                        listview(recordScriptureViewModel.takeCardViews) {
+                            addClass("record-scripture__take-list")
+                            vgrow = Priority.ALWAYS
+
+                            setCellFactory { ScriptureTakeCardCell() }
+
+                            minHeightProperty().bind(Bindings.size(items).multiply(TAKES_ROW_HEIGHT))
+                            placeholder = ListViewPlaceHolder()
+
+                            selectionModelProperty().set(NoSelectionModel())
                         }
-
-                        vbox {
-                            addClass("record-scripture__book-info")
-                            hgrow = Priority.ALWAYS
-                            label {
-                                addClass("record-scripture__book-title")
-                                textProperty().bind(workbookDataStore.activeChapterTitleBinding())
-                            }
-                            label {
-                                addClass("record-scripture__chunk-title")
-                                textProperty().bind(workbookDataStore.activeChunkTitleBinding())
-                                visibleProperty().bind(workbookDataStore.activeChunkTitleBinding().isNotNull)
-                                managedProperty().bind(visibleProperty())
-                            }
-                        }
-
-                        // next verse button
-                        button(messages["nextVerse"]) {
-                            addClass("btn", "btn--secondary")
-                            tooltip(text)
-                            graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT).apply {
-                                scaleXProperty().bind(settingsViewModel.orientationScaleProperty)
-                            }
-                            action {
-                                recordScriptureViewModel.nextChunk()
-                            }
-                            enableWhen(recordScriptureViewModel.hasNextChunk)
-                            visibleWhen(recordScriptureViewModel.isChunk)
-                            managedWhen(visibleProperty())
-                        }
-
-                        // next chapter button
-                        button(messages["nextChapter"]) {
-                            addClass("btn", "btn--secondary")
-                            tooltip(text)
-                            graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT).apply {
-                                scaleXProperty().bind(settingsViewModel.orientationScaleProperty)
-                            }
-                            action {
-                                recordScriptureViewModel.nextChapter()
-                            }
-                            enableWhen(recordScriptureViewModel.hasNextChapter)
-                            visibleWhen(recordScriptureViewModel.isChunk.not())
-                            managedWhen(visibleProperty())
-                        }
-                    }
-
-                    add(
-                        NewRecordingCard(
-                            FX.messages["record"],
-                            recordScriptureViewModel::recordNewTake
-                        ).apply {
-                            shortcut(Shortcut.RECORD.value, action)
-                        }
-                    )
-
-                    listview(recordScriptureViewModel.takeCardViews) {
-                        addClass("record-scripture__take-list")
-                        vgrow = Priority.ALWAYS
-
-                        setCellFactory { ScriptureTakeCardCell() }
-
-                        minHeightProperty().bind(Bindings.size(items).multiply(TAKES_ROW_HEIGHT))
-                        placeholder = ListViewPlaceHolder()
-
-                        selectionModelProperty().set(NoSelectionModel())
                     }
                 }
-            }
 
             add(sourceContent, 0, 0)
             add(rightPane, 1, 0)
@@ -360,13 +368,13 @@ class RecordScripturePage : View() {
                     JFXSnackbar.SnackbarEvent(
                         JFXSnackbarLayout(
                             pluginErrorMessage,
-                            messages["addApp"].uppercase(Locale.getDefault())
+                            messages["addApp"].uppercase(Locale.getDefault()),
                         ) {
                             audioPluginViewModel.addPlugin(true, false)
                         },
                         Duration.millis(5000.0),
-                        null
-                    )
+                        null,
+                    ),
                 )
             }
     }
@@ -388,15 +396,15 @@ class RecordScripturePage : View() {
             sourceSpeedRateProperty.bind(
                 workbookDataStore.activeWorkbookProperty.select {
                     it.translation.sourceRate.toLazyBinding()
-                }
+                },
             )
             targetSpeedRateProperty.bind(
                 workbookDataStore.activeWorkbookProperty.select {
                     it.translation.targetRate.toLazyBinding()
-                }
+                },
             )
             sourceTextZoomRateProperty.bind(
-                recordScriptureViewModel.sourceTextZoomRateProperty
+                recordScriptureViewModel.sourceTextZoomRateProperty,
             )
         }
     }

@@ -35,15 +35,19 @@ import java.text.MessageFormat
 
 class ChunkCell(
     private val orientationScale: Double,
-    private val focusedChunkProperty: Property<ChunkItem>
+    private val focusedChunkProperty: Property<ChunkItem>,
 ) : ListCell<CardData>() {
     private val view = ChunkItem()
     private var focusedListenerDisposer: ListenerDisposer? = null
+
     init {
         addClass("chunk-list-cell")
     }
 
-    override fun updateItem(item: CardData?, empty: Boolean) {
+    override fun updateItem(
+        item: CardData?,
+        empty: Boolean,
+    ) {
         super.updateItem(item, empty)
 
         if (empty || item == null) {
@@ -63,70 +67,72 @@ class ChunkCell(
             view.toggleShowTakes()
         }
 
-        graphic = view.apply {
-            showTakesProperty.set(false)
-            orientationScaleProperty.set(orientationScale)
+        graphic =
+            view.apply {
+                showTakesProperty.set(false)
+                orientationScaleProperty.set(orientationScale)
 
-            chunkTitleProperty.set(
-                MessageFormat.format(
-                    FX.messages["chunkTitle"],
-                    FX.messages[item.item].capitalizeString(),
-                    item.bodyText
+                chunkTitleProperty.set(
+                    MessageFormat.format(
+                        FX.messages["chunkTitle"],
+                        FX.messages[item.item].capitalizeString(),
+                        item.bodyText,
+                    ),
                 )
-            )
 
-            setOnChunkOpen { item.onChunkOpen(item) }
-            setOnTakeSelected {
-                item.onTakeSelected(item, it)
+                setOnChunkOpen { item.onChunkOpen(item) }
+                setOnTakeSelected {
+                    item.onTakeSelected(item, it)
+                    refreshTakes()
+                    findChild<Button>()?.requestFocus()
+                }
+
+                hasSelectedProperty.set(item.takes.size > 0)
+
                 refreshTakes()
-                findChild<Button>()?.requestFocus()
-            }
 
-            hasSelectedProperty.set(item.takes.size > 0)
-
-            refreshTakes()
-
-            focusedProperty().onChangeWithDisposer {
-                if (isFocused) {
-                    focusedChunkProperty.value?.hideTakes()
-                    focusedChunkProperty.value = this
-                }
-            }.let { focusedListenerDisposer = it }
-
-            setOnKeyReleased {
-                when (it.code) {
-                    KeyCode.ENTER, KeyCode.SPACE -> {
-                        if (index == listView.items.size - 1) {
-                            forceScrollToResizeListView()
-                        }
-                        toggleShowTakes()
+                focusedProperty().onChangeWithDisposer {
+                    if (isFocused) {
+                        focusedChunkProperty.value?.hideTakes()
+                        focusedChunkProperty.value = this
                     }
-                    KeyCode.DOWN, KeyCode.UP -> {
-                        val isDown = it.code == KeyCode.DOWN
-                        if (isDown && listView.selectionModel.selectedIndex == 0) {
-                            return@setOnKeyReleased
-                        }
+                }.let { focusedListenerDisposer = it }
 
-                        if (it.target is ChunkItem) {
-                            hideTakes()
-                            simulateKeyPress(
-                                KeyCode.TAB,
-                                shiftDown = it.code == KeyCode.UP
-                            )
+                setOnKeyReleased {
+                    when (it.code) {
+                        KeyCode.ENTER, KeyCode.SPACE -> {
+                            if (index == listView.items.size - 1) {
+                                forceScrollToResizeListView()
+                            }
+                            toggleShowTakes()
                         }
+                        KeyCode.DOWN, KeyCode.UP -> {
+                            val isDown = it.code == KeyCode.DOWN
+                            if (isDown && listView.selectionModel.selectedIndex == 0) {
+                                return@setOnKeyReleased
+                            }
+
+                            if (it.target is ChunkItem) {
+                                hideTakes()
+                                simulateKeyPress(
+                                    KeyCode.TAB,
+                                    shiftDown = it.code == KeyCode.UP,
+                                )
+                            }
+                        }
+                        KeyCode.ESCAPE -> hideTakes()
+                        else -> {}
                     }
-                    KeyCode.ESCAPE -> hideTakes()
-                    else -> {}
                 }
             }
-        }
     }
 
     private fun refreshTakes() {
-        val sorted = item.takes.sortedWith(
-            compareByDescending<TakeModel> { it.selected }
-                .thenByDescending { it.take.file.lastModified() }
-        )
+        val sorted =
+            item.takes.sortedWith(
+                compareByDescending<TakeModel> { it.selected }
+                    .thenByDescending { it.take.file.lastModified() },
+            )
         view.takes.setAll(sorted)
     }
 
@@ -135,9 +141,10 @@ class ChunkCell(
      * to fully display when expanding causes an overflow
      */
     private fun forceScrollToResizeListView() {
-        val flow = listView
-            .childrenUnmodifiable
-            .find { it is VirtualFlow<*> } as VirtualFlow<*>
+        val flow =
+            listView
+                .childrenUnmodifiable
+                .find { it is VirtualFlow<*> } as VirtualFlow<*>
         flow.scrollPixels(-5.0)
         runLater { flow.scrollPixels(10.0) }
     }

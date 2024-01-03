@@ -29,7 +29,6 @@ import tornadofx.ScopedInstance
 import javax.inject.Inject
 
 class AppPreferencesStore : Component(), ScopedInstance {
-
     @Inject
     lateinit var appPrefRepository: IAppPreferencesRepository
 

@@ -37,9 +37,8 @@ import tornadofx.*
 class AudioSlider(
     min: Double = 0.0,
     max: Double = 1.0,
-    value: Double = 0.0
+    value: Double = 0.0,
 ) : Slider(min, max, value) {
-
     val colorThemeProperty = SimpleObjectProperty<ColorTheme>()
     val waveformImageProperty = SimpleObjectProperty<Image>()
     val thumbFillProperty = SimpleObjectProperty(Paint.valueOf("#00000015"))
@@ -51,6 +50,7 @@ class AudioSlider(
 
     val player = SimpleObjectProperty<IAudioPlayer>()
     val pixelsInHighlight = SimpleObjectProperty<(Double) -> Double> { 0.0 }
+
     fun setPixelsInHighlightFunction(op: (Double) -> Double) {
         pixelsInHighlight.set(op)
     }
@@ -71,7 +71,10 @@ class AudioSlider(
         return AudioSliderSkin(this)
     }
 
-    fun updateMarker(id: Int, position: Double) {
+    fun updateMarker(
+        id: Int,
+        position: Double,
+    ) {
         (skin as? WaveformSliderSkin)?.updateMarker(id, position)
     }
 }

@@ -32,9 +32,8 @@ class UpdateProgressListener(
     private val statusMessageProperty: StringProperty? = null,
     private val detailMessageProperty: StringProperty? = null,
     private val actionStartedProperty: StringProperty? = null,
-    private val indeterminateProgressProperty: BooleanProperty? = null
+    private val indeterminateProgressProperty: BooleanProperty? = null,
 ) : ApplicationLauncher.ProgressListener {
-
     private val logger = LoggerFactory.getLogger(UpdateProgressListener::class.java)
 
     override fun screenActivated(id: String?) {

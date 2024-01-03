@@ -20,9 +20,6 @@ package org.wycliffeassociates.otter.common.audio.mp3
 
 import com.mpatric.mp3agic.ID3v24Tag
 import com.mpatric.mp3agic.Mp3File
-import java.io.File
-import java.lang.Exception
-import kotlin.math.roundToInt
 import org.digitalmediaserver.cuelib.CueParser
 import org.digitalmediaserver.cuelib.CueSheet
 import org.digitalmediaserver.cuelib.CueSheetSerializer
@@ -34,6 +31,9 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.AudioMetadata
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
+import java.io.File
+import java.lang.Exception
+import kotlin.math.roundToInt
 
 /**
  * Frames in Cue files are different from frames in the audio sample context.
@@ -45,7 +45,6 @@ private const val CUE_FRAME_SIZE = 75.0
 private const val DEFAULT_CUE_TRACK_INDEX = 1 // see https://en.wikipedia.org/wiki/Cue_sheet_(computing) or look up "cue sheet file"
 
 class Mp3Metadata(val mp3File: File, val cueFile: File) : AudioMetadata {
-
     private val logger = LoggerFactory.getLogger(Mp3Metadata::class.java)
 
     private val _cues = mutableListOf<AudioCue>()
@@ -66,10 +65,11 @@ class Mp3Metadata(val mp3File: File, val cueFile: File) : AudioMetadata {
                     val label = it.title
                     val index = it.indices.find { it.number == DEFAULT_CUE_TRACK_INDEX }
                     index?.let {
-                        val position = (
+                        val position =
+                            (
                                 index.position.totalFrames / CUE_FRAME_SIZE * DEFAULT_SAMPLE_RATE.toFloat()
-                                )
-                            .roundToInt()
+                            )
+                                .roundToInt()
                         _cues.add(AudioCue(position, label))
                     }
                 }
@@ -79,7 +79,10 @@ class Mp3Metadata(val mp3File: File, val cueFile: File) : AudioMetadata {
         }
     }
 
-    override fun addCue(location: Int, label: String) {
+    override fun addCue(
+        location: Int,
+        label: String,
+    ) {
         _cues.add(AudioCue(location, label))
     }
 
@@ -133,9 +136,10 @@ class Mp3Metadata(val mp3File: File, val cueFile: File) : AudioMetadata {
     }
 
     private fun writeID3Tag() {
-        /* Make a copy first, then overwrite the original file */
-        val tempFile = kotlin.io.path.createTempFile("orature-audio", ".mp3")
-            .toFile()
+        // Make a copy first, then overwrite the original file
+        val tempFile =
+            kotlin.io.path.createTempFile("orature-audio", ".mp3")
+                .toFile()
 
         try {
             id3Metadata.save(tempFile.path)

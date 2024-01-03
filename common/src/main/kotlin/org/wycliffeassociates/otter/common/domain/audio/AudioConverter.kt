@@ -28,61 +28,73 @@ import java.io.File
 import javax.inject.Inject
 import de.sciss.jump3r.Main as jump3r
 
-class AudioConverter @Inject constructor() {
-    fun wavToMp3(
-        wavFile: File,
-        mp3File: File,
-        bitrate: Int = 64
-    ): Completable {
-        return Completable.fromCallable {
-            val args = arrayOf(
-                "-b", bitrate.toString(),
-                "-m", "m",
-                wavFile.invariantSeparatorsPath,
-                mp3File.invariantSeparatorsPath
-            )
-            jump3r().run(args)
+class AudioConverter
+    @Inject
+    constructor() {
+        fun wavToMp3(
+            wavFile: File,
+            mp3File: File,
+            bitrate: Int = 64,
+        ): Completable {
+            return Completable.fromCallable {
+                val args =
+                    arrayOf(
+                        "-b",
+                        bitrate.toString(),
+                        "-m",
+                        "m",
+                        wavFile.invariantSeparatorsPath,
+                        mp3File.invariantSeparatorsPath,
+                    )
+                jump3r().run(args)
+            }
         }
-    }
 
-    fun wavToPcm(wavFile: File, pcmFile: File): Completable {
-        return Completable.fromCallable {
-            val wavReader = WavFile(wavFile).reader()
-            val pcmWriter = PcmFile(pcmFile).writer(append = false)
+        fun wavToPcm(
+            wavFile: File,
+            pcmFile: File,
+        ): Completable {
+            return Completable.fromCallable {
+                val wavReader = WavFile(wavFile).reader()
+                val pcmWriter = PcmFile(pcmFile).writer(append = false)
 
-            wavReader.use { reader ->
-                pcmWriter.use { writer ->
-                    reader.open()
-                    val buffer = ByteArray(10240)
-                    while (reader.hasRemaining()) {
-                        val written = reader.getPcmBuffer(buffer)
-                        writer.write(buffer, 0, written)
+                wavReader.use { reader ->
+                    pcmWriter.use { writer ->
+                        reader.open()
+                        val buffer = ByteArray(10240)
+                        while (reader.hasRemaining()) {
+                            val written = reader.getPcmBuffer(buffer)
+                            writer.write(buffer, 0, written)
+                        }
+                    }
+                }
+            }
+        }
+
+        fun pcmToWav(
+            pcmFile: File,
+            wavFile: File,
+        ): Completable {
+            return Completable.fromCallable {
+                val pcmReader = PcmFile(pcmFile).reader()
+                val wavWriter =
+                    WavFile(
+                        wavFile,
+                        DEFAULT_CHANNELS,
+                        DEFAULT_SAMPLE_RATE,
+                        DEFAULT_BITS_PER_SAMPLE,
+                    ).writer(append = false)
+
+                pcmReader.use { reader ->
+                    wavWriter.use { writer ->
+                        reader.open()
+                        val buffer = ByteArray(10240)
+                        while (reader.hasRemaining()) {
+                            val written = reader.getPcmBuffer(buffer)
+                            writer.write(buffer, 0, written)
+                        }
                     }
                 }
             }
         }
     }
-
-    fun pcmToWav(pcmFile: File, wavFile: File): Completable {
-        return Completable.fromCallable {
-            val pcmReader = PcmFile(pcmFile).reader()
-            val wavWriter = WavFile(
-                wavFile,
-                DEFAULT_CHANNELS,
-                DEFAULT_SAMPLE_RATE,
-                DEFAULT_BITS_PER_SAMPLE
-            ).writer(append = false)
-
-            pcmReader.use { reader ->
-                wavWriter.use { writer ->
-                    reader.open()
-                    val buffer = ByteArray(10240)
-                    while (reader.hasRemaining()) {
-                        val written = reader.getPcmBuffer(buffer)
-                        writer.write(buffer, 0, written)
-                    }
-                }
-            }
-        }
-    }
-}

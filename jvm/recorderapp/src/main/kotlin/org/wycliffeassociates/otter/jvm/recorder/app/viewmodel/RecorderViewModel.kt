@@ -23,23 +23,22 @@ import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
+import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
 import org.wycliffeassociates.otter.common.recorder.RecordingTimer
 import org.wycliffeassociates.otter.common.recorder.WavFileWriter
-import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import org.wycliffeassociates.otter.jvm.controls.waveform.BaseWaveLine
+import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
+import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformLayer
+import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.recorder.app.view.CanvasFragment
 import org.wycliffeassociates.otter.jvm.recorder.app.view.FramerateView
-import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformLayer
-import java.io.File
-import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
-import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
-import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
-import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
+import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseFinishedEvent
 import tornadofx.*
+import java.io.File
 
 class RecorderViewModel : ViewModel() {
-
     private val parameters = (scope as ParameterizedScope).parameters
     private val targetFile = File(parameters.named["wav"])
     private val sourceLanguageName = parameters.named["source_language"]
@@ -65,19 +64,21 @@ class RecorderViewModel : ViewModel() {
     val timerTextProperty = SimpleStringProperty("00:00:00")
     var timerText by timerTextProperty
 
-    val at = object : AnimationTimer() {
-        override fun handle(now: Long) {
-            waveformView.draw()
-            volumeBarView.draw()
-            val t = timer.timeElapsed
-            timerText = String.format(
-                "%02d:%02d:%02d",
-                t / 3600000,
-                (t / 60000) % 60,
-                (t / 1000) % 60
-            )
+    val at =
+        object : AnimationTimer() {
+            override fun handle(now: Long) {
+                waveformView.draw()
+                volumeBarView.draw()
+                val t = timer.timeElapsed
+                timerText =
+                    String.format(
+                        "%02d:%02d:%02d",
+                        t / 3600000,
+                        (t / 60000) % 60,
+                        (t / 1000) % 60,
+                    )
+            }
         }
-    }
 
     init {
         initializeAudioData()
@@ -87,15 +88,17 @@ class RecorderViewModel : ViewModel() {
             waveformView.add(fps)
         }
     }
+
     private lateinit var renderer: ActiveRecordingRenderer
 
     fun onViewReady(width: Int) {
-        renderer = ActiveRecordingRenderer(
-            recorder.getAudioStream(),
-            writer.isWriting,
-            width,
-            secondsOnScreen = 10
-        )
+        renderer =
+            ActiveRecordingRenderer(
+                recorder.getAudioStream(),
+                writer.isWriting,
+                width,
+                secondsOnScreen = 10,
+            )
         val waveformLayer = WaveformLayer(renderer)
         waveformView.addDrawable(waveformLayer)
 
@@ -165,7 +168,7 @@ class RecorderViewModel : ViewModel() {
     }
 
     private fun createTempRecordingTake(): File {
-        return kotlin.io.path.createTempFile("otter-take",".wav").toFile()
+        return kotlin.io.path.createTempFile("otter-take", ".wav").toFile()
             .also {
                 it.deleteOnExit()
                 targetFile.copyTo(it, true)

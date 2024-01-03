@@ -22,10 +22,9 @@ import java.io.File
 import javax.inject.Inject
 
 class RecorderViewModel : ViewModel() {
-
     enum class Result {
         SUCCESS,
-        CANCELLED
+        CANCELLED,
     }
 
     @Inject
@@ -33,6 +32,7 @@ class RecorderViewModel : ViewModel() {
 
     val targetFileProperty = SimpleObjectProperty<File>(null)
     var hasWrittenProperty = SimpleBooleanProperty(false)
+
     @Volatile
     var recordingProperty = SimpleBooleanProperty(false)
     var isRecording by recordingProperty
@@ -53,19 +53,21 @@ class RecorderViewModel : ViewModel() {
     private val timer = RecordingTimer()
     private lateinit var renderer: ActiveRecordingRenderer
 
-    val at = object : AnimationTimer() {
-        override fun handle(now: Long) {
-            waveformCanvas.draw()
-            volumeCanvas.draw()
-            val t = timer.timeElapsed
-            timerTextProperty.value = String.format(
-                "%02d:%02d:%02d",
-                t / 3600000,
-                (t / 60000) % 60,
-                (t / 1000) % 60
-            )
+    val at =
+        object : AnimationTimer() {
+            override fun handle(now: Long) {
+                waveformCanvas.draw()
+                volumeCanvas.draw()
+                val t = timer.timeElapsed
+                timerTextProperty.value =
+                    String.format(
+                        "%02d:%02d:%02d",
+                        t / 3600000,
+                        (t / 60000) % 60,
+                        (t / 1000) % 60,
+                    )
+            }
         }
-    }
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -74,12 +76,13 @@ class RecorderViewModel : ViewModel() {
     fun onViewReady(width: Int) {
         initializeAudio()
         val renderedWidth = width - volumeCanvas.minWidth.toInt()
-        renderer = ActiveRecordingRenderer(
-            recorder.getAudioStream(),
-            writer.isWriting,
-            renderedWidth,
-            secondsOnScreen = 10
-        )
+        renderer =
+            ActiveRecordingRenderer(
+                recorder.getAudioStream(),
+                writer.isWriting,
+                renderedWidth,
+                secondsOnScreen = 10,
+            )
         volumeCanvas.addDrawable(VolumeBar(recorder.getAudioStream()))
         val waveformLayer = WaveformLayer(renderer)
         waveformCanvas.addDrawable(BaseWaveLine())
@@ -156,7 +159,7 @@ class RecorderViewModel : ViewModel() {
     }
 
     private fun createTempRecordingTake(): File {
-        return kotlin.io.path.createTempFile("otter-take",".wav").toFile()
+        return kotlin.io.path.createTempFile("otter-take", ".wav").toFile()
             .also {
                 it.deleteOnExit()
                 targetFileProperty.value?.copyTo(it, true)

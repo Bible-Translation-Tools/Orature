@@ -12,7 +12,7 @@ import kotlin.math.min
 internal data class VerseNode(
     var placed: Boolean = false,
     val marker: AudioMarker,
-    var sectors: MutableList<IntRange> = mutableListOf()
+    var sectors: MutableList<IntRange> = mutableListOf(),
 ) {
     @get:JsonIgnore
     val length: Int
@@ -173,10 +173,11 @@ internal data class VerseNode(
      * Deep copies this VerseNode
      */
     fun copy(): VerseNode {
-        val vn = VerseNode(
-            placed,
-            marker
-        )
+        val vn =
+            VerseNode(
+                placed,
+                marker,
+            )
         vn.sectors.addAll(sectors.map { it })
         return vn
     }
@@ -219,7 +220,7 @@ internal data class VerseNode(
             if (remaining > sector.length()) {
                 remaining -= sector.length()
             } else {
-                return sector.first +  remaining - 1 // Add - 1 to account for inclusive start
+                return sector.first + remaining - 1 // Add - 1 to account for inclusive start
                 // Depending on in the intended functionality, remove the - 1.
                 //  If the question this is answering is "Get the next frame after some offset?", then
                 //  remove the - 1, if the question this is answering is "Offset by some amount, then get me that frame?"
@@ -230,7 +231,10 @@ internal data class VerseNode(
         throw IndexOutOfBoundsException("Requested offset $framesFromStart exceeded boundaries within ranges $sectors")
     }
 
-    fun getSectorsFromOffset(framePosition: Int, ftr: Int): List<IntRange> {
+    fun getSectorsFromOffset(
+        framePosition: Int,
+        ftr: Int,
+    ): List<IntRange> {
         if (ftr <= 0 || framePosition !in this) return listOf()
 
         var framesToRead = ftr
@@ -263,7 +267,9 @@ internal data class VerseNode(
             is BookMarker -> marker.copy(location = location)
             is VerseMarker -> marker.copy(location = location)
             is UnknownMarker -> marker.copy(location = location)
-            else -> { throw UnsupportedOperationException("Copy is not supported for marker $marker") }
+            else -> {
+                throw UnsupportedOperationException("Copy is not supported for marker $marker")
+            }
         }
     }
 }

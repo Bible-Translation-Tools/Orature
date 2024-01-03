@@ -9,13 +9,11 @@ import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 
 class NewVerseActionTest {
-
     private val totalVerses: MutableList<VerseNode> = mutableListOf()
     lateinit var workingAudioFile: AudioFile
     lateinit var emptyWorkingAudio: AudioFile
     val numTestVerses = 31
     val totalFramesInTestAudio = 44100 * numTestVerses
-
 
     @Before
     fun setup() {
@@ -31,14 +29,13 @@ class NewVerseActionTest {
     }
 
     fun initializeTotalVerses() {
-        for(i in 0 until numTestVerses){
-            val verseMarker = VerseMarker((i+1), (i+1), 0)
+        for (i in 0 until numTestVerses) {
+            val verseMarker = VerseMarker((i + 1), (i + 1), 0)
             val sectors = mutableListOf<IntRange>()
             val verseNode = VerseNode(false, verseMarker, sectors)
             totalVerses.add(verseNode)
         }
     }
-
 
     @Test
     fun `execute with empty working audio, 31 total verses, and no placed verses`() {
@@ -60,7 +57,6 @@ class NewVerseActionTest {
         Assert.assertEquals(0..0, totalVerses[verseIndex].sectors.last())
         Assert.assertTrue(totalVerses[verseIndex].placed)
     }
-
 
     @Test
     fun `execute with valid working audio, 31 total verses, and placed verses`() {
@@ -93,7 +89,7 @@ class NewVerseActionTest {
         try {
             newVerseAction.undo(totalVerses)
             Assert.fail("expecting IndexOutOfBoundsException")
-        } catch (illegalIndex: IndexOutOfBoundsException){
+        } catch (illegalIndex: IndexOutOfBoundsException) {
             // Success: expecting IndexOutOfBoundsException
         }
     }
@@ -116,7 +112,6 @@ class NewVerseActionTest {
         // verify that it was undone
         Assert.assertFalse(totalVerses[verseIndex].placed)
     }
-
 
     @Test
     fun `redo with valid verseIndex`() {
@@ -157,7 +152,6 @@ class NewVerseActionTest {
         Assert.assertFalse(totalVerses[verseIndex].placed)
     }
 
-
     @Test
     fun `finalize with null node and valid verseIndex`() {
         val verseIndex = 0
@@ -173,7 +167,6 @@ class NewVerseActionTest {
 
         Assert.assertEquals(0, totalVerses[verseIndex].sectors.size)
     }
-
 
     @Test
     fun `finalize with verseNode that has been started, but not finalized`() {

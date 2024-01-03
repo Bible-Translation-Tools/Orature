@@ -15,7 +15,7 @@ import java.io.InputStream
  */
 abstract class RCImporter(
     private val directoryProvider: IDirectoryProvider,
-    private val resourceMetadataRepository: IResourceMetadataRepository
+    private val resourceMetadataRepository: IResourceMetadataRepository,
 ) : IProjectImporter {
     private var next: RCImporter? = null
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -23,19 +23,22 @@ abstract class RCImporter(
     abstract override fun import(
         file: File,
         callback: ProjectImporterCallback?,
-        options: ImportOptions?
+        options: ImportOptions?,
     ): Single<ImportResult>
 
     protected fun passToNextImporter(
         file: File,
         callback: ProjectImporterCallback?,
-        options: ImportOptions?
+        options: ImportOptions?,
     ): Single<ImportResult> {
         return next?.import(file, callback, options)
             ?: Single.just(ImportResult.FAILED)
     }
 
-    protected fun importAsStream(filename: String, stream: InputStream): Single<ImportResult> {
+    protected fun importAsStream(
+        filename: String,
+        stream: InputStream,
+    ): Single<ImportResult> {
         val outFile = directoryProvider.createTempFile(filename, ".zip")
 
         return Single
@@ -64,7 +67,7 @@ abstract class RCImporter(
                 .map { resources ->
                     resources.any {
                         it.language.slug == dublinCore.language.identifier &&
-                                it.identifier == dublinCore.identifier
+                            it.identifier == dublinCore.identifier
                     }
                 }
                 .doOnError {

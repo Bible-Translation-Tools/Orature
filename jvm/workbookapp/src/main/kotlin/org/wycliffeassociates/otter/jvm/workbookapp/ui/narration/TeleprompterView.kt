@@ -22,6 +22,7 @@ import java.text.MessageFormat
 import kotlin.math.max
 
 object RefreshTeleprompter : FXEvent()
+
 class TeleprompterSeekEvent(val index: Int) : FXEvent()
 
 class TeleprompterViewModel : ViewModel() {
@@ -50,7 +51,6 @@ class TeleprompterViewModel : ViewModel() {
     val isRecordingAgainProperty = SimpleBooleanProperty()
     private var isRecordingAgain by isRecordingAgainProperty
 
-
     val lastRecordedVerseProperty = SimpleIntegerProperty(0)
 
     val recordingVerseProperty = SimpleIntegerProperty()
@@ -76,17 +76,17 @@ class TeleprompterViewModel : ViewModel() {
                         MessageFormat.format(
                             messages["currentVerseTitle"],
                             messages["verse"],
-                            itemData.chunk.title
+                            itemData.chunk.title,
                         )
                     } else {
                         MessageFormat.format(
                             messages["currentTitle"],
-                            itemData.chunk.textItem.text
+                            itemData.chunk.textItem.text,
                         )
                     }
                 }
             },
-            stickyVerseProperty
+            stickyVerseProperty,
         )
     }
 
@@ -104,18 +104,20 @@ class TeleprompterViewModel : ViewModel() {
             recordResumeProperty,
             isRecordingProperty,
             recordPauseProperty,
-            isRecordingAgainProperty
+            isRecordingAgainProperty,
         )
     }
 
     fun updateStickyVerse() {
-        val activeStates = listOf(
-            TeleprompterItemState.RECORD_ACTIVE,
-            TeleprompterItemState.RECORD_AGAIN_ACTIVE,
-            TeleprompterItemState.RECORDING_PAUSED,
-            TeleprompterItemState.RECORD_AGAIN_PAUSED
-        )
-        val verse = narrationViewModel.narratableList
+        val activeStates =
+            listOf(
+                TeleprompterItemState.RECORD_ACTIVE,
+                TeleprompterItemState.RECORD_AGAIN_ACTIVE,
+                TeleprompterItemState.RECORDING_PAUSED,
+                TeleprompterItemState.RECORD_AGAIN_PAUSED,
+            )
+        val verse =
+            narrationViewModel.narratableList
                 .firstOrNull {
                     it.state in activeStates || !it.hasRecording
                 }
@@ -125,7 +127,6 @@ class TeleprompterViewModel : ViewModel() {
 }
 
 class TeleprompterView : View() {
-
     private val logger = LoggerFactory.getLogger(TeleprompterView::class.java)
 
     private val viewModel: TeleprompterViewModel by inject()
@@ -191,56 +192,59 @@ class TeleprompterView : View() {
         subscriptions.clear()
     }
 
-    override val root = vbox {
-        addClass("narration__verses")
-        vgrow = Priority.ALWAYS
-
-        stickyVerse {
-            verseLabelProperty.bind(viewModel.currentVerseTextBinding())
-            resumeTextProperty.set(messages["resume"])
-
-            visibleWhen { viewModel.showStickyVerseProperty.and(viewModel.stickyVerseProperty.isNotNull) }
-            managedWhen(visibleProperty())
-
-            visibleProperty().onChange {
-                animateStickyVerse(it)
-            }
-        }
-
-        narrationTextListview(viewModel.chunks) {
-            addClass("narration__list")
+    override val root =
+        vbox {
+            addClass("narration__verses")
             vgrow = Priority.ALWAYS
 
-            listView = this
-            firstVerseToResumeProperty.bind(viewModel.stickyVerseProperty)
+            stickyVerse {
+                verseLabelProperty.bind(viewModel.currentVerseTextBinding())
+                resumeTextProperty.set(messages["resume"])
 
-            setCellFactory {
-                NarrationTextCell(
-                    messages["nextVerse"],
-                    viewModel.recordButtonTextBinding(),
-                    viewModel.isRecordingProperty,
-                    viewModel.isRecordingAgainProperty,
-                    viewModel.isPlayingProperty,
-                    viewModel.recordingVerseProperty,
-                    viewModel.playingVerseProperty
-                )
+                visibleWhen { viewModel.showStickyVerseProperty.and(viewModel.stickyVerseProperty.isNotNull) }
+                managedWhen(visibleProperty())
+
+                visibleProperty().onChange {
+                    animateStickyVerse(it)
+                }
             }
 
-            runLater { customizeScrollbarSkin() }
+            narrationTextListview(viewModel.chunks) {
+                addClass("narration__list")
+                vgrow = Priority.ALWAYS
+
+                listView = this
+                firstVerseToResumeProperty.bind(viewModel.stickyVerseProperty)
+
+                setCellFactory {
+                    NarrationTextCell(
+                        messages["nextVerse"],
+                        viewModel.recordButtonTextBinding(),
+                        viewModel.isRecordingProperty,
+                        viewModel.isRecordingAgainProperty,
+                        viewModel.isPlayingProperty,
+                        viewModel.recordingVerseProperty,
+                        viewModel.playingVerseProperty,
+                    )
+                }
+
+                runLater { customizeScrollbarSkin() }
+            }
         }
-    }
 
     private fun StickyVerse.animateStickyVerse(showing: Boolean) {
         if (showing) {
             opacity = 1.0
-            val scaleTransition = ScaleTransition(Duration.seconds(0.6), this).apply {
-                fromY = 0.2
-                toY = 1.0
-            }
-            val tt1 = TranslateTransition(Duration.seconds(0.6), this).apply {
-                fromY = -maxHeight / 2
-                toY = 0.0
-            }
+            val scaleTransition =
+                ScaleTransition(Duration.seconds(0.6), this).apply {
+                    fromY = 0.2
+                    toY = 1.0
+                }
+            val tt1 =
+                TranslateTransition(Duration.seconds(0.6), this).apply {
+                    fromY = -maxHeight / 2
+                    toY = 0.0
+                }
             val animation = ParallelTransition(scaleTransition, tt1)
             animation.play()
         } else {

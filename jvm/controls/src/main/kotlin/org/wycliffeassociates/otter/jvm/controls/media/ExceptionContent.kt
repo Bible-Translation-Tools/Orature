@@ -31,7 +31,6 @@ import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.jvm.controls.skins.media.ExceptionContentSkin
 
 class ExceptionContent : Control() {
-
     private val titleTextProperty = SimpleStringProperty()
     private val headerTextProperty = SimpleStringProperty()
     private val showMoreTextProperty = SimpleStringProperty()

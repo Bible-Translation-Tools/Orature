@@ -334,5 +334,4 @@ class ChapterPageViewModelTest {
 //        chapterPageViewModel.processTakeWithPlugin(PluginType.MARKER)
 //    }
 //
-
 }

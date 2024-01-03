@@ -33,7 +33,6 @@ import java.io.File
 import java.util.concurrent.Callable
 
 class ChapterCard : ButtonBase() {
-
     val coverArtProperty = SimpleObjectProperty<File>()
     val titleProperty = SimpleStringProperty()
     val notStartedTextProperty = SimpleStringProperty("Not Started")
@@ -52,7 +51,7 @@ class ChapterCard : ButtonBase() {
                 "${recordedChunksProperty.value}/${totalChunksProperty.value}"
             },
             recordedChunksProperty,
-            totalChunksProperty
+            totalChunksProperty,
         )
     }
 
@@ -68,7 +67,7 @@ class ChapterCard : ButtonBase() {
                 }
             },
             recordedChunksProperty,
-            totalChunksProperty
+            totalChunksProperty,
         )
     }
 
@@ -78,7 +77,7 @@ class ChapterCard : ButtonBase() {
                 "${selectedChunksProperty.value}/${totalChunksProperty.value}"
             },
             selectedChunksProperty,
-            totalChunksProperty
+            totalChunksProperty,
         )
     }
 
@@ -94,7 +93,7 @@ class ChapterCard : ButtonBase() {
                 }
             },
             selectedChunksProperty,
-            totalChunksProperty
+            totalChunksProperty,
         )
     }
 

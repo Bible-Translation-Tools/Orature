@@ -31,7 +31,6 @@ import org.junit.Before
 import org.junit.Test
 import org.wycliffeassociates.otter.common.ResourceContainerBuilder
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
-import org.wycliffeassociates.otter.common.domain.project.InProgressNarrationFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
@@ -39,6 +38,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.inProgressNarrationPattern
 import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.takeFilenamePattern
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
+import org.wycliffeassociates.otter.common.domain.project.InProgressNarrationFileFormat
 import org.wycliffeassociates.otter.common.domain.project.TakeCheckingStatusMap
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOptions
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
@@ -53,7 +53,6 @@ import javax.inject.Provider
 import kotlin.io.path.createTempDirectory
 
 class TestBackupProjectExporter {
-
     @Inject
     lateinit var dbEnvProvider: Provider<DatabaseEnvironment>
 
@@ -87,8 +86,9 @@ class TestBackupProjectExporter {
     fun setUp() {
         importer.get().import(seedProject).blockingGet()
         importer.get().import(narrationBackup).blockingGet()
-        workbook = workbookRepository.getProjects().blockingGet()
-            .find { it.target.slug == ResourceContainerBuilder.defaultProjectSlug }!!
+        workbook =
+            workbookRepository.getProjects().blockingGet()
+                .find { it.target.slug == ResourceContainerBuilder.defaultProjectSlug }!!
         outputDir = createTempDirectory("orature-export-test").toFile()
     }
 
@@ -99,14 +99,15 @@ class TestBackupProjectExporter {
 
     @Test
     fun exportProjectWithContributorInfo() {
-        val result = exportBackupUseCase.get()
-            .export(
-                outputDir,
-                workbook,
-                callback = null,
-                options = null
-            )
-            .blockingGet()
+        val result =
+            exportBackupUseCase.get()
+                .export(
+                    outputDir,
+                    workbook,
+                    callback = null,
+                    options = null,
+                )
+                .blockingGet()
 
         Assert.assertEquals(ExportResult.SUCCESS, result)
 
@@ -114,23 +115,25 @@ class TestBackupProjectExporter {
 
         Assert.assertNotNull(file)
 
-        val exportedContributorList = ResourceContainer.load(file!!).use {
-            it.manifest.dublinCore.contributor.toList()
-        }
+        val exportedContributorList =
+            ResourceContainer.load(file!!).use {
+                it.manifest.dublinCore.contributor.toList()
+            }
         Assert.assertEquals(contributors, exportedContributorList)
     }
 
     @Test
     fun exportProjectWithChapterFilter() {
         val chapterFilter = ExportOptions(chapters = listOf(1, 3))
-        val result = exportBackupUseCase.get()
-            .export(
-                outputDir,
-                workbook,
-                options = chapterFilter,
-                callback = null
-            )
-            .blockingGet()
+        val result =
+            exportBackupUseCase.get()
+                .export(
+                    outputDir,
+                    workbook,
+                    options = chapterFilter,
+                    callback = null,
+                )
+                .blockingGet()
 
         Assert.assertEquals(ExportResult.SUCCESS, result)
 
@@ -142,29 +145,30 @@ class TestBackupProjectExporter {
 
         Assert.assertEquals(
             chapterFilter.chapters,
-            chapterToTakes.keys.toList().sorted()
+            chapterToTakes.keys.toList().sorted(),
         )
         Assert.assertEquals(
             takesPerChapter * chapterFilter.chapters.size,
-            chapterToTakes.values.sum()
+            chapterToTakes.values.sum(),
         )
         Assert.assertEquals(
             "Chapters from selected metadata file should match filter.",
             chapterFilter.chapters,
-            chaptersFromSelectedTakesFile(file)
+            chaptersFromSelectedTakesFile(file),
         )
     }
 
     @Test
     fun exportTranslationWithChecking() {
-        val result = exportBackupUseCase.get()
-            .export(
-                outputDir,
-                workbook,
-                callback = null,
-                options = null
-            )
-            .blockingGet()
+        val result =
+            exportBackupUseCase.get()
+                .export(
+                    outputDir,
+                    workbook,
+                    callback = null,
+                    options = null,
+                )
+                .blockingGet()
 
         Assert.assertEquals(ExportResult.SUCCESS, result)
 
@@ -174,27 +178,29 @@ class TestBackupProjectExporter {
 
         ResourceContainer.load(file!!).use { rc ->
             rc.accessor.getInputStream(ResourceContainerBuilder.checkingStatusFilePath).use { stream ->
-                val mapper = ObjectMapper(JsonFactory())
-                    .registerKotlinModule()
-                    .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                val mapper =
+                    ObjectMapper(JsonFactory())
+                        .registerKotlinModule()
+                        .setSerializationInclusion(JsonInclude.Include.NON_NULL)
                 val takeCheckingMap = mapper.readValue<TakeCheckingStatusMap>(stream)
 
                 Assert.assertEquals(6, takeCheckingMap.size)
-                Assert.assertEquals(1, takeCheckingMap.values.filter { it == verseChecking }.size )
+                Assert.assertEquals(1, takeCheckingMap.values.filter { it == verseChecking }.size)
             }
         }
     }
 
     @Test
     fun exportNarrationBackup() {
-        val result = exportBackupUseCase.get()
-            .export(
-                outputDir,
-                workbook,
-                callback = null,
-                options = null
-            )
-            .blockingGet()
+        val result =
+            exportBackupUseCase.get()
+                .export(
+                    outputDir,
+                    workbook,
+                    callback = null,
+                    options = null,
+                )
+                .blockingGet()
 
         Assert.assertEquals(ExportResult.SUCCESS, result)
 
@@ -228,25 +234,31 @@ class TestBackupProjectExporter {
     @Test
     fun testEstimateExportSize() {
         var expectedSize = 192L
-        var computedSize = exportBackupUseCase.get()
-            .estimateExportSize(workbook, listOf(1, 2))
+        var computedSize =
+            exportBackupUseCase.get()
+                .estimateExportSize(workbook, listOf(1, 2))
 
         Assert.assertEquals("Estimated backup size should be $expectedSize bytes", expectedSize, computedSize)
 
         expectedSize = 288L
-        computedSize = exportBackupUseCase.get()
-            .estimateExportSize(workbook, listOf(1, 2, 3))
+        computedSize =
+            exportBackupUseCase.get()
+                .estimateExportSize(workbook, listOf(1, 2, 3))
 
         Assert.assertEquals("Estimated backup size should be $expectedSize bytes", expectedSize, computedSize)
 
         expectedSize = 0L
-        computedSize = exportBackupUseCase.get()
-            .estimateExportSize(workbook, listOf())
+        computedSize =
+            exportBackupUseCase.get()
+                .estimateExportSize(workbook, listOf())
 
         Assert.assertEquals("Estimated backup size should be $expectedSize bytes", expectedSize, computedSize)
     }
 
-    private fun parseChapter(path: String, pattern: Pattern): Int {
+    private fun parseChapter(
+        path: String,
+        pattern: Pattern,
+    ): Int {
         return pattern
             .matcher(path)
             .apply { find() }
@@ -300,12 +312,11 @@ class TestBackupProjectExporter {
     private fun chaptersFromSelectedTakesFile(projectFile: File): List<Int> {
         var lines = mutableListOf<String>()
         ResourceContainer.load(projectFile).use {
-            if (it.accessor.fileExists(".apps/orature/selected.txt"))
-                {
-                    it.accessor.getReader(".apps/orature/selected.txt").use {
-                        lines.addAll(it.readText().split("\n"))
-                    }
+            if (it.accessor.fileExists(".apps/orature/selected.txt")) {
+                it.accessor.getReader(".apps/orature/selected.txt").use {
+                    lines.addAll(it.readText().split("\n"))
                 }
+            }
         }
         return lines
             .filter { it.isNotBlank() }

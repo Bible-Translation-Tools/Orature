@@ -27,23 +27,24 @@ import org.wycliffeassociates.otter.common.persistence.config.Initializable
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 import javax.inject.Inject
 
-class InitializeTakeRepository @Inject constructor(
-    private val takeRepository: ITakeRepository
-) : Initializable {
+class InitializeTakeRepository
+    @Inject
+    constructor(
+        private val takeRepository: ITakeRepository,
+    ) : Initializable {
+        private val log = LoggerFactory.getLogger(InitializeTakeRepository::class.java)
 
-    private val log = LoggerFactory.getLogger(InitializeTakeRepository::class.java)
-
-    override fun exec(progressEmitter: ObservableEmitter<ProgressStatus>): Completable {
-        log.info("Initializing take repository...")
-        return takeRepository
-            .removeNonExistentTakes()
-            .andThen(takeRepository.deleteExpiredTakes())
-            .doOnError { e ->
-                log.error("Error initializing take repository", e)
-            }
-            .doOnComplete {
-                log.info("Take repository initialized!")
-            }
-            .subscribeOn(Schedulers.io())
+        override fun exec(progressEmitter: ObservableEmitter<ProgressStatus>): Completable {
+            log.info("Initializing take repository...")
+            return takeRepository
+                .removeNonExistentTakes()
+                .andThen(takeRepository.deleteExpiredTakes())
+                .doOnError { e ->
+                    log.error("Error initializing take repository", e)
+                }
+                .doOnComplete {
+                    log.info("Take repository initialized!")
+                }
+                .subscribeOn(Schedulers.io())
+        }
     }
-}

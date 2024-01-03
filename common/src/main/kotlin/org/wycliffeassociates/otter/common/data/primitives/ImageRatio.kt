@@ -24,17 +24,22 @@ enum class ImageRatio(val width: Int, val height: Int) {
     FOUR_BY_ONE(4, 1),
     TWO_BY_ONE(2, 1),
     ONE_BY_ONE(1, 1),
-    DEFAULT(0, 0);
+    DEFAULT(0, 0),
+    ;
 
     override fun toString(): String {
         return if (this != DEFAULT) {
             "${width}x$height"
-        } else ""
+        } else {
+            ""
+        }
     }
 
     fun getImageSuffix(): String {
         return if (this != DEFAULT) {
             "_${toString()}"
-        } else ""
+        } else {
+            ""
+        }
     }
 }

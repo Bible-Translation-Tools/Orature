@@ -29,8 +29,8 @@ import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
-import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
+import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
 import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
@@ -48,8 +48,11 @@ import javax.inject.Inject
 
 class AudioPluginViewModel : ViewModel() {
     @Inject lateinit var pluginRepository: IAudioPluginRepository
+
     @Inject lateinit var launchPlugin: LaunchPlugin
+
     @Inject lateinit var pluginActions: PluginActions
+
     @Inject lateinit var localeLanguage: LocaleLanguage
 
     private val workbookDataStore: WorkbookDataStore by inject()
@@ -76,16 +79,19 @@ class AudioPluginViewModel : ViewModel() {
             audio = recordable.audio,
             projectAudioDir = workbookDataStore.workbook.projectFilesAccessor.audioDir,
             namer = createFileNamer(recordable),
-            pluginParameters = params
+            pluginParameters = params,
         )
     }
 
-    fun import(recordable: Recordable, take: File): Completable {
+    fun import(
+        recordable: Recordable,
+        take: File,
+    ): Completable {
         return pluginActions.import(
             audio = recordable.audio,
             projectAudioDir = workbookDataStore.workbook.projectFilesAccessor.audioDir,
             namer = createFileNamer(recordable),
-            take = take
+            take = take,
         )
     }
 
@@ -97,19 +103,22 @@ class AudioPluginViewModel : ViewModel() {
         val chapterLabel = messages[workbookDataStore.activeChapterProperty.value.label]
         val chapterNumber = workbookDataStore.activeChapterProperty.value.sort
 
-        val verseLabels = workbookDataStore.getSourceChapter()
-            .map { it.getDraft() }.blockingGet()
-            .map { it.title }.toList()
-            .blockingGet()
-        val verseTotal =  workbookDataStore.getSourceChapter().flatMapSingle { it.chunkCount }.blockingGet()
-        val chunkLabel = workbookDataStore.activeChunkProperty.value?.let {
-            messages[workbookDataStore.activeChunkProperty.value.label]
-        }
+        val verseLabels =
+            workbookDataStore.getSourceChapter()
+                .map { it.getDraft() }.blockingGet()
+                .map { it.title }.toList()
+                .blockingGet()
+        val verseTotal = workbookDataStore.getSourceChapter().flatMapSingle { it.chunkCount }.blockingGet()
+        val chunkLabel =
+            workbookDataStore.activeChunkProperty.value?.let {
+                messages[workbookDataStore.activeChunkProperty.value.label]
+            }
         val chunkNumber = workbookDataStore.activeChunkProperty.value?.sort
         val chunkTitle = workbookDataStore.activeChunkProperty.value?.title
-        val resourceLabel = workbookDataStore.activeResourceComponentProperty.value?.let {
-            messages[workbookDataStore.activeResourceComponentProperty.value.label]
-        }
+        val resourceLabel =
+            workbookDataStore.activeResourceComponentProperty.value?.let {
+                messages[workbookDataStore.activeResourceComponentProperty.value.label]
+            }
         val targetAudio = audioDataStore.targetAudioProperty.value
 
         val sourceRate = (workbookDataStore.workbook.translation.sourceRate as BehaviorRelay).value ?: 1.0
@@ -139,7 +148,7 @@ class AudioPluginViewModel : ViewModel() {
             sourceRate = sourceRate,
             targetRate = targetRate,
             sourceTextZoom = sourceTextZoom,
-            sourceLanguageName = workbook.source.language.name
+            sourceLanguageName = workbook.source.language.name,
         )
     }
 
@@ -149,7 +158,7 @@ class AudioPluginViewModel : ViewModel() {
             chapter = workbookDataStore.chapter,
             chunk = workbookDataStore.chunk,
             recordable = recordable,
-            rcSlug = workbookDataStore.workbook.sourceMetadataSlug
+            rcSlug = workbookDataStore.workbook.sourceMetadataSlug,
         )
     }
 
@@ -160,27 +169,37 @@ class AudioPluginViewModel : ViewModel() {
     fun edit(file: File): Single<PluginActions.Result> {
         val takes = ReplayRelay.create<Take>()
         val audio = AssociatedAudio(takes)
-        val take = Take(
-            name = file.name,
-            file = file,
-            number = 1,
-            format = MimeType.WAV,
-            createdTimestamp = LocalDate.now()
-        )
+        val take =
+            Take(
+                name = file.name,
+                file = file,
+                number = 1,
+                format = MimeType.WAV,
+                createdTimestamp = LocalDate.now(),
+            )
         return edit(audio, take)
     }
 
-    fun edit(audio: AssociatedAudio, take: Take): Single<PluginActions.Result> {
+    fun edit(
+        audio: AssociatedAudio,
+        take: Take,
+    ): Single<PluginActions.Result> {
         val params = constructPluginParameters()
         return pluginActions.edit(audio, take, params)
     }
 
-    fun mark(audio: AssociatedAudio, take: Take): Single<PluginActions.Result> {
+    fun mark(
+        audio: AssociatedAudio,
+        take: Take,
+    ): Single<PluginActions.Result> {
         val params = constructPluginParameters(messages["markAction"])
         return pluginActions.mark(audio, take, params)
     }
 
-    fun addPlugin(record: Boolean, edit: Boolean) {
+    fun addPlugin(
+        record: Boolean,
+        edit: Boolean,
+    ) {
         find<AddPluginDialog>().apply {
             themeProperty.set(settingsViewModel.appColorMode.value)
             orientationProperty.set(settingsViewModel.orientationProperty.value)

@@ -17,31 +17,74 @@ import org.wycliffeassociates.otter.common.domain.collections.UpdateTranslation
 typealias ModelTake = org.wycliffeassociates.otter.common.data.primitives.Take
 
 interface IWorkbookDatabaseAccessors {
-    fun addContentForCollection(collection: Collection, chunks: List<Content>): Completable
+    fun addContentForCollection(
+        collection: Collection,
+        chunks: List<Content>,
+    ): Completable
+
     fun getChildren(collection: Collection): Single<List<Collection>>
+
     fun getCollectionMetaContent(collection: Collection): Single<Content>
+
     fun getContentByCollection(collection: Collection): Single<List<Content>>
+
     fun getContentByCollectionActiveConnection(collection: Collection): Observable<List<Content>>
+
     fun updateContent(content: Content): Completable
-    fun getResources(content: Content, metadata: ResourceMetadata): Observable<Content>
-    fun getResources(collection: Collection, metadata: ResourceMetadata): Observable<Content>
+
+    fun getResources(
+        content: Content,
+        metadata: ResourceMetadata,
+    ): Observable<Content>
+
+    fun getResources(
+        collection: Collection,
+        metadata: ResourceMetadata,
+    ): Observable<Content>
+
     fun getResourceMetadata(content: Content): List<ResourceMetadata>
+
     fun getResourceMetadata(collection: Collection): List<ResourceMetadata>
+
     fun getLinkedResourceMetadata(metadata: ResourceMetadata): List<ResourceMetadata>
+
     fun getSubtreeResourceMetadata(collection: Collection): List<ResourceMetadata>
-    fun insertTakeForContent(take: ModelTake, content: Content): Single<Int>
+
+    fun insertTakeForContent(
+        take: ModelTake,
+        content: Content,
+    ): Single<Int>
+
     fun getTakeByContent(content: Content): Single<List<ModelTake>>
+
     fun updateTake(take: ModelTake): Completable
-    fun deleteTake(take: ModelTake, date: DateHolder): Completable
-    fun getSoftDeletedTakes(metadata: ResourceMetadata, projectSlug: String): Single<List<ModelTake>>
+
+    fun deleteTake(
+        take: ModelTake,
+        date: DateHolder,
+    ): Completable
+
+    fun getSoftDeletedTakes(
+        metadata: ResourceMetadata,
+        projectSlug: String,
+    ): Single<List<ModelTake>>
+
     fun getDerivedProject(sourceCollection: Collection): Maybe<Collection>
+
     fun getDerivedProjects(): Single<List<Collection>>
+
     fun getSourceProject(targetProject: Collection): Maybe<Collection>
-    fun getTranslation(sourceLanguage: Language, targetLanguage: Language): Single<Translation>
+
+    fun getTranslation(
+        sourceLanguage: Language,
+        targetLanguage: Language,
+    ): Single<Translation>
+
     fun updateTranslation(translation: Translation): Completable
+
     fun clearContentForCollection(
         chapterCollection: Collection,
-        typeFilter: ContentType
+        typeFilter: ContentType,
     ): Single<List<ModelTake>>
 
     fun getChunkCount(chapterCollection: Collection): Single<Int>
@@ -54,9 +97,8 @@ class WorkbookDatabaseAccessor(
     private val resourceMetadataRepo: IResourceMetadataRepository,
     private val takeRepo: ITakeRepository,
     private val languageRepo: ILanguageRepository,
-    private val updateTranslationUseCase: UpdateTranslation
+    private val updateTranslationUseCase: UpdateTranslation,
 ) : IWorkbookDatabaseAccessors {
-
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun getChunkCount(chapterCollection: Collection): Single<Int> {
@@ -67,7 +109,7 @@ class WorkbookDatabaseAccessor(
 
     override fun clearContentForCollection(
         chapterCollection: Collection,
-        typeFilter: ContentType
+        typeFilter: ContentType,
     ): Single<List<ModelTake>> {
         return takeRepo
             .getByCollection(chapterCollection, true)
@@ -86,18 +128,22 @@ class WorkbookDatabaseAccessor(
             }
     }
 
-    override fun addContentForCollection(collection: Collection, chunks: List<Content>): Completable {
+    override fun addContentForCollection(
+        collection: Collection,
+        chunks: List<Content>,
+    ): Completable {
         return Observable.just(chunks)
             .map { contents ->
                 contentRepo.insertForCollection(contents, collection)
                     .blockingGet()
             }
             .flatMapCompletable { contents ->
-                val sourceContents = collectionRepo.getSource(collection)
-                    .blockingGet()
-                    ?.let { collection ->
-                        contentRepo.getByCollection(collection).blockingGet()
-                    }
+                val sourceContents =
+                    collectionRepo.getSource(collection)
+                        .blockingGet()
+                        ?.let { collection ->
+                            contentRepo.getByCollection(collection).blockingGet()
+                        }
 
                 if (sourceContents == null || sourceContents.isEmpty()) {
                     Completable.complete()
@@ -110,35 +156,51 @@ class WorkbookDatabaseAccessor(
     override fun getChildren(collection: Collection) = collectionRepo.getChildren(collection)
 
     override fun getCollectionMetaContent(collection: Collection) = contentRepo.getCollectionMetaContent(collection)
+
     override fun getContentByCollection(collection: Collection) = contentRepo.getByCollection(collection)
+
     override fun getContentByCollectionActiveConnection(collection: Collection): Observable<List<Content>> {
         return contentRepo.getByCollectionWithPersistentConnection(collection)
     }
 
     override fun updateContent(content: Content) = contentRepo.update(content)
 
-    override fun getResources(content: Content, metadata: ResourceMetadata) =
-        resourceRepo.getResources(content, metadata)
+    override fun getResources(
+        content: Content,
+        metadata: ResourceMetadata,
+    ) = resourceRepo.getResources(content, metadata)
 
-    override fun getResources(collection: Collection, metadata: ResourceMetadata) =
-        resourceRepo.getResources(collection, metadata)
+    override fun getResources(
+        collection: Collection,
+        metadata: ResourceMetadata,
+    ) = resourceRepo.getResources(collection, metadata)
 
     override fun getResourceMetadata(content: Content) = resourceRepo.getResourceMetadata(content)
+
     override fun getResourceMetadata(collection: Collection) = resourceRepo.getResourceMetadata(collection)
 
-    override fun getLinkedResourceMetadata(metadata: ResourceMetadata) =
-        resourceMetadataRepo.getLinked(metadata).blockingGet()
+    override fun getLinkedResourceMetadata(metadata: ResourceMetadata) = resourceMetadataRepo.getLinked(metadata).blockingGet()
 
-    override fun getSubtreeResourceMetadata(collection: Collection) =
-        resourceRepo.getSubtreeResourceMetadata(collection)
+    override fun getSubtreeResourceMetadata(collection: Collection) = resourceRepo.getSubtreeResourceMetadata(collection)
 
-    override fun insertTakeForContent(take: ModelTake, content: Content) = takeRepo.insertForContent(take, content)
+    override fun insertTakeForContent(
+        take: ModelTake,
+        content: Content,
+    ) = takeRepo.insertForContent(take, content)
+
     override fun getTakeByContent(content: Content) = takeRepo.getByContent(content, includeDeleted = true)
-    override fun updateTake(take: ModelTake) = takeRepo.update(take)
-    override fun deleteTake(take: ModelTake, date: DateHolder) = takeRepo.update(take.copy(deleted = date.value))
 
-    override fun getSoftDeletedTakes(metadata: ResourceMetadata, projectSlug: String) =
-        takeRepo.getSoftDeletedTakes(collectionRepo.getProjectBySlugAndMetadata(projectSlug, metadata).blockingGet())
+    override fun updateTake(take: ModelTake) = takeRepo.update(take)
+
+    override fun deleteTake(
+        take: ModelTake,
+        date: DateHolder,
+    ) = takeRepo.update(take.copy(deleted = date.value))
+
+    override fun getSoftDeletedTakes(
+        metadata: ResourceMetadata,
+        projectSlug: String,
+    ) = takeRepo.getSoftDeletedTakes(collectionRepo.getProjectBySlugAndMetadata(projectSlug, metadata).blockingGet())
 
     override fun getDerivedProject(sourceCollection: Collection): Maybe<Collection> {
         return collectionRepo.getDerivedProject(sourceCollection)
@@ -146,10 +208,12 @@ class WorkbookDatabaseAccessor(
 
     override fun getDerivedProjects(): Single<List<Collection>> = collectionRepo.getDerivedProjects()
 
-    override fun getSourceProject(targetProject: Collection): Maybe<Collection> =
-        collectionRepo.getSource(targetProject)
+    override fun getSourceProject(targetProject: Collection): Maybe<Collection> = collectionRepo.getSource(targetProject)
 
-    override fun getTranslation(sourceLanguage: Language, targetLanguage: Language): Single<Translation> {
+    override fun getTranslation(
+        sourceLanguage: Language,
+        targetLanguage: Language,
+    ): Single<Translation> {
         return languageRepo.getTranslation(sourceLanguage, targetLanguage)
     }
 

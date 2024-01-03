@@ -25,7 +25,6 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 class PcmFileReaderTest {
-
     @Test
     fun `test that mapped buffer is released`() {
         val file = File.createTempFile("file", ".pcm")

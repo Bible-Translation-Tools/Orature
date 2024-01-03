@@ -21,15 +21,14 @@ package org.wycliffeassociates.otter.common.audio.wav
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
 import org.junit.Test
-import java.io.File
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
 import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
+import java.io.File
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 class WavFileReaderTest {
-
     @Test
     fun `test that mapped buffer is released`() {
         val file = File.createTempFile("file", ".wav")

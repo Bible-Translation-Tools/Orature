@@ -9,7 +9,7 @@ enum class TeleprompterItemState {
     RECORD_AGAIN,
     RECORD_AGAIN_ACTIVE,
     RECORD_AGAIN_PAUSED,
-    RECORD_AGAIN_DISABLED
+    RECORD_AGAIN_DISABLED,
 }
 
 interface TeleprompterState {
@@ -23,10 +23,11 @@ interface TeleprompterState {
 object BeginRecordingState : TeleprompterState {
     override val type = TeleprompterItemState.BEGIN_RECORDING
 
-    override val validStateTransitions = setOf(
-        TeleprompterItemState.RECORD,
-        TeleprompterItemState.RECORD_DISABLED
-    )
+    override val validStateTransitions =
+        setOf(
+            TeleprompterItemState.RECORD,
+            TeleprompterItemState.RECORD_DISABLED,
+        )
 
     override val disabledState = RecordDisabledState
 
@@ -48,11 +49,12 @@ object BeginRecordingState : TeleprompterState {
 object RecordState : TeleprompterState {
     override val type = TeleprompterItemState.RECORD
 
-    override val validStateTransitions = setOf(
-        TeleprompterItemState.RECORD,
-        TeleprompterItemState.RECORD_ACTIVE,
-        TeleprompterItemState.RECORD_DISABLED,
-    )
+    override val validStateTransitions =
+        setOf(
+            TeleprompterItemState.RECORD,
+            TeleprompterItemState.RECORD_ACTIVE,
+            TeleprompterItemState.RECORD_DISABLED,
+        )
 
     override val disabledState = RecordDisabledState
 
@@ -75,10 +77,11 @@ object RecordState : TeleprompterState {
 object RecordDisabledState : TeleprompterState {
     override val type = TeleprompterItemState.RECORD_DISABLED
 
-    override val validStateTransitions = setOf(
-        TeleprompterItemState.RECORD,
-        TeleprompterItemState.RECORD_ACTIVE
-    )
+    override val validStateTransitions =
+        setOf(
+            TeleprompterItemState.RECORD,
+            TeleprompterItemState.RECORD_ACTIVE,
+        )
 
     override val disabledState = RecordDisabledState
 
@@ -100,11 +103,12 @@ object RecordDisabledState : TeleprompterState {
 object RecordActiveState : TeleprompterState {
     override val type = TeleprompterItemState.RECORD_ACTIVE
 
-    override val validStateTransitions = setOf(
-        TeleprompterItemState.RECORDING_PAUSED,
-        TeleprompterItemState.RECORD_AGAIN,
-        TeleprompterItemState.RECORD_AGAIN_DISABLED
-    )
+    override val validStateTransitions =
+        setOf(
+            TeleprompterItemState.RECORDING_PAUSED,
+            TeleprompterItemState.RECORD_AGAIN,
+            TeleprompterItemState.RECORD_AGAIN_DISABLED,
+        )
 
     override val disabledState: TeleprompterState
         get() = throw IllegalStateException("Tried to disable an active recording")
@@ -129,11 +133,12 @@ object RecordActiveState : TeleprompterState {
 object RecordPausedState : TeleprompterState {
     override val type = TeleprompterItemState.RECORDING_PAUSED
 
-    override val validStateTransitions = setOf(
-        TeleprompterItemState.RECORD_ACTIVE,
-        TeleprompterItemState.RECORD_AGAIN,
-        TeleprompterItemState.RECORD_AGAIN_DISABLED
-    )
+    override val validStateTransitions =
+        setOf(
+            TeleprompterItemState.RECORD_ACTIVE,
+            TeleprompterItemState.RECORD_AGAIN,
+            TeleprompterItemState.RECORD_AGAIN_DISABLED,
+        )
 
     override val disabledState = RecordDisabledState
 
@@ -156,10 +161,11 @@ object RecordPausedState : TeleprompterState {
 object RecordAgainState : TeleprompterState {
     override val type = TeleprompterItemState.RECORD_AGAIN
 
-    override val validStateTransitions = setOf(
-        TeleprompterItemState.RECORD_AGAIN_ACTIVE,
-        TeleprompterItemState.RECORD_AGAIN_DISABLED,
-    )
+    override val validStateTransitions =
+        setOf(
+            TeleprompterItemState.RECORD_AGAIN_ACTIVE,
+            TeleprompterItemState.RECORD_AGAIN_DISABLED,
+        )
 
     override val disabledState = RecordAgainDisabledState
 
@@ -181,9 +187,10 @@ object RecordAgainState : TeleprompterState {
 object RecordAgainDisabledState : TeleprompterState {
     override val type = TeleprompterItemState.RECORD_AGAIN_DISABLED
 
-    override val validStateTransitions = setOf(
-        TeleprompterItemState.RECORD_AGAIN
-    )
+    override val validStateTransitions =
+        setOf(
+            TeleprompterItemState.RECORD_AGAIN,
+        )
 
     override val disabledState = RecordAgainDisabledState
 
@@ -204,10 +211,11 @@ object RecordAgainDisabledState : TeleprompterState {
 object RecordAgainActiveState : TeleprompterState {
     override val type = TeleprompterItemState.RECORD_AGAIN_ACTIVE
 
-    override val validStateTransitions = setOf(
-        TeleprompterItemState.RECORD_AGAIN_PAUSED,
-        TeleprompterItemState.RECORD_AGAIN
-    )
+    override val validStateTransitions =
+        setOf(
+            TeleprompterItemState.RECORD_AGAIN_PAUSED,
+            TeleprompterItemState.RECORD_AGAIN,
+        )
 
     override fun changeState(request: TeleprompterItemState): TeleprompterState {
         if (request !in validStateTransitions) {
@@ -229,11 +237,12 @@ object RecordAgainActiveState : TeleprompterState {
 object RecordAgainPausedState : TeleprompterState {
     override val type = TeleprompterItemState.RECORD_AGAIN_PAUSED
 
-    override val validStateTransitions = setOf(
-        TeleprompterItemState.RECORD_AGAIN_ACTIVE,
-        TeleprompterItemState.RECORD_AGAIN,
-        TeleprompterItemState.RECORD_AGAIN_DISABLED
-    )
+    override val validStateTransitions =
+        setOf(
+            TeleprompterItemState.RECORD_AGAIN_ACTIVE,
+            TeleprompterItemState.RECORD_AGAIN,
+            TeleprompterItemState.RECORD_AGAIN_DISABLED,
+        )
 
     override fun changeState(request: TeleprompterItemState): TeleprompterState {
         if (request !in validStateTransitions) {

@@ -24,7 +24,7 @@ import java.io.File
 
 class ImportAudioPlugins(
     private val pluginRegistrar: IAudioPluginRegistrar,
-    private val directoryProvider: IDirectoryProvider
+    private val directoryProvider: IDirectoryProvider,
 ) {
     fun importAll(): Completable {
         // Imports all the plugins from the workbookapp's plugin directory

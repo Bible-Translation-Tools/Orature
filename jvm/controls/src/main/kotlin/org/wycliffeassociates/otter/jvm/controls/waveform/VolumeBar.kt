@@ -18,11 +18,11 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.waveform
 
+import io.reactivex.Observable
+import io.reactivex.schedulers.Schedulers
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.paint.Paint
-import io.reactivex.Observable
-import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.bar.VolumeBar
 import java.nio.ByteBuffer
@@ -33,7 +33,6 @@ import kotlin.math.max
 const val RANGE = 32767.0
 
 class VolumeBar(stream: Observable<ByteArray>) : Drawable {
-
     private val logger = LoggerFactory.getLogger(VolumeBar::class.java)
 
     companion object {
@@ -75,7 +74,10 @@ class VolumeBar(stream: Observable<ByteArray>) : Drawable {
             }
     }
 
-    override fun draw(context: GraphicsContext, canvas: Canvas) {
+    override fun draw(
+        context: GraphicsContext,
+        canvas: Canvas,
+    ) {
         context.clearRect(0.0, 0.0, canvas.width, canvas.height)
         calculateDbPixelLocations(canvas.height)
         drawBar(canvas, context)
@@ -89,7 +91,10 @@ class VolumeBar(stream: Observable<ByteArray>) : Drawable {
         dbMax = getDbLevel(32767, height)
     }
 
-    private fun drawBar(canvas: Canvas, context: GraphicsContext) {
+    private fun drawBar(
+        canvas: Canvas,
+        context: GraphicsContext,
+    ) {
         val decible = decibleAtom
         val currentDb = getDbLevel(decible, canvas.height)
         val currentDbNeg = getDbLevel(decible * -1, canvas.height)
@@ -110,21 +115,28 @@ class VolumeBar(stream: Observable<ByteArray>) : Drawable {
         context.fillPolygon(
             xPoints,
             yPoints,
-            4
+            4,
         )
     }
 
-    private fun getDbLevel(db: Int, height: Double): Double {
+    private fun getDbLevel(
+        db: Int,
+        height: Double,
+    ): Double {
         return (db / (RANGE) * (height / 2.0)) + height / 2.0
     }
 
-    private fun setColor(currentDb: Double, ctx: GraphicsContext) {
-        ctx.fill = when {
-            currentDb < dbLow -> lowColor
-            currentDb < dbGood -> goodColor
-            currentDb < dbHigh -> highColor
-            currentDb < dbMax -> maxColor
-            else -> defaultColor
-        }
+    private fun setColor(
+        currentDb: Double,
+        ctx: GraphicsContext,
+    ) {
+        ctx.fill =
+            when {
+                currentDb < dbLow -> lowColor
+                currentDb < dbGood -> goodColor
+                currentDb < dbHigh -> highColor
+                currentDb < dbMax -> maxColor
+                else -> defaultColor
+            }
     }
 }

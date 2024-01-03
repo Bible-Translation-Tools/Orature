@@ -21,19 +21,17 @@ package integrationtest.projects
 import com.fasterxml.jackson.databind.MappingIterator
 import com.fasterxml.jackson.dataformat.csv.CsvMapper
 import com.fasterxml.jackson.dataformat.csv.CsvSchema
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import integrationtest.di.DaggerTestPersistenceComponent
-import javax.inject.Inject
-import javax.inject.Provider
 import org.junit.Test
 import org.wycliffeassociates.otter.common.data.primitives.ContentType.BODY
 import org.wycliffeassociates.otter.common.data.primitives.ContentType.META
 import org.wycliffeassociates.otter.common.data.primitives.ContentType.TEXT
 import org.wycliffeassociates.otter.common.data.primitives.ContentType.TITLE
+import javax.inject.Inject
+import javax.inject.Provider
 
 class TestRcImport {
-
     @Inject
     lateinit var dbEnvProvider: Provider<DatabaseEnvironment>
 
@@ -47,13 +45,14 @@ class TestRcImport {
             .import("en_ulb.zip")
             .assertRowCounts(
                 RowCount(
-                    contents = mapOf(
-                        TEXT to 31104,
-                        META to 1189
-                    ),
+                    contents =
+                        mapOf(
+                            TEXT to 31104,
+                            META to 1189,
+                        ),
                     collections = 1256,
-                    links = 0
-                )
+                    links = 0,
+                ),
             )
     }
 
@@ -69,13 +68,14 @@ class TestRcImport {
             .import("en_ulb.zip", true)
             .assertRowCounts(
                 RowCount(
-                    contents = mapOf(
-                        TEXT to 31104,
-                        META to 1189
-                    ),
+                    contents =
+                        mapOf(
+                            TEXT to 31104,
+                            META to 1189,
+                        ),
                     collections = 1256,
-                    links = 0
-                )
+                    links = 0,
+                ),
             )
     }
 
@@ -86,30 +86,34 @@ class TestRcImport {
             .import("en_tn.zip")
             .assertRowCounts(
                 message = "Row counts after importing TN",
-                expected = RowCount(
-                    contents = mapOf(
-                        META to 1189,
-                        TEXT to 31104,
-                        TITLE to 80148,
-                        BODY to 77433
+                expected =
+                    RowCount(
+                        contents =
+                            mapOf(
+                                META to 1189,
+                                TEXT to 31104,
+                                TITLE to 80148,
+                                BODY to 77433,
+                            ),
+                        collections = 1256,
+                        links = 157581,
                     ),
-                    collections = 1256,
-                    links = 157581
-                )
             )
             .import("en_tq-v19-10.zip")
             .assertRowCounts(
                 message = "Row counts after importing TQ",
-                expected = RowCount(
-                    contents = mapOf(
-                        META to 1189,
-                        TEXT to 31104,
-                        TITLE to 98520,
-                        BODY to 95805
+                expected =
+                    RowCount(
+                        contents =
+                            mapOf(
+                                META to 1189,
+                                TEXT to 31104,
+                                TITLE to 98520,
+                                BODY to 95805,
+                            ),
+                        collections = 1256,
+                        links = 194325,
                     ),
-                    collections = 1256,
-                    links = 194325
-                )
             )
     }
 
@@ -120,12 +124,13 @@ class TestRcImport {
             .assertRowCounts(
                 RowCount(
                     collections = 57,
-                    contents = mapOf(
-                        META to 55,
-                        TEXT to 716
-                    ),
-                    links = 0
-                )
+                    contents =
+                        mapOf(
+                            META to 55,
+                            TEXT to 716,
+                        ),
+                    links = 0,
+                ),
             )
     }
 
@@ -136,15 +141,16 @@ class TestRcImport {
             .import("obs-tn-biel-v6.zip")
             .assertRowCounts(
                 RowCount(
-                    contents = mapOf(
-                        META to 55,
-                        TEXT to 716,
-                        TITLE to 2237,
-                        BODY to 2237
-                    ),
+                    contents =
+                        mapOf(
+                            META to 55,
+                            TEXT to 716,
+                            TITLE to 2237,
+                            BODY to 2237,
+                        ),
                     collections = 57,
-                    links = 4474
-                )
+                    links = 4474,
+                ),
             )
     }
 
@@ -156,7 +162,7 @@ class TestRcImport {
                 "obs",
                 CollectionDescriptor(label = "book", slug = "obs"),
                 CollectionDescriptor(label = "project", slug = "obs"),
-                CollectionDescriptor(label = "chapter", slug = "obs_1")
+                CollectionDescriptor(label = "chapter", slug = "obs_1"),
             )
     }
 
@@ -168,7 +174,7 @@ class TestRcImport {
                 "ulb",
                 CollectionDescriptor(label = "bundle", slug = "ulb"),
                 CollectionDescriptor(label = "project", slug = "gen"),
-                CollectionDescriptor(label = "chapter", slug = "gen_1")
+                CollectionDescriptor(label = "chapter", slug = "gen_1"),
             )
     }
 
@@ -180,10 +186,11 @@ class TestRcImport {
             val csv = javaClass.classLoader.getResource("verse-count-en_ulb-v21-05/$book.csv").readText()
             val mapper = CsvMapper().registerKotlinModule()
             val schema = CsvSchema.builder().addColumn("Chapter").addColumn("Verses").setUseHeader(true).build()
-            val reader: MappingIterator<ChapterVerse> = mapper
-                .readerFor(ChapterVerse::class.java)
-                .with(schema)
-                .readValues(csv)
+            val reader: MappingIterator<ChapterVerse> =
+                mapper
+                    .readerFor(ChapterVerse::class.java)
+                    .with(schema)
+                    .readValues(csv)
             val data = reader.readAll()
 
             for (test in data) {

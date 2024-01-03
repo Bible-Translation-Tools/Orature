@@ -13,7 +13,7 @@ import java.util.*
 data class ChunkData(
     val sort: Int,
     val title: String,
-    val text: String
+    val text: String,
 ) {
     var file: File? = null
     var start: Int = -1
@@ -60,7 +60,7 @@ data class ChunkData(
     constructor(chunk: Chunk) : this(
         sort = chunk.sort,
         title = chunk.title,
-        text = chunk.textItem.text
+        text = chunk.textItem.text,
     )
 
     fun hasAudio(): Boolean {

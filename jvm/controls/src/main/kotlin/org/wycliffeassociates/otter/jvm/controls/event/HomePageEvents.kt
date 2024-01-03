@@ -31,9 +31,9 @@ class ProjectImportFinishEvent(
     val project: String? = null,
     val language: String? = null,
     val filePath: String? = null,
-    val workbookDescriptor: WorkbookDescriptor? = null
-): FXEvent()
+    val workbookDescriptor: WorkbookDescriptor? = null,
+) : FXEvent()
 
 class ProjectImportEvent(
-    val file: File
+    val file: File,
 ) : FXEvent()

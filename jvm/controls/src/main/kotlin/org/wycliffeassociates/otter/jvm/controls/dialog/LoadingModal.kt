@@ -7,26 +7,25 @@ import javafx.scene.layout.VBox
 import tornadofx.*
 
 class LoadingModal : OtterDialog() {
-
     val messageProperty = SimpleStringProperty()
 
-    private val content = VBox().apply {
-        addClass("confirm-dialog", "progress-dialog")
+    private val content =
+        VBox().apply {
+            addClass("confirm-dialog", "progress-dialog")
 
-        vbox {
-            addClass("confirm-dialog__body")
-            vgrow = Priority.ALWAYS
-            label(messageProperty) {
-                addClass("confirm-dialog__message", "normal-text")
-            }
-            add(
-                JFXProgressBar().apply {
-                    prefWidthProperty().bind(this@vbox.widthProperty())
+            vbox {
+                addClass("confirm-dialog__body")
+                vgrow = Priority.ALWAYS
+                label(messageProperty) {
+                    addClass("confirm-dialog__message", "normal-text")
                 }
-            )
+                add(
+                    JFXProgressBar().apply {
+                        prefWidthProperty().bind(this@vbox.widthProperty())
+                    },
+                )
+            }
         }
-
-    }
 
     init {
         setContent(content)

@@ -28,6 +28,7 @@ import tornadofx.property
 class SVGImage(svgGroup: Group) : StackPane() {
     private val svgAspectRatio = svgGroup.boundsInLocal.width / svgGroup.boundsInLocal.height
     var preserveAspect: Boolean by property(true)
+
     fun preserveAspectProperty() = getProperty(SVGImage::preserveAspect)
 
     init {
@@ -40,7 +41,7 @@ class SVGImage(svgGroup: Group) : StackPane() {
                     scaleX = svgAspectRatio * height / svgGroup.boundsInLocal.width
                 }
                 return@doubleBinding scaleX
-            })
+            }),
         )
         svgGroup.scaleYProperty().bind(
             doubleBinding(heightProperty(), widthProperty(), preserveAspectProperty(), op = {
@@ -50,7 +51,7 @@ class SVGImage(svgGroup: Group) : StackPane() {
                     scaleY = (width / svgAspectRatio) / svgGroup.boundsInLocal.height
                 }
                 return@doubleBinding scaleY
-            })
+            }),
         )
         minHeight = 0.0
         minWidth = 0.0

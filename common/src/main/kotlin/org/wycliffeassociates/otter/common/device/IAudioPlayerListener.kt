@@ -24,9 +24,9 @@ interface IAudioPlayerListener {
     fun onEvent(event: AudioPlayerEvent)
 }
 
-
 class WeakAudioListener(listener: IAudioPlayerListener) : IAudioPlayerListener {
     private val wref: WeakReference<IAudioPlayerListener>
+
     init {
         wref = WeakReference(listener)
     }

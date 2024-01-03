@@ -7,11 +7,11 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview.lang
 import tornadofx.*
 
 class LanguageTableDemoView : View() {
-
-    private val languages = observableListOf(
-        Language("en", "English", "English", "", true, ""),
-        Language("fr", "français", "French", "", true, ""),
-    )
+    private val languages =
+        observableListOf(
+            Language("en", "English", "English", "", true, ""),
+            Language("fr", "français", "French", "", true, ""),
+        )
 
     init {
         tryImportStylesheet("/css/popup-menu.css")
@@ -23,9 +23,10 @@ class LanguageTableDemoView : View() {
         }
     }
 
-    override val root = vbox {
-        paddingAll = 20.0
+    override val root =
+        vbox {
+            paddingAll = 20.0
 
-        languageTableView(languages)
-    }
+            languageTableView(languages)
+        }
 }

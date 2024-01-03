@@ -22,7 +22,7 @@ import io.reactivex.Maybe
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 
 class CreatePlugin(
-    private val pluginRepository: IAudioPluginRepository
+    private val pluginRepository: IAudioPluginRepository,
 ) {
     fun create(data: AudioPluginData): Maybe<Int> {
         return pluginRepository

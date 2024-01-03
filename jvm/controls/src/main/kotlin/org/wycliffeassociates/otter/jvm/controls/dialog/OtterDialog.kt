@@ -42,16 +42,18 @@ abstract class OtterDialog : Fragment() {
 
     private val roundRadius = 15.0
 
-    private val mainContainer = VBox().apply {
-        addClass("otter-dialog-container")
-    }
+    private val mainContainer =
+        VBox().apply {
+            addClass("otter-dialog-container")
+        }
 
-    override val root = VBox().apply {
-        addClass("otter-dialog-overlay")
-        nodeOrientationProperty().bind(orientationProperty)
+    override val root =
+        VBox().apply {
+            addClass("otter-dialog-overlay")
+            nodeOrientationProperty().bind(orientationProperty)
 
-        add(mainContainer)
-    }
+            add(mainContainer)
+        }
 
     init {
         tryImportStylesheet(resources.get("/css/otter-dialog.css"))
@@ -89,7 +91,7 @@ abstract class OtterDialog : Fragment() {
                         clipRegion(content, it)
                     }
                 }
-            }
+            },
         )
     }
 
@@ -118,7 +120,10 @@ abstract class OtterDialog : Fragment() {
         stage.scene.fill = Color.TRANSPARENT
     }
 
-    private fun clipRegion(region: Region, bounds: Bounds) {
+    private fun clipRegion(
+        region: Region,
+        bounds: Bounds,
+    ) {
         val rect = Rectangle()
         rect.width = bounds.width
         rect.height = bounds.height

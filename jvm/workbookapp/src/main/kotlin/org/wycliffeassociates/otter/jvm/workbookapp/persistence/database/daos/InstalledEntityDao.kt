@@ -23,25 +23,31 @@ import org.jooq.DSLContext
 import org.wycliffeassociates.otter.common.persistence.config.Installable
 
 class InstalledEntityDao(
-    private val instanceDsl: DSLContext
+    private val instanceDsl: DSLContext,
 ) {
-    fun upsert(entity: Installable, dsl: DSLContext = instanceDsl) {
+    fun upsert(
+        entity: Installable,
+        dsl: DSLContext = instanceDsl,
+    ) {
         dsl
             .insertInto(
                 INSTALLED_ENTITY,
                 INSTALLED_ENTITY.NAME,
-                INSTALLED_ENTITY.VERSION
+                INSTALLED_ENTITY.VERSION,
             )
             .values(
                 entity.name,
-                entity.version
+                entity.version,
             )
             .onDuplicateKeyUpdate()
             .set(INSTALLED_ENTITY.VERSION, entity.version)
             .execute()
     }
 
-    fun fetchVersion(entity: Installable, dsl: DSLContext = instanceDsl): Int? {
+    fun fetchVersion(
+        entity: Installable,
+        dsl: DSLContext = instanceDsl,
+    ): Int? {
         val set =
             dsl
                 .select(INSTALLED_ENTITY.VERSION)

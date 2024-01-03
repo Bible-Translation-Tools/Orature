@@ -30,41 +30,42 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPlugin
 import java.io.File
 import javax.inject.Inject
 
-class InitializePlugins @Inject constructor(
-    val directoryProvider: IDirectoryProvider,
-    val audioPluginRegistrar: IAudioPluginRegistrar,
-    val pluginRepository: IAudioPluginRepository
-) : Initializable {
+class InitializePlugins
+    @Inject
+    constructor(
+        val directoryProvider: IDirectoryProvider,
+        val audioPluginRegistrar: IAudioPluginRegistrar,
+        val pluginRepository: IAudioPluginRepository,
+    ) : Initializable {
+        private val log = LoggerFactory.getLogger(InitializePlugins::class.java)
 
-    private val log = LoggerFactory.getLogger(InitializePlugins::class.java)
+        override fun exec(progressEmitter: ObservableEmitter<ProgressStatus>): Completable {
+            copyOcenaudioPlugin()
 
-    override fun exec(progressEmitter: ObservableEmitter<ProgressStatus>): Completable {
-        copyOcenaudioPlugin()
+            // Always import new plugins
+            return ImportAudioPlugins(audioPluginRegistrar, directoryProvider)
+                .importAll()
+                .andThen(pluginRepository.initSelected())
+                .doOnError { e ->
+                    log.error("Error initializing plugins", e)
+                }
+                .doOnComplete {
+                    log.info("Plugins imported!")
+                }
+        }
 
-        // Always import new plugins
-        return ImportAudioPlugins(audioPluginRegistrar, directoryProvider)
-            .importAll()
-            .andThen(pluginRepository.initSelected())
-            .doOnError { e ->
-                log.error("Error initializing plugins", e)
+        private fun copyOcenaudioPlugin() {
+            if (!File(directoryProvider.audioPluginDirectory, "ocenaudio.yaml").exists()) {
+                log.info("Copying ocenaudio plugin")
+                ClassLoader.getSystemResourceAsStream("plugins/ocenaudio.yaml")
+                    .transferTo(
+                        File(
+                            directoryProvider.audioPluginDirectory.absolutePath,
+                            "ocenaudio.yaml",
+                        ).outputStream(),
+                    )
+            } else {
+                log.info("Ocenaudio plugin not initialized but ocenaudio.yaml exists in plugins directory")
             }
-            .doOnComplete {
-                log.info("Plugins imported!")
-            }
-    }
-
-    private fun copyOcenaudioPlugin() {
-        if (!File(directoryProvider.audioPluginDirectory, "ocenaudio.yaml").exists()) {
-            log.info("Copying ocenaudio plugin")
-            ClassLoader.getSystemResourceAsStream("plugins/ocenaudio.yaml")
-                .transferTo(
-                    File(
-                        directoryProvider.audioPluginDirectory.absolutePath,
-                        "ocenaudio.yaml"
-                    ).outputStream()
-                )
-        } else {
-            log.info("Ocenaudio plugin not initialized but ocenaudio.yaml exists in plugins directory")
         }
     }
-}

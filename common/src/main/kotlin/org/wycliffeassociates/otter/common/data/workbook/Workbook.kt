@@ -18,30 +18,30 @@
  */
 package org.wycliffeassociates.otter.common.data.workbook
 
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.ArtworkAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.ArtworkAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
-import java.util.*
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import java.util.*
 
 class Workbook(
     directoryProvider: IDirectoryProvider,
     val source: Book,
     val target: Book,
-    val translation: AssociatedTranslation
+    val translation: AssociatedTranslation,
 ) {
     val sourceAudioAccessor: SourceAudioAccessor by lazy {
         SourceAudioAccessor(
             directoryProvider,
             source.resourceMetadata,
-            source.slug
+            source.slug,
         )
     }
     val artworkAccessor: ArtworkAccessor by lazy {
         ArtworkAccessor(
             directoryProvider,
             source.resourceMetadata,
-            source.slug
+            source.slug,
         )
     }
 
@@ -50,7 +50,7 @@ class Workbook(
             directoryProvider,
             source.resourceMetadata,
             target.resourceMetadata,
-            target.toCollection()
+            target.toCollection(),
         )
     }
 
@@ -65,7 +65,7 @@ class Workbook(
             source.language,
             target.collectionId,
             target.slug,
-            target.language
+            target.language,
         )
     }
 

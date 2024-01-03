@@ -31,7 +31,6 @@ import org.wycliffeassociates.otter.jvm.controls.banner.ResumeBookBanner
 import tornadofx.*
 
 class ResumeBookBannerSkin(private val banner: ResumeBookBanner) : SkinBase<ResumeBookBanner>(banner) {
-
     @FXML
     lateinit var bgGraphic: HBox
 
@@ -62,13 +61,14 @@ class ResumeBookBannerSkin(private val banner: ResumeBookBanner) : SkinBase<Resu
 
     private fun initializeControl() {
         bgGraphic.apply {
-            val rect = Rectangle().apply {
-                widthProperty().bind(bgGraphic.widthProperty())
-                heightProperty().bind(bgGraphic.heightProperty())
+            val rect =
+                Rectangle().apply {
+                    widthProperty().bind(bgGraphic.widthProperty())
+                    heightProperty().bind(bgGraphic.heightProperty())
 
-                arcWidth = cornerRadius
-                arcHeight = cornerRadius
-            }
+                    arcWidth = cornerRadius
+                    arcHeight = cornerRadius
+                }
             clip = rect
         }
         bookCoverImage.apply {

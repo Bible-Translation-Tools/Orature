@@ -24,7 +24,6 @@ import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import java.io.File
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
@@ -33,31 +32,31 @@ import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
-import javax.inject.Inject
-import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.common.domain.translation.ChunkAudioUseCase
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.content.CreateChunks
 import org.wycliffeassociates.otter.common.domain.content.ResetChunks
+import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
+import org.wycliffeassociates.otter.common.domain.translation.ChunkAudioUseCase
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
-import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
+import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
-import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
+import org.wycliffeassociates.otter.jvm.controls.waveform.WAVEFORM_MAX_HEIGHT
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
-import org.wycliffeassociates.otter.jvm.controls.waveform.WAVEFORM_MAX_HEIGHT
 import tornadofx.*
+import java.io.File
+import javax.inject.Inject
 
 const val WAV_COLOR = "#66768B"
 const val BACKGROUND_COLOR = "#fff"
 
 class ChunkingViewModel : ViewModel(), IMarkerViewModel {
-
     val workbookDataStore: WorkbookDataStore by inject()
     val audioDataStore: AudioDataStore by inject()
     val translationViewModel: TranslationViewModel2 by inject()
@@ -160,7 +159,11 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         onUndoableAction()
     }
 
-    override fun moveMarker(id: Int, start: Int, end: Int) {
+    override fun moveMarker(
+        id: Int,
+        start: Int,
+        end: Int,
+    ) {
         super.moveMarker(id, start, end)
         onUndoableAction()
     }
@@ -192,10 +195,11 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         }
 
         waveformAudioPlayerProperty.set(player)
-        audioController = AudioPlayerController().also { controller ->
-            controller.load(player)
-            isPlayingProperty.bind(controller.isPlayingProperty)
-        }
+        audioController =
+            AudioPlayerController().also { controller ->
+                controller.load(player)
+                isPlayingProperty.bind(controller.isPlayingProperty)
+            }
         return audio
     }
 
@@ -203,17 +207,19 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         markers.clear()
         val totalMarkers = 500
         audio.clearCues()
-        val chunkMarkers = audio.getMarker<ChunkMarker>().map {
-            ChunkMarkerModel(AudioCue(it.location, it.label))
-        }
+        val chunkMarkers =
+            audio.getMarker<ChunkMarker>().map {
+                ChunkMarkerModel(AudioCue(it.location, it.label))
+            }
         markers.setAll(chunkMarkers)
-        markerModel = VerseMarkerModel(
-            audio,
-            totalMarkers,
-            (1..totalMarkers).map { it.toString() }
-        ).apply {
-            loadMarkers(chunkMarkers)
-        }
+        markerModel =
+            VerseMarkerModel(
+                audio,
+                totalMarkers,
+                (1..totalMarkers).map { it.toString() },
+            ).apply {
+                loadMarkers(chunkMarkers)
+            }
     }
 
     fun cleanup() {
@@ -236,7 +242,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
         resetChunks.resetChapter(accessor, chapter)
             .andThen(
-                createChunks.createUserDefinedChunks(wb, chapter, cues)
+                createChunks.createUserDefinedChunks(wb, chapter, cues),
             )
             .andThen { completable ->
                 ChunkAudioUseCase(directoryProvider, accessor)
@@ -254,13 +260,14 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     private fun createWaveformImages(audio: OratureAudioFile) {
         imageWidthProperty.set(computeImageWidth(width, SECONDS_ON_SCREEN))
 
-        waveform = builder.buildAsync(
-            audio.reader(),
-            width = imageWidthProperty.value.toInt(),
-            height = height,
-            wavColor = Color.web(WAV_COLOR),
-            background = Color.web(BACKGROUND_COLOR)
-        )
+        waveform =
+            builder.buildAsync(
+                audio.reader(),
+                width = imageWidthProperty.value.toInt(),
+                height = height,
+                wavColor = Color.web(WAV_COLOR),
+                background = Color.web(BACKGROUND_COLOR),
+            )
     }
 
     private fun onUndoableAction() {

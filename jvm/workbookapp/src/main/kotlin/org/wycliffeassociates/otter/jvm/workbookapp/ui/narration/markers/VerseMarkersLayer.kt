@@ -3,13 +3,13 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
+import javafx.event.EventTarget
+import javafx.scene.layout.BorderPane
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.*
-import javafx.event.EventTarget
-import javafx.scene.layout.BorderPane
-import org.slf4j.LoggerFactory
 
 class VerseMarkersLayer : BorderPane() {
     private val logger = LoggerFactory.getLogger(VerseMarkersLayer::class.java)
@@ -99,8 +99,8 @@ class VerseMarkersLayer : BorderPane() {
                         FX.eventbus.fire(
                             NarrationMarkerChangedEvent(
                                 verseMarkerControl.verseIndexProperty.value,
-                                frameDelta
-                            )
+                                frameDelta,
+                            ),
                         )
                     }
                     userIsDraggingProperty.set(false)
@@ -112,13 +112,19 @@ class VerseMarkersLayer : BorderPane() {
 
     private fun verseBoundaries(verseIndex: Int): Pair<Double, Double> {
         val previousVerse = verseMarkersControls.getOrNull(verseIndex - 1)
-        val startBounds = if (previousVerse != null && previousVerse.visibleProperty().value) {
-            previousVerse.layoutX + (MARKER_AREA_WIDTH * 4)
-        } else 0.0
+        val startBounds =
+            if (previousVerse != null && previousVerse.visibleProperty().value) {
+                previousVerse.layoutX + (MARKER_AREA_WIDTH * 4)
+            } else {
+                0.0
+            }
         val nextVerse = verseMarkersControls.getOrNull(verseIndex + 1)
-        val endBounds = if (nextVerse != null && nextVerse.visibleProperty().value) {
-            nextVerse.layoutX - (MARKER_AREA_WIDTH * 4)
-        } else width
+        val endBounds =
+            if (nextVerse != null && nextVerse.visibleProperty().value) {
+                nextVerse.layoutX - (MARKER_AREA_WIDTH * 4)
+            } else {
+                width
+            }
 
         return Pair(startBounds, endBounds)
     }
@@ -132,9 +138,7 @@ class VerseMarkersLayer : BorderPane() {
     }
 }
 
-fun EventTarget.verse_markers_layer(
-    op: VerseMarkersLayer.() -> Unit = {}
-): VerseMarkersLayer {
+fun EventTarget.verse_markers_layer(op: VerseMarkersLayer.() -> Unit = {}): VerseMarkersLayer {
     val markerLayer = VerseMarkersLayer()
     opcr(this, markerLayer, op)
     return markerLayer

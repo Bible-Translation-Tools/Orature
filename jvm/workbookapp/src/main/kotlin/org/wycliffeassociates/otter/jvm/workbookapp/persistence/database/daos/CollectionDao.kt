@@ -27,9 +27,12 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.Inserti
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.CollectionEntity
 
 class CollectionDao(
-    private val instanceDsl: DSLContext
+    private val instanceDsl: DSLContext,
 ) {
-    fun fetchChildren(entity: CollectionEntity, dsl: DSLContext = instanceDsl): List<CollectionEntity> {
+    fun fetchChildren(
+        entity: CollectionEntity,
+        dsl: DSLContext = instanceDsl,
+    ): List<CollectionEntity> {
         return dsl
             .select()
             .from(COLLECTION_ENTITY)
@@ -38,7 +41,10 @@ class CollectionDao(
             .fetch(RecordMappers.Companion::mapToCollectionEntity)
     }
 
-    fun fetchSource(entity: CollectionEntity, dsl: DSLContext = instanceDsl): CollectionEntity? {
+    fun fetchSource(
+        entity: CollectionEntity,
+        dsl: DSLContext = instanceDsl,
+    ): CollectionEntity? {
         return dsl
             .select()
             .from(COLLECTION_ENTITY)
@@ -56,7 +62,7 @@ class CollectionDao(
         slug: String,
         containerId: Int,
         label: String = "project",
-        dsl: DSLContext = instanceDsl
+        dsl: DSLContext = instanceDsl,
     ): CollectionEntity? {
         return dsl
             .select()
@@ -64,7 +70,7 @@ class CollectionDao(
             .where(
                 COLLECTION_ENTITY.SLUG.eq(slug)
                     .and(COLLECTION_ENTITY.DUBLIN_CORE_FK.eq(containerId))
-                    .and(COLLECTION_ENTITY.LABEL.eq(label))
+                    .and(COLLECTION_ENTITY.LABEL.eq(label)),
             )
             .fetchOne()
             ?.let {
@@ -73,7 +79,10 @@ class CollectionDao(
     }
 
     @Synchronized
-    fun insert(entity: CollectionEntity, dsl: DSLContext = instanceDsl): Int {
+    fun insert(
+        entity: CollectionEntity,
+        dsl: DSLContext = instanceDsl,
+    ): Int {
         if (entity.id != 0) throw InsertionException("Entity ID is not 0")
 
         // Insert the collection entity
@@ -87,7 +96,7 @@ class CollectionDao(
                 COLLECTION_ENTITY.LABEL,
                 COLLECTION_ENTITY.SORT,
                 COLLECTION_ENTITY.DUBLIN_CORE_FK,
-                COLLECTION_ENTITY.MODIFIED_TS
+                COLLECTION_ENTITY.MODIFIED_TS,
             )
             .values(
                 entity.parentFk,
@@ -97,7 +106,7 @@ class CollectionDao(
                 entity.label,
                 entity.sort,
                 entity.dublinCoreFk,
-                entity.modifiedTs
+                entity.modifiedTs,
             )
             .execute()
 
@@ -110,7 +119,10 @@ class CollectionDao(
             }!!
     }
 
-    fun fetchById(id: Int, dsl: DSLContext = instanceDsl): CollectionEntity {
+    fun fetchById(
+        id: Int,
+        dsl: DSLContext = instanceDsl,
+    ): CollectionEntity {
         return dsl
             .select()
             .from(COLLECTION_ENTITY)
@@ -129,7 +141,10 @@ class CollectionDao(
             }
     }
 
-    fun fetchByLabel(label: String, dsl: DSLContext = instanceDsl): List<CollectionEntity> {
+    fun fetchByLabel(
+        label: String,
+        dsl: DSLContext = instanceDsl,
+    ): List<CollectionEntity> {
         return dsl
             .select()
             .from(COLLECTION_ENTITY)
@@ -139,7 +154,10 @@ class CollectionDao(
             }
     }
 
-    fun update(entity: CollectionEntity, dsl: DSLContext = instanceDsl) {
+    fun update(
+        entity: CollectionEntity,
+        dsl: DSLContext = instanceDsl,
+    ) {
         dsl
             .update(COLLECTION_ENTITY)
             .set(COLLECTION_ENTITY.PARENT_FK, entity.parentFk)
@@ -154,7 +172,10 @@ class CollectionDao(
             .execute()
     }
 
-    fun delete(entity: CollectionEntity, dsl: DSLContext = instanceDsl) {
+    fun delete(
+        entity: CollectionEntity,
+        dsl: DSLContext = instanceDsl,
+    ) {
         dsl
             .deleteFrom(COLLECTION_ENTITY)
             .where(COLLECTION_ENTITY.ID.eq(entity.id))
@@ -163,51 +184,56 @@ class CollectionDao(
 
     fun collectionsWithoutTakes(
         projectEntity: CollectionEntity,
-        dsl: DSLContext = instanceDsl
+        dsl: DSLContext = instanceDsl,
     ): List<CollectionEntity> {
         val id = COLLECTION_ENTITY.ID.`as`("id")
         val contentid = CONTENT_ENTITY.ID.`as`("contentid")
         val chapterid = CONTENT_ENTITY.COLLECTION_FK.`as`("chapterid")
         val takecount = count(TAKE_ENTITY.FILENAME).`as`("takecount")
 
-        val chapterIdsInBook = dsl
-            .select(COLLECTION_ENTITY.ID)
-            .from(COLLECTION_ENTITY)
-            .where(COLLECTION_ENTITY.PARENT_FK.eq(projectEntity.id))
+        val chapterIdsInBook =
+            dsl
+                .select(COLLECTION_ENTITY.ID)
+                .from(COLLECTION_ENTITY)
+                .where(COLLECTION_ENTITY.PARENT_FK.eq(projectEntity.id))
 
-        val contentAndChapterIdsInBook = dsl
-            .select(contentid, chapterid)
-            .from(CONTENT_ENTITY)
-            .where(
-                CONTENT_ENTITY.COLLECTION_FK.`in`(chapterIdsInBook).and(CONTENT_ENTITY.TYPE_FK.eq(1))
-            )
+        val contentAndChapterIdsInBook =
+            dsl
+                .select(contentid, chapterid)
+                .from(CONTENT_ENTITY)
+                .where(
+                    CONTENT_ENTITY.COLLECTION_FK.`in`(chapterIdsInBook).and(CONTENT_ENTITY.TYPE_FK.eq(1)),
+                )
 
-        val contentAndTakeCountInBook = dsl
-            .select(takecount, asterisk())
-            .from(
-                contentAndChapterIdsInBook.asTable()
-                    .leftJoin(TAKE_ENTITY).on(TAKE_ENTITY.CONTENT_FK.eq(contentid))
-            )
-            .groupBy(contentid)
+        val contentAndTakeCountInBook =
+            dsl
+                .select(takecount, asterisk())
+                .from(
+                    contentAndChapterIdsInBook.asTable()
+                        .leftJoin(TAKE_ENTITY).on(TAKE_ENTITY.CONTENT_FK.eq(contentid)),
+                )
+                .groupBy(contentid)
 
-        val collectionsWithTakes = dsl.select(id)
-            .from(
-                COLLECTION_ENTITY
-                    .leftJoin(
-                        contentAndTakeCountInBook
-                    ).on(COLLECTION_ENTITY.ID.eq(chapterid))
-            )
-            .where(takecount.greaterThan(0))
-            .groupBy(chapterid)
+        val collectionsWithTakes =
+            dsl.select(id)
+                .from(
+                    COLLECTION_ENTITY
+                        .leftJoin(
+                            contentAndTakeCountInBook,
+                        ).on(COLLECTION_ENTITY.ID.eq(chapterid)),
+                )
+                .where(takecount.greaterThan(0))
+                .groupBy(chapterid)
 
-        val query = dsl
-            .select()
-            .from(COLLECTION_ENTITY)
-            .where(
-                COLLECTION_ENTITY.ID.`notIn`(
-                    collectionsWithTakes
-                ).and(COLLECTION_ENTITY.PARENT_FK.eq(projectEntity.id))
-            )
+        val query =
+            dsl
+                .select()
+                .from(COLLECTION_ENTITY)
+                .where(
+                    COLLECTION_ENTITY.ID.`notIn`(
+                        collectionsWithTakes,
+                    ).and(COLLECTION_ENTITY.PARENT_FK.eq(projectEntity.id)),
+                )
         return query.fetch {
             RecordMappers.mapToCollectionEntity(it)
         }
@@ -220,5 +246,4 @@ class CollectionDao(
 //    where collection_entity.parent_fk == 1257) and type_fk == 1)
 //    left join take_entity on take_entity.content_fk == contentid
 //    group by contentid) on collection_entity.id == chapterid where takecount > 0 group by chapterid)
-
 }

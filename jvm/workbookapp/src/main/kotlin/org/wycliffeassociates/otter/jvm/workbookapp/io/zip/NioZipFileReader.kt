@@ -28,7 +28,7 @@ import java.nio.file.Files
 import kotlin.streams.asSequence
 
 class NioZipFileReader(
-    zipFile: File
+    zipFile: File,
 ) : IFileReader {
     private val fileSystem: FileSystem = FileSystems.newFileSystem(zipFile.jarUri(), mapOf("create" to "false"))
 
@@ -50,7 +50,7 @@ class NioZipFileReader(
     override fun copyDirectory(
         source: String,
         destinationDirectory: File,
-        filter: (String) -> Boolean
+        filter: (String) -> Boolean,
     ): Observable<String> {
         val sourcePath = fileSystem.getPath(source)
         val destPath = destinationDirectory.toPath()

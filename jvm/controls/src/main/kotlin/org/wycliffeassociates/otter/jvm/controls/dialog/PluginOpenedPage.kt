@@ -37,7 +37,6 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import tornadofx.*
 
 class PluginOpenedPage : View() {
-
     val dialogTitleProperty = SimpleStringProperty()
     val dialogTextProperty = SimpleStringProperty()
     val licenseProperty = SimpleStringProperty()
@@ -60,47 +59,48 @@ class PluginOpenedPage : View() {
         tryImportStylesheet(resources["/css/plugin-opened-page.css"])
     }
 
-    override val root = vbox {
-        alignment = Pos.CENTER
-        addClass("plugin-opened-page")
-        label(dialogTitleProperty) {
-            addClass("plugin-opened-page__title", "plugin-opened-page__label")
-            visibleWhen(textProperty().isNotEmpty)
-            managedProperty().bind(visibleProperty())
-        }
-        label(dialogTextProperty) {
+    override val root =
+        vbox {
             alignment = Pos.CENTER
-            addClass("plugin-opened-page__label", "plugin-opened-page__label--message")
-            visibleWhen(textProperty().isNotEmpty)
-            managedWhen(visibleProperty())
-        }
-        add(
-            SourceContent().apply {
-                addClass("plugin-opened-page__source")
-                sourceContent = this
-                vgrow = Priority.ALWAYS
-                sourceTextProperty.bind(this@PluginOpenedPage.sourceTextProperty)
-                sourceAudioPlayerProperty.bind(playerProperty)
-                targetAudioPlayerProperty.bind(this@PluginOpenedPage.targetAudioPlayerProperty)
-                licenseProperty.bind(this@PluginOpenedPage.licenseProperty)
-
-                audioNotAvailableTextProperty.set(messages["audioNotAvailable"])
-                textNotAvailableTextProperty.set(messages["textNotAvailable"])
-                playSourceLabelProperty.set(messages["playSource"])
-                pauseSourceLabelProperty.set(messages["pauseSource"])
-                playTargetLabelProperty.set(messages["playTarget"])
-                pauseTargetLabelProperty.set(messages["pauseTarget"])
-
-                orientationProperty.bind(this@PluginOpenedPage.orientationProperty)
-                sourceOrientationProperty.bind(this@PluginOpenedPage.sourceOrientationProperty)
-                contentTitleProperty.bind(sourceContentTitleProperty)
-                isMinimizableProperty.set(false)
-
-                sourceSpeedRateProperty.bind(this@PluginOpenedPage.sourceSpeedRateProperty)
-                targetSpeedRateProperty.bind(this@PluginOpenedPage.targetSpeedRateProperty)
+            addClass("plugin-opened-page")
+            label(dialogTitleProperty) {
+                addClass("plugin-opened-page__title", "plugin-opened-page__label")
+                visibleWhen(textProperty().isNotEmpty)
+                managedProperty().bind(visibleProperty())
             }
-        )
-    }
+            label(dialogTextProperty) {
+                alignment = Pos.CENTER
+                addClass("plugin-opened-page__label", "plugin-opened-page__label--message")
+                visibleWhen(textProperty().isNotEmpty)
+                managedWhen(visibleProperty())
+            }
+            add(
+                SourceContent().apply {
+                    addClass("plugin-opened-page__source")
+                    sourceContent = this
+                    vgrow = Priority.ALWAYS
+                    sourceTextProperty.bind(this@PluginOpenedPage.sourceTextProperty)
+                    sourceAudioPlayerProperty.bind(playerProperty)
+                    targetAudioPlayerProperty.bind(this@PluginOpenedPage.targetAudioPlayerProperty)
+                    licenseProperty.bind(this@PluginOpenedPage.licenseProperty)
+
+                    audioNotAvailableTextProperty.set(messages["audioNotAvailable"])
+                    textNotAvailableTextProperty.set(messages["textNotAvailable"])
+                    playSourceLabelProperty.set(messages["playSource"])
+                    pauseSourceLabelProperty.set(messages["pauseSource"])
+                    playTargetLabelProperty.set(messages["playTarget"])
+                    pauseTargetLabelProperty.set(messages["pauseTarget"])
+
+                    orientationProperty.bind(this@PluginOpenedPage.orientationProperty)
+                    sourceOrientationProperty.bind(this@PluginOpenedPage.sourceOrientationProperty)
+                    contentTitleProperty.bind(sourceContentTitleProperty)
+                    isMinimizableProperty.set(false)
+
+                    sourceSpeedRateProperty.bind(this@PluginOpenedPage.sourceSpeedRateProperty)
+                    targetSpeedRateProperty.bind(this@PluginOpenedPage.targetSpeedRateProperty)
+                },
+            )
+        }
 
     override fun onDock() {
         playerProperty.onChangeAndDoNowWithDisposer {
@@ -132,7 +132,10 @@ class PluginOpenedPage : View() {
         super.onUndock()
     }
 
-    private fun addShortcut(combo: KeyCodeCombination, action: () -> Unit) {
+    private fun addShortcut(
+        combo: KeyCodeCombination,
+        action: () -> Unit,
+    ) {
         workspace.shortcut(combo, action)
     }
 

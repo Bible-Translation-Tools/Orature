@@ -53,13 +53,13 @@ import java.text.MessageFormat
 
 enum class PlaybackRateType {
     SOURCE,
-    TARGET
+    TARGET,
 }
 
 class PlaybackRateChangedEvent(val type: PlaybackRateType, val rate: Double) : FXEvent()
 
 class SimpleAudioPlayer(
-    player: IAudioPlayer? = null
+    player: IAudioPlayer? = null,
 ) : HBox() {
     val playerProperty = SimpleObjectProperty<IAudioPlayer>(player)
     val playButtonProperty = SimpleObjectProperty<Button>()
@@ -104,7 +104,7 @@ class SimpleAudioPlayer(
                 audioPlayerController.isPlayingProperty.objectBinding { isPlaying ->
                     togglePseudoClass("active", isPlaying == true)
                     if (isPlaying == true) pauseIcon else playIcon
-                }
+                },
             )
             action {
                 audioPlayerController.toggle()
@@ -116,7 +116,7 @@ class SimpleAudioPlayer(
             hgrow = Priority.ALWAYS
             addClass("audio-player--center")
 
-            label(titleTextProperty){
+            label(titleTextProperty) {
                 addClass("h5", "h5--60", "audio-player__title")
                 visibleWhen { textProperty().isNotEmpty }
                 managedWhen(visibleProperty())
@@ -135,13 +135,13 @@ class SimpleAudioPlayer(
                                 it?.let {
                                     onPlaybackProgressChanged(it.toDouble())
                                     remainingTimeProperty.set(
-                                        remainingTimecode(it.toDouble(), audioDurationMs.value, audioSampleRate.value)
+                                        remainingTimecode(it.toDouble(), audioDurationMs.value, audioSampleRate.value),
                                     )
                                     framesToTimecode(it.toDouble(), audioSampleRate.value)
                                 }
                             }
                         }
-                    }
+                    },
                 )
                 label(sideTextProperty) {
                     addClass("h5", "h5--60")
@@ -151,7 +151,6 @@ class SimpleAudioPlayer(
             }
         }
 
-
         add(
             menuButton.apply {
                 tooltip(messages["playbackSpeed"])
@@ -160,7 +159,7 @@ class SimpleAudioPlayer(
 
                 visibleProperty().bind(enablePlaybackRateProperty)
                 managedProperty().bind(visibleProperty())
-            }
+            },
         )
 
         initController()
@@ -173,7 +172,7 @@ class SimpleAudioPlayer(
                 audioSampleRate.set(player.getAudioReader()?.sampleRate ?: DEFAULT_SAMPLE_RATE)
                 audioDurationMs.set(player.getDurationMs())
                 remainingTimeProperty.set(
-                    remainingTimecode(slider.value, audioDurationMs.value, audioSampleRate.value)
+                    remainingTimecode(slider.value, audioDurationMs.value, audioSampleRate.value),
                 )
             } ?: audioPlayerController.release()
         }
@@ -188,7 +187,7 @@ class SimpleAudioPlayer(
                     graphicProperty().bind(
                         audioPlayerController.isPlayingProperty.objectBinding { isPlaying ->
                             if (isPlaying == true) customPauseIcon else customPlayIcon
-                        }
+                        },
                     )
                     action {
                         audioPlayerController.toggle()
@@ -217,7 +216,7 @@ class SimpleAudioPlayer(
                 if (isPlaying) pauseText else playText
             },
             audioPlayerController.isPlayingProperty,
-            playTextProperty
+            playTextProperty,
         )
     }
 
@@ -252,7 +251,7 @@ class SimpleAudioPlayer(
                     menuButton.show()
                 }
                 isHideOnClick = false
-            }
+            },
         )
 
         items.addAll(playbackRateMenuItems())
@@ -262,7 +261,7 @@ class SimpleAudioPlayer(
                 items.add(
                     createPlaybackSpeedItem(speed, true) {
                         audioPlaybackRateProperty.set(speed)
-                    }
+                    },
                 )
             }
         }
@@ -295,31 +294,35 @@ class SimpleAudioPlayer(
                             }
                         }
                     }
-                    add(JFXSlider().apply {
-                        addClass("wa-slider")
+                    add(
+                        JFXSlider().apply {
+                            addClass("wa-slider")
 
-                        rateSlider = this
-                        min = playbackRateOptions.first()
-                        max = playbackRateOptions.last()
+                            rateSlider = this
+                            min = playbackRateOptions.first()
+                            max = playbackRateOptions.last()
 
-                        value = audioPlaybackRateProperty.value
-                        blockIncrement = (10 * max) / 100 // 10% intervals
+                            value = audioPlaybackRateProperty.value
+                            blockIncrement = (10 * max) / 100 // 10% intervals
 
-                        setValueFactory {
-                            Bindings.createStringBinding(
-                                {
-                                    String.format("%.2fx", it.value)
-                                },
-                                valueProperty()
-                            )
-                        }
-                    })
+                            setValueFactory {
+                                Bindings.createStringBinding(
+                                    {
+                                        String.format("%.2fx", it.value)
+                                    },
+                                    valueProperty(),
+                                )
+                            }
+                        },
+                    )
                     label {
                         addClass("wa-menu-button__large-text")
                         alignment = Pos.CENTER
-                        textProperty().bind(rateSlider.valueProperty().stringBinding {
-                            String.format("%.2fx", it)
-                        })
+                        textProperty().bind(
+                            rateSlider.valueProperty().stringBinding {
+                                String.format("%.2fx", it)
+                            },
+                        )
                         fitToParentWidth()
                     }
                     button {
@@ -341,7 +344,7 @@ class SimpleAudioPlayer(
                     menuButton.show()
                 }
                 isHideOnClick = false
-            }
+            },
         )
         return items
     }
@@ -357,37 +360,41 @@ class SimpleAudioPlayer(
     private fun createPlaybackSpeedItem(
         speed: Double,
         isCustom: Boolean = false,
-        onSelected: () -> Unit
+        onSelected: () -> Unit,
     ): MenuItem {
         return CustomMenuItem().apply {
             val formattedValue = String.format("%.2fx", speed)
-            val title = if (isCustom) {
-                MessageFormat.format(
-                    FX.messages["customSpeedRate"],
-                    FX.messages["custom"],
+            val title =
+                if (isCustom) {
+                    MessageFormat.format(
+                        FX.messages["customSpeedRate"],
+                        FX.messages["custom"],
+                        formattedValue,
+                    )
+                } else {
                     formattedValue
-                )
-            } else formattedValue
-
-            content = HBox().apply {
-                addClass("wa-menu-button__list-item")
-                label {
-                    hgrow = Priority.ALWAYS
-                    text = title
                 }
-                tooltip(title)
 
-                setOnKeyReleased {
-                    when (it.code) {
-                        KeyCode.ENTER, KeyCode.SPACE -> {
-                            onSelected()
-                            menuButton.hide()
+            content =
+                HBox().apply {
+                    addClass("wa-menu-button__list-item")
+                    label {
+                        hgrow = Priority.ALWAYS
+                        text = title
+                    }
+                    tooltip(title)
+
+                    setOnKeyReleased {
+                        when (it.code) {
+                            KeyCode.ENTER, KeyCode.SPACE -> {
+                                onSelected()
+                                menuButton.hide()
+                            }
+
+                            else -> {}
                         }
-
-                        else -> {}
                     }
                 }
-            }
             setOnAction {
                 onSelected()
             }
@@ -397,5 +404,5 @@ class SimpleAudioPlayer(
 
 fun EventTarget.simpleaudioplayer(
     player: IAudioPlayer? = null,
-    op: SimpleAudioPlayer.() -> Unit = {}
+    op: SimpleAudioPlayer.() -> Unit = {},
 ) = SimpleAudioPlayer(player).attachTo(this, op)

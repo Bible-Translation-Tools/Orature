@@ -28,7 +28,7 @@ import tornadofx.*
 
 class TakesListView(
     items: ObservableList<TakeCardModel>,
-    createTakeNode: (TakeCardModel) -> Node
+    createTakeNode: (TakeCardModel) -> Node,
 ) : ListView<TakeCardModel>(items) {
     init {
         selectionModelProperty().set(NoSelectionModel())

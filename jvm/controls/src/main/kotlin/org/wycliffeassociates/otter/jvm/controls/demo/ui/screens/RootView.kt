@@ -27,14 +27,15 @@ import tornadofx.*
 class RootView : View() {
     private val viewModel: DemoViewModel by inject()
 
-    override val root = stackpane {
-        prefWidth = 800.0
-        prefHeight = 600.0
+    override val root =
+        stackpane {
+            prefWidth = 800.0
+            prefHeight = 600.0
 
-        borderpane {
-            center<Workspace>()
+            borderpane {
+                center<Workspace>()
+            }
         }
-    }
 
     init {
         workspace.header.removeFromParent()

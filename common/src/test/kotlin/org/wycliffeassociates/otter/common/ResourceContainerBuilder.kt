@@ -23,10 +23,10 @@ internal const val ACTIVE_VERSES_FILE_NAME = "active_verses.json"
 internal const val CHAPTER_NARRATION_FILE_NAME = "chapter_narration.pcm"
 
 class ResourceContainerBuilder(baseRC: File? = null) {
-
-    private val tempDir = createTempDirectory("orature-test")
-        .toFile()
-        .apply { deleteOnExit() }
+    private val tempDir =
+        createTempDirectory("orature-test")
+            .toFile()
+            .apply { deleteOnExit() }
 
     private val selectedTakes: MutableList<String> = mutableListOf()
     private val takeCheckingMap = mutableMapOf<String, TakeCheckingState>()
@@ -45,22 +45,24 @@ class ResourceContainerBuilder(baseRC: File? = null) {
     }
 
     fun setTargetLanguage(language: Language): ResourceContainerBuilder {
-        manifest.dublinCore.language = RCLanguage(
-            identifier = language.slug,
-            title = language.name,
-            direction = language.direction
-        )
+        manifest.dublinCore.language =
+            RCLanguage(
+                identifier = language.slug,
+                title = language.name,
+                direction = language.direction,
+            )
         return this
     }
 
     fun setManifestSource(
         identifier: String,
         languageSlug: String,
-        version: String
+        version: String,
     ): ResourceContainerBuilder {
-        manifest.dublinCore.source = mutableListOf(
-            Source(identifier, languageSlug, version)
-        )
+        manifest.dublinCore.source =
+            mutableListOf(
+                Source(identifier, languageSlug, version),
+            )
         return this
     }
 
@@ -68,16 +70,17 @@ class ResourceContainerBuilder(baseRC: File? = null) {
         title: String,
         identifier: String,
         sort: Int,
-        path: String
+        path: String,
     ): ResourceContainerBuilder {
-        manifest.projects = listOf(
-            Project(
-                title = title,
-                identifier = identifier,
-                sort = sort,
-                path = path
+        manifest.projects =
+            listOf(
+                Project(
+                    title = title,
+                    identifier = identifier,
+                    sort = sort,
+                    path = path,
+                ),
             )
-        )
         return this
     }
 
@@ -95,9 +98,11 @@ class ResourceContainerBuilder(baseRC: File? = null) {
         if (isOngoing) {
             val pathInRC = RcConstants.SELECTED_TAKES_FILE
             val selectedFile = File(pathInRC).name
-            val tempFile = tempDir.resolve(selectedFile).apply {
-                createNewFile(); deleteOnExit()
-            }
+            val tempFile =
+                tempDir.resolve(selectedFile).apply {
+                    createNewFile()
+                    deleteOnExit()
+                }
 
             ResourceContainer.load(rcFile).use {
                 it.addFileToContainer(tempFile, pathInRC)
@@ -120,37 +125,40 @@ class ResourceContainerBuilder(baseRC: File? = null) {
         chapter: Int = sort,
         start: Int? = null,
         end: Int? = null,
-        checking: TakeCheckingState? = null
+        checking: TakeCheckingState? = null,
     ): ResourceContainerBuilder {
-        val fileName = FileNamer(
-            start = start,
-            end = end,
-            sort = sort,
-            contentType = contentType,
-            languageSlug = manifest.dublinCore.language.identifier,
-            bookSlug = manifest.projects.first().identifier,
-            rcSlug = manifest.dublinCore.identifier,
-            chunkCount = 90, // less than 100
-            chapterCount = 90,
-            chapterTitle = "",
-            chapterSort = chapter
-        ).generateName(takeNumber, AudioFileFormat.WAV)
+        val fileName =
+            FileNamer(
+                start = start,
+                end = end,
+                sort = sort,
+                contentType = contentType,
+                languageSlug = manifest.dublinCore.language.identifier,
+                bookSlug = manifest.projects.first().identifier,
+                rcSlug = manifest.dublinCore.identifier,
+                chunkCount = 90, // less than 100
+                chapterCount = 90,
+                chapterTitle = "",
+                chapterSort = chapter,
+            ).generateName(takeNumber, AudioFileFormat.WAV)
 
         val tempTakeFile = createTestWavFile(tempDir)
-        val takeToAdd = tempTakeFile.parentFile.resolve(fileName)
-            .apply {
-                parentFile.mkdirs()
-                tempTakeFile.copyTo(this, overwrite = true)
-                deleteOnExit()
-            }
+        val takeToAdd =
+            tempTakeFile.parentFile.resolve(fileName)
+                .apply {
+                    parentFile.mkdirs()
+                    tempTakeFile.copyTo(this, overwrite = true)
+                    deleteOnExit()
+                }
 
         val chapterDirTokens = "c${chapter.toString().padStart(2, '0')}"
         val relativePath = "$chapterDirTokens/$fileName"
-        val pathInRC = if (selected && contentType == ContentType.META) {
-            "${RcConstants.MEDIA_DIR}/$relativePath"
-        } else {
-            "${RcConstants.TAKE_DIR}/$relativePath"
-        }
+        val pathInRC =
+            if (selected && contentType == ContentType.META) {
+                "${RcConstants.MEDIA_DIR}/$relativePath"
+            } else {
+                "${RcConstants.TAKE_DIR}/$relativePath"
+            }
         ResourceContainer.load(rcFile).use {
             it.addFileToContainer(takeToAdd, pathInRC)
         }
@@ -183,7 +191,7 @@ class ResourceContainerBuilder(baseRC: File? = null) {
             if (selectedTakes.isNotEmpty()) {
                 rc.accessor.write(RcConstants.SELECTED_TAKES_FILE) { outputStream ->
                     outputStream.write(
-                        selectedTakes.joinToString("\n").byteInputStream().readAllBytes()
+                        selectedTakes.joinToString("\n").byteInputStream().readAllBytes(),
                     )
                 }
             }
@@ -202,28 +210,30 @@ class ResourceContainerBuilder(baseRC: File? = null) {
     }
 
     private fun getDefaultRCFile(): File {
-        val sourcePath = javaClass.classLoader.getResource(
-            "resource-containers/en_ulb.zip"
-        ).file
+        val sourcePath =
+            javaClass.classLoader.getResource(
+                "resource-containers/en_ulb.zip",
+            ).file
         val sourceFile = File(sourcePath)
-        val tempFile = tempDir.resolve("rc_test_generated.orature")
-            .apply {
-                deleteOnExit()
-            }
+        val tempFile =
+            tempDir.resolve("rc_test_generated.orature")
+                .apply {
+                    deleteOnExit()
+                }
         val rcMetadata = getResourceMetadata(getEnglishLanguage(1))
 
         ResourceContainer.create(tempFile) {
-            manifest = Manifest(
-                getDublinCore(rcMetadata),
-                listOf(),
-                Checking()
-            )
+            manifest =
+                Manifest(
+                    getDublinCore(rcMetadata),
+                    listOf(),
+                    Checking(),
+                )
             write()
         }.use { rc ->
             // add source
             rc.addFileToContainer(sourceFile, "${RcConstants.SOURCE_DIR}/${sourceFile.name}")
         }
-
 
         return tempFile
     }
@@ -231,9 +241,10 @@ class ResourceContainerBuilder(baseRC: File? = null) {
     private fun writeCheckingStatusFile(rc: ResourceContainer) {
         rc.accessor.write(RcConstants.CHECKING_STATUS_FILE) { outputStream ->
             outputStream.use { stream ->
-                val mapper = ObjectMapper(JsonFactory())
-                    .registerKotlinModule()
-                    .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                val mapper =
+                    ObjectMapper(JsonFactory())
+                        .registerKotlinModule()
+                        .setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
                 mapper.writeValue(stream, takeCheckingMap)
             }
@@ -249,13 +260,13 @@ class ResourceContainerBuilder(baseRC: File? = null) {
                 .setManifestSource(
                     identifier = "ulb",
                     languageSlug = "en",
-                    version = "12"
+                    version = "12",
                 )
                 .setProjectManifest(
                     title = "John",
                     identifier = defaultProjectSlug,
                     sort = 1,
-                    path = "./content"
+                    path = "./content",
                 )
         }
 

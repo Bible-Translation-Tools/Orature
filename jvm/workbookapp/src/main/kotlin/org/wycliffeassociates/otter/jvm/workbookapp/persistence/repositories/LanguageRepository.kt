@@ -30,205 +30,214 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.map
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.TranslationMapper
 import javax.inject.Inject
 
-class LanguageRepository @Inject constructor(
-    database: AppDatabase,
-    private val mapper: LanguageMapper,
-    private val translationMapper: TranslationMapper
-) : ILanguageRepository {
-    private val logger = LoggerFactory.getLogger(LanguageRepository::class.java)
+class LanguageRepository
+    @Inject
+    constructor(
+        database: AppDatabase,
+        private val mapper: LanguageMapper,
+        private val translationMapper: TranslationMapper,
+    ) : ILanguageRepository {
+        private val logger = LoggerFactory.getLogger(LanguageRepository::class.java)
 
-    private val languageDao = database.languageDao
-    private val translationDao = database.translationDao
+        private val languageDao = database.languageDao
+        private val translationDao = database.translationDao
 
-    override fun insert(language: Language): Single<Int> {
-        return Single
-            .fromCallable {
-                languageDao.insert(mapper.mapToEntity(language))
-            }
-            .doOnError { e ->
-                logger.error("Error in insert for language: $language", e)
-            }
-            .subscribeOn(Schedulers.io())
-    }
-
-    override fun insertAll(languages: List<Language>): Single<List<Int>> {
-        return Single
-            .fromCallable {
-                languageDao.insertAll(languages.map(mapper::mapToEntity))
-            }
-            .doOnError { e ->
-                logger.error("Error in insertAll", e)
-            }
-            .subscribeOn(Schedulers.io())
-    }
-
-    override fun upsertAll(languages: List<Language>): Completable {
-        return Completable.fromCallable {
-            languageDao.updateAll(languages.map(mapper::mapToEntity))
+        override fun insert(language: Language): Single<Int> {
+            return Single
+                .fromCallable {
+                    languageDao.insert(mapper.mapToEntity(language))
+                }
+                .doOnError { e ->
+                    logger.error("Error in insert for language: $language", e)
+                }
+                .subscribeOn(Schedulers.io())
         }
-            .doOnError { e ->
-                logger.error("Error in updateAll", e)
-            }
-            .subscribeOn(Schedulers.io())
-    }
 
-    override fun updateRegions(languages: List<Language>): Completable {
-        return Completable
-            .fromCallable {
-                languageDao.updateRegions(languages.map(mapper::mapToEntity))
-            }
-            .doOnError { e ->
-                logger.error("Error in updateRegions", e)
-            }
-            .subscribeOn(Schedulers.io())
-    }
+        override fun insertAll(languages: List<Language>): Single<List<Int>> {
+            return Single
+                .fromCallable {
+                    languageDao.insertAll(languages.map(mapper::mapToEntity))
+                }
+                .doOnError { e ->
+                    logger.error("Error in insertAll", e)
+                }
+                .subscribeOn(Schedulers.io())
+        }
 
-    override fun getAll(): Single<List<Language>> {
-        return Single
-            .fromCallable {
-                languageDao
-                    .fetchAll()
-                    .map { mapper.mapFromEntity(it) }
+        override fun upsertAll(languages: List<Language>): Completable {
+            return Completable.fromCallable {
+                languageDao.updateAll(languages.map(mapper::mapToEntity))
             }
-            .doOnError { e ->
-                logger.error("Error in getAll", e)
-            }
-            .subscribeOn(Schedulers.io())
-    }
+                .doOnError { e ->
+                    logger.error("Error in updateAll", e)
+                }
+                .subscribeOn(Schedulers.io())
+        }
 
-    /**
-     * Gets the list of Gateway (Source) languages
-     */
-    override fun getGateway(): Single<List<Language>> {
-        return Single
-            .fromCallable {
-                languageDao
-                    .fetchGateway()
-                    .map { mapper.mapFromEntity(it) }
-            }
-            .doOnError { e ->
-                logger.error("Error in getGateway", e)
-            }
-            .subscribeOn(Schedulers.io())
-    }
+        override fun updateRegions(languages: List<Language>): Completable {
+            return Completable
+                .fromCallable {
+                    languageDao.updateRegions(languages.map(mapper::mapToEntity))
+                }
+                .doOnError { e ->
+                    logger.error("Error in updateRegions", e)
+                }
+                .subscribeOn(Schedulers.io())
+        }
 
-    /**
-     * Gets the list of Target (Heart) languages
-     */
-    override fun getTargets(): Single<List<Language>> {
-        return Single
-            .fromCallable {
-                languageDao
-                    .fetchTargets()
-                    .map { mapper.mapFromEntity(it) }
-            }
-            .doOnError { e ->
-                logger.error("Error in getTargets", e)
-            }
-            .subscribeOn(Schedulers.io())
-    }
+        override fun getAll(): Single<List<Language>> {
+            return Single
+                .fromCallable {
+                    languageDao
+                        .fetchAll()
+                        .map { mapper.mapFromEntity(it) }
+                }
+                .doOnError { e ->
+                    logger.error("Error in getAll", e)
+                }
+                .subscribeOn(Schedulers.io())
+        }
 
-    override fun getBySlug(slug: String): Single<Language> {
-        return Single
-            .fromCallable {
-                val language = languageDao.fetchBySlug(slug)
-                    ?: throw NullPointerException("Could not find language with slug $slug.")
-                mapper.mapFromEntity(language)
-            }
-            .doOnError { e ->
-                logger.error("Error in getBySlug for slug: $slug", e)
-            }
-            .subscribeOn(Schedulers.io())
-    }
+        /**
+         * Gets the list of Gateway (Source) languages
+         */
+        override fun getGateway(): Single<List<Language>> {
+            return Single
+                .fromCallable {
+                    languageDao
+                        .fetchGateway()
+                        .map { mapper.mapFromEntity(it) }
+                }
+                .doOnError { e ->
+                    logger.error("Error in getGateway", e)
+                }
+                .subscribeOn(Schedulers.io())
+        }
 
-    override fun update(obj: Language): Completable {
-        return Completable
-            .fromAction {
-                languageDao.update(mapper.mapToEntity(obj))
-            }
-            .doOnError { e ->
-                logger.error("Error in update for language: $obj", e)
-            }
-            .subscribeOn(Schedulers.io())
-    }
+        /**
+         * Gets the list of Target (Heart) languages
+         */
+        override fun getTargets(): Single<List<Language>> {
+            return Single
+                .fromCallable {
+                    languageDao
+                        .fetchTargets()
+                        .map { mapper.mapFromEntity(it) }
+                }
+                .doOnError { e ->
+                    logger.error("Error in getTargets", e)
+                }
+                .subscribeOn(Schedulers.io())
+        }
 
-    override fun delete(obj: Language): Completable {
-        return Completable
-            .fromAction {
-                languageDao.delete(mapper.mapToEntity(obj))
-            }
-            .doOnError { e ->
-                logger.error("Error in delete for language: $obj", e)
-            }
-            .subscribeOn(Schedulers.io())
-    }
+        override fun getBySlug(slug: String): Single<Language> {
+            return Single
+                .fromCallable {
+                    val language =
+                        languageDao.fetchBySlug(slug)
+                            ?: throw NullPointerException("Could not find language with slug $slug.")
+                    mapper.mapFromEntity(language)
+                }
+                .doOnError { e ->
+                    logger.error("Error in getBySlug for slug: $slug", e)
+                }
+                .subscribeOn(Schedulers.io())
+        }
 
-    override fun getTranslation(sourceLanguage: Language, targetLanguage: Language): Single<Translation> {
-        return Single
-            .fromCallable {
-                val translation = translationDao
-                    .fetch(sourceLanguage.id, targetLanguage.id)
-                    ?: throw NullPointerException("Translation not found")
+        override fun update(obj: Language): Completable {
+            return Completable
+                .fromAction {
+                    languageDao.update(mapper.mapToEntity(obj))
+                }
+                .doOnError { e ->
+                    logger.error("Error in update for language: $obj", e)
+                }
+                .subscribeOn(Schedulers.io())
+        }
 
-                translationMapper.mapFromEntity(translation, sourceLanguage, targetLanguage)
-            }
-            .doOnError {
-                logger.error(
-                    "Could not get translation for these languages: ${sourceLanguage.slug} -> ${targetLanguage.slug}.",
-                    it
-                )
-            }
-    }
+        override fun delete(obj: Language): Completable {
+            return Completable
+                .fromAction {
+                    languageDao.delete(mapper.mapToEntity(obj))
+                }
+                .doOnError { e ->
+                    logger.error("Error in delete for language: $obj", e)
+                }
+                .subscribeOn(Schedulers.io())
+        }
 
-    override fun getAllTranslations(): Single<List<Translation>> {
-        return Single.fromCallable {
-            translationDao.fetchAll()
-                .map {
-                    val source = mapper
-                        .mapFromEntity(languageDao.fetchById(it.sourceFk)!!)
-                    val target = mapper
-                        .mapFromEntity(languageDao.fetchById(it.targetFk)!!)
-                    translationMapper.mapFromEntity(it, source, target)
+        override fun getTranslation(
+            sourceLanguage: Language,
+            targetLanguage: Language,
+        ): Single<Translation> {
+            return Single
+                .fromCallable {
+                    val translation =
+                        translationDao
+                            .fetch(sourceLanguage.id, targetLanguage.id)
+                            ?: throw NullPointerException("Translation not found")
+
+                    translationMapper.mapFromEntity(translation, sourceLanguage, targetLanguage)
+                }
+                .doOnError {
+                    logger.error(
+                        "Could not get translation for these languages: ${sourceLanguage.slug} -> ${targetLanguage.slug}.",
+                        it,
+                    )
                 }
         }
-    }
 
-    override fun insertTranslation(translation: Translation): Single<Int> {
-        return Single
-            .fromCallable {
-                val existing = translationDao.fetch(translation.source.id, translation.target.id)
-                if (existing != null) {
-                    existing.modifiedTs = translation.modifiedTs?.toString()
-                    translationDao.update(existing)
-                    existing.id
-                } else {
-                    translationDao.insert(translationMapper.mapToEntity(translation))
-                }
+        override fun getAllTranslations(): Single<List<Translation>> {
+            return Single.fromCallable {
+                translationDao.fetchAll()
+                    .map {
+                        val source =
+                            mapper
+                                .mapFromEntity(languageDao.fetchById(it.sourceFk)!!)
+                        val target =
+                            mapper
+                                .mapFromEntity(languageDao.fetchById(it.targetFk)!!)
+                        translationMapper.mapFromEntity(it, source, target)
+                    }
             }
-            .doOnError { e ->
-                logger.error("Error in insert for translation: $translation", e)
-            }
-            .subscribeOn(Schedulers.io())
-    }
-
-    override fun updateTranslation(translation: Translation): Completable {
-        return Completable.fromCallable {
-            translationDao.update(translationMapper.mapToEntity(translation))
         }
-            .doOnError { e ->
-                logger.error("Error in update translation: $translation", e)
-            }
-            .subscribeOn(Schedulers.io())
-    }
 
-    override fun deleteTranslation(translation: Translation): Completable {
-        return Completable
-            .fromAction {
-                translationDao.delete(translationMapper.mapToEntity(translation))
+        override fun insertTranslation(translation: Translation): Single<Int> {
+            return Single
+                .fromCallable {
+                    val existing = translationDao.fetch(translation.source.id, translation.target.id)
+                    if (existing != null) {
+                        existing.modifiedTs = translation.modifiedTs?.toString()
+                        translationDao.update(existing)
+                        existing.id
+                    } else {
+                        translationDao.insert(translationMapper.mapToEntity(translation))
+                    }
+                }
+                .doOnError { e ->
+                    logger.error("Error in insert for translation: $translation", e)
+                }
+                .subscribeOn(Schedulers.io())
+        }
+
+        override fun updateTranslation(translation: Translation): Completable {
+            return Completable.fromCallable {
+                translationDao.update(translationMapper.mapToEntity(translation))
             }
-            .doOnError { e ->
-                logger.error("Error in delete translation: $translation", e)
-            }
-            .subscribeOn(Schedulers.io())
+                .doOnError { e ->
+                    logger.error("Error in update translation: $translation", e)
+                }
+                .subscribeOn(Schedulers.io())
+        }
+
+        override fun deleteTranslation(translation: Translation): Completable {
+            return Completable
+                .fromAction {
+                    translationDao.delete(translationMapper.mapToEntity(translation))
+                }
+                .doOnError { e ->
+                    logger.error("Error in delete translation: $translation", e)
+                }
+                .subscribeOn(Schedulers.io())
+        }
     }
-}

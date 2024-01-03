@@ -29,7 +29,6 @@ import java.lang.Math.floor
 import java.util.concurrent.TimeUnit
 
 class Timecode(width: Double, height: Double) : Canvas(width, height) {
-
     private val ctx = graphicsContext2D
 
     // an epsilon offset so the tick marks don't accidentally fall inside the same second

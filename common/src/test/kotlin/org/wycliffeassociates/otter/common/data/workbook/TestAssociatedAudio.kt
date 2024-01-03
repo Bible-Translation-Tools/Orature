@@ -33,7 +33,7 @@ class TestAssociatedAudio {
             File("."),
             num,
             MimeType.WAV,
-            LocalDate.now()
+            LocalDate.now(),
         )
 
     private fun createTakesRelay(numTakes: Int): ReplayRelay<Take> {

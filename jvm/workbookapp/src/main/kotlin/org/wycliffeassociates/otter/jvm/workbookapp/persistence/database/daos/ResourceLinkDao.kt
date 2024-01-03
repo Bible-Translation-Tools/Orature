@@ -27,9 +27,12 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.Inserti
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ResourceLinkEntity
 
 class ResourceLinkDao(
-    private val instanceDsl: DSLContext
+    private val instanceDsl: DSLContext,
 ) {
-    fun fetchByContentId(id: Int, dsl: DSLContext = instanceDsl): List<ResourceLinkEntity> {
+    fun fetchByContentId(
+        id: Int,
+        dsl: DSLContext = instanceDsl,
+    ): List<ResourceLinkEntity> {
         return dsl
             .select()
             .from(RESOURCE_LINK)
@@ -39,7 +42,10 @@ class ResourceLinkDao(
             }
     }
 
-    fun fetchByCollectionId(id: Int, dsl: DSLContext = instanceDsl): List<ResourceLinkEntity> {
+    fun fetchByCollectionId(
+        id: Int,
+        dsl: DSLContext = instanceDsl,
+    ): List<ResourceLinkEntity> {
         return dsl
             .select()
             .from(RESOURCE_LINK)
@@ -50,7 +56,10 @@ class ResourceLinkDao(
     }
 
     @Synchronized
-    fun insert(entity: ResourceLinkEntity, dsl: DSLContext = instanceDsl): Int {
+    fun insert(
+        entity: ResourceLinkEntity,
+        dsl: DSLContext = instanceDsl,
+    ): Int {
         if (entity.id != 0) throw InsertionException("Entity ID is not 0")
 
         // Insert the resource link entity
@@ -60,13 +69,13 @@ class ResourceLinkDao(
                 RESOURCE_LINK.RESOURCE_CONTENT_FK,
                 RESOURCE_LINK.CONTENT_FK,
                 RESOURCE_LINK.COLLECTION_FK,
-                RESOURCE_LINK.DUBLIN_CORE_FK
+                RESOURCE_LINK.DUBLIN_CORE_FK,
             )
             .values(
                 entity.resourceContentFk,
                 entity.contentFk,
                 entity.collectionFk,
-                entity.dublinCoreFk
+                entity.dublinCoreFk,
             )
             .execute()
 
@@ -80,36 +89,44 @@ class ResourceLinkDao(
     }
 
     @Synchronized
-    fun insertNoReturn(vararg entities: ResourceLinkEntity, dsl: DSLContext = instanceDsl) {
+    fun insertNoReturn(
+        vararg entities: ResourceLinkEntity,
+        dsl: DSLContext = instanceDsl,
+    ) {
         if (entities.any { it.id != 0 }) throw InsertionException("Entity ID is not 0")
-        val bareInsert = dsl
-            .insertInto(
-                RESOURCE_LINK,
-                RESOURCE_LINK.RESOURCE_CONTENT_FK,
-                RESOURCE_LINK.CONTENT_FK,
-                RESOURCE_LINK.COLLECTION_FK,
-                RESOURCE_LINK.DUBLIN_CORE_FK
-            )
-        val insertWithValues = entities.fold(bareInsert) { query, entity ->
-            query.values(
-                entity.resourceContentFk,
-                entity.contentFk,
-                entity.collectionFk,
-                entity.dublinCoreFk
-            )
-        }
+        val bareInsert =
+            dsl
+                .insertInto(
+                    RESOURCE_LINK,
+                    RESOURCE_LINK.RESOURCE_CONTENT_FK,
+                    RESOURCE_LINK.CONTENT_FK,
+                    RESOURCE_LINK.COLLECTION_FK,
+                    RESOURCE_LINK.DUBLIN_CORE_FK,
+                )
+        val insertWithValues =
+            entities.fold(bareInsert) { query, entity ->
+                query.values(
+                    entity.resourceContentFk,
+                    entity.contentFk,
+                    entity.collectionFk,
+                    entity.dublinCoreFk,
+                )
+            }
         insertWithValues.execute()
     }
 
     /** @param select a triple record containing values for main content ID, resource content ID, dublinCore ID */
     @Synchronized
-    fun insertContentResourceNoReturn(select: Select<Record3<Int, Int, Int>>, dsl: DSLContext = instanceDsl) {
+    fun insertContentResourceNoReturn(
+        select: Select<Record3<Int, Int, Int>>,
+        dsl: DSLContext = instanceDsl,
+    ) {
         dsl
             .insertInto(
                 RESOURCE_LINK,
                 RESOURCE_LINK.CONTENT_FK,
                 RESOURCE_LINK.RESOURCE_CONTENT_FK,
-                RESOURCE_LINK.DUBLIN_CORE_FK
+                RESOURCE_LINK.DUBLIN_CORE_FK,
             )
             .select(select)
             .execute()
@@ -117,19 +134,25 @@ class ResourceLinkDao(
 
     /** @param select a triple record containing values for collection ID, resource content ID, dublinCore ID */
     @Synchronized
-    fun insertCollectionResourceNoReturn(select: Select<Record3<Int, Int, Int>>, dsl: DSLContext = instanceDsl) {
+    fun insertCollectionResourceNoReturn(
+        select: Select<Record3<Int, Int, Int>>,
+        dsl: DSLContext = instanceDsl,
+    ) {
         dsl
             .insertInto(
                 RESOURCE_LINK,
                 RESOURCE_LINK.COLLECTION_FK,
                 RESOURCE_LINK.RESOURCE_CONTENT_FK,
-                RESOURCE_LINK.DUBLIN_CORE_FK
+                RESOURCE_LINK.DUBLIN_CORE_FK,
             )
             .select(select)
             .execute()
     }
 
-    fun fetchById(id: Int, dsl: DSLContext = instanceDsl): ResourceLinkEntity {
+    fun fetchById(
+        id: Int,
+        dsl: DSLContext = instanceDsl,
+    ): ResourceLinkEntity {
         return dsl
             .select()
             .from(RESOURCE_LINK)
@@ -148,7 +171,10 @@ class ResourceLinkDao(
             }
     }
 
-    fun update(entity: ResourceLinkEntity, dsl: DSLContext = instanceDsl) {
+    fun update(
+        entity: ResourceLinkEntity,
+        dsl: DSLContext = instanceDsl,
+    ) {
         dsl
             .update(RESOURCE_LINK)
             .set(RESOURCE_LINK.RESOURCE_CONTENT_FK, entity.resourceContentFk)
@@ -159,7 +185,10 @@ class ResourceLinkDao(
             .execute()
     }
 
-    fun delete(entity: ResourceLinkEntity, dsl: DSLContext = instanceDsl) {
+    fun delete(
+        entity: ResourceLinkEntity,
+        dsl: DSLContext = instanceDsl,
+    ) {
         dsl
             .deleteFrom(RESOURCE_LINK)
             .where(RESOURCE_LINK.ID.eq(entity.id))

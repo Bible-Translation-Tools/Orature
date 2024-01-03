@@ -26,7 +26,6 @@ import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 
 interface IDirectoryProvider {
-
     /** Directory to store the user's application projects/documents */
     fun getUserDataDirectory(appendedPath: String = ""): File
 
@@ -37,48 +36,48 @@ interface IDirectoryProvider {
     fun getProjectDirectory(
         source: ResourceMetadata,
         target: ResourceMetadata?,
-        book: Collection
+        book: Collection,
     ): File
 
     /** Directory for project */
     fun getProjectDirectory(
         source: ResourceMetadata,
         target: ResourceMetadata?,
-        bookSlug: String
+        bookSlug: String,
     ): File
 
     /** Directory for project audio */
     fun getProjectAudioDirectory(
         source: ResourceMetadata,
         target: ResourceMetadata?,
-        book: Collection
+        book: Collection,
     ): File
 
     /** Directory for project audio */
     fun getProjectAudioDirectory(
         source: ResourceMetadata,
         target: ResourceMetadata?,
-        bookSlug: String
+        bookSlug: String,
     ): File
 
     /** Directory for source */
     fun getProjectSourceDirectory(
         source: ResourceMetadata,
         target: ResourceMetadata?,
-        book: Collection
+        book: Collection,
     ): File
 
     /** Directory for source */
     fun getProjectSourceDirectory(
         source: ResourceMetadata,
         target: ResourceMetadata?,
-        bookSlug: String
+        bookSlug: String,
     ): File
 
     fun getProjectSourceAudioDirectory(
         source: ResourceMetadata,
         target: ResourceMetadata?,
-        bookSlug: String
+        bookSlug: String,
     ): File
 
     /** Internal-use directory of the given source RC */
@@ -88,7 +87,10 @@ interface IDirectoryProvider {
     fun getSourceContainerDirectory(metadata: ResourceMetadata): File
 
     /** Internal-use directory of the given derived RC */
-    fun getDerivedContainerDirectory(metadata: ResourceMetadata, source: ResourceMetadata): File
+    fun getDerivedContainerDirectory(
+        metadata: ResourceMetadata,
+        source: ResourceMetadata,
+    ): File
 
     /** Create a new IFileWriter */
     fun newFileWriter(file: File): IFileWriter
@@ -97,7 +99,10 @@ interface IDirectoryProvider {
     fun newFileReader(file: File): IFileReader
 
     /** Create temp file */
-    fun createTempFile(prefix: String, suffix: String? = null): File
+    fun createTempFile(
+        prefix: String,
+        suffix: String? = null,
+    ): File
 
     /** Clean temporary directory */
     fun cleanTempDirectory()

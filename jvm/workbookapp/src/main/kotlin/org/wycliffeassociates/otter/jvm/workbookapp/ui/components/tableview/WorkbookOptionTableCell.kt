@@ -30,43 +30,50 @@ import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class WorkbookOptionTableCell(
-    private val selectedIndexProperty: SimpleIntegerProperty
+    private val selectedIndexProperty: SimpleIntegerProperty,
 ) : TableCell<WorkbookDescriptor, WorkbookDescriptor>() {
+    private val actionButton =
+        button {
+            addClass("btn", "btn--icon", "btn--borderless", "option-button")
+            graphic =
+                FontIcon(MaterialDesign.MDI_DOTS_HORIZONTAL).apply {
+                    addClass("wa-icon", "option-icon")
+                }
+            tooltip(messages["options"])
 
-    private val actionButton = button {
-        addClass("btn", "btn--icon", "btn--borderless", "option-button")
-        graphic = FontIcon(MaterialDesign.MDI_DOTS_HORIZONTAL).apply {
-            addClass("wa-icon", "option-icon")
+            isFocusTraversable = false
         }
-        tooltip(messages["options"])
 
-        isFocusTraversable = false
-    }
-
-    private val popupMenu = WorkbookOptionMenu().apply {
-        setOnShowing {
-            actionButton.addClass("button--active")
+    private val popupMenu =
+        WorkbookOptionMenu().apply {
+            setOnShowing {
+                actionButton.addClass("button--active")
+            }
+            setOnHidden {
+                actionButton.removeClass("button--active")
+            }
         }
-        setOnHidden {
-            actionButton.removeClass("button--active")
-        }
-    }
 
-    private val graphicContent = hbox {
-        alignment = Pos.CENTER_RIGHT
-        add(actionButton)
-    }
+    private val graphicContent =
+        hbox {
+            alignment = Pos.CENTER_RIGHT
+            add(actionButton)
+        }
 
     init {
         selectedIndexProperty.onChange {
-            if (item != null && !isEmpty && it == index){
-                actionButton.onAction.handle(ActionEvent())
-                selectedIndexProperty.set(-1) // resets to allow subsequent invocations
-            }
+            if (item != null && !isEmpty && it == index)
+                {
+                    actionButton.onAction.handle(ActionEvent())
+                    selectedIndexProperty.set(-1) // resets to allow subsequent invocations
+                }
         }
     }
 
-    override fun updateItem(item: WorkbookDescriptor?, empty: Boolean) {
+    override fun updateItem(
+        item: WorkbookDescriptor?,
+        empty: Boolean,
+    ) {
         super.updateItem(item, empty)
         if (item == null || empty) {
             popupMenu.workbookInfoProperty.set(null)
@@ -79,7 +86,7 @@ class WorkbookOptionTableCell(
             val bound = this.boundsInLocal
             val screenBound = this.localToScreen(bound)
             popupMenu.show(
-                FX.primaryStage
+                FX.primaryStage,
             )
             popupMenu.x = screenBound.minX - popupMenu.width + this.width
             popupMenu.y = screenBound.centerY

@@ -73,126 +73,129 @@ class AudioErrorDialog : OtterDialog() {
         }
     }
 
-    private val content = vbox {
-        addClass("audio-error-dialog")
-        hbox {
-            addClass("audio-error-dialog__title-bar")
-            label(titleTextProperty).apply {
-                addClass("audio-error-dialog__title")
-            }
-            region { hgrow = Priority.ALWAYS }
-            button {
-                addClass("btn", "btn--secondary")
-                graphic = FontIcon("gmi-close")
-                onActionProperty().bind(onCancelActionProperty())
-            }
-        }
-        stackpane {
-            addClass("audio-error-dialog__header")
-            vgrow = Priority.ALWAYS
-
-            hbox {
-                backgroundProperty().bind(backgroundBinding())
-            }
-        }
-        hbox {
-            addClass("audio-error-dialog__body")
-            vgrow = Priority.ALWAYS
-
-            vbox {
-                label(inputMessageTitleTextProperty) {
-                    addClass("audio-error-dialog__subtitle")
-                    managedProperty().bind(errorTypeProperty.isEqualTo(AudioErrorType.RECORDING))
-                    visibleProperty().bind(managedProperty())
-                }
-
-                label(inputMessageTextProperty) {
-                    addClass("audio-error-dialog__message")
-                    managedProperty().bind(errorTypeProperty.isEqualTo(AudioErrorType.RECORDING))
-                    visibleProperty().bind(managedProperty())
-                }
-
-                label(outputMessageTitleTextProperty) {
-                    addClass("audio-error-dialog__subtitle")
-                    managedProperty().bind(errorTypeProperty.isEqualTo(AudioErrorType.PLAYBACK))
-                    visibleProperty().bind(managedProperty())
-                }
-
-                label(outputMessageTextProperty) {
-                    addClass("audio-error-dialog__message")
-                    managedProperty().bind(errorTypeProperty.isEqualTo(AudioErrorType.PLAYBACK))
-                    visibleProperty().bind(managedProperty())
-                }
-            }
-        }
-
+    private val content =
         vbox {
-            addClass("audio-error-dialog__footer")
-
-            combobox(settingsViewModel.selectedOutputDeviceProperty, settingsViewModel.outputDevices) {
-                addClass("wa-combobox")
-
-                cellFormat {
-                    val view = ComboboxItem()
-                    graphic = view.apply {
-                        topTextProperty.set(it)
-                    }
-                }
-
-                buttonCell = IconComboBoxCell(FontIcon(MaterialDesign.MDI_MICROPHONE))
-                overrideDefaultKeyEventHandler {
-                    settingsViewModel.updateOutputDevice(it)
-                }
-
-                visibleProperty().bind(
-                    errorTypeProperty.isEqualTo(AudioErrorType.PLAYBACK)
-                )
-                managedProperty().bind(visibleProperty())
-            }
-
-            combobox(settingsViewModel.selectedInputDeviceProperty, settingsViewModel.inputDevices) {
-                addClass("wa-combobox")
-
-                cellFormat {
-                    val view = ComboboxItem()
-                    graphic = view.apply {
-                        topTextProperty.set(it)
-                    }
-                }
-
-                buttonCell = IconComboBoxCell(FontIcon(MaterialDesign.MDI_MICROPHONE))
-                overrideDefaultKeyEventHandler {
-                    settingsViewModel.updateInputDevice(it)
-                }
-
-                visibleProperty().bind(
-                    errorTypeProperty.isEqualTo(AudioErrorType.RECORDING)
-                )
-                managedProperty().bind(visibleProperty())
-            }
-
+            addClass("audio-error-dialog")
             hbox {
-                button(cancelButtonTextProperty) {
-                    addClass("btn", "btn--primary")
+                addClass("audio-error-dialog__title-bar")
+                label(titleTextProperty).apply {
+                    addClass("audio-error-dialog__title")
+                }
+                region { hgrow = Priority.ALWAYS }
+                button {
+                    addClass("btn", "btn--secondary")
                     graphic = FontIcon("gmi-close")
                     onActionProperty().bind(onCancelActionProperty())
-                    visibleProperty().bind(onCancelActionProperty.isNotNull)
+                }
+            }
+            stackpane {
+                addClass("audio-error-dialog__header")
+                vgrow = Priority.ALWAYS
+
+                hbox {
+                    backgroundProperty().bind(backgroundBinding())
+                }
+            }
+            hbox {
+                addClass("audio-error-dialog__body")
+                vgrow = Priority.ALWAYS
+
+                vbox {
+                    label(inputMessageTitleTextProperty) {
+                        addClass("audio-error-dialog__subtitle")
+                        managedProperty().bind(errorTypeProperty.isEqualTo(AudioErrorType.RECORDING))
+                        visibleProperty().bind(managedProperty())
+                    }
+
+                    label(inputMessageTextProperty) {
+                        addClass("audio-error-dialog__message")
+                        managedProperty().bind(errorTypeProperty.isEqualTo(AudioErrorType.RECORDING))
+                        visibleProperty().bind(managedProperty())
+                    }
+
+                    label(outputMessageTitleTextProperty) {
+                        addClass("audio-error-dialog__subtitle")
+                        managedProperty().bind(errorTypeProperty.isEqualTo(AudioErrorType.PLAYBACK))
+                        visibleProperty().bind(managedProperty())
+                    }
+
+                    label(outputMessageTextProperty) {
+                        addClass("audio-error-dialog__message")
+                        managedProperty().bind(errorTypeProperty.isEqualTo(AudioErrorType.PLAYBACK))
+                        visibleProperty().bind(managedProperty())
+                    }
+                }
+            }
+
+            vbox {
+                addClass("audio-error-dialog__footer")
+
+                combobox(settingsViewModel.selectedOutputDeviceProperty, settingsViewModel.outputDevices) {
+                    addClass("wa-combobox")
+
+                    cellFormat {
+                        val view = ComboboxItem()
+                        graphic =
+                            view.apply {
+                                topTextProperty.set(it)
+                            }
+                    }
+
+                    buttonCell = IconComboBoxCell(FontIcon(MaterialDesign.MDI_MICROPHONE))
+                    overrideDefaultKeyEventHandler {
+                        settingsViewModel.updateOutputDevice(it)
+                    }
+
+                    visibleProperty().bind(
+                        errorTypeProperty.isEqualTo(AudioErrorType.PLAYBACK),
+                    )
                     managedProperty().bind(visibleProperty())
                 }
 
-                region {
-                    addClass("audio-error-dialog__footer-spacer")
-                    hgrow = Priority.ALWAYS
-                    managedProperty().bind(onCancelActionProperty.isNotNull)
+                combobox(settingsViewModel.selectedInputDeviceProperty, settingsViewModel.inputDevices) {
+                    addClass("wa-combobox")
+
+                    cellFormat {
+                        val view = ComboboxItem()
+                        graphic =
+                            view.apply {
+                                topTextProperty.set(it)
+                            }
+                    }
+
+                    buttonCell = IconComboBoxCell(FontIcon(MaterialDesign.MDI_MICROPHONE))
+                    overrideDefaultKeyEventHandler {
+                        settingsViewModel.updateInputDevice(it)
+                    }
+
+                    visibleProperty().bind(
+                        errorTypeProperty.isEqualTo(AudioErrorType.RECORDING),
+                    )
+                    managedProperty().bind(visibleProperty())
                 }
 
-                visibleProperty().bind(
-                    onCloseActionProperty.isNotNull
-                )
-                managedProperty().bind(visibleProperty())
+                hbox {
+                    button(cancelButtonTextProperty) {
+                        addClass("btn", "btn--primary")
+                        graphic = FontIcon("gmi-close")
+                        onActionProperty().bind(onCancelActionProperty())
+                        visibleProperty().bind(onCancelActionProperty.isNotNull)
+                        managedProperty().bind(visibleProperty())
+                    }
+
+                    region {
+                        addClass("audio-error-dialog__footer-spacer")
+                        hgrow = Priority.ALWAYS
+                        managedProperty().bind(onCancelActionProperty.isNotNull)
+                    }
+
+                    visibleProperty().bind(
+                        onCloseActionProperty.isNotNull,
+                    )
+                    managedProperty().bind(visibleProperty())
+                }
             }
         }
-    }
 
     init {
         setContent(content)
@@ -207,25 +210,26 @@ class AudioErrorDialog : OtterDialog() {
                 }
                 background
             },
-            backgroundImageProperty
+            backgroundImageProperty,
         )
     }
 
     private fun backgroundImage(image: Image): BackgroundImage {
-        val backgroundSize = BackgroundSize(
-            1.0,
-            1.0,
-            true,
-            true,
-            true,
-            false
-        )
+        val backgroundSize =
+            BackgroundSize(
+                1.0,
+                1.0,
+                true,
+                true,
+                true,
+                false,
+            )
         return BackgroundImage(
             image,
             BackgroundRepeat.NO_REPEAT,
             BackgroundRepeat.NO_REPEAT,
             BackgroundPosition.CENTER,
-            backgroundSize
+            backgroundSize,
         )
     }
 

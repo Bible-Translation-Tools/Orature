@@ -25,7 +25,7 @@ import java.lang.IllegalStateException
 import java.util.*
 
 class ContentTypeDao(
-    instanceDsl: DSLContext
+    instanceDsl: DSLContext,
 ) {
     private val mapToId: Map<ContentType, Int> by lazy { loadDatabaseMap(instanceDsl) }
     private val mapToEnum: Map<Int, ContentType> by lazy { mapToId.entries.associate { (k, v) -> v to k } }
@@ -54,7 +54,10 @@ class ContentTypeDao(
         return enumMap
     }
 
-    private fun insert(contentType: ContentType, dsl: DSLContext) = dsl
+    private fun insert(
+        contentType: ContentType,
+        dsl: DSLContext,
+    ) = dsl
         .insertInto(CONTENT_TYPE, CONTENT_TYPE.NAME)
         .values(contentType.name)
         .returning(CONTENT_TYPE.ID)

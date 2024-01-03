@@ -33,7 +33,6 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class ChapterCardSkin(private val card: ChapterCard) : SkinBase<ChapterCard>(card) {
-
     private val behavior = ButtonBehavior(card)
 
     @FXML

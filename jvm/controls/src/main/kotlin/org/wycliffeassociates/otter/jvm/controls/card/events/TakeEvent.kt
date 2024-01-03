@@ -25,9 +25,8 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 class TakeEvent(
     val take: Take,
     val onComplete: () -> Unit,
-    eventType: EventType<out InputEvent>?
+    eventType: EventType<out InputEvent>?,
 ) : InputEvent(eventType) {
-
     companion object {
         private val ANY: EventType<TakeEvent> = EventType<TakeEvent>(InputEvent.ANY, "TAKE")
         val EDIT_TAKE: EventType<TakeEvent> = EventType(ANY, "EDIT_TAKE")

@@ -23,28 +23,29 @@ import org.wycliffeassociates.otter.common.persistence.mapping.Mapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.LanguageEntity
 import javax.inject.Inject
 
-class LanguageMapper @Inject constructor() : Mapper<LanguageEntity, Language> {
+class LanguageMapper
+    @Inject
+    constructor() : Mapper<LanguageEntity, Language> {
+        override fun mapFromEntity(type: LanguageEntity) =
+            Language(
+                type.slug,
+                type.name,
+                type.anglicizedName,
+                type.direction.lowercase(),
+                type.gateway == 1,
+                type.region,
+                type.id,
+            )
 
-    override fun mapFromEntity(type: LanguageEntity) =
-        Language(
-            type.slug,
-            type.name,
-            type.anglicizedName,
-            type.direction.lowercase(),
-            type.gateway == 1,
-            type.region,
-            type.id
-        )
-
-    override fun mapToEntity(type: Language): LanguageEntity {
-        return LanguageEntity(
-            type.id,
-            type.slug,
-            type.name,
-            type.anglicizedName,
-            type.direction.lowercase(),
-            if (type.isGateway) 1 else 0,
-            type.region
-        )
+        override fun mapToEntity(type: Language): LanguageEntity {
+            return LanguageEntity(
+                type.id,
+                type.slug,
+                type.name,
+                type.anglicizedName,
+                type.direction.lowercase(),
+                if (type.isGateway) 1 else 0,
+                type.region,
+            )
+        }
     }
-}

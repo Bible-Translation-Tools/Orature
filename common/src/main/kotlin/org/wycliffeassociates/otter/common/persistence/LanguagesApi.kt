@@ -25,5 +25,7 @@ import retrofit2.http.Url
 
 interface LanguagesApi {
     @GET
-    fun fetchLanguages(@Url url: String) : Observable<List<Language>>
+    fun fetchLanguages(
+        @Url url: String,
+    ): Observable<List<Language>>
 }

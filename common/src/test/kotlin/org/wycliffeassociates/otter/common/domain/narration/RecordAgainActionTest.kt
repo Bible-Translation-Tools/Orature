@@ -9,7 +9,6 @@ import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 
 class RecordAgainActionTest {
-
     private val totalVerses: MutableList<VerseNode> = mutableListOf()
     lateinit var workingAudioFile: AudioFile
     val numTestVerses = 31
@@ -27,8 +26,8 @@ class RecordAgainActionTest {
     }
 
     fun initializeTotalVerses() {
-        for(i in 0 until numTestVerses){
-            val verseMarker = VerseMarker((i+1), (i+1), 0)
+        for (i in 0 until numTestVerses) {
+            val verseMarker = VerseMarker((i + 1), (i + 1), 0)
             val sectors = mutableListOf<IntRange>()
             val verseNode = VerseNode(false, verseMarker, sectors)
             totalVerses.add(verseNode)
@@ -39,7 +38,6 @@ class RecordAgainActionTest {
         totalVerses[0].placed = true
         totalVerses[0].sectors.add(0..44099)
     }
-
 
     @Test
     fun `execute with valid working audio, 31 total verses, and no placed verses`() {
@@ -67,10 +65,8 @@ class RecordAgainActionTest {
         Assert.assertTrue(totalVerses[verseIndex].placed)
     }
 
-
     @Test
     fun `execute with valid working audio, 31 total verses, and one placed verse`() {
-
         placeFirstVerseWithOneSecondAudio()
 
         val verseIndex = 0
@@ -99,7 +95,6 @@ class RecordAgainActionTest {
         Assert.assertTrue(totalVerses[verseIndex].placed)
     }
 
-
     @Test
     fun `execute with invalid index`() {
         val verseIndex = -1
@@ -108,14 +103,13 @@ class RecordAgainActionTest {
         try {
             recordAgainAction.execute(totalVerses, workingAudioFile)
             Assert.fail("expecting IndexOutOfBoundsException")
-        } catch (illegalIndex: IndexOutOfBoundsException){
+        } catch (illegalIndex: IndexOutOfBoundsException) {
             // Success: expecting IndexOutOfBoundsException
         }
     }
 
     @Test
     fun `undo with null previous`() {
-
         placeFirstVerseWithOneSecondAudio()
 
         val verseIndex = 0
@@ -130,7 +124,6 @@ class RecordAgainActionTest {
 
     @Test
     fun `undo with non-null previous and valid verseIndex`() {
-
         placeFirstVerseWithOneSecondAudio()
 
         val verseIndex = 0
@@ -153,7 +146,6 @@ class RecordAgainActionTest {
 
     @Test
     fun `redo with non-null previous and valid verseIndex`() {
-
         placeFirstVerseWithOneSecondAudio()
 
         val verseIndex = 0
@@ -179,7 +171,6 @@ class RecordAgainActionTest {
         Assert.assertEquals(expectedEnd..expectedEnd, totalVerses[verseIndex].sectors.last())
         Assert.assertTrue(totalVerses[verseIndex].placed)
     }
-
 
     @Test
     fun `finalize before execute`() {
@@ -217,7 +208,7 @@ class RecordAgainActionTest {
         recordAgainAction.finalize(882000, totalVerses)
 
         // Verify that totalVerse[verseIndex] has been finalized
-        Assert.assertEquals(expectedEnd .. 882000, totalVerses[verseIndex].sectors.last())
+        Assert.assertEquals(expectedEnd..882000, totalVerses[verseIndex].sectors.last())
         Assert.assertTrue(previousNode.placed)
     }
 }

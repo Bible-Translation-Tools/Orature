@@ -19,56 +19,60 @@
 package org.wycliffeassociates.otter.common.domain.content
 
 import io.reactivex.Single
-import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
-import org.wycliffeassociates.otter.common.data.audio.OratureCueType
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
 import javax.inject.Inject
 
-class ConcatenateAudio @Inject constructor(private val directoryProvider: IDirectoryProvider) {
-
-    fun execute(
-        files: List<File>,
-        includeMarkers: Boolean = true
-    ): Single<File> {
-        return Single.fromCallable {
-            val inputFile = OratureAudioFile(files.first())
-            val tempFile = directoryProvider.createTempFile("output", ".wav")
-            val outputFile = OratureAudioFile(
-                tempFile,
-                inputFile.channels,
-                inputFile.sampleRate,
-                inputFile.bitsPerSample
-            )
-            outputFile.writer(append = true).use { os ->
-                files.forEach { file ->
-                    val oratureAudioFile = OratureAudioFile(file)
-                    val buffer = ByteArray(10240)
-                    oratureAudioFile.reader().use { reader ->
-                        reader.open()
-                        while (reader.hasRemaining()) {
-                            val written = reader.getPcmBuffer(buffer)
-                            os.write(buffer, 0, written)
+class ConcatenateAudio
+    @Inject
+    constructor(private val directoryProvider: IDirectoryProvider) {
+        fun execute(
+            files: List<File>,
+            includeMarkers: Boolean = true,
+        ): Single<File> {
+            return Single.fromCallable {
+                val inputFile = OratureAudioFile(files.first())
+                val tempFile = directoryProvider.createTempFile("output", ".wav")
+                val outputFile =
+                    OratureAudioFile(
+                        tempFile,
+                        inputFile.channels,
+                        inputFile.sampleRate,
+                        inputFile.bitsPerSample,
+                    )
+                outputFile.writer(append = true).use { os ->
+                    files.forEach { file ->
+                        val oratureAudioFile = OratureAudioFile(file)
+                        val buffer = ByteArray(10240)
+                        oratureAudioFile.reader().use { reader ->
+                            reader.open()
+                            while (reader.hasRemaining()) {
+                                val written = reader.getPcmBuffer(buffer)
+                                os.write(buffer, 0, written)
+                            }
                         }
                     }
                 }
+                if (includeMarkers) generateMarkers(files, outputFile)
+
+                outputFile.file
             }
-            if (includeMarkers) generateMarkers(files, outputFile)
+        }
 
-            outputFile.file
+        private fun generateMarkers(
+            inputFiles: List<File>,
+            outputAudio: OratureAudioFile,
+        ) {
+            var markerLocation = 0
+
+            inputFiles.forEach { file ->
+                val oratureAudioFile = OratureAudioFile(file)
+                val oldMarker = oratureAudioFile.getMarker<VerseMarker>().first()
+                outputAudio.addMarker(VerseMarker(oldMarker.start, oldMarker.end, markerLocation))
+                markerLocation += oratureAudioFile.totalFrames
+            }
+            outputAudio.update()
         }
     }
-
-    private fun generateMarkers(inputFiles: List<File>, outputAudio: OratureAudioFile) {
-        var markerLocation = 0
-
-        inputFiles.forEach { file ->
-            val oratureAudioFile = OratureAudioFile(file)
-            val oldMarker = oratureAudioFile.getMarker<VerseMarker>().first()
-            outputAudio.addMarker(VerseMarker(oldMarker.start, oldMarker.end, markerLocation))
-            markerLocation += oratureAudioFile.totalFrames
-        }
-        outputAudio.update()
-    }
-}

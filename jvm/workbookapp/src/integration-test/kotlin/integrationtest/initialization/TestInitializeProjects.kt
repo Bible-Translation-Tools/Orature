@@ -30,13 +30,13 @@ import io.reactivex.observers.TestObserver
 import org.junit.Assert
 import org.junit.Test
 import org.wycliffeassociates.otter.assets.initialization.InitializeProjects
+import org.wycliffeassociates.otter.common.data.ProgressStatus
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.data.ProgressStatus
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
 import java.io.File
 import java.time.LocalDate
@@ -44,7 +44,6 @@ import javax.inject.Inject
 import javax.inject.Provider
 
 class TestInitializeProjects {
-
     @Inject
     lateinit var initProjectsProvider: Provider<InitializeProjects>
 
@@ -61,43 +60,47 @@ class TestInitializeProjects {
         DaggerTestPersistenceComponent.create().inject(this)
     }
 
-    private val sourceMetadata = ResourceMetadata(
-        "rc0.2",
-        "Door43 World Missions Community",
-        "",
-        "",
-        "ulb",
-        LocalDate.now(),
-        Language("en", "", "", "", true, "Europe"),
-        LocalDate.now(),
-        "",
-        "",
-        ContainerType.Book,
-        "",
-        "12",
-        "",
-        File(".")
-    )
+    private val sourceMetadata =
+        ResourceMetadata(
+            "rc0.2",
+            "Door43 World Missions Community",
+            "",
+            "",
+            "ulb",
+            LocalDate.now(),
+            Language("en", "", "", "", true, "Europe"),
+            LocalDate.now(),
+            "",
+            "",
+            ContainerType.Book,
+            "",
+            "12",
+            "",
+            File("."),
+        )
 
-    private val targetMetadata = sourceMetadata.copy(
-        creator = "Orature",
-        language = Language("en-x-demo1", "", "", "", true, "Europe")
-    )
+    private val targetMetadata =
+        sourceMetadata.copy(
+            creator = "Orature",
+            language = Language("en-x-demo1", "", "", "", true, "Europe"),
+        )
 
-    private val project = Collection(
-        1,
-        "rev",
-        "rev",
-        "",
-        null
-    )
+    private val project =
+        Collection(
+            1,
+            "rev",
+            "rev",
+            "",
+            null,
+        )
 
     @Test
     fun testInitializeProjects() {
         prepareInitialProject()
-        val mockProgressEmitter = mock<ObservableEmitter<ProgressStatus>>{
-            on { onNext(any()) } doAnswer { }
-        }
+        val mockProgressEmitter =
+            mock<ObservableEmitter<ProgressStatus>> {
+                on { onNext(any()) } doAnswer { }
+            }
 
         val testSub = TestObserver<Completable>()
         val init = initProjectsProvider.get()
@@ -112,22 +115,24 @@ class TestInitializeProjects {
 
         env.assertRowCounts(
             RowCount(
-                contents = mapOf(
-                    ContentType.META to 2378,
-                    ContentType.TEXT to 31124
-                ),
+                contents =
+                    mapOf(
+                        ContentType.META to 2378,
+                        ContentType.TEXT to 31124,
+                    ),
                 collections = 2511,
-                links = 0
-            )
+                links = 0,
+            ),
         )
     }
 
     private fun prepareInitialProject() {
-        val targetDir = directoryProvider.getProjectDirectory(
-            sourceMetadata,
-            targetMetadata,
-            project
-        )
+        val targetDir =
+            directoryProvider.getProjectDirectory(
+                sourceMetadata,
+                targetMetadata,
+                project,
+            )
         env.unzipProject("en-x-demo1-ulb-rev.zip", targetDir)
     }
 }

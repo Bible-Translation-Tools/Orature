@@ -22,8 +22,11 @@ import javafx.animation.AnimationTimer
 import javafx.scene.effect.ColorAdjust
 import org.wycliffeassociates.otter.common.data.ColorTheme
 
-fun adjustWaveformColorByTheme(theme: ColorTheme, adjust: ColorAdjust) {
-    when(theme) {
+fun adjustWaveformColorByTheme(
+    theme: ColorTheme,
+    adjust: ColorAdjust,
+) {
+    when (theme) {
         ColorTheme.LIGHT -> {
             adjust.brightness = 0.0
             adjust.contrast = 0.0

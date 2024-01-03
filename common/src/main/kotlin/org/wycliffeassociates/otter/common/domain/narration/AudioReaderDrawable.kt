@@ -26,7 +26,10 @@ class AudioReaderDrawable(
     private val tempBuff = ByteArray(DEFAULT_BUFFER_SIZE)
     private val bb = ByteBuffer.wrap(tempBuff).apply { order(ByteOrder.LITTLE_ENDIAN) }
 
-    private fun samplesToCompress(width: Int, secondsOnScreen: Int): Int {
+    private fun samplesToCompress(
+        width: Int,
+        secondsOnScreen: Int,
+    ): Int {
         return (recordingSampleRate * secondsOnScreen) / width
     }
 
@@ -81,7 +84,7 @@ class AudioReaderDrawable(
         pcmCompressor: PCMCompressor,
         byteBuffer: ByteBuffer,
         framesToRead: Int,
-        frameSizeBytes: Int
+        frameSizeBytes: Int,
     ) {
         byteBuffer.position(0)
         for (i in 0 until framesToRead / frameSizeBytes) {
@@ -95,8 +98,15 @@ class AudioReaderDrawable(
      *
      * @return returns the number of frames read
      */
-    private fun padStart(pcmCompressor: PCMCompressor, frameSize: Int, location: Int, framesToRead: Int): Int {
-        if (location >= 0) { return 0 }
+    private fun padStart(
+        pcmCompressor: PCMCompressor,
+        frameSize: Int,
+        location: Int,
+        framesToRead: Int,
+    ): Int {
+        if (location >= 0) {
+            return 0
+        }
 
         var framesRead = 0
         for (i in location until 0) {

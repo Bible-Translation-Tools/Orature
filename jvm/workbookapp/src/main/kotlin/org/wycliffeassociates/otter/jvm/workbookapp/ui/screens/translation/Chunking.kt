@@ -31,94 +31,99 @@ class Chunking : View() {
     val settingsViewModel: SettingsViewModel by inject()
 
     private lateinit var waveform: MarkerWaveform
-    private val audioScrollBar = createAudioScrollBar(
-        viewModel.audioPositionProperty,
-        viewModel.totalFramesProperty,
-        viewModel.isPlayingProperty,
-        viewModel::seek
-    )
+    private val audioScrollBar =
+        createAudioScrollBar(
+            viewModel.audioPositionProperty,
+            viewModel.totalFramesProperty,
+            viewModel.isPlayingProperty,
+            viewModel::seek,
+        )
     private val eventSubscriptions = mutableListOf<EventRegistration>()
 
     private var cleanUpWaveform: () -> Unit = {}
     private var timer: AnimationTimer? = null
 
-    override val root = vbox {
-        borderpane {
-            vgrow = Priority.ALWAYS
+    override val root =
+        vbox {
+            borderpane {
+                vgrow = Priority.ALWAYS
 
-            center = VBox().apply {
-                MarkerWaveform().apply {
-                    waveform = this
-                    addClass("waveform--focusable")
-                    vgrow = Priority.ALWAYS
-                    clip = Rectangle().apply {
-                        widthProperty().bind(this@vbox.widthProperty())
-                        heightProperty().bind(this@vbox.heightProperty())
-                    }
-                    themeProperty.bind(settingsViewModel.appColorMode)
-                    positionProperty.bind(viewModel.positionProperty)
-                    canMoveMarkerProperty.set(true)
-                    canDeleteMarkerProperty.set(true)
-
-                    setUpWaveformActionHandlers()
-                    cleanUpWaveform = ::freeImages
-
-                    // Marker stuff
-                    this.markers.bind(viewModel.markers) { it }
-                }
-                add(waveform)
-                add(audioScrollBar)
-            }
-            bottom = hbox {
-                addClass("consume__bottom")
-                button(messages["addChunk"]) {
-                    addClass("btn", "btn--primary", "consume__btn")
-                    tooltip(text)
-                    graphic = FontIcon(MaterialDesign.MDI_PLUS)
-
-                    action {
-                        viewModel.placeMarker()
-                    }
-                }
-                region { hgrow = Priority.ALWAYS }
-                hbox {
-                    addClass("chunking-bottom__media-btn-group")
-
-                    button {
-                        addClass("btn", "btn--icon")
-                        graphic = FontIcon(MaterialDesign.MDI_SKIP_PREVIOUS)
-                        tooltip(messages["previousChunk"])
-                        action { viewModel.seekPrevious() }
-                    }
-                    button {
-                        addClass("btn", "btn--icon")
-                        val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
-                        val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
-                        tooltipProperty().bind(
-                            viewModel.isPlayingProperty.objectBinding {
-                                togglePseudoClass("active", it == true)
-                                if (it == true) {
-                                    graphic = pauseIcon
-                                    Tooltip(messages["pause"])
-                                } else {
-                                    graphic = playIcon
-                                    Tooltip(messages["playSource"])
+                center =
+                    VBox().apply {
+                        MarkerWaveform().apply {
+                            waveform = this
+                            addClass("waveform--focusable")
+                            vgrow = Priority.ALWAYS
+                            clip =
+                                Rectangle().apply {
+                                    widthProperty().bind(this@vbox.widthProperty())
+                                    heightProperty().bind(this@vbox.heightProperty())
                                 }
-                            }
-                        )
+                            themeProperty.bind(settingsViewModel.appColorMode)
+                            positionProperty.bind(viewModel.positionProperty)
+                            canMoveMarkerProperty.set(true)
+                            canDeleteMarkerProperty.set(true)
 
-                        action { viewModel.mediaToggle() }
+                            setUpWaveformActionHandlers()
+                            cleanUpWaveform = ::freeImages
+
+                            // Marker stuff
+                            this.markers.bind(viewModel.markers) { it }
+                        }
+                        add(waveform)
+                        add(audioScrollBar)
                     }
-                    button {
-                        addClass("btn", "btn--icon")
-                        graphic = FontIcon(MaterialDesign.MDI_SKIP_NEXT)
-                        tooltip(messages["nextChunk"])
-                        action { viewModel.seekNext() }
+                bottom =
+                    hbox {
+                        addClass("consume__bottom")
+                        button(messages["addChunk"]) {
+                            addClass("btn", "btn--primary", "consume__btn")
+                            tooltip(text)
+                            graphic = FontIcon(MaterialDesign.MDI_PLUS)
+
+                            action {
+                                viewModel.placeMarker()
+                            }
+                        }
+                        region { hgrow = Priority.ALWAYS }
+                        hbox {
+                            addClass("chunking-bottom__media-btn-group")
+
+                            button {
+                                addClass("btn", "btn--icon")
+                                graphic = FontIcon(MaterialDesign.MDI_SKIP_PREVIOUS)
+                                tooltip(messages["previousChunk"])
+                                action { viewModel.seekPrevious() }
+                            }
+                            button {
+                                addClass("btn", "btn--icon")
+                                val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
+                                val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
+                                tooltipProperty().bind(
+                                    viewModel.isPlayingProperty.objectBinding {
+                                        togglePseudoClass("active", it == true)
+                                        if (it == true) {
+                                            graphic = pauseIcon
+                                            Tooltip(messages["pause"])
+                                        } else {
+                                            graphic = playIcon
+                                            Tooltip(messages["playSource"])
+                                        }
+                                    },
+                                )
+
+                                action { viewModel.mediaToggle() }
+                            }
+                            button {
+                                addClass("btn", "btn--icon")
+                                graphic = FontIcon(MaterialDesign.MDI_SKIP_NEXT)
+                                tooltip(messages["nextChunk"])
+                                action { viewModel.seekNext() }
+                            }
+                        }
                     }
-                }
             }
         }
-    }
 
     override fun onDock() {
         super.onDock()
@@ -172,7 +177,6 @@ class Chunking : View() {
             }
             .addTo(viewModel.compositeDisposable)
     }
-
 
     private fun setUpWaveformActionHandlers() {
         waveform.apply {

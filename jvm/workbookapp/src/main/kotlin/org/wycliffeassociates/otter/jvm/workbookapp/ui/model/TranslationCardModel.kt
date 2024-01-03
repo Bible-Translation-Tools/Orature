@@ -27,5 +27,5 @@ class TranslationCardModel(
     val sourceLanguage: Language,
     val targetLanguage: Language,
     val modifiedTs: LocalDateTime?,
-    val books: ObservableList<Workbook>
+    val books: ObservableList<Workbook>,
 )

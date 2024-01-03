@@ -23,14 +23,12 @@ import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.persistence.repositories.IVersificationRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDatabaseAccessors
-import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.*
 import java.io.File
@@ -39,8 +37,10 @@ import java.time.LocalDate
 class CreateChunksTest {
     @JvmField @Rule
     val tempDir = TemporaryFolder()
+
     @JvmField @Rule
     val providerTempDir = TemporaryFolder()
+
     @JvmField @Rule
     val projectDir = TemporaryFolder()
 
@@ -69,18 +69,20 @@ class CreateChunksTest {
     private val mockedDirectoryProvider = mock<IDirectoryProvider>()
     private val mockedDb = mock<IWorkbookDatabaseAccessors>()
 
-    private val sourceCues = listOf(
-        AudioCue(0, "1"),
-        AudioCue(10, "2"),
-        AudioCue(20, "3"),
-        AudioCue(30, "4"),
-        AudioCue(40, "5")
-    )
+    private val sourceCues =
+        listOf(
+            AudioCue(0, "1"),
+            AudioCue(10, "2"),
+            AudioCue(20, "3"),
+            AudioCue(30, "4"),
+            AudioCue(40, "5"),
+        )
 
-    private val customCues = listOf(
-        AudioCue(0, "1"),
-        AudioCue(20, "2")
-    )
+    private val customCues =
+        listOf(
+            AudioCue(0, "1"),
+            AudioCue(20, "2"),
+        )
 
     private lateinit var dublinCore: DublinCore
 
@@ -96,18 +98,18 @@ class CreateChunksTest {
     fun setup() {
         mockedDb.apply {
             whenever(
-                getTranslation(any(), any())
+                getTranslation(any(), any()),
             ).thenReturn(
                 Single.just(
                     Translation(
                         english,
                         spanish,
-                        null
-                    )
-                )
+                        null,
+                    ),
+                ),
             )
             whenever(
-                getChildren(any())
+                getChildren(any()),
             ).thenAnswer { invocation ->
                 val collection = invocation.getArgument<Collection>(0)!!
                 Single.just(
@@ -120,16 +122,16 @@ class CreateChunksTest {
                                     id = autoincrement,
                                     resourceContainer = collection.resourceContainer,
                                     titleKey = chapter.toString(),
-                                    labelKey = ContentLabel.CHAPTER.value
+                                    labelKey = ContentLabel.CHAPTER.value,
                                 )
                             }
                         }
                         else -> emptyList()
-                    }
+                    },
                 )
             }
             whenever(
-                getCollectionMetaContent(any())
+                getCollectionMetaContent(any()),
             ).thenReturn(
                 Single.just(
                     Content(
@@ -142,35 +144,36 @@ class CreateChunksTest {
                         format = "WAV",
                         type = ContentType.META,
                         id = autoincrement,
-                        draftNumber = 1
-                    )
-                )
+                        draftNumber = 1,
+                    ),
+                ),
             )
             whenever(
-                getTakeByContent(any())
+                getTakeByContent(any()),
             ).thenAnswer { invocation ->
                 val content = invocation.getArgument<Content>(0)!!
-                val take = if (content.format == "audio/wav" && content.start == 3) {
-                    val id = autoincrement
-                    Take(
-                        id = id,
-                        number = id,
-                        path = File("."),
-                        filename = ".",
-                        markers = listOf(),
-                        played = false,
-                        created = LocalDate.now(),
-                        deleted = null,
-                        checkingStatus = CheckingStatus.UNCHECKED,
-                        checksum = null
-                    )
-                } else {
-                    null
-                }
+                val take =
+                    if (content.format == "audio/wav" && content.start == 3) {
+                        val id = autoincrement
+                        Take(
+                            id = id,
+                            number = id,
+                            path = File("."),
+                            filename = ".",
+                            markers = listOf(),
+                            played = false,
+                            created = LocalDate.now(),
+                            deleted = null,
+                            checkingStatus = CheckingStatus.UNCHECKED,
+                            checksum = null,
+                        )
+                    } else {
+                        null
+                    }
                 Single.just(listOfNotNull(take))
             }
             whenever(
-                getChunkCount(any())
+                getChunkCount(any()),
             ).thenAnswer { invocation ->
                 val collection = invocation.getArgument<Collection>(0)!!
                 when (collection.slug.count { it == '_' }) {
@@ -186,7 +189,7 @@ class CreateChunksTest {
                 .thenReturn(
                     Completable.fromAction {
                         chunksAddedToDatabase = true
-                    }
+                    },
                 )
         }
 
@@ -208,9 +211,10 @@ class CreateChunksTest {
         rc = createRcWithAudio()
         val sourceMetadata = rc.manifest.dublinCore.mapToMetadata(rc.file, rcSource.language)
         projectFilesAccessor = ProjectFilesAccessor(mockedDirectoryProvider, sourceMetadata, rcTarget, collTarget)
-        audioSourceAudioAccessor = mock<SourceAudioAccessor> {
-            on { getChapter(any(), any()) } doReturn(SourceAudio(sourceAudioFile, 1, sourceCues.size))
-        }
+        audioSourceAudioAccessor =
+            mock<SourceAudioAccessor> {
+                on { getChapter(any(), any()) } doReturn(SourceAudio(sourceAudioFile, 1, sourceCues.size))
+            }
 
         workbook = spy(buildWorkbook(mockedDirectoryProvider, mockedDb, collSource, collTarget))
         doReturn(audioSourceAudioAccessor).whenever(workbook).sourceAudioAccessor
@@ -242,9 +246,13 @@ class CreateChunksTest {
     }
 
     private fun createRcWithAudio(): ResourceContainer {
-        val fileName = templateAudioFileName(
-            rcSource.language.slug, rcSource.identifier, collSource.slug, "{chapter}"
-        )
+        val fileName =
+            templateAudioFileName(
+                rcSource.language.slug,
+                rcSource.identifier,
+                collSource.slug,
+                "{chapter}",
+            )
         val sourceFile = createWavFile(tempDir.root, "${fileName.replace("{chapter}", "1")}.wav", "123456".toByteArray())
         val sourceCueFile = File(tempDir.root, "${fileName.replace("{chapter}", "1")}.cue").apply { createNewFile() }
         val audio = OratureAudioFile(sourceFile)

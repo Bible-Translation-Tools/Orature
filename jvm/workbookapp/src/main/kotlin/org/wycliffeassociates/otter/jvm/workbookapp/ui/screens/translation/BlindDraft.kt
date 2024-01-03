@@ -12,15 +12,15 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.TakeSelectionAnimationMediator
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
-import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
-import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChunkTakeCard
 import org.wycliffeassociates.otter.jvm.controls.event.ChunkTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.TakeAction
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
+import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChunkTakeCard
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BlindDraftViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecorderViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -39,25 +39,26 @@ class BlindDraft : View() {
     private val eventSubscriptions = mutableListOf<EventRegistration>()
     private val listenerDisposers = mutableListOf<ListenerDisposer>()
 
-    override val root = borderpane {
-        addClass("blind-draft")
+    override val root =
+        borderpane {
+            addClass("blind-draft")
 
-        top {
-            vbox {
-                addClass("blind-draft-section")
-                label(viewModel.chunkTitleProperty).addClass("h4", "h4--80")
-                simpleaudioplayer {
-                    playerProperty.bind(viewModel.sourcePlayerProperty)
-                    enablePlaybackRateProperty.set(true)
-                    sideTextProperty.set(messages["sourceAudio"])
-                    menuSideProperty.set(Side.BOTTOM)
+            top {
+                vbox {
+                    addClass("blind-draft-section")
+                    label(viewModel.chunkTitleProperty).addClass("h4", "h4--80")
+                    simpleaudioplayer {
+                        playerProperty.bind(viewModel.sourcePlayerProperty)
+                        enablePlaybackRateProperty.set(true)
+                        sideTextProperty.set(messages["sourceAudio"])
+                        menuSideProperty.set(Side.BOTTOM)
+                    }
+                    visibleWhen { hideSourceAudio.not() }
+                    managedWhen(visibleProperty())
                 }
-                visibleWhen { hideSourceAudio.not() }
-                managedWhen(visibleProperty())
             }
+            centerProperty().bind(mainSectionProperty)
         }
-        centerProperty().bind(mainSectionProperty)
-    }
 
     init {
         tryImportStylesheet("/css/recording-screen.css")
@@ -176,7 +177,7 @@ class BlindDraft : View() {
                 mainSectionProperty.set(takesView)
             }
         }.also { listenerDisposers.add(it) }
-        
+
         subscribe<ChunkTakeEvent> {
             when (it.action) {
                 TakeAction.SELECT -> viewModel.onSelectTake(it.take)

@@ -20,28 +20,34 @@ package org.wycliffeassociates.otter.common.audio.wav
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import java.io.File
-import java.io.FileInputStream
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
 import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
+import java.io.File
+import java.io.FileInputStream
 
 class WavIOTest {
-    private val testCues = listOf(
-        AudioCue(123_943_347, "marker 1"),
-        AudioCue(200_000_000, "marker 2"),
-        AudioCue(300_000_000, "marker 3 ")
-    )
-
-    private fun writeDataToFile(file: File, samplesToWrite: Int, cues: List<AudioCue>): WavFile {
-        val wav = WavFile(
-            file,
-            DEFAULT_CHANNELS,
-            DEFAULT_SAMPLE_RATE,
-            DEFAULT_BITS_PER_SAMPLE,
-            WavMetadata(listOf(CueChunk()))
+    private val testCues =
+        listOf(
+            AudioCue(123_943_347, "marker 1"),
+            AudioCue(200_000_000, "marker 2"),
+            AudioCue(300_000_000, "marker 3 "),
         )
+
+    private fun writeDataToFile(
+        file: File,
+        samplesToWrite: Int,
+        cues: List<AudioCue>,
+    ): WavFile {
+        val wav =
+            WavFile(
+                file,
+                DEFAULT_CHANNELS,
+                DEFAULT_SAMPLE_RATE,
+                DEFAULT_BITS_PER_SAMPLE,
+                WavMetadata(listOf(CueChunk())),
+            )
         for (cue in cues) {
             wav.metadata.addCue(cue.location, cue.label)
         }
@@ -115,27 +121,29 @@ class WavIOTest {
     fun `buffered wav produces equivalent file`() {
         val temp = File.createTempFile("testwav", "wav")
         val temp2 = File.createTempFile("test2wav", "wav")
-        val wav = WavFile(
-            temp,
-            DEFAULT_CHANNELS,
-            DEFAULT_SAMPLE_RATE,
-            DEFAULT_BITS_PER_SAMPLE,
-            WavMetadata(listOf(CueChunk()))
-        )
-        val wav2 = WavFile(
-            temp2,
-            DEFAULT_CHANNELS,
-            DEFAULT_SAMPLE_RATE,
-            DEFAULT_BITS_PER_SAMPLE,
-            WavMetadata(listOf(CueChunk()))
-        )
+        val wav =
+            WavFile(
+                temp,
+                DEFAULT_CHANNELS,
+                DEFAULT_SAMPLE_RATE,
+                DEFAULT_BITS_PER_SAMPLE,
+                WavMetadata(listOf(CueChunk())),
+            )
+        val wav2 =
+            WavFile(
+                temp2,
+                DEFAULT_CHANNELS,
+                DEFAULT_SAMPLE_RATE,
+                DEFAULT_BITS_PER_SAMPLE,
+                WavMetadata(listOf(CueChunk())),
+            )
 
         val audioSamples = 700_000
 
         WavOutputStream(
             wav,
             append = false,
-            buffered = false
+            buffered = false,
         ).use {
             for (i in 1..audioSamples) {
                 it.write(i)
@@ -144,7 +152,7 @@ class WavIOTest {
         WavOutputStream(
             wav2,
             append = false,
-            buffered = true
+            buffered = true,
         ).use {
             for (i in 1..audioSamples) {
                 it.write(i)
@@ -169,20 +177,22 @@ class WavIOTest {
     fun `writing byte array buffered wav produces equivalent file`() {
         val temp = File.createTempFile("testwav", "wav")
         val temp2 = File.createTempFile("test2wav", "wav")
-        val wav = WavFile(
-            temp,
-            DEFAULT_CHANNELS,
-            DEFAULT_SAMPLE_RATE,
-            DEFAULT_BITS_PER_SAMPLE,
-            WavMetadata(listOf(CueChunk()))
-        )
-        val wav2 = WavFile(
-            temp2,
-            DEFAULT_CHANNELS,
-            DEFAULT_SAMPLE_RATE,
-            DEFAULT_BITS_PER_SAMPLE,
-            WavMetadata(listOf(CueChunk()))
-        )
+        val wav =
+            WavFile(
+                temp,
+                DEFAULT_CHANNELS,
+                DEFAULT_SAMPLE_RATE,
+                DEFAULT_BITS_PER_SAMPLE,
+                WavMetadata(listOf(CueChunk())),
+            )
+        val wav2 =
+            WavFile(
+                temp2,
+                DEFAULT_CHANNELS,
+                DEFAULT_SAMPLE_RATE,
+                DEFAULT_BITS_PER_SAMPLE,
+                WavMetadata(listOf(CueChunk())),
+            )
 
         val audioSamples = 700_000
         val byteArray = ByteArray(audioSamples)
@@ -193,14 +203,14 @@ class WavIOTest {
         WavOutputStream(
             wav,
             append = false,
-            buffered = false
+            buffered = false,
         ).use {
             it.write(byteArray)
         }
         WavOutputStream(
             wav2,
             append = false,
-            buffered = true
+            buffered = true,
         ).use {
             it.write(byteArray)
         }

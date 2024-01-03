@@ -29,42 +29,43 @@ import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseRequest
 import tornadofx.*
 
 class ControlFragment : Fragment() {
-
     private val vm: RecorderViewModel by inject()
 
-    private val timer = label {
-        textProperty().bind(vm.timerTextProperty)
-    }
+    private val timer =
+        label {
+            textProperty().bind(vm.timerTextProperty)
+        }
     private val continueBtn = button(messages["continue"], FontIcon("fas-check"))
     private val cancelBtn = button(messages["cancel"], FontIcon("gmi-undo"))
     private val recordBtn = Button()
     private val resetBtn = Button(messages["reset"], FontIcon("gmi-delete"))
 
-    override val root = borderpane {
-        addClass("controls")
+    override val root =
+        borderpane {
+            addClass("controls")
 
-        left {
-            vbox {
-                add(timer)
-                alignment = Pos.CENTER_LEFT
-                padding = Insets(10.0, 0.0, 10.0, 10.0)
+            left {
+                vbox {
+                    add(timer)
+                    alignment = Pos.CENTER_LEFT
+                    padding = Insets(10.0, 0.0, 10.0, 10.0)
+                }
+            }
+            center {
+                hgrow = Priority.ALWAYS
+                add(recordBtn)
+            }
+            right {
+                hbox {
+                    padding = Insets(10.0, 10.0, 10.0, 0.0)
+                    alignment = Pos.CENTER_RIGHT
+                    spacing = 10.0
+                    add(resetBtn)
+                    add(continueBtn)
+                    add(cancelBtn)
+                }
             }
         }
-        center {
-            hgrow = Priority.ALWAYS
-            add(recordBtn)
-        }
-        right {
-            hbox {
-                padding = Insets(10.0, 10.0, 10.0, 0.0)
-                alignment = Pos.CENTER_RIGHT
-                spacing = 10.0
-                add(resetBtn)
-                add(continueBtn)
-                add(cancelBtn)
-            }
-        }
-    }
 
     init {
         timer.apply {
@@ -78,7 +79,8 @@ class ControlFragment : Fragment() {
                 textProperty().bind(
                     vm.recordingProperty.stringBinding {
                         if (it == true) messages["pause"] else messages["record"]
-                })
+                    },
+                )
             }
             setOnAction {
                 toggleRecording()

@@ -28,15 +28,15 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
+import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
-import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.otter.common.io.zip.IFileWriter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -63,61 +63,72 @@ class ProjectFilesAccessorTest {
         val project = mock(Collection::class.java)
         `when`(project.slug).thenReturn(jasProjectSlug)
 
-        val sourceMetadata = ResourceMetadata(
-            "_",
-            "_",
-            "_",
-            "_",
-            "ulb",
-            LocalDate.now(),
-            mock(Language::class.java),
-            LocalDate.now(),
-            "_",
-            "_",
-            mock(ContainerType::class.java),
-            "_",
-            "_",
-            "_",
-            sourceRC
-        )
-        val targetMetadata = ResourceMetadata(
-            "_",
-            "_",
-            "_",
-            "_",
-            "ulb",
-            LocalDate.now(),
-            mock(Language::class.java),
-            LocalDate.now(),
-            "_",
-            "_",
-            mock(ContainerType::class.java),
-            "_",
-            "_",
-            "_",
-            File("")
-        )
+        val sourceMetadata =
+            ResourceMetadata(
+                "_",
+                "_",
+                "_",
+                "_",
+                "ulb",
+                LocalDate.now(),
+                mock(Language::class.java),
+                LocalDate.now(),
+                "_",
+                "_",
+                mock(ContainerType::class.java),
+                "_",
+                "_",
+                "_",
+                sourceRC,
+            )
+        val targetMetadata =
+            ResourceMetadata(
+                "_",
+                "_",
+                "_",
+                "_",
+                "ulb",
+                LocalDate.now(),
+                mock(Language::class.java),
+                LocalDate.now(),
+                "_",
+                "_",
+                mock(ContainerType::class.java),
+                "_",
+                "_",
+                "_",
+                File(""),
+            )
 
         `when`(
             directoryProviderMock.getProjectDirectory(
-                sourceMetadata, targetMetadata, project
-            )
+                sourceMetadata,
+                targetMetadata,
+                project,
+            ),
         ).thenReturn(mock(File::class.java))
 
         `when`(
             directoryProviderMock.getProjectSourceDirectory(
-                sourceMetadata, targetMetadata, project
-            )
+                sourceMetadata,
+                targetMetadata,
+                project,
+            ),
         ).thenReturn(projectSourceDir)
 
         `when`(
             directoryProviderMock.getProjectAudioDirectory(
-                sourceMetadata, targetMetadata, project
-            )
+                sourceMetadata,
+                targetMetadata,
+                project,
+            ),
         ).thenReturn(mock(File::class.java))
 
         return ProjectFilesAccessor(
-            directoryProviderMock, sourceMetadata, targetMetadata, project
+            directoryProviderMock,
+            sourceMetadata,
+            targetMetadata,
+            project,
         )
     }
 
@@ -139,27 +150,31 @@ class ProjectFilesAccessorTest {
 
         assertEquals(
             "Target location must have exactly ONE item",
-            1, projectSourceDir.listFiles().size
+            1,
+            projectSourceDir.listFiles().size,
         )
         val target = projectSourceDir.listFiles().first()
         ResourceContainer.load(target).use {
             assertEquals(
                 "Media manifest (source) projects should be empty.",
                 0,
-                it.media!!.projects.size
+                it.media!!.projects.size,
             )
         }
 
         ZipFile(target).use { zip ->
             val zipEntries = zip.entries().toList()
-            val hasNoMedia = zipEntries.all { entry ->
-                File(entry.name).extension !in ProjectFilesAccessor.ignoredSourceMediaExtensions
-            }
+            val hasNoMedia =
+                zipEntries.all { entry ->
+                    File(entry.name).extension !in ProjectFilesAccessor.ignoredSourceMediaExtensions
+                }
             assertTrue(hasNoMedia)
         }
 
         verify(directoryProviderMock).getProjectSourceDirectory(
-            any(), any(), any<Collection>()
+            any(),
+            any(),
+            any<Collection>(),
         )
     }
 
@@ -171,44 +186,49 @@ class ProjectFilesAccessorTest {
 
         assertEquals(
             "Target location must have exactly ONE item",
-            1, projectSourceDir.listFiles().size
+            1,
+            projectSourceDir.listFiles().size,
         )
 
         val target = projectSourceDir.listFiles().first()
         ResourceContainer.load(target).use {
             assertNotNull(
-                it.media != null
+                it.media != null,
             )
             assertEquals(
                 mediaProjectSize,
-                it.media!!.projects.size
+                it.media!!.projects.size,
             )
         }
 
         ZipFile(target).use { zip ->
             val zipEntries = zip.entries().toList()
-            val hasMedia = zipEntries.any { entry ->
-                File(entry.name).extension in ProjectFilesAccessor.ignoredSourceMediaExtensions
-            }
+            val hasMedia =
+                zipEntries.any { entry ->
+                    File(entry.name).extension in ProjectFilesAccessor.ignoredSourceMediaExtensions
+                }
             assertTrue(hasMedia)
         }
 
         verify(directoryProviderMock).getProjectSourceDirectory(
-            any(), any(), any<Collection>()
+            any(),
+            any(),
+            any<Collection>(),
         )
     }
 
     @Test
     fun `copy source files with project-related media only`() {
         val pfa = buildProjectAccessor()
-        val writer = mock<IFileWriter> {
-            on { copyFile(any<File>(), anyString()) } doAnswer { invocation ->
-                // stub the writer with a simple copy to source dir
-                val source = invocation.arguments[0] as File
-                source.copyTo(pfa.sourceDir.resolve(source.name))
-                Unit
+        val writer =
+            mock<IFileWriter> {
+                on { copyFile(any<File>(), anyString()) } doAnswer { invocation ->
+                    // stub the writer with a simple copy to source dir
+                    val source = invocation.arguments[0] as File
+                    source.copyTo(pfa.sourceDir.resolve(source.name))
+                    Unit
+                }
             }
-        }
 
         pfa.copySourceFilesWithRelatedMedia(writer, tempDir)
 
@@ -219,12 +239,12 @@ class ProjectFilesAccessorTest {
             assertEquals(
                 "Media project of source should have 1 project.",
                 1,
-                rc.media?.projects?.size
+                rc.media?.projects?.size,
             )
             assertEquals(
                 "Source audio project slug should match the target slug.",
                 jasProjectSlug,
-                rc.media?.projects?.single()?.identifier
+                rc.media?.projects?.single()?.identifier,
             )
         }
         ZipFile(source).use { zip ->
@@ -235,7 +255,7 @@ class ProjectFilesAccessorTest {
             assertTrue(mediaPaths.isNotEmpty())
             assertTrue(
                 "Source media should only contain files related to the target project.",
-                isRelevantMedia
+                isRelevantMedia,
             )
         }
     }
@@ -245,15 +265,20 @@ class ProjectFilesAccessorTest {
         val projectPath = getResource("valid_single_book_rc")
         val mockProject = mock<Collection>()
         val mockMetadata = mock<ResourceMetadata>()
-        val mockDirProvider = mock<IDirectoryProvider> {
-            on { getProjectDirectory(any(), any(), any<Collection>()) } doReturn (projectPath)
-            on { getProjectSourceDirectory(any(), any(), any<Collection>()) } doReturn (File("mock-dir"))
-            on { getProjectAudioDirectory(any(), any(), any<Collection>()) } doReturn (File("mock-dir"))
-        }
+        val mockDirProvider =
+            mock<IDirectoryProvider> {
+                on { getProjectDirectory(any(), any(), any<Collection>()) } doReturn (projectPath)
+                on { getProjectSourceDirectory(any(), any(), any<Collection>()) } doReturn (File("mock-dir"))
+                on { getProjectAudioDirectory(any(), any(), any<Collection>()) } doReturn (File("mock-dir"))
+            }
 
-        val projectFilesAccessor = ProjectFilesAccessor(
-            mockDirProvider, mockMetadata, mockMetadata, mockProject
-        )
+        val projectFilesAccessor =
+            ProjectFilesAccessor(
+                mockDirProvider,
+                mockMetadata,
+                mockMetadata,
+                mockProject,
+            )
         var contributors = projectFilesAccessor.getContributorInfo().toMutableList()
 
         assertEquals(2, contributors.size)

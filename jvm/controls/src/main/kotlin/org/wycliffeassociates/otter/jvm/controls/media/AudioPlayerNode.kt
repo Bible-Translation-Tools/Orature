@@ -25,7 +25,6 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.skins.media.AudioPlayerSkin
 
 open class AudioPlayerNode(private var player: IAudioPlayer?) : Control() {
-
     val audioPlayerProperty = SimpleObjectProperty<IAudioPlayer>(player)
 
     val sourceAvailable: Boolean

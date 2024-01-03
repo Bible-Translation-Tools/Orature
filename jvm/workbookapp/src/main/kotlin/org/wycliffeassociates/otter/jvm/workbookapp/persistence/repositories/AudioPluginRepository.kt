@@ -28,168 +28,177 @@ import org.wycliffeassociates.otter.common.domain.plugins.IAudioPlugin
 import org.wycliffeassociates.otter.common.persistence.IAppPreferences
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
-import org.wycliffeassociates.otter.jvm.workbookapp.plugin.AudioPlugin
+import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.AppPreferences
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.AudioPluginDataMapper
+import org.wycliffeassociates.otter.jvm.workbookapp.plugin.AudioPlugin
 import javax.inject.Inject
-import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 
-class AudioPluginRepository @Inject constructor(
-    database: AppDatabase,
-    private val preferences: IAppPreferences,
-    private val audioConnectionFactory: AudioConnectionFactory,
-    private val mapper: AudioPluginDataMapper
-) : IAudioPluginRepository {
-    private val logger = LoggerFactory.getLogger(AudioPluginRepository::class.java)
+class AudioPluginRepository
+    @Inject
+    constructor(
+        database: AppDatabase,
+        private val preferences: IAppPreferences,
+        private val audioConnectionFactory: AudioConnectionFactory,
+        private val mapper: AudioPluginDataMapper,
+    ) : IAudioPluginRepository {
+        private val logger = LoggerFactory.getLogger(AudioPluginRepository::class.java)
 
-    private val audioPluginDao = database.audioPluginDao
+        private val audioPluginDao = database.audioPluginDao
 
-    override fun insert(data: AudioPluginData): Single<Int> {
-        return Single
-            .fromCallable {
-                audioPluginDao.insert(mapper.mapToEntity(data))
-            }
-            .doOnError { e ->
-                logger.error("Error in insert with plugin data: $data", e)
-            }
-            .subscribeOn(Schedulers.io())
-    }
-
-    override fun getAll(): Single<List<AudioPluginData>> {
-        return Single
-            .fromCallable {
-                audioPluginDao
-                    .fetchAll()
-                    .map { mapper.mapFromEntity(it) }
-            }
-            .doOnError { e ->
-                logger.error("Error in getAll", e)
-            }
-            .subscribeOn(Schedulers.io())
-    }
-
-    override fun getAllPlugins(): Single<List<IAudioPlugin>> {
-        return getAll()
-            .map {
-                it.map { AudioPlugin(audioConnectionFactory, it) }
-            }
-    }
-
-    override fun update(obj: AudioPluginData): Completable {
-        return Completable
-            .fromAction {
-                audioPluginDao.update(mapper.mapToEntity(obj))
-            }
-            .doOnError { e ->
-                logger.error("Error in update for plugin data: $obj", e)
-            }
-            .subscribeOn(Schedulers.io())
-    }
-
-    override fun delete(obj: AudioPluginData): Completable {
-        return Completable
-            .fromAction {
-                obj.pluginFile?.let { if (it.exists()) it.delete() }
-                audioPluginDao.delete(mapper.mapToEntity(obj))
-            }
-            // Update the preferences if necessary
-            .andThen(preferences.pluginId(PluginType.RECORDER))
-            .flatMapCompletable {
-                if (it == obj.id)
-                    return@flatMapCompletable preferences.setPluginId(PluginType.RECORDER, -1)
-                else
-                    return@flatMapCompletable Completable.complete()
-            }
-            .andThen(preferences.pluginId(PluginType.EDITOR))
-            .flatMapCompletable {
-                if (it == obj.id)
-                    return@flatMapCompletable preferences.setPluginId(PluginType.EDITOR, -1)
-                else
-                    return@flatMapCompletable Completable.complete()
-            }
-            .doOnError { e ->
-                logger.error("Error in delete for plugin data: $obj", e)
-            }
-            .subscribeOn(Schedulers.io())
-    }
-
-    override fun initSelected(): Completable =
-        Single
-            .fromCallable {
-                audioPluginDao.fetchAll()
-            }
-            .flatMapCompletable { allPlugins ->
-                if (allPlugins.isEmpty()) {
-                    Completable.complete()
-                } else {
-                    preferences.pluginId(PluginType.EDITOR)
-                        .flatMapCompletable { editorId ->
-                            val editPlugins = allPlugins.filter { it.edit == 1 }
-                            val pluginNotFound = editPlugins.isNotEmpty() &&
-                                    (editorId == AppPreferences.NO_ID  || !editPlugins.any { it.id == editorId })
-
-                            if (pluginNotFound) {
-                                preferences.setPluginId(PluginType.EDITOR, editPlugins.first().id)
-                            } else {
-                                Completable.complete()
-                            }
-                        }
-                        .andThen(preferences.pluginId(PluginType.RECORDER))
-                        .flatMapCompletable { recorderId ->
-                            val recordPlugins = allPlugins.filter { it.record == 1 }
-                            val pluginNotFound = recordPlugins.isNotEmpty() &&
-                                    (recorderId == AppPreferences.NO_ID  || !recordPlugins.any { it.id == recorderId })
-
-                            if (pluginNotFound) {
-                                preferences.setPluginId(PluginType.RECORDER, recordPlugins.first().id)
-                            } else {
-                                Completable.complete()
-                            }
-                        }
+        override fun insert(data: AudioPluginData): Single<Int> {
+            return Single
+                .fromCallable {
+                    audioPluginDao.insert(mapper.mapToEntity(data))
                 }
-            }
-            .doOnError { e ->
-                logger.error("Error in initSelected", e)
-            }
-            .subscribeOn(Schedulers.io())
-
-    override fun getPlugin(type: PluginType): Maybe<IAudioPlugin> {
-        return getPluginData(type).map { AudioPlugin(audioConnectionFactory, it) }
-    }
-
-    override fun getPluginData(type: PluginType): Maybe<AudioPluginData> {
-        return preferences.pluginId(type)
-            .flatMapMaybe { pluginId ->
-                if (pluginId == AppPreferences.NO_ID) {
-                    return@flatMapMaybe Maybe.empty<AudioPluginData>()
-                } else {
-                    Maybe
-                        .fromCallable {
-                            audioPluginDao.fetchById(pluginId)?.let {
-                                mapper.mapFromEntity(it)
-                            }
-                        }
-                        .onErrorComplete()
-                        .subscribeOn(Schedulers.io())
+                .doOnError { e ->
+                    logger.error("Error in insert with plugin data: $data", e)
                 }
-            }
-            .doOnError { e ->
-                logger.error("Error in getPluginData", e)
-            }
-    }
+                .subscribeOn(Schedulers.io())
+        }
 
-    override fun setPluginData(type: PluginType, default: AudioPluginData): Completable {
-        return when (type) {
-            PluginType.RECORDER -> {
-                if (default.canRecord) preferences.setPluginId(type, default.id) else Completable.complete()
-            }
-            PluginType.EDITOR -> {
-                if (default.canEdit) preferences.setPluginId(type, default.id) else Completable.complete()
-            }
-            PluginType.MARKER -> {
-                if (default.canMark) preferences.setPluginId(type, default.id) else Completable.complete()
+        override fun getAll(): Single<List<AudioPluginData>> {
+            return Single
+                .fromCallable {
+                    audioPluginDao
+                        .fetchAll()
+                        .map { mapper.mapFromEntity(it) }
+                }
+                .doOnError { e ->
+                    logger.error("Error in getAll", e)
+                }
+                .subscribeOn(Schedulers.io())
+        }
+
+        override fun getAllPlugins(): Single<List<IAudioPlugin>> {
+            return getAll()
+                .map {
+                    it.map { AudioPlugin(audioConnectionFactory, it) }
+                }
+        }
+
+        override fun update(obj: AudioPluginData): Completable {
+            return Completable
+                .fromAction {
+                    audioPluginDao.update(mapper.mapToEntity(obj))
+                }
+                .doOnError { e ->
+                    logger.error("Error in update for plugin data: $obj", e)
+                }
+                .subscribeOn(Schedulers.io())
+        }
+
+        override fun delete(obj: AudioPluginData): Completable {
+            return Completable
+                .fromAction {
+                    obj.pluginFile?.let { if (it.exists()) it.delete() }
+                    audioPluginDao.delete(mapper.mapToEntity(obj))
+                }
+                // Update the preferences if necessary
+                .andThen(preferences.pluginId(PluginType.RECORDER))
+                .flatMapCompletable {
+                    if (it == obj.id) {
+                        return@flatMapCompletable preferences.setPluginId(PluginType.RECORDER, -1)
+                    } else {
+                        return@flatMapCompletable Completable.complete()
+                    }
+                }
+                .andThen(preferences.pluginId(PluginType.EDITOR))
+                .flatMapCompletable {
+                    if (it == obj.id) {
+                        return@flatMapCompletable preferences.setPluginId(PluginType.EDITOR, -1)
+                    } else {
+                        return@flatMapCompletable Completable.complete()
+                    }
+                }
+                .doOnError { e ->
+                    logger.error("Error in delete for plugin data: $obj", e)
+                }
+                .subscribeOn(Schedulers.io())
+        }
+
+        override fun initSelected(): Completable =
+            Single
+                .fromCallable {
+                    audioPluginDao.fetchAll()
+                }
+                .flatMapCompletable { allPlugins ->
+                    if (allPlugins.isEmpty()) {
+                        Completable.complete()
+                    } else {
+                        preferences.pluginId(PluginType.EDITOR)
+                            .flatMapCompletable { editorId ->
+                                val editPlugins = allPlugins.filter { it.edit == 1 }
+                                val pluginNotFound =
+                                    editPlugins.isNotEmpty() &&
+                                        (editorId == AppPreferences.NO_ID || !editPlugins.any { it.id == editorId })
+
+                                if (pluginNotFound) {
+                                    preferences.setPluginId(PluginType.EDITOR, editPlugins.first().id)
+                                } else {
+                                    Completable.complete()
+                                }
+                            }
+                            .andThen(preferences.pluginId(PluginType.RECORDER))
+                            .flatMapCompletable { recorderId ->
+                                val recordPlugins = allPlugins.filter { it.record == 1 }
+                                val pluginNotFound =
+                                    recordPlugins.isNotEmpty() &&
+                                        (recorderId == AppPreferences.NO_ID || !recordPlugins.any { it.id == recorderId })
+
+                                if (pluginNotFound) {
+                                    preferences.setPluginId(PluginType.RECORDER, recordPlugins.first().id)
+                                } else {
+                                    Completable.complete()
+                                }
+                            }
+                    }
+                }
+                .doOnError { e ->
+                    logger.error("Error in initSelected", e)
+                }
+                .subscribeOn(Schedulers.io())
+
+        override fun getPlugin(type: PluginType): Maybe<IAudioPlugin> {
+            return getPluginData(type).map { AudioPlugin(audioConnectionFactory, it) }
+        }
+
+        override fun getPluginData(type: PluginType): Maybe<AudioPluginData> {
+            return preferences.pluginId(type)
+                .flatMapMaybe { pluginId ->
+                    if (pluginId == AppPreferences.NO_ID) {
+                        return@flatMapMaybe Maybe.empty<AudioPluginData>()
+                    } else {
+                        Maybe
+                            .fromCallable {
+                                audioPluginDao.fetchById(pluginId)?.let {
+                                    mapper.mapFromEntity(it)
+                                }
+                            }
+                            .onErrorComplete()
+                            .subscribeOn(Schedulers.io())
+                    }
+                }
+                .doOnError { e ->
+                    logger.error("Error in getPluginData", e)
+                }
+        }
+
+        override fun setPluginData(
+            type: PluginType,
+            default: AudioPluginData,
+        ): Completable {
+            return when (type) {
+                PluginType.RECORDER -> {
+                    if (default.canRecord) preferences.setPluginId(type, default.id) else Completable.complete()
+                }
+                PluginType.EDITOR -> {
+                    if (default.canEdit) preferences.setPluginId(type, default.id) else Completable.complete()
+                }
+                PluginType.MARKER -> {
+                    if (default.canMark) preferences.setPluginId(type, default.id) else Completable.complete()
+                }
             }
         }
     }
-}

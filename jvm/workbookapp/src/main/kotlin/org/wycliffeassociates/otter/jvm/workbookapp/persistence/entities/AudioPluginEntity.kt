@@ -27,5 +27,5 @@ data class AudioPluginEntity(
     var edit: Int,
     var record: Int,
     var mark: Int,
-    var path: String?
+    var path: String?,
 )

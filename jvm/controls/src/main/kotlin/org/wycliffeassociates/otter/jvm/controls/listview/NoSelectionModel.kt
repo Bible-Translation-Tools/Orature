@@ -48,7 +48,10 @@ class NoSelectionModel<T> : MultipleSelectionModel<T>() {
 
     override fun getSelectedItems() = observableListOf<T>()
 
-    override fun selectIndices(index: Int, vararg indices: Int) { /*no op */ }
+    override fun selectIndices(
+        index: Int,
+        vararg indices: Int,
+    ) { /*no op */ }
 
     override fun selectAll() { /*no op */ }
 }

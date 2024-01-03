@@ -18,31 +18,25 @@
  */
 package org.wycliffeassociates.otter.common.data.workbook
 
-import io.reactivex.Observable
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
-import java.util.*
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.domain.content.ResourceRecordable
+import java.util.*
 
 class Chunk(
     override val sort: Int,
     override val label: String,
     override val audio: AssociatedAudio,
     override val resources: List<ResourceGroup>,
-
     override val textItem: TextItem,
     val start: Int,
     val end: Int,
-
     val bridged: Boolean = false,
-
     var draftNumber: Int,
-
-    override val contentType: ContentType
-
+    override val contentType: ContentType,
 ) : BookElement, ResourceRecordable {
     override val title
-        get() = if (start != end) "${start}-${end}" else "$start"
+        get() = if (start != end) "$start-$end" else "$start"
 
     fun hasSelectedAudio(): Boolean {
         return audio.selected.value?.value?.let { take ->
@@ -69,7 +63,7 @@ class Chunk(
             textItem,
             start,
             end,
-            contentType
+            contentType,
         )
     }
 

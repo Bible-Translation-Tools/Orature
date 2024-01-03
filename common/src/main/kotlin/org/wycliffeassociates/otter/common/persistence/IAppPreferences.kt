@@ -25,27 +25,53 @@ import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 // interface to getting user-independent workbookapp preferences
 interface IAppPreferences {
     fun currentUserId(): Single<Int>
+
     fun setCurrentUserId(userId: Int): Completable
+
     fun appInitialized(): Single<Boolean>
+
     fun setAppInitialized(initialized: Boolean): Completable
+
     fun pluginId(type: PluginType): Single<Int>
-    fun setPluginId(type: PluginType, id: Int): Completable
+
+    fun setPluginId(
+        type: PluginType,
+        id: Int,
+    ): Completable
+
     fun resumeBookId(): Single<Int>
+
     fun setResumeBookId(id: Int): Completable
+
     fun lastResource(): Single<String>
+
     fun setLastResource(resource: String): Completable
+
     fun audioOutputDevice(): Single<String>
+
     fun setAudioOutputDevice(name: String): Completable
+
     fun audioInputDevice(): Single<String>
+
     fun setAudioInputDevice(name: String): Completable
+
     fun localeLanguage(): Single<String>
+
     fun setLocaleLanguage(locale: String): Completable
+
     fun appTheme(): Single<String>
+
     fun setAppTheme(theme: String): Completable
+
     fun sourceTextZoomRate(): Single<Int>
+
     fun setSourceTextZoomRate(rate: Int): Completable
+
     fun languageNamesUrl(): Single<String>
+
     fun setLanguageNamesUrl(server: String): Completable
+
     fun defaultLanguageNamesUrl(): Single<String>
+
     fun resetLanguageNamesUrl(): Single<String>
 }

@@ -18,76 +18,77 @@ import java.lang.IllegalArgumentException
 import javax.inject.Inject
 import javax.inject.Provider
 
-class ImportProjectUseCase @Inject constructor() {
-
+class ImportProjectUseCase
     @Inject
-    lateinit var rcFactoryProvider: Provider<RCImporterFactory>
+    constructor() {
+        @Inject
+        lateinit var rcFactoryProvider: Provider<RCImporterFactory>
 
-    @Inject
-    lateinit var rcImporterProvider: Provider<OngoingProjectImporter>
+        @Inject
+        lateinit var rcImporterProvider: Provider<OngoingProjectImporter>
 
-    @Inject
-    lateinit var directoryProvider: IDirectoryProvider
+        @Inject
+        lateinit var directoryProvider: IDirectoryProvider
 
-    private val logger = LoggerFactory.getLogger(javaClass)
+        private val logger = LoggerFactory.getLogger(javaClass)
 
-    @Throws(
-        IllegalArgumentException::class,
-        InvalidResourceContainerException::class
-    )
-    fun import(
-        file: File,
-        callback: ProjectImporterCallback?,
-        options: ImportOptions? = null
-    ): Single<ImportResult> {
-        return Single
-            .fromCallable {
-                val format = ProjectFormatIdentifier.getProjectFormat(file)
-                getImporter(format)
-            }
-            .flatMap {
-                it.import(file, callback, options)
-            }
-            .onErrorReturn {
-                logger.error("Failed to import project file: $file. See exception detail below.", it)
-                ImportResult.FAILED
-            }
-    }
-
-    fun import(file: File): Single<ImportResult> {
-        return import(file, null, null)
-    }
-
-    fun isAlreadyImported(file: File): Boolean {
-        return rcFactoryProvider.get()
-            .makeImporter()
-            .isAlreadyImported(file)
-    }
-
-    fun isSourceAudioProject(file: File): Boolean {
-        return directoryProvider.newFileReader(file).use {
-            !it.exists(RcConstants.SELECTED_TAKES_FILE) && it.exists(RcConstants.SOURCE_MEDIA_DIR)
+        @Throws(
+            IllegalArgumentException::class,
+            InvalidResourceContainerException::class,
+        )
+        fun import(
+            file: File,
+            callback: ProjectImporterCallback?,
+            options: ImportOptions? = null,
+        ): Single<ImportResult> {
+            return Single
+                .fromCallable {
+                    val format = ProjectFormatIdentifier.getProjectFormat(file)
+                    getImporter(format)
+                }
+                .flatMap {
+                    it.import(file, callback, options)
+                }
+                .onErrorReturn {
+                    logger.error("Failed to import project file: $file. See exception detail below.", it)
+                    ImportResult.FAILED
+                }
         }
-    }
 
-    fun getSourceMetadata(file: File): Maybe<ResourceMetadata> {
-        return when (ProjectFormatIdentifier.getProjectFormat(file)) {
-            ProjectFormat.RESOURCE_CONTAINER -> {
-                rcImporterProvider.get().getSourceMetadata(file)
-            }
-            else -> Maybe.empty()
+        fun import(file: File): Single<ImportResult> {
+            return import(file, null, null)
         }
-    }
 
-    /**
-     * Get the corresponding importer based on the project format.
-     */
-    private fun getImporter(format: ProjectFormat): IProjectImporter {
+        fun isAlreadyImported(file: File): Boolean {
+            return rcFactoryProvider.get()
+                .makeImporter()
+                .isAlreadyImported(file)
+        }
+
+        fun isSourceAudioProject(file: File): Boolean {
+            return directoryProvider.newFileReader(file).use {
+                !it.exists(RcConstants.SELECTED_TAKES_FILE) && it.exists(RcConstants.SOURCE_MEDIA_DIR)
+            }
+        }
+
+        fun getSourceMetadata(file: File): Maybe<ResourceMetadata> {
+            return when (ProjectFormatIdentifier.getProjectFormat(file)) {
+                ProjectFormat.RESOURCE_CONTAINER -> {
+                    rcImporterProvider.get().getSourceMetadata(file)
+                }
+                else -> Maybe.empty()
+            }
+        }
+
+        /**
+         * Get the corresponding importer based on the project format.
+         */
+        private fun getImporter(format: ProjectFormat): IProjectImporter {
         /*
             If we support 2+ formats, uncomment this
             val factory = when (format) { ... }
-        */
-        val factory: IProjectImporterFactory = rcFactoryProvider.get()
-        return factory.makeImporter()
+         */
+            val factory: IProjectImporterFactory = rcFactoryProvider.get()
+            return factory.makeImporter()
+        }
     }
-}

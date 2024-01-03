@@ -24,8 +24,10 @@ import javafx.scene.paint.Paint
 import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
 
 class WaveformLayer(private val renderer: ActiveRecordingRenderer) : Drawable {
-
-    override fun draw(context: GraphicsContext, canvas: Canvas) {
+    override fun draw(
+        context: GraphicsContext,
+        canvas: Canvas,
+    ) {
         context.stroke = Paint.valueOf("#1A1A1A")
         context.lineWidth = 1.0
 
@@ -37,7 +39,7 @@ class WaveformLayer(private val renderer: ActiveRecordingRenderer) : Drawable {
                 x,
                 scaleAmplitude(buffer[i].toDouble(), canvas.height),
                 x,
-                scaleAmplitude(buffer[i + 1].toDouble(), canvas.height)
+                scaleAmplitude(buffer[i + 1].toDouble(), canvas.height),
             )
             i += 2
             x += 1
@@ -47,7 +49,10 @@ class WaveformLayer(private val renderer: ActiveRecordingRenderer) : Drawable {
     // 16 bit audio range is -32,768 to 32,767, or 65535 (size of unsigned short)
     // This scales the sample to fit within the canvas height, and moves the
     // sample down (-y translate) by half the height
-    private fun scaleAmplitude(sample: Double, height: Double): Double {
+    private fun scaleAmplitude(
+        sample: Double,
+        height: Double,
+    ): Double {
         return height * (sample / UShort.MAX_VALUE.toDouble()) + height / 2
     }
 }

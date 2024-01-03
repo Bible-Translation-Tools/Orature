@@ -32,7 +32,7 @@ class Take(
     val format: MimeType,
     val createdTimestamp: LocalDate,
     val deletedTimestamp: BehaviorRelay<DateHolder> = BehaviorRelay.createDefault(DateHolder.empty),
-    val checkingState: BehaviorRelay<TakeCheckingState> = BehaviorRelay.createDefault(TakeCheckingState(CheckingStatus.UNCHECKED, null))
+    val checkingState: BehaviorRelay<TakeCheckingState> = BehaviorRelay.createDefault(TakeCheckingState(CheckingStatus.UNCHECKED, null)),
 ) {
     fun checksum() = computeFileChecksum(file)
 
@@ -52,6 +52,7 @@ class Take(
 data class DateHolder(val value: LocalDate?) {
     companion object {
         val empty = DateHolder(null)
+
         fun now() = DateHolder(LocalDate.now())
     }
 }

@@ -29,5 +29,5 @@ enum class ImportResult {
     UNMATCHED_HELP,
     DEPENDENCY_CONSTRAINT,
     FAILED,
-    ABORTED
+    ABORTED,
 }

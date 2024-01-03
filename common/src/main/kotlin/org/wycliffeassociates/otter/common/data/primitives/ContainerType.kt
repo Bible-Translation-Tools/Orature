@@ -33,7 +33,8 @@ enum class ContainerType(val slug: String) {
     Dictionary("dict"),
 
     @Deprecated("Type not supported")
-    Manual("man");
+    Manual("man"),
+    ;
 
     companion object {
         private val map = values().associateBy { it.slug.lowercase() }

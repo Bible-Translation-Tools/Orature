@@ -27,7 +27,7 @@ import java.net.URL
  * Wrapper of FX.importStylesheet(String).
  * Use this function to prevent duplicated imports.
  */
-fun tryImportStylesheet(stylesheet: String) : Boolean {
+fun tryImportStylesheet(stylesheet: String): Boolean {
     val css = stylesheet.replace(" ", "%20")
     try {
         URL(css).toExternalForm()

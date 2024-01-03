@@ -27,9 +27,13 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.Transla
 import kotlin.jvm.Throws
 
 class TranslationDao(
-    private val instanceDsl: DSLContext
+    private val instanceDsl: DSLContext,
 ) {
-    fun fetch(sourceId: Int, targetId: Int, dsl: DSLContext = instanceDsl): TranslationEntity? {
+    fun fetch(
+        sourceId: Int,
+        targetId: Int,
+        dsl: DSLContext = instanceDsl,
+    ): TranslationEntity? {
         return dsl
             .select()
             .from(Tables.TRANSLATION_ENTITY)
@@ -41,7 +45,10 @@ class TranslationDao(
             }
     }
 
-    fun fetchById(id: Int, dsl: DSLContext = instanceDsl): TranslationEntity? {
+    fun fetchById(
+        id: Int,
+        dsl: DSLContext = instanceDsl,
+    ): TranslationEntity? {
         return try {
             dsl
                 .select()
@@ -66,7 +73,10 @@ class TranslationDao(
 
     @Synchronized
     @Throws(InsertionException::class)
-    fun insert(entity: TranslationEntity, dsl: DSLContext = instanceDsl): Int {
+    fun insert(
+        entity: TranslationEntity,
+        dsl: DSLContext = instanceDsl,
+    ): Int {
         if (entity.id != 0) throw InsertionException("Entity ID is not 0")
 
         // Insert the translation entity
@@ -75,12 +85,12 @@ class TranslationDao(
                 Tables.TRANSLATION_ENTITY,
                 Tables.TRANSLATION_ENTITY.SOURCE_FK,
                 Tables.TRANSLATION_ENTITY.TARGET_FK,
-                Tables.TRANSLATION_ENTITY.MODIFIED_TS
+                Tables.TRANSLATION_ENTITY.MODIFIED_TS,
             )
             .values(
                 entity.sourceFk,
                 entity.targetFk,
-                entity.modifiedTs
+                entity.modifiedTs,
             )
             .execute()
 
@@ -94,7 +104,10 @@ class TranslationDao(
     }
 
     @Synchronized
-    fun update(entity: TranslationEntity, dsl: DSLContext = instanceDsl) {
+    fun update(
+        entity: TranslationEntity,
+        dsl: DSLContext = instanceDsl,
+    ) {
         // Update the translation entity
         dsl
             .update(Tables.TRANSLATION_ENTITY)
@@ -108,12 +121,15 @@ class TranslationDao(
     }
 
     @Synchronized
-    fun delete(entity: TranslationEntity, dsl: DSLContext = instanceDsl) {
+    fun delete(
+        entity: TranslationEntity,
+        dsl: DSLContext = instanceDsl,
+    ) {
         dsl
             .deleteFrom(Tables.TRANSLATION_ENTITY)
             .where(
                 Tables.TRANSLATION_ENTITY.SOURCE_FK.equal(entity.sourceFk)
-                    .and(Tables.TRANSLATION_ENTITY.TARGET_FK.equal(entity.targetFk))
+                    .and(Tables.TRANSLATION_ENTITY.TARGET_FK.equal(entity.targetFk)),
             )
             .execute()
     }

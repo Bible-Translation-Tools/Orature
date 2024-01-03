@@ -22,14 +22,14 @@ import jooq.Tables
 import jooq.tables.VersificationEntity.VERSIFICATION_ENTITY
 import org.jooq.DSLContext
 import org.jooq.exception.DataAccessException
-import org.jooq.impl.DSL
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.PreferenceEntity
 
 class VersificationDao(
-    private val instanceDsl: DSLContext
+    private val instanceDsl: DSLContext,
 ) {
-
-    fun fetchVersificationFile(slug: String, dsl: DSLContext = instanceDsl): String? {
+    fun fetchVersificationFile(
+        slug: String,
+        dsl: DSLContext = instanceDsl,
+    ): String? {
         return dsl
             .select(VERSIFICATION_ENTITY.PATH)
             .from(VERSIFICATION_ENTITY)
@@ -39,22 +39,30 @@ class VersificationDao(
     }
 
     @Synchronized
-    fun insert(slug: String, path: String, dsl: DSLContext = instanceDsl) {
+    fun insert(
+        slug: String,
+        path: String,
+        dsl: DSLContext = instanceDsl,
+    ) {
         dsl
             .insertInto(
                 Tables.VERSIFICATION_ENTITY,
                 Tables.VERSIFICATION_ENTITY.SLUG,
-                Tables.VERSIFICATION_ENTITY.PATH
+                Tables.VERSIFICATION_ENTITY.PATH,
             )
             .values(
                 slug,
-                path
+                path,
             )
             .execute()
     }
 
     @Synchronized
-    fun update(slug: String, path: String, dsl: DSLContext = instanceDsl) {
+    fun update(
+        slug: String,
+        path: String,
+        dsl: DSLContext = instanceDsl,
+    ) {
         dsl
             .update(Tables.VERSIFICATION_ENTITY)
             .set(Tables.VERSIFICATION_ENTITY.PATH, path)
@@ -62,7 +70,11 @@ class VersificationDao(
             .execute()
     }
 
-    fun upsert(slug: String, path: String, dsl: DSLContext = instanceDsl) {
+    fun upsert(
+        slug: String,
+        path: String,
+        dsl: DSLContext = instanceDsl,
+    ) {
         try {
             insert(slug, path)
         } catch (e: DataAccessException) {
