@@ -210,13 +210,7 @@ internal class ChapterRepresentation(
     }
 
     fun versesWithRecordings(): List<Boolean> {
-        val recorded = activeVerses.filter { it.length > 0 }
-        val versesWithRecordings = totalVerses.map { false }.toMutableList()
-        for (verse in recorded) {
-            val index = totalVerses.indexOfFirst { it.marker.label == verse.marker.label }
-            versesWithRecordings[index] = true
-        }
-        return versesWithRecordings
+        return totalVerses.map { it.placed && it.length > 0 }
     }
 
     fun getCompletionProgress(): Double {

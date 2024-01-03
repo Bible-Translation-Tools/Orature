@@ -60,7 +60,7 @@ import java.text.MessageFormat
 
 class HomePage2 : View() {
 
-    private val logger = LoggerFactory.getLogger(HomePage::class.java)
+    private val logger = LoggerFactory.getLogger(HomePage2::class.java)
     private val listeners = mutableListOf<ListenerDisposer>()
 
     private val viewModel: HomePageViewModel2 by inject()
