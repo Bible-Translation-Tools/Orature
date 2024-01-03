@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (C) 2020-2022 Wycliffe Associates
+    Copyright (C) 2020-2024 Wycliffe Associates
 
     This file is part of Orature.
 
@@ -19,7 +19,6 @@
     along with Orature.  If not, see <https://www.gnu.org/licenses/>.
 
 -->
-
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.image.ImageView?>
