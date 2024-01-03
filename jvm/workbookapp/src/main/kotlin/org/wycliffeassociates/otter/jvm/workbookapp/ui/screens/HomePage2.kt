@@ -292,6 +292,8 @@ class HomePage2 : View() {
                 orientationProperty.set(settingsViewModel.orientationProperty.value)
                 themeProperty.set(settingsViewModel.appColorMode.value)
                 workbookDescriptorProperty.set(workbookDescriptor)
+                onEstimateSizeAction.set(exportProjectViewModel::getEstimateExportSize)
+                open()
 
                 open()
 

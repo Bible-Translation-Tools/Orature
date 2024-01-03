@@ -27,6 +27,8 @@ import org.wycliffeassociates.otter.common.data.primitives.License
 import java.io.File
 import javax.inject.Inject
 
+const val WAV_TO_MP3_COMPRESSED_RATE = 10 // converting from wav to mp3 yields ~10x smaller file size
+
 class AudioExporter @Inject constructor() {
     @Inject
     lateinit var audioConverter: AudioConverter

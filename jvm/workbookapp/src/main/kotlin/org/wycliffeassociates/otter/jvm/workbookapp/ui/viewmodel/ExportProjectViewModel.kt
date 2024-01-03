@@ -117,6 +117,21 @@ class ExportProjectViewModel : ViewModel() {
         }
     }
 
+    fun getEstimateExportSize(
+        workbookDescriptor: WorkbookDescriptor,
+        chapters: List<Int>,
+        exportType: ExportType
+    ): Long {
+        val workbook = workbookRepo.get(workbookDescriptor.sourceCollection, workbookDescriptor.targetCollection)
+        return when(exportType) {
+            ExportType.BACKUP -> exportBackupUseCase.estimateExportSize(workbook, chapters)
+            ExportType.LISTEN -> exportAudioUseCase.estimateExportSize(workbook, chapters)
+            ExportType.SOURCE_AUDIO,
+            ExportType.PUBLISH -> exportSourceUseCase.estimateExportSize(workbook, chapters)
+            else -> 0L
+        }
+    }
+
     private fun setUpCallback(emitter: ObservableEmitter<ProgressStatus>): ProjectExporterCallback {
         return object : ProjectExporterCallback {
             override fun onNotifySuccess(project: Collection, file: File) {
