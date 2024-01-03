@@ -24,10 +24,10 @@ import java.text.MessageFormat
 class ExportProjectDialog : OtterDialog() {
 
     val chapters = observableListOf<ChapterDescriptor>()
-    val workbookDescriptorProperty = SimpleObjectProperty<WorkbookDescriptor>()
+    val selectedChapters = observableSetOf<ChapterDescriptor>()
 
+    val workbookDescriptorProperty = SimpleObjectProperty<WorkbookDescriptor>()
     private val exportTypeProperty = SimpleObjectProperty<ExportType>(ExportType.BACKUP)
-    private val selectedChapters = observableSetOf<ChapterDescriptor>()
     private val onCloseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     private lateinit var tableView: ExportProjectTableView
 
@@ -125,9 +125,11 @@ class ExportProjectDialog : OtterDialog() {
                 })
             }
             region { hgrow = Priority.ALWAYS }
-            button(messages["export"]) {
+            button(messages["exportProject"]) {
                 addClass("btn", "btn--primary")
                 disableWhen { booleanBinding(selectedChapters) { selectedChapters.isEmpty() } }
+                tooltip(text)
+                graphic = FontIcon(MaterialDesign.MDI_PUBLISH)
 
                 action {
                     val directory = chooseDirectory(FX.messages["exportProject"], owner = currentWindow)

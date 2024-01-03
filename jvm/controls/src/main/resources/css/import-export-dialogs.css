@@ -11,11 +11,13 @@
 }
 
 .export-project-dialog .export-project-dialog__body {
-    -fx-padding: 12 0;
+    -fx-padding: 0;
 }
 
 .export-project-dialog__body .left-pane {
     -fx-pref-width: 240;
+    -fx-border-width: 0 1 0 0;
+    -fx-border-color: -wa-border-light;
 }
 
 .export-project-dialog__body .radio-button-card__labels {
@@ -38,4 +40,8 @@
 .export-project-dialog__body .radio-button-card__control:focused:selected {
     -fx-background-color: -wa-primary-light;
     -fx-border-color: -wa-primary;
+}
+
+.export-project-dialog__body .column-header-background {
+    -fx-background-radius: 0;
 }

@@ -159,7 +159,7 @@
 
     /* dialog */
     -wa-dialog-overlay: -wa-black-60;
-    -wa-dialog-background: -wa-background;
+    -wa-dialog-background: -wa-foreground;
 
     /* status */
     -wa-success-color: #82A93F;
