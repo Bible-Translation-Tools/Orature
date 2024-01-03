@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2023 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -32,7 +32,7 @@ import org.wycliffeassociates.otter.common.data.primitives.Take
 
 object TestDataStore {
     val languages = listOf(
-            Language("ar", "العَرَبِيَّة", "Arabic", "rtl", true, "Africa"),
+            Language("ar", "العَرَب�?يَّة", "Arabic", "rtl", true, "Africa"),
             Language("en", "English", "English", "ltr", true, "Africa"),
             Language("atj", "Atikamekw", "Atikamekw", "ltr", false, "Africa"),
             Language("bbs", "Bakpinka", "Bakpinka", "ltr", false, "Africa"),
