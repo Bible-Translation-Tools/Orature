@@ -256,18 +256,28 @@ class TranslationViewModel2 : ViewModel() {
                 }
             }
             .doOnComplete { // source audio not found
-                showAudioMissingViewProperty.set(true)
-                if (chapter.chunks.take(1).blockingFirst().isNotEmpty()) {
-                    noSourceAudioProperty.set(true)
-                    updateStep {
-                        selectedStepProperty.set(reachableStepProperty.value)
-                    }
-                } else {
-                    reachableStepProperty.set(null)
-                    compositeDisposable.clear()
-                }
+                handleSourceAudioUnavailable(chapter)
             }
             .subscribe()
+    }
+
+    private fun handleSourceAudioUnavailable(chapter: Chapter) {
+        showAudioMissingViewProperty.set(true)
+        val chapterHasChunks = chapter
+            .chunks
+            .take(1)
+            .blockingFirst()
+            .isNotEmpty()
+
+        if (chapterHasChunks) {
+            noSourceAudioProperty.set(true)
+            updateStep {
+                selectedStepProperty.set(reachableStepProperty.value)
+            }
+        } else {
+            reachableStepProperty.set(null)
+            compositeDisposable.clear()
+        }
     }
 
     private fun resetUndoRedo() {
