@@ -96,7 +96,9 @@ class ChunkingTranslationPage : View() {
                 visibleWhen {
                     viewModel.selectedStepProperty.booleanBinding { step ->
                         step?.let {
-                            it.ordinal >= ChunkingStep.PEER_EDIT.ordinal
+                            val showSourceText = viewModel.noSourceAudioProperty.value ||
+                                    it.ordinal >= ChunkingStep.PEER_EDIT.ordinal
+                            showSourceText
                         } ?: false
                     }
                 }
