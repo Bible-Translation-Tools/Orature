@@ -50,7 +50,7 @@ jobs:
           -e ORG_GRADLE_PROJECT_sentryDsn \
           -e GITHUB_TOKEN \
           -e SONAR_TOKEN \
-          wycliffeassociates/install4j-docker:9.0.2 \
+          wycliffeassociates/install4j-docker:10.0.6 \
           ./gradlew build codeCoverageReport sonarqube :jvm:workbookapp:install4jdeploy "-Dorg.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m"
         env:
           ORG_GRADLE_PROJECT_gradlewCommandLicenseProp: ${{ secrets.INSTALL4J_LICENSE_9 }}
