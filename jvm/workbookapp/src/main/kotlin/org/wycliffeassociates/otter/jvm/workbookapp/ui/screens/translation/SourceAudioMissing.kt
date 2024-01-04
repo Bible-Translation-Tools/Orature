@@ -220,6 +220,11 @@ class SourceAudioMissing : View() {
         }
     }
 
+    override fun onDock() {
+        super.onDock()
+        viewModel.loadingStepProperty.set(false)
+    }
+
     private fun onDragOverHandler(): EventHandler<DragEvent> {
         return EventHandler {
             if (it.gestureSource != this && it.dragboard.hasFiles()) {

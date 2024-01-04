@@ -113,13 +113,15 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         initializeSourceAudio(workbookDataStore.chapter.sort)
             .subscribeOn(Schedulers.io())
             .observeOnFx()
+            .doFinally {
+                translationViewModel.loadingStepProperty.set(false)
+            }
             .subscribe { sa ->
                 audioDataStore.sourceAudioProperty.set(sa)
                 audio = loadAudio(sa.file)
                 createWaveformImages(audio)
                 loadChunkMarkers(audio)
                 subscribeOnWaveformImages()
-                translationViewModel.loadingStepProperty.set(false)
             }
     }
 
