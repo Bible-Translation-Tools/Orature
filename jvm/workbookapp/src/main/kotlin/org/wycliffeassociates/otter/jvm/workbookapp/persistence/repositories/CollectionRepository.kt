@@ -474,16 +474,16 @@ class CollectionRepository @Inject constructor(
                         workbookTypeDao.fetchId(mode)
                     )
                     if (workbookDescriptor == null) {
+                        // copy the content under chapter-level
+                        if (verseByVerse) {
+                            copyContent(dsl, sourceCollectionEntity.id, mainDerivedMetadata.id)
+                            linkDerivativeContent(dsl, sourceCollectionEntity.id, projectEntity.id)
+                        } else {
+                            copyMetaContent(dsl, sourceCollectionEntity.id, mainDerivedMetadata.id)
+                        }
                         insertWorkbookDescriptor(sourceCollection.id, projectEntity.id, mode)
                     }
 
-                    // copy the content under chapter-level
-                    if (verseByVerse) {
-                        copyContent(dsl, sourceCollectionEntity.id, mainDerivedMetadata.id)
-                        linkDerivativeContent(dsl, sourceCollectionEntity.id, projectEntity.id)
-                    } else {
-                        copyMetaContent(dsl, sourceCollectionEntity.id, mainDerivedMetadata.id)
-                    }
 
                     return@transactionResult collectionMapper.mapFromEntity(
                         projectEntity,

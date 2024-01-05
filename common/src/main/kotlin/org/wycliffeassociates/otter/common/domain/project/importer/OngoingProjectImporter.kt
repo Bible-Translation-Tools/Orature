@@ -306,7 +306,9 @@ class OngoingProjectImporter @Inject constructor(
         projectFilesAccessor.copySourceFiles(fileReader)
 
         importContributorInfo(metadata, projectFilesAccessor)
-
+        if (projectAppVersion == ProjectAppVersion.ONE) {
+            deriveChapterContentFromVerses(derivedProject, projectFilesAccessor)
+        }
         importChunks(
             derivedProject,
             projectFilesAccessor,
@@ -394,6 +396,25 @@ class OngoingProjectImporter @Inject constructor(
                 contentRepository.insertForCollection(contents, chapter).blockingGet()
             }
         }
+    }
+
+    private fun deriveChapterContentFromVerses(
+        project: Collection,
+        projectAccessor: ProjectFilesAccessor
+    ) {
+        val filteredChapters = takesInChapterFilter?.values?.distinct() ?: listOf()
+        collectionRepository.getChildren(project).blockingGet()
+            .filter { if (filteredChapters.isEmpty()) true else it.sort in filteredChapters }
+            .forEach { chapter ->
+                val contents = projectAccessor.getChapterContent(project.slug, chapter.sort)
+                    .mapIndexed { index, content ->
+                        content.sort = index + 1
+                        content.draftNumber = 1
+                        content
+                    }
+                contentRepository.deleteForCollection(chapter).blockingAwait()
+                contentRepository.insertForCollection(contents, chapter).blockingGet()
+            }
     }
 
     private fun resetChaptersWithoutTakes(fileReader: IFileReader, derivedProject: Collection, mode: ProjectMode) {
