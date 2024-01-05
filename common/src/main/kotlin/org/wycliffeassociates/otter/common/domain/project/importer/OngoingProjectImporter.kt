@@ -402,9 +402,9 @@ class OngoingProjectImporter @Inject constructor(
         project: Collection,
         projectAccessor: ProjectFilesAccessor
     ) {
-        val filteredChapters = takesInChapterFilter?.values?.distinct() ?: listOf()
+        val filteredChapters = takesInChapterFilter?.values?.distinct()
         collectionRepository.getChildren(project).blockingGet()
-            .filter { if (filteredChapters.isEmpty()) true else it.sort in filteredChapters }
+            .filter { filteredChapters == null || it.sort in filteredChapters }
             .forEach { chapter ->
                 val contents = projectAccessor.getChapterContent(project.slug, chapter.sort)
                     .mapIndexed { index, content ->
