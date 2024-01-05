@@ -41,7 +41,7 @@ internal fun setupImportCallback(
         }
 
         override fun onRequestUserInput(parameter: ImportCallbackParameter): Single<ImportOptions> {
-            throw NotImplementedError("no op")
+            return Single.just(ImportOptions(chapters = parameter.options))
         }
 
         override fun onNotifySuccess(language: String?, project: String?, workbookDescriptor: WorkbookDescriptor?) {

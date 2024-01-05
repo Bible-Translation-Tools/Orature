@@ -49,6 +49,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.takeFilenamePattern
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
+import org.wycliffeassociates.otter.common.domain.project.ProjectAppVersion
 import org.wycliffeassociates.otter.common.domain.project.TakeCheckingStatusMap
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
@@ -93,6 +94,7 @@ class OngoingProjectImporter @Inject constructor(
     private var takesInChapterFilter: Map<String, Int>? = null
     private var duplicatedTakes: MutableList<String> = mutableListOf()
     private var takesCheckingMap: TakeCheckingStatusMap = mapOf()
+    private var projectAppVersion = ProjectAppVersion.THREE
 
     override fun import(
         file: File,
@@ -278,11 +280,14 @@ class OngoingProjectImporter @Inject constructor(
     ): Collection {
         val sourceMetadata = sourceCollection.resourceContainer!!
         val mode = getProjectMode(fileReader, metadata.language, sourceCollection.resourceContainer!!.language)
+        val isVerseByVerse = mode != ProjectMode.TRANSLATION ||
+                projectAppVersion == ProjectAppVersion.ONE
+
         val derivedProject = createDerivedProjects(
             metadata.language,
             sourceCollection,
             mode,
-            true
+            isVerseByVerse
         )
 
         val translation = createTranslation(sourceMetadata.language, metadata.language)
@@ -341,13 +346,15 @@ class OngoingProjectImporter @Inject constructor(
         sourceLanguage: Language
     ): ProjectMode {
         if (fileReader.exists(RcConstants.PROJECT_MODE_FILE)) {
+            projectAppVersion = ProjectAppVersion.THREE
             val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
             fileReader.bufferedReader(RcConstants.PROJECT_MODE_FILE).use {
                 val serialized: SerializableProjectMode = mapper.readValue(it)
                 return serialized.mode
             }
         }
-        // backward compatibility when there was no mode in the import file
+        // backward compatibility - project mode does not exist until Orature 3
+        projectAppVersion = ProjectAppVersion.ONE
         return if (targetLanguage.slug == sourceLanguage.slug) {
             ProjectMode.NARRATION
         } else {
