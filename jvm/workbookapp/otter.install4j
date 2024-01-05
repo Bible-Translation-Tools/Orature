@@ -32,7 +32,7 @@
     </launcher>
     <launcher name="orature_mac_launcher" id="501">
       <executable name="orature" iconSet="true" iconFile="./orature_icon.ico" executableDir="." executableMode="gui" />
-      <java mainClass="org.wycliffeassociates.otter.jvm.workbookapp.MainKt" vmParameters="--add-exports=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED, --add-exports=javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED, --add-exports=javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED, --add-opens=javafx.controls/javafx.scene.control.skin=com.jfoenix, --add-exports=javafx.controls/com.sun.javafx.scene.control=com.jfoenix, --add-exports=javafx.base/com.sun.javafx.binding=com.jfoenix">
+      <java mainClass="org.wycliffeassociates.otter.jvm.workbookapp.MainKt" vmParameters="--add-exports=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED, --add-exports=javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED, --add-exports=javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED, --add-exports=javafx.controls/javafx.scene.control.skin=ALL-UNNAMED, --add-exports=javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED, --add-exports=javafx.base/com.sun.javafx.binding=ALL-UNNAMED">
         <classPath>
           <archive location="workbookapp.jar" />
         </classPath>
