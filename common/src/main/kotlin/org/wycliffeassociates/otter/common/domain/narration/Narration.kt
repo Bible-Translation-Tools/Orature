@@ -236,7 +236,7 @@ class Narration @AssistedInject constructor(
         val action = MoveMarkerAction(verseIndex, delta)
         execute(action)
 
-        takeAudioModifier?.modifyMetaData(activeVerses)
+        takeAudioModifier?.modifyMetadata(activeVerses)
     }
 
     fun onEditVerse(verseIndex: Int, editedFile: File) {
@@ -419,9 +419,11 @@ class Narration @AssistedInject constructor(
                 take
             }
             .map { take ->
-                takeAudioModifier = NarrationTakeAudioModifier(take)
-                takeAudioModifier?.modifyAudioData(chapterRepresentation.getAudioFileReader(), activeVerses)
                 take
+            }
+            .doAfterSuccess {
+                takeAudioModifier = NarrationTakeAudioModifier(it)
+                takeAudioModifier?.modifyAudioData(chapterRepresentation.getAudioFileReader(), activeVerses)
             }
     }
 

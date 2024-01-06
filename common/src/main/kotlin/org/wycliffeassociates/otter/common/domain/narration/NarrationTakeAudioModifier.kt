@@ -9,41 +9,33 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 
 class NarrationTakeAudioModifier(val take: Take) {
+    var oaf: OratureAudioFile
 
     init {
-        if (!take.file.exists()) {
+        oaf = if (!take.file.exists()) {
             OratureAudioFile(
                 take.file,
                 DEFAULT_CHANNELS,
                 DEFAULT_SAMPLE_RATE,
                 DEFAULT_BITS_PER_SAMPLE
             )
+        } else {
+            OratureAudioFile(take.file)
         }
     }
 
     private val audioBounceTaskRunner = NarrationAudioBouncerTaskRunner
 
     fun modifyAudioData(reader: AudioFileReader, markers: List<AudioMarker>) {
-        val oaf = OratureAudioFile(take.file)
+        // May need to examine the history. The reader is a shared resource, and we may need to get a snapshot of it
+        // when bouncing the audio.
+        oaf = OratureAudioFile(take.file)
         audioBounceTaskRunner.bounce(oaf.file, reader, markers)
+
     }
 
-    fun modifyMetaData(markers: List<AudioMarker>) {
-        val oaf = OratureAudioFile(take.file)
-        clearNarrationMarkers(oaf)
-        addNarrationMarkers(oaf, markers)
-        oaf.update()
-    }
-
-    private fun clearNarrationMarkers(audioFile: OratureAudioFile) {
-        audioFile.clearMarkersOfType<VerseMarker>()
-        audioFile.clearMarkersOfType<ChapterMarker>()
-        audioFile.clearMarkersOfType<BookMarker>()
-    }
-
-    private fun addNarrationMarkers(audioFile: OratureAudioFile, markers: List<AudioMarker>) {
-        markers.forEach { marker ->
-            audioFile.addMarker(audioFile.getMarkerTypeFromClass(marker::class), marker)
-        }
+    fun modifyMetadata(markers: List<AudioMarker>) {
+        oaf = OratureAudioFile(take.file)
+        audioBounceTaskRunner.updateMarkers(oaf, markers)
     }
 }
