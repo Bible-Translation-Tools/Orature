@@ -89,6 +89,7 @@ class OngoingProjectImporter @Inject constructor(
 ) : RCImporter(directoryProvider, resourceMetadataRepository) {
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
+    private val contentCache = mutableMapOf<ContentSignature, Content>()
     private var projectName = ""
     private var takesInChapterFilter: Map<String, Int>? = null
     private var duplicatedTakes: MutableList<String> = mutableListOf()
@@ -104,8 +105,9 @@ class OngoingProjectImporter @Inject constructor(
         if (!isOngoingProject) {
             return super.passToNextImporter(file, callback, options)
         }
-        takesInChapterFilter = null
         projectName = ""
+        takesInChapterFilter = null
+        contentCache.clear()
 
         return Single
             .fromCallable { projectExists(file) }
@@ -754,7 +756,7 @@ class OngoingProjectImporter @Inject constructor(
     }
 
     private fun getContent(sig: ContentSignature, project: Collection, metadata: ResourceMetadata): Content? {
-        return sig.let { (chapter, verse, sort, type) ->
+        return contentCache.computeIfAbsent(sig) { (chapter, verse, sort, type) ->
             val collection: Observable<Collection> = collectionRepository
                 .getChildren(project)
                 .flattenAsObservable { it }
