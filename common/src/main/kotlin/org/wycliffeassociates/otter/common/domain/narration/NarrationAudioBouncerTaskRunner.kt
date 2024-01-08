@@ -7,7 +7,6 @@ import io.reactivex.ObservableEmitter
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.BookMarker
@@ -16,7 +15,6 @@ import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.domain.audio.AudioBouncer
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import java.io.File
-import java.lang.Error
 import java.util.concurrent.atomic.AtomicBoolean
 
 object NarrationAudioBouncerTaskRunner {
@@ -51,7 +49,21 @@ object NarrationAudioBouncerTaskRunner {
 
     fun bounce(file: File, reader: AudioFileReader, markers: List<AudioMarker>) {
         cancelPreviousAudioBounceTask()
-        currentAudioBounceTask = bounceAudioTask(file, reader, markers).subscribe()
+
+        if (isBusy.compareAndSet(false, true)) {
+            currentAudioBounceTask = bounceAudioTask(file, reader, markers).subscribe()
+        } else {
+            markerUpdateBusy
+                .filter { busy -> !busy }
+                .firstOrError()
+                .flatMapCompletable {
+                    bounceAudioTask(file, reader, markers)
+                }
+                .doOnSubscribe {
+                    currentAudioBounceTask = it
+                }
+                .subscribe()
+        }
     }
 
 
@@ -103,7 +115,7 @@ object NarrationAudioBouncerTaskRunner {
                 emitter.onComplete()
             }
             .doOnError {
-                logger.error(it.toString())
+                logger.error("Error occurred while updating markers")
             }
             .doFinally {
                 isBusy.set(false)
@@ -128,9 +140,6 @@ object NarrationAudioBouncerTaskRunner {
                 }
                 .doOnSubscribe {
                     currentMarkerUpdateTask = it
-                }
-                .doOnError {
-                    logger.error(it.toString())
                 }
                 .subscribe()
         }
