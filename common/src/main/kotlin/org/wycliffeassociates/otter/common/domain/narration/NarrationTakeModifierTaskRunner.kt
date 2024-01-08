@@ -17,9 +17,9 @@ import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 
-object NarrationAudioBouncerTaskRunner {
+object NarrationTakeModifierTaskRunner {
 
-    private val logger = LoggerFactory.getLogger(NarrationAudioBouncerTaskRunner::class.java)
+    private val logger = LoggerFactory.getLogger(NarrationTakeModifierTaskRunner::class.java)
 
     private val audioBouncer = AudioBouncer()
     private var currentAudioBounceTask: Disposable? = null
@@ -105,7 +105,7 @@ object NarrationAudioBouncerTaskRunner {
             .create { emitter ->
                 markerUpdateBusyEmitter?.onNext(true)
                 isBusy.set(true)
-                currentUpdateMarkerTaskEmitter = emitter
+                this.currentUpdateMarkerTaskEmitter = emitter
 
                 val oaf = OratureAudioFile(file)
                 clearNarrationMarkers(oaf)
