@@ -7,6 +7,7 @@ import io.reactivex.ObservableEmitter
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.BookMarker
@@ -15,6 +16,8 @@ import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.domain.audio.AudioBouncer
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import java.io.File
+import java.lang.Error
+import java.util.concurrent.atomic.AtomicBoolean
 
 object NarrationAudioBouncerTaskRunner {
 
@@ -32,15 +35,15 @@ object NarrationAudioBouncerTaskRunner {
     var markerUpdateBusy: Observable<Boolean>
     private var markerUpdateBusyEmitter: ObservableEmitter<Boolean>? = null
 
+    private val isBusy = AtomicBoolean(false)
+
 
     init {
         audioBouncerBusy = Observable.create { emitter ->
-            emitter.onNext(false)
             this.audioBouncerBusyEmitter = emitter
         }
 
         markerUpdateBusy = Observable.create { emitter ->
-            emitter.onNext(false)
             this.markerUpdateBusyEmitter = emitter
         }
     }
@@ -64,11 +67,15 @@ object NarrationAudioBouncerTaskRunner {
         reader: AudioFileReader,
         markers: List<AudioMarker>
     ): Completable {
+
         return Completable
             .create { emitter ->
                 audioBouncerBusyEmitter?.onNext(true)
+                isBusy.set(true)
                 this.currentAudioBounceTaskEmitter = emitter
+
                 audioBouncer.bounceAudio(file, reader, markers)
+
                 emitter.onComplete()
             }
             .doOnError {
@@ -76,31 +83,58 @@ object NarrationAudioBouncerTaskRunner {
             }
             .doFinally {
                 audioBouncerBusyEmitter?.onNext(false)
+                isBusy.set(false)
             }
             .subscribeOn(Schedulers.io())
     }
 
-    private fun updateMarkersTask(audioFile: OratureAudioFile, markers: List<AudioMarker>): Completable {
+    private fun updateMarkersTask(file: File, markers: List<AudioMarker>): Completable {
         return Completable
             .create { emitter ->
                 markerUpdateBusyEmitter?.onNext(true)
+                isBusy.set(true)
                 currentUpdateMarkerTaskEmitter = emitter
 
-                clearNarrationMarkers(audioFile)
-                addNarrationMarkers(audioFile, markers)
-                audioFile.update()
+                val oaf = OratureAudioFile(file)
+                clearNarrationMarkers(oaf)
+                addNarrationMarkers(oaf, markers)
+                oaf.update()
 
                 emitter.onComplete()
             }
+            .doOnError {
+                logger.error(it.toString())
+            }
             .doFinally {
-                markerUpdateBusyEmitter?.onNext(false) // Ensure emission on completion
-            }.subscribeOn(Schedulers.io())
+                isBusy.set(false)
+                markerUpdateBusyEmitter?.onNext(false)
+            }
+            .subscribeOn(Schedulers.io())
 
     }
 
-    fun updateMarkers(audioFile: OratureAudioFile, markers: List<AudioMarker>) {
+    fun updateMarkers(file: File, markers: List<AudioMarker>) {
         cancelPreviousMarkerUpdateTask()
-        currentMarkerUpdateTask = updateMarkersTask(audioFile, markers).subscribe()
+
+        // If isBusy is true, then wait until bounceAudioBusy is false, otherwise, go ahead and update markers
+        if (isBusy.compareAndSet(false, true)) {
+            currentMarkerUpdateTask = updateMarkersTask(file, markers).subscribe()
+        } else {
+            audioBouncerBusy
+                .filter { busy -> !busy }
+                .firstOrError()
+                .flatMapCompletable {
+                    updateMarkersTask(file, markers)
+                }
+                .doOnSubscribe {
+                    currentMarkerUpdateTask = it
+                }
+                .doOnError {
+                    logger.error(it.toString())
+                }
+                .subscribe()
+        }
+
     }
 
     private fun cancelPreviousMarkerUpdateTask() {
