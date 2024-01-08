@@ -845,15 +845,12 @@ class NarrationViewModel : ViewModel() {
                         if (marker.layoutX != newPos) {
                             marker.layoutX = newPos
                         }
-                        marker.visibleProperty().set(true)
                     }
                     found = true
                 }
             }
-            if (!found) {
-                runLater {
-                    marker.visibleProperty().set(false)
-                }
+            runLater {
+                marker.visibleProperty().set(found)
             }
         }
     }
