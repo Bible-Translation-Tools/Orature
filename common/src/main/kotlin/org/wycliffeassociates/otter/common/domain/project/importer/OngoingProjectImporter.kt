@@ -740,7 +740,7 @@ class OngoingProjectImporter @Inject constructor(
     }
 
     private fun getContent(sig: ContentSignature, project: Collection, metadata: ResourceMetadata): Content? {
-        return contentCache.computeIfAbsent(sig) { (chapter, verse, sort, type) ->
+        return sig.let { (chapter, verse, sort, type) ->
             val collection: Observable<Collection> = collectionRepository
                 .getChildren(project)
                 .flattenAsObservable { it }
