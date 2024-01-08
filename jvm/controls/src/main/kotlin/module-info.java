@@ -1,0 +1,47 @@
+module otter.jvm.controls.main {
+    requires com.jfoenix;
+    requires com.jthemedetector;
+    requires io.reactivex.rxjava2;
+    requires javafx.base;
+    requires javafx.controls;
+    requires javafx.fxml;
+    requires javafx.graphics;
+    requires kotlin.stdlib;
+    requires kotlin.stdlib.common;
+    requires org.controlsfx.controls;
+    requires org.kordamp.ikonli.fontawesome;
+    requires org.kordamp.ikonli.javafx;
+    requires org.kordamp.ikonli.material;
+    requires org.kordamp.ikonli.materialdesign;
+    // requires org.testfx.monocle;
+    requires rxkotlin;
+    requires rxkotlinfx;
+    requires org.slf4j;
+    requires tornadofx;
+    requires otter.common.audio;
+    requires otter.common;
+    requires otter.jvm.utils;
+
+    exports org.wycliffeassociates.otter.jvm.controls;
+    exports org.wycliffeassociates.otter.jvm.controls.bar;
+    exports org.wycliffeassociates.otter.jvm.controls.breadcrumbs;
+    exports org.wycliffeassociates.otter.jvm.controls.button;
+    exports org.wycliffeassociates.otter.jvm.controls.canvas;
+    exports org.wycliffeassociates.otter.jvm.controls.card;
+    exports org.wycliffeassociates.otter.jvm.controls.card.events;
+    exports org.wycliffeassociates.otter.jvm.controls.chapterselector;
+    exports org.wycliffeassociates.otter.jvm.controls.combobox;
+    exports org.wycliffeassociates.otter.jvm.controls.controllers;
+    exports org.wycliffeassociates.otter.jvm.controls.demo.ui.screens;
+    exports org.wycliffeassociates.otter.jvm.controls.dialog;
+    exports org.wycliffeassociates.otter.jvm.controls.event;
+    exports org.wycliffeassociates.otter.jvm.controls.listview;
+    exports org.wycliffeassociates.otter.jvm.controls.media;
+    exports org.wycliffeassociates.otter.jvm.controls.model;
+    exports org.wycliffeassociates.otter.jvm.controls.narration;
+    exports org.wycliffeassociates.otter.jvm.controls.popup;
+    exports org.wycliffeassociates.otter.jvm.controls.skins.slider;
+    exports org.wycliffeassociates.otter.jvm.controls.styles;
+    exports org.wycliffeassociates.otter.jvm.controls.toggle;
+    exports org.wycliffeassociates.otter.jvm.controls.waveform;
+}

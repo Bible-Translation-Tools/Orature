@@ -59,6 +59,7 @@ configurations {
 }
 
 application {
+    mainModule.set("otter.jvm.workbookapp.main")
     mainClass = "org.wycliffeassociates.otter.jvm.workbookapp.MainKt"
 }
 
@@ -149,6 +150,9 @@ dependencies {
 
     // Testing
     implementation "io.mockk:mockk:$mockkVer"
+    implementation "org.testfx:testfx-core:$testFxVer"
+    implementation "org.testfx:testfx-junit:$testFxVer"
+    implementation "org.testfx:openjfx-monocle:$testFxMonocleVer"
     testImplementation "junit:junit:$junitVer"
     testImplementation "org.mockito:mockito-core:$mockitoVer"
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVer"

@@ -1,6 +1,6 @@
 ext {
     // Plugins
-    javafxPluginVer = '0.0.13'
+    javafxPluginVer = '0.0.14'
     jooqPluginVer = '7.2'
     install4jPluginVer = '9.0.2'
     nebulaLintPluginVer = '16.23.0' // Gradle Linter
@@ -29,7 +29,7 @@ ext {
     retrofitVer = '2.9.0'
     retrofitJacksonVer = '2.9.0'
     retrofitRxJava2Ver = '2.9.0'
-    jacksonVer = '2.15.1'
+    jacksonVer = '2.15.2'
     daggerVer = '2.47'
     junitVer = '4.12'
     mockkVer = '1.13.5'
@@ -54,4 +54,5 @@ ext {
     tarsosDspVer = '2.4.1'
     mp3TagVer = '0.9.3'
     tikaVer = '2.0.0'
+    jsonVer = '20231013'
 }
