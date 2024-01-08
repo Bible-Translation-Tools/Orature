@@ -356,7 +356,7 @@ class OngoingProjectImporter @Inject constructor(
                 return serialized.mode
             }
         }
-        // backward compatibility - project mode does not exist until Orature 3
+        // project mode does not exist until Orature 3
         projectAppVersion = ProjectAppVersion.ONE
         return if (targetLanguage.slug == sourceLanguage.slug) {
             ProjectMode.NARRATION
@@ -401,7 +401,7 @@ class OngoingProjectImporter @Inject constructor(
 
     /**
      * Populates all contents under the filtered chapters as verse-by-verse.
-     * This method is used for backward-compatible with projects from Orature 1
+     * This method is used when importing projects from Orature 1
      */
     private fun deriveChapterContentFromVerses(
         project: Collection,
