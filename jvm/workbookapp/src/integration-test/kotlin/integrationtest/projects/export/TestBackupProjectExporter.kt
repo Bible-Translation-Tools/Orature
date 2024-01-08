@@ -86,7 +86,6 @@ class TestBackupProjectExporter {
     @Before
     fun setUp() {
         importer.get().import(seedProject).blockingGet()
-        importer.get().import(narrationBackup).blockingGet()
         workbook = workbookRepository.getProjects().blockingGet()
             .find { it.target.slug == ResourceContainerBuilder.defaultProjectSlug }!!
         outputDir = createTempDirectory("orature-export-test").toFile()
@@ -187,6 +186,8 @@ class TestBackupProjectExporter {
 
     @Test
     fun exportNarrationBackup() {
+        importer.get().import(narrationBackup).blockingGet()
+
         val result = exportBackupUseCase.get()
             .export(
                 outputDir,
