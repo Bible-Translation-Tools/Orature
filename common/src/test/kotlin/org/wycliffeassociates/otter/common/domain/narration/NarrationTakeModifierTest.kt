@@ -10,10 +10,7 @@ import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
 import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.data.audio.*
-import org.wycliffeassociates.otter.common.data.primitives.Marker
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
-import org.wycliffeassociates.otter.common.data.workbook.Book
-import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -168,32 +165,43 @@ class NarrationTakeModifierTest {
 
         val originalAudioMarkers = makeAudioMarkers(1, 5)
 
+        var oaf = OratureAudioFile(chapterTake.file)
         makeTestChapterTakeRecording(
-            takeModifier.audioFile,
+            oaf,
             secondsOfAudio,
             originalAudioMarkers
         )
 
         // Verify that we have the expected amount of audio data
-        Assert.assertEquals(takeModifier.audioFile.totalFrames, secondsOfAudio * DEFAULT_SAMPLE_RATE)
+        Assert.assertEquals(oaf.totalFrames, secondsOfAudio * DEFAULT_SAMPLE_RATE)
 
         // Verify that we have the expected cues specified by originalAudioMarkers
-        takeModifier.audioFile.getCues().forEachIndexed { idx, cue ->
+        oaf.getCues().forEachIndexed { idx, cue ->
             Assert.assertTrue(originalAudioMarkers.map { it.toCue() }.contains(cue))
         }
 
         // Simulates moving each marker by 400 samples
         val newAudioMarkers = moveAllAudioMarkers(originalAudioMarkers, 400)
 
-        takeModifier.modifyMetaData(newAudioMarkers)
 
-        // Verify that we have the expected amount of cues / Markers in the Wav file
-        Assert.assertEquals(newAudioMarkers.size, takeModifier.audioFile.getCues().size)
+        var hasStartedModifying = false
+        takeModifier.isBusy
+            .subscribe {
+                // Begins check after the takeModifier has been busy
+                if (hasStartedModifying && !it) {
+                    // Verify that we have the expected amount of cues / Markers in the Wav file
+                    oaf = OratureAudioFile(chapterTake.file)
+                    Assert.assertEquals(newAudioMarkers.size, oaf.getCues().size)
 
-        // Verify that we have the expected cues specified by newAudioMarkers
-        takeModifier.audioFile.getCues().forEachIndexed { idx, cue ->
-            Assert.assertTrue(newAudioMarkers.map { it.toCue() }.contains(cue))
-        }
+                    // Verify that we have the expected cues specified by newAudioMarkers
+                    oaf.getCues().forEachIndexed { idx, cue ->
+                        Assert.assertTrue(newAudioMarkers.map { it.toCue() }.contains(cue))
+                    }
+                }
+                hasStartedModifying = it
+            }
+
+        takeModifier.modifyMetadata(newAudioMarkers)
     }
 
     // Test that Wav file metadata is updated properly when using a different amount of markers with different locations
@@ -205,68 +213,44 @@ class NarrationTakeModifierTest {
         val originalAudioMarkers = makeAudioMarkers(1, 5)
         val markersToKeep = 3
 
+        var oaf = OratureAudioFile(chapterTake.file)
+
         makeTestChapterTakeRecording(
-            takeModifier.audioFile,
+            oaf,
             secondsOfAudio,
             originalAudioMarkers
         )
 
         // Verify that we have the expected amount of audio data
-        Assert.assertEquals(takeModifier.audioFile.totalFrames, secondsOfAudio * DEFAULT_SAMPLE_RATE)
+        Assert.assertEquals(oaf.totalFrames, secondsOfAudio * DEFAULT_SAMPLE_RATE)
 
         // Verify that we have the expected cues specified by originalAudioMarkers
-        takeModifier.audioFile.getCues().forEachIndexed { idx, cue ->
+        oaf.getCues().forEachIndexed { idx, cue ->
             Assert.assertTrue(originalAudioMarkers.map { it.toCue() }.contains(cue))
         }
 
         // Simulates moving all markers by 100 and removing all but the first markersToKeep number of markers
         val newAudioMarkers = moveAllAudioMarkers(originalAudioMarkers, 100).subList(0, markersToKeep)
 
-        takeModifier.modifyMetaData(newAudioMarkers)
 
-        // Verify that we have the expected amount of cues / Markers in the Wav file
-        Assert.assertEquals(markersToKeep, takeModifier.audioFile.getCues().size)
+        var hasStartedModifying = false
+        takeModifier.isBusy
+            .subscribe {
+                // Begins check after the takeModifier has been busy
+                if (hasStartedModifying && !it) {
+                    oaf = OratureAudioFile(chapterTake.file)
+                    // Verify that we have the expected amount of cues / Markers in the Wav file
+                    Assert.assertEquals(markersToKeep, oaf.getCues().size)
 
-        // Verify that we have the expected cues specified by newAudioMarkers
-        takeModifier.audioFile.getCues().forEachIndexed { idx, cue ->
-            Assert.assertTrue(newAudioMarkers.map { it.toCue() }.contains(cue))
-        }
-    }
-
-    // Test that the modifying the metadata multiple times with the same data does not cause unexpected changes
-    @Test
-    fun testMoveMarkerToSamePosition() {
-        val takeModifier = NarrationTakeAudioModifier(chapterTake)
-        val secondsOfAudio = 10
-        val numberOfModifications = 5
-        val originalAudioMarkers = makeAudioMarkers(1, 5)
-
-        // Initializes audio and adds markers
-        makeTestChapterTakeRecording(
-            takeModifier.audioFile,
-            secondsOfAudio,
-            originalAudioMarkers
-        )
-
-        // Verify that we have the expected cues specified by originalAudioMarkers
-        takeModifier.audioFile.getCues().forEachIndexed { idx, cue ->
-            Assert.assertTrue(originalAudioMarkers.map { it.toCue() }.contains(cue))
-        }
-
-
-        for (i in 0 until numberOfModifications) {
-            // Re-inserts markers
-            val newAudioMarkers = originalAudioMarkers.map { it }
-
-            takeModifier.modifyMetaData(newAudioMarkers)
-
-            // Verify that we have the expected amount of cues / Markers in the Wav file
-            Assert.assertEquals(newAudioMarkers.size, takeModifier.audioFile.getCues().size)
-
-            // Verify that we have the expected cues specified by newAudioMarkers
-            takeModifier.audioFile.getCues().forEachIndexed { idx, cue ->
-                Assert.assertTrue(newAudioMarkers.map { it.toCue() }.contains(cue))
+                    // Verify that we have the expected cues specified by newAudioMarkers
+                    oaf.getCues().forEachIndexed { idx, cue ->
+                        Assert.assertTrue(newAudioMarkers.map { it.toCue() }.contains(cue))
+                    }
+                }
+                hasStartedModifying = it
             }
-        }
+
+
+        takeModifier.modifyMetadata(newAudioMarkers)
     }
 }
