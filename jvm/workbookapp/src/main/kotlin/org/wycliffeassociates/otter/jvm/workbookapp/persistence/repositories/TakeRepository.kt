@@ -63,6 +63,21 @@ class TakeRepository @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
+    override fun deleteForContent(content: Content): Completable {
+        return Completable
+            .fromAction {
+                takeDao
+                    .fetchByContentId(content.id, true)
+                    .forEach {
+                        takeDao.delete(it)
+                    }
+            }
+            .doOnError { e ->
+                logger.error("Error in deleteForContent: $content\n", e)
+            }
+            .subscribeOn(Schedulers.io())
+    }
+
     /** Set the deleted timestamp to now. */
     override fun markDeleted(take: Take): Completable {
         return Completable

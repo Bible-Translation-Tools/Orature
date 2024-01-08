@@ -305,10 +305,10 @@ class OngoingProjectImporter @Inject constructor(
         callback?.onNotifyProgress(localizeKey = "copyingSource", percent = 50.0)
         projectFilesAccessor.copySourceFiles(fileReader)
 
-        importContributorInfo(metadata, projectFilesAccessor)
         if (projectAppVersion == ProjectAppVersion.ONE) {
             deriveChapterContentFromVerses(derivedProject, projectFilesAccessor)
         }
+        importContributorInfo(metadata, projectFilesAccessor)
         importChunks(
             derivedProject,
             projectFilesAccessor,
@@ -392,12 +392,17 @@ class OngoingProjectImporter @Inject constructor(
         chapters.forEach { chapter ->
             if (chunks.containsKey(chapter.sort)) {
                 val contents = chunks[chapter.sort] ?: listOf()
+                println("deleting content for chapter ${chapter.slug}")
                 contentRepository.deleteForCollection(chapter).blockingAwait()
                 contentRepository.insertForCollection(contents, chapter).blockingGet()
             }
         }
     }
 
+    /**
+     * Populates all contents under the filtered chapters as verse-by-verse.
+     * This method is used for backward-compatible with projects from Orature 1
+     */
     private fun deriveChapterContentFromVerses(
         project: Collection,
         projectAccessor: ProjectFilesAccessor
@@ -412,7 +417,12 @@ class OngoingProjectImporter @Inject constructor(
                         content.draftNumber = 1
                         content
                     }
-                contentRepository.deleteForCollection(chapter).blockingAwait()
+                contentRepository.deleteForCollection(chapter, ContentType.TEXT).blockingAwait()
+                contentRepository.getByCollection(chapter)
+                    .blockingGet()
+                    .forEach { content ->
+                        takeRepository.deleteForContent(content).blockingAwait()
+                    }
                 contentRepository.insertForCollection(contents, chapter).blockingGet()
             }
     }
