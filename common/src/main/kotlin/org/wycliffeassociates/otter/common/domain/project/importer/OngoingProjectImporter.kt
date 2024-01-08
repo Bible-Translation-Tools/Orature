@@ -89,7 +89,6 @@ class OngoingProjectImporter @Inject constructor(
 ) : RCImporter(directoryProvider, resourceMetadataRepository) {
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
-    private val contentCache = mutableMapOf<ContentSignature, Content>()
     private var projectName = ""
     private var takesInChapterFilter: Map<String, Int>? = null
     private var duplicatedTakes: MutableList<String> = mutableListOf()
@@ -417,13 +416,19 @@ class OngoingProjectImporter @Inject constructor(
                         content.draftNumber = 1
                         content
                     }
-                contentRepository.deleteForCollection(chapter, ContentType.TEXT).blockingAwait()
-                contentRepository.getByCollection(chapter)
-                    .blockingGet()
-                    .forEach { content ->
-                        takeRepository.deleteForContent(content).blockingAwait()
+                contentRepository.deleteForCollection(chapter, ContentType.TEXT)
+                    .andThen(
+                        contentRepository.getByCollection(chapter)
+                    )
+                    .flattenAsObservable { it }
+                    .flatMapCompletable { content ->
+                        takeRepository.deleteForContent(content)
                     }
-                contentRepository.insertForCollection(contents, chapter).blockingGet()
+                    .andThen(
+                        contentRepository.insertForCollection(contents, chapter) // derive contents
+                    )
+                    .ignoreElement()
+                    .blockingGet()
             }
     }
 
