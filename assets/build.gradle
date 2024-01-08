@@ -37,8 +37,6 @@ configurations {
 }
 
 dependencies {
-    implementation project(path: ':common:audio')
-
     /**
      * Commented out Bible artwork to reduce file size as new design doesn't use it
      */
