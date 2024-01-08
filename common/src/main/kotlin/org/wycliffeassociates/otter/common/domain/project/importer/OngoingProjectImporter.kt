@@ -391,7 +391,6 @@ class OngoingProjectImporter @Inject constructor(
         chapters.forEach { chapter ->
             if (chunks.containsKey(chapter.sort)) {
                 val contents = chunks[chapter.sort] ?: listOf()
-                println("deleting content for chapter ${chapter.slug}")
                 contentRepository.deleteForCollection(chapter).blockingAwait()
                 contentRepository.insertForCollection(contents, chapter).blockingGet()
             }
