@@ -45,6 +45,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.primitives.SerializableProjectMode
 import org.wycliffeassociates.otter.common.data.primitives.Take
+import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.takeFilenamePattern
@@ -65,6 +66,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRep
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
+import org.wycliffeassociates.otter.common.utils.computeFileChecksum
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Manifest
 import org.wycliffeassociates.resourcecontainer.entity.Project
@@ -92,6 +94,7 @@ class OngoingProjectImporter @Inject constructor(
     private val contentCache = mutableMapOf<ContentSignature, Content>()
     private var projectName = ""
     private var takesInChapterFilter: Map<String, Int>? = null
+    private var completedChapters: List<Int>? = null
     private var takesCheckingMap: TakeCheckingStatusMap = mapOf()
     private var projectAppVersion = ProjectAppVersion.THREE
 
@@ -306,6 +309,14 @@ class OngoingProjectImporter @Inject constructor(
         projectFilesAccessor.copySourceFiles(fileReader)
 
         if (projectAppVersion == ProjectAppVersion.ONE) {
+            completedChapters = takesInChapterFilter
+                ?.filterKeys { takePath ->
+                    parseNumbers(takePath)?.contentSignature?.let { sig ->
+                        sig.verse == null // filter only chapter take
+                    } ?: false
+                }
+                ?.values
+                ?.toList()
             deriveChapterContentFromVerses(derivedProject, projectFilesAccessor)
         }
         importContributorInfo(metadata, projectFilesAccessor)
@@ -564,7 +575,16 @@ class OngoingProjectImporter @Inject constructor(
                 val now = LocalDate.now()
                 val file = File(filepath).canonicalFile
                 val relativeFile = file.relativeTo(projectAudioDir.canonicalFile)
-                val checkingStatus = takesCheckingMap[relativeFile.name]
+
+                val checkingStatus = when {
+                    projectAppVersion.ordinal >= ProjectAppVersion.THREE.ordinal -> takesCheckingMap[relativeFile.name]
+
+                    completedChapters?.contains(sig.chapter) == true -> {
+                        TakeCheckingState(CheckingStatus.VERSE, computeFileChecksum(file))
+                    }
+
+                    else -> null
+                }
 
                 val take = Take(
                     file.name,
