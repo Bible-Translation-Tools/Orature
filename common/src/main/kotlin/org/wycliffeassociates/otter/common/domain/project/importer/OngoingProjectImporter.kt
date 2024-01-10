@@ -109,6 +109,7 @@ class OngoingProjectImporter @Inject constructor(
         }
         projectName = ""
         takesInChapterFilter = null
+        completedChapters = null
         contentCache.clear()
 
         return Single

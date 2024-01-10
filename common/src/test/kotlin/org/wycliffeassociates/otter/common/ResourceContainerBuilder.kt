@@ -23,8 +23,12 @@ import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
+import org.wycliffeassociates.otter.common.data.Chunkification
+import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
+import org.wycliffeassociates.otter.common.data.primitives.SerializableProjectMode
 import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
@@ -48,6 +52,7 @@ class ResourceContainerBuilder(baseRC: File? = null) {
 
     private val selectedTakes: MutableList<String> = mutableListOf()
     private val takeCheckingMap = mutableMapOf<String, TakeCheckingState>()
+    private val chunks = Chunkification()
     private val rcFile: File = baseRC ?: getDefaultRCFile()
     private val manifest: Manifest
 
@@ -121,6 +126,32 @@ class ResourceContainerBuilder(baseRC: File? = null) {
                 it.addFileToContainer(tempFile, pathInRC)
             }
         }
+        return this
+    }
+
+    fun setProjectMode(mode: ProjectMode): ResourceContainerBuilder {
+        val modeFile = File(RcConstants.PROJECT_MODE_FILE)
+        val tempFile = tempDir.resolve(modeFile.name).apply {
+            createNewFile(); deleteOnExit()
+        }
+        val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
+        mapper.writeValue(tempFile, SerializableProjectMode(mode))
+
+        ResourceContainer.load(rcFile).use {
+            it.addFileToContainer(tempFile, RcConstants.PROJECT_MODE_FILE)
+        }
+
+        return this
+    }
+
+    fun addChunk(content: Content, chapter: Int): ResourceContainerBuilder {
+        val existingChunks = chunks.getOrPut(chapter) {
+            listOf(content)
+        }
+        if (content !in existingChunks) {
+            chunks[chapter] = existingChunks + listOf(content)
+        }
+
         return this
     }
 
@@ -208,6 +239,9 @@ class ResourceContainerBuilder(baseRC: File? = null) {
             if (takeCheckingMap.isNotEmpty()) {
                 writeCheckingStatusFile(rc)
             }
+            if (chunks.isNotEmpty()) {
+                writeChunksFile(rc)
+            }
 
             rc.manifest = this.manifest
             rc.writeManifest()
@@ -254,6 +288,18 @@ class ResourceContainerBuilder(baseRC: File? = null) {
                     .setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
                 mapper.writeValue(stream, takeCheckingMap)
+            }
+        }
+    }
+
+    private fun writeChunksFile(rc: ResourceContainer) {
+        rc.accessor.write(RcConstants.CHUNKS_FILE) { outputStream ->
+            outputStream.use { stream ->
+                val mapper = ObjectMapper(JsonFactory())
+                    .registerKotlinModule()
+                    .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+
+                mapper.writeValue(stream, chunks)
             }
         }
     }
