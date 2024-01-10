@@ -47,7 +47,13 @@ class ChunkingTranslationPage : View() {
 
     private val mainFragmentProperty = viewModel.selectedStepProperty.objectBinding { step ->
         val fragment = when(step) {
-            ChunkingStep.CONSUME_AND_VERBALIZE -> find<Consume>()
+            ChunkingStep.CONSUME_AND_VERBALIZE -> {
+                if (viewModel.noSourceAudioProperty.value) {
+                    find<SourceAudioMissing>()
+                } else {
+                    find<Consume>()
+                }
+            }
             ChunkingStep.CHUNKING -> find<Chunking>()
             ChunkingStep.BLIND_DRAFT -> find<BlindDraft>()
             ChunkingStep.PEER_EDIT,
@@ -80,7 +86,8 @@ class ChunkingTranslationPage : View() {
 
             left = ChunkingStepsDrawer(viewModel.selectedStepProperty).apply {
                 chunksProperty.bind(viewModel.chunkListProperty)
-                this.reachableStepProperty.bind(viewModel.reachableStepProperty)
+                reachableStepProperty.bind(viewModel.reachableStepProperty)
+                noSourceAudioProperty.bind(viewModel.noSourceAudioProperty)
             }
 
             centerProperty().bind(mainFragmentProperty)
@@ -89,7 +96,9 @@ class ChunkingTranslationPage : View() {
                 visibleWhen {
                     viewModel.selectedStepProperty.booleanBinding { step ->
                         step?.let {
-                            it.ordinal >= ChunkingStep.PEER_EDIT.ordinal
+                            val showSourceText = viewModel.noSourceAudioProperty.value ||
+                                    it.ordinal >= ChunkingStep.PEER_EDIT.ordinal
+                            showSourceText
                         } ?: false
                     }
                 }

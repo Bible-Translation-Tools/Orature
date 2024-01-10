@@ -58,6 +58,7 @@ class TranslationViewModel2 : ViewModel() {
     val canRedoProperty = SimpleBooleanProperty(false)
     val isFirstChapterProperty = SimpleBooleanProperty(false)
     val isLastChapterProperty = SimpleBooleanProperty(false)
+    val noSourceAudioProperty = SimpleBooleanProperty(false)
     val showAudioMissingViewProperty = SimpleBooleanProperty(false)
     val selectedStepProperty = SimpleObjectProperty<ChunkingStep>(null)
     val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.CHUNKING)
@@ -103,6 +104,7 @@ class TranslationViewModel2 : ViewModel() {
 
     fun navigateChapter(chapter: Int) {
         selectedStepProperty.set(null)
+        noSourceAudioProperty.set(false)
         showAudioMissingViewProperty.set(false)
 
         workbookDataStore.workbook.target
@@ -244,6 +246,7 @@ class TranslationViewModel2 : ViewModel() {
             .subscribeOn(Schedulers.io())
             .observeOnFx()
             .doOnSuccess {
+                noSourceAudioProperty.set(false)
                 updateStep {
                     if (reachableStepProperty.value == ChunkingStep.CHUNKING) {
                         selectedStepProperty.set(ChunkingStep.CONSUME_AND_VERBALIZE)
@@ -252,12 +255,29 @@ class TranslationViewModel2 : ViewModel() {
                     }
                 }
             }
-            .doOnComplete {
-                showAudioMissingViewProperty.set(true)
-                reachableStepProperty.set(null)
-                compositeDisposable.clear()
+            .doOnComplete { // source audio not found
+                handleSourceAudioUnavailable(chapter)
             }
             .subscribe()
+    }
+
+    private fun handleSourceAudioUnavailable(chapter: Chapter) {
+        showAudioMissingViewProperty.set(true)
+        val chapterHasChunks = chapter
+            .chunks
+            .take(1)
+            .blockingFirst()
+            .isNotEmpty()
+
+        if (chapterHasChunks) {
+            noSourceAudioProperty.set(true)
+            updateStep {
+                selectedStepProperty.set(reachableStepProperty.value)
+            }
+        } else {
+            reachableStepProperty.set(null)
+            compositeDisposable.clear()
+        }
     }
 
     private fun resetUndoRedo() {
