@@ -573,8 +573,11 @@ class ProjectFilesAccessor(
     private fun fetchTakes(
         workbook: Workbook
     ): Observable<Take> {
-        val chapters = workbook.target.chapters
-        return chapters
+        return Observable
+            .fromCallable {
+                workbook.target.chapters.toList().blockingGet()
+            }
+            .flatMapIterable { it }
             .flatMap { chapter ->
                 chapter.chunks
                     .take(1)
@@ -582,6 +585,9 @@ class ProjectFilesAccessor(
                     .cast<BookElement>()
                     .startWith(chapter as BookElement)
                     .concatMap {
+                        if (it.audio.getSelectedTake() != null && it.audio.getAllTakes().isEmpty()) {
+                            it.audio.takes.blockingFirst() // force-subscribe to emit items from relay
+                        }
                         it.audio.getAllTakes().toObservable()
                     }
             }
