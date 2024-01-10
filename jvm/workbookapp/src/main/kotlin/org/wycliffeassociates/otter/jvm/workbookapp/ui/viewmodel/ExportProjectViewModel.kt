@@ -95,7 +95,7 @@ class ExportProjectViewModel : ViewModel() {
 
                                 else -> projectCompletionStatus.getChapterTranslationProgress(chapter)
                             }
-                            ChapterDescriptor(chapter.sort, progress)
+                            ChapterDescriptor(chapter.sort, progress, progress > 0)
                         }
                     }.blockingGet() // blocking get is required for the .cache() observable to emit
             }
