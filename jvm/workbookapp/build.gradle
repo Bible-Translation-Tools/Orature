@@ -120,6 +120,7 @@ dependencies {
     // JFoenix
     implementation "com.jfoenix:jfoenix:$jfoenixVer"
     implementation "com.github.bkenn:kfoenix:$kfoenixVer"
+    implementation "io.github.palexdev:materialfx:$materialFxVer"
 
     // ControlsFX
     implementation "org.wycliffeassociates:javafx-gridview:$javaGridviewVer"
