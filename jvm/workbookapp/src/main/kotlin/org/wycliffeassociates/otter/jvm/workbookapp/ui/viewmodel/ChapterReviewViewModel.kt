@@ -242,17 +242,26 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
 
     private fun loadVerseMarkers(audio: OratureAudioFile) {
         markers.clear()
-        val sourceAudio = OratureAudioFile(sourceAudio.file)
-        val sourceMarkers = sourceAudio.getMarker<VerseMarker>()
         val markerList = audio.getMarker<VerseMarker>().map {
             ChunkMarkerModel(AudioCue(it.location, it.label))
         }
+        val wb = workbookDataStore.workbook
+        val verseLabels = wb.projectFilesAccessor.getChapterContent(
+            wb.target.slug,
+            workbookDataStore.chapter.sort
+        ).map { content ->
+            if (content.start != content.end) {
+                "${content.start}-${content.end}"
+            } else {
+                "${content.start}"
+            }
+        }
 
-        totalMarkersProperty.set(sourceMarkers.size)
+        totalMarkersProperty.set(verseLabels.size)
         markerModel = VerseMarkerModel(
             audio,
-            sourceMarkers.size,
-            sourceMarkers.map { it.label }
+            verseLabels.size,
+            verseLabels
         ).also {
             it.loadMarkers(markerList)
         }
