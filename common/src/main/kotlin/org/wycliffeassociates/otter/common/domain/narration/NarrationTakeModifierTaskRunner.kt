@@ -15,25 +15,24 @@ import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.domain.audio.AudioBouncer
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import java.io.File
-import java.util.concurrent.atomic.AtomicBoolean
 
 object NarrationTakeModifierTaskRunner {
 
     private val logger = LoggerFactory.getLogger(NarrationTakeModifierTaskRunner::class.java)
 
     private val audioBouncer = AudioBouncer()
+
     private var currentAudioBounceTask: Disposable? = null
     private lateinit var currentAudioBounceTaskEmitter: CompletableEmitter
-
-    private var currentMarkerUpdateTask: Disposable? = null
-    private lateinit var currentUpdateMarkerTaskEmitter: CompletableEmitter
-
     var audioBouncerBusy: Observable<Boolean>
     private var audioBouncerBusyEmitter: ObservableEmitter<Boolean>? = null
+    private var isBouncingAudio = false
+
+    private var currentMarkerUpdateTask: Disposable? = null
+    private var currentUpdateMarkerTaskEmitter: CompletableEmitter? = null
+    private var waitingMarkerUpdateTask: Disposable? = null
     var markerUpdateBusy: Observable<Boolean>
     private var markerUpdateBusyEmitter: ObservableEmitter<Boolean>? = null
-
-    private val isBusy = AtomicBoolean(false)
 
 
     init {
@@ -46,31 +45,28 @@ object NarrationTakeModifierTaskRunner {
         }
     }
 
-
+    @Synchronized
     fun bounce(file: File, reader: AudioFileReader, markers: List<AudioMarker>) {
-        cancelPreviousAudioBounceTask()
+        updateIsBouncingAudio(true)
 
-        if (isBusy.compareAndSet(false, true)) {
-            currentAudioBounceTask = bounceAudioTask(file, reader, markers).subscribe()
-        } else {
-            markerUpdateBusy
-                .filter { busy -> !busy }
-                .firstOrError()
-                .flatMapCompletable {
-                    bounceAudioTask(file, reader, markers)
-                }
-                .doOnSubscribe {
-                    currentAudioBounceTask = it
-                }
-                .subscribe()
-        }
+        waitingMarkerUpdateTask?.dispose()
+        currentAudioBounceTask?.dispose()
+
+        cancelPreviousAudioBounceTask()
+        currentAudioBounceTask = bounceAudioTask(file, reader, markers).subscribe()
+    }
+
+
+    private fun updateIsBouncingAudio(newValue: Boolean) {
+        isBouncingAudio = newValue
+        audioBouncerBusyEmitter?.onNext(newValue)
     }
 
 
     private fun cancelPreviousAudioBounceTask() {
         if (currentAudioBounceTask != null) {
             audioBouncer.interrupt()
-            currentAudioBounceTaskEmitter.onComplete()
+            currentMarkerUpdateTask?.dispose()
         }
     }
 
@@ -82,29 +78,59 @@ object NarrationTakeModifierTaskRunner {
 
         return Completable
             .create { emitter ->
-                audioBouncerBusyEmitter?.onNext(true)
-                isBusy.set(true)
                 this.currentAudioBounceTaskEmitter = emitter
-
                 audioBouncer.bounceAudio(file, reader, markers)
-
                 emitter.onComplete()
             }
-            .doOnError {
-                logger.error("Error occurred while bouncing audio")
+            .doOnDispose {
+                logger.info("Canceling audio bounce task")
             }
-            .doFinally {
-                audioBouncerBusyEmitter?.onNext(false)
-                isBusy.set(false)
+            .doOnComplete {
+                synchronized(this) {
+                    updateIsBouncingAudio(false)
+                }
             }
             .subscribeOn(Schedulers.io())
     }
+
+
+    @Synchronized
+    fun updateMarkers(file: File, markers: List<AudioMarker>) {
+
+        if (!isBouncingAudio) {
+            currentMarkerUpdateTask?.dispose()
+            currentMarkerUpdateTask = updateMarkersTask(file, markers).subscribe()
+
+        } else {
+
+            markerUpdateBusyEmitter?.onNext(true)
+
+            audioBouncerBusy
+                .takeWhile { busy -> busy }
+                .doOnComplete {
+                    currentMarkerUpdateTask = updateMarkersTask(file, markers).subscribe()
+                }
+                .doOnDispose {
+                    logger.info("Disposing unnecessary marker update")
+                }
+                .doOnSubscribe {
+                    currentMarkerUpdateTask?.dispose()
+                }
+                .subscribe().let {
+                    waitingMarkerUpdateTask?.dispose()
+                    waitingMarkerUpdateTask = it
+                }
+
+        }
+
+    }
+
 
     private fun updateMarkersTask(file: File, markers: List<AudioMarker>): Completable {
         return Completable
             .create { emitter ->
                 markerUpdateBusyEmitter?.onNext(true)
-                isBusy.set(true)
+                logger.info("Started updating markers")
                 this.currentUpdateMarkerTaskEmitter = emitter
 
                 val oaf = OratureAudioFile(file)
@@ -114,43 +140,13 @@ object NarrationTakeModifierTaskRunner {
 
                 emitter.onComplete()
             }
-            .doOnError {
-                logger.error("Error occurred while updating markers")
-            }
             .doFinally {
-                isBusy.set(false)
+                logger.info("Finished updating markers")
                 markerUpdateBusyEmitter?.onNext(false)
             }
             .subscribeOn(Schedulers.io())
-
     }
 
-    fun updateMarkers(file: File, markers: List<AudioMarker>) {
-        cancelPreviousMarkerUpdateTask()
-
-        // If isBusy is true, then wait until bounceAudioBusy is false, otherwise, go ahead and update markers
-        if (isBusy.compareAndSet(false, true)) {
-            currentMarkerUpdateTask = updateMarkersTask(file, markers).subscribe()
-        } else {
-            audioBouncerBusy
-                .filter { busy -> !busy }
-                .firstOrError()
-                .flatMapCompletable {
-                    updateMarkersTask(file, markers)
-                }
-                .doOnSubscribe {
-                    currentMarkerUpdateTask = it
-                }
-                .subscribe()
-        }
-
-    }
-
-    private fun cancelPreviousMarkerUpdateTask() {
-        if (currentMarkerUpdateTask != null) {
-            currentUpdateMarkerTaskEmitter.onComplete()
-        }
-    }
 
     private fun clearNarrationMarkers(audioFile: OratureAudioFile) {
         audioFile.clearMarkersOfType<VerseMarker>()
