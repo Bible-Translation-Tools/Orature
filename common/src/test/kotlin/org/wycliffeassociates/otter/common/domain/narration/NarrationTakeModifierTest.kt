@@ -107,17 +107,23 @@ class NarrationTakeModifierTest {
         val audioMarkers = mutableListOf<AudioMarker>()
         var verseCount = 1
         for (i in 0 until numberOfMarkers) {
-            if (i == 0) {
-                audioMarkers.add(BookMarker(testBookSlug, 0))
-            } else if (i == 1) {
-                audioMarkers.add(
-                    ChapterMarker(testChapterNumber, secondsOfAudioPerMarker * DEFAULT_SAMPLE_RATE * i)
-                )
-            } else {
-                audioMarkers.add(
-                    VerseMarker(verseCount, verseCount, secondsOfAudioPerMarker * DEFAULT_SAMPLE_RATE * i)
-                )
-                verseCount++
+            when (i) {
+                0 -> {
+                    audioMarkers.add(BookMarker(testBookSlug, 0))
+                }
+
+                1 -> {
+                    audioMarkers.add(
+                        ChapterMarker(testChapterNumber, secondsOfAudioPerMarker * DEFAULT_SAMPLE_RATE * i)
+                    )
+                }
+
+                else -> {
+                    audioMarkers.add(
+                        VerseMarker(verseCount, verseCount, secondsOfAudioPerMarker * DEFAULT_SAMPLE_RATE * i)
+                    )
+                    verseCount++
+                }
             }
         }
         return audioMarkers
@@ -129,16 +135,21 @@ class NarrationTakeModifierTest {
         markers.forEach {
             if (it == markerToMove) {
                 val newLocation = it.location + delta
-                if (it::class == BookMarker::class) {
-                    newAudioMarkers.add(BookMarker(testBookSlug, newLocation))
-                } else if (it::class == ChapterMarker::class) {
-                    newAudioMarkers.add(ChapterMarker(testChapterNumber, newLocation))
-                } else if (it::class == VerseMarker::class) {
-                    val verseStart = (it as VerseMarker).start
-                    val verseEnd = it.end
-                    newAudioMarkers.add(VerseMarker(verseStart, verseEnd, newLocation))
-                } else {
-                    // no op, only considering book, chapter, and verse markers
+
+                when (it::class) {
+                    BookMarker::class -> {
+                        newAudioMarkers.add(BookMarker(testBookSlug, newLocation))
+                    }
+
+                    ChapterMarker::class -> {
+                        newAudioMarkers.add(ChapterMarker(testChapterNumber, newLocation))
+                    }
+
+                    VerseMarker::class -> {
+                        val verseStart = (it as VerseMarker).start
+                        val verseEnd = it.end
+                        newAudioMarkers.add(VerseMarker(verseStart, verseEnd, newLocation))
+                    }
                 }
             } else {
                 newAudioMarkers.add(it)
