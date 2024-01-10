@@ -2,6 +2,9 @@ package org.wycliffeassociates.otter.common.domain.audio
 
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
+import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
+import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
+import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.common.audio.wav.WavOutputStream
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
@@ -35,7 +38,7 @@ class AudioBouncer {
             bouncedAudio.delete()
         }
 
-        val wav = WavFile(bouncedAudio, 1, 44100, 16)
+        val wav = WavFile(bouncedAudio, DEFAULT_CHANNELS, DEFAULT_SAMPLE_RATE, DEFAULT_BITS_PER_SAMPLE)
         WavOutputStream(wav).use { out ->
             while (reader.hasRemaining() && !isInterrupted.get()) {
                 val read = reader.getPcmBuffer(bytes)
