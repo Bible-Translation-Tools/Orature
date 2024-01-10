@@ -65,13 +65,13 @@ class VerseMarkerControl : BorderPane() {
 
             dragAreaProperty.set(this)
 
-            region {
+            stackpane {
                 line {
                     addClass("verse-marker__line")
 
-                    startXProperty().bind(this@region.layoutXProperty().plus(MARKER_AREA_WIDTH / 2))
-                    startYProperty().bind(this@region.layoutYProperty())
-                    endXProperty().bind(this@region.widthProperty().minus(MARKER_AREA_WIDTH / 2))
+                    startXProperty().bind(this@stackpane.layoutXProperty().plus(MARKER_AREA_WIDTH / 2))
+                    startYProperty().bind(this@stackpane.layoutYProperty())
+                    endXProperty().bind(this@stackpane.widthProperty().minus(MARKER_AREA_WIDTH / 2))
                     endYProperty().bind(this@VerseMarkerControl.prefHeightProperty())
                     strokeWidth = MARKER_WIDTH
                 }
