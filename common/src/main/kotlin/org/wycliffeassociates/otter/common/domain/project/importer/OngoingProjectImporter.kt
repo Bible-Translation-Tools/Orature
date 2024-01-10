@@ -596,7 +596,8 @@ class OngoingProjectImporter @Inject constructor(
                     checkingStatus?.checksum,
                     listOf()
                 )
-                take.id = takeRepository.insertForContent(take, chunk).blockingGet()
+                val insertedId = takeRepository.insertForContent(take, chunk).blockingGet()
+                take.id = insertedId
 
                 if (relativeFile.invariantSeparatorsPath in selectedTakes) {
                     chunk.selectedTake = take
