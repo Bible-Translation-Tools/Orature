@@ -21,7 +21,6 @@ package org.wycliffeassociates.otter.common.domain.project.importer
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -385,19 +384,18 @@ class OngoingProjectImporter @Inject constructor(
         mapper.registerKotlinModule()
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
-        val chunks = mutableMapOf<Int, List<Content>>()
-
-        val file: File = accessor.getChunkFile()
-        try {
-            if (file.exists() && file.length() > 0) {
-                val typeRef: TypeReference<HashMap<Int, List<Content>>> =
-                    object : TypeReference<HashMap<Int, List<Content>>>() {}
-                val map: Map<Int, List<Content>> = mapper.readValue(file, typeRef)
-                chunks.putAll(map)
+        val chunkFileExists = fileReader.exists(RcConstants.CHUNKS_FILE)
+        val chunks: Chunkification = if (chunkFileExists) {
+            try {
+                fileReader.stream(RcConstants.CHUNKS_FILE).let { input ->
+                    mapper.readValue(input)
+                }
+            } catch (e: MismatchedInputException) {
+                // empty file
+                Chunkification()
             }
-        } catch (e: MismatchedInputException) {
-            // clear file if it can't be read
-            file.writer().use { }
+        } else {
+            Chunkification()
         }
 
         val chapters = collectionRepository.getChildren(project).blockingGet()
