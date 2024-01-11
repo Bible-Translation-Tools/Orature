@@ -45,7 +45,7 @@ ext {
     sentryVer = '5.2.4'
     usfmToolsVer = "1.7.1"
     testFxVer = '4.0.17'
-    testFxMonocleVer = 'jdk-17.0.9'
+    testFxMonocleVer = 'jfx-21'
     jlayerVer = '1.0'
     cuelibVer = '2.0.0'
     install4jVer = '9.0.4'
