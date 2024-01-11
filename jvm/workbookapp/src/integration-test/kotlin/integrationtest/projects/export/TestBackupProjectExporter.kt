@@ -137,11 +137,12 @@ class TestBackupProjectExporter {
     @Test
     fun exportProjectWithChapterFilter() {
         val chaptersToExport = listOf(1, 3)
+        val stubbedWorkbook = prepareChunksInChapter(chaptersToExport)
         val chapterFilter = ExportOptions(chaptersToExport)
         val result = exportBackupUseCase.get()
             .export(
                 outputDir,
-                workbook,
+                stubbedWorkbook,
                 options = chapterFilter,
                 callback = null
             )
@@ -153,20 +154,26 @@ class TestBackupProjectExporter {
 
         Assert.assertNotNull(file)
 
-        val chapterToTakes = getTakesByChapterFromProject(file!!)
+        val chapterTakeMap = getTakesByChapterFromProject(file!!)
+        val totalTakes = takesPerChapter * chaptersToExport.size
 
         Assert.assertEquals(
             chaptersToExport,
-            chapterToTakes.keys.toList().sorted()
+            chapterTakeMap.keys.toList().sorted()
         )
         Assert.assertEquals(
-            takesPerChapter * chaptersToExport.size,
-            chapterToTakes.values.sum()
+            totalTakes,
+            chapterTakeMap.values.sum()
         )
         Assert.assertEquals(
             "Chapters from selected metadata file should match filter.",
             chaptersToExport,
             chaptersFromSelectedTakesFile(file)
+        )
+        Assert.assertEquals(
+            "Chapters from chunk file should match filter.",
+            chaptersToExport,
+            chaptersInChunksFile(file)
         )
     }
 
@@ -200,42 +207,19 @@ class TestBackupProjectExporter {
         }
     }
 
-    @Test
-    fun testExportChapterTranslation() {
-        val chapterToExport = 1
-        workbook = createChunksInChapter(chapterToExport)
-
-        val result = exportBackupUseCase.get()
-            .export(
-                outputDir,
-                workbook,
-                callback = null,
-                options = ExportOptions(listOf(chapterToExport))
-            )
-            .blockingGet()
-
-        Assert.assertEquals(ExportResult.SUCCESS, result)
-
-        val file = outputDir.listFiles().singleOrNull()
-
-        Assert.assertNotNull(file)
-        Assert.assertEquals(
-            listOf(chapterToExport),
-            chaptersInChunksFile(file!!)
-        )
-    }
-
-    private fun createChunksInChapter(chapterToExport: Int): Workbook {
-        val chapter = workbook.target.chapters.filter{ it.sort == chapterToExport }.blockingFirst()
+    /**
+     * Create chunks based on stubbed source audio
+     */
+    private fun prepareChunksInChapter(chaptersToExport: List<Int>): Workbook {
         val cues = listOf(
             AudioCue(0, "1"),
             AudioCue(5000, "2")
         )
         val sourceAudioFile = createTestWavFile(directoryProvider.tempDirectory)
         OratureAudioFile(sourceAudioFile).apply {
-            addMarker<VerseMarker>(VerseMarker(1,1, 0))
-            addMarker<VerseMarker>(VerseMarker(2,2, 5_000))
-            addMarker<VerseMarker>(VerseMarker(3,3, 10_000))
+            addMarker<VerseMarker>(VerseMarker(1, 1, 0))
+            addMarker<VerseMarker>(VerseMarker(2, 2, 5_000))
+            addMarker<VerseMarker>(VerseMarker(3, 3, 10_000))
             update()
         }
         val sourceAudio = SourceAudio(sourceAudioFile, 0, 100_000)
@@ -253,8 +237,10 @@ class TestBackupProjectExporter {
         every { workbookSpy.target } answers { callOriginal() }
         every { workbookSpy.source } answers { callOriginal() }
 
-        createChunks.createUserDefinedChunks(workbookSpy, chapter, cues).blockingAwait()
-        createChunks.createUserDefinedChunks(workbookSpy, workbookSpy.target.chapters.blockingLast(), cues).blockingAwait()
+        val chapters = workbook.target.chapters.filter { it.sort in chaptersToExport }.toList().blockingGet()
+        chapters.forEach {
+            createChunks.createUserDefinedChunks(workbookSpy, it, cues).blockingAwait()
+        }
 
         return workbookSpy
     }
