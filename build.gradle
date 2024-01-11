@@ -109,7 +109,12 @@ subprojects {
     }
 
     group 'org.wycliffeassociates'
-    sourceCompatibility = 11
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(11)
+        }
+    }
 
     compileKotlin {
         kotlinOptions.jvmTarget = "11"
