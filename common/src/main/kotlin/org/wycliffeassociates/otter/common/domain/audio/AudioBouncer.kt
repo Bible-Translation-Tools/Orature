@@ -31,36 +31,38 @@ class AudioBouncer {
 
         val bytes = ByteArray(DEFAULT_BUFFER_SIZE)
 
-        reader.open()
-        reader.seek(0)
+        reader.use {
+            reader.open()
+            reader.seek(0)
 
-        if (bouncedAudio.exists() && bouncedAudio.length() > 0) {
-            bouncedAudio.delete()
-        }
-
-        val wav = WavFile(bouncedAudio, DEFAULT_CHANNELS, DEFAULT_SAMPLE_RATE, DEFAULT_BITS_PER_SAMPLE)
-        WavOutputStream(wav).use { out ->
-            while (reader.hasRemaining() && !isInterrupted.get()) {
-                val read = reader.getPcmBuffer(bytes)
-                out.write(bytes, 0, read)
+            if (bouncedAudio.exists() && bouncedAudio.length() > 0) {
+                bouncedAudio.delete()
             }
-        }
 
-        if (!isInterrupted.get()) {
-            wav.update()
-            val oaf = OratureAudioFile(bouncedAudio)
-            for (verse in markers) {
-                oaf.addMarker<AudioMarker>(verse.clone())
+            val wav = WavFile(bouncedAudio, reader.channels, reader.sampleRate, reader.sampleSizeBits)
+            WavOutputStream(wav).use { out ->
+                while (reader.hasRemaining() && !isInterrupted.get()) {
+                    val read = reader.getPcmBuffer(bytes)
+                    out.write(bytes, 0, read)
+                }
             }
-            oaf.update()
-        }
 
-        if (isInterrupted.get()) {
-            logger.info("interrupted bouncing audio")
-        } else {
-            logger.info("Finished bouncing audio for ${markers}")
+            if (!isInterrupted.get()) {
+                wav.update()
+                val oaf = OratureAudioFile(bouncedAudio)
+                for (verse in markers) {
+                    oaf.addMarker<AudioMarker>(verse.clone())
+                }
+                oaf.update()
+            }
+
+            if (isInterrupted.get()) {
+                logger.info("interrupted bouncing audio")
+            } else {
+                logger.info("Finished bouncing audio for ${markers}")
+            }
+            isInterrupted.set(false)
         }
-        isInterrupted.set(false)
     }
 
     fun interrupt() {
