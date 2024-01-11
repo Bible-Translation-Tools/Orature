@@ -18,7 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
 
-import com.jfoenix.controls.JFXProgressBar
+import io.github.palexdev.materialfx.controls.MFXProgressBar
 import javafx.application.Platform
 import javafx.collections.ObservableList
 import javafx.scene.control.Button
@@ -264,7 +264,7 @@ class SettingsView : View() {
                             stackpane {
                                 addClass("app-drawer-progress-bar")
                                 hgrow = Priority.ALWAYS
-                                add(JFXProgressBar().apply {
+                                add(MFXProgressBar().apply {
                                     progressBar = this
                                     hgrow = Priority.ALWAYS
                                     addClass("app-drawer-progress")
