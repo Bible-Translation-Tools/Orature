@@ -18,18 +18,22 @@
  */
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.project
 
+
+import io.mockk.every
+import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
-import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito
 import java.util.zip.ZipFile
 
 class OtterZipFileTest {
 
-    private val mockZipFile = Mockito.mock(ZipFile::class.java)
-    private val mockParentFile = Mockito.mock(OtterFile::class.java)
     private val sep = "/"
     private val basePath = "dir1/dir2/"
+
+    private val mockZipFile = mockk<ZipFile>()
+    private val mockParentFile = mockk<OtterFile> {
+        every { absolutePath } returns basePath
+    }
 
     private val testNameCases = listOf(
         "file.md" to "file.md",
@@ -62,12 +66,6 @@ class OtterZipFileTest {
         "test1/file.md" to "test1/file.md",
         "file.md" to "file.md"
     )
-
-    @Before
-    fun setup() {
-        Mockito.`when`(mockParentFile.absolutePath)
-            .thenReturn(basePath)
-    }
 
     private fun checkStringResult(absPath: String, output: String, expected: String) {
         try {
