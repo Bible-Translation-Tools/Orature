@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -47,6 +48,7 @@ import kotlin.io.path.createTempDirectory
 import kotlin.io.path.outputStream
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.AudioMetadataFileFormat
+import org.wycliffeassociates.otter.common.data.Chunkification
 import org.wycliffeassociates.otter.common.domain.project.InProgressNarrationFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.*
 import org.wycliffeassociates.otter.common.data.primitives.Collection
@@ -343,10 +345,21 @@ class ProjectFilesAccessor(
         }
     }
 
-    fun writeChunksFile(fileWriter: IFileWriter) {
+    fun writeChunksFile(fileWriter: IFileWriter, chapterFilter: List<Int>? = null) {
         val inFile = projectDir.resolve(RcConstants.CHUNKS_FILE)
 
-        if (inFile.exists()) {
+        if (inFile.exists() && inFile.length() > 0) {
+            val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
+            val chunks: Chunkification = mapper.readValue(inFile)
+            val filteredChunks = if (chapterFilter != null) {
+                chunks.filterKeys { chapter -> chapter in chapterFilter }
+            } else {
+                chunks
+            }
+            fileWriter.bufferedWriter(RcConstants.CHUNKS_FILE).use { _fileWriter ->
+                mapper.writeValue(_fileWriter, filteredChunks)
+            }
+        } else if (inFile.exists()) {
             fileWriter.bufferedWriter(RcConstants.CHUNKS_FILE).use { _fileWriter ->
                 inFile.reader().use { _fileReader ->
                     _fileReader.transferTo(_fileWriter)

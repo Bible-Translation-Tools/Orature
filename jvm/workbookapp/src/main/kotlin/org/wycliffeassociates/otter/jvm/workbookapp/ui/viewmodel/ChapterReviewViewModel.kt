@@ -211,11 +211,13 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
             }
             .subscribeOn(Schedulers.io())
             .observeOnFx()
+            .doFinally {
+                translationViewModel.loadingStepProperty.set(false)
+            }
             .subscribe { audio ->
                 loadVerseMarkers(audio)
                 createWaveformImages(audio)
                 subscribeOnWaveformImages()
-                translationViewModel.loadingStepProperty.set(false)
             }
     }
 

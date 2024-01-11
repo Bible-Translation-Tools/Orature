@@ -102,7 +102,7 @@ class BackupProjectExporter @Inject constructor(
                     ) { takeName ->
                         takesFilter(takeName, takeFilenamePattern, options)
                     }
-                    projectAccessor.writeChunksFile(fileWriter)
+                    projectAccessor.writeChunksFile(fileWriter, options?.chapters)
                     projectAccessor.copyProjectModeFile(fileWriter)
                     projectAccessor.writeTakeCheckingStatus(fileWriter, workbook) { path ->
                         takesFilter(path, takeFilenamePattern, options)

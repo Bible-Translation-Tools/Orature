@@ -37,6 +37,7 @@ class ChunkingStepsDrawer(
 ) : VBox() {
     val chunksProperty = SimpleListProperty<ChunkViewData>()
     val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.BLIND_DRAFT)
+    val noSourceAudioProperty = SimpleBooleanProperty(false)
 
     private val isCollapsedProperty = SimpleBooleanProperty(false)
 
@@ -77,7 +78,10 @@ class ChunkingStepsDrawer(
             isFitToWidth = true
             vbox {
                 chunkingStep(ChunkingStep.CONSUME_AND_VERBALIZE,selectedStepProperty,reachableStepProperty, isCollapsedProperty)
-                chunkingStep(ChunkingStep.CHUNKING, selectedStepProperty, reachableStepProperty, isCollapsedProperty)
+                chunkingStep(ChunkingStep.CHUNKING, selectedStepProperty, reachableStepProperty, isCollapsedProperty) {
+                    visibleWhen(noSourceAudioProperty.not())
+                    managedWhen(visibleProperty())
+                }
                 chunkingStep(ChunkingStep.BLIND_DRAFT, selectedStepProperty, reachableStepProperty, isCollapsedProperty) {
                     chunkListProperty.bind(chunksProperty)
                 }

@@ -109,14 +109,19 @@ subprojects {
     }
 
     group 'org.wycliffeassociates'
-    sourceCompatibility = 11
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(17)
+        }
+    }
 
     compileKotlin {
-        kotlinOptions.jvmTarget = "11"
+        kotlinOptions.jvmTarget = "17"
     }
 
     compileTestKotlin {
-        kotlinOptions.jvmTarget = "11"
+        kotlinOptions.jvmTarget = "17"
     }
 
     gradleLint.rules = ['deprecated-dependency-configuration']

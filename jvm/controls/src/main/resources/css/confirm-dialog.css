@@ -65,16 +65,21 @@
     -fx-pref-height: 8px;
 }
 
-.confirm-dialog__progress .progress-bar .bar {
+.confirm-dialog__progress .progress-bar .bar1,
+.confirm-dialog__progress .progress-bar .bar2 {
     -fx-background-radius: 6px;
-    -fx-background-color: -wa-primary;
+    -fx-arc-height: 6;
+    -fx-arc-width: 6;
+    -fx-fill: -wa-primary;
 }
 
 .confirm-dialog__progress .progress-bar .track {
-    -fx-background-color: -wa-slider-track-color;
+    -fx-fill: -wa-slider-track-color;
     -fx-background-radius: 6px;
     -fx-border-width: 1px;
     -fx-border-radius: 6px;
+    -fx-arc-height: 6;
+    -fx-arc-width: 6;
     -fx-border-color: -wa-slider-border-color;
 }
 

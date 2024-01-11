@@ -75,6 +75,7 @@ open class PeerEdit : View() {
             label(viewModel.chunkTitleProperty).addClass("h4", "h4--80")
             simpleaudioplayer {
                 playerProperty.bind(viewModel.sourcePlayerProperty)
+                disableProperty().bind(playerProperty.isNull)
                 enablePlaybackRateProperty.set(true)
                 sideTextProperty.set(messages["sourceAudio"])
                 menuSideProperty.set(Side.BOTTOM)

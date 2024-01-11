@@ -98,13 +98,15 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
             }
             .subscribeOn(Schedulers.io())
             .observeOnFx()
+            .doFinally {
+                translationViewModel.loadingStepProperty.set(false)
+            }
             .subscribe { sa ->
                 audioDataStore.sourceAudioProperty.set(sa)
                 audio = loadAudio(sa.file)
                 createWaveformImages(audio)
                 subscribeOnWaveformImages()
                 loadSourceMarkers(audio)
-                translationViewModel.loadingStepProperty.set(false)
             }
 
         translationViewModel.currentMarkerProperty.bind(currentMarkerNumberProperty)
