@@ -21,21 +21,30 @@ package integrationtest.projects.export
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import integrationtest.createTestWavFile
 import integrationtest.di.DaggerTestPersistenceComponent
 import integrationtest.projects.DatabaseEnvironment
+import io.mockk.every
+import io.mockk.spyk
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.wycliffeassociates.otter.common.ResourceContainerBuilder
+import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
+import org.wycliffeassociates.otter.common.data.Chunkification
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.domain.project.InProgressNarrationFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
+import org.wycliffeassociates.otter.common.domain.content.CreateChunks
 import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.inProgressNarrationPattern
 import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.takeFilenamePattern
 import org.wycliffeassociates.otter.common.domain.project.ImportProjectUseCase
@@ -43,6 +52,8 @@ import org.wycliffeassociates.otter.common.domain.project.TakeCheckingStatusMap
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOptions
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer.BackupProjectExporter
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
@@ -62,6 +73,9 @@ class TestBackupProjectExporter {
 
     @Inject
     lateinit var exportBackupUseCase: Provider<BackupProjectExporter>
+
+    @Inject
+    lateinit var createChunks: CreateChunks
 
     @Inject
     lateinit var workbookRepository: IWorkbookRepository
@@ -122,7 +136,8 @@ class TestBackupProjectExporter {
 
     @Test
     fun exportProjectWithChapterFilter() {
-        val chapterFilter = ExportOptions(chapters = listOf(1, 3))
+        val chaptersToExport = listOf(1, 3)
+        val chapterFilter = ExportOptions(chaptersToExport)
         val result = exportBackupUseCase.get()
             .export(
                 outputDir,
@@ -141,16 +156,16 @@ class TestBackupProjectExporter {
         val chapterToTakes = getTakesByChapterFromProject(file!!)
 
         Assert.assertEquals(
-            chapterFilter.chapters,
+            chaptersToExport,
             chapterToTakes.keys.toList().sorted()
         )
         Assert.assertEquals(
-            takesPerChapter * chapterFilter.chapters.size,
+            takesPerChapter * chaptersToExport.size,
             chapterToTakes.values.sum()
         )
         Assert.assertEquals(
             "Chapters from selected metadata file should match filter.",
-            chapterFilter.chapters,
+            chaptersToExport,
             chaptersFromSelectedTakesFile(file)
         )
     }
@@ -180,9 +195,68 @@ class TestBackupProjectExporter {
                 val takeCheckingMap = mapper.readValue<TakeCheckingStatusMap>(stream)
 
                 Assert.assertEquals(6, takeCheckingMap.size)
-                Assert.assertEquals(1, takeCheckingMap.values.filter { it == verseChecking }.size )
+                Assert.assertEquals(1, takeCheckingMap.values.filter { it == verseChecking }.size)
             }
         }
+    }
+
+    @Test
+    fun testExportChapterTranslation() {
+        val chapterToExport = 1
+        workbook = createChunksInChapter(chapterToExport)
+
+        val result = exportBackupUseCase.get()
+            .export(
+                outputDir,
+                workbook,
+                callback = null,
+                options = ExportOptions(listOf(chapterToExport))
+            )
+            .blockingGet()
+
+        Assert.assertEquals(ExportResult.SUCCESS, result)
+
+        val file = outputDir.listFiles().singleOrNull()
+
+        Assert.assertNotNull(file)
+        Assert.assertEquals(
+            listOf(chapterToExport),
+            chaptersInChunksFile(file!!)
+        )
+    }
+
+    private fun createChunksInChapter(chapterToExport: Int): Workbook {
+        val chapter = workbook.target.chapters.filter{ it.sort == chapterToExport }.blockingFirst()
+        val cues = listOf(
+            AudioCue(0, "1"),
+            AudioCue(5000, "2")
+        )
+        val sourceAudioFile = createTestWavFile(directoryProvider.tempDirectory)
+        OratureAudioFile(sourceAudioFile).apply {
+            addMarker<VerseMarker>(VerseMarker(1,1, 0))
+            addMarker<VerseMarker>(VerseMarker(2,2, 5_000))
+            addMarker<VerseMarker>(VerseMarker(3,3, 10_000))
+            update()
+        }
+        val sourceAudio = SourceAudio(sourceAudioFile, 0, 100_000)
+        val sourceAudioAccessor = spyk(
+            SourceAudioAccessor(
+                directoryProvider,
+                workbook.source.resourceMetadata,
+                workbook.source.slug
+            )
+        )
+        val workbookSpy = spyk(workbook)
+
+        every { sourceAudioAccessor.getChapter(any<Int>(), any()) } returns sourceAudio
+        every { workbookSpy.sourceAudioAccessor } returns sourceAudioAccessor
+        every { workbookSpy.target } answers { callOriginal() }
+        every { workbookSpy.source } answers { callOriginal() }
+
+        createChunks.createUserDefinedChunks(workbookSpy, chapter, cues).blockingAwait()
+        createChunks.createUserDefinedChunks(workbookSpy, workbookSpy.target.chapters.blockingLast(), cues).blockingAwait()
+
+        return workbookSpy
     }
 
     @Test
@@ -300,12 +374,11 @@ class TestBackupProjectExporter {
     private fun chaptersFromSelectedTakesFile(projectFile: File): List<Int> {
         var lines = mutableListOf<String>()
         ResourceContainer.load(projectFile).use {
-            if (it.accessor.fileExists(".apps/orature/selected.txt"))
-                {
-                    it.accessor.getReader(".apps/orature/selected.txt").use {
-                        lines.addAll(it.readText().split("\n"))
-                    }
+            if (it.accessor.fileExists(ResourceContainerBuilder.selectedTakesFilePath)) {
+                it.accessor.getReader(ResourceContainerBuilder.selectedTakesFilePath).use {
+                    lines.addAll(it.readText().split("\n"))
                 }
+            }
         }
         return lines
             .filter { it.isNotBlank() }
@@ -317,5 +390,23 @@ class TestBackupProjectExporter {
                     .toInt()
             }
             .distinct()
+    }
+
+    private fun chaptersInChunksFile(projectFile: File): List<Int> {
+        ResourceContainer.load(projectFile).use {
+            return if (it.accessor.fileExists(ResourceContainerBuilder.chunksFilePath)) {
+                try {
+                    it.accessor.getInputStream(ResourceContainerBuilder.chunksFilePath).use { stream ->
+                        val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
+                        val chunks: Chunkification = mapper.readValue(stream)
+                        chunks.keys.toList()
+                    }
+                } catch (e: MismatchedInputException) {
+                    listOf<Int>()
+                }
+            } else {
+                listOf()
+            }
+        }
     }
 }

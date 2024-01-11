@@ -310,17 +310,13 @@ class CreateChunks @Inject constructor(
             if (file.exists() && file.length() > 0) {
                 val map: Chunkification = mapper.readValue(file)
                 chunks.putAll(map)
-                logger.error("restoring chunks")
             }
         } catch (e: MismatchedInputException) {
             // clear file if it can't be read
             file.writer().use { }
         }
 
-        logger.error("adding chunks to chapter: $chapterNumber")
         chunks[chapterNumber] = chunksToAdd
-
-        logger.error("File with chunks is ${file.absolutePath}")
 
         file.writer().use {
             mapper.writeValue(it, chunks)
