@@ -34,7 +34,6 @@ object NarrationTakeModifierTaskRunner {
     var markerUpdateBusy: Observable<Boolean>
     private var markerUpdateBusyEmitter: ObservableEmitter<Boolean>? = null
 
-
     init {
         audioBouncerBusy = Observable.create { emitter ->
             this.audioBouncerBusyEmitter = emitter

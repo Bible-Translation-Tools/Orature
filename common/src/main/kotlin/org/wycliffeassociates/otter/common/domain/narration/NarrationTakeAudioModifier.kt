@@ -5,28 +5,15 @@ import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.workbook.Take
 
-class NarrationTakeAudioModifier(val take: Take) {
+fun modifyAudioData(take: Take?, reader: AudioFileReader, markers: List<AudioMarker>) {
+    if (take == null) return
+    // May need to examine the history. The reader is a shared resource, and we may need to get a snapshot of it
+    // when bouncing the audio.
+    NarrationTakeModifierTaskRunner.bounce(take.file, reader, markers)
+}
 
-    private val audioBounceTaskRunner = NarrationTakeModifierTaskRunner
-    lateinit var isBusy: Observable<Boolean>
+fun modifyMetadata(take: Take?, markers: List<AudioMarker>) {
+    if (take == null) return
 
-    init {
-        isBusy = Observable.combineLatest(
-            audioBounceTaskRunner.audioBouncerBusy.startWith(false),
-            audioBounceTaskRunner.markerUpdateBusy.startWith(false)
-        ) { audioBounceBusy, markerUpdateBusy ->
-            audioBounceBusy || markerUpdateBusy
-        }
-            .distinctUntilChanged()
-    }
-
-    fun modifyAudioData(reader: AudioFileReader, markers: List<AudioMarker>) {
-        // May need to examine the history. The reader is a shared resource, and we may need to get a snapshot of it
-        // when bouncing the audio.
-        audioBounceTaskRunner.bounce(take.file, reader, markers)
-    }
-
-    fun modifyMetadata(markers: List<AudioMarker>) {
-        audioBounceTaskRunner.updateMarkers(take.file, markers)
-    }
+    NarrationTakeModifierTaskRunner.updateMarkers(take.file, markers)
 }
