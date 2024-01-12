@@ -16,6 +16,14 @@ import org.wycliffeassociates.otter.common.domain.audio.AudioBouncer
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import java.io.File
 
+
+enum class TaskRunnerStatus {
+    BOUNCING_AUDIO,
+    UPDATING_MARKERS,
+    IDLE
+}
+
+
 object NarrationTakeModifierTaskRunner {
 
     private val logger = LoggerFactory.getLogger(NarrationTakeModifierTaskRunner::class.java)
@@ -24,25 +32,18 @@ object NarrationTakeModifierTaskRunner {
 
     private var currentAudioBounceTask: Disposable? = null
     private lateinit var currentAudioBounceTaskEmitter: CompletableEmitter
-    var audioBouncerBusy: Observable<Boolean>
-    private var audioBouncerBusyEmitter: ObservableEmitter<Boolean>? = null
-    private var isBouncingAudio = false
 
     private var currentMarkerUpdateTask: Disposable? = null
     private var currentUpdateMarkerTaskEmitter: CompletableEmitter? = null
     private var waitingMarkerUpdateTask: Disposable? = null
-    var markerUpdateBusy: Observable<Boolean>
-    private var markerUpdateBusyEmitter: ObservableEmitter<Boolean>? = null
 
-    init {
-        audioBouncerBusy = Observable.create { emitter ->
-            this.audioBouncerBusyEmitter = emitter
+    private var busyStatusEmitter: ObservableEmitter<TaskRunnerStatus>? = null
+    val busyStatus: Observable<TaskRunnerStatus> = Observable
+        .create {
+            busyStatusEmitter = it
         }
+    private var isBouncingAudio = false
 
-        markerUpdateBusy = Observable.create { emitter ->
-            this.markerUpdateBusyEmitter = emitter
-        }
-    }
 
     @Synchronized
     fun bounce(file: File, reader: AudioFileReader, markers: List<AudioMarker>) {
@@ -58,7 +59,12 @@ object NarrationTakeModifierTaskRunner {
 
     private fun updateIsBouncingAudio(newValue: Boolean) {
         isBouncingAudio = newValue
-        audioBouncerBusyEmitter?.onNext(newValue)
+        if (newValue) {
+            busyStatusEmitter?.onNext(TaskRunnerStatus.BOUNCING_AUDIO)
+
+        } else {
+            busyStatusEmitter?.onNext(TaskRunnerStatus.IDLE)
+        }
     }
 
 
@@ -102,10 +108,12 @@ object NarrationTakeModifierTaskRunner {
 
         } else {
 
-            markerUpdateBusyEmitter?.onNext(true)
+            busyStatusEmitter?.onNext(TaskRunnerStatus.UPDATING_MARKERS)
 
-            audioBouncerBusy
-                .takeWhile { busy -> busy }
+            busyStatus
+                .takeWhile { busy ->
+                    busy == TaskRunnerStatus.UPDATING_MARKERS || busy == TaskRunnerStatus.BOUNCING_AUDIO
+                }
                 .doOnComplete {
                     currentMarkerUpdateTask = updateMarkersTask(file, markers).subscribe()
                 }
@@ -128,7 +136,7 @@ object NarrationTakeModifierTaskRunner {
     private fun updateMarkersTask(file: File, markers: List<AudioMarker>): Completable {
         return Completable
             .create { emitter ->
-                markerUpdateBusyEmitter?.onNext(true)
+                busyStatusEmitter?.onNext(TaskRunnerStatus.UPDATING_MARKERS)
                 logger.info("Started updating markers")
                 this.currentUpdateMarkerTaskEmitter = emitter
 
@@ -141,7 +149,7 @@ object NarrationTakeModifierTaskRunner {
             }
             .doFinally {
                 logger.info("Finished updating markers")
-                markerUpdateBusyEmitter?.onNext(false)
+                busyStatusEmitter?.onNext(TaskRunnerStatus.IDLE)
             }
             .subscribeOn(Schedulers.io())
     }
