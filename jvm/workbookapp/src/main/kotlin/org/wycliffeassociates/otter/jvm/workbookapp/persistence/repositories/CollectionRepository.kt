@@ -473,7 +473,6 @@ class CollectionRepository @Inject constructor(
                         projectEntity.id,
                         workbookTypeDao.fetchId(mode)
                     )
-
                     if (workbookDescriptor == null) {
                         // copy the content under chapter-level
                         if (verseByVerse) {
@@ -482,9 +481,9 @@ class CollectionRepository @Inject constructor(
                         } else {
                             copyMetaContent(dsl, sourceCollectionEntity.id, mainDerivedMetadata.id)
                         }
-
                         insertWorkbookDescriptor(sourceCollection.id, projectEntity.id, mode)
                     }
+
 
                     return@transactionResult collectionMapper.mapFromEntity(
                         projectEntity,
