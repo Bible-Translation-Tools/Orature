@@ -317,6 +317,7 @@ class OngoingProjectImporter @Inject constructor(
                 }
                 ?.values
                 ?.toList()
+
             deriveChapterContentFromVerses(derivedProject, projectFilesAccessor)
         }
         importContributorInfo(metadata, projectFilesAccessor)

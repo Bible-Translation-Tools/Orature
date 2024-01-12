@@ -307,6 +307,8 @@ class ResourceContainerBuilder(baseRC: File? = null) {
     companion object {
         const val defaultProjectSlug = "jhn"
         const val checkingStatusFilePath = RcConstants.CHECKING_STATUS_FILE
+        const val selectedTakesFilePath = RcConstants.SELECTED_TAKES_FILE
+        const val chunksFilePath = RcConstants.CHUNKS_FILE
 
         fun setUpEmptyProjectBuilder(): ResourceContainerBuilder {
             return ResourceContainerBuilder()

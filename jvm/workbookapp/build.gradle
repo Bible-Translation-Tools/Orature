@@ -50,7 +50,7 @@ sourceSets {
 }
 
 compileIntegrationTestKotlin {
-    kotlinOptions.jvmTarget = "11"
+    kotlinOptions.jvmTarget = "17"
 }
 
 configurations {
@@ -120,6 +120,7 @@ dependencies {
     // JFoenix
     implementation "com.jfoenix:jfoenix:$jfoenixVer"
     implementation "com.github.bkenn:kfoenix:$kfoenixVer"
+    implementation "io.github.palexdev:materialfx:$materialFxVer"
 
     // ControlsFX
     implementation "org.wycliffeassociates:javafx-gridview:$javaGridviewVer"
@@ -155,7 +156,7 @@ dependencies {
     testImplementation "io.mockk:mockk:$mockkVer"
     testImplementation "org.testfx:testfx-core:$testFxVer"
     testImplementation "org.testfx:testfx-junit:$testFxVer"
-    testImplementation "org.testfx:openjfx-monocle:$testFxMonocleVer"
+    testImplementation "one.jpro:openjfx-monocle:$testFxMonocleVer"
     integrationTestImplementation group: 'junit', name: 'junit', version: "$junitVer"
     integrationTestImplementation "org.mockito:mockito-core:$mockitoVer"
     integrationTestImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVer"

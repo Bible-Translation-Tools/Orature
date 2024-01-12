@@ -27,13 +27,18 @@
 }
 
 .progress-dialog .progress-bar .track {
-    -fx-background-color: -wa-progress-track-background;
+    -fx-fill: -wa-progress-track-background;
     -fx-background-insets: 0;
     -fx-background-radius: 5px;
+    -fx-arc-height: 5;
+    -fx-arc-width: 5;
 }
 
-.progress-dialog .progress-bar .bar {
-    -fx-background-color: -wa-progress-foreground;
+.progress-dialog .progress-bar .bar1,
+ .progress-dialog .progress-bar .bar2 {
+    -fx-fill: -wa-progress-foreground;
     -fx-background-insets: 0;
     -fx-background-radius: 8px 0 0 8px;
+    -fx-arc-height: 5;
+    -fx-arc-width: 5;
 }
