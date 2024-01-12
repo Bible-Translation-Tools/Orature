@@ -853,7 +853,6 @@ class NarrationViewModel : ViewModel() {
                         viewport.last - viewport.first
                     ).toDouble() - (MARKER_AREA_WIDTH / 2) + viewportOffset
                     runLater {
-                        marker.visibleProperty().set(true)
                         if (marker.layoutX != newPos) {
                             marker.layoutX = newPos
                         }
@@ -861,10 +860,8 @@ class NarrationViewModel : ViewModel() {
                     found = true
                 }
             }
-            if (!found) {
-                runLater {
-                    marker.visibleProperty().set(false)
-                }
+            runLater {
+                marker.visibleProperty().set(found)
             }
         }
     }
