@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Orature" type="JetRunConfigurationType">
+    <option name="MAIN_CLASS_NAME" value="org.wycliffeassociates.otter.jvm.workbookapp.MainKt" />
+    <module name="otter.jvm.workbookapp.main" />
+    <shortenClasspath name="NONE" />
+    <option name="VM_PARAMETERS" value="--add-modules=ALL-MODULE-PATH, --add-exports=javafx.base/com.sun.javafx.logging=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.javafx.application=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.javafx.util=ALL-UNNAMED, --add-exports=javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED, --add-exports=javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED, --add-exports=javafx.base/com.sun.javafx.binding=ALL-UNNAMED, --add-exports=javafx.graphics/com.sun.javafx.css=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.javafx.util=ALL-UNNAMED, --add-opens=javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED, --add-opens=javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED, --add-opens=javafx.controls/javafx.scene.control.skin=ALL-UNNAMED, --add-opens=javafx.base/com.sun.javafx.binding=ALL-UNNAMED, --add-opens=javafx.graphics/com.sun.javafx.css=ALL-UNNAMED" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
