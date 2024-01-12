@@ -305,10 +305,11 @@ class OngoingProjectImporter @Inject constructor(
         projectFilesAccessor.initializeResourceContainerInDir()
         projectFilesAccessor.setProjectMode(mode)
 
-        callback?.onNotifyProgress(localizeKey = "copyingSource", percent = 50.0)
+        callback?.onNotifyProgress(localizeKey = "copyingSource", percent = 40.0)
         projectFilesAccessor.copySourceFiles(fileReader)
 
         if (projectAppVersion == ProjectAppVersion.ONE) {
+            callback?.onNotifyProgress(localizeKey = "loading_content", percent = 60.0)
             completedChapters = takesInChapterFilter
                 ?.filterKeys { takePath ->
                     parseNumbers(takePath)?.contentSignature?.let { sig ->
@@ -349,7 +350,7 @@ class OngoingProjectImporter @Inject constructor(
         languageRepository.updateTranslation(translation).subscribe()
         resetChaptersWithoutTakes(fileReader, derivedProject, mode)
 
-        callback?.onNotifyProgress(localizeKey = "finishingUp", percent = 100.0)
+        callback?.onNotifyProgress(localizeKey = "finishingUp", percent = 99.0)
 
         return derivedProject
     }
