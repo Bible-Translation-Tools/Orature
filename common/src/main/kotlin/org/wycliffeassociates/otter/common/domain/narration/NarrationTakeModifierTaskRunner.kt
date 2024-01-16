@@ -5,6 +5,7 @@ import io.reactivex.CompletableEmitter
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
 import io.reactivex.disposables.Disposable
+import io.reactivex.observables.ConnectableObservable
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
@@ -20,6 +21,7 @@ import java.io.File
 enum class TaskRunnerStatus {
     BOUNCING_AUDIO,
     UPDATING_MARKERS,
+    UPDATE_MARKERS_WAITING,
     IDLE
 }
 
@@ -38,18 +40,22 @@ object NarrationTakeModifierTaskRunner {
     private var waitingMarkerUpdateTask: Disposable? = null
 
     private var busyStatusEmitter: ObservableEmitter<TaskRunnerStatus>? = null
-    val busyStatus: Observable<TaskRunnerStatus> = Observable
+    val busyStatus: ConnectableObservable<TaskRunnerStatus> = Observable
         .create {
             busyStatusEmitter = it
-        }
+        }.publish()
     private var isBouncingAudio = false
 
+    init {
+        busyStatus.connect()
+    }
 
     @Synchronized
     fun bounce(file: File, reader: AudioFileReader, markers: List<AudioMarker>) {
-        updateIsBouncingAudio(true)
+        updateBusyStatus(TaskRunnerStatus.BOUNCING_AUDIO)
 
         waitingMarkerUpdateTask?.dispose()
+        waitingMarkerUpdateTask = null
         currentAudioBounceTask?.dispose()
 
         cancelPreviousAudioBounceTask()
@@ -57,14 +63,9 @@ object NarrationTakeModifierTaskRunner {
     }
 
 
-    private fun updateIsBouncingAudio(newValue: Boolean) {
-        isBouncingAudio = newValue
-        if (newValue) {
-            busyStatusEmitter?.onNext(TaskRunnerStatus.BOUNCING_AUDIO)
-
-        } else {
-            busyStatusEmitter?.onNext(TaskRunnerStatus.IDLE)
-        }
+    private fun updateBusyStatus(status: TaskRunnerStatus) {
+        isBouncingAudio = (status == TaskRunnerStatus.BOUNCING_AUDIO)
+        busyStatusEmitter?.onNext(status)
     }
 
 
@@ -92,7 +93,13 @@ object NarrationTakeModifierTaskRunner {
             }
             .doOnComplete {
                 synchronized(this) {
-                    updateIsBouncingAudio(false)
+                    if (waitingMarkerUpdateTask == null) {
+                        // Only set busy status to IDLE when we do not have a waiting update marker task
+                        updateBusyStatus(TaskRunnerStatus.IDLE)
+                    } else {
+                        // Sets status to UPDATING_MARKERS so the waiting update marker task can start executing
+                        updateBusyStatus(TaskRunnerStatus.UPDATING_MARKERS)
+                    }
                 }
             }
             .subscribeOn(Schedulers.io())
@@ -103,18 +110,20 @@ object NarrationTakeModifierTaskRunner {
     fun updateMarkers(file: File, markers: List<AudioMarker>) {
 
         if (!isBouncingAudio) {
+            updateBusyStatus(TaskRunnerStatus.UPDATING_MARKERS)
             currentMarkerUpdateTask?.dispose()
             currentMarkerUpdateTask = updateMarkersTask(file, markers).subscribe()
 
         } else {
 
-            busyStatusEmitter?.onNext(TaskRunnerStatus.UPDATING_MARKERS)
+            updateBusyStatus(TaskRunnerStatus.UPDATE_MARKERS_WAITING)
 
             busyStatus
                 .takeWhile { busy ->
-                    busy == TaskRunnerStatus.UPDATING_MARKERS || busy == TaskRunnerStatus.BOUNCING_AUDIO
+                    busy == TaskRunnerStatus.UPDATE_MARKERS_WAITING || busy == TaskRunnerStatus.BOUNCING_AUDIO
                 }
                 .doOnComplete {
+                    waitingMarkerUpdateTask = null
                     currentMarkerUpdateTask = updateMarkersTask(file, markers).subscribe()
                 }
                 .doOnDispose {
@@ -136,7 +145,6 @@ object NarrationTakeModifierTaskRunner {
     private fun updateMarkersTask(file: File, markers: List<AudioMarker>): Completable {
         return Completable
             .create { emitter ->
-                busyStatusEmitter?.onNext(TaskRunnerStatus.UPDATING_MARKERS)
                 logger.info("Started updating markers")
                 this.currentUpdateMarkerTaskEmitter = emitter
 
@@ -147,9 +155,11 @@ object NarrationTakeModifierTaskRunner {
 
                 emitter.onComplete()
             }
-            .doFinally {
+            .doOnComplete {
                 logger.info("Finished updating markers")
-                busyStatusEmitter?.onNext(TaskRunnerStatus.IDLE)
+                // Can emit IDLE at this point, because we only reach this if we have not been interrupted by another
+                // bounce audio task or update marker task.
+                updateBusyStatus(TaskRunnerStatus.IDLE)
             }
             .subscribeOn(Schedulers.io())
     }
