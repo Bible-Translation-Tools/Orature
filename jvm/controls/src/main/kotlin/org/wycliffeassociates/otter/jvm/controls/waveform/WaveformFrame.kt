@@ -29,6 +29,7 @@ import javafx.scene.effect.ColorAdjust
 import javafx.scene.image.Image
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.HBox
+import javafx.scene.layout.Pane
 import javafx.scene.layout.Region
 import javafx.scene.layout.StackPane
 import org.wycliffeassociates.otter.common.data.ColorTheme
@@ -99,7 +100,7 @@ class WaveformFrame(
     private var dragStart: Point2D? = null
     private val waveformColorEffect = ColorAdjust()
 
-    lateinit var imageRegion: Region
+    lateinit var imageRegion: Pane
 
     lateinit var topTrackRegion: Region
     lateinit var bottomTrackRegion: Region
@@ -112,7 +113,7 @@ class WaveformFrame(
 
             alignment = Pos.CENTER
 
-            region {
+            pane {
                 imageRegion = this
                 stackpane {
                     fitToParentHeight()

@@ -137,7 +137,7 @@ class MarkerWaveform : StackPane() {
             onPositionChangedProperty.bind(onPositionChanged)
             onLocationRequestProperty.bind(onLocationRequest)
         }
-        waveformFrame = WaveformFrame(topTrack).apply {
+        waveformFrame = WaveformFrame(null).apply {
             themeProperty.bind(this@MarkerWaveform.themeProperty)
             framePositionProperty.bind(positionProperty)
             uiVersionProperty.set(UIVersion.THREE)
