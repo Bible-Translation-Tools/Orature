@@ -112,16 +112,16 @@ subprojects {
 
     java {
         toolchain {
-            languageVersion = JavaLanguageVersion.of(11)
+            languageVersion = JavaLanguageVersion.of("$javaVer")
         }
     }
 
     compileKotlin {
-        kotlinOptions.jvmTarget = "11"
+        kotlinOptions.jvmTarget = "$javaVer"
     }
 
     compileTestKotlin {
-        kotlinOptions.jvmTarget = "11"
+        kotlinOptions.jvmTarget = "$javaVer"
     }
 
     gradleLint.rules = ['deprecated-dependency-configuration']

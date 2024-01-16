@@ -50,7 +50,7 @@ sourceSets {
 }
 
 compileIntegrationTestKotlin {
-    kotlinOptions.jvmTarget = "11"
+    kotlinOptions.jvmTarget = "$javaVer"
 }
 
 configurations {
