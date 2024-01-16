@@ -62,7 +62,7 @@ class NarrationHeader : View() {
                 setOnAction {
                     FX.eventbus.fire(NarrationUndoEvent())
                 }
-                enableWhen(viewModel.hasUndoProperty.and(viewModel.chapterTakeBusyProperty.not()))
+                enableWhen(viewModel.hasUndoProperty)
             }
             button {
                 tooltip = tooltip(messages["redoAction"])
@@ -71,7 +71,7 @@ class NarrationHeader : View() {
                 setOnAction {
                     FX.eventbus.fire(NarrationRedoEvent())
                 }
-                enableWhen(viewModel.hasRedoProperty.and(viewModel.chapterTakeBusyProperty.not()))
+                enableWhen(viewModel.hasRedoProperty)
             }
             narrationMenuButton(
                 viewModel.hasChapterTakeProperty,
@@ -104,8 +104,6 @@ class NarrationHeader : View() {
                 setOnNextChapter {
                     viewModel.selectNextChapter()
                 }
-
-                enableWhen(viewModel.chapterTakeBusyProperty.not())
             }
         }
     }
@@ -159,7 +157,7 @@ class NarrationHeaderViewModel : ViewModel() {
         chapterTitleProperty.bind(narrationViewModel.chapterTitleProperty)
         hasNextChapter.bind(narrationViewModel.hasNextChapter)
         hasPreviousChapter.bind(narrationViewModel.hasPreviousChapter)
-        chapterTakeBusyProperty.bind(narrationViewModel.isModifyingTakeAudio)
+        chapterTakeBusyProperty.bind(narrationViewModel.isModifyingTakeAudioProperty)
 
         hasUndoProperty.bind(narrationViewModel.hasUndoProperty)
         hasRedoProperty.bind(narrationViewModel.hasRedoProperty)
