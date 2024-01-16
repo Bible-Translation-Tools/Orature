@@ -50,7 +50,7 @@ sourceSets {
 }
 
 compileIntegrationTestKotlin {
-    kotlinOptions.jvmTarget = "17"
+    kotlinOptions.jvmTarget = "11"
 }
 
 configurations {
