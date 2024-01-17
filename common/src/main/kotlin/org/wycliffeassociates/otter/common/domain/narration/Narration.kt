@@ -80,6 +80,9 @@ class Narration @AssistedInject constructor(
         return chapterRepresentation.versesWithRecordings()
     }
 
+    val allVersesRecorded: Boolean
+        get() = !versesWithRecordings().contains(false)
+
     val onActiveVersesUpdated: PublishSubject<List<AudioMarker>>
         get() = chapterRepresentation.onActiveVersesUpdated
 
@@ -171,7 +174,10 @@ class Narration @AssistedInject constructor(
         seek(getLocationInChapter(), true)
         history.undo(chapterRepresentation.totalVerses)
         chapterRepresentation.onVersesUpdated()
-        modifyAudioData(takeToModify, chapterRepresentation.getAudioFileReader(), activeVerses)
+
+        if (allVersesRecorded) {
+            modifyAudioData(takeToModify, chapterRepresentation.getAudioFileReader(), activeVerses)
+        }
     }
 
     fun redo() {
@@ -179,8 +185,10 @@ class Narration @AssistedInject constructor(
         seek(getLocationInChapter(), true)
         history.redo(chapterRepresentation.totalVerses)
         chapterRepresentation.onVersesUpdated()
-        modifyAudioData(takeToModify, chapterRepresentation.getAudioFileReader(), activeVerses)
 
+        if (allVersesRecorded) {
+            modifyAudioData(takeToModify, chapterRepresentation.getAudioFileReader(), activeVerses)
+        }
     }
 
     fun finalizeVerse(verseIndex: Int) {
