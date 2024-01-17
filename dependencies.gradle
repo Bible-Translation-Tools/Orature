@@ -14,7 +14,8 @@ ext {
 
     // Libraries
     kotlinVer = '1.8.0'
-    javafxVer = '21'
+    javafxVer = '19'
+    javaVer = '11'
     javaGridviewVer = '1.0.0'
     tornadofxVer = '2.1.1-WA-fork'
     rxkotlinVer = '2.4.0'
@@ -54,5 +55,5 @@ ext {
     tarsosDspVer = '2.4.1'
     mp3TagVer = '0.9.3'
     tikaVer = '2.0.0'
-    materialFxVer = '11.17.0'
+    materialFxVer = '11.16.0' // higher versions require JavaFX 21
 }
