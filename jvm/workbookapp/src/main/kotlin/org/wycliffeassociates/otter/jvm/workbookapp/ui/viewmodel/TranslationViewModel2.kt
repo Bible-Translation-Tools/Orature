@@ -174,23 +174,24 @@ class TranslationViewModel2 : ViewModel() {
             .chunks
             .observeOnFx()
             .subscribe { list ->
+                val chunkList = list.filter { it.sort > 0 }
                 when {
-                    list.isEmpty() -> {
+                    chunkList.isEmpty() -> {
                         reachableStepProperty.set(ChunkingStep.CHUNKING)
                     }
-                    list.all { it.checkingStatus() == CheckingStatus.VERSE } -> {
+                    chunkList.all { it.checkingStatus() == CheckingStatus.VERSE } -> {
                         reachableStepProperty.set(ChunkingStep.FINAL_REVIEW)
                     }
-                    list.all { it.checkingStatus().ordinal >= CheckingStatus.KEYWORD.ordinal } -> {
+                    chunkList.all { it.checkingStatus().ordinal >= CheckingStatus.KEYWORD.ordinal } -> {
                         reachableStepProperty.set(ChunkingStep.VERSE_CHECK)
                     }
-                    list.all { it.checkingStatus().ordinal >= CheckingStatus.PEER_EDIT.ordinal } -> {
+                    chunkList.all { it.checkingStatus().ordinal >= CheckingStatus.PEER_EDIT.ordinal } -> {
                         reachableStepProperty.set(ChunkingStep.KEYWORD_CHECK)
                     }
-                    list.all { it.hasSelectedAudio() } -> {
+                    chunkList.all { it.hasSelectedAudio() } -> {
                         reachableStepProperty.set(ChunkingStep.PEER_EDIT)
                     }
-                    list.isNotEmpty() -> {
+                    chunkList.isNotEmpty() -> {
                         reachableStepProperty.set(ChunkingStep.BLIND_DRAFT)
                     }
                 }
@@ -266,6 +267,7 @@ class TranslationViewModel2 : ViewModel() {
         val chapterHasChunks = chapter
             .chunks
             .take(1)
+            .map { chunks -> chunks.filter { it.sort > 0 } }
             .blockingFirst()
             .isNotEmpty()
 

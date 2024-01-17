@@ -131,7 +131,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     fun refreshChunkList() {
         workbookDataStore.activeChapterProperty.value?.let { chapter ->
             chapter.chunks.value?.let { chunks ->
-                translationViewModel.loadChunks(chunks)
+                translationViewModel.loadChunks(chunks.filter { it.sort > 0 })
             }
         }
     }
@@ -222,6 +222,9 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     private fun subscribeToChunks() {
         workbookDataStore.chapter
             .chunks
+            .map { contents ->
+                contents.filter { it.sort > 0 } // omit titles
+            }
             .observeOnFx()
             .subscribe { chunks ->
                 translationViewModel.loadChunks(chunks)
