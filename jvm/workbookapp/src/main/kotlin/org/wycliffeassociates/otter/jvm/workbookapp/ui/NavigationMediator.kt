@@ -28,6 +28,7 @@ import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadcrumbBar
 import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
+import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestBlockedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
@@ -43,6 +44,7 @@ class NavigationMediator : Component(), ScopedInstance {
     val breadCrumbsBar = BreadcrumbBar()
     private val pluginOpenedProperty = SimpleBooleanProperty(false)
     private val returningView = SimpleObjectProperty<View>(null)
+    val blockNavigationEvents = SimpleBooleanProperty(false)
     private var appExitRequested = false
 
     private val recorderBreadCrumb = BreadCrumb().apply {
@@ -94,11 +96,16 @@ class NavigationMediator : Component(), ScopedInstance {
             pluginOpenedProperty.set(false)
         }
         subscribe<NavigationRequestEvent> {
-            if (pluginOpenedProperty.value) {
-                returningView.set(it.view)
-                fire(PluginCloseRequestEvent)
+
+            if (blockNavigationEvents.value) {
+                fire(NavigationRequestBlockedEvent(it))
             } else {
-                dock(it.view)
+                if (pluginOpenedProperty.value) {
+                    returningView.set(it.view)
+                    fire(PluginCloseRequestEvent)
+                } else {
+                    dock(it.view)
+                }
             }
         }
         subscribe<PluginCloseFinishedEvent> {
