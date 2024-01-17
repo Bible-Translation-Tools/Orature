@@ -183,7 +183,7 @@ private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<O
                 start = startVerse,
                 end = endVerse,
                 selectedTake = null,
-                text = null,
+                text = book.headerText,
                 format = FORMAT,
                 type = ContentType.TITLE,
                 draftNumber = 1
