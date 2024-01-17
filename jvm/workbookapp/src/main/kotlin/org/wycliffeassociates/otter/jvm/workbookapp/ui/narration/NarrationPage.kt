@@ -7,22 +7,11 @@ import javafx.util.Duration
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
-import org.wycliffeassociates.otter.jvm.controls.event.BeginRecordingEvent
-import org.wycliffeassociates.otter.jvm.controls.event.ChapterReturnFromPluginEvent
-import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
-import org.wycliffeassociates.otter.jvm.controls.event.OpenChapterEvent
-import org.wycliffeassociates.otter.jvm.controls.event.OpenInAudioPluginEvent
-import org.wycliffeassociates.otter.jvm.controls.event.PauseEvent
-import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordAgainEvent
-import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordingEvent
-import org.wycliffeassociates.otter.jvm.controls.event.PlayChapterEvent
-import org.wycliffeassociates.otter.jvm.controls.event.PlayVerseEvent
-import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
-import org.wycliffeassociates.otter.jvm.controls.event.RecordVerseEvent
-import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingAgainEvent
-import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingEvent
-import org.wycliffeassociates.otter.jvm.controls.event.SaveRecordingEvent
+import org.wycliffeassociates.otter.jvm.controls.dialog.SavingModal
+import org.wycliffeassociates.otter.jvm.controls.event.*
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.NarrationMarkerChangedEvent
@@ -46,6 +35,7 @@ class NarrationPage : View() {
     private val pluginOpenedPage: PluginOpenedPage
 
     private val eventSubscriptions = mutableListOf<EventRegistration>()
+    private val disposableListeners = mutableListOf<ListenerDisposer>()
 
     private lateinit var narrationHeader: NarrationHeader
     private lateinit var audioWorkspaceView: AudioWorkspaceView
@@ -87,11 +77,13 @@ class NarrationPage : View() {
     override fun onDock() {
         super.onDock()
         subscribeToEvents()
+        setUpSavingModal()
         // avoid resetting ViewModel states & action history when coming back from plugin
         when (viewModel.pluginOpenedProperty.value) {
             true -> { // navigate back from plugin
                 viewModel.pluginOpenedProperty.set(false)
             }
+
             false -> { // regular navigation
                 viewModel.onDock()
                 narrationHeader.onDock()
@@ -104,11 +96,13 @@ class NarrationPage : View() {
     override fun onUndock() {
         super.onUndock()
         unsubscribeFromEvents()
+        disposableListeners.forEach { it.dispose() }
         // avoid resetting ViewModel states & action history when opening plugin
         when (viewModel.pluginOpenedProperty.value) {
             true -> {
                 /* no-op, opening plugin */
             }
+
             false -> { // regular navigation
                 viewModel.onUndock()
                 narrationHeader.onUndock()
@@ -232,6 +226,25 @@ class NarrationPage : View() {
                     )
                 )
             }
+    }
+
+    private fun setUpSavingModal() {
+        find<SavingModal>().apply {
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
+
+            viewModel.openSavingModalProperty.onChangeWithDisposer {
+                it?.let {
+                    runLater {
+                        if (it) {
+                            open()
+                        } else {
+                            close()
+                        }
+                    }
+                }
+            }.apply { disposableListeners.add(this) }
+        }
     }
 
     private fun createPluginOpenedPage(): PluginOpenedPage {

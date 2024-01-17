@@ -16,7 +16,6 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
-import net.bytebuddy.build.Plugin.Factory.Simple
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
@@ -40,6 +39,7 @@ import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NarrationTextItemData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.MARKER_AREA_WIDTH
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkerControl
@@ -102,7 +102,11 @@ class NarrationViewModel : ViewModel() {
     val chapterTakeProperty = SimpleObjectProperty<Take>()
     val hasNextChapter = SimpleBooleanProperty()
     val hasPreviousChapter = SimpleBooleanProperty()
-    val isModifyingTakeAudio = SimpleBooleanProperty()
+    val isModifyingTakeAudioProperty = SimpleBooleanProperty()
+    val openSavingModalProperty = SimpleBooleanProperty()
+    val pendingChapterToLoadProperty = SimpleObjectProperty<Chapter>()
+    val blockedNavigationEvent = SimpleObjectProperty<NavigationRequestEvent>()
+    private val navigator: NavigationMediator by inject()
 
     val chunkTotalProperty = SimpleIntegerProperty(0)
     val chunksList: ObservableList<Chunk> = observableListOf()
@@ -115,8 +119,9 @@ class NarrationViewModel : ViewModel() {
 
     //FIXME: Refactor this if and when Chunk entries are officially added for Titles in the Workbook
     var numberOfTitlesProperty = SimpleIntegerProperty(0)
-    val potentiallyFinishedProperty = chunkTotalProperty
+    val recordedAllVerses = chunkTotalProperty
         .eq(recordedVerses.sizeProperty.minus(numberOfTitlesProperty))
+    val potentiallyFinishedProperty = recordedAllVerses
         .and(isRecordingProperty.not())
         .and(isRecordingAgainProperty.not())
         .and(chapterTakeProperty.isNull)
@@ -128,6 +133,7 @@ class NarrationViewModel : ViewModel() {
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
     private val disposables = CompositeDisposable()
+    private val eventSubscriptions = mutableListOf<EventRegistration>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -138,7 +144,14 @@ class NarrationViewModel : ViewModel() {
         subscribe<AppCloseRequestEvent> {
             logger.info("Received close event request")
             onUndock()
-        }
+        }.let { eventSubscriptions.add(it) }
+
+        subscribe<NavigationRequestBlockedEvent> {
+            if (isModifyingTakeAudioProperty.value) {
+                openSavingModalProperty.set(true)
+                blockedNavigationEvent.set(it.navigationRequest)
+            }
+        }.let { eventSubscriptions.add(it) }
 
         narratableList.bind(chunksList) { chunk ->
 
@@ -204,15 +217,16 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun onUndock() {
-        if (isModifyingTakeAudio.value) {
-            // TODO: Possibly show the user a progress bar and message stating that the changes need to be saved
-            //  before navigating to a new chapter
-            logger.error("Undocking NarrationViewModel before chapter take modification is complete")
-        }
         disposables.clear()
         closeNarrationAudio()
         narration.close()
         renderer.close()
+        unsubscribeFromEvents()
+    }
+
+    private fun unsubscribeFromEvents() {
+        eventSubscriptions.forEach { it.unsubscribe() }
+        eventSubscriptions.clear()
     }
 
     private fun initializeNarration(chapter: Chapter) {
@@ -233,6 +247,7 @@ class NarrationViewModel : ViewModel() {
         }
         volumeBar = VolumeBar(narration.getRecorderAudioStream())
         subscribeActiveVersesChanged()
+        subscribeTaskRunnerBusyChanged()
         updateRecordingState()
         rendererAudioReader = narration.audioReader
         rendererAudioReader.open()
@@ -328,10 +343,12 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun loadChapter(chapter: Chapter) {
-        if (isModifyingTakeAudio.value) {
-            // TODO: Possibly show the user a progress bar and message stating that the changes need to be saved
-            //  before navigating to a new chapter
-            logger.error("Trying to navigate chapter before take modification is complete")
+
+        // Prevents loading chapter while modifying chapter take audio
+        if (isModifyingTakeAudioProperty.value) {
+            openSavingModalProperty.set(true)
+            pendingChapterToLoadProperty.set(chapter)
+            return
         }
 
         logger.info("Loading chapter: ${chapter.sort}")
@@ -749,6 +766,36 @@ class NarrationViewModel : ViewModel() {
                 }
             )
             .let(disposables::add)
+    }
+
+    private fun subscribeTaskRunnerBusyChanged() {
+        NarrationTakeModifierTaskRunner.busyStatus
+            .doOnNext {
+                val isIdle = (it == TaskRunnerStatus.IDLE)
+
+                runLater {
+                    isModifyingTakeAudioProperty.set(!isIdle)
+                    navigator.blockNavigationEvents.set(!isIdle)
+
+                    // Indicates that we have opened the saving model to interrupt either a chapter navigation or
+                    // home navigation and that we should re-attempt the interrupted navigation
+                    if (isIdle && openSavingModalProperty.value) {
+                        openSavingModalProperty.set(false)
+
+                        if (pendingChapterToLoadProperty.value != null) {
+                            val chapterToLoad = pendingChapterToLoadProperty.value
+                            pendingChapterToLoadProperty.set(null)
+                            loadChapter(chapterToLoad)
+                        } else if (blockedNavigationEvent.value != null) {
+                            val navigationEventToFire = blockedNavigationEvent.value
+                            blockedNavigationEvent.set(null)
+                            fire(navigationEventToFire)
+                        }
+                    }
+                }
+
+            }
+            .subscribe().let(disposables::add)
     }
 
     fun drawWaveform(
