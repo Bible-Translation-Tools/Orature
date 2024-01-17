@@ -406,7 +406,7 @@ class NarrationViewModel : ViewModel() {
                 chapter.chunks.take(1)
             }
             .flatMap { it }
-            .map { insertTitles(chapter, it) }
+            .map { injectChapterTitleText(chapter, it) }
             .observeOnFx()
             .subscribe(
                 { chunksList.setAll(it) },
@@ -416,17 +416,16 @@ class NarrationViewModel : ViewModel() {
     }
 
     /**
-     * //FIXME remove this if and when titles are added to the database/workbook
-     *
-     * Inserts a Chunk for the Book and Chapter titles since the database and workbook do not have this data
+     * Injects chapter title text since the source may not have it.
      */
-    private fun insertTitles(chapter: Chapter, chunks: List<Chunk>): List<Chunk> {
-        val chunksWithTitles = chunks.toMutableList()
-        val chapterTitle = chapterTitleProperty.value
-        var numberOfTitles = 1
-        chunksWithTitles.add(
-            0,
-            Chunk(
+    private fun injectChapterTitleText(chapter: Chapter, chunks: List<Chunk>): List<Chunk> {
+        val indexOfChapterTitle = chunks.indexOfFirst {
+            it.sort == -1 && it.contentType == ContentType.TITLE && it.textItem.text == ""
+        }
+        if (indexOfChapterTitle >= 0) {
+            val updatedChunks = chunks.toMutableList()
+            val chapterTitle = chapterTitleProperty.value
+            val updatedChapterTitle = Chunk(
                 CHAPTER_TITLE_SORT,
                 chapter.label,
                 AssociatedAudio(ReplayRelay.create()),
@@ -438,29 +437,11 @@ class NarrationViewModel : ViewModel() {
                 1,
                 ContentType.TITLE
             )
-        )
-        val addBookTitle = chapter.sort == 1
-        if (addBookTitle) {
-            val book = workbookDataStore.workbook.source
-            chunksWithTitles.add(
-                0,
-                Chunk(
-                    BOOK_TITLE_SORT,
-                    book.label,
-                    AssociatedAudio(ReplayRelay.create()),
-                    listOf(),
-                    TextItem(book.title, MimeType.USFM),
-                    1,
-                    chunks.size,
-                    false,
-                    1,
-                    ContentType.TITLE
-                )
-            )
-            numberOfTitles = 2
+            updatedChunks[indexOfChapterTitle] = updatedChapterTitle
+            return updatedChunks
+        } else {
+            return chunks
         }
-        numberOfTitlesProperty.set(numberOfTitles)
-        return chunksWithTitles
     }
 
     private fun clearTeleprompter() {
