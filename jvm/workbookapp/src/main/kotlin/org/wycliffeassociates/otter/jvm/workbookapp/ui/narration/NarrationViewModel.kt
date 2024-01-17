@@ -133,7 +133,6 @@ class NarrationViewModel : ViewModel() {
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
     private val disposables = CompositeDisposable()
-    private val eventSubscriptions = mutableListOf<EventRegistration>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -144,14 +143,14 @@ class NarrationViewModel : ViewModel() {
         subscribe<AppCloseRequestEvent> {
             logger.info("Received close event request")
             onUndock()
-        }.let { eventSubscriptions.add(it) }
+        }
 
         subscribe<NavigationRequestBlockedEvent> {
             if (isModifyingTakeAudioProperty.value) {
                 openSavingModalProperty.set(true)
                 blockedNavigationEvent.set(it.navigationRequest)
             }
-        }.let { eventSubscriptions.add(it) }
+        }
 
         narratableList.bind(chunksList) { chunk ->
 
@@ -221,12 +220,6 @@ class NarrationViewModel : ViewModel() {
         closeNarrationAudio()
         narration.close()
         renderer.close()
-        unsubscribeFromEvents()
-    }
-
-    private fun unsubscribeFromEvents() {
-        eventSubscriptions.forEach { it.unsubscribe() }
-        eventSubscriptions.clear()
     }
 
     private fun initializeNarration(chapter: Chapter) {
