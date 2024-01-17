@@ -38,6 +38,7 @@ import org.wycliffeassociates.resourcecontainer.entity.Project
 import org.wycliffeassociates.usfmtools.USFMParser
 import org.wycliffeassociates.usfmtools.models.markers.CMarker
 import org.wycliffeassociates.usfmtools.models.markers.FMarker
+import org.wycliffeassociates.usfmtools.models.markers.HMarker
 import org.wycliffeassociates.usfmtools.models.markers.TextBlock
 import org.wycliffeassociates.usfmtools.models.markers.VMarker
 import org.wycliffeassociates.usfmtools.models.markers.XMarker
@@ -135,6 +136,7 @@ private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<O
     val usfmText = reader.readText()
     val parser = USFMParser(arrayListOf("s5"))
     val doc = parser.parseFromString(usfmText)
+    val book = doc.getChildMarkers(HMarker::class.java).first()
     val chapters = doc.getChildMarkers(CMarker::class.java)
     return chapters.map { chapter ->
         val verses = chapter.getChildMarkers(VMarker::class.java)
@@ -163,6 +165,33 @@ private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<O
             type = ContentType.META,
             draftNumber = 1
         )
+        val chapTitle = Content(
+            sort = -1,
+            labelKey = ContentLabel.CHAPTER.value,
+            start = startVerse,
+            end = endVerse,
+            selectedTake = null,
+            text = null,
+            format = FORMAT,
+            type = ContentType.TITLE,
+            draftNumber = 1
+        )
+        if (chapter.number == 1) {
+            val bookContent = Content(
+                sort = -2,
+                labelKey = "book",
+                start = startVerse,
+                end = endVerse,
+                selectedTake = null,
+                text = null,
+                format = FORMAT,
+                type = ContentType.TITLE,
+                draftNumber = 1
+            )
+            chapterTree.addChild(OtterTreeNode(bookContent))
+        }
+
+        chapterTree.addChild(OtterTreeNode(chapTitle))
         chapterTree.addChild(OtterTreeNode(chapChunk))
 
         verses.sortBy { it.startingVerse }
