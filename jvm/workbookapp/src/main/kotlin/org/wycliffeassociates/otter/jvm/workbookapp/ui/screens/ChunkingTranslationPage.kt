@@ -35,6 +35,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.Consu
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.PeerEdit
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.ChapterReview
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.SourceAudioMissing
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.TranslationHeader
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.translationHeader
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -66,11 +67,13 @@ class ChunkingTranslationPage : View() {
     }
 
     private lateinit var sourceTextDrawer: SourceTextDrawer
+    private lateinit var header: TranslationHeader
 
     override val root = vbox {
         vgrow = Priority.ALWAYS
 
         translationHeader {
+            header = this
             titleProperty.bind(viewModel.bookTitleProperty)
             chapterTitleProperty.bind(workbookDataStore.activeChapterTitleBinding())
             canUndoProperty.bind(viewModel.canUndoProperty)
@@ -138,6 +141,7 @@ class ChunkingTranslationPage : View() {
             viewModel.previousChapter()
         }
         subscribe<NavigateChapterEvent> {
+            header.dismissChapterSelector()
             viewModel.navigateChapter(it.chapterNumber)
         }
     }
