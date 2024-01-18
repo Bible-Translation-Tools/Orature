@@ -89,19 +89,19 @@
 }
 
 .wa-table-view .progress-bar .track {
-    -fx-background-color: -wa-progress-track-background;
+    -fx-fill: -wa-progress-track-background;
     -fx-background-insets: 0;
     -fx-background-radius: 5px;
+    -fx-arc-width: 5;
+    -fx-arc-height: 5;
 }
 
-.wa-table-view .progress-bar .bar {
-    -fx-background-color: -wa-progress-foreground;
-    -fx-background-insets: 0;
-    -fx-background-radius: 8px 0 0 8px;
-}
-
-.wa-table-view .progress-bar.full .bar {
-    -fx-background-radius: 8px;
+.wa-table-view .progress-bar .bar1,
+.wa-table-view .progress-bar .bar2 {
+    -fx-background-radius: 6px;
+    -fx-arc-height: 6;
+    -fx-arc-width: 6;
+    -fx-fill: -wa-primary;
 }
 
 .wa-table-view .ikonli-font-icon {
