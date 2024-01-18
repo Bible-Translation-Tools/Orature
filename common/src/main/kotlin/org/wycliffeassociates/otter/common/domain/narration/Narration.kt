@@ -259,6 +259,7 @@ class Narration @AssistedInject constructor(
     private fun onChapterEdited(newVerses: List<VerseNode>) {
         val action = ChapterEditedAction(newVerses)
         execute(action)
+        modifyAudioData(takeToModify, chapterRepresentation.getAudioFileReader(), activeVerses)
     }
 
     fun pauseRecording() {
