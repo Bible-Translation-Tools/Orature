@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview
 
+import io.github.palexdev.materialfx.controls.MFXProgressBar
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -94,8 +95,7 @@ class WorkBookTableView(
             setCellValueFactory { it.value.progress.toProperty() }
             cellFormat {
                 val percent = item.toDouble()
-                graphic = progressbar(percent) {
-                    if (percent == 1.0) addClass("full")
+                graphic = MFXProgressBar(percent).apply {
                     fitToParentWidth()
                 }
             }

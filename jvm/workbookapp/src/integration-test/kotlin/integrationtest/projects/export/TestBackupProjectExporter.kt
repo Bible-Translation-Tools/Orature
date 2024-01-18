@@ -40,7 +40,9 @@ import org.wycliffeassociates.otter.common.data.Chunkification
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.domain.project.InProgressNarrationFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
+import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
+import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
@@ -320,13 +322,16 @@ class TestBackupProjectExporter {
             .setUpEmptyProjectBuilder()
             .setOngoingProject(true)
             .setContributors(contributors)
+            .setProjectMode(ProjectMode.TRANSLATION)
             .addTake(1, ContentType.META, 1, true)
             .addTake(2, ContentType.META, 1, true)
             .addTake(3, ContentType.META, 1, true)
             .addTake(1, ContentType.TEXT, 1, true, chapter = 1, start = 1, end = 1)
             .addTake(2, ContentType.TEXT, 1, true, chapter = 2, start = 1, end = 1)
-            // set checking status to be imported
             .addTake(3, ContentType.TEXT, 1, true, chapter = 3, start = 1, end = 1, checking = verseChecking)
+            .addChunk(Content( sort = 1, labelKey = "chunk", start = 1, end = 1, selectedTake = null, text = "", format = "usfm", type = ContentType.TEXT, draftNumber = 2 ), 1)
+            .addChunk(Content( sort = 2, labelKey = "chunk", start = 1, end = 1, selectedTake = null, text = "", format = "usfm", type = ContentType.TEXT, draftNumber = 2 ), 2)
+            .addChunk(Content( sort = 3, labelKey = "chunk", start = 1, end = 1, selectedTake = null, text = "", format = "usfm", type = ContentType.TEXT, draftNumber = 2 ), 3)
             .buildFile()
     }
 
@@ -334,6 +339,7 @@ class TestBackupProjectExporter {
         return ResourceContainerBuilder
             .setUpEmptyProjectBuilder()
             .setOngoingProject(true)
+            .setProjectMode(ProjectMode.NARRATION)
             .setContributors(contributors)
             .addInProgressNarration(narrationChapter)
             .buildFile()

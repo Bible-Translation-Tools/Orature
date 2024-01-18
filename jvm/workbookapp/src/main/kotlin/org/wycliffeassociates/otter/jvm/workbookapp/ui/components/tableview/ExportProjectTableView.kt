@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview
 
+import io.github.palexdev.materialfx.controls.MFXProgressBar
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import javafx.collections.ObservableSet
@@ -89,8 +90,7 @@ class ExportProjectTableView(
             setCellValueFactory { it.value.progress.toProperty() }
             cellFormat {
                 val percent = item.toDouble()
-                graphic = progressbar(percent) {
-                    toggleClass("full", percent == 1.0)
+                graphic = MFXProgressBar(percent).apply {
                     fitToParentWidth()
                 }
             }

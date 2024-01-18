@@ -44,6 +44,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.primitives.SerializableProjectMode
 import org.wycliffeassociates.otter.common.data.primitives.Take
+import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.takeFilenamePattern
@@ -64,6 +65,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRep
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
+import org.wycliffeassociates.otter.common.utils.computeFileChecksum
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Manifest
 import org.wycliffeassociates.resourcecontainer.entity.Project
@@ -91,6 +93,7 @@ class OngoingProjectImporter @Inject constructor(
     private val contentCache = mutableMapOf<ContentSignature, Content>()
     private var projectName = ""
     private var takesInChapterFilter: Map<String, Int>? = null
+    private var completedChapters: List<Int>? = null
     private var takesCheckingMap: TakeCheckingStatusMap = mapOf()
     private var projectAppVersion = ProjectAppVersion.THREE
 
@@ -105,6 +108,7 @@ class OngoingProjectImporter @Inject constructor(
         }
         projectName = ""
         takesInChapterFilter = null
+        completedChapters = null
         contentCache.clear()
 
         return Single
@@ -113,12 +117,18 @@ class OngoingProjectImporter @Inject constructor(
                 logger.error("Error while checking whether project already exists.", it)
             }
             .flatMap { exists ->
+                val takesByChapterInProject = fetchTakesInRC(file)
+
                 if (exists && callback != null) {
-                    val filterProvided = updateTakesImportFilter(file, callback)
-                    if (!filterProvided) {
-                        return@flatMap Single.just(ImportResult.ABORTED)
-                    }
+                    val availableChapters = takesByChapterInProject.values.distinct().sorted()
+                    val selectedChapters = getUserSelectedChapter(availableChapters, callback)
+                        ?: return@flatMap Single.just(ImportResult.ABORTED)
+
+                    takesInChapterFilter = takesByChapterInProject.filterValues { it in selectedChapters }
+                } else {
+                    takesInChapterFilter = takesByChapterInProject // accept all takes
                 }
+
                 importResumableProject(file, callback)
             }
             .subscribeOn(Schedulers.io())
@@ -160,18 +170,12 @@ class OngoingProjectImporter @Inject constructor(
         }
     }
 
-    private fun updateTakesImportFilter(
-        file: File,
+    private fun getUserSelectedChapter(
+        availableChapters: List<Int>,
         callback: ProjectImporterCallback
-    ): Boolean {
-        val takesChapterMap = fetchTakesInRC(file)
-        val chapterList = takesChapterMap.values.distinct().sorted()
-        val callbackParam = ImportCallbackParameter(chapterList, projectName)
-        val chaptersToImport = callback.onRequestUserInput(callbackParam).blockingGet().chapters
-            ?: return false
-
-        takesInChapterFilter = takesChapterMap.filter { entry -> entry.value in chaptersToImport }
-        return true
+    ): List<Int>? {
+        val callbackParam = ImportCallbackParameter(availableChapters, projectName)
+        return callback.onRequestUserInput(callbackParam).blockingGet().chapters
     }
 
     private fun fetchTakesInRC(file: File): Map<String, Int> {
@@ -301,10 +305,20 @@ class OngoingProjectImporter @Inject constructor(
         projectFilesAccessor.initializeResourceContainerInDir()
         projectFilesAccessor.setProjectMode(mode)
 
-        callback?.onNotifyProgress(localizeKey = "copyingSource", percent = 50.0)
+        callback?.onNotifyProgress(localizeKey = "copyingSource", percent = 40.0)
         projectFilesAccessor.copySourceFiles(fileReader)
 
         if (projectAppVersion == ProjectAppVersion.ONE) {
+            callback?.onNotifyProgress(localizeKey = "loading_content", percent = 60.0)
+            completedChapters = takesInChapterFilter
+                ?.filterKeys { takePath ->
+                    parseNumbers(takePath)?.contentSignature?.let { sig ->
+                        sig.verse == null // filter only chapter take
+                    } ?: false
+                }
+                ?.values
+                ?.toList()
+
             deriveChapterContentFromVerses(derivedProject, projectFilesAccessor)
         }
         importContributorInfo(metadata, projectFilesAccessor)
@@ -336,7 +350,7 @@ class OngoingProjectImporter @Inject constructor(
         languageRepository.updateTranslation(translation).subscribe()
         resetChaptersWithoutTakes(fileReader, derivedProject, mode)
 
-        callback?.onNotifyProgress(localizeKey = "finishingUp", percent = 100.0)
+        callback?.onNotifyProgress(localizeKey = "finishingUp", percent = 99.0)
 
         return derivedProject
     }
@@ -562,7 +576,16 @@ class OngoingProjectImporter @Inject constructor(
                 val now = LocalDate.now()
                 val file = File(filepath).canonicalFile
                 val relativeFile = file.relativeTo(projectAudioDir.canonicalFile)
-                val checkingStatus = takesCheckingMap[relativeFile.name]
+
+                val checkingStatus = when {
+                    projectAppVersion.ordinal >= ProjectAppVersion.THREE.ordinal -> takesCheckingMap[relativeFile.name]
+
+                    completedChapters?.contains(sig.chapter) == true -> {
+                        TakeCheckingState(CheckingStatus.VERSE, computeFileChecksum(file))
+                    }
+
+                    else -> null
+                }
 
                 val take = Take(
                     file.name,
@@ -575,7 +598,8 @@ class OngoingProjectImporter @Inject constructor(
                     checkingStatus?.checksum,
                     listOf()
                 )
-                take.id = takeRepository.insertForContent(take, chunk).blockingGet()
+                val insertedId = takeRepository.insertForContent(take, chunk).blockingGet()
+                take.id = insertedId
 
                 if (relativeFile.invariantSeparatorsPath in selectedTakes) {
                     chunk.selectedTake = take
