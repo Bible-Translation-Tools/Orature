@@ -49,10 +49,11 @@ class TestRcImport {
                 RowCount(
                     contents = mapOf(
                         TEXT to 31104,
-                        META to 1189
+                        META to 1189,
+                        TITLE to 1255
                     ),
                     collections = 1256,
-                    links = 0
+                    links = 1255
                 )
             )
     }
@@ -71,10 +72,11 @@ class TestRcImport {
                 RowCount(
                     contents = mapOf(
                         TEXT to 31104,
-                        META to 1189
+                        META to 1189,
+                        TITLE to 1255
                     ),
                     collections = 1256,
-                    links = 0
+                    links = 1255
                 )
             )
     }
@@ -90,11 +92,11 @@ class TestRcImport {
                     contents = mapOf(
                         META to 1189,
                         TEXT to 31104,
-                        TITLE to 80148,
+                        TITLE to 81403,
                         BODY to 77433
                     ),
                     collections = 1256,
-                    links = 157581
+                    links = 158836
                 )
             )
             .import("en_tq-v19-10.zip")
@@ -104,11 +106,11 @@ class TestRcImport {
                     contents = mapOf(
                         META to 1189,
                         TEXT to 31104,
-                        TITLE to 98520,
+                        TITLE to 99775,
                         BODY to 95805
                     ),
                     collections = 1256,
-                    links = 194325
+                    links = 195580
                 )
             )
     }

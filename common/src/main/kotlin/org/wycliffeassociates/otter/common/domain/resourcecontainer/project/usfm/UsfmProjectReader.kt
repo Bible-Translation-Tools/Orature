@@ -136,7 +136,7 @@ private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<O
     val usfmText = reader.readText()
     val parser = USFMParser(arrayListOf("s5"))
     val doc = parser.parseFromString(usfmText)
-    val book = doc.getChildMarkers(HMarker::class.java).first()
+    val book = doc.getChildMarkers(HMarker::class.java).firstOrNull()
     val chapters = doc.getChildMarkers(CMarker::class.java)
     return chapters.map { chapter ->
         val verses = chapter.getChildMarkers(VMarker::class.java)
@@ -183,7 +183,7 @@ private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<O
                 start = startVerse,
                 end = endVerse,
                 selectedTake = null,
-                text = book.headerText,
+                text = book?.headerText,
                 format = FORMAT,
                 type = ContentType.TITLE,
                 draftNumber = 1
