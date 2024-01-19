@@ -26,6 +26,8 @@ import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.wycliffeassociates.otter.common.data.audio.BookMarker
+import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
@@ -133,7 +135,7 @@ class ChapterRepresentationTest {
     }
 
     private fun initializeTitlesWithSectors(verseNodeList: MutableList<VerseNode>, paddingLength: Int = 0) {
-        val titles = getTitleMarkers(verseNodeList)
+        val titles = getOrInsertTitleMarkers(verseNodeList)
 
         var start = verseNodeList.lastOrNull()?.lastFrame()?.let { it + 1 } ?: 0
         titles.forEach {
@@ -143,10 +145,24 @@ class ChapterRepresentationTest {
         }
     }
 
-    private fun getTitleMarkers(verseNodeList: MutableList<VerseNode>): List<VerseNode> {
+    private fun getOrInsertTitleMarkers(verseNodeList: MutableList<VerseNode>): List<VerseNode> {
         val regex = """orature-vm-\d+""".toRegex()
         return verseNodeList.filter {
             !regex.containsMatchIn(it.marker.formattedLabel)
+        }.let { titles ->
+            titles.ifEmpty {
+                val bookMarker = BookMarker(workbookWithAudio.source.slug, 0)
+                val bookNode = VerseNode(true, bookMarker)
+                bookNode.sectors.add(0 .. framesPerVerse)
+
+                val chapterMarker = ChapterMarker(1, 0)
+                val chapterNode = VerseNode(true, chapterMarker)
+                chapterNode.sectors.add(framesPerVerse + 1 .. framesPerVerse * 2)
+
+                verseNodeList.add(0, bookNode)
+                verseNodeList.add(1, chapterNode)
+                listOf(bookNode, chapterNode)
+            }
         }
     }
 
@@ -248,7 +264,7 @@ class ChapterRepresentationTest {
 
         val verses = chapterRepresentation.versesWithRecordings()
 
-        val titles = getTitleMarkers(chapterRepresentation.totalVerses)
+        val titles = getOrInsertTitleMarkers(chapterRepresentation.totalVerses)
 
         // Verify that only title markers have recordings
         chapterRepresentation.totalVerses.forEachIndexed { idx, verseNode ->
@@ -280,7 +296,7 @@ class ChapterRepresentationTest {
         val verses = chapterRepresentation.versesWithRecordings()
 
         // Verify that we have numTestVerses - versesToRemove verses recorded
-        val numTitles = getTitleMarkers(chapterRepresentation.totalVerses).size
+        val numTitles = getOrInsertTitleMarkers(chapterRepresentation.totalVerses).size
         val (recorded, notRecorded) = verses.partition { it }
         Assert.assertEquals(recorded.size, numTestVerses - numVersesToRemove + numTitles)
         Assert.assertEquals(notRecorded.size, numVersesToRemove)
@@ -303,7 +319,7 @@ class ChapterRepresentationTest {
         }
 
         val verses = chapterRepresentation.versesWithRecordings()
-        val numTitles = getTitleMarkers(chapterRepresentation.totalVerses).size
+        val numTitles = getOrInsertTitleMarkers(chapterRepresentation.totalVerses).size
         val (recorded, notRecorded) = verses.partition { it }
         Assert.assertEquals(recorded.size, numTestVerses - numVersesToRemove + numTitles)
         Assert.assertEquals(notRecorded.size, numVersesToRemove)
@@ -1035,8 +1051,3 @@ class ChapterRepresentationTest {
         Assert.assertTrue(responseBuffer > testAudioDataBuffer)
     }
 }
-
-
-
-
-
