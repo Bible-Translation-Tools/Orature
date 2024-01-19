@@ -135,7 +135,7 @@ class ChapterRepresentationTest {
     private fun initializeTitlesWithSectors(verseNodeList: MutableList<VerseNode>, paddingLength: Int = 0) {
         val titles = getTitleMarkers(verseNodeList)
 
-        var start = verseNodeList.last().lastFrame() + 1
+        var start = verseNodeList.lastOrNull()?.lastFrame()?.let { it + 1 } ?: 0
         titles.forEach {
             it.sectors.add(start..(start + framesPerVerse))
             start += framesPerVerse + 1
