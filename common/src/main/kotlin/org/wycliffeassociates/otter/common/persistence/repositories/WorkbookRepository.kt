@@ -395,9 +395,13 @@ class WorkbookRepository(
         return take.checkingState
             .concatMapCompletable {
                 val takeToUpdate = modelTake.copy(checkingStatus = it.status, checksum = it.checksum)
-                content.selectedTake = takeToUpdate
-                db.updateTake(takeToUpdate)
-                    .andThen(db.updateContent(content))
+                if (content.selectedTake?.path == takeToUpdate.path) {
+                    content.selectedTake = takeToUpdate
+                    db.updateTake(takeToUpdate)
+                        .andThen(db.updateContent(content))  // update checking status of selected take
+                } else {
+                    db.updateTake(takeToUpdate)
+                }
             }
             .subscribeOn(Schedulers.io())
             .doOnError { e -> logger.error("Error in Take's Checking Status subscription: $take", e) }
