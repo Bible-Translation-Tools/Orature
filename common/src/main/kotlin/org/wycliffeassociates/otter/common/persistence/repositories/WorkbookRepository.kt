@@ -387,12 +387,17 @@ class WorkbookRepository(
             }
     }
 
-    private fun subscribeToCheckingStatus(take: WorkbookTake, modelTake: ModelTake): Disposable {
+    private fun subscribeToCheckingStatus(
+        take: WorkbookTake,
+        modelTake: ModelTake,
+        content: Content
+    ): Disposable {
         return take.checkingState
-            .flatMapCompletable {
-                db.updateTake(
-                    modelTake.copy(checkingStatus =  it.status, checksum = it.checksum)
-                )
+            .concatMapCompletable {
+                val takeToUpdate = modelTake.copy(checkingStatus = it.status, checksum = it.checksum)
+                content.selectedTake = takeToUpdate
+                db.updateTake(takeToUpdate)
+                    .andThen(db.updateContent(content))
             }
             .subscribeOn(Schedulers.io())
             .doOnError { e -> logger.error("Error in Take's Checking Status subscription: $take", e) }
@@ -535,7 +540,7 @@ class WorkbookRepository(
             .doOnNext { (wbTake, modelTake) ->
                 if (content.type == ContentType.TEXT) {
                     wbTake?.let {
-                        subscribeToCheckingStatus(it, modelTake) // subscribe to takes from db
+                        subscribeToCheckingStatus(it, modelTake, content) // subscribe to takes from db
                     }
                 }
                 takeMap[wbTake] = modelTake
@@ -575,7 +580,7 @@ class WorkbookRepository(
                         selectedTakeRelay.accept(TakeHolder(wbTake))
 
                         if (content.type == ContentType.TEXT) {
-                            subscribeToCheckingStatus(wbTake, modelTake) // subscribe to takes from UI
+                            subscribeToCheckingStatus(wbTake, modelTake, content) // subscribe to takes from UI
                         }
                     }
             }
