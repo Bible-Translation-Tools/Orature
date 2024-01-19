@@ -30,6 +30,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
+import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -131,7 +132,9 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     fun refreshChunkList() {
         workbookDataStore.activeChapterProperty.value?.let { chapter ->
             chapter.chunks.value?.let { chunks ->
-                translationViewModel.loadChunks(chunks.filter { it.sort > 0 })
+                translationViewModel.loadChunks(
+                    chunks.filter { it.contentType == ContentType.TEXT }
+                )
             }
         }
     }
@@ -223,7 +226,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         workbookDataStore.chapter
             .chunks
             .map { contents ->
-                contents.filter { it.sort > 0 } // omit titles
+                contents.filter { it.contentType == ContentType.TEXT } // omit titles
             }
             .observeOnFx()
             .subscribe { chunks ->

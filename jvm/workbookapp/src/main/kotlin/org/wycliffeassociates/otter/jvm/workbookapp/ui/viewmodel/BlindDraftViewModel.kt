@@ -28,6 +28,7 @@ import javafx.collections.transformation.FilteredList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
+import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Take
@@ -209,7 +210,7 @@ class BlindDraftViewModel : ViewModel() {
             .chunks
             .observeOnFx()
             .map { contents ->
-                contents.filter { it.sort > 0 } // omit titles
+                contents.filter { it.contentType == ContentType.TEXT } // omit titles
             }
             .subscribe { chunks ->
                 translationViewModel.loadChunks(chunks)
@@ -246,7 +247,9 @@ class BlindDraftViewModel : ViewModel() {
     private fun refreshChunkList() {
         workbookDataStore.activeChapterProperty.value?.let { chapter ->
             chapter.chunks.value?.let { chunks ->
-                translationViewModel.loadChunks(chunks.filter { it.sort > 0 })
+                translationViewModel.loadChunks(
+                    chunks.filter { it.contentType == ContentType.TEXT }
+                )
             }
         }
     }

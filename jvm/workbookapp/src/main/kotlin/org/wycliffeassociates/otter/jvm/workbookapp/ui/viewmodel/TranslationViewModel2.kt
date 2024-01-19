@@ -30,6 +30,7 @@ import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
+import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
@@ -174,7 +175,7 @@ class TranslationViewModel2 : ViewModel() {
             .chunks
             .observeOnFx()
             .subscribe { list ->
-                val chunkList = list.filter { it.sort > 0 }
+                val chunkList = list.filter { it.contentType == ContentType.TEXT }
                 when {
                     chunkList.isEmpty() -> {
                         reachableStepProperty.set(ChunkingStep.CHUNKING)
@@ -267,7 +268,7 @@ class TranslationViewModel2 : ViewModel() {
         val chapterHasChunks = chapter
             .chunks
             .take(1)
-            .map { chunks -> chunks.filter { it.sort > 0 } }
+            .map { chunks -> chunks.filter { it.contentType == ContentType.TEXT } }
             .blockingFirst()
             .isNotEmpty()
 
