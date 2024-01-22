@@ -122,7 +122,7 @@ class NarrationViewModel : ViewModel() {
     val hasPreviousChapter = SimpleBooleanProperty()
     val isModifyingTakeAudioProperty = SimpleBooleanProperty()
     val openSavingModalProperty = SimpleBooleanProperty()
-    val pendingChapterToLoadProperty = SimpleObjectProperty<Chapter>()
+    val pendingChapterToLoadProperty = SimpleObjectProperty<Int>()
     val blockedNavigationEvent = SimpleObjectProperty<NavigationRequestEvent>()
     private val navigator: NavigationMediator by inject()
 
@@ -352,6 +352,14 @@ class NarrationViewModel : ViewModel() {
      * @param chapterNumber the chapter to move to
      */
     fun navigateChapter(chapterNumber: Int) {
+
+        // Prevents navigating to chapter while modifying chapter take audio
+        if (isModifyingTakeAudioProperty.value) {
+            openSavingModalProperty.set(true)
+            pendingChapterToLoadProperty.set(chapterNumber)
+            return
+        }
+
         if (::narration.isInitialized) {
             closeNarrationAudio()
             narration.close()
@@ -369,13 +377,6 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun loadChapter(chapter: Chapter) {
-
-        // Prevents loading chapter while modifying chapter take audio
-        if (isModifyingTakeAudioProperty.value) {
-            openSavingModalProperty.set(true)
-            pendingChapterToLoadProperty.set(chapter)
-            return
-        }
 
         logger.info("Loading chapter: ${chapter.sort}")
         resetState()
@@ -815,7 +816,7 @@ class NarrationViewModel : ViewModel() {
                         if (pendingChapterToLoadProperty.value != null) {
                             val chapterToLoad = pendingChapterToLoadProperty.value
                             pendingChapterToLoadProperty.set(null)
-                            loadChapter(chapterToLoad)
+                            navigateChapter(chapterToLoad)
                         } else if (blockedNavigationEvent.value != null) {
                             val navigationEventToFire = blockedNavigationEvent.value
                             blockedNavigationEvent.set(null)
