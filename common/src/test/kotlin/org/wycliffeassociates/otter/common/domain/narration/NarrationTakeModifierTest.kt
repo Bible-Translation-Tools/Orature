@@ -171,7 +171,6 @@ class NarrationTakeModifierTest {
     // Test that Wav file metadata is updated properly when keeping the same markers, but changing their location
     @Test
     fun testMoveMarkers() {
-        val takeModifier = NarrationTakeAudioModifier(chapterTake)
         val secondsOfAudio = 10
 
         val originalAudioMarkers = makeAudioMarkers(1, 5)
@@ -195,11 +194,11 @@ class NarrationTakeModifierTest {
         val newAudioMarkers = moveAllAudioMarkers(originalAudioMarkers, 400)
 
 
-        var hasStartedModifying = false
-        takeModifier.isBusy
+        var oldBusyStatus: TaskRunnerStatus? = null
+        NarrationTakeModifierTaskRunner.busyStatus
             .subscribe {
                 // Begins check after the takeModifier has been busy
-                if (hasStartedModifying && !it) {
+                if (oldBusyStatus == TaskRunnerStatus.UPDATING_MARKERS && it == TaskRunnerStatus.IDLE) {
                     // Verify that we have the expected amount of cues / Markers in the Wav file
                     oaf = OratureAudioFile(chapterTake.file)
                     Assert.assertEquals(newAudioMarkers.size, oaf.getCues().size)
@@ -209,16 +208,15 @@ class NarrationTakeModifierTest {
                         Assert.assertTrue(newAudioMarkers.map { it.toCue() }.contains(cue))
                     }
                 }
-                hasStartedModifying = it
+                oldBusyStatus = it
             }
 
-        takeModifier.modifyMetadata(newAudioMarkers)
+        NarrationTakeModifierTaskRunner.updateMarkers(chapterTake.file, newAudioMarkers)
     }
 
     // Test that Wav file metadata is updated properly when using a different amount of markers with different locations
     @Test
     fun testMoveThenDeleteMarkers() {
-        val takeModifier = NarrationTakeAudioModifier(chapterTake)
         val secondsOfAudio = 10
 
         val originalAudioMarkers = makeAudioMarkers(1, 5)
@@ -244,11 +242,11 @@ class NarrationTakeModifierTest {
         val newAudioMarkers = moveAllAudioMarkers(originalAudioMarkers, 100).subList(0, markersToKeep)
 
 
-        var hasStartedModifying = false
-        takeModifier.isBusy
+        var oldBusyStatus: TaskRunnerStatus? = null
+        NarrationTakeModifierTaskRunner.busyStatus
             .subscribe {
                 // Begins check after the takeModifier has been busy
-                if (hasStartedModifying && !it) {
+                if (oldBusyStatus == TaskRunnerStatus.UPDATING_MARKERS && it == TaskRunnerStatus.IDLE) {
                     oaf = OratureAudioFile(chapterTake.file)
                     // Verify that we have the expected amount of cues / Markers in the Wav file
                     Assert.assertEquals(markersToKeep, oaf.getCues().size)
@@ -258,10 +256,10 @@ class NarrationTakeModifierTest {
                         Assert.assertTrue(newAudioMarkers.map { it.toCue() }.contains(cue))
                     }
                 }
-                hasStartedModifying = it
+                oldBusyStatus = it
             }
 
 
-        takeModifier.modifyMetadata(newAudioMarkers)
+        NarrationTakeModifierTaskRunner.updateMarkers(chapterTake.file, newAudioMarkers)
     }
 }
