@@ -123,7 +123,7 @@
 }
 
 .narration-list__verse-item-text:highlighted {
-    -fx-text-fill: -wa-primary;
+    -fx-text-fill: -wa-highlight-text;
 }
 
 .narration-list__buttons {
