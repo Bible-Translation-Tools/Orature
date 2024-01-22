@@ -54,6 +54,7 @@ class NarrationTextItem : VBox() {
     val isRecording by isRecordingProperty
 
     val playingVerseIndexProperty = SimpleIntegerProperty()
+    val highlightedIndexProperty = SimpleIntegerProperty()
 
     val isRecordingAgainProperty = SimpleBooleanProperty()
     val isRecordingAgain by isRecordingAgainProperty
@@ -116,10 +117,16 @@ class NarrationTextItem : VBox() {
                 label(verseLabelProperty) {
                     minWidth = Region.USE_PREF_SIZE
                     addClass("narration-list__verse-item-text", "narration-list__verse-item-text__title")
+                    highlightedIndexProperty.onChangeAndDoNow {
+                        togglePseudoClass("highlighted", it == indexProperty.value)
+                    }
                     translateY += 2.0
                 }
                 label(verseTextProperty) {
                     addClass("narration-list__verse-item-text")
+                    highlightedIndexProperty.onChangeAndDoNow {
+                        togglePseudoClass("highlighted", it == indexProperty.value)
+                    }
                     isWrapText = true
                 }
             }

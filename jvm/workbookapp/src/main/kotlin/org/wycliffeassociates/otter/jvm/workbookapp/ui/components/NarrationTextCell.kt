@@ -53,7 +53,8 @@ class NarrationTextCell(
     private val isRecordingAgainProperty: ObservableValue<Boolean>,
     private val isPlayingProperty: ObservableValue<Boolean>,
     private val recordingIndexProperty: IntegerProperty,
-    private val playingVerseProperty: IntegerProperty
+    private val playingVerseProperty: IntegerProperty,
+    private val highlightedVerseProperty: IntegerProperty
 ) : ListCell<NarrationTextItemData>() {
 
     private val logger = LoggerFactory.getLogger(NarrationTextCell::class.java)
@@ -91,6 +92,7 @@ class NarrationTextCell(
             isRecordingAgainProperty.bind(this@NarrationTextCell.isRecordingAgainProperty)
             isPlayingProperty.bind(this@NarrationTextCell.isPlayingProperty)
             playingVerseIndexProperty.bind(this@NarrationTextCell.playingVerseProperty)
+            highlightedIndexProperty.bind(this@NarrationTextCell.highlightedVerseProperty)
             indexProperty.set(index)
             nextChunkTextProperty.set(nextChunkText)
 

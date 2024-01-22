@@ -111,6 +111,7 @@ class NarrationViewModel : ViewModel() {
     val playingVerseProperty = SimpleObjectProperty<VerseMarker?>()
     var playingVerse by playingVerseProperty
     val playingVerseIndex = SimpleIntegerProperty(-1)
+    val highlightedVerseIndex = SimpleIntegerProperty(-1)
 
     val hasUndoProperty = SimpleBooleanProperty()
     var hasUndo by hasUndoProperty
@@ -530,6 +531,9 @@ class NarrationViewModel : ViewModel() {
         renderer.clearActiveRecordingData()
         audioPlayer.pause()
         narration.loadChapterIntoPlayer()
+
+        updateHighlightedItem(narration.getLocationInFrames())
+
         // audioPlayer.seek(0)
         audioPlayer.play()
     }
@@ -795,6 +799,7 @@ class NarrationViewModel : ViewModel() {
                 val position = narration.getLocationInFrames()
                 runLater {
                     audioPositionProperty.set(position)
+                    updateHighlightedItem(position)
                 }
                 var reRecordLoc: Int? = null
                 var nextVerseLoc: Int? = null
@@ -945,5 +950,11 @@ class NarrationViewModel : ViewModel() {
         val updated = narratableList.mapIndexed { idx, item -> item.apply { item.state = list[idx] } }
         narratableList.setAll(updated)
         refreshTeleprompter()
+    }
+
+    private fun updateHighlightedItem(position: Int) {
+        val marker = narration.findMarkerAtPosition(position)
+        val index = narratableList.indexOfFirst { it.marker == marker }
+        highlightedVerseIndex.set(index)
     }
 }
