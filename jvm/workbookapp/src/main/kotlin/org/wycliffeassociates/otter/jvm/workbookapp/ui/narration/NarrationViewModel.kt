@@ -134,9 +134,10 @@ class NarrationViewModel : ViewModel() {
     val totalAudioSizeProperty = SimpleIntegerProperty()
 
     //FIXME: Refactor this if and when Chunk entries are officially added for Titles in the Workbook
-    var numberOfTitlesProperty = SimpleIntegerProperty(0)
-    val potentiallyFinishedProperty = chunkTotalProperty
+    val numberOfTitlesProperty = SimpleIntegerProperty(0)
+    val hasAllVersesRecordedProperty = chunkTotalProperty
         .eq(recordedVerses.sizeProperty.minus(numberOfTitlesProperty))
+    val potentiallyFinishedProperty = hasAllVersesRecordedProperty
         .and(isRecordingProperty.not())
         .and(isRecordingAgainProperty.not())
     val potentiallyFinished by potentiallyFinishedProperty
