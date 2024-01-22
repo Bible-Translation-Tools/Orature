@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.jvm.controls.dialog
 
-import com.jfoenix.controls.JFXProgressBar
+import io.github.palexdev.materialfx.controls.MFXProgressBar
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import tornadofx.*
@@ -16,7 +16,7 @@ class SavingModal : OtterDialog() {
                 addClass("confirm-dialog__message", "normal-text")
             }
             add(
-                JFXProgressBar().apply {
+                MFXProgressBar().apply {
                     prefWidthProperty().bind(this@vbox.widthProperty())
                 }
             )
