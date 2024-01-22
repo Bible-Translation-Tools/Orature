@@ -1,8 +1,51 @@
+/**
+ * Copyright (C) 2020-2024 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
+.marker-node {
+    -fx-focus-traversable: true;
+    -fx-border-width: 0 0 0 1;
+    -fx-border-color: -wa-border-light;
+}
+
 .marker-node .title-section {
     -fx-pref-height: 80;
     -fx-alignment: center-left;
-    -fx-border-width: 0 0 0 1;
-    -fx-border-color: -wa-border-light;
     -fx-spacing: 10;
     -fx-padding: 0 2 0 16;
+    -fx-background-color: linear-gradient(to right, -wa-white-80, -wa-white-70, -wa-white-10);
+}
+
+.marker-node__drag-button {
+    -fx-focus-traversable: false;
+}
+
+.marker-node:focus-visible .marker-node__drag-button {
+    -fx-border-width: 4px;
+    -fx-border-color: -wa-button-border;
+    -fx-border-insets: 0;
+}
+
+.marker-node:dragging,
+.marker-node:focus-visible,
+.marker-node__drag-button:pressed {
+    -fx-border-color: -wa-primary;
+}
+
+.marker-node:dragging .marker-node__drag-button .ikonli-font-icon {
+    -fx-icon-color: -wa-primary;
 }

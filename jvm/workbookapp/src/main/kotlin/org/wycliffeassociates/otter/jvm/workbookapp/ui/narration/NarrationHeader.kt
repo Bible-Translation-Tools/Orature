@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020-2024 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
@@ -16,7 +34,7 @@ import org.wycliffeassociates.otter.common.domain.content.PluginActions
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.chapterselector.chapterSelector
 import org.wycliffeassociates.otter.jvm.controls.event.ChapterReturnFromPluginEvent
-import org.wycliffeassociates.otter.jvm.controls.event.OpenChapterEvent
+import org.wycliffeassociates.otter.jvm.controls.event.NavigateChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
@@ -40,7 +58,7 @@ class NarrationHeader : View() {
             viewModel.processWithPlugin(it.plugin)
         }
 
-        subscribe<OpenChapterEvent> {
+        subscribe<NavigateChapterEvent> {
             popupMenu.hide()
         }
     }
@@ -190,7 +208,7 @@ class NarrationHeaderViewModel : ViewModel() {
         narrationViewModel.chapterList
             .elementAtOrNull(nextIndex)
             ?.let {
-                fire(OpenChapterEvent(it.sort))
+                fire(NavigateChapterEvent(it.sort))
             }
     }
 

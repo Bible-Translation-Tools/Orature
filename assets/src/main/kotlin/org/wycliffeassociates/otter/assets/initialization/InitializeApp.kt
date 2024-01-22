@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -29,7 +29,6 @@ class InitializeApp @Inject constructor(
     private val initializeSources: InitializeSources,
     private val initializeLanguages: InitializeLanguages,
     private val initializeUlb: InitializeUlb,
-    private val initializeArtwork: InitializeArtwork,
     private val initializeRecorder: InitializeRecorder,
     private val initializeMarker: InitializeMarker,
     private val initializePlugins: InitializePlugins,
@@ -48,7 +47,6 @@ class InitializeApp @Inject constructor(
                     initializeLanguages,
                     initializeSources,
                     initializeUlb,
-                    initializeArtwork,
                     initializeRecorder,
                     initializeMarker,
                     initializePlugins,

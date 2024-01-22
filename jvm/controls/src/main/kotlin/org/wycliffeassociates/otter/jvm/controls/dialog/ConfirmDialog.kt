@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -18,7 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.dialog
 
-import com.jfoenix.controls.JFXProgressBar
+import io.github.palexdev.materialfx.controls.MFXProgressBar
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.ObjectBinding
 import javafx.beans.property.ObjectProperty
@@ -106,7 +106,7 @@ class ConfirmDialog : OtterDialog() {
         vbox {
             addClass("confirm-dialog__progress")
             add(
-                JFXProgressBar().apply {
+                MFXProgressBar().apply {
                     prefWidthProperty().bind(this@vbox.widthProperty())
                 }
             )

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -26,6 +26,8 @@ import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.License
 import java.io.File
 import javax.inject.Inject
+
+const val WAV_TO_MP3_COMPRESSED_RATE = 10 // converting from wav to mp3 yields ~10x smaller file size
 
 class AudioExporter @Inject constructor() {
     @Inject

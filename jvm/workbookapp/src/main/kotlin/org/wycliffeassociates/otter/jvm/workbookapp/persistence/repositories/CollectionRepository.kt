@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2023 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -124,7 +124,7 @@ class CollectionRepository @Inject constructor(
                             }
                         }
                     } catch (e: Exception) {
-                        log.info("Manifest doesn't exist, so no changes needed. Project : $project.")
+                        log.info("Delete project - Manifest doesn't exist, no changes committed for ${project.slug}")
                     }
                 }
             }
@@ -473,7 +473,6 @@ class CollectionRepository @Inject constructor(
                         projectEntity.id,
                         workbookTypeDao.fetchId(mode)
                     )
-
                     if (workbookDescriptor == null) {
                         // copy the content under chapter-level
                         if (verseByVerse) {
@@ -482,9 +481,9 @@ class CollectionRepository @Inject constructor(
                         } else {
                             copyMetaContent(dsl, sourceCollectionEntity.id, mainDerivedMetadata.id)
                         }
-
                         insertWorkbookDescriptor(sourceCollection.id, projectEntity.id, mode)
                     }
+
 
                     return@transactionResult collectionMapper.mapFromEntity(
                         projectEntity,

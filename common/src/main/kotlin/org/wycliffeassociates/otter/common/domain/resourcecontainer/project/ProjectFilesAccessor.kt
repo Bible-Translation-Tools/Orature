@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -47,6 +48,8 @@ import kotlin.io.path.createTempDirectory
 import kotlin.io.path.outputStream
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.AudioMetadataFileFormat
+import org.wycliffeassociates.otter.common.data.Chunkification
+import org.wycliffeassociates.otter.common.domain.project.InProgressNarrationFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.*
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.workbook.Book
@@ -120,6 +123,17 @@ class ProjectFilesAccessor(
             if (!it.exists()) it.mkdirs()
         }
         return chapterDir
+    }
+
+    fun getInProgressNarrationFiles(workbook: Workbook, chapter: Chapter): List<File> {
+        val chapterDir = getChapterAudioDir(workbook, chapter)
+        val chapterNarrationPath = RcConstants.CHAPTER_NARRATION_FILE.format(chapterDir.name)
+        val activeVersesPath = RcConstants.ACTIVE_VERSES_FILE.format(chapterDir.name)
+
+        val chapterNarrationFile = projectDir.resolve(chapterNarrationPath)
+        val activeVersesFile = projectDir.resolve(activeVersesPath)
+
+        return listOf(chapterNarrationFile, activeVersesFile)
     }
 
     fun isInitialized(): Boolean {
@@ -331,10 +345,21 @@ class ProjectFilesAccessor(
         }
     }
 
-    fun writeChunksFile(fileWriter: IFileWriter) {
+    fun writeChunksFile(fileWriter: IFileWriter, chapterFilter: List<Int>? = null) {
         val inFile = projectDir.resolve(RcConstants.CHUNKS_FILE)
 
-        if (inFile.exists()) {
+        if (inFile.exists() && inFile.length() > 0) {
+            val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
+            val chunks: Chunkification = mapper.readValue(inFile)
+            val filteredChunks = if (chapterFilter != null) {
+                chunks.filterKeys { chapter -> chapter in chapterFilter }
+            } else {
+                chunks
+            }
+            fileWriter.bufferedWriter(RcConstants.CHUNKS_FILE).use { _fileWriter ->
+                mapper.writeValue(_fileWriter, filteredChunks)
+            }
+        } else if (inFile.exists()) {
             fileWriter.bufferedWriter(RcConstants.CHUNKS_FILE).use { _fileWriter ->
                 inFile.reader().use { _fileReader ->
                     _fileReader.transferTo(_fileWriter)
@@ -397,6 +422,29 @@ class ProjectFilesAccessor(
         fileWriter.copyDirectory(audioDir, RcConstants.MEDIA_DIR) {
             val normalized = File(it).invariantSeparatorsPath
             selectedChapters.contains(normalized) && filter(it)
+        }
+    }
+
+    fun copyInProgressNarrationFiles(
+        fileReader: IFileReader,
+        manifestProject: Project
+    ): Observable<String> {
+        return Observable.just(RcConstants.TAKE_DIR, manifestProject.path)
+            .filter(fileReader::exists)
+            .flatMap { audioDirInRc ->
+                val normalized = File(audioDirInRc).normalize().path
+                fileReader.copyDirectory(normalized, audioDir) {
+                    isInProgressNarrationFile(it)
+                }
+            }
+    }
+
+    fun copyInProgressNarrationFiles(
+        fileWriter: IFileWriter,
+        filter: (String) -> Boolean = { true }
+    ) {
+        fileWriter.copyDirectory(audioDir, RcConstants.TAKE_DIR) {
+            filter(it)
         }
     }
 
@@ -525,16 +573,20 @@ class ProjectFilesAccessor(
     private fun fetchTakes(
         workbook: Workbook
     ): Observable<Take> {
-        val chapters = workbook.target.chapters
-        return chapters
+        return workbook.target.chapters
             .flatMap { chapter ->
                 chapter.chunks
                     .take(1)
                     .flatMapIterable { it }
                     .cast<BookElement>()
                     .startWith(chapter as BookElement)
-                    .concatMap {
-                        it.audio.getAllTakes().toObservable()
+                    .concatMap { content ->
+                        val takesNotEmitted = content.audio.getSelectedTake() != null &&
+                                content.audio.getAllTakes().isEmpty()
+                        if (takesNotEmitted) {
+                            content.audio.takes.blockingFirst() // force-subscribe to emit items from relay
+                        }
+                        content.audio.getAllTakes().toObservable()
                     }
             }
     }
@@ -722,6 +774,11 @@ class ProjectFilesAccessor(
 
     private fun isAudioFile(file: File) =
         file.extension.lowercase().let { it == "wav" || it == "mp3" }
+
+    private fun isInProgressNarrationFile(file: String) = isInProgressNarrationFile(File(file))
+
+    private fun isInProgressNarrationFile(file: File) =
+        InProgressNarrationFileFormat.isSupported(file.extension)
 
     fun getChunkFile(): File {
         return projectDir.resolve(RcConstants.CHUNKS_FILE)

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -28,6 +28,7 @@ import javafx.scene.control.ListView
 import javafx.scene.control.ScrollBar
 import javafx.util.Duration
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.enableScrollByKey
 import org.wycliffeassociates.otter.jvm.utils.findChildren
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
@@ -42,6 +43,7 @@ class NarrationTextListView<T>(items: ObservableList<T>? = null) : ListView<T>(i
 
     init {
         addClass("wa-list-view")
+        enableScrollByKey()
     }
 
     fun addListeners() {

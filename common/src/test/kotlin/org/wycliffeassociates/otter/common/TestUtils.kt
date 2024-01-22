@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -28,6 +28,8 @@ import org.junit.Assert
 import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
 import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
+import org.wycliffeassociates.otter.common.audio.pcm.PcmFile
+import org.wycliffeassociates.otter.common.audio.pcm.PcmOutputStream
 import org.wycliffeassociates.otter.common.audio.wav.CueChunk
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.common.audio.wav.WavMetadata
@@ -98,6 +100,91 @@ fun createTestWavFile(dir: File): File {
         }
     }
     wav.update()
+    return testFile
+}
+
+fun createTestChapterRepresentationFiles(dir: File): List<File> {
+    val pcmFile = dir.resolve(CHAPTER_NARRATION_FILE_NAME)
+        .apply { createNewFile(); deleteOnExit() }
+
+    val pcm = PcmFile(pcmFile)
+    PcmOutputStream(pcm).use {
+        for (i in 0 .. 10) {
+            it.write(i)
+        }
+    }
+
+    val jsonFile = dir.resolve(ACTIVE_VERSES_FILE_NAME)
+        .apply { createNewFile(); deleteOnExit() }
+
+    val jsonData = """
+        [
+          {
+            "placed": true,
+            "marker": {
+              "type": "BookMarker",
+              "bookSlug": "jhn",
+              "location": 0
+            },
+            "sectors": [
+              {
+                "start": 0,
+                "end": 2
+              }
+            ]
+          },
+          {
+            "placed": true,
+            "marker": {
+              "type": "ChapterMarker",
+              "chapterNumber": 1,
+              "location": 0
+            },
+            "sectors": [
+              {
+                "start": 3,
+                "end": 6
+              }
+            ]
+          },
+          {
+            "placed": true,
+            "marker": {
+              "type": "VerseMarker",
+              "start": 1,
+              "end": 1,
+              "location": 0
+            },
+            "sectors": [
+              {
+                "start": 7,
+                "end": 10
+              }
+            ]
+          }
+        ]
+    """.trimIndent()
+
+    jsonFile.bufferedWriter().use {
+        it.write(jsonData)
+    }
+
+    return listOf(pcmFile, jsonFile)
+}
+
+fun createTestActiveVersesFile(dir: File, fileName: String = ACTIVE_VERSES_FILE_NAME): File {
+    val testFile = dir.resolve(fileName)
+        .apply { createNewFile(); deleteOnExit() }
+
+    val testData = "[{\"placed\":true,\"marker\":{\"type\":\"BookMarker\",\"bookSlug\":\"jhn\",\"location\":0}" +
+            ",\"sectors\":[{\"start\":0,\"end\":2}]},{\"placed\":true,\"marker\":{\"type\":\"ChapterMarker\"," +
+            "\"chapterNumber\":1,\"location\":0},\"sectors\":[{\"start\":3,\"end\":6}]},{\"placed\":true" +
+            ",\"marker\":{\"type\":\"VerseMarker\",\"start\":1,\"end\":1,\"location\":0}" +
+            ",\"sectors\":[{\"start\":7,\"end\":1}]}]"
+
+    testFile.bufferedWriter().use {
+        it.write(testData)
+    }
     return testFile
 }
 

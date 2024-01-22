@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2023 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -182,6 +182,7 @@ class AudioPluginViewModel : ViewModel() {
 
     fun addPlugin(record: Boolean, edit: Boolean) {
         find<AddPluginDialog>().apply {
+            themeProperty.set(settingsViewModel.appColorMode.value)
             orientationProperty.set(settingsViewModel.orientationProperty.value)
             open()
         }

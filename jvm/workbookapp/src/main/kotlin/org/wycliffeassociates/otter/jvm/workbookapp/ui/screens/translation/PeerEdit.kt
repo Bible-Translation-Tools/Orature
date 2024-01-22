@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020-2024 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
@@ -13,6 +31,7 @@ import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
 import org.wycliffeassociates.otter.jvm.controls.event.UndoChunkingPageEvent
@@ -56,6 +75,7 @@ open class PeerEdit : View() {
             label(viewModel.chunkTitleProperty).addClass("h4", "h4--80")
             simpleaudioplayer {
                 playerProperty.bind(viewModel.sourcePlayerProperty)
+                disableProperty().bind(playerProperty.isNull)
                 enablePlaybackRateProperty.set(true)
                 sideTextProperty.set(messages["sourceAudio"])
                 menuSideProperty.set(Side.BOTTOM)
@@ -130,6 +150,7 @@ open class PeerEdit : View() {
 
     private fun createPlaybackWaveform(container: VBox): MarkerWaveform {
         return MarkerWaveform().apply {
+            addClass("waveform--focusable")
             vgrow = Priority.ALWAYS
             themeProperty.bind(settingsViewModel.appColorMode)
             positionProperty.bind(viewModel.positionProperty)
@@ -145,6 +166,9 @@ open class PeerEdit : View() {
                 val final = Utils.clamp(0, curFrames - deltaFrames, duration)
                 viewModel.seek(final)
             }
+            setOnRewind(viewModel::rewind)
+            setOnFastForward(viewModel::fastForward)
+            setOnToggleMedia(viewModel::toggleAudio)
 
             viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
             viewModel.cleanUpWaveform = ::freeImages
@@ -197,6 +221,8 @@ open class PeerEdit : View() {
     }
 
     private fun subscribeEvents() {
+        addShortcut()
+
         viewModel.currentChunkProperty.onChangeWithDisposer { selectedChunk ->
             // clears recording screen if another chunk is selected
             if (selectedChunk != null && mainSectionProperty.value == recordingView) {
@@ -217,6 +243,7 @@ open class PeerEdit : View() {
     private fun unsubscribeEvents() {
         eventSubscriptions.forEach { it.unsubscribe() }
         eventSubscriptions.clear()
+        removeShortcut()
     }
 
     private fun subscribeOnWaveformImages() {
@@ -226,5 +253,17 @@ open class PeerEdit : View() {
                 waveform.addWaveformImage(it)
             }
             .addTo(viewModel.disposable)
+    }
+
+    private fun addShortcut() {
+        workspace.shortcut(Shortcut.PLAY_SOURCE.value) {
+            viewModel.sourcePlayerProperty.value?.toggle()
+        }
+        workspace.shortcut(Shortcut.PLAY_TARGET.value, viewModel::toggleAudio)
+    }
+
+    private fun removeShortcut() {
+        workspace.accelerators.remove(Shortcut.PLAY_SOURCE.value)
+        workspace.accelerators.remove(Shortcut.PLAY_TARGET.value)
     }
 }

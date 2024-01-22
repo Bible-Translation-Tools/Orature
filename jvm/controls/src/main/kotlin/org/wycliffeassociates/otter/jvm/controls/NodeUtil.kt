@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020-2024 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.controls
 
 import javafx.beans.property.BooleanProperty
@@ -9,6 +27,7 @@ import javafx.scene.layout.StackPane
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import tornadofx.*
+import kotlin.math.min
 
 /**
  * Calls this method from a scrollable component such as a ScrollPane
@@ -37,9 +56,9 @@ fun Parent.customizeScrollbarSkin() {
 }
 
 /** The distance of scroll bar increment/decrement measured in audio frames */
-const val SCROLL_INCREMENT_UNIT = 20_000.0
+const val SCROLL_INCREMENT_UNIT = 10_000.0
 /** The distance of scroll bar jump measured in audio frames */
-const val SCROLL_JUMP_UNIT = 400_000.0
+const val SCROLL_JUMP_UNIT = 100_000.0
 
 /**
  * Constructs a custom horizontal scroll bar for the audio waveform.
@@ -59,17 +78,20 @@ fun createAudioScrollBar(
         orientation = Orientation.HORIZONTAL
         disableWhen { isPlayingProperty }
 
-        unitIncrement = SCROLL_INCREMENT_UNIT
-        blockIncrement = SCROLL_JUMP_UNIT
-
         valueProperty().onChange { value ->
             if (!isPlayingProperty.value) {
                 onScroll(value.toInt())
             }
         }
         valueProperty().bindBidirectional(audioPositionProperty) // sync when audio played
-
         maxProperty().bind(totalFramesProperty)
+
+        unitIncrement = SCROLL_INCREMENT_UNIT
+        blockIncrementProperty().bind(maxProperty().doubleBinding {
+            it?.let { maxValue ->
+                maxValue.toDouble() / 10
+            } ?: SCROLL_JUMP_UNIT
+        })
 
         runLater {
             customizeScrollbarSkin()

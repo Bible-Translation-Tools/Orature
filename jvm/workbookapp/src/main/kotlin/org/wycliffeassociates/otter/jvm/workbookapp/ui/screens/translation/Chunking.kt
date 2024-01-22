@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020-2024 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
@@ -11,6 +29,7 @@ import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
@@ -48,7 +67,7 @@ class Chunking : View() {
             center = VBox().apply {
                 MarkerWaveform().apply {
                     waveform = this
-                    addClass("consume__scrolling-waveform")
+                    addClass("waveform--focusable")
                     vgrow = Priority.ALWAYS
                     clip = Rectangle().apply {
                         widthProperty().bind(this@vbox.widthProperty())
@@ -138,6 +157,8 @@ class Chunking : View() {
     }
 
     private fun subscribeEvents() {
+        addShortcut()
+
         subscribe<MarkerDeletedEvent> {
             viewModel.deleteMarker(it.markerId)
         }.also { eventSubscriptions.add(it) }
@@ -158,6 +179,7 @@ class Chunking : View() {
     private fun unsubscribeEvents() {
         eventSubscriptions.forEach { it.unsubscribe() }
         eventSubscriptions.clear()
+        removeShortcut()
     }
 
     private fun subscribeOnWaveformImages() {
@@ -172,6 +194,7 @@ class Chunking : View() {
 
     private fun setUpWaveformActionHandlers() {
         waveform.apply {
+            setOnSeek { viewModel.seek(it) }
             setOnSeekNext { viewModel.seekNext() }
             setOnSeekPrevious { viewModel.seekPrevious() }
             setOnWaveformClicked { viewModel.pause() }
@@ -187,5 +210,15 @@ class Chunking : View() {
             setOnToggleMedia(viewModel::mediaToggle)
             setOnResumeMedia(viewModel::resumeMedia)
         }
+    }
+
+    private fun addShortcut() {
+        workspace.shortcut(Shortcut.PLAY_SOURCE.value, viewModel::mediaToggle)
+        workspace.shortcut(Shortcut.ADD_MARKER.value, viewModel::placeMarker)
+    }
+
+    private fun removeShortcut() {
+        workspace.accelerators.remove(Shortcut.PLAY_SOURCE.value)
+        workspace.accelerators.remove(Shortcut.ADD_MARKER.value)
     }
 }

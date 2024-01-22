@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020-2024 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.common.domain.narration
 
 import dagger.assisted.Assisted
@@ -475,6 +493,11 @@ class Narration @AssistedInject constructor(
         player.close()
         recorder.stop()
         chapterRepresentation.closeConnections()
+
+        if (history.hasRedo() || history.hasUndo()) {
+            chapterRepresentation.trim()
+        }
+        history.clear()
     }
 
     fun seekToPrevious() {
@@ -495,15 +518,20 @@ class Narration @AssistedInject constructor(
         player.pause()
         val loc = getLocationInChapter()
         lockToVerse(null)
-        val seekLoc = activeVerses.firstOrNull { it.location > loc }
-        seekLoc?.let {
-            logger.info("Seeking to next: ${it.formattedLabel}")
-            seek(it.location)
-        } ?: chapterRepresentation.apply {
-            logger.info("Next marker not found, seeking to end of audio")
-            val lastFrame = audioLocationToLocationInChapter(activeVerses.last().lastFrame())
-            seek(lastFrame)
-        }
+
+        activeVerses
+            .firstOrNull { it.location > loc }
+            ?.let {
+                logger.info("Seeking to next: ${it.formattedLabel}")
+                seek(it.location)
+            }
+            ?: chapterRepresentation.apply {
+                if (activeVerses.isNotEmpty()) {
+                    logger.info("Next marker not found, seeking to end of audio")
+                    val lastFrame = audioLocationToLocationInChapter(activeVerses.last().lastFrame())
+                    seek(lastFrame)
+                }
+            }
     }
 }
 

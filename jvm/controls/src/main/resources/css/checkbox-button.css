@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -42,7 +42,7 @@
     -fx-text-fill: -wa-primary;
 }
 
-.checkbox-button:focused {
+.checkbox-button:focus-visible {
     -fx-border-width: 4px;
     -fx-border-color: -wa-button-border;
     -fx-border-radius: 6px;

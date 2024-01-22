@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2023 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -123,6 +123,7 @@ class LanguageDao(
                         entity.gateway,
                         entity.region
                     )
+                    .onConflictDoNothing()
                     .execute()
             }
             // Implicit commit

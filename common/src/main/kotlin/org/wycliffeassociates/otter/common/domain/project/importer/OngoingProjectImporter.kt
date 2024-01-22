@@ -1,12 +1,28 @@
+/**
+ * Copyright (C) 2020-2024 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.common.domain.project.importer
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.reactivex.Maybe
@@ -28,10 +44,12 @@ import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.primitives.SerializableProjectMode
 import org.wycliffeassociates.otter.common.data.primitives.Take
+import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.takeFilenamePattern
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
+import org.wycliffeassociates.otter.common.domain.project.ProjectAppVersion
 import org.wycliffeassociates.otter.common.domain.project.TakeCheckingStatusMap
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
@@ -47,6 +65,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRep
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
+import org.wycliffeassociates.otter.common.utils.computeFileChecksum
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Manifest
 import org.wycliffeassociates.resourcecontainer.entity.Project
@@ -74,8 +93,9 @@ class OngoingProjectImporter @Inject constructor(
     private val contentCache = mutableMapOf<ContentSignature, Content>()
     private var projectName = ""
     private var takesInChapterFilter: Map<String, Int>? = null
-    private var duplicatedTakes: MutableList<String> = mutableListOf()
+    private var completedChapters: List<Int>? = null
     private var takesCheckingMap: TakeCheckingStatusMap = mapOf()
+    private var projectAppVersion = ProjectAppVersion.THREE
 
     override fun import(
         file: File,
@@ -86,8 +106,10 @@ class OngoingProjectImporter @Inject constructor(
         if (!isOngoingProject) {
             return super.passToNextImporter(file, callback, options)
         }
-        takesInChapterFilter = null
         projectName = ""
+        takesInChapterFilter = null
+        completedChapters = null
+        contentCache.clear()
 
         return Single
             .fromCallable { projectExists(file) }
@@ -95,12 +117,18 @@ class OngoingProjectImporter @Inject constructor(
                 logger.error("Error while checking whether project already exists.", it)
             }
             .flatMap { exists ->
+                val takesByChapterInProject = fetchTakesInRC(file)
+
                 if (exists && callback != null) {
-                    val filterProvided = updateTakesImportFilter(file, callback)
-                    if (!filterProvided) {
-                        return@flatMap Single.just(ImportResult.ABORTED)
-                    }
+                    val availableChapters = takesByChapterInProject.values.distinct().sorted()
+                    val selectedChapters = getUserSelectedChapter(availableChapters, callback)
+                        ?: return@flatMap Single.just(ImportResult.ABORTED)
+
+                    takesInChapterFilter = takesByChapterInProject.filterValues { it in selectedChapters }
+                } else {
+                    takesInChapterFilter = takesByChapterInProject // accept all takes
                 }
+
                 importResumableProject(file, callback)
             }
             .subscribeOn(Schedulers.io())
@@ -142,18 +170,12 @@ class OngoingProjectImporter @Inject constructor(
         }
     }
 
-    private fun updateTakesImportFilter(
-        file: File,
+    private fun getUserSelectedChapter(
+        availableChapters: List<Int>,
         callback: ProjectImporterCallback
-    ): Boolean {
-        val takesChapterMap = fetchTakesInRC(file)
-        val chapterList = takesChapterMap.values.distinct().sorted()
-        val callbackParam = ImportCallbackParameter(chapterList, projectName)
-        val chaptersToImport = callback.onRequestUserInput(callbackParam).blockingGet().chapters
-            ?: return false
-
-        takesInChapterFilter = takesChapterMap.filter { entry -> entry.value in chaptersToImport }
-        return true
+    ): List<Int>? {
+        val callbackParam = ImportCallbackParameter(availableChapters, projectName)
+        return callback.onRequestUserInput(callbackParam).blockingGet().chapters
     }
 
     private fun fetchTakesInRC(file: File): Map<String, Int> {
@@ -233,7 +255,7 @@ class OngoingProjectImporter @Inject constructor(
 
                     val derived = importResumableProject(fileReader, metadata, manifestProject, sourceCollection, callback)
                     val workbookDescriptor = workbookDescriptorRepository.getAll().blockingGet().firstOrNull {
-                        it.targetCollection == derived && it.sourceCollection == sourceCollection
+                        it.targetCollection.id == derived.id && it.sourceCollection.id == sourceCollection.id
                     }
                     callback?.onNotifySuccess(
                         manifest.dublinCore.language.title,
@@ -261,11 +283,14 @@ class OngoingProjectImporter @Inject constructor(
     ): Collection {
         val sourceMetadata = sourceCollection.resourceContainer!!
         val mode = getProjectMode(fileReader, metadata.language, sourceCollection.resourceContainer!!.language)
+        val isVerseByVerse = mode != ProjectMode.TRANSLATION ||
+                projectAppVersion == ProjectAppVersion.ONE
+
         val derivedProject = createDerivedProjects(
             metadata.language,
             sourceCollection,
             mode,
-            true
+            isVerseByVerse
         )
 
         val translation = createTranslation(sourceMetadata.language, metadata.language)
@@ -280,11 +305,23 @@ class OngoingProjectImporter @Inject constructor(
         projectFilesAccessor.initializeResourceContainerInDir()
         projectFilesAccessor.setProjectMode(mode)
 
-        callback?.onNotifyProgress(localizeKey = "copyingSource", percent = 50.0)
+        callback?.onNotifyProgress(localizeKey = "copyingSource", percent = 40.0)
         projectFilesAccessor.copySourceFiles(fileReader)
 
-        importContributorInfo(metadata, projectFilesAccessor)
+        if (projectAppVersion == ProjectAppVersion.ONE) {
+            callback?.onNotifyProgress(localizeKey = "loading_content", percent = 60.0)
+            completedChapters = takesInChapterFilter
+                ?.filterKeys { takePath ->
+                    parseNumbers(takePath)?.contentSignature?.let { sig ->
+                        sig.verse == null // filter only chapter take
+                    } ?: false
+                }
+                ?.values
+                ?.toList()
 
+            deriveChapterContentFromVerses(derivedProject, projectFilesAccessor)
+        }
+        importContributorInfo(metadata, projectFilesAccessor)
         importChunks(
             derivedProject,
             projectFilesAccessor,
@@ -301,11 +338,19 @@ class OngoingProjectImporter @Inject constructor(
             projectFilesAccessor
         )
 
+        projectFilesAccessor.copyInProgressNarrationFiles(fileReader, manifestProject)
+            .doOnError { e ->
+                logger.error("Error in importInProgressFiles, project: $derivedProject, manifestProject: $manifestProject")
+                logger.error("metadata: $metadata, sourceMetadata: ${sourceCollection.resourceContainer}")
+                logger.error("sourceCollection: $sourceCollection", e)
+            }
+            .blockingSubscribe()
+
         translation.modifiedTs = LocalDateTime.now()
         languageRepository.updateTranslation(translation).subscribe()
-        resetChaptersWithoutTakes(fileReader, derivedProject)
+        resetChaptersWithoutTakes(fileReader, derivedProject, mode)
 
-        callback?.onNotifyProgress(localizeKey = "finishingUp", percent = 100.0)
+        callback?.onNotifyProgress(localizeKey = "finishingUp", percent = 99.0)
 
         return derivedProject
     }
@@ -316,13 +361,15 @@ class OngoingProjectImporter @Inject constructor(
         sourceLanguage: Language
     ): ProjectMode {
         if (fileReader.exists(RcConstants.PROJECT_MODE_FILE)) {
+            projectAppVersion = ProjectAppVersion.THREE
             val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
             fileReader.bufferedReader(RcConstants.PROJECT_MODE_FILE).use {
                 val serialized: SerializableProjectMode = mapper.readValue(it)
                 return serialized.mode
             }
         }
-        // backward compatibility when there was no mode in the import file
+        // project mode does not exist until Orature 3
+        projectAppVersion = ProjectAppVersion.ONE
         return if (targetLanguage.slug == sourceLanguage.slug) {
             ProjectMode.NARRATION
         } else {
@@ -339,19 +386,18 @@ class OngoingProjectImporter @Inject constructor(
         mapper.registerKotlinModule()
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
-        val chunks = mutableMapOf<Int, List<Content>>()
-
-        val file: File = accessor.getChunkFile()
-        try {
-            if (file.exists() && file.length() > 0) {
-                val typeRef: TypeReference<HashMap<Int, List<Content>>> =
-                    object : TypeReference<HashMap<Int, List<Content>>>() {}
-                val map: Map<Int, List<Content>> = mapper.readValue(file, typeRef)
-                chunks.putAll(map)
+        val chunkFileExists = fileReader.exists(RcConstants.CHUNKS_FILE)
+        val chunks: Chunkification = if (chunkFileExists) {
+            try {
+                fileReader.stream(RcConstants.CHUNKS_FILE).let { input ->
+                    mapper.readValue(input)
+                }
+            } catch (e: MismatchedInputException) {
+                // empty file
+                Chunkification()
             }
-        } catch (e: MismatchedInputException) {
-            // clear file if it can't be read
-            file.writer().use { }
+        } else {
+            Chunkification()
         }
 
         val chapters = collectionRepository.getChildren(project).blockingGet()
@@ -364,7 +410,45 @@ class OngoingProjectImporter @Inject constructor(
         }
     }
 
-    private fun resetChaptersWithoutTakes(fileReader: IFileReader, derivedProject: Collection) {
+    /**
+     * Populates all contents under the filtered chapters as verse-by-verse.
+     * This method is used when importing projects from Orature 1
+     */
+    private fun deriveChapterContentFromVerses(
+        project: Collection,
+        projectAccessor: ProjectFilesAccessor
+    ) {
+        val filteredChapters = takesInChapterFilter?.values?.distinct()
+        collectionRepository.getChildren(project).blockingGet()
+            .filter { filteredChapters == null || it.sort in filteredChapters }
+            .forEach { chapter ->
+                val contents = projectAccessor.getChapterContent(project.slug, chapter.sort)
+                    .mapIndexed { index, content ->
+                        content.sort = index + 1
+                        content.draftNumber = 1
+                        content
+                    }
+                contentRepository.deleteForCollection(chapter, ContentType.TEXT)
+                    .andThen(
+                        contentRepository.getByCollection(chapter)
+                    )
+                    .flattenAsObservable { it }
+                    .flatMapCompletable { content ->
+                        takeRepository.deleteForContent(content)
+                    }
+                    .andThen(
+                        contentRepository.insertForCollection(contents, chapter) // derive contents
+                    )
+                    .ignoreElement()
+                    .blockingGet()
+            }
+    }
+
+    private fun resetChaptersWithoutTakes(fileReader: IFileReader, derivedProject: Collection, mode: ProjectMode) {
+        if (mode != ProjectMode.TRANSLATION) {
+            return
+        }
+
         val chunkFileExists = fileReader.exists(RcConstants.CHUNKS_FILE)
         val chapterStarted = if (!chunkFileExists) {
             listOf()
@@ -414,16 +498,7 @@ class OngoingProjectImporter @Inject constructor(
         }
         val sourceMetadata = sourceCollection.resourceContainer!!
 
-        val existingTakes = projectFilesAccessor.audioDir.walk()
-            .filter { AudioFileFormat.isSupported(it.extension) }
-            .map { it.name }
-
         val selectedTakes = prepareSelectedTakes(fileReader)
-        duplicatedTakes = takesInChapterFilter
-            ?.keys
-            ?.filter { takePath -> existingTakes.contains(File(takePath).name) }
-            ?.toMutableList()
-            ?: mutableListOf()
 
         takesCheckingMap = parseCheckingStatusFile(fileReader)
 
@@ -434,7 +509,7 @@ class OngoingProjectImporter @Inject constructor(
                 logger.error("metadata: $metadata, sourceMetadata: $sourceMetadata")
                 logger.error("sourceCollection: $sourceCollection", e)
             }
-            .subscribe { newTakeFile ->
+            .blockingSubscribe { newTakeFile ->
                 insertTake(
                     newTakeFile,
                     projectFilesAccessor.audioDir,
@@ -443,15 +518,6 @@ class OngoingProjectImporter @Inject constructor(
                     selectedTakes
                 )
             }
-
-        importDuplicatedTakes(
-            fileReader,
-            projectFilesAccessor.audioDir,
-            collectionForTakes,
-            manifestProject,
-            sourceMetadata,
-            selectedTakes
-        )
     }
 
     private fun prepareSelectedTakes(fileReader: IFileReader): Set<String> {
@@ -488,14 +554,13 @@ class OngoingProjectImporter @Inject constructor(
 
     /**
      * Filters only takes that are chosen to import (based on the callback result)
-     * AND excludes duplicated takes (takes that already exist).
      */
     private fun takeCopyFilter(path: String): Boolean {
         return takesInChapterFilter?.let { takesInChapter ->
             val takePath = takesInChapter.keys.firstOrNull { filterPath ->
                 File(filterPath).name == File(path).name
             }
-            takePath != null && takePath !in duplicatedTakes
+            takePath != null
         } ?: true
     }
 
@@ -511,7 +576,16 @@ class OngoingProjectImporter @Inject constructor(
                 val now = LocalDate.now()
                 val file = File(filepath).canonicalFile
                 val relativeFile = file.relativeTo(projectAudioDir.canonicalFile)
-                val checkingStatus = takesCheckingMap[relativeFile.name]
+
+                val checkingStatus = when {
+                    projectAppVersion.ordinal >= ProjectAppVersion.THREE.ordinal -> takesCheckingMap[relativeFile.name]
+
+                    completedChapters?.contains(sig.chapter) == true -> {
+                        TakeCheckingState(CheckingStatus.VERSE, computeFileChecksum(file))
+                    }
+
+                    else -> null
+                }
 
                 val take = Take(
                     file.name,
@@ -524,7 +598,8 @@ class OngoingProjectImporter @Inject constructor(
                     checkingStatus?.checksum,
                     listOf()
                 )
-                take.id = takeRepository.insertForContent(take, chunk).blockingGet()
+                val insertedId = takeRepository.insertForContent(take, chunk).blockingGet()
+                take.id = insertedId
 
                 if (relativeFile.invariantSeparatorsPath in selectedTakes) {
                     chunk.selectedTake = take
@@ -579,42 +654,6 @@ class OngoingProjectImporter @Inject constructor(
             throw ImportException(ImportResult.FAILED)
         }
         return sourceCollection
-    }
-
-    private fun importDuplicatedTakes(
-        fileReader: IFileReader,
-        projectAudioDir: File,
-        project: Collection,
-        manifestProject: Project,
-        metadata: ResourceMetadata,
-        selectedTakes: Set<String>
-    ) {
-        duplicatedTakes.forEach { takePath ->
-            parseNumbers(takePath)?.let { (sig, _) ->
-                getContent(sig, project, metadata)?.let { content ->
-                    val takeName = File(takePath).name
-                    val take = copyDuplicatedTakeToProjectDir(
-                        takePath,
-                        projectAudioDir,
-                        content,
-                        manifestProject,
-                        fileReader
-                    )
-                    takesCheckingMap[takeName]?.let {
-                        take.checkingStatus = it.status
-                        take.checksum = it.checksum
-                    }
-                    take.id = takeRepository.insertForContent(take, content).blockingGet()
-
-                    if (
-                        selectedTakes.any { selected -> File(selected).name == takeName }
-                    ) {
-                        content.selectedTake = take
-                        contentRepository.update(content).blockingAwait()
-                    }
-                }
-            }
-        }
     }
 
     private fun hasInProgressMarker(resourceContainer: File): Boolean {
@@ -724,61 +763,6 @@ class OngoingProjectImporter @Inject constructor(
                 .firstElement()
 
             content.blockingGet()
-        }
-    }
-
-    private fun copyDuplicatedTakeToProjectDir(
-        takePath: String,
-        projectAudioDir: File,
-        content: Content,
-        manifestProject: Project,
-        fileReader: IFileReader
-    ): Take {
-        val now = LocalDate.now()
-        val newTakeNumber = takeRepository.getByContent(content, false)
-            .blockingGet()
-            .maxByOrNull { it.number }
-            ?.let { it.number + 1 }
-            ?: 1
-
-        val newFileName = File(takePath).name
-            .replaceFirst(Regex("_t\\d"), "_t$newTakeNumber")
-
-        val targetTakeFile = projectAudioDir
-            .resolve(getRelativeTakePath(takePath, manifestProject.path))
-            .parentFile.resolve(newFileName)
-            .apply {
-                parentFile.mkdirs()
-                createNewFile()
-            }
-
-        fileReader.stream(takePath).buffered().use { input ->
-            targetTakeFile.outputStream().use {
-                input.transferTo(it)
-            }
-        }
-
-        return Take(
-            newFileName,
-            targetTakeFile,
-            newTakeNumber,
-            now,
-            null,
-            false,
-            CheckingStatus.UNCHECKED,
-            null,
-            listOf())
-    }
-
-    private fun getRelativeTakePath(pathInRC: String, metaProjectPath: String): String {
-        val metaProjectDir = File(metaProjectPath).normalize()
-        val takeDirInRC = File(RcConstants.TAKE_DIR)
-        val filePath = File(pathInRC)
-
-        return if (pathInRC.startsWith(metaProjectDir.invariantSeparatorsPath)) {
-            filePath.relativeTo(metaProjectDir).invariantSeparatorsPath
-        } else {
-            filePath.relativeTo(takeDirInRC).invariantSeparatorsPath
         }
     }
 

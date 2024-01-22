@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -27,8 +27,10 @@ import javax.inject.Inject
 class AppTheme @Inject constructor(
     private val appPrefRepo: IAppPreferencesRepository
 ) {
-    val preferredTheme: Single<ColorTheme>
-        get() = preferredTheme()
+    val preferredTheme: Single<ColorTheme> = Single.just(ColorTheme.LIGHT)
+        /* TODO: uncomment the line below when dark mode is supported:
+         * // get() = preferredTheme()
+         */
 
     private fun preferredTheme(): Single<ColorTheme> {
         return appPrefRepo.appTheme()

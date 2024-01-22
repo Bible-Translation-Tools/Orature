@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020-2024 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 
 import javafx.beans.property.SimpleObjectProperty
@@ -9,6 +27,7 @@ import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.TakeSelectionAnimationMediator
 import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
@@ -47,6 +66,7 @@ class BlindDraft : View() {
                 label(viewModel.chunkTitleProperty).addClass("h4", "h4--80")
                 simpleaudioplayer {
                     playerProperty.bind(viewModel.sourcePlayerProperty)
+                    disableProperty().bind(playerProperty.isNull)
                     enablePlaybackRateProperty.set(true)
                     sideTextProperty.set(messages["sourceAudio"])
                     menuSideProperty.set(Side.BOTTOM)
@@ -166,6 +186,8 @@ class BlindDraft : View() {
     }
 
     private fun subscribeEvents() {
+        addShortcut()
+
         viewModel.currentChunkProperty.onChangeWithDisposer { selectedChunk ->
             // clears recording screen if another chunk is selected
             if (selectedChunk != null && mainSectionProperty.value == recordingView) {
@@ -198,5 +220,16 @@ class BlindDraft : View() {
         eventSubscriptions.clear()
         listenerDisposers.forEach { it.dispose() }
         listenerDisposers.clear()
+        removeShortcut()
+    }
+
+    private fun addShortcut() {
+        workspace.shortcut(Shortcut.PLAY_SOURCE.value) {
+            viewModel.sourcePlayerProperty.value?.toggle()
+        }
+    }
+
+    private fun removeShortcut() {
+        workspace.accelerators.remove(Shortcut.PLAY_SOURCE.value)
     }
 }

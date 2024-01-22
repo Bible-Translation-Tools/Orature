@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2023 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -24,6 +24,8 @@ import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Pane
 import javafx.stage.Stage
 import javafx.stage.StageStyle
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.OratureInfo
 import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -45,9 +47,16 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
     override val dependencyGraph = DaggerAppDependencyGraph.builder().build()
     var shouldBlockWindowCloseRequest = false
 
-    @Inject lateinit var localeLanguage: LocaleLanguage
-    @Inject lateinit var directoryProvider: IDirectoryProvider
-    @Inject lateinit var audioConnectionFactory: AudioConnectionFactory
+    @Inject
+    lateinit var localeLanguage: LocaleLanguage
+
+    @Inject
+    lateinit var directoryProvider: IDirectoryProvider
+
+    @Inject
+    lateinit var audioConnectionFactory: AudioConnectionFactory
+
+    val logger: Logger
 
     init {
         DatabaseInitializer(
@@ -58,6 +67,8 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
         Thread.setDefaultUncaughtExceptionHandler(OtterExceptionHandler(directoryProvider, localeLanguage))
         initializeLogger(directoryProvider)
         initializeAppLocale()
+
+        logger = LoggerFactory.getLogger(OtterApp::class.java)
     }
 
     fun initializeLogger(directoryProvider: IDirectoryProvider) {
@@ -72,6 +83,8 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
 
     override fun start(stage: Stage) {
         super.start(stage)
+        logSystemProperties()
+
         stage.isMaximized = true
         stage.scene.window.setOnCloseRequest {
             if (shouldBlockWindowCloseRequest) {
@@ -88,6 +101,25 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
             }
         }
         find<SplashScreen>().openModal(StageStyle.UNDECORATED)
+    }
+
+    /**
+     * Logs properties about the system running, such as the java version, OS, and javaFX.
+     *
+     * This needs to run after JavaFX is initialized as javafx.version is not added to the system properties prior
+     * to launching the app class.
+     */
+    private fun logSystemProperties() {
+        logger.info(
+            """
+            JDK distribution: ${System.getProperty("java.vendor")}
+            Java version: ${System.getProperty("java.version")}
+            JavaFX version: ${System.getProperty("javafx.version")}
+            OS: ${System.getProperty("os.name")}
+            OS arch: ${System.getProperty("os.arch")}
+            OS version: ${System.getProperty("os.version")}
+            """ 
+        )
     }
 
     override fun onBeforeShow(view: UIComponent) {

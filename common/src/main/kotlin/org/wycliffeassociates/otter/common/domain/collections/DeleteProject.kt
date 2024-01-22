@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -29,6 +29,8 @@ import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookDescriptorRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
+import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class DeleteProject @Inject constructor(
@@ -86,6 +88,13 @@ class DeleteProject @Inject constructor(
                     }
             }
             .andThen(workbookDescriptorRepo.delete(list))
+            .subscribeOn(Schedulers.single()) // sequential execution of delete to avoid db transaction error
+    }
+
+    fun deleteProjectsWithTimer(books: List<WorkbookDescriptor>, timeoutMillis: Int): Completable {
+        return Completable
+            .timer(timeoutMillis.toLong(), TimeUnit.MILLISECONDS)
+            .andThen(deleteProjects(books))
     }
 
     private fun recreateWorkbookDescriptor(workbookDescriptor: WorkbookDescriptor): Completable {

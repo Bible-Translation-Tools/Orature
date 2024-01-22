@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -21,12 +21,15 @@ package org.wycliffeassociates.otter.common.domain.project.exporter
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.License
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.audio.AudioExporter
+import org.wycliffeassociates.otter.common.domain.audio.WAV_TO_MP3_COMPRESSED_RATE
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.utils.mapNotNull
 import java.io.File
 import javax.inject.Inject
 
@@ -53,6 +56,20 @@ class AudioProjectExporter @Inject constructor(
         )
         logger.info("Exporting project as mp3: ${workbook.target.slug}")
         return exportBookMp3(outputDirectory, workbook, projectAccessor, callback, options)
+    }
+
+    override fun estimateExportSize(workbook: Workbook, chapterFilter: List<Int>): Long {
+        return workbook.target.chapters
+            .filter { it.sort in chapterFilter }
+            .mapNotNull {it.getSelectedTake()?.file }
+            .reduce(0L) { size, nextFile ->
+                when (AudioFileFormat.of(nextFile.extension)) {
+                    AudioFileFormat.MP3 -> size + nextFile.length()
+                    AudioFileFormat.WAV -> size + nextFile.length() / WAV_TO_MP3_COMPRESSED_RATE
+                    else -> size
+                }
+            }
+            .blockingGet()
     }
 
     private fun exportBookMp3(

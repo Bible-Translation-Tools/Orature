@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2023 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -44,12 +44,13 @@ class AppBar : Fragment() {
     private val buttonsToggleGroup = ToggleGroup()
 
     private val homeButton = AppBarButton().apply {
+        addClass("bottom-border")
         textProperty().set(messages["home"])
         graphicProperty().set(FontIcon(MaterialDesign.MDI_HOME))
 
         toggleGroup = buttonsToggleGroup
+        selectedProperty().onChange { removePseudoClass("selected") }
         setOnMouseClicked {
-            isSelected = false
             val homePage = find<HomePage2>()
             fire(NavigationRequestEvent(homePage))
         }
@@ -70,6 +71,7 @@ class AppBar : Fragment() {
     }
 
     private val settingsButton = AppBarButton().apply {
+        addClass("top-border")
         textProperty().set(messages["settings"])
         graphicProperty().set(FontIcon(MaterialDesign.MDI_SETTINGS))
         toggleGroup = buttonsToggleGroup
@@ -84,6 +86,7 @@ class AppBar : Fragment() {
     }
 
     private val infoButton = AppBarButton().apply {
+        addClass("top-border")
         textProperty().set(messages["info"])
         graphicProperty().set(FontIcon(MaterialDesign.MDI_INFORMATION))
         toggleGroup = buttonsToggleGroup
@@ -109,7 +112,6 @@ class AppBar : Fragment() {
 
             region { vgrow = Priority.ALWAYS }
 
-//            add(addButton)
             add(settingsButton)
             add(infoButton)
 

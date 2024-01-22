@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -104,6 +104,11 @@ class FileNamer(
             val take = """_t(\d+)"""
             val extensionDelim = """\."""
             Pattern.compile(chapter + verse + sort + type + take + extensionDelim)
+        }
+        val inProgressNarrationPattern: Pattern = run {
+            val chapter = """c(\d+)/"""
+            val fileName = "(chapter_narration.pcm|active_verses.json)"
+            Pattern.compile(chapter + fileName)
         }
     }
 }

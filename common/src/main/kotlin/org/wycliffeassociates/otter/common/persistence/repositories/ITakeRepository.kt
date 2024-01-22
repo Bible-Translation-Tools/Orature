@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -28,6 +28,7 @@ import org.wycliffeassociates.otter.common.data.primitives.Take
 interface ITakeRepository : IRepository<Take> {
     fun insertForContent(take: Take, content: Content): Single<Int>
     fun getByContent(content: Content, includeDeleted: Boolean = false): Single<List<Take>>
+    fun deleteForContent(content: Content): Completable
     fun removeNonExistentTakes(): Completable
     fun markDeleted(take: Take): Completable
     fun getSoftDeletedTakes(project: Collection): Single<List<Take>>

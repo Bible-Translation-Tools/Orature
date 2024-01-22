@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (C) 2020-2022 Wycliffe Associates
+    Copyright (C) 2020-2024 Wycliffe Associates
 
     This file is part of Orature.
 
@@ -19,7 +19,6 @@
     along with Orature.  If not, see <https://www.gnu.org/licenses/>.
 
 -->
-
 <?import com.jfoenix.controls.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
@@ -27,6 +26,7 @@
 <?import org.kordamp.ikonli.javafx.*?>
 
 <?import javafx.scene.image.ImageView?>
+<?import io.github.palexdev.materialfx.controls.MFXProgressBar?>
 <HBox fx:id="root" spacing="10.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <StackPane alignment="CENTER" HBox.hgrow="NEVER" prefWidth="70.0" styleClass="chapter-card__graphic">
@@ -55,7 +55,7 @@
                                         <FontIcon iconLiteral="mdi-rocket" iconSize="18" />
                                     </graphic>
                                 </Label>
-                                <JFXProgressBar fx:id="recordedProgress" styleClass="chapter-card__recorded-progress" maxWidth="1.7976931348623157E308" progress="0.0" HBox.hgrow="ALWAYS" />
+                                <MFXProgressBar fx:id="recordedProgress" styleClass="chapter-card__recorded-progress" maxWidth="1.7976931348623157E308" progress="0.0" HBox.hgrow="ALWAYS" />
                                 <Label fx:id="recordedChunks" text="0/0" HBox.hgrow="NEVER" />
                             </children>
                         </HBox>
@@ -66,7 +66,7 @@
                                         <FontIcon iconLiteral="mdi-check-circle-outline" />
                                     </graphic>
                                 </Label>
-                                <JFXProgressBar fx:id="selectedProgress" styleClass="chapter-card__selected-progress" maxWidth="1.7976931348623157E308" progress="0.0" HBox.hgrow="ALWAYS" />
+                                <MFXProgressBar fx:id="selectedProgress" styleClass="chapter-card__selected-progress" maxWidth="1.7976931348623157E308" progress="0.0" HBox.hgrow="ALWAYS" />
                                 <Label fx:id="selectedChunks" text="0/0" HBox.hgrow="NEVER" />
                             </children>
                         </HBox>

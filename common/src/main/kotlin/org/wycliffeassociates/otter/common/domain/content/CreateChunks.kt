@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020-2024 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.common.domain.content
 
 import com.fasterxml.jackson.annotation.JsonInclude
@@ -292,17 +310,13 @@ class CreateChunks @Inject constructor(
             if (file.exists() && file.length() > 0) {
                 val map: Chunkification = mapper.readValue(file)
                 chunks.putAll(map)
-                logger.error("restoring chunks")
             }
         } catch (e: MismatchedInputException) {
             // clear file if it can't be read
             file.writer().use { }
         }
 
-        logger.error("adding chunks to chapter: $chapterNumber")
         chunks[chapterNumber] = chunksToAdd
-
-        logger.error("File with chunks is ${file.absolutePath}")
 
         file.writer().use {
             mapper.writeValue(it, chunks)

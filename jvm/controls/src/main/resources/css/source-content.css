@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 .source-content {
     -fx-focus-traversable: false;
 }
@@ -71,7 +70,7 @@
     -fx-pref-height: 30px;
 }
 
-.source-content__minimize-btn:focused {
+.source-content__minimize-btn:focus-visible {
     -fx-border-width: 4px;
     -fx-border-color: -wa-button-border;
 }
@@ -93,10 +92,9 @@
     -fx-border-width: 3px;
     -fx-border-radius: 6px;
     -fx-border-color: transparent;
-    -fx-padding: 5;
 }
 
-.source-content__chunk-list:focused {
+.source-content__chunk-list:focus-visible {
     -fx-border-color: -wa-card-border;
 }
 

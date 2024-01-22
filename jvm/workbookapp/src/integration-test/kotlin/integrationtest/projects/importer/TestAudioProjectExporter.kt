@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2023 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -118,6 +118,7 @@ class TestAudioProjectExporter {
     private fun setUpProject(): File {
         return ResourceContainerBuilder
             .setUpEmptyProjectBuilder()
+            .setOngoingProject(true)
             .setContributors(contributors)
             .addTake(1, ContentType.META, 1, true)
             .addTake(1, ContentType.TEXT, 1, true, chapter = 1, start = 1, end = 1)

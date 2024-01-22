@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020-2024 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
@@ -8,8 +26,12 @@ import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ProgressStatus
 import org.wycliffeassociates.otter.common.data.primitives.Collection
+import org.wycliffeassociates.otter.common.data.workbook.Chapter
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterDescriptor
 import org.wycliffeassociates.otter.common.data.workbook.WorkbookDescriptor
+import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
+import org.wycliffeassociates.otter.common.domain.project.ProjectCompletionStatus
 import org.wycliffeassociates.otter.common.domain.project.exporter.AudioProjectExporter
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOptions
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
@@ -41,6 +63,12 @@ class ExportProjectViewModel : ViewModel() {
     @Inject
     lateinit var exportAudioUseCase: AudioProjectExporter
 
+    @Inject
+    lateinit var narrationFactory: NarrationFactory
+
+    @Inject
+    lateinit var projectCompletionStatus: ProjectCompletionStatus
+
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
     }
@@ -52,31 +80,25 @@ class ExportProjectViewModel : ViewModel() {
             .fromCallable {
                 workbookRepo.get(workbookDescriptor.sourceCollection, workbookDescriptor.targetCollection)
             }
-            .flatMapObservable { workbook ->
-                workbook.target.chapters
-                    .map { chapter ->
-                        val chunkCount = chapter.chunkCount.blockingGet()
+            .map { workbook ->
+                workbook
+                    .target
+                    .chapters
+                    .toList()
+                    .map { chapters ->
+                        chapters.map { chapter ->
+                            val progress = when {
+                                chapter.hasSelectedAudio() -> 1.0
+                                hasInProgressNarration(workbook, chapter) -> {
+                                    projectCompletionStatus.getChapterNarrationProgress(workbook, chapter)
+                                }
 
-                        val progress = when {
-                            chapter.hasSelectedAudio() -> 1.0
-                            chunkCount != 0 -> {
-                                // collect chunks from the relay as soon as it starts emitting (blocking)
-                                val chunkWithAudio = chapter.chunks
-                                    .take(1)
-                                    .map {
-                                        it.count { it.hasSelectedAudio() }
-                                    }
-                                    .blockingFirst()
-
-                                chunkWithAudio.toDouble() / chunkCount
+                                else -> projectCompletionStatus.getChapterTranslationProgress(chapter)
                             }
-                            else -> 0.0
+                            ChapterDescriptor(chapter.sort, progress, progress > 0)
                         }
-
-                        ChapterDescriptor(chapter.sort, progress)
-                    }
+                    }.blockingGet() // blocking get is required for the .cache() observable to emit
             }
-            .toList()
             .subscribeOn(Schedulers.io())
             .doOnError { logger.error("Error retrieving chapters to export.", it) }
     }
@@ -117,6 +139,21 @@ class ExportProjectViewModel : ViewModel() {
         }
     }
 
+    fun getEstimateExportSize(
+        workbookDescriptor: WorkbookDescriptor,
+        chapters: List<Int>,
+        exportType: ExportType
+    ): Long {
+        val workbook = workbookRepo.get(workbookDescriptor.sourceCollection, workbookDescriptor.targetCollection)
+        return when(exportType) {
+            ExportType.BACKUP -> exportBackupUseCase.estimateExportSize(workbook, chapters)
+            ExportType.LISTEN -> exportAudioUseCase.estimateExportSize(workbook, chapters)
+            ExportType.SOURCE_AUDIO,
+            ExportType.PUBLISH -> exportSourceUseCase.estimateExportSize(workbook, chapters)
+            else -> 0L
+        }
+    }
+
     private fun setUpCallback(emitter: ObservableEmitter<ProgressStatus>): ProjectExporterCallback {
         return object : ProjectExporterCallback {
             override fun onNotifySuccess(project: Collection, file: File) {
@@ -140,5 +177,10 @@ class ExportProjectViewModel : ViewModel() {
                 )
             }
         }
+    }
+
+    private fun hasInProgressNarration(workbook: Workbook, chapter: Chapter): Boolean {
+        val files = workbook.projectFilesAccessor.getInProgressNarrationFiles(workbook, chapter)
+        return files.all { it.exists() }
     }
 }

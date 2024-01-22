@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -22,7 +22,7 @@ import tornadofx.FXEvent
 import tornadofx.View
 
 class NavigationRequestEvent(val view: View) : FXEvent()
-class OpenChapterEvent(val chapterNumber: Int) : FXEvent()
 class NavigationRequestBlockedEvent(val navigationRequest: NavigationRequestEvent) : FXEvent()
+class NavigateChapterEvent(val chapterNumber: Int) : FXEvent()
 
 object AppCloseRequestEvent : FXEvent()

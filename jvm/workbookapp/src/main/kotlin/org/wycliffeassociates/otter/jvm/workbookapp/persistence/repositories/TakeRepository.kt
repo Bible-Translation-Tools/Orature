@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2023 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -59,6 +59,21 @@ class TakeRepository @Inject constructor(
             }
             .doOnError { e ->
                 logger.error("Error in delete with take: $obj", e)
+            }
+            .subscribeOn(Schedulers.io())
+    }
+
+    override fun deleteForContent(content: Content): Completable {
+        return Completable
+            .fromAction {
+                takeDao
+                    .fetchByContentId(content.id, true)
+                    .forEach {
+                        takeDao.delete(it)
+                    }
+            }
+            .doOnError { e ->
+                logger.error("Error in deleteForContent: $content\n", e)
             }
             .subscribeOn(Schedulers.io())
     }

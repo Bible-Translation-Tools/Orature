@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -60,6 +60,10 @@
 
 .scrolling-waveform__playback-line {
     -fx-stroke: -wa-playback-line;
+}
+
+.scrolling-waveform-frame__image-container {
+    -fx-background-color: white;
 }
 
 .scrolling-waveform-frame__top-track {

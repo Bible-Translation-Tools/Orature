@@ -1,8 +1,25 @@
+/**
+ * Copyright (C) 2020-2024 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.jfoenix.controls.JFXSnackbar
-import io.reactivex.disposables.Disposable
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.EventHandler
 import javafx.scene.Node
@@ -51,7 +68,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookQuickBacku
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ImportProjectViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ExportProjectViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel2
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.NOTIFICATION_DURATION_SEC
+import org.wycliffeassociates.otter.jvm.workbookapp.NOTIFICATION_DURATION_SEC
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectWizardViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
@@ -61,7 +78,7 @@ import java.text.MessageFormat
 
 class HomePage2 : View() {
 
-    private val logger = LoggerFactory.getLogger(HomePage::class.java)
+    private val logger = LoggerFactory.getLogger(HomePage2::class.java)
     private val listeners = mutableListOf<ListenerDisposer>()
 
     private val viewModel: HomePageViewModel2 by inject()
@@ -254,9 +271,8 @@ class HomePage2 : View() {
                 ?: return@subscribe
 
             viewModel.removeProjectFromList(cardModel)
-
-            val cancellable = viewModel.deleteProjectGroupWithTimer(cardModel)
-            val notification = createProjectGroupDeleteNotification(cardModel, cancellable)
+            viewModel.deleteProjectGroupWithTimer(cardModel)
+            val notification = createProjectGroupDeleteNotification(cardModel)
             showNotification(notification)
         }
 
@@ -294,12 +310,17 @@ class HomePage2 : View() {
                 orientationProperty.set(settingsViewModel.orientationProperty.value)
                 themeProperty.set(settingsViewModel.appColorMode.value)
                 workbookDescriptorProperty.set(workbookDescriptor)
+                onEstimateSizeAction.set(exportProjectViewModel::getEstimateExportSize)
+                open()
+
+                open()
 
                 exportProjectViewModel.loadChapters(workbookDescriptor)
                     .observeOnFx()
                     .subscribe { chapters ->
                         this.chapters.setAll(chapters)
-                        open()
+                        this.selectedChapters.clear()
+                        this.selectedChapters.addAll(chapters.filter { it.selectable })
                     }
 
                 setOnCloseAction { this.close() }
@@ -343,6 +364,7 @@ class HomePage2 : View() {
             themeProperty.set(settingsViewModel.appColorMode.value)
             viewModel.isLoadingProperty.onChangeWithDisposer {
                 if (it == true) {
+                    messageProperty.set(messages["loadingProjectWait"])
                     open()
                 } else {
                     close()
@@ -536,8 +558,7 @@ class HomePage2 : View() {
     }
 
     private fun createProjectGroupDeleteNotification(
-        cardModel: ProjectGroupCardModel,
-        cancellable: Disposable
+        cardModel: ProjectGroupCardModel
     ): NotificationViewData {
         return NotificationViewData(
             title = messages["projectDeleted"],
@@ -551,14 +572,7 @@ class HomePage2 : View() {
             actionText = messages["undo"],
             actionIcon = MaterialDesign.MDI_UNDO
         ) {
-            // undo deletion by cancelling the task
-            cancellable.dispose()
-            // reinsert the project group
-            viewModel.projectGroups.add(cardModel)
-            if (viewModel.projectGroups.size == 1) {
-                viewModel.bookList.setAll(cardModel.books)
-                viewModel.selectedProjectGroupProperty.set(cardModel.getKey())
-            }
+            viewModel.undoDeleteProjectGroup(cardModel)
         }
     }
 

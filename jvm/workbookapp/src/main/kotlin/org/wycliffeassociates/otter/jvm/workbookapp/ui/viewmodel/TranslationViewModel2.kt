@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020-2024 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
@@ -40,6 +58,7 @@ class TranslationViewModel2 : ViewModel() {
     val canRedoProperty = SimpleBooleanProperty(false)
     val isFirstChapterProperty = SimpleBooleanProperty(false)
     val isLastChapterProperty = SimpleBooleanProperty(false)
+    val noSourceAudioProperty = SimpleBooleanProperty(false)
     val showAudioMissingViewProperty = SimpleBooleanProperty(false)
     val selectedStepProperty = SimpleObjectProperty<ChunkingStep>(null)
     val reachableStepProperty = SimpleObjectProperty<ChunkingStep>(ChunkingStep.CHUNKING)
@@ -51,6 +70,7 @@ class TranslationViewModel2 : ViewModel() {
     val chunkList = observableListOf<ChunkViewData>()
     val chunkListProperty = SimpleListProperty<ChunkViewData>(chunkList)
     val selectedChunkBinding = workbookDataStore.activeChunkProperty.integerBinding { it?.sort ?: -1 }
+    val loadingStepProperty = SimpleBooleanProperty(false)
 
     private val compositeDisposable = CompositeDisposable()
 
@@ -84,6 +104,7 @@ class TranslationViewModel2 : ViewModel() {
 
     fun navigateChapter(chapter: Int) {
         selectedStepProperty.set(null)
+        noSourceAudioProperty.set(false)
         showAudioMissingViewProperty.set(false)
 
         workbookDataStore.workbook.target
@@ -99,8 +120,13 @@ class TranslationViewModel2 : ViewModel() {
     }
 
     fun navigateStep(target: ChunkingStep) {
-        selectedStepProperty.set(target)
-        resetUndoRedo()
+        if (!loadingStepProperty.value) {
+            loadingStepProperty.set(true)
+            runLater {
+                selectedStepProperty.set(target)
+            }
+            resetUndoRedo()
+        }
     }
 
     fun selectChunk(chunkNumber: Int) {
@@ -220,6 +246,7 @@ class TranslationViewModel2 : ViewModel() {
             .subscribeOn(Schedulers.io())
             .observeOnFx()
             .doOnSuccess {
+                noSourceAudioProperty.set(false)
                 updateStep {
                     if (reachableStepProperty.value == ChunkingStep.CHUNKING) {
                         selectedStepProperty.set(ChunkingStep.CONSUME_AND_VERBALIZE)
@@ -228,12 +255,29 @@ class TranslationViewModel2 : ViewModel() {
                     }
                 }
             }
-            .doOnComplete {
-                showAudioMissingViewProperty.set(true)
-                reachableStepProperty.set(null)
-                compositeDisposable.clear()
+            .doOnComplete { // source audio not found
+                handleSourceAudioUnavailable(chapter)
             }
             .subscribe()
+    }
+
+    private fun handleSourceAudioUnavailable(chapter: Chapter) {
+        showAudioMissingViewProperty.set(true)
+        val chapterHasChunks = chapter
+            .chunks
+            .take(1)
+            .blockingFirst()
+            .isNotEmpty()
+
+        if (chapterHasChunks) {
+            noSourceAudioProperty.set(true)
+            updateStep {
+                selectedStepProperty.set(reachableStepProperty.value)
+            }
+        } else {
+            reachableStepProperty.set(null)
+            compositeDisposable.clear()
+        }
     }
 
     private fun resetUndoRedo() {

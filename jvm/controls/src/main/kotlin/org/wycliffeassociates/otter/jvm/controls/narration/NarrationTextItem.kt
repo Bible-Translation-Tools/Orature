@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -262,7 +262,6 @@ class NarrationTextItem : VBox() {
                         addPseudoClass("inactive")
                         text = messages["record"]
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
-                        setDisabled(true)
                     }
                     visibleProperty().bind(stateProperty.isEqualTo(TeleprompterItemState.RECORD_DISABLED))
                 }
@@ -343,27 +342,29 @@ class NarrationTextItem : VBox() {
         graphic: Node? = null,
         op: Button.() -> Unit = {}
     ): Button {
-        return Button(text).attachTo(this, op) {
-            it.disableWhen {
-                isPlayingProperty.or(
-                    isRecordingProperty.and(
-                        stateProperty.isNotEqualTo(TeleprompterItemState.RECORD_ACTIVE)
-                            .and(
-                                stateProperty.isNotEqualTo(TeleprompterItemState.RECORD_AGAIN_ACTIVE)
-                            ).and(
-                                stateProperty.isNotEqualTo(TeleprompterItemState.RECORD_AGAIN_PAUSED)
-                            ).and(
-                                stateProperty.isNotEqualTo(TeleprompterItemState.RECORDING_PAUSED)
-                            )
-                    )
-                ).or(
-                    stateProperty.isEqualTo(TeleprompterItemState.RECORD_AGAIN_DISABLED)
-                )
+        return Button(text).attachTo(this, op) { btn ->
+            val recordingStates = listOf(
+                TeleprompterItemState.RECORD_ACTIVE,
+                TeleprompterItemState.RECORD_AGAIN_ACTIVE,
+                TeleprompterItemState.RECORD_AGAIN_PAUSED,
+                TeleprompterItemState.RECORDING_PAUSED,
+            )
+            btn.disableWhen {
+                booleanBinding(stateProperty, isPlayingProperty, isRecordingProperty) {
+                    val differentItemRecording = isRecordingProperty.value && state !in recordingStates
+                    when {
+                        isPlayingProperty.value -> true
+                        differentItemRecording -> true
+                        stateProperty.value == TeleprompterItemState.RECORD_DISABLED -> true
+                        stateProperty.value == TeleprompterItemState.RECORD_AGAIN_DISABLED -> true
+                        else -> false
+                    }
+                }
             }
-            if (graphic != null) it.graphic = graphic
-            it.tooltip = Tooltip().apply {
+            if (graphic != null) btn.graphic = graphic
+            btn.tooltip = Tooltip().apply {
                 addClass("tooltip-text")
-                textProperty().bind(it.textProperty())
+                textProperty().bind(btn.textProperty())
             }
         }
     }

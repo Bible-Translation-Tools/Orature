@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -31,6 +31,8 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.jvm.controls.SCROLL_INCREMENT_UNIT
+import org.wycliffeassociates.otter.jvm.controls.SCROLL_JUMP_UNIT
 import org.wycliffeassociates.otter.jvm.utils.simulateKeyPress
 import tornadofx.*
 import java.util.concurrent.TimeUnit
@@ -257,8 +259,12 @@ class AudioPlayerController(
                 toggle()
             }
 
-            val percent = if (speed == ScrollSpeed.FAST) FAST_SEEK_INTERVAL else SEEK_INTERVAL
-            val interval = percentageToLocation(percent)
+            val interval = if (speed == ScrollSpeed.FAST) {
+                SCROLL_INCREMENT_UNIT * 10
+            } else {
+                SCROLL_INCREMENT_UNIT
+            }.toInt()
+
             var location = it.getLocationInFrames()
             when (keyCode) {
                 KeyCode.LEFT -> location -= interval

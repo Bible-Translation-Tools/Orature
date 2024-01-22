@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -20,17 +20,22 @@ package org.wycliffeassociates.otter.common.domain.project.exporter.resourcecont
 
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import org.apache.commons.io.FileUtils
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.inProgressNarrationPattern
 import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.takeFilenamePattern
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportOptions
 import org.wycliffeassociates.otter.common.domain.project.exporter.ExportResult
 import org.wycliffeassociates.otter.common.domain.project.exporter.ProjectExporterCallback
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import java.io.File
 import java.lang.Exception
+import java.util.regex.Pattern
+import java.util.zip.ZipFile
 import javax.inject.Inject
 
 class BackupProjectExporter @Inject constructor(
@@ -74,7 +79,11 @@ class BackupProjectExporter @Inject constructor(
                         workbookRepository,
                         isBook = true
                     ) {
-                        takesFilter(it, options)
+                        takesFilter(it, takeFilenamePattern, options)
+                    }
+
+                    projectAccessor.copyInProgressNarrationFiles(fileWriter) {
+                        takesFilter(it, inProgressNarrationPattern, options)
                     }
                     callback?.onNotifyProgress(70.0, messageKey = "copyingSource")
 
@@ -91,12 +100,12 @@ class BackupProjectExporter @Inject constructor(
                         workbook,
                         isBook = true
                     ) { takeName ->
-                        takesFilter(takeName, options)
+                        takesFilter(takeName, takeFilenamePattern, options)
                     }
-                    projectAccessor.writeChunksFile(fileWriter)
+                    projectAccessor.writeChunksFile(fileWriter, options?.chapters)
                     projectAccessor.copyProjectModeFile(fileWriter)
                     projectAccessor.writeTakeCheckingStatus(fileWriter, workbook) { path ->
-                        takesFilter(path, options)
+                        takesFilter(path, takeFilenamePattern, options)
                     }.blockingAwait()
                 }
 
@@ -112,14 +121,56 @@ class BackupProjectExporter @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
-    private fun takesFilter(path: String, exportOptions: ExportOptions?): Boolean {
+    override fun estimateExportSize(workbook: Workbook, chapterFilter: List<Int>): Long {
+        var size = 0L
+        val projectAccessor = workbook.projectFilesAccessor
+        val chapterRegex = Regex("""c(\d+)""")
+        val takeDir = projectAccessor.projectDir.resolve(RcConstants.TAKE_DIR)
+        val chapterDirs = takeDir
+            .listFiles()
+            ?.filter {
+                val chapter = chapterRegex.find(it.name)?.groupValues?.get(1)?.toIntOrNull()
+                chapter in chapterFilter && it.isDirectory
+            }
+
+        chapterDirs?.forEach {
+            size += FileUtils.sizeOfDirectory(it)
+        }
+        size += FileUtils.sizeOfDirectory(projectAccessor.sourceAudioDir)
+        size += estimateSourceSize(workbook)
+
+        return size
+    }
+
+    /**
+     * Estimates the size of source media included in the export file.
+     */
+    private fun estimateSourceSize(workbook: Workbook): Long {
+        val project = workbook.source.slug
+        val file = workbook.source.resourceMetadata.path
+        var size = 0L
+
+        ZipFile(file).use { zip ->
+            zip.entries()
+            .asIterator()
+            .forEach {
+                if (it.name.contains("${RcConstants.SOURCE_MEDIA_DIR}/${project}")) {
+                    size += it.compressedSize
+                }
+            }
+        }
+
+        return size
+    }
+
+    private fun takesFilter(path: String, pattern: Pattern, exportOptions: ExportOptions?): Boolean {
         if (exportOptions == null) {
             return true
         }
 
         return try {
-            takeFilenamePattern
-                .matcher(path)
+            pattern
+                .matcher(File(path).invariantSeparatorsPath)
                 .apply { find() }
                 .group(1)
                 .toInt() in exportOptions.chapters

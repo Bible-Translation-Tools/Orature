@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -20,9 +20,11 @@ package org.wycliffeassociates.otter.common.io.zip
 
 import java.io.BufferedWriter
 import java.io.File
+import java.io.OutputStream
 
 interface IFileWriter : AutoCloseable {
     fun bufferedWriter(filepath: String): BufferedWriter
+    fun outputStream(filepath: String): OutputStream
     fun copyDirectory(source: File, destination: String, filter: (String) -> Boolean = { _ -> true })
     fun copyFile(source: File, destination: String)
 }

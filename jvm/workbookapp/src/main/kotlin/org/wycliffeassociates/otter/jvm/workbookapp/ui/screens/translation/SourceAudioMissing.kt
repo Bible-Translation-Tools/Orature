@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020-2024 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
@@ -5,7 +23,6 @@ import com.jfoenix.controls.JFXSnackbar
 import javafx.event.EventHandler
 import javafx.scene.input.DragEvent
 import javafx.scene.input.TransferMode
-import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
@@ -17,13 +34,13 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.jvm.controls.dialog.ProgressDialog
-import org.wycliffeassociates.otter.jvm.controls.event.OpenChapterEvent
+import org.wycliffeassociates.otter.jvm.controls.event.NavigateChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ProjectImportFinishEvent
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
 import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
 import org.wycliffeassociates.otter.jvm.controls.popup.NotificationSnackBar
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ImportProjectViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.NOTIFICATION_DURATION_SEC
+import org.wycliffeassociates.otter.jvm.workbookapp.NOTIFICATION_DURATION_SEC
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -203,6 +220,11 @@ class SourceAudioMissing : View() {
         }
     }
 
+    override fun onDock() {
+        super.onDock()
+        viewModel.loadingStepProperty.set(false)
+    }
+
     private fun onDragOverHandler(): EventHandler<DragEvent> {
         return EventHandler {
             if (it.gestureSource != this && it.dragboard.hasFiles()) {
@@ -327,6 +349,6 @@ class SourceAudioMissing : View() {
     private fun refresh() {
         val chapter = workbookDataStore.chapter.sort
         workbookDataStore.activeChapterProperty.set(null)
-        FX.eventbus.fire(OpenChapterEvent(chapter))
+        FX.eventbus.fire(NavigateChapterEvent(chapter))
     }
 }

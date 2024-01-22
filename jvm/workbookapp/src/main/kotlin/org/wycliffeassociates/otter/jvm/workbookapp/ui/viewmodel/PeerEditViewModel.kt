@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020-2024 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
@@ -20,6 +38,7 @@ import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.translation.TranslationTakeApproveAction
 import org.wycliffeassociates.otter.common.domain.model.UndoableActionHistory
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
+import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import org.wycliffeassociates.otter.jvm.controls.waveform.IWaveformViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
@@ -27,6 +46,7 @@ import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
+import org.wycliffeassociates.otter.jvm.controls.waveform.WAVEFORM_MAX_HEIGHT
 import tornadofx.*
 import javax.inject.Inject
 
@@ -64,7 +84,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
 
     private val newTakeProperty = SimpleObjectProperty<Take>(null)
     private val builder = ObservableWaveformBuilder()
-    private val height = Integer.min(Screen.getMainScreen().platformHeight, 500)
+    private val height = Integer.min(Screen.getMainScreen().platformHeight, WAVEFORM_MAX_HEIGHT.toInt())
     private val width = Screen.getMainScreen().platformWidth
     private val disposableListeners = mutableListOf<ListenerDisposer>()
     private val selectedTakeDisposable = CompositeDisposable()
@@ -90,6 +110,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         }.also { disposableListeners.add(it) }
 
         sourcePlayerProperty.bind(audioDataStore.sourceAudioPlayerProperty)
+        translationViewModel.loadingStepProperty.set(false)
     }
 
     fun undock() {
@@ -125,6 +146,18 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
 
     fun seek(location: Int) {
         audioController?.seek(location)
+    }
+
+    fun rewind(speed: ScrollSpeed) {
+        if (!isPlayingProperty.value) {
+            audioController?.rewind(speed)
+        }
+    }
+
+    fun fastForward(speed: ScrollSpeed) {
+        if (!isPlayingProperty.value) {
+            audioController?.fastForward(speed)
+        }
     }
 
     fun confirmChunk() {

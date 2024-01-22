@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2023 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -35,7 +35,7 @@ class ZipEntryTreeBuilder @Inject constructor() : IZipEntryTreeBuilder {
 
     private fun createZipFileSystem(zipFilename: String): FileSystem {
         val path = Paths.get(zipFilename)
-        return FileSystems.newFileSystem(path, null)
+        return FileSystems.newFileSystem(path, null as java.lang.ClassLoader?)
     }
 
     override fun buildOtterFileTree(

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2023 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -36,7 +36,6 @@ class ExportChapterViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val workbookDataStore: WorkbookDataStore by inject()
-    private val workbookPageViewModel: WorkbookPageViewModel by inject()
     private val chapterViewModel: ChapterPageViewModel by inject()
 
     val contributors = observableListOf<Contributor>()
@@ -66,7 +65,9 @@ class ExportChapterViewModel : ViewModel() {
     }
 
     fun loadContributors() {
-        contributors.setAll(workbookPageViewModel.contributors)
+        contributors.setAll(
+            workbookDataStore.workbook.projectFilesAccessor.getContributorInfo()
+        )
     }
 
     fun saveContributors() {

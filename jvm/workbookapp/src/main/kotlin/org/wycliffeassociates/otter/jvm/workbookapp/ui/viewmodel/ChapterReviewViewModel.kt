@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020-2024 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
@@ -7,14 +25,12 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import javafx.animation.AnimationTimer
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.scene.control.Slider
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
@@ -35,6 +51,7 @@ import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerControll
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
+import org.wycliffeassociates.otter.jvm.controls.waveform.WAVEFORM_MAX_HEIGHT
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
@@ -80,7 +97,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     lateinit var waveform: Observable<Image>
     private val sourceAudio by audioDataStore.sourceAudioProperty
     private val width = Screen.getMainScreen().platformWidth
-    private val height = Integer.min(Screen.getMainScreen().platformHeight, 500)
+    private val height = Integer.min(Screen.getMainScreen().platformHeight, WAVEFORM_MAX_HEIGHT.toInt())
     private val builder = ObservableWaveformBuilder()
 
     var subscribeOnWaveformImages: () -> Unit = {}
@@ -194,6 +211,9 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
             }
             .subscribeOn(Schedulers.io())
             .observeOnFx()
+            .doFinally {
+                translationViewModel.loadingStepProperty.set(false)
+            }
             .subscribe { audio ->
                 loadVerseMarkers(audio)
                 createWaveformImages(audio)
@@ -222,17 +242,26 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
 
     private fun loadVerseMarkers(audio: OratureAudioFile) {
         markers.clear()
-        val sourceAudio = OratureAudioFile(sourceAudio.file)
-        val sourceMarkers = sourceAudio.getMarker<VerseMarker>()
         val markerList = audio.getMarker<VerseMarker>().map {
             ChunkMarkerModel(AudioCue(it.location, it.label))
         }
+        val wb = workbookDataStore.workbook
+        val verseLabels = wb.projectFilesAccessor.getChapterContent(
+            wb.target.slug,
+            workbookDataStore.chapter.sort
+        ).map { content ->
+            if (content.start != content.end) {
+                "${content.start}-${content.end}"
+            } else {
+                "${content.start}"
+            }
+        }
 
-        totalMarkersProperty.set(sourceMarkers.size)
+        totalMarkersProperty.set(verseLabels.size)
         markerModel = VerseMarkerModel(
             audio,
-            sourceMarkers.size,
-            sourceMarkers.map { it.label }
+            verseLabels.size,
+            verseLabels
         ).also {
             it.loadMarkers(markerList)
         }

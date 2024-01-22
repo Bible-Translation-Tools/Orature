@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -37,6 +37,9 @@ import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import org.wycliffeassociates.otter.jvm.controls.marker.MarkerTrackControl
 
 import tornadofx.*
+import kotlin.math.min
+
+const val WAVEFORM_MAX_HEIGHT = 500.0
 
 class WaveformFrame(
     topTrack: Node? = null,
@@ -54,6 +57,7 @@ class WaveformFrame(
     val onResumeMediaProperty = SimpleObjectProperty<() -> Unit>()
     val onSeekPreviousProperty = SimpleObjectProperty<() -> Unit>()
     val onSeekNextProperty = SimpleObjectProperty<() -> Unit>()
+    val onSeekProperty = SimpleObjectProperty<(Int) -> Unit>()
 
     val themeProperty = SimpleObjectProperty<ColorTheme>()
     val framePositionProperty = SimpleDoubleProperty(0.0)
@@ -130,6 +134,7 @@ class WaveformFrame(
                      * 2. The width of the marker track will not extend to the end of the waveform for longer recordings
                      */
                     hbox {
+                        addClass("scrolling-waveform-frame__image-container")
                         alignment = Pos.CENTER
                         imageHolder = this@hbox
                     }
@@ -160,6 +165,7 @@ class WaveformFrame(
                             val me = (it as MarkerTrackControl)
                             me.onSeekPreviousProperty.bind(this@WaveformFrame.onSeekPreviousProperty)
                             me.onSeekNextProperty.bind(this@WaveformFrame.onSeekNextProperty)
+                            me.onSeekProperty.bind(this@WaveformFrame.onSeekProperty)
                         })
                     }
                 }
@@ -247,7 +253,11 @@ class WaveformFrame(
                 this.effect = waveformColorEffect
                 // This is to adjust the height of the image to fit within the tracks
                 if (uiVersionProperty.value == UIVersion.THREE) {
-                    fitHeightProperty().bind(imageRegion.heightProperty())
+                    fitHeightProperty().bind(
+                        imageRegion.heightProperty().doubleBinding {
+                            it?.let { min(WAVEFORM_MAX_HEIGHT, it.toDouble()) } ?: image.height
+                        }
+                    )
                 } else {
                     fitHeightProperty()
                         .bind(

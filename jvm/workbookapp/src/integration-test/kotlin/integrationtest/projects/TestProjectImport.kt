@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2023 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -27,10 +27,12 @@ import org.wycliffeassociates.otter.common.ResourceContainerBuilder
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
+import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.ContentType.META
 import org.wycliffeassociates.otter.common.data.primitives.ContentType.TEXT
 import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
@@ -229,9 +231,13 @@ class TestProjectImport {
             javaClass.classLoader.getResource("resource-containers/$projectFileName").path
         )
         return ResourceContainerBuilder(file)
+            .setProjectMode(ProjectMode.TRANSLATION)
             .addTake(1, ContentType.TEXT, 1, true, chapter = 1, start = 1, end = 1)
             .addTake(2, ContentType.TEXT, 1, true, chapter = 2, start = 1, end = 1, checking = TakeCheckingState(checking, "test"))
             .addTake(3, ContentType.TEXT, 1, true, chapter = 3, start = 1, end = 1, checking = TakeCheckingState(checking, "test"))
+            .addChunk(Content( sort = 1, labelKey = "chunk", start = 1, end = 1, selectedTake = null, text = "", format = "usfm", type = TEXT, draftNumber = 2 ), 1)
+            .addChunk(Content( sort = 2, labelKey = "chunk", start = 1, end = 1, selectedTake = null, text = "", format = "usfm", type = TEXT, draftNumber = 2 ), 2)
+            .addChunk(Content( sort = 3, labelKey = "chunk", start = 1, end = 1, selectedTake = null, text = "", format = "usfm", type = TEXT, draftNumber = 2 ), 3)
             .buildFile()
     }
 }

@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020-2024 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import javafx.beans.binding.Bindings
@@ -8,7 +26,7 @@ import org.wycliffeassociates.otter.jvm.controls.event.ChunkSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ChunkingStepSelectedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.GoToNextChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.GoToPreviousChapterEvent
-import org.wycliffeassociates.otter.jvm.controls.event.OpenChapterEvent
+import org.wycliffeassociates.otter.jvm.controls.event.NavigateChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.BlindDraft
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.Chunking
@@ -29,7 +47,13 @@ class ChunkingTranslationPage : View() {
 
     private val mainFragmentProperty = viewModel.selectedStepProperty.objectBinding { step ->
         val fragment = when(step) {
-            ChunkingStep.CONSUME_AND_VERBALIZE -> find<Consume>()
+            ChunkingStep.CONSUME_AND_VERBALIZE -> {
+                if (viewModel.noSourceAudioProperty.value) {
+                    find<SourceAudioMissing>()
+                } else {
+                    find<Consume>()
+                }
+            }
             ChunkingStep.CHUNKING -> find<Chunking>()
             ChunkingStep.BLIND_DRAFT -> find<BlindDraft>()
             ChunkingStep.PEER_EDIT,
@@ -62,7 +86,8 @@ class ChunkingTranslationPage : View() {
 
             left = ChunkingStepsDrawer(viewModel.selectedStepProperty).apply {
                 chunksProperty.bind(viewModel.chunkListProperty)
-                this.reachableStepProperty.bind(viewModel.reachableStepProperty)
+                reachableStepProperty.bind(viewModel.reachableStepProperty)
+                noSourceAudioProperty.bind(viewModel.noSourceAudioProperty)
             }
 
             centerProperty().bind(mainFragmentProperty)
@@ -71,7 +96,9 @@ class ChunkingTranslationPage : View() {
                 visibleWhen {
                     viewModel.selectedStepProperty.booleanBinding { step ->
                         step?.let {
-                            it.ordinal >= ChunkingStep.PEER_EDIT.ordinal
+                            val showSourceText = viewModel.noSourceAudioProperty.value ||
+                                    it.ordinal >= ChunkingStep.PEER_EDIT.ordinal
+                            showSourceText
                         } ?: false
                     }
                 }
@@ -88,8 +115,8 @@ class ChunkingTranslationPage : View() {
     init {
         tryImportStylesheet("/css/chapter-selector.css")
         tryImportStylesheet("/css/chapter-grid.css")
+        tryImportStylesheet("/css/translation-page.css")
         tryImportStylesheet("/css/consume-page.css")
-        tryImportStylesheet("/css/chunking-page.css")
         tryImportStylesheet("/css/blind-draft-page.css")
         tryImportStylesheet("/css/audio-player.css")
         tryImportStylesheet("/css/source-content.css")
@@ -110,7 +137,7 @@ class ChunkingTranslationPage : View() {
         subscribe<GoToPreviousChapterEvent> {
             viewModel.previousChapter()
         }
-        subscribe<OpenChapterEvent> {
+        subscribe<NavigateChapterEvent> {
             viewModel.navigateChapter(it.chapterNumber)
         }
     }

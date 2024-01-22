@@ -1,6 +1,27 @@
+/**
+ * Copyright (C) 2020-2024 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Completable
+import io.reactivex.Observable
+import io.reactivex.schedulers.Schedulers
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.ObservableValue
@@ -10,12 +31,15 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
+import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.function.Predicate
 import javax.inject.Inject
 
@@ -24,6 +48,8 @@ class ProjectWizardViewModel : ViewModel() {
 
     @Inject
     lateinit var creationUseCase: CreateProject
+    @Inject
+    lateinit var deleteProjectUseCase: DeleteProject
     @Inject
     lateinit var languageRepo: ILanguageRepository
     @Inject
@@ -43,6 +69,7 @@ class ProjectWizardViewModel : ViewModel() {
 
     val sourceLanguageSearchQueryProperty = SimpleStringProperty("")
     val targetLanguageSearchQueryProperty = SimpleStringProperty("")
+    private val projectDeleteCounter = AtomicInteger(0)
 
     private val disposableListeners = mutableListOf<ListenerDisposer>()
 
@@ -111,15 +138,17 @@ class ProjectWizardViewModel : ViewModel() {
     fun onLanguageSelected(language: Language, onNavigateBack: () -> Unit) {
         val sourceLanguage = selectedSourceLanguageProperty.value
         if (sourceLanguage != null) {
-            logger.info("Creating project group: ${sourceLanguage.slug} - ${language.slug}")
+            logger.info("Creating project group: ${sourceLanguage.name} - ${language.name}")
             creationUseCase
                 .createAllBooks(
                     sourceLanguage,
                     language,
                     selectedModeProperty.value
                 )
+                .startWith(waitForProjectDeletionFinishes())
                 .observeOnFx()
                 .subscribe {
+                    logger.info("Project group created: ${sourceLanguage.name} - ${language.name}")
                     existingLanguagePairs.add(Pair(sourceLanguage, language))
                     reset()
                     onNavigateBack()
@@ -153,6 +182,20 @@ class ProjectWizardViewModel : ViewModel() {
         reset()
         disposableListeners.forEach { it.dispose() }
         disposableListeners.clear()
+    }
+
+    fun increaseProjectDeleteCounter() { projectDeleteCounter.incrementAndGet() }
+    fun decreaseProjectDeleteCounter() { projectDeleteCounter.decrementAndGet() }
+
+    /**
+     * Blocks the execution of project creation until projects delete queue completes.
+     */
+    private fun waitForProjectDeletionFinishes(): Completable {
+        val waitIntervalMillis = 100L
+        return Observable.interval(waitIntervalMillis, TimeUnit.MILLISECONDS)
+            .takeWhile { projectDeleteCounter.get() > 0 }
+            .subscribeOn(Schedulers.io())
+            .ignoreElements()
     }
 
     private fun reset() {

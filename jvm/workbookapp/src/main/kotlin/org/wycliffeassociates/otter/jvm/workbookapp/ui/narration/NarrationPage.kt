@@ -1,14 +1,46 @@
+/**
+ * Copyright (C) 2020-2024 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import com.github.thomasnield.rxkotlinfx.toLazyBinding
-import com.jfoenix.controls.JFXSnackbar
-import com.jfoenix.controls.JFXSnackbarLayout
-import javafx.util.Duration
+import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.dialog.SavingModal
-import org.wycliffeassociates.otter.jvm.controls.event.*
+import org.wycliffeassociates.otter.jvm.controls.event.BeginRecordingEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ChapterReturnFromPluginEvent
+import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.NavigateChapterEvent
+import org.wycliffeassociates.otter.jvm.controls.event.OpenInAudioPluginEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PauseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordAgainEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PauseRecordingEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PlayChapterEvent
+import org.wycliffeassociates.otter.jvm.controls.event.PlayVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.RecordAgainEvent
+import org.wycliffeassociates.otter.jvm.controls.event.RecordVerseEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingAgainEvent
+import org.wycliffeassociates.otter.jvm.controls.event.ResumeRecordingEvent
+import org.wycliffeassociates.otter.jvm.controls.event.SaveRecordingEvent
+import org.wycliffeassociates.otter.jvm.controls.model.NotificationStatusType
+import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
 import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
@@ -16,13 +48,12 @@ import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.NarrationMarkerChangedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationRedoEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationResetChapterEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationRestartChapterEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.menu.NarrationUndoEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
-import java.util.*
 
 class NarrationPage : View() {
     private val logger = LoggerFactory.getLogger(NarrationPage::class.java)
@@ -46,6 +77,7 @@ class NarrationPage : View() {
         tryImportStylesheet(resources["/css/narration.css"])
         tryImportStylesheet(resources["/css/chapter-selector.css"])
         tryImportStylesheet("/css/chapter-grid.css")
+        tryImportStylesheet("/css/add-plugin-dialog.css")
 
         pluginOpenedPage = createPluginOpenedPage()
     }
@@ -123,8 +155,8 @@ class NarrationPage : View() {
             viewModel.snackBarMessage(it.message)
         }.let { eventSubscriptions.add(it) }
 
-        subscribe<NarrationResetChapterEvent> {
-            viewModel.resetChapter()
+        subscribe<NarrationRestartChapterEvent> {
+            viewModel.restartChapter()
         }.let { eventSubscriptions.add(it) }
 
         subscribe<NarrationUndoEvent> {
@@ -196,8 +228,8 @@ class NarrationPage : View() {
             viewModel.onChapterReturnFromPlugin()
         }.let { eventSubscriptions.add(it) }
 
-        subscribe<OpenChapterEvent> {
-            viewModel.loadChapter(it.chapterNumber)
+        subscribe<NavigateChapterEvent> {
+            viewModel.navigateChapter(it.chapterNumber)
         }.let { eventSubscriptions.add(it) }
     }
 
@@ -213,18 +245,16 @@ class NarrationPage : View() {
                 logger.error("Error in creating no plugin snackbar", e)
             }
             .subscribe { pluginErrorMessage ->
-                SnackbarHandler.enqueue(
-                    JFXSnackbar.SnackbarEvent(
-                        JFXSnackbarLayout(
-                            pluginErrorMessage,
-                            messages["addApp"].uppercase(Locale.getDefault())
-                        ) {
-                            audioPluginViewModel.addPlugin(record = true, edit = false)
-                        },
-                        Duration.millis(5000.0),
-                        null
-                    )
-                )
+                val notification = NotificationViewData(
+                    title = messages["noPlugins"],
+                    message = pluginErrorMessage,
+                    statusType = NotificationStatusType.WARNING,
+                    actionIcon = MaterialDesign.MDI_PLUS,
+                    actionText = messages["addApp"]
+                ) {
+                    audioPluginViewModel.addPlugin(record = true, edit = false)
+                }
+                SnackbarHandler.enqueue(notification)
             }
     }
 

@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020-2024 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
@@ -22,6 +40,7 @@ import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
+import org.wycliffeassociates.otter.jvm.controls.waveform.WAVEFORM_MAX_HEIGHT
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
@@ -64,7 +83,7 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
 
     private val builder = ObservableWaveformBuilder()
     private val width = Screen.getMainScreen().platformWidth
-    private val height = Integer.min(Screen.getMainScreen().platformHeight, 500)
+    private val height = Integer.min(Screen.getMainScreen().platformHeight, WAVEFORM_MAX_HEIGHT.toInt())
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -79,6 +98,9 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
             }
             .subscribeOn(Schedulers.io())
             .observeOnFx()
+            .doFinally {
+                translationViewModel.loadingStepProperty.set(false)
+            }
             .subscribe { sa ->
                 audioDataStore.sourceAudioProperty.set(sa)
                 audio = loadAudio(sa.file)

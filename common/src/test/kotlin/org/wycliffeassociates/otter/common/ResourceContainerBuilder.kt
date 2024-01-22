@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020-2024 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.common
 
 import com.fasterxml.jackson.annotation.JsonInclude
@@ -5,8 +23,12 @@ import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
+import org.wycliffeassociates.otter.common.data.Chunkification
+import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
+import org.wycliffeassociates.otter.common.data.primitives.SerializableProjectMode
 import org.wycliffeassociates.otter.common.data.workbook.TakeCheckingState
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.RcConstants
@@ -19,6 +41,9 @@ import java.io.File
 import kotlin.io.path.createTempDirectory
 import org.wycliffeassociates.resourcecontainer.entity.Language as RCLanguage
 
+internal const val ACTIVE_VERSES_FILE_NAME = "active_verses.json"
+internal const val CHAPTER_NARRATION_FILE_NAME = "chapter_narration.pcm"
+
 class ResourceContainerBuilder(baseRC: File? = null) {
 
     private val tempDir = createTempDirectory("orature-test")
@@ -27,6 +52,7 @@ class ResourceContainerBuilder(baseRC: File? = null) {
 
     private val selectedTakes: MutableList<String> = mutableListOf()
     private val takeCheckingMap = mutableMapOf<String, TakeCheckingState>()
+    private val chunks = Chunkification()
     private val rcFile: File = baseRC ?: getDefaultRCFile()
     private val manifest: Manifest
 
@@ -88,6 +114,47 @@ class ResourceContainerBuilder(baseRC: File? = null) {
         return this
     }
 
+    fun setOngoingProject(isOngoing: Boolean): ResourceContainerBuilder {
+        if (isOngoing) {
+            val pathInRC = RcConstants.SELECTED_TAKES_FILE
+            val selectedFile = File(pathInRC).name
+            val tempFile = tempDir.resolve(selectedFile).apply {
+                createNewFile(); deleteOnExit()
+            }
+
+            ResourceContainer.load(rcFile).use {
+                it.addFileToContainer(tempFile, pathInRC)
+            }
+        }
+        return this
+    }
+
+    fun setProjectMode(mode: ProjectMode): ResourceContainerBuilder {
+        val modeFile = File(RcConstants.PROJECT_MODE_FILE)
+        val tempFile = tempDir.resolve(modeFile.name).apply {
+            createNewFile(); deleteOnExit()
+        }
+        val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
+        mapper.writeValue(tempFile, SerializableProjectMode(mode))
+
+        ResourceContainer.load(rcFile).use {
+            it.addFileToContainer(tempFile, RcConstants.PROJECT_MODE_FILE)
+        }
+
+        return this
+    }
+
+    fun addChunk(content: Content, chapter: Int): ResourceContainerBuilder {
+        val existingChunks = chunks.getOrPut(chapter) {
+            listOf(content)
+        }
+        if (content !in existingChunks) {
+            chunks[chapter] = existingChunks + listOf(content)
+        }
+
+        return this
+    }
+
     /**
      * Inserts a take to the current resource container.
      * If a take is selected, it will be added to the list of selected takes.
@@ -146,6 +213,20 @@ class ResourceContainerBuilder(baseRC: File? = null) {
         return this
     }
 
+    fun addInProgressNarration(sort: Int): ResourceContainerBuilder {
+        val inProgressFiles = createTestChapterRepresentationFiles(tempDir)
+        val chapterDirTokens = "c${sort.toString().padStart(2, '0')}"
+        ResourceContainer.load(rcFile).use {
+            inProgressFiles.forEach { file ->
+                val relativePath = "$chapterDirTokens/${file.name}"
+                val pathInRC = "${RcConstants.TAKE_DIR}/$relativePath"
+                it.addFileToContainer(file, pathInRC)
+            }
+        }
+
+        return this
+    }
+
     fun build(): ResourceContainer {
         return ResourceContainer.load(rcFile).also { rc ->
             if (selectedTakes.isNotEmpty()) {
@@ -157,6 +238,9 @@ class ResourceContainerBuilder(baseRC: File? = null) {
             }
             if (takeCheckingMap.isNotEmpty()) {
                 writeCheckingStatusFile(rc)
+            }
+            if (chunks.isNotEmpty()) {
+                writeChunksFile(rc)
             }
 
             rc.manifest = this.manifest
@@ -208,9 +292,23 @@ class ResourceContainerBuilder(baseRC: File? = null) {
         }
     }
 
+    private fun writeChunksFile(rc: ResourceContainer) {
+        rc.accessor.write(RcConstants.CHUNKS_FILE) { outputStream ->
+            outputStream.use { stream ->
+                val mapper = ObjectMapper(JsonFactory())
+                    .registerKotlinModule()
+                    .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+
+                mapper.writeValue(stream, chunks)
+            }
+        }
+    }
+
     companion object {
         const val defaultProjectSlug = "jhn"
         const val checkingStatusFilePath = RcConstants.CHECKING_STATUS_FILE
+        const val selectedTakesFilePath = RcConstants.SELECTED_TAKES_FILE
+        const val chunksFilePath = RcConstants.CHUNKS_FILE
 
         fun setUpEmptyProjectBuilder(): ResourceContainerBuilder {
             return ResourceContainerBuilder()

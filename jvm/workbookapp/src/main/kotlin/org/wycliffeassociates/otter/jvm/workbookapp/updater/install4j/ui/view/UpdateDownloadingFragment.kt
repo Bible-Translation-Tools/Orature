@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2023 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -18,7 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.updater.install4j.ui.view
 
-import com.jfoenix.controls.JFXProgressBar
+import io.github.palexdev.materialfx.controls.MFXProgressBar
 import org.wycliffeassociates.otter.jvm.workbookapp.updater.install4j.ui.viewmodel.AppUpdaterViewModel
 import tornadofx.*
 
@@ -48,7 +48,7 @@ class UpdateDownloadingFragment : Fragment() {
         }
 
         add(
-            JFXProgressBar().apply {
+            MFXProgressBar().apply {
                 prefWidth = 300.0
                 progressProperty().bind(vm.percentCompleteProperty.divide(100.0))
             }

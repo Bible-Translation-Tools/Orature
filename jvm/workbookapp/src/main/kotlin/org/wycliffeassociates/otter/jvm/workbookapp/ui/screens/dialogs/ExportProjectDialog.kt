@@ -1,6 +1,26 @@
+/**
+ * Copyright (C) 2020-2024 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs
 
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.collections.SetChangeListener
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.scene.control.ScrollPane
@@ -20,14 +40,16 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview.expo
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.events.WorkbookExportEvent
 import tornadofx.*
 import java.text.MessageFormat
+import kotlin.math.roundToInt
 
 class ExportProjectDialog : OtterDialog() {
 
     val chapters = observableListOf<ChapterDescriptor>()
+    val selectedChapters = observableSetOf<ChapterDescriptor>()
     val workbookDescriptorProperty = SimpleObjectProperty<WorkbookDescriptor>()
-
+    val onEstimateSizeAction = SimpleObjectProperty<(WorkbookDescriptor, List<Int>, ExportType) -> Long>()
     private val exportTypeProperty = SimpleObjectProperty<ExportType>(ExportType.BACKUP)
-    private val selectedChapters = observableSetOf<ChapterDescriptor>()
+    private val estimatedSizeProperty = SimpleDoubleProperty(0.0)
     private val onCloseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     private lateinit var tableView: ExportProjectTableView
 
@@ -114,20 +136,16 @@ class ExportProjectDialog : OtterDialog() {
             addClass("confirm-dialog__footer")
             label {
                 addClass("h5")
-                textProperty().bind(exportTypeProperty.stringBinding {
-                    val estimatedSize = when (it) {
-                        ExportType.BACKUP -> messages["large"]
-                        ExportType.LISTEN -> messages["small"]
-                        ExportType.SOURCE_AUDIO, ExportType.PUBLISH -> messages["normal"]
-                        else -> ""
-                    }
-                    MessageFormat.format(messages["estimatedFileSize"], estimatedSize)
+                textProperty().bind(estimatedSizeProperty.stringBinding {
+                    MessageFormat.format(messages["estimatedFileSize"], it)
                 })
             }
             region { hgrow = Priority.ALWAYS }
-            button(messages["export"]) {
+            button(messages["exportProject"]) {
                 addClass("btn", "btn--primary")
                 disableWhen { booleanBinding(selectedChapters) { selectedChapters.isEmpty() } }
+                tooltip(text)
+                graphic = FontIcon(MaterialDesign.MDI_PUBLISH)
 
                 action {
                     val directory = chooseDirectory(FX.messages["exportProject"], owner = currentWindow)
@@ -151,10 +169,21 @@ class ExportProjectDialog : OtterDialog() {
         setContent(content)
     }
 
+    private val selectionListener = SetChangeListener<ChapterDescriptor> {
+        updateEstimateSize()
+    }
+
     override fun onDock() {
         super.onDock()
         onSelectExportType(ExportType.BACKUP) // selects default option
         tableView.customizeScrollbarSkin()
+
+        selectedChapters.addListener(selectionListener)
+    }
+
+    override fun onUndock() {
+        super.onUndock()
+        selectedChapters.removeListener(selectionListener)
     }
 
     fun setOnCloseAction(op: () -> Unit) {
@@ -169,5 +198,17 @@ class ExportProjectDialog : OtterDialog() {
         chapters.setAll(newList)
         selectedChapters.clear()
         selectedChapters.addAll(newList.filter { it.selectable }) // select available chapters by default
+    }
+
+    private fun updateEstimateSize() {
+        val sizeInBytes = onEstimateSizeAction.value?.invoke(
+            workbookDescriptorProperty.value,
+            selectedChapters.map { it.number },
+            exportTypeProperty.value
+        ) ?: 0
+
+        val sizeInMBs = sizeInBytes.toDouble() / 1_000_000
+        val roundedSize = (sizeInMBs * 10).roundToInt() / 10.0 // round to 1 decimal place
+        estimatedSizeProperty.set(roundedSize)
     }
 }

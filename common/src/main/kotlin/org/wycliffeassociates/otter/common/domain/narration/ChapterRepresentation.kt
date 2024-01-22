@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020-2024 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.common.domain.narration
 
 import com.fasterxml.jackson.core.type.TypeReference
@@ -75,12 +93,12 @@ internal class ChapterRepresentation(
         private set
 
     init {
-        totalVerses = initalizeActiveVerses()
+        totalVerses = initializeActiveVerses()
         initializeWorkingAudioFile()
         initializeSerializedVersesFile()
     }
 
-    private fun initalizeActiveVerses(): MutableList<VerseNode> {
+    private fun initializeActiveVerses(): MutableList<VerseNode> {
         return chapter
             .chunks
             .take(1)
@@ -133,8 +151,19 @@ internal class ChapterRepresentation(
     }
 
     fun onVersesUpdated() {
+        updateTotalVerses()
         serializeVerses()
         publishActiveVerses()
+    }
+
+    private fun updateTotalVerses() {
+        activeVerses.forEachIndexed { idx, verseNode ->
+            val newLoc = audioLocationToLocationInChapter(verseNode.firstFrame())
+            val updatedMarker = verseNode.copyMarker(location = newLoc)
+            totalVerses[idx] = VerseNode(
+                true, updatedMarker, totalVerses[idx].sectors
+            )
+        }
     }
 
     private fun serializeVerses() {
@@ -153,14 +182,62 @@ internal class ChapterRepresentation(
         onActiveVersesUpdated.onNext(updatedVerses)
     }
 
-    fun versesWithRecordings(): List<Boolean> {
-        val recorded = activeVerses.filter { it.length > 0 }
-        val versesWithRecordings = totalVerses.map { false }.toMutableList()
-        for (verse in recorded) {
-            val index = totalVerses.indexOfFirst { it.marker.label == verse.marker.label }
-            versesWithRecordings[index] = true
+    /**
+     * Remove old audio data from chapter representation file and update serialized verses file
+     */
+    fun trim() {
+        logger.info("Trimming chapter representation file")
+        trimScratchAudio()
+        trimActiveVerses()
+    }
+
+    private fun trimScratchAudio() {
+        val chapterDir = workbook.projectFilesAccessor.getChapterAudioDir(workbook, chapter)
+        val newScratchAudio = chapterDir.resolve("new_$CHAPTER_NARRATION_FILE_NAME")
+
+        newScratchAudio.outputStream().use { writer ->
+            getAudioFileReader().use { reader ->
+                reader.open()
+                reader.seek(0)
+                val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                while (reader.hasRemaining()) {
+                    val read = reader.getPcmBuffer(buffer)
+                    writer.write(buffer, 0, read)
+                }
+            }
         }
-        return versesWithRecordings
+
+        scratchAudio.file.delete()
+        newScratchAudio.renameTo(scratchAudio.file)
+    }
+
+    private fun trimActiveVerses() {
+        var start = 0
+        activeVerses.forEach { verse ->
+            val sectors = mutableListOf<IntRange>()
+
+            val end = start + verse.length - 1
+            sectors.add(IntRange(start, end))
+            start = end + 1
+
+            verse.sectors.clear()
+            verse.sectors.addAll(sectors)
+        }
+
+        serializeVerses()
+    }
+
+    fun versesWithRecordings(): List<Boolean> {
+        return totalVerses.map { it.placed && it.length > 0 }
+    }
+
+    fun getCompletionProgress(): Double {
+        val totalVerses = totalVerses.size
+        val activeVerses = activeVerses.size
+
+        return if (totalVerses > 0) {
+            activeVerses / totalVerses.toDouble()
+        } else 0.0
     }
 
     private fun initializeSerializedVersesFile() {

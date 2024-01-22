@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2023 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -34,14 +34,4 @@
 
 .vm-waveform-frame {
     -fx-focus-traversable: true;
-}
-
-.consume__scrolling-waveform {
-    -fx-focus-traversable: false;
-}
-
-.consume__scrolling-waveform:active {
-    -fx-border-width: 4px 0;
-    -fx-border-color: -wa-button-border;
-    -fx-border-insets: 0;
 }

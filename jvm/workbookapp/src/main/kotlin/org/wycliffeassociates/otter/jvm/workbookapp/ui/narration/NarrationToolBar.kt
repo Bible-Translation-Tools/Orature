@@ -1,5 +1,24 @@
+/**
+ * Copyright (C) 2020-2024 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
+import javafx.beans.binding.Bindings.not
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -21,6 +40,7 @@ import java.text.MessageFormat
 class NarrationToolBar : View() {
     private val viewModel by inject<NarrationViewModel>()
 
+
     override val root = hbox {
         addClass("narration-toolbar", "narration-toolbar__play-controls")
         alignment = Pos.CENTER_LEFT
@@ -28,6 +48,11 @@ class NarrationToolBar : View() {
             addClass("btn", "btn--secondary")
             addPseudoClass("active")
             tooltip { textProperty().bind(this@button.textProperty()) }
+
+
+            disableWhen {
+                viewModel.isRecordingProperty.or(viewModel.hasVersesProperty.not())
+            }
 
             viewModel.isPlayingProperty.onChangeAndDoNow {
                 it?.let { playing ->
@@ -61,7 +86,7 @@ class NarrationToolBar : View() {
                 viewModel.seekToPrevious()
             }
             disableWhen {
-                viewModel.isPlayingProperty.or(viewModel.isRecordingProperty)
+                viewModel.isPlayingProperty.or(viewModel.isRecordingProperty).or(viewModel.hasVersesProperty.not())
             }
         }
         button {
@@ -72,7 +97,7 @@ class NarrationToolBar : View() {
                 viewModel.seekToNext()
             }
             disableWhen {
-                viewModel.isPlayingProperty.or(viewModel.isRecordingProperty)
+                viewModel.isPlayingProperty.or(viewModel.isRecordingProperty).or(viewModel.hasVersesProperty.not())
             }
         }
     }

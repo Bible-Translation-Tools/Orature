@@ -14,7 +14,7 @@
   </files>
   <launchers>
     <launcher name="orature" id="59">
-      <executable name="orature" iconSet="true" iconFile="./orature_icon.ico" executableDir="." executableMode="gui" />
+      <executable name="orature" iconSet="true" iconFile="./orature_icon.ico" executableDir="." executableMode="gui" singleInstance="true" />
       <java mainClass="org.wycliffeassociates.otter.jvm.workbookapp.MainKt">
         <classPath>
           <archive location="workbookapp.jar" />
@@ -887,7 +887,7 @@ for desktop in /home/*/Desktop; do
     rm "$desktop/orature.desktop" || true
 done</postUninstallScript>
     </linuxDeb>
-    <macosArchive name="macOS Single Bundle Archive" id="415" launcherId="59">
+    <macosArchive name="macOS Single Bundle Archive" id="415" architecture="universal" launcherId="59">
       <jreBundle jreBundleSource="preCreated" includedJre="macosx-amd64-11.0.3.tar.gz" manualJreEntry="true" />
       <topLevelFiles>
         <symlink name="&quot; &quot;" target="/Applications" />

@@ -1,10 +1,27 @@
+/**
+ * Copyright (C) 2020-2024 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.controls.popup
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
-import javafx.scene.control.Tooltip
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
@@ -16,6 +33,9 @@ import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import tornadofx.FX.Companion.messages
+import tornadofx.FX.Companion.primaryStage
+
+private const val SNACK_BAR_TO_SCREEN_RATIO = 9.0/10.0
 
 class NotificationSnackBar(notification: NotificationViewData): HBox() {
 
@@ -30,6 +50,8 @@ class NotificationSnackBar(notification: NotificationViewData): HBox() {
 
     init {
         addClass("wa-snack-bar")
+
+        maxWidthProperty().bind(primaryStage.widthProperty().multiply(SNACK_BAR_TO_SCREEN_RATIO))
 
         button {
             addClass("btn", "btn--icon", "btn--borderless", "success-btn-icon")
@@ -70,6 +92,7 @@ class NotificationSnackBar(notification: NotificationViewData): HBox() {
         region { hgrow = Priority.ALWAYS }
         button {
             addClass("btn", "btn--secondary")
+            minWidth = USE_PREF_SIZE
             textProperty().bind(actionTextProperty)
             tooltip { textProperty().bind(actionTextProperty) }
             graphicProperty().bind(actionIconProperty.objectBinding { it ->

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020-2022 Wycliffe Associates
+ * Copyright (C) 2020-2024 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -18,6 +18,9 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.marker
 
+import com.sun.javafx.scene.NodeHelper
+import com.sun.javafx.scene.traversal.Direction
+import com.sun.javafx.scene.traversal.TraversalMethod
 import com.sun.javafx.util.Utils
 import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
@@ -46,6 +49,7 @@ open class MarkerTrackControl : Region() {
     val onPositionChangedProperty = SimpleObjectProperty<(Int, Double) -> Unit>()
     val onSeekPreviousProperty = SimpleObjectProperty<() -> Unit>()
     val onSeekNextProperty = SimpleObjectProperty<() -> Unit>()
+    val onSeekProperty = SimpleObjectProperty<(Int) -> Unit>()
     val onLocationRequestProperty = SimpleObjectProperty<() -> Int>()
 
     fun setOnPositionChanged(op: (Int, Double) -> Unit) {
@@ -138,6 +142,7 @@ open class MarkerTrackControl : Region() {
                     preDragThumbPos[i] = clampedValue / trackWidth
                     me.consume()
                 }
+                togglePseudoClass("dragging", true)
                 this.requestFocus()
             }
 
@@ -173,6 +178,7 @@ open class MarkerTrackControl : Region() {
                         FX.eventbus.fire(MarkerMovedEvent(markerIdProperty.value, start, end))
                     }
                 }
+                togglePseudoClass("dragging", false)
             }
 
             markerPositionProperty.onChangeAndDoNow {
@@ -181,8 +187,13 @@ open class MarkerTrackControl : Region() {
                 }
             }
 
-            focusedProperty().onChange {
-                if (it) focusedMarkerProperty.set(this)
+            focusVisibleProperty().onChange {
+                if (it) {
+                    // seeks to focused marker (focus-visible)
+                    val markerFrame = pixelsToFrames(markerPositionProperty.value)
+                    onSeekProperty.value?.invoke(markerFrame)
+                    focusedMarkerProperty.set(this)
+                }
             }
         }
     }
@@ -267,12 +278,10 @@ open class MarkerTrackControl : Region() {
                     e.consume()
                 }
                 KeyCode.TAB -> {
-                    if (e.isShiftDown) {
-                        onSeekPreviousProperty.value?.invoke()
-                    } else {
-                        onSeekNextProperty.value?.invoke()
+                    if (e.isControlDown) {
+                        // Ctrl + Tab should move the focus out of the markers area and into the next node
+                        NodeHelper.traverse(this, Direction.NEXT_IN_LINE, TraversalMethod.KEY)
                     }
-                    focusMarker(e)
                 }
 
                 else -> {}
@@ -297,6 +306,10 @@ open class MarkerTrackControl : Region() {
                 percent + MOVE_MARKER_INTERVAL
             }
             updateValue(marker.markerIndexProperty.value, moveTo)
+            // notify changes for model's undo/redo history update
+            val start = pixelsToFrames(position)
+            val end = pixelsToFrames(marker.markerPositionProperty.value)
+            FX.eventbus.fire(MarkerMovedEvent(marker.markerIdProperty.value, start, end))
         }
     }
 

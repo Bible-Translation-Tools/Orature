@@ -1,5 +1,24 @@
+/**
+ * Copyright (C) 2020-2024 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.tableview
 
+import io.github.palexdev.materialfx.controls.MFXProgressBar
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import javafx.collections.ObservableSet
@@ -71,8 +90,7 @@ class ExportProjectTableView(
             setCellValueFactory { it.value.progress.toProperty() }
             cellFormat {
                 val percent = item.toDouble()
-                graphic = progressbar(percent) {
-                    toggleClass("full", percent == 1.0)
+                graphic = MFXProgressBar(percent).apply {
                     fitToParentWidth()
                 }
             }

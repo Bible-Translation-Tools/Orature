@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020-2024 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.narration
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
@@ -274,21 +292,18 @@ class NarrationViewModel : ViewModel() {
             .map { list ->
                 val chapterToResume = list.firstOrNull { !it.hasSelectedAudio() } ?: list.first()
                 val activeChapter = workbookDataStore.activeChapterProperty.value ?: chapterToResume
-                runLater {
-                    workbookDataStore.activeChapterProperty.set(activeChapter)
-                }
+                workbookDataStore.activeChapterProperty.set(activeChapter)
                 chapterList.setAll(list)
                 activeChapter
             }
     }
 
-    private fun resetState() {
-        if (::narration.isInitialized) {
-            closeNarrationAudio()
-            narration.close()
-            renderer.close()
-        }
 
+    /**
+     * Resets the properties and state of the ViewModel to prevent dirty state when moving to other chapters or
+     * another narration project.
+     */
+    private fun resetState() {
         recordedVerses.clear()
         chunksList.clear()
         narratableList.clear()
@@ -325,6 +340,24 @@ class NarrationViewModel : ViewModel() {
                     }
                 ).let { disposables.add(it) }
         }
+    }
+
+    /**
+     * Called when changing the chapter from the chapter selector.
+     *
+     * This means that we are in a chapter, and moving to another chapter, so undock was not called in between.
+     * Normally, undock would trim the audio, so we want to make sure that the audio is trimmed before moving to
+     * the next chapter.
+     *
+     * @param chapterNumber the chapter to move to
+     */
+    fun navigateChapter(chapterNumber: Int) {
+        if (::narration.isInitialized) {
+            closeNarrationAudio()
+            narration.close()
+            renderer.close()
+        }
+        loadChapter(chapterNumber)
     }
 
     fun loadChapter(chapterNumber: Int) {
@@ -590,7 +623,11 @@ class NarrationViewModel : ViewModel() {
         narration.onVerseMarkerMoved(index, delta)
     }
 
-    fun resetChapter() {
+    /**
+     * Clears the chapter to start over, resetting the teleprompter so that all verses are cleared and the first verse
+     * is restored to the begin recording state.
+     */
+    fun restartChapter() {
         narration.onResetAll()
         teleprompterStateMachine.initialize(narration.versesWithRecordings())
         recordStart = true
@@ -806,14 +843,7 @@ class NarrationViewModel : ViewModel() {
                 var nextVerseLoc: Int? = null
                 if (isRecordingAgain) {
                     val reRecordingIndex = recordingVerseIndex.value
-                    val nextChunk = chunksList.getOrNull(reRecordingIndex + 1)
-                    if (nextChunk != null) {
-                        val next = recordedVerses.firstOrNull { it.label == nextChunk.title }
-                        if (next != null) {
-                            nextVerseLoc = next.location
-                        }
-                    }
-
+                    nextVerseLoc = recordedVerses.getOrNull(reRecordingIndex + 1)?.location
                     reRecordLoc = recordedVerses[reRecordingIndex].location
                 }
 
@@ -867,7 +897,6 @@ class NarrationViewModel : ViewModel() {
                         viewport.last - viewport.first
                     ).toDouble() - (MARKER_AREA_WIDTH / 2) + viewportOffset
                     runLater {
-                        marker.visibleProperty().set(true)
                         if (marker.layoutX != newPos) {
                             marker.layoutX = newPos
                         }
@@ -875,10 +904,8 @@ class NarrationViewModel : ViewModel() {
                     found = true
                 }
             }
-            if (!found) {
-                runLater {
-                    marker.visibleProperty().set(false)
-                }
+            runLater {
+                marker.visibleProperty().set(found)
             }
         }
     }
