@@ -20,9 +20,9 @@ import java.io.File
 
 
 enum class TaskRunnerStatus {
-    BOUNCING_AUDIO,
-    UPDATING_MARKERS,
-    UPDATE_MARKERS_WAITING,
+    MODIFYING_AUDIO,
+    MODIFYING_METADATA,
+    MODIFYING_AUDIO_AND_METADATA_MODIFICATION_WAITING,
     IDLE
 }
 
@@ -58,7 +58,7 @@ object NarrationTakeModifier {
 
         val takeFile = take.file
 
-        updateStatus(TaskRunnerStatus.BOUNCING_AUDIO)
+        updateStatus(TaskRunnerStatus.MODIFYING_AUDIO)
 
         // Prevents waiting marker update task from executing after ongoing audio bounce tasks are canceled.
         cancelMarkerUpdateTask()
@@ -70,7 +70,7 @@ object NarrationTakeModifier {
 
     private fun updateStatus(status: TaskRunnerStatus) {
         isBouncingAudio =
-            (status == TaskRunnerStatus.BOUNCING_AUDIO || status == TaskRunnerStatus.UPDATE_MARKERS_WAITING)
+            (status == TaskRunnerStatus.MODIFYING_AUDIO || status == TaskRunnerStatus.MODIFYING_AUDIO_AND_METADATA_MODIFICATION_WAITING)
         statusEmitter?.onNext(status)
     }
 
@@ -113,7 +113,7 @@ object NarrationTakeModifier {
                         updateStatus(TaskRunnerStatus.IDLE)
                     } else {
                         // Sets status to UPDATING_MARKERS so the waiting update marker task can start executing
-                        updateStatus(TaskRunnerStatus.UPDATING_MARKERS)
+                        updateStatus(TaskRunnerStatus.MODIFYING_METADATA)
                     }
                 }
             }
@@ -129,11 +129,11 @@ object NarrationTakeModifier {
         val takeFile = take.file
 
         if (isBouncingAudio) {
-            updateStatus(TaskRunnerStatus.UPDATE_MARKERS_WAITING)
+            updateStatus(TaskRunnerStatus.MODIFYING_AUDIO_AND_METADATA_MODIFICATION_WAITING)
 
             status
                 .takeWhile { status ->
-                    status == TaskRunnerStatus.UPDATE_MARKERS_WAITING || status == TaskRunnerStatus.BOUNCING_AUDIO
+                    status == TaskRunnerStatus.MODIFYING_AUDIO_AND_METADATA_MODIFICATION_WAITING || status == TaskRunnerStatus.MODIFYING_AUDIO
                 }
                 .doOnComplete {
                     waitingMarkerUpdateTask = null
@@ -151,7 +151,7 @@ object NarrationTakeModifier {
                 }
 
         } else {
-            updateStatus(TaskRunnerStatus.UPDATING_MARKERS)
+            updateStatus(TaskRunnerStatus.MODIFYING_METADATA)
 
             // Cancels the current marker update task (if any) since it now contains outdated markers
             currentMarkerUpdateTask?.dispose()

@@ -198,7 +198,7 @@ class NarrationTakeModifierTest {
         NarrationTakeModifier.status
             .subscribe {
                 // Begins check after the takeModifier has been busy
-                if (oldBusyStatus == TaskRunnerStatus.UPDATING_MARKERS && it == TaskRunnerStatus.IDLE) {
+                if (oldBusyStatus == TaskRunnerStatus.MODIFYING_METADATA && it == TaskRunnerStatus.IDLE) {
                     // Verify that we have the expected amount of cues / Markers in the Wav file
                     oaf = OratureAudioFile(chapterTake.file)
                     Assert.assertEquals(newAudioMarkers.size, oaf.getCues().size)
@@ -246,7 +246,7 @@ class NarrationTakeModifierTest {
         NarrationTakeModifier.status
             .subscribe {
                 // Begins check after the takeModifier has been busy
-                if (oldBusyStatus == TaskRunnerStatus.UPDATING_MARKERS && it == TaskRunnerStatus.IDLE) {
+                if (oldBusyStatus == TaskRunnerStatus.MODIFYING_METADATA && it == TaskRunnerStatus.IDLE) {
                     oaf = OratureAudioFile(chapterTake.file)
                     // Verify that we have the expected amount of cues / Markers in the Wav file
                     Assert.assertEquals(markersToKeep, oaf.getCues().size)
