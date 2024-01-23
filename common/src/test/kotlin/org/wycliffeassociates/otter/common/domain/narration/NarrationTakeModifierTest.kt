@@ -195,7 +195,7 @@ class NarrationTakeModifierTest {
 
 
         var oldBusyStatus: TaskRunnerStatus? = null
-        NarrationTakeModifierTaskRunner.status
+        NarrationTakeModifier.status
             .subscribe {
                 // Begins check after the takeModifier has been busy
                 if (oldBusyStatus == TaskRunnerStatus.UPDATING_MARKERS && it == TaskRunnerStatus.IDLE) {
@@ -211,7 +211,7 @@ class NarrationTakeModifierTest {
                 oldBusyStatus = it
             }
 
-        NarrationTakeModifierTaskRunner.updateMarkers(chapterTake.file, newAudioMarkers)
+        NarrationTakeModifier.modifyMetadata(chapterTake, newAudioMarkers)
     }
 
     // Test that Wav file metadata is updated properly when using a different amount of markers with different locations
@@ -243,7 +243,7 @@ class NarrationTakeModifierTest {
 
 
         var oldBusyStatus: TaskRunnerStatus? = null
-        NarrationTakeModifierTaskRunner.status
+        NarrationTakeModifier.status
             .subscribe {
                 // Begins check after the takeModifier has been busy
                 if (oldBusyStatus == TaskRunnerStatus.UPDATING_MARKERS && it == TaskRunnerStatus.IDLE) {
@@ -260,6 +260,6 @@ class NarrationTakeModifierTest {
             }
 
 
-        NarrationTakeModifierTaskRunner.updateMarkers(chapterTake.file, newAudioMarkers)
+        NarrationTakeModifier.modifyMetadata(chapterTake, newAudioMarkers)
     }
 }

@@ -13,6 +13,7 @@ import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.BookMarker
 import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
+import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.audio.AudioBouncer
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import java.io.File
@@ -26,9 +27,9 @@ enum class TaskRunnerStatus {
 }
 
 
-object NarrationTakeModifierTaskRunner {
+object NarrationTakeModifier {
 
-    private val logger = LoggerFactory.getLogger(NarrationTakeModifierTaskRunner::class.java)
+    private val logger = LoggerFactory.getLogger(NarrationTakeModifier::class.java)
 
     private val audioBouncer = AudioBouncer()
 
@@ -51,14 +52,19 @@ object NarrationTakeModifierTaskRunner {
     }
 
     @Synchronized
-    fun bounce(file: File, reader: AudioFileReader, markers: List<AudioMarker>) {
+    fun modifyAudioData(take: Take?, reader: AudioFileReader, markers: List<AudioMarker>) {
+
+        if (take == null) return
+
+        val takeFile = take.file
+
         updateStatus(TaskRunnerStatus.BOUNCING_AUDIO)
 
         // Prevents waiting marker update task from executing after ongoing audio bounce tasks are canceled.
         cancelMarkerUpdateTask()
 
         cancelPreviousAudioBounceTask()
-        currentAudioBounceTask = bounceAudioTask(file, reader, markers).subscribe()
+        currentAudioBounceTask = bounceAudioTask(takeFile, reader, markers).subscribe()
     }
 
 
@@ -116,7 +122,11 @@ object NarrationTakeModifierTaskRunner {
 
 
     @Synchronized
-    fun updateMarkers(file: File, markers: List<AudioMarker>) {
+    fun modifyMetadata(take: Take?, markers: List<AudioMarker>) {
+
+        if (take == null) return
+
+        val takeFile = take.file
 
         if (isBouncingAudio) {
             updateStatus(TaskRunnerStatus.UPDATE_MARKERS_WAITING)
@@ -127,7 +137,7 @@ object NarrationTakeModifierTaskRunner {
                 }
                 .doOnComplete {
                     waitingMarkerUpdateTask = null
-                    currentMarkerUpdateTask = updateMarkersTask(file, markers).subscribe()
+                    currentMarkerUpdateTask = updateMarkersTask(takeFile, markers).subscribe()
                 }
                 .doOnDispose {
                     logger.info("Cancelling stale update markers task")
@@ -146,7 +156,7 @@ object NarrationTakeModifierTaskRunner {
             // Cancels the current marker update task (if any) since it now contains outdated markers
             currentMarkerUpdateTask?.dispose()
 
-            currentMarkerUpdateTask = updateMarkersTask(file, markers).subscribe()
+            currentMarkerUpdateTask = updateMarkersTask(takeFile, markers).subscribe()
         }
 
     }
