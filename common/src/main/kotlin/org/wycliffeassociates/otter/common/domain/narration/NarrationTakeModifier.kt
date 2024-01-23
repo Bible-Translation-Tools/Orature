@@ -39,7 +39,7 @@ object NarrationTakeModifier {
     private var currentMarkerUpdateTask: Disposable? = null
     private var currentUpdateMarkerTaskEmitter: CompletableEmitter? = null
 
-    // Stores the most recent update marker task since bounce audio task must complete before metedata modification
+    // Stores the most recent update marker task since bounce audio task must complete before metadata modification
     private var waitingMarkerUpdateTask: Disposable? = null
 
     private var statusEmitter: ObservableEmitter<TaskRunnerStatus>? = null
