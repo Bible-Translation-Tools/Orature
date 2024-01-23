@@ -22,8 +22,8 @@ import com.github.thomasnield.rxkotlinfx.toLazyBinding
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ColorTheme
+import org.wycliffeassociates.otter.jvm.controls.dialog.LoadingModal
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
-import org.wycliffeassociates.otter.jvm.controls.dialog.SavingModal
 import org.wycliffeassociates.otter.jvm.controls.event.BeginRecordingEvent
 import org.wycliffeassociates.otter.jvm.controls.event.ChapterReturnFromPluginEvent
 import org.wycliffeassociates.otter.jvm.controls.event.NextVerseEvent
@@ -109,7 +109,7 @@ class NarrationPage : View() {
     override fun onDock() {
         super.onDock()
         subscribeToEvents()
-        setUpSavingModal()
+        setUpLoadingModal()
         // avoid resetting ViewModel states & action history when coming back from plugin
         when (viewModel.pluginOpenedProperty.value) {
             true -> { // navigate back from plugin
@@ -258,12 +258,13 @@ class NarrationPage : View() {
             }
     }
 
-    private fun setUpSavingModal() {
-        find<SavingModal>().apply {
+    private fun setUpLoadingModal() {
+        find<LoadingModal>().apply {
             orientationProperty.set(settingsViewModel.orientationProperty.value)
             themeProperty.set(settingsViewModel.appColorMode.value)
+            messageProperty.set(messages["savingProjectWait"])
 
-            viewModel.openSavingModalProperty.onChangeWithDisposer {
+            viewModel.openLoadingModalProperty.onChangeWithDisposer {
                 it?.let {
                     runLater {
                         if (it) {

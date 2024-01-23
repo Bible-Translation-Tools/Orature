@@ -121,7 +121,7 @@ class NarrationViewModel : ViewModel() {
     val hasNextChapter = SimpleBooleanProperty()
     val hasPreviousChapter = SimpleBooleanProperty()
     val isModifyingTakeAudioProperty = SimpleBooleanProperty()
-    val openSavingModalProperty = SimpleBooleanProperty()
+    val openLoadingModalProperty = SimpleBooleanProperty()
     private val navigator: NavigationMediator by inject()
 
     val chunkTotalProperty = SimpleIntegerProperty(0)
@@ -164,7 +164,7 @@ class NarrationViewModel : ViewModel() {
 
         subscribe<NavigationRequestBlockedEvent> {
             if (isModifyingTakeAudioProperty.value) {
-                openSavingModalProperty.set(true)
+                openLoadingModalProperty.set(true)
                 onTaskRunnerIdle = {
                     FX.eventbus.fire(it.navigationRequest)
                 }
@@ -346,7 +346,7 @@ class NarrationViewModel : ViewModel() {
     // Prevents navigating to chapter while modifying chapter take audio
     fun tryToNavigateChapter(chapterNumber: Int) {
         if (isModifyingTakeAudioProperty.value) {
-            openSavingModalProperty.set(true)
+            openLoadingModalProperty.set(true)
             onTaskRunnerIdle = {
                 navigateChapter(chapterNumber)
             }
@@ -818,8 +818,8 @@ class NarrationViewModel : ViewModel() {
 
                     // Indicates that we have opened the saving model to interrupt either a chapter navigation or
                     // home navigation and that we should re-attempt the interrupted navigation
-                    if (isIdle && openSavingModalProperty.value) {
-                        openSavingModalProperty.set(false)
+                    if (isIdle && openLoadingModalProperty.value) {
+                        openLoadingModalProperty.set(false)
                         onTaskRunnerIdle()
                         onTaskRunnerIdle = { }
                     }
