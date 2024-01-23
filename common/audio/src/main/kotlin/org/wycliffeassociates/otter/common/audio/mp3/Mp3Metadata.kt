@@ -101,9 +101,9 @@ class Mp3Metadata(val mp3File: File, val cueFile: File) : AudioMetadata {
         cueFile.createNewFile()
         val sheet = CueSheet()
         sheet.title = title
-        val fileData = FileData(sheet, "\"${cueFile.name}\"", "MP3")
+        val fileData = FileData(sheet, "\"${mp3File.name}\"", "MP3")
         for ((i, cue) in _cues.sortedBy { it.location }.withIndex()) {
-            val cueNumber = cue.label.findInt()
+            val cueNumber = i + 1
             val trackData = TrackData(fileData, cueNumber, "AUDIO")
             trackData.title = cue.label
             val index = Index()
