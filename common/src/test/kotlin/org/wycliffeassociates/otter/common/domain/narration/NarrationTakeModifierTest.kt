@@ -136,17 +136,17 @@ class NarrationTakeModifierTest {
             if (it == markerToMove) {
                 val newLocation = it.location + delta
 
-                when (it::class) {
-                    BookMarker::class -> {
+                when (it) {
+                    is BookMarker -> {
                         newAudioMarkers.add(BookMarker(testBookSlug, newLocation))
                     }
 
-                    ChapterMarker::class -> {
+                    is ChapterMarker -> {
                         newAudioMarkers.add(ChapterMarker(testChapterNumber, newLocation))
                     }
 
-                    VerseMarker::class -> {
-                        val verseStart = (it as VerseMarker).start
+                    is VerseMarker -> {
+                        val verseStart = (it).start
                         val verseEnd = it.end
                         newAudioMarkers.add(VerseMarker(verseStart, verseEnd, newLocation))
                     }
