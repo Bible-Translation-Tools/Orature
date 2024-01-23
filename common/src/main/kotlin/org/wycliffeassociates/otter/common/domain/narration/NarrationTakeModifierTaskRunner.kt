@@ -130,7 +130,7 @@ object NarrationTakeModifierTaskRunner {
                     currentMarkerUpdateTask = updateMarkersTask(file, markers).subscribe()
                 }
                 .doOnDispose {
-                    logger.info("Disposing unnecessary marker update")
+                    logger.info("Cancelling stale update markers task")
                 }
                 .doOnSubscribe {
                     currentMarkerUpdateTask?.dispose()
