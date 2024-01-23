@@ -39,15 +39,15 @@ object NarrationTakeModifierTaskRunner {
     private var currentUpdateMarkerTaskEmitter: CompletableEmitter? = null
     private var waitingMarkerUpdateTask: Disposable? = null
 
-    private var busyStatusEmitter: ObservableEmitter<TaskRunnerStatus>? = null
-    val busyStatus: ConnectableObservable<TaskRunnerStatus> = Observable
+    private var statusEmitter: ObservableEmitter<TaskRunnerStatus>? = null
+    val status: ConnectableObservable<TaskRunnerStatus> = Observable
         .create {
-            busyStatusEmitter = it
+            statusEmitter = it
         }.publish()
     private var isBouncingAudio = false
 
     init {
-        busyStatus.connect()
+        status.connect()
     }
 
     @Synchronized
@@ -65,7 +65,7 @@ object NarrationTakeModifierTaskRunner {
     private fun updateBusyStatus(status: TaskRunnerStatus) {
         isBouncingAudio =
             (status == TaskRunnerStatus.BOUNCING_AUDIO || status == TaskRunnerStatus.UPDATE_MARKERS_WAITING)
-        busyStatusEmitter?.onNext(status)
+        statusEmitter?.onNext(status)
     }
 
     private fun cancelMarkerUpdateTask() {
@@ -130,7 +130,7 @@ object NarrationTakeModifierTaskRunner {
 
             updateBusyStatus(TaskRunnerStatus.UPDATE_MARKERS_WAITING)
 
-            busyStatus
+            status
                 .takeWhile { busy ->
                     busy == TaskRunnerStatus.UPDATE_MARKERS_WAITING || busy == TaskRunnerStatus.BOUNCING_AUDIO
                 }

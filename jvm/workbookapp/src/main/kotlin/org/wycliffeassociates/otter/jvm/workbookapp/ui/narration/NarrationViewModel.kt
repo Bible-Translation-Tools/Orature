@@ -808,7 +808,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     private fun subscribeTaskRunnerBusyChanged() {
-        NarrationTakeModifierTaskRunner.busyStatus
+        NarrationTakeModifierTaskRunner.status
             .doOnNext {
                 val isIdle = (it == TaskRunnerStatus.IDLE)
 

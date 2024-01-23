@@ -195,7 +195,7 @@ class NarrationTakeModifierTest {
 
 
         var oldBusyStatus: TaskRunnerStatus? = null
-        NarrationTakeModifierTaskRunner.busyStatus
+        NarrationTakeModifierTaskRunner.status
             .subscribe {
                 // Begins check after the takeModifier has been busy
                 if (oldBusyStatus == TaskRunnerStatus.UPDATING_MARKERS && it == TaskRunnerStatus.IDLE) {
@@ -243,7 +243,7 @@ class NarrationTakeModifierTest {
 
 
         var oldBusyStatus: TaskRunnerStatus? = null
-        NarrationTakeModifierTaskRunner.busyStatus
+        NarrationTakeModifierTaskRunner.status
             .subscribe {
                 // Begins check after the takeModifier has been busy
                 if (oldBusyStatus == TaskRunnerStatus.UPDATING_MARKERS && it == TaskRunnerStatus.IDLE) {
