@@ -118,16 +118,7 @@ object NarrationTakeModifierTaskRunner {
     @Synchronized
     fun updateMarkers(file: File, markers: List<AudioMarker>) {
 
-        if (!isBouncingAudio) {
-            updateBusyStatus(TaskRunnerStatus.UPDATING_MARKERS)
-
-            // Cancels the current marker update task (if any) since it now contains outdated markers
-            currentMarkerUpdateTask?.dispose()
-
-            currentMarkerUpdateTask = updateMarkersTask(file, markers).subscribe()
-
-        } else {
-
+        if (isBouncingAudio) {
             updateBusyStatus(TaskRunnerStatus.UPDATE_MARKERS_WAITING)
 
             status
@@ -149,6 +140,13 @@ object NarrationTakeModifierTaskRunner {
                     waitingMarkerUpdateTask = it
                 }
 
+        } else {
+            updateBusyStatus(TaskRunnerStatus.UPDATING_MARKERS)
+
+            // Cancels the current marker update task (if any) since it now contains outdated markers
+            currentMarkerUpdateTask?.dispose()
+
+            currentMarkerUpdateTask = updateMarkersTask(file, markers).subscribe()
         }
 
     }
