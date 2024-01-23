@@ -22,11 +22,11 @@ import java.io.File
 enum class TaskRunnerStatus {
     MODIFYING_AUDIO,
     MODIFYING_METADATA,
-    MODIFYING_AUDIO_AND_METADATA_MODIFICATION_WAITING,
     IDLE
 }
 
 
+// Manages audio and metadata modifications for chapter takes by fully executing the most relevant modification
 object NarrationTakeModifier {
 
     private val logger = LoggerFactory.getLogger(NarrationTakeModifier::class.java)
@@ -38,6 +38,8 @@ object NarrationTakeModifier {
 
     private var currentMarkerUpdateTask: Disposable? = null
     private var currentUpdateMarkerTaskEmitter: CompletableEmitter? = null
+
+    // Stores the most recent update marker task since bounce audio task must complete before metedata modification
     private var waitingMarkerUpdateTask: Disposable? = null
 
     private var statusEmitter: ObservableEmitter<TaskRunnerStatus>? = null
@@ -51,6 +53,15 @@ object NarrationTakeModifier {
         status.connect()
     }
 
+    /**
+     * Called when we need to update chapter take audio.
+     *
+     * Cancels any ongoing audio modifications and metadata modifications.
+     *
+     * @param take the take to modify
+     * @param reader the reader to retrieve new audio data
+     * @param markers the markers that correspond to the new audio data
+     */
     @Synchronized
     fun modifyAudioData(take: Take?, reader: AudioFileReader, markers: List<AudioMarker>) {
 
@@ -70,7 +81,7 @@ object NarrationTakeModifier {
 
     private fun updateStatus(status: TaskRunnerStatus) {
         isBouncingAudio =
-            (status == TaskRunnerStatus.MODIFYING_AUDIO || status == TaskRunnerStatus.MODIFYING_AUDIO_AND_METADATA_MODIFICATION_WAITING)
+            (status == TaskRunnerStatus.MODIFYING_AUDIO)
         statusEmitter?.onNext(status)
     }
 
@@ -112,7 +123,7 @@ object NarrationTakeModifier {
                         // Only set status to IDLE when we do not have a waiting update marker task
                         updateStatus(TaskRunnerStatus.IDLE)
                     } else {
-                        // Sets status to UPDATING_MARKERS so the waiting update marker task can start executing
+                        // Sets status to MODIFYING_METADATA so waiting update marker task can start executing
                         updateStatus(TaskRunnerStatus.MODIFYING_METADATA)
                     }
                 }
@@ -121,6 +132,16 @@ object NarrationTakeModifier {
     }
 
 
+    /**
+     * Called when we need to update chapter take audio metadata.
+     *
+     * This happens for actions that involve chapter take audio metadata (i.e. moving a verse marker).
+     *
+     * Waits for any ongoing audio modifications to finish, before executing the most recent metadata modification
+     *
+     * @param take the take to modify
+     * @param markers the markers that correspond to the audio data
+     */
     @Synchronized
     fun modifyMetadata(take: Take?, markers: List<AudioMarker>) {
 
@@ -129,11 +150,9 @@ object NarrationTakeModifier {
         val takeFile = take.file
 
         if (isBouncingAudio) {
-            updateStatus(TaskRunnerStatus.MODIFYING_AUDIO_AND_METADATA_MODIFICATION_WAITING)
-
             status
                 .takeWhile { status ->
-                    status == TaskRunnerStatus.MODIFYING_AUDIO_AND_METADATA_MODIFICATION_WAITING || status == TaskRunnerStatus.MODIFYING_AUDIO
+                    status == TaskRunnerStatus.MODIFYING_AUDIO
                 }
                 .doOnComplete {
                     waitingMarkerUpdateTask = null
