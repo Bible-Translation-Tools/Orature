@@ -226,8 +226,8 @@ class NarrationViewModel : ViewModel() {
             )
             .let { disposables.add(it) }
 
-        audioPositionProperty.onChangeWithDisposer {
-            if (it != null) { updateHighlightedItem(it.toInt()) }
+        audioPositionProperty.onChangeWithDisposer { pos ->
+            if (pos != null) updateHighlightedItem(pos.toInt())
         }.also { disposers.add(it) }
     }
 
@@ -960,8 +960,16 @@ class NarrationViewModel : ViewModel() {
     }
 
     private fun updateHighlightedItem(audioPosition: Int) {
-        val marker = narration.findMarkerAtPosition(audioPosition)
-        val index = narratableList.indexOfFirst { it.marker == marker }
-        highlightedVerseIndex.set(index)
+        when {
+            isRecording -> highlightedVerseIndex.set(recordingVerseIndex.value)
+
+            isRecordingAgain -> highlightedVerseIndex.set(recordAgainVerseIndex!!)
+
+            else -> {
+                val marker = narration.findMarkerAtPosition(audioPosition)
+                val index = narratableList.indexOfFirst { it.marker == marker }
+                highlightedVerseIndex.set(index)
+            }
+        }
     }
 }
