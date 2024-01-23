@@ -234,7 +234,7 @@ class NarrationViewModel : ViewModel() {
     fun onUndock() {
         disposables.clear()
         disposers.forEach { it.dispose() }
-        disposables.clear()
+        disposers.clear()
         closeNarrationAudio()
         narration.close()
         renderer.close()
