@@ -75,15 +75,10 @@ class NarrationTakeModifierTest {
 
 
     fun addBytesToFile(file: File, numberOfBytes: Int) {
-        try {
-            val outputStream = FileOutputStream(file, false)
 
+        FileOutputStream(file, false).use { outputStream ->
             val byteArray = ByteArray(numberOfBytes) { 1 }
             outputStream.write(byteArray)
-
-            outputStream.close()
-        } catch (e: Exception) {
-            println("Error: ${e.message}")
         }
     }
 
