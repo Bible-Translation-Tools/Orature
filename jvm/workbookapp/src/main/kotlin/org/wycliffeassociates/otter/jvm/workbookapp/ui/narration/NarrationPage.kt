@@ -229,7 +229,7 @@ class NarrationPage : View() {
         }.let { eventSubscriptions.add(it) }
 
         subscribe<NavigateChapterEvent> {
-            viewModel.tryToNavigateChapter(it.chapterNumber)
+            viewModel.deferNavigateChapterWhileModifyingTake(it.chapterNumber)
         }.let { eventSubscriptions.add(it) }
     }
 

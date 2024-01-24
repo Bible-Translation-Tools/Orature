@@ -343,8 +343,14 @@ class NarrationViewModel : ViewModel() {
         }
     }
 
-    // Prevents navigating to chapter while modifying chapter take audio
-    fun tryToNavigateChapter(chapterNumber: Int) {
+
+    /**
+     * If we are currently modifying the chapter take, the chapter navigation is postponed until the modification is
+     * done, otherwise, the chapter navigation is performed immediately.
+     *
+     * @param chapterNumber the chapter to move to
+     */
+    fun deferNavigateChapterWhileModifyingTake(chapterNumber: Int) {
         if (isModifyingTakeAudioProperty.value) {
             openLoadingModalProperty.set(true)
             onTaskRunnerIdle = {
@@ -366,8 +372,6 @@ class NarrationViewModel : ViewModel() {
      * @param chapterNumber the chapter to move to
      */
     fun navigateChapter(chapterNumber: Int) {
-
-
         if (::narration.isInitialized) {
             closeNarrationAudio()
             narration.close()
