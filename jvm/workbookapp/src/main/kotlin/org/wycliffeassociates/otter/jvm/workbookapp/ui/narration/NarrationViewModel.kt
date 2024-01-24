@@ -57,6 +57,8 @@ import org.wycliffeassociates.otter.common.domain.narration.teleprompter.Telepro
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.event.*
 import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
@@ -111,6 +113,7 @@ class NarrationViewModel : ViewModel() {
     val playingVerseProperty = SimpleObjectProperty<VerseMarker?>()
     var playingVerse by playingVerseProperty
     val playingVerseIndex = SimpleIntegerProperty(-1)
+    val highlightedVerseIndex = SimpleIntegerProperty(-1)
 
     val hasUndoProperty = SimpleBooleanProperty()
     var hasUndo by hasUndoProperty
@@ -148,6 +151,7 @@ class NarrationViewModel : ViewModel() {
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
     private val disposables = CompositeDisposable()
+    private var disposers = mutableListOf<ListenerDisposer>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -221,10 +225,16 @@ class NarrationViewModel : ViewModel() {
                 }
             )
             .let { disposables.add(it) }
+
+        audioPositionProperty.onChangeWithDisposer { pos ->
+            if (pos != null) updateHighlightedItem(pos.toInt())
+        }.also { disposers.add(it) }
     }
 
     fun onUndock() {
         disposables.clear()
+        disposers.forEach { it.dispose() }
+        disposers.clear()
         closeNarrationAudio()
         narration.close()
         renderer.close()
@@ -307,6 +317,7 @@ class NarrationViewModel : ViewModel() {
         recordingVerseIndex.set(-1)
         playingVerseProperty.set(null)
         playingVerseIndex.set(-1)
+        highlightedVerseIndex.set(-1)
         hasUndoProperty.set(false)
         hasRedoProperty.set(false)
         audioPositionProperty.set(0)
@@ -530,6 +541,7 @@ class NarrationViewModel : ViewModel() {
         renderer.clearActiveRecordingData()
         audioPlayer.pause()
         narration.loadChapterIntoPlayer()
+
         // audioPlayer.seek(0)
         audioPlayer.play()
     }
@@ -945,5 +957,19 @@ class NarrationViewModel : ViewModel() {
         val updated = narratableList.mapIndexed { idx, item -> item.apply { item.state = list[idx] } }
         narratableList.setAll(updated)
         refreshTeleprompter()
+    }
+
+    private fun updateHighlightedItem(audioPosition: Int) {
+        when {
+            isRecording -> highlightedVerseIndex.set(recordingVerseIndex.value)
+
+            isRecordingAgain -> highlightedVerseIndex.set(recordAgainVerseIndex!!)
+
+            else -> {
+                val marker = narration.findMarkerAtPosition(audioPosition)
+                val index = narratableList.indexOfFirst { it.marker == marker }
+                highlightedVerseIndex.set(index)
+            }
+        }
     }
 }

@@ -278,7 +278,7 @@ internal class ChapterRepresentation(
         return 0
     }
 
-    private fun findVerse(absoluteFrame: Int): VerseNode? {
+    fun findVerse(absoluteFrame: Int): VerseNode? {
         return activeVerses.find { node ->
             absoluteFrame in node
         }

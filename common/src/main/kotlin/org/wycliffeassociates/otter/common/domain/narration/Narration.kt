@@ -546,6 +546,11 @@ class Narration @AssistedInject constructor(
                 }
             }
     }
+
+    fun findMarkerAtPosition(position: Int): AudioMarker? {
+        val frame = chapterRepresentation.relativeChapterToAbsolute(position)
+        return chapterRepresentation.findVerse(frame)?.marker
+    }
 }
 
 @AssistedFactory

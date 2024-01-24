@@ -73,6 +73,7 @@ class TeleprompterViewModel : ViewModel() {
 
     val recordingVerseProperty = SimpleIntegerProperty()
     val playingVerseProperty = SimpleIntegerProperty()
+    val highlightedVerseProperty = SimpleIntegerProperty()
 
     init {
         recordStartProperty.bindBidirectional(narrationViewModel.recordStartProperty)
@@ -84,6 +85,7 @@ class TeleprompterViewModel : ViewModel() {
         lastRecordedVerseProperty.bindBidirectional(narrationViewModel.lastRecordedVerseProperty)
         recordingVerseProperty.bind(narrationViewModel.recordingVerseIndex)
         playingVerseProperty.bind(narrationViewModel.playingVerseIndex)
+        highlightedVerseProperty.bind(narrationViewModel.highlightedVerseIndex)
     }
 
     fun currentVerseTextBinding(): StringBinding {
@@ -240,11 +242,16 @@ class TeleprompterView : View() {
                     viewModel.isRecordingAgainProperty,
                     viewModel.isPlayingProperty,
                     viewModel.recordingVerseProperty,
-                    viewModel.playingVerseProperty
+                    viewModel.playingVerseProperty,
+                    viewModel.highlightedVerseProperty
                 )
             }
 
             runLater { customizeScrollbarSkin() }
+
+            viewModel.highlightedVerseProperty.onChange {
+                if (it in items.indices) scrollTo(it)
+            }
         }
     }
 
