@@ -164,7 +164,8 @@ object NarrationTakeModifier {
                 .doOnSubscribe {
                     currentMarkerUpdateTask?.dispose()
                 }
-                .subscribe().let {
+                .subscribe()
+                .let {
                     waitingMarkerUpdateTask?.dispose()
                     waitingMarkerUpdateTask = it
                 }
