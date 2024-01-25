@@ -71,18 +71,25 @@ object MergeTextContent {
     }
 
     private fun manifestFilePermutations(fromRc: ResourceContainer, project: Project): Map<String, InputStream> {
-        // TODO: get input streams of all files under a project directory for non-bundle RCs
         //val content = fromRc.getProjectContent(project.identifier, fromRc.manifest.dublinCore.format)
+        // TODO: ./ breaks file access, this should be fixed in the RC library
+        val path = if (project.path.startsWith("./")) {
+            project.path.substringAfter("./")
+        } else {
+            project.path
+        }
         if (fromRc.manifest.dublinCore.type == "bundle") {
-            // TODO: ./ breaks file access, this should be fixed in the RC library
-            val path = if (project.path.startsWith("./")) {
-                project.path.substringAfter("./")
-            } else {
-                project.path
-            }
             if (fromRc.accessor.fileExists(path)) {
                 return mapOf(path to fromRc.accessor.getInputStream(path))
             }
+        } else if (fromRc.manifest.dublinCore.type == "book") {
+            val projectPath = File(project.path)
+            val projectDir = if (projectPath.extension == "") {
+                path
+            } else {
+                projectPath.parent
+            }
+            return fromRc.accessor.getInputStreams(projectDir, listOf("usfm"))
         }
         return mapOf()
     }
