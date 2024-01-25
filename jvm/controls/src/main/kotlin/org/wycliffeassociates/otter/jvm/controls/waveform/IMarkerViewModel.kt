@@ -38,14 +38,14 @@ interface IMarkerViewModel : IWaveformViewModel {
     fun placeMarker() {
         markerModel?.let { markerModel ->
             markerModel.addMarker(waveformAudioPlayerProperty.get().getLocationInFrames())
-            markers.setAll(markerModel.markers)
+            markers.setAll(markerModel.markerModels)
         }
     }
 
     fun deleteMarker(id: Int) {
         markerModel?.let { markerModel ->
             markerModel.deleteMarker(id)
-            markers.setAll(markerModel.markers)
+            markers.setAll(markerModel.markerModels)
         }
     }
 
@@ -100,14 +100,14 @@ interface IMarkerViewModel : IWaveformViewModel {
     fun undoMarker() {
         markerModel?.let { markerModel ->
             markerModel.undo()
-            markers.setAll(markerModel.markers)
+            markers.setAll(markerModel.markerModels)
         }
     }
 
     fun redoMarker() {
         markerModel?.let { markerModel ->
             markerModel.redo()
-            markers.setAll(markerModel.markers)
+            markers.setAll(markerModel.markerModels)
         }
     }
 

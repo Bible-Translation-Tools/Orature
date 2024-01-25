@@ -128,7 +128,7 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
         val verseMarkers = audio.getMarker<VerseMarker>()
         markerModel = VerseMarkerModel(audio, verseMarkers.size, verseMarkers.map { it.label })
         markerModel?.let { markerModel ->
-            markers.setAll(markerModel.markers)
+            markers.setAll(markerModel.markerModels)
         }
     }
 

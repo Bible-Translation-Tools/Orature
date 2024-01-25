@@ -138,12 +138,12 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
 
         markerRatioProperty.bind(
             Bindings.createStringBinding(
-                { "${markerCountProperty.value}/$totalMarkers" },
+                { "${markerCountProperty.value}/${markerModel?.markerTotal}" },
                 markerCountProperty
             )
         )
         markerModel?.let { markerModel ->
-            markers.setAll(markerModel.markers)
+            markers.setAll(markerModel.markerModels)
         }
     }
 

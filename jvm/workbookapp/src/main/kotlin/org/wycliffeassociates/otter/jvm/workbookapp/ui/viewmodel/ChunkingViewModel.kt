@@ -206,7 +206,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         val totalMarkers = 500
         audio.clearCues()
         val chunkMarkers = audio.getMarker<ChunkMarker>().map {
-            ChunkMarkerModel(AudioCue(it.location, it.label))
+            ChunkMarkerModel(it, true)
         }
         markers.setAll(chunkMarkers)
         markerModel = VerseMarkerModel(

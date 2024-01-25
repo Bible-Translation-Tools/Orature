@@ -52,6 +52,7 @@ interface AudioMarker {
     }
 
     fun clone(): AudioMarker
+    fun clone(location: Int): AudioMarker
 }
 
 data class UnknownMarker(override val location: Int, override val label: String) : AudioMarker {
@@ -66,6 +67,10 @@ data class UnknownMarker(override val location: Int, override val label: String)
 
     override fun clone(): UnknownMarker {
         return copy()
+    }
+
+    override fun clone(location: Int): UnknownMarker {
+        return copy(location = location)
     }
 }
 
@@ -85,6 +90,10 @@ data class BookMarker(val bookSlug: String, override val location: Int) : AudioM
     override fun clone(): BookMarker {
         return copy()
     }
+
+    override fun clone(location: Int): BookMarker {
+        return copy(location = location)
+    }
 }
 
 data class ChapterMarker(val chapterNumber: Int, override val location: Int) : AudioMarker {
@@ -102,6 +111,10 @@ data class ChapterMarker(val chapterNumber: Int, override val location: Int) : A
 
     override fun clone(): ChapterMarker {
         return copy()
+    }
+
+    override fun clone(location: Int): ChapterMarker {
+        return copy(location = location)
     }
 }
 
@@ -122,6 +135,10 @@ data class VerseMarker(val start: Int, val end: Int, override val location: Int)
     override fun clone(): VerseMarker {
         return copy()
     }
+
+    override fun clone(location: Int): VerseMarker {
+        return copy(location = location)
+    }
 }
 
 data class ChunkMarker(val chunk: Int, override val location: Int) : AudioMarker {
@@ -135,5 +152,9 @@ data class ChunkMarker(val chunk: Int, override val location: Int) : AudioMarker
 
     override fun clone(): ChunkMarker {
         return copy()
+    }
+
+    override fun clone(location: Int): ChunkMarker {
+        return copy(location = location)
     }
 }

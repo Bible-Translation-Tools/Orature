@@ -33,6 +33,7 @@ import java.util.concurrent.Callable
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
 import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
@@ -212,7 +213,7 @@ open class MarkerTrackControl : Region() {
 
     protected open fun preallocateMarkers() {
         for (i in 0 until MARKER_COUNT) {
-            val mk = ChunkMarkerModel(0, i.toString(), false)
+            val mk = ChunkMarkerModel(VerseMarker(i, i, 0), false)
             val marker = createMarker(i, mk)
             val rect = createHighlight(i, mk)
             rect.heightProperty().bind(heightProperty().minus(40.0))

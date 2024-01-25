@@ -24,55 +24,88 @@ import java.util.*
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
+import org.wycliffeassociates.otter.common.data.audio.BookMarker
+import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.domain.IUndoable
-import kotlin.math.absoluteValue
+import java.util.regex.Pattern
 
 private const val SEEK_EPSILON = 15_000
 
 class VerseMarkerModel(
     private val audio: OratureAudioFile,
-    private val markerTotal: Int,
-    private val markerLabels: List<String>
+    markerTotal: Int,
+    markerLabels: List<String>
 ) {
     private val logger = LoggerFactory.getLogger(VerseMarkerModel::class.java)
 
     private val undoStack: Deque<MarkerOperation> = ArrayDeque()
     private val redoStack: Deque<MarkerOperation> = ArrayDeque()
 
-    private val cues = sanitizeCues(audio, markerLabels)
-    val markers = mutableListOf<ChunkMarkerModel>()
+    private val markers = mutableListOf<AudioMarker>()
+    val markerModels = mutableListOf<ChunkMarkerModel>()
 
     private var placedMarkersCount = 0
     private val audioEnd = audio.totalFrames
 
-    private var labelIndex = 0
+    val markerTotal
+        get() = markers.size
+
+    private val labelIndex
+        get() = undoStack.size
 
     init {
-        cues as MutableList
-        cues.sortBy { it.location }
-        placedMarkersCount = cues.size
+        loadMarkersFromAudio()
+    }
 
-        markers.addAll(initializeMarkers(markerTotal, cues))
+    private fun loadMarkersFromAudio() {
+        val bookMarker = audio.getMarker<BookMarker>()
+            .firstOrNull()
+            ?.let { arrayOf(ChunkMarkerModel(it, true)) }
+            ?: arrayOf()
+        val chapterMarker = audio.getMarker<ChapterMarker>()
+            .firstOrNull()
+            ?.let { arrayOf(ChunkMarkerModel(it, true)) }
+            ?: arrayOf()
+        val verses = audio.getMarker<VerseMarker>().map { ChunkMarkerModel(it, true) }.toTypedArray()
+
+        undoStack.clear()
+        redoStack.clear()
+        markerModels.clear()
+        markerModels.addAll(listOf(*bookMarker, *chapterMarker, *verses))
+        markerModels.forEach { markers.add(it.marker) }
+        markerModels.forEach { undoStack.push(Add(it)) }
     }
 
     fun loadMarkers(chunkMarkers: List<ChunkMarkerModel>) {
-        markers.clear()
-        markers.addAll(chunkMarkers)
+        markerModels.clear()
+        markerModels.addAll(chunkMarkers)
         refreshMarkers()
     }
 
     fun addMarker(location: Int) {
-        if (markers.size < markerTotal) {
-            val label = markerLabels.getOrElse(labelIndex) { labelIndex + 1 }.toString()
-            val marker = ChunkMarkerModel(AudioCue(location, label))
-            val op = Add(marker)
+        if (markerModels.size < markerTotal) {
+            val marker = markers.getOrNull(labelIndex) ?: return
+            val markerModel = ChunkMarkerModel(marker.clone(location), true)
+            val op = Add(markerModel)
             undoStack.push(op)
             op.execute()
             redoStack.clear()
 
             refreshMarkers()
+        }
+    }
+
+    private fun parseLabel(label: String): Pair<Int, Int> {
+        val pattern = Pattern.compile("(\\d)(?:-(\\d))?")
+        val match = pattern.matcher(label)
+        if (match.matches()) {
+            val start: Int = match.group(1)!!.toInt()
+            val end: Int = match.group(2)?.toInt() ?: start
+            return Pair(start, end)
+        } else {
+            throw NumberFormatException("Invalid verse label: $label, which could not be parsed to a verse or verse range")
         }
     }
 
@@ -118,13 +151,13 @@ class VerseMarkerModel(
 
     fun seekCurrent(location: Int): Int {
         // find the nearest frame preceding the location
-        return markers.filter { it.placed }.lastOrNull {
+        return markerModels.filter { it.placed }.lastOrNull {
             it.frame <= location
         }?.frame ?: 0
     }
 
     fun seekNext(location: Int): Int {
-        for (marker in markers.filter { it.placed }) {
+        for (marker in markerModels.filter { it.placed }) {
             if (location < marker.frame) {
                 return marker.frame
             }
@@ -133,7 +166,7 @@ class VerseMarkerModel(
     }
 
     fun seekPrevious(location: Int): Int {
-        val filtered = markers.filter { it.placed }
+        val filtered = markerModels.filter { it.placed }
         return if (filtered.isNotEmpty()) {
             findMarkerPrecedingPosition(location, filtered).frame
         } else {
@@ -145,13 +178,13 @@ class VerseMarkerModel(
     fun canRedo() = redoStack.isNotEmpty()
 
     private fun refreshMarkers() {
-        markers.sortBy { it.frame }
-        markers.forEachIndexed { index, chunkMarker ->
-            if (index < markerLabels.size) {
-                chunkMarker.label = markerLabels[index]
+        markerModels.sortBy { it.frame }
+        markerModels.forEachIndexed { index, chunkMarker ->
+            if (index < markers.size) {
+                chunkMarker.marker = markers[index]
             }
         }
-        placedMarkersCount = markers.filter { it.placed }.size
+        placedMarkersCount = markerModels.filter { it.placed }.size
     }
 
     private fun findMarkerPrecedingPosition(
@@ -168,150 +201,35 @@ class VerseMarkerModel(
 
     fun writeMarkers(): Completable {
         return Single.fromCallable {
-            cues as MutableList
-            cues.clear()
-            markers.forEach {
+            audio.clearMarkersOfType<BookMarker>()
+            audio.clearMarkersOfType<ChapterMarker>()
+            audio.clearMarkersOfType<VerseMarker>()
+
+            markerModels.forEach {
                 if (it.placed) {
-                    cues.add(it.toAudioCue())
-                }
-            }
-            audio.clearVerseMarkers()
-            cues.forEach { audio.addVerseMarker(it.location, it.label) }
-            audio.update()
-        }.ignoreElement()
-    }
-
-    private fun sanitizeCues(
-        audio: OratureAudioFile,
-        markerLabels: List<String>
-    ): List<AudioCue> {
-        val verses = audio.getMarker<VerseMarker>()
-        val map = mutableMapOf<String, AudioMarker?>()
-        map.putAll(markerLabels.map { it to null })
-        val unmatched = mutableListOf<AudioMarker>()
-        for (verse in verses) {
-            if (verse.label in map.keys) {
-                map[verse.label] = verse
-            } else {
-                unmatched.add(verse)
-            }
-        }
-        handleUnmatched(map, unmatched)
-        val nonNullMap = map.filterValues { it != null }
-        val sanitized = nonNullMap.values.map { AudioCue(it!!.location, it!!.label) }
-        return sanitized
-    }
-
-
-    private fun handleUnmatched(
-        labelsToMarkers: MutableMap<String, AudioMarker?>,
-        unmatchedMarkers: List<AudioMarker>
-    ) {
-        if (unmatchedMarkers.isEmpty()) return
-
-        data class Bridge(val start: Int, val end: Int)
-
-        val labelMatcher = Regex("^(\\d+)(?:-(\\d+))?$")
-        val bridgeToLabel = mutableMapOf<Bridge, String>()
-        labelsToMarkers.forEach {
-            val match = labelMatcher.find(it.key)
-            match?.let { match ->
-                val start = match.groups[1]!!.value.toInt()
-                val end = match.groups[2]?.value?.toInt()?.absoluteValue ?: start
-                val bridge = Bridge(start, end)
-                bridgeToLabel[bridge] = it.key
-            }
-        }
-
-        for (verse in unmatchedMarkers) {
-            bridgeToLabel.forEach { (bridge, label) ->
-                (verse as? VerseMarker)?.let { marker ->
-                    if (marker.start == bridge.start) {
-                        val newVerse = VerseMarker(bridge.start, bridge.end, verse.location)
-                        labelsToMarkers[label] = newVerse
+                    when (val marker = it.marker) {
+                        is BookMarker -> audio.addMarker<BookMarker>(marker.copy(location = it.frame))
+                        is ChapterMarker -> audio.addMarker<ChapterMarker>(marker.copy(location = it.frame))
+                        is VerseMarker -> audio.addMarker<VerseMarker>(marker.copy(it.frame))
                     }
                 }
             }
-        }
-    }
 
-    private fun initializeMarkers(markerTotal: Int, cues: List<AudioCue>): List<ChunkMarkerModel> {
-        cues as MutableList
-        cues.sortBy { it.location }
-
-        val mappedCues = mapCuesToMarkerLabels(cues, markerLabels)
-
-        val markers = mutableListOf<ChunkMarkerModel>()
-        for ((idx, cue) in cues.withIndex()) {
-            if (idx < markerTotal) {
-                markers.add(ChunkMarkerModel(cue))
-            }
-        }
-
-        return markers
-    }
-
-    fun mapCuesToMarkerLabels(cues: List<AudioCue>, markerLabels: List<String>): List<AudioCue> {
-        val bridgesExist = labelsContainBridges(markerLabels)
-        val mappedCues = mutableMapOf<String, AudioCue>()
-        val labels = markerLabels.map { it }.toMutableList()
-        for (cue in cues) {
-            if (cue.label in labels) {
-                mappedCues[cue.label] = cue
-                labels.remove(cue.label)
-            } else if (cueInRange(cue, labels)) {
-                bridgeCue(cue, labels, mappedCues)
-            }
-            mappedCues[cue.label] = cue
-
-        }
-        return emptyList()
-    }
-
-    fun cueInRange(cue: AudioCue, labels: List<String>): Boolean {
-        val bridges = labels.filter { it.contains("-") }
-        for (bridge in bridges) {
-            val range = bridge.trim().split("-")
-            val start = range[0].toInt()
-            val end = range[1].toInt()
-            return cue.label.toInt() in start..end
-        }
-        return false
-    }
-
-    fun bridgeCue(
-        cue: AudioCue,
-        labels: MutableList<String>,
-        mappedCues: MutableMap<String, AudioCue>
-    ) {
-        val label = labels.find { it.contains("-") }
-        if (label != null) {
-            val range = label.split("-")
-            val start = range[0].toInt()
-            val end = range[1].toInt()
-            if (cue.label.toInt() in start..end) {
-                val newCue = AudioCue(cue.location, label)
-                mappedCues[label] = newCue
-                labels.remove(label)
-            }
-        }
-    }
-
-    private fun labelsContainBridges(markerLabels: List<String>): Boolean {
-        return markerLabels.find { it.contains("-") } != null
+            audio.update()
+        }.ignoreElement()
     }
 
     private abstract inner class MarkerOperation(val markerId: Int) : IUndoable
 
     private inner class Add(val marker: ChunkMarkerModel) : MarkerOperation(marker.id) {
         override fun execute() {
-            labelIndex++
-            markers.add(marker)
+            //labelIndex++
+            markerModels.add(marker)
         }
 
         override fun undo() {
-            labelIndex--
-            markers.remove(marker)
+            //labelIndex--
+            markerModels.remove(marker)
         }
 
         override fun redo() = execute()
@@ -321,17 +239,17 @@ class VerseMarkerModel(
         var marker: ChunkMarkerModel? = null
 
         override fun execute() {
-            labelIndex--
-            marker = markers.find { it.id == markerId }
+            //labelIndex--
+            marker = markerModels.find { it.id == markerId }
             marker?.let {
-                markers.remove(it)
+                markerModels.remove(it)
             }
         }
 
         override fun undo() {
-            labelIndex++
+            //labelIndex++
             marker?.let {
-                markers.add(it)
+                markerModels.add(it)
             }
         }
 
@@ -346,7 +264,7 @@ class VerseMarkerModel(
         var marker: ChunkMarkerModel? = null
 
         override fun execute() {
-            marker = markers.find { it.id == markerId }
+            marker = markerModels.find { it.id == markerId }
             marker?.frame = end
         }
 
@@ -359,12 +277,12 @@ class VerseMarkerModel(
 }
 
 data class ChunkMarkerModel(
-    var frame: Int,
-    var label: String,
+    var marker: AudioMarker,
     var placed: Boolean,
     var id: Int = idGen++
 ) {
-    constructor(audioCue: AudioCue) : this(audioCue.location, audioCue.label, true)
+    var frame: Int = marker.location
+    var label: String = marker.label
 
     fun toAudioCue(): AudioCue {
         return AudioCue(frame, label)
