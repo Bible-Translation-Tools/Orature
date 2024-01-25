@@ -30,6 +30,7 @@ import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IProjectReader
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.MediaMerge
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.MergeTextContent
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectImporter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
@@ -84,15 +85,29 @@ class ImportResourceContainer @Inject constructor(
             }
             canMergeMedia -> {
                 logger.info("RC already imported, merging media")
-                Single.fromCallable {
-                    val existingRC = getExistingMetadata(rcFile)
-                    MediaMerge(
-                        directoryProvider,
-                        ResourceContainer.load(rcFile),
-                        ResourceContainer.load(existingRC.path)
-                    ).merge()
-                    ImportResult.SUCCESS
-                }
+                Single
+                    .fromCallable {
+                        val existingRC = getExistingMetadata(rcFile)
+                        MediaMerge(
+                            directoryProvider,
+                            ResourceContainer.load(rcFile),
+                            ResourceContainer.load(existingRC.path)
+                        ).merge()
+                        logger.info("Merging text content...")
+                        MergeTextContent.merge(
+                            ResourceContainer.load(rcFile),
+                            ResourceContainer.load(existingRC.path)
+                        )
+                        ImportResult.SUCCESS
+                    }
+                    .flatMap {
+                        if (it == ImportResult.SUCCESS) {
+                            logger.info("Merging completed!")
+                            importContainer(rcFile)
+                        } else {
+                            Single.just(it)
+                        }
+                    }
             }
             tryUpdateExistingRC(rcFile) -> {
                 logger.info("Importing RC as default")
