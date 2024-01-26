@@ -20,6 +20,8 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.jfoenix.controls.JFXSnackbar
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.EventHandler
 import javafx.scene.Node
@@ -118,6 +120,8 @@ class HomePage2 : View() {
             }
         }
     }
+
+    private val disposable = CompositeDisposable()
 
     init {
         tryImportStylesheet("/css/control.css")
@@ -231,6 +235,7 @@ class HomePage2 : View() {
         viewModel.undock()
         listeners.forEach(ListenerDisposer::dispose)
         listeners.clear()
+        disposable.clear()
     }
 
     private fun subscribeActionEvents() {
@@ -588,6 +593,19 @@ class HomePage2 : View() {
             validateFileCallback.set {
                 importProjectViewModel.isValidImportFile(it)
             }
+
+            importProjectViewModel.snackBarObservable
+                .subscribe { msg ->
+                    SnackbarHandler.showNotification(
+                        NotificationViewData(
+                            title = messages["error"],
+                            message = msg,
+                            statusType = NotificationStatusType.FAILED
+                        ),
+                        this.root
+                    )
+                }.addTo(disposable)
+
             open()
         }
     }
