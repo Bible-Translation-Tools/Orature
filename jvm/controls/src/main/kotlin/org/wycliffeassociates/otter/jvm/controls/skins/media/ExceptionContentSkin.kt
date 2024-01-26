@@ -60,6 +60,8 @@ class ExceptionContentSkin(private var content: ExceptionContent) : SkinBase<Exc
     private val showLessIcon = FontIcon("gmi-expand-less").apply { styleClass.add("btn__icon") }
 
     init {
+        tryImportStylesheet(javaClass.getResource("/css/exception-content.css").toExternalForm())
+
         loadFXML()
         bindText()
         bindAction()
@@ -69,8 +71,6 @@ class ExceptionContentSkin(private var content: ExceptionContent) : SkinBase<Exc
             managedProperty().bind(this@ExceptionContentSkin.content.showMoreProperty())
             nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
         }
-
-        tryImportStylesheet(javaClass.getResource("/css/exception-content.css").toExternalForm())
     }
 
     private fun bindText() {
