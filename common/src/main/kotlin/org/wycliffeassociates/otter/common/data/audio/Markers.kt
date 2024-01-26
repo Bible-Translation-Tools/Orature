@@ -23,6 +23,13 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import org.wycliffeassociates.otter.common.audio.AudioCue
 
+enum class MarkerType {
+    TITLE,
+    CONTENT,
+    METADATA,
+    UNKNOWN
+}
+
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
     include = JsonTypeInfo.As.PROPERTY,
@@ -36,6 +43,7 @@ import org.wycliffeassociates.otter.common.audio.AudioCue
     JsonSubTypes.Type(value = UnknownMarker::class, name = "unknown_marker")
 )
 interface AudioMarker {
+    val type: MarkerType
     /**
      * The marker label which does not contain any namespacing, most often a verse number or verse range
      */
@@ -56,6 +64,8 @@ interface AudioMarker {
 }
 
 data class UnknownMarker(override val location: Int, override val label: String) : AudioMarker {
+    override val type = MarkerType.UNKNOWN
+
     constructor(cue: AudioCue) : this(cue.location, cue.label)
 
     override val formattedLabel
@@ -75,6 +85,8 @@ data class UnknownMarker(override val location: Int, override val label: String)
 }
 
 data class BookMarker(val bookSlug: String, override val location: Int) : AudioMarker {
+    override val type = MarkerType.TITLE
+
     override val label: String
         @JsonIgnore
         get() = bookSlug
@@ -97,6 +109,8 @@ data class BookMarker(val bookSlug: String, override val location: Int) : AudioM
 }
 
 data class ChapterMarker(val chapterNumber: Int, override val location: Int) : AudioMarker {
+    override val type = MarkerType.TITLE
+
     override val label: String
         @JsonIgnore
         get() = "$chapterNumber"
@@ -119,6 +133,7 @@ data class ChapterMarker(val chapterNumber: Int, override val location: Int) : A
 }
 
 data class VerseMarker(val start: Int, val end: Int, override val location: Int) : AudioMarker {
+    override val type = MarkerType.CONTENT
 
     override val label: String
         @JsonIgnore
@@ -142,6 +157,8 @@ data class VerseMarker(val start: Int, val end: Int, override val location: Int)
 }
 
 data class ChunkMarker(val chunk: Int, override val location: Int) : AudioMarker {
+    override val type = MarkerType.CONTENT
+
     override val label = "$chunk"
     override val formattedLabel
         get() = "orature-chunk-${label}"

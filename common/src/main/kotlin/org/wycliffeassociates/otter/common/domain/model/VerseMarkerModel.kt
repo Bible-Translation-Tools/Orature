@@ -26,10 +26,12 @@ import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.BookMarker
 import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
+import org.wycliffeassociates.otter.common.data.audio.MarkerType
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.domain.IUndoable
 import java.util.regex.Pattern
+import kotlin.properties.Delegates
 
 private const val SEEK_EPSILON = 15_000
 
@@ -49,17 +51,17 @@ class VerseMarkerModel(
     private var placedMarkersCount = 0
     private val audioEnd = audio.totalFrames
 
-    val markerTotal
+    init {
+        loadMarkersFromAudio(markerLabels)
+    }
+
+    val markerTotal: Int
         get() = markers.size
 
     private val labelIndex
         get() = undoStack.size
 
-    init {
-        loadMarkersFromAudio()
-    }
-
-    private fun loadMarkersFromAudio() {
+    private fun loadMarkersFromAudio(markerLabels: List<String>) {
         val bookMarker = audio.getMarker<BookMarker>()
             .firstOrNull()
             ?.let { arrayOf(ChunkMarkerModel(it, true)) }
@@ -73,9 +75,41 @@ class VerseMarkerModel(
         undoStack.clear()
         redoStack.clear()
         markerModels.clear()
-        markerModels.addAll(listOf(*bookMarker, *chapterMarker, *verses))
+
+        val finalizedVerses = addMissingLabels(markerLabels, verses).toTypedArray()
+
+        markerModels.addAll(listOf(*bookMarker, *chapterMarker, *finalizedVerses))
+
         markerModels.forEach { markers.add(it.marker) }
-        markerModels.forEach { undoStack.push(Add(it)) }
+        markerModels.removeIf { !it.placed }
+        markerModels.forEach { if (it.placed) undoStack.push(Add(it)) }
+    }
+
+    private fun matchesTotal(markerModels: Array<ChunkMarkerModel>): Boolean {
+        val titleCount = markerModels.count { it.marker.type == MarkerType.TITLE }
+        return markerModels.size == markerTotal + titleCount
+    }
+
+    private fun addMissingLabels(
+        markerLabels: List<String>,
+        markerModels: Array<ChunkMarkerModel>
+    ): List<ChunkMarkerModel> {
+        if (markerModels.size == markerLabels.size) return markerModels.toList()
+
+        val all = markerLabels.map {
+            val (start, end) = parseLabel(it)
+            val marker = VerseMarker(start, end, 0)
+            ChunkMarkerModel(marker, false)
+        }
+
+        val placedVerses = markerModels.filter { it.marker is VerseMarker }.toTypedArray()
+        val missing = all.filter { marker ->
+            placedVerses.any { it.marker.label == marker.label }.not()
+        }.toTypedArray()
+
+        val final = listOf(*placedVerses, *missing)
+        final.sortedBy { (it.marker as VerseMarker).start }
+        return final
     }
 
     fun loadMarkers(chunkMarkers: List<ChunkMarkerModel>) {
@@ -98,7 +132,7 @@ class VerseMarkerModel(
     }
 
     private fun parseLabel(label: String): Pair<Int, Int> {
-        val pattern = Pattern.compile("(\\d)(?:-(\\d))?")
+        val pattern = Pattern.compile("(\\d+)(?:-(\\d+))?")
         val match = pattern.matcher(label)
         if (match.matches()) {
             val start: Int = match.group(1)!!.toInt()
