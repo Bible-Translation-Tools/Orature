@@ -163,8 +163,6 @@ class ChapterPage : View() {
     override val root = hbox {
         addClass("chapter-page")
 
-        createSnackBar()
-
         vbox {
             addClass("chapter-page__chapter-info")
             vgrow = Priority.ALWAYS
@@ -526,28 +524,6 @@ class ChapterPage : View() {
                 viewModel.sourceTextZoomRateProperty
             )
         }
-    }
-
-    private fun createSnackBar() {
-        viewModel
-            .snackBarObservable
-            .doOnError { e ->
-                logger.error("Error in creating no plugin snackbar", e)
-            }
-            .subscribe { pluginErrorMessage ->
-                SnackbarHandler.enqueue(
-                    JFXSnackbar.SnackbarEvent(
-                        JFXSnackbarLayout(
-                            pluginErrorMessage,
-                            messages["addApp"].uppercase(Locale.getDefault())
-                        ) {
-                            audioPluginViewModel.addPlugin(true, false)
-                        },
-                        Duration.millis(5000.0),
-                        null
-                    )
-                )
-            }
     }
 
     private fun initializeProgressDialog() {

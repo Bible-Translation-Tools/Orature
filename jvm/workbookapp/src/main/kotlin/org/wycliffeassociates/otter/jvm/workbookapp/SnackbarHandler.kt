@@ -30,36 +30,24 @@ const val NOTIFICATION_DURATION_SEC = 5.0
 
 object SnackbarHandler {
 
-    private val snackbar = JFXSnackbar()
-
-    fun setWindowRoot(pane: Pane) {
-        snackbar.registerSnackbarContainer(pane)
+    fun showNotification(message: String, root: Pane) {
+        val snackbar = JFXSnackbar(root)
+        snackbar.enqueue(
+            JFXSnackbar.SnackbarEvent(
+                JFXSnackbarLayout(message),
+                Duration.seconds(NOTIFICATION_DURATION_SEC)
+            )
+        )
     }
 
-    fun enqueue(event: JFXSnackbar.SnackbarEvent) {
-        if (snackbar.popupContainer != null) {
-            snackbar.enqueue(event)
-        }
-    }
+    fun showNotification(notification: NotificationViewData, container: Pane) {
+        val snackbar = JFXSnackbar(container)
 
-    fun enqueue(customSnackbar: JFXSnackbarLayout) {
-        if (snackbar.popupContainer != null) {
-            snackbar.enqueue(JFXSnackbar.SnackbarEvent(customSnackbar))
-        }
-    }
-
-    fun enqueue(message: String) {
-        if (snackbar.popupContainer != null) {
-            snackbar.enqueue(JFXSnackbar.SnackbarEvent(JFXSnackbarLayout(message)))
-        }
-    }
-
-    fun enqueue(notification: NotificationViewData) {
         val graphic = NotificationSnackBar(notification).apply {
-            setOnDismiss { snackbar.close() }
+            setOnDismiss { snackbar.hide() }  /* avoid crashing if close() is invoked before timeout */
             setOnMainAction {
                 notification.actionCallback()
-                snackbar.close()
+                snackbar.hide()
             }
         }
         snackbar.enqueue(

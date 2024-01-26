@@ -69,6 +69,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ImportProjectVi
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ExportProjectViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.NOTIFICATION_DURATION_SEC
+import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectWizardViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
@@ -577,23 +578,7 @@ class HomePage2 : View() {
     }
 
     private fun showNotification(notification: NotificationViewData) {
-        val snackBar = JFXSnackbar(root)
-        val graphic = NotificationSnackBar(notification).apply {
-            setOnDismiss {
-                snackBar.hide() /* avoid crashing if close() invoked before timeout */
-            }
-            setOnMainAction {
-                notification.actionCallback()
-                snackBar.hide()
-            }
-        }
-
-        snackBar.enqueue(
-            JFXSnackbar.SnackbarEvent(
-                graphic,
-                Duration.seconds(NOTIFICATION_DURATION_SEC)
-            )
-        )
+        SnackbarHandler.showNotification(notification, root)
     }
 
     private fun showImportModal() {

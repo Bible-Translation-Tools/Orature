@@ -18,12 +18,15 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui
 
+import com.jfoenix.controls.JFXSnackbar
+import com.jfoenix.controls.JFXSnackbarLayout
 import javafx.scene.control.ButtonBase
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Pane
 import javafx.stage.Stage
 import javafx.stage.StageStyle
+import javafx.util.Duration
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.OratureInfo
@@ -31,7 +34,9 @@ import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.event.AppCloseRequestEvent
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
+import org.wycliffeassociates.otter.jvm.workbookapp.NOTIFICATION_DURATION_SEC
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
+import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler.showNotification
 import org.wycliffeassociates.otter.jvm.workbookapp.di.DaggerAppDependencyGraph
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.logging.ConfigureLogger
@@ -57,6 +62,8 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
     lateinit var audioConnectionFactory: AudioConnectionFactory
 
     val logger: Logger
+
+    private lateinit var snackBarRoot: Pane
 
     init {
         DatabaseInitializer(
@@ -89,7 +96,7 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
         stage.scene.window.setOnCloseRequest {
             if (shouldBlockWindowCloseRequest) {
                 it.consume()
-                SnackbarHandler.enqueue(messages["applicationCloseBlocked"])
+                showNotification(messages["applicationCloseBlocked"], snackBarRoot)
             } else {
                 fire(AppCloseRequestEvent)
                 audioConnectionFactory.releasePlayer()
@@ -124,7 +131,7 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
 
     override fun onBeforeShow(view: UIComponent) {
         // Configure Snackbar Handler to display received snackbars on the root window
-        SnackbarHandler.setWindowRoot(view.root as Pane)
+        snackBarRoot = view.root as Pane
     }
 
     override fun shouldShowPrimaryStage(): Boolean {
