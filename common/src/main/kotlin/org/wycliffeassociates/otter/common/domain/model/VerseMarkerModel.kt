@@ -210,7 +210,7 @@ class VerseMarkerModel(
                     when (val marker = it.marker) {
                         is BookMarker -> audio.addMarker<BookMarker>(marker.copy(location = it.frame))
                         is ChapterMarker -> audio.addMarker<ChapterMarker>(marker.copy(location = it.frame))
-                        is VerseMarker -> audio.addMarker<VerseMarker>(marker.copy(it.frame))
+                        is VerseMarker -> audio.addMarker<VerseMarker>(marker.copy(location = it.frame))
                     }
                 }
             }
@@ -285,7 +285,7 @@ data class ChunkMarkerModel(
     var label: String = marker.label
 
     fun toAudioCue(): AudioCue {
-        return AudioCue(frame, label)
+        return AudioCue(frame, marker.formattedLabel)
     }
 
     companion object {
