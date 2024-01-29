@@ -120,7 +120,7 @@ class MarkerWaveform : StackPane() {
     }
 
     init {
-        addClass("marker-waveform")
+        addClass("marker-waveform", "scrolling-waveform-frame__center")
         minHeight = 120.0
 
         nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
