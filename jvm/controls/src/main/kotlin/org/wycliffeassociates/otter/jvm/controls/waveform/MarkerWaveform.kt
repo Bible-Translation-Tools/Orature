@@ -125,10 +125,6 @@ class MarkerWaveform : StackPane() {
 
         nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
 
-        vbox {
-            addClass("scrolling-waveform-frame__center")
-        }
-
         val topTrack = MarkersContainer().apply {
             top = this
             markers.bind(this@MarkerWaveform.markers, { it })
