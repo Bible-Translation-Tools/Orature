@@ -55,8 +55,8 @@ class ScriptureTakeCard : Control() {
     val onPlaybackProgressChanged: (value: Double) -> Unit = { location ->
         markerModelProperty.value?.let { markerModel ->
             val nearestMarkerFrame = markerModel.seekCurrent(location.toInt())
-            val currentMarker = markerModel.markerModels.find { it.frame == nearestMarkerFrame }
-            val index = currentMarker?.let { markerModel.markerModels.indexOf(it) } ?: -1
+            val currentMarker = markerModel.markerItems.find { it.frame == nearestMarkerFrame }
+            val index = currentMarker?.let { markerModel.markerItems.indexOf(it) } ?: -1
             onChunkPlaybackUpdated(index)
         }
     }

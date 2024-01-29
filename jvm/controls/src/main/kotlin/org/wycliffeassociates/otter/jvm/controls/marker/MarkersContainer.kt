@@ -19,7 +19,7 @@
 package org.wycliffeassociates.otter.jvm.controls.marker
 
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
-import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.MarkerItem
 import tornadofx.*
 
 class MarkersContainer : MarkerTrackControl() {
@@ -35,7 +35,7 @@ class MarkersContainer : MarkerTrackControl() {
      */
     override fun preallocateMarkers() {
         for (i in 0 until MARKER_COUNT) {
-            val mk = ChunkMarkerModel(VerseMarker(i, i, 0), false)
+            val mk = MarkerItem(VerseMarker(i, i, 0), false)
             val marker = createMarker(i, mk)
             val rect = createHighlight(i, mk)
             val headerOffset = 80.0

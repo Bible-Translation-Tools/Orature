@@ -34,7 +34,6 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
@@ -45,7 +44,7 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.content.ChapterTranslationBuilder
-import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.MarkerItem
 import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
@@ -79,7 +78,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     val translationViewModel: TranslationViewModel2 by inject()
 
     override var markerModel: VerseMarkerModel? = null
-    override val markers = observableListOf<ChunkMarkerModel>()
+    override val markers = observableListOf<MarkerItem>()
 
     override val markerCountProperty = markers.sizeProperty
     override val currentMarkerNumberProperty = SimpleIntegerProperty(-1)
@@ -245,7 +244,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
         val sourceAudio = OratureAudioFile(sourceAudio.file)
         val sourceMarkers = sourceAudio.getMarker<VerseMarker>()
         val markerList = audio.getMarker<VerseMarker>().map {
-            ChunkMarkerModel(it, true)
+            MarkerItem(it, true)
         }
 
         totalMarkersProperty.set(sourceMarkers.size)

@@ -42,7 +42,7 @@ import javafx.animation.AnimationTimer
 import javafx.beans.binding.Bindings
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseFinishedEvent
-import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.MarkerItem
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
 import org.wycliffeassociates.otter.jvm.controls.waveform.WAVEFORM_MAX_HEIGHT
@@ -66,7 +66,7 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
     override val currentMarkerNumberProperty = SimpleIntegerProperty(0)
     override val audioPositionProperty = SimpleIntegerProperty()
     override var markerModel: VerseMarkerModel? = null
-    override val markers = observableListOf<ChunkMarkerModel>()
+    override val markers = observableListOf<MarkerItem>()
     override val markerCountProperty = markers.sizeProperty
     override var sampleRate: Int = 0 // beware of divided by 0
     override val totalFramesProperty = SimpleIntegerProperty(0)
@@ -143,7 +143,7 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
             )
         )
         markerModel?.let { markerModel ->
-            markers.setAll(markerModel.markerModels)
+            markers.setAll(markerModel.markerItems)
         }
     }
 

@@ -35,7 +35,7 @@ import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
-import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.MarkerItem
 import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 
@@ -44,7 +44,7 @@ const val MARKER_COUNT = 500
 
 open class MarkerTrackControl : Region() {
 
-    val markers = observableListOf<ChunkMarkerModel>()
+    val markers = observableListOf<MarkerItem>()
     val canMoveMarkerProperty = SimpleBooleanProperty(true)
     val canDeleteMarkerProperty = SimpleBooleanProperty(true)
     val onPositionChangedProperty = SimpleObjectProperty<(Int, Double) -> Unit>()
@@ -115,7 +115,7 @@ open class MarkerTrackControl : Region() {
 
     open fun createMarker(): MarkerControl = ChunkMarker()
 
-    protected fun createMarker(i: Int, mk: ChunkMarkerModel): MarkerControl {
+    protected fun createMarker(i: Int, mk: MarkerItem): MarkerControl {
         val container = this
         var startPos = 0.0
         return createMarker().apply {
@@ -199,7 +199,7 @@ open class MarkerTrackControl : Region() {
         }
     }
 
-    protected fun createHighlight(i: Int, mk: ChunkMarkerModel): Rectangle {
+    protected fun createHighlight(i: Int, mk: MarkerItem): Rectangle {
         return Rectangle().apply {
             when (i % 2 == 0) {
                 true -> styleClass.setAll("scrolling-waveform__highlight--primary")
@@ -213,7 +213,7 @@ open class MarkerTrackControl : Region() {
 
     protected open fun preallocateMarkers() {
         for (i in 0 until MARKER_COUNT) {
-            val mk = ChunkMarkerModel(VerseMarker(i, i, 0), false)
+            val mk = MarkerItem(VerseMarker(i, i, 0), false)
             val marker = createMarker(i, mk)
             val rect = createHighlight(i, mk)
             rect.heightProperty().bind(heightProperty().minus(40.0))

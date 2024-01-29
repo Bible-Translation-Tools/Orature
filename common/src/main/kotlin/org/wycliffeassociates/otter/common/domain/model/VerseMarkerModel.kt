@@ -31,11 +31,10 @@ import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.domain.IUndoable
 import java.util.regex.Pattern
-import kotlin.properties.Delegates
 
 private const val SEEK_EPSILON = 15_000
 
-class VerseMarkerModel(
+class VerseMarkerModel (
     private val audio: OratureAudioFile,
     markerTotal: Int,
     markerLabels: List<String>
@@ -46,7 +45,7 @@ class VerseMarkerModel(
     private val redoStack: Deque<MarkerOperation> = ArrayDeque()
 
     private val markers = mutableListOf<AudioMarker>()
-    val markerModels = mutableListOf<ChunkMarkerModel>()
+    val markerItems = mutableListOf<MarkerItem>()
 
     private var placedMarkersCount = 0
     private val audioEnd = audio.totalFrames
@@ -61,45 +60,46 @@ class VerseMarkerModel(
     private val labelIndex
         get() = undoStack.size
 
+    private inline fun <reified T : AudioMarker> getTitlesAsModels(audio: OratureAudioFile): Array<MarkerItem> {
+        return audio.getMarker<T>()
+            .firstOrNull()
+            ?.let { arrayOf(MarkerItem(it, true)) }
+            ?: arrayOf()
+    }
     private fun loadMarkersFromAudio(markerLabels: List<String>) {
-        val bookMarker = audio.getMarker<BookMarker>()
-            .firstOrNull()
-            ?.let { arrayOf(ChunkMarkerModel(it, true)) }
-            ?: arrayOf()
-        val chapterMarker = audio.getMarker<ChapterMarker>()
-            .firstOrNull()
-            ?.let { arrayOf(ChunkMarkerModel(it, true)) }
-            ?: arrayOf()
-        val verses = audio.getMarker<VerseMarker>().map { ChunkMarkerModel(it, true) }.toTypedArray()
+        val bookMarker = getTitlesAsModels<BookMarker>(audio)
+        val chapterMarker =  getTitlesAsModels<ChapterMarker>(audio)
+
+        val verses = audio.getMarker<VerseMarker>().map { MarkerItem(it, true) }.toTypedArray()
 
         undoStack.clear()
         redoStack.clear()
-        markerModels.clear()
+        markerItems.clear()
 
         val finalizedVerses = addMissingLabels(markerLabels, verses).toTypedArray()
 
-        markerModels.addAll(listOf(*bookMarker, *chapterMarker, *finalizedVerses))
+        markerItems.addAll(listOf(*bookMarker, *chapterMarker, *finalizedVerses))
 
-        markerModels.forEach { markers.add(it.marker) }
-        markerModels.removeIf { !it.placed }
-        markerModels.forEach { if (it.placed) undoStack.push(Add(it)) }
+        markerItems.forEach { markers.add(it.marker) }
+        markerItems.removeIf { !it.placed }
+        markerItems.forEach { if (it.placed) undoStack.push(Add(it)) }
     }
 
-    private fun matchesTotal(markerModels: Array<ChunkMarkerModel>): Boolean {
+    private fun matchesTotal(markerModels: Array<MarkerItem>): Boolean {
         val titleCount = markerModels.count { it.marker.type == MarkerType.TITLE }
         return markerModels.size == markerTotal + titleCount
     }
 
     private fun addMissingLabels(
         markerLabels: List<String>,
-        markerModels: Array<ChunkMarkerModel>
-    ): List<ChunkMarkerModel> {
+        markerModels: Array<MarkerItem>
+    ): List<MarkerItem> {
         if (markerModels.size == markerLabels.size) return markerModels.toList()
 
         val all = markerLabels.map {
             val (start, end) = parseLabel(it)
             val marker = VerseMarker(start, end, 0)
-            ChunkMarkerModel(marker, false)
+            MarkerItem(marker, false)
         }
 
         val placedVerses = markerModels.filter { it.marker is VerseMarker }.toTypedArray()
@@ -112,16 +112,16 @@ class VerseMarkerModel(
         return final
     }
 
-    fun loadMarkers(chunkMarkers: List<ChunkMarkerModel>) {
-        markerModels.clear()
-        markerModels.addAll(chunkMarkers)
+    fun loadMarkers(chunkMarkers: List<MarkerItem>) {
+        markerItems.clear()
+        markerItems.addAll(chunkMarkers)
         refreshMarkers()
     }
 
     fun addMarker(location: Int) {
-        if (markerModels.size < markerTotal) {
+        if (markerItems.size < markerTotal) {
             val marker = markers.getOrNull(labelIndex) ?: return
-            val markerModel = ChunkMarkerModel(marker.clone(location), true)
+            val markerModel = MarkerItem(marker.clone(location), true)
             val op = Add(markerModel)
             undoStack.push(op)
             op.execute()
@@ -185,13 +185,13 @@ class VerseMarkerModel(
 
     fun seekCurrent(location: Int): Int {
         // find the nearest frame preceding the location
-        return markerModels.filter { it.placed }.lastOrNull {
+        return markerItems.filter { it.placed }.lastOrNull {
             it.frame <= location
         }?.frame ?: 0
     }
 
     fun seekNext(location: Int): Int {
-        for (marker in markerModels.filter { it.placed }) {
+        for (marker in markerItems.filter { it.placed }) {
             if (location < marker.frame) {
                 return marker.frame
             }
@@ -200,7 +200,7 @@ class VerseMarkerModel(
     }
 
     fun seekPrevious(location: Int): Int {
-        val filtered = markerModels.filter { it.placed }
+        val filtered = markerItems.filter { it.placed }
         return if (filtered.isNotEmpty()) {
             findMarkerPrecedingPosition(location, filtered).frame
         } else {
@@ -212,19 +212,19 @@ class VerseMarkerModel(
     fun canRedo() = redoStack.isNotEmpty()
 
     private fun refreshMarkers() {
-        markerModels.sortBy { it.frame }
-        markerModels.forEachIndexed { index, chunkMarker ->
+        markerItems.sortBy { it.frame }
+        markerItems.forEachIndexed { index, chunkMarker ->
             if (index < markers.size) {
                 chunkMarker.marker = markers[index]
             }
         }
-        placedMarkersCount = markerModels.filter { it.placed }.size
+        placedMarkersCount = markerItems.filter { it.placed }.size
     }
 
     private fun findMarkerPrecedingPosition(
         location: Int,
-        list: List<ChunkMarkerModel>
-    ): ChunkMarkerModel {
+        list: List<MarkerItem>
+    ): MarkerItem {
         list.forEachIndexed { idx, _ ->
             if (list.lastIndex == idx) return@forEachIndexed
             // Seek Epsilon used so that the user can seek back while playing
@@ -239,7 +239,7 @@ class VerseMarkerModel(
             audio.clearMarkersOfType<ChapterMarker>()
             audio.clearMarkersOfType<VerseMarker>()
 
-            markerModels.forEach {
+            markerItems.forEach {
                 if (it.placed) {
                     when (val marker = it.marker) {
                         is BookMarker -> audio.addMarker<BookMarker>(marker.copy(location = it.frame))
@@ -255,35 +255,35 @@ class VerseMarkerModel(
 
     private abstract inner class MarkerOperation(val markerId: Int) : IUndoable
 
-    private inner class Add(val marker: ChunkMarkerModel) : MarkerOperation(marker.id) {
+    private inner class Add(val marker: MarkerItem) : MarkerOperation(marker.id) {
         override fun execute() {
             //labelIndex++
-            markerModels.add(marker)
+            markerItems.add(marker)
         }
 
         override fun undo() {
             //labelIndex--
-            markerModels.remove(marker)
+            markerItems.remove(marker)
         }
 
         override fun redo() = execute()
     }
 
     private inner class Delete(id: Int) : MarkerOperation(id) {
-        var marker: ChunkMarkerModel? = null
+        var marker: MarkerItem? = null
 
         override fun execute() {
             //labelIndex--
-            marker = markerModels.find { it.id == markerId }
+            marker = markerItems.find { it.id == markerId }
             marker?.let {
-                markerModels.remove(it)
+                markerItems.remove(it)
             }
         }
 
         override fun undo() {
             //labelIndex++
             marker?.let {
-                markerModels.add(it)
+                markerItems.add(it)
             }
         }
 
@@ -295,10 +295,10 @@ class VerseMarkerModel(
         val start: Int,
         val end: Int
     ): MarkerOperation(id) {
-        var marker: ChunkMarkerModel? = null
+        var marker: MarkerItem? = null
 
         override fun execute() {
-            marker = markerModels.find { it.id == markerId }
+            marker = markerItems.find { it.id == markerId }
             marker?.frame = end
         }
 
@@ -310,7 +310,7 @@ class VerseMarkerModel(
     }
 }
 
-data class ChunkMarkerModel(
+data class MarkerItem(
     var marker: AudioMarker,
     var placed: Boolean,
     var id: Int = idGen++

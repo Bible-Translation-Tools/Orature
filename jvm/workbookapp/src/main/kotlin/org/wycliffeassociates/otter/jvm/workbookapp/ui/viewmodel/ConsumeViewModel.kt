@@ -34,7 +34,7 @@ import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
-import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.MarkerItem
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
@@ -63,7 +63,7 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
     var subscribeOnWaveformImages: () -> Unit = {}
 
     override var markerModel: VerseMarkerModel? = null
-    override val markers = observableListOf<ChunkMarkerModel>()
+    override val markers = observableListOf<MarkerItem>()
     override val markerCountProperty = markers.sizeProperty
     override val currentMarkerNumberProperty = SimpleIntegerProperty(-1)
     override var resumeAfterScroll: Boolean = false
@@ -128,7 +128,7 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
         val verseMarkers = audio.getMarker<VerseMarker>()
         markerModel = VerseMarkerModel(audio, verseMarkers.size, verseMarkers.map { it.label })
         markerModel?.let { markerModel ->
-            markers.setAll(markerModel.markerModels)
+            markers.setAll(markerModel.markerItems)
         }
     }
 

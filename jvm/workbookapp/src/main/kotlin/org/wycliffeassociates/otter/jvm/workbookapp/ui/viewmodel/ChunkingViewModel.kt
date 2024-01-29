@@ -31,7 +31,6 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
-import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import javax.inject.Inject
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
@@ -42,7 +41,7 @@ import org.wycliffeassociates.otter.common.domain.content.ResetChunks
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
-import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.MarkerItem
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
@@ -79,7 +78,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     lateinit var resetChunks: ResetChunks
 
     override var markerModel: VerseMarkerModel? = null
-    override val markers = observableListOf<ChunkMarkerModel>()
+    override val markers = observableListOf<MarkerItem>()
 
     override val markerCountProperty = markers.sizeProperty
     override val currentMarkerNumberProperty = SimpleIntegerProperty(-1)
@@ -206,7 +205,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         val totalMarkers = 500
         audio.clearCues()
         val chunkMarkers = audio.getMarker<ChunkMarker>().map {
-            ChunkMarkerModel(it, true)
+            MarkerItem(it, true)
         }
         markers.setAll(chunkMarkers)
         markerModel = VerseMarkerModel(
