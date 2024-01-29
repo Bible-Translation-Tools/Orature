@@ -41,7 +41,7 @@ class MarkerPlacementModel(
     private val primaryType: Class<out AudioMarker>,
     private val audio: OratureAudioFile,
     val chunkCount: Int = 0,
-    markerLabels: List<String>
+    private val markerLabels: List<String>
 ) {
     private val logger = LoggerFactory.getLogger(MarkerPlacementModel::class.java)
 
@@ -251,6 +251,7 @@ class MarkerPlacementModel(
         markerItems.forEachIndexed { index, chunkMarker ->
             if (index < markers.size) {
                 chunkMarker.marker = markers[index]
+                chunkMarker.label = markerLabels[index]
             }
         }
         placedMarkersCount = markerItems.filter { it.placed }.size
