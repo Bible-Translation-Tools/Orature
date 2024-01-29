@@ -27,7 +27,6 @@ import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.BookMarker
 import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
-import org.wycliffeassociates.otter.common.data.audio.MarkerType
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.domain.IUndoable
@@ -350,11 +349,16 @@ class MarkerPlacementModel(
 
         override fun execute() {
             marker = markerItems.find { it.id == markerId }
-            marker?.frame = end
+            marker?.let {
+                it.marker = it.marker.clone(location = end)
+            }
         }
 
         override fun undo() {
-            marker?.frame = start
+            marker?.let {
+                it.marker = it.marker.clone(location = start)
+            }
+
         }
 
         override fun redo() = execute()
@@ -366,8 +370,11 @@ data class MarkerItem(
     var placed: Boolean,
     var id: Int = idGen++
 ) {
-    var frame: Int = marker.location
-    var label: String = marker.label
+    val frame: Int
+        get() = marker.location
+
+    val label: String
+        get() = marker.label
 
     fun toAudioCue(): AudioCue {
         return AudioCue(frame, marker.formattedLabel)
