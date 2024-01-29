@@ -26,20 +26,24 @@ import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.data.audio.AudioMarker
 import org.wycliffeassociates.otter.common.data.audio.BookMarker
 import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
+import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.audio.MarkerType
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.domain.IUndoable
 import java.util.regex.Pattern
 
-private const val SEEK_EPSILON = 15_000
 
-class VerseMarkerModel (
+private const val SEEK_EPSILON = 15_000
+const val DEFAULT_CHUNK_MARKER_TOTAL = 500
+
+class MarkerPlacementModel(
+    private val primaryType: Class<out AudioMarker>,
     private val audio: OratureAudioFile,
-    markerTotal: Int,
+    val chunkCount: Int = 0,
     markerLabels: List<String>
 ) {
-    private val logger = LoggerFactory.getLogger(VerseMarkerModel::class.java)
+    private val logger = LoggerFactory.getLogger(MarkerPlacementModel::class.java)
 
     private val undoStack: Deque<MarkerOperation> = ArrayDeque()
     private val redoStack: Deque<MarkerOperation> = ArrayDeque()
@@ -51,6 +55,11 @@ class VerseMarkerModel (
     private val audioEnd = audio.totalFrames
 
     init {
+        if (primaryType !in arrayOf(ChunkMarker::class.java, VerseMarker::class.java)) {
+            throw IllegalArgumentException(
+                "MarkerPlacementModel may only be constructed with a ChunkMarker or VerseMarker as the primary type."
+            )
+        }
         loadMarkersFromAudio(markerLabels)
     }
 
@@ -60,23 +69,38 @@ class VerseMarkerModel (
     private val labelIndex
         get() = undoStack.size
 
-    private inline fun <reified T : AudioMarker> getTitlesAsModels(audio: OratureAudioFile): Array<MarkerItem> {
+    private inline fun <reified T : AudioMarker> getTitlesAsModels(
+        audio: OratureAudioFile,
+    ): Array<MarkerItem> {
         return audio.getMarker<T>()
             .firstOrNull()
             ?.let { arrayOf(MarkerItem(it, true)) }
             ?: arrayOf()
     }
+
     private fun loadMarkersFromAudio(markerLabels: List<String>) {
         val bookMarker = getTitlesAsModels<BookMarker>(audio)
-        val chapterMarker =  getTitlesAsModels<ChapterMarker>(audio)
+        val chapterMarker = getTitlesAsModels<ChapterMarker>(audio)
 
-        val verses = audio.getMarker<VerseMarker>().map { MarkerItem(it, true) }.toTypedArray()
+        val chunks = when (primaryType) {
+            VerseMarker::class.java -> audio.getMarker<VerseMarker>().map { MarkerItem(it, true) }.toTypedArray()
+            ChunkMarker::class.java -> audio.getMarker<ChunkMarker>().map { MarkerItem(it, true) }.toTypedArray()
+            else -> {
+                throw IllegalArgumentException("Invalid MarkerPlacementModel primary type: $primaryType")
+            }
+        }
 
         undoStack.clear()
         redoStack.clear()
         markerItems.clear()
 
-        val finalizedVerses = addMissingLabels(markerLabels, verses).toTypedArray()
+        val finalizedVerses = when (primaryType) {
+            VerseMarker::class.java -> addMissingLabels(markerLabels, chunks)
+            ChunkMarker::class.java -> padExtraChunks(chunks)
+            else -> {
+                throw IllegalArgumentException("Invalid MarkerPlacementModel primary type: $primaryType")
+            }
+        }
 
         markerItems.addAll(listOf(*bookMarker, *chapterMarker, *finalizedVerses))
 
@@ -85,31 +109,42 @@ class VerseMarkerModel (
         markerItems.forEach { if (it.placed) undoStack.push(Add(it)) }
     }
 
-    private fun matchesTotal(markerModels: Array<MarkerItem>): Boolean {
-        val titleCount = markerModels.count { it.marker.type == MarkerType.TITLE }
-        return markerModels.size == markerTotal + titleCount
+    private fun padExtraChunks(markerModels: Array<MarkerItem>): Array<MarkerItem> {
+        val existing = markerItems.size + 1
+        val toAdd = buildList {
+            for (i in existing..chunkCount) {
+                add(MarkerItem(ChunkMarker(i, 0), false))
+            }
+        }.toTypedArray()
+        return listOf(*markerModels, *toAdd).toTypedArray()
     }
 
     private fun addMissingLabels(
         markerLabels: List<String>,
         markerModels: Array<MarkerItem>
-    ): List<MarkerItem> {
-        if (markerModels.size == markerLabels.size) return markerModels.toList()
+    ): Array<MarkerItem> {
+        if (markerModels.size == markerLabels.size) return markerModels
 
         val all = markerLabels.map {
             val (start, end) = parseLabel(it)
-            val marker = VerseMarker(start, end, 0)
+            val marker = when (primaryType) {
+                VerseMarker::class.java -> VerseMarker(start, end, 0)
+                ChunkMarker::class.java -> ChunkMarker(start, 0)
+                else -> {
+                    throw IllegalArgumentException("Invalid MarkerPlacementModel primary type: $primaryType")
+                }
+            }
             MarkerItem(marker, false)
         }
 
-        val placedVerses = markerModels.filter { it.marker is VerseMarker }.toTypedArray()
+        val placedVerses = markerModels.filter { it.marker.javaClass == primaryType }.toTypedArray()
         val missing = all.filter { marker ->
             placedVerses.any { it.marker.label == marker.label }.not()
         }.toTypedArray()
 
         val final = listOf(*placedVerses, *missing)
         final.sortedBy { (it.marker as VerseMarker).start }
-        return final
+        return final.toTypedArray()
     }
 
     fun loadMarkers(chunkMarkers: List<MarkerItem>) {
@@ -233,18 +268,34 @@ class VerseMarkerModel (
         return list.last()
     }
 
+
+    // WARN: Probably bad, marker items might not have all the old marker
     fun writeMarkers(): Completable {
         return Single.fromCallable {
             audio.clearMarkersOfType<BookMarker>()
             audio.clearMarkersOfType<ChapterMarker>()
-            audio.clearMarkersOfType<VerseMarker>()
+            if (primaryType == VerseMarker::class.java) {
+                audio.clearMarkersOfType<VerseMarker>()
+            }
+            if (primaryType == ChunkMarker::class.java) {
+                audio.clearMarkersOfType<ChunkMarker>()
+            }
 
             markerItems.forEach {
                 if (it.placed) {
                     when (val marker = it.marker) {
                         is BookMarker -> audio.addMarker<BookMarker>(marker.copy(location = it.frame))
                         is ChapterMarker -> audio.addMarker<ChapterMarker>(marker.copy(location = it.frame))
-                        is VerseMarker -> audio.addMarker<VerseMarker>(marker.copy(location = it.frame))
+                        is VerseMarker -> {
+                            if (primaryType == VerseMarker::class.java)
+                                audio.addMarker<VerseMarker>(marker.copy(location = it.frame))
+                        }
+
+                        is ChunkMarker -> {
+                            if (primaryType == ChunkMarker::class.java) {
+                                audio.addMarker<ChunkMarker>(marker.copy(location = it.frame))
+                            }
+                        }
                     }
                 }
             }
@@ -294,7 +345,7 @@ class VerseMarkerModel (
         id: Int,
         val start: Int,
         val end: Int
-    ): MarkerOperation(id) {
+    ) : MarkerOperation(id) {
         var marker: MarkerItem? = null
 
         override fun execute() {

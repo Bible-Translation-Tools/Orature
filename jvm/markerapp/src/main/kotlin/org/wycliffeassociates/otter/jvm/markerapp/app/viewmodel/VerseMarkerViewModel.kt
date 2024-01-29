@@ -32,7 +32,7 @@ import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
-import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
@@ -40,6 +40,7 @@ import java.io.File
 import java.lang.Integer.min
 import javafx.animation.AnimationTimer
 import javafx.beans.binding.Bindings
+import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseFinishedEvent
 import org.wycliffeassociates.otter.common.domain.model.MarkerItem
@@ -65,7 +66,7 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
 
     override val currentMarkerNumberProperty = SimpleIntegerProperty(0)
     override val audioPositionProperty = SimpleIntegerProperty()
-    override var markerModel: VerseMarkerModel? = null
+    override var markerModel: MarkerPlacementModel? = null
     override val markers = observableListOf<MarkerItem>()
     override val markerCountProperty = markers.sizeProperty
     override var sampleRate: Int = 0 // beware of divided by 0
@@ -134,7 +135,7 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
         val markersList: List<String> = getVerseLabelList(params.named["marker_labels"])
         val totalMarkers: Int = markersList.size
 
-        markerModel = VerseMarkerModel(audio, totalMarkers, markersList)
+        markerModel = MarkerPlacementModel(VerseMarker::class.java, audio, totalMarkers, markersList)
 
         markerRatioProperty.bind(
             Bindings.createStringBinding(

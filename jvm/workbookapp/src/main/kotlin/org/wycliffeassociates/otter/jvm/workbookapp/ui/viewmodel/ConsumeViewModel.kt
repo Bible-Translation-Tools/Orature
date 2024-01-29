@@ -36,7 +36,7 @@ import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.common.domain.model.MarkerItem
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
-import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
@@ -62,7 +62,7 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
 
     var subscribeOnWaveformImages: () -> Unit = {}
 
-    override var markerModel: VerseMarkerModel? = null
+    override var markerModel: MarkerPlacementModel? = null
     override val markers = observableListOf<MarkerItem>()
     override val markerCountProperty = markers.sizeProperty
     override val currentMarkerNumberProperty = SimpleIntegerProperty(-1)
@@ -126,7 +126,7 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
     private fun loadSourceMarkers(audio: OratureAudioFile) {
         audio.clearCues()
         val verseMarkers = audio.getMarker<VerseMarker>()
-        markerModel = VerseMarkerModel(audio, verseMarkers.size, verseMarkers.map { it.label })
+        markerModel = MarkerPlacementModel(VerseMarker::class.java, audio, verseMarkers.size, verseMarkers.map { it.label })
         markerModel?.let { markerModel ->
             markers.setAll(markerModel.markerItems)
         }

@@ -38,12 +38,13 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.translation.ChunkAudioUseCase
 import org.wycliffeassociates.otter.common.domain.content.CreateChunks
 import org.wycliffeassociates.otter.common.domain.content.ResetChunks
+import org.wycliffeassociates.otter.common.domain.model.DEFAULT_CHUNK_MARKER_TOTAL
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.common.domain.model.MarkerItem
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
-import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
@@ -77,7 +78,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
     @Inject
     lateinit var resetChunks: ResetChunks
 
-    override var markerModel: VerseMarkerModel? = null
+    override var markerModel: MarkerPlacementModel? = null
     override val markers = observableListOf<MarkerItem>()
 
     override val markerCountProperty = markers.sizeProperty
@@ -202,13 +203,14 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
     private fun loadChunkMarkers(audio: OratureAudioFile) {
         markers.clear()
-        val totalMarkers = 500
+        val totalMarkers = DEFAULT_CHUNK_MARKER_TOTAL
         audio.clearCues()
         val chunkMarkers = audio.getMarker<ChunkMarker>().map {
             MarkerItem(it, true)
         }
         markers.setAll(chunkMarkers)
-        markerModel = VerseMarkerModel(
+        markerModel = MarkerPlacementModel(
+            ChunkMarker::class.java,
             audio,
             totalMarkers,
             (1..totalMarkers).map { it.toString() }

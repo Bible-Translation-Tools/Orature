@@ -24,10 +24,10 @@ import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import org.wycliffeassociates.otter.common.domain.model.MarkerItem
-import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
 
 interface IMarkerViewModel : IWaveformViewModel {
-    var markerModel: VerseMarkerModel?
+    var markerModel: MarkerPlacementModel?
     val markers: ObservableList<MarkerItem>
     val markerCountProperty: IntegerBinding
     var audioController: AudioPlayerController?

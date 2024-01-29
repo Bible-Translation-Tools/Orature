@@ -35,6 +35,7 @@ import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
+import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.data.primitives.CheckingStatus
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
@@ -45,7 +46,7 @@ import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.content.ChapterTranslationBuilder
 import org.wycliffeassociates.otter.common.domain.model.MarkerItem
-import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
@@ -77,7 +78,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     val audioDataStore: AudioDataStore by inject()
     val translationViewModel: TranslationViewModel2 by inject()
 
-    override var markerModel: VerseMarkerModel? = null
+    override var markerModel: MarkerPlacementModel? = null
     override val markers = observableListOf<MarkerItem>()
 
     override val markerCountProperty = markers.sizeProperty
@@ -248,7 +249,8 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
         }
 
         totalMarkersProperty.set(sourceMarkers.size)
-        markerModel = VerseMarkerModel(
+        markerModel = MarkerPlacementModel(
+            ChunkMarker::class.java,
             audio,
             sourceMarkers.size,
             sourceMarkers.map { it.label }
