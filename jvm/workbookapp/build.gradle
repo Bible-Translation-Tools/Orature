@@ -13,7 +13,7 @@ apply plugin: 'idea'
 
 javafx {
     version = "$javafxVer"
-    modules = ['javafx.controls', 'javafx.fxml']
+    modules = ['javafx.base', 'javafx.graphics', 'javafx.controls', 'javafx.fxml']
 }
 
 repositories {
@@ -135,6 +135,7 @@ dependencies {
     runtimeOnly "org.openjfx:javafx-graphics:$javafxVer:win"
     runtimeOnly "org.openjfx:javafx-graphics:$javafxVer:linux"
     runtimeOnly "org.openjfx:javafx-graphics:$javafxVer:mac"
+    runtimeOnly "org.openjfx:javafx-graphics:$javafxVer:macos-aarch64"
 
     // SVG Loader
     implementation "com.github.jsarabia:FranzXaverSVG:$franzXaverSvgVer"
