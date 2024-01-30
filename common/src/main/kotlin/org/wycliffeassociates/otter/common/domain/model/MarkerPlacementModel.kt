@@ -42,14 +42,14 @@ enum class MarkerPlacementType {
 }
 
 class MarkerPlacementModel(
-    primaryType: MarkerPlacementType,
+    placementType: MarkerPlacementType,
     private val audio: OratureAudioFile,
     val chunkCount: Int = 0,
     markerLabels: List<String>
 ) {
     private val logger = LoggerFactory.getLogger(MarkerPlacementModel::class.java)
 
-    private val primaryType: Class<out AudioMarker> = when (primaryType) {
+    private val primaryType: Class<out AudioMarker> = when (placementType) {
         MarkerPlacementType.CHUNK -> ChunkMarker::class.java
         MarkerPlacementType.VERSE -> VerseMarker::class.java
     }
