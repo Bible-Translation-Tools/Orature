@@ -3,7 +3,7 @@
   <directoryPresets config="." />
   <application name="Orature" applicationId="8057-9807-3529-9982" mediaDir=".exec" mediaFilePattern="${compiler:sys.shortName}-${compiler:sys.platform}-${compiler:sys.mediaName}-${compiler:sys.version}" shortName="orature" version="0.1" allPathsRelative="true" convertDotsToUnderscores="false" macVolumeId="82fd10b9f6e2b1b5" javaMinVersion="11" javaMaxVersion="17">
     <codeSigning windowsEnabled="true" windowsPkcs12File="~/signing.p12" />
-    <jreBundles jdkProviderId="Corretto" release="17/latest">
+    <jreBundles jdkProviderId="AdoptOpenJDK" release="17/latest">
       <modules>
         <defaultModules set="all" />
       </modules>
