@@ -78,7 +78,15 @@ class ResourceContainerRepository @Inject constructor(
                     val language = LanguageMapper().mapFromEntity(languageDao.fetchBySlug(languageSlug, dsl))
                     val metadata = dublinCore.mapToMetadata(rc.file, language)
                         .let {
-                            insertMetadataOrThrow(dsl, it)
+                            try {
+                                insertMetadataOrThrow(dsl, it)
+                            } catch (e: Exception) {
+                                val metaEnt = resourceMetadataDao.fetchLatestVersion(it.language.slug, it.identifier)!!
+                                val meta = ResourceMetadataMapper().mapFromEntity(metaEnt, it.language)
+                                val ih = ImportHelper(meta, null, dsl)
+                                ih.import(rcTree)
+                                return@transaction
+                            }
                         }
 
                     val relatedDublinCoreIds: List<Int> =
@@ -237,20 +245,30 @@ class ResourceContainerRepository @Inject constructor(
             }
         }
 
-        /** Add collection to the database, return copy of collection that includes database row id. */
-        private fun addCollection(collection: Collection, parent: Collection?): Collection {
-            val entity = CollectionMapper().mapToEntity(collection).apply {
-                parentFk = parent?.id
-                dublinCoreFk = metadata.id
+        /** Get or Add collection to the database, return copy of collection that includes database row id. */
+        private fun getOrInsertCollection(collection: Collection, parent: Collection?): Collection {
+            val existingCollection = collectionDao
+                .fetch(collection.slug, metadata.id, collection.labelKey)
+                ?.let {
+                    CollectionMapper().mapFromEntity(it, metadata)
+                }
+
+            return if (existingCollection != null) {
+                existingCollection
+            } else {
+                val entity = CollectionMapper().mapToEntity(collection).apply {
+                    parentFk = parent?.id
+                    dublinCoreFk = metadata.id
+                }
+                val collectionId = collectionDao.insert(entity, dsl)
+                collection.copy(id = collectionId)
             }
-            val insertedId = collectionDao.insert(entity, dsl)
-            return collection.copy(id = insertedId)
         }
 
         private fun importCollection(parent: Collection?, node: OtterTreeNode<CollectionOrContent>): Collection? {
             val collection = (node.value as Collection).let { collection ->
                 when (relatedBundleDublinCoreId) {
-                    null -> addCollection(collection, parent)
+                    null -> getOrInsertCollection(collection, parent)
                     else -> fetchCollectionFromDb(collection, relatedBundleDublinCoreId)
                     // TODO: If we don't find a corresponding collection, we continue on, setting collection = null.
                     // TODO: ... Eventually, contents will not be created if there is no parentId. This will happen for
