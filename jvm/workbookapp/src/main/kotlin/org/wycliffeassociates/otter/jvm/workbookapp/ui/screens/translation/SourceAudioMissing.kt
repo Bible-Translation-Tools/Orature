@@ -20,6 +20,8 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.jfoenix.controls.JFXSnackbar
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import javafx.event.EventHandler
 import javafx.scene.input.DragEvent
 import javafx.scene.input.TransferMode
@@ -41,6 +43,7 @@ import org.wycliffeassociates.otter.jvm.controls.model.NotificationViewData
 import org.wycliffeassociates.otter.jvm.controls.popup.NotificationSnackBar
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ImportProjectViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.NOTIFICATION_DURATION_SEC
+import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -56,6 +59,8 @@ class SourceAudioMissing : View() {
     private val workbookDataStore: WorkbookDataStore by inject()
     private val settingsViewModel: SettingsViewModel by inject()
     private val importProjectViewModel: ImportProjectViewModel by inject()
+
+    private val disposable = CompositeDisposable()
 
     override val root = VBox().apply {
         addClass("audio-missing-view")
@@ -223,6 +228,22 @@ class SourceAudioMissing : View() {
     override fun onDock() {
         super.onDock()
         viewModel.loadingStepProperty.set(false)
+
+        importProjectViewModel.snackBarObservable
+            .subscribe { msg ->
+                showNotification(
+                    NotificationViewData(
+                        title = messages["error"],
+                        message = msg,
+                        statusType = NotificationStatusType.FAILED
+                    )
+                )
+            }.addTo(disposable)
+    }
+
+    override fun onUndock() {
+        super.onUndock()
+        disposable.clear()
     }
 
     private fun onDragOverHandler(): EventHandler<DragEvent> {
@@ -331,19 +352,7 @@ class SourceAudioMissing : View() {
     }
 
     private fun showNotification(notification: NotificationViewData) {
-        val snackBar = JFXSnackbar(root)
-        val graphic = NotificationSnackBar(notification).apply {
-            setOnDismiss {
-                snackBar.hide()
-            }
-        }
-
-        snackBar.enqueue(
-            JFXSnackbar.SnackbarEvent(
-                graphic,
-                Duration.seconds(NOTIFICATION_DURATION_SEC)
-            )
-        )
+        SnackbarHandler.showNotification(notification, root)
     }
 
     private fun refresh() {

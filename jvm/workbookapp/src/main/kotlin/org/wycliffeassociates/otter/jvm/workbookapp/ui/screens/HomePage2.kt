@@ -20,6 +20,8 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.jfoenix.controls.JFXSnackbar
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.EventHandler
 import javafx.scene.Node
@@ -69,6 +71,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ImportProjectVi
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ExportProjectViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel2
 import org.wycliffeassociates.otter.jvm.workbookapp.NOTIFICATION_DURATION_SEC
+import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectWizardViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
@@ -117,6 +120,8 @@ class HomePage2 : View() {
             }
         }
     }
+
+    private val disposable = CompositeDisposable()
 
     init {
         tryImportStylesheet("/css/control.css")
@@ -230,6 +235,7 @@ class HomePage2 : View() {
         viewModel.undock()
         listeners.forEach(ListenerDisposer::dispose)
         listeners.clear()
+        disposable.clear()
     }
 
     private fun subscribeActionEvents() {
@@ -577,23 +583,7 @@ class HomePage2 : View() {
     }
 
     private fun showNotification(notification: NotificationViewData) {
-        val snackBar = JFXSnackbar(root)
-        val graphic = NotificationSnackBar(notification).apply {
-            setOnDismiss {
-                snackBar.hide() /* avoid crashing if close() invoked before timeout */
-            }
-            setOnMainAction {
-                notification.actionCallback()
-                snackBar.hide()
-            }
-        }
-
-        snackBar.enqueue(
-            JFXSnackbar.SnackbarEvent(
-                graphic,
-                Duration.seconds(NOTIFICATION_DURATION_SEC)
-            )
-        )
+        SnackbarHandler.showNotification(notification, root)
     }
 
     private fun showImportModal() {
@@ -603,6 +593,19 @@ class HomePage2 : View() {
             validateFileCallback.set {
                 importProjectViewModel.isValidImportFile(it)
             }
+
+            importProjectViewModel.snackBarObservable
+                .subscribe { msg ->
+                    SnackbarHandler.showNotification(
+                        NotificationViewData(
+                            title = messages["error"],
+                            message = msg,
+                            statusType = NotificationStatusType.FAILED
+                        ),
+                        this.root
+                    )
+                }.addTo(disposable)
+
             open()
         }
     }

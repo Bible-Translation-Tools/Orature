@@ -254,7 +254,7 @@ class NarrationPage : View() {
                 ) {
                     audioPluginViewModel.addPlugin(record = true, edit = false)
                 }
-                SnackbarHandler.enqueue(notification)
+                SnackbarHandler.showNotification(notification, root)
             }
     }
 

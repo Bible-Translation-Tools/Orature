@@ -129,7 +129,6 @@ class RecordScripturePage : View() {
 
     override val root = anchorpane {
         addButtonEventHandlers()
-        createSnackBar()
 
         add(mainContainer
             .apply {
@@ -347,28 +346,6 @@ class RecordScripturePage : View() {
         addEventHandler(TakeEvent.SELECT_TAKE) {
             recordScriptureViewModel.selectTake(it.take).subscribe()
         }
-    }
-
-    private fun createSnackBar() {
-        recordScriptureViewModel
-            .snackBarObservable
-            .doOnError { e ->
-                logger.error("Error in creating no plugin snackbar", e)
-            }
-            .subscribe { pluginErrorMessage ->
-                SnackbarHandler.enqueue(
-                    JFXSnackbar.SnackbarEvent(
-                        JFXSnackbarLayout(
-                            pluginErrorMessage,
-                            messages["addApp"].uppercase(Locale.getDefault())
-                        ) {
-                            audioPluginViewModel.addPlugin(true, false)
-                        },
-                        Duration.millis(5000.0),
-                        null
-                    )
-                )
-            }
     }
 
     private fun createPluginOpenedPage(): PluginOpenedPage {
