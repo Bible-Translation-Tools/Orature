@@ -210,12 +210,6 @@ class HomePage2 : View() {
                     showImportModal()
                 }
             }
-
-            visibleWhen {
-                // hide left pane when window size is reduced
-                primaryStage.widthProperty().greaterThan(1000.0) ?: booleanProperty(true)
-            }
-            managedWhen(visibleProperty())
         }
         center = stackpane {
             bindSingleChild(mainSectionProperty)
