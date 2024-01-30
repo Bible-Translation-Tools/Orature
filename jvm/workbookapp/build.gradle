@@ -135,7 +135,7 @@ dependencies {
     runtimeOnly "org.openjfx:javafx-graphics:$javafxVer:win"
     runtimeOnly "org.openjfx:javafx-graphics:$javafxVer:linux"
     runtimeOnly "org.openjfx:javafx-graphics:$javafxVer:mac"
-    runtimeOnly "org.openjfx:javafx-graphics:$javafxVer:macos-aarch64"
+    runtimeOnly "org.openjfx:javafx-graphics:$javafxVer:mac-aarch64"
 
     // SVG Loader
     implementation "com.github.jsarabia:FranzXaverSVG:$franzXaverSvgVer"
