@@ -36,13 +36,23 @@ import java.util.regex.Pattern
 private const val SEEK_EPSILON = 15_000
 const val DEFAULT_CHUNK_MARKER_TOTAL = 500
 
+enum class MarkerPlacementType {
+    CHUNK,
+    VERSE
+}
+
 class MarkerPlacementModel(
-    private val primaryType: Class<out AudioMarker>,
+    primaryType: MarkerPlacementType,
     private val audio: OratureAudioFile,
     val chunkCount: Int = 0,
     markerLabels: List<String>
 ) {
     private val logger = LoggerFactory.getLogger(MarkerPlacementModel::class.java)
+
+    private val primaryType: Class<out AudioMarker> = when (primaryType) {
+        MarkerPlacementType.CHUNK -> ChunkMarker::class.java
+        MarkerPlacementType.VERSE -> VerseMarker::class.java
+    }
 
     private val undoStack: Deque<MarkerOperation> = ArrayDeque()
     private val redoStack: Deque<MarkerOperation> = ArrayDeque()

@@ -47,6 +47,7 @@ import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.content.ChapterTranslationBuilder
 import org.wycliffeassociates.otter.common.domain.model.MarkerItem
 import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
+import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementType
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
@@ -250,7 +251,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
 
         totalMarkersProperty.set(sourceMarkers.size)
         markerModel = MarkerPlacementModel(
-            ChunkMarker::class.java,
+            MarkerPlacementType.CHUNK,
             audio,
             sourceMarkers.size,
             sourceMarkers.map { it.label }

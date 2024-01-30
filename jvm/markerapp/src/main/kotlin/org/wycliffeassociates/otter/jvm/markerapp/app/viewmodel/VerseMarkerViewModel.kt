@@ -44,6 +44,7 @@ import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseFinishedEvent
 import org.wycliffeassociates.otter.common.domain.model.MarkerItem
+import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementType
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
 import org.wycliffeassociates.otter.jvm.controls.waveform.WAVEFORM_MAX_HEIGHT
@@ -135,7 +136,7 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
         val markersList: List<String> = getVerseLabelList(params.named["marker_labels"])
         val totalMarkers: Int = markersList.size
 
-        markerModel = MarkerPlacementModel(VerseMarker::class.java, audio, totalMarkers, markersList)
+        markerModel = MarkerPlacementModel(MarkerPlacementType.VERSE, audio, totalMarkers, markersList)
 
         markerRatioProperty.bind(
             Bindings.createStringBinding(

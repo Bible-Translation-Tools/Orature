@@ -37,6 +37,7 @@ import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerControll
 import org.wycliffeassociates.otter.common.domain.model.MarkerItem
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
+import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementType
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
@@ -126,7 +127,12 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
     private fun loadSourceMarkers(audio: OratureAudioFile) {
         audio.clearCues()
         val verseMarkers = audio.getMarker<VerseMarker>()
-        markerModel = MarkerPlacementModel(VerseMarker::class.java, audio, verseMarkers.size, verseMarkers.map { it.label })
+        markerModel = MarkerPlacementModel(
+            MarkerPlacementType.VERSE,
+            audio,
+            verseMarkers.size,
+            verseMarkers.map { it.label }
+        )
         markerModel?.let { markerModel ->
             markers.setAll(markerModel.markerItems)
         }

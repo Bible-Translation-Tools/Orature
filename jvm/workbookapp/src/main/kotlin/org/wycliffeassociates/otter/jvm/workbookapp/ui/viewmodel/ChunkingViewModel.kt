@@ -45,6 +45,7 @@ import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerControll
 import org.wycliffeassociates.otter.common.domain.model.MarkerItem
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
+import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementType
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
@@ -210,7 +211,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         }
         markers.setAll(chunkMarkers)
         markerModel = MarkerPlacementModel(
-            ChunkMarker::class.java,
+            MarkerPlacementType.CHUNK,
             audio,
             totalMarkers,
             (1..totalMarkers).map { it.toString() }
