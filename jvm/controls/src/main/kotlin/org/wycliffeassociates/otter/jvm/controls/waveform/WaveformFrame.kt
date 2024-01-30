@@ -112,7 +112,7 @@ class WaveformFrame(
 
             alignment = Pos.CENTER
 
-            region {
+            pane {
                 imageRegion = this
                 stackpane {
                     fitToParentHeight()
@@ -144,13 +144,13 @@ class WaveformFrame(
                         managedWhen(visibleProperty())
 
                         top {
-                            region {
+                            pane {
                                 topTrackRegion = this
                                 styleClass.add("scrolling-waveform-frame__top-track")
                             }
                         }
                         bottom {
-                            region {
+                            pane {
                                 bottomTrackRegion = this
                                 styleClass.add("scrolling-waveform-frame__bottom-track")
                                 bottomTrack?.let {
