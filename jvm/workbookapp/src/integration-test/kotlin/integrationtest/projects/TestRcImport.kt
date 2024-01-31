@@ -246,4 +246,26 @@ class TestRcImport {
                 )
             }
     }
+
+    @Test
+    fun testImportDuplicateSourceRC() {
+        val ulbRowCount = RowCount(
+            collections = 1256,
+            contents = mapOf(
+                META to 1189,
+                TEXT to 31104
+            )
+        )
+
+        // importing the same source twice won't duplicate content
+        dbEnvProvider.get()
+            .import("en_ulb.zip")
+            .assertRowCounts(
+                ulbRowCount
+            )
+            .import("en_ulb.zip")
+            .assertRowCounts(
+                ulbRowCount
+            )
+    }
 }
