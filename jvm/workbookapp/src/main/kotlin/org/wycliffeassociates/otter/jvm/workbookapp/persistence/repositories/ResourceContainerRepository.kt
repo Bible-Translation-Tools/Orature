@@ -232,10 +232,6 @@ class ResourceContainerRepository @Inject constructor(
                 ?.forEach(resourceRepository::calculateAndSetSubtreeHasResources)
         }
 
-        fun updateCollection(node: OtterTreeNode<CollectionOrContent>) {
-
-        }
-
         /** Finds a collection from the database that matches the given collection on slug, label, and containerId. */
         private fun fetchCollectionFromDb(collection: Collection, containerId: Int): Collection? {
             val entity = collectionDao.fetch(
