@@ -1,6 +1,6 @@
 ext {
     // Plugins
-    javafxPluginVer = '0.0.13'
+    javafxPluginVer = '0.0.14'
     jooqPluginVer = '7.2'
     install4jPluginVer = '9.0.2'
     nebulaLintPluginVer = '16.23.0' // Gradle Linter

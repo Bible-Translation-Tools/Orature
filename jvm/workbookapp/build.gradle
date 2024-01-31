@@ -14,6 +14,7 @@ apply plugin: 'idea'
 javafx {
     version = "$javafxVer"
     modules = ['javafx.base', 'javafx.graphics', 'javafx.controls', 'javafx.fxml']
+    platform = 'mac-aarch64'
 }
 
 repositories {
