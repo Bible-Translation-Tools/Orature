@@ -78,21 +78,22 @@ class ExistingSourceImporter @Inject constructor(
             return Single.just(ImportResult.LOAD_RC_ERROR)
         }
 
-        val singleStream = if (sameVersion) {
+        val singleStream = if (sameVersion || sameVersification) {
             callback?.onNotifyProgress(localizeKey = "mergingSource", percent = 30.0)
 
-            logger.info("RC ${file.name} already imported, merging media...")
-            mergeMedia(file, existingSource.path, callback)
-        } else if (sameVersification) {
-            callback?.onNotifyProgress(localizeKey = "updatingVersification", percent = 25.0)
-
-            logger.info("RC ${file.name} already imported but uses the same versification, updating source...")
+            logger.info("RC ${file.name} already imported, updating source...")
             updateSource(existingSource, file).blockingGet()
 
             callback?.onNotifyProgress(localizeKey = "mergingSource", percent = 50.0)
 
             mergeMedia(file, existingSource.path, callback)
-            mergeText(file, existingSource.path)
+                .flatMap {
+                    if (it == ImportResult.SUCCESS) {
+                        mergeText(file, existingSource.path)
+                    } else {
+                        Single.just(it)
+                    }
+                }
         } else {
             // existing resource has a different version, confirms overwrite/delete
             callback?.onNotifyProgress(localizeKey = "overridingSource", percent = 15.0)
