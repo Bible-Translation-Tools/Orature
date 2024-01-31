@@ -266,7 +266,7 @@ class WorkbookRepository(
         return content.format?.let { format ->
             content.text?.let { text ->
                 TextItem(text, MimeType.of(format))
-            } ?: throw IllegalStateException("Content text is null")
+            }
         } ?: TextItem("[empty]", MimeType.USFM)
     }
 
