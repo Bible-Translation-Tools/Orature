@@ -100,7 +100,6 @@ internal class PcmFileReader(
             channel?.close()
             mappedFile = null
             channel = null
-            System.gc()
         }
     }
 

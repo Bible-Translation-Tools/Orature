@@ -134,7 +134,6 @@ internal class WavFileReader(val wav: WavFile, start: Int? = null, end: Int? = n
             channel?.close()
             mappedFile = null
             channel = null
-            System.gc()
         }
     }
 

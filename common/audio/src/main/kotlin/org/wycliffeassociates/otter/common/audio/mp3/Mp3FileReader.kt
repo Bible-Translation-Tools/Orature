@@ -142,7 +142,6 @@ class MP3FileReader(
         decoder?.stop()
         decoder = null
         pos = 0
-        System.gc()
     }
 
     override fun close() {
