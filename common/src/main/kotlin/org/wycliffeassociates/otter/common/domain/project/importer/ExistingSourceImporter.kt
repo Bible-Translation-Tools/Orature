@@ -86,9 +86,10 @@ class ExistingSourceImporter @Inject constructor(
 
             callback?.onNotifyProgress(localizeKey = "mergingSource", percent = 50.0)
 
-            mergeMedia(file, existingSource.path, callback)
+            mergeMedia(file, existingSource.path)
                 .flatMap {
                     if (it == ImportResult.SUCCESS) {
+                        callback?.onNotifyProgress(percent = 90.0)
                         mergeText(file, existingSource.path)
                     } else {
                         Single.just(it)
@@ -176,7 +177,6 @@ class ExistingSourceImporter @Inject constructor(
     fun mergeMedia(
         newRC: File,
         existingRC: File,
-        callback: ProjectImporterCallback?
     ): Single<ImportResult> {
         logger.info("RC already imported, merging media...")
         return Single
@@ -184,10 +184,8 @@ class ExistingSourceImporter @Inject constructor(
                 MediaMerge.merge(
                     ResourceContainer.load(newRC),
                     ResourceContainer.load(existingRC),
-                    callback
                 )
                 logger.info("Merge media completed.")
-                callback?.onNotifyProgress(percent = 95.0)
                 ImportResult.SUCCESS
             }
             .onErrorReturn {

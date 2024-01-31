@@ -18,7 +18,6 @@
  */
 package org.wycliffeassociates.otter.common.domain.project.exporter.resourcecontainer
 
-import org.wycliffeassociates.otter.common.domain.project.importer.ProjectImporterCallback
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Media
 import org.wycliffeassociates.resourcecontainer.entity.MediaProject
@@ -29,11 +28,10 @@ import java.io.File
  * This will overwrite media files with matching names.
  */
 object MediaMerge {
-    fun merge(fromRC: ResourceContainer, toRC: ResourceContainer, callback: ProjectImporterCallback? = null) {
+    fun merge(fromRC: ResourceContainer, toRC: ResourceContainer) {
         try {
             if (fromRC.media != null) {
                 mergeManifest(fromRC, toRC)
-                callback?.onNotifyProgress(percent = 80.0)
                 mergeMediaFiles(fromRC, toRC)
             }
         } finally {
