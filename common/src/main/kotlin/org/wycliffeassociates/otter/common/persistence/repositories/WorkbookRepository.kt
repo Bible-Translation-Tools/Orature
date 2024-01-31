@@ -267,7 +267,7 @@ class WorkbookRepository(
             content.text?.let { text ->
                 TextItem(text, MimeType.of(format))
             }
-        } ?: TextItem("[empty]", MimeType.USFM)
+        } ?: TextItem("", MimeType.USFM)
     }
 
     private fun constructResource(
