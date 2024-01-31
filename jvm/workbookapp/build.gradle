@@ -132,10 +132,10 @@ dependencies {
     implementation "no.tornado:tornadofx2:$tornadofxVer"
 
     //OpenJFX cross-platform fat jar dependencies
-    runtimeOnly "org.openjfx:javafx-graphics:$javafxVer:win"
-    runtimeOnly "org.openjfx:javafx-graphics:$javafxVer:linux"
-    runtimeOnly "org.openjfx:javafx-graphics:$javafxVer:mac"
-    runtimeOnly "org.openjfx:javafx-graphics:$javafxVer:mac-aarch64"
+    implementation "org.openjfx:javafx-graphics:$javafxVer:win"
+    implementation "org.openjfx:javafx-graphics:$javafxVer:linux"
+    implementation "org.openjfx:javafx-graphics:$javafxVer:mac"
+    implementation "org.openjfx:javafx-graphics:$javafxVer:mac-aarch64"
 
     // SVG Loader
     implementation "com.github.jsarabia:FranzXaverSVG:$franzXaverSvgVer"
