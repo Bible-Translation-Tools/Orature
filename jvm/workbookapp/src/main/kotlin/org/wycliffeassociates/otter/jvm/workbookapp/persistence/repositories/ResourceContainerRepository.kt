@@ -232,6 +232,10 @@ class ResourceContainerRepository @Inject constructor(
                 ?.forEach(resourceRepository::calculateAndSetSubtreeHasResources)
         }
 
+        fun updateCollection(node: OtterTreeNode<CollectionOrContent>) {
+
+        }
+
         /** Finds a collection from the database that matches the given collection on slug, label, and containerId. */
         private fun fetchCollectionFromDb(collection: Collection, containerId: Int): Collection? {
             val entity = collectionDao.fetch(
@@ -246,22 +250,26 @@ class ResourceContainerRepository @Inject constructor(
         }
 
         /** Get or Add collection to the database, return copy of collection that includes database row id. */
-        private fun getOrInsertCollection(collection: Collection, parent: Collection?): Collection {
+        private fun getOrInsertCollection(collection: Collection, parent: Collection?): Collection? {
             val existingCollection = collectionDao
                 .fetch(collection.slug, metadata.id, collection.labelKey)
                 ?.let {
                     CollectionMapper().mapFromEntity(it, metadata)
                 }
 
-            return if (existingCollection != null) {
-                existingCollection
-            } else {
-                val entity = CollectionMapper().mapToEntity(collection).apply {
-                    parentFk = parent?.id
-                    dublinCoreFk = metadata.id
+            return when {
+                existingCollection?.labelKey == "project" -> null // avoid importing duplicate book content
+
+                existingCollection != null -> existingCollection
+
+                else -> {
+                    val entity = CollectionMapper().mapToEntity(collection).apply {
+                        parentFk = parent?.id
+                        dublinCoreFk = metadata.id
+                    }
+                    val collectionId = collectionDao.insert(entity, dsl)
+                    collection.copy(id = collectionId)
                 }
-                val collectionId = collectionDao.insert(entity, dsl)
-                collection.copy(id = collectionId)
             }
         }
 
@@ -269,6 +277,8 @@ class ResourceContainerRepository @Inject constructor(
             val collection = (node.value as Collection).let { collection ->
                 when (relatedBundleDublinCoreId) {
                     null -> getOrInsertCollection(collection, parent)
+                        ?: return null // ignore if book (project) collection exists
+
                     else -> fetchCollectionFromDb(collection, relatedBundleDublinCoreId)
                     // TODO: If we don't find a corresponding collection, we continue on, setting collection = null.
                     // TODO: ... Eventually, contents will not be created if there is no parentId. This will happen for
