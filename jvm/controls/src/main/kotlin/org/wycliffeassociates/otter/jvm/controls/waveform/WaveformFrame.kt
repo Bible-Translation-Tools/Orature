@@ -27,6 +27,7 @@ import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.effect.ColorAdjust
 import javafx.scene.image.Image
+import javafx.scene.image.ImageView
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Region
@@ -247,7 +248,7 @@ class WaveformFrame(
     }
 
     fun addImage(image: Image) {
-        imageHolder?.add(
+        imageHolder?.apply {
             imageview(image) {
                 addClass("waveform-image")
                 this.effect = waveformColorEffect
@@ -267,7 +268,7 @@ class WaveformFrame(
                         )
                 }
             }
-        )
+        }
     }
 
     fun freeImages() {

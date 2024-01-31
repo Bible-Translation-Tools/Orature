@@ -37,6 +37,8 @@ import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
 import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithDisposer
 
 const val MOVE_MARKER_INTERVAL = 0.001
 const val MARKER_COUNT = 500
@@ -60,11 +62,6 @@ open class MarkerTrackControl : Region() {
         onLocationRequestProperty.set(op)
     }
 
-    init {
-        // Makes the the region mouse transparent but not children
-        pickOnBoundsProperty().set(false)
-    }
-
     protected val _markers = mutableListOf<MarkerControl>()
     protected val highlights = mutableListOf<Rectangle>()
 
@@ -72,6 +69,23 @@ open class MarkerTrackControl : Region() {
     var dragStart: Array<Point2D?> = Array(markers.size) { null }
 
     private val focusedMarkerProperty = SimpleObjectProperty<MarkerControl>()
+    private val listeners = mutableListOf<ListenerDisposer>()
+
+    fun initialize() {
+        resetState()
+        preallocateMarkers()
+
+        highlights.forEach { add(it) }
+        _markers.forEach { add(it) }
+        refreshMarkers()
+        refreshHighlights()
+
+        markers.onChangeAndDoNowWithDisposer {
+            it.sortedBy { it.frame }
+            refreshMarkers()
+            refreshHighlights()
+        }.also(listeners::add)
+    }
 
     fun refreshMarkers() {
         markers.forEachIndexed { index, chunkMarker ->
@@ -110,6 +124,9 @@ open class MarkerTrackControl : Region() {
         highlights.clear()
         preDragThumbPos = DoubleArray(MARKER_COUNT)
         dragStart = Array(MARKER_COUNT) { null }
+        getChildList()?.clear()
+        listeners.forEach(ListenerDisposer::dispose)
+        listeners.clear()
     }
 
     open fun createMarker(): MarkerControl = ChunkMarker()
@@ -255,19 +272,8 @@ open class MarkerTrackControl : Region() {
     }
 
     init {
-        resetState()
-        preallocateMarkers()
-        getChildList()?.clear()
-        highlights.forEach { add(it) }
-        _markers.forEach { add(it) }
-        refreshMarkers()
-        refreshHighlights()
-
-        markers.onChangeAndDoNow {
-            it.sortedBy { it.frame }
-            refreshMarkers()
-            refreshHighlights()
-        }
+        // Makes the region mouse transparent but not children
+        pickOnBoundsProperty().set(false)
 
         setOnKeyPressed { e ->
             when (e.code) {
