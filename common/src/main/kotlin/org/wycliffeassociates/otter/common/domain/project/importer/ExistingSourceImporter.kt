@@ -84,12 +84,12 @@ class ExistingSourceImporter @Inject constructor(
             logger.info("RC ${file.name} already imported, updating source...")
             updateSource(existingSource, file).blockingGet()
 
-            callback?.onNotifyProgress(localizeKey = "mergingSource", percent = 50.0)
+            callback?.onNotifyProgress(localizeKey = "importing_source_audio", percent = 50.0)
 
             mergeMedia(file, existingSource.path)
                 .flatMap {
                     if (it == ImportResult.SUCCESS) {
-                        callback?.onNotifyProgress(percent = 90.0)
+                        callback?.onNotifyProgress(localizeKey = "importing_source_text", percent = 90.0)
                         mergeText(file, existingSource.path)
                     } else {
                         Single.just(it)
