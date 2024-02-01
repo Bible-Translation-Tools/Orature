@@ -30,7 +30,6 @@ import org.wycliffeassociates.otter.common.data.audio.ChunkMarker
 import org.wycliffeassociates.otter.common.domain.audio.OratureAudioFile
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.common.domain.IUndoable
-import java.util.regex.Pattern
 
 
 private const val SEEK_EPSILON = 15_000
@@ -45,7 +44,7 @@ class MarkerPlacementModel(
     placementType: MarkerPlacementType,
     private val audio: OratureAudioFile,
     val chunkCount: Int = 0,
-    markerLabels: List<String>
+    markerLabels: List<AudioMarker>
 ) {
     private val logger = LoggerFactory.getLogger(MarkerPlacementModel::class.java)
 
@@ -76,7 +75,10 @@ class MarkerPlacementModel(
         get() = markers.size
 
     private val labelIndex
-        get() = undoStack.size
+        get(): Int {
+            val unplacedIndex = markerItems.indexOfFirst { !it.placed }
+            return if (unplacedIndex != -1) unplacedIndex else markerItems.size
+        }
 
     private inline fun <reified T : AudioMarker> getTitlesAsModels(
         audio: OratureAudioFile,
@@ -87,9 +89,12 @@ class MarkerPlacementModel(
             ?: arrayOf()
     }
 
-    private fun loadMarkersFromAudio(markerLabels: List<String>) {
-        val bookMarker = getTitlesAsModels<BookMarker>(audio)
-        val chapterMarker = getTitlesAsModels<ChapterMarker>(audio)
+    private fun loadMarkersFromAudio(markerLabels: List<AudioMarker>) {
+        val bookMarker: Array<MarkerItem> = arrayOf()
+        val chapterMarker: Array<MarkerItem> = arrayOf()
+
+//        val bookMarker = getTitlesAsModels<BookMarker>(audio)
+//        val chapterMarker = getTitlesAsModels<ChapterMarker>(audio)
 
         val chunks = when (primaryType) {
             VerseMarker::class.java -> audio.getMarker<VerseMarker>().map { MarkerItem(it, true) }.toTypedArray()
@@ -104,14 +109,14 @@ class MarkerPlacementModel(
         markerItems.clear()
 
         val finalizedVerses = when (primaryType) {
-            VerseMarker::class.java -> addMissingLabels(markerLabels, chunks)
+            VerseMarker::class.java -> addMissingLabels(markerLabels, arrayOf(*bookMarker, *chapterMarker, *chunks))
             ChunkMarker::class.java -> padExtraChunks(chunks)
             else -> {
                 throw IllegalArgumentException("Invalid MarkerPlacementModel primary type: $primaryType")
             }
         }
 
-        markerItems.addAll(listOf(*bookMarker, *chapterMarker, *finalizedVerses))
+        markerItems.addAll(listOf(*finalizedVerses))
 
         markerItems.forEach { markers.add(it.marker) }
         markerItems.removeIf { !it.placed }
@@ -129,30 +134,32 @@ class MarkerPlacementModel(
     }
 
     private fun addMissingLabels(
-        markerLabels: List<String>,
+        markerLabels: List<AudioMarker>,
         markerModels: Array<MarkerItem>
     ): Array<MarkerItem> {
         if (markerModels.size == markerLabels.size) return markerModels
 
-        val all = markerLabels.map {
-            val (start, end) = parseLabel(it)
-            val marker = when (primaryType) {
-                VerseMarker::class.java -> VerseMarker(start, end, 0)
-                ChunkMarker::class.java -> ChunkMarker(start, 0)
-                else -> {
-                    throw IllegalArgumentException("Invalid MarkerPlacementModel primary type: $primaryType")
-                }
+        val all = markerLabels.map { marker -> MarkerItem(marker, false) }
+
+        val missing = all
+            .filter { marker ->
+                markerModels.any { it.marker.label == marker.label }.not()
             }
-            MarkerItem(marker, false)
+            .toTypedArray()
+
+        val final = listOf(*markerModels, *missing)
+
+        val contentSortPadding = 100
+        final.sortedBy {
+            when (it.marker::class.java) {
+                BookMarker::class.java -> 1
+                ChapterMarker::class.java -> 2
+                VerseMarker::class.java -> (it.marker as VerseMarker).start + contentSortPadding
+                ChunkMarker::class.java -> (it.marker as ChunkMarker).chunk + contentSortPadding
+                else -> 0
+            }
         }
 
-        val placedVerses = markerModels.filter { it.marker.javaClass == primaryType }.toTypedArray()
-        val missing = all.filter { marker ->
-            placedVerses.any { it.marker.label == marker.label }.not()
-        }.toTypedArray()
-
-        val final = listOf(*placedVerses, *missing)
-        final.sortedBy { (it.marker as VerseMarker).start }
         return final.toTypedArray()
     }
 
@@ -172,18 +179,6 @@ class MarkerPlacementModel(
             redoStack.clear()
 
             refreshMarkers()
-        }
-    }
-
-    private fun parseLabel(label: String): Pair<Int, Int> {
-        val pattern = Pattern.compile("(\\d+)(?:-(\\d+))?")
-        val match = pattern.matcher(label)
-        if (match.matches()) {
-            val start: Int = match.group(1)!!.toInt()
-            val end: Int = match.group(2)?.toInt() ?: start
-            return Pair(start, end)
-        } else {
-            throw NumberFormatException("Invalid verse label: $label, which could not be parsed to a verse or verse range")
         }
     }
 
@@ -259,7 +254,7 @@ class MarkerPlacementModel(
         markerItems.sortBy { it.frame }
         markerItems.forEachIndexed { index, chunkMarker ->
             if (index < markers.size) {
-                chunkMarker.marker = markers[index]
+                chunkMarker.marker = markers[index].clone()
             }
         }
         placedMarkersCount = markerItems.filter { it.placed }.size

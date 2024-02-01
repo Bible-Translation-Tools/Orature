@@ -39,7 +39,11 @@ import tornadofx.*
 import java.io.File
 import java.lang.Integer.min
 import javafx.animation.AnimationTimer
+import javafx.application.Application
 import javafx.beans.binding.Bindings
+import org.wycliffeassociates.otter.common.data.audio.AudioMarker
+import org.wycliffeassociates.otter.common.data.audio.BookMarker
+import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginCloseFinishedEvent
@@ -48,6 +52,7 @@ import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementType
 import org.wycliffeassociates.otter.jvm.controls.waveform.IMarkerViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.ObservableWaveformBuilder
 import org.wycliffeassociates.otter.jvm.controls.waveform.WAVEFORM_MAX_HEIGHT
+import java.util.regex.Pattern
 
 private const val WAV_COLOR = "#0A337390"
 private const val BACKGROUND_COLOR = "#FFFFFF"
@@ -133,10 +138,10 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
 
     private fun loadMarkers(audio: OratureAudioFile) {
         val params = (scope as ParameterizedScope).parameters
-        val markersList: List<String> = getVerseLabelList(params.named["marker_labels"])
-        val totalMarkers: Int = markersList.size
+        val audioMarkers = loadMarkersFromParameters(params)
+        val totalMarkers: Int = audioMarkers.size
 
-        markerModel = MarkerPlacementModel(MarkerPlacementType.VERSE, audio, totalMarkers, markersList)
+        markerModel = MarkerPlacementModel(MarkerPlacementType.VERSE, audio, totalMarkers, audioMarkers)
 
         markerRatioProperty.bind(
             Bindings.createStringBinding(
@@ -149,8 +154,45 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
         }
     }
 
+    private fun loadMarkersFromParameters(params: Application.Parameters): List<AudioMarker> {
+        val labels = getVerseLabelList(params.named["marker_labels"])
+        val verses = verseLabelsToMarkers(labels)
+        val titles = getTitleMarkers(params.named["book_slug"], params.named["chapter_number"])
+        return listOf(*titles, *verses)
+    }
+
+    private fun getTitleMarkers(bookSlug: String?, chapterNumber: String?): Array<AudioMarker> {
+        if (bookSlug == null || chapterNumber == null) return arrayOf()
+        return arrayOf(BookMarker(bookSlug, 0), ChapterMarker(Integer.parseInt(chapterNumber), 0))
+    }
+
     private fun getVerseLabelList(s: String?): List<String> {
-        return s?.removeSurrounding("[", "]")?.split(",")?.map { it.trim() } ?: emptyList()
+        return s
+            ?.removeSurrounding("[", "]")
+            ?.split(",")
+            ?.map { it.trim() }
+            ?: emptyList()
+    }
+
+    private fun parseLabel(label: String): Pair<Int, Int> {
+        val pattern = Pattern.compile("(\\d+)(?:-(\\d+))?")
+        val match = pattern.matcher(label)
+        if (match.matches()) {
+            val start: Int = match.group(1)!!.toInt()
+            val end: Int = match.group(2)?.toInt() ?: start
+            return Pair(start, end)
+        } else {
+            throw NumberFormatException(
+                "Invalid verse label: $label, which could not be parsed to a verse or verse range"
+            )
+        }
+    }
+
+    private fun verseLabelsToMarkers(list: List<String>): Array<VerseMarker> {
+        return list.map {
+            val (start, end) = parseLabel(it)
+            VerseMarker(start, end, 0)
+        }.toTypedArray()
     }
 
     private fun loadTitles() {

@@ -38,14 +38,16 @@ interface IMarkerViewModel : IWaveformViewModel {
     fun placeMarker() {
         markerModel?.let { markerModel ->
             markerModel.addMarker(waveformAudioPlayerProperty.get().getLocationInFrames())
-            markers.setAll(markerModel.markerItems)
+            markers.clear()
+            markers.setAll(markerModel.markerItems.map { it.copy() })
         }
     }
 
     fun deleteMarker(id: Int) {
         markerModel?.let { markerModel ->
             markerModel.deleteMarker(id)
-            markers.setAll(markerModel.markerItems)
+            markers.clear()
+            markers.setAll(markerModel.markerItems.map { it.copy() })
         }
     }
 

@@ -122,6 +122,7 @@ class AudioPluginViewModel : ViewModel() {
 
         return PluginParameters(
             languageName = workbook.target.language.name,
+            bookSlug = workbook.target.slug,
             bookTitle = workbook.target.title,
             chapterLabel = chapterLabel,
             chapterNumber = chapterNumber,

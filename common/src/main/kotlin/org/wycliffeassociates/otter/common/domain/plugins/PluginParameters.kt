@@ -22,6 +22,7 @@ import java.io.File
 
 data class PluginParameters(
     val languageName: String,
+    val bookSlug: String,
     val bookTitle: String,
     val chapterLabel: String,
     val chapterNumber: Int,

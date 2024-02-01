@@ -214,7 +214,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
             MarkerPlacementType.CHUNK,
             audio,
             totalMarkers,
-            (1..totalMarkers).map { it.toString() }
+            (1..totalMarkers).map { ChunkMarker(it, 0) }
         ).apply {
             loadMarkers(chunkMarkers)
         }
