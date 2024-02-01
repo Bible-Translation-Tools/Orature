@@ -51,6 +51,7 @@ import org.wycliffeassociates.otter.common.domain.narration.*
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterItemState
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterStateMachine
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterStateTransition
+import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.event.*
 import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
@@ -64,6 +65,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NarrationTextI
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.MARKER_AREA_WIDTH
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkerControl
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.NarrationWaveformRenderer
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AppPreferencesStore
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
@@ -80,12 +82,14 @@ class NarrationViewModel : ViewModel() {
     private lateinit var rendererAudioReader: AudioFileReader
     private val logger = LoggerFactory.getLogger(NarrationViewModel::class.java)
     private val workbookDataStore: WorkbookDataStore by inject()
-
     private val audioPluginViewModel: AudioPluginViewModel by inject()
+    private val appPreferencesStore: AppPreferencesStore by inject()
     lateinit var audioPlayer: IAudioPlayer
 
     @Inject
     lateinit var narrationFactory: NarrationFactory
+    @Inject
+    lateinit var appPreferencesRepo: IAppPreferencesRepository
 
     private lateinit var narration: Narration
     private lateinit var renderer: NarrationWaveformRenderer
@@ -240,6 +244,11 @@ class NarrationViewModel : ViewModel() {
         audioPositionProperty.onChangeWithDisposer { pos ->
             if (pos != null) updateHighlightedItem(pos.toInt())
         }.also { disposers.add(it) }
+
+        appPreferencesRepo.sourceTextZoomRate()
+            .subscribe { rate ->
+                appPreferencesStore.sourceTextZoomRateProperty.set(rate)
+            }.let { disposables.add(it) }
     }
 
     fun onUndock() {

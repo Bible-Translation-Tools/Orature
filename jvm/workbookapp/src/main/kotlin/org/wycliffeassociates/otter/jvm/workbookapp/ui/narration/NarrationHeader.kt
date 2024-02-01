@@ -80,7 +80,7 @@ class NarrationHeader : View() {
                 setOnAction {
                     FX.eventbus.fire(NarrationUndoEvent())
                 }
-                enableWhen(viewModel.hasUndoProperty)
+                enableWhen(viewModel.hasUndoProperty.and(viewModel.isRecordingProperty.not()))
             }
             button {
                 tooltip = tooltip(messages["redoAction"])
@@ -89,14 +89,14 @@ class NarrationHeader : View() {
                 setOnAction {
                     FX.eventbus.fire(NarrationRedoEvent())
                 }
-                enableWhen(viewModel.hasRedoProperty)
+                enableWhen(viewModel.hasRedoProperty.and(viewModel.isRecordingProperty.not()))
             }
             narrationMenuButton(
                 viewModel.hasChapterTakeProperty,
                 viewModel.hasVersesProperty,
                 viewModel.hasAllVersesRecordedProperty
             ) {
-                enableWhen(viewModel.chapterTakeBusyProperty.not())
+                enableWhen(viewModel.chapterTakeBusyProperty.not().and(viewModel.isRecordingProperty.not()))
             }
             chapterSelector {
                 chapterTitleProperty.bind(viewModel.chapterTitleProperty)
@@ -156,6 +156,7 @@ class NarrationHeaderViewModel : ViewModel() {
 
     val hasUndoProperty = SimpleBooleanProperty()
     val hasRedoProperty = SimpleBooleanProperty()
+    val isRecordingProperty = narrationViewModel.isRecordingProperty.or(narrationViewModel.isRecordingAgainProperty)
 
     val pluginContextProperty = SimpleObjectProperty(PluginType.EDITOR)
 

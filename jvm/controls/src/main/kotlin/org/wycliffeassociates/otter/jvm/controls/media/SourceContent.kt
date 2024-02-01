@@ -37,6 +37,7 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.jvm.controls.customizeScrollbarSkin
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.*
 import tornadofx.*
@@ -217,6 +218,8 @@ class SourceContent : StackPane() {
                                     }
                                 }
                             }
+
+                            runLater { customizeScrollbarSkin() }
                         }
 
                         visibleWhen(sourceTextAvailableProperty.and(sourceTextCompactMode.not()))
