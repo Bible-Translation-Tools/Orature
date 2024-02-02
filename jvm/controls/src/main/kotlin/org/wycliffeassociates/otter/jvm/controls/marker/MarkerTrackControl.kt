@@ -33,6 +33,7 @@ import java.util.concurrent.Callable
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
+import org.wycliffeassociates.otter.common.data.audio.ChapterMarker
 import org.wycliffeassociates.otter.common.data.audio.VerseMarker
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
 import org.wycliffeassociates.otter.common.domain.model.MarkerItem
@@ -62,7 +63,7 @@ open class MarkerTrackControl : Region() {
     }
 
     init {
-        // Makes the the region mouse transparent but not children
+        // Makes the region mouse transparent but not children
         pickOnBoundsProperty().set(false)
     }
 
@@ -84,7 +85,7 @@ open class MarkerTrackControl : Region() {
                     chunkMarker.frame
                 ).toDouble()
             )
-            marker.markerNumberProperty.set(chunkMarker.label)
+            marker.markerNumberProperty.set(markerDisplayLabel(chunkMarker))
             highlights[index].apply {
                 styleClass.clear()
                 when (index % 2 == 1) {
@@ -114,6 +115,12 @@ open class MarkerTrackControl : Region() {
     }
 
     open fun createMarker(): MarkerControl = ChunkMarker()
+    private fun markerDisplayLabel(chunkMarker: MarkerItem): String {
+        return when (chunkMarker.marker) {
+            is ChapterMarker -> "c${chunkMarker.label}"
+            else -> chunkMarker.label
+        }
+    }
 
     protected fun createMarker(i: Int, mk: MarkerItem): MarkerControl {
         val container = this
@@ -125,7 +132,7 @@ open class MarkerTrackControl : Region() {
 
             isPlacedProperty.set(mk.placed)
             markerIndexProperty.set(i)
-            markerNumberProperty.set(mk.label)
+            markerNumberProperty.set(markerDisplayLabel(mk))
             canBeMovedProperty.bind(canMoveMarkerProperty)
             canBeDeletedProperty.bind(canDeleteMarkerProperty)
             markerPositionProperty.set(pixel)
