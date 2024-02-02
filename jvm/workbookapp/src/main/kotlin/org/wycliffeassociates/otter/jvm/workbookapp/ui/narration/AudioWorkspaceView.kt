@@ -42,11 +42,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.Wavefo
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.narration_waveform
 import tornadofx.*
 import java.util.concurrent.Executors
-import java.util.concurrent.LinkedBlockingQueue
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.math.min
 
 class AudioWorkspaceView : View() {
     private val userIsDraggingProperty = SimpleBooleanProperty(false)
@@ -61,15 +57,14 @@ class AudioWorkspaceView : View() {
 
     private val drawables = mutableListOf<Drawable>()
 
-    val jobQueue = LinkedBlockingQueue<Runnable>()
-    val executor = Executors.newSingleThreadExecutor()
-    val executor2 = Executors.newSingleThreadExecutor()
+    val waveformThreadExecutor = Executors.newSingleThreadExecutor()
+    val volumeThreadExecutor = Executors.newSingleThreadExecutor()
 
     val finishedFrame = AtomicBoolean(true)
 
     val markerNodes = observableListOf<VerseMarkerControl>()
 
-    val runnable = Runnable {
+    val renderWaveformTask = Runnable {
         if (finishedFrame.compareAndExchange(true, false)) {
             try {
                 if (canvasInflatedProperty.value) {
@@ -86,18 +81,19 @@ class AudioWorkspaceView : View() {
             }
         }
     }
+    val renderVolumeTask = Runnable {
+        if (canvasInflatedProperty.value) {
+            viewModel.drawVolumeBar(
+                narrationWaveformLayer.getVolumeBarContext(),
+                narrationWaveformLayer.getVolumeCanvas()
+            )
+        }
+    }
 
     val at = object : AnimationTimer() {
         override fun handle(now: Long) {
-            executor.submit(runnable)
-            executor2.submit {
-                if (canvasInflatedProperty.value) {
-                    viewModel.drawVolumeBar(
-                        narrationWaveformLayer.getVolumeBarContext(),
-                        narrationWaveformLayer.getVolumeCanvas()
-                    )
-                }
-            }
+            waveformThreadExecutor.submit(renderWaveformTask)
+            volumeThreadExecutor.submit(renderVolumeTask)
         }
     }
 
@@ -138,9 +134,8 @@ class AudioWorkspaceView : View() {
     override val root = stackpane {
         subscribe<AppCloseRequestEvent> {
             at.stop()
-            jobQueue.clear()
-            executor.shutdownNow()
-            executor2.shutdownNow()
+            waveformThreadExecutor.shutdownNow()
+            volumeThreadExecutor.shutdownNow()
         }
 
         borderpane {
