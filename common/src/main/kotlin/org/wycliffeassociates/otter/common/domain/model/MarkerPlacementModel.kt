@@ -41,7 +41,7 @@ enum class MarkerPlacementType {
 }
 
 /**
- * State Machine for placing markers
+ * A model consisting of the state of placeable markers and their operations
  *
  * @param primaryPlacementType This is the primary marker type that is being placed- Chunk or Verse
  *
