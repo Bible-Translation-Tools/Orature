@@ -111,53 +111,38 @@ class MarkerPlacementModel(
         redoStack.clear()
         markerItems.clear()
 
-        val finalizedVerses = when (primaryType) {
-            VerseMarker::class.java -> addUnplacedMarkers(markerLabels, arrayOf(*bookMarker, *chapterMarker, *chunks))
-            ChunkMarker::class.java -> padExtraChunks(chunks)
-            else -> {
-                throw IllegalArgumentException("Invalid MarkerPlacementModel primary type: $primaryType")
-            }
-        }
+        val finalizedVerses = addUnplacedMarkers(markerLabels, arrayOf(*bookMarker, *chapterMarker, *chunks))
 
         markerItems.addAll(listOf(*finalizedVerses))
-
         markerItems.forEach { markers.add(it.marker) }
         markerItems.removeIf { !it.placed }
-        markerItems.forEach { if (it.placed) undoStack.push(Add(it)) }
-    }
-
-    /**
-     * Adds all extra chunks that need to be placed but were not found in the audio file
-     */
-    private fun padExtraChunks(markerModels: Array<MarkerItem>): Array<MarkerItem> {
-        val existing = markerItems.size + 1
-        val chunkCount = markers.count { it is ChunkMarker }
-        val toAdd = buildList {
-            for (i in existing..chunkCount) {
-                add(MarkerItem(ChunkMarker(i, 0), false))
-            }
-        }.toTypedArray()
-        return listOf(*markerModels, *toAdd).toTypedArray()
     }
 
     /**
      * Adds the remaining MarkerItems for markers which were not found from the audio file
+     *
+     * @param totalPlaceableMarkers a list of all the markers that should be assigned
+     * @param placedMarkerItems an array of marker items which were found when the audio file was loaded, and thus
+     * are already placed
+     *
+     * @return an array of all MarkerItems, both placed and unplaced, in sorted order.
      */
     private fun addUnplacedMarkers(
-        markerLabels: List<AudioMarker>,
-        markerModels: Array<MarkerItem>
+        totalPlaceableMarkers: List<AudioMarker>,
+        placedMarkerItems: Array<MarkerItem>
     ): Array<MarkerItem> {
-        if (markerModels.size == markerLabels.size) return markerModels
+        if (placedMarkerItems.size == totalPlaceableMarkers.size) return placedMarkerItems
 
-        val all = markerLabels.map { marker -> MarkerItem(marker, false) }
+        val all = totalPlaceableMarkers
+            .map { marker -> MarkerItem(marker, false) }
 
         val missing = all
             .filter { marker ->
-                markerModels.any { it.marker.label == marker.label }.not()
+                placedMarkerItems.any { it.marker.label == marker.label }.not()
             }
             .toTypedArray()
 
-        val final = listOf(*markerModels, *missing)
+        val final = listOf(*placedMarkerItems, *missing)
 
         return final.sortedBy { it.marker.sort }.toTypedArray()
     }
@@ -276,11 +261,11 @@ class MarkerPlacementModel(
         return Single.fromCallable {
             audio.clearMarkersOfType<BookMarker>()
             audio.clearMarkersOfType<ChapterMarker>()
-            if (primaryType == VerseMarker::class.java) {
-                audio.clearMarkersOfType<VerseMarker>()
-            }
-            if (primaryType == ChunkMarker::class.java) {
-                audio.clearMarkersOfType<ChunkMarker>()
+
+            // Preserves the markers that aren't of the primary type so that they can coexist
+            when (primaryType) {
+                VerseMarker::class.java -> audio.clearMarkersOfType<VerseMarker>()
+                ChunkMarker::class.java -> audio.clearMarkersOfType<ChunkMarker>()
             }
 
             markerItems.forEach {
@@ -289,8 +274,9 @@ class MarkerPlacementModel(
                         is BookMarker -> audio.addMarker<BookMarker>(marker.copy(location = it.frame))
                         is ChapterMarker -> audio.addMarker<ChapterMarker>(marker.copy(location = it.frame))
                         is VerseMarker -> {
-                            if (primaryType == VerseMarker::class.java)
+                            if (primaryType == VerseMarker::class.java) {
                                 audio.addMarker<VerseMarker>(marker.copy(location = it.frame))
+                            }
                         }
 
                         is ChunkMarker -> {
