@@ -130,7 +130,6 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
         markerModel = MarkerPlacementModel(
             MarkerPlacementType.VERSE,
             audio,
-            verseMarkers.size,
             verseMarkers.map { it }
         )
         markerModel?.let { markerModel ->

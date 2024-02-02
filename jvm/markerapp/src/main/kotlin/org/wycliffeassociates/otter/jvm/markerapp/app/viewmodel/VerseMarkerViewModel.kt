@@ -141,7 +141,7 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
         val audioMarkers = loadMarkersFromParameters(params)
         val totalMarkers: Int = audioMarkers.size
 
-        markerModel = MarkerPlacementModel(MarkerPlacementType.VERSE, audio, totalMarkers, audioMarkers)
+        markerModel = MarkerPlacementModel(MarkerPlacementType.VERSE, audio, audioMarkers)
 
         markerRatioProperty.bind(
             Bindings.createStringBinding(

@@ -40,15 +40,24 @@ enum class MarkerPlacementType {
     VERSE
 }
 
+/**
+ * State Machine for placing markers
+ *
+ * @param primaryPlacementType This is the primary marker type that is being placed- Chunk or Verse
+ *
+ * @param audio The audio file being operated on
+ *
+ * @param reservedMarkers the exhaustive list of all AudioMarkers that need to be placed and accounted for, which
+ * can include markers that are not of the primaryPlacementType, such as BookMarker and ChapterMarker
+ */
 class MarkerPlacementModel(
-    placementType: MarkerPlacementType,
+    primaryPlacementType: MarkerPlacementType,
     private val audio: OratureAudioFile,
-    val chunkCount: Int = 0,
-    markerLabels: List<AudioMarker>
+    reservedMarkers: List<AudioMarker>
 ) {
     private val logger = LoggerFactory.getLogger(MarkerPlacementModel::class.java)
 
-    private val primaryType: Class<out AudioMarker> = when (placementType) {
+    private val primaryType: Class<out AudioMarker> = when (primaryPlacementType) {
         MarkerPlacementType.CHUNK -> ChunkMarker::class.java
         MarkerPlacementType.VERSE -> VerseMarker::class.java
     }
@@ -59,7 +68,9 @@ class MarkerPlacementModel(
     private val markers = mutableListOf<AudioMarker>()
     val markerItems = mutableListOf<MarkerItem>()
 
-    private var placedMarkersCount = 0
+    private val placedMarkersCount
+        get() = markerItems.count { it.placed }
+
     private val audioEnd = audio.totalFrames
 
     init {
@@ -68,7 +79,7 @@ class MarkerPlacementModel(
                 "MarkerPlacementModel may only be constructed with a ChunkMarker or VerseMarker as the primary type."
             )
         }
-        loadMarkersFromAudio(markerLabels)
+        loadMarkersFromAudio(reservedMarkers)
     }
 
     val markerTotal: Int
@@ -106,7 +117,7 @@ class MarkerPlacementModel(
         markerItems.clear()
 
         val finalizedVerses = when (primaryType) {
-            VerseMarker::class.java -> addMissingLabels(markerLabels, arrayOf(*bookMarker, *chapterMarker, *chunks))
+            VerseMarker::class.java -> addUnplacedMarkers(markerLabels, arrayOf(*bookMarker, *chapterMarker, *chunks))
             ChunkMarker::class.java -> padExtraChunks(chunks)
             else -> {
                 throw IllegalArgumentException("Invalid MarkerPlacementModel primary type: $primaryType")
@@ -120,8 +131,12 @@ class MarkerPlacementModel(
         markerItems.forEach { if (it.placed) undoStack.push(Add(it)) }
     }
 
+    /**
+     * Adds all extra chunks that need to be placed but were not found in the audio file
+     */
     private fun padExtraChunks(markerModels: Array<MarkerItem>): Array<MarkerItem> {
         val existing = markerItems.size + 1
+        val chunkCount = markers.count { it is ChunkMarker }
         val toAdd = buildList {
             for (i in existing..chunkCount) {
                 add(MarkerItem(ChunkMarker(i, 0), false))
@@ -130,7 +145,10 @@ class MarkerPlacementModel(
         return listOf(*markerModels, *toAdd).toTypedArray()
     }
 
-    private fun addMissingLabels(
+    /**
+     * Adds the remaining MarkerItems for markers which were not found from the audio file
+     */
+    private fun addUnplacedMarkers(
         markerLabels: List<AudioMarker>,
         markerModels: Array<MarkerItem>
     ): Array<MarkerItem> {
@@ -244,7 +262,6 @@ class MarkerPlacementModel(
                 chunkMarker.marker = markers[index].clone(chunkMarker.frame)
             }
         }
-        placedMarkersCount = markerItems.filter { it.placed }.size
     }
 
     private fun findMarkerPrecedingPosition(
@@ -260,7 +277,6 @@ class MarkerPlacementModel(
     }
 
 
-    // WARN: Probably bad, marker items might not have all the old marker
     fun writeMarkers(): Completable {
         return Single.fromCallable {
             audio.clearMarkersOfType<BookMarker>()
@@ -315,7 +331,6 @@ class MarkerPlacementModel(
         var marker: MarkerItem? = null
 
         override fun execute() {
-            //labelIndex--
             marker = markerItems.find { it.id == markerId }
             marker?.let {
                 markerItems.remove(it)
@@ -323,7 +338,6 @@ class MarkerPlacementModel(
         }
 
         override fun undo() {
-            //labelIndex++
             marker?.let {
                 markerItems.add(it)
             }

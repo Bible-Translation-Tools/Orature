@@ -201,7 +201,6 @@ class RecordScriptureViewModel : ViewModel() {
                             MarkerPlacementModel(
                                 MarkerPlacementType.VERSE,
                                 OratureAudioFile(takeCardModel.take.file),
-                                verseCountProperty.value,
                                 listOf()
                             )
                         )

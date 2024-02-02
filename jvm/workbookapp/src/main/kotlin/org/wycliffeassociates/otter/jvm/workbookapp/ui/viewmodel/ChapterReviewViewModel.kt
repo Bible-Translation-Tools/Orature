@@ -253,7 +253,6 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
         markerModel = MarkerPlacementModel(
             MarkerPlacementType.CHUNK,
             audio,
-            sourceMarkers.size,
             sourceMarkers.map { ChunkMarker(it.start, it.location) }
         ).also {
             it.loadMarkers(markerList)
