@@ -163,7 +163,12 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
 
     private fun getTitleMarkers(bookSlug: String?, chapterNumber: String?): Array<AudioMarker> {
         if (bookSlug == null || chapterNumber == null) return arrayOf()
-        return arrayOf(BookMarker(bookSlug, 0), ChapterMarker(Integer.parseInt(chapterNumber), 0))
+
+        val chapterNumber = Integer.parseInt(chapterNumber)
+        return when(chapterNumber) {
+            1 -> arrayOf(BookMarker(bookSlug, 0), ChapterMarker(chapterNumber, 0))
+            else -> arrayOf(ChapterMarker(chapterNumber, 0))
+        }
     }
 
     private fun getVerseLabelList(s: String?): List<String> {
