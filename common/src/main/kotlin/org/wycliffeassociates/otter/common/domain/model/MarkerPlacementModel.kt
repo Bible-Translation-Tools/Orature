@@ -310,12 +310,10 @@ class MarkerPlacementModel(
 
     private inner class Add(val marker: MarkerItem) : MarkerOperation(marker.id) {
         override fun execute() {
-            //labelIndex++
             markerItems.add(marker)
         }
 
         override fun undo() {
-            //labelIndex--
             markerItems.remove(marker)
         }
 
