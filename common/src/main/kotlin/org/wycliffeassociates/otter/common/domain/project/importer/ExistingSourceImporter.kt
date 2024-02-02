@@ -78,21 +78,23 @@ class ExistingSourceImporter @Inject constructor(
             return Single.just(ImportResult.LOAD_RC_ERROR)
         }
 
-        val singleStream = if (sameVersion) {
+        val singleStream = if (sameVersion || sameVersification) {
             callback?.onNotifyProgress(localizeKey = "mergingSource", percent = 30.0)
 
-            logger.info("RC ${file.name} already imported, merging media...")
-            mergeMedia(file, existingSource.path, callback)
-        } else if (sameVersification) {
-            callback?.onNotifyProgress(localizeKey = "updatingVersification", percent = 25.0)
-
-            logger.info("RC ${file.name} already imported but uses the same versification, updating source...")
+            logger.info("RC ${file.name} already imported, updating source...")
             updateSource(existingSource, file).blockingGet()
 
-            callback?.onNotifyProgress(localizeKey = "mergingSource", percent = 50.0)
+            callback?.onNotifyProgress(localizeKey = "importing_source_audio", percent = 50.0)
 
-            mergeMedia(file, existingSource.path, callback)
-            mergeText(file, existingSource.path)
+            mergeMedia(file, existingSource.path)
+                .flatMap {
+                    if (it == ImportResult.SUCCESS) {
+                        callback?.onNotifyProgress(localizeKey = "importing_source_text", percent = 90.0)
+                        mergeText(file, existingSource.path)
+                    } else {
+                        Single.just(it)
+                    }
+                }
         } else {
             // existing resource has a different version, confirms overwrite/delete
             callback?.onNotifyProgress(localizeKey = "overridingSource", percent = 15.0)
@@ -175,7 +177,6 @@ class ExistingSourceImporter @Inject constructor(
     fun mergeMedia(
         newRC: File,
         existingRC: File,
-        callback: ProjectImporterCallback?
     ): Single<ImportResult> {
         logger.info("RC already imported, merging media...")
         return Single
@@ -183,10 +184,8 @@ class ExistingSourceImporter @Inject constructor(
                 MediaMerge.merge(
                     ResourceContainer.load(newRC),
                     ResourceContainer.load(existingRC),
-                    callback
                 )
                 logger.info("Merge media completed.")
-                callback?.onNotifyProgress(percent = 95.0)
                 ImportResult.SUCCESS
             }
             .onErrorReturn {
