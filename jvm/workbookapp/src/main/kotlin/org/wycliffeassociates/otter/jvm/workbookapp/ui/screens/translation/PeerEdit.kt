@@ -171,7 +171,7 @@ open class PeerEdit : View() {
             setOnToggleMedia(viewModel::toggleAudio)
 
             viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
-            viewModel.cleanUpWaveform = ::freeImages
+            viewModel.cleanUpWaveform = ::cleanup
             minWidth = 0.0
         }
     }
@@ -214,6 +214,7 @@ open class PeerEdit : View() {
         logger.info("Checking undocked.")
         timer?.stop()
         unsubscribeEvents()
+        waveform.cleanup()
         viewModel.undock()
         if (mainSectionProperty.value == recordingView) {
             recorderViewModel.cancel()

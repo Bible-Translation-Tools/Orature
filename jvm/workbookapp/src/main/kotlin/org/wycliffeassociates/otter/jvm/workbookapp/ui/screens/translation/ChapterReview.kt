@@ -58,7 +58,6 @@ class ChapterReview : View() {
         viewModel::seek
     )
     private var timer: AnimationTimer? = null
-    private var cleanUpWaveform: () -> Unit = {}
 
     private val eventSubscriptions = mutableListOf<EventRegistration>()
 
@@ -99,7 +98,6 @@ class ChapterReview : View() {
                 setOnToggleMedia(viewModel::mediaToggle)
 
                 viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
-                cleanUpWaveform = ::freeImages
 
                 markers.bind(viewModel.markers) { it }
             }
@@ -178,6 +176,7 @@ class ChapterReview : View() {
     override fun onDock() {
         logger.info("Final Review docked.")
         timer = startAnimationTimer { viewModel.calculatePosition() }
+        waveform.initializeMarkers()
         viewModel.dock()
         subscribeEvents()
     }
@@ -185,8 +184,8 @@ class ChapterReview : View() {
     override fun onUndock() {
         logger.info("Final Review undocked.")
         timer?.stop()
+        waveform.cleanup()
         viewModel.undock()
-        cleanUpWaveform()
         unsubscribeEvents()
     }
 

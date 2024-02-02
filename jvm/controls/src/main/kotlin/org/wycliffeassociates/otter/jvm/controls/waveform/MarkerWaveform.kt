@@ -105,12 +105,17 @@ class MarkerWaveform : StackPane() {
 
     private val waveformFrame: WaveformFrame
 
-    fun freeImages() {
+    fun cleanup() {
         waveformFrame.freeImages()
+        top.resetState()
     }
 
     fun addWaveformImage(image: Image) {
         waveformFrame.addImage(image)
+    }
+
+    fun initializeMarkers() {
+        top.initialize()
     }
 
     private lateinit var top: MarkersContainer
@@ -127,7 +132,7 @@ class MarkerWaveform : StackPane() {
 
         val topTrack = MarkersContainer().apply {
             top = this
-            markers.bind(this@MarkerWaveform.markers, { it })
+            markers.bind(this@MarkerWaveform.markers) { it }
             canMoveMarkerProperty.bind(this@MarkerWaveform.canMoveMarkerProperty)
             canDeleteMarkerProperty.bind(this@MarkerWaveform.canDeleteMarkerProperty)
             onPositionChangedProperty.bind(onPositionChanged)
