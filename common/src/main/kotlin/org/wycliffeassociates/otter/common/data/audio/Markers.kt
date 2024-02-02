@@ -32,11 +32,11 @@ enum class MarkerType {
 
 
 // These sort starts pad out the sort value so that all markers in an audio file can be sorted in BCV order
-const val BOOK_SORT_START = 0
-const val CHAPTER_SORT_START = 1_000
-const val VERSE_SORT_START = 10_000
-const val CHUNK_SORT_START = 100_000
-const val UNKNOWN_SORT_START = 100_000_000
+private const val BOOK_SORT_START = 0
+private const val CHAPTER_SORT_START = 1_000
+private const val VERSE_SORT_START = 10_000
+private const val CHUNK_SORT_START = 100_000
+private const val UNKNOWN_SORT_START = 100_000_000
 
 
 @JsonTypeInfo(
@@ -53,6 +53,7 @@ const val UNKNOWN_SORT_START = 100_000_000
 )
 interface AudioMarker {
     val type: MarkerType
+
     /**
      * The marker label which does not contain any namespacing, most often a verse number or verse range
      */
@@ -94,8 +95,10 @@ data class UnknownMarker(override val location: Int, override val label: String)
         return copy(location = location)
     }
 
-    // Note: this will overflow an int if the position of an unknown marker is beyond ~2GB worth of audio frames
-    // which is about 6 hours for 16bit 44.1khz mono
+    /**
+     * Note: this will overflow an int if the position of an unknown marker is beyond ~2GB worth of audio frames
+     * which is about 6 hours for 16bit 44.1khz mono
+     */
     override val sort = UNKNOWN_SORT_START + location
 }
 
