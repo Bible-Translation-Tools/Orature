@@ -41,6 +41,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.verse_m
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.WaveformLayer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.narration_waveform
 import tornadofx.*
+import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
@@ -61,7 +62,8 @@ class AudioWorkspaceView : View() {
     private val drawables = mutableListOf<Drawable>()
 
     val jobQueue = LinkedBlockingQueue<Runnable>()
-    val executor = ThreadPoolExecutor(1, 1, 5, TimeUnit.SECONDS, jobQueue)
+    val executor = Executors.newSingleThreadExecutor()
+    val executor2 = Executors.newSingleThreadExecutor()
 
     val finishedFrame = AtomicBoolean(true)
 
@@ -76,10 +78,6 @@ class AudioWorkspaceView : View() {
                         narrationWaveformLayer.getWaveformCanvas(),
                         markerNodes
                     )
-                    viewModel.drawVolumeBar(
-                        narrationWaveformLayer.getVolumeBarContext(),
-                        narrationWaveformLayer.getVolumeCanvas()
-                    )
                 }
             } catch (e: Exception) {
                 logger.error("Exception in render loop", e)
@@ -92,6 +90,14 @@ class AudioWorkspaceView : View() {
     val at = object : AnimationTimer() {
         override fun handle(now: Long) {
             executor.submit(runnable)
+            executor2.submit {
+                if (canvasInflatedProperty.value) {
+                    viewModel.drawVolumeBar(
+                        narrationWaveformLayer.getVolumeBarContext(),
+                        narrationWaveformLayer.getVolumeCanvas()
+                    )
+                }
+            }
         }
     }
 
@@ -134,6 +140,7 @@ class AudioWorkspaceView : View() {
             at.stop()
             jobQueue.clear()
             executor.shutdownNow()
+            executor2.shutdownNow()
         }
 
         borderpane {
