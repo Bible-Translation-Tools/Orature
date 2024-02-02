@@ -74,11 +74,6 @@ class MarkerPlacementModel(
     private val audioEnd = audio.totalFrames
 
     init {
-        if (primaryType !in arrayOf(ChunkMarker::class.java, VerseMarker::class.java)) {
-            throw IllegalArgumentException(
-                "MarkerPlacementModel may only be constructed with a ChunkMarker or VerseMarker as the primary type."
-            )
-        }
         loadMarkersFromAudio(reservedMarkers)
     }
 
