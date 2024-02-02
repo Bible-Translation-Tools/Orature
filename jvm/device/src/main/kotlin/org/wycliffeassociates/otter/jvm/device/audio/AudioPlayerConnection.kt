@@ -107,7 +107,9 @@ internal class AudioPlayerConnection(
     }
 
     override fun play() {
-        connectionFactory.load(state)
+        if (connectionFactory.currentConnection?.id != id) {
+            connectionFactory.load(state)
+        }
         connectionFactory.player.play()
     }
 
