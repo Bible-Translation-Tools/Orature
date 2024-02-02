@@ -34,6 +34,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ProjectMode
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
+import org.wycliffeassociates.otter.jvm.controls.event.BeforeNavigationEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ChapterGridItemData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChunkViewData
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkingStep
@@ -103,6 +104,8 @@ class TranslationViewModel2 : ViewModel() {
     }
 
     fun navigateChapter(chapter: Int) {
+        FX.eventbus.fire(BeforeNavigationEvent())
+
         selectedStepProperty.set(null)
         noSourceAudioProperty.set(false)
         showAudioMissingViewProperty.set(false)
@@ -120,6 +123,8 @@ class TranslationViewModel2 : ViewModel() {
     }
 
     fun navigateStep(target: ChunkingStep) {
+        FX.eventbus.fire(BeforeNavigationEvent())
+
         if (!loadingStepProperty.value) {
             loadingStepProperty.set(true)
             runLater {

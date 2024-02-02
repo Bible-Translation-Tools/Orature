@@ -31,6 +31,7 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
+import org.wycliffeassociates.otter.jvm.controls.event.BeforeNavigationEvent
 import org.wycliffeassociates.otter.jvm.controls.event.GoToNextChapterEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
@@ -96,8 +97,6 @@ class ChapterReview : View() {
                 setOnRewind(viewModel::rewind)
                 setOnFastForward(viewModel::fastForward)
                 setOnToggleMedia(viewModel::mediaToggle)
-
-                viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
 
                 markers.bind(viewModel.markers) { it }
             }
@@ -177,6 +176,7 @@ class ChapterReview : View() {
         logger.info("Final Review docked.")
         timer = startAnimationTimer { viewModel.calculatePosition() }
         waveform.initializeMarkers()
+        viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
         viewModel.dock()
         subscribeEvents()
     }
@@ -184,7 +184,6 @@ class ChapterReview : View() {
     override fun onUndock() {
         logger.info("Final Review undocked.")
         timer?.stop()
-        waveform.cleanup()
         viewModel.undock()
         unsubscribeEvents()
     }
@@ -206,6 +205,10 @@ class ChapterReview : View() {
 
         subscribe<RedoChunkingPageEvent> {
             viewModel.redoMarker()
+        }.also { eventSubscriptions.add(it) }
+
+        subscribe<BeforeNavigationEvent> {
+            waveform.cleanup()
         }.also { eventSubscriptions.add(it) }
     }
 

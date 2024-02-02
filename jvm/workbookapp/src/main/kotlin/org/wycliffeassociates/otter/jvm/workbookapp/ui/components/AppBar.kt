@@ -25,6 +25,7 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.button.AppBarButton
 import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
+import org.wycliffeassociates.otter.jvm.controls.event.BeforeNavigationEvent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.AddFilesView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.DrawerEvent
@@ -51,6 +52,7 @@ class AppBar : Fragment() {
         toggleGroup = buttonsToggleGroup
         selectedProperty().onChange { removePseudoClass("selected") }
         setOnMouseClicked {
+            fire(BeforeNavigationEvent())
             val homePage = find<HomePage2>()
             fire(NavigationRequestEvent(homePage))
         }

@@ -30,6 +30,7 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
+import org.wycliffeassociates.otter.jvm.controls.event.BeforeNavigationEvent
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ConsumeViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
@@ -52,6 +53,7 @@ class Consume : View() {
     )
 
     private var timer: AnimationTimer? = null
+    private val eventSubscriptions = mutableListOf<EventRegistration>()
 
     override fun onDock() {
         super.onDock()
@@ -61,16 +63,15 @@ class Consume : View() {
         viewModel.onDockConsume()
         waveform.initializeMarkers()
         waveform.markers.bind(viewModel.markers) { it }
-        addShortcut()
+        subscribeEvents()
     }
 
     override fun onUndock() {
         super.onUndock()
         logger.info("Consume undocked")
         timer?.stop()
-        waveform.cleanup()
         viewModel.onUndockConsume()
-        removeShortcut()
+        unsubscribeEvents()
     }
 
     private fun subscribeOnWaveformImages() {
@@ -151,6 +152,20 @@ class Consume : View() {
             setOnToggleMedia(viewModel::mediaToggle)
             setOnResumeMedia(viewModel::resumeMedia)
         }
+    }
+
+    private fun subscribeEvents() {
+        addShortcut()
+
+        subscribe<BeforeNavigationEvent> {
+            waveform.cleanup()
+        }.also { eventSubscriptions.add(it) }
+    }
+
+    private fun unsubscribeEvents() {
+        eventSubscriptions.forEach { it.unsubscribe() }
+        eventSubscriptions.clear()
+        removeShortcut()
     }
 
     private fun addShortcut() {

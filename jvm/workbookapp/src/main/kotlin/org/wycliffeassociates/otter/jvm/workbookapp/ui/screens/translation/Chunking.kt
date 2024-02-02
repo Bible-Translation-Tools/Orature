@@ -31,6 +31,7 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
+import org.wycliffeassociates.otter.jvm.controls.event.BeforeNavigationEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerDeletedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.MarkerMovedEvent
 import org.wycliffeassociates.otter.jvm.controls.event.RedoChunkingPageEvent
@@ -150,7 +151,6 @@ class Chunking : View() {
         super.onUndock()
         logger.info("Chunking undocked")
         timer?.stop()
-        waveform.cleanup()
         unsubscribeEvents()
         viewModel.undock()
     }
@@ -172,6 +172,10 @@ class Chunking : View() {
 
         subscribe<RedoChunkingPageEvent> {
             viewModel.redoMarker()
+        }.also { eventSubscriptions.add(it) }
+
+        subscribe<BeforeNavigationEvent> {
+            waveform.cleanup()
         }.also { eventSubscriptions.add(it) }
     }
 
