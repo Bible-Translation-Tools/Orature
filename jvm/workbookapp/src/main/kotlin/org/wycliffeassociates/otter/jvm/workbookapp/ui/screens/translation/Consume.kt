@@ -30,7 +30,8 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
-import org.wycliffeassociates.otter.jvm.controls.event.BeforeNavigationEvent
+import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
+import org.wycliffeassociates.otter.jvm.controls.event.TranslationNavigationEvent
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ConsumeViewModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerWaveform
@@ -157,7 +158,11 @@ class Consume : View() {
     private fun subscribeEvents() {
         addShortcut()
 
-        subscribe<BeforeNavigationEvent> {
+        subscribe<TranslationNavigationEvent> {
+            waveform.cleanup()
+        }.also { eventSubscriptions.add(it) }
+
+        subscribe<NavigationRequestEvent> { // navigate Home
             waveform.cleanup()
         }.also { eventSubscriptions.add(it) }
     }
