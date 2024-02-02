@@ -25,6 +25,7 @@ import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.bar.VolumeBar
+import tornadofx.*
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlin.math.absoluteValue
@@ -76,7 +77,9 @@ class VolumeBar(stream: Observable<ByteArray>) : Drawable {
     }
 
     override fun draw(context: GraphicsContext, canvas: Canvas) {
-        context.clearRect(0.0, 0.0, canvas.width, canvas.height)
+        runLater {
+            context.clearRect(0.0, 0.0, canvas.width, canvas.height)
+        }
         calculateDbPixelLocations(canvas.height)
         drawBar(canvas, context)
     }
@@ -107,11 +110,13 @@ class VolumeBar(stream: Observable<ByteArray>) : Drawable {
         xPoints[3] = 0.0
         yPoints[3] = currentDbNeg
 
-        context.fillPolygon(
-            xPoints,
-            yPoints,
-            4
-        )
+        runLater {
+            context.fillPolygon(
+                xPoints,
+                yPoints,
+                4
+            )
+        }
     }
 
     private fun getDbLevel(db: Int, height: Double): Double {
