@@ -90,11 +90,8 @@ class MarkerPlacementModel(
     }
 
     private fun loadMarkersFromAudio(markerLabels: List<AudioMarker>) {
-        val bookMarker: Array<MarkerItem> = arrayOf()
-        val chapterMarker: Array<MarkerItem> = arrayOf()
-
-//        val bookMarker = getTitlesAsModels<BookMarker>(audio)
-//        val chapterMarker = getTitlesAsModels<ChapterMarker>(audio)
+        val bookMarker = getTitlesAsModels<BookMarker>(audio)
+        val chapterMarker = getTitlesAsModels<ChapterMarker>(audio)
 
         val chunks = when (primaryType) {
             VerseMarker::class.java -> audio.getMarker<VerseMarker>().map { MarkerItem(it, true) }.toTypedArray()
@@ -149,18 +146,7 @@ class MarkerPlacementModel(
 
         val final = listOf(*markerModels, *missing)
 
-        val contentSortPadding = 100
-        final.sortedBy {
-            when (it.marker::class.java) {
-                BookMarker::class.java -> 1
-                ChapterMarker::class.java -> 2
-                VerseMarker::class.java -> (it.marker as VerseMarker).start + contentSortPadding
-                ChunkMarker::class.java -> (it.marker as ChunkMarker).chunk + contentSortPadding
-                else -> 0
-            }
-        }
-
-        return final.toTypedArray()
+        return final.sortedBy { it.marker.sort }.toTypedArray()
     }
 
     fun loadMarkers(chunkMarkers: List<MarkerItem>) {
@@ -170,16 +156,15 @@ class MarkerPlacementModel(
     }
 
     fun addMarker(location: Int) {
-        if (markerItems.size < markerTotal) {
-            val marker = markers.getOrNull(labelIndex) ?: return
-            val markerModel = MarkerItem(marker.clone(location), true)
-            val op = Add(markerModel)
-            undoStack.push(op)
-            op.execute()
-            redoStack.clear()
+        val marker = markers.getOrNull(labelIndex) ?: return
+        val markerModel = MarkerItem(marker.clone(location), true)
 
-            refreshMarkers()
-        }
+        val op = Add(markerModel)
+        undoStack.push(op)
+        op.execute()
+        redoStack.clear()
+
+        refreshMarkers()
     }
 
     fun deleteMarker(id: Int) {
@@ -254,7 +239,9 @@ class MarkerPlacementModel(
         markerItems.sortBy { it.frame }
         markerItems.forEachIndexed { index, chunkMarker ->
             if (index < markers.size) {
-                chunkMarker.marker = markers[index].clone()
+                // We want the marker from the index, but the position of chunkMarker
+                // This keeps the markers in verse/chunk order and may "swap" markers around
+                chunkMarker.marker = markers[index].clone(chunkMarker.frame)
             }
         }
         placedMarkersCount = markerItems.filter { it.placed }.size
