@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.dialog
 
+import io.github.palexdev.materialfx.controls.MFXProgressBar
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -68,10 +69,12 @@ class ProgressDialog : OtterDialog() {
                 addClass("confirm-dialog__message")
                 textProperty().bind(dialogMessageProperty)
             }
-            progressbar {
-                progressProperty().bind(percentageProperty.divide(100))
-                fitToParentWidth()
-            }
+            add(
+                MFXProgressBar().apply {
+                    prefWidthProperty().bind(this@vbox.widthProperty())
+                    progressProperty().bind(percentageProperty.divide(100))
+                }
+            )
             hbox {
                 label {
                     addClass("h5")

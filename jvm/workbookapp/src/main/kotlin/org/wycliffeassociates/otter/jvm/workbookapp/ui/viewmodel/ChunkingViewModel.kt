@@ -247,7 +247,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
 
                 completable.onComplete()
             }
-            .subscribe()
+            .blockingAwait() // ensures chunks are written before going to next step
     }
 
     fun pause() {

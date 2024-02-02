@@ -63,6 +63,7 @@
 }
 
 .scrolling-waveform-frame__image-container {
+    -fx-padding: 80 0;
     -fx-background-color: white;
 }
 

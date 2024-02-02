@@ -27,6 +27,7 @@ import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.effect.ColorAdjust
 import javafx.scene.image.Image
+import javafx.scene.image.ImageView
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Region
@@ -112,7 +113,7 @@ class WaveformFrame(
 
             alignment = Pos.CENTER
 
-            region {
+            pane {
                 imageRegion = this
                 stackpane {
                     fitToParentHeight()
@@ -144,13 +145,13 @@ class WaveformFrame(
                         managedWhen(visibleProperty())
 
                         top {
-                            region {
+                            pane {
                                 topTrackRegion = this
                                 styleClass.add("scrolling-waveform-frame__top-track")
                             }
                         }
                         bottom {
-                            region {
+                            pane {
                                 bottomTrackRegion = this
                                 styleClass.add("scrolling-waveform-frame__bottom-track")
                                 bottomTrack?.let {
@@ -247,7 +248,7 @@ class WaveformFrame(
     }
 
     fun addImage(image: Image) {
-        imageHolder?.add(
+        imageHolder?.apply {
             imageview(image) {
                 addClass("waveform-image")
                 this.effect = waveformColorEffect
@@ -267,7 +268,7 @@ class WaveformFrame(
                         )
                 }
             }
-        )
+        }
     }
 
     fun freeImages() {

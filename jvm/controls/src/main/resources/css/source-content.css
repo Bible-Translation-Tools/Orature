@@ -21,7 +21,7 @@
 }
 
 .source-content__root {
-    -fx-background-color: -wa-background;
+    -fx-background-color: -wa-foreground;
     -fx-padding: 10px 20px;
     -fx-alignment: center;
 }

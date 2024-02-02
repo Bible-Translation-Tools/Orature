@@ -47,23 +47,25 @@ import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.PluginActions
-import org.wycliffeassociates.otter.common.domain.narration.AudioScene
-import org.wycliffeassociates.otter.common.domain.narration.Narration
-import org.wycliffeassociates.otter.common.domain.narration.NarrationFactory
-import org.wycliffeassociates.otter.common.domain.narration.framesToPixels
+import org.wycliffeassociates.otter.common.domain.narration.*
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterItemState
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterStateMachine
 import org.wycliffeassociates.otter.common.domain.narration.teleprompter.TeleprompterStateTransition
+import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.event.*
 import org.wycliffeassociates.otter.jvm.controls.waveform.VolumeBar
+import org.wycliffeassociates.otter.jvm.utils.ListenerDisposer
+import org.wycliffeassociates.otter.jvm.utils.onChangeWithDisposer
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.NarrationTextItemData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.MARKER_AREA_WIDTH
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.markers.VerseMarkerControl
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.narration.waveform.NarrationWaveformRenderer
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AppPreferencesStore
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
@@ -80,12 +82,14 @@ class NarrationViewModel : ViewModel() {
     private lateinit var rendererAudioReader: AudioFileReader
     private val logger = LoggerFactory.getLogger(NarrationViewModel::class.java)
     private val workbookDataStore: WorkbookDataStore by inject()
-
     private val audioPluginViewModel: AudioPluginViewModel by inject()
+    private val appPreferencesStore: AppPreferencesStore by inject()
     lateinit var audioPlayer: IAudioPlayer
 
     @Inject
     lateinit var narrationFactory: NarrationFactory
+    @Inject
+    lateinit var appPreferencesRepo: IAppPreferencesRepository
 
     private lateinit var narration: Narration
     private lateinit var renderer: NarrationWaveformRenderer
@@ -111,6 +115,7 @@ class NarrationViewModel : ViewModel() {
     val playingVerseProperty = SimpleObjectProperty<VerseMarker?>()
     var playingVerse by playingVerseProperty
     val playingVerseIndex = SimpleIntegerProperty(-1)
+    val highlightedVerseIndex = SimpleIntegerProperty(-1)
 
     val hasUndoProperty = SimpleBooleanProperty()
     var hasUndo by hasUndoProperty
@@ -122,7 +127,9 @@ class NarrationViewModel : ViewModel() {
     val chapterTakeProperty = SimpleObjectProperty<Take>()
     val hasNextChapter = SimpleBooleanProperty()
     val hasPreviousChapter = SimpleBooleanProperty()
-    val chapterTakeBusyProperty = SimpleBooleanProperty()
+    val isModifyingTakeAudioProperty = SimpleBooleanProperty()
+    val openLoadingModalProperty = SimpleBooleanProperty()
+    private val navigator: NavigationMediator by inject()
 
     val chunkTotalProperty = SimpleIntegerProperty(0)
     val chunksList: ObservableList<Chunk> = observableListOf()
@@ -132,13 +139,16 @@ class NarrationViewModel : ViewModel() {
     val lastRecordedVerseProperty = SimpleIntegerProperty()
     val audioPositionProperty = SimpleIntegerProperty()
     val totalAudioSizeProperty = SimpleIntegerProperty()
+    private var onTaskRunnerIdle: () -> Unit = { }
 
     //FIXME: Refactor this if and when Chunk entries are officially added for Titles in the Workbook
-    var numberOfTitlesProperty = SimpleIntegerProperty(0)
-    val potentiallyFinishedProperty = chunkTotalProperty
+    val numberOfTitlesProperty = SimpleIntegerProperty(0)
+    val hasAllVersesRecordedProperty = chunkTotalProperty
         .eq(recordedVerses.sizeProperty.minus(numberOfTitlesProperty))
+    val potentiallyFinishedProperty = hasAllVersesRecordedProperty
         .and(isRecordingProperty.not())
         .and(isRecordingAgainProperty.not())
+        .and(chapterTakeProperty.isNull)
     val potentiallyFinished by potentiallyFinishedProperty
 
     val pluginContextProperty = SimpleObjectProperty(PluginType.EDITOR)
@@ -147,6 +157,7 @@ class NarrationViewModel : ViewModel() {
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
     private val disposables = CompositeDisposable()
+    private var disposers = mutableListOf<ListenerDisposer>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -157,6 +168,15 @@ class NarrationViewModel : ViewModel() {
         subscribe<AppCloseRequestEvent> {
             logger.info("Received close event request")
             onUndock()
+        }
+
+        subscribe<NavigationRequestBlockedEvent> {
+            if (isModifyingTakeAudioProperty.value) {
+                openLoadingModalProperty.set(true)
+                onTaskRunnerIdle = {
+                    FX.eventbus.fire(it.navigationRequest)
+                }
+            }
         }
 
         narratableList.bind(chunksList) { chunk ->
@@ -220,10 +240,21 @@ class NarrationViewModel : ViewModel() {
                 }
             )
             .let { disposables.add(it) }
+
+        audioPositionProperty.onChangeWithDisposer { pos ->
+            if (pos != null) updateHighlightedItem(pos.toInt())
+        }.also { disposers.add(it) }
+
+        appPreferencesRepo.sourceTextZoomRate()
+            .subscribe { rate ->
+                appPreferencesStore.sourceTextZoomRateProperty.set(rate)
+            }.let { disposables.add(it) }
     }
 
     fun onUndock() {
         disposables.clear()
+        disposers.forEach { it.dispose() }
+        disposers.clear()
         closeNarrationAudio()
         narration.close()
         renderer.close()
@@ -247,6 +278,7 @@ class NarrationViewModel : ViewModel() {
         }
         volumeBar = VolumeBar(narration.getRecorderAudioStream())
         subscribeActiveVersesChanged()
+        subscribeTaskRunnerBusyChanged()
         updateRecordingState()
         rendererAudioReader = narration.audioReader
         rendererAudioReader.open()
@@ -306,6 +338,7 @@ class NarrationViewModel : ViewModel() {
         recordingVerseIndex.set(-1)
         playingVerseProperty.set(null)
         playingVerseIndex.set(-1)
+        highlightedVerseIndex.set(-1)
         hasUndoProperty.set(false)
         hasRedoProperty.set(false)
         audioPositionProperty.set(0)
@@ -314,18 +347,12 @@ class NarrationViewModel : ViewModel() {
 
     private fun createPotentiallyFinishedChapterTake() {
         if (potentiallyFinished) {
-            chapterTakeBusyProperty.set(true)
-            logger.info("Chapter is potentially finished, creating a chapter take")
             narration
                 .createChapterTake()
                 .subscribeOn(Schedulers.io())
-                .doFinally {
-                    chapterTakeBusyProperty.set(false)
-                }
                 .subscribe(
                     {
                         chapterTakeProperty.set(it)
-                        logger.info("Created a chapter take for ${chapterTitleProperty.value}")
                     }, { e ->
                         logger.error(
                             "Error in creating a chapter take for ${chapterTitleProperty.value}",
@@ -333,6 +360,25 @@ class NarrationViewModel : ViewModel() {
                         )
                     }
                 ).let { disposables.add(it) }
+        }
+    }
+
+
+    /**
+     * If we are currently modifying the chapter take, the chapter navigation is postponed until the modification is
+     * done, otherwise, the chapter navigation is performed immediately.
+     *
+     * @param chapterNumber the chapter to move to
+     */
+    fun deferNavigateChapterWhileModifyingTake(chapterNumber: Int) {
+        if (isModifyingTakeAudioProperty.value) {
+            openLoadingModalProperty.set(true)
+            onTaskRunnerIdle = {
+                navigateChapter(chapterNumber)
+            }
+
+        } else {
+            navigateChapter(chapterNumber)
         }
     }
 
@@ -363,6 +409,7 @@ class NarrationViewModel : ViewModel() {
     }
 
     fun loadChapter(chapter: Chapter) {
+
         logger.info("Loading chapter: ${chapter.sort}")
         resetState()
 
@@ -529,6 +576,7 @@ class NarrationViewModel : ViewModel() {
         renderer.clearActiveRecordingData()
         audioPlayer.pause()
         narration.loadChapterIntoPlayer()
+
         // audioPlayer.seek(0)
         audioPlayer.play()
     }
@@ -784,6 +832,28 @@ class NarrationViewModel : ViewModel() {
             .let(disposables::add)
     }
 
+    private fun subscribeTaskRunnerBusyChanged() {
+        NarrationTakeModifier.status
+            .doOnNext {
+                val isIdle = (it == TaskRunnerStatus.IDLE)
+
+                runLater {
+                    isModifyingTakeAudioProperty.set(!isIdle)
+                    navigator.blockNavigationEvents.set(!isIdle)
+
+                    // Indicates that we have opened the saving model to interrupt either a chapter navigation or
+                    // home navigation and that we should re-attempt the interrupted navigation
+                    if (isIdle && openLoadingModalProperty.value) {
+                        openLoadingModalProperty.set(false)
+                        onTaskRunnerIdle()
+                        onTaskRunnerIdle = { }
+                    }
+                }
+
+            }
+            .subscribe().let(disposables::add)
+    }
+
     fun drawWaveform(
         context: GraphicsContext,
         canvas: Canvas,
@@ -944,5 +1014,19 @@ class NarrationViewModel : ViewModel() {
         val updated = narratableList.mapIndexed { idx, item -> item.apply { item.state = list[idx] } }
         narratableList.setAll(updated)
         refreshTeleprompter()
+    }
+
+    private fun updateHighlightedItem(audioPosition: Int) {
+        when {
+            isRecording -> highlightedVerseIndex.set(recordingVerseIndex.value)
+
+            isRecordingAgain -> highlightedVerseIndex.set(recordAgainVerseIndex!!)
+
+            else -> {
+                val marker = narration.findMarkerAtPosition(audioPosition)
+                val index = narratableList.indexOfFirst { it.marker == marker }
+                highlightedVerseIndex.set(index)
+            }
+        }
     }
 }

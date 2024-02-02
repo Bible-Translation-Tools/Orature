@@ -22,6 +22,7 @@ import tornadofx.FXEvent
 import tornadofx.View
 
 class NavigationRequestEvent(val view: View) : FXEvent()
+class NavigationRequestBlockedEvent(val navigationRequest: NavigationRequestEvent) : FXEvent()
 class NavigateChapterEvent(val chapterNumber: Int) : FXEvent()
 
 object AppCloseRequestEvent : FXEvent()
