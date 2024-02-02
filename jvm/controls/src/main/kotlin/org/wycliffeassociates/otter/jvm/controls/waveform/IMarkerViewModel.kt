@@ -39,7 +39,7 @@ interface IMarkerViewModel : IWaveformViewModel {
         markerModel?.let { markerModel ->
             markerModel.addMarker(waveformAudioPlayerProperty.get().getLocationInFrames())
             markers.clear()
-            markers.setAll(markerModel.markerItems.map { it.copy() })
+            markers.setAll(markerModel.markerItems.toList())
         }
     }
 
