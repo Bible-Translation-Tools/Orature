@@ -280,6 +280,8 @@ open class MarkerTrackControl : Region() {
     }
 
     init {
+        initialize()
+
         // Makes the region mouse transparent but not children
         pickOnBoundsProperty().set(false)
 
