@@ -62,8 +62,8 @@ class MarkerPlacementModel(
         MarkerPlacementType.VERSE -> VerseMarker::class.java
     }
 
-    private val undoStack: Deque<MarkerOperation> = ArrayDeque()
-    private val redoStack: Deque<MarkerOperation> = ArrayDeque()
+    private val undoStack: Deque<IUndoable> = ArrayDeque()
+    private val redoStack: Deque<IUndoable> = ArrayDeque()
 
     private val markers = mutableListOf<AudioMarker>()
     val markerItems = mutableListOf<MarkerItem>()
