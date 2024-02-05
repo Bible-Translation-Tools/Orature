@@ -142,7 +142,7 @@ class Chunking : View() {
         subscribeEvents()
         timer = startAnimationTimer { viewModel.calculatePosition() }
         waveform.initializeMarkers()
-        viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
+        viewModel.subscribeOnWaveformProperty.set(::subscribeOnWaveformImages)
         viewModel.dock()
     }
 

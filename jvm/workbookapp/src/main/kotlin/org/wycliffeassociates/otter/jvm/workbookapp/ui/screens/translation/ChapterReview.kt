@@ -97,7 +97,7 @@ class ChapterReview : View() {
                 setOnFastForward(viewModel::fastForward)
                 setOnToggleMedia(viewModel::mediaToggle)
 
-                viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
+                viewModel.subscribeOnWaveformProperty.set(::subscribeOnWaveformImages)
 
                 markers.bind(viewModel.markers) { it }
             }

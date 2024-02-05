@@ -71,11 +71,12 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     val chunkConfirmed = SimpleBooleanProperty(false)
     val sourcePlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     val isPlayingProperty = SimpleBooleanProperty(false)
+
+    val cleanUpWaveformProperty = SimpleObjectProperty<() -> Unit>()
     val disposable = CompositeDisposable()
 
     lateinit var waveform: Observable<Image>
     var subscribeOnWaveformImages: () -> Unit = {}
-    var cleanUpWaveform: () -> Unit = {}
     private var audioController: AudioPlayerController? = null
 
     override var sampleRate: Int = 0 // beware of divided by 0
@@ -259,7 +260,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     }
 
     private fun createWaveformImages(audio: OratureAudioFile) {
-        cleanUpWaveform()
+        cleanUpWaveformProperty.value.invoke()
         imageWidthProperty.set(computeImageWidth(width))
 
         builder.cancel()

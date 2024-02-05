@@ -61,7 +61,7 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
 
     lateinit var waveform: Observable<Image>
 
-    var subscribeOnWaveformImages: () -> Unit = {}
+    val subscribeOnWaveformProperty = SimpleObjectProperty<() -> Unit>()
 
     override var markerModel: MarkerPlacementModel? = null
     override val markers = observableListOf<MarkerItem>()
@@ -106,7 +106,7 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
                 audioDataStore.sourceAudioProperty.set(sa)
                 audio = loadAudio(sa.file)
                 createWaveformImages(audio)
-                subscribeOnWaveformImages()
+                subscribeOnWaveformProperty.value.invoke()
                 loadSourceMarkers(audio)
             }
 

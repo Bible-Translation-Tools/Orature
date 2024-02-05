@@ -57,7 +57,7 @@ class Consume : View() {
         super.onDock()
         logger.info("Consume docked")
         timer = startAnimationTimer { viewModel.calculatePosition() }
-        viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
+        viewModel.subscribeOnWaveformProperty.set(::subscribeOnWaveformImages)
         viewModel.onDockConsume()
         waveform.initializeMarkers()
         waveform.markers.bind(viewModel.markers) { it }

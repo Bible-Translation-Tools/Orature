@@ -101,7 +101,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
     private val height = Integer.min(Screen.getMainScreen().platformHeight, WAVEFORM_MAX_HEIGHT.toInt())
     private val builder = ObservableWaveformBuilder()
 
-    var subscribeOnWaveformImages: () -> Unit = {}
+    val subscribeOnWaveformProperty = SimpleObjectProperty<() -> Unit>()
 
     val chapterTitleProperty = workbookDataStore.activeChapterTitleBinding()
     val sourcePlayerProperty = SimpleObjectProperty<IAudioPlayer>()
@@ -218,7 +218,7 @@ class ChapterReviewViewModel : ViewModel(), IMarkerViewModel {
             .subscribe { audio ->
                 loadVerseMarkers(audio)
                 createWaveformImages(audio)
-                subscribeOnWaveformImages()
+                subscribeOnWaveformProperty.value.invoke()
             }
     }
 

@@ -171,7 +171,7 @@ open class PeerEdit : View() {
             setOnToggleMedia(viewModel::toggleAudio)
 
             viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
-            viewModel.cleanUpWaveform = ::cleanup
+            viewModel.cleanUpWaveformProperty.set(::cleanup)
             minWidth = 0.0
         }
     }
