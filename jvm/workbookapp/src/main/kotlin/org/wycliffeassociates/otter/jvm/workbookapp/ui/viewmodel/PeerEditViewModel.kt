@@ -74,8 +74,8 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     val disposable = CompositeDisposable()
 
     lateinit var waveform: Observable<Image>
-    var subscribeOnWaveformImages: () -> Unit = {}
-    var cleanUpWaveform: () -> Unit = {}
+    var subscribeOnWaveformImagesProperty = SimpleObjectProperty {}
+    val cleanupWaveformProperty = SimpleObjectProperty {}
     private var audioController: AudioPlayerController? = null
 
     override var sampleRate: Int = 0 // beware of divided by 0
@@ -218,6 +218,14 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         }
     }
 
+    fun cleanupWaveform() {
+        cleanupWaveformProperty.value.invoke()
+    }
+
+    fun subscribeOnWaveformImages() {
+        subscribeOnWaveformImagesProperty.value.invoke()
+    }
+
     private fun subscribeToChunks() {
         workbookDataStore.chapter
             .chunks
@@ -259,7 +267,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
     }
 
     private fun createWaveformImages(audio: OratureAudioFile) {
-        cleanUpWaveform()
+        cleanupWaveform()
         imageWidthProperty.set(computeImageWidth(width))
 
         builder.cancel()

@@ -177,7 +177,8 @@ class ChapterReview : View() {
         logger.info("Final Review docked.")
         timer = startAnimationTimer { viewModel.calculatePosition() }
         waveform.initializeMarkers()
-        viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
+        viewModel.subscribeOnWaveformImagesProperty.set(::subscribeOnWaveformImages)
+        viewModel.cleanupWaveformProperty.set(waveform::cleanup)
         viewModel.dock()
         subscribeEvents()
     }
@@ -209,11 +210,11 @@ class ChapterReview : View() {
         }.also { eventSubscriptions.add(it) }
 
         subscribe<TranslationNavigationEvent> {
-            waveform.cleanup()
+            viewModel.cleanupWaveform()
         }.also { eventSubscriptions.add(it) }
 
         subscribe<NavigationRequestEvent> { // navigate Home
-            waveform.cleanup()
+            viewModel.cleanupWaveform()
         }.also { eventSubscriptions.add(it) }
     }
 

@@ -205,8 +205,8 @@ open class PeerEdit : View() {
         recorderViewModel.volumeCanvas = recordingView.volumeCanvas
         mainSectionProperty.set(playbackView)
         timer = startAnimationTimer { viewModel.calculatePosition() }
-        viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
-        viewModel.cleanUpWaveform = waveform::cleanup
+        viewModel.subscribeOnWaveformImagesProperty.set(::subscribeOnWaveformImages)
+        viewModel.cleanupWaveformProperty.set(waveform::cleanup)
         viewModel.dock()
         subscribeEvents()
     }
@@ -242,11 +242,11 @@ open class PeerEdit : View() {
         }.also { eventSubscriptions.add(it) }
 
         subscribe<TranslationNavigationEvent> {
-            waveform.cleanup()
+            viewModel.cleanupWaveform()
         }.also { eventSubscriptions.add(it) }
 
         subscribe<NavigationRequestEvent> { // navigate Home
-            waveform.cleanup()
+            viewModel.cleanupWaveform()
         }.also { eventSubscriptions.add(it) }
     }
 

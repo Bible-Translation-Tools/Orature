@@ -60,7 +60,8 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
 
     lateinit var waveform: Observable<Image>
 
-    var subscribeOnWaveformImages: () -> Unit = {}
+    var subscribeOnWaveformImagesProperty = SimpleObjectProperty {}
+    val cleanupWaveformProperty = SimpleObjectProperty {}
 
     override var markerModel: VerseMarkerModel? = null
     override val markers = observableListOf<ChunkMarkerModel>()
@@ -150,6 +151,14 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
         builder.cancel()
         compositeDisposable.clear()
         markerModel = null
+    }
+
+    fun cleanupWaveform() {
+        cleanupWaveformProperty.value.invoke()
+    }
+
+    fun subscribeOnWaveformImages() {
+        subscribeOnWaveformImagesProperty.value.invoke()
     }
 
     private fun loadAudio(audioFile: File): OratureAudioFile {

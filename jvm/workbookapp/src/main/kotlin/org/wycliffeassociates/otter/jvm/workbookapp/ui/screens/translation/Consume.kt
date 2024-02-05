@@ -60,7 +60,8 @@ class Consume : View() {
         super.onDock()
         logger.info("Consume docked")
         timer = startAnimationTimer { viewModel.calculatePosition() }
-        viewModel.subscribeOnWaveformImages = ::subscribeOnWaveformImages
+        viewModel.subscribeOnWaveformImagesProperty.set(::subscribeOnWaveformImages)
+        viewModel.cleanupWaveformProperty.set(waveform::cleanup)
         viewModel.onDockConsume()
         waveform.initializeMarkers()
         waveform.markers.bind(viewModel.markers) { it }
@@ -159,11 +160,11 @@ class Consume : View() {
         addShortcut()
 
         subscribe<TranslationNavigationEvent> {
-            waveform.cleanup()
+            viewModel.cleanupWaveform()
         }.also { eventSubscriptions.add(it) }
 
         subscribe<NavigationRequestEvent> { // navigate Home
-            waveform.cleanup()
+            viewModel.cleanupWaveform()
         }.also { eventSubscriptions.add(it) }
     }
 
