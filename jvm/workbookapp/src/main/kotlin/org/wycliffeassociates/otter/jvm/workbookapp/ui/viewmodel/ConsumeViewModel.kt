@@ -156,6 +156,7 @@ class ConsumeViewModel : ViewModel(), IMarkerViewModel {
         builder.cancel()
         compositeDisposable.clear()
         markerModel = null
+        cleanupWaveform()
     }
 
     fun cleanupWaveform() {

@@ -30,7 +30,6 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.createAudioScrollBar
-import org.wycliffeassociates.otter.jvm.controls.event.NavigationRequestEvent
 import org.wycliffeassociates.otter.jvm.controls.event.TranslationNavigationEvent
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ConsumeViewModel
@@ -160,10 +159,6 @@ class Consume : View() {
         addShortcut()
 
         subscribe<TranslationNavigationEvent> {
-            viewModel.cleanupWaveform()
-        }.also { eventSubscriptions.add(it) }
-
-        subscribe<NavigationRequestEvent> { // navigate Home
             viewModel.cleanupWaveform()
         }.also { eventSubscriptions.add(it) }
     }
