@@ -23,12 +23,12 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
-import org.wycliffeassociates.otter.common.domain.model.ChunkMarkerModel
-import org.wycliffeassociates.otter.common.domain.model.VerseMarkerModel
+import org.wycliffeassociates.otter.common.domain.model.MarkerItem
+import org.wycliffeassociates.otter.common.domain.model.MarkerPlacementModel
 
 interface IMarkerViewModel : IWaveformViewModel {
-    var markerModel: VerseMarkerModel?
-    val markers: ObservableList<ChunkMarkerModel>
+    var markerModel: MarkerPlacementModel?
+    val markers: ObservableList<MarkerItem>
     val markerCountProperty: IntegerBinding
     var audioController: AudioPlayerController?
     val currentMarkerNumberProperty: SimpleIntegerProperty
@@ -38,14 +38,16 @@ interface IMarkerViewModel : IWaveformViewModel {
     fun placeMarker() {
         markerModel?.let { markerModel ->
             markerModel.addMarker(waveformAudioPlayerProperty.get().getLocationInFrames())
-            markers.setAll(markerModel.markers)
+            markers.clear()
+            markers.setAll(markerModel.markerItems.toList())
         }
     }
 
     fun deleteMarker(id: Int) {
         markerModel?.let { markerModel ->
             markerModel.deleteMarker(id)
-            markers.setAll(markerModel.markers)
+            markers.clear()
+            markers.setAll(markerModel.markerItems.map { it.copy() })
         }
     }
 
@@ -100,14 +102,14 @@ interface IMarkerViewModel : IWaveformViewModel {
     fun undoMarker() {
         markerModel?.let { markerModel ->
             markerModel.undo()
-            markers.setAll(markerModel.markers)
+            markers.setAll(markerModel.markerItems)
         }
     }
 
     fun redoMarker() {
         markerModel?.let { markerModel ->
             markerModel.redo()
-            markers.setAll(markerModel.markers)
+            markers.setAll(markerModel.markerItems)
         }
     }
 
