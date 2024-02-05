@@ -86,6 +86,8 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
 
     override var resumeAfterScroll = false
 
+    var cleanupWaveform: () -> Unit = {}
+
     private var timer: AnimationTimer? = object : AnimationTimer() {
         override fun handle(currentNanoTime: Long) {
             calculatePosition()
@@ -172,6 +174,7 @@ class VerseMarkerViewModel : ViewModel(), IMarkerViewModel {
         audioController!!.release()
         audioController = null
         asyncBuilder.cancel()
+        cleanupWaveform()
 
         writeMarkers()
             .doOnError { e ->

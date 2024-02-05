@@ -41,7 +41,7 @@ class InitializeMarker @Inject constructor(
 ) : Installable {
 
     override val name = "MARKER"
-    override val version = 32
+    override val version = 33
     private val log = LoggerFactory.getLogger(InitializeMarker::class.java)
 
     override fun exec(progressEmitter: ObservableEmitter<ProgressStatus>): Completable {

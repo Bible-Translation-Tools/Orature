@@ -98,12 +98,17 @@ class MarkerPlacementWaveform : StackPane() {
 
     private val waveformFrame: WaveformFrame
 
-    fun freeImages() {
+    fun cleanup() {
         waveformFrame.freeImages()
+        top.resetState()
     }
 
     fun addWaveformImage(image: Image) {
         waveformFrame.addImage(image)
+    }
+
+    fun initializeMarkers() {
+        top.initialize()
     }
 
     private lateinit var top: MarkerTrackControl
