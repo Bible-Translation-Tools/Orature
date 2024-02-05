@@ -224,6 +224,7 @@ class ChunkingViewModel : ViewModel(), IMarkerViewModel {
         builder.cancel()
         compositeDisposable.clear()
         markerModel = null
+        cleanupWaveform()
     }
 
     fun saveChanges() {

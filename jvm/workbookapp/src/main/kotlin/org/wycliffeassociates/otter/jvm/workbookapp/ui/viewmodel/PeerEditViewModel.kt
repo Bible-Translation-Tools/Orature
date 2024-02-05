@@ -125,6 +125,7 @@ class PeerEditViewModel : ViewModel(), IWaveformViewModel {
         disposableListeners.forEach { it.dispose() }
         disposableListeners.clear()
         actionHistory.clear()
+        cleanupWaveform()
     }
 
     fun refreshChunkList() {
